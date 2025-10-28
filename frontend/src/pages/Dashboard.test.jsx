@@ -46,8 +46,8 @@ vi.mock('../components', () => ({
 
 // Mock react-router-dom navigate
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', () => ({
-  ...await vi.importActual('react-router-dom'),
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
   useNavigate: () => mockNavigate,
 }));
 

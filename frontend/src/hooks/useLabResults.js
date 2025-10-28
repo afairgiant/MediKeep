@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useMedicalData } from './useMedicalData';
-import { apiService } from '../services/api';
-import { useApi } from './useApi';
+import { apiService } from '../services/api/index.js';
+import { useApi } from './useApi.js';
 
 export const useLabResults = () => {
   const [selectedLabResult, setSelectedLabResult] = useState(null);

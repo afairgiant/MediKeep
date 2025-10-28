@@ -16,9 +16,11 @@ vi.mock('@mantine/notifications', () => ({
 }));
 
 vi.mock('../../services/logger', () => ({
-  info: vi.fn(),
-  debug: vi.fn(),
-  error: vi.fn(),
+  default: {
+    info: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 vi.mock('../../constants/errorMessages', () => ({
@@ -149,12 +151,12 @@ describe('Upload Progress System Integration Tests', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllTimers();
     vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     vi.useRealTimers();
   });
 
@@ -174,7 +176,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Fast-forward through form submission
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
       await waitFor(() => {
@@ -211,7 +213,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Fast-forward through entire process
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {
@@ -247,7 +249,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Monitor progress during upload
       act(() => {
-        jest.advanceTimersByTime(500);
+        vi.advanceTimersByTime(500);
       });
 
       // Check intermediate state
@@ -259,7 +261,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Complete the process
       act(() => {
-        jest.advanceTimersByTime(1500);
+        vi.advanceTimersByTime(1500);
       });
 
       await waitFor(() => {
@@ -290,7 +292,7 @@ describe('Upload Progress System Integration Tests', () => {
       fireEvent.click(screen.getByTestId('submit-button'));
 
       act(() => {
-        jest.advanceTimersByTime(200);
+        vi.advanceTimersByTime(200);
       });
 
       await waitFor(() => {
@@ -323,13 +325,13 @@ describe('Upload Progress System Integration Tests', () => {
       fireEvent.click(screen.getByTestId('submit-button'));
 
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {
         const formState = JSON.parse(screen.getByTestId('form-state').textContent);
         const uploadState = JSON.parse(screen.getByTestId('upload-state').textContent);
-        
+
         expect(formState.isCompleted).toBe(true);
         expect(uploadState.hasErrors).toBe(true);
       });
@@ -364,7 +366,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Check initial form submission state
       act(() => {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
       });
 
       await waitFor(() => {
@@ -375,13 +377,13 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Check transition to upload state
       act(() => {
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
       });
 
       await waitFor(() => {
         const formState = JSON.parse(screen.getByTestId('form-state').textContent);
         const uploadState = JSON.parse(screen.getByTestId('upload-state').textContent);
-        
+
         expect(formState.isSubmitting).toBe(false);
         expect(formState.isUploading).toBe(true);
         expect(uploadState.isUploading).toBe(true);
@@ -389,7 +391,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Check final completion state
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {
@@ -421,7 +423,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Check form submission status
       act(() => {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
       });
 
       await waitFor(() => {
@@ -432,7 +434,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Check upload status
       act(() => {
-        jest.advanceTimersByTime(150);
+        vi.advanceTimersByTime(150);
       });
 
       await waitFor(() => {
@@ -443,7 +445,7 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Check completion status
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {

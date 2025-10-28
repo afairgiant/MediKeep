@@ -11,6 +11,7 @@ import '@testing-library/jest-dom';
 import { MantineProvider } from '@mantine/core';
 import DocumentManager from './DocumentManager';
 import { apiService } from '../../services/api';
+import { getPaperlessSettings } from '../../services/api/paperlessApi.jsx';
 
 // Mock the API service
 vi.mock('../../services/api', () => ({
@@ -31,10 +32,12 @@ vi.mock('../../services/api/paperlessApi', () => ({
 
 // Mock logger
 vi.mock('../../services/logger', () => ({
-  debug: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 const MockWrapper = ({ children }) => (
@@ -58,7 +61,6 @@ describe('DocumentManager Paperless Integration', () => {
 
     apiService.getEntityFiles.mockResolvedValue([]);
 
-    const { getPaperlessSettings } = require('../../services/api/paperlessApi');
     getPaperlessSettings.mockResolvedValue({
       paperless_enabled: true,
       paperless_url: 'http://paperless.example.com',
@@ -110,7 +112,6 @@ describe('DocumentManager Paperless Integration', () => {
 
     apiService.getEntityFiles.mockResolvedValue([]);
 
-    const { getPaperlessSettings } = require('../../services/api/paperlessApi');
     getPaperlessSettings.mockResolvedValue({
       paperless_enabled: true,
       paperless_url: 'http://paperless.example.com',
@@ -152,7 +153,6 @@ describe('DocumentManager Paperless Integration', () => {
 
     apiService.getEntityFiles.mockResolvedValue([]);
 
-    const { getPaperlessSettings } = require('../../services/api/paperlessApi');
     getPaperlessSettings.mockResolvedValue({
       paperless_enabled: true,
       paperless_url: 'http://paperless.example.com',

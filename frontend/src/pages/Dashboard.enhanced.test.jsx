@@ -107,8 +107,8 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
       const mockNavigate = vi.fn();
       
       // Mock useNavigate
-      jest.doMock('react-router-dom', () => ({
-        ...await vi.importActual('react-router-dom'),
+      vi.doMock('react-router-dom', async () => ({
+        ...(await vi.importActual('react-router-dom')),
         useNavigate: () => mockNavigate,
       }));
 

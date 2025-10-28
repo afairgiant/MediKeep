@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Container, Title, Text, Group, Button, Paper, Stack, Code, Badge } from '@mantine/core';
-import ResponsiveNavigation from '../../components/navigation/ResponsiveNavigation';
+import ResponsiveNavigation from '../../components/navigation/ResponsiveNavigation.jsx';
 import { useResponsive } from '../../hooks/useResponsive';
 import { createMockUser } from '../../test-utils/test-data';
 

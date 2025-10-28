@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, act, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 import { ResponsiveProvider } from '../providers/ResponsiveProvider';
 import { BREAKPOINTS } from '../config/responsive.config';
 
@@ -273,16 +274,16 @@ export const ResponsiveTestHelpers = {
   beforeEach() {
     // Mock IntersectionObserver
     global.IntersectionObserver = jest.fn(() => ({
-      observe: jest.fn(),
-      disconnect: jest.fn(),
-      unobserve: jest.fn()
+      observe: vi.fn(),
+      disconnect: vi.fn(),
+      unobserve: vi.fn()
     }));
     
     // Mock ResizeObserver
     global.ResizeObserver = jest.fn(() => ({
-      observe: jest.fn(),
-      disconnect: jest.fn(),
-      unobserve: jest.fn()
+      observe: vi.fn(),
+      disconnect: vi.fn(),
+      unobserve: vi.fn()
     }));
     
     // Set default window dimensions
@@ -294,7 +295,7 @@ export const ResponsiveTestHelpers = {
    */
   afterEach() {
     // Clear all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Reset window dimensions
     delete global.innerWidth;

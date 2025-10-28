@@ -17,9 +17,11 @@ vi.mock('../contexts/AuthContext', () => ({
 }));
 
 vi.mock('../services/logger', () => ({
-  debug: vi.fn(),
-  error: vi.fn(),
-  info: vi.fn(),
+  default: {
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+  },
 }));
 
 // Mock the activity config
@@ -45,10 +47,12 @@ vi.mock('../config/activityConfig', () => ({
 
 // Mock secure activity logger
 vi.mock('../utils/secureActivityLogger', () => ({
-  logActivityInit: vi.fn(),
-  logActivityDetected: vi.fn(),
-  logActivityCleanup: vi.fn(),
-  logActivityError: vi.fn(),
+  default: {
+    logActivityInit: vi.fn(),
+    logActivityDetected: vi.fn(),
+    logActivityCleanup: vi.fn(),
+    logActivityError: vi.fn(),
+  },
 }));
 
 // Mock throttle utils

@@ -2,7 +2,6 @@ import { vi } from 'vitest';
 import React from 'react';
 import { screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest } from '@jest/globals';
 
 // Import component to test
 import ResponsiveTable from '../../components/adapters/ResponsiveTable';
@@ -19,13 +18,16 @@ import {
 } from './ResponsiveTestUtils';
 
 import logger from '../../services/logger';
+import { useResponsive } from '../../hooks/useResponsive';
 
 // Mock logger to avoid console noise during tests
 vi.mock('../../services/logger', () => ({
-  debug: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn()
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock useResponsive hook
@@ -179,7 +181,6 @@ describe('ResponsiveTable Component Tests', () => {
         describe(`Table Display at ${breakpoint}`, () => {
           it('displays correct view type for breakpoint', () => {
             // Mock the responsive hook to return correct values
-            const { useResponsive } = require('../../hooks/useResponsive');
             useResponsive.mockReturnValue({
               breakpoint,
               deviceType,
@@ -204,7 +205,6 @@ describe('ResponsiveTable Component Tests', () => {
           });
 
           it('shows appropriate columns for breakpoint', () => {
-            const { useResponsive } = require('../../hooks/useResponsive');
             useResponsive.mockReturnValue({
               breakpoint,
               deviceType,
@@ -238,8 +238,7 @@ describe('ResponsiveTable Component Tests', () => {
               const user = userEvent.setup();
               const mockOnRowClick = vi.fn();
               
-              const { useResponsive } = require('../../hooks/useResponsive');
-              useResponsive.mockReturnValue({
+                useResponsive.mockReturnValue({
                 breakpoint,
                 deviceType: 'mobile',
                 isMobile: true,
@@ -444,7 +443,6 @@ describe('ResponsiveTable Component Tests', () => {
 
   describe('Card View Tests (Mobile)', () => {
     beforeEach(() => {
-      const { useResponsive } = require('../../hooks/useResponsive');
       useResponsive.mockReturnValue({
         breakpoint: 'xs',
         deviceType: 'mobile',
@@ -568,7 +566,6 @@ describe('ResponsiveTable Component Tests', () => {
     });
 
     it('has proper role attributes in card view', () => {
-      const { useResponsive } = require('../../hooks/useResponsive');
       useResponsive.mockReturnValue({
         breakpoint: 'xs',
         deviceType: 'mobile',
@@ -660,7 +657,6 @@ describe('ResponsiveTable Component Tests', () => {
     });
 
     it('adapts column priorities based on data type', () => {
-      const { useResponsive } = require('../../hooks/useResponsive');
       useResponsive.mockReturnValue({
         breakpoint: 'md',
         deviceType: 'tablet',

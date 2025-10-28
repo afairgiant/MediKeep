@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { vi } from 'vitest';
 import { render as rtlRender } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
@@ -16,9 +17,9 @@ const defaultResponsiveContext = {
   width: 1200,
   height: 800,
   deviceType: 'desktop',
-  matches: jest.fn(() => false),
-  isAbove: jest.fn(() => false),
-  isBelow: jest.fn(() => false),
+  matches: vi.fn(() => false),
+  isAbove: vi.fn(() => false),
+  isBelow: vi.fn(() => false),
   isMobile: false,
   isTablet: false,
   isDesktop: true,
@@ -89,9 +90,9 @@ export function renderMobile(ui, options = {}) {
       width: 375,
       height: 667,
       deviceType: 'mobile',
-      matches: jest.fn((bp) => bp === 'xs'),
-      isAbove: jest.fn(() => false),
-      isBelow: jest.fn((bp) => ['sm', 'md', 'lg', 'xl'].includes(bp)),
+      matches: vi.fn((bp) => bp === 'xs'),
+      isAbove: vi.fn(() => false),
+      isBelow: vi.fn((bp) => ['sm', 'md', 'lg', 'xl'].includes(bp)),
       isMobile: true,
       isTablet: false,
       isDesktop: false,
@@ -112,9 +113,9 @@ export function renderTablet(ui, options = {}) {
       width: 768,
       height: 1024,
       deviceType: 'tablet',
-      matches: jest.fn((bp) => bp === 'md'),
-      isAbove: jest.fn((bp) => ['xs', 'sm'].includes(bp)),
-      isBelow: jest.fn((bp) => ['lg', 'xl'].includes(bp)),
+      matches: vi.fn((bp) => bp === 'md'),
+      isAbove: vi.fn((bp) => ['xs', 'sm'].includes(bp)),
+      isBelow: vi.fn((bp) => ['lg', 'xl'].includes(bp)),
       isMobile: false,
       isTablet: true,
       isDesktop: false,
@@ -135,9 +136,9 @@ export function renderDesktop(ui, options = {}) {
       width: 1200,
       height: 800,
       deviceType: 'desktop',
-      matches: jest.fn((bp) => bp === 'lg'),
-      isAbove: jest.fn((bp) => ['xs', 'sm', 'md'].includes(bp)),
-      isBelow: jest.fn((bp) => bp === 'xl'),
+      matches: vi.fn((bp) => bp === 'lg'),
+      isAbove: vi.fn((bp) => ['xs', 'sm', 'md'].includes(bp)),
+      isBelow: vi.fn((bp) => bp === 'xl'),
       isMobile: false,
       isTablet: false,
       isDesktop: true,
@@ -213,12 +214,12 @@ export function createMockResponsive(breakpoint = 'lg', overrides = {}) {
     ...defaultResponsiveContext,
     breakpoint,
     ...settings,
-    matches: jest.fn((bp) => bp === breakpoint),
-    isAbove: jest.fn((bp) => {
+    matches: vi.fn((bp) => bp === breakpoint),
+    isAbove: vi.fn((bp) => {
       const targetIndex = breakpointOrder.indexOf(bp);
       return currentIndex > targetIndex;
     }),
-    isBelow: jest.fn((bp) => {
+    isBelow: vi.fn((bp) => {
       const targetIndex = breakpointOrder.indexOf(bp);
       return currentIndex < targetIndex;
     }),

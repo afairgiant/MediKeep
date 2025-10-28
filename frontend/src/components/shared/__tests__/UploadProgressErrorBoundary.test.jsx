@@ -7,7 +7,9 @@ import logger from '../../../services/logger';
 
 // Mock the logger
 vi.mock('../../../services/logger', () => ({
-  error: vi.fn(),
+  default: {
+    error: vi.fn(),
+  },
 }));
 
 // Create a problematic component that throws errors on demand

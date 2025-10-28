@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../ui';
-import { getStorageUsageStats } from '../../services/api/paperlessApi';
+import { getStorageUsageStats } from '../../services/api/paperlessApi.jsx';
 import frontendLogger from '../../services/frontendLogger';
 
 /**

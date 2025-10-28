@@ -14,15 +14,15 @@ vi.mock('react-toastify', () => ({
 }));
 
 // Mock LoadingSpinner
-vi.mock('../ui/LoadingSpinner', () => {
-  return function MockLoadingSpinner({ message }) {
+vi.mock('../ui/LoadingSpinner', () => ({
+  default: function MockLoadingSpinner({ message }) {
     return <div data-testid="loading-spinner">{message}</div>;
-  };
-});
+  },
+}));
 
 // Mock react-router-dom hooks and Navigate
-vi.mock('react-router-dom', () => ({
-  ...await vi.importActual('react-router-dom'),
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
   useLocation: () => ({ pathname: '/test', state: null, search: '', hash: '' }),
   Navigate: ({ to, state, replace }) => (
     <div data-testid="navigate" data-to={to} data-replace={replace} />

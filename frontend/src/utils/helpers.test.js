@@ -171,7 +171,7 @@ describe('Utility Functions', () => {
       debouncedFn('test');
       expect(mockFn).not.toHaveBeenCalled();
 
-      jest.advanceTimersByTime(100);
+      vi.advanceTimersByTime(100);
       expect(mockFn).toHaveBeenCalledWith('test');
     });
 
@@ -183,14 +183,14 @@ describe('Utility Functions', () => {
       debouncedFn('second');
       debouncedFn('third');
 
-      jest.advanceTimersByTime(100);
-      
+      vi.advanceTimersByTime(100);
+
       expect(mockFn).toHaveBeenCalledTimes(1);
       expect(mockFn).toHaveBeenCalledWith('third');
     });
 
     afterEach(() => {
-      jest.clearAllTimers();
+      vi.clearAllTimers();
     });
   });
 

@@ -13,9 +13,11 @@ vi.mock('@mantine/notifications', () => ({
 }));
 
 vi.mock('../../services/logger', () => ({
-  info: vi.fn(),
-  debug: vi.fn(),
-  error: vi.fn(),
+  default: {
+    info: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock error messages
@@ -51,12 +53,12 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllTimers();
     vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     vi.useRealTimers();
   });
 
@@ -484,7 +486,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
       // Wait a bit to ensure onSuccess is not called
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       expect(mockOnSuccess).not.toHaveBeenCalled();
@@ -502,7 +504,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
       // Wait a bit to ensure onSuccess is not called
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
       });
 
       expect(mockOnSuccess).not.toHaveBeenCalled();

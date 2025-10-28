@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
-import { getPaperlessSettings } from '../../services/api/paperlessApi';
+import { getPaperlessSettings } from '../../services/api/paperlessApi.jsx';
 import logger from '../../services/logger';
 import { 
   ERROR_MESSAGES, 

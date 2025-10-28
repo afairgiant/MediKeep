@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, Button } from '../ui';
 import ConnectionConfigCard from './ConnectionConfigCard';
 import StoragePreferencesCard from './StoragePreferencesCard';
-import { testPaperlessConnection, updatePaperlessSettings } from '../../services/api/paperlessApi';
+import { testPaperlessConnection, updatePaperlessSettings } from '../../services/api/paperlessApi.jsx';
 import frontendLogger from '../../services/frontendLogger';
 import '../../styles/components/PaperlessSettings.css';
 

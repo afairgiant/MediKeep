@@ -10,7 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import { getVersionInfo } from '../services/systemService';
 import { updateUserPreferences } from '../services/api/userPreferencesApi';
-import { cleanupOutOfSyncFiles } from '../services/api/paperlessApi';
+import { cleanupOutOfSyncFiles } from '../services/api/paperlessApi.jsx';
 import frontendLogger from '../services/frontendLogger';
 import { PAPERLESS_SETTING_KEYS, isPaperlessSetting } from '../constants/paperlessSettings';
 import { toast } from 'react-toastify';
@@ -189,7 +189,7 @@ const Settings = () => {
       
       // Update paperless settings separately
       if (Object.keys(paperlessFields).length > 0) {
-        const { updatePaperlessSettings } = await import('../services/api/paperlessApi');
+        const { updatePaperlessSettings } = await import('../services/api/paperlessApi.jsx');
         const paperlessResponse = await updatePaperlessSettings(paperlessFields);
         updatedPreferences = { ...updatedPreferences, ...paperlessResponse };
       }

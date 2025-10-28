@@ -2,7 +2,6 @@ import { vi } from 'vitest';
 import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest } from '@jest/globals';
 
 // Import components to test
 import MantineAllergyForm from '../../components/medical/MantineAllergyForm';
@@ -25,10 +24,12 @@ import logger from '../../services/logger';
 
 // Mock logger to avoid console noise during tests
 vi.mock('../../services/logger', () => ({
-  debug: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn()
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock API calls
@@ -57,7 +58,7 @@ describe('Medical Form Submission Tests - Responsive Behavior', () => {
 
   afterEach(() => {
     // Clean up any hanging timers or async operations
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
   });
 
   describe('Medication Form Submission', () => {

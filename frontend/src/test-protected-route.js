@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import logger from './services/logger';
 
 // Simple test to validate ProtectedRoute syntax
@@ -15,7 +16,7 @@ const mockAuthContext = {
 };
 
 // Mock useAuth hook
-jest.mock('./contexts/AuthContext', () => ({
+vi.mock('./contexts/AuthContext', () => ({
   useAuth: () => mockAuthContext
 }));
 

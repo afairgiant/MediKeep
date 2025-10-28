@@ -10,6 +10,8 @@ import { rest } from 'msw';
 import { renderWithPatient } from '../../../test-utils/render';
 import { server } from '../../../test-utils/mocks/server';
 import EmergencyContacts from '../EmergencyContacts';
+import { useMedicalData } from '../../../hooks/useMedicalData';
+import { useDataManagement } from '../../../hooks/useDataManagement';
 
 // Mock the hooks that make API calls
 vi.mock('../../../hooks/useMedicalData');
@@ -112,10 +114,8 @@ describe('Emergency Contacts Page Integration Tests', () => {
 
   beforeEach(() => {
     // Mock the hooks to return our test data
-    const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-    const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
 
-    useMedicalData.mockReturnValue({
+    vi.mocked(useMedicalData).mockReturnValue({
       items: mockEmergencyContacts,
       currentPatient: { id: 1, first_name: 'John', last_name: 'Doe' },
       loading: false,
@@ -226,8 +226,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+        vi.mocked(useMedicalData).mockReturnValue({
         items: mockEmergencyContacts,
         currentPatient: { id: 1 },
         loading: false,
@@ -302,8 +301,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       
       const mockUpdateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+        vi.mocked(useMedicalData).mockReturnValue({
         items: mockEmergencyContacts,
         currentPatient: { id: 1 },
         loading: false,
@@ -361,8 +359,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       
       const mockUpdateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+        vi.mocked(useMedicalData).mockReturnValue({
         items: mockEmergencyContacts,
         currentPatient: { id: 1 },
         loading: false,
@@ -409,8 +406,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       
       const mockDeleteItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+        vi.mocked(useMedicalData).mockReturnValue({
         items: mockEmergencyContacts,
         currentPatient: { id: 1 },
         loading: false,
@@ -492,8 +488,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       
       
       // Mock filtered data for family relationships
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+        vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockEmergencyContacts.filter(c => ['spouse', 'child'].includes(c.relationship)),
         hasActiveFilters: true,
@@ -521,8 +516,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       
       
       // Mock filtered data for active contacts
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+        vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockEmergencyContacts.filter(c => c.is_active),
         hasActiveFilters: true,
@@ -550,8 +544,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       
       
       // Mock filtered data for physician search
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+        vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockEmergencyContacts.filter(c => 
           c.name.toLowerCase().includes('chen') || 
@@ -674,8 +667,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockRejectedValue(new Error('Network error'));
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+        vi.mocked(useMedicalData).mockReturnValue({
         items: mockEmergencyContacts,
         currentPatient: { id: 1 },
         loading: false,
@@ -728,10 +720,8 @@ describe('Emergency Contacts Page Integration Tests', () => {
         },
       ];
 
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      
-      useMedicalData.mockReturnValue({
+          
+      vi.mocked(useMedicalData).mockReturnValue({
         items: minimalContacts,
         currentPatient: { id: 1 },
         loading: false,
@@ -745,7 +735,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
         setError: vi.fn(),
       });
 
-      useDataManagement.mockReturnValue({
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: minimalContacts,
       });
@@ -758,10 +748,8 @@ describe('Emergency Contacts Page Integration Tests', () => {
     });
 
     test('displays empty state when no contacts exist', () => {
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      
-      useMedicalData.mockReturnValue({
+          
+      vi.mocked(useMedicalData).mockReturnValue({
         items: [],
         currentPatient: { id: 1 },
         loading: false,
@@ -775,7 +763,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
         setError: vi.fn(),
       });
 
-      useDataManagement.mockReturnValue({
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: [],
         totalCount: 0,
