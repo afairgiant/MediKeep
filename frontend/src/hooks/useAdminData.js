@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useApi } from './useApi';
+import { useApi } from './useApi.js';
 import logger from '../services/logger';
 
 export const useAdminData = config => {

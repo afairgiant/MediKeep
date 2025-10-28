@@ -10,6 +10,7 @@ import { rest } from 'msw';
 import { renderWithPatient } from '../../../test-utils/render';
 import { server } from '../../../test-utils/mocks/server';
 import Procedures from '../Procedures';
+import { useMedicalData } from '../../../hooks/useMedicalData';
 
 // Mock the hooks that make API calls
 vi.mock('../../../hooks/useMedicalData');
@@ -186,8 +187,7 @@ describe('Procedures Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockProcedures,
         currentPatient: { id: 1 },
         loading: false,
@@ -274,8 +274,7 @@ describe('Procedures Page Integration Tests', () => {
       
       const mockUpdateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockProcedures,
         currentPatient: { id: 1 },
         loading: false,
@@ -332,8 +331,7 @@ describe('Procedures Page Integration Tests', () => {
       
       const mockDeleteItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockProcedures,
         currentPatient: { id: 1 },
         loading: false,
@@ -588,8 +586,7 @@ describe('Procedures Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockRejectedValue(new Error('Network error'));
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockProcedures,
         currentPatient: { id: 1 },
         loading: false,

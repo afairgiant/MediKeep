@@ -12,9 +12,11 @@ vi.mock('@mantine/notifications', () => ({
 }));
 
 vi.mock('../../services/logger', () => ({
-  info: vi.fn(),
-  debug: vi.fn(),
-  error: vi.fn(),
+  default: {
+    info: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 vi.mock('../../constants/errorMessages', () => ({
@@ -59,12 +61,12 @@ const createLargeFileSet = (count) => {
 describe('Upload Progress Performance Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllTimers();
     vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     vi.useRealTimers();
   });
 
@@ -278,7 +280,7 @@ describe('Upload Progress Performance Tests', () => {
       }, 100);
 
       act(() => {
-        jest.advanceTimersByTime(150);
+        vi.advanceTimersByTime(150);
       });
 
       // Should not throw errors or cause memory leaks

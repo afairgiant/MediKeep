@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useApi } from './useApi';
-import { apiService } from '../services/api';
+import { useApi } from './useApi.js';
+import { apiService } from '../services/api/index.js';
 import { useCurrentPatient } from './useGlobalData';
 import { useAuth } from '../contexts/AuthContext';
 import logger from '../services/logger';

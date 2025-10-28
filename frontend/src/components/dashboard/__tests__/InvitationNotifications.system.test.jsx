@@ -23,9 +23,11 @@ vi.mock('@mantine/notifications', () => ({
 
 // Mock the logger service
 vi.mock('../../../services/logger', () => ({
-  debug: vi.fn(),
-  info: vi.fn(),
-  error: vi.fn(),
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock the API service to avoid logger issues

@@ -77,9 +77,11 @@ vi.mock('../../../services/api/familyHistoryApi', () => ({
 
 // Mock logger
 vi.mock('../../../services/logger', () => ({
-  debug: vi.fn(),
-  info: vi.fn(),
-  error: vi.fn(),
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock utility functions

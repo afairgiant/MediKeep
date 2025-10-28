@@ -8,7 +8,7 @@ import { vi } from 'vitest';
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import renderWithResponsive, { createMockResponsive } from '../../../test-utils/renderWithResponsive';
-import ResponsiveNavigation from '../ResponsiveNavigation';
+import ResponsiveNavigation from '../ResponsiveNavigation.jsx';
 import { createMockUser } from '../../../test-utils/test-data';
 
 // Mock child components

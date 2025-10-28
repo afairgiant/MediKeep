@@ -10,6 +10,9 @@ import { rest } from 'msw';
 import { renderWithPatient } from '../../../test-utils/render';
 import { server } from '../../../test-utils/mocks/server';
 import LabResults from '../LabResults';
+import { useMedicalData } from '../../../hooks/useMedicalData';
+import { useDataManagement } from '../../../hooks/useDataManagement';
+import { usePractitioners } from '../../../hooks/useGlobalData';
 
 // Mock the hooks that make API calls
 vi.mock('../../../hooks/useMedicalData');
@@ -138,11 +141,11 @@ describe('Lab Results Page Integration Tests', () => {
 
   beforeEach(() => {
     // Mock the hooks to return our test data
-    const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-    const usePractitioners = require('../../../hooks/useGlobalData').usePractitioners;
-    const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
 
-    useMedicalData.mockReturnValue({
+
+
+
+    vi.mocked(useMedicalData).mockReturnValue({
       items: mockLabResults,
       currentPatient: { id: 1, first_name: 'John', last_name: 'Doe' },
       loading: false,
@@ -156,7 +159,7 @@ describe('Lab Results Page Integration Tests', () => {
       setError: vi.fn(),
     });
 
-    usePractitioners.mockReturnValue({
+    vi.mocked(usePractitioners).mockReturnValue({
       practitioners: mockPractitioners,
       loading: false,
     });
@@ -267,8 +270,8 @@ describe('Lab Results Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+  
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockLabResults,
         currentPatient: { id: 1 },
         loading: false,
@@ -349,8 +352,8 @@ describe('Lab Results Page Integration Tests', () => {
       
       const mockUpdateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+  
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockLabResults,
         currentPatient: { id: 1 },
         loading: false,
@@ -413,8 +416,8 @@ describe('Lab Results Page Integration Tests', () => {
       
       const mockDeleteItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+  
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockLabResults,
         currentPatient: { id: 1 },
         loading: false,
@@ -458,8 +461,8 @@ describe('Lab Results Page Integration Tests', () => {
         })
       );
 
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+  
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockLabResults,
         currentPatient: { id: 1 },
         loading: false,
@@ -567,8 +570,8 @@ describe('Lab Results Page Integration Tests', () => {
       
       
       // Mock filtered data for completed results
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+  
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockLabResults.filter(r => r.status === 'completed'),
         hasActiveFilters: true,
@@ -595,8 +598,8 @@ describe('Lab Results Page Integration Tests', () => {
       
       
       // Mock filtered data for hematology
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+  
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockLabResults.filter(r => r.test_category === 'Hematology'),
         hasActiveFilters: true,
@@ -623,8 +626,8 @@ describe('Lab Results Page Integration Tests', () => {
       
       
       // Mock filtered data for lipid search
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+  
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockLabResults.filter(r => r.test_name.toLowerCase().includes('lipid')),
         hasActiveFilters: true,
@@ -743,8 +746,8 @@ describe('Lab Results Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockRejectedValue(new Error('Network error'));
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+  
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockLabResults,
         currentPatient: { id: 1 },
         loading: false,
@@ -795,10 +798,10 @@ describe('Lab Results Page Integration Tests', () => {
     });
 
     test('displays empty state when no lab results exist', () => {
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
+  
+  
       
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: [],
         currentPatient: { id: 1 },
         loading: false,
@@ -812,7 +815,7 @@ describe('Lab Results Page Integration Tests', () => {
         setError: vi.fn(),
       });
 
-      useDataManagement.mockReturnValue({
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: [],
         totalCount: 0,

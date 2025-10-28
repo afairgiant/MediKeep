@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 import { MantineProvider } from '@mantine/core';
 import { ResponsiveProvider } from '../../contexts/ResponsiveContext';
 import logger from '../../services/logger';
@@ -59,7 +60,7 @@ export const mockViewport = (width, height) => {
   });
 
   // Mock window.matchMedia
-  window.matchMedia = jest.fn((query) => {
+  window.matchMedia = vi.fn((query) => {
     const match = query.includes('max-width') 
       ? width <= parseInt(query.match(/\d+/)[0])
       : width >= parseInt(query.match(/\d+/)[0]);
@@ -68,11 +69,11 @@ export const mockViewport = (width, height) => {
       matches: match,
       media: query,
       onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn()
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn()
     };
   });
 
@@ -427,7 +428,7 @@ export const testMedicalFormAtAllBreakpoints = async (formComponent, formData = 
     });
 
     it('handles form submission', async () => {
-      const onSubmit = jest.fn();
+      const onSubmit = vi.fn();
       const FormWithSubmit = React.cloneElement(formComponent, { onSubmit });
       
       renderResponsive(FormWithSubmit, { viewport });

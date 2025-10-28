@@ -10,6 +10,7 @@ import { rest } from 'msw';
 import { renderWithPatient } from '../../../test-utils/render';
 import { server } from '../../../test-utils/mocks/server';
 import Medication from '../Medication';
+import { useMedicalData } from '../../../hooks/useMedicalData';
 
 // Mock the hooks that make API calls
 vi.mock('../../../hooks/useMedicalData');
@@ -151,8 +152,7 @@ describe('Medication Page Integration Tests', () => {
     });
 
     test('displays loading state initially', () => {
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: [],
         loading: true,
         error: null,
@@ -171,8 +171,7 @@ describe('Medication Page Integration Tests', () => {
     });
 
     test('displays error state when there is an error', () => {
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: [],
         loading: false,
         error: 'Failed to load medications',
@@ -218,8 +217,7 @@ describe('Medication Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockMedications,
         currentPatient: { id: 1 },
         loading: false,
@@ -288,8 +286,7 @@ describe('Medication Page Integration Tests', () => {
       
       const mockUpdateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockMedications,
         currentPatient: { id: 1 },
         loading: false,
@@ -337,8 +334,7 @@ describe('Medication Page Integration Tests', () => {
       
       const mockDeleteItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockMedications,
         currentPatient: { id: 1 },
         loading: false,
@@ -490,8 +486,7 @@ describe('Medication Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockRejectedValue(new Error('API Error'));
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockMedications,
         currentPatient: { id: 1 },
         loading: false,
@@ -531,8 +526,7 @@ describe('Medication Page Integration Tests', () => {
 
   describe('Success Messages', () => {
     test('displays success message after successful operation', async () => {
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockMedications,
         currentPatient: { id: 1 },
         loading: false,

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
-import { useApi } from './useApi';
-import { apiService } from '../services/api';
+import { useApi } from './useApi.js';
+import { apiService } from '../services/api/index.js';
 import { notifications } from '@mantine/notifications';
 import logger from '../services/logger';
 

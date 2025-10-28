@@ -1,7 +1,7 @@
-// Jest setup file for responsive tests
+// Vitest setup file for responsive tests
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 
 // Polyfills for jsdom environment
 global.TextEncoder = TextEncoder;
@@ -10,15 +10,15 @@ global.TextDecoder = TextDecoder;
 // Mock window.matchMedia (required for responsive testing)
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(), // deprecated
-    removeListener: jest.fn(), // deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   })),
 });
 
@@ -64,7 +64,7 @@ global.cancelAnimationFrame = (id) => {
 };
 
 // Mock performance.now for consistent timing in tests
-const mockPerformanceNow = jest.fn(() => Date.now());
+const mockPerformanceNow = vi.fn(() => Date.now());
 global.performance = {
   ...global.performance,
   now: mockPerformanceNow,
@@ -76,8 +76,8 @@ global.performance = {
 };
 
 // Mock window.getComputedStyle for style testing
-global.getComputedStyle = jest.fn().mockImplementation((element) => ({
-  getPropertyValue: jest.fn().mockReturnValue(''),
+global.getComputedStyle = vi.fn().mockImplementation((element) => ({
+  getPropertyValue: vi.fn().mockReturnValue(''),
   minHeight: '44px',
   fontSize: '16px',
   padding: '16px',
@@ -100,10 +100,10 @@ Object.defineProperty(window, 'innerHeight', {
 });
 
 // Mock window.scrollTo
-window.scrollTo = jest.fn();
+window.scrollTo = vi.fn();
 
 // Mock HTMLElement.getBoundingClientRect
-Element.prototype.getBoundingClientRect = jest.fn().mockImplementation(() => ({
+Element.prototype.getBoundingClientRect = vi.fn().mockImplementation(() => ({
   width: 120,
   height: 44,
   top: 0,
@@ -112,20 +112,20 @@ Element.prototype.getBoundingClientRect = jest.fn().mockImplementation(() => ({
   right: 120,
   x: 0,
   y: 0,
-  toJSON: jest.fn()
+  toJSON: vi.fn()
 }));
 
 // Mock HTMLElement.scrollIntoView
-Element.prototype.scrollIntoView = jest.fn();
+Element.prototype.scrollIntoView = vi.fn();
 
 // Mock focus and blur for form testing
-HTMLElement.prototype.focus = jest.fn();
-HTMLElement.prototype.blur = jest.fn();
+HTMLElement.prototype.focus = vi.fn();
+HTMLElement.prototype.blur = vi.fn();
 
 // Mock clipboard API for copy/paste tests
 global.navigator.clipboard = {
-  writeText: jest.fn().mockResolvedValue(undefined),
-  readText: jest.fn().mockResolvedValue('')
+  writeText: vi.fn().mockResolvedValue(undefined),
+  readText: vi.fn().mockResolvedValue('')
 };
 
 // Mock touch events for mobile testing
@@ -143,8 +143,8 @@ const originalConsole = { ...console };
 global.console = {
   ...console,
   // Suppress console.log in tests unless explicitly needed
-  log: jest.fn(),
-  debug: jest.fn(),
+  log: vi.fn(),
+  debug: vi.fn(),
   // Keep warnings and errors visible
   warn: originalConsole.warn,
   error: originalConsole.error,
@@ -165,7 +165,7 @@ global.measureRenderTime = (renderFn) => {
 // Cleanup function to run after each test
 afterEach(() => {
   // Clear all mocks
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   
   // Reset performance mock
   mockPerformanceNow.mockClear();
@@ -175,7 +175,7 @@ afterEach(() => {
   window.innerHeight = 768;
   
   // Clear any remaining timers
-  jest.clearAllTimers();
+  vi.clearAllTimers();
 });
 
 // Global test utilities available in all responsive tests
@@ -280,12 +280,12 @@ console.warn = (...args) => {
 
 // Set up fake timers for animations and debouncing
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
-  jest.runOnlyPendingTimers();
-  jest.useRealTimers();
+  vi.runOnlyPendingTimers();
+  vi.useRealTimers();
 });
 
 export default {};

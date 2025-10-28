@@ -471,7 +471,7 @@ describe('MantineConditionForm', () => {
 
     test('handles missing status config gracefully', () => {
       // Mock empty status config
-      jest.doMock('../../../utils/statusConfig', () => ({
+      vi.doMock('../../../utils/statusConfig', () => ({
         CONDITION_STATUS_OPTIONS: [],
         SEVERITY_OPTIONS: [],
       }));

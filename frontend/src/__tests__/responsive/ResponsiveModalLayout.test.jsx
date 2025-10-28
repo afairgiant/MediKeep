@@ -2,7 +2,6 @@ import { vi } from 'vitest';
 import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest } from '@jest/globals';
 
 // Import components to test
 import ResponsiveModal from '../../components/adapters/ResponsiveModal';
@@ -20,13 +19,16 @@ import {
 } from './ResponsiveTestUtils';
 
 import logger from '../../services/logger';
+import { useResponsive } from '../../hooks/useResponsive';
 
 // Mock logger
 vi.mock('../../services/logger', () => ({
-  debug: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn()
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock useResponsive hook
@@ -67,7 +69,6 @@ describe('Responsive Modal and Layout Tests', () => {
 
         describe(`Modal at ${breakpoint}`, () => {
           beforeEach(() => {
-            const { useResponsive } = require('../../hooks/useResponsive');
             useResponsive.mockReturnValue({
               breakpoint,
               deviceType,
@@ -200,7 +201,6 @@ describe('Responsive Modal and Layout Tests', () => {
       };
 
       it('adapts size based on form complexity', () => {
-        const { useResponsive } = require('../../hooks/useResponsive');
         
         // Test high complexity form on mobile
         useResponsive.mockReturnValue({
@@ -330,7 +330,6 @@ describe('Responsive Modal and Layout Tests', () => {
 
         describe(`Select at ${breakpoint}`, () => {
           beforeEach(() => {
-            const { useResponsive } = require('../../hooks/useResponsive');
             useResponsive.mockReturnValue({
               breakpoint,
               deviceType,
@@ -505,7 +504,6 @@ describe('Responsive Modal and Layout Tests', () => {
       });
 
       it('applies appropriate limits based on device type', () => {
-        const { useResponsive } = require('../../hooks/useResponsive');
         
         // Test mobile with large dataset
         useResponsive.mockReturnValue({
@@ -607,7 +605,6 @@ describe('Responsive Modal and Layout Tests', () => {
 
   describe('Touch and Keyboard Navigation', () => {
     it('handles touch interactions on mobile', async () => {
-      const { useResponsive } = require('../../hooks/useResponsive');
       useResponsive.mockReturnValue({
         breakpoint: 'xs',
         deviceType: 'mobile',

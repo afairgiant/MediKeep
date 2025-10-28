@@ -3,7 +3,7 @@
  *
  * Streamlined logging with focus on reliability and simplicity
  */
-import { getApiUrl, isDevelopment } from '../config/env';
+import { getApiUrl, isDevelopment } from '../config/env.ts';
 
 class Logger {
   constructor() {

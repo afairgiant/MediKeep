@@ -1,4 +1,4 @@
-import logger from '../logger';
+import logger from '../logger.js';
 import { ENTITY_TYPES } from '../../utils/entityRelationships';
 import { extractErrorMessage } from '../../utils/errorUtils';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
@@ -670,7 +670,7 @@ class ApiService {
       );
 
       // Import the pollPaperlessTaskStatus function
-      const { pollPaperlessTaskStatus } = await import('./paperlessApi');
+      const { pollPaperlessTaskStatus } = await import('./paperlessApi.jsx');
 
       // Handle background transition notification
       const handleBackgroundTransition = taskUuid => {
@@ -763,7 +763,7 @@ class ApiService {
         });
 
         // Start background resolution immediately (don't await - let it run in background)
-        const { resolveBackgroundTask } = await import('./paperlessApi');
+        const { resolveBackgroundTask } = await import('./paperlessApi.jsx');
         resolveBackgroundTask(
           taskResult.task_uuid,
           entityType,

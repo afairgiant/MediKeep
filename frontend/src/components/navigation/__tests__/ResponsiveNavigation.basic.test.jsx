@@ -32,7 +32,7 @@ vi.mock('../MobileDrawer', () => {
 });
 
 // Import after mocking
-const ResponsiveNavigation = require('../ResponsiveNavigation').default;
+import ResponsiveNavigation from '../ResponsiveNavigation.jsx';
 
 const mockUser = createMockUser();
 

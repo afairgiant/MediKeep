@@ -38,7 +38,7 @@ import {
   IconWifi,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
-import { getPaperlessSettings } from '../../services/api/paperlessApi';
+import { getPaperlessSettings } from '../../services/api/paperlessApi.jsx';
 import logger from '../../services/logger';
 import FileUploadZone from './FileUploadZone';
 import FileList from './FileList';

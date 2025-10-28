@@ -2,7 +2,7 @@
  * Centralized exports for all custom hooks
  */
 
-export * from './useApi';
+export * from './useApi.js';
 export * from './useGlobalData';
 export * from './useAdminData';
 

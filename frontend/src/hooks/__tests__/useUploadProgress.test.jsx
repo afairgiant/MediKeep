@@ -13,9 +13,11 @@ vi.mock('@mantine/notifications', () => ({
 }));
 
 vi.mock('../../services/logger', () => ({
-  info: vi.fn(),
-  debug: vi.fn(),
-  error: vi.fn(),
+  default: {
+    info: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock error messages
@@ -42,12 +44,12 @@ const wrapper = ({ children }) => (
 describe('useUploadProgress Hook', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    jest.clearAllTimers();
+    vi.clearAllTimers();
     vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    vi.runOnlyPendingTimers();
     vi.useRealTimers();
   });
 
@@ -163,7 +165,7 @@ describe('useUploadProgress Hook', () => {
 
       // Fast-forward timers to execute all updates
       act(() => {
-        jest.runAllTimers();
+        vi.runAllTimers();
       });
 
       await waitFor(() => {
@@ -477,7 +479,7 @@ describe('useUploadProgress Hook', () => {
 
       // Simulate time passing and progress
       act(() => {
-        jest.advanceTimersByTime(1000); // 1 second
+        vi.advanceTimersByTime(1000); // 1 second
         result.current.updateFileProgress('file-1', 10, 'uploading'); // 10% in 1 second
       });
 
@@ -496,7 +498,7 @@ describe('useUploadProgress Hook', () => {
 
       // Simulate 50% progress (500KB) in 1 second
       act(() => {
-        jest.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
         result.current.updateFileProgress('file-1', 50, 'uploading');
       });
 
@@ -596,7 +598,7 @@ describe('useUploadProgress Hook', () => {
       act(() => {
         for (let i = 1; i <= 10; i++) {
           result.current.updateFileProgress('file-1', i * 10, 'uploading');
-          jest.advanceTimersByTime(100); // 100ms between updates
+          vi.advanceTimersByTime(100); // 100ms between updates
         }
       });
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { vi } from 'vitest';
 import { render as rtlRender } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
@@ -12,17 +13,17 @@ const defaultAuthContext = {
   isAuthenticated: false,
   isLoading: false,
   error: null,
-  login: jest.fn(),
-  logout: jest.fn(),
-  clearError: jest.fn(),
+  login: vi.fn(),
+  logout: vi.fn(),
+  clearError: vi.fn(),
 };
 
 // Mock app data context values
 const defaultAppDataContext = {
   currentPatient: null,
   practitioners: [],
-  refreshPatient: jest.fn(),
-  refreshPractitioners: jest.fn(),
+  refreshPatient: vi.fn(),
+  refreshPractitioners: vi.fn(),
   isLoading: false,
   error: null,
 };

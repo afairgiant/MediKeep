@@ -2,7 +2,6 @@ import { vi } from 'vitest';
 import React from 'react';
 import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { jest } from '@jest/globals';
 
 // Import components to test
 import ResponsiveTable from '../../components/adapters/ResponsiveTable';
@@ -24,10 +23,12 @@ import logger from '../../services/logger';
 
 // Mock logger
 vi.mock('../../services/logger', () => ({
-  debug: vi.fn(),
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn()
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock useResponsive hook with performance tracking

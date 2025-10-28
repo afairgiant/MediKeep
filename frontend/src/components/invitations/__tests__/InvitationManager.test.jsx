@@ -27,9 +27,11 @@ vi.mock('../../../contexts/AuthContext', () => ({
 }));
 
 vi.mock('../../../services/logger', () => ({
-  debug: vi.fn(),
-  info: vi.fn(),
-  error: vi.fn(),
+  default: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 // Mock API services

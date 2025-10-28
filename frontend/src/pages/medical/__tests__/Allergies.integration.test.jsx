@@ -10,6 +10,8 @@ import { rest } from 'msw';
 import { renderWithPatient } from '../../../test-utils/render';
 import { server } from '../../../test-utils/mocks/server';
 import Allergies from '../Allergies';
+import { useMedicalData } from '../../../hooks/useMedicalData';
+import { useDataManagement } from '../../../hooks/useDataManagement';
 
 // Mock the hooks that make API calls
 vi.mock('../../../hooks/useMedicalData');
@@ -226,8 +228,7 @@ describe('Allergies Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockAllergies,
         currentPatient: { id: 1 },
         loading: false,
@@ -295,8 +296,7 @@ describe('Allergies Page Integration Tests', () => {
       
       const mockUpdateItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockAllergies,
         currentPatient: { id: 1 },
         loading: false,
@@ -349,8 +349,7 @@ describe('Allergies Page Integration Tests', () => {
       
       const mockDeleteItem = vi.fn().mockResolvedValue({});
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockAllergies,
         currentPatient: { id: 1 },
         loading: false,
@@ -385,8 +384,7 @@ describe('Allergies Page Integration Tests', () => {
       
       
       // Mock filtered data for severe allergies
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockAllergies.filter(a => a.severity === 'severe' || a.severity === 'life-threatening'),
         hasActiveFilters: true,
@@ -414,8 +412,7 @@ describe('Allergies Page Integration Tests', () => {
       
       
       // Mock filtered data for active allergies
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockAllergies.filter(a => a.status === 'active'),
         hasActiveFilters: true,
@@ -443,8 +440,7 @@ describe('Allergies Page Integration Tests', () => {
       
       
       // Mock filtered data for penicillin search
-      const useDataManagement = require('../../../hooks/useDataManagement').useDataManagement;
-      useDataManagement.mockReturnValue({
+      vi.mocked(useDataManagement).mockReturnValue({
         ...mockDataManagement,
         data: mockAllergies.filter(a => a.allergen.toLowerCase().includes('penicillin')),
         hasActiveFilters: true,
@@ -640,8 +636,7 @@ describe('Allergies Page Integration Tests', () => {
       
       const mockCreateItem = vi.fn().mockRejectedValue(new Error('Network error'));
       
-      const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-      useMedicalData.mockReturnValue({
+      vi.mocked(useMedicalData).mockReturnValue({
         items: mockAllergies,
         currentPatient: { id: 1 },
         loading: false,
