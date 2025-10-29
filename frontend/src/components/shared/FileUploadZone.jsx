@@ -42,18 +42,27 @@ const FileUploadZone = ({
   // Validate file
   const validateFile = useCallback((file) => {
     const errors = [];
-    
+
     // Check file size
     if (file.size > maxSize) {
       errors.push(`File size exceeds ${Math.round(maxSize / 1024 / 1024)}MB limit`);
     }
-    
+
     // Check file type
     const fileName = file.name.toLowerCase();
-    const hasValidExtension = acceptedTypes.some(type => 
+    const hasValidExtension = acceptedTypes.some(type =>
       fileName.endsWith(type.toLowerCase())
     );
-    
+
+    // DEBUG: Log validation details
+    console.log('🔍 File Validation Debug:', {
+      fileName: file.name,
+      fileNameLower: fileName,
+      acceptedTypes: acceptedTypes,
+      hasZip: acceptedTypes.includes('.zip'),
+      hasValidExtension
+    });
+
     if (!hasValidExtension) {
       errors.push(`File type not supported. Accepted: ${acceptedTypes.join(', ')}`);
     }

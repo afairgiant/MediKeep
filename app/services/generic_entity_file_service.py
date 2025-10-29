@@ -804,19 +804,23 @@ class GenericEntityFileService:
             with open(file_path, "wb") as f:
                 f.write(file_content)
 
-            # Create database record
-            entity_file = EntityFile(
+            # ✅ FIX: Validate with Pydantic schema BEFORE creating database record
+            # This ensures validation failures are caught BEFORE committing to database
+            file_create = EntityFileCreate(
                 entity_type=entity_type,
                 entity_id=entity_id,
                 file_name=file.filename,
                 file_path=str(file_path),
-                file_type=file.content_type,
+                file_type=file.content_type,  # Pydantic validation happens HERE
                 file_size=file_size,
                 description=description,
                 category=category,
                 storage_backend="local",
                 uploaded_at=get_utc_now(),
             )
+
+            # Create database record from validated schema
+            entity_file = EntityFile(**file_create.model_dump())
 
             db.add(entity_file)
             db.commit()
@@ -976,23 +980,29 @@ class GenericEntityFileService:
                 # No document ID or task ID - something went wrong
                 raise Exception("No document ID or task ID returned from Paperless")
 
-            # Create database record for paperless file
-            entity_file = EntityFile(
+            # ✅ FIX: Validate with Pydantic schema BEFORE creating database record
+            # This ensures validation failures are caught BEFORE committing to database
+            file_create = EntityFileCreate(
                 entity_type=entity_type,
                 entity_id=entity_id,
                 file_name=file.filename,
                 file_path="paperless://",  # Paperless storage, no local path
-                file_type=file.content_type,
+                file_type=file.content_type,  # Pydantic validation happens HERE
                 file_size=file_size,
                 description=description,
                 category=category,
                 storage_backend="paperless",
-                paperless_document_id=paperless_id,  # Only set when document is processed
-                paperless_task_uuid=paperless_task_uuid,  # Set when document is processing
+                uploaded_at=get_utc_now(),
                 sync_status=sync_status,
                 last_sync_at=last_sync,
-                uploaded_at=get_utc_now(),
+                paperless_document_id=paperless_id,  # Only set when document is processed
             )
+
+            # Create database record from validated schema
+            entity_file = EntityFile(**file_create.model_dump())
+
+            # Set task UUID separately (not in EntityFileCreate schema)
+            entity_file.paperless_task_uuid = paperless_task_uuid
 
             db.add(entity_file)
             db.commit()
@@ -1002,7 +1012,7 @@ class GenericEntityFileService:
                 f"File uploaded to paperless: {file.filename} for {entity_type} {entity_id} "
                 f"(status: {sync_status}, id: {paperless_id}, task_uuid: {paperless_task_uuid})"
             )
-            
+
             # TODO: If sync_status is "processing", start background task to poll for completion
             # For now, you can manually call update_processing_files() to check status
             # Future: Implement with Celery, background threads, or cron job
