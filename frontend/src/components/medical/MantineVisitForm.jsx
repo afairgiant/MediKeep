@@ -295,11 +295,6 @@ const MantineVisitForm = ({
                       entityType="visit"
                       entityId={editingVisit.id}
                       mode="edit"
-                      config={{
-                        acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-                        maxSize: 10 * 1024 * 1024, // 10MB
-                        maxFiles: 10
-                      }}
                       onError={(error) => {
                         logger.error('Document manager error in visit form:', error);
                       }}

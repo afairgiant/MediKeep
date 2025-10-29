@@ -1,4 +1,5 @@
 import logger from '../../services/logger';
+import { MEDICAL_DOCUMENT_CONFIG } from '../../constants/fileTypes';
 
 import React, { memo } from 'react';
 import {
@@ -257,9 +258,9 @@ const RenderModeContent = memo(({
               }
             });
           }}
-          acceptedTypes={config.acceptedTypes}
-          maxSize={config.maxSize}
-          maxFiles={config.maxFiles}
+          acceptedTypes={config.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
+          maxSize={config.maxSize || MEDICAL_DOCUMENT_CONFIG.maxSize}
+          maxFiles={config.maxFiles || MEDICAL_DOCUMENT_CONFIG.maxFiles}
           selectedStorageBackend={selectedStorageBackend}
           paperlessSettings={paperlessSettings}
           mode={mode}
@@ -293,9 +294,9 @@ const RenderModeContent = memo(({
               }
             });
           }}
-          acceptedTypes={config.acceptedTypes}
-          maxSize={config.maxSize}
-          maxFiles={config.maxFiles}
+          acceptedTypes={config.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
+          maxSize={config.maxSize || MEDICAL_DOCUMENT_CONFIG.maxSize}
+          maxFiles={config.maxFiles || MEDICAL_DOCUMENT_CONFIG.maxFiles}
           autoUpload={true}
           selectedStorageBackend={selectedStorageBackend}
           paperlessSettings={paperlessSettings}

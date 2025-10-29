@@ -36,7 +36,7 @@ router = APIRouter()
 
 # Configuration
 UPLOAD_DIRECTORY = "uploads/lab_result_files"
-MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+MAX_FILE_SIZE = 1024 * 1024 * 1024  # 1GB (increased for archive support)
 ALLOWED_EXTENSIONS = {
     ".pdf",
     ".jpg",
@@ -53,8 +53,28 @@ ALLOWED_EXTENSIONS = {
     ".docx",
     ".xls",
     ".xlsx",
-    ".dcm",
+    ".dcm",  # DICOM medical imaging
+    ".zip",  # Archive format for medical imaging packages
+    ".iso",  # CD/DVD image format
+    ".7z",   # 7-Zip archive
+    ".rar",  # RAR archive
+    ".avi",  # Video - ultrasound recordings
+    ".mp4",  # Video - procedures, endoscopy
+    ".mov",  # Video - QuickTime format
+    ".webm", # Video - web format
+    ".stl",  # 3D models - surgical planning
+    ".nii",  # NIfTI - neuroimaging research
+    ".nrrd", # Nearly Raw Raster Data - 3D medical imaging
+    ".mp3",  # Audio - voice notes, dictations
+    ".wav",  # Audio - uncompressed
+    ".m4a",  # Audio - compressed
 }
+
+# Archive-specific security limits (see docs/ZIP_ISO_SECURITY_REQUIREMENTS.md)
+MAX_COMPRESSION_RATIO = 10.0  # Prevent ZIP bombs
+MAX_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 * 1024  # 10GB uncompressed
+MAX_FILES_IN_ARCHIVE = 10000  # Reasonable limit for medical imaging
+MAX_EXTRACTION_TIME = 300  # 5 minutes timeout
 
 
 @router.post(

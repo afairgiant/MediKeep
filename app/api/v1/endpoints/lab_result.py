@@ -469,7 +469,7 @@ async def upload_lab_result_file(
 
     # Configuration
     UPLOAD_DIRECTORY = settings.UPLOAD_DIR / "lab_result_files"
-    MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+    MAX_FILE_SIZE = 1024 * 1024 * 1024  # 1GB (increased for archive support)
     ALLOWED_EXTENSIONS = {
         ".pdf",
         ".jpg",
@@ -486,7 +486,21 @@ async def upload_lab_result_file(
         ".docx",
         ".xls",
         ".xlsx",
-        ".dcm",
+        ".dcm",  # DICOM medical imaging
+        ".zip",  # Archive format for medical imaging packages
+        ".iso",  # CD/DVD image format
+        ".7z",   # 7-Zip archive
+        ".rar",  # RAR archive
+        ".avi",  # Video - ultrasound recordings
+        ".mp4",  # Video - procedures, endoscopy
+        ".mov",  # Video - QuickTime format
+        ".webm", # Video - web format
+        ".stl",  # 3D models - surgical planning
+        ".nii",  # NIfTI - neuroimaging research
+        ".nrrd", # Nearly Raw Raster Data - 3D medical imaging
+        ".mp3",  # Audio - voice notes, dictations
+        ".wav",  # Audio - uncompressed
+        ".m4a",  # Audio - compressed
     }
 
     # Check file extension
