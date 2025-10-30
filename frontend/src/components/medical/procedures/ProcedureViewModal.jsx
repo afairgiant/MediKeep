@@ -297,11 +297,6 @@ const ProcedureViewModal = ({
                 entityType="procedure"
                 entityId={procedure.id}
                 mode="view"
-                config={{
-                  acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-                  maxSize: 10 * 1024 * 1024, // 10MB
-                  maxFiles: 10
-                }}
                 showProgressModal={true}
                 onUploadComplete={handleDocumentUploadComplete}
                 onError={handleDocumentError}

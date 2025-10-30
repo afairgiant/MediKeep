@@ -891,7 +891,7 @@ async def cleanup_out_of_sync_files(
             logger.info(f"Deleting {file_record.sync_status} file: {file_record.id} - {file_record.file_name}", extra={
                 "user_id": current_user.id,
                 "file_id": file_record.id,
-                "filename": file_record.file_name,
+                "file_name": file_record.file_name,
                 "sync_status": file_record.sync_status,
                 "paperless_document_id": file_record.paperless_document_id
             })

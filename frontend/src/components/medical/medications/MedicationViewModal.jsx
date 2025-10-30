@@ -336,11 +336,6 @@ const MedicationViewModal = ({
                   entityType="medication"
                   entityId={medication.id}
                   mode="view"
-                  config={{
-                    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-                    maxSize: 10 * 1024 * 1024, // 10MB
-                    maxFiles: 10
-                  }}
                   onUploadComplete={(success, completedCount, failedCount) => {
                     if (onFileUploadComplete) {
                       onFileUploadComplete(success, completedCount, failedCount);

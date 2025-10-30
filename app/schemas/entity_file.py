@@ -56,13 +56,8 @@ class EntityFileBase(BaseModel):
     def validate_file_type(cls, v):
         """Validate file type (MIME type)"""
         valid_types = [
+            # Documents
             "application/pdf",
-            "image/jpeg",
-            "image/png",
-            "image/tiff",
-            "image/bmp",
-            "image/gif",
-            "application/dicom",
             "text/plain",
             "text/csv",
             "text/xml",
@@ -72,6 +67,42 @@ class EntityFileBase(BaseModel):
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "application/vnd.ms-excel",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            # Images
+            "image/jpeg",
+            "image/jpg",  # Non-standard but commonly sent by browsers
+            "image/png",
+            "image/tiff",
+            "image/bmp",
+            "image/gif",
+            # Medical Imaging
+            "application/dicom",
+            # Archives (multiple MIME type variants for browser compatibility)
+            "application/zip",
+            "application/x-zip",
+            "application/x-zip-compressed",
+            "application/x-iso9660-image",
+            "application/x-7z-compressed",
+            "application/vnd.rar",
+            "application/x-rar-compressed",
+            "application/x-rar",
+            # Video
+            "video/x-msvideo",
+            "video/avi",  # Non-standard but commonly sent by browsers
+            "video/mp4",
+            "video/quicktime",
+            "video/webm",
+            # 3D Models
+            "model/stl",
+            "application/vnd.ms-pki.stl",
+            # Research Imaging
+            "application/octet-stream",  # Used for .nii, .nrrd
+            # Audio
+            "audio/mpeg",
+            "audio/mp3",  # Non-standard but commonly sent by browsers
+            "audio/wav",
+            "audio/x-wav",  # Legacy variant for browser compatibility
+            "audio/mp4",
+            "audio/x-m4a",  # Legacy variant for browser compatibility
         ]
         if v and v.lower() not in valid_types:
             raise ValueError(f"File type must be one of: {', '.join(valid_types)}")
@@ -79,12 +110,12 @@ class EntityFileBase(BaseModel):
 
     @validator("file_size")
     def validate_file_size(cls, v):
-        """Validate file size (max 100MB)"""
+        """Validate file size (max 1GB for archive support)"""
         if v is not None:
             if v < 0:
                 raise ValueError("File size cannot be negative")
-            if v > 100 * 1024 * 1024:  # 100MB
-                raise ValueError("File size cannot exceed 100MB")
+            if v > 1024 * 1024 * 1024:  # 1GB (increased for archive support)
+                raise ValueError("File size cannot exceed 1GB")
         return v
 
     @validator("description")
@@ -112,6 +143,7 @@ class EntityFileCreate(EntityFileBase):
     sync_status: Optional[str] = "synced"
     last_sync_at: Optional[datetime] = None
     paperless_document_id: Optional[str] = None
+    paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
 
     @validator("entity_id")
     def validate_entity_id(cls, v):
@@ -159,14 +191,8 @@ class EntityFileUpdate(BaseModel):
     def validate_file_type(cls, v):
         if v is not None:
             valid_types = [
+                # Documents
                 "application/pdf",
-                "image/jpeg",
-                "image/jpg",
-                "image/png", 
-                "image/tiff",
-                "image/bmp",
-                "image/gif",
-                "application/dicom",
                 "text/plain",
                 "text/csv",
                 "text/xml",
@@ -176,6 +202,42 @@ class EntityFileUpdate(BaseModel):
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "application/vnd.ms-excel",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                # Images
+                "image/jpeg",
+                "image/jpg",  # Non-standard but commonly sent by browsers
+                "image/png",
+                "image/tiff",
+                "image/bmp",
+                "image/gif",
+                # Medical Imaging
+                "application/dicom",
+                # Archives (multiple MIME type variants for browser compatibility)
+                "application/zip",
+                "application/x-zip",
+                "application/x-zip-compressed",
+                "application/x-iso9660-image",
+                "application/x-7z-compressed",
+                "application/vnd.rar",
+                "application/x-rar-compressed",
+                "application/x-rar",
+                # Video
+                "video/x-msvideo",
+                "video/avi",  # Non-standard but commonly sent by browsers
+                "video/mp4",
+                "video/quicktime",
+                "video/webm",
+                # 3D Models
+                "model/stl",
+                "application/vnd.ms-pki.stl",
+                # Research Imaging
+                "application/octet-stream",  # Used for .nii, .nrrd
+                # Audio
+                "audio/mpeg",
+                "audio/mp3",  # Non-standard but commonly sent by browsers
+                "audio/wav",
+                "audio/x-wav",  # Legacy variant for browser compatibility
+                "audio/mp4",
+                "audio/x-m4a",  # Legacy variant for browser compatibility
             ]
             if v.lower() not in valid_types:
                 raise ValueError(f"File type must be one of: {', '.join(valid_types)}")
@@ -187,8 +249,8 @@ class EntityFileUpdate(BaseModel):
         if v is not None:
             if v < 0:
                 raise ValueError("File size cannot be negative")
-            if v > 100 * 1024 * 1024:  # 100MB
-                raise ValueError("File size cannot exceed 100MB")
+            if v > 1024 * 1024 * 1024:  # 1GB (increased for archive support)
+                raise ValueError("File size cannot exceed 1GB")
         return v
 
     @validator("description")

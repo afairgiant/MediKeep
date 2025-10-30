@@ -86,11 +86,6 @@ const LabResultFormWrapper = ({
           entityType="lab-result"
           entityId={editingItem?.id}
           mode={editingItem ? 'edit' : 'create'}
-          config={{
-            acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif', '.txt', '.csv', '.xml', '.json', '.doc', '.docx', '.xls', '.xlsx'],
-            maxSize: 10 * 1024 * 1024, // 10MB
-            maxFiles: 10
-          }}
           onUploadPendingFiles={handleDocumentManagerRef}
           showProgressModal={true}
           onUploadComplete={handleDocumentUploadComplete}

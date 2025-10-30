@@ -502,11 +502,6 @@ const SymptomViewModal = ({
                   entityType="symptom"
                   entityId={symptom.id}
                   mode="view"
-                  config={{
-                    acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-                    maxSize: 10 * 1024 * 1024,
-                    maxFiles: 10,
-                  }}
                   onError={error => {
                     logger.error('Document manager error in symptom view:', error);
                   }}

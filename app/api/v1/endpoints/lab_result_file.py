@@ -36,7 +36,7 @@ router = APIRouter()
 
 # Configuration
 UPLOAD_DIRECTORY = "uploads/lab_result_files"
-MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+MAX_FILE_SIZE = 1024 * 1024 * 1024  # 1GB (increased for archive support)
 ALLOWED_EXTENSIONS = {
     ".pdf",
     ".jpg",
@@ -53,8 +53,25 @@ ALLOWED_EXTENSIONS = {
     ".docx",
     ".xls",
     ".xlsx",
-    ".dcm",
+    ".dcm",  # DICOM medical imaging
+    ".zip",  # Archive format for medical imaging packages
+    ".iso",  # CD/DVD image format
+    ".7z",   # 7-Zip archive
+    ".rar",  # RAR archive
+    ".avi",  # Video - ultrasound recordings
+    ".mp4",  # Video - procedures, endoscopy
+    ".mov",  # Video - QuickTime format
+    ".webm", # Video - web format
+    ".stl",  # 3D models - surgical planning
+    ".nii",  # NIfTI - neuroimaging research
+    ".nrrd", # Nearly Raw Raster Data - 3D medical imaging
+    ".mp3",  # Audio - voice notes, dictations
+    ".wav",  # Audio - uncompressed
+    ".m4a",  # Audio - compressed
 }
+
+# Archive validation is now handled by app.utils.archive_validator
+# See archive_validator.py for ZIP/ISO security validation and limits
 
 
 @router.post(
@@ -199,7 +216,7 @@ async def upload_file(
                 LogFields.FILE: file_path,
                 "lab_result_id": lab_result_id,
                 "file_size": len(file_content),
-                "filename": file.filename
+                "file_name": file.filename
             }
         )
     except Exception as e:

@@ -383,11 +383,6 @@ const VisitViewModal = ({
                     entityType="visit"
                     entityId={visit.id}
                     mode="view"
-                    config={{
-                      acceptedTypes: ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-                      maxSize: 10 * 1024 * 1024, // 10MB
-                      maxFiles: 10
-                    }}
                     onUploadComplete={handleDocumentUploadComplete}
                     onError={handleDocumentError}
                     showProgressModal={true}

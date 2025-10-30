@@ -1,4 +1,9 @@
 import logger from '../../services/logger';
+import {
+  MEDICAL_DOCUMENT_EXTENSIONS,
+  MEDICAL_DOCUMENT_MIME_TYPES,
+  MEDICAL_DOCUMENT_CONFIG
+} from '../../constants/fileTypes';
 
 import React, { useState, useCallback } from 'react';
 import {
@@ -21,9 +26,9 @@ import { Dropzone } from '@mantine/dropzone';
 const FileUploadZone = ({
   onUpload,
   onValidationError,
-  acceptedTypes = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'],
-  maxSize = 10 * 1024 * 1024, // 10MB
-  maxFiles = 5,
+  acceptedTypes = MEDICAL_DOCUMENT_EXTENSIONS,
+  maxSize = MEDICAL_DOCUMENT_CONFIG.maxSize,
+  maxFiles = MEDICAL_DOCUMENT_CONFIG.maxFiles,
   multiple = true,
   disabled = false,
   className = '',
@@ -37,18 +42,28 @@ const FileUploadZone = ({
   // Validate file
   const validateFile = useCallback((file) => {
     const errors = [];
-    
+
     // Check file size
     if (file.size > maxSize) {
       errors.push(`File size exceeds ${Math.round(maxSize / 1024 / 1024)}MB limit`);
     }
-    
+
     // Check file type
     const fileName = file.name.toLowerCase();
-    const hasValidExtension = acceptedTypes.some(type => 
+    const hasValidExtension = acceptedTypes.some(type =>
       fileName.endsWith(type.toLowerCase())
     );
-    
+
+    // Log validation details for debugging
+    logger.debug('file_validation', 'File validation check', {
+      component: 'FileUploadZone',
+      fileName: file.name,
+      fileNameLower: fileName,
+      acceptedTypes: acceptedTypes,
+      hasZip: acceptedTypes.includes('.zip'),
+      hasValidExtension
+    });
+
     if (!hasValidExtension) {
       errors.push(`File type not supported. Accepted: ${acceptedTypes.join(', ')}`);
     }
@@ -158,17 +173,8 @@ const FileUploadZone = ({
         }}
         maxSize={maxSize}
         accept={acceptedTypes.reduce((acc, type) => {
-          // Convert file extensions to MIME types
-          const mimeTypes = {
-            '.pdf': 'application/pdf',
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg', 
-            '.png': 'image/png',
-            '.gif': 'image/gif',
-            '.doc': 'application/msword',
-            '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-          };
-          const mimeType = mimeTypes[type];
+          // Convert file extensions to MIME types using centralized mapping
+          const mimeType = MEDICAL_DOCUMENT_MIME_TYPES[type];
           if (mimeType) acc[mimeType] = [type];
           return acc;
         }, {})}
