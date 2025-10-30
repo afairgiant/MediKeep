@@ -216,7 +216,7 @@ async def upload_file(
                 LogFields.FILE: file_path,
                 "lab_result_id": lab_result_id,
                 "file_size": len(file_content),
-                "filename": file.filename
+                "file_name": file.filename
             }
         )
     except Exception as e:

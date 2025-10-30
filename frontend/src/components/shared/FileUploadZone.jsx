@@ -54,8 +54,9 @@ const FileUploadZone = ({
       fileName.endsWith(type.toLowerCase())
     );
 
-    // DEBUG: Log validation details
-    console.log('🔍 File Validation Debug:', {
+    // Log validation details for debugging
+    logger.debug('file_validation', 'File validation check', {
+      component: 'FileUploadZone',
       fileName: file.name,
       fileNameLower: fileName,
       acceptedTypes: acceptedTypes,

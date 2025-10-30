@@ -139,8 +139,8 @@ def fix_filename_for_paperless_content(filename: str, content: bytes) -> str:
         log_debug(
             logger,
             f"Paperless file conversion detected: {filename} -> {corrected_filename}",
-            original_filename=filename,
-            corrected_filename=corrected_filename
+            original_file_name=filename,
+            corrected_file_name=corrected_filename
         )
         return corrected_filename
 
@@ -558,8 +558,8 @@ async def download_file(
             log_debug(
                 logger,
                 "Processing Paperless download",
-                original_filename=filename,
-                corrected_filename=corrected_filename,
+                original_file_name=filename,
+                corrected_file_name=corrected_filename,
                 content_size=len(file_info),
                 file_id=file_id
             )
@@ -577,7 +577,7 @@ async def download_file(
                     log_debug(
                         logger,
                         "Guessed content type from filename",
-                        filename=corrected_filename,
+                        file_name=corrected_filename,
                         content_type=content_type,
                         file_id=file_id
                     )
@@ -589,7 +589,7 @@ async def download_file(
                     logger,
                     "Forced content type for PDF file",
                     file_id=file_id,
-                    filename=corrected_filename
+                    file_name=corrected_filename
                 )
 
             # Set proper headers for binary content
@@ -686,8 +686,8 @@ async def view_file(
             log_debug(
                 logger,
                 "Processing Paperless file view",
-                original_filename=filename,
-                corrected_filename=corrected_filename,
+                original_file_name=filename,
+                corrected_file_name=corrected_filename,
                 content_size=len(file_info),
                 file_id=file_id
             )
@@ -705,7 +705,7 @@ async def view_file(
                     log_debug(
                         logger,
                         "Guessed content type for view",
-                        filename=corrected_filename,
+                        file_name=corrected_filename,
                         content_type=content_type,
                         file_id=file_id
                     )
@@ -717,7 +717,7 @@ async def view_file(
                     logger,
                     "Forced content type for PDF view",
                     file_id=file_id,
-                    filename=corrected_filename
+                    file_name=corrected_filename
                 )
 
             # Set secure headers for inline file viewing with proper binary handling

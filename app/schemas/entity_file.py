@@ -69,7 +69,7 @@ class EntityFileBase(BaseModel):
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             # Images
             "image/jpeg",
-            "image/jpg",
+            "image/jpg",  # Non-standard but commonly sent by browsers
             "image/png",
             "image/tiff",
             "image/bmp",
@@ -87,7 +87,7 @@ class EntityFileBase(BaseModel):
             "application/x-rar",
             # Video
             "video/x-msvideo",
-            "video/avi",
+            "video/avi",  # Non-standard but commonly sent by browsers
             "video/mp4",
             "video/quicktime",
             "video/webm",
@@ -98,11 +98,11 @@ class EntityFileBase(BaseModel):
             "application/octet-stream",  # Used for .nii, .nrrd
             # Audio
             "audio/mpeg",
-            "audio/mp3",
+            "audio/mp3",  # Non-standard but commonly sent by browsers
             "audio/wav",
-            "audio/x-wav",
+            "audio/x-wav",  # Legacy variant for browser compatibility
             "audio/mp4",
-            "audio/x-m4a",
+            "audio/x-m4a",  # Legacy variant for browser compatibility
         ]
         if v and v.lower() not in valid_types:
             raise ValueError(f"File type must be one of: {', '.join(valid_types)}")
@@ -143,6 +143,7 @@ class EntityFileCreate(EntityFileBase):
     sync_status: Optional[str] = "synced"
     last_sync_at: Optional[datetime] = None
     paperless_document_id: Optional[str] = None
+    paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
 
     @validator("entity_id")
     def validate_entity_id(cls, v):
@@ -203,7 +204,7 @@ class EntityFileUpdate(BaseModel):
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 # Images
                 "image/jpeg",
-                "image/jpg",
+                "image/jpg",  # Non-standard but commonly sent by browsers
                 "image/png",
                 "image/tiff",
                 "image/bmp",
@@ -221,7 +222,7 @@ class EntityFileUpdate(BaseModel):
                 "application/x-rar",
                 # Video
                 "video/x-msvideo",
-                "video/avi",
+                "video/avi",  # Non-standard but commonly sent by browsers
                 "video/mp4",
                 "video/quicktime",
                 "video/webm",
@@ -232,11 +233,11 @@ class EntityFileUpdate(BaseModel):
                 "application/octet-stream",  # Used for .nii, .nrrd
                 # Audio
                 "audio/mpeg",
-                "audio/mp3",
+                "audio/mp3",  # Non-standard but commonly sent by browsers
                 "audio/wav",
-                "audio/x-wav",
+                "audio/x-wav",  # Legacy variant for browser compatibility
                 "audio/mp4",
-                "audio/x-m4a",
+                "audio/x-m4a",  # Legacy variant for browser compatibility
             ]
             if v.lower() not in valid_types:
                 raise ValueError(f"File type must be one of: {', '.join(valid_types)}")

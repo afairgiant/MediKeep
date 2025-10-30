@@ -247,7 +247,7 @@ def check_zip_bomb(file_path: str) -> Tuple[bool, float, int]:
                     extra={
                         LogFields.CATEGORY: "security",
                         LogFields.EVENT: "large_file_in_archive",
-                        "filename": info.filename,
+                        "file_name": info.filename,
                         "file_size": info.file_size
                     }
                 )

@@ -996,13 +996,11 @@ class GenericEntityFileService:
                 sync_status=sync_status,
                 last_sync_at=last_sync,
                 paperless_document_id=paperless_id,  # Only set when document is processed
+                paperless_task_uuid=paperless_task_uuid,  # Task UUID for Paperless processing
             )
 
             # Create database record from validated schema
             entity_file = EntityFile(**file_create.model_dump())
-
-            # Set task UUID separately (not in EntityFileCreate schema)
-            entity_file.paperless_task_uuid = paperless_task_uuid
 
             db.add(entity_file)
             db.commit()
