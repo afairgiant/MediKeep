@@ -15,8 +15,8 @@ See docs/ZIP_ISO_SECURITY_REQUIREMENTS.md for detailed security requirements.
 import os
 import zipfile
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
+from typing import List, Optional, Tuple
+from dataclasses import dataclass, field
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -30,11 +30,13 @@ MAX_FILES_IN_ARCHIVE = int(os.getenv("MAX_FILES_IN_ARCHIVE", "10000"))
 MAX_SINGLE_FILE_SIZE = int(os.getenv("MAX_SINGLE_FILE_SIZE", str(500 * 1024 * 1024)))  # 500MB
 
 # Prohibited file extensions (executables, scripts)
+# Note: .js files are JavaScript executables (blocked for security)
+# .json files are data files and are allowed elsewhere in the application
 PROHIBITED_EXTENSIONS = {
     '.exe', '.bat', '.cmd', '.com', '.msi', '.scr',  # Windows executables
     '.sh', '.bash', '.zsh', '.fish',  # Unix shells
     '.ps1', '.psm1', '.psd1',  # PowerShell
-    '.vbs', '.vbe', '.js', '.jse', '.wsf', '.wsh',  # Scripts
+    '.vbs', '.vbe', '.js', '.jse', '.wsf', '.wsh',  # Scripts (.js = JavaScript code, NOT .json)
     '.app', '.deb', '.rpm',  # Application packages
     '.jar',  # Java executables
 }
@@ -48,14 +50,10 @@ class ValidationResult:
     """Result of archive validation."""
     is_valid: bool
     error_message: Optional[str] = None
-    warnings: List[str] = None
+    warnings: List[str] = field(default_factory=list)
     compression_ratio: Optional[float] = None
     file_count: Optional[int] = None
     total_uncompressed_size: Optional[int] = None
-
-    def __post_init__(self):
-        if self.warnings is None:
-            self.warnings = []
 
 
 @dataclass

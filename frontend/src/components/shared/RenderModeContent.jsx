@@ -258,9 +258,9 @@ const RenderModeContent = memo(({
               }
             });
           }}
-          acceptedTypes={config.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
-          maxSize={config.maxSize || MEDICAL_DOCUMENT_CONFIG.maxSize}
-          maxFiles={config.maxFiles || MEDICAL_DOCUMENT_CONFIG.maxFiles}
+          acceptedTypes={config?.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
+          maxSize={config?.maxSize || MEDICAL_DOCUMENT_CONFIG.maxSize}
+          maxFiles={config?.maxFiles || MEDICAL_DOCUMENT_CONFIG.maxFiles}
           selectedStorageBackend={selectedStorageBackend}
           paperlessSettings={paperlessSettings}
           mode={mode}
@@ -294,9 +294,9 @@ const RenderModeContent = memo(({
               }
             });
           }}
-          acceptedTypes={config.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
-          maxSize={config.maxSize || MEDICAL_DOCUMENT_CONFIG.maxSize}
-          maxFiles={config.maxFiles || MEDICAL_DOCUMENT_CONFIG.maxFiles}
+          acceptedTypes={config?.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
+          maxSize={config?.maxSize || MEDICAL_DOCUMENT_CONFIG.maxSize}
+          maxFiles={config?.maxFiles || MEDICAL_DOCUMENT_CONFIG.maxFiles}
           autoUpload={true}
           selectedStorageBackend={selectedStorageBackend}
           paperlessSettings={paperlessSettings}

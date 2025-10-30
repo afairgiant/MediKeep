@@ -70,11 +70,8 @@ ALLOWED_EXTENSIONS = {
     ".m4a",  # Audio - compressed
 }
 
-# Archive-specific security limits (see docs/ZIP_ISO_SECURITY_REQUIREMENTS.md)
-MAX_COMPRESSION_RATIO = 10.0  # Prevent ZIP bombs
-MAX_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 * 1024  # 10GB uncompressed
-MAX_FILES_IN_ARCHIVE = 10000  # Reasonable limit for medical imaging
-MAX_EXTRACTION_TIME = 300  # 5 minutes timeout
+# Archive validation is now handled by app.utils.archive_validator
+# See archive_validator.py for ZIP/ISO security validation and limits
 
 
 @router.post(
