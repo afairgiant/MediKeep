@@ -1,6 +1,6 @@
 # MediKeep API Reference (v1.0)
 
-**Last Updated:** October 4, 2025
+**Last Updated:** November 1, 2025
 **API Version:** 1.0
 **Base URL:** `http://localhost:8000/api/v1`
 
@@ -77,6 +77,7 @@
 - Authentication endpoints: 10 requests/minute
 - File upload endpoints: 50 requests/hour
 - Search endpoints: 30 requests/minute
+- System monitoring endpoints: 60 requests/minute per IP (`/system/log-level`, `/system/log-rotation-config`)
 
 ---
 
@@ -593,6 +594,106 @@ Base path: `/api/v1/patients`
 - **Authentication**: Yes (must be owner)
 - **Success Response** (204): No content
 
+### 5.1 Multi-Patient Management (V1)
+
+Base path: `/api/v1/patient-management`
+
+**Purpose**: Netflix-style patient switching for managing multiple patient records
+
+#### Create Patient
+`POST /patient-management/`
+- **Purpose**: Create a new patient record (for managing family members, dependents, etc.)
+- **Request Body**:
+```json
+{
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "birth_date": "2010-05-20",
+  "gender": "female",
+  "blood_type": "A+",
+  "height": 60,
+  "weight": 85,
+  "address": "123 Main St",
+  "physician_id": 3,
+  "is_self_record": false
+}
+```
+- **Success Response** (201): Created patient object
+
+#### List All Patients
+`GET /patient-management/`
+- **Purpose**: Get all accessible patients (owned + shared with user)
+- **Query Parameters**:
+  - `skip`: Pagination offset
+  - `limit`: Max items
+  - `include_shared`: Include patients shared with user (default: true)
+- **Success Response** (200):
+```json
+{
+  "patients": [...],
+  "total": 5,
+  "owned_count": 3,
+  "shared_count": 2
+}
+```
+
+#### Get Patient by ID
+`GET /patient-management/{patient_id}`
+- **Purpose**: Get specific patient details
+- **Success Response** (200): Patient object
+
+#### Update Patient
+`PUT /patient-management/{patient_id}`
+- **Purpose**: Update patient information
+- **Request Body**: Same as create (all fields optional)
+- **Success Response** (200): Updated patient object
+
+#### Delete Patient
+`DELETE /patient-management/{patient_id}`
+- **Purpose**: Delete a patient record
+- **Note**: Cannot delete if it's the last remaining patient
+- **Success Response** (200): `{"message": "Patient deleted successfully"}`
+
+#### List Owned Patients
+`GET /patient-management/owned/list`
+- **Purpose**: Get only patients owned by current user
+- **Success Response** (200): Array of owned patient objects
+
+#### Get Self Record
+`GET /patient-management/self-record`
+- **Purpose**: Get the user's own patient record (is_self_record=true)
+- **Success Response** (200): Patient object or null
+
+#### Switch Active Patient
+`POST /patient-management/switch`
+- **Purpose**: Switch the currently active patient context
+- **Request Body**:
+```json
+{
+  "patient_id": 3
+}
+```
+- **Success Response** (200): New active patient object
+- **Use Case**: Switch between managing different family members
+
+#### Get Current Active Patient
+`GET /patient-management/active/current`
+- **Purpose**: Get the currently active patient
+- **Success Response** (200): Active patient object or null
+
+#### Get Patient Statistics
+`GET /patient-management/stats`
+- **Purpose**: Get statistics about accessible patients
+- **Success Response** (200):
+```json
+{
+  "total_patients": 5,
+  "owned_patients": 3,
+  "shared_patients": 2,
+  "self_record_exists": true
+}
+```
+
 ---
 
 ## 6. Medical Records
@@ -924,6 +1025,261 @@ Base path: `/api/v1/treatments`
 }
 ```
 
+### 6.10 Symptoms
+
+Base path: `/api/v1/symptoms`
+
+#### Create Symptom
+`POST /symptoms/`
+- **Purpose**: Create a new symptom definition (reusable symptom type)
+- **Request Body**:
+```json
+{
+  "patient_id": 1,
+  "symptom_name": "Headache",
+  "body_part": "Head",
+  "status": "active",
+  "notes": "Recurring tension headaches"
+}
+```
+
+#### List Symptoms
+`GET /symptoms/`
+- **Query Parameters**:
+  - `skip`: Pagination offset (default: 0)
+  - `limit`: Max items (default: 100, max: 100)
+  - `status`: Filter by status (`active`, `inactive`, `resolved`)
+  - `search`: Search by symptom name
+- **Success Response** (200): Array of symptom objects
+
+#### Get Symptom by ID
+`GET /symptoms/{symptom_id}`
+- **Success Response** (200): Symptom object with details
+
+#### Update Symptom
+`PUT /symptoms/{symptom_id}`
+- **Request Body**: Same as create (all fields optional)
+
+#### Delete Symptom
+`DELETE /symptoms/{symptom_id}`
+- **Note**: Deletes symptom and all occurrences via cascade
+- **Success Response** (200): `{"message": "Symptom deleted successfully"}`
+
+#### Get Symptom Statistics
+`GET /symptoms/stats`
+- **Query Parameters**:
+  - `patient_id`: Optional patient ID for patient switching
+- **Success Response** (200):
+```json
+{
+  "total_symptoms": 5,
+  "active_symptoms": 3,
+  "resolved_symptoms": 2,
+  "total_occurrences": 47,
+  "recent_occurrences": 12
+}
+```
+
+#### Get Symptom Timeline
+`GET /symptoms/timeline`
+- **Query Parameters**:
+  - `patient_id`: Optional patient ID
+  - `start_date`: Start date (YYYY-MM-DD)
+  - `end_date`: End date (YYYY-MM-DD)
+- **Purpose**: Get timeline data formatted for visualization
+- **Success Response** (200): Array of timeline data points
+
+#### Log Symptom Occurrence
+`POST /symptoms/{symptom_id}/occurrences`
+- **Purpose**: Log a new episode/occurrence of an existing symptom
+- **Request Body**:
+```json
+{
+  "occurred_at": "2025-10-15T14:30:00Z",
+  "severity": "moderate",
+  "duration_minutes": 120,
+  "notes": "Started after lunch, took ibuprofen"
+}
+```
+
+#### List Symptom Occurrences
+`GET /symptoms/{symptom_id}/occurrences`
+- **Query Parameters**: `skip`, `limit`
+- **Success Response** (200): Array of occurrence objects
+
+#### Get Specific Occurrence
+`GET /symptoms/{symptom_id}/occurrences/{occurrence_id}`
+
+#### Update Occurrence
+`PUT /symptoms/{symptom_id}/occurrences/{occurrence_id}`
+
+#### Delete Occurrence
+`DELETE /symptoms/{symptom_id}/occurrences/{occurrence_id}`
+
+#### Link Symptom to Condition
+`POST /symptoms/{symptom_id}/link-condition`
+- **Purpose**: Associate symptom with a diagnosed condition
+- **Request Body**:
+```json
+{
+  "condition_id": 3,
+  "symptom_id": 1,
+  "notes": "Primary symptom of this condition"
+}
+```
+
+#### Get Linked Conditions
+`GET /symptoms/{symptom_id}/conditions`
+- **Success Response** (200): Array of condition relationships
+
+#### Unlink Symptom from Condition
+`DELETE /symptoms/{symptom_id}/unlink-condition/{condition_id}`
+
+#### Link Symptom to Medication
+`POST /symptoms/{symptom_id}/link-medication`
+- **Purpose**: Associate symptom with medication (side effect or treatment)
+- **Request Body**:
+```json
+{
+  "medication_id": 5,
+  "symptom_id": 1,
+  "relationship_type": "side_effect",
+  "notes": "Occurs 2 hours after taking medication"
+}
+```
+
+#### Get Linked Medications
+`GET /symptoms/{symptom_id}/medications`
+
+#### Unlink Symptom from Medication
+`DELETE /symptoms/{symptom_id}/unlink-medication/{medication_id}`
+
+#### Link Symptom to Treatment
+`POST /symptoms/{symptom_id}/link-treatment`
+- **Request Body**:
+```json
+{
+  "treatment_id": 2,
+  "symptom_id": 1,
+  "notes": "Treatment helps reduce symptom severity"
+}
+```
+
+#### Get Linked Treatments
+`GET /symptoms/{symptom_id}/treatments`
+
+#### Unlink Symptom from Treatment
+`DELETE /symptoms/{symptom_id}/unlink-treatment/{treatment_id}`
+
+### 6.11 Standardized Tests (LOINC)
+
+Base path: `/api/v1/standardized-tests`
+
+**Purpose**: Search and autocomplete for standardized lab tests using LOINC codes
+
+#### Search Tests
+`GET /standardized-tests/search`
+- **Purpose**: Search for standardized tests
+- **Query Parameters**:
+  - `query`: Search term (test name, LOINC code, etc.)
+  - `category`: Filter by category
+  - `skip`: Pagination offset
+  - `limit`: Max items
+- **Success Response** (200):
+```json
+{
+  "tests": [
+    {
+      "id": 1,
+      "loinc_code": "2345-7",
+      "test_name": "Glucose [Mass/volume] in Serum or Plasma",
+      "short_name": "Glucose",
+      "default_unit": "mg/dL",
+      "category": "Chemistry",
+      "common_names": ["Blood sugar", "Blood glucose"],
+      "is_common": true
+    }
+  ],
+  "total": 1
+}
+```
+
+#### Autocomplete
+`GET /standardized-tests/autocomplete`
+- **Purpose**: Get autocomplete suggestions for test names
+- **Query Parameters**:
+  - `q`: Query string (min 2 characters)
+  - `limit`: Max suggestions (default: 10)
+- **Success Response** (200):
+```json
+[
+  {
+    "value": "Glucose [Mass/volume] in Serum or Plasma",
+    "label": "Glucose - Blood sugar test",
+    "loinc_code": "2345-7",
+    "default_unit": "mg/dL",
+    "category": "Chemistry"
+  }
+]
+```
+
+#### Get Common Tests
+`GET /standardized-tests/common`
+- **Purpose**: Get frequently ordered tests
+- **Success Response** (200): Array of common test objects
+
+#### Get Tests by Category
+`GET /standardized-tests/by-category/{category}`
+- **Purpose**: Get all tests in a specific category
+- **Success Response** (200): Array of test objects
+
+#### Get Test by LOINC Code
+`GET /standardized-tests/by-loinc/{loinc_code}`
+- **Purpose**: Get test details by LOINC code
+- **Success Response** (200): Test object
+
+#### Get Test by Name
+`GET /standardized-tests/by-name/{test_name}`
+- **Purpose**: Get test details by exact name match
+- **Success Response** (200): Test object
+
+#### Get Test Count
+`GET /standardized-tests/count`
+- **Purpose**: Get total number of standardized tests in database
+- **Success Response** (200):
+```json
+{
+  "total_tests": 45672,
+  "common_tests": 150,
+  "categories": 12
+}
+```
+
+#### Batch Match Tests
+`POST /standardized-tests/batch-match`
+- **Purpose**: Match multiple test names to LOINC codes
+- **Request Body**:
+```json
+{
+  "test_names": ["Glucose", "Hemoglobin", "Cholesterol"]
+}
+```
+- **Success Response** (200):
+```json
+{
+  "matches": [
+    {
+      "input": "Glucose",
+      "matched": true,
+      "loinc_code": "2345-7",
+      "test_name": "Glucose [Mass/volume] in Serum or Plasma"
+    }
+  ],
+  "total_requested": 3,
+  "total_matched": 2
+}
+```
+
 ---
 
 ## 7. Related Information
@@ -1105,6 +1461,95 @@ Base path: `/api/v1/invitations`
 #### Revoke Invitation
 `DELETE /invitations/{invitation_id}`
 
+### 9.3 Family History Sharing (V1.5)
+
+Base path: `/api/v1/family-history-sharing`
+
+**Purpose**: Share family medical history with relatives for better health tracking
+
+#### Get My Family History
+`GET /family-history-sharing/mine`
+- **Purpose**: Get all family history accessible to current user (owned + shared)
+- **Success Response** (200):
+```json
+{
+  "owned_family_members": [...],
+  "shared_family_members": [...],
+  "total_owned": 5,
+  "total_shared": 3
+}
+```
+
+#### Get Family Member Shares
+`GET /family-history-sharing/{family_member_id}/shares`
+- **Purpose**: Get list of users who have access to this family member's history
+- **Success Response** (200): Array of share objects with user info
+
+#### Share Family Member
+`POST /family-history-sharing/{family_member_id}/shares`
+- **Purpose**: Share a family member's history with another user
+- **Request Body**:
+```json
+{
+  "shared_with_user_id": 5,
+  "permission_level": "view",
+  "notes": "Sharing father's medical history"
+}
+```
+- **Permission levels**: `view`, `edit`
+- **Success Response** (201): Created share object
+
+#### Revoke Family History Access
+`DELETE /family-history-sharing/{family_member_id}/shares/{user_id}`
+- **Purpose**: Remove a user's access to family member history
+- **Success Response** (200): `{"message": "Access revoked successfully"}`
+
+#### Remove My Access
+`DELETE /family-history-sharing/shared-with-me/{family_member_id}/remove-access`
+- **Purpose**: Remove own access to shared family history
+- **Success Response** (200): `{"message": "Access removed successfully"}`
+
+#### Bulk Invite
+`POST /family-history-sharing/bulk-invite`
+- **Purpose**: Invite multiple family members at once
+- **Request Body**:
+```json
+{
+  "family_member_ids": [1, 2, 3],
+  "recipient_emails": ["sibling1@example.com", "sibling2@example.com"],
+  "permission_level": "view",
+  "message": "Sharing our family medical history"
+}
+```
+- **Success Response** (200):
+```json
+{
+  "successful_invites": 5,
+  "failed_invites": 1,
+  "results": [...]
+}
+```
+
+#### Get Family Member Details
+`GET /family-history-sharing/{family_member_id}/details`
+- **Purpose**: Get detailed family member information with medical history
+- **Success Response** (200): Family member object with full medical history
+
+#### Get Family History Shared With Me
+`GET /family-history-sharing/shared-with-me`
+- **Purpose**: Get all family history shared with current user by others
+- **Success Response** (200): Array of shared family member objects
+
+#### Get My Own Family Members
+`GET /family-history-sharing/my-own`
+- **Purpose**: Get only family members owned by current user
+- **Success Response** (200): Array of owned family member objects
+
+#### Get Family History I've Shared
+`GET /family-history-sharing/shared-by-me`
+- **Purpose**: Get family history records that current user has shared with others
+- **Success Response** (200): Array of family members with share information
+
 ---
 
 ## 10. Search & Tags
@@ -1242,14 +1687,128 @@ Base path: `/api/v1/system`
 #### Health Check
 `GET /system/health`
 - **Authentication**: No
+- **Purpose**: Basic system health check
 - **Success Response** (200):
 ```json
 {
   "status": "healthy",
-  "database": "connected",
-  "version": "0.33.1"
+  "timestamp": "2025-10-19T12:00:00Z",
+  "logging_system": {
+    "current_level": "INFO",
+    "level_valid": true,
+    "categories_configured": 2
+  }
 }
 ```
+
+#### Version Information
+`GET /system/version`
+- **Authentication**: No
+- **Purpose**: Get application version information
+- **Success Response** (200):
+```json
+{
+  "app_name": "MediKeep",
+  "version": "0.40.0",
+  "timestamp": "2025-10-19T12:00:00Z"
+}
+```
+
+#### Log Level Configuration
+`GET /system/log-level`
+- **Authentication**: No
+- **Rate Limit**: 60 requests/minute per IP
+- **Purpose**: Get current logging configuration for frontend integration
+- **Success Response** (200):
+```json
+{
+  "current_level": "INFO",
+  "available_levels": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+  "default_level": "INFO",
+  "categories": ["app", "security"],
+  "file_mapping": {
+    "app": "logs/app.log - Patient access, API calls, frontend errors, performance events",
+    "security": "logs/security.log - Authentication failures, security threats, suspicious activity"
+  },
+  "configuration": {
+    "log_level_numeric": 20,
+    "simplified_structure": true,
+    "file_count": 2,
+    "max_file_size_mb": 50,
+    "backup_count": 10
+  },
+  "timestamp": "2025-10-19T12:00:00Z",
+  "rate_limit_info": {
+    "requests_remaining": 59,
+    "requests_limit": 60,
+    "window_seconds": 60,
+    "reset_time": "2025-10-19T12:01:00Z"
+  }
+}
+```
+- **Error Response** (429 - Rate Limit Exceeded):
+```json
+{
+  "detail": "Rate limit exceeded. Maximum 60 requests per minute."
+}
+```
+- **Headers** (on rate limit):
+  - `X-RateLimit-Limit`: 60
+  - `X-RateLimit-Remaining`: 0
+  - `X-RateLimit-Reset`: Unix timestamp
+  - `Retry-After`: Seconds until reset
+
+#### Log Rotation Configuration
+`GET /system/log-rotation-config`
+- **Authentication**: No
+- **Rate Limit**: 60 requests/minute per IP
+- **Purpose**: Get current log rotation configuration and status
+- **Success Response** (200):
+```json
+{
+  "rotation_method": "python",
+  "logrotate_available": false,
+  "configuration": {
+    "method": "auto",
+    "size": "5M",
+    "time": "daily",
+    "backup_count": 30,
+    "compression": true,
+    "retention_days": 180
+  },
+  "log_directory": "E:\\path\\to\\logs",
+  "log_files": {
+    "app": {
+      "path": "E:\\path\\to\\logs\\app.log",
+      "size_bytes": 1048576,
+      "size_mb": 1.0,
+      "exists": true
+    },
+    "security": {
+      "path": "E:\\path\\to\\logs\\security.log",
+      "size_bytes": 524288,
+      "size_mb": 0.5,
+      "exists": true
+    }
+  },
+  "features": {
+    "size_based_rotation": true,
+    "time_based_rotation": false,
+    "compression": false,
+    "hybrid_rotation": false
+  },
+  "notes": {
+    "python_rotation": "Size-based only, fallback for development/Windows",
+    "logrotate_rotation": "Full features including time-based and compression"
+  },
+  "timestamp": "2025-10-19T12:00:00Z"
+}
+```
+- **Use Cases**:
+  - Monitor log file sizes and rotation status
+  - Verify which rotation method is active (logrotate vs Python)
+  - Check if log rotation features are working correctly
+  - Troubleshoot log management issues
 
 #### System Backup
 `POST /system/backup`
@@ -1259,12 +1818,31 @@ Base path: `/api/v1/system`
 `POST /system/restore`
 - **Authentication**: Yes (Admin only)
 
-### 13.2 Frontend Logs
+### 13.2 Utils
+
+Base path: `/api/v1/utils`
+
+#### Get Timezone Information
+`GET /utils/timezone-info`
+- **Purpose**: Get facility timezone information for proper date/time handling
+- **Authentication**: No
+- **Success Response** (200):
+```json
+{
+  "timezone": "America/New_York",
+  "utc_offset": "-05:00",
+  "current_time": "2025-10-19T14:30:00-05:00",
+  "is_dst": false
+}
+```
+
+### 13.3 Frontend Logs
 
 Base path: `/api/v1/frontend-logs`
 
 #### Submit Frontend Log
 `POST /frontend-logs/`
+- **Purpose**: Submit client-side logs to server for monitoring
 - **Request Body**:
 ```json
 {
@@ -1272,10 +1850,14 @@ Base path: `/api/v1/frontend-logs`
   "message": "JavaScript error occurred",
   "context": {
     "url": "/dashboard",
-    "user_agent": "Mozilla/5.0..."
+    "user_agent": "Mozilla/5.0...",
+    "error_stack": "Error: ...",
+    "timestamp": "2025-10-19T14:30:00Z"
   }
 }
 ```
+- **Log levels**: `debug`, `info`, `warning`, `error`, `critical`
+- **Success Response** (201): `{"message": "Log submitted successfully"}`
 
 ---
 
