@@ -373,8 +373,9 @@ class LoggingConfig:
                 encoding=LOG_FILE_ENCODING,
             )
 
-            # Using logrotate for rotation (no Python rotation needed)
-            pass
+            # Log rotation method (use stderr to avoid circular logging dependency)
+            import sys
+            sys.stderr.write(f"INFO: Using logrotate for {category}.log rotation\n")
         else:
             # Use Python's built-in rotation as fallback
             try:
@@ -384,10 +385,10 @@ class LoggingConfig:
                 import sys
                 sys.stderr.write(f"WARNING: Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log\n")
                 max_bytes = 5 * 1024 * 1024  # 5MB default
-            
+
 
             backup_count = settings.LOG_ROTATION_BACKUP_COUNT
-            
+
             handler = logging.handlers.RotatingFileHandler(
                 log_file,
                 maxBytes=max_bytes,
@@ -395,8 +396,10 @@ class LoggingConfig:
                 encoding=LOG_FILE_ENCODING,
             )
 
-            # Python rotation configured (logged via print to avoid circular logging)
-            pass
+            # Log rotation configuration (use stderr to avoid circular logging dependency)
+            import sys
+            size_mb = max_bytes / (1024 * 1024)
+            sys.stderr.write(f"INFO: Using Python rotation for {category}.log (size: {size_mb:.1f}MB, backups: {backup_count})\n")
 
         handler.setFormatter(formatter)
         handler.setLevel(level)

@@ -26,6 +26,9 @@ from app.core.logging.constants import (
     validate_log_level,
 )
 
+# Constants
+BYTES_PER_MB = 1048576  # 1024 * 1024
+
 router = APIRouter()
 
 # Initialize loggers using shared constants
@@ -313,4 +316,129 @@ def system_health() -> Dict[str, Any]:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="System health check failed",
+        )
+
+
+@router.get("/log-rotation-config")
+def get_log_rotation_config(request: Request) -> Dict[str, Any]:
+    """
+    Get current log rotation configuration (admin endpoint).
+
+    Returns detailed information about log rotation settings including:
+    - Active rotation method (logrotate vs Python)
+    - Configuration settings (size, backup count, retention)
+    - Log directory and file information
+    - Feature availability by method
+
+    Rate limited to 60 requests per minute per IP address.
+
+    Returns:
+        Dict containing log rotation configuration details
+    """
+    client_ip = get_client_ip(request)
+
+    try:
+        # Apply rate limiting
+        if not rate_limiter.is_allowed(client_ip):
+            remaining_requests = rate_limiter.get_remaining_requests(client_ip)
+            reset_time = rate_limiter.get_reset_time(client_ip)
+
+            log_security_event(
+                security_logger,
+                "rate_limit_exceeded",
+                request,
+                f"Rate limit exceeded for log rotation config endpoint from {client_ip}",
+                endpoint="/api/v1/system/log-rotation-config",
+            )
+
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Rate limit exceeded. Maximum 60 requests per minute.",
+                headers={
+                    "X-RateLimit-Limit": "60",
+                    "X-RateLimit-Remaining": str(remaining_requests),
+                    "X-RateLimit-Reset": str(int(reset_time)),
+                },
+            )
+
+        # Log access
+        app_logger.info(
+            f"Log rotation config endpoint accessed from {client_ip}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "log_rotation_config_access",
+                LogFields.IP: client_ip,
+            },
+        )
+
+        # Get rotation configuration
+        from app.core.logging.config import _get_rotation_method, _is_logrotate_available
+        from pathlib import Path
+
+        rotation_method = _get_rotation_method()
+        log_dir = Path(settings.LOG_DIR)
+
+        # Get log file sizes
+        log_files = {}
+        for category in CATEGORIES:
+            log_file = log_dir / f"{category}.log"
+            if log_file.exists():
+                size_bytes = log_file.stat().st_size
+                size_mb = size_bytes / BYTES_PER_MB
+                log_files[category] = {
+                    "path": str(log_file),
+                    "size_bytes": size_bytes,
+                    "size_mb": round(size_mb, 2),
+                    "exists": True,
+                }
+            else:
+                log_files[category] = {
+                    "path": str(log_file),
+                    "exists": False,
+                }
+
+        response_data = {
+            "rotation_method": rotation_method,
+            "logrotate_available": _is_logrotate_available(),
+            "configuration": {
+                "method": settings.LOG_ROTATION_METHOD,
+                "size": settings.LOG_ROTATION_SIZE,
+                "time": settings.LOG_ROTATION_TIME,
+                "backup_count": settings.LOG_ROTATION_BACKUP_COUNT,
+                "compression": settings.LOG_COMPRESSION,
+                "retention_days": settings.LOG_RETENTION_DAYS,
+            },
+            "log_directory": str(log_dir),
+            "log_files": log_files,
+            "features": {
+                "size_based_rotation": True,
+                "time_based_rotation": rotation_method == "logrotate",
+                "compression": rotation_method == "logrotate",
+                "hybrid_rotation": rotation_method == "logrotate",
+            },
+            "notes": {
+                "python_rotation": "Size-based only, fallback for development/Windows",
+                "logrotate_rotation": "Full features including time-based and compression",
+            },
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+
+        return response_data
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        app_logger.error(
+            f"Log rotation config endpoint error for {client_ip}: {e}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "log_rotation_config_error",
+                LogFields.IP: client_ip,
+                LogFields.ERROR: sanitize_log_input(str(e)),
+            },
+        )
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error. Please try again later.",
         )
