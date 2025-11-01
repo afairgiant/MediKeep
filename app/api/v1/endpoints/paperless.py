@@ -1343,7 +1343,8 @@ async def search_paperless_documents(
             
             results = await response.json()
             documents = results.get("results", [])
-            logger.info(f"Paperless search returned {len(documents)} results")
+            total_count = results.get("count", len(documents))
+            logger.info(f"Paperless search returned {len(documents)} results (total: {total_count})")
 
             # Optionally filter out already-linked documents
             if exclude_linked and documents:
@@ -1368,7 +1369,7 @@ async def search_paperless_documents(
 
             return {
                 "results": documents,
-                "count": len(documents)
+                "count": total_count  # Return original Paperless total for proper pagination
             }
         
     except PaperlessAuthenticationError as e:

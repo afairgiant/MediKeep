@@ -629,8 +629,25 @@ async def link_paperless_document(
                 )
 
             # Extract metadata from Paperless
-            file_name = doc_info.get('original_file_name') or doc_info.get('title', f'document_{link_request.paperless_document_id}.pdf')
             file_type = doc_info.get('mime_type') or 'application/pdf'
+
+            # Determine file extension from mime type
+            mime_to_ext = {
+                'application/pdf': '.pdf',
+                'image/jpeg': '.jpg',
+                'image/png': '.png',
+                'image/tiff': '.tiff',
+                'text/plain': '.txt',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+                'application/msword': '.doc',
+            }
+            extension = mime_to_ext.get(file_type, '')
+
+            # Get filename with appropriate fallback
+            file_name = doc_info.get('original_file_name') or doc_info.get('title') or f'document_{link_request.paperless_document_id}{extension}'
+
+            # Get file size from Paperless metadata if available
+            file_size = doc_info.get('archive_size') or doc_info.get('size')
 
             # Create placeholder file_path
             file_path = f"paperless://document/{link_request.paperless_document_id}"
@@ -642,7 +659,7 @@ async def link_paperless_document(
                 file_name=file_name,
                 file_path=file_path,  # Placeholder path
                 file_type=file_type,
-                file_size=None,  # No local file
+                file_size=file_size,  # File size from Paperless metadata
                 description=link_request.description or f"Linked from Paperless (ID: {link_request.paperless_document_id})",
                 category=link_request.category,
                 storage_backend='paperless',

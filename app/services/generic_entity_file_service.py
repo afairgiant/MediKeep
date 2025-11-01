@@ -643,7 +643,10 @@ class GenericEntityFileService:
                         status_code=404,
                         detail="Paperless document ID not found"
                     )
-                
+
+                # Convert document ID to int once to avoid redundant casting
+                document_id = int(file_record.paperless_document_id)
+
                 # Use existing paperless service to get file content
                 
                 # Get user for paperless credentials
@@ -678,7 +681,7 @@ class GenericEntityFileService:
                 logger.debug(f"View debug - Has token: {bool(user_prefs.paperless_api_token_encrypted)}")
                 logger.debug(f"View debug - Has username: {bool(user_prefs.paperless_username_encrypted)}")
                 logger.debug(f"View debug - Has password: {bool(user_prefs.paperless_password_encrypted)}")
-                logger.debug(f"View debug - Document ID: {file_record.paperless_document_id}")
+                logger.debug(f"View debug - Document ID: {document_id}")
                 
                 # Create paperless service using token auth (supports 2FA)
                 from app.services.paperless_service import create_paperless_service
@@ -697,7 +700,7 @@ class GenericEntityFileService:
                 async with paperless_service:
                     try:
                         # Try to get document info first to test permissions
-                        async with paperless_service._make_request("GET", f"/api/documents/{int(file_record.paperless_document_id)}/") as doc_response:
+                        async with paperless_service._make_request("GET", f"/api/documents/{document_id}/") as doc_response:
                             if doc_response.status == 200:
                                 doc_info = await doc_response.json()
                                 logger.debug(f"Document info accessible: {doc_info.get('title', 'N/A')}")
@@ -705,16 +708,16 @@ class GenericEntityFileService:
                                 logger.debug(f"Document info failed: {doc_response.status}")
                     except Exception as info_error:
                         logger.debug(f"Document info error: {info_error}")
-                    
+
                     # Now try download
-                    logger.debug(f"Starting download for document ID: {file_record.paperless_document_id}")
+                    logger.debug(f"Starting download for document ID: {document_id}")
                     try:
                         file_content = await paperless_service.download_document(
-                            document_id=int(file_record.paperless_document_id)
+                            document_id=document_id
                         )
                         logger.debug(f"Download completed, content size: {len(file_content) if file_content else 0}")
                     except Exception as download_error:
-                        logger.error(f"Download failed for document {file_record.paperless_document_id}: {download_error}")
+                        logger.error(f"Download failed for document {document_id}: {download_error}")
                         logger.error(f"Document owner in search results might be different from authenticated user")
                         raise
                 
@@ -1193,6 +1196,9 @@ class GenericEntityFileService:
                 detail=f"Paperless document ID not found for file: {file_record.file_name}",
             )
 
+        # Convert document ID to int once to avoid redundant casting
+        document_id = int(file_record.paperless_document_id)
+
         # Get user preferences to create paperless service
         if not current_user_id:
             raise HTTPException(
@@ -1220,21 +1226,21 @@ class GenericEntityFileService:
             logger.debug(f"Download debug - Has token: {bool(user_prefs.paperless_api_token_encrypted)}")
             logger.debug(f"Download debug - Has username: {bool(user_prefs.paperless_username_encrypted)}")
             logger.debug(f"Download debug - Has password: {bool(user_prefs.paperless_password_encrypted)}")
-            logger.debug(f"Download debug - Document ID: {file_record.paperless_document_id}")
-            
+            logger.debug(f"Download debug - Document ID: {document_id}")
+
             # Create paperless client using new simplified architecture
             async with await self._create_paperless_client(user_prefs, current_user_id) as paperless_client:
                 logger.debug("Paperless client created successfully")
 
                 # Download from paperless
-                logger.debug(f"Starting download for document ID: {file_record.paperless_document_id}")
+                logger.debug(f"Starting download for document ID: {document_id}")
                 file_content = await paperless_client.download_document(
-                    file_record.paperless_document_id
+                    document_id
                 )
             logger.debug(f"Download completed, content size: {len(file_content) if file_content else 0}")
 
             logger.info(
-                f"File downloaded from paperless: document_id={file_record.paperless_document_id}, size={len(file_content)}"
+                f"File downloaded from paperless: document_id={document_id}, size={len(file_content)}"
             )
 
             return (

@@ -103,8 +103,8 @@ export const searchPaperlessDocuments = async (query = '', options = {}) => {
   };
 
   const response = await apiService.get('/paperless/documents/search', { params });
-  // Backend now returns { results: [...], count: N }, extract the results array
-  return response.results || [];
+  // Backend now returns { results: [...], count: N }, return the full object
+  return response;
 };
 
 /**

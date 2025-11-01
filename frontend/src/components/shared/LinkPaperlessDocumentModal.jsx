@@ -97,12 +97,13 @@ const LinkPaperlessDocumentModal = ({
         excludeLinked,
       });
 
-      setSearchResults(results || []);
-      setTotalResults(results?.length || 0);
+      setSearchResults(results?.results || []);
+      setTotalResults(results?.count || 0);
 
       logger.info('paperless_search_success', 'Search completed', {
         component: 'LinkPaperlessDocumentModal',
-        resultCount: results?.length || 0,
+        resultCount: results?.results?.length || 0,
+        totalCount: results?.count || 0,
       });
     } catch (err) {
       const errorMessage = err.message || 'Failed to search Paperless documents';
@@ -272,8 +273,8 @@ const LinkPaperlessDocumentModal = ({
                         {doc.tags && doc.tags.length > 0 && (
                           <Group gap="xs">
                             <IconTag size={14} />
-                            {doc.tags.slice(0, 3).map((tag, index) => (
-                              <Badge key={index} size="xs" variant="light">
+                            {doc.tags.slice(0, 3).map((tag) => (
+                              <Badge key={tag} size="xs" variant="light">
                                 {tag}
                               </Badge>
                             ))}
