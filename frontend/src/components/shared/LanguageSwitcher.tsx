@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Select } from '@mantine/core';
 import logger from '../../services/logger';
+import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 
 interface LanguageSwitcherProps {
   compact?: boolean;
@@ -28,6 +29,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   size = 'sm'
 }) => {
   const { i18n } = useTranslation();
+  const { updatePreferences } = useUserPreferences();
 
   // Available languages
   const languages: Language[] = [
@@ -48,8 +50,21 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           previousLanguage: previousLanguage,
         });
 
-        // TODO Phase 5: Save to backend API
-        // await userPreferencesApi.updateLanguage(value);
+        // Save to backend via UserPreferencesContext
+        try {
+          await updatePreferences({ language: value });
+          logger.info('language_saved_to_backend', 'Language preference saved to backend', {
+            component: 'LanguageSwitcher',
+            language: value,
+          });
+        } catch (backendError) {
+          // Log but don't fail - language is already changed locally
+          logger.error('language_backend_save_failed', 'Failed to save language to backend', {
+            component: 'LanguageSwitcher',
+            language: value,
+            error: backendError instanceof Error ? backendError.message : 'Unknown error',
+          });
+        }
       } catch (error) {
         logger.error('language_change_failed', 'Failed to change language', {
           component: 'LanguageSwitcher',

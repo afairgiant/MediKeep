@@ -9,6 +9,7 @@ class UserPreferencesBase(BaseModel):
 
     unit_system: str
     session_timeout_minutes: Optional[int] = 30
+    language: Optional[str] = "en"
     paperless_enabled: Optional[bool] = False
     paperless_url: Optional[str] = None
     paperless_api_token: Optional[str] = None
@@ -59,7 +60,30 @@ class UserPreferencesBase(BaseModel):
                 f"Unit system must be one of: {', '.join(allowed_systems)}"
             )
         return v.lower()
-    
+
+    @validator("language")
+    def validate_language(cls, v):
+        """
+        Validate that the language is one of the supported values.
+
+        Args:
+            v: The language code to validate (ISO 639-1)
+
+        Returns:
+            Validated language code (lowercase)
+
+        Raises:
+            ValueError: If language is not in supported list
+        """
+        if v is not None:
+            allowed_languages = ["en", "fr", "de"]
+            if v.lower() not in allowed_languages:
+                raise ValueError(
+                    f"Language must be one of: {', '.join(allowed_languages)}"
+                )
+            return v.lower()
+        return v
+
     @validator("paperless_url")
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
@@ -134,6 +158,7 @@ class UserPreferencesUpdate(BaseModel):
 
     unit_system: Optional[str] = None
     session_timeout_minutes: Optional[int] = None
+    language: Optional[str] = None
     paperless_enabled: Optional[bool] = None
     paperless_url: Optional[str] = None
     paperless_username: Optional[str] = None
@@ -163,7 +188,19 @@ class UserPreferencesUpdate(BaseModel):
                 )
             return v.lower()
         return v
-    
+
+    @validator("language")
+    def validate_language(cls, v):
+        """Validate language if provided."""
+        if v is not None:
+            allowed_languages = ["en", "fr", "de"]
+            if v.lower() not in allowed_languages:
+                raise ValueError(
+                    f"Language must be one of: {', '.join(allowed_languages)}"
+                )
+            return v.lower()
+        return v
+
     @validator("paperless_url")
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
