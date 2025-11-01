@@ -313,6 +313,38 @@ class FileUploadRequest(BaseModel):
         return v
 
 
+class EntityFileLinkPaperlessRequest(BaseModel):
+    """Schema for linking an existing Paperless document to an entity"""
+
+    paperless_document_id: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+
+    @validator("paperless_document_id")
+    def validate_paperless_document_id(cls, v):
+        """Validate Paperless document ID"""
+        if not v or not v.strip():
+            raise ValueError("Paperless document ID is required")
+        # Paperless document IDs are numeric strings
+        if not v.strip().isdigit():
+            raise ValueError("Paperless document ID must be numeric")
+        return v.strip()
+
+    @validator("description")
+    def validate_description(cls, v):
+        """Validate description"""
+        if v and len(v.strip()) > 1000:
+            raise ValueError("Description must be less than 1000 characters")
+        return v.strip() if v else None
+
+    @validator("category")
+    def validate_category(cls, v):
+        """Validate category"""
+        if v and len(v.strip()) > 100:
+            raise ValueError("Category must be less than 100 characters")
+        return v.strip() if v else None
+
+
 class FileDownloadResponse(BaseModel):
     """Schema for file download response"""
 

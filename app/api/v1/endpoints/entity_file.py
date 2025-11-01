@@ -30,12 +30,20 @@ from app.models.models import EntityFile, User
 from app.schemas.entity_file import (
     EntityFileResponse,
     EntityType,
+    EntityFileLinkPaperlessRequest,
     FileBatchCountRequest,
     FileBatchCountResponse,
     FileOperationResult,
     FileUploadRequest,
 )
 from app.services.generic_entity_file_service import GenericEntityFileService
+from app.services.paperless_client import (
+    create_paperless_client,
+    PaperlessClientError,
+    PaperlessConnectionError as NewPaperlessConnectionError,
+)
+from app.crud.user_preferences import user_preferences
+from app.core.utils.datetime_utils import get_utc_now
 
 router = APIRouter()
 
@@ -512,6 +520,221 @@ async def upload_entity_file(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to upload file: {str(e)}",
+        )
+
+
+@router.post(
+    "/{entity_type}/{entity_id}/link-paperless",
+    response_model=EntityFileResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def link_paperless_document(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    entity_type: str,
+    entity_id: int,
+    link_request: EntityFileLinkPaperlessRequest,
+    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+) -> EntityFileResponse:
+    """
+    Link an existing Paperless document to an entity without uploading.
+
+    This creates an EntityFile record that references a document already in Paperless,
+    allowing users to associate existing Paperless documents with MediKeep records
+    without duplicating files.
+
+    Args:
+        entity_type: Type of entity (lab-result, insurance, visit, procedure, etc.)
+        entity_id: ID of the entity
+        link_request: Link request with paperless_document_id and optional description
+
+    Returns:
+        Created EntityFile record
+
+    Raises:
+        HTTPException: If document doesn't exist in Paperless or user lacks access
+    """
+    try:
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "paperless_document_link_requested",
+            message=f"Paperless document link request for {entity_type} {entity_id}",
+            entity_type=entity_type,
+            entity_id=entity_id,
+            paperless_document_id=link_request.paperless_document_id
+        )
+
+        # Get the parent entity and verify access
+        parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
+        if not parent_entity:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"{entity_type.title()} not found"
+            )
+
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            deps.verify_patient_access(entity_patient_id, db, current_user)
+
+        # Get user's Paperless preferences
+        user_prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
+
+        if not user_prefs or not user_prefs.paperless_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Paperless integration is not enabled"
+            )
+
+        # Check if credentials exist
+        has_auth = (user_prefs.paperless_api_token_encrypted or
+                   (user_prefs.paperless_username_encrypted and
+                    user_prefs.paperless_password_encrypted))
+
+        if not user_prefs.paperless_url or not has_auth:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Paperless configuration is incomplete"
+            )
+
+        # Create Paperless client and verify document exists
+        paperless_client = create_paperless_client(
+            url=user_prefs.paperless_url,
+            encrypted_token=user_prefs.paperless_api_token_encrypted,
+            encrypted_username=user_prefs.paperless_username_encrypted,
+            encrypted_password=user_prefs.paperless_password_encrypted,
+            user_id=current_user_id
+        )
+
+        # Verify document exists in Paperless
+        async with paperless_client:
+            doc_info = await paperless_client.get_document_info(link_request.paperless_document_id)
+
+            if not doc_info:
+                log_endpoint_error(
+                    logger,
+                    request,
+                    "Document not found in Paperless",
+                    Exception(f"Document {link_request.paperless_document_id} not found"),
+                    user_id=current_user_id,
+                    paperless_document_id=link_request.paperless_document_id
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Document {link_request.paperless_document_id} not found in Paperless"
+                )
+
+            # Extract metadata from Paperless
+            file_name = doc_info.get('original_file_name') or doc_info.get('title', f'document_{link_request.paperless_document_id}.pdf')
+            file_type = doc_info.get('mime_type') or 'application/pdf'
+
+            # Create placeholder file_path
+            file_path = f"paperless://document/{link_request.paperless_document_id}"
+
+            # Create EntityFile record (no local file - exists only in Paperless)
+            entity_file = EntityFile(
+                entity_type=entity_type,
+                entity_id=entity_id,
+                file_name=file_name,
+                file_path=file_path,  # Placeholder path
+                file_type=file_type,
+                file_size=None,  # No local file
+                description=link_request.description or f"Linked from Paperless (ID: {link_request.paperless_document_id})",
+                category=link_request.category,
+                storage_backend='paperless',
+                paperless_document_id=link_request.paperless_document_id,
+                sync_status='synced',  # Already in Paperless
+                uploaded_at=get_utc_now(),
+                created_at=get_utc_now(),
+                updated_at=get_utc_now(),
+            )
+
+            db.add(entity_file)
+            db.commit()
+            db.refresh(entity_file)
+
+            # Log the creation activity
+            try:
+                log_create(
+                    db=db,
+                    entity_type=ActivityEntityType.ENTITY_FILE,
+                    entity_obj=entity_file,
+                    user_id=current_user_id,
+                )
+            except Exception as log_error:
+                # Don't fail the request if logging fails
+                logger.error(f"Failed to log file link: {log_error}", extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "logging_failure",
+                    LogFields.ERROR: str(log_error)
+                })
+
+            log_data_access(
+                logger,
+                request,
+                current_user_id,
+                "create",
+                "EntityFile",
+                record_id=entity_file.id,
+                entity_type=entity_type,
+                entity_id=entity_id,
+                paperless_document_id=link_request.paperless_document_id,
+                link_type="existing_document"
+            )
+
+            return EntityFileResponse.from_orm(entity_file)
+
+    except (HTTPException, NotFoundException, MedicalRecordsAPIException):
+        raise
+
+    except NewPaperlessConnectionError as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Paperless connection error during link",
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            paperless_document_id=link_request.paperless_document_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unable to connect to Paperless: {str(e)}"
+        )
+
+    except PaperlessClientError as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Paperless client error during link",
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            paperless_document_id=link_request.paperless_document_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Paperless error: {str(e)}"
+        )
+
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Unexpected error linking Paperless document",
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            paperless_document_id=link_request.paperless_document_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to link document: {str(e)}",
         )
 
 

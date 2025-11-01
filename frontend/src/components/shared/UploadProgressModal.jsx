@@ -102,6 +102,7 @@ const UploadProgressModal = ({
       withCloseButton={canClose}
       closeOnClickOutside={false}
       closeOnEscape={canClose}
+      zIndex={3100}
       title={
         <Group gap="sm">
           <ThemeIcon

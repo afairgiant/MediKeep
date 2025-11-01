@@ -29,7 +29,8 @@ import {
   IconEye,
   IconAlertCircle,
   IconCopy,
-  IconX
+  IconX,
+  IconUnlink
 } from '@tabler/icons-react';
 import { formatDate } from '../../utils/helpers';
 
@@ -239,8 +240,9 @@ const FileList = ({
             onChange={(value) => setFilterByType(value || '')}
             clearable
             style={{ minWidth: 120 }}
+            comboboxProps={{ withinPortal: true, zIndex: 2100 }}
           />
-          
+
           <Select
             placeholder="Sort by"
             data={[
@@ -252,6 +254,7 @@ const FileList = ({
             value={sortBy}
             onChange={(value) => setSortBy(value || 'uploaded_at')}
             style={{ minWidth: 120 }}
+            comboboxProps={{ withinPortal: true, zIndex: 2100 }}
           />
           
           <ActionIcon
@@ -284,9 +287,12 @@ const FileList = ({
             // Check if file is a duplicate
             const isDuplicate = file.storage_backend === 'paperless' && file.sync_status === 'duplicate';
             
-            // Check if file processing failed  
+            // Check if file processing failed
             const isFailed = file.storage_backend === 'paperless' && file.sync_status === 'failed';
-            
+
+            // Check if this is a linked document (not uploaded by us)
+            const isLinkedDocument = file.file_path && file.file_path.startsWith('paperless://document/');
+
             return (
               <Paper
                 key={file.id}
@@ -457,11 +463,11 @@ const FileList = ({
                       {onDelete && !isMarkedForDeletion && (
                         <ActionIcon
                           variant="light"
-                          color="red"
+                          color={isLinkedDocument ? "blue" : "red"}
                           onClick={() => onDelete(file.id)}
-                          title="Delete file"
+                          title={isLinkedDocument ? "Unlink document" : "Delete file"}
                         >
-                          <IconTrash size={16} />
+                          {isLinkedDocument ? <IconUnlink size={16} /> : <IconTrash size={16} />}
                         </ActionIcon>
                       )}
                       

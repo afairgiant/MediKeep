@@ -471,43 +471,56 @@ class GenericEntityFileService:
                     status_code=404, detail=f"File not found: {file_id}"
                 )
 
+            # Track whether this is a linked document for success message
+            is_linked_document = False
+
             # Route to appropriate storage backend for deletion
             if file_record.storage_backend == "paperless":
-                # Check if other records reference the same Paperless document
-                other_references = (
-                    db.query(EntityFile)
-                    .filter(
-                        EntityFile.paperless_document_id == file_record.paperless_document_id,
-                        EntityFile.storage_backend == "paperless",
-                        EntityFile.id != file_record.id
-                    )
-                    .count()
-                )
-                
-                if other_references > 0:
+                # Check if this is a linked document (not uploaded by us)
+                is_linked_document = file_record.file_path and file_record.file_path.startswith("paperless://document/")
+
+                if is_linked_document:
                     logger.info(
-                        f"Paperless document {file_record.paperless_document_id} has {other_references} other references. "
-                        f"Skipping Paperless deletion, only removing database record."
+                        f"Document {file_record.paperless_document_id} is a linked document. "
+                        f"Unlinking from MediKeep only, will NOT delete from Paperless."
                     )
-                    # Don't delete from Paperless since other records reference it
+                    # Don't delete from Paperless - this document was linked, not uploaded by us
                 else:
-                    # Check if document is missing - if so, don't try to delete from Paperless
-                    if file_record.sync_status == "missing":
-                        logger.info(
-                            f"Document {file_record.paperless_document_id} is marked as missing. "
-                            f"Skipping Paperless deletion since document is not accessible."
+                    # This is an uploaded document, check if other records reference it
+                    other_references = (
+                        db.query(EntityFile)
+                        .filter(
+                            EntityFile.paperless_document_id == file_record.paperless_document_id,
+                            EntityFile.storage_backend == "paperless",
+                            EntityFile.id != file_record.id
                         )
-                        # Document is missing from Paperless, we'll just remove the database record below
+                        .count()
+                    )
+
+                    if other_references > 0:
+                        logger.info(
+                            f"Paperless document {file_record.paperless_document_id} has {other_references} other references. "
+                            f"Skipping Paperless deletion, only removing database record."
+                        )
+                        # Don't delete from Paperless since other records reference it
                     else:
-                        # Document exists in Paperless, try to delete it
-                        logger.info(f"Attempting to delete document {file_record.paperless_document_id} from Paperless (sync_status: {file_record.sync_status})")
-                        paperless_deleted = await self._delete_from_paperless(db, file_record, current_user_id)
-                        if not paperless_deleted:
-                            logger.error(f"Paperless deletion failed for document {file_record.paperless_document_id}")
-                            raise HTTPException(
-                                status_code=500,
-                                detail=f"Failed to delete file from Paperless. The document may still exist on the Paperless server.",
+                        # Check if document is missing - if so, don't try to delete from Paperless
+                        if file_record.sync_status == "missing":
+                            logger.info(
+                                f"Document {file_record.paperless_document_id} is marked as missing. "
+                                f"Skipping Paperless deletion since document is not accessible."
                             )
+                            # Document is missing from Paperless, we'll just remove the database record below
+                        else:
+                            # Document exists in Paperless and was uploaded by us, try to delete it
+                            logger.info(f"Attempting to delete uploaded document {file_record.paperless_document_id} from Paperless (sync_status: {file_record.sync_status})")
+                            paperless_deleted = await self._delete_from_paperless(db, file_record, current_user_id)
+                            if not paperless_deleted:
+                                logger.error(f"Paperless deletion failed for document {file_record.paperless_document_id}")
+                                raise HTTPException(
+                                    status_code=500,
+                                    detail=f"Failed to delete file from Paperless. The document may still exist on the Paperless server.",
+                                )
             else:
                 # Handle local file deletion
                 file_path = file_record.file_path
@@ -522,13 +535,17 @@ class GenericEntityFileService:
             db.delete(file_record)
             db.commit()
 
+            # Create appropriate success message based on operation type
+            operation_type = "unlinked" if is_linked_document else "deleted"
+            success_message = f"Document {operation_type} successfully"
+
             logger.info(
-                f"File deleted successfully: {file_record.file_name} from {file_record.storage_backend} storage"
+                f"File {operation_type} successfully: {file_record.file_name} from {file_record.storage_backend} storage"
             )
 
             return FileOperationResult(
                 success=True,
-                message="File deleted successfully",
+                message=success_message,
                 file_id=file_id,
                 file_path=file_record.file_path
                 or f"paperless:{file_record.paperless_document_id}",
@@ -680,7 +697,7 @@ class GenericEntityFileService:
                 async with paperless_service:
                     try:
                         # Try to get document info first to test permissions
-                        async with paperless_service._make_request("GET", f"/api/documents/{file_record.paperless_document_id}/") as doc_response:
+                        async with paperless_service._make_request("GET", f"/api/documents/{int(file_record.paperless_document_id)}/") as doc_response:
                             if doc_response.status == 200:
                                 doc_info = await doc_response.json()
                                 logger.debug(f"Document info accessible: {doc_info.get('title', 'N/A')}")
@@ -691,10 +708,15 @@ class GenericEntityFileService:
                     
                     # Now try download
                     logger.debug(f"Starting download for document ID: {file_record.paperless_document_id}")
-                    file_content = await paperless_service.download_document(
-                        document_id=file_record.paperless_document_id
-                    )
-                logger.debug(f"Download completed, content size: {len(file_content) if file_content else 0}")
+                    try:
+                        file_content = await paperless_service.download_document(
+                            document_id=int(file_record.paperless_document_id)
+                        )
+                        logger.debug(f"Download completed, content size: {len(file_content) if file_content else 0}")
+                    except Exception as download_error:
+                        logger.error(f"Download failed for document {file_record.paperless_document_id}: {download_error}")
+                        logger.error(f"Document owner in search results might be different from authenticated user")
+                        raise
                 
                 return file_content, file_record.file_name, file_record.file_type
             else:

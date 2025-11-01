@@ -1269,22 +1269,24 @@ async def search_paperless_documents(
     current_user: User = Depends(get_current_user),
     query: str = "",
     page: int = 1,
-    page_size: int = 25
+    page_size: int = 25,
+    exclude_linked: bool = False
 ) -> Dict[str, Any]:
     """
     Search documents in Paperless-ngx.
-    
+
     Args:
         query: Search query string
         page: Page number (default: 1)
         page_size: Number of results per page (default: 25)
-    
+        exclude_linked: If True, exclude documents already linked in MediKeep (default: False)
+
     Returns:
-        Search results from Paperless
+        Search results from Paperless with optional filtering of linked documents
     """
     try:
         # Get user preferences
-        user_prefs = user_preferences.get_by_user_id(db, current_user.id)
+        user_prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
         
         if not user_prefs or not user_prefs.paperless_enabled:
             raise HTTPException(
@@ -1302,7 +1304,13 @@ async def search_paperless_documents(
             )
         
         # Create paperless service using consistent auth method
-        paperless_service = create_paperless_service(user_prefs.paperless_url, current_user.id)
+        paperless_service = create_paperless_service(
+            user_prefs.paperless_url,
+            encrypted_token=user_prefs.paperless_api_token_encrypted,
+            encrypted_username=user_prefs.paperless_username_encrypted,
+            encrypted_password=user_prefs.paperless_password_encrypted,
+            user_id=current_user.id
+        )
         
         # Simple search without user filtering for fallback during uploads
         logger.info(f"Searching Paperless documents with query: {query}")
@@ -1334,8 +1342,34 @@ async def search_paperless_documents(
                 )
             
             results = await response.json()
-            logger.info(f"Paperless search returned {len(results.get('results', []))} results")
-            return results.get("results", [])
+            documents = results.get("results", [])
+            logger.info(f"Paperless search returned {len(documents)} results")
+
+            # Optionally filter out already-linked documents
+            if exclude_linked and documents:
+                from app.models.models import EntityFile
+
+                # Get all Paperless document IDs linked by this user
+                linked_doc_ids = db.query(EntityFile.paperless_document_id).filter(
+                    EntityFile.storage_backend == 'paperless',
+                    EntityFile.paperless_document_id.isnot(None)
+                ).all()
+
+                linked_ids_set = {str(doc_id[0]) for doc_id in linked_doc_ids if doc_id[0]}
+
+                # Filter out linked documents
+                original_count = len(documents)
+                documents = [
+                    doc for doc in documents
+                    if str(doc.get('id')) not in linked_ids_set
+                ]
+
+                logger.info(f"Filtered out {original_count - len(documents)} already-linked documents")
+
+            return {
+                "results": documents,
+                "count": len(documents)
+            }
         
     except PaperlessAuthenticationError as e:
         raise HTTPException(
@@ -1391,7 +1425,7 @@ async def test_paperless_connection_v2(
         
         if use_saved_credentials:
             # Get saved credentials from database
-            user_prefs = user_preferences.get_by_user_id(db, current_user.id)
+            user_prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
             if not user_prefs:
                 raise HTTPException(status.HTTP_400_BAD_REQUEST, "No saved credentials found")
             
