@@ -1244,7 +1244,15 @@ const useDocumentManagerCore = ({
 
   // Performance optimization: Memoize delete handler
   const handleImmediateDelete = useCallback(async fileId => {
-    if (!window.confirm('Are you sure you want to delete this file?')) {
+    // Find the file to check if it's a linked document
+    const file = files.find(f => f.id === fileId);
+    const isLinkedDocument = file?.file_path && file.file_path.startsWith('paperless://document/');
+
+    const confirmMessage = isLinkedDocument
+      ? 'Are you sure you want to unlink this document? It will remain in Paperless.'
+      : 'Are you sure you want to delete this file?';
+
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
@@ -1253,21 +1261,26 @@ const useDocumentManagerCore = ({
     setError('');
 
     try {
-      await apiService.deleteEntityFile(fileId);
+      const response = await apiService.deleteEntityFile(fileId);
       await loadFiles();
 
+      // Use the message from backend response if available
+      const operationType = isLinkedDocument ? 'Unlinked' : 'Deleted';
+      const notificationMessage = response?.message || (isLinkedDocument ? 'Document unlinked successfully' : SUCCESS_MESSAGES.FILE_DELETED);
+
       notifications.show({
-        title: 'File Deleted',
-        message: SUCCESS_MESSAGES.FILE_DELETED,
+        title: `File ${operationType}`,
+        message: notificationMessage,
         color: 'green',
         icon: <IconCheck size={16} />,
       });
 
       logger.info('document_manager_delete_success', {
-        message: 'File deleted successfully',
+        message: notificationMessage,
         entityType,
         entityId,
         fileId,
+        isLinkedDocument,
         component: 'DocumentManagerCore',
       });
     } catch (err) {
@@ -1289,7 +1302,7 @@ const useDocumentManagerCore = ({
     } finally {
       setLoading(false);
     }
-  }, [entityType, entityId, loadFiles, onError]);
+  }, [entityType, entityId, loadFiles, onError, files]);
 
   // Performance optimization: Memoize pending file description change handler
   const handlePendingFileDescriptionChange = useCallback((fileId, description) => {

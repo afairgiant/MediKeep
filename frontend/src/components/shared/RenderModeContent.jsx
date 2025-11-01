@@ -15,6 +15,7 @@ import {
   ThemeIcon,
   TextInput,
   Badge,
+  Menu,
 } from '@mantine/core';
 import {
   IconUpload,
@@ -22,6 +23,8 @@ import {
   IconX,
   IconFileText,
   IconCheck,
+  IconLink,
+  IconChevronDown,
 } from '@tabler/icons-react';
 import FileList from './FileList';
 import FileUploadZone from './FileUploadZone';
@@ -46,6 +49,7 @@ const RenderModeContent = memo(({
   filesToDelete,
   config,
   onUploadModalOpen,
+  onLinkModalOpen,
   onCheckSyncStatus,
   onDownloadFile,
   onViewFile,
@@ -161,14 +165,33 @@ const RenderModeContent = memo(({
         {/* File Upload Section */}
         <Paper withBorder p="md" bg="gray.1">
           <Group justify="space-between" align="center">
-            <Text fw={500}>Upload New File</Text>
-            <Button
-              leftSection={<IconUpload size={16} />}
-              onClick={onUploadModalOpen}
-              disabled={loading}
-            >
-              Upload File
-            </Button>
+            <Text fw={500}>Add Document</Text>
+            <Menu position="bottom-end" shadow="md" withinPortal zIndex={3000}>
+              <Menu.Target>
+                <Button
+                  rightSection={<IconChevronDown size={16} />}
+                  disabled={loading}
+                >
+                  Add Document
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item
+                  leftSection={<IconUpload size={16} />}
+                  onClick={onUploadModalOpen}
+                >
+                  Upload New File
+                </Menu.Item>
+                {paperlessSettings?.paperless_enabled && (
+                  <Menu.Item
+                    leftSection={<IconLink size={16} />}
+                    onClick={onLinkModalOpen}
+                  >
+                    Link Existing Paperless Document
+                  </Menu.Item>
+                )}
+              </Menu.Dropdown>
+            </Menu>
           </Group>
         </Paper>
 

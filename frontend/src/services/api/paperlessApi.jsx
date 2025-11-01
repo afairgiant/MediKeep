@@ -91,16 +91,34 @@ export const getPaperlessSyncStatus = async () => {
  * @param {Object} options - Search options
  * @param {number} options.page - Page number (default: 1)
  * @param {number} options.pageSize - Results per page (default: 25)
+ * @param {boolean} options.excludeLinked - Exclude already-linked documents (default: false)
  * @returns {Promise} Search results
  */
 export const searchPaperlessDocuments = async (query = '', options = {}) => {
   const params = {
     query,
     page: options.page || 1,
-    page_size: options.pageSize || 25
+    page_size: options.pageSize || 25,
+    exclude_linked: options.excludeLinked || false
   };
-  
-  return apiService.get('/paperless/documents/search', { params });
+
+  const response = await apiService.get('/paperless/documents/search', { params });
+  // Backend now returns { results: [...], count: N }, return the full object
+  return response;
+};
+
+/**
+ * Link an existing Paperless document to an entity
+ * @param {string} entityType - Type of entity (e.g., 'visit', 'lab-result', 'procedure')
+ * @param {number} entityId - ID of the entity
+ * @param {Object} linkData - Link data
+ * @param {string} linkData.paperless_document_id - Paperless document ID to link
+ * @param {string} linkData.description - Optional description for the link
+ * @param {string} linkData.category - Optional category
+ * @returns {Promise} Linked file details
+ */
+export const linkPaperlessDocument = async (entityType, entityId, linkData) => {
+  return apiService.post(`/entity-files/${entityType}/${entityId}/link-paperless`, linkData);
 };
 
 /**
@@ -400,6 +418,7 @@ export default {
   triggerPaperlessSync,
   getPaperlessSyncStatus,
   searchPaperlessDocuments,
+  linkPaperlessDocument,
   migrateDocuments,
   getMigrationStatus,
   cancelMigration,

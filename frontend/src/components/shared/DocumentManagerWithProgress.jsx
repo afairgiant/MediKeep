@@ -16,6 +16,8 @@ import useDocumentManagerCore from './DocumentManagerCore';
 import ProgressTracking from './ProgressTracking';
 import RenderModeContent from './RenderModeContent';
 import DocumentManagerErrorBoundary from './DocumentManagerErrorBoundary';
+import LinkPaperlessDocumentModal from './LinkPaperlessDocumentModal';
+import { linkPaperlessDocument } from '../../services/api/paperlessApi';
 import logger from '../../services/logger';
 
 // Separate component to properly handle React Hooks
@@ -31,9 +33,12 @@ const DocumentManagerContent = ({
   config,
   showUploadModal,
   setShowUploadModal,
+  showLinkModal,
+  setShowLinkModal,
   fileUpload,
   setFileUpload,
   handleFileUploadSubmit,
+  handleLinkDocument,
   updateHandlersRef,
   className
 }) => {
@@ -97,6 +102,7 @@ const DocumentManagerContent = ({
           filesToDelete={coreHandlers.filesToDelete}
           config={config}
           onUploadModalOpen={() => setShowUploadModal(true)}
+          onLinkModalOpen={() => setShowLinkModal(true)}
           onCheckSyncStatus={coreHandlers.handleCheckSyncStatus}
           onDownloadFile={coreHandlers.handleDownloadFile}
           onViewFile={coreHandlers.handleViewFile}
@@ -161,6 +167,15 @@ const DocumentManagerContent = ({
           </Stack>
         </form>
       </Modal>
+
+      {/* Link Paperless Document Modal */}
+      <LinkPaperlessDocumentModal
+        opened={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
+        onLinkDocument={handleLinkDocument}
+        entityType={entityType}
+        entityId={entityId}
+      />
     </Stack>
   );
 };
@@ -178,8 +193,9 @@ const DocumentManagerWithProgress = React.memo(({
   onUploadComplete, // Callback when upload completes
 }) => {
   
-  // Local state for modal
+  // Local state for modals
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
 
   // Refs to store handlers for stable callback functions
@@ -194,6 +210,39 @@ const DocumentManagerWithProgress = React.memo(({
     setFileUpload({ file: null, description: '' });
     setShowUploadModal(false);
   }, [fileUpload.file, fileUpload.description]);
+
+  // Handler for linking Paperless documents
+  const handleLinkDocument = useCallback(async (linkData) => {
+    try {
+      logger.info('document_manager_link_paperless', 'Linking Paperless document', {
+        component: 'DocumentManagerWithProgress',
+        entityType,
+        entityId,
+        paperlessDocId: linkData.paperless_document_id,
+      });
+
+      await linkPaperlessDocument(entityType, entityId, linkData);
+
+      // Refresh file list after successful link
+      if (handlersRef.current?.loadFiles) {
+        await handlersRef.current.loadFiles();
+      }
+
+      logger.info('document_manager_link_success', 'Paperless document linked successfully', {
+        component: 'DocumentManagerWithProgress',
+        entityType,
+        entityId,
+      });
+    } catch (error) {
+      logger.error('document_manager_link_error', 'Failed to link Paperless document', {
+        component: 'DocumentManagerWithProgress',
+        error: error.message,
+        entityType,
+        entityId,
+      });
+      throw error;
+    }
+  }, [entityType, entityId]);
 
   // Expose upload function to parent when handlers change
   useEffect(() => {
@@ -235,7 +284,7 @@ const DocumentManagerWithProgress = React.memo(({
     >
       {(progressProps) => {
         // Get handlers from DocumentManagerCore hook - moved outside callback
-        return <DocumentManagerContent 
+        return <DocumentManagerContent
           entityType={entityType}
           entityId={entityId}
           mode={mode}
@@ -247,9 +296,12 @@ const DocumentManagerWithProgress = React.memo(({
           config={config}
           showUploadModal={showUploadModal}
           setShowUploadModal={setShowUploadModal}
+          showLinkModal={showLinkModal}
+          setShowLinkModal={setShowLinkModal}
           fileUpload={fileUpload}
           setFileUpload={setFileUpload}
           handleFileUploadSubmit={handleFileUploadSubmit}
+          handleLinkDocument={handleLinkDocument}
           updateHandlersRef={updateHandlersRef}
           className={className}
         />;

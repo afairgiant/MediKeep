@@ -17,6 +17,7 @@ import {
   TextInput,
   ThemeIcon,
   Progress,
+  Menu,
 } from '@mantine/core';
 import {
   IconFile,
@@ -36,15 +37,18 @@ import {
   IconLock,
   IconDatabase,
   IconWifi,
+  IconLink,
+  IconChevronDown,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
-import { getPaperlessSettings } from '../../services/api/paperlessApi.jsx';
+import { getPaperlessSettings, linkPaperlessDocument } from '../../services/api/paperlessApi.jsx';
 import logger from '../../services/logger';
 import FileUploadZone from './FileUploadZone';
 import FileList from './FileList';
 import FileCountBadge from './FileCountBadge';
 import StorageBackendSelector from './StorageBackendSelector';
 import useDocumentManagerCore from './DocumentManagerCore';
+import LinkPaperlessDocumentModal from './LinkPaperlessDocumentModal';
 
 const DocumentManager = ({
   entityType,
@@ -93,6 +97,7 @@ const DocumentManager = ({
   const [uploadProgress, setUploadProgress] = useState({});
   const [error, setError] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
   const [syncStatus, setSyncStatus] = useState({});
   const [syncLoading, setSyncLoading] = useState(false);
 
@@ -594,7 +599,15 @@ const DocumentManager = ({
 
   // Delete file immediately (view mode)
   const handleImmediateDelete = async fileId => {
-    if (!window.confirm('Are you sure you want to delete this file?')) {
+    // Find the file to check if it's a linked document
+    const file = files.find(f => f.id === fileId);
+    const isLinkedDocument = file?.file_path && file.file_path.startsWith('paperless://document/');
+
+    const confirmMessage = isLinkedDocument
+      ? 'Are you sure you want to unlink this document? It will remain in Paperless.'
+      : 'Are you sure you want to delete this file?';
+
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
@@ -608,10 +621,11 @@ const DocumentManager = ({
       await loadFiles();
 
       logger.info('document_manager_delete_success', {
-        message: 'File deleted successfully',
+        message: isLinkedDocument ? 'Document unlinked successfully' : 'File deleted successfully',
         entityType,
         entityId,
         fileId,
+        isLinkedDocument,
         component: 'DocumentManager',
       });
     } catch (err) {
@@ -630,6 +644,55 @@ const DocumentManager = ({
         error: err.message,
         component: 'DocumentManager',
       });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle linking existing Paperless document
+  const handleLinkPaperlessDocument = async (linkData) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      logger.info('document_manager_link_paperless', {
+        message: 'Linking Paperless document',
+        entityType,
+        entityId,
+        paperlessDocumentId: linkData.paperless_document_id,
+        component: 'DocumentManager',
+      });
+
+      await linkPaperlessDocument(entityType, entityId, linkData);
+
+      // Reload files to show the newly linked document
+      await loadFiles();
+
+      logger.info('document_manager_link_success', {
+        message: 'Paperless document linked successfully',
+        entityType,
+        entityId,
+        paperlessDocumentId: linkData.paperless_document_id,
+        component: 'DocumentManager',
+      });
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to link document';
+      setError(errorMessage);
+
+      if (onError) {
+        onError(errorMessage);
+      }
+
+      logger.error('document_manager_link_error', {
+        message: 'Failed to link Paperless document',
+        entityType,
+        entityId,
+        error: err.message,
+        component: 'DocumentManager',
+      });
+
+      // Re-throw so modal can handle it
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -1023,14 +1086,33 @@ const DocumentManager = ({
           {/* File Upload Section */}
           <Paper withBorder p="md" bg="gray.1">
             <Group justify="space-between" align="center">
-              <Text fw={500}>Upload New File</Text>
-              <Button
-                leftSection={<IconUpload size={16} />}
-                onClick={() => setShowUploadModal(true)}
-                disabled={loading}
-              >
-                Upload File
-              </Button>
+              <Text fw={500}>Manage Documents</Text>
+              <Menu position="bottom-end" shadow="md">
+                <Menu.Target>
+                  <Button
+                    rightSection={<IconChevronDown size={16} />}
+                    disabled={loading}
+                  >
+                    Add Document
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={<IconUpload size={16} />}
+                    onClick={() => setShowUploadModal(true)}
+                  >
+                    Upload New File
+                  </Menu.Item>
+                  {paperlessSettings?.paperless_enabled && (
+                    <Menu.Item
+                      leftSection={<IconLink size={16} />}
+                      onClick={() => setShowLinkModal(true)}
+                    >
+                      Link Existing Paperless Document
+                    </Menu.Item>
+                  )}
+                </Menu.Dropdown>
+              </Menu>
             </Group>
           </Paper>
 
@@ -1625,6 +1707,15 @@ const DocumentManager = ({
           </Stack>
         </form>
       </Modal>
+
+      {/* Link Paperless Document Modal */}
+      <LinkPaperlessDocumentModal
+        opened={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
+        onLinkDocument={handleLinkPaperlessDocument}
+        entityType={entityType}
+        entityId={entityId}
+      />
     </Stack>
     </>
   );
