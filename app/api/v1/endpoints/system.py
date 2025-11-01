@@ -26,6 +26,9 @@ from app.core.logging.constants import (
     validate_log_level,
 )
 
+# Constants
+BYTES_PER_MB = 1048576  # 1024 * 1024
+
 router = APIRouter()
 
 # Initialize loggers using shared constants
@@ -381,7 +384,7 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
             log_file = log_dir / f"{category}.log"
             if log_file.exists():
                 size_bytes = log_file.stat().st_size
-                size_mb = size_bytes / (1024 * 1024)
+                size_mb = size_bytes / BYTES_PER_MB
                 log_files[category] = {
                     "path": str(log_file),
                     "size_bytes": size_bytes,

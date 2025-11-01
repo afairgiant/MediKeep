@@ -5,12 +5,7 @@ Tests the log rotation configuration, size parsing, method detection,
 and handler creation for both logrotate and Python rotation methods.
 """
 
-import logging
-import logging.handlers
-import os
-import shutil
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
 
