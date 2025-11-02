@@ -3,6 +3,9 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
+# Supported languages - single source of truth
+SUPPORTED_LANGUAGES = ["en", "fr", "de"]
+
 
 class UserPreferencesBase(BaseModel):
     """Base User Preferences schema with common fields."""
@@ -76,10 +79,9 @@ class UserPreferencesBase(BaseModel):
             ValueError: If language is not in supported list
         """
         if v is not None:
-            allowed_languages = ["en", "fr", "de"]
-            if v.lower() not in allowed_languages:
+            if v.lower() not in SUPPORTED_LANGUAGES:
                 raise ValueError(
-                    f"Language must be one of: {', '.join(allowed_languages)}"
+                    f"Language must be one of: {', '.join(SUPPORTED_LANGUAGES)}"
                 )
             return v.lower()
         return v
@@ -193,10 +195,9 @@ class UserPreferencesUpdate(BaseModel):
     def validate_language(cls, v):
         """Validate language if provided."""
         if v is not None:
-            allowed_languages = ["en", "fr", "de"]
-            if v.lower() not in allowed_languages:
+            if v.lower() not in SUPPORTED_LANGUAGES:
                 raise ValueError(
-                    f"Language must be one of: {', '.join(allowed_languages)}"
+                    f"Language must be one of: {', '.join(SUPPORTED_LANGUAGES)}"
                 )
             return v.lower()
         return v

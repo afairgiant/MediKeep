@@ -299,11 +299,6 @@ class TestLanguageCRUD:
         )
         user_obj = user_crud.create(db_session, obj_in=user_in)
 
-        # Create preferences with French language
-        prefs = user_preferences.get_or_create_by_user_id(
-            db_session, user_id=user_obj.id
-        )
-
         # Update language to French
         from app.schemas.user_preferences import UserPreferencesUpdate
         updated_prefs = user_preferences.update_by_user_id(

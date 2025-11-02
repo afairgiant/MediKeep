@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   getUserPreferences,
   updateUserPreferences,
@@ -7,6 +7,9 @@ import { useAuth } from './AuthContext';
 import frontendLogger from '../services/frontendLogger';
 import { PAPERLESS_SETTING_DEFAULTS } from '../constants/paperlessSettings';
 import i18n from '../i18n';
+
+// Supported languages - must match backend validation
+const SUPPORTED_LANGUAGES = ['en', 'fr', 'de'];
 
 /**
  * User Preferences Context
@@ -92,40 +95,8 @@ export const UserPreferencesProvider = ({ children }) => {
     }
   }, [isAuthenticated, user?.id, authLoading]); // Depend on authentication state, user ID, and auth loading state
 
-  // Sync auto-detected language to backend on first login
-  useEffect(() => {
-    const syncAutoDetectedLanguage = async () => {
-      if (isAuthenticated && user && preferences && !loading) {
-        const currentLanguage = i18n.language;
-        const savedLanguage = preferences.language;
-
-        // Only save if user has no language preference yet (still on default 'en')
-        // and their browser/system language is different
-        if (savedLanguage === 'en' && currentLanguage !== 'en') {
-          try {
-            await updatePreferences({ language: currentLanguage });
-            frontendLogger.logInfo('Auto-detected language saved to backend', {
-              language: currentLanguage,
-              userId: user.id,
-              component: 'UserPreferencesContext',
-            });
-          } catch (error) {
-            frontendLogger.logError('Failed to save auto-detected language', {
-              error: error.message,
-              language: currentLanguage,
-              userId: user.id,
-              component: 'UserPreferencesContext',
-            });
-          }
-        }
-      }
-    };
-
-    syncAutoDetectedLanguage();
-  }, [isAuthenticated, user, preferences, loading]); // Run when preferences are loaded
-
   // Function to update preferences and save to server
-  const updatePreferences = async newPreferences => {
+  const updatePreferences = useCallback(async newPreferences => {
     try {
       // Save to server first
       const updatedPreferences = await updateUserPreferences(newPreferences);
@@ -154,7 +125,51 @@ export const UserPreferencesProvider = ({ children }) => {
 
       throw err;
     }
-  };
+  }, []);
+
+  // Sync auto-detected language to backend on first login
+  useEffect(() => {
+    const syncAutoDetectedLanguage = async () => {
+      if (isAuthenticated && user && preferences && !loading) {
+        const currentLanguage = i18n.language;
+        const savedLanguage = preferences.language;
+
+        // Only save if user has no language preference yet (still on default 'en')
+        // and their browser/system language is different AND supported
+        if (
+          savedLanguage === 'en' &&
+          currentLanguage !== 'en' &&
+          SUPPORTED_LANGUAGES.includes(currentLanguage)
+        ) {
+          try {
+            await updatePreferences({ language: currentLanguage });
+            frontendLogger.logInfo('Auto-detected language saved to backend', {
+              language: currentLanguage,
+              userId: user.id,
+              component: 'UserPreferencesContext',
+            });
+          } catch (error) {
+            frontendLogger.logError('Failed to save auto-detected language', {
+              error: error.message,
+              language: currentLanguage,
+              userId: user.id,
+              component: 'UserPreferencesContext',
+            });
+          }
+        } else if (savedLanguage === 'en' && currentLanguage !== 'en') {
+          // Log when browser language is not supported
+          frontendLogger.logInfo('Browser language not supported, keeping default', {
+            browserLanguage: currentLanguage,
+            supportedLanguages: SUPPORTED_LANGUAGES,
+            userId: user.id,
+            component: 'UserPreferencesContext',
+          });
+        }
+      }
+    };
+
+    syncAutoDetectedLanguage();
+  }, [isAuthenticated, user, preferences, loading, updatePreferences]);
 
   // Function to update local preferences only (for internal use)
   const updateLocalPreferences = newPreferences => {
