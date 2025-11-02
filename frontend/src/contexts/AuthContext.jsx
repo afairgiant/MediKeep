@@ -11,6 +11,8 @@ import { getActivityConfig } from '../config/activityConfig';
 import secureActivityLogger from '../utils/secureActivityLogger';
 import { isAdminRole } from '../utils/authUtils';
 import { secureStorage, legacyMigration } from '../utils/secureStorage';
+import { getUserPreferences } from '../services/api/userPreferencesApi';
+import i18n from '../i18n';
 
 // Auth State Management
 const initialState = {
@@ -181,13 +183,35 @@ export function AuthProvider({ children }) {
                   sessionTimeoutMinutes,
                 },
               });
-              
+
               logger.info('Authentication restored successfully', {
                 category: 'auth_restore_success',
                 userId: user.id,
                 username: user.username,
                 timestamp: new Date().toISOString()
               });
+
+              // Load user's language preference from backend
+              try {
+                const userPrefs = await getUserPreferences();
+                if (userPrefs.language && userPrefs.language !== i18n.language) {
+                  await i18n.changeLanguage(userPrefs.language);
+                  logger.info('User language preference loaded from backend', {
+                    category: 'language_loaded',
+                    language: userPrefs.language,
+                    userId: user.id,
+                    timestamp: new Date().toISOString()
+                  });
+                }
+              } catch (langError) {
+                // Don't fail auth if language loading fails
+                logger.warn('Failed to load user language preference', {
+                  category: 'language_load_failed',
+                  error: langError.message,
+                  userId: user.id,
+                  timestamp: new Date().toISOString()
+                });
+              }
             } catch (error) {
               // Token invalid on server, clear local storage
               logger.warn('Stored token invalid on server, clearing auth data', {
@@ -614,6 +638,28 @@ export function AuthProvider({ children }) {
           sessionTimeoutMinutes,
         },
       });
+
+      // Load user's language preference from backend after successful login
+      try {
+        const userPrefs = await getUserPreferences();
+        if (userPrefs.language && userPrefs.language !== i18n.language) {
+          await i18n.changeLanguage(userPrefs.language);
+          logger.info('User language preference loaded from backend after login', {
+            category: 'language_loaded',
+            language: userPrefs.language,
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+        }
+      } catch (langError) {
+        // Don't fail auth if language loading fails
+        logger.warn('Failed to load user language preference after login', {
+          category: 'language_load_failed',
+          error: langError.message,
+          userId: user.id,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       toast.success('Login successful!');
 

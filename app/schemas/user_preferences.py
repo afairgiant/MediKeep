@@ -3,12 +3,16 @@ from typing import Optional
 
 from pydantic import BaseModel, validator
 
+# Supported languages - single source of truth
+SUPPORTED_LANGUAGES = ["en", "fr", "de"]
+
 
 class UserPreferencesBase(BaseModel):
     """Base User Preferences schema with common fields."""
 
     unit_system: str
     session_timeout_minutes: Optional[int] = 30
+    language: Optional[str] = "en"
     paperless_enabled: Optional[bool] = False
     paperless_url: Optional[str] = None
     paperless_api_token: Optional[str] = None
@@ -59,7 +63,29 @@ class UserPreferencesBase(BaseModel):
                 f"Unit system must be one of: {', '.join(allowed_systems)}"
             )
         return v.lower()
-    
+
+    @validator("language")
+    def validate_language(cls, v):
+        """
+        Validate that the language is one of the supported values.
+
+        Args:
+            v: The language code to validate (ISO 639-1)
+
+        Returns:
+            Validated language code (lowercase)
+
+        Raises:
+            ValueError: If language is not in supported list
+        """
+        if v is not None:
+            if v.lower() not in SUPPORTED_LANGUAGES:
+                raise ValueError(
+                    f"Language must be one of: {', '.join(SUPPORTED_LANGUAGES)}"
+                )
+            return v.lower()
+        return v
+
     @validator("paperless_url")
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
@@ -134,6 +160,7 @@ class UserPreferencesUpdate(BaseModel):
 
     unit_system: Optional[str] = None
     session_timeout_minutes: Optional[int] = None
+    language: Optional[str] = None
     paperless_enabled: Optional[bool] = None
     paperless_url: Optional[str] = None
     paperless_username: Optional[str] = None
@@ -163,7 +190,18 @@ class UserPreferencesUpdate(BaseModel):
                 )
             return v.lower()
         return v
-    
+
+    @validator("language")
+    def validate_language(cls, v):
+        """Validate language if provided."""
+        if v is not None:
+            if v.lower() not in SUPPORTED_LANGUAGES:
+                raise ValueError(
+                    f"Language must be one of: {', '.join(SUPPORTED_LANGUAGES)}"
+                )
+            return v.lower()
+        return v
+
     @validator("paperless_url")
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
