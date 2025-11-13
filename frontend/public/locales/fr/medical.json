@@ -445,6 +445,8 @@
       "description": "Notez tout réaction délétère ou autres informations importantes"
     },
     "siteOptions": {
+      "leftArm": "Bras gauche",
+      "rightArm": "Bras droit",
       "leftDeltoid": "Deltoïde gauche",
       "rightDeltoid": "Deltoïde droit",
       "leftThigh": "Cuisse gauche",

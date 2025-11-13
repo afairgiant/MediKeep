@@ -126,14 +126,6 @@ describe('Symptoms Page - Translations', () => {
   });
 
   describe('Episode Management', () => {
-    const mockSymptom = {
-      id: 1,
-      symptom_name: 'Headache',
-      category: 'Pain',
-      is_chronic: true,
-      status: 'active',
-    };
-
     it('should show log episode button in English', async () => {
       renderWithProviders(<Symptoms />);
 

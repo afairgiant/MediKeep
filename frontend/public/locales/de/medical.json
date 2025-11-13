@@ -444,6 +444,8 @@
 			"description": "Eventuelle Nebenwirkungen oder wichtige Hinweise"
 		},
 		"siteOptions": {
+			"leftArm": "Linker Arm",
+			"rightArm": "Rechter Arm",
 			"leftDeltoid": "Linker Deltoidmuskel",
 			"rightDeltoid": "Rechter Deltoidmuskel",
 			"leftThigh": "Linker Oberschenkel",
