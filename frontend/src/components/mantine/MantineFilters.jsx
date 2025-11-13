@@ -64,7 +64,6 @@ const MantineFilters = ({
     showSearch = true,
   } = config;
 
-  const { t } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchWidth, setSearchWidth] = useState('150px');
@@ -74,20 +73,23 @@ const MantineFilters = ({
   const searchDebounceRef = useRef(null);
 
   // Debounced search handler - prevents excessive re-renders during typing
-  const handleSearchChange = useCallback((value) => {
-    setLocalSearch(value);
+  const handleSearchChange = useCallback(
+    value => {
+      setLocalSearch(value);
 
-    // Clear existing timeout
-    if (searchDebounceRef.current) {
-      clearTimeout(searchDebounceRef.current);
-    }
+      // Clear existing timeout
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
 
-    // Set new timeout to update filter after 300ms of no typing
-    searchDebounceRef.current = setTimeout(() => {
-      updateFilter('search', value);
-      searchDebounceRef.current = null;
-    }, 300);
-  }, [updateFilter]);
+      // Set new timeout to update filter after 300ms of no typing
+      searchDebounceRef.current = setTimeout(() => {
+        updateFilter('search', value);
+        searchDebounceRef.current = null;
+      }, 300);
+    },
+    [updateFilter]
+  );
 
   // Sync local search with filter when filters change externally
   useEffect(() => {
@@ -107,10 +109,11 @@ const MantineFilters = ({
 
   // Helper functions for theme-aware colors
   const getDividerColor = () =>
-    colorScheme === 'dark' ? 'var(--mantine-color-dark-4)' : 'var(--mantine-color-gray-3)';
+    colorScheme === 'dark'
+      ? 'var(--mantine-color-dark-4)'
+      : 'var(--mantine-color-gray-3)';
 
-  const getLabelColor = () =>
-    colorScheme === 'dark' ? 'gray.4' : 'dark';
+  const getLabelColor = () => (colorScheme === 'dark' ? 'gray.4' : 'dark');
 
   // Adjust search width based on viewport
   useEffect(() => {
@@ -145,27 +148,38 @@ const MantineFilters = ({
   ].filter(Boolean).length;
 
   return (
-    <Card withBorder shadow="sm" p={{ base: 'sm', sm: 'md' }} mb="lg" className="no-print" style={{ width: '100%', boxSizing: 'border-box' }}>
+    <Card
+      withBorder
+      shadow="sm"
+      p={{ base: 'sm', sm: 'md' }}
+      mb="lg"
+      className="no-print"
+      style={{ width: '100%', boxSizing: 'border-box' }}
+    >
       <Stack gap="md">
         {/* Compact Header with Filter Button */}
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'row', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          flexWrap: 'wrap', 
-          gap: '0.5rem',
-          width: '100%',
-          boxSizing: 'border-box'
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem', 
-            flex: '1 1 50%',
-            minWidth: '0',
-            overflow: 'hidden'
-          }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              flex: '1 1 50%',
+              minWidth: '0',
+              overflow: 'hidden',
+            }}
+          >
             <ActionIcon
               variant={isExpanded ? 'filled' : 'light'}
               color={hasActiveFilters ? 'blue' : 'gray'}
@@ -176,11 +190,13 @@ const MantineFilters = ({
               <IconFilter size={18} />
             </ActionIcon>
 
-            <div style={{ 
-              flex: '1 1 auto',
-              minWidth: '0',
-              overflow: 'hidden'
-            }}>
+            <div
+              style={{
+                flex: '1 1 auto',
+                minWidth: '0',
+                overflow: 'hidden',
+              }}
+            >
               <Group gap="xs" align="center" style={{ flexWrap: 'nowrap' }}>
                 <Text size="md" fw={500} style={{ whiteSpace: 'nowrap' }}>
                   {t('filters.title', 'Filters & Search')}
@@ -191,13 +207,22 @@ const MantineFilters = ({
                   </Badge>
                 )}
               </Group>
-              <Text size="xs" c="dimmed" style={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}>
-                {t('filters.itemCount', '{{filtered}} of {{total}} items', { filtered: filteredCount, total: totalCount })}
-                {filterCount > 0 ? ` • ${t('filters.moreFilters', '{{count}} more filters', { count: filterCount })}` : ''}
+              <Text
+                size="xs"
+                c="dimmed"
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {t('filters.itemCount', '{{filtered}} of {{total}} items', {
+                  filtered: filteredCount,
+                  total: totalCount,
+                })}
+                {filterCount > 0
+                  ? ` • ${t('filters.moreFilters', '{{count}} more filters', { count: filterCount })}`
+                  : ''}
               </Text>
             </div>
 
@@ -215,12 +240,14 @@ const MantineFilters = ({
             </ActionIcon>
           </div>
 
-          <div style={{ 
-            display: 'flex', 
-            gap: '0.5rem', 
-            flex: '0 1 auto',
-            minWidth: '0'
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '0.5rem',
+              flex: '0 1 auto',
+              minWidth: '0',
+            }}
+          >
             {/* Always visible search - most commonly used */}
             {showSearch && (
               <TextInput
@@ -229,10 +256,10 @@ const MantineFilters = ({
                 onChange={e => handleSearchChange(e.target.value)}
                 leftSection={<IconSearch size={16} />}
                 size="sm"
-                style={{ 
+                style={{
                   width: searchWidth,
                   minWidth: '100px',
-                  maxWidth: searchWidth
+                  maxWidth: searchWidth,
                 }}
               />
             )}
@@ -435,7 +462,7 @@ const MantineFilters = ({
                         width: '1px',
                         backgroundColor: getDividerColor(),
                         margin: '0 8px',
-                        alignSelf: 'center'
+                        alignSelf: 'center',
                       }}
                     />
                     <Text
@@ -445,7 +472,7 @@ const MantineFilters = ({
                       style={{
                         alignSelf: 'center',
                         whiteSpace: 'nowrap',
-                        marginRight: '8px'
+                        marginRight: '8px',
                       }}
                     >
                       Sort by:
