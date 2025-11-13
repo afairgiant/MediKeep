@@ -213,7 +213,7 @@ const Symptoms = () => {
   };
 
   const handleDeleteSymptom = async symptomId => {
-    if (!window.confirm('Are you sure you want to delete this symptom and all its occurrences?')) {
+    if (!window.confirm(t('symptoms.confirmDeleteSymptom'))) {
       return;
     }
 
@@ -603,7 +603,7 @@ const Symptoms = () => {
           setShowSymptomForm(false);
           setEditingSymptom(null);
         }}
-        title={editingSymptom ? 'Edit Symptom' : 'Add New Symptom'}
+        title={editingSymptom ? t('symptoms.editSymptomTitle') : t('symptoms.addSymptomTitle')}
         formData={symptomFormData}
         onInputChange={handleSymptomInputChange}
         onSubmit={handleSymptomSubmit}
@@ -620,8 +620,8 @@ const Symptoms = () => {
         }}
         title={
           editingOccurrence
-            ? `Edit Episode: ${selectedSymptomForOccurrence?.symptom_name}`
-            : `Log Episode: ${selectedSymptomForOccurrence?.symptom_name}`
+            ? `${t('symptoms.editEpisodeTitle')}: ${selectedSymptomForOccurrence?.symptom_name}`
+            : `${t('symptoms.logEpisodeTitle')}: ${selectedSymptomForOccurrence?.symptom_name}`
         }
         formData={occurrenceFormData}
         onInputChange={handleOccurrenceInputChange}

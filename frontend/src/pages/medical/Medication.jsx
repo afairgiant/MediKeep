@@ -470,7 +470,7 @@ const Medication = () => {
                 )
               }
             >
-              {MEDICATION_TYPE_LABELS[MEDICATION_TYPES.PRESCRIPTION]}
+              {t('medications.types.prescription')}
               <Badge size="xs" ml={6} variant="filled" color="dark">
                 {
                   medications.filter(
@@ -494,7 +494,7 @@ const Medication = () => {
                 )
               }
             >
-              {MEDICATION_TYPE_LABELS[MEDICATION_TYPES.SUPPLEMENT]}
+              {t('medications.types.supplement')}
               <Badge size="xs" ml={6} variant="filled" color="dark">
                 {
                   medications.filter(
@@ -517,7 +517,7 @@ const Medication = () => {
                 )
               }
             >
-              {MEDICATION_TYPE_LABELS[MEDICATION_TYPES.OTC]}
+              {t('medications.types.otc')}
               <Badge size="xs" ml={6} variant="filled" color="dark">
                 {
                   medications.filter(
@@ -541,7 +541,7 @@ const Medication = () => {
                 )
               }
             >
-              {MEDICATION_TYPE_LABELS[MEDICATION_TYPES.HERBAL]}
+              {t('medications.types.herbal')}
               <Badge size="xs" ml={6} variant="filled" color="dark">
                 {
                   medications.filter(

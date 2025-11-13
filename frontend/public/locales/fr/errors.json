@@ -27,8 +27,22 @@
     "invalidDate": "Veuillez saisir une date valide.",
     "invalidEmail": "Veuillez saisir une adresse email valide.",
     "invalidPhone": "Veuillez saisir un numéro de téléphone valide.",
-    "patientNotSelected": "Veuillez sélectionner un patientNotSelected.",
+    "invalidPhoneDigits": "Veuillez saisir un numéro de téléphone valide (10-15 chiffres)",
+    "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide",
+    "patientNotSelected": "Veuillez sélectionner un patient.",
+    "medicationNotSelected": "Veuillez sélectionner un médicament",
+    "conditionNotSelected": "Veuillez sélectionner une condition",
+    "mustBeValidNumber": "Doit être un nombre valide",
     "entityNotFound": "L'objet demandé ne peut pas être trouvé."
+  },
+  "patientForm": {
+    "error": "Erreur",
+    "firstNameRequired": "Le prénom est requis",
+    "lastNameRequired": "Le nom de famille est requis",
+    "birthDateRequired": "La date de naissance est requise",
+    "birthDateFuture": "La date de naissance ne peut pas être dans le futur",
+    "createFailed": "Échec de la création : {{message}}",
+    "updateFailed": "Échec de la mise à jour : {{message}}"
   },
   "file": {
     "deleteFailed": "Echec de la suppression du fichier.",
@@ -64,5 +78,9 @@
     "slowConnection": "Le téléversement prend plus de temps que d'habitude en raison d'une connexion lente.",
     "largeFileWarning": "Fichier lourd détecté. Le téléversement peut prendre plusieurs minutes.",
     "duplicateWarning": "Ce fichier semble être un doublon."
+  },
+  "relationships": {
+    "addConditionFailed": "Échec de l'ajout de la relation de condition",
+    "addMedicationFailed": "Échec de l'ajout de la relation de médicament"
   }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import {
@@ -34,6 +35,8 @@ const ConditionRelationships = ({
   navigate,
   isViewMode = false, // New prop to distinguish between view and edit modes
 }) => {
+  const { t } = useTranslation('common');
+  const { t: tErrors } = useTranslation('errors');
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -59,7 +62,7 @@ const ConditionRelationships = ({
 
   const handleAddRelationship = async () => {
     if (!newRelationship.condition_id) {
-      setError('Please select a condition');
+      setError(tErrors('form.conditionNotSelected'));
       return;
     }
 
@@ -82,7 +85,7 @@ const ConditionRelationships = ({
       setNewRelationship({ condition_id: '', relevance_note: '' });
       setShowAddModal(false);
     } catch (err) {
-      setError(err.message || 'Failed to add condition relationship');
+      setError(err.message || tErrors('relationships.addConditionFailed'));
     } finally {
       setLoading(false);
     }
@@ -109,7 +112,7 @@ const ConditionRelationships = ({
   };
 
   const handleDeleteRelationship = async (relationshipId) => {
-    if (!window.confirm('Are you sure you want to remove this condition relationship?')) {
+    if (!window.confirm(t('messages.confirmRemoveConditionRelationship'))) {
       return;
     }
 
@@ -201,7 +204,7 @@ const ConditionRelationships = ({
 
                     {!isViewMode && isEditing ? (
                       <Textarea
-                        placeholder="Relevance note (optional)"
+                        placeholder={t('modals.relevanceNoteOptional')}
                         value={editingRelationship?.relevance_note || relationship.relevance_note || ''}
                         onChange={(e) => setEditingRelationship({
                           ...editingRelationship,
@@ -217,7 +220,7 @@ const ConditionRelationships = ({
                       </Text>
                     ) : !isViewMode ? (
                       <Text size="sm" c="dimmed">
-                        No relevance note provided
+                        {t('modals.noRelevanceNoteProvided')}
                       </Text>
                     ) : null}
                   </Stack>
@@ -279,7 +282,7 @@ const ConditionRelationships = ({
         </Stack>
       ) : (
         <Paper withBorder p="md" ta="center">
-          <Text c="dimmed">No conditions linked to this lab result</Text>
+          <Text c="dimmed">{t('labels.noConditionsLinked')}</Text>
         </Paper>
       )}
 
@@ -291,7 +294,7 @@ const ConditionRelationships = ({
           onClick={() => setShowAddModal(true)}
           disabled={loading}
         >
-          Link Condition
+          {t('buttons.linkCondition')}
         </Button>
       )}
 
@@ -303,14 +306,14 @@ const ConditionRelationships = ({
           setNewRelationship({ condition_id: '', relevance_note: '' });
           setError(null);
         }}
-        title="Link Condition to Lab Result"
+        title={t('modals.linkConditionToLabResult')}
         size="md"
         centered
       >
         <Stack gap="md">
           <MultiSelect
-            label="Select Condition"
-            placeholder="Choose a condition to link"
+            label={t('modals.selectCondition')}
+            placeholder={t('modals.chooseConditionToLink')}
             data={availableConditionOptions}
             value={newRelationship.condition_id ? [newRelationship.condition_id] : []}
             onChange={(values) => setNewRelationship(prev => ({
@@ -323,8 +326,8 @@ const ConditionRelationships = ({
           />
 
           <Textarea
-            label="Relevance Note"
-            placeholder="Describe how this condition relates to the lab result (optional)"
+            label={t('modals.relevanceNote')}
+            placeholder={t('modals.describeConditionRelevance')}
             value={newRelationship.relevance_note}
             onChange={(e) => setNewRelationship(prev => ({
               ...prev,
@@ -343,14 +346,14 @@ const ConditionRelationships = ({
                 setError(null);
               }}
             >
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button
               onClick={handleAddRelationship}
               loading={loading}
               disabled={!newRelationship.condition_id}
             >
-              Link Condition
+              {t('buttons.linkCondition')}
             </Button>
           </Group>
         </Stack>

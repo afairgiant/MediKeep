@@ -219,6 +219,19 @@
 	},
 	"medications": {
 		"title": "Medikamente",
+		"tabs": {
+			"basicInfo": "Grundinformationen",
+			"details": "Details",
+			"documents": "Dokumente",
+			"notes": "Notizen"
+		},
+		"form": {
+			"saving": "Medikament wird gespeichert...",
+			"updateMedication": "Medikament aktualisieren",
+			"addMedication": "Medikament hinzufügen",
+			"notesPlaceholder": "Zusätzliche Notizen und Informationen zu diesem Medikament können in zukünftigen Updates hinzugefügt werden.",
+			"attachedDocuments": "Angehängte Dokumente"
+		},
 		"medicationName": {
 			"label": "Medikamentenname",
 			"placeholder": "z. B. Lisinopril, Metformin",
@@ -274,6 +287,49 @@
 	},
 	"labResults": {
 		"title": "Laborergebnisse",
+		"status": {
+			"ordered": "Bestellt - Test wurde angefordert",
+			"inProgress": "In Bearbeitung - Probe wird verarbeitet",
+			"completed": "Abgeschlossen - Ergebnisse verfügbar",
+			"cancelled": "Abgebrochen - Test wurde storniert"
+		},
+		"category": {
+			"bloodWork": "Blutuntersuchung",
+			"imaging": "Bildgebung (Röntgen, MRT, CT)",
+			"pathology": "Pathologie",
+			"microbiology": "Mikrobiologie",
+			"chemistry": "Chemie",
+			"hematology": "Hämatologie",
+			"immunology": "Immunologie",
+			"genetics": "Genetik",
+			"cardiology": "Kardiologie",
+			"pulmonology": "Pneumologie",
+			"other": "Sonstiges"
+		},
+		"testType": {
+			"routine": "Routine - Standardverarbeitung",
+			"urgent": "Dringend - Beschleunigte Verarbeitung",
+			"emergency": "Notfall - Kritische Priorität",
+			"followUp": "Nachuntersuchung - Wiederholungstest",
+			"screening": "Screening - Präventivtest"
+		},
+		"result": {
+			"normal": "Normal - Innerhalb des Referenzbereichs",
+			"abnormal": "Abnormal - Außerhalb des Referenzbereichs",
+			"critical": "Kritisch - Erfordert sofortige Aufmerksamkeit",
+			"high": "Hoch - Über dem Normalbereich",
+			"low": "Niedrig - Unter dem Normalbereich",
+			"borderline": "Grenzwertig - Nahe am Schwellenwert",
+			"inconclusive": "Nicht schlüssig - Wiederholung erforderlich"
+		},
+		"form": {
+			"testDetails": "Testdetails",
+			"statusIndicator": "Statusanzeige:",
+			"resultIndicator": "Ergebnisanzeige:",
+			"relatedConditions": "Zugehörige Erkrankungen",
+			"linkConditionsTitle": "Medizinische Erkrankungen verknüpfen",
+			"linkConditionsDescription": "Verknüpfen Sie dieses Laborergebnis mit relevanten medizinischen Erkrankungen für eine bessere Nachverfolgung und Organisation."
+		},
 		"testName": {
 			"label": "Testname",
 			"placeholder": "z. B. Komplettes Blutbild (CBC)",
@@ -386,6 +442,35 @@
 			"label": "Zusätzliche Notizen",
 			"placeholder": "Alle Reaktionen, Nebenwirkungen oder Beobachtungen...",
 			"description": "Eventuelle Nebenwirkungen oder wichtige Hinweise"
+		},
+		"siteOptions": {
+			"leftDeltoid": "Linker Deltoidmuskel",
+			"rightDeltoid": "Rechter Deltoidmuskel",
+			"leftThigh": "Linker Oberschenkel",
+			"rightThigh": "Rechter Oberschenkel",
+			"leftGluteal": "Linker Gesäßmuskel",
+			"rightGluteal": "Rechter Gesäßmuskel",
+			"abdomen": "Bauch",
+			"other": "Andere"
+		},
+		"routeOptions": {
+			"intramuscular": "Intramuskulär (IM)",
+			"subcutaneous": "Subkutan (SC)",
+			"intradermal": "Intradermal (ID)",
+			"oral": "Oral",
+			"nasal": "Nasal",
+			"other": "Andere"
+		},
+		"manufacturerOptions": {
+			"pfizer": "Pfizer-BioNTech",
+			"moderna": "Moderna",
+			"jj": "Johnson & Johnson",
+			"astrazeneca": "AstraZeneca",
+			"sanofi": "Sanofi",
+			"glaxosmithkline": "GlaxoSmithKline",
+			"merck": "Merck",
+			"novartis": "Novartis",
+			"other": "Andere"
 		}
 	},
 	"procedures": {
@@ -665,6 +750,11 @@
 			"placeholder": "z. B. 500mg, 2 Tabletten, 30 Minuten",
 			"description": "Menge oder Intensität pro Sitzung"
 		},
+		"frequency": {
+			"label": "Häufigkeit",
+			"placeholder": "Häufigkeit auswählen",
+			"description": "Wie oft die Behandlung stattfindet"
+		},
 		"frequencyOptions": {
 			"onceDaily": "Einmal täglich",
 			"twiceDaily": "Zweimal täglich (BID)",
@@ -676,6 +766,21 @@
 			"asNeeded": "Bei Bedarf (PRN)",
 			"oneTime": "Einmalig",
 			"continuous": "Kontinuierlich/fortlaufend"
+		},
+		"startDate": {
+			"label": "Startdatum",
+			"placeholder": "Startdatum auswählen",
+			"description": "Wann die Behandlung beginnt/begann"
+		},
+		"endDate": {
+			"label": "Enddatum",
+			"placeholder": "Enddatum auswählen (falls bekannt)",
+			"description": "Voraussichtliches oder tatsächliches Abschlussdatum"
+		},
+		"performingPractitioner": {
+			"label": "Durchführender Arzt",
+			"placeholder": "Arzt auswählen (optional)",
+			"description": "Dieser Behandlung einen Arzt zuweisen"
 		},
 		"treatmentDescription": {
 			"label": "Behandlungsbeschreibung",

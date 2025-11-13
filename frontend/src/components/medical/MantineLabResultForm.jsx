@@ -1,5 +1,6 @@
 import React from 'react';
 import { Divider, Stack, Title, Paper, Text, Badge } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from './BaseMedicalForm';
 import ConditionRelationships from './ConditionRelationships';
 import { labResultFormFields } from '../../utils/medicalFormFields';
@@ -20,65 +21,67 @@ const MantineLabResultForm = ({
   fetchLabResultConditions,
   navigate,
 }) => {
+  const { t } = useTranslation('medical');
+
   // Status options with visual indicators
   const statusOptions = [
-    { value: 'ordered', label: 'Ordered - Test has been requested' },
-    { value: 'in-progress', label: 'In Progress - Sample being processed' },
-    { value: 'completed', label: 'Completed - Results available' },
-    { value: 'cancelled', label: 'Cancelled - Test was cancelled' },
+    { value: 'ordered', label: t('labResults.status.ordered') },
+    { value: 'in-progress', label: t('labResults.status.inProgress') },
+    { value: 'completed', label: t('labResults.status.completed') },
+    { value: 'cancelled', label: t('labResults.status.cancelled') },
   ];
 
   // Test category options
   const categoryOptions = [
-    { value: 'blood work', label: 'Blood Work' },
-    { value: 'imaging', label: 'Imaging (X-ray, MRI, CT)' },
-    { value: 'pathology', label: 'Pathology' },
-    { value: 'microbiology', label: 'Microbiology' },
-    { value: 'chemistry', label: 'Chemistry' },
-    { value: 'hematology', label: 'Hematology' },
-    { value: 'immunology', label: 'Immunology' },
-    { value: 'genetics', label: 'Genetics' },
-    { value: 'cardiology', label: 'Cardiology' },
-    { value: 'pulmonology', label: 'Pulmonology' },
-    { value: 'other', label: 'Other' },
+    { value: 'blood work', label: t('labResults.category.bloodWork') },
+    { value: 'imaging', label: t('labResults.category.imaging') },
+    { value: 'pathology', label: t('labResults.category.pathology') },
+    { value: 'microbiology', label: t('labResults.category.microbiology') },
+    { value: 'chemistry', label: t('labResults.category.chemistry') },
+    { value: 'hematology', label: t('labResults.category.hematology') },
+    { value: 'immunology', label: t('labResults.category.immunology') },
+    { value: 'genetics', label: t('labResults.category.genetics') },
+    { value: 'cardiology', label: t('labResults.category.cardiology') },
+    { value: 'pulmonology', label: t('labResults.category.pulmonology') },
+    { value: 'other', label: t('labResults.category.other') },
   ];
 
   // Test type options with urgency levels
   const testTypeOptions = [
-    { value: 'routine', label: 'Routine - Standard processing' },
-    { value: 'urgent', label: 'Urgent - Expedited processing' },
-    { value: 'emergency', label: 'Emergency - Critical priority' },
-    { value: 'follow-up', label: 'Follow-up - Repeat testing' },
-    { value: 'screening', label: 'Screening - Preventive testing' },
+    { value: 'routine', label: t('labResults.testType.routine') },
+    { value: 'urgent', label: t('labResults.testType.urgent') },
+    { value: 'emergency', label: t('labResults.testType.emergency') },
+    { value: 'follow-up', label: t('labResults.testType.followUp') },
+    { value: 'screening', label: t('labResults.testType.screening') },
   ];
 
   // Lab result options with color coding
   const labResultOptions = [
     {
       value: 'normal',
-      label: 'Normal - Within reference range',
+      label: t('labResults.result.normal'),
       color: 'green',
     },
     {
       value: 'abnormal',
-      label: 'Abnormal - Outside reference range',
+      label: t('labResults.result.abnormal'),
       color: 'red',
     },
     {
       value: 'critical',
-      label: 'Critical - Requires immediate attention',
+      label: t('labResults.result.critical'),
       color: 'red',
     },
-    { value: 'high', label: 'High - Above normal range', color: 'orange' },
-    { value: 'low', label: 'Low - Below normal range', color: 'orange' },
+    { value: 'high', label: t('labResults.result.high'), color: 'orange' },
+    { value: 'low', label: t('labResults.result.low'), color: 'orange' },
     {
       value: 'borderline',
-      label: 'Borderline - Near threshold',
+      label: t('labResults.result.borderline'),
       color: 'yellow',
     },
     {
       value: 'inconclusive',
-      label: 'Inconclusive - Needs repeat',
+      label: t('labResults.result.inconclusive'),
       color: 'gray',
     },
   ];
@@ -127,12 +130,12 @@ const MantineLabResultForm = ({
   // Custom content for divider, badges, condition relationships, and file management
   const customContent = (
     <>
-      <Divider label="Test Details" labelPosition="center" />
-      
+      <Divider label={t('labResults.form.testDetails')} labelPosition="center" />
+
       {/* Status Badge */}
       {formData.status && (
         <div style={{ marginTop: '-8px', marginBottom: '8px' }}>
-          <Text size="sm" fw={500} mb="xs">Status Indicator:</Text>
+          <Text size="sm" fw={500} mb="xs">{t('labResults.form.statusIndicator')}</Text>
           <Badge
             color={getStatusColor(formData.status)}
             variant="light"
@@ -146,7 +149,7 @@ const MantineLabResultForm = ({
       {/* Result Badge */}
       {formData.labs_result && (
         <div style={{ marginBottom: '16px' }}>
-          <Text size="sm" fw={500} mb="xs">Result Indicator:</Text>
+          <Text size="sm" fw={500} mb="xs">{t('labResults.form.resultIndicator')}</Text>
           {getResultBadge(formData.labs_result)}
         </div>
       )}
@@ -154,14 +157,14 @@ const MantineLabResultForm = ({
       {/* Condition Relationships Section for Edit Mode */}
       {editingLabResult && conditions.length > 0 && (
         <>
-          <Divider label="Related Conditions" labelPosition="center" mt="lg" />
+          <Divider label={t('labResults.form.relatedConditions')} labelPosition="center" mt="lg" />
           <Paper withBorder p="md" bg="gray.1">
             <Stack gap="md">
-              <Title order={5}>Link Medical Conditions</Title>
+              <Title order={5}>{t('labResults.form.linkConditionsTitle')}</Title>
               <Text size="sm" c="dimmed">
-                Associate this lab result with relevant medical conditions for better tracking and organization.
+                {t('labResults.form.linkConditionsDescription')}
               </Text>
-              <ConditionRelationships 
+              <ConditionRelationships
                 labResultId={editingLabResult.id}
                 labResultConditions={labResultConditions}
                 conditions={conditions}

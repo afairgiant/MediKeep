@@ -31,7 +31,9 @@
     "retry": "Retry",
     "continue": "Continue",
     "skip": "Skip",
-    "done": "Done"
+    "done": "Done",
+    "linkMedication": "Link Medication",
+    "linkCondition": "Link Condition"
   },
   "labels": {
     "loading": "Loading...",
@@ -63,7 +65,51 @@
     "profile": "Profile",
     "account": "Account",
     "help": "Help",
-    "support": "Support"
+    "support": "Support",
+    "loadingOption": "Loading {{option}}...",
+    "addCustom": "+ Add \"{{value}}\"",
+    "ratingStars": "{{count}}/5 stars",
+    "noRating": "No rating",
+    "noMedicationsLinked": "No medications linked to this condition",
+    "noConditionsLinked": "No conditions linked to this lab result",
+    "medicationsAvailableToLink": "{{count}} medications available to link",
+    "conditionsAvailableToLink": "{{count}} conditions available to link",
+    "linkedMedications": "Linked Medications",
+    "visitWebsite": "Visit Website ↗"
+  },
+  "vitals": {
+    "form": {
+      "selectDate": "Select date",
+      "selectDateTime": "Select date and time"
+    }
+  },
+  "medications": {
+    "quickFilter": "Quick Filter",
+    "allTypes": "All Types",
+    "types": {
+      "prescription": "Prescription",
+      "otc": "Over-the-Counter",
+      "supplement": "Supplement/Vitamin",
+      "herbal": "Herbal/Natural"
+    }
+  },
+  "searchPlaceholders": {
+    "conditions": "Search conditions, notes, tags...",
+    "insurance": "Search insurance companies, member names...",
+    "medications": "Search medications, indications, dosages, tags...",
+    "procedures": "Search procedures, notes, tags...",
+    "treatments": "Search treatments, notes, tags...",
+    "visits": "Search visits, reasons, notes, tags...",
+    "immunizations": "Search immunizations, vaccines, tags...",
+    "allergies": "Search allergies, reactions, tags...",
+    "symptoms": "Search symptoms, descriptions, tags...",
+    "practitioners": "Search practitioners...",
+    "pharmacies": "Search pharmacies...",
+    "labResults": "Search lab results, test codes, facilities, practitioners, tags...",
+    "vitals": "Search vitals notes...",
+    "emergencyContacts": "Search contacts, relationships, phone, email...",
+    "familyHistory": "Search family members, conditions, notes...",
+    "generic": "Search..."
   },
   "messages": {
     "confirmDelete": "Are you sure you want to delete this item?",
@@ -76,7 +122,21 @@
     "operationSuccess": "Operation completed successfully",
     "operationFailed": "Operation failed. Please try again.",
     "pleaseWait": "Please wait...",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "confirmRemoveMedicationRelationship": "Are you sure you want to remove this medication relationship?",
+    "confirmRemoveConditionRelationship": "Are you sure you want to remove this condition relationship?"
+  },
+  "modals": {
+    "linkMedicationToCondition": "Link Medication to Condition",
+    "linkConditionToLabResult": "Link Condition to Lab Result",
+    "selectMedication": "Select Medication",
+    "selectCondition": "Select Condition",
+    "chooseMedicationToLink": "Choose a medication to link",
+    "chooseConditionToLink": "Choose a condition to link",
+    "relevanceNoteOptional": "Relevance note (optional)",
+    "noRelevanceNoteProvided": "No relevance note provided",
+    "relevanceNote": "Relevance Note",
+    "describeConditionRelevance": "Describe how this condition relates to the lab result (optional)"
   },
   "time": {
     "today": "Today",
@@ -105,6 +165,117 @@
     "next": "Next",
     "first": "First",
     "last": "Last"
+  },
+  "patients": {
+    "form": {
+      "createTitle": "Create New Patient",
+      "editTitle": "Edit Patient",
+      "saveFirstMessage": "Save patient information first, then you can add a photo",
+      "sections": {
+        "basicInformation": "Basic Information",
+        "medicalInformation": "Medical Information",
+        "contactInformation": "Contact Information"
+      },
+      "selfRecord": {
+        "label": "This is my own medical record",
+        "description": "Check this if you're creating a record for yourself"
+      },
+      "firstName": {
+        "label": "First Name",
+        "placeholder": "Enter first name",
+        "description": "Patient's first name"
+      },
+      "lastName": {
+        "label": "Last Name",
+        "placeholder": "Enter last name",
+        "description": "Patient's last name"
+      },
+      "birthDate": {
+        "label": "Birth Date",
+        "placeholder": "Select birth date",
+        "description": "Patient's date of birth"
+      },
+      "gender": {
+        "label": "Gender",
+        "placeholder": "Select gender",
+        "description": "Patient's gender",
+        "options": {
+          "select": "Select gender",
+          "male": "Male",
+          "female": "Female",
+          "other": "Other",
+          "preferNotToSay": "Prefer not to say"
+        }
+      },
+      "relationship": {
+        "label": "Relationship to You",
+        "placeholder": "Select relationship (optional)",
+        "description": "How is this person related to you?",
+        "options": {
+          "select": "Select relationship (optional)",
+          "self": "Self",
+          "spouse": "Spouse",
+          "partner": "Partner",
+          "child": "Child",
+          "son": "Son",
+          "daughter": "Daughter",
+          "parent": "Parent",
+          "father": "Father",
+          "mother": "Mother",
+          "sibling": "Sibling",
+          "brother": "Brother",
+          "sister": "Sister",
+          "grandparent": "Grandparent",
+          "grandchild": "Grandchild",
+          "otherFamily": "Other Family",
+          "friend": "Friend",
+          "other": "Other"
+        }
+      },
+      "address": {
+        "label": "Address",
+        "placeholder": "Enter address",
+        "description": "Full address for medical records (optional)"
+      },
+      "medicalInfoHeading": "Medical Information",
+      "bloodType": {
+        "label": "Blood Type",
+        "placeholder": "Select blood type",
+        "description": "Important for emergencies"
+      },
+      "height": {
+        "label": "Height",
+        "placeholder": {
+          "imperial": "Enter height in inches",
+          "metric": "Enter height in centimeters"
+        },
+        "description": "Height in {{unit}}"
+      },
+      "weight": {
+        "label": "Weight",
+        "placeholder": {
+          "imperial": "Enter weight in pounds",
+          "metric": "Enter weight in kilograms"
+        },
+        "description": "Weight in {{unit}}"
+      },
+      "physician": {
+        "label": "Primary Care Physician",
+        "placeholder": "Select physician (optional)",
+        "description": "Your primary doctor for ongoing care"
+      },
+      "buttons": {
+        "saving": "Saving...",
+        "createPatient": "Create Patient",
+        "updatePatient": "Update Patient",
+        "saveChanges": "Save Changes",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "createSuccess": "Created {{firstName}} {{lastName}} successfully",
+        "updateSuccess": "Updated {{firstName}} {{lastName}} successfully"
+      }
+    }
   },
   "patientSelector": {
     "title": "Patient Selector",
@@ -160,7 +331,13 @@
     "noPatientSelected": "No Patient Selected",
     "selectPatientPrompt": "Please select or create a patient to track symptoms.",
     "addSymptom": "Add Symptom",
+    "addSymptomTitle": "Add New Symptom",
+    "editSymptomTitle": "Edit Symptom",
     "logEpisode": "Log Episode",
+    "logEpisodeTitle": "Log Episode",
+    "editEpisode": "Edit Episode",
+    "editEpisodeTitle": "Edit Episode",
+    "confirmDeleteSymptom": "Are you sure you want to delete this symptom and all its occurrences?",
     "chronic": "Chronic",
     "category": "Category",
     "first": "First",
@@ -171,6 +348,13 @@
     "moreCount": "+{{count}} more",
     "noRecords": "No symptoms recorded yet",
     "noRecordsPrompt": "Click \"Add Symptom\" to start tracking a new symptom",
+    "occurrence": {
+      "additionalNotes": {
+        "label": "Additional Notes",
+        "placeholder": "Additional details about this episode...",
+        "description": "Any other relevant information about this occurrence"
+      }
+    },
     "tabs": {
       "list": "List",
       "timeline": "Timeline",

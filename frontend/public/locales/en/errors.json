@@ -27,8 +27,22 @@
     "invalidDate": "Please enter a valid date.",
     "invalidEmail": "Please enter a valid email address.",
     "invalidPhone": "Please enter a valid phone number.",
+    "invalidPhoneDigits": "Please enter a valid phone number (10-15 digits)",
+    "invalidWebsiteUrl": "Please enter a valid website URL",
     "patientNotSelected": "Please select a patient.",
-    "entityNotFound": "The requested item could not be found."
+    "entityNotFound": "The requested item could not be found.",
+    "medicationNotSelected": "Please select a medication",
+    "conditionNotSelected": "Please select a condition",
+    "mustBeValidNumber": "Must be a valid number"
+  },
+  "patientForm": {
+    "error": "Error",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "birthDateRequired": "Birth date is required",
+    "birthDateFuture": "Birth date cannot be in the future",
+    "createFailed": "Creation Failed: {{message}}",
+    "updateFailed": "Update Failed: {{message}}"
   },
   "file": {
     "deleteFailed": "Failed to delete file. Please try again.",
@@ -64,5 +78,9 @@
     "slowConnection": "Upload is taking longer than usual due to slow connection.",
     "largeFileWarning": "Large file detected. Upload may take several minutes.",
     "duplicateWarning": "This file appears to be a duplicate."
+  },
+  "relationships": {
+    "addConditionFailed": "Failed to add condition relationship",
+    "addMedicationFailed": "Failed to add medication relationship"
   }
 }

@@ -220,6 +220,19 @@
   },
   "medications": {
     "title": "Médicaments",
+    "tabs": {
+      "basicInfo": "Informations de base",
+      "details": "Détails",
+      "documents": "Documents",
+      "notes": "Notes"
+    },
+    "form": {
+      "saving": "Sauvegarde du médicament...",
+      "updateMedication": "Mettre à jour le médicament",
+      "addMedication": "Ajouter un médicament",
+      "notesPlaceholder": "Des notes et informations supplémentaires sur ce médicament pourront être ajoutées ici dans de futures mises à jour.",
+      "attachedDocuments": "Documents joints"
+    },
     "medicationName": {
       "label": "Nom du médicament",
       "placeholder": "ex : Lisinopril, Metformine",
@@ -275,6 +288,49 @@
   },
   "labResults": {
     "title": "Résultats d'analyses",
+    "status": {
+      "ordered": "Prescrit - L'analyse a été demandée",
+      "inProgress": "En cours - Échantillon en traitement",
+      "completed": "Terminé - Résultats disponibles",
+      "cancelled": "Annulé - L'analyse a été annulée"
+    },
+    "category": {
+      "bloodWork": "Analyse de sang",
+      "imaging": "Imagerie (Radiographie, IRM, CT)",
+      "pathology": "Pathologie",
+      "microbiology": "Microbiologie",
+      "chemistry": "Chimie",
+      "hematology": "Hématologie",
+      "immunology": "Immunologie",
+      "genetics": "Génétique",
+      "cardiology": "Cardiologie",
+      "pulmonology": "Pneumologie",
+      "other": "Autre"
+    },
+    "testType": {
+      "routine": "Routine - Traitement standard",
+      "urgent": "Urgent - Traitement accéléré",
+      "emergency": "Urgence - Priorité critique",
+      "followUp": "Suivi - Nouvelle analyse",
+      "screening": "Dépistage - Test préventif"
+    },
+    "result": {
+      "normal": "Normal - Dans la plage de référence",
+      "abnormal": "Anormal - Hors de la plage de référence",
+      "critical": "Critique - Nécessite une attention immédiate",
+      "high": "Élevé - Au-dessus de la normale",
+      "low": "Bas - En dessous de la normale",
+      "borderline": "Limite - Proche du seuil",
+      "inconclusive": "Non concluant - Doit être répété"
+    },
+    "form": {
+      "testDetails": "Détails de l'analyse",
+      "statusIndicator": "Indicateur de statut :",
+      "resultIndicator": "Indicateur de résultat :",
+      "relatedConditions": "Conditions associées",
+      "linkConditionsTitle": "Lier des conditions médicales",
+      "linkConditionsDescription": "Associez ce résultat d'analyse avec des conditions médicales pertinentes pour un meilleur suivi et organisation."
+    },
     "testName": {
       "label": "Nom de l'analyse",
       "placeholder": "ex : hémogramme",
@@ -387,6 +443,35 @@
       "label": "Notes supplémentaires",
       "placeholder": "Réactions, effets secondaires, ou observations supplémentaires...",
       "description": "Notez tout réaction délétère ou autres informations importantes"
+    },
+    "siteOptions": {
+      "leftDeltoid": "Deltoïde gauche",
+      "rightDeltoid": "Deltoïde droit",
+      "leftThigh": "Cuisse gauche",
+      "rightThigh": "Cuisse droite",
+      "leftGluteal": "Fessier gauche",
+      "rightGluteal": "Fessier droit",
+      "abdomen": "Abdomen",
+      "other": "Autre"
+    },
+    "routeOptions": {
+      "intramuscular": "Intramusculaire (IM)",
+      "subcutaneous": "Sous-cutanée (SC)",
+      "intradermal": "Intradermique (ID)",
+      "oral": "Orale",
+      "nasal": "Nasale",
+      "other": "Autre"
+    },
+    "manufacturerOptions": {
+      "pfizer": "Pfizer-BioNTech",
+      "moderna": "Moderna",
+      "jj": "Johnson & Johnson",
+      "astrazeneca": "AstraZeneca",
+      "sanofi": "Sanofi",
+      "glaxosmithkline": "GlaxoSmithKline",
+      "merck": "Merck",
+      "novartis": "Novartis",
+      "other": "Autre"
     }
   },
   "procedures": {
@@ -677,6 +762,26 @@
       "asNeeded": "Lorsque nécessaire",
       "oneTime": "Une seule fois",
       "continuous": "Continu / en cours"
+    },
+    "frequency": {
+      "label": "Fréquence",
+      "placeholder": "Sélectionnez la fréquence",
+      "description": "Fréquence à laquelle le traitement est administré"
+    },
+    "startDate": {
+      "label": "Date de début",
+      "placeholder": "Sélectionnez la date de début",
+      "description": "Quand le traitement commence/a commencé"
+    },
+    "endDate": {
+      "label": "Date de fin",
+      "placeholder": "Sélectionnez la date de fin (si connue)",
+      "description": "Date de fin prévue ou effective"
+    },
+    "performingPractitioner": {
+      "label": "Médecin responsable",
+      "placeholder": "Sélectionnez un médecin",
+      "description": "Médecin responsable du traitement"
     },
     "treatmentDescription": {
       "label": "Description du traitement",

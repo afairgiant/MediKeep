@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, Anchor } from '@mantine/core';
 import BaseMedicalForm from './BaseMedicalForm';
 import { practitionerFormFields } from '../../utils/medicalFormFields';
@@ -15,6 +16,9 @@ const MantinePractitionerForm = ({
   onSubmit,
   editingPractitioner = null,
 }) => {
+  const { t } = useTranslation('errors');
+  const { t: tCommon } = useTranslation('common');
+
   // State for dynamic specialties
   const [specialtyOptions, setSpecialtyOptions] = useState([]);
   const [isLoadingSpecialties, setIsLoadingSpecialties] = useState(true);
@@ -88,7 +92,7 @@ const MantinePractitionerForm = ({
       if (value.trim() !== '' && !isValidPhoneNumber(value)) {
         setFieldErrors(prev => ({
           ...prev,
-          [name]: 'Please enter a valid phone number (10-15 digits)'
+          [name]: t('form.invalidPhoneDigits')
         }));
       }
       
@@ -115,7 +119,7 @@ const MantinePractitionerForm = ({
 
   const websiteError =
     formData.website && !isValidWebsite(formData.website)
-      ? 'Please enter a valid website URL'
+      ? t('form.invalidWebsiteUrl')
       : null;
 
   // Custom validation for submit - prevent submission if website is invalid
@@ -142,7 +146,7 @@ const MantinePractitionerForm = ({
             rel="noopener noreferrer"
             style={{ fontSize: '12px', color: 'var(--mantine-color-blue-6)' }}
           >
-            Visit Website ↗
+            {tCommon('labels.visitWebsite')}
           </Anchor>
         </div>
       )}

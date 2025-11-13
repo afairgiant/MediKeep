@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '@mantine/core';
 import BaseMedicalForm from './BaseMedicalForm';
 import { treatmentFormFields } from '../../utils/medicalFormFields';
@@ -16,6 +17,8 @@ const MantineTreatmentForm = ({
   practitionersOptions = [],
   practitionersLoading = false,
 }) => {
+  const { t } = useTranslation('medical');
+
   // Convert conditions to dynamic options format
   const conditionOptions = conditionsOptions.map(condition => ({
     value: String(condition.id),
@@ -60,11 +63,11 @@ const MantineTreatmentForm = ({
 
   // Status options with labels
   const statusOptions = [
-    { value: 'planned', label: 'Planned - Treatment scheduled for future' },
-    { value: 'active', label: 'Active - Currently undergoing treatment' },
-    { value: 'on-hold', label: 'On Hold - Temporarily paused' },
-    { value: 'completed', label: 'Completed - Treatment finished successfully' },
-    { value: 'cancelled', label: 'Cancelled - Treatment discontinued' },
+    { value: 'planned', label: t('treatments.treatmentStatus.options.planned') },
+    { value: 'active', label: t('treatments.treatmentStatus.options.active') },
+    { value: 'on-hold', label: t('treatments.treatmentStatus.options.onHold') },
+    { value: 'completed', label: t('treatments.treatmentStatus.options.completed') },
+    { value: 'cancelled', label: t('treatments.treatmentStatus.options.cancelled') },
   ];
 
   return (

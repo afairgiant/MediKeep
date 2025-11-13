@@ -12,6 +12,7 @@ import {
   Divider,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { useTranslation } from 'react-i18next';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import {
@@ -124,6 +125,8 @@ const MantinePatientForm = ({
     label: `${practitioner.name} - ${practitioner.specialty}`,
   }));
 
+  const { t } = useTranslation('common');
+
   const {
     handleTextInputChange,
     handleSelectChange,
@@ -134,7 +137,7 @@ const MantinePatientForm = ({
   return (
     <Stack spacing="md">
       <Text size="lg" fw={600} mb="sm">
-        {isCreating ? 'Create Patient Information' : 'Edit Patient Information'}
+        {isCreating ? t('patients.form.createTitle') : t('patients.form.editTitle')}
       </Text>
 
       {/* Patient Photo Section */}
@@ -156,7 +159,7 @@ const MantinePatientForm = ({
       {isCreating && (
         <>
           <Text size="sm" c="dimmed" ta="center" style={{ fontStyle: 'italic' }}>
-            Save patient information first, then you can add a photo
+            {t('patients.form.saveFirstMessage')}
           </Text>
           <Divider />
         </>
@@ -166,26 +169,26 @@ const MantinePatientForm = ({
       <Grid>
         <Grid.Col span={6}>
           <TextInput
-            label="First Name"
-            placeholder="Enter first name"
+            label={t('patients.form.firstName.label')}
+            placeholder={t('patients.form.firstName.placeholder')}
             value={formData.first_name}
             onChange={handleTextInputChange('first_name')}
             required
             withAsterisk
             disabled={saving}
-            description="Patient's first name"
+            description={t('patients.form.firstName.description')}
           />
         </Grid.Col>
         <Grid.Col span={6}>
           <TextInput
-            label="Last Name"
-            placeholder="Enter last name"
+            label={t('patients.form.lastName.label')}
+            placeholder={t('patients.form.lastName.placeholder')}
             value={formData.last_name}
             onChange={handleTextInputChange('last_name')}
             required
             withAsterisk
             disabled={saving}
-            description="Patient's last name"
+            description={t('patients.form.lastName.description')}
           />
         </Grid.Col>
       </Grid>
@@ -194,8 +197,8 @@ const MantinePatientForm = ({
       <Grid>
         <Grid.Col span={6}>
           <DateInput
-            label="Birth Date"
-            placeholder="Select birth date"
+            label={t('patients.form.birthDate.label')}
+            placeholder={t('patients.form.birthDate.placeholder')}
             value={
               formData.birth_date
                 ? (() => {
@@ -220,24 +223,24 @@ const MantinePatientForm = ({
             required
             withAsterisk
             disabled={saving}
-            description="Patient's date of birth"
+            description={t('patients.form.birthDate.description')}
             maxDate={new Date()} // Can't be in the future
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         </Grid.Col>
         <Grid.Col span={6}>
           <Select
-            label="Gender"
-            placeholder="Select gender"
+            label={t('patients.form.gender.label')}
+            placeholder={t('patients.form.gender.placeholder')}
             value={formData.gender}
             onChange={handleSelectChange('gender')}
             disabled={saving}
             data={[
-              { value: 'M', label: 'Male' },
-              { value: 'F', label: 'Female' },
-              { value: 'OTHER', label: 'Other' },
+              { value: 'M', label: t('patients.form.gender.options.male') },
+              { value: 'F', label: t('patients.form.gender.options.female') },
+              { value: 'OTHER', label: t('patients.form.gender.options.other') },
             ]}
-            description="Patient's gender"
+            description={t('patients.form.gender.description')}
             clearable
           />
         </Grid.Col>
@@ -245,39 +248,39 @@ const MantinePatientForm = ({
 
       {/* Relationship to You */}
       <Select
-        label="Relationship to You"
-        placeholder="Select relationship (optional)"
+        label={t('patients.form.relationship.label')}
+        placeholder={t('patients.form.relationship.placeholder')}
         value={formData.relationship_to_self}
         onChange={handleSelectChange('relationship_to_self')}
         disabled={saving}
         data={RELATIONSHIP_OPTIONS}
-        description="How is this person related to you?"
+        description={t('patients.form.relationship.description')}
         clearable
         searchable
       />
 
       {/* Address */}
       <Textarea
-        label="Address"
-        placeholder="Enter patient's address"
+        label={t('patients.form.address.label')}
+        placeholder={t('patients.form.address.placeholder')}
         value={formData.address}
         onChange={handleTextInputChange('address')}
         disabled={saving}
-        description="Full address for medical records (optional)"
+        description={t('patients.form.address.description')}
         minRows={2}
         maxRows={4}
       />
 
       {/* Medical Information */}
       <Text size="md" fw={500} mt="lg" mb="xs">
-        Medical Information
+        {t('patients.form.medicalInfoHeading')}
       </Text>
 
       <Grid>
         <Grid.Col span={4}>
           <Select
-            label="Blood Type"
-            placeholder="Select blood type"
+            label={t('patients.form.bloodType.label')}
+            placeholder={t('patients.form.bloodType.placeholder')}
             value={formData.blood_type}
             onChange={handleSelectChange('blood_type')}
             disabled={saving}
@@ -291,14 +294,14 @@ const MantinePatientForm = ({
               { value: 'O+', label: 'O+' },
               { value: 'O-', label: 'O-' },
             ]}
-            description="Important for emergencies"
+            description={t('patients.form.bloodType.description')}
             clearable
             searchable
           />
         </Grid.Col>
         <Grid.Col span={4}>
           <NumberInput
-            label="Height"
+            label={t('patients.form.height.label')}
             placeholder={unitSystem === 'imperial' ? 'e.g., 70' : 'e.g., 178'}
             value={
               formData.height
@@ -314,7 +317,7 @@ const MantinePatientForm = ({
               handleNumberChange('height')(convertedValue);
             }}
             disabled={saving}
-            description={`Height in ${labels.heightLong}`}
+            description={t('patients.form.height.description', { unit: labels.heightLong })}
             min={ranges.height.min}
             max={ranges.height.max}
             step={unitSystem === 'imperial' ? 0.5 : 1}
@@ -322,7 +325,7 @@ const MantinePatientForm = ({
         </Grid.Col>
         <Grid.Col span={4}>
           <NumberInput
-            label="Weight"
+            label={t('patients.form.weight.label')}
             placeholder={unitSystem === 'imperial' ? 'e.g., 150' : 'e.g., 68'}
             value={
               formData.weight
@@ -338,7 +341,7 @@ const MantinePatientForm = ({
               handleNumberChange('weight')(convertedValue);
             }}
             disabled={saving}
-            description={`Weight in ${labels.weightLong}`}
+            description={t('patients.form.weight.description', { unit: labels.weightLong })}
             min={ranges.weight.min}
             max={ranges.weight.max}
             step={0.1}
@@ -348,13 +351,13 @@ const MantinePatientForm = ({
 
       {/* Primary Care Physician */}
       <Select
-        label="Primary Care Physician"
-        placeholder="Select physician (optional)"
+        label={t('patients.form.physician.label')}
+        placeholder={t('patients.form.physician.placeholder')}
         value={formData.physician_id ? String(formData.physician_id) : ''}
         onChange={handleSelectChange('physician_id')}
         disabled={saving}
         data={practitionerOptions}
-        description="Your primary doctor for ongoing care"
+        description={t('patients.form.physician.description')}
         clearable
         searchable
       />
@@ -362,7 +365,7 @@ const MantinePatientForm = ({
       {/* Form Actions */}
       <Group justify="flex-end" mt="xl">
         <Button variant="subtle" onClick={onCancel} disabled={saving}>
-          Cancel
+          {t('buttons.cancel')}
         </Button>
         <Button
           variant="filled"
@@ -371,10 +374,10 @@ const MantinePatientForm = ({
           loading={saving}
         >
           {saving
-            ? 'Saving...'
+            ? t('patients.form.buttons.saving')
             : isCreating
-              ? 'Create Patient'
-              : 'Save Changes'}
+              ? t('patients.form.buttons.createPatient')
+              : t('patients.form.buttons.saveChanges')}
         </Button>
       </Group>
     </Stack>

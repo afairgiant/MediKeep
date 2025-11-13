@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Divider, Stack, Title } from '@mantine/core';
 import BaseMedicalForm from './BaseMedicalForm';
 import MedicationRelationships from './MedicationRelationships';
@@ -18,6 +19,7 @@ const MantineConditionForm = ({
   fetchConditionMedications = null,
   navigate = null,
 }) => {
+  const { t } = useTranslation('common');
   const dynamicOptions = {
     conditionStatus: CONDITION_STATUS_OPTIONS,
     severity: SEVERITY_OPTIONS,
@@ -28,7 +30,7 @@ const MantineConditionForm = ({
     <>
       <Divider />
       <Stack gap="md">
-        <Title order={4}>Linked Medications</Title>
+        <Title order={4}>{t('labels.linkedMedications')}</Title>
         <MedicationRelationships 
           conditionId={editingCondition.id}
           conditionMedications={conditionMedications}

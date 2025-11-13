@@ -47,8 +47,9 @@ const MantineFilters = ({
   filteredCount,
   config = {},
 }) => {
+  const { t } = useTranslation('common');
   const {
-    searchPlaceholder = 'Search...',
+    searchPlaceholder = 'searchPlaceholders.generic',
     title = 'Filters & Search',
     description,
     showStatus = true,
@@ -223,7 +224,7 @@ const MantineFilters = ({
             {/* Always visible search - most commonly used */}
             {showSearch && (
               <TextInput
-                placeholder={searchPlaceholder}
+                placeholder={t(searchPlaceholder)}
                 value={localSearch}
                 onChange={e => handleSearchChange(e.target.value)}
                 leftSection={<IconSearch size={16} />}

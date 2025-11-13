@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from './BaseMedicalForm';
 import { emergencyContactFormFields } from '../../utils/medicalFormFields';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
@@ -13,6 +14,8 @@ const MantineEmergencyContactForm = ({
   onSubmit,
   editingContact = null,
 }) => {
+  const { t } = useTranslation('errors');
+
   // Field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
   
@@ -42,7 +45,7 @@ const MantineEmergencyContactForm = ({
       if (value.trim() !== '' && !isValidPhoneNumber(value)) {
         setFieldErrors(prev => ({
           ...prev,
-          [name]: 'Please enter a valid phone number (10-15 digits)'
+          [name]: t('form.invalidPhoneDigits')
         }));
       }
       

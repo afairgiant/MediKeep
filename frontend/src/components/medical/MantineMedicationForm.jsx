@@ -19,6 +19,7 @@ import {
   IconFileText,
   IconNotes,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { formatDateInputChange } from '../../utils/dateUtils';
@@ -40,6 +41,9 @@ const MantineMedicationForm = ({
   isLoading = false,
   children,
 }) => {
+  // Translation
+  const { t } = useTranslation(['medical', 'common']);
+
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,10 +97,10 @@ const MantineMedicationForm = ({
 
     const commonProps = {
       key: field.name,
-      label: field.label,
-      placeholder: field.placeholder,
+      label: field.labelKey ? t(field.labelKey) : field.label,
+      placeholder: field.placeholderKey ? t(field.placeholderKey) : field.placeholder,
       required: field.required,
-      description: field.description,
+      description: field.descriptionKey ? t(field.descriptionKey) : field.description,
       error: null,
     };
 
@@ -106,6 +110,18 @@ const MantineMedicationForm = ({
       options = practitionerOptions;
     } else if (field.dynamicOptions === 'pharmacies') {
       options = pharmacyOptions;
+    } else if (field.optionsKey && field.options) {
+      // Translate options using optionsKey as base
+      options = field.options.map(opt => ({
+        value: opt.value,
+        label: opt.labelKey ? t(`${field.optionsKey}.${opt.labelKey}`) : opt.label,
+      }));
+    } else if (field.options && field.options.some(opt => opt.labelKey)) {
+      // Translate options with individual labelKey
+      options = field.options.map(opt => ({
+        value: opt.value,
+        label: opt.labelKey ? t(opt.labelKey) : opt.label,
+      }));
     }
 
     switch (field.type) {
@@ -204,7 +220,7 @@ const MantineMedicationForm = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message="Saving medication..." />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={t('medications.form.saving')} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -212,18 +228,18 @@ const MantineMedicationForm = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                Basic Info
+                {t('medications.tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
-                Details
+                {t('medications.tabs.details')}
               </Tabs.Tab>
               {editingMedication && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  Documents
+                  {t('medications.tabs.documents')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                Notes
+                {t('medications.tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -258,7 +274,7 @@ const MantineMedicationForm = ({
               <Tabs.Panel value="documents">
                 <Box mt="md">
                   <Stack gap="md">
-                    <Title order={4}>Attached Documents</Title>
+                    <Title order={4}>{t('medications.form.attachedDocuments')}</Title>
                     <DocumentManagerWithProgress
                       entityType="medication"
                       entityId={editingMedication.id}
@@ -277,7 +293,7 @@ const MantineMedicationForm = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Text size="sm" c="dimmed">
-                  Additional notes and information about this medication can be added here in future updates.
+                  {t('medications.form.notesPlaceholder')}
                 </Text>
               </Box>
             </Tabs.Panel>
@@ -289,10 +305,10 @@ const MantineMedicationForm = ({
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting || isLoading}>
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting || isLoading}>
-              {editingMedication ? 'Update Medication' : 'Add Medication'}
+              {editingMedication ? t('medications.form.updateMedication') : t('medications.form.addMedication')}
             </Button>
           </Group>
         </Stack>
