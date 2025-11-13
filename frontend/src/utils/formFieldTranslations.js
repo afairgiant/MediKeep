@@ -110,9 +110,9 @@ const fieldTranslationMap = {
   'How was this episode resolved...': 'symptoms.occurrence.resolutionNotes.placeholder',
   'Details about how this episode ended or was treated': 'symptoms.occurrence.resolutionNotes.description',
 
-  'Additional Notes': 'common:symptoms.occurrence.additionalNotes.label',
-  'Additional details about this episode...': 'common:symptoms.occurrence.additionalNotes.placeholder',
-  'Any other relevant information about this occurrence': 'common:symptoms.occurrence.additionalNotes.description',
+  'Additional Notes': 'symptoms.occurrence.additionalNotes.label',
+  'Additional details about this episode...': 'symptoms.occurrence.additionalNotes.placeholder',
+  'Any other relevant information about this occurrence': 'symptoms.occurrence.additionalNotes.description',
 
   // Symptom occurrence severity options
   'Mild - Minor discomfort': 'common.severity.mild',
