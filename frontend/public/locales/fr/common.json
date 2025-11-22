@@ -32,7 +32,9 @@
     "continue": "Continuer",
     "skip": "Ignorer",
     "done": "Fait",
-    "saveChanges": "Enregistrer les modifications"
+    "saveChanges": "Enregistrer les modifications",
+    "linkMedication": "Lier un médicament",
+    "linkCondition": "Lier une condition"
   },
   "labels": {
     "loading": "Chargement...",
@@ -66,7 +68,51 @@
     "help": "Aide",
     "support": "Support",
     "notes": "Notes",
-    "notSpecified": "Non spécifié"
+    "notSpecified": "Non spécifié",
+    "loadingOption": "Chargement de {{option}}...",
+    "addCustom": "+ Ajouter \"{{value}}\"",
+    "ratingStars": "{{count}}/5 étoiles",
+    "noRating": "Aucune note",
+    "noMedicationsLinked": "Aucun médicament lié à cette condition",
+    "noConditionsLinked": "Aucune condition liée à ce résultat d'analyse",
+    "medicationsAvailableToLink": "{{count}} médicaments disponibles à lier",
+    "conditionsAvailableToLink": "{{count}} conditions disponibles à lier",
+    "linkedMedications": "Médicaments liés",
+    "visitWebsite": "Visiter le site web ↗"
+  },
+  "vitals": {
+    "form": {
+      "selectDate": "Sélectionner la date",
+      "selectDateTime": "Sélectionner la date et l'heure"
+    }
+  },
+  "medications": {
+    "quickFilter": "Filtre rapide",
+    "allTypes": "Tous les types",
+    "types": {
+      "prescription": "Sur ordonnance",
+      "otc": "En vente libre",
+      "supplement": "Complément/Vitamine",
+      "herbal": "À base de plantes/Naturel"
+    }
+  },
+  "searchPlaceholders": {
+    "conditions": "Rechercher conditions, notes, tags...",
+    "insurance": "Rechercher compagnies d'assurance, noms de membres...",
+    "medications": "Rechercher médicaments, indications, dosages, tags...",
+    "procedures": "Rechercher procédures, notes, tags...",
+    "treatments": "Rechercher traitements, notes, tags...",
+    "visits": "Rechercher visites, raisons, notes, tags...",
+    "immunizations": "Rechercher immunisations, vaccins, tags...",
+    "allergies": "Rechercher allergies, réactions, tags...",
+    "symptoms": "Rechercher symptômes, descriptions, tags...",
+    "practitioners": "Rechercher praticiens...",
+    "pharmacies": "Rechercher pharmacies...",
+    "labResults": "Rechercher résultats d'analyses, codes de test, établissements, praticiens, tags...",
+    "vitals": "Rechercher notes de signes vitaux...",
+    "emergencyContacts": "Rechercher contacts, relations, téléphone, email...",
+    "familyHistory": "Rechercher membres de la famille, conditions, notes...",
+    "generic": "Rechercher..."
   },
   "messages": {
     "confirmDelete": "Voulez-vous vraiment supprimer cet objet ?",
@@ -79,7 +125,21 @@
     "operationSuccess": "Opération complétée avec succès",
     "operationFailed": "Echec de l'opération. Veuillez réessayer.",
     "pleaseWait": "Veuillez patienter...",
-    "processing": "Traitement en cours..."
+    "processing": "Traitement en cours...",
+    "confirmRemoveMedicationRelationship": "Voulez-vous vraiment supprimer cette relation de médicament ?",
+    "confirmRemoveConditionRelationship": "Voulez-vous vraiment supprimer cette relation de condition ?"
+  },
+  "modals": {
+    "linkMedicationToCondition": "Lier un médicament à une condition",
+    "linkConditionToLabResult": "Lier une condition à un résultat d'analyse",
+    "selectMedication": "Sélectionner un médicament",
+    "selectCondition": "Sélectionner une condition",
+    "chooseMedicationToLink": "Choisir un médicament à lier",
+    "chooseConditionToLink": "Choisir une condition à lier",
+    "relevanceNoteOptional": "Note de pertinence (optionnel)",
+    "noRelevanceNoteProvided": "Aucune note de pertinence fournie",
+    "relevanceNote": "Note de pertinence",
+    "describeConditionRelevance": "Décrivez comment cette condition est liée au résultat d'analyse (optionnel)"
   },
   "time": {
     "today": "Aujourd'hui",
@@ -108,6 +168,117 @@
     "next": "Suivant",
     "first": "Premier",
     "last": "Dernier"
+  },
+  "patients": {
+    "form": {
+      "createTitle": "Créer un nouveau patient",
+      "editTitle": "Modifier le patient",
+      "saveFirstMessage": "Enregistrez d'abord les informations du patient, puis vous pourrez ajouter une photo",
+      "sections": {
+        "basicInformation": "Informations de base",
+        "medicalInformation": "Informations médicales",
+        "contactInformation": "Informations de contact"
+      },
+      "selfRecord": {
+        "label": "Ceci est mon propre dossier médical",
+        "description": "Cochez cette case si vous créez un dossier pour vous-même"
+      },
+      "firstName": {
+        "label": "Prénom",
+        "placeholder": "Entrez le prénom",
+        "description": "Prénom du patient"
+      },
+      "lastName": {
+        "label": "Nom de famille",
+        "placeholder": "Entrez le nom de famille",
+        "description": "Nom de famille du patient"
+      },
+      "birthDate": {
+        "label": "Date de naissance",
+        "placeholder": "Sélectionnez la date de naissance",
+        "description": "Date de naissance du patient"
+      },
+      "gender": {
+        "label": "Genre",
+        "placeholder": "Sélectionnez le genre",
+        "description": "Genre du patient",
+        "options": {
+          "select": "Sélectionnez le genre",
+          "male": "Homme",
+          "female": "Femme",
+          "other": "Autre",
+          "preferNotToSay": "Préfère ne pas dire"
+        }
+      },
+      "relationship": {
+        "label": "Relation avec vous",
+        "placeholder": "Sélectionnez la relation (optionnel)",
+        "description": "Quelle est la relation de cette personne avec vous ?",
+        "options": {
+          "select": "Sélectionnez la relation (optionnel)",
+          "self": "Moi-même",
+          "spouse": "Conjoint(e)",
+          "partner": "Partenaire",
+          "child": "Enfant",
+          "son": "Fils",
+          "daughter": "Fille",
+          "parent": "Parent",
+          "father": "Père",
+          "mother": "Mère",
+          "sibling": "Frère/Sœur",
+          "brother": "Frère",
+          "sister": "Sœur",
+          "grandparent": "Grand-parent",
+          "grandchild": "Petit-enfant",
+          "otherFamily": "Autre famille",
+          "friend": "Ami(e)",
+          "other": "Autre"
+        }
+      },
+      "address": {
+        "label": "Adresse",
+        "placeholder": "Entrez l'adresse",
+        "description": "Adresse complète pour le dossier médical (optionnel)"
+      },
+      "medicalInfoHeading": "Informations médicales",
+      "bloodType": {
+        "label": "Groupe sanguin",
+        "placeholder": "Sélectionnez le groupe sanguin",
+        "description": "Important en cas d'urgence"
+      },
+      "height": {
+        "label": "Taille",
+        "placeholder": {
+          "imperial": "Entrez la taille en pouces",
+          "metric": "Entrez la taille en centimètres"
+        },
+        "description": "Taille en {{unit}}"
+      },
+      "weight": {
+        "label": "Poids",
+        "placeholder": {
+          "imperial": "Entrez le poids en livres",
+          "metric": "Entrez le poids en kilogrammes"
+        },
+        "description": "Poids en {{unit}}"
+      },
+      "physician": {
+        "label": "Médecin traitant",
+        "placeholder": "Sélectionnez un médecin (optionnel)",
+        "description": "Votre médecin principal pour les soins continus"
+      },
+      "buttons": {
+        "saving": "Enregistrement...",
+        "createPatient": "Créer un patient",
+        "updatePatient": "Mettre à jour le patient",
+        "saveChanges": "Enregistrer les modifications",
+        "cancel": "Annuler"
+      },
+      "messages": {
+        "createSuccess": "{{firstName}} {{lastName}} créé(e) avec succès",
+        "updateSuccess": "{{firstName}} {{lastName}} mis(e) à jour avec succès"
+      }
+    }
   },
   "patientSelector": {
     "title": "Sélecteur de patient",
@@ -743,6 +914,12 @@
       "selectPatientPrompt": "Veuillez sélectionner ou créer un patient pour suivre les symptômes.",
       "addSymptom": "Ajouter un Symptôme",
       "logEpisode": "Enregistrer un Épisode",
+      "logEpisodeTitle": "Enregistrer un Épisode",
+      "editEpisode": "Modifier l'Épisode",
+      "addSymptomTitle": "Ajouter un nouveau symptôme",
+      "editSymptomTitle": "Modifier le symptôme",
+      "editEpisodeTitle": "Modifier l'épisode",
+      "confirmDeleteSymptom": "Voulez-vous vraiment supprimer ce symptôme et toutes ses occurrences ?",
       "chronic": "Chronique",
       "category": "Catégorie",
       "first": "Premier",
@@ -753,6 +930,13 @@
       "moreCount": "+{{count}} de plus",
       "noRecords": "Aucun symptôme enregistré pour le moment",
       "noRecordsPrompt": "Cliquez sur \"Ajouter un Symptôme\" pour commencer à suivre un nouveau symptôme",
+      "occurrence": {
+        "additionalNotes": {
+          "label": "Notes supplémentaires",
+          "placeholder": "Détails supplémentaires sur cet épisode...",
+          "description": "Toute autre information pertinente sur cette occurrence"
+        }
+      },
       "tabs": {
         "list": "Liste",
         "timeline": "Chronologie",

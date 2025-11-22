@@ -192,7 +192,7 @@ const BaseMedicalForm = ({
         clearable={clearable}
         maxDropdownHeight={dropdownHeight}
         disabled={isFieldLoading}
-        placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : baseProps.placeholder}
+        placeholder={isFieldLoading ? tCommon('labels.loadingOption', { option: dynamicOptionsKey }) : baseProps.placeholder}
         limit={itemLimit}
         comboboxProps={{ withinPortal: true, zIndex: 3000 }}
       />
@@ -360,7 +360,7 @@ const BaseMedicalForm = ({
             value={formData[name] || ''}
             maxDropdownHeight={getDropdownHeight()}
             disabled={isFieldLoading}
-            placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
+            placeholder={isFieldLoading ? tCommon('labels.loadingOption', { option: dynamicOptionsKey }) : placeholder}
             limit={50}
             comboboxProps={{ withinPortal: true, zIndex: 3000 }}
           />
@@ -453,7 +453,7 @@ const BaseMedicalForm = ({
                     combobox.closeDropdown();
                     setSearch(value || '');
                   }}
-                  placeholder={isFieldLoading ? `Loading ${dynamicOptionsKey}...` : placeholder}
+                  placeholder={isFieldLoading ? tCommon('labels.loadingOption', { option: dynamicOptionsKey }) : placeholder}
                   rightSectionPointerEvents="none"
                   disabled={isFieldLoading}
                 />
@@ -469,7 +469,7 @@ const BaseMedicalForm = ({
                 >
                   {search.trim() && !exactOptionMatch && (
                     <Combobox.Option value="$create" style={{ fontWeight: 'bold', borderBottom: '1px solid #e9ecef' }}>
-                      + Add "{search}"
+                      {tCommon('labels.addCustom', { value: search })}
                     </Combobox.Option>
                   )}
                   {options}
@@ -501,7 +501,7 @@ const BaseMedicalForm = ({
                 size="lg"
               />
               <Text size="sm" c="dimmed">
-                {formData[name] ? `${formData[name]}/5 stars` : 'No rating'}
+                {formData[name] ? tCommon('labels.ratingStars', { count: formData[name] }) : tCommon('labels.noRating')}
               </Text>
             </div>
             {description && (

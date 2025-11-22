@@ -45,7 +45,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search conditions, notes, tags...',
+      searchPlaceholder: 'searchPlaceholders.conditions',
       title: 'Filter & Sort Conditions',
       showDateRange: true,
     },
@@ -176,7 +176,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search insurance companies, member names...',
+      searchPlaceholder: 'searchPlaceholders.insurance',
       title: 'Filter & Sort Insurance',
       showDateRange: true,
       showCategory: true,
@@ -233,7 +233,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search medications, indications, dosages, tags...',
+      searchPlaceholder: 'searchPlaceholders.medications',
       title: 'Filter & Sort Medications',
       showMedicationType: true,
       showCategory: true,
@@ -272,7 +272,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search procedures, notes, tags...',
+      searchPlaceholder: 'searchPlaceholders.procedures',
       title: 'Filter & Sort Procedures',
       showDateRange: true,
     },
@@ -405,7 +405,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search treatments, notes, tags...',
+      searchPlaceholder: 'searchPlaceholders.treatments',
       title: 'Filter & Sort Treatments',
       showDateRange: true,
     },
@@ -429,7 +429,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search visits, reasons, notes, tags...',
+      searchPlaceholder: 'searchPlaceholders.visits',
       title: 'Filter & Sort Visits',
       showStatus: false,
       showDateRange: true,
@@ -454,7 +454,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search immunizations, vaccines, tags...',
+      searchPlaceholder: 'searchPlaceholders.immunizations',
       title: 'Filter & Sort Immunizations',
       showStatus: false,
       showDateRange: true,
@@ -492,7 +492,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search allergies, reactions, tags...',
+      searchPlaceholder: 'searchPlaceholders.allergies',
       title: 'Filter & Sort Allergies',
       showStatus: false,
       showCategory: true,
@@ -540,7 +540,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search symptoms, descriptions, tags...',
+      searchPlaceholder: 'searchPlaceholders.symptoms',
       title: 'Filter & Sort Symptoms',
       showStatus: true,
       showCategory: true,
@@ -569,7 +569,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search practitioners...',
+      searchPlaceholder: 'searchPlaceholders.practitioners',
       title: 'Filter & Sort Practitioners',
       showStatus: false,
       showCategory: true,
@@ -597,7 +597,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search pharmacies...',
+      searchPlaceholder: 'searchPlaceholders.pharmacies',
       title: 'Filter & Sort Pharmacies',
       showStatus: false,
       showCategory: true,
@@ -1098,7 +1098,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search vitals notes...',
+      searchPlaceholder: 'searchPlaceholders.vitals',
       title: 'Filter & Sort Vital Signs',
       showStatus: false,
       showCategory: true,
@@ -1182,7 +1182,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search contacts, relationships, phone, email...',
+      searchPlaceholder: 'searchPlaceholders.emergencyContacts',
       title: 'Filter & Sort Emergency Contacts',
       showCategory: true,
       showStatus: true,
@@ -1335,7 +1335,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder: 'Search family members, conditions, notes...',
+      searchPlaceholder: 'searchPlaceholders.familyHistory',
       title: 'Filter & Sort Family Members',
       showCategory: true,
       showStatus: true,
@@ -1450,7 +1450,7 @@ export const getMedicalPageConfig = pageName => {
         sortOptions: [{ value: 'name', label: 'Name' }],
       },
       filterControls: {
-        searchPlaceholder: 'Search...',
+        searchPlaceholder: 'searchPlaceholders.generic',
         title: 'Filters',
       },
     }

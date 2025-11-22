@@ -219,6 +219,19 @@
   },
   "medications": {
     "title": "Medications",
+    "tabs": {
+      "basicInfo": "Basic Info",
+      "details": "Details",
+      "documents": "Documents",
+      "notes": "Notes"
+    },
+    "form": {
+      "saving": "Saving medication...",
+      "updateMedication": "Update Medication",
+      "addMedication": "Add Medication",
+      "notesPlaceholder": "Additional notes and information about this medication can be added here in future updates.",
+      "attachedDocuments": "Attached Documents"
+    },
     "medicationName": {
       "label": "Medication Name",
       "placeholder": "e.g., Lisinopril, Metformin",
@@ -274,6 +287,49 @@
   },
   "labResults": {
     "title": "Lab Results",
+    "status": {
+      "ordered": "Ordered - Test has been requested",
+      "inProgress": "In Progress - Sample being processed",
+      "completed": "Completed - Results available",
+      "cancelled": "Cancelled - Test was cancelled"
+    },
+    "category": {
+      "bloodWork": "Blood Work",
+      "imaging": "Imaging (X-ray, MRI, CT)",
+      "pathology": "Pathology",
+      "microbiology": "Microbiology",
+      "chemistry": "Chemistry",
+      "hematology": "Hematology",
+      "immunology": "Immunology",
+      "genetics": "Genetics",
+      "cardiology": "Cardiology",
+      "pulmonology": "Pulmonology",
+      "other": "Other"
+    },
+    "testType": {
+      "routine": "Routine - Standard processing",
+      "urgent": "Urgent - Expedited processing",
+      "emergency": "Emergency - Critical priority",
+      "followUp": "Follow-up - Repeat testing",
+      "screening": "Screening - Preventive testing"
+    },
+    "result": {
+      "normal": "Normal - Within reference range",
+      "abnormal": "Abnormal - Outside reference range",
+      "critical": "Critical - Requires immediate attention",
+      "high": "High - Above normal range",
+      "low": "Low - Below normal range",
+      "borderline": "Borderline - Near threshold",
+      "inconclusive": "Inconclusive - Needs repeat"
+    },
+    "form": {
+      "testDetails": "Test Details",
+      "statusIndicator": "Status Indicator:",
+      "resultIndicator": "Result Indicator:",
+      "relatedConditions": "Related Conditions",
+      "linkConditionsTitle": "Link Medical Conditions",
+      "linkConditionsDescription": "Associate this lab result with relevant medical conditions for better tracking and organization."
+    },
     "testName": {
       "label": "Test Name",
       "placeholder": "e.g., Complete Blood Count (CBC)",
@@ -386,6 +442,31 @@
       "label": "Additional Notes",
       "placeholder": "Any reactions, side effects, or additional observations...",
       "description": "Record any adverse reactions or important notes"
+    },
+    "siteOptions": {
+      "leftArm": "Left Arm",
+      "rightArm": "Right Arm",
+      "leftDeltoid": "Left Deltoid",
+      "rightDeltoid": "Right Deltoid",
+      "leftThigh": "Left Thigh",
+      "rightThigh": "Right Thigh"
+    },
+    "routeOptions": {
+      "intramuscular": "Intramuscular (IM)",
+      "subcutaneous": "Subcutaneous (SC)",
+      "intradermal": "Intradermal (ID)",
+      "oral": "Oral",
+      "nasal": "Nasal"
+    },
+    "manufacturerOptions": {
+      "pfizerBioNTech": "Pfizer-BioNTech",
+      "moderna": "Moderna",
+      "johnsonJohnson": "Johnson & Johnson",
+      "astraZeneca": "AstraZeneca",
+      "merck": "Merck",
+      "glaxoSmithKline": "GlaxoSmithKline",
+      "sanofi": "Sanofi",
+      "other": "Other"
     }
   },
   "procedures": {

@@ -513,15 +513,407 @@ t('navigation:menu.settings')
 
 ---
 
+## New Features - PR #350 Examples
+
+### Modal Dialog Translations
+
+#### Linking Medications to Conditions
+
+```jsx
+import { useTranslation } from 'react-i18next';
+import { Modal, Button } from '@mantine/core';
+
+function ConditionRelationships() {
+  const { t } = useTranslation('common');
+
+  return (
+    <>
+      <Button onClick={openModal}>
+        {t('buttons.linkMedication')}
+      </Button>
+
+      <Modal
+        opened={opened}
+        onClose={close}
+        title={t('modals.linkMedicationToCondition')}
+      >
+        <Select
+          label={t('modals.selectMedication')}
+          placeholder={t('modals.chooseMedicationToLink')}
+          data={medications}
+        />
+        <Textarea
+          label={t('modals.relevanceNoteOptional')}
+          placeholder={t('modals.relevanceNote')}
+        />
+      </Modal>
+    </>
+  );
+}
+```
+
+#### Linking Conditions to Lab Results
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function LabResultRelationships() {
+  const { t } = useTranslation(['common', 'medical']);
+
+  return (
+    <>
+      <Button>{t('common:buttons.linkCondition')}</Button>
+
+      <Modal title={t('common:modals.linkConditionToLabResult')}>
+        <Text>{t('common:modals.chooseConditionToLink')}</Text>
+        <Text>{t('medical:labResults.form.linkConditionsDescription')}</Text>
+      </Modal>
+    </>
+  );
+}
+```
+
+### Patient Form Translations
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function MantinePatientForm({ isEditing }) {
+  const { t } = useTranslation('common');
+
+  return (
+    <form>
+      <Title>
+        {isEditing
+          ? t('patients.form.editTitle')
+          : t('patients.form.createTitle')}
+      </Title>
+
+      {/* Sections */}
+      <Divider label={t('patients.form.sections.basicInformation')} />
+      <Divider label={t('patients.form.sections.medicalInformation')} />
+      <Divider label={t('patients.form.sections.contactInformation')} />
+
+      {/* Fields */}
+      <TextInput
+        label={t('patients.form.firstName.label')}
+        placeholder={t('patients.form.firstName.placeholder')}
+        description={t('patients.form.firstName.description')}
+      />
+
+      <Select
+        label={t('patients.form.gender.label')}
+        placeholder={t('patients.form.gender.placeholder')}
+        data={[
+          { value: 'male', label: t('patients.form.gender.options.male') },
+          { value: 'female', label: t('patients.form.gender.options.female') },
+          { value: 'other', label: t('patients.form.gender.options.other') },
+        ]}
+      />
+
+      <Select
+        label={t('patients.form.relationship.label')}
+        placeholder={t('patients.form.relationship.placeholder')}
+        data={[
+          { value: 'self', label: t('patients.form.relationship.options.self') },
+          { value: 'spouse', label: t('patients.form.relationship.options.spouse') },
+          { value: 'child', label: t('patients.form.relationship.options.child') },
+        ]}
+      />
+
+      {/* Buttons */}
+      <Button loading={isSubmitting}>
+        {isSubmitting
+          ? t('patients.form.buttons.saving')
+          : isEditing
+          ? t('patients.form.buttons.updatePatient')
+          : t('patients.form.buttons.createPatient')}
+      </Button>
+    </form>
+  );
+}
+```
+
+### Symptom Episode Management
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function SymptomsPage() {
+  const { t } = useTranslation('common');
+
+  return (
+    <>
+      <Title>{t('symptoms.title')}</Title>
+
+      <Button onClick={openAddModal}>
+        {t('symptoms.addSymptom')}
+      </Button>
+
+      <Button onClick={openLogModal}>
+        {t('symptoms.logEpisode')}
+      </Button>
+
+      {/* Add Symptom Modal */}
+      <Modal
+        opened={addModalOpened}
+        title={t('symptoms.addSymptomTitle')}
+      >
+        {/* Form fields */}
+      </Modal>
+
+      {/* Log Episode Modal */}
+      <Modal
+        opened={logModalOpened}
+        title={t('symptoms.logEpisodeTitle')}
+      >
+        <Textarea
+          label={t('symptoms.occurrence.additionalNotes.label')}
+          placeholder={t('symptoms.occurrence.additionalNotes.placeholder')}
+          description={t('symptoms.occurrence.additionalNotes.description')}
+        />
+      </Modal>
+
+      {/* Edit Episode Modal */}
+      <Modal
+        opened={editModalOpened}
+        title={t('symptoms.editEpisodeTitle')}
+      >
+        {/* Form fields */}
+      </Modal>
+    </>
+  );
+}
+```
+
+### Lab Results Enhanced Options
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function LabResultForm() {
+  const { t } = useTranslation('medical');
+
+  return (
+    <>
+      <Select
+        label={t('labResults.testStatus.label')}
+        data={[
+          { value: 'ordered', label: t('labResults.status.ordered') },
+          { value: 'inProgress', label: t('labResults.status.inProgress') },
+          { value: 'completed', label: t('labResults.status.completed') },
+          { value: 'cancelled', label: t('labResults.status.cancelled') },
+        ]}
+      />
+
+      <Select
+        label={t('labResults.testCategory.label')}
+        data={[
+          { value: 'bloodWork', label: t('labResults.category.bloodWork') },
+          { value: 'imaging', label: t('labResults.category.imaging') },
+          { value: 'pathology', label: t('labResults.category.pathology') },
+        ]}
+      />
+
+      <Select
+        label={t('labResults.labResult.label')}
+        data={[
+          { value: 'normal', label: t('labResults.result.normal') },
+          { value: 'abnormal', label: t('labResults.result.abnormal') },
+          { value: 'critical', label: t('labResults.result.critical') },
+        ]}
+      />
+
+      {/* Related Conditions Section */}
+      <Divider label={t('labResults.form.relatedConditions')} />
+      <Text>{t('labResults.form.linkConditionsDescription')}</Text>
+    </>
+  );
+}
+```
+
+### Immunization Site, Route, and Manufacturer Options
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function ImmunizationForm() {
+  const { t } = useTranslation('medical');
+
+  return (
+    <>
+      <Select
+        label={t('immunizations.site.label')}
+        data={[
+          { value: 'leftDeltoid', label: t('immunizations.siteOptions.leftDeltoid') },
+          { value: 'rightDeltoid', label: t('immunizations.siteOptions.rightDeltoid') },
+          { value: 'leftThigh', label: t('immunizations.siteOptions.leftThigh') },
+          { value: 'rightThigh', label: t('immunizations.siteOptions.rightThigh') },
+        ]}
+      />
+
+      <Select
+        label={t('immunizations.route.label')}
+        data={[
+          { value: 'intramuscular', label: t('immunizations.routeOptions.intramuscular') },
+          { value: 'subcutaneous', label: t('immunizations.routeOptions.subcutaneous') },
+          { value: 'intradermal', label: t('immunizations.routeOptions.intradermal') },
+        ]}
+      />
+
+      <Select
+        label={t('immunizations.manufacturer.label')}
+        data={[
+          { value: 'pfizer', label: t('immunizations.manufacturerOptions.pfizer') },
+          { value: 'moderna', label: t('immunizations.manufacturerOptions.moderna') },
+          { value: 'jj', label: t('immunizations.manufacturerOptions.jj') },
+        ]}
+      />
+    </>
+  );
+}
+```
+
+### Search Placeholders for Medical Pages
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function MedicationsPage() {
+  const { t } = useTranslation('common');
+
+  return (
+    <TextInput
+      placeholder={t('searchPlaceholders.medications')}
+      // Shows: "Search medications, indications, dosages, tags..."
+    />
+  );
+}
+
+function LabResultsPage() {
+  const { t } = useTranslation('common');
+
+  return (
+    <TextInput
+      placeholder={t('searchPlaceholders.labResults')}
+      // Shows: "Search lab results, test codes, facilities, practitioners, tags..."
+    />
+  );
+}
+```
+
+### Relationship Error Messages
+
+```jsx
+import { useTranslation } from 'react-i18next';
+import { notifications } from '@mantine/notifications';
+
+function handleAddMedication() {
+  const { t } = useTranslation('errors');
+
+  try {
+    await api.addMedicationRelationship(data);
+  } catch (error) {
+    notifications.show({
+      title: t('patientForm.error'),
+      message: t('relationships.addMedicationFailed'),
+      color: 'red',
+    });
+  }
+}
+
+function handleAddCondition() {
+  const { t } = useTranslation('errors');
+
+  try {
+    await api.addConditionRelationship(data);
+  } catch (error) {
+    notifications.show({
+      title: t('patientForm.error'),
+      message: t('relationships.addConditionFailed'),
+      color: 'red',
+    });
+  }
+}
+```
+
+### Medication Tabs
+
+```jsx
+import { useTranslation } from 'react-i18next';
+import { Tabs } from '@mantine/core';
+
+function MedicationDetails() {
+  const { t } = useTranslation('medical');
+
+  return (
+    <Tabs>
+      <Tabs.List>
+        <Tabs.Tab value="basic">{t('medications.tabs.basicInfo')}</Tabs.Tab>
+        <Tabs.Tab value="details">{t('medications.tabs.details')}</Tabs.Tab>
+        <Tabs.Tab value="documents">{t('medications.tabs.documents')}</Tabs.Tab>
+        <Tabs.Tab value="notes">{t('medications.tabs.notes')}</Tabs.Tab>
+      </Tabs.List>
+    </Tabs>
+  );
+}
+```
+
+### Treatment Frequency Options
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function TreatmentForm() {
+  const { t } = useTranslation('medical');
+
+  return (
+    <>
+      <Select
+        label={t('treatments.frequency.label')}
+        placeholder={t('treatments.frequency.placeholder')}
+        description={t('treatments.frequency.description')}
+        data={[
+          { value: 'onceDaily', label: t('treatments.frequencyOptions.onceDaily') },
+          { value: 'twiceDaily', label: t('treatments.frequencyOptions.twiceDaily') },
+          { value: 'weekly', label: t('treatments.frequencyOptions.weekly') },
+        ]}
+      />
+
+      <DateInput
+        label={t('treatments.startDate.label')}
+        placeholder={t('treatments.startDate.placeholder')}
+        description={t('treatments.startDate.description')}
+      />
+
+      <DateInput
+        label={t('treatments.endDate.label')}
+        placeholder={t('treatments.endDate.placeholder')}
+        description={t('treatments.endDate.description')}
+      />
+
+      <Select
+        label={t('treatments.performingPractitioner.label')}
+        placeholder={t('treatments.performingPractitioner.placeholder')}
+        description={t('treatments.performingPractitioner.description')}
+      />
+    </>
+  );
+}
+```
+
+---
+
 ## Testing Your Translations
 
 ### 1. Check for Missing Keys
 
 Open browser console in development. i18next will log warnings for missing keys.
 
-### 2. Test with Different Languages (Future)
+### 2. Test with Different Languages
 
-When adding new languages:
+Switch between supported languages to verify all translations display correctly:
+
 ```jsx
 import { useTranslation } from 'react-i18next';
 
@@ -534,7 +926,8 @@ function LanguageSwitcher() {
       onChange={(value) => i18n.changeLanguage(value)}
       data={[
         { value: 'en', label: 'English' },
-        // Add more languages here when available
+        { value: 'de', label: 'Deutsch' },
+        { value: 'fr', label: 'Français' },
       ]}
     />
   );
@@ -548,6 +941,16 @@ npm run build
 # Should build successfully with no translation errors
 ```
 
+### 4. Run Translation Tests
+
+```bash
+# Run translation validation tests
+npm test translationKeys.test.js
+
+# Run component translation tests
+npm test -- --grep "translations"
+```
+
 ---
 
 ## Need Help?
@@ -555,7 +958,9 @@ npm run build
 - **Missing a translation key?** Check the JSON files in `frontend/public/locales/en/`
 - **Adding new translations?** Follow the existing structure and naming conventions
 - **Translation not showing?** Check console for missing key warnings
+- **Want to add a new language?** See [docs/LOCALIZATION_GUIDE.md](./LOCALIZATION_GUIDE.md)
 
 For more details, see:
 - [docs/LOCALIZATION_GUIDE.md](./LOCALIZATION_GUIDE.md) - How to add new languages
+- [docs/LOCALIZATION_SUMMARY.md](./LOCALIZATION_SUMMARY.md) - Framework overview
 - [docs/working_docs/LOCALIZATION_IMPLEMENTATION.md](./working_docs/LOCALIZATION_IMPLEMENTATION.md) - Implementation tracking

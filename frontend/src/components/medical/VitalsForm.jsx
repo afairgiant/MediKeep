@@ -77,6 +77,7 @@ const VitalsForm = ({
   clearError,
 }) => {
   const { t } = useTranslation('common');
+  const { t: tErrors } = useTranslation('errors');
   const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
@@ -424,7 +425,7 @@ const VitalsForm = ({
     // Numeric validations
     if (config.type === 'number') {
       const numValue = parseFloat(value);
-      if (isNaN(numValue)) return 'Must be a valid number';
+      if (isNaN(numValue)) return tErrors('form.mustBeValidNumber');
 
       if (validation.min && numValue < validation.min.value) {
         return validation.min.message;

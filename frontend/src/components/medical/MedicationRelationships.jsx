@@ -1,6 +1,7 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import {
@@ -29,6 +30,8 @@ const MedicationRelationships = ({
   navigate,
   isViewMode = false, // New prop to distinguish between view and edit modes
 }) => {
+  const { t } = useTranslation('common');
+  const { t: tErrors } = useTranslation('errors');
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -59,7 +62,7 @@ const MedicationRelationships = ({
 
   const handleAddRelationship = async () => {
     if (!newRelationship.medication_id) {
-      setError('Please select a medication');
+      setError(tErrors('form.medicationNotSelected'));
       return;
     }
 
@@ -82,7 +85,7 @@ const MedicationRelationships = ({
       setShowAddModal(false);
     } catch (err) {
       logger.error('Error adding medication relationship:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to add medication relationship');
+      setError(err.response?.data?.detail || err.message || tErrors('relationships.addMedicationFailed'));
     } finally {
       setLoading(false);
     }
@@ -90,7 +93,7 @@ const MedicationRelationships = ({
 
 
   const handleDeleteRelationship = async (relationshipId) => {
-    if (!window.confirm('Are you sure you want to remove this medication relationship?')) {
+    if (!window.confirm(t('messages.confirmRemoveMedicationRelationship'))) {
       return;
     }
 
@@ -190,7 +193,7 @@ const MedicationRelationships = ({
         </Stack>
       ) : (
         <Paper withBorder p="md" ta="center">
-          <Text c="dimmed">No medications linked to this condition</Text>
+          <Text c="dimmed">{t('labels.noMedicationsLinked')}</Text>
         </Paper>
       )}
 
@@ -198,7 +201,7 @@ const MedicationRelationships = ({
       {!isViewMode && (
         <Group justify="space-between" align="center">
           <Text size="sm" c="dimmed">
-            {availableMedicationOptions.length} medications available to link
+            {t('labels.medicationsAvailableToLink', { count: availableMedicationOptions.length })}
           </Text>
           <Button
             variant="light"
@@ -206,7 +209,7 @@ const MedicationRelationships = ({
             onClick={() => setShowAddModal(true)}
             disabled={loading || availableMedicationOptions.length === 0}
           >
-            Link Medication
+            {t('buttons.linkMedication')}
           </Button>
         </Group>
       )}
@@ -219,14 +222,14 @@ const MedicationRelationships = ({
           setNewRelationship({ medication_id: '' });
           setError(null);
         }}
-        title="Link Medication to Condition"
+        title={t('modals.linkMedicationToCondition')}
         size="md"
         centered
       >
         <Stack gap="md">
           <MultiSelect
-            label="Select Medication"
-            placeholder="Choose a medication to link"
+            label={t('modals.selectMedication')}
+            placeholder={t('modals.chooseMedicationToLink')}
             data={availableMedicationOptions}
             value={newRelationship.medication_id ? [newRelationship.medication_id] : []}
             onChange={(values) => setNewRelationship(prev => ({
@@ -247,14 +250,14 @@ const MedicationRelationships = ({
                 setError(null);
               }}
             >
-              Cancel
+              {t('buttons.cancel')}
             </Button>
             <Button
               onClick={handleAddRelationship}
               loading={loading}
               disabled={!newRelationship.medication_id}
             >
-              Link Medication
+              {t('buttons.linkMedication')}
             </Button>
           </Group>
         </Stack>

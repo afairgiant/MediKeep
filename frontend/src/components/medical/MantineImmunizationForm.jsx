@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from './BaseMedicalForm';
 import { immunizationFormFields } from '../../utils/medicalFormFields';
 
@@ -11,35 +12,37 @@ const MantineImmunizationForm = ({
   onSubmit,
   editingImmunization = null,
 }) => {
+  const { t } = useTranslation('medical');
+
   // Injection site options with descriptions
   const siteOptions = [
-    { value: 'left_arm', label: 'Left Arm' },
-    { value: 'right_arm', label: 'Right Arm' },
-    { value: 'left_deltoid', label: 'Left Deltoid' },
-    { value: 'right_deltoid', label: 'Right Deltoid' },
-    { value: 'left_thigh', label: 'Left Thigh' },
-    { value: 'right_thigh', label: 'Right Thigh' },
+    { value: 'left_arm', label: t('immunizations.siteOptions.leftArm') },
+    { value: 'right_arm', label: t('immunizations.siteOptions.rightArm') },
+    { value: 'left_deltoid', label: t('immunizations.siteOptions.leftDeltoid') },
+    { value: 'right_deltoid', label: t('immunizations.siteOptions.rightDeltoid') },
+    { value: 'left_thigh', label: t('immunizations.siteOptions.leftThigh') },
+    { value: 'right_thigh', label: t('immunizations.siteOptions.rightThigh') },
   ];
 
   // Route options with medical descriptions
   const routeOptions = [
-    { value: 'intramuscular', label: 'Intramuscular (IM)' },
-    { value: 'subcutaneous', label: 'Subcutaneous (SC)' },
-    { value: 'intradermal', label: 'Intradermal (ID)' },
-    { value: 'oral', label: 'Oral' },
-    { value: 'nasal', label: 'Nasal' },
+    { value: 'intramuscular', label: t('immunizations.routeOptions.intramuscular') },
+    { value: 'subcutaneous', label: t('immunizations.routeOptions.subcutaneous') },
+    { value: 'intradermal', label: t('immunizations.routeOptions.intradermal') },
+    { value: 'oral', label: t('immunizations.routeOptions.oral') },
+    { value: 'nasal', label: t('immunizations.routeOptions.nasal') },
   ];
 
   // Common vaccine manufacturers
   const manufacturerOptions = [
-    { value: 'Pfizer-BioNTech', label: 'Pfizer-BioNTech' },
-    { value: 'Moderna', label: 'Moderna' },
-    { value: 'Johnson & Johnson', label: 'Johnson & Johnson' },
-    { value: 'AstraZeneca', label: 'AstraZeneca' },
-    { value: 'Merck', label: 'Merck' },
-    { value: 'GlaxoSmithKline', label: 'GlaxoSmithKline' },
-    { value: 'Sanofi', label: 'Sanofi' },
-    { value: 'Other', label: 'Other' },
+    { value: 'Pfizer-BioNTech', label: t('immunizations.manufacturerOptions.pfizerBioNTech') },
+    { value: 'Moderna', label: t('immunizations.manufacturerOptions.moderna') },
+    { value: 'Johnson & Johnson', label: t('immunizations.manufacturerOptions.johnsonJohnson') },
+    { value: 'AstraZeneca', label: t('immunizations.manufacturerOptions.astraZeneca') },
+    { value: 'Merck', label: t('immunizations.manufacturerOptions.merck') },
+    { value: 'GlaxoSmithKline', label: t('immunizations.manufacturerOptions.glaxoSmithKline') },
+    { value: 'Sanofi', label: t('immunizations.manufacturerOptions.sanofi') },
+    { value: 'Other', label: t('immunizations.manufacturerOptions.other') },
   ];
 
   const dynamicOptions = {

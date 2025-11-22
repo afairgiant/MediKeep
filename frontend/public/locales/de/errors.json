@@ -27,8 +27,22 @@
     "invalidDate": "Bitte geben Sie ein gültiges Datum ein.",
     "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
     "invalidPhone": "Bitte geben Sie eine gültige Telefonnummer ein.",
+    "invalidPhoneDigits": "Bitte geben Sie eine gültige Telefonnummer ein (10-15 Ziffern)",
+    "invalidWebsiteUrl": "Bitte geben Sie eine gültige Website-URL ein",
     "patientNotSelected": "Bitte wählen Sie einen Patienten aus.",
-    "entityNotFound": "Der angeforderte Eintrag konnte nicht gefunden werden."
+    "entityNotFound": "Der angeforderte Eintrag konnte nicht gefunden werden.",
+    "medicationNotSelected": "Bitte wählen Sie ein Medikament aus",
+    "conditionNotSelected": "Bitte wählen Sie eine Erkrankung aus",
+    "mustBeValidNumber": "Muss eine gültige Zahl sein"
+  },
+  "patientForm": {
+    "error": "Fehler",
+    "firstNameRequired": "Vorname ist erforderlich",
+    "lastNameRequired": "Nachname ist erforderlich",
+    "birthDateRequired": "Geburtsdatum ist erforderlich",
+    "birthDateFuture": "Geburtsdatum darf nicht in der Zukunft liegen",
+    "createFailed": "Erstellung fehlgeschlagen: {{message}}",
+    "updateFailed": "Aktualisierung fehlgeschlagen: {{message}}"
   },
   "file": {
     "deleteFailed": "Datei konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
@@ -64,5 +78,9 @@
     "slowConnection": "Upload dauert länger als üblich aufgrund langsamer Verbindung.",
     "largeFileWarning": "Große Datei erkannt. Upload kann mehrere Minuten dauern.",
     "duplicateWarning": "Diese Datei scheint ein Duplikat zu sein."
+  },
+  "relationships": {
+    "addConditionFailed": "Fehler beim Hinzufügen der Erkrankungsverknüpfung",
+    "addMedicationFailed": "Fehler beim Hinzufügen der Medikamentenverknüpfung"
   }
 }

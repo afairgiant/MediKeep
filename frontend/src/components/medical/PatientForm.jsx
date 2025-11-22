@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Stack,
   Group,
@@ -39,7 +40,6 @@ import {
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
-import { RELATIONSHIP_OPTIONS } from '../../constants/relationshipOptions';
 
 const PatientForm = ({
   patient = null,
@@ -47,6 +47,7 @@ const PatientForm = ({
   onCancel,
   isModal = true,
 }) => {
+  const { t } = useTranslation(['common', 'errors']);
   const { unitSystem } = useUserPreferences();
   const labels = unitLabels[unitSystem];
   const ranges = validationRanges[unitSystem];
@@ -125,7 +126,10 @@ const PatientForm = ({
       if (isEditing) {
         result = await patientApi.updatePatient(patient.id, submitData);
         toast.success(
-          `Updated ${result.first_name} ${result.last_name} successfully`
+          t('patients.form.messages.updateSuccess', {
+            firstName: result.first_name,
+            lastName: result.last_name
+          })
         );
 
         logger.info('patient_form_updated', {
@@ -136,7 +140,10 @@ const PatientForm = ({
       } else {
         result = await patientApi.createPatient(submitData);
         toast.success(
-          `Created ${result.first_name} ${result.last_name} successfully`
+          t('patients.form.messages.createSuccess', {
+            firstName: result.first_name,
+            lastName: result.last_name
+          })
         );
 
         logger.info('patient_form_created', {
@@ -159,7 +166,9 @@ const PatientForm = ({
 
       setError(error.message);
       toast.error(
-        `${isEditing ? 'Update' : 'Creation'} Failed: ${error.message}`
+        t(isEditing ? 'errors:patientForm.updateFailed' : 'errors:patientForm.createFailed', {
+          message: error.message
+        })
       );
     } finally {
       setLoading(false);
@@ -168,15 +177,15 @@ const PatientForm = ({
 
   const validateForm = () => {
     if (!formData.first_name?.trim()) {
-      setError('First name is required');
+      setError(t('errors:patientForm.firstNameRequired'));
       return false;
     }
     if (!formData.last_name?.trim()) {
-      setError('Last name is required');
+      setError(t('errors:patientForm.lastNameRequired'));
       return false;
     }
     if (!formData.birth_date) {
-      setError('Birth date is required');
+      setError(t('errors:patientForm.birthDateRequired'));
       return false;
     }
     const birthDate =
@@ -184,14 +193,14 @@ const PatientForm = ({
         ? formData.birth_date
         : new Date(formData.birth_date);
     if (birthDate > new Date()) {
-      setError('Birth date cannot be in the future');
+      setError(t('errors:patientForm.birthDateFuture'));
       return false;
     }
     return true;
   };
 
   const bloodTypeOptions = [
-    { value: '', label: 'Select blood type' },
+    { value: '', label: t('patients.form.bloodType.placeholder') },
     { value: 'A+', label: 'A+' },
     { value: 'A-', label: 'A-' },
     { value: 'B+', label: 'B+' },
@@ -203,11 +212,32 @@ const PatientForm = ({
   ];
 
   const genderOptions = [
-    { value: '', label: 'Select gender' },
-    { value: 'Male', label: 'Male' },
-    { value: 'Female', label: 'Female' },
-    { value: 'Other', label: 'Other' },
-    { value: 'Prefer not to say', label: 'Prefer not to say' },
+    { value: '', label: t('patients.form.gender.options.select') },
+    { value: 'Male', label: t('patients.form.gender.options.male') },
+    { value: 'Female', label: t('patients.form.gender.options.female') },
+    { value: 'Other', label: t('patients.form.gender.options.other') },
+    { value: 'Prefer not to say', label: t('patients.form.gender.options.preferNotToSay') },
+  ];
+
+  const relationshipOptions = [
+    { value: '', label: t('patients.form.relationship.options.select') },
+    { value: 'self', label: t('patients.form.relationship.options.self') },
+    { value: 'spouse', label: t('patients.form.relationship.options.spouse') },
+    { value: 'partner', label: t('patients.form.relationship.options.partner') },
+    { value: 'child', label: t('patients.form.relationship.options.child') },
+    { value: 'son', label: t('patients.form.relationship.options.son') },
+    { value: 'daughter', label: t('patients.form.relationship.options.daughter') },
+    { value: 'parent', label: t('patients.form.relationship.options.parent') },
+    { value: 'father', label: t('patients.form.relationship.options.father') },
+    { value: 'mother', label: t('patients.form.relationship.options.mother') },
+    { value: 'sibling', label: t('patients.form.relationship.options.sibling') },
+    { value: 'brother', label: t('patients.form.relationship.options.brother') },
+    { value: 'sister', label: t('patients.form.relationship.options.sister') },
+    { value: 'grandparent', label: t('patients.form.relationship.options.grandparent') },
+    { value: 'grandchild', label: t('patients.form.relationship.options.grandchild') },
+    { value: 'other_family', label: t('patients.form.relationship.options.otherFamily') },
+    { value: 'friend', label: t('patients.form.relationship.options.friend') },
+    { value: 'other', label: t('patients.form.relationship.options.other') },
   ];
 
 
@@ -218,7 +248,7 @@ const PatientForm = ({
         <Group justify="space-between" align="center">
           <Title order={isModal ? 4 : 3}>
             <IconUser size="1.2rem" style={{ marginRight: 8 }} />
-            {isEditing ? 'Edit Patient' : 'Create New Patient'}
+            {t(isEditing ? 'patients.form.editTitle' : 'patients.form.createTitle')}
           </Title>
         </Group>
 
@@ -226,7 +256,7 @@ const PatientForm = ({
         {error && (
           <Alert
             icon={<IconAlertCircle size="1rem" />}
-            title="Error"
+            title={t('errors:patientForm.error')}
             color="red"
             variant="light"
           >
@@ -238,8 +268,8 @@ const PatientForm = ({
         {!isEditing && (
           <Box>
             <Switch
-              label="This is my own medical record"
-              description="Check this if you're creating a record for yourself"
+              label={t('patients.form.selfRecord.label')}
+              description={t('patients.form.selfRecord.description')}
               checked={formData.is_self_record}
               onChange={event =>
                 setFormData({
@@ -254,13 +284,13 @@ const PatientForm = ({
         {/* Basic Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            Basic Information
+            {t('patients.form.sections.basicInformation')}
           </Text>
           <Stack gap="sm">
             <Group grow>
               <TextInput
-                label="First Name"
-                placeholder="Enter first name"
+                label={t('patients.form.firstName.label')}
+                placeholder={t('patients.form.firstName.placeholder')}
                 required
                 value={formData.first_name}
                 onChange={e =>
@@ -269,8 +299,8 @@ const PatientForm = ({
                 disabled={loading}
               />
               <TextInput
-                label="Last Name"
-                placeholder="Enter last name"
+                label={t('patients.form.lastName.label')}
+                placeholder={t('patients.form.lastName.placeholder')}
                 required
                 value={formData.last_name}
                 onChange={e =>
@@ -282,8 +312,8 @@ const PatientForm = ({
 
             <Group grow>
               <DateInput
-                label="Birth Date"
-                placeholder="Select birth date"
+                label={t('patients.form.birthDate.label')}
+                placeholder={t('patients.form.birthDate.placeholder')}
                 required
                 leftSection={<IconCalendar size="1rem" />}
                 value={formData.birth_date}
@@ -295,8 +325,8 @@ const PatientForm = ({
                 popoverProps={{ withinPortal: true, zIndex: 3000 }}
               />
               <Select
-                label="Gender"
-                placeholder="Select gender"
+                label={t('patients.form.gender.label')}
+                placeholder={t('patients.form.gender.placeholder')}
                 data={genderOptions}
                 value={formData.gender}
                 onChange={value => setFormData({ ...formData, gender: value })}
@@ -306,10 +336,10 @@ const PatientForm = ({
             </Group>
 
             <Select
-              label="Relationship to You"
-              placeholder="Select relationship (optional)"
-              description="How is this person related to you?"
-              data={RELATIONSHIP_OPTIONS}
+              label={t('patients.form.relationship.label')}
+              placeholder={t('patients.form.relationship.placeholder')}
+              description={t('patients.form.relationship.description')}
+              data={relationshipOptions}
               value={formData.relationship_to_self}
               onChange={value =>
                 setFormData({ ...formData, relationship_to_self: value })
@@ -325,12 +355,12 @@ const PatientForm = ({
         {/* Medical Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            Medical Information
+            {t('patients.form.sections.medicalInformation')}
           </Text>
           <Stack gap="sm">
             <Select
-              label="Blood Type"
-              placeholder="Select blood type"
+              label={t('patients.form.bloodType.label')}
+              placeholder={t('patients.form.bloodType.placeholder')}
               data={bloodTypeOptions}
               value={formData.blood_type}
               onChange={value =>
@@ -342,12 +372,12 @@ const PatientForm = ({
 
             <Group grow>
               <NumberInput
-                label={`Height (${labels.heightLong})`}
-                placeholder={
+                label={`${t('patients.form.height.label')} (${labels.heightLong})`}
+                placeholder={t(
                   unitSystem === 'imperial'
-                    ? 'Enter height in inches'
-                    : 'Enter height in centimeters'
-                }
+                    ? 'patients.form.height.placeholder.imperial'
+                    : 'patients.form.height.placeholder.metric'
+                )}
                 min={ranges.height.min}
                 max={ranges.height.max}
                 value={formData.height}
@@ -356,12 +386,12 @@ const PatientForm = ({
                 step={unitSystem === 'imperial' ? 0.5 : 1}
               />
               <NumberInput
-                label={`Weight (${labels.weightLong})`}
-                placeholder={
+                label={`${t('patients.form.weight.label')} (${labels.weightLong})`}
+                placeholder={t(
                   unitSystem === 'imperial'
-                    ? 'Enter weight in pounds'
-                    : 'Enter weight in kilograms'
-                }
+                    ? 'patients.form.weight.placeholder.imperial'
+                    : 'patients.form.weight.placeholder.metric'
+                )}
                 min={ranges.weight.min}
                 max={ranges.weight.max}
                 value={formData.weight}
@@ -378,11 +408,11 @@ const PatientForm = ({
         {/* Contact Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            Contact Information
+            {t('patients.form.sections.contactInformation')}
           </Text>
           <Textarea
-            label="Address"
-            placeholder="Enter address"
+            label={t('patients.form.address.label')}
+            placeholder={t('patients.form.address.placeholder')}
             leftSection={<IconMapPin size="1rem" />}
             value={formData.address}
             onChange={e =>
@@ -405,7 +435,7 @@ const PatientForm = ({
               onClick={onCancel}
               disabled={loading}
             >
-              Cancel
+              {t('patients.form.buttons.cancel')}
             </Button>
           )}
           <Button
@@ -414,7 +444,7 @@ const PatientForm = ({
             leftSection={<IconDeviceFloppy size="1rem" />}
             loading={loading}
           >
-            {isEditing ? 'Update Patient' : 'Create Patient'}
+            {t(isEditing ? 'patients.form.buttons.updatePatient' : 'patients.form.buttons.createPatient')}
           </Button>
         </Group>
       </Stack>

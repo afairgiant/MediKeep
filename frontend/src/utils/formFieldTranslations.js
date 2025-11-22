@@ -201,7 +201,8 @@ const fieldTranslationMap = {
   'Detailed description of the treatment plan...': 'treatments.treatmentDescription.placeholder',
   'Comprehensive details about the treatment approach': 'treatments.treatmentDescription.description',
 
-  'Additional Notes': 'treatments.notes.label',
+  // Note: "Additional Notes" mapping for treatments removed to avoid conflict
+  // Treatments should use labelKey: 'medical:treatments.notes.label'
   'Progress notes, side effects, adjustments, outcomes...': 'treatments.notes.placeholder',
   'Progress updates, observations, or important notes': 'treatments.notes.description',
 
@@ -286,7 +287,8 @@ const fieldTranslationMap = {
   'Follow-up care instructions...': 'visits.form.fields.followUpInstructions.placeholder',
   'Instructions for ongoing care and follow-up appointments': 'visits.form.fields.followUpInstructions.description',
 
-  'Additional Notes': 'visits.form.fields.additionalNotes.label',
+  // Note: "Additional Notes" mapping for visits removed to avoid conflict with symptom occurrences
+  // Visits should use a more specific label like "Visit Notes" or use labelKey
   'Any other important details about the visit...': 'visits.form.fields.additionalNotes.placeholder',
   'Any additional observations, notes, or important details': 'visits.form.fields.additionalNotes.description',
 
@@ -729,18 +731,24 @@ export const translateFieldProperty = (text, t) => {
 export const translateFieldConfig = (fieldConfig, t) => {
   const translated = { ...fieldConfig };
 
-  // Translate label
-  if (translated.label) {
+  // Translate label (support both label and labelKey)
+  if (translated.labelKey) {
+    translated.label = t(translated.labelKey);
+  } else if (translated.label) {
     translated.label = translateFieldProperty(translated.label, t);
   }
 
-  // Translate placeholder
-  if (translated.placeholder) {
+  // Translate placeholder (support both placeholder and placeholderKey)
+  if (translated.placeholderKey) {
+    translated.placeholder = t(translated.placeholderKey);
+  } else if (translated.placeholder) {
     translated.placeholder = translateFieldProperty(translated.placeholder, t);
   }
 
-  // Translate description
-  if (translated.description) {
+  // Translate description (support both description and descriptionKey)
+  if (translated.descriptionKey) {
+    translated.description = t(translated.descriptionKey);
+  } else if (translated.description) {
     translated.description = translateFieldProperty(translated.description, t);
   }
 

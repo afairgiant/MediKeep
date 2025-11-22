@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { useTranslation } from 'react-i18next';
 import { Text } from '@mantine/core';
 
 import BaseMedicalForm from './BaseMedicalForm';
@@ -15,6 +15,8 @@ const MantinePharmacyForm = ({
   onSubmit,
   editingPharmacy = null,
 }) => {
+  const { t } = useTranslation('errors');
+
   // Custom handler for store number formatting
   const handleStoreNumberChange = (event) => {
     let value = event.target.value;
@@ -68,7 +70,7 @@ const MantinePharmacyForm = ({
       if (value.trim() !== '' && !isValidPhoneNumber(value)) {
         setFieldErrors(prev => ({
           ...prev,
-          [name]: 'Please enter a valid phone number (10-15 digits)'
+          [name]: t('form.invalidPhoneDigits')
         }));
       }
       
@@ -103,7 +105,7 @@ const MantinePharmacyForm = ({
 
   const websiteError =
     formData.website && !isValidWebsite(formData.website)
-      ? 'Please enter a valid website URL'
+      ? t('form.invalidWebsiteUrl')
       : null;
 
   // Custom validation for submit - prevent submission if website is invalid
