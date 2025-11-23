@@ -251,6 +251,20 @@ class VitalsService {
       }
     }
 
+    // Blood glucose validation
+    if (vitalsData.blood_glucose) {
+      if (vitalsData.blood_glucose < 20 || vitalsData.blood_glucose > 800) {
+        errors.blood_glucose = 'Blood glucose must be between 20-800 mg/dL';
+      }
+    }
+
+    // A1C validation
+    if (vitalsData.a1c) {
+      if (vitalsData.a1c < 0 || vitalsData.a1c > 20) {
+        errors.a1c = 'A1C must be between 0-20%';
+      }
+    }
+
     // Add warnings for unusual values
     if (vitalsData.systolic_bp && vitalsData.diastolic_bp) {
       const bpCategory = this.getBloodPressureCategory(

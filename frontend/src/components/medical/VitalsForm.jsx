@@ -115,7 +115,7 @@ const VitalsForm = ({
     additional: {
       title: t('vitals.modal.additionalMeasurements', 'Additional Measurements'),
       icon: IconDropletFilled,
-      fields: ['blood_glucose', 'pain_scale'],
+      fields: ['blood_glucose', 'a1c', 'pain_scale'],
       description: t('vitals.form.additionalMeasurementsDesc', 'Supplementary health indicators'),
     },
     metadata: {
@@ -274,6 +274,20 @@ const VitalsForm = ({
           max: { value: 800, message: t('vitals.form.validation.bloodGlucoseMax', 'Blood glucose cannot exceed 800 mg/dL') },
         },
       },
+      a1c: {
+        label: t('vitals.modal.a1c', 'A1C'),
+        type: 'number',
+        unit: '%',
+        placeholder: '5.7',
+        icon: IconDropletFilled,
+        min: 0,
+        max: 20,
+        step: 0.1,
+        validation: {
+          min: { value: 0, message: t('vitals.form.validation.a1cMin', 'A1C must be at least 0%') },
+          max: { value: 20, message: t('vitals.form.validation.a1cMax', 'A1C cannot exceed 20%') },
+        },
+      },
       pain_scale: {
         label: t('vitals.modal.painScale', 'Pain Scale'),
         type: 'number',
@@ -344,6 +358,7 @@ const VitalsForm = ({
     respiratory_rate: '',
     oxygen_saturation: '',
     blood_glucose: '',
+    a1c: '',
     pain_scale: '',
     location: '',
     device_used: '',
@@ -382,6 +397,7 @@ const VitalsForm = ({
         respiratory_rate: vitals.respiratory_rate || '',
         oxygen_saturation: vitals.oxygen_saturation || '',
         blood_glucose: vitals.blood_glucose || '',
+        a1c: vitals.a1c || '',
         pain_scale: vitals.pain_scale || '',
         location: vitals.location || '',
         device_used: vitals.device_used || '',
@@ -532,6 +548,9 @@ const VitalsForm = ({
           : null,
         blood_glucose: formData.blood_glucose
           ? parseFloat(formData.blood_glucose)
+          : null,
+        a1c: formData.a1c
+          ? parseFloat(formData.a1c)
           : null,
         pain_scale: formData.pain_scale ? parseInt(formData.pain_scale) : null,
         // Text fields

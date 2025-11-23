@@ -80,7 +80,28 @@
   "vitals": {
     "form": {
       "selectDate": "Select date",
-      "selectDateTime": "Select date and time"
+      "selectDateTime": "Select date and time",
+      "validation": {
+        "bloodGlucoseMin": "Blood glucose must be at least 20 mg/dL",
+        "bloodGlucoseMax": "Blood glucose cannot exceed 800 mg/dL",
+        "a1cMin": "A1C must be at least 0%",
+        "a1cMax": "A1C cannot exceed 20%"
+      }
+    },
+    "modal": {
+      "bloodGlucose": "Blood Glucose",
+      "a1c": "A1C"
+    },
+    "units": {
+      "mgdl": "mg/dL"
+    },
+    "stats": {
+      "bloodGlucoseDesc": "Click to filter records with blood glucose",
+      "a1cDesc": "Click to filter records with A1C"
+    },
+    "categories": {
+      "prediabetes": "Pre-diabetes",
+      "diabetes": "Diabetes"
     }
   },
   "medications": {
