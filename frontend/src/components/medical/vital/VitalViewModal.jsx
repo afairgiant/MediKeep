@@ -164,6 +164,12 @@ const VitalViewModal = ({
           unit: vital.blood_glucose ? t('vitals.units.mgdl', 'mg/dL') : '',
         },
         {
+          label: t('vitals.modal.a1c', 'A1C'),
+          value: vital.a1c || t('labels.notAvailable', 'N/A'),
+          icon: IconDroplet,
+          unit: vital.a1c ? '%' : '',
+        },
+        {
           label: t('vitals.modal.painScale', 'Pain Scale'),
           value: vital.pain_scale !== null ? `${vital.pain_scale}/10` : t('labels.notAvailable', 'N/A'),
           icon: IconMoodSad,

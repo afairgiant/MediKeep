@@ -64,6 +64,7 @@ class TestVitalsAPI:
             "oxygen_saturation": 98.5,
             "respiratory_rate": 16,
             "blood_glucose": 85.0,
+            "a1c": 5.7,
             "bmi": 25.8,
             "pain_scale": 2,
             "notes": "Normal vitals, patient feeling well",
@@ -408,3 +409,47 @@ class TestVitalsAPI:
         # Check that vitals data is returned (trend analysis would be done client-side)
         assert all("systolic_bp" in v for v in data)
         assert all("weight" in v for v in data)
+
+    def test_create_vitals_with_a1c(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test creating vitals record with A1C value."""
+        patient = test_patient_with_practitioner["patient"]
+        practitioner = test_patient_with_practitioner["practitioner"]
+
+        vitals_data = {
+            "patient_id": patient.id,
+            "practitioner_id": practitioner.id,
+            "recorded_date": "2024-01-15T10:30:00",
+            "blood_glucose": 120.0,
+            "a1c": 6.5
+        }
+
+        response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["blood_glucose"] == 120.0
+        assert data["a1c"] == 6.5
+
+    def test_a1c_validation_errors(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test A1C validation errors."""
+        patient = test_patient_with_practitioner["patient"]
+
+        # Test A1C value too high
+        invalid_a1c_vitals = {
+            "patient_id": patient.id,
+            "recorded_date": "2024-01-15T10:30:00",
+            "a1c": 25.0  # Invalid - above 20%
+        }
+
+        response = authenticated_client.post("/api/v1/vitals/", json=invalid_a1c_vitals)
+        assert response.status_code == 422
+
+        # Test negative A1C value
+        invalid_negative_a1c = {
+            "patient_id": patient.id,
+            "recorded_date": "2024-01-15T10:30:00",
+            "a1c": -1.0  # Invalid - negative
+        }
+
+        response = authenticated_client.post("/api/v1/vitals/", json=invalid_negative_a1c)
+        assert response.status_code == 422

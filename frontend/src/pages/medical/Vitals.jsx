@@ -36,6 +36,7 @@ import {
   IconPlus,
   IconAlertTriangle,
   IconCheck,
+  IconDroplet,
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -126,6 +127,34 @@ const Vitals = () => {
       color: 'yellow',
       filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
       description: t('vitals.stats.bmiDesc', 'Click to filter records with weight measurements')
+    },
+    blood_glucose: {
+      title: t('vitals.modal.bloodGlucose', 'Blood Glucose'),
+      icon: IconDroplet,
+      getValue: stats =>
+        stats.current_blood_glucose ? stats.current_blood_glucose.toFixed(0) : t('labels.notAvailable', 'N/A'),
+      getUnit: () => t('vitals.units.mgdl', 'mg/dL'),
+      getCategory: stats => {
+        if (!stats.current_blood_glucose) return null;
+        const glucose = stats.current_blood_glucose;
+        if (glucose < 70) return t('vitals.categories.low', 'Low');
+        if (glucose > 180) return t('vitals.categories.high', 'High');
+        return t('vitals.categories.normal', 'Normal');
+      },
+      color: 'orange',
+      filterType: VITAL_FILTER_TYPES.WITH_BLOOD_GLUCOSE,
+      description: t('vitals.stats.bloodGlucoseDesc', 'Click to filter records with blood glucose')
+    },
+    a1c: {
+      title: t('vitals.modal.a1c', 'A1C'),
+      icon: IconChartBar,
+      getValue: stats =>
+        stats.current_a1c ? stats.current_a1c.toFixed(1) : t('labels.notAvailable', 'N/A'),
+      getUnit: () => '%',
+      getCategory: () => null,
+      color: 'pink',
+      filterType: VITAL_FILTER_TYPES.WITH_A1C,
+      description: t('vitals.stats.a1cDesc', 'Click to filter records with A1C')
     },
   }), [t]);
   const navigate = useNavigate();

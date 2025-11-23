@@ -79,6 +79,8 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             query = query.filter(Vitals.oxygen_saturation.isnot(None))
         elif vital_type == "blood_glucose":
             query = query.filter(Vitals.blood_glucose.isnot(None))
+        elif vital_type == "a1c":
+            query = query.filter(Vitals.a1c.isnot(None))
 
         return (
             query.order_by(desc(Vitals.recorded_date)).offset(skip).limit(limit).all()
@@ -103,6 +105,8 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
                 "current_weight": None,
                 "current_bmi": None,
                 "weight_change": None,
+                "current_blood_glucose": None,
+                "current_a1c": None,
             }
 
         # Get latest reading date
@@ -207,6 +211,32 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             if first_weight_reading and first_weight_reading.weight is not None:
                 weight_change = current_weight - first_weight_reading.weight
 
+        # Get latest blood glucose (from latest reading with blood_glucose data)
+        latest_blood_glucose_reading = (
+            db.query(self.model)
+            .filter(Vitals.patient_id == patient_id, Vitals.blood_glucose.isnot(None))
+            .order_by(desc(Vitals.recorded_date))
+            .first()
+        )
+        current_blood_glucose = (
+            latest_blood_glucose_reading.blood_glucose
+            if latest_blood_glucose_reading
+            else None
+        )
+
+        # Get latest A1C (from latest reading with a1c data)
+        latest_a1c_reading = (
+            db.query(self.model)
+            .filter(Vitals.patient_id == patient_id, Vitals.a1c.isnot(None))
+            .order_by(desc(Vitals.recorded_date))
+            .first()
+        )
+        current_a1c = (
+            latest_a1c_reading.a1c
+            if latest_a1c_reading
+            else None
+        )
+
         # Helper function to safely round values
         def safe_round(value, digits=1):
             try:
@@ -225,6 +255,8 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             "current_weight": current_weight,
             "current_bmi": current_bmi,
             "weight_change": safe_round(weight_change),
+            "current_blood_glucose": safe_round(current_blood_glucose),
+            "current_a1c": safe_round(current_a1c),
         }
 
     def get_recent_readings(

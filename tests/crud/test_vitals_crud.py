@@ -365,3 +365,74 @@ class TestVitalsCRUD:
         # Should be ordered by date descending (newest first)
         assert bp_readings[0].recorded_date > bp_readings[1].recorded_date
         assert bp_readings[1].recorded_date > bp_readings[2].recorded_date
+
+    def test_create_vitals_with_a1c(self, db_session: Session, test_patient):
+        """Test creating a vitals record with A1C."""
+        vitals_data = VitalsCreate(
+            patient_id=test_patient.id,
+            recorded_date=datetime(2024, 1, 1, 10, 0, 0),
+            a1c=6.5,
+            blood_glucose=120.0
+        )
+
+        vital_signs = vitals_crud.create(db_session, obj_in=vitals_data)
+
+        assert vital_signs is not None
+        assert vital_signs.a1c == 6.5
+        assert vital_signs.blood_glucose == 120.0
+        assert vital_signs.patient_id == test_patient.id
+
+    def test_get_by_vital_type_a1c(self, db_session: Session, test_patient):
+        """Test filtering vitals by A1C type."""
+        # Create vitals with different measurements
+        vitals_data = [
+            VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 1, 10, 0, 0),
+                a1c=5.7,
+                blood_glucose=100.0
+            ),
+            VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 2, 10, 0, 0),
+                blood_glucose=110.0  # No A1C
+            ),
+            VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 3, 10, 0, 0),
+                a1c=6.8
+            )
+        ]
+
+        for data in vitals_data:
+            vitals_crud.create(db_session, obj_in=data)
+
+        # Get A1C readings only
+        a1c_readings = vitals_crud.get_by_vital_type(
+            db_session, patient_id=test_patient.id, vital_type="a1c"
+        )
+
+        assert len(a1c_readings) == 2
+        assert all(v.a1c is not None for v in a1c_readings)
+
+    def test_update_vitals_with_a1c(self, db_session: Session, test_patient):
+        """Test updating vitals with A1C value."""
+        # Create vitals without A1C
+        vitals_data = VitalsCreate(
+            patient_id=test_patient.id,
+            recorded_date=datetime(2024, 1, 1, 10, 0, 0),
+            blood_glucose=95.0
+        )
+
+        created_vitals = vitals_crud.create(db_session, obj_in=vitals_data)
+        assert created_vitals.a1c is None
+
+        # Update with A1C
+        update_data = VitalsUpdate(a1c=5.4)
+
+        updated_vitals = vitals_crud.update(
+            db_session, db_obj=created_vitals, obj_in=update_data
+        )
+
+        assert updated_vitals.a1c == 5.4
+        assert updated_vitals.blood_glucose == 95.0  # Unchanged

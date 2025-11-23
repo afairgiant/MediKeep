@@ -376,6 +376,12 @@ const VitalsList = ({
             unit: selectedVital.blood_glucose ? 'mg/dL' : '',
           },
           {
+            label: 'A1C',
+            value: selectedVital.a1c || 'N/A',
+            icon: IconDroplet,
+            unit: selectedVital.a1c ? '%' : '',
+          },
+          {
             label: 'Pain Scale',
             value:
               selectedVital.pain_scale !== null
@@ -617,6 +623,28 @@ const VitalsList = ({
         )}
       </Table.Td>
       <Table.Td>
+        {vital.blood_glucose ? (
+          <Text size="sm" fw={500}>
+            {vital.blood_glucose} mg/dL
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            N/A
+          </Text>
+        )}
+      </Table.Td>
+      <Table.Td>
+        {vital.a1c ? (
+          <Text size="sm" fw={500}>
+            {vital.a1c}%
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">
+            N/A
+          </Text>
+        )}
+      </Table.Td>
+      <Table.Td>
         {vital.oxygen_saturation ? (
           <Text size="sm" fw={500}>
             {vital.oxygen_saturation}%
@@ -719,6 +747,22 @@ const VitalsList = ({
                 <Table.Th>
                   <ThComponent sorted="bmi" onSort={() => handleSort('bmi')}>
                     {t('vitals.stats.bmi', 'BMI')}
+                  </ThComponent>
+                </Table.Th>
+                <Table.Th>
+                  <ThComponent
+                    sorted="blood_glucose"
+                    onSort={() => handleSort('blood_glucose')}
+                  >
+                    {t('vitals.modal.bloodGlucose', 'Glucose')}
+                  </ThComponent>
+                </Table.Th>
+                <Table.Th>
+                  <ThComponent
+                    sorted="a1c"
+                    onSort={() => handleSort('a1c')}
+                  >
+                    {t('vitals.modal.a1c', 'A1C')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>

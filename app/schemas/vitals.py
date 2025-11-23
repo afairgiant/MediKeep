@@ -17,6 +17,7 @@ class VitalsBase(BaseModel):
     oxygen_saturation: Optional[float] = None
     respiratory_rate: Optional[int] = None
     blood_glucose: Optional[float] = None
+    a1c: Optional[float] = None
     bmi: Optional[float] = None
     pain_scale: Optional[int] = None
     notes: Optional[str] = None
@@ -99,6 +100,14 @@ class VitalsBase(BaseModel):
                 raise ValueError("Blood glucose must be between 20-800 mg/dL")
         return v
 
+    @validator("a1c")
+    def validate_a1c(cls, v):
+        """Validate hemoglobin A1C (%)"""
+        if v is not None:
+            if v < 0.0 or v > 20.0:
+                raise ValueError("A1C must be between 0-20%")
+        return v
+
     @validator("bmi")
     def validate_bmi(cls, v):
         """Validate BMI"""
@@ -156,6 +165,7 @@ class VitalsUpdate(BaseModel):
     oxygen_saturation: Optional[float] = None
     respiratory_rate: Optional[int] = None
     blood_glucose: Optional[float] = None
+    a1c: Optional[float] = None
     bmi: Optional[float] = None
     pain_scale: Optional[int] = None
     notes: Optional[str] = None
@@ -215,6 +225,8 @@ class VitalsStats(BaseModel):
     current_weight: Optional[float] = None
     current_bmi: Optional[float] = None
     weight_change: Optional[float] = None  # Change from first to latest reading
+    current_blood_glucose: Optional[float] = None
+    current_a1c: Optional[float] = None
 
     class Config:
         from_attributes = True
