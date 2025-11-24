@@ -43,12 +43,12 @@
     "visits": "Visites",
     "treatments": "Traitements",
     "symptoms": "Symptômes",
-    "practitioners": "Praticiens",
+    "practitioners": "Médecins",
     "pharmacies": "Pharmacies"
   },
   "dashboard": {
-    "title": "Tableau de bord MediKeep",
-    "subtitle": "Gérez vos informations de santé en toute sécurité",
+    "title": "Tableau de bord de MediKeep",
+    "subtitle": "Gérez vos données de santé en toute sécurité",
     "hello": "Bonjour",
     "loading": "Chargement de votre tableau de bord médical...",
     "sections": {
@@ -60,7 +60,7 @@
       "recentActivity": "Activité récente"
     },
     "stats": {
-      "totalRecords": "Total des dossiers",
+      "totalRecords": "Entrées totales",
       "activeMedications": "Médicaments actifs",
       "labResults": "Résultats d'analyse",
       "procedures": "Procédures"
@@ -77,39 +77,39 @@
       "allergies": "Allergies",
       "immunizations": "Immunisations",
       "visitHistory": "Historique des visites",
-      "familyHistory": "Antécédents familiaux",
+      "familyHistory": "Historique familial",
       "insurance": "Assurance",
       "emergencyContacts": "Contacts d'urgence",
-      "exportRecords": "Exporter les dossiers",
-      "practitioners": "Praticiens",
+      "exportRecords": "Exporter les données",
+      "practitioners": "Médecins",
       "pharmacies": "Pharmacies",
-      "adminDashboard": "Tableau de bord admin"
+      "adminDashboard": "Tableau de bord administrateur"
     },
     "activity": {
       "noActivity": "Aucune activité récente",
-      "noActivityDescription": "Vos activités de dossier médical apparaîtront ici",
+      "noActivityDescription": "L'activité de vos données médicales apparaîtra ici.",
       "lastUpdated": "Dernière mise à jour"
     },
     "search": {
-      "placeholder": "Rechercher des dossiers médicaux..."
+      "placeholder": "Rechercher dans les données médicales..."
     }
   },
   "invitations": {
     "title": "Invitations",
     "lastUpdated": "Dernière mise à jour",
     "from": "De",
-    "viewAll": "Voir toutes les {{count}} invitations",
+    "viewAll": "Voir toutes les invitations ({{count}})",
     "noPending": "Aucune invitation en attente",
     "noPendingDescription": "Les nouvelles invitations de partage apparaîtront ici",
     "manageAll": "Gérer toutes les invitations",
-    "sharePatient": "Partager le patient",
+    "sharePatient": "Partager un patient",
     "confirmTitle": "Confirmer l'acceptation de l'invitation",
-    "confirmQuestion": "Êtes-vous sûr de vouloir accepter cette invitation?",
-    "confirmDescription": "En acceptant, vous aurez accès aux informations médicales partagées.",
+    "confirmQuestion": "Souhaietz-vous vraiment accepter cette invitation ?",
+    "confirmDescription": "En acceptant ceci, vous obtiendrez l'accès aux informations médicales partagées.",
     "acceptButton": "Accepter l'invitation",
     "types": {
-      "familyHistory": "Antécédents familiaux",
-      "patientRecord": "Dossier patient"
+      "familyHistory": "Historique familial",
+      "patientRecord": "Données du patient"
     }
   },
   "activity": {
@@ -120,16 +120,16 @@
       "added": "Ajouté",
       "modified": "Modifié",
       "removed": "Retiré",
-      "completed": "Terminé",
+      "completed": "Complété",
       "cancelled": "Annulé",
-      "scheduled": "Planifié",
-      "viewed": "Consulté"
+      "scheduled": "Prévu",
+      "viewed": "Visionné"
     }
   },
   "sidebarNav": {
     "sections": {
-      "medicalRecords": "Dossiers médicaux",
-      "careAndTreatment": "Soins & Traitements",
+      "medicalRecords": "Données médicales",
+      "careAndTreatment": "Soins & Traitement",
       "misc": "Divers",
       "tools": "Outils",
       "administration": "Administration"
@@ -146,19 +146,19 @@
       "procedures": "Procédures",
       "immunizations": "Immunisations",
       "visitHistory": "Historique des visites",
-      "familyHistory": "Antécédents familiaux",
-      "practitioners": "Praticiens",
+      "familyHistory": "Historique familial",
+      "practitioners": "Médecins",
       "pharmacies": "Pharmacies",
       "insurance": "Assurance",
       "emergencyContacts": "Contacts d'urgence",
-      "tagManagement": "Gestion des tags",
+      "tagManagement": "Gestion des étiquettes",
       "customReports": "Rapports personnalisés",
-      "exportRecords": "Exporter les dossiers",
+      "exportRecords": "Exporter des données",
       "settings": "Paramètres",
-      "adminDashboard": "Tableau de bord admin",
+      "adminDashboard": "Tableau de bord administrateur",
       "dataModels": "Modèles de données",
-      "backupManagement": "Gestion des sauvegardes",
-      "systemHealth": "État du système",
+      "backupManagement": "Gestion des backups",
+      "systemHealth": "Santé du système",
       "language": "Langue",
       "theme": "Thème"
     }
