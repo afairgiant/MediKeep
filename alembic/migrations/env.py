@@ -26,7 +26,10 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Set the SQLAlchemy URL from your app settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Escape % signs for configparser (it uses % for interpolation)
+# URL-encoded passwords contain %XX sequences that need to be escaped as %%XX
+escaped_url = settings.DATABASE_URL.replace("%", "%%")
+config.set_main_option("sqlalchemy.url", escaped_url)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
