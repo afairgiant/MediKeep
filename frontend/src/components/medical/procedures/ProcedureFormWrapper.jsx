@@ -192,10 +192,10 @@ const ProcedureFormWrapper = ({
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
                       label={t('procedures.form.procedureDate', 'Procedure Date')}
-                      value={parseDateInput(formData.date)}
+                      value={parseDateInput(formData.procedure_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'date', value: formattedDate } });
+                        onInputChange({ target: { name: 'procedure_date', value: formattedDate } });
                       }}
                       placeholder={t('procedures.form.procedureDatePlaceholder', 'Select procedure date')}
                       description={t('procedures.form.procedureDateDesc', 'When the procedure was performed')}
