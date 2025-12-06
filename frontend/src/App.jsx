@@ -363,7 +363,7 @@ function App() {
               <MantineProvider theme={theme}>
                 <Notifications />
                 <ResponsiveProvider>
-                  <DatesProvider settings={{ timezone: 'UTC' }}>
+                  <DatesProvider settings={{}}>
                     <MantineIntegratedThemeProvider>
                     <NavigationTracker />
                     {/* <ActivityTracker /> */}

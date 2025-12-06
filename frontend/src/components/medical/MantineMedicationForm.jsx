@@ -22,7 +22,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
-import { formatDateInputChange } from '../../utils/dateUtils';
+import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
@@ -155,7 +155,7 @@ const MantineMedicationForm = ({
         return (
           <DateInput
             {...commonProps}
-            value={formData[field.name] ? new Date(formData[field.name]) : null}
+            value={parseDateInput(formData[field.name])}
             onChange={(date) => {
               const formattedDate = formatDateInputChange(date);
               onInputChange({ target: { name: field.name, value: formattedDate } });

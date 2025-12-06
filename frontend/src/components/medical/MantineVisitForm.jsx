@@ -24,7 +24,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { visitFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
-import { formatDateInputChange } from '../../utils/dateUtils';
+import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import { translateFieldConfig } from '../../utils/formFieldTranslations';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
@@ -149,7 +149,7 @@ const MantineVisitForm = ({
         return (
           <DateInput
             {...commonProps}
-            value={formData[translatedField.name] ? new Date(formData[translatedField.name]) : null}
+            value={parseDateInput(formData[translatedField.name])}
             onChange={(date) => {
               const formattedDate = formatDateInputChange(date);
               onInputChange({ target: { name: translatedField.name, value: formattedDate } });
