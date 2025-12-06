@@ -8,9 +8,7 @@ import {
   MEDICATION_TYPE_LABELS,
 } from '../constants/medicationTypes';
 import { getTimeOfDayOptions } from '../constants/symptomEnums';
-
-// Static date reference for maxDate validation (prevents creating new Date on each render)
-const TODAY = new Date();
+import { getTodayEndOfDay } from './dateUtils';
 
 // Add tags field configuration that can be used across all forms
 const tagsFieldConfig = {
@@ -78,7 +76,7 @@ export const allergyFormFields = [
     placeholder: 'When did this allergy first occur',
     description: 'When this allergy was first discovered',
     gridColumn: 6,
-    maxDate: TODAY, // Can't be in the future
+    maxDate: getTodayEndOfDay, // Can't be in the future
   },
   {
     name: 'medication_id',
@@ -164,7 +162,7 @@ export const conditionFormFields = [
     description: 'When this condition was first diagnosed',
     gridColumn: 6,
 
-    maxDate: TODAY,
+    maxDate: getTodayEndOfDay,
   },
   {
     name: 'end_date',
@@ -173,7 +171,7 @@ export const conditionFormFields = [
     placeholder: 'When was this condition resolved',
     description: 'When this condition was resolved (optional)',
     gridColumn: 6,
-    maxDate: TODAY,
+    maxDate: getTodayEndOfDay,
   },
   {
     name: 'icd10_code',
@@ -903,7 +901,7 @@ export const visitFormFields = [
     required: true,
     description: 'When the visit occurred',
     gridColumn: 6,
-    maxDate: TODAY,
+    maxDate: getTodayEndOfDay,
   },
   {
     name: 'practitioner_id',
@@ -2084,7 +2082,7 @@ export const symptomParentFormFields = [
     required: true,
     description: 'When you first noticed this symptom',
     gridColumn: 6,
-    maxDate: TODAY,
+    maxDate: getTodayEndOfDay,
   },
   {
     name: 'status',
@@ -2150,7 +2148,7 @@ export const symptomOccurrenceFormFields = [
     required: true,
     description: 'Date of this specific episode',
     gridColumn: 6,
-    maxDate: TODAY,
+    maxDate: getTodayEndOfDay,
   },
   {
     name: 'time_of_day',
@@ -2271,7 +2269,7 @@ export const symptomOccurrenceFormFields = [
     placeholder: 'When did this episode resolve',
     description: 'Leave blank if still experiencing this episode',
     gridColumn: 6,
-    maxDate: TODAY,
+    maxDate: getTodayEndOfDay,
   },
   {
     name: 'resolution_notes',
