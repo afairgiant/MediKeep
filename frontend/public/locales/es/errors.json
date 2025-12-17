@@ -1,0 +1,68 @@
+{
+  "upload": {
+    "failed": "Fallo en la carga. Por favor, inténtelo de nuevo.",
+    "connectionError": "Error de conexión. Por favor, verifique su red e inténtelo de nuevo.",
+    "fileTooLarge": "El tamaño del archivo excede el límite máximo.",
+    "invalidFileType": "Formato de archivo no soportado.",
+    "fileProcessingFailed": "Error al procesar el archivo. Por favor, intente con un archivo diferente.",
+    "duplicateFile": "Este archivo ya ha sido cargado.",
+    "batchUploadFailed": "Error al cargar algunos archivos. Por favor, consulte los errores de los archivos individuales.",
+    "partialUploadSuccess": "Carga completada con errores. Por favor, verifique los archivos que fallaron.",
+    "allUploadsFailed": "Fallo en todas las cargas. Por favor, verifique su red e inténtelo de nuevo."
+  },
+  "paperless": {
+    "unavailable": "El servicio de gestión de documentos no está disponible actualmente.",
+    "notEnabled": "La integración con Paperless no está activada. Por favor, actívela en la configuración.",
+    "configIncomplete": "La configuración de Paperless está incompleta. Por favor, verifique sus ajustes.",
+    "uploadFailed": "Error al cargar en el sistema de gestión de documentos Paperless.",
+    "connectionFailed": "No se puede conectar al servicio Paperless. Por favor, verifique la configuración.",
+    "authFailed": "Error de autenticación con el servicio Paperless. Por favor, verifique las credenciales.",
+    "duplicateDocument": "Este documento ya existe en Paperless. Los documentos idénticos no pueden ser cargados varias veces.",
+    "taskFailed": "Error al cargar el documento en Paperless. Por favor, inténtelo de nuevo o contacte con el soporte.",
+    "taskTimeout": "Tiempo de procesamiento del documento agotado. Es posible que aún se esté procesando en Paperless."
+  },
+  "form": {
+    "submissionFailed": "Error al guardar el formulario. Por favor, verifique su entrada y vuelva a intentarlo.",
+    "requiredFieldMissing": "Por favor, complete todos los campos requeridos.",
+    "invalidDate": "Por favor, introduzca una fecha válida.",
+    "invalidEmail": "Por favor, introduzca una dirección de correo electrónico válida.",
+    "invalidPhone": "Por favor, introduzca un número de teléfono válido.",
+    "patientNotSelected": "Por favor, seleccione un paciente.",
+    "entityNotFound": "El objeto solicitado no se puede encontrar."
+  },
+  "file": {
+    "deleteFailed": "Error al eliminar el archivo.",
+    "downloadFailed": "Error al descargar el archivo. Por favor, inténtelo de nuevo.",
+    "viewFailed": "Error al abrir el archivo para visualizarlo. Por favor, inténtelo de nuevo.",
+    "notFound": "Fichero no encontrado."
+  },
+  "network": {
+    "unavailable": "Red no disponible. Por favor, verifique su conexión.",
+    "timeout": "Solicitud expirada. Por favor, inténtelo de nuevo.",
+    "serverError": "Se produjo un error en el servidor. Por favor, inténtelo de nuevo más tarde.",
+    "connectionError": "Error de conexión. Por favor, verifique su red e inténtelo de nuevo."
+  },
+  "general": {
+    "unknownError": "Se produjo un error desconocido. Por favor, inténtelo de nuevo.",
+    "permissionDenied": "No tiene permiso para realizar esta acción.",
+    "sessionExpired": "Su sesión ha expirado. Por favor, vuelva a iniciar sesión.",
+    "rateLimitExceeded": "Demasiadas solicitudes. Por favor, espere un momento y vuelva a intentarlo.",
+    "maintenanceMode": "El sistema está actualmente en mantenimiento. Por favor, inténtelo de nuevo más tarde.",
+    "storageFull": "Capacidad de almacenamiento máxima alcanzada. Por favor, libere espacio y vuelva a intentarlo.",
+    "validationError": "Por favor, verifique su entrada y vuelva a intentarlo."
+  },
+  "success": {
+    "uploadSuccess": "Archivo cargado con éxito.",
+    "uploadMultipleSuccess": "Todos los archivos se han cargado con éxito.",
+    "formSaved": "Formulario guardado con éxito.",
+    "fileDeleted": "Archivo eliminado con éxito.",
+    "paperlessSyncSuccess": "Sincronización exitosa con el sistema de gestión de documentos Paperless.",
+    "batchUploadSuccess": "Todos los archivos se han cargado con éxito."
+  },
+  "warnings": {
+    "partialSuccess": "Operación completada con alertas.",
+    "slowConnection": "La carga está tardando más de lo habitual debido a una conexión lenta.",
+    "largeFileWarning": "Archivo grande detectado. La carga puede tardar varios minutos.",
+    "duplicateWarning": "Este archivo parece ser un duplicado."
+  }
+}

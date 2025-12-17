@@ -36,6 +36,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     { value: 'en', label: 'English', shortLabel: 'EN' },
     { value: 'fr', label: 'Français', shortLabel: 'FR' },
     { value: 'de', label: 'Deutsch', shortLabel: 'DE' },
+    { value: 'es', label: 'Español', shortLabel: 'ES' },
   ];
 
   const handleLanguageChange = async (value: string | null) => {
