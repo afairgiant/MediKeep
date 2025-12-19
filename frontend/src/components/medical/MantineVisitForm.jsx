@@ -70,7 +70,7 @@ const MantineVisitForm = ({
   // Convert practitioners to options
   const practitionerOptions = practitioners.map(practitioner => ({
     value: String(practitioner.id),
-    label: `Dr. ${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`,
+    label: `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`,
   }));
 
   // Convert conditions to options

@@ -55,7 +55,7 @@ const MedicationViewModal = ({
   const getPractitionerDisplay = (medication) => {
     // Check if practitioner object exists
     if (medication.practitioner) {
-      return `Dr. ${medication.practitioner.name}${medication.practitioner.specialty ? ` - ${medication.practitioner.specialty}` : ''}`;
+      return `${medication.practitioner.name}${medication.practitioner.specialty ? ` - ${medication.practitioner.specialty}` : ''}`;
     }
 
     // Check if prescribing_doctor string exists (legacy)
@@ -67,7 +67,7 @@ const MedicationViewModal = ({
     if (medication.practitioner_id && practitioners.length > 0) {
       const practitioner = practitioners.find(p => p.id === parseInt(medication.practitioner_id));
       if (practitioner) {
-        return `Dr. ${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
+        return `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
       }
     }
 
