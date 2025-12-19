@@ -61,7 +61,7 @@ const ConditionViewModal = ({
       return null;
     }
     const practitioner = practitioners.find(p => p.id === practitionerId);
-    return practitioner ? practitioner.name || `Dr. ${practitioner.first_name || ''} ${practitioner.last_name || ''}`.trim() : null;
+    return practitioner ? practitioner.name || `${practitioner.first_name || ''} ${practitioner.last_name || ''}`.trim() : null;
   };
 
   const handleMedicationClick = (medicationId) => {
