@@ -62,7 +62,7 @@ SQLAlchemy==2.0.41
 starlette==0.46.2
 typing-inspection==0.4.1
 typing_extensions==4.14.0
-urllib3==2.4.0
+urllib3==2.6.0
 uvicorn==0.34.3
 watchfiles==1.0.5
 websockets==15.0.1
