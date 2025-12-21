@@ -27,7 +27,6 @@ const LabResultQuickImportModal = ({
   onClose,
   onSuccess,
   patientId,
-  practitioners,
 }) => {
   const { t } = useTranslation('common');
 
@@ -48,11 +47,26 @@ const LabResultQuickImportModal = ({
 
   // Handle creating the minimal lab result
   const handleCreateLabResult = useCallback(async () => {
+    const MIN_TEST_NAME_LENGTH = 2;
     const MAX_TEST_NAME_LENGTH = 255;
 
-    // Validate test name
+    // Validate required fields
+    if (!patientId) {
+      setError('Patient ID is required. Please select a patient first.');
+      return;
+    }
+
     if (!testName.trim()) {
-      setError(t('labResults.testNameLabel', 'Lab Test Name') + ' is required');
+      setError(t('labResults.testNameRequired', 'Test name is required'));
+      return;
+    }
+
+    if (testName.trim().length < MIN_TEST_NAME_LENGTH) {
+      setError(
+        t('labResults.testNameTooShort', 'Test name must be at least {{minLength}} characters', {
+          minLength: MIN_TEST_NAME_LENGTH,
+        })
+      );
       return;
     }
 
@@ -65,8 +79,9 @@ const LabResultQuickImportModal = ({
       return;
     }
 
-    // Sanitize test name (remove potentially dangerous characters)
-    const sanitizedTestName = testName.trim().replace(/<script[^>]*>.*?<\/script>/gi, '').replace(/[<>]/g, '');
+    // Sanitize test name - strip all HTML-related characters
+    // Using simple character removal instead of regex to avoid bypasses
+    const sanitizedTestName = testName.trim().replace(/[<>]/g, '');
 
     setIsCreating(true);
     setError(null);
@@ -119,12 +134,41 @@ const LabResultQuickImportModal = ({
         component: 'LabResultQuickImportModal',
       });
 
-      // Detect network errors for better user messaging
+      // Parse backend validation errors for specific field messages
       let errorMessage = err.message;
-      if (err.name === 'NetworkError' || err.message?.includes('fetch') || err.message?.includes('network')) {
+
+      // Check if it's a validation error from the backend
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail;
+
+        // Handle array of validation errors (FastAPI format)
+        if (Array.isArray(detail)) {
+          const fieldErrors = detail.map(error => {
+            const field = error.loc?.[error.loc.length - 1] || 'field';
+            const message = error.msg || error.message || 'Invalid value';
+
+            // Map field names to user-friendly names
+            const fieldName = field === 'test_name'
+              ? t('labResults.testNameLabel', 'Test name')
+              : field.replace(/_/g, ' ');
+
+            return `${fieldName}: ${message}`;
+          });
+
+          errorMessage = fieldErrors.join(', ');
+        }
+        // Handle string error message
+        else if (typeof detail === 'string') {
+          errorMessage = detail;
+        }
+      }
+      // Detect network errors for better user messaging
+      else if (err instanceof TypeError && !navigator.onLine) {
         errorMessage = t('labResults.networkError', 'Network error. Please check your connection and try again.');
-      } else if (err.message?.includes('timeout')) {
+      } else if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT' || err.message?.toLowerCase().includes('timeout')) {
         errorMessage = t('labResults.timeoutError', 'Request timed out. Please try again.');
+      } else if (err instanceof TypeError || err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET') {
+        errorMessage = t('labResults.networkError', 'Network error. Please check your connection and try again.');
       }
 
       setError(errorMessage || t('labResults.createFailedTryAgain', 'Failed to create lab result. Please try again.'));
@@ -188,6 +232,17 @@ const LabResultQuickImportModal = ({
     [createdLabResultId, onSuccess, t]
   );
 
+  // Reset all state
+  const resetState = useCallback(() => {
+    setStage('form');
+    setTestName('');
+    setCreatedLabResultId(null);
+    setComponentsAdded(false);
+    setParsedComponentCount(0);
+    setIsCreating(false);
+    setError(null);
+  }, []);
+
   // Handle modal close - check if we need to cleanup
   const handleClose = useCallback(() => {
     // Priority 1: If components are parsed but not added, warn about data loss
@@ -202,7 +257,7 @@ const LabResultQuickImportModal = ({
       resetState();
       onClose();
     }
-  }, [createdLabResultId, componentsAdded, parsedComponentCount, onClose]);
+  }, [createdLabResultId, componentsAdded, parsedComponentCount, onClose, resetState]);
 
   // Handle delete confirmation
   const handleConfirmDelete = useCallback(async () => {
@@ -244,14 +299,14 @@ const LabResultQuickImportModal = ({
     setShowDeleteConfirmation(false);
     resetState();
     onClose();
-  }, [createdLabResultId, onClose, t, isDeleting]);
+  }, [createdLabResultId, onClose, t, isDeleting, resetState]);
 
   // Handle cancel delete (keep lab result)
   const handleCancelDelete = useCallback(() => {
     setShowDeleteConfirmation(false);
     resetState();
     onClose();
-  }, [onClose]);
+  }, [onClose, resetState]);
 
   // Handle data loss warning - user wants to continue despite losing parsed data
   const handleConfirmDataLoss = useCallback(() => {
@@ -263,22 +318,11 @@ const LabResultQuickImportModal = ({
       resetState();
       onClose();
     }
-  }, [createdLabResultId, componentsAdded, onClose]);
+  }, [createdLabResultId, componentsAdded, onClose, resetState]);
 
   // Handle cancel data loss warning - return to modal
   const handleCancelDataLoss = useCallback(() => {
     setShowDataLossWarning(false);
-  }, []);
-
-  // Reset all state
-  const resetState = useCallback(() => {
-    setStage('form');
-    setTestName('');
-    setCreatedLabResultId(null);
-    setComponentsAdded(false);
-    setParsedComponentCount(0);
-    setIsCreating(false);
-    setError(null);
   }, []);
 
   // Get current step number for stepper
