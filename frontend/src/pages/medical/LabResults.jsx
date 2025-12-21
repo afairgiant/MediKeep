@@ -27,6 +27,7 @@ import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
 import LabResultFormWrapper from '../../components/medical/labresults/LabResultFormWrapper';
+import LabResultQuickImportModal from '../../components/medical/labresults/LabResultQuickImportModal';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Button,
@@ -41,6 +42,7 @@ import {
   Group,
   Paper,
 } from '@mantine/core';
+import { IconFileUpload } from '@tabler/icons-react';
 
 const LabResults = () => {
   const { t } = useTranslation('common');
@@ -227,6 +229,8 @@ const LabResults = () => {
   // Form and modal state
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showQuickImportModal, setShowQuickImportModal] = useState(false);
+  const [initialViewTab, setInitialViewTab] = useState('overview');
   const [viewingLabResult, setViewingLabResult] = useState(null);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [formData, setFormData] = useState({
@@ -453,6 +457,45 @@ const LabResults = () => {
     await refreshData();
   }, [viewingLabResult, refreshData]);
 
+  const handleQuickImportSuccess = useCallback(async (labResultId) => {
+    setShowQuickImportModal(false);
+
+    // Refresh lab results list
+    await refreshData();
+
+    // Fetch the specific lab result directly to avoid race condition with stale state
+    try {
+      const labResult = await apiService.getLabResult(labResultId);
+
+      if (labResult) {
+        // Open the view modal with Test Components tab active
+        setViewingLabResult(labResult);
+        setInitialViewTab('test-components');
+        setShowViewModal(true);
+
+        // Update URL with lab result ID
+        const searchParams = new URLSearchParams(location.search);
+        searchParams.set('view', labResult.id);
+        navigate(`${location.pathname}?${searchParams.toString()}`, {
+          replace: true,
+        });
+
+        logger.info('quick_import_completed', {
+          message: 'Quick PDF import completed successfully',
+          labResultId,
+          component: 'LabResults',
+        });
+      }
+    } catch (error) {
+      logger.error('quick_import_fetch_failed', {
+        message: 'Failed to fetch newly created lab result',
+        labResultId,
+        error: error.message,
+        component: 'LabResults',
+      });
+    }
+  }, [refreshData, navigate, location.pathname, location.search]);
+
   const handleDeleteLabResult = useCallback(async labResultId => {
     const success = await deleteItem(labResultId);
     // Note: deleteItem already updates local state, no need to refresh all data
@@ -661,9 +704,18 @@ const LabResults = () => {
           )}
 
           <Group justify="space-between" align="center">
-            <Button variant="filled" onClick={handleAddLabResult}>
-              {t('labResults.addNew', '+ Add New Lab Result')}
-            </Button>
+            <Group gap="sm">
+              <Button variant="filled" onClick={handleAddLabResult}>
+                {t('labResults.addNew', '+ Add New Lab Result')}
+              </Button>
+              <Button
+                variant="light"
+                leftSection={<IconFileUpload size={16} />}
+                onClick={() => setShowQuickImportModal(true)}
+              >
+                {t('labResults.quickPdfImport', 'Quick PDF Import')}
+              </Button>
+            </Group>
 
             <ViewToggle
               viewMode={viewMode}
@@ -822,6 +874,7 @@ const LabResults = () => {
         fetchLabResultConditions={fetchLabResultConditions}
         navigate={navigate}
         isBlocking={isBlocking}
+        initialTab={initialViewTab}
         onFileUploadComplete={(success) => {
           if (success && viewingLabResult) {
             refreshFileCount(viewingLabResult.id);
@@ -829,6 +882,17 @@ const LabResults = () => {
         }}
         onLabResultUpdated={handleLabResultUpdated}
       />
+
+      {/* Quick PDF Import Modal */}
+      {showQuickImportModal && (
+        <LabResultQuickImportModal
+          isOpen={showQuickImportModal}
+          onClose={() => setShowQuickImportModal(false)}
+          onSuccess={handleQuickImportSuccess}
+          patientId={currentPatient?.id}
+          practitioners={practitioners}
+        />
+      )}
     </>
   );
 };

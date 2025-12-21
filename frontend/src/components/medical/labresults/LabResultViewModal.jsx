@@ -41,19 +41,20 @@ const LabResultViewModal = ({
   navigate,
   isBlocking,
   onError,
-  onLabResultUpdated
+  onLabResultUpdated,
+  initialTab = 'overview'
 }) => {
   const { t } = useTranslation('common');
 
   // Reset activeTab when modal opens with new labResult
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(initialTab);
 
-  // Reset tab when labResult changes
+  // Reset tab when labResult changes or initialTab changes
   React.useEffect(() => {
     if (isOpen) {
-      setActiveTab('overview');
+      setActiveTab(initialTab);
     }
-  }, [isOpen, labResult?.id]);
+  }, [isOpen, labResult?.id, initialTab]);
 
   const handleError = (error, context) => {
     logger.error('lab_result_view_modal_error', {

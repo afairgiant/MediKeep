@@ -1631,5 +1631,46 @@
       "exportComplete": "Export completed successfully! Your {{format}} file has been downloaded.",
       "bulkExportComplete": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded."
     }
+  },
+  "labResults": {
+    "addNew": "+ Add New Lab Result",
+    "quickPdfImport": "Quick PDF Import",
+    "quickImportModalTitle": "Quick PDF Import - Step {{step}} of 2",
+    "quickFormInstructions": "Enter a name for this lab result, then you'll be able to upload and parse your PDF.",
+    "testNameLabel": "Lab Test Name",
+    "testNamePlaceholder": "e.g., Endocrine Bloodwork etc.",
+    "testNameDescription": "This is the only required field - you can add more details later",
+    "testNameRequired": "Test name is required",
+    "testNameTooShort": "Test name must be at least {{minLength}} characters",
+    "testNameTooLong": "Test name cannot exceed {{maxLength}} characters",
+    "patientIdRequired": "Patient ID is required. Please select a patient first.",
+    "createAndContinue": "Create & Upload PDF",
+    "creatingLabResult": "Creating lab result...",
+    "createFailed": "Failed to create lab result",
+    "createFailedTryAgain": "Failed to create lab result. Please try again.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "timeoutError": "Request timed out. Please try again.",
+    "labResultCreated": "Lab result \"{{testName}}\" has been created. Now you can upload and parse your PDF.",
+    "labResultDeleted": "Lab result deleted",
+    "deleteFailed": "Failed to delete lab result",
+    "errorOccurred": "An error occurred",
+    "quickImportSuccess": "Lab result and test components imported successfully",
+    "unsavedDataWarning": "Unsaved Parsed Data",
+    "unsavedDataMessage": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
+    "unsavedDataInstructions": "Click \"Add Components\" in the Preview tab to save your parsed data before closing.",
+    "continueEditing": "Continue Editing",
+    "discardParsedData": "Discard Parsed Data",
+    "emptyLabResultWarning": "Lab Result Created But Empty",
+    "emptyLabResultMessage": "You created a lab result but didn't add any test components. Would you like to delete this lab result?",
+    "deleteEmptyLabResult": "Delete Lab Result",
+    "keepEmptyLabResult": "Keep Lab Result",
+    "stepperLabels": {
+      "labResultInfo": "Lab Result Info",
+      "enterTestName": "Enter test name",
+      "uploadParse": "Upload & Parse",
+      "importFromPdf": "Import from PDF"
+    },
+    "error": "Error",
+    "success": "Success"
   }
 }
