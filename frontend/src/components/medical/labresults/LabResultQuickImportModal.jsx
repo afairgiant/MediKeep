@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Modal,
@@ -52,7 +52,7 @@ const LabResultQuickImportModal = ({
 
     // Validate required fields
     if (!patientId) {
-      setError('Patient ID is required. Please select a patient first.');
+      setError(t('labResults.patientIdRequired', 'Patient ID is required. Please select a patient first.'));
       return;
     }
 
@@ -61,7 +61,12 @@ const LabResultQuickImportModal = ({
       return;
     }
 
-    if (testName.trim().length < MIN_TEST_NAME_LENGTH) {
+    // Sanitize test name first - strip all HTML-related characters
+    // Using simple character removal instead of regex to avoid bypasses
+    const sanitizedTestName = testName.trim().replace(/[<>]/g, '');
+
+    // Validate sanitized value (after removing dangerous characters)
+    if (sanitizedTestName.length < MIN_TEST_NAME_LENGTH) {
       setError(
         t('labResults.testNameTooShort', 'Test name must be at least {{minLength}} characters', {
           minLength: MIN_TEST_NAME_LENGTH,
@@ -70,7 +75,7 @@ const LabResultQuickImportModal = ({
       return;
     }
 
-    if (testName.trim().length > MAX_TEST_NAME_LENGTH) {
+    if (sanitizedTestName.length > MAX_TEST_NAME_LENGTH) {
       setError(
         t('labResults.testNameTooLong', 'Test name cannot exceed {{maxLength}} characters', {
           maxLength: MAX_TEST_NAME_LENGTH,
@@ -78,10 +83,6 @@ const LabResultQuickImportModal = ({
       );
       return;
     }
-
-    // Sanitize test name - strip all HTML-related characters
-    // Using simple character removal instead of regex to avoid bypasses
-    const sanitizedTestName = testName.trim().replace(/[<>]/g, '');
 
     setIsCreating(true);
     setError(null);

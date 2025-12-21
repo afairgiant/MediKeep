@@ -43,7 +43,6 @@ import {
   Paper,
 } from '@mantine/core';
 import { IconFileUpload } from '@tabler/icons-react';
-import { notifications } from '@mantine/notifications';
 
 const LabResults = () => {
   const { t } = useTranslation('common');
@@ -464,28 +463,38 @@ const LabResults = () => {
     // Refresh lab results list
     await refreshData();
 
-    // Find the lab result that was just created
-    const labResult = labResults.find(lr => lr.id === labResultId);
-    if (labResult) {
-      // Open the view modal with Test Components tab active
-      setViewingLabResult(labResult);
-      setInitialViewTab('test-components');
-      setShowViewModal(true);
+    // Fetch the specific lab result directly to avoid race condition with stale state
+    try {
+      const labResult = await apiService.getLabResult(labResultId);
 
-      // Update URL with lab result ID
-      const searchParams = new URLSearchParams(location.search);
-      searchParams.set('view', labResult.id);
-      navigate(`${location.pathname}?${searchParams.toString()}`, {
-        replace: true,
+      if (labResult) {
+        // Open the view modal with Test Components tab active
+        setViewingLabResult(labResult);
+        setInitialViewTab('test-components');
+        setShowViewModal(true);
+
+        // Update URL with lab result ID
+        const searchParams = new URLSearchParams(location.search);
+        searchParams.set('view', labResult.id);
+        navigate(`${location.pathname}?${searchParams.toString()}`, {
+          replace: true,
+        });
+
+        logger.info('quick_import_completed', {
+          message: 'Quick PDF import completed successfully',
+          labResultId,
+          component: 'LabResults',
+        });
+      }
+    } catch (error) {
+      logger.error('quick_import_fetch_failed', {
+        message: 'Failed to fetch newly created lab result',
+        labResultId,
+        error: error.message,
+        component: 'LabResults',
       });
     }
-
-    logger.info('quick_import_completed', {
-      message: 'Quick PDF import completed successfully',
-      labResultId,
-      component: 'LabResults',
-    });
-  }, [labResults, refreshData, navigate, location.pathname, location.search]);
+  }, [refreshData, navigate, location.pathname, location.search]);
 
   const handleDeleteLabResult = useCallback(async labResultId => {
     const success = await deleteItem(labResultId);

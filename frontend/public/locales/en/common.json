@@ -1643,6 +1643,7 @@
     "testNameRequired": "Test name is required",
     "testNameTooShort": "Test name must be at least {{minLength}} characters",
     "testNameTooLong": "Test name cannot exceed {{maxLength}} characters",
+    "patientIdRequired": "Patient ID is required. Please select a patient first.",
     "createAndContinue": "Create & Upload PDF",
     "creatingLabResult": "Creating lab result...",
     "createFailed": "Failed to create lab result",
