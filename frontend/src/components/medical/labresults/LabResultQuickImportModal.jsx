@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Modal,
@@ -36,16 +36,37 @@ const LabResultQuickImportModal = ({
   const [testName, setTestName] = useState('');
   const [createdLabResultId, setCreatedLabResultId] = useState(null);
   const [componentsAdded, setComponentsAdded] = useState(false);
+  const [parsedComponentCount, setParsedComponentCount] = useState(0);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showDataLossWarning, setShowDataLossWarning] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // TODO: Cleanup on unmount removed due to timing issues
+  // User can manually delete empty lab results if needed
 
   // Handle creating the minimal lab result
   const handleCreateLabResult = useCallback(async () => {
+    const MAX_TEST_NAME_LENGTH = 255;
+
+    // Validate test name
     if (!testName.trim()) {
       setError(t('labResults.testNameLabel', 'Lab Test Name') + ' is required');
       return;
     }
+
+    if (testName.trim().length > MAX_TEST_NAME_LENGTH) {
+      setError(
+        t('labResults.testNameTooLong', 'Test name cannot exceed {{maxLength}} characters', {
+          maxLength: MAX_TEST_NAME_LENGTH,
+        })
+      );
+      return;
+    }
+
+    // Sanitize test name (remove potentially dangerous characters)
+    const sanitizedTestName = testName.trim().replace(/<script[^>]*>.*?<\/script>/gi, '').replace(/[<>]/g, '');
 
     setIsCreating(true);
     setError(null);
@@ -55,7 +76,7 @@ const LabResultQuickImportModal = ({
       // Dates will be set by PDF parser based on the actual test date
       const labResultData = {
         patient_id: patientId,
-        test_name: testName.trim(),
+        test_name: sanitizedTestName,
         status: 'completed',  // We have results, so it's completed
         ordered_date: null,   // Will be set from PDF or defaulted
         completed_date: null, // Will be set from PDF
@@ -98,22 +119,49 @@ const LabResultQuickImportModal = ({
         component: 'LabResultQuickImportModal',
       });
 
-      setError(err.message || 'Failed to create lab result. Please try again.');
+      // Detect network errors for better user messaging
+      let errorMessage = err.message;
+      if (err.name === 'NetworkError' || err.message?.includes('fetch') || err.message?.includes('network')) {
+        errorMessage = t('labResults.networkError', 'Network error. Please check your connection and try again.');
+      } else if (err.message?.includes('timeout')) {
+        errorMessage = t('labResults.timeoutError', 'Request timed out. Please try again.');
+      }
+
+      setError(errorMessage || t('labResults.createFailedTryAgain', 'Failed to create lab result. Please try again.'));
 
       notifications.show({
         title: t('labResults.error', 'Error'),
-        message: err.message || 'Failed to create lab result',
+        message: errorMessage || t('labResults.createFailed', 'Failed to create lab result'),
         color: 'red',
+        autoClose: 5000,
       });
     } finally {
       setIsCreating(false);
     }
   }, [testName, patientId, t]);
 
+  // Handle when components are parsed (for data loss warning)
+  const handleComponentsParsed = useCallback(
+    componentCount => {
+      setParsedComponentCount(componentCount);
+
+      if (componentCount > 0) {
+        logger.info('quick_import_components_parsed', {
+          message: 'Test components parsed in quick import',
+          labResultId: createdLabResultId,
+          count: componentCount,
+          component: 'LabResultQuickImportModal',
+        });
+      }
+    },
+    [createdLabResultId]
+  );
+
   // Handle when components are successfully added
   const handleComponentsAdded = useCallback(
     newComponents => {
       setComponentsAdded(true);
+      setParsedComponentCount(0); // Reset parsed count
 
       logger.info('quick_import_components_added', {
         message: 'Test components added via quick import',
@@ -142,18 +190,25 @@ const LabResultQuickImportModal = ({
 
   // Handle modal close - check if we need to cleanup
   const handleClose = useCallback(() => {
-    // If we created a lab result but didn't add components, prompt to delete
-    if (createdLabResultId && !componentsAdded) {
+    // Priority 1: If components are parsed but not added, warn about data loss
+    if (parsedComponentCount > 0 && !componentsAdded) {
+      setShowDataLossWarning(true);
+    }
+    // Priority 2: If we created a lab result but didn't add components, prompt to delete
+    else if (createdLabResultId && !componentsAdded) {
       setShowDeleteConfirmation(true);
     } else {
       // Clean close
       resetState();
       onClose();
     }
-  }, [createdLabResultId, componentsAdded, onClose]);
+  }, [createdLabResultId, componentsAdded, parsedComponentCount, onClose]);
 
   // Handle delete confirmation
   const handleConfirmDelete = useCallback(async () => {
+    if (isDeleting) return; // Prevent double submission
+
+    setIsDeleting(true);
     try {
       await apiService.deleteLabResult(createdLabResultId);
 
@@ -165,7 +220,7 @@ const LabResultQuickImportModal = ({
 
       notifications.show({
         title: t('labResults.success', 'Success'),
-        message: 'Lab result deleted',
+        message: t('labResults.labResultDeleted', 'Lab result deleted'),
         color: 'green',
       });
     } catch (err) {
@@ -178,16 +233,18 @@ const LabResultQuickImportModal = ({
 
       notifications.show({
         title: t('labResults.error', 'Error'),
-        message: 'Failed to delete lab result',
+        message: t('labResults.deleteFailed', 'Failed to delete lab result'),
         color: 'red',
       });
+    } finally {
+      setIsDeleting(false);
     }
 
     // Reset state and close modal
     setShowDeleteConfirmation(false);
     resetState();
     onClose();
-  }, [createdLabResultId, onClose, t]);
+  }, [createdLabResultId, onClose, t, isDeleting]);
 
   // Handle cancel delete (keep lab result)
   const handleCancelDelete = useCallback(() => {
@@ -196,12 +253,30 @@ const LabResultQuickImportModal = ({
     onClose();
   }, [onClose]);
 
+  // Handle data loss warning - user wants to continue despite losing parsed data
+  const handleConfirmDataLoss = useCallback(() => {
+    setShowDataLossWarning(false);
+    // Now check if we need to show delete confirmation
+    if (createdLabResultId && !componentsAdded) {
+      setShowDeleteConfirmation(true);
+    } else {
+      resetState();
+      onClose();
+    }
+  }, [createdLabResultId, componentsAdded, onClose]);
+
+  // Handle cancel data loss warning - return to modal
+  const handleCancelDataLoss = useCallback(() => {
+    setShowDataLossWarning(false);
+  }, []);
+
   // Reset all state
   const resetState = useCallback(() => {
     setStage('form');
     setTestName('');
     setCreatedLabResultId(null);
     setComponentsAdded(false);
+    setParsedComponentCount(0);
     setIsCreating(false);
     setError(null);
   }, []);
@@ -229,12 +304,12 @@ const LabResultQuickImportModal = ({
           {/* Stepper */}
           <Stepper active={activeStep} size="sm">
             <Stepper.Step
-              label="Lab Result Info"
-              description="Enter test name"
+              label={t('labResults.stepperLabels.labResultInfo', 'Lab Result Info')}
+              description={t('labResults.stepperLabels.enterTestName', 'Enter test name')}
             />
             <Stepper.Step
-              label="Upload & Parse"
-              description="Import from PDF"
+              label={t('labResults.stepperLabels.uploadParse', 'Upload & Parse')}
+              description={t('labResults.stepperLabels.importFromPdf', 'Import from PDF')}
             />
           </Stepper>
 
@@ -256,8 +331,23 @@ const LabResultQuickImportModal = ({
                   title={t('labResults.error', 'Error')}
                   color="red"
                   onClose={() => setError(null)}
+                  role="alert"
+                  aria-live="assertive"
                 >
-                  {error}
+                  <Stack gap="xs">
+                    <Text size="sm">{error}</Text>
+                    <Group gap="xs">
+                      <Button
+                        size="xs"
+                        variant="light"
+                        color="red"
+                        onClick={handleCreateLabResult}
+                        disabled={!testName.trim() || isCreating}
+                      >
+                        {t('buttons.retry', 'Retry')}
+                      </Button>
+                    </Group>
+                  </Stack>
                 </Alert>
               )}
 
@@ -267,13 +357,22 @@ const LabResultQuickImportModal = ({
                   'labResults.testNamePlaceholder',
                   'Endocrine Bloodwork etc.'
                 )}
-                description="This is the only required field - you can add more details later"
+                description={t(
+                  'labResults.testNameDescription',
+                  'This is the only required field - you can add more details later'
+                )}
                 value={testName}
-                onChange={e => setTestName(e.target.value)}
+                onChange={e => {
+                  setTestName(e.target.value);
+                  // Clear error when user starts typing
+                  if (error) setError(null);
+                }}
                 required
                 autoFocus
                 error={
-                  error && !testName.trim() ? 'Test name is required' : null
+                  error && !testName.trim()
+                    ? t('labResults.testNameRequired', 'Test name is required')
+                    : null
                 }
               />
 
@@ -293,7 +392,7 @@ const LabResultQuickImportModal = ({
 
               <FormLoadingOverlay
                 visible={isCreating}
-                message="Creating lab result..."
+                message={t('labResults.creatingLabResult', 'Creating lab result...')}
               />
             </Stack>
           )}
@@ -303,16 +402,22 @@ const LabResultQuickImportModal = ({
             <Stack gap="md">
               <Alert
                 icon={<IconCheck size={16} />}
-                title="Lab Result Created"
+                title={t('labResults.success', 'Success')}
                 color="green"
+                role="status"
+                aria-live="polite"
               >
-                Lab result "{testName}" has been created. Now you can upload and
-                parse your PDF.
+                {t(
+                  'labResults.labResultCreated',
+                  'Lab result "{{testName}}" has been created. Now you can upload and parse your PDF.',
+                  { testName }
+                )}
               </Alert>
 
               <TestComponentBulkEntry
                 labResultId={createdLabResultId}
                 onComponentsAdded={handleComponentsAdded}
+                onComponentsParsed={handleComponentsParsed}
                 onError={error => {
                   logger.error('quick_import_bulk_entry_error', {
                     message: 'Error in bulk entry during quick import',
@@ -323,13 +428,56 @@ const LabResultQuickImportModal = ({
 
                   notifications.show({
                     title: t('labResults.error', 'Error'),
-                    message: error.message || 'An error occurred',
+                    message: error.message || t('labResults.errorOccurred', 'An error occurred'),
                     color: 'red',
                   });
                 }}
               />
             </Stack>
           )}
+        </Stack>
+      </Modal>
+
+      {/* Data Loss Warning Modal */}
+      <Modal
+        opened={showDataLossWarning}
+        onClose={handleCancelDataLoss}
+        title={t(
+          'labResults.unsavedDataWarning',
+          'Unsaved Parsed Data'
+        )}
+        size="md"
+        centered
+        zIndex={3002}
+        role="alertdialog"
+        aria-describedby="data-loss-warning-description"
+      >
+        <Stack gap="md">
+          <Alert icon={<IconAlertCircle size={16} />} color="orange" role="alert">
+            <Text size="sm" id="data-loss-warning-description">
+              {t(
+                'labResults.unsavedDataMessage',
+                'You have {{count}} parsed test component(s) that haven\'t been added yet. If you close now, you\'ll lose this parsed data.',
+                { count: parsedComponentCount }
+              )}
+            </Text>
+          </Alert>
+
+          <Text size="sm" c="dimmed">
+            {t(
+              'labResults.unsavedDataInstructions',
+              'Click "Add Components" in the Preview tab to save your parsed data before closing.'
+            )}
+          </Text>
+
+          <Group justify="flex-end" mt="md">
+            <Button variant="subtle" onClick={handleCancelDataLoss}>
+              {t('labResults.continueEditing', 'Continue Editing')}
+            </Button>
+            <Button color="orange" onClick={handleConfirmDataLoss}>
+              {t('labResults.discardParsedData', 'Discard Parsed Data')}
+            </Button>
+          </Group>
         </Stack>
       </Modal>
 
@@ -344,9 +492,11 @@ const LabResultQuickImportModal = ({
         size="md"
         centered
         zIndex={3001}
+        role="alertdialog"
+        aria-describedby="delete-confirmation-description"
       >
         <Stack gap="md">
-          <Text size="sm">
+          <Text size="sm" id="delete-confirmation-description">
             {t(
               'labResults.emptyLabResultMessage',
               "You created a lab result but didn't add any test components. Would you like to delete this lab result?"
@@ -354,10 +504,19 @@ const LabResultQuickImportModal = ({
           </Text>
 
           <Group justify="flex-end" mt="md">
-            <Button variant="subtle" onClick={handleCancelDelete}>
+            <Button
+              variant="subtle"
+              onClick={handleCancelDelete}
+              disabled={isDeleting}
+            >
               {t('labResults.keepEmptyLabResult', 'Keep Lab Result')}
             </Button>
-            <Button color="red" onClick={handleConfirmDelete}>
+            <Button
+              color="red"
+              onClick={handleConfirmDelete}
+              loading={isDeleting}
+              disabled={isDeleting}
+            >
               {t('labResults.deleteEmptyLabResult', 'Delete Lab Result')}
             </Button>
           </Group>

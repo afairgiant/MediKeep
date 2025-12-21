@@ -130,6 +130,7 @@ interface ParsedTestComponent {
 interface TestComponentBulkEntryProps {
   labResultId: number;
   onComponentsAdded?: (components: LabTestComponent[]) => void;
+  onComponentsParsed?: (componentCount: number) => void; // Callback when components are parsed but not yet added
   onLabResultUpdated?: () => void; // Callback to refresh lab result after updating completed_date
   onError?: (error: Error) => void;
   disabled?: boolean;
@@ -332,6 +333,7 @@ TableRow.displayName = 'TableRow';
 const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   labResultId,
   onComponentsAdded,
+  onComponentsParsed,
   onLabResultUpdated,
   onError,
   disabled = false
@@ -386,6 +388,13 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       });
     }
   }, [failedLineCount, parsedComponents.length]);
+
+  // Notify parent when components are parsed (for data loss warnings)
+  useEffect(() => {
+    if (onComponentsParsed) {
+      onComponentsParsed(parsedComponents.length);
+    }
+  }, [parsedComponents.length, onComponentsParsed]);
 
   // Parse text into test components
   const parseText = useCallback((text: string): { components: ParsedTestComponent[], failedLineCount: number } => {
