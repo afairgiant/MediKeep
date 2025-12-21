@@ -360,6 +360,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   const [extractionMetadata, setExtractionMetadata] = useState<any>(null);
   const [extractionError, setExtractionError] = useState('');
   const [completedDate, setCompletedDate] = useState<Date | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('input');
 
   const handleError = useCallback((error: Error, context: string) => {
     logger.error('test_component_bulk_entry_error', {
@@ -932,7 +933,7 @@ Sodium,140,mEq/L,136-145,Normal`
         submessage="Processing bulk entry data"
       />
 
-            <Tabs defaultValue="input">
+            <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'input')}>
               <Tabs.List>
                 <Tabs.Tab value="input" leftSection={<IconFileText size={16} />}>
                   Text Input
@@ -1091,6 +1092,27 @@ Sodium,140,mEq/L,136-145,Normal`
                           </Text>
                         </Box>
                       </Stack>
+                    </Alert>
+                  )}
+
+                  {/* After Parsing - Show Preview Button */}
+                  {parsedComponents.length > 0 && (
+                    <Alert color="blue" icon={<IconTable size={16} />}>
+                      <Group justify="space-between" align="center">
+                        <div>
+                          <Text size="sm" fw={500}>Parsing complete!</Text>
+                          <Text size="xs" c="dimmed">
+                            Found {validComponents.length} valid component{validComponents.length !== 1 ? 's' : ''} ready to review
+                          </Text>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => setActiveTab('preview')}
+                          leftSection={<IconTable size={16} />}
+                        >
+                          Preview {validComponents.length} Result{validComponents.length !== 1 ? 's' : ''}
+                        </Button>
+                      </Group>
                     </Alert>
                   )}
 

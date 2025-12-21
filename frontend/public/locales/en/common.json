@@ -1631,5 +1631,21 @@
       "exportComplete": "Export completed successfully! Your {{format}} file has been downloaded.",
       "bulkExportComplete": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded."
     }
+  },
+  "labResults": {
+    "addNew": "+ Add New Lab Result",
+    "quickPdfImport": "Quick PDF Import",
+    "quickImportModalTitle": "Quick PDF Import - Step {{step}} of 2",
+    "quickFormInstructions": "Enter a name for this lab result, then you'll be able to upload and parse your PDF.",
+    "testNameLabel": "Lab Test Name",
+    "testNamePlaceholder": "e.g., Endocrine Bloodwork etc.",
+    "createAndContinue": "Create & Upload PDF",
+    "quickImportSuccess": "Lab result and test components imported successfully",
+    "emptyLabResultWarning": "Lab Result Created But Empty",
+    "emptyLabResultMessage": "You created a lab result but didn't add any test components. Would you like to delete this lab result?",
+    "deleteEmptyLabResult": "Delete Lab Result",
+    "keepEmptyLabResult": "Keep Lab Result",
+    "error": "Error",
+    "success": "Success"
   }
 }
