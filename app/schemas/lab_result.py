@@ -434,6 +434,8 @@ class PDFExtractionMetadata(BaseModel):
     lab_name: Optional[str] = None  # If lab-specific parser was used
     test_count: Optional[int] = None  # If lab-specific parser was used
     test_date: Optional[str] = None  # Extracted test date in YYYY-MM-DD format
+    fallback_triggered: Optional[bool] = False  # Indicates OCR fallback was used
+    native_test_count: Optional[int] = None  # Original test count before fallback
 
     @field_validator("method")
     @classmethod

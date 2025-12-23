@@ -173,6 +173,101 @@ class PDFTextExtractionService:
             PDFTextExtractionService._tesseract_available_cache = False
             return False
 
+    def _extract_ocr_text_with_retry(
+        self, pdf_bytes: bytes, filename: str, native_test_count: int
+    ) -> Optional[Dict]:
+        """
+        Attempt OCR extraction and lab-specific parsing as a fallback.
+
+        This method is called when native extraction yields poor results
+        (fewer than the configured minimum test count).
+
+        Args:
+            pdf_bytes: PDF file content as bytes
+            filename: Original filename for logging
+            native_test_count: Number of tests extracted by native method
+
+        Returns:
+            Dict with OCR extraction results if successful, None otherwise
+        """
+        from app.core.config import Settings
+
+        settings = Settings()
+
+        try:
+            logger.warning(
+                f"Native extraction yielded only {native_test_count} tests "
+                f"(threshold: {settings.OCR_FALLBACK_MIN_TESTS}). Attempting OCR fallback...",
+                extra={
+                    "component": "PDFTextExtractionService",
+                    "pdf_filename": filename,
+                    "native_test_count": native_test_count,
+                    "fallback_threshold": settings.OCR_FALLBACK_MIN_TESTS
+                }
+            )
+
+            # Extract text using OCR
+            ocr_result = self._extract_ocr_text(pdf_bytes)
+
+            if not ocr_result or not ocr_result.get('text'):
+                logger.warning(
+                    "OCR fallback failed: No text extracted",
+                    extra={"component": "PDFTextExtractionService", "pdf_filename": filename}
+                )
+                return None
+
+            # Try lab-specific parsing with OCR text
+            parsed_result = self._try_lab_specific_parsing(
+                ocr_result['text'], extraction_method='ocr'
+            )
+
+            if not parsed_result:
+                logger.warning(
+                    "OCR fallback failed: Lab-specific parsing unsuccessful",
+                    extra={"component": "PDFTextExtractionService", "pdf_filename": filename}
+                )
+                return None
+
+            ocr_test_count = parsed_result.get('test_count', 0)
+
+            # Compare OCR vs native results
+            if ocr_test_count > native_test_count:
+                logger.info(
+                    f"OCR fallback successful: Extracted {ocr_test_count} tests "
+                    f"(vs {native_test_count} from native extraction)",
+                    extra={
+                        "component": "PDFTextExtractionService",
+                        "pdf_filename": filename,
+                        "native_count": native_test_count,
+                        "ocr_count": ocr_test_count,
+                        "improvement": ocr_test_count - native_test_count
+                    }
+                )
+                return parsed_result
+            else:
+                logger.warning(
+                    f"OCR fallback did not improve results: {ocr_test_count} tests "
+                    f"(vs {native_test_count} from native)",
+                    extra={
+                        "component": "PDFTextExtractionService",
+                        "pdf_filename": filename,
+                        "native_count": native_test_count,
+                        "ocr_count": ocr_test_count
+                    }
+                )
+                return None
+
+        except Exception as e:
+            logger.error(
+                f"OCR fallback failed with exception: {str(e)}",
+                extra={
+                    "component": "PDFTextExtractionService",
+                    "pdf_filename": filename,
+                    "error": str(e)
+                }
+            )
+            return None
+
     def extract_text(self, pdf_bytes: bytes, filename: str = "document.pdf") -> Dict:
         """
         Extract text from PDF using hybrid approach.
@@ -209,7 +304,40 @@ class PDFTextExtractionService:
                 parsed_result = self._try_lab_specific_parsing(native_result['text'])
 
                 if parsed_result:
-                    # Lab-specific parser succeeded
+                    # Lab-specific parser succeeded, but check if quality is good enough
+                    from app.core.config import Settings
+                    settings = Settings()
+
+                    test_count = parsed_result.get('test_count', 0)
+
+                    # Quality-based OCR fallback: retry if test count below threshold
+                    if (test_count < settings.OCR_FALLBACK_MIN_TESTS and
+                        settings.OCR_FALLBACK_ENABLED and
+                        self.ocr_available):
+
+                        # Attempt OCR fallback
+                        ocr_fallback_result = self._extract_ocr_text_with_retry(
+                            pdf_bytes, filename, test_count
+                        )
+
+                        if ocr_fallback_result:
+                            # OCR fallback succeeded - return improved results
+                            ocr_fallback_result['fallback_triggered'] = True
+                            ocr_fallback_result['native_test_count'] = test_count
+                            return ocr_fallback_result
+
+                        # OCR fallback didn't improve results - return native
+                        logger.info(
+                            f"OCR fallback did not improve results, returning native extraction",
+                            extra={
+                                "component": "PDFTextExtractionService",
+                                "pdf_filename": filename,
+                                "test_count": test_count
+                            }
+                        )
+
+                    # Return native result (either good quality or fallback didn't help)
+                    parsed_result['fallback_triggered'] = False
                     return parsed_result
 
                 # Fallback to generic cleaning if no lab parser matched
@@ -232,7 +360,8 @@ class PDFTextExtractionService:
                     'method': 'native',
                     'confidence': 0.95,
                     'error': None,
-                    'lab_name': 'Unknown'
+                    'lab_name': 'Unknown',
+                    'fallback_triggered': False
                 }
 
             # Phase 2: Fallback to OCR (slow path) - only if available
@@ -251,7 +380,8 @@ class PDFTextExtractionService:
                     'confidence': 0.0,
                     'page_count': native_result['page_count'],
                     'char_count': 0,
-                    'error': 'Tesseract OCR is not installed. Cannot extract text from scanned PDFs. Please install Tesseract or provide a digital PDF.'
+                    'error': 'Tesseract OCR is not installed. Cannot extract text from scanned PDFs. Please install Tesseract or provide a digital PDF.',
+                    'fallback_triggered': False
                 }
 
             logger.info(
@@ -273,7 +403,8 @@ class PDFTextExtractionService:
                 'char_count': len(cleaned_text),
                 'method': 'ocr',
                 'confidence': 0.75,  # OCR is less reliable
-                'error': None
+                'error': None,
+                'fallback_triggered': False
             }
 
         except Exception as e:
@@ -292,7 +423,8 @@ class PDFTextExtractionService:
                 'confidence': 0.0,
                 'page_count': 0,
                 'char_count': 0,
-                'error': str(e)
+                'error': str(e),
+                'fallback_triggered': False
             }
 
     def _extract_native_text(self, pdf_bytes: bytes) -> Dict:
@@ -450,12 +582,13 @@ class PDFTextExtractionService:
 
         return cleaned_text
 
-    def _try_lab_specific_parsing(self, text: str) -> Optional[Dict]:
+    def _try_lab_specific_parsing(self, text: str, extraction_method: str = 'native') -> Optional[Dict]:
         """
         Try to parse using lab-specific parsers.
 
         Args:
             text: Extracted PDF text
+            extraction_method: Method used to extract text ('native' or 'ocr')
 
         Returns:
             Dict with formatted text if successful, None otherwise
@@ -509,14 +642,22 @@ class PDFTextExtractionService:
             # Normalize lab name for method field (remove spaces, convert to lowercase)
             # "Quest Diagnostics" -> "quest_parser"
             # "LabCorp" -> "labcorp_parser"
-            lab_method = lab_name.lower().replace(' ', '_').replace('diagnostics', '').replace('__', '_').strip('_') + '_parser'
+            lab_method_base = lab_name.lower().replace(' ', '_').replace('diagnostics', '').replace('__', '_').strip('_') + '_parser'
+
+            # Adjust method name and confidence based on extraction method
+            if extraction_method == 'ocr':
+                lab_method = lab_method_base + '_ocr'
+                confidence = 0.85  # Lower confidence for OCR-based extraction
+            else:
+                lab_method = lab_method_base
+                confidence = 0.98  # Higher confidence for native extraction
 
             return {
                 'text': formatted_text,
                 'page_count': 1,  # Not tracking pages in structured parsing
                 'char_count': len(formatted_text),
                 'method': lab_method,
-                'confidence': 0.98,  # Higher confidence for structured parsing
+                'confidence': confidence,
                 'error': None,
                 'lab_name': lab_name,
                 'test_count': len(results),
