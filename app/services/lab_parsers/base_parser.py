@@ -56,7 +56,7 @@ class BaseLabParser(ABC):
         # Leading character corruption
         r'^\^([a-z])': r'B\1',   # ^asos → Basos
         r'^h([A-Z])': r'\1',     # hNeutrophils → Neutrophils (remove h before uppercase)
-        r'^hl([a-z])': r'N\1',   # hleutrophils → Neutrophils (hl -> N before lowercase)
+        r'^hl': r'N',            # hleutrophils → Neutrophils (hl -> N)
 
         # Trailing artifacts - remove quotes and apostrophes
         # Match quotes/apostrophes after any word character or closing parenthesis
@@ -64,11 +64,8 @@ class BaseLabParser(ABC):
         r'(\w|\))"': r'\1',      # Single double quote
         r'(\w|\))\'': r'\1',     # Single apostrophe
 
-        # Special character cleanup in test names
-        r'([A-Za-z]+)<"': r'\1',  # RBC<" → RBC
-        r'([A-Za-z]+)<': r'\1',   # RBC< → RBC
-        r'([A-Za-z]+)>"': r'\1',  # TEST>" → TEST
-        r'([A-Za-z]+)>': r'\1',   # TEST> → TEST
+        # Special character cleanup in test names (consolidated pattern)
+        r'([A-Za-z]+)[<>]"?': r'\1',  # RBC<", RBC<, TEST>", TEST> → RBC, TEST
 
         # Unicode/OCR character misreads
         r'^lijn': 'Im',  # lijnmature → Immature (lijn -> Im)

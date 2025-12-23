@@ -174,7 +174,7 @@ class PDFTextExtractionService:
             return False
 
     def _extract_ocr_text_with_retry(
-        self, pdf_bytes: bytes, filename: str, native_test_count: int
+        self, pdf_bytes: bytes, filename: str, native_test_count: int, settings
     ) -> Optional[Dict]:
         """
         Attempt OCR extraction and lab-specific parsing as a fallback.
@@ -186,13 +186,11 @@ class PDFTextExtractionService:
             pdf_bytes: PDF file content as bytes
             filename: Original filename for logging
             native_test_count: Number of tests extracted by native method
+            settings: Settings instance (to avoid redundant instantiation)
 
         Returns:
             Dict with OCR extraction results if successful, None otherwise
         """
-        from app.core.config import Settings
-
-        settings = Settings()
 
         try:
             logger.warning(
@@ -317,7 +315,7 @@ class PDFTextExtractionService:
 
                         # Attempt OCR fallback
                         ocr_fallback_result = self._extract_ocr_text_with_retry(
-                            pdf_bytes, filename, test_count
+                            pdf_bytes, filename, test_count, settings
                         )
 
                         if ocr_fallback_result:

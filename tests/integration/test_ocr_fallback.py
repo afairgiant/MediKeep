@@ -5,7 +5,7 @@ Tests the automatic OCR retry when native extraction yields poor results.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from app.services.pdf_text_extraction_service import PDFTextExtractionService
 
 

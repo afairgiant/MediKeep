@@ -6,7 +6,6 @@ found in scanned lab reports (quote marks, special characters, corruption).
 """
 
 import pytest
-from app.services.lab_parsers.base_parser import BaseLabParser
 from app.services.lab_parsers.labcorp_parser_v2 import LabCorpParserV2
 
 

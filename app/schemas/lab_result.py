@@ -441,9 +441,17 @@ class PDFExtractionMetadata(BaseModel):
     @classmethod
     def validate_method(cls, v):
         """Validate extraction method"""
+        # Base methods
         valid_methods = ["native", "ocr", "failed", "labcorp_parser", "quest_parser"]
+
+        # Allow OCR variants (e.g., "labcorp_parser_ocr", "quest_parser_ocr")
+        if v.endswith("_ocr"):
+            base_method = v[:-4]  # Remove "_ocr" suffix
+            if base_method in ["labcorp_parser", "quest_parser"]:
+                return v
+
         if v not in valid_methods:
-            raise ValueError(f"Method must be one of: {', '.join(valid_methods)}")
+            raise ValueError(f"Method must be one of: {', '.join(valid_methods)} or parser_ocr variants")
         return v
 
     @field_validator("confidence")
