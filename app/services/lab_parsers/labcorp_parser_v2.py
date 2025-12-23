@@ -50,18 +50,40 @@ class LabCorpParserV2(BaseLabParser):
         logger.info("LABCORP PARSER V2 - PROCESSING LINES")
         logger.info("="*80)
 
-        for line in lines:
-            line = line.strip()
+        # Use index-based loop to support multi-line parsing
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+
+            # Skip empty lines
             if not line:
+                i += 1
                 continue
 
-            # Try to parse this line
+            # Try single-line parse first
             result = self._parse_line(line, test_date=test_date)
             if result:
-                logger.info(f"✓ PARSED: {result.test_name} = {result.value} {result.unit}")
+                logger.info(f"✓ PARSED (single): {result.test_name} = {result.value} {result.unit}")
                 results.append(result)
-            else:
-                logger.info(f"✗ SKIPPED: {line[:80]}")
+                i += 1
+                continue
+
+            # Try multi-line parse (combine with next line)
+            if i + 1 < len(lines):
+                next_line = lines[i + 1].strip()
+                combined = line + " " + next_line
+                result = self._parse_line(combined, test_date=test_date)
+                if result:
+                    logger.info(f"✓ PARSED (multi-line): {result.test_name} = {result.value} {result.unit}")
+                    logger.info(f"  Line 1: {line[:60]}")
+                    logger.info(f"  Line 2: {next_line[:60]}")
+                    results.append(result)
+                    i += 2  # Skip both lines
+                    continue
+
+            # No match, skip line
+            logger.info(f"✗ SKIPPED: {line[:80]}")
+            i += 1
 
         logger.info("="*80)
         logger.info(f"TOTAL PARSED: {len(results)} components")
@@ -79,6 +101,9 @@ class LabCorpParserV2(BaseLabParser):
         if self._is_noise(line):
             return None
 
+        # Clean OCR artifacts before parsing
+        line = self.clean_ocr_artifacts(line)
+
         # Pattern to match lab results:
         # Group 1: Test name (letters, spaces, commas, parentheses, slashes, hyphens, NUMBERS for B12, etc.)
         # Group 2: Optional superscript (01, 02, 03, etc.)
@@ -88,18 +113,24 @@ class LabCorpParserV2(BaseLabParser):
 
         # Try pattern WITH superscript first (more specific)
         # Allow % at start for tests like "% Free Testosterone"
-        pattern_with_super = r'^([\%A-Za-z][A-Za-z0-9\s,\(\)/\-\%]+?)\s+(\d{2})\s+(\d+\.?\d*)\s*(High|Low|Critical|H|L)?\s+'
+        # Include OCR artifacts (", ', <, >, ^) in pattern - cleanup happens after matching
+        # This allows regex to match corrupted text, then clean_test_name() removes artifacts
+        # Note: Caret (^) is escaped as \^ to avoid confusion with negation
+        pattern_with_super = r'^([\%A-Za-z"\'\^<>][A-Za-z0-9\s,\(\)/\-\%"\'\^<>]+?)\s+(\d{2})\s+(\d+\.?\d*)\s*(High|Low|Critical|H|L)?\s+'
         match = re.match(pattern_with_super, line)
 
         # If no match, try pattern WITHOUT superscript
         if not match:
-            pattern_no_super = r'^([A-Za-z][A-Za-z0-9\s,\(\)/\-\%]+?)\s+(\d+\.?\d*)\s+(High|Low|Critical|H|L)?\s*(\d+\.?\d*)\s+'
+            # Allow < or > before previous value (e.g., <5.0, >10.0)
+            # Allow % at start for tests like "% Free Testosterone"
+            # Include OCR artifacts in pattern - cleanup happens after matching
+            pattern_no_super = r'^([\%A-Za-z"\'\^<>][A-Za-z0-9\s,\(\)/\-\%"\'\^<>]+?)\s+(\d+\.?\d*)\s+(High|Low|Critical|H|L)?\s*([<>]?\d+\.?\d*)\s+'
             match = re.match(pattern_no_super, line)
             if match:
-                # Reorder groups to match expected structure (name, None, value, flag)
+                # Reorder groups to match expected structure (name, superscript, value, flag)
                 # In this pattern: group1=name, group2=value, group3=flag, group4=previous_value
-                # We need to pretend group2 is the superscript (None) and group2 is value
-                test_name = match.group(1).strip()
+                # We need to pretend superscript is None and use group2 as value
+                test_name = self.clean_test_name(match.group(1))
                 value_str = match.group(2)
                 flag = match.group(3) or ""
 
@@ -129,7 +160,7 @@ class LabCorpParserV2(BaseLabParser):
         if not match:
             return None
 
-        test_name = match.group(1).strip()
+        test_name = self.clean_test_name(match.group(1))
         value_str = match.group(3)
         flag = match.group(4) or ""
 
