@@ -58,14 +58,15 @@ class BaseLabParser(ABC):
         r'^h([A-Z])': r'\1',     # hNeutrophils → Neutrophils (remove h before uppercase)
         r'^hl': r'N',            # hleutrophils → Neutrophils (hl -> N)
 
-        # Trailing artifacts - remove quotes and apostrophes
-        # Match quotes/apostrophes after any word character or closing parenthesis
-        r'(\w|\))"\'*': r'\1',   # Remove quotes after word chars or )
-        r'(\w|\))"': r'\1',      # Single double quote
-        r'(\w|\))\'': r'\1',     # Single apostrophe
+        # Trailing artifacts - remove quotes and apostrophes (consolidated pattern)
+        # Match one or more quotes/apostrophes after word chars or closing parenthesis
+        r'(\w|\))["\']+': r'\1',  # Remove trailing quotes/apostrophes
 
         # Special character cleanup in test names (consolidated pattern)
         r'([A-Za-z]+)[<>]"?': r'\1',  # RBC<", RBC<, TEST>", TEST> → RBC, TEST
+
+        # Unit corruption - OCR misreads in scientific notation units
+        r'x[lI]O(E\d+)': r'x10\1',  # xlOE3 → x10E3, xIOE6 → x10E6 (l/I → 1, O → 0)
 
         # Unicode/OCR character misreads
         r'^lijn': 'Im',  # lijnmature → Immature (lijn -> Im)
@@ -117,9 +118,11 @@ class BaseLabParser(ABC):
             >>> parser.clean_ocr_artifacts('^asos')
             'Basos'
             >>> parser.clean_ocr_artifacts('hleutrophils')
-            'Nleutrophils'
+            'Neutrophils'
             >>> parser.clean_ocr_artifacts('RBC<"')
             'RBC'
+            >>> parser.clean_ocr_artifacts('xlOE3/uL')
+            'x10E3/uL'
         """
         cleaned = text
 

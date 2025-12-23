@@ -115,7 +115,7 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is True, "Fallback should be triggered"
+            assert result['fallback_triggered'] is True, "Fallback triggered (OCR improved results)"
             assert result['native_test_count'] == 3, "Should record original test count"
             assert result['test_count'] == 10, "Should return OCR test count"
             assert 'ocr' in result['method'], "Method should indicate OCR was used"
@@ -151,7 +151,7 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is False, "Fallback should NOT be triggered"
+            assert result['fallback_triggered'] is False, "Fallback not triggered (good quality)"
             assert result['test_count'] == 10, "Should return native test count"
             assert result['method'] == 'labcorp_parser', "Should use native parser"
             assert result['confidence'] == 0.98, "Native confidence should be 0.98"
@@ -191,7 +191,7 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is False, "Fallback unsuccessful, should be False"
+            assert result['fallback_triggered'] is False, "Fallback not used (no improvement)"
             assert result['test_count'] == 3, "Should return native test count"
             assert result['method'] == 'labcorp_parser', "Should use native parser"
             assert result['confidence'] == 0.98, "Should have native confidence"
@@ -213,7 +213,7 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
         with patch.object(extraction_service, '_extract_native_text') as mock_native, \
              patch.object(extraction_service, '_extract_ocr_text') as mock_ocr, \
              patch.object(extraction_service, 'ocr_available', True), \
-             patch('app.core.config.Settings') as mock_settings:
+             patch('app.services.pdf_text_extraction_service.Settings') as mock_settings:
 
             # Disable OCR fallback in config
             mock_settings_instance = Mock()
@@ -232,7 +232,7 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is False, "Fallback disabled, should be False"
+            assert result['fallback_triggered'] is False, "Fallback not triggered (disabled in config)"
             assert result['test_count'] == 3, "Should return native test count"
 
             # Verify OCR was NOT called
@@ -264,7 +264,7 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is False, "OCR unavailable, no fallback"
+            assert result['fallback_triggered'] is False, "Fallback not triggered (OCR unavailable)"
             assert result['test_count'] == 3, "Should return native test count"
 
             # Verify OCR was NOT called
@@ -346,6 +346,6 @@ MCV 85 87 11/23/2022 fL 79-97
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # At threshold (5 tests), no fallback should occur
-            assert result['fallback_triggered'] is False
-            assert result['test_count'] == 5
+            assert result['fallback_triggered'] is False, "Fallback not triggered (at threshold)"
+            assert result['test_count'] == 5, "Should return exactly 5 tests"
             mock_ocr.assert_not_called()

@@ -423,6 +423,12 @@ class LabResultConditionWithDetails(LabResultConditionResponse):
 
 # OCR/PDF Extraction Schemas
 
+# Valid extraction methods - centralized for maintainability
+EXTRACTION_METHODS_BASE = ["native", "ocr", "failed"]
+EXTRACTION_METHODS_PARSERS = ["labcorp_parser", "quest_parser"]
+EXTRACTION_METHODS_ALL = EXTRACTION_METHODS_BASE + EXTRACTION_METHODS_PARSERS
+
+
 class PDFExtractionMetadata(BaseModel):
     """Metadata about PDF text extraction"""
 
@@ -441,17 +447,17 @@ class PDFExtractionMetadata(BaseModel):
     @classmethod
     def validate_method(cls, v):
         """Validate extraction method"""
-        # Base methods
-        valid_methods = ["native", "ocr", "failed", "labcorp_parser", "quest_parser"]
-
         # Allow OCR variants (e.g., "labcorp_parser_ocr", "quest_parser_ocr")
         if v.endswith("_ocr"):
             base_method = v[:-4]  # Remove "_ocr" suffix
-            if base_method in ["labcorp_parser", "quest_parser"]:
+            if base_method in EXTRACTION_METHODS_PARSERS:
                 return v
 
-        if v not in valid_methods:
-            raise ValueError(f"Method must be one of: {', '.join(valid_methods)} or parser_ocr variants")
+        if v not in EXTRACTION_METHODS_ALL:
+            raise ValueError(
+                f"Method must be one of: {', '.join(EXTRACTION_METHODS_ALL)} "
+                f"or parser_ocr variants ({', '.join(p + '_ocr' for p in EXTRACTION_METHODS_PARSERS)})"
+            )
         return v
 
     @field_validator("confidence")

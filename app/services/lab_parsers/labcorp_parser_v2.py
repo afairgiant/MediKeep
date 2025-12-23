@@ -115,7 +115,8 @@ class LabCorpParserV2(BaseLabParser):
         # Allow % at start for tests like "% Free Testosterone"
         # Include OCR artifacts (", ', <, >, ^) in pattern - cleanup happens after matching
         # This allows regex to match corrupted text, then clean_test_name() removes artifacts
-        pattern_with_super = r'^([\%A-Za-z"\'^<>][A-Za-z0-9\s,\(\)/\-\%"\'^<>]+?)\s+(\d{2})\s+(\d+\.?\d*)\s*(High|Low|Critical|H|L)?\s+'
+        # Note: Caret (^) is escaped as \^ to avoid confusion with negation
+        pattern_with_super = r'^([\%A-Za-z"\'\^<>][A-Za-z0-9\s,\(\)/\-\%"\'\^<>]+?)\s+(\d{2})\s+(\d+\.?\d*)\s*(High|Low|Critical|H|L)?\s+'
         match = re.match(pattern_with_super, line)
 
         # If no match, try pattern WITHOUT superscript
@@ -123,7 +124,7 @@ class LabCorpParserV2(BaseLabParser):
             # Allow < or > before previous value (e.g., <5.0, >10.0)
             # Allow % at start for tests like "% Free Testosterone"
             # Include OCR artifacts in pattern - cleanup happens after matching
-            pattern_no_super = r'^([\%A-Za-z"\'^<>][A-Za-z0-9\s,\(\)/\-\%"\'^<>]+?)\s+(\d+\.?\d*)\s+(High|Low|Critical|H|L)?\s*([<>]?\d+\.?\d*)\s+'
+            pattern_no_super = r'^([\%A-Za-z"\'\^<>][A-Za-z0-9\s,\(\)/\-\%"\'\^<>]+?)\s+(\d+\.?\d*)\s+(High|Low|Critical|H|L)?\s*([<>]?\d+\.?\d*)\s+'
             match = re.match(pattern_no_super, line)
             if match:
                 # Reorder groups to match expected structure (name, None, value, flag)

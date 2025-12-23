@@ -15,6 +15,7 @@ from PIL import Image
 import pytesseract
 
 from app.core.logging.config import get_logger
+from app.core.config import Settings
 from app.services.lab_parsers import lab_parser_registry
 from app.core.platform.external_binaries import (
     get_poppler_path,
@@ -303,7 +304,6 @@ class PDFTextExtractionService:
 
                 if parsed_result:
                     # Lab-specific parser succeeded, but check if quality is good enough
-                    from app.core.config import Settings
                     settings = Settings()
 
                     test_count = parsed_result.get('test_count', 0)
