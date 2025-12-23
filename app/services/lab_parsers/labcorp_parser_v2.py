@@ -127,9 +127,9 @@ class LabCorpParserV2(BaseLabParser):
             pattern_no_super = r'^([\%A-Za-z"\'\^<>][A-Za-z0-9\s,\(\)/\-\%"\'\^<>]+?)\s+(\d+\.?\d*)\s+(High|Low|Critical|H|L)?\s*([<>]?\d+\.?\d*)\s+'
             match = re.match(pattern_no_super, line)
             if match:
-                # Reorder groups to match expected structure (name, None, value, flag)
+                # Reorder groups to match expected structure (name, superscript, value, flag)
                 # In this pattern: group1=name, group2=value, group3=flag, group4=previous_value
-                # We need to pretend group2 is the superscript (None) and group2 is value
+                # We need to pretend superscript is None and use group2 as value
                 test_name = self.clean_test_name(match.group(1))
                 value_str = match.group(2)
                 flag = match.group(3) or ""

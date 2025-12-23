@@ -111,6 +111,9 @@ class PDFTextExtractionService:
         # Configure bundled binaries for Windows EXE
         configure_environment_for_binaries()
 
+        # Initialize settings
+        self.settings = Settings()
+
         # Check Tesseract availability on initialization (cached at class level)
         self.ocr_available = self._check_tesseract_availability()
 
@@ -175,7 +178,7 @@ class PDFTextExtractionService:
             return False
 
     def _extract_ocr_text_with_retry(
-        self, pdf_bytes: bytes, filename: str, native_test_count: int, settings
+        self, pdf_bytes: bytes, filename: str, native_test_count: int
     ) -> Optional[Dict]:
         """
         Attempt OCR extraction and lab-specific parsing as a fallback.
@@ -187,7 +190,6 @@ class PDFTextExtractionService:
             pdf_bytes: PDF file content as bytes
             filename: Original filename for logging
             native_test_count: Number of tests extracted by native method
-            settings: Settings instance (to avoid redundant instantiation)
 
         Returns:
             Dict with OCR extraction results if successful, None otherwise
@@ -196,12 +198,12 @@ class PDFTextExtractionService:
         try:
             logger.warning(
                 f"Native extraction yielded only {native_test_count} tests "
-                f"(threshold: {settings.OCR_FALLBACK_MIN_TESTS}). Attempting OCR fallback...",
+                f"(threshold: {self.settings.OCR_FALLBACK_MIN_TESTS}). Attempting OCR fallback...",
                 extra={
                     "component": "PDFTextExtractionService",
                     "pdf_filename": filename,
                     "native_test_count": native_test_count,
-                    "fallback_threshold": settings.OCR_FALLBACK_MIN_TESTS
+                    "fallback_threshold": self.settings.OCR_FALLBACK_MIN_TESTS
                 }
             )
 
@@ -304,18 +306,16 @@ class PDFTextExtractionService:
 
                 if parsed_result:
                     # Lab-specific parser succeeded, but check if quality is good enough
-                    settings = Settings()
-
                     test_count = parsed_result.get('test_count', 0)
 
                     # Quality-based OCR fallback: retry if test count below threshold
-                    if (test_count < settings.OCR_FALLBACK_MIN_TESTS and
-                        settings.OCR_FALLBACK_ENABLED and
+                    if (test_count < self.settings.OCR_FALLBACK_MIN_TESTS and
+                        self.settings.OCR_FALLBACK_ENABLED and
                         self.ocr_available):
 
                         # Attempt OCR fallback
                         ocr_fallback_result = self._extract_ocr_text_with_retry(
-                            pdf_bytes, filename, test_count, settings
+                            pdf_bytes, filename, test_count
                         )
 
                         if ocr_fallback_result:

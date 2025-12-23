@@ -23,8 +23,8 @@ class TestOCRCleanup:
         """Test removal of leading ^ character (^asos → Basos)."""
         assert parser.clean_ocr_artifacts("^asos") == "Basos"
 
-    def test_clean_leading_h_corruption(self, parser):
-        """Test correction of h -> N at start (hNeutrophils → Neutrophils)."""
+    def test_clean_leading_h_removal(self, parser):
+        """Test removal of leading h before uppercase (hNeutrophils → Neutrophils)."""
         # Note: The pattern requires uppercase after h
         assert parser.clean_ocr_artifacts("hNeutrophils") == "Neutrophils"
 
