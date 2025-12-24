@@ -80,7 +80,28 @@
   "vitals": {
     "form": {
       "selectDate": "Sélectionnez la date",
-      "selectDateTime": "Sélectionnez la date et l'heure"
+      "selectDateTime": "Sélectionnez la date et l'heure",
+      "validation": {
+        "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",
+        "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
+        "a1cMin": "A1C doit valoir au moins 0 %",
+        "a1cMax": "A1C ne peut dépasser 20 %"
+      }
+    },
+    "modal": {
+      "bloodGlucose": "Taux de glucose dans le sang",
+      "a1c": "A1C"
+    },
+    "units": {
+      "mgdl": "mg/dL"
+    },
+    "stats": {
+      "bloodGlucoseDesc": "Cliquez pour afficher les entrées avec un taux de glucose dans le sang",
+      "a1cDesc": "Cliquez pour afficher les entrées avec une valeur de test A1C"
+    },
+    "categories": {
+      "prediabetes": "Pre-diabète",
+      "diabetes": "Diabète"
     }
   },
   "medications": {
@@ -209,7 +230,7 @@
       },
       "relationship": {
         "label": "Lien de parenté",
-        "placeholder": "Sélectionnez la relation (optionnel)",
+        "placeholder": "Sélectionnez le lien de parenté (optionnel)",
         "description": "Quel est votre lien de parenté avec cette personne ?",
         "options": {
           "select": "Sélectionnez le lien de parenté (optionnel)",
@@ -807,12 +828,12 @@
     "tryAdjustingFilters": "Essayez d'ajuster vos critères de recherche ou de tri.",
     "clickToGetStarted": "Cliquez sur \"Ajouter une nouvelle visite\" pour commencer.",
     "table": {
-      "visitDate": "Visit Date",
-      "reason": "Reason",
-      "visitType": "Visit Type",
-      "facility": "Facility",
-      "relatedCondition": "Related Condition",
-      "diagnosis": "Diagnosis"
+      "visitDate": "Date de la visite",
+      "reason": "Raison",
+      "visitType": "Type de visite",
+      "facility": "Etablissement",
+      "relatedCondition": "Condition concernée",
+      "diagnosis": "Diagnostic"
     },
     "card": {
       "noPractitionerAssigned": "Aucun médecin assigné",
@@ -1610,5 +1631,46 @@
       "exportComplete": "Exportation complétée avec succès. Votre fichier au format {{format}} a été téléchargé.",
       "bulkExportComplete": "Exportation de masse complétée avec succès. Votre fichier ZIP contenant {{count}} types de données a été téléchargé."
     }
+  },
+  "labResults": {
+    "addNew": "+ Ajouter un résultat d'analyses",
+    "quickPdfImport": "Importation PDF rapide",
+    "quickImportModalTitle": "Importation PDF rapide - Etape {{step}} sur 2",
+    "quickFormInstructions": "Saisissez un nom pour ce résultat d'analyses, puis vous pourrez téléverser et analyser votre PDF.",
+    "testNameLabel": "Nom du résultat d'analyses",
+    "testNamePlaceholder": "ex : Analyse des hormones sanguines, etc.",
+    "testNameDescription": "Ceci est le seul champ requis ; vous pouvez ajouter plus de détails plus tard",
+    "testNameRequired": "Le nom du résultat est requis",
+    "testNameTooShort": "Le nom du résultat doit faire au moins {{minLength}} caractères",
+    "testNameTooLong": "Le nom du résultat ne peut pas dépasser {{maxLength}} caractères",
+    "patientIdRequired": "L'ID du patient est requis. Veuillez d'abord sélectionner un patient.",
+    "createAndContinue": "Créer & Téléverser PDF",
+    "creatingLabResult": "Création du résultat d'analyses...",
+    "createFailed": "Echec de création du résultat d'analyses",
+    "createFailedTryAgain": "Echec de création du résultat d'analyses. Veuillez réessayer.",
+    "networkError": "Erreur réseau. Veuillez vérifier votre connexion et réessayer.",
+    "timeoutError": "Requête expirée. Veuillez réessayer.",
+    "labResultCreated": "Le résultat d'analyses \"{{testName}}\" a été créé. Vous pouvez désormais télécharger et analyser votre PDF.",
+    "labResultDeleted": "Résultat d'analyses supprimé",
+    "deleteFailed": "Echec de suppression du résultat d'analyses",
+    "errorOccurred": "Une erreur s'est produite",
+    "quickImportSuccess": "Résultat et composants d'analyses importés avec succès",
+    "unsavedDataWarning": "Données analysées non sauvegardées",
+    "unsavedDataMessage": "Vous avez {{count}} composant(s) d'analyses analysés non encore ajouté(s). Si vous quittez le menu maintenant, vous perdrez ces données analysées.",
+    "unsavedDataInstructions": "Cliquez sur \"Ajouter des composants\" dans l'onglet de prévisualisation pour sauvegarder vos données analysées avant la fermeture du menu.",
+    "continueEditing": "Continuer à éditer",
+    "discardParsedData": "Abandonner les donneés analysées",
+    "emptyLabResultWarning": "Résultat d'analyses créé, mais vide",
+    "emptyLabResultMessage": "Vous avez créé un résultat d'analyses, mais sans y ajouter de composants d'analyses. Souhaitez-vous supprimer ce résultat d'analyses ?",
+    "deleteEmptyLabResult": "Supprimer le résultat d'analyses",
+    "keepEmptyLabResult": "Conserver le résultat d'analyses",
+    "stepperLabels": {
+      "labResultInfo": "Informations du résultat d'analyses",
+      "enterTestName": "Saisissez un nom d'analyse",
+      "uploadParse": "Téléverser et analyser",
+      "importFromPdf": "Importer depuis PDF"
+    },
+    "error": "Erreur",
+    "success": "Succès"
   }
 }
