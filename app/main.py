@@ -8,7 +8,6 @@ from app.core.logging.middleware import RequestLoggingMiddleware
 from app.core.http.middleware import TrailingSlashMiddleware
 from app.core.logging.activity_middleware import ActivityTrackingMiddleware
 from app.core.logging.request_id_middleware import RequestIDMiddleware
-from app.core.http.spa_routing import setup_spa_routing
 from app.core.startup import startup_event
 from app.core.http.static_files import setup_static_files
 from app.core.logging.uvicorn_logging import configure_uvicorn_logging
@@ -65,7 +64,3 @@ def health():
         "Health check requested", extra={"category": "app", "event": "health_check"}
     )
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}
-
-
-# Setup SPA routing (only activates if React build exists)
-setup_spa_routing(app, static_dir, html_dir)
