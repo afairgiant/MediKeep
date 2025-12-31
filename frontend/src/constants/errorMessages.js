@@ -265,8 +265,11 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
   const lowerError = errorMessage.toLowerCase();
 
   // If message already has error code pattern, it's already been processed
-  // Pattern: (Error: [A-Z]+-\d+) or (Error: [A-Z]+)
-  if (/\(Error: [A-Z0-9-]+\)/.test(errorMessage)) {
+  // Handles multiple error code formats to prevent double-processing:
+  // - (Error: CODE) or (Error:CODE) - with or without space
+  // - Error: CODE or Error:CODE - at start of message
+  if (/\(Error:\s*[A-Z0-9-]+\)/.test(errorMessage) ||
+      /^Error:\s*[A-Z]+-\d+/.test(errorMessage)) {
     return errorMessage;
   }
 
@@ -275,7 +278,13 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
 
   // SIMPLE RULE: If error has field-level details (formatted by backend), keep it
   // Updated regex to handle single-letter fields, acronyms (ID, URL), and CamelCase
-  if (/^[A-Z][^:]*:/.test(errorMessage)) {
+  // Supports: "X: error", "ID: error", "StartDate: error", "Patient_ID: error"
+  // Excludes: "Error:", "Warning:", "Info:", "Debug:" (common log prefixes)
+  if (/^[A-Z][a-zA-Z0-9_\s]*:/.test(errorMessage) &&
+      !errorMessage.startsWith('Error:') &&
+      !errorMessage.startsWith('Warning:') &&
+      !errorMessage.startsWith('Info:') &&
+      !errorMessage.startsWith('Debug:')) {
     friendlyMessage = errorMessage;
     errorCode = errorCode || 'VAL-422'; // Validation errors use backend code
   }
@@ -302,7 +311,19 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
     friendlyMessage = ERROR_MESSAGES.DUPLICATE_FILE;
     errorCode = errorCode || 'FILE-409';
   }
-  // Permission errors
+  // Login errors (check EARLY before permission check to avoid conflicts)
+  // This ensures "Access denied" during login shows "Incorrect credentials" not "Permission denied"
+  else if (operation === 'login' &&
+           (lowerError.includes('incorrect') ||
+            lowerError.includes('invalid') ||
+            lowerError.includes('login failed') ||
+            lowerError.includes('unauthorized') ||
+            lowerError.includes('denied') ||
+            lowerError.includes('401'))) {
+    friendlyMessage = 'Incorrect credentials.';
+    errorCode = errorCode || 'AUTH-401';
+  }
+  // Permission errors (skip login operation - already handled above)
   else if (lowerError.includes('permission') || lowerError.includes('unauthorized') || lowerError.includes('denied')) {
     friendlyMessage = ERROR_MESSAGES.PERMISSION_DENIED;
     errorCode = errorCode || 'PERM-403';
@@ -316,15 +337,6 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
   else if (lowerError.includes('paperless')) {
     friendlyMessage = enhancePaperlessError(errorMessage);
     errorCode = errorCode || 'PAPER-503';
-  }
-  // Login errors (check BEFORE generic validation to avoid conflicts)
-  else if (operation === 'login' &&
-           (lowerError.includes('incorrect') ||
-            lowerError.includes('invalid') ||
-            lowerError.includes('login failed') ||
-            lowerError.includes('401'))) {
-    friendlyMessage = 'Incorrect credentials.';
-    errorCode = errorCode || 'AUTH-401';
   }
   // Validation errors
   else if (lowerError.includes('validation') || lowerError.includes('invalid')) {

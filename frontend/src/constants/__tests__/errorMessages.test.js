@@ -181,6 +181,71 @@ describe('Error Messages System', () => {
       const result = getUserFriendlyError(alreadyProcessed);
       expect(result).toBe(alreadyProcessed);
     });
+
+    test('handles single-letter field validation errors', () => {
+      const result1 = getUserFriendlyError('X: must be positive');
+      expect(result1).toContain('X: must be positive');
+      expect(result1).toContain('VAL-422');
+
+      const result2 = getUserFriendlyError('Y: out of range');
+      expect(result2).toContain('Y: out of range');
+      expect(result2).toContain('VAL-422');
+    });
+
+    test('handles CamelCase field validation errors', () => {
+      const result1 = getUserFriendlyError('StartDate: must be in the past');
+      expect(result1).toContain('StartDate: must be in the past');
+      expect(result1).toContain('VAL-422');
+
+      const result2 = getUserFriendlyError('EndDate: cannot be before start date');
+      expect(result2).toContain('EndDate: cannot be before start date');
+      expect(result2).toContain('VAL-422');
+    });
+
+    test('handles field names with underscores and special characters', () => {
+      const result1 = getUserFriendlyError('Patient_ID: invalid format');
+      expect(result1).toContain('Patient_ID: invalid format');
+      expect(result1).toContain('VAL-422');
+
+      const result2 = getUserFriendlyError('Lab Result: out of range');
+      expect(result2).toContain('Lab Result: out of range');
+      expect(result2).toContain('VAL-422');
+    });
+
+    test('does not treat generic errors as validation errors', () => {
+      const result1 = getUserFriendlyError('Error: Something went wrong');
+      expect(result1).not.toContain('VAL-422');
+      expect(result1).toContain('SYS-500');
+
+      const result2 = getUserFriendlyError('Warning: This is a warning message');
+      expect(result2).not.toContain('VAL-422');
+    });
+
+    test('detects already processed errors in various formats', () => {
+      expect(getUserFriendlyError('Error: VAL-422 - Invalid')).toBe('Error: VAL-422 - Invalid');
+      expect(getUserFriendlyError('(Error:VAL-422)')).toBe('(Error:VAL-422)');
+      expect(getUserFriendlyError('Some message (Error: FILE-500)')).toBe('Some message (Error: FILE-500)');
+    });
+
+    test('does not double-append error codes', () => {
+      const alreadyProcessed = 'Upload failed (Error: FILE-500)';
+      const result = getUserFriendlyError(alreadyProcessed);
+      expect(result).toBe(alreadyProcessed);
+      expect(result).not.toMatch(/\(Error: FILE-500\).*\(Error: FILE-500\)/);
+    });
+
+    test('prioritizes login-specific error over generic permission error', () => {
+      const result = getUserFriendlyError('Access denied', 'login');
+      expect(result).toContain('Incorrect credentials');
+      expect(result).toContain('AUTH-401');
+      expect(result).not.toContain('PERM-403');
+    });
+
+    test('handles login errors with different message formats', () => {
+      expect(getUserFriendlyError('Invalid username or password', 'login')).toContain('Incorrect credentials');
+      expect(getUserFriendlyError('Authentication failed', 'login')).toContain('AUTH-');
+      expect(getUserFriendlyError('Unauthorized access', 'login')).toContain('Incorrect credentials');
+    });
   });
 
   describe('getErrorIcon', () => {
