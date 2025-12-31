@@ -171,7 +171,6 @@ const AllergyFormWrapper = ({
                       placeholder={t('common.fields.severity.placeholder')}
                       description={t('allergies.severity.description')}
                       withAsterisk
-                      clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>

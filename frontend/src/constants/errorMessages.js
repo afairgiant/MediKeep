@@ -264,38 +264,46 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
   const errorMessage = typeof error === 'string' ? error : error?.message || '';
   const lowerError = errorMessage.toLowerCase();
 
+  // If message already has error code pattern, it's already been processed
+  // Pattern: (Error: [A-Z]+-\d+) or (Error: [A-Z]+)
+  if (/\(Error: [A-Z0-9-]+\)/.test(errorMessage)) {
+    return errorMessage;
+  }
+
   let friendlyMessage = '';
   let errorCode = extractErrorCode(error);
 
   // SIMPLE RULE: If error has field-level details (formatted by backend), keep it
-  if (/^[A-Z][a-z\s]+:/.test(errorMessage)) {
+  // Updated regex to handle single-letter fields, acronyms (ID, URL), and CamelCase
+  if (/^[A-Z][^:]*:/.test(errorMessage)) {
     friendlyMessage = errorMessage;
     errorCode = errorCode || 'VAL-422'; // Validation errors use backend code
   }
   // Network-related errors
   else if (lowerError.includes('network') || lowerError.includes('connection')) {
     friendlyMessage = ERROR_MESSAGES.CONNECTION_ERROR;
-    errorCode = errorCode || 'NET';
+    errorCode = errorCode || 'NET-503';
   }
   else if (lowerError.includes('timeout')) {
     friendlyMessage = ERROR_MESSAGES.TIMEOUT_ERROR;
-    errorCode = errorCode || 'NET';
+    errorCode = errorCode || 'NET-504';
   }
   // File-related errors
   else if (lowerError.includes('file size') || lowerError.includes('too large')) {
     friendlyMessage = ERROR_MESSAGES.FILE_TOO_LARGE;
-    errorCode = errorCode || 'FILE';
+    errorCode = errorCode || 'FILE-413';
   }
   else if (lowerError.includes('file type') || lowerError.includes('not supported')) {
     friendlyMessage = ERROR_MESSAGES.INVALID_FILE_TYPE;
-    errorCode = errorCode || 'FILE';
+    errorCode = errorCode || 'FILE-400';
   }
-  else if (lowerError.includes('duplicate')) {
+  // Generic duplicate check (exclude Paperless-specific duplicates)
+  else if (lowerError.includes('duplicate') && !lowerError.includes('paperless')) {
     friendlyMessage = ERROR_MESSAGES.DUPLICATE_FILE;
-    errorCode = errorCode || 'FILE';
+    errorCode = errorCode || 'FILE-409';
   }
   // Permission errors
-  else if (lowerError.includes('permission') || lowerError.includes('unauthorized')) {
+  else if (lowerError.includes('permission') || lowerError.includes('unauthorized') || lowerError.includes('denied')) {
     friendlyMessage = ERROR_MESSAGES.PERMISSION_DENIED;
     errorCode = errorCode || 'PERM-403';
   }
@@ -307,7 +315,16 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
   // Paperless-specific errors
   else if (lowerError.includes('paperless')) {
     friendlyMessage = enhancePaperlessError(errorMessage);
-    errorCode = errorCode || 'PAPER';
+    errorCode = errorCode || 'PAPER-503';
+  }
+  // Login errors (check BEFORE generic validation to avoid conflicts)
+  else if (operation === 'login' &&
+           (lowerError.includes('incorrect') ||
+            lowerError.includes('invalid') ||
+            lowerError.includes('login failed') ||
+            lowerError.includes('401'))) {
+    friendlyMessage = 'Incorrect credentials.';
+    errorCode = errorCode || 'AUTH-401';
   }
   // Validation errors
   else if (lowerError.includes('validation') || lowerError.includes('invalid')) {
@@ -319,41 +336,33 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
     switch (operation) {
       case 'upload':
         friendlyMessage = ERROR_MESSAGES.UPLOAD_FAILED;
-        errorCode = errorCode || 'FILE';
+        errorCode = errorCode || 'FILE-500';
         break;
       case 'delete':
         friendlyMessage = ERROR_MESSAGES.FILE_DELETE_FAILED;
-        errorCode = errorCode || 'FILE';
+        errorCode = errorCode || 'FILE-500';
         break;
       case 'download':
         friendlyMessage = ERROR_MESSAGES.FILE_DOWNLOAD_FAILED;
-        errorCode = errorCode || 'FILE';
+        errorCode = errorCode || 'FILE-500';
         break;
       case 'view':
         friendlyMessage = ERROR_MESSAGES.FILE_VIEW_FAILED;
-        errorCode = errorCode || 'FILE';
+        errorCode = errorCode || 'FILE-500';
         break;
       case 'submit':
       case 'save':
         friendlyMessage = ERROR_MESSAGES.FORM_SUBMISSION_FAILED;
-        errorCode = errorCode || 'FORM';
+        errorCode = errorCode || 'FORM-400';
         break;
       case 'login':
-        // Check for login-specific errors
-        if (lowerError.includes('incorrect') ||
-            lowerError.includes('invalid') ||
-            lowerError.includes('login failed') ||
-            lowerError.includes('401')) {
-          friendlyMessage = 'Incorrect credentials.';
-          errorCode = errorCode || 'AUTH-401';
-        } else {
-          friendlyMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-          errorCode = errorCode || 'AUTH';
-        }
+        // Login-specific errors already handled before generic validation check
+        friendlyMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+        errorCode = errorCode || 'AUTH-500';
         break;
       default:
         friendlyMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
-        errorCode = errorCode || 'SYS';
+        errorCode = errorCode || 'SYS-500';
     }
   }
 

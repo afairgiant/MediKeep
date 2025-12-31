@@ -2,6 +2,7 @@
 import logger from '../logger';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import { getApiUrl } from '../../config/env';
+import { extractErrorMessage } from '../../utils/errorUtils.js';
 
 const API_BASE_URL = getApiUrl();
 
@@ -270,7 +271,6 @@ class BaseApiService {
       const error = await response.json().catch(() => ({}));
 
       // Use extractErrorMessage for consistent error handling
-      const { extractErrorMessage } = await import('../../utils/errorUtils.js');
       const errorMsg = extractErrorMessage(error, response.status);
       throw new Error(errorMsg);
     }

@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { getUserFriendlyError } from '../constants/errorMessages.js';
 
 export const useApi = () => {
   const [loading, setLoading] = useState(false);
@@ -6,8 +7,6 @@ export const useApi = () => {
   const abortControllerRef = useRef(null);
 
   const execute = useCallback(async (apiCall, options = {}) => {
-    // Import getUserFriendlyError at the top of the function
-    const { getUserFriendlyError } = await import('../constants/errorMessages.js');
     // Create new abort controller for this request
     const controller = new AbortController();
     
