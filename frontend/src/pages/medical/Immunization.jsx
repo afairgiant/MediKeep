@@ -295,6 +295,7 @@ const Immunization = () => {
             withCloseButton
             onClose={clearError}
             mb="md"
+            style={{ whiteSpace: 'pre-line' }}
           >
             {error}
           </Alert>

@@ -158,6 +158,7 @@ const DataExport = () => {
               title="Error"
               withCloseButton
               onClose={() => setError(null)}
+              style={{ whiteSpace: 'pre-line' }}
             >
               {error}
             </Alert>

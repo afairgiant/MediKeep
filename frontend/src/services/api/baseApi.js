@@ -269,13 +269,10 @@ class BaseApiService {
 
       const error = await response.json().catch(() => ({}));
 
-      // Handle validation errors
-      if (Array.isArray(error.detail)) {
-        const validationErrors = error.detail.map(err => err.msg).join(', ');
-        throw new Error(`Validation errors: ${validationErrors}`);
-      }
-
-      throw new Error(error.detail || errorMessage);
+      // Use extractErrorMessage for consistent error handling
+      const { extractErrorMessage } = await import('../../utils/errorUtils.js');
+      const errorMsg = extractErrorMessage(error, response.status);
+      throw new Error(errorMsg);
     }
 
     // Handle 204 No Content responses (common for DELETE operations)

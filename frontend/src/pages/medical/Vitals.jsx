@@ -501,6 +501,7 @@ const Vitals = () => {
             withCloseButton
             onClose={clearError}
             mb="md"
+            style={{ whiteSpace: 'pre-line' }}
           >
             {vitalsError}
           </Alert>
@@ -568,6 +569,7 @@ const Vitals = () => {
                 color="red"
                 icon={<IconAlertTriangle size={16} />}
                 title={t('vitals.statsLoadError', 'Failed to load statistics')}
+                style={{ whiteSpace: 'pre-line' }}
               >
                 <Group justify="space-between" align="center">
                   <Text size="sm">{statsError}</Text>

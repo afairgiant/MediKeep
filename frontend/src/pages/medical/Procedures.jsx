@@ -506,6 +506,7 @@ const Procedures = () => {
               title={t('procedures.error', 'Error')}
               withCloseButton
               onClose={clearError}
+              style={{ whiteSpace: 'pre-line' }}
             >
               {error}
             </Alert>

@@ -403,6 +403,7 @@ const Symptoms = () => {
           onClose={() => setError(null)}
           withCloseButton
           mb="md"
+          style={{ whiteSpace: 'pre-line' }}
         >
           {error}
         </Alert>

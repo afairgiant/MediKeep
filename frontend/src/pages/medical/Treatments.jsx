@@ -327,6 +327,7 @@ const Treatments = () => {
               title={t('labels.error', 'Error')}
               withCloseButton
               onClose={clearError}
+              style={{ whiteSpace: 'pre-line' }}
             >
               {error}
             </Alert>

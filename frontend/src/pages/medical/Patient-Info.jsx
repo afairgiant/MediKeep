@@ -394,6 +394,7 @@ const PatientInfo = () => {
               title={t('patientInfo.error', 'Error')}
               withCloseButton
               onClose={() => setError('')}
+              style={{ whiteSpace: 'pre-line' }}
             >
               {error}
             </Alert>

@@ -268,6 +268,7 @@ const Practitioners = () => {
             withCloseButton
             onClose={() => setError('')}
             mb="md"
+            style={{ whiteSpace: 'pre-line' }}
           >
             {error}
           </Alert>
