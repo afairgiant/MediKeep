@@ -693,6 +693,7 @@ const LabResults = () => {
               title={t('labResults.error', 'Error')}
               withCloseButton
               onClose={clearError}
+              style={{ whiteSpace: 'pre-line' }}
             >
               {error}
             </Alert>

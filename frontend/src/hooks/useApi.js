@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { getUserFriendlyError } from '../constants/errorMessages.js';
 
 export const useApi = () => {
   const [loading, setLoading] = useState(false);
@@ -37,27 +38,15 @@ export const useApi = () => {
       if (err.name !== 'AbortError' && !controller.signal.aborted) {
         // Only show error if this is the most recent request
         if (abortControllerRef.current === controller) {
-          // Extract detailed error message if available
-          let errorMessage = options.errorMessage || err.message || 'An error occurred';
-          
-          // If the error contains validation details, extract them
-          if (err.message && err.message.includes('Validation Error:')) {
-            errorMessage = err.message; // Use the detailed validation error
-          } else if (err.response?.data?.detail) {
-            // Handle structured error responses
-            if (Array.isArray(err.response.data.detail)) {
-              const details = err.response.data.detail
-                .map(e => `${e.loc?.join('.') || 'field'}: ${e.msg}`)
-                .join('; ');
-              errorMessage = `Validation failed: ${details}`;
-            } else {
-              errorMessage = err.response.data.detail;
-            }
-          } else if (err.response?.data?.message) {
-            errorMessage = err.response.data.message;
-          }
-          
-          setError(errorMessage);
+          // Use actual error message (already processed by extractErrorMessage in baseApi)
+          // Fall back to options.errorMessage only if err.message is empty
+          let errorMessage = err.message || options.errorMessage || 'An error occurred';
+
+          // Apply getUserFriendlyError to format with error codes
+          const operation = options.operation || 'save';
+          const friendlyError = getUserFriendlyError(errorMessage, operation);
+
+          setError(friendlyError);
         }
         // API error logged by apiService automatically
       }

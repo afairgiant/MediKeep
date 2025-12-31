@@ -545,7 +545,7 @@ const Insurance = () => {
   if (error) {
     return (
       <Container size="xl">
-        <Alert color="red" title="Error loading insurance records">
+        <Alert color="red" title="Error loading insurance records" style={{ whiteSpace: 'pre-line' }}>
           {getUserFriendlyError(error, 'load')}
         </Alert>
       </Container>

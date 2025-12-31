@@ -665,6 +665,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         title={t('patientSelector.errors.loadFailed', 'Failed to load patients')}
         color="red"
         variant="light"
+        style={{ whiteSpace: 'pre-line' }}
       >
         {combinedError}
         <Button

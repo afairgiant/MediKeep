@@ -1,15 +1,20 @@
 /**
- * Centralized Error Messages for Upload Progress System
- * 
+ * Centralized Error Messages
+ *
  * This file contains standardized, user-friendly error messages used across
- * the upload progress system to ensure consistent UX and easier maintenance.
- * 
+ * the application to ensure consistent UX and easier maintenance.
+ *
  * Error Message Guidelines:
  * - Clear and actionable - Tell users what went wrong and what to do
  * - Consistent tone - Professional but friendly
  * - Specific enough - Help users understand the issue
  * - Solution-oriented - Include next steps when possible
  * - No technical jargon - Use language users understand
+ *
+ * Error Code System:
+ * - Uses backend error codes (e.g., VAL-422, AUTH-401, DB-500)
+ * - Format: CATEGORY-STATUS (follows RFC 7807 standard)
+ * - Single source of truth: Backend defines codes, frontend displays them
  */
 
 // Main error messages organized by category
@@ -229,73 +234,155 @@ export const enhancePaperlessError = (originalError) => {
 };
 
 /**
+ * Extract error code from error object or infer from message
+ * @param {Error|string} error - The error object or message
+ * @returns {string|null} Error code or null if not found
+ */
+const extractErrorCode = (error) => {
+  // Check if error object has error_code property
+  if (error && typeof error === 'object' && error.error_code) {
+    return error.error_code;
+  }
+
+  // Try to extract from message (e.g., "Message (Error: VAL)")
+  const errorMessage = typeof error === 'string' ? error : error?.message || '';
+  const codeMatch = errorMessage.match(/\(Error: ([A-Z0-9-]+)\)/);
+  if (codeMatch) {
+    return codeMatch[1];
+  }
+
+  return null;
+};
+
+/**
  * Get user-friendly error message from technical error
  * @param {Error|string} error - The error object or message
  * @param {string} operation - The operation that failed (e.g., 'upload', 'delete')
- * @returns {string} User-friendly error message
+ * @returns {string} User-friendly error message with error code
  */
 export const getUserFriendlyError = (error, operation = 'operation') => {
   const errorMessage = typeof error === 'string' ? error : error?.message || '';
   const lowerError = errorMessage.toLowerCase();
-  
+
+  // If message already has error code pattern, it's already been processed
+  // Handles multiple error code formats to prevent double-processing:
+  // - (Error: CODE) or (Error:CODE) - with or without space
+  // - Error: CODE or Error:CODE - at start of message
+  if (/\(Error:\s*[A-Z0-9-]+\)/.test(errorMessage) ||
+      /^Error:\s*[A-Z]+-\d+/.test(errorMessage)) {
+    return errorMessage;
+  }
+
+  let friendlyMessage = '';
+  let errorCode = extractErrorCode(error);
+
+  // SIMPLE RULE: If error has field-level details (formatted by backend), keep it
+  // Updated regex to handle single-letter fields, acronyms (ID, URL), and CamelCase
+  // Supports: "X: error", "ID: error", "StartDate: error", "Patient_ID: error"
+  // Excludes: "Error:", "Warning:", "Info:", "Debug:" (common log prefixes)
+  if (/^[A-Z][a-zA-Z0-9_\s]*:/.test(errorMessage) &&
+      !errorMessage.startsWith('Error:') &&
+      !errorMessage.startsWith('Warning:') &&
+      !errorMessage.startsWith('Info:') &&
+      !errorMessage.startsWith('Debug:')) {
+    friendlyMessage = errorMessage;
+    errorCode = errorCode || 'VAL-422'; // Validation errors use backend code
+  }
   // Network-related errors
-  if (lowerError.includes('network') || lowerError.includes('connection')) {
-    return ERROR_MESSAGES.CONNECTION_ERROR;
+  else if (lowerError.includes('network') || lowerError.includes('connection')) {
+    friendlyMessage = ERROR_MESSAGES.CONNECTION_ERROR;
+    errorCode = errorCode || 'NET-503';
   }
-  
-  if (lowerError.includes('timeout')) {
-    return ERROR_MESSAGES.TIMEOUT_ERROR;
+  else if (lowerError.includes('timeout')) {
+    friendlyMessage = ERROR_MESSAGES.TIMEOUT_ERROR;
+    errorCode = errorCode || 'NET-504';
   }
-  
   // File-related errors
-  if (lowerError.includes('file size') || lowerError.includes('too large')) {
-    return ERROR_MESSAGES.FILE_TOO_LARGE;
+  else if (lowerError.includes('file size') || lowerError.includes('too large')) {
+    friendlyMessage = ERROR_MESSAGES.FILE_TOO_LARGE;
+    errorCode = errorCode || 'FILE-413';
   }
-  
-  if (lowerError.includes('file type') || lowerError.includes('not supported')) {
-    return ERROR_MESSAGES.INVALID_FILE_TYPE;
+  else if (lowerError.includes('file type') || lowerError.includes('not supported')) {
+    friendlyMessage = ERROR_MESSAGES.INVALID_FILE_TYPE;
+    errorCode = errorCode || 'FILE-400';
   }
-  
-  if (lowerError.includes('duplicate')) {
-    return ERROR_MESSAGES.DUPLICATE_FILE;
+  // Generic duplicate check (exclude Paperless-specific duplicates)
+  else if (lowerError.includes('duplicate') && !lowerError.includes('paperless')) {
+    friendlyMessage = ERROR_MESSAGES.DUPLICATE_FILE;
+    errorCode = errorCode || 'FILE-409';
   }
-  
-  // Permission errors
-  if (lowerError.includes('permission') || lowerError.includes('unauthorized')) {
-    return ERROR_MESSAGES.PERMISSION_DENIED;
+  // Login errors (check EARLY before permission check to avoid conflicts)
+  // This ensures "Access denied" during login shows "Incorrect credentials" not "Permission denied"
+  else if (operation === 'login' &&
+           (lowerError.includes('incorrect') ||
+            lowerError.includes('invalid') ||
+            lowerError.includes('login failed') ||
+            lowerError.includes('unauthorized') ||
+            lowerError.includes('denied') ||
+            lowerError.includes('401'))) {
+    friendlyMessage = 'Incorrect credentials.';
+    errorCode = errorCode || 'AUTH-401';
   }
-  
+  // Permission errors (skip login operation - already handled above)
+  else if (lowerError.includes('permission') || lowerError.includes('unauthorized') || lowerError.includes('denied')) {
+    friendlyMessage = ERROR_MESSAGES.PERMISSION_DENIED;
+    errorCode = errorCode || 'PERM-403';
+  }
   // Server errors
-  if (lowerError.includes('server error') || lowerError.includes('internal server')) {
-    return ERROR_MESSAGES.SERVER_ERROR;
+  else if (lowerError.includes('server error') || lowerError.includes('internal server')) {
+    friendlyMessage = ERROR_MESSAGES.SERVER_ERROR;
+    errorCode = errorCode || 'ISE-500';
   }
-  
   // Paperless-specific errors
-  if (lowerError.includes('paperless')) {
-    return enhancePaperlessError(errorMessage);
+  else if (lowerError.includes('paperless')) {
+    friendlyMessage = enhancePaperlessError(errorMessage);
+    errorCode = errorCode || 'PAPER-503';
   }
-  
   // Validation errors
-  if (lowerError.includes('validation') || lowerError.includes('invalid')) {
-    return ERROR_MESSAGES.VALIDATION_ERROR;
+  else if (lowerError.includes('validation') || lowerError.includes('invalid')) {
+    friendlyMessage = ERROR_MESSAGES.VALIDATION_ERROR;
+    errorCode = errorCode || 'VAL-422';
   }
-  
   // Operation-specific fallbacks
-  switch (operation) {
-    case 'upload':
-      return ERROR_MESSAGES.UPLOAD_FAILED;
-    case 'delete':
-      return ERROR_MESSAGES.FILE_DELETE_FAILED;
-    case 'download':
-      return ERROR_MESSAGES.FILE_DOWNLOAD_FAILED;
-    case 'view':
-      return ERROR_MESSAGES.FILE_VIEW_FAILED;
-    case 'submit':
-    case 'save':
-      return ERROR_MESSAGES.FORM_SUBMISSION_FAILED;
-    default:
-      return ERROR_MESSAGES.UNKNOWN_ERROR;
+  else {
+    switch (operation) {
+      case 'upload':
+        friendlyMessage = ERROR_MESSAGES.UPLOAD_FAILED;
+        errorCode = errorCode || 'FILE-500';
+        break;
+      case 'delete':
+        friendlyMessage = ERROR_MESSAGES.FILE_DELETE_FAILED;
+        errorCode = errorCode || 'FILE-500';
+        break;
+      case 'download':
+        friendlyMessage = ERROR_MESSAGES.FILE_DOWNLOAD_FAILED;
+        errorCode = errorCode || 'FILE-500';
+        break;
+      case 'view':
+        friendlyMessage = ERROR_MESSAGES.FILE_VIEW_FAILED;
+        errorCode = errorCode || 'FILE-500';
+        break;
+      case 'submit':
+      case 'save':
+        friendlyMessage = ERROR_MESSAGES.FORM_SUBMISSION_FAILED;
+        errorCode = errorCode || 'FORM-400';
+        break;
+      case 'login':
+        // Login-specific errors already handled before generic validation check
+        friendlyMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+        errorCode = errorCode || 'AUTH-500';
+        break;
+      default:
+        friendlyMessage = ERROR_MESSAGES.UNKNOWN_ERROR;
+        errorCode = errorCode || 'SYS-500';
+    }
   }
+
+  // Append error code if available
+  if (errorCode) {
+    return `${friendlyMessage} (Error: ${errorCode})`;
+  }
+  return friendlyMessage;
 };
 
 /**

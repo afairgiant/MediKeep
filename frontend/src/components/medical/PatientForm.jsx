@@ -259,6 +259,7 @@ const PatientForm = ({
             title={t('errors:patientForm.error')}
             color="red"
             variant="light"
+            style={{ whiteSpace: 'pre-line' }}
           >
             {error}
           </Alert>

@@ -158,6 +158,19 @@ class ValidationException(MedicalRecordsAPIException):
         )
         self.validation_errors = validation_errors or []
 
+    def to_response_model(self):
+        """Override to include validation_errors in detail field."""
+        from app.core.http.response_models import ResponseModel
+
+        # Create response model with validation errors in detail field
+        return ResponseModel(
+            status=self.status,
+            message=self.message,
+            error_code=self.error_code,
+            description=self.description,
+            detail=self.validation_errors if self.validation_errors else None
+        )
+
 
 class UnauthorizedException(MedicalRecordsAPIException):
     """Exception for unauthorized access (401)."""
@@ -350,25 +363,54 @@ def create_enhanced_validation_error_handler():
             }
         )
 
-        # Create user-friendly error messages (same logic as original)
+        # Create user-friendly error messages using Pydantic's ctx field
         detailed_errors = []
         for error in exc.errors():
+            # Extract basic error information
             field = error.get('loc')[-1] if error.get('loc') else 'unknown'
+            error_type = error.get('type', '')
+            ctx = error.get('ctx', {})
             msg = error.get('msg', 'Invalid value')
-            
-            # Make common validation errors more user-friendly
-            if 'ensure this value is greater than' in msg:
-                detailed_errors.append(f"{field}: Value must be greater than the minimum allowed")
-            elif 'ensure this value is less than' in msg:
-                detailed_errors.append(f"{field}: Value exceeds the maximum allowed")
-            elif 'field required' in msg:
-                detailed_errors.append(f"{field}: This field is required")
-            elif 'string too short' in msg:
-                detailed_errors.append(f"{field}: Value is too short")
-            elif 'string too long' in msg:
-                detailed_errors.append(f"{field}: Value is too long")
+
+            # Format field name: capitalize and replace underscores
+            field_name = str(field).replace('_', ' ').title()
+
+            # Generate specific error message using ctx constraints
+            if error_type == 'string_too_short':
+                min_len = ctx.get('min_length', 'minimum')
+                detailed_errors.append(f"{field_name}: Must be at least {min_len} characters")
+
+            elif error_type == 'string_too_long':
+                max_len = ctx.get('max_length', 'maximum')
+                detailed_errors.append(f"{field_name}: Must be less than {max_len} characters")
+
+            elif error_type == 'greater_than':
+                gt_value = ctx.get('gt', 'minimum')
+                detailed_errors.append(f"{field_name}: Must be greater than {gt_value}")
+
+            elif error_type == 'greater_than_equal':
+                ge_value = ctx.get('ge', 'minimum')
+                detailed_errors.append(f"{field_name}: Must be {ge_value} or greater")
+
+            elif error_type == 'less_than':
+                lt_value = ctx.get('lt', 'maximum')
+                detailed_errors.append(f"{field_name}: Must be less than {lt_value}")
+
+            elif error_type == 'less_than_equal':
+                le_value = ctx.get('le', 'maximum')
+                detailed_errors.append(f"{field_name}: Must be {le_value} or less")
+
+            elif error_type == 'missing':
+                detailed_errors.append(f"{field_name}: This field is required")
+
+            elif error_type == 'value_error':
+                # Custom validators - use the error message from ctx or msg
+                custom_msg = ctx.get('error', msg)
+                detailed_errors.append(f"{field_name}: {custom_msg}")
+
             else:
-                detailed_errors.append(f"{field}: {msg}")
+                # Fallback for unknown error types - use the original message
+                detailed_errors.append(f"{field_name}: {msg}")
         
         # Create ValidationException with our enhanced error details
         validation_exception = ValidationException(

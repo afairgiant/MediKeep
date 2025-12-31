@@ -2,6 +2,7 @@
 import logger from '../logger';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import { getApiUrl } from '../../config/env';
+import { extractErrorMessage } from '../../utils/errorUtils.js';
 
 const API_BASE_URL = getApiUrl();
 
@@ -269,13 +270,9 @@ class BaseApiService {
 
       const error = await response.json().catch(() => ({}));
 
-      // Handle validation errors
-      if (Array.isArray(error.detail)) {
-        const validationErrors = error.detail.map(err => err.msg).join(', ');
-        throw new Error(`Validation errors: ${validationErrors}`);
-      }
-
-      throw new Error(error.detail || errorMessage);
+      // Use extractErrorMessage for consistent error handling
+      const errorMsg = extractErrorMessage(error, response.status);
+      throw new Error(errorMsg);
     }
 
     // Handle 204 No Content responses (common for DELETE operations)

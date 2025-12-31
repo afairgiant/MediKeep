@@ -933,7 +933,7 @@ const FamilyHistory = () => {
       {error && !currentError && (
         <Alert
           color="red"
-          style={{ marginBottom: '1rem' }}
+          style={{ marginBottom: '1rem', whiteSpace: 'pre-line' }}
           onClose={() => setError(null)}
         >
           {typeof error === 'string' ? error : error?.message || 'An error occurred'}

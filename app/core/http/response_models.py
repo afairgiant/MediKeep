@@ -169,11 +169,11 @@ class ExceptionCode(ExceptionCodeDefinition):
 class ResponseModel(BaseModel):
     """
     Standard response model for API endpoints.
-    
+
     This model provides a consistent structure for all API responses,
     whether successful or error responses.
     """
-    
+
     data: Optional[Any] = Field(None, description="Response data payload")
     status: ExceptionStatus = Field(
         ExceptionStatus.SUCCESS,
@@ -182,6 +182,7 @@ class ResponseModel(BaseModel):
     message: str = Field(..., description="Human-readable response message")
     error_code: Optional[str] = Field(None, description="Specific error code for failures")
     description: Optional[str] = Field(None, description="Detailed description of the response")
+    detail: Optional[Any] = Field(None, description="Detailed error information (e.g., validation errors)")
     
     class Config:
         """Pydantic model configuration."""

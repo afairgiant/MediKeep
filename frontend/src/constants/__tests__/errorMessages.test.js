@@ -110,7 +110,7 @@ describe('Error Messages System', () => {
 
     test('enhances duplicate file error', () => {
       const result = enhancePaperlessError('File appears to be a duplicate');
-      expect(result).toBe(ERROR_MESSAGES.DUPLICATE_FILE);
+      expect(result).toBe(ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT);
     });
 
     test('enhances generic paperless upload error', () => {
@@ -128,52 +128,123 @@ describe('Error Messages System', () => {
     test('handles network errors', () => {
       const networkError = new Error('Network connection failed');
       const result = getUserFriendlyError(networkError);
-      expect(result).toBe(ERROR_MESSAGES.CONNECTION_ERROR);
+      expect(result).toBe(`${ERROR_MESSAGES.CONNECTION_ERROR} (Error: NET-503)`);
     });
 
     test('handles timeout errors', () => {
       const timeoutError = new Error('Request timeout');
       const result = getUserFriendlyError(timeoutError);
-      expect(result).toBe(ERROR_MESSAGES.TIMEOUT_ERROR);
+      expect(result).toBe(`${ERROR_MESSAGES.TIMEOUT_ERROR} (Error: NET-504)`);
     });
 
     test('handles file size errors', () => {
       const fileSizeError = new Error('File size too large');
       const result = getUserFriendlyError(fileSizeError);
-      expect(result).toBe(ERROR_MESSAGES.FILE_TOO_LARGE);
+      expect(result).toBe(`${ERROR_MESSAGES.FILE_TOO_LARGE} (Error: FILE-413)`);
     });
 
     test('handles permission errors', () => {
       const permissionError = new Error('Permission denied');
       const result = getUserFriendlyError(permissionError);
-      expect(result).toBe(ERROR_MESSAGES.PERMISSION_DENIED);
+      expect(result).toBe(`${ERROR_MESSAGES.PERMISSION_DENIED} (Error: PERM-403)`);
     });
 
     test('handles server errors', () => {
       const serverError = new Error('Internal server error');
       const result = getUserFriendlyError(serverError);
-      expect(result).toBe(ERROR_MESSAGES.SERVER_ERROR);
+      expect(result).toBe(`${ERROR_MESSAGES.SERVER_ERROR} (Error: ISE-500)`);
     });
 
     test('handles paperless errors', () => {
       const paperlessError = new Error('Paperless service unavailable');
       const result = getUserFriendlyError(paperlessError);
-      expect(result).toBe(ERROR_MESSAGES.PAPERLESS_UNAVAILABLE);
+      expect(result).toBe(`${ERROR_MESSAGES.PAPERLESS_UNAVAILABLE} (Error: PAPER-503)`);
     });
 
     test('returns operation-specific errors for unknown errors', () => {
       const unknownError = new Error('Something went wrong');
-      
-      expect(getUserFriendlyError(unknownError, 'upload')).toBe(ERROR_MESSAGES.UPLOAD_FAILED);
-      expect(getUserFriendlyError(unknownError, 'delete')).toBe(ERROR_MESSAGES.FILE_DELETE_FAILED);
-      expect(getUserFriendlyError(unknownError, 'download')).toBe(ERROR_MESSAGES.FILE_DOWNLOAD_FAILED);
-      expect(getUserFriendlyError(unknownError, 'save')).toBe(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
-      expect(getUserFriendlyError(unknownError, 'unknown')).toBe(ERROR_MESSAGES.UNKNOWN_ERROR);
+
+      expect(getUserFriendlyError(unknownError, 'upload')).toBe(`${ERROR_MESSAGES.UPLOAD_FAILED} (Error: FILE-500)`);
+      expect(getUserFriendlyError(unknownError, 'delete')).toBe(`${ERROR_MESSAGES.FILE_DELETE_FAILED} (Error: FILE-500)`);
+      expect(getUserFriendlyError(unknownError, 'download')).toBe(`${ERROR_MESSAGES.FILE_DOWNLOAD_FAILED} (Error: FILE-500)`);
+      expect(getUserFriendlyError(unknownError, 'save')).toBe(`${ERROR_MESSAGES.FORM_SUBMISSION_FAILED} (Error: FORM-400)`);
+      expect(getUserFriendlyError(unknownError, 'unknown')).toBe(`${ERROR_MESSAGES.UNKNOWN_ERROR} (Error: SYS-500)`);
     });
 
     test('handles string errors', () => {
       const result = getUserFriendlyError('Network error occurred');
-      expect(result).toBe(ERROR_MESSAGES.CONNECTION_ERROR);
+      expect(result).toBe(`${ERROR_MESSAGES.CONNECTION_ERROR} (Error: NET-503)`);
+    });
+
+    test('skips processing for already processed errors with error codes', () => {
+      const alreadyProcessed = 'Some error message (Error: VAL-422)';
+      const result = getUserFriendlyError(alreadyProcessed);
+      expect(result).toBe(alreadyProcessed);
+    });
+
+    test('handles single-letter field validation errors', () => {
+      const result1 = getUserFriendlyError('X: must be positive');
+      expect(result1).toContain('X: must be positive');
+      expect(result1).toContain('VAL-422');
+
+      const result2 = getUserFriendlyError('Y: out of range');
+      expect(result2).toContain('Y: out of range');
+      expect(result2).toContain('VAL-422');
+    });
+
+    test('handles CamelCase field validation errors', () => {
+      const result1 = getUserFriendlyError('StartDate: must be in the past');
+      expect(result1).toContain('StartDate: must be in the past');
+      expect(result1).toContain('VAL-422');
+
+      const result2 = getUserFriendlyError('EndDate: cannot be before start date');
+      expect(result2).toContain('EndDate: cannot be before start date');
+      expect(result2).toContain('VAL-422');
+    });
+
+    test('handles field names with underscores and special characters', () => {
+      const result1 = getUserFriendlyError('Patient_ID: invalid format');
+      expect(result1).toContain('Patient_ID: invalid format');
+      expect(result1).toContain('VAL-422');
+
+      const result2 = getUserFriendlyError('Lab Result: out of range');
+      expect(result2).toContain('Lab Result: out of range');
+      expect(result2).toContain('VAL-422');
+    });
+
+    test('does not treat generic errors as validation errors', () => {
+      const result1 = getUserFriendlyError('Error: Something went wrong');
+      expect(result1).not.toContain('VAL-422');
+      expect(result1).toContain('SYS-500');
+
+      const result2 = getUserFriendlyError('Warning: This is a warning message');
+      expect(result2).not.toContain('VAL-422');
+    });
+
+    test('detects already processed errors in various formats', () => {
+      expect(getUserFriendlyError('Error: VAL-422 - Invalid')).toBe('Error: VAL-422 - Invalid');
+      expect(getUserFriendlyError('(Error:VAL-422)')).toBe('(Error:VAL-422)');
+      expect(getUserFriendlyError('Some message (Error: FILE-500)')).toBe('Some message (Error: FILE-500)');
+    });
+
+    test('does not double-append error codes', () => {
+      const alreadyProcessed = 'Upload failed (Error: FILE-500)';
+      const result = getUserFriendlyError(alreadyProcessed);
+      expect(result).toBe(alreadyProcessed);
+      expect(result).not.toMatch(/\(Error: FILE-500\).*\(Error: FILE-500\)/);
+    });
+
+    test('prioritizes login-specific error over generic permission error', () => {
+      const result = getUserFriendlyError('Access denied', 'login');
+      expect(result).toContain('Incorrect credentials');
+      expect(result).toContain('AUTH-401');
+      expect(result).not.toContain('PERM-403');
+    });
+
+    test('handles login errors with different message formats', () => {
+      expect(getUserFriendlyError('Invalid username or password', 'login')).toContain('Incorrect credentials');
+      expect(getUserFriendlyError('Authentication failed', 'login')).toContain('AUTH-');
+      expect(getUserFriendlyError('Unauthorized access', 'login')).toContain('Incorrect credentials');
     });
   });
 
@@ -216,12 +287,12 @@ describe('Error Messages System', () => {
   describe('Integration with existing error patterns', () => {
     test('can handle common upload error scenarios', () => {
       const scenarios = [
-        { error: 'Failed to upload file', expected: ERROR_MESSAGES.UPLOAD_FAILED },
-        { error: 'File size exceeds limit', expected: ERROR_MESSAGES.FILE_TOO_LARGE },
-        { error: 'Unsupported file type', expected: ERROR_MESSAGES.INVALID_FILE_TYPE },
-        { error: 'Network timeout', expected: ERROR_MESSAGES.CONNECTION_ERROR }, // timeout gets mapped to connection error
-        { error: 'timeout', expected: ERROR_MESSAGES.TIMEOUT_ERROR },
-        { error: 'Access denied', expected: ERROR_MESSAGES.PERMISSION_DENIED },
+        { error: 'Failed to upload file', expected: `${ERROR_MESSAGES.UPLOAD_FAILED} (Error: FILE-500)` },
+        { error: 'File size exceeds limit', expected: `${ERROR_MESSAGES.FILE_TOO_LARGE} (Error: FILE-413)` },
+        { error: 'Unsupported file type', expected: `${ERROR_MESSAGES.INVALID_FILE_TYPE} (Error: FILE-400)` },
+        { error: 'Network timeout', expected: `${ERROR_MESSAGES.CONNECTION_ERROR} (Error: NET-503)` }, // timeout gets mapped to connection error
+        { error: 'timeout', expected: `${ERROR_MESSAGES.TIMEOUT_ERROR} (Error: NET-504)` },
+        { error: 'Access denied', expected: `${ERROR_MESSAGES.PERMISSION_DENIED} (Error: PERM-403)` },
       ];
 
       scenarios.forEach(({ error, expected }) => {
@@ -231,9 +302,9 @@ describe('Error Messages System', () => {
 
     test('can handle form validation scenarios', () => {
       const scenarios = [
-        { error: 'Patient information not available', operation: 'save', expected: ERROR_MESSAGES.FORM_SUBMISSION_FAILED },
-        { error: 'Required field missing', operation: 'save', expected: ERROR_MESSAGES.FORM_SUBMISSION_FAILED },
-        { error: 'validation failed', operation: 'save', expected: ERROR_MESSAGES.VALIDATION_ERROR },
+        { error: 'Patient information not available', operation: 'save', expected: `${ERROR_MESSAGES.FORM_SUBMISSION_FAILED} (Error: FORM-400)` },
+        { error: 'Required field missing', operation: 'save', expected: `${ERROR_MESSAGES.FORM_SUBMISSION_FAILED} (Error: FORM-400)` },
+        { error: 'validation failed', operation: 'save', expected: `${ERROR_MESSAGES.VALIDATION_ERROR} (Error: VAL-422)` },
       ];
 
       scenarios.forEach(({ error, operation, expected }) => {

@@ -394,6 +394,7 @@ const Medication = () => {
             withCloseButton
             onClose={clearError}
             mb="md"
+            style={{ whiteSpace: 'pre-line' }}
           >
             {error}
           </Alert>

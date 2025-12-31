@@ -154,7 +154,7 @@ export const processValidationErrors = (errors) => {
 
 /**
  * Extract error message from API response
- * 
+ *
  * @param {Object} errorData - The error response data
  * @param {number} statusCode - The HTTP status code
  * @returns {string} - Extracted error message
@@ -162,22 +162,28 @@ export const processValidationErrors = (errors) => {
 export const extractErrorMessage = (errorData, statusCode) => {
   // Handle validation errors (422)
   if (statusCode === 422) {
-    // Check for FastAPI's validation error format
+    // Check for detail field with array of strings (our enhanced format)
     if (errorData.detail && Array.isArray(errorData.detail)) {
+      // Check if it's an array of formatted strings (our backend format)
+      if (typeof errorData.detail[0] === 'string') {
+        // Join multiple errors with newlines for better readability
+        return errorData.detail.join('\n');
+      }
+      // Otherwise it's FastAPI format with objects
       return processValidationErrors(errorData.detail);
     }
-    
+
     // Check for custom validation error format
     if (errorData.validation_errors && Array.isArray(errorData.validation_errors)) {
       return errorData.validation_errors.join('; ');
     }
-    
+
     // Check for description field
     if (errorData.description) {
       return errorData.description;
     }
   }
-  
+
   // For other errors, use message or detail
   return errorData.message || errorData.detail || 'An error occurred';
 };
