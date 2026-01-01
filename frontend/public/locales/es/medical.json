@@ -221,22 +221,65 @@
   },
   "labResults": {
     "title": "Resultados de análisis de laboratorio",
+    "status": {
+      "ordered": "Ordenado - El análisis ha sido solicitado",
+      "inProgress": "En progreso - La muestra está siendo procesada",
+      "completed": "Completado - Resultados disponibles",
+      "cancelled": "Cancelado - El análisis fue cancelado"
+    },
+    "category": {
+      "bloodWork": "Análisis de sangre",
+      "imaging": "Imágenes (Rayos X, IRM, TC)",
+      "pathology": "Patología",
+      "microbiology": "Microbiología",
+      "chemistry": "Química",
+      "hematology": "Hematología",
+      "immunology": "Inmunología",
+      "genetics": "Genética",
+      "cardiology": "Cardiología",
+      "pulmonology": "Neumología",
+      "other": "Otro"
+    },
+    "testType": {
+      "routine": "Rutina - Procesamiento estándar",
+      "urgent": "Urgente - Procesamiento acelerado",
+      "emergency": "Emergencia - Prioridad crítica",
+      "followUp": "Seguimiento - Repetición del análisis",
+      "screening": "Detección - Análisis preventivo"
+    },
+    "result": {
+      "normal": "Normal - Dentro del rango de referencia",
+      "abnormal": "Anormal - Fuera del rango de referencia",
+      "critical": "Crítico - Requiere atención inmediata",
+      "high": "Alto - Por encima del rango normal",
+      "low": "Bajo - Por debajo del rango normal",
+      "borderline": "Límite - Cerca del umbral",
+      "inconclusive": "No concluyente - Necesita repetirse"
+    },
+    "form": {
+      "testDetails": "Detalles del análisis",
+      "statusIndicator": "Indicador de estado:",
+      "resultIndicator": "Indicador de resultado:",
+      "relatedConditions": "Condiciones relacionadas",
+      "linkConditionsTitle": "Vincular condiciones médicas",
+      "linkConditionsDescription": "Asocie este resultado de laboratorio con condiciones médicas relevantes para un mejor seguimiento y organización."
+    },
     "testName": {
       "label": "Nombre del análisis",
-      "placeholder": "ej: hemograma",
+      "placeholder": "ej: Hemograma completo (CBC)",
       "description": "Nombre o descripción del análisis de laboratorio"
     },
     "testCode": {
       "label": "Código del análisis",
-      "placeholder": "ej: 85025",
+      "placeholder": "ej: CBC, 85025",
       "description": "Código del análisis o LOINC"
     },
     "testCategory": {
       "label": "Categoría del análisis",
       "placeholder": "Seleccione una categoría",
-      "description": "Categoría de análisis de laboratorio"
+      "description": "Tipo de análisis de laboratorio"
     },
-    "testType": {
+    "testTypeField": {
       "label": "Tipo de análisis",
       "placeholder": "Seleccione el nivel de urgencia",
       "description": "Prioridad o urgencia del análisis"
@@ -254,7 +297,7 @@
     "testStatus": {
       "label": "Estado del análisis",
       "placeholder": "Seleccione el estado",
-      "description": "Estado actual del análisis"
+      "description": "Estado actual del análisis de laboratorio"
     },
     "labResult": {
       "label": "Resultado del análisis",
@@ -264,7 +307,7 @@
     "orderedDate": {
       "label": "Fecha de prescripción",
       "placeholder": "Cuándo se prescribió el análisis",
-      "description": "Fecha de prescripción del análisis"
+      "description": "Fecha de solicitud del análisis"
     },
     "completedDate": {
       "label": "Fecha de realización",

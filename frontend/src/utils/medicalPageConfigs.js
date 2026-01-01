@@ -1010,8 +1010,7 @@ export const medicalPageConfigs = {
       },
     },
     filterControls: {
-      searchPlaceholder:
-        'Search lab results, test codes, facilities, practitioners, tags...',
+      searchPlaceholder: 'searchPlaceholders.labResults',
       title: 'Filter & Sort Lab Results',
       showCategory: true,
       showOrderedDate: true,

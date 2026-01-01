@@ -389,7 +389,7 @@ const Medication = () => {
           <Alert
             variant="light"
             color="red"
-            title={t('medications.error', 'Error')}
+            title={t('labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -404,7 +404,7 @@ const Medication = () => {
           <Alert
             variant="light"
             color="green"
-            title={t('medications.success', 'Success')}
+            title={t('labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >

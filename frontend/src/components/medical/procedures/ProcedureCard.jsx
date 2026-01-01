@@ -17,7 +17,8 @@ const ProcedureCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
   const handleError = (error) => {
     logger.error('procedure_card_error', {
       message: 'Error in ProcedureCard',
@@ -53,46 +54,46 @@ const ProcedureCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('procedures.card.procedureDate', 'Procedure Date'),
+        label: t('procedures.procedureDate.label'),
         value: procedure.date,
-        render: (value) => value ? formatDate(value) : t('procedures.card.notSpecified', 'Not specified')
+        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
       },
       {
-        label: t('procedures.card.code', 'Code'),
+        label: t('procedures.procedureCode.label'),
         value: procedure.procedure_code
       },
       {
-        label: t('procedures.card.setting', 'Setting'),
+        label: t('procedures.procedureSetting.label'),
         value: procedure.procedure_setting,
         render: (value) => value ? (
           <Badge variant="light" color="cyan" size="sm">
             {value}
           </Badge>
-        ) : t('procedures.card.notSpecified', 'Not specified')
+        ) : tCommon('labels.notSpecified')
       },
       {
-        label: t('procedures.card.duration', 'Duration'),
+        label: t('procedures.procedureDuration.label'),
         value: procedure.procedure_duration,
-        render: (value) => value ? t('procedures.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : t('procedures.card.notSpecified', 'Not specified')
+        render: (value) => value ? tCommon('procedures.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : tCommon('labels.notSpecified')
       },
       {
-        label: t('procedures.card.facility', 'Facility'),
+        label: tCommon('labels.facility'),
         value: procedure.facility
       },
       {
-        label: t('procedures.card.doctor', 'Doctor'),
+        label: t('procedures.performingPractitioner.label'),
         value: procedure.practitioner_id,
         render: (value) => {
-          if (!value) return t('procedures.card.notSpecified', 'Not specified');
+          if (!value) return tCommon('labels.notSpecified');
 
-          const practitionerName = practitioner?.name || t('procedures.card.practitionerId', 'Practitioner ID: {{id}}', { id: value });
+          const practitionerName = practitioner?.name || tCommon('procedures.card.practitionerId', 'Practitioner ID: {{id}}', { id: value });
           return (
             <Text
               size="sm"
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={t('procedures.card.viewPractitioner', 'View practitioner details')}
+              title={tCommon('procedures.card.viewPractitioner', 'View practitioner details')}
             >
               {practitionerName}
             </Text>
@@ -100,7 +101,7 @@ const ProcedureCard = ({
         }
       },
       {
-        label: t('procedures.card.description', 'Description'),
+        label: tCommon('labels.description'),
         value: procedure.description,
         align: 'flex-start',
         style: { flex: 1 }
@@ -110,7 +111,7 @@ const ProcedureCard = ({
     // Add complications field if it exists
     if (procedure.procedure_complications) {
       fields.push({
-        label: t('procedures.card.complications', 'Complications'),
+        label: t('procedures.complications.label'),
         value: procedure.procedure_complications,
         align: 'flex-start',
         style: { flex: 1, color: '#d63384' }

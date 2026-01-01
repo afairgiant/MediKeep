@@ -55,6 +55,16 @@
     "no": "No",
     "unknown": "Unknown",
     "notSpecified": "Not specified",
+    "notCompleted": "Not completed",
+    "pending": "Pending",
+    "error": "Error",
+    "success": "Success",
+    "viewPractitionerDetails": "View practitioner details",
+    "viewPharmacyDetails": "View pharmacy details",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "duration": "Duration",
+    "notes": "Notes",
     "name": "Name",
     "date": "Date",
     "time": "Time",
@@ -76,6 +86,16 @@
     "conditionsAvailableToLink": "{{count}} conditions available to link",
     "linkedMedications": "Linked Medications",
     "visitWebsite": "Visit Website ↗"
+  },
+  "viewToggle": {
+    "cards": "Cards",
+    "table": "Table"
+  },
+  "filters": {
+    "title": "Filters & Search",
+    "itemCount": "{{filtered}} of {{total}} items",
+    "moreFilters": "{{count}} more filters",
+    "active": "Active"
   },
   "vitals": {
     "form": {
@@ -105,6 +125,8 @@
     }
   },
   "medications": {
+    "title": "Medications",
+    "addNew": "+ Add New Medication",
     "quickFilter": "Quick Filter",
     "allTypes": "All Types",
     "types": {
@@ -173,7 +195,15 @@
     "morning": "Morning",
     "afternoon": "Afternoon",
     "evening": "Evening",
-    "night": "Night"
+    "night": "Night",
+    "day": "day",
+    "days": "days",
+    "month": "month",
+    "months": "months",
+    "year": "year",
+    "years": "years",
+    "ended": "ended",
+    "ongoing": "ongoing"
   },
   "pagination": {
     "page": "Page",
@@ -447,8 +477,28 @@
       }
     }
   },
+  "conditions": {
+    "title": "Medical Conditions",
+    "loading": "Loading conditions...",
+    "addNew": "+ Add New Condition",
+    "editTitle": "Edit Condition",
+    "addTitle": "Add New Condition",
+    "noResults": "No medical conditions found",
+    "tryAdjustingFilters": "Try adjusting your search or filter criteria.",
+    "getStarted": "Click \"Add New Condition\" to get started.",
+    "table": {
+      "condition": "Condition",
+      "severity": "Severity",
+      "onsetDate": "Onset Date",
+      "endDate": "End Date",
+      "status": "Status",
+      "icd10": "ICD-10",
+      "notes": "Notes"
+    }
+  },
   "treatments": {
     "title": "Treatments",
+    "loadingTreatments": "Loading treatments...",
     "addTreatment": "+ Add Treatment",
     "noTreatmentsFound": "No Treatments Found",
     "tryAdjustingFilters": "Try adjusting your search or filter criteria.",
@@ -685,6 +735,17 @@
       "cancel": "Cancel",
       "createProcedure": "Create Procedure",
       "updateProcedure": "Update Procedure"
+    },
+    "table": {
+      "procedureName": "Procedure Name",
+      "type": "Type",
+      "code": "Code",
+      "date": "Date",
+      "status": "Status",
+      "setting": "Setting",
+      "facility": "Facility",
+      "practitioner": "Practitioner",
+      "description": "Description"
     }
   },
   "immunizations": {
@@ -1633,6 +1694,7 @@
     }
   },
   "labResults": {
+    "title": "Lab Results",
     "addNew": "+ Add New Lab Result",
     "quickPdfImport": "Quick PDF Import",
     "quickImportModalTitle": "Quick PDF Import - Step {{step}} of 2",
@@ -1670,7 +1732,104 @@
       "uploadParse": "Upload & Parse",
       "importFromPdf": "Import from PDF"
     },
+    "modal": {
+      "title": "Lab Result Details",
+      "tabs": {
+        "overview": "Overview",
+        "testComponents": "Test Components",
+        "relatedConditions": "Related Conditions",
+        "tags": "Tags",
+        "files": "Files"
+      },
+      "sections": {
+        "testInfo": "Test Information",
+        "testResults": "Test Results",
+        "orderingPractitioner": "Ordering Practitioner",
+        "notes": "Notes",
+        "tags": "Tags",
+        "associatedFiles": "Associated Files"
+      },
+      "labels": {
+        "testCode": "Test Code",
+        "category": "Category",
+        "testType": "Test Type",
+        "facility": "Facility",
+        "labResult": "Lab Result",
+        "orderedDate": "Ordered Date",
+        "completedDate": "Completed Date",
+        "doctor": "Doctor",
+        "specialty": "Specialty"
+      },
+      "noNotes": "No notes available",
+      "editLabResult": "Edit Lab Result"
+    },
     "error": "Error",
     "success": "Success"
+  },
+  "testComponents": {
+    "title": "Test Components",
+    "testCount": "{{count}} test",
+    "testCount_plural": "{{count}} tests",
+    "addTests": "Add Tests",
+    "addTestComponents": "Add Test Components",
+    "refreshComponents": "Refresh components",
+    "errorLoading": "Error loading test components",
+    "noComponents": "No test components",
+    "noComponentsDescription": "This lab result doesn't have any individual test components yet.",
+    "tabs": {
+      "testResults": "Test Results",
+      "statistics": "Statistics"
+    },
+    "emptyState": {
+      "description": "Templates provide common lab panels (CBC, CMP, etc.) where you can enter values and ranges. Bulk import allows you to copy/paste results from lab reports for automatic parsing."
+    },
+    "notifications": {
+      "componentDeleted": "Component deleted",
+      "hasBeenDeleted": "{{name}} has been deleted"
+    },
+    "editModal": {
+      "title": "Edit Test Component",
+      "updating": "Updating test component...",
+      "editing": "Editing",
+      "notDetermined": "Not determined",
+      "fields": {
+        "testName": "Test Name",
+        "abbreviation": "Abbreviation",
+        "testCode": "Test Code",
+        "value": "Value",
+        "unit": "Unit",
+        "referenceRange": "Reference Range",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "rangeText": "Range Text (alternative)",
+        "status": "Status (Auto-calculated)",
+        "category": "Category"
+      },
+      "placeholders": {
+        "testName": "e.g., Hemoglobin",
+        "abbreviation": "e.g., HGB",
+        "testCode": "e.g., 718-7",
+        "value": "Enter test value",
+        "unit": "e.g., g/dL",
+        "minValue": "Minimum value",
+        "maxValue": "Maximum value",
+        "rangeText": "e.g., 'Negative' or 'Male: 13.5-17.5, Female: 12.0-15.5'",
+        "category": "Select category",
+        "notes": "Additional notes about this test result"
+      }
+    },
+    "categories": {
+      "chemistry": "Blood Chemistry & Metabolism",
+      "hematology": "Blood Cells & Counts",
+      "lipids": "Cholesterol & Lipids",
+      "endocrinology": "Hormones & Thyroid",
+      "immunology": "Immune System & Antibodies",
+      "microbiology": "Infections & Cultures",
+      "toxicology": "Drug & Toxin Screening",
+      "genetics": "Genetic Tests",
+      "molecular": "Molecular & DNA Tests",
+      "pathology": "Tissue & Biopsy Analysis",
+      "other": "Other Tests"
+    }
   }
 }

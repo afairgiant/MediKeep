@@ -24,7 +24,8 @@ const ConditionCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
 
   const handleError = (error) => {
     logger.error('condition_card_error', {
@@ -84,20 +85,23 @@ const ConditionCard = ({
 
     let duration;
     if (diffDays < 30) {
-      duration = `${diffDays} day${diffDays === 1 ? '' : 's'}`;
+      const unit = diffDays === 1 ? tCommon('time.day') : tCommon('time.days');
+      duration = `${diffDays} ${unit}`;
     } else if (diffDays < 365) {
       const months = Math.floor(diffDays / 30);
-      duration = `${months} month${months === 1 ? '' : 's'}`;
+      const unit = months === 1 ? tCommon('time.month') : tCommon('time.months');
+      duration = `${months} ${unit}`;
     } else {
       const years = Math.floor(diffDays / 365);
-      duration = `${years} year${years === 1 ? '' : 's'}`;
+      const unit = years === 1 ? tCommon('time.year') : tCommon('time.years');
+      duration = `${years} ${unit}`;
     }
 
     // Add appropriate suffix based on condition status
     if (endDate || status === 'resolved' || status === 'inactive') {
-      return t('conditions.card.durationEnded', '{{duration}} (ended)', { duration });
+      return `${duration} (${tCommon('time.ended')})`;
     } else {
-      return t('conditions.card.durationOngoing', '{{duration}} (ongoing)', { duration });
+      return `${duration} (${tCommon('time.ongoing')})`;
     }
   };
 
@@ -131,29 +135,29 @@ const ConditionCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('conditions.card.onsetDate', 'Onset Date'),
+        label: t('common.fields.onsetDate.label'),
         value: condition.onset_date,
-        render: (value) => value ? formatDate(value) : t('labels.notSpecified', 'Not specified')
+        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
       },
       {
-        label: t('conditions.card.duration', 'Duration'),
+        label: tCommon('labels.duration'),
         value: condition.onset_date,
         render: () => condition.onset_date
           ? getConditionDuration(condition.onset_date, condition.end_date, condition.status)
-          : t('labels.notSpecified', 'Not specified')
+          : tCommon('labels.notSpecified')
       },
       condition.end_date && {
-        label: t('conditions.card.endDate', 'End Date'),
+        label: t('common.fields.endDate.label'),
         value: condition.end_date,
         render: (value) => formatDate(value)
       },
       condition.snomed_code && {
-        label: t('conditions.card.snomedCode', 'SNOMED Code'),
+        label: t('conditions.snomedCode.label'),
         value: condition.snomed_code,
         render: (value) => value
       },
       condition.code_description && {
-        label: t('conditions.card.codeDescription', 'Code Description'),
+        label: t('conditions.codeDescription.label'),
         value: condition.code_description,
         render: (value) => value,
         align: 'flex-start',

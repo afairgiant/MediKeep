@@ -587,15 +587,15 @@ const Procedures = () => {
               <ResponsiveTable
                 data={filteredProcedures}
                 columns={[
-                  { header: 'Procedure Name', accessor: 'procedure_name', priority: 'high', width: 200 },
-                  { header: 'Type', accessor: 'procedure_type', priority: 'medium', width: 120 },
-                  { header: 'Code', accessor: 'procedure_code', priority: 'low', width: 100 },
-                  { header: 'Date', accessor: 'date', priority: 'high', width: 120 },
-                  { header: 'Status', accessor: 'status', priority: 'high', width: 100 },
-                  { header: 'Setting', accessor: 'procedure_setting', priority: 'low', width: 120 },
-                  { header: 'Facility', accessor: 'facility', priority: 'medium', width: 150 },
-                  { header: 'Practitioner', accessor: 'practitioner_name', priority: 'medium', width: 150 },
-                  { header: 'Description', accessor: 'description', priority: 'low', width: 200 },
+                  { header: t('procedures.table.procedureName'), accessor: 'procedure_name', priority: 'high', width: 200 },
+                  { header: t('procedures.table.type'), accessor: 'procedure_type', priority: 'medium', width: 120 },
+                  { header: t('procedures.table.code'), accessor: 'procedure_code', priority: 'low', width: 100 },
+                  { header: t('procedures.table.date'), accessor: 'date', priority: 'high', width: 120 },
+                  { header: t('procedures.table.status'), accessor: 'status', priority: 'high', width: 100 },
+                  { header: t('procedures.table.setting'), accessor: 'procedure_setting', priority: 'low', width: 120 },
+                  { header: t('procedures.table.facility'), accessor: 'facility', priority: 'medium', width: 150 },
+                  { header: t('procedures.table.practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 150 },
+                  { header: t('procedures.table.description'), accessor: 'description', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
                 tableName="Procedures"

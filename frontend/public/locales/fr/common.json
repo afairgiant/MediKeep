@@ -55,6 +55,16 @@
     "no": "Non",
     "unknown": "Inconnu",
     "notSpecified": "Non spécifié(e)",
+    "notCompleted": "Non complété",
+    "pending": "En attente",
+    "error": "Erreur",
+    "success": "Succès",
+    "viewPractitionerDetails": "Voir les détails du praticien",
+    "viewPharmacyDetails": "Voir les détails de la pharmacie",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "duration": "Durée",
+    "notes": "Notes",
     "name": "Nom",
     "date": "Date",
     "time": "Heure",
@@ -76,6 +86,16 @@
     "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
     "linkedMedications": "Médicaments connectés",
     "visitWebsite": "Visiter le site web ↗"
+  },
+  "viewToggle": {
+    "cards": "Cartes",
+    "table": "Tableau"
+  },
+  "filters": {
+    "title": "Filtres et recherche",
+    "itemCount": "{{filtered}} sur {{total}} éléments",
+    "moreFilters": "{{count}} filtres supplémentaires",
+    "active": "Actif"
   },
   "vitals": {
     "form": {
@@ -105,6 +125,8 @@
     }
   },
   "medications": {
+    "title": "Médicaments",
+    "addNew": "+ Ajouter un nouveau médicament",
     "quickFilter": "Filtre rapide",
     "allTypes": "Tous les types",
     "types": {
@@ -173,7 +195,15 @@
     "morning": "Matin",
     "afternoon": "Après-midi",
     "evening": "Soir",
-    "night": "Nuit"
+    "night": "Nuit",
+    "day": "jour",
+    "days": "jours",
+    "month": "mois",
+    "months": "mois",
+    "year": "an",
+    "years": "ans",
+    "ended": "terminé",
+    "ongoing": "en cours"
   },
   "pagination": {
     "page": "Page",
@@ -447,8 +477,28 @@
       }
     }
   },
+  "conditions": {
+    "title": "Conditions médicales",
+    "loading": "Chargement des conditions...",
+    "addNew": "+ Ajouter une nouvelle condition",
+    "editTitle": "Modifier la condition",
+    "addTitle": "Ajouter une nouvelle condition",
+    "noResults": "Aucune condition médicale trouvée",
+    "tryAdjustingFilters": "Essayez d'ajuster vos critères de recherche ou de filtre.",
+    "getStarted": "Cliquez sur \"Ajouter une nouvelle condition\" pour commencer.",
+    "table": {
+      "condition": "Condition",
+      "severity": "Sévérité",
+      "onsetDate": "Date d'apparition",
+      "endDate": "Date de fin",
+      "status": "Statut",
+      "icd10": "CIM-10",
+      "notes": "Notes"
+    }
+  },
   "treatments": {
     "title": "Traitements",
+    "loadingTreatments": "Chargement des traitements...",
     "addTreatment": "+ Ajouter traitement",
     "noTreatmentsFound": "Aucun traitement trouvé",
     "tryAdjustingFilters": "Essayez d'ajuster vos critères de recherche ou de tri.",
@@ -685,6 +735,17 @@
       "cancel": "Annuler",
       "createProcedure": "Créer une procédure",
       "updateProcedure": "Mettre à jour une procédure"
+    },
+    "table": {
+      "procedureName": "Nom de la procédure",
+      "type": "Type",
+      "code": "Code",
+      "date": "Date",
+      "status": "Statut",
+      "setting": "Paramètre",
+      "facility": "Établissement",
+      "practitioner": "Praticien",
+      "description": "Description"
     }
   },
   "immunizations": {
@@ -1633,6 +1694,7 @@
     }
   },
   "labResults": {
+    "title": "Résultats d'analyses",
     "addNew": "+ Ajouter un résultat d'analyses",
     "quickPdfImport": "Importation PDF rapide",
     "quickImportModalTitle": "Importation PDF rapide - Etape {{step}} sur 2",
@@ -1670,7 +1732,104 @@
       "uploadParse": "Téléverser et analyser",
       "importFromPdf": "Importer depuis PDF"
     },
+    "modal": {
+      "title": "Détails du résultat d'analyses",
+      "tabs": {
+        "overview": "Aperçu",
+        "testComponents": "Composants d'analyses",
+        "relatedConditions": "Conditions connexes",
+        "tags": "Étiquettes",
+        "files": "Fichiers"
+      },
+      "sections": {
+        "testInfo": "Informations sur l'analyse",
+        "testResults": "Résultats de l'analyse",
+        "orderingPractitioner": "Médecin prescripteur",
+        "notes": "Notes",
+        "tags": "Étiquettes",
+        "associatedFiles": "Fichiers associés"
+      },
+      "labels": {
+        "testCode": "Code d'analyse",
+        "category": "Catégorie",
+        "testType": "Type d'analyse",
+        "facility": "Établissement",
+        "labResult": "Résultat d'analyses",
+        "orderedDate": "Date prescrite",
+        "completedDate": "Date terminée",
+        "doctor": "Médecin",
+        "specialty": "Spécialité"
+      },
+      "noNotes": "Aucune note disponible",
+      "editLabResult": "Modifier le résultat d'analyses"
+    },
     "error": "Erreur",
     "success": "Succès"
+  },
+  "testComponents": {
+    "title": "Composants d'analyses",
+    "testCount": "{{count}} test",
+    "testCount_plural": "{{count}} tests",
+    "addTests": "Ajouter des tests",
+    "addTestComponents": "Ajouter des composants d'analyses",
+    "refreshComponents": "Actualiser les composants",
+    "errorLoading": "Erreur lors du chargement des composants d'analyses",
+    "noComponents": "Aucun composant d'analyses",
+    "noComponentsDescription": "Ce résultat d'analyses n'a pas encore de composants d'analyses individuels.",
+    "tabs": {
+      "testResults": "Résultats des tests",
+      "statistics": "Statistiques"
+    },
+    "emptyState": {
+      "description": "Les modèles fournissent des panels de laboratoire courants (NFS, BMP, etc.) où vous pouvez saisir des valeurs et des plages. L'importation en masse vous permet de copier/coller les résultats des rapports de laboratoire pour une analyse automatique."
+    },
+    "notifications": {
+      "componentDeleted": "Composant supprimé",
+      "hasBeenDeleted": "{{name}} a été supprimé"
+    },
+    "editModal": {
+      "title": "Modifier le composant d'analyses",
+      "updating": "Mise à jour du composant d'analyses...",
+      "editing": "Modification",
+      "notDetermined": "Non déterminé",
+      "fields": {
+        "testName": "Nom du test",
+        "abbreviation": "Abréviation",
+        "testCode": "Code du test",
+        "value": "Valeur",
+        "unit": "Unité",
+        "referenceRange": "Plage de référence",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "rangeText": "Texte de plage (alternatif)",
+        "status": "Statut (calculé automatiquement)",
+        "category": "Catégorie"
+      },
+      "placeholders": {
+        "testName": "ex : Hémoglobine",
+        "abbreviation": "ex : HGB",
+        "testCode": "ex : 718-7",
+        "value": "Entrez la valeur du test",
+        "unit": "ex : g/dL",
+        "minValue": "Valeur minimale",
+        "maxValue": "Valeur maximale",
+        "rangeText": "ex : 'Négatif' ou 'Homme : 13,5-17,5, Femme : 12,0-15,5'",
+        "category": "Sélectionnez une catégorie",
+        "notes": "Notes supplémentaires sur ce résultat de test"
+      }
+    },
+    "categories": {
+      "chemistry": "Chimie sanguine et métabolisme",
+      "hematology": "Cellules sanguines et comptages",
+      "lipids": "Cholestérol et lipides",
+      "endocrinology": "Hormones et thyroïde",
+      "immunology": "Système immunitaire et anticorps",
+      "microbiology": "Infections et cultures",
+      "toxicology": "Dépistage de drogues et toxines",
+      "genetics": "Tests génétiques",
+      "molecular": "Tests moléculaires et ADN",
+      "pathology": "Analyse tissulaire et biopsie",
+      "other": "Autres tests"
+    }
   }
 }

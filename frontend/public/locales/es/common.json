@@ -50,6 +50,17 @@
     "yes": "Si",
     "no": "No",
     "unknown": "Desconocido",
+    "notSpecified": "No especificado",
+    "notCompleted": "No completado",
+    "pending": "Pendiente",
+    "error": "Error",
+    "success": "Éxito",
+    "viewPractitionerDetails": "Ver detalles del profesional",
+    "viewPharmacyDetails": "Ver detalles de la farmacia",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "duration": "Duración",
+    "notes": "Notas",
     "name": "Nombre",
     "date": "Fecha",
     "time": "Hora",
@@ -61,6 +72,28 @@
     "account": "Cuenta",
     "help": "Ayuda",
     "support": "Soporte"
+  },
+  "viewToggle": {
+    "cards": "Tarjetas",
+    "table": "Tabla"
+  },
+  "filters": {
+    "title": "Filtros y búsqueda",
+    "itemCount": "{{filtered}} de {{total}} elementos",
+    "moreFilters": "{{count}} filtros más",
+    "active": "Activo"
+  },
+  "medications": {
+    "title": "Medicamentos",
+    "addNew": "+ Añadir nuevo medicamento",
+    "quickFilter": "Filtro rápido",
+    "allTypes": "Todos los tipos",
+    "types": {
+      "prescription": "Prescripción",
+      "otc": "Medicamento sin receta",
+      "supplement": "Suplemento/Vitamina",
+      "herbal": "Herbal/Natural"
+    }
   },
   "messages": {
     "confirmDelete": "¿Está seguro de que desea eliminar este objeto?",
@@ -89,7 +122,15 @@
     "morning": "Por la Mañana",
     "afternoon": "Al mediodía",
     "evening": "Por la Tarde",
-    "night": "Por la Noche"
+    "night": "Por la Noche",
+    "day": "día",
+    "days": "días",
+    "month": "mes",
+    "months": "meses",
+    "year": "año",
+    "years": "años",
+    "ended": "terminado",
+    "ongoing": "en curso"
   },
   "pagination": {
     "page": "Página",
@@ -102,5 +143,148 @@
     "next": "Siguiente",
     "first": "Primero",
     "last": "Último"
+  },
+  "conditions": {
+    "title": "Condiciones médicas",
+    "loading": "Cargando condiciones...",
+    "addNew": "+ Añadir nueva condición",
+    "editTitle": "Editar condición",
+    "addTitle": "Añadir nueva condición",
+    "noResults": "No se encontraron condiciones médicas",
+    "tryAdjustingFilters": "Intente ajustar sus criterios de búsqueda o filtro.",
+    "getStarted": "Haga clic en \"Añadir nueva condición\" para comenzar.",
+    "table": {
+      "condition": "Condición",
+      "severity": "Gravedad",
+      "onsetDate": "Fecha de inicio",
+      "endDate": "Fecha de fin",
+      "status": "Estado",
+      "icd10": "CIE-10",
+      "notes": "Notas"
+    }
+  },
+  "treatments": {
+    "title": "Tratamientos",
+    "loadingTreatments": "Cargando tratamientos...",
+    "addTreatment": "+ Añadir tratamiento"
+  },
+  "procedures": {
+    "title": "Procedimientos",
+    "loadingProcedures": "Cargando procedimientos...",
+    "addProcedure": "+ Añadir procedimiento",
+    "table": {
+      "procedureName": "Nombre del procedimiento",
+      "type": "Tipo",
+      "code": "Código",
+      "date": "Fecha",
+      "status": "Estado",
+      "setting": "Configuración",
+      "facility": "Centro",
+      "practitioner": "Profesional",
+      "description": "Descripción"
+    }
+  },
+  "labResults": {
+    "title": "Resultados de laboratorio",
+    "addNew": "+ Añadir nuevo resultado de laboratorio",
+    "modal": {
+      "title": "Detalles del resultado de laboratorio",
+      "tabs": {
+        "overview": "Resumen",
+        "testComponents": "Componentes de la prueba",
+        "relatedConditions": "Condiciones relacionadas",
+        "tags": "Etiquetas",
+        "files": "Archivos"
+      },
+      "sections": {
+        "testInfo": "Información de la prueba",
+        "testResults": "Resultados de la prueba",
+        "orderingPractitioner": "Profesional que ordena",
+        "notes": "Notas",
+        "tags": "Etiquetas",
+        "associatedFiles": "Archivos asociados"
+      },
+      "labels": {
+        "testCode": "Código de prueba",
+        "category": "Categoría",
+        "testType": "Tipo de prueba",
+        "facility": "Centro",
+        "labResult": "Resultado de laboratorio",
+        "orderedDate": "Fecha ordenada",
+        "completedDate": "Fecha completada",
+        "doctor": "Médico",
+        "specialty": "Especialidad"
+      },
+      "noNotes": "No hay notas disponibles",
+      "editLabResult": "Editar resultado de laboratorio"
+    },
+    "error": "Error",
+    "success": "Éxito"
+  },
+  "testComponents": {
+    "title": "Componentes de la prueba",
+    "testCount": "{{count}} prueba",
+    "testCount_plural": "{{count}} pruebas",
+    "addTests": "Añadir pruebas",
+    "addTestComponents": "Añadir componentes de la prueba",
+    "refreshComponents": "Actualizar componentes",
+    "errorLoading": "Error al cargar los componentes de la prueba",
+    "noComponents": "Sin componentes de la prueba",
+    "noComponentsDescription": "Este resultado de laboratorio aún no tiene componentes de prueba individuales.",
+    "tabs": {
+      "testResults": "Resultados de las pruebas",
+      "statistics": "Estadísticas"
+    },
+    "emptyState": {
+      "description": "Las plantillas proporcionan paneles de laboratorio comunes (CBC, CMP, etc.) donde puede ingresar valores y rangos. La importación masiva le permite copiar/pegar resultados de informes de laboratorio para análisis automático."
+    },
+    "notifications": {
+      "componentDeleted": "Componente eliminado",
+      "hasBeenDeleted": "{{name}} ha sido eliminado"
+    },
+    "editModal": {
+      "title": "Editar componente de la prueba",
+      "updating": "Actualizando componente de la prueba...",
+      "editing": "Editando",
+      "notDetermined": "No determinado",
+      "fields": {
+        "testName": "Nombre de la prueba",
+        "abbreviation": "Abreviatura",
+        "testCode": "Código de prueba",
+        "value": "Valor",
+        "unit": "Unidad",
+        "referenceRange": "Rango de referencia",
+        "minimum": "Mínimo",
+        "maximum": "Máximo",
+        "rangeText": "Texto de rango (alternativo)",
+        "status": "Estado (calculado automáticamente)",
+        "category": "Categoría"
+      },
+      "placeholders": {
+        "testName": "ej: Hemoglobina",
+        "abbreviation": "ej: HGB",
+        "testCode": "ej: 718-7",
+        "value": "Ingrese el valor de la prueba",
+        "unit": "ej: g/dL",
+        "minValue": "Valor mínimo",
+        "maxValue": "Valor máximo",
+        "rangeText": "ej: 'Negativo' o 'Hombre: 13.5-17.5, Mujer: 12.0-15.5'",
+        "category": "Seleccione una categoría",
+        "notes": "Notas adicionales sobre este resultado de prueba"
+      }
+    },
+    "categories": {
+      "chemistry": "Química sanguínea y metabolismo",
+      "hematology": "Células sanguíneas y conteos",
+      "lipids": "Colesterol y lípidos",
+      "endocrinology": "Hormonas y tiroides",
+      "immunology": "Sistema inmunológico y anticuerpos",
+      "microbiology": "Infecciones y cultivos",
+      "toxicology": "Detección de drogas y toxinas",
+      "genetics": "Pruebas genéticas",
+      "molecular": "Pruebas moleculares y ADN",
+      "pathology": "Análisis de tejidos y biopsia",
+      "other": "Otras pruebas"
+    }
   }
 }

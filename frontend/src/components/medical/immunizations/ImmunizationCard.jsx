@@ -15,7 +15,8 @@ const ImmunizationCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
 
   const handleError = (error) => {
     logger.error('immunization_card_error', {
@@ -59,7 +60,7 @@ const ImmunizationCard = ({
     
     if (immunization.dose_number) {
       badges.push({
-        label: t('immunizations.card.dose', 'Dose {{number}}', { number: immunization.dose_number }),
+        label: tCommon('immunizations.card.dose', 'Dose {{number}}', { number: immunization.dose_number }),
         color: getDoseColor(immunization.dose_number)
       });
     }
@@ -83,45 +84,45 @@ const ImmunizationCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('immunizations.card.dateAdministered', 'Date Administered'),
+        label: t('immunizations.dateAdministered.label'),
         value: immunization.date_administered,
-        render: (value) => value ? formatDate(value) : t('immunizations.card.notSpecified', 'Not specified')
+        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
       },
       immunization.lot_number && {
-        label: t('immunizations.card.lotNumber', 'Lot Number'),
+        label: t('immunizations.lotNumber.label'),
         value: immunization.lot_number,
         render: (value) => value
       },
       immunization.ndc_number && {
-        label: t('immunizations.card.ndcNumber', 'NDC Number'),
+        label: t('immunizations.ndcNumber.label'),
         value: immunization.ndc_number,
         render: (value) => value
       },
       immunization.site && {
-        label: t('immunizations.card.injectionSite', 'Injection Site'),
+        label: t('immunizations.site.label'),
         value: immunization.site,
         render: (value) => value
       },
       immunization.route && {
-        label: t('immunizations.card.route', 'Route'),
+        label: t('immunizations.route.label'),
         value: immunization.route,
         render: (value) => value
       },
       immunization.location && {
-        label: t('immunizations.card.location', 'Location'),
+        label: t('immunizations.location.label'),
         value: immunization.location,
         render: (value) => value
       },
       immunization.expiration_date && {
-        label: t('immunizations.card.expirationDate', 'Expiration Date'),
+        label: t('immunizations.expirationDate.label'),
         value: immunization.expiration_date,
         render: (value) => formatDate(value)
       },
       immunization.practitioner_id && {
-        label: t('immunizations.card.practitioner', 'Practitioner'),
+        label: tCommon('labels.practitioner'),
         value: immunization.practitioner_id,
         render: (value) => {
-          if (!value) return t('immunizations.card.notSpecified', 'Not specified');
+          if (!value) return tCommon('labels.notSpecified');
           const practitioner = practitioners.find(p => p.id === value);
           return (
             <Text
@@ -129,9 +130,9 @@ const ImmunizationCard = ({
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={t('immunizations.card.viewPractitioner', 'View practitioner details')}
+              title={tCommon('immunizations.card.viewPractitioner', 'View practitioner details')}
             >
-              {practitioner?.name || t('immunizations.card.practitionerId', 'ID: {{id}}', { id: value })}
+              {practitioner?.name || tCommon('immunizations.card.practitionerId', 'ID: {{id}}', { id: value })}
             </Text>
           );
         }
