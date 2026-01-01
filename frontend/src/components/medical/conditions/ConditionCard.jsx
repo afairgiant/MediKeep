@@ -24,7 +24,8 @@ const ConditionCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
 
   const handleError = (error) => {
     logger.error('condition_card_error', {
@@ -95,9 +96,9 @@ const ConditionCard = ({
 
     // Add appropriate suffix based on condition status
     if (endDate || status === 'resolved' || status === 'inactive') {
-      return t('conditions.card.durationEnded', '{{duration}} (ended)', { duration });
+      return `${duration} (ended)`;
     } else {
-      return t('conditions.card.durationOngoing', '{{duration}} (ongoing)', { duration });
+      return `${duration} (ongoing)`;
     }
   };
 
@@ -131,29 +132,29 @@ const ConditionCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('conditions.card.onsetDate', 'Onset Date'),
+        label: t('common.fields.onsetDate.label'),
         value: condition.onset_date,
-        render: (value) => value ? formatDate(value) : t('labels.notSpecified', 'Not specified')
+        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
       },
       {
-        label: t('conditions.card.duration', 'Duration'),
+        label: 'Duration',
         value: condition.onset_date,
         render: () => condition.onset_date
           ? getConditionDuration(condition.onset_date, condition.end_date, condition.status)
-          : t('labels.notSpecified', 'Not specified')
+          : tCommon('labels.notSpecified')
       },
       condition.end_date && {
-        label: t('conditions.card.endDate', 'End Date'),
+        label: t('common.fields.endDate.label'),
         value: condition.end_date,
         render: (value) => formatDate(value)
       },
       condition.snomed_code && {
-        label: t('conditions.card.snomedCode', 'SNOMED Code'),
+        label: t('conditions.snomedCode.label'),
         value: condition.snomed_code,
         render: (value) => value
       },
       condition.code_description && {
-        label: t('conditions.card.codeDescription', 'Code Description'),
+        label: t('conditions.codeDescription.label'),
         value: condition.code_description,
         render: (value) => value,
         align: 'flex-start',

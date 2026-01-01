@@ -22,24 +22,25 @@ const MedicationCard = ({
   navigate,
   onError,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
 
   const getMedicationPurpose = (medication) => {
     const indication = medication.indication?.trim();
-    return indication || t('medications.fields.noIndication', 'No indication specified');
+    return indication || tCommon('labels.notSpecified');
   };
 
   const getMedicationTypeLabel = (type) => {
     const typeKey = `medications.types.${type}`;
     switch(type) {
       case MEDICATION_TYPES.PRESCRIPTION:
-        return t(typeKey, 'Prescription');
+        return tCommon(typeKey, 'Prescription');
       case MEDICATION_TYPES.OTC:
-        return t(typeKey, 'Over-the-Counter');
+        return tCommon(typeKey, 'Over-the-Counter');
       case MEDICATION_TYPES.SUPPLEMENT:
-        return t(typeKey, 'Supplement/Vitamin');
+        return tCommon(typeKey, 'Supplement/Vitamin');
       case MEDICATION_TYPES.HERBAL:
-        return t(typeKey, 'Herbal/Natural');
+        return tCommon(typeKey, 'Herbal/Natural');
       default:
         return type;
     }
@@ -102,7 +103,7 @@ const MedicationCard = ({
           {medication.frequency && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.fields.frequency', 'Frequency')}:
+                {t('medications.frequency.label')}:
               </Text>
               <Text size="sm">{medication.frequency}</Text>
             </Group>
@@ -110,7 +111,7 @@ const MedicationCard = ({
           {medication.route && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.fields.route', 'Route')}:
+                {t('medications.route.label')}:
               </Text>
               <Badge variant="light" color="cyan" size="sm">
                 {medication.route}
@@ -119,7 +120,7 @@ const MedicationCard = ({
           )}
           <Group align="flex-start">
             <Text size="sm" fw={500} c="dimmed" w={120}>
-              {t('medications.fields.purpose', 'Purpose')}:
+              {t('medications.indication.label')}:
             </Text>
             <Text size="sm" style={{ flex: 1 }}>
               {getMedicationPurpose(medication)}
@@ -128,14 +129,14 @@ const MedicationCard = ({
           {medication.practitioner && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.fields.prescriber', 'Prescriber')}:
+                {t('medications.prescribingProvider.label')}:
               </Text>
               <Text
                 size="sm"
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
-                title={t('medications.fields.viewPractitioner', 'View practitioner details')}
+                title={tCommon('labels.viewPractitionerDetails')}
               >
                 {medication.practitioner.name}
               </Text>
@@ -144,14 +145,14 @@ const MedicationCard = ({
           {medication.pharmacy && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.fields.pharmacy', 'Pharmacy')}:
+                {t('medications.pharmacy.label')}:
               </Text>
               <Text
                 size="sm"
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
-                title={t('medications.fields.viewPharmacy', 'View pharmacy details')}
+                title={tCommon('labels.viewPharmacyDetails', 'View pharmacy details')}
               >
                 {medication.pharmacy.name}
               </Text>
@@ -160,7 +161,7 @@ const MedicationCard = ({
           {medication.effective_period_start && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.fields.startDate', 'Start Date')}:
+                {tCommon('labels.startDate', 'Start Date')}:
               </Text>
               <Text size="sm">
                 {formatDate(medication.effective_period_start)}
@@ -170,7 +171,7 @@ const MedicationCard = ({
           {medication.effective_period_end && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.fields.endDate', 'End Date')}:
+                {tCommon('labels.endDate', 'End Date')}:
               </Text>
               <Text size="sm">
                 {formatDate(medication.effective_period_end)}
@@ -188,14 +189,14 @@ const MedicationCard = ({
             size="xs"
             onClick={() => onView(medication)}
           >
-            {t('buttons.view', 'View')}
+            {tCommon('buttons.view')}
           </Button>
           <Button
             variant="filled"
             size="xs"
             onClick={() => onEdit(medication)}
           >
-            {t('buttons.edit', 'Edit')}
+            {tCommon('buttons.edit')}
           </Button>
           <Button
             variant="filled"
@@ -203,7 +204,7 @@ const MedicationCard = ({
             size="xs"
             onClick={() => onDelete(medication.id)}
           >
-            {t('buttons.delete', 'Delete')}
+            {tCommon('buttons.delete')}
           </Button>
         </Group>
       </Stack>

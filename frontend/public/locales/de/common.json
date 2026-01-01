@@ -56,6 +56,15 @@
     "no": "Nein",
     "unknown": "Unbekannt",
     "notSpecified": "Nicht angegeben",
+    "notCompleted": "Nicht abgeschlossen",
+    "pending": "Ausstehend",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "viewPractitionerDetails": "Arztdetails anzeigen",
+    "viewPharmacyDetails": "Apothekendetails anzeigen",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "notes": "Notizen",
     "name": "Name",
     "date": "Datum",
     "time": "Zeit",
@@ -80,6 +89,16 @@
     "linkedMedications": "Verknüpfte Medikamente",
     "visitWebsite": "Website besuchen ↗"
   },
+  "viewToggle": {
+    "cards": "Karten",
+    "table": "Tabelle"
+  },
+  "filters": {
+    "title": "Filter & Suche",
+    "itemCount": "{{filtered}} von {{total}} Einträgen",
+    "moreFilters": "{{count}} weitere Filter",
+    "active": "Aktiv"
+  },
   "vitals": {
     "form": {
       "selectDate": "Datum auswählen",
@@ -87,6 +106,8 @@
     }
   },
   "medications": {
+    "title": "Medikamente",
+    "addNew": "+ Neues Medikament hinzufügen",
     "quickFilter": "Schnellfilter",
     "allTypes": "Alle Typen",
     "types": {
@@ -552,8 +573,6 @@
         "doctor": "Arzt",
         "specialty": "Fachgebiet"
       },
-      "notSpecified": "Nicht angegeben",
-      "notCompleted": "Nicht abgeschlossen",
       "noNotes": "Keine Notizen verfügbar",
       "editLabResult": "Laborergebnis bearbeiten"
     },
@@ -1011,6 +1030,7 @@
   },
   "treatments": {
     "title": "Behandlungen",
+    "loadingTreatments": "Behandlungen werden geladen...",
     "addTreatment": "+ Behandlung Hinzufügen",
     "noTreatmentsFound": "Keine Behandlungen Gefunden",
     "tryAdjustingFilters": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen.",
@@ -1134,6 +1154,17 @@
     "editProcedure": "Verfahren Bearbeiten",
     "addNewProcedure": "Neues Verfahren Hinzufügen",
     "processing": "Wird verarbeitet...",
+    "table": {
+      "procedureName": "Verfahrensname",
+      "type": "Typ",
+      "code": "Code",
+      "date": "Datum",
+      "status": "Status",
+      "setting": "Einstellung",
+      "facility": "Einrichtung",
+      "practitioner": "Praktiker",
+      "description": "Beschreibung"
+    },
     "card": {
       "procedureDate": "Verfahrensdatum",
       "code": "Code",

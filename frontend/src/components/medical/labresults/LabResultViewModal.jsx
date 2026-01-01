@@ -150,22 +150,22 @@ const LabResultViewModal = ({
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.testCode', 'Test Code')}</Text>
-                        <Text>{labResult.test_code || t('labResults.modal.notSpecified', 'Not specified')}</Text>
+                        <Text>{labResult.test_code || t('labels.notSpecified', 'Not specified')}</Text>
                       </Stack>
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.category', 'Category')}</Text>
-                        <Text>{labResult.test_category || t('labResults.modal.notSpecified', 'Not specified')}</Text>
+                        <Text>{labResult.test_category || t('labels.notSpecified', 'Not specified')}</Text>
                       </Stack>
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.testType', 'Test Type')}</Text>
                         <Text c={labResult.test_type ? 'inherit' : 'dimmed'}>
-                          {labResult.test_type || t('labResults.modal.notSpecified', 'Not specified')}
+                          {labResult.test_type || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.facility', 'Facility')}</Text>
                         <Text c={labResult.facility ? 'inherit' : 'dimmed'}>
-                          {labResult.facility || t('labResults.modal.notSpecified', 'Not specified')}
+                          {labResult.facility || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                     </SimpleGrid>
@@ -184,7 +184,7 @@ const LabResultViewModal = ({
                         {labResult.labs_result ? (
                           <StatusBadge status={labResult.labs_result} />
                         ) : (
-                          <Text c="dimmed">{t('labResults.modal.notSpecified', 'Not specified')}</Text>
+                          <Text c="dimmed">{t('labels.notSpecified', 'Not specified')}</Text>
                         )}
                       </Stack>
                       <Stack gap="xs">
@@ -196,7 +196,7 @@ const LabResultViewModal = ({
                         <Text c={labResult.completed_date ? 'inherit' : 'dimmed'}>
                           {labResult.completed_date
                             ? formatDate(labResult.completed_date)
-                            : t('labResults.modal.notCompleted', 'Not completed')}
+                            : t('labels.notCompleted', 'Not completed')}
                         </Text>
                       </Stack>
                     </SimpleGrid>
@@ -211,7 +211,7 @@ const LabResultViewModal = ({
                         <Text c={labResult.practitioner_id ? 'inherit' : 'dimmed'}>
                           {labResult.practitioner_id
                             ? practitioner?.name || `Practitioner ID: ${labResult.practitioner_id}`
-                            : t('labResults.modal.notSpecified', 'Not specified')}
+                            : t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       {practitioner?.specialty && (

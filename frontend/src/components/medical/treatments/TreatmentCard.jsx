@@ -16,7 +16,8 @@ const TreatmentCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
 
   const handleError = (error) => {
     logger.error('treatment_card_error', {
@@ -61,7 +62,7 @@ const TreatmentCard = ({
       badges.push({
         label: treatment.condition?.diagnosis ||
                 getConditionName(treatment.condition_id) ||
-                t('treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id }),
+                tCommon('treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id }),
         color: 'teal',
         clickable: true,
         onClick: () => handleConditionClick(treatment.condition_id)
@@ -80,29 +81,29 @@ const TreatmentCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('treatments.card.startDate', 'Start Date'),
+        label: t('common.fields.startDate.label'),
         value: treatment.start_date,
-        render: (value) => value ? formatDate(value) : t('treatments.card.notSpecified', 'Not specified')
+        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
       },
       {
-        label: t('treatments.card.endDate', 'End Date'),
+        label: t('common.fields.endDate.label'),
         value: treatment.end_date,
-        render: (value) => value ? formatDate(value) : t('treatments.card.notSpecified', 'Not specified')
+        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
       },
       {
-        label: t('treatments.card.amount', 'Amount'),
+        label: t('treatments.amount.label'),
         value: treatment.dosage,
-        render: (value) => value || t('treatments.card.notSpecified', 'Not specified')
+        render: (value) => value || tCommon('labels.notSpecified')
       },
       {
-        label: t('treatments.card.frequency', 'Frequency'),
+        label: t('treatments.frequency.label'),
         value: treatment.frequency,
-        render: (value) => value || t('treatments.card.notSpecified', 'Not specified')
+        render: (value) => value || tCommon('labels.notSpecified')
       },
       {
-        label: t('treatments.card.description', 'Description'),
+        label: tCommon('labels.description'),
         value: treatment.description,
-        render: (value) => value || t('treatments.card.notSpecified', 'Not specified'),
+        render: (value) => value || tCommon('labels.notSpecified'),
         style: { flex: 1 }
       }
     ].filter(field => field.value); // Only show fields with values
@@ -121,7 +122,7 @@ const TreatmentCard = ({
     const customContent = treatment.condition_id ? (
       <Group gap="xs" style={{ marginBottom: '8px' }}>
         <Text size="sm" c="dimmed">
-          {t('treatments.card.relatedCondition', 'Related Condition')}:
+          {tCommon('treatments.card.relatedCondition', 'Related Condition')}:
         </Text>
         <Text
           size="sm"
@@ -129,11 +130,11 @@ const TreatmentCard = ({
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={() => handleConditionClick(treatment.condition_id)}
-          title={t('treatments.card.viewConditionDetails', 'View condition details')}
+          title={tCommon('treatments.card.viewConditionDetails', 'View condition details')}
         >
           {treatment.condition?.diagnosis ||
            getConditionName(treatment.condition_id) ||
-           t('treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id })}
+           tCommon('treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id })}
         </Text>
       </Group>
     ) : null;
@@ -141,7 +142,7 @@ const TreatmentCard = ({
     return (
       <BaseMedicalCard
         title={titleContent}
-        subtitle={t('treatments.card.subtitle', 'Medical Treatment')}
+        subtitle={tCommon('treatments.card.subtitle', 'Medical Treatment')}
         badges={badges.filter(badge => !badge.clickable)} // Only include non-clickable badges
         fields={fields}
         notes={treatment.notes}

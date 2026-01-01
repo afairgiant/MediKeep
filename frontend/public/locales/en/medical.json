@@ -345,7 +345,7 @@
       "placeholder": "Select category",
       "description": "Type of laboratory test"
     },
-    "testType": {
+    "testTypeField": {
       "label": "Test Type",
       "placeholder": "Select urgency level",
       "description": "Priority or urgency of the test"

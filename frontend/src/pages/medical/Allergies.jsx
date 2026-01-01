@@ -41,7 +41,6 @@ const Allergies = () => {
   const location = useLocation();
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
-  const { t: tErrors } = useTranslation('errors');
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
@@ -258,7 +257,7 @@ const Allergies = () => {
           <Alert
             variant="light"
             color="red"
-            title={tErrors('title.error', 'Error')}
+            title={tCommon('labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={clearError}
@@ -273,7 +272,7 @@ const Allergies = () => {
           <Alert
             variant="light"
             color="green"
-            title={tErrors('title.success', 'Success')}
+            title={tCommon('labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             mb="md"
           >

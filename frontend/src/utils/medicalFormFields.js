@@ -375,9 +375,9 @@ export const labResultFormFields = [
   {
     name: 'test_type',
     type: 'select',
-    labelKey: 'medical:labResults.testType.label',
-    placeholderKey: 'medical:labResults.testType.placeholder',
-    descriptionKey: 'medical:labResults.testType.description',
+    labelKey: 'medical:labResults.testTypeField.label',
+    placeholderKey: 'medical:labResults.testTypeField.placeholder',
+    descriptionKey: 'medical:labResults.testTypeField.description',
     gridColumn: 6,
     clearable: true,
     dynamicOptions: 'testTypes',

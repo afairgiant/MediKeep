@@ -304,7 +304,7 @@ const Treatments = () => {
         <Center h={200}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text>Loading treatments...</Text>
+            <Text>{t('treatments.loadingTreatments')}</Text>
             <Text size="sm" c="dimmed">
               If this takes too long, please refresh the page
             </Text>
