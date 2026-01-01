@@ -59,6 +59,7 @@
     "viewPharmacyDetails": "Ver detalles de la farmacia",
     "startDate": "Fecha de inicio",
     "endDate": "Fecha de fin",
+    "duration": "Duración",
     "notes": "Notas",
     "name": "Nombre",
     "date": "Fecha",
@@ -121,7 +122,15 @@
     "morning": "Por la Mañana",
     "afternoon": "Al mediodía",
     "evening": "Por la Tarde",
-    "night": "Por la Noche"
+    "night": "Por la Noche",
+    "day": "día",
+    "days": "días",
+    "month": "mes",
+    "months": "meses",
+    "year": "año",
+    "years": "años",
+    "ended": "terminado",
+    "ongoing": "en curso"
   },
   "pagination": {
     "page": "Página",

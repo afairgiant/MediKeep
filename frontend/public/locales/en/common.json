@@ -63,6 +63,7 @@
     "viewPharmacyDetails": "View pharmacy details",
     "startDate": "Start Date",
     "endDate": "End Date",
+    "duration": "Duration",
     "notes": "Notes",
     "name": "Name",
     "date": "Date",
@@ -194,7 +195,15 @@
     "morning": "Morning",
     "afternoon": "Afternoon",
     "evening": "Evening",
-    "night": "Night"
+    "night": "Night",
+    "day": "day",
+    "days": "days",
+    "month": "month",
+    "months": "months",
+    "year": "year",
+    "years": "years",
+    "ended": "ended",
+    "ongoing": "ongoing"
   },
   "pagination": {
     "page": "Page",

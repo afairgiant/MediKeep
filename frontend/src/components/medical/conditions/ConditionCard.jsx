@@ -85,20 +85,23 @@ const ConditionCard = ({
 
     let duration;
     if (diffDays < 30) {
-      duration = `${diffDays} day${diffDays === 1 ? '' : 's'}`;
+      const unit = diffDays === 1 ? tCommon('time.day') : tCommon('time.days');
+      duration = `${diffDays} ${unit}`;
     } else if (diffDays < 365) {
       const months = Math.floor(diffDays / 30);
-      duration = `${months} month${months === 1 ? '' : 's'}`;
+      const unit = months === 1 ? tCommon('time.month') : tCommon('time.months');
+      duration = `${months} ${unit}`;
     } else {
       const years = Math.floor(diffDays / 365);
-      duration = `${years} year${years === 1 ? '' : 's'}`;
+      const unit = years === 1 ? tCommon('time.year') : tCommon('time.years');
+      duration = `${years} ${unit}`;
     }
 
     // Add appropriate suffix based on condition status
     if (endDate || status === 'resolved' || status === 'inactive') {
-      return `${duration} (ended)`;
+      return `${duration} (${tCommon('time.ended')})`;
     } else {
-      return `${duration} (ongoing)`;
+      return `${duration} (${tCommon('time.ongoing')})`;
     }
   };
 
@@ -137,7 +140,7 @@ const ConditionCard = ({
         render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
       },
       {
-        label: 'Duration',
+        label: tCommon('labels.duration'),
         value: condition.onset_date,
         render: () => condition.onset_date
           ? getConditionDuration(condition.onset_date, condition.end_date, condition.status)
