@@ -65,10 +65,12 @@ class ProcedureStatus(Enum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
+    POSTPONED = "postponed"
 
 
 class TreatmentStatus(Enum):
     """Status values for treatments"""
+    PLANNED = "planned"
     ACTIVE = "active"      # Mapped from old "ongoing"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
