@@ -501,6 +501,7 @@ class TestProceduresAPI:
         """Test workflow from scheduled to completed procedure."""
         # Create scheduled procedure
         scheduled_data = {
+            "patient_id": user_with_patient["patient"].id,
             "procedure_name": "Outpatient Surgery",
             "date": "2024-03-15",
             "status": "scheduled",
@@ -519,7 +520,7 @@ class TestProceduresAPI:
             "status": "completed",
             "procedure_duration": 45,
             "notes": "Procedure completed successfully",
-            "complications": "None"
+            "procedure_complications": "None"
         }
 
         response = client.put(
@@ -533,4 +534,4 @@ class TestProceduresAPI:
         assert data["status"] == "completed"
         assert data["procedure_duration"] == 45
         assert data["notes"] == "Procedure completed successfully"
-        assert data["complications"] == "None"
+        assert data["procedure_complications"] == "None"
