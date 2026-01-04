@@ -248,10 +248,9 @@ const TreatmentFormWrapper = ({
                         onInputChange({ target: { name: 'start_date', value: formattedDate } });
                       }}
                       placeholder={t('treatments.form.selectStartDate', 'Select start date')}
-                      description={t('treatments.form.startDateDesc', 'When treatment begins')}
+                      description={t('treatments.form.startDateDesc', 'When treatment is planned to begin or began')}
                       clearable
                       firstDayOfWeek={0}
-                      maxDate={today}
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>

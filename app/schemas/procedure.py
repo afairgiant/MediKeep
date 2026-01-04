@@ -1,9 +1,10 @@
 from datetime import date as DateType
 from typing import Optional, List
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, root_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
+from app.models.enums import ProcedureStatus
 
 
 class ProcedureBase(TaggedEntityMixin):
@@ -54,21 +55,41 @@ class ProcedureBase(TaggedEntityMixin):
         None, max_length=1000, description="Additional notes about the anesthesia"
     )
 
-    @validator("date")
-    def validate_date(cls, v):
-        if v > DateType.today():
-            raise ValueError("Procedure date cannot be in the future")
-        return v
+    @root_validator(skip_on_failure=True)
+    def validate_date_with_status(cls, values):
+        """Validate procedure date based on status.
+
+        When status is not provided (partial updates), skip validation to allow
+        updating only the date field without requiring status.
+        """
+        from datetime import timedelta
+
+        date_value = values.get("date")
+        status = values.get("status", "").lower() if values.get("status") else ""
+
+        if not date_value:
+            return values
+
+        # Skip validation if status is not provided (partial update scenario)
+        if not status:
+            return values
+
+        # For scheduled or postponed procedures, allow reasonable future dates
+        if status in ["scheduled", "postponed"]:
+            max_future = DateType.today() + timedelta(days=3650)  # 10 years
+            if date_value > max_future:
+                raise ValueError("Procedure date cannot be more than 10 years in the future")
+            # Allow past dates for scheduled procedures (e.g., rescheduled from past)
+            return values
+
+        # For all other statuses (completed, in_progress, cancelled), date should not be in future
+        if date_value > DateType.today():
+            raise ValueError(f"Procedure date cannot be in the future for {status} procedures")
+        return values
 
     @validator("status")
     def validate_status(cls, v):
-        valid_statuses = [
-            "scheduled",
-            "in-progress",
-            "completed",
-            "cancelled",
-            "postponed",
-        ]
+        valid_statuses = [s.value for s in ProcedureStatus]
         if v.lower() not in valid_statuses:
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower()
@@ -95,22 +116,42 @@ class ProcedureUpdate(BaseModel):
     anesthesia_notes: Optional[str] = Field(None, max_length=1000)
     tags: Optional[List[str]] = None
 
-    @validator("date")
-    def validate_date(cls, v):
-        if v and v > DateType.today():
-            raise ValueError("Procedure date cannot be in the future")
-        return v
+    @root_validator(skip_on_failure=True)
+    def validate_date_with_status(cls, values):
+        """Validate procedure date based on status.
+
+        When status is not provided (partial updates), skip validation to allow
+        updating only the date field without requiring status.
+        """
+        from datetime import timedelta
+
+        date_value = values.get("date")
+        status = values.get("status", "").lower() if values.get("status") else ""
+
+        if not date_value:
+            return values
+
+        # Skip validation if status is not provided (partial update scenario)
+        if not status:
+            return values
+
+        # For scheduled or postponed procedures, allow reasonable future dates
+        if status in ["scheduled", "postponed"]:
+            max_future = DateType.today() + timedelta(days=3650)  # 10 years
+            if date_value > max_future:
+                raise ValueError("Procedure date cannot be more than 10 years in the future")
+            # Allow past dates for scheduled procedures (e.g., rescheduled from past)
+            return values
+
+        # For all other statuses (completed, in_progress, cancelled), date should not be in future
+        if date_value > DateType.today():
+            raise ValueError(f"Procedure date cannot be in the future for {status} procedures")
+        return values
 
     @validator("status")
     def validate_status(cls, v):
         if v is not None:
-            valid_statuses = [
-                "scheduled",
-                "in-progress",
-                "completed",
-                "cancelled",
-                "postponed",
-            ]
+            valid_statuses = [s.value for s in ProcedureStatus]
             if v.lower() not in valid_statuses:
                 raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
             return v.lower()

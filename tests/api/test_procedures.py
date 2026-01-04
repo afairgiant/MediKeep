@@ -501,6 +501,7 @@ class TestProceduresAPI:
         """Test workflow from scheduled to completed procedure."""
         # Create scheduled procedure
         scheduled_data = {
+            "patient_id": user_with_patient["patient"].id,
             "procedure_name": "Outpatient Surgery",
             "date": "2024-03-15",
             "status": "scheduled",
@@ -519,7 +520,7 @@ class TestProceduresAPI:
             "status": "completed",
             "procedure_duration": 45,
             "notes": "Procedure completed successfully",
-            "complications": "None"
+            "procedure_complications": "None"
         }
 
         response = client.put(
@@ -533,4 +534,224 @@ class TestProceduresAPI:
         assert data["status"] == "completed"
         assert data["procedure_duration"] == 45
         assert data["notes"] == "Procedure completed successfully"
-        assert data["complications"] == "None"
+        assert data["procedure_complications"] == "None"
+
+    def test_scheduled_procedure_future_date_allowed(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that scheduled procedures can have future dates."""
+        from datetime import timedelta
+        future_date = (date.today() + timedelta(days=30)).isoformat()
+
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Future Scheduled Surgery",
+            "date": future_date,
+            "status": "scheduled"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["date"] == future_date
+        assert data["status"] == "scheduled"
+
+    def test_scheduled_procedure_within_10_year_limit(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that scheduled procedures can be up to 10 years in the future."""
+        from datetime import timedelta
+        # Set date to 9 years in future (within limit)
+        future_date = (date.today() + timedelta(days=3285)).isoformat()  # ~9 years
+
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Long-term Scheduled Procedure",
+            "date": future_date,
+            "status": "scheduled"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["date"] == future_date
+
+    def test_scheduled_procedure_beyond_10_year_limit_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that scheduled procedures beyond 10 years are rejected."""
+        from datetime import timedelta
+        # Set date to 11 years in future (beyond limit)
+        future_date = (date.today() + timedelta(days=4015)).isoformat()  # ~11 years
+
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Too Far Future Procedure",
+            "date": future_date,
+            "status": "scheduled"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 422
+        # Just check for 422 status - validation errors can have different formats
+        # The important part is that the validation rejects the request
+
+    def test_postponed_procedure_future_date_allowed(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that postponed procedures can have future dates."""
+        from datetime import timedelta
+        future_date = (date.today() + timedelta(days=60)).isoformat()
+
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Postponed Surgery",
+            "date": future_date,
+            "status": "postponed"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["date"] == future_date
+        assert data["status"] == "postponed"
+
+    def test_completed_procedure_future_date_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that completed procedures cannot have future dates."""
+        from datetime import timedelta
+        future_date = (date.today() + timedelta(days=1)).isoformat()
+
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Completed Procedure",
+            "date": future_date,
+            "status": "completed"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 422
+        # Just check for 422 status - validation errors can have different formats
+        # The important part is that the validation rejects the request
+
+    def test_in_progress_procedure_future_date_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that in_progress procedures cannot have future dates."""
+        from datetime import timedelta
+        future_date = (date.today() + timedelta(days=1)).isoformat()
+
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "In Progress Procedure",
+            "date": future_date,
+            "status": "in_progress"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 422
+        # Just check for 422 status - validation errors can have different formats
+        # The important part is that the validation rejects the request
+
+    def test_cancelled_procedure_future_date_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that cancelled procedures cannot have future dates."""
+        from datetime import timedelta
+        future_date = (date.today() + timedelta(days=1)).isoformat()
+
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Cancelled Procedure",
+            "date": future_date,
+            "status": "cancelled"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 422
+        # Just check for 422 status - validation errors can have different formats
+        # The important part is that the validation rejects the request
+
+    def test_partial_update_date_without_status(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that date can be updated without re-specifying status (partial update)."""
+        from datetime import timedelta
+
+        # Create a scheduled procedure with future date
+        initial_date = (date.today() + timedelta(days=30)).isoformat()
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Scheduled Procedure",
+            "date": initial_date,
+            "status": "scheduled"
+        }
+
+        create_response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        procedure_id = create_response.json()["id"]
+
+        # Update only the date, without providing status
+        new_date = (date.today() + timedelta(days=60)).isoformat()
+        update_data = {
+            "date": new_date
+            # Status intentionally not provided
+        }
+
+        response = client.put(
+            f"/api/v1/procedures/{procedure_id}",
+            json=update_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["date"] == new_date
+        assert data["status"] == "scheduled"  # Status unchanged
+
+    def test_scheduled_procedure_past_date_allowed(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that scheduled procedures can have past dates (e.g., rescheduled from past)."""
+        from datetime import timedelta
+        past_date = (date.today() - timedelta(days=10)).isoformat()
+
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Rescheduled from Past",
+            "date": past_date,
+            "status": "scheduled"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["date"] == past_date
+        assert data["status"] == "scheduled"

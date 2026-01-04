@@ -198,10 +198,9 @@ const ProcedureFormWrapper = ({
                         onInputChange({ target: { name: 'procedure_date', value: formattedDate } });
                       }}
                       placeholder={t('procedures.form.procedureDatePlaceholder', 'Select procedure date')}
-                      description={t('procedures.form.procedureDateDesc', 'When the procedure was performed')}
+                      description={t('procedures.form.procedureDateDesc', 'When the procedure is scheduled or was performed')}
                       clearable
                       firstDayOfWeek={0}
-                      maxDate={today}
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>

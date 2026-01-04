@@ -1,9 +1,10 @@
 from datetime import date
 from typing import Optional, List
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, root_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
+from app.models.enums import TreatmentStatus
 
 
 class TreatmentBase(TaggedEntityMixin):
@@ -45,11 +46,37 @@ class TreatmentBase(TaggedEntityMixin):
         None, gt=0, description="ID of the related condition"
     )
 
-    @validator("start_date")
-    def validate_start_date(cls, v):
-        if v > date.today():
-            raise ValueError("Start date cannot be in the future")
-        return v
+    @root_validator(skip_on_failure=True)
+    def validate_start_date_with_status(cls, values):
+        """Validate treatment start date based on status.
+
+        When status is not provided (partial updates), skip validation to allow
+        updating only the start_date field without requiring status.
+        """
+        from datetime import timedelta
+
+        start_date = values.get("start_date")
+        status = values.get("status", "").lower() if values.get("status") else ""
+
+        if not start_date:
+            return values
+
+        # Skip validation if status is not provided (partial update scenario)
+        if not status:
+            return values
+
+        # For planned or on_hold treatments, allow reasonable future dates
+        if status in ["planned", "on_hold"]:
+            max_future = date.today() + timedelta(days=3650)  # 10 years
+            if start_date > max_future:
+                raise ValueError("Start date cannot be more than 10 years in the future")
+            # Allow past dates for planned treatments (e.g., rescheduled from past)
+            return values
+
+        # For all other statuses (not planned/on_hold), start date should not be in future
+        if start_date > date.today():
+            raise ValueError(f"Start date cannot be in the future for {status} treatments")
+        return values
 
     @validator("end_date")
     def validate_end_date(cls, v, values):
@@ -61,7 +88,7 @@ class TreatmentBase(TaggedEntityMixin):
     def validate_status(cls, v):
         if v is None:
             return "active"  # Default value
-        valid_statuses = ["active", "completed", "discontinued", "on-hold", "planned"]
+        valid_statuses = [s.value for s in TreatmentStatus]
         if v.lower() not in valid_statuses:
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower()
@@ -88,11 +115,37 @@ class TreatmentUpdate(BaseModel):
     condition_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None
 
-    @validator("start_date")
-    def validate_start_date(cls, v):
-        if v and v > date.today():
-            raise ValueError("Start date cannot be in the future")
-        return v
+    @root_validator(skip_on_failure=True)
+    def validate_start_date_with_status(cls, values):
+        """Validate treatment start date based on status.
+
+        When status is not provided (partial updates), skip validation to allow
+        updating only the start_date field without requiring status.
+        """
+        from datetime import timedelta
+
+        start_date = values.get("start_date")
+        status = values.get("status", "").lower() if values.get("status") else ""
+
+        if not start_date:
+            return values
+
+        # Skip validation if status is not provided (partial update scenario)
+        if not status:
+            return values
+
+        # For planned or on_hold treatments, allow reasonable future dates
+        if status in ["planned", "on_hold"]:
+            max_future = date.today() + timedelta(days=3650)  # 10 years
+            if start_date > max_future:
+                raise ValueError("Start date cannot be more than 10 years in the future")
+            # Allow past dates for planned treatments (e.g., rescheduled from past)
+            return values
+
+        # For all other statuses (not planned/on_hold), start date should not be in future
+        if start_date > date.today():
+            raise ValueError(f"Start date cannot be in the future for {status} treatments")
+        return values
 
     @validator("end_date")
     def validate_end_date(cls, v, values):
@@ -108,13 +161,7 @@ class TreatmentUpdate(BaseModel):
     @validator("status")
     def validate_status(cls, v):
         if v is not None:
-            valid_statuses = [
-                "active",
-                "completed",
-                "stopped",
-                "on-hold",
-                "planned",
-            ]
+            valid_statuses = [s.value for s in TreatmentStatus]
             if v.lower() not in valid_statuses:
                 raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
             return v.lower()
