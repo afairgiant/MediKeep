@@ -48,13 +48,21 @@ class TreatmentBase(TaggedEntityMixin):
 
     @root_validator(skip_on_failure=True)
     def validate_start_date_with_status(cls, values):
-        """Validate treatment start date based on status."""
+        """Validate treatment start date based on status.
+
+        When status is not provided (partial updates), skip validation to allow
+        updating only the start_date field without requiring status.
+        """
         from datetime import timedelta
 
         start_date = values.get("start_date")
         status = values.get("status", "").lower() if values.get("status") else ""
 
         if not start_date:
+            return values
+
+        # Skip validation if status is not provided (partial update scenario)
+        if not status:
             return values
 
         # For planned or on_hold treatments, allow reasonable future dates
@@ -65,7 +73,7 @@ class TreatmentBase(TaggedEntityMixin):
             # Allow past dates for planned treatments (e.g., rescheduled from past)
             return values
 
-        # For active, completed, or cancelled treatments, date should not be in future
+        # For all other statuses (not planned/on_hold), start date should not be in future
         if start_date > date.today():
             raise ValueError(f"Start date cannot be in the future for {status} treatments")
         return values
@@ -109,13 +117,21 @@ class TreatmentUpdate(BaseModel):
 
     @root_validator(skip_on_failure=True)
     def validate_start_date_with_status(cls, values):
-        """Validate treatment start date based on status."""
+        """Validate treatment start date based on status.
+
+        When status is not provided (partial updates), skip validation to allow
+        updating only the start_date field without requiring status.
+        """
         from datetime import timedelta
 
         start_date = values.get("start_date")
         status = values.get("status", "").lower() if values.get("status") else ""
 
         if not start_date:
+            return values
+
+        # Skip validation if status is not provided (partial update scenario)
+        if not status:
             return values
 
         # For planned or on_hold treatments, allow reasonable future dates
@@ -126,7 +142,7 @@ class TreatmentUpdate(BaseModel):
             # Allow past dates for planned treatments (e.g., rescheduled from past)
             return values
 
-        # For active, completed, or cancelled treatments, date should not be in future
+        # For all other statuses (not planned/on_hold), start date should not be in future
         if start_date > date.today():
             raise ValueError(f"Start date cannot be in the future for {status} treatments")
         return values
