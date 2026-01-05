@@ -58,6 +58,7 @@ import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import {
   formatMeasurement,
   convertForDisplay,
+  unitLabels,
 } from '../../utils/unitConversion';
 import {
   formatDate as formatDateHelper,
@@ -324,9 +325,18 @@ const VitalsList = ({
           },
           {
             label: 'Temperature',
-            value: selectedVital.temperature || 'N/A',
+            value: selectedVital.temperature
+              ? formatMeasurement(
+                  convertForDisplay(selectedVital.temperature, 'temperature', unitSystem),
+                  'temperature',
+                  unitSystem,
+                  false
+                )
+              : 'N/A',
             icon: IconThermometer,
-            unit: selectedVital.temperature ? '°F' : '',
+            unit: selectedVital.temperature
+              ? unitLabels[unitSystem].temperature
+              : '',
           },
           {
             label: 'Respiratory Rate',
@@ -348,9 +358,18 @@ const VitalsList = ({
         items: [
           {
             label: 'Weight',
-            value: selectedVital.weight || 'N/A',
+            value: selectedVital.weight
+              ? formatMeasurement(
+                  convertForDisplay(selectedVital.weight, 'weight', unitSystem),
+                  'weight',
+                  unitSystem,
+                  false
+                )
+              : 'N/A',
             icon: IconWeight,
-            unit: selectedVital.weight ? 'lbs' : '',
+            unit: selectedVital.weight
+              ? unitLabels[unitSystem].weight
+              : '',
           },
           {
             label: 'Height',

@@ -5,6 +5,8 @@ import BaseMedicalCard from '../base/BaseMedicalCard';
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
+import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
+import { formatMeasurement, convertForDisplay } from '../../../utils/unitConversion';
 
 const VitalCard = ({
   vital,
@@ -16,6 +18,7 @@ const VitalCard = ({
   onError
 }) => {
   const { t } = useTranslation('common');
+  const { unitSystem } = useUserPreferences();
 
   const handleError = (error) => {
     logger.error('vital_card_error', {
@@ -70,12 +73,20 @@ const VitalCard = ({
       {
         label: t('vitals.stats.temperature', 'Temperature'),
         value: vital.temperature,
-        render: (value) => value ? `${value}${t('vitals.units.fahrenheit', '°F')}` : t('vitals.card.notRecorded', 'Not recorded')
+        render: (value) => value ? formatMeasurement(
+          convertForDisplay(value, 'temperature', unitSystem),
+          'temperature',
+          unitSystem
+        ) : t('vitals.card.notRecorded', 'Not recorded')
       },
       {
         label: t('vitals.stats.weight', 'Weight'),
         value: vital.weight,
-        render: (value) => value ? `${value} ${t('vitals.units.lbs', 'lbs')}` : t('vitals.card.notRecorded', 'Not recorded')
+        render: (value) => value ? formatMeasurement(
+          convertForDisplay(value, 'weight', unitSystem),
+          'weight',
+          unitSystem
+        ) : t('vitals.card.notRecorded', 'Not recorded')
       },
       {
         label: t('vitals.card.oxygenSaturation', 'Oxygen Saturation'),
