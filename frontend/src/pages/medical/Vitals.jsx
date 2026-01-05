@@ -53,9 +53,12 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { VITAL_FILTER_TYPES } from '../../constants/vitalFilters';
+import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import { convertForDisplay, unitLabels } from '../../utils/unitConversion';
 
 const Vitals = () => {
   const { t } = useTranslation('common');
+  const { unitSystem } = useUserPreferences();
 
   // Quick stats card configurations with Mantine icons and filter mappings
   const STATS_CONFIGS = useMemo(() => ({
@@ -93,8 +96,10 @@ const Vitals = () => {
       title: t('vitals.stats.temperature', 'Latest Temperature'),
       icon: IconTrendingUp,
       getValue: stats =>
-        stats.current_temperature ? stats.current_temperature.toFixed(1) : t('labels.notAvailable', 'N/A'),
-      getUnit: () => t('vitals.units.fahrenheit', '°F'),
+        stats.current_temperature
+          ? convertForDisplay(stats.current_temperature, 'temperature', unitSystem).toFixed(1)
+          : t('labels.notAvailable', 'N/A'),
+      getUnit: () => unitLabels[unitSystem].temperature,
       getCategory: stats => {
         if (!stats.current_temperature) return null;
         const temp = stats.current_temperature;
@@ -110,8 +115,10 @@ const Vitals = () => {
       title: t('vitals.stats.weight', 'Latest Weight'),
       icon: IconTrendingUp,
       getValue: stats =>
-        stats.current_weight ? stats.current_weight.toFixed(1) : t('labels.notAvailable', 'N/A'),
-      getUnit: () => t('vitals.units.lbs', 'lbs'),
+        stats.current_weight
+          ? convertForDisplay(stats.current_weight, 'weight', unitSystem).toFixed(1)
+          : t('labels.notAvailable', 'N/A'),
+      getUnit: () => unitLabels[unitSystem].weight,
       getCategory: () => null,
       color: 'violet',
       filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
@@ -156,7 +163,7 @@ const Vitals = () => {
       filterType: VITAL_FILTER_TYPES.WITH_A1C,
       description: t('vitals.stats.a1cDesc', 'Click to filter records with A1C')
     },
-  }), [t]);
+  }), [t, unitSystem]);
   const navigate = useNavigate();
   const location = useLocation();
 
