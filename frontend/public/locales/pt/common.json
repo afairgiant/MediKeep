@@ -1240,7 +1240,7 @@
         },
         "statusOptions": {
           "active": "Ativo - Condição em andamento",
-          "resolved": "Resolvido - ão mais presente",
+          "resolved": "Resolvido - Não mais presente",
           "chronic": "Crônico - Condição de longo prazo"
         }
       }
