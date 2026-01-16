@@ -426,7 +426,7 @@
     "route": {
       "label": "Via de Administração",
       "placeholder": "Selecione a via",
-      "description": "étodo de administração"
+      "description": "Método de administração"
     },
     "expirationDate": {
       "label": "Data de vencimento",
