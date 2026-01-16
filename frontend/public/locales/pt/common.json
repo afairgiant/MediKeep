@@ -247,7 +247,7 @@
         "description": "Data de nascimento do paciente"
       },
       "gender": {
-        "label": "ênero",
+        "label": "Gênero",
         "placeholder": "Selecione o gênero",
         "description": "Gênero do paciente",
         "options": {
