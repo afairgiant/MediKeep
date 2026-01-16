@@ -108,13 +108,13 @@
     },
     "statusDescriptions": {
       "activeAllergic": "Ativo - Atualmente alérgico",
-      "inactiveAllergic": "Inativo - ão mais alérgico",
+      "inactiveAllergic": "Inativo - Não mais alérgico",
       "resolvedAllergy": "Resolvido - Superou a alergia",
       "activeCondition": "Ativo - Condição em andamento",
-      "resolvedCondition": "Resolvido - ão mais presente",
+      "resolvedCondition": "Resolvido - Não mais presente",
       "chronicCondition": "Crônico - Condição de longo prazo",
       "activeExperiencing": "Ativo - Atualmente experimentando",
-      "resolvedExperiencing": "Resolvido - ão mais experimentando",
+      "resolvedExperiencing": "Resolvido - Não mais experimentando",
       "recurring": "Recorrente - Vai e vem"
     }
   },
