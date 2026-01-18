@@ -1,0 +1,86 @@
+{
+  "upload": {
+    "failed": "Caricamento del file non riuscito. Riprova.",
+    "connectionError": "Errore di connessione. Controlla la rete e riprova.",
+    "fileTooLarge": "La dimensione del file supera il limite massimo.",
+    "invalidFileType": "Tipo di file non supportato.",
+    "fileProcessingFailed": "Elaborazione del file non riuscita. Prova un file diverso.",
+    "duplicateFile": "Questo file è già stato caricato.",
+    "batchUploadFailed": "Alcuni file non sono stati caricati. Verifica gli errori individuali.",
+    "partialUploadSuccess": "Caricamento completato con alcuni errori. Rivedi i file non riusciti.",
+    "allUploadsFailed": "Tutti i caricamenti dei file non sono riusciti. Controlla la connessione e riprova."
+  },
+  "paperless": {
+    "unavailable": "Il servizio di gestione documenti non è attualmente disponibile.",
+    "notEnabled": "L'integrazione con Paperless non è abilitata. Attivala nelle Impostazioni.",
+    "configIncomplete": "La configurazione di Paperless è incompleta. Verifica le impostazioni.",
+    "uploadFailed": "Caricamento su Paperless non riuscito.",
+    "connectionFailed": "Impossibile connettersi al servizio Paperless. Verifica la configurazione.",
+    "authFailed": "Autenticazione con Paperless non riuscita. Controlla le credenziali.",
+    "duplicateDocument": "Questo documento esiste già in Paperless. I documenti identici non possono essere inviati due volte.",
+    "taskFailed": "Invio del documento a Paperless non riuscito. Riprova o contatta il supporto.",
+    "taskTimeout": "Elaborazione del documento scaduta. Il documento potrebbe essere ancora in lavorazione su Paperless."
+  },
+  "form": {
+    "submissionFailed": "Salvataggio del modulo non riuscito. Verifica i dati e riprova.",
+    "requiredFieldMissing": "Compila tutti i campi obbligatori.",
+    "invalidDate": "Inserisci una data valida.",
+    "invalidEmail": "Inserisci un indirizzo email valido.",
+    "invalidPhone": "Inserisci un numero di telefono valido.",
+    "invalidPhoneDigits": "Inserisci un numero di telefono valido (10–15 cifre)",
+    "invalidWebsiteUrl": "Inserisci un URL del sito valido",
+    "patientNotSelected": "Seleziona un paziente.",
+    "entityNotFound": "L'elemento richiesto non è stato trovato.",
+    "medicationNotSelected": "Seleziona un farmaco",
+    "conditionNotSelected": "Seleziona una condizione",
+    "mustBeValidNumber": "Deve essere un numero valido"
+  },
+  "patientForm": {
+    "error": "Errore",
+    "firstNameRequired": "Il nome è obbligatorio",
+    "lastNameRequired": "Il cognome è obbligatorio",
+    "birthDateRequired": "La data di nascita è obbligatoria",
+    "birthDateFuture": "La data di nascita non può essere nel futuro",
+    "createFailed": "Creazione non riuscita: {{message}}",
+    "updateFailed": "Aggiornamento non riuscito: {{message}}"
+  },
+  "file": {
+    "deleteFailed": "Eliminazione del file non riuscita. Riprova.",
+    "downloadFailed": "Download del file non riuscito. Riprova.",
+    "viewFailed": "Apertura del file per la visualizzazione non riuscita. Riprova.",
+    "notFound": "File non trovato."
+  },
+  "network": {
+    "unavailable": "Rete non disponibile. Controlla la connessione.",
+    "timeout": "La richiesta è scaduta. Riprova.",
+    "serverError": "Si è verificato un errore sul server. Riprova più tardi.",
+    "connectionError": "Errore di connessione. Controlla la rete e riprova."
+  },
+  "general": {
+    "unknownError": "Si è verificato un errore imprevisto. Riprova.",
+    "permissionDenied": "Non hai l'autorizzazione per eseguire questa azione.",
+    "sessionExpired": "La sessione è scaduta. Accedi nuovamente.",
+    "rateLimitExceeded": "Troppe richieste. Attendi un momento e riprova.",
+    "maintenanceMode": "Il sistema è attualmente in manutenzione. Riprova più tardi.",
+    "storageFull": "Limite di archiviazione raggiunto. Libera spazio e riprova.",
+    "validationError": "Verifica i dati inseriti e riprova."
+  },
+  "success": {
+    "uploadSuccess": "File caricato con successo!",
+    "uploadMultipleSuccess": "Tutti i file sono stati caricati con successo!",
+    "formSaved": "Modulo salvato con successo!",
+    "fileDeleted": "File eliminato con successo.",
+    "paperlessSyncSuccess": "Sincronizzato con successo con Paperless.",
+    "batchUploadSuccess": "Tutti i file sono stati caricati con successo!"
+  },
+  "warnings": {
+    "partialSuccess": "Operazione completata con alcuni avvisi.",
+    "slowConnection": "Il caricamento sta impiegando più del normale a causa della connessione lenta.",
+    "largeFileWarning": "File di grandi dimensioni rilevato. Il caricamento può richiedere diversi minuti.",
+    "duplicateWarning": "Questo file sembra essere un duplicato."
+  },
+  "relationships": {
+    "addConditionFailed": "Impossibile aggiungere la relazione della condizione",
+    "addMedicationFailed": "Impossibile aggiungere la relazione del farmaco"
+  }
+}
