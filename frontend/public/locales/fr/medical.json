@@ -345,7 +345,7 @@
       "placeholder": "Sélectionnez une catégorie",
       "description": "Type d'analyse"
     },
-    "testTypeField": {
+    "testType": {
       "label": "Type d'analyse",
       "placeholder": "Sélectionnez le niveau d'urgence",
       "description": "Priorité ou urgence de l'analyse"
