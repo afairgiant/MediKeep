@@ -1,0 +1,166 @@
+{
+  "menu": {
+    "dashboard": "Painel",
+    "backToDashboard": "Voltar ao painel",
+    "patients": "Pacientes",
+    "medicalRecords": "Registros Médicos",
+    "settings": "Configurações",
+    "reports": "Relatórios",
+    "administration": "Administração",
+    "logout": "Sair",
+    "profile": "Perfil",
+    "help": "Ajuda"
+  },
+  "pages": {
+    "dashboard": "Painel",
+    "patientList": "Lista de Pacientes",
+    "patientDetails": "Detalhes do Paciente",
+    "medicalHistory": "Histórico Médico",
+    "settings": "Configurações",
+    "userProfile": "Perfil do Usuário",
+    "preferences": "Preferências",
+    "reports": "Relatórios",
+    "help": "Ajuda e Suporte"
+  },
+  "sections": {
+    "overview": "Visão Geral",
+    "personalInfo": "Informações Pessoais",
+    "medicalInfo": "Informações Médicas",
+    "documents": "Documentos",
+    "timeline": "Linha do Tempo",
+    "familyHistory": "Histórico Familiar",
+    "emergencyContacts": "Contatos de Emergência",
+    "insurance": "Seguro",
+    "preferences": "Preferências"
+  },
+  "medicalRecords": {
+    "allergies": "Alergias",
+    "conditions": "Condições",
+    "medications": "Medicamentos",
+    "labResults": "Resultados de Exames",
+    "immunizations": "Imunizações",
+    "procedures": "Procedimentos",
+    "visits": "Consultas",
+    "treatments": "Tratamentos",
+    "symptoms": "Sintomas",
+    "practitioners": "Profissionais de Saúde",
+    "pharmacies": "Farmácias"
+  },
+  "dashboard": {
+    "title": "Painel MediKeep",
+    "subtitle": "Gerencie suas informações de saúde com segurança",
+    "hello": "Olá",
+    "loading": "Carregando seu painel médico...",
+    "sections": {
+      "coreMedical": "Informações Médicas Principais",
+      "treatments": "Tratamentos e Procedimentos",
+      "healthMonitoring": "Monitoramento de Saúde",
+      "prevention": "Prevenção e Histórico",
+      "additionalResources": "Recursos Adicionais",
+      "recentActivity": "Atividade Recente"
+    },
+    "stats": {
+      "totalRecords": "Total de Registros",
+      "activeMedications": "Medicamentos Ativos",
+      "labResults": "Resultados de Exames",
+      "procedures": "Procedimentos"
+    },
+    "modules": {
+      "patientInfo": "Informações do Paciente",
+      "medications": "Medicamentos",
+      "labResults": "Resultados de Exames",
+      "treatments": "Tratamentos",
+      "procedures": "Procedimentos",
+      "vitalSigns": "Sinais Vitais",
+      "symptoms": "Sintomas",
+      "conditions": "Condições",
+      "allergies": "Alergias",
+      "immunizations": "Imunizações",
+      "visitHistory": "Histórico de Consultas",
+      "familyHistory": "Histórico Familiar",
+      "insurance": "Plano de saúde",
+      "emergencyContacts": "Contatos de Emergência",
+      "exportRecords": "Exportar Registros",
+      "practitioners": "Profissionais de Saúde",
+      "pharmacies": "Farmácias",
+      "adminDashboard": "Painel Administrativo"
+    },
+    "activity": {
+      "noActivity": "Nenhuma atividade recente",
+      "noActivityDescription": "As atividades do seu prontuário aparecerão aqui",
+      "lastUpdated": "Última atualização"
+    },
+    "search": {
+      "placeholder": "Pesquisar registros médicos..."
+    }
+  },
+  "invitations": {
+    "title": "Convites",
+    "lastUpdated": "Última atualização",
+    "from": "De",
+    "viewAll": "View all {{count}} invitations",
+    "noPending": "Nenhum convite pendente",
+    "noPendingDescription": "Novos convites de compartilhamento aparecerão aqui",
+    "manageAll": "Gerenciar Todos os Convites",
+    "sharePatient": "Compartilhar Paciente",
+    "confirmTitle": "Confirmar Aceitação do Convite",
+    "confirmQuestion": "Tem certeza de que deseja aceitar este convite?",
+    "confirmDescription": "Ao aceitar, você terá acesso para visualizar as informações médicas compartilhadas.",
+    "acceptButton": "Aceitar Convite",
+    "types": {
+      "familyHistory": "Histórico Familiar",
+      "patientRecord": "Prontuário do Paciente"
+    }
+  },
+  "activity": {
+    "actions": {
+      "created": "Criado",
+      "updated": "Atualizado",
+      "deleted": "Excluído",
+      "added": "Adicionado",
+      "modified": "Modificado",
+      "removed": "Removido",
+      "completed": "Concluído",
+      "cancelled": "Cancelado",
+      "scheduled": "Agendado",
+      "viewed": "Visualizado"
+    }
+  },
+  "sidebarNav": {
+    "sections": {
+      "medicalRecords": "Registros Médicos",
+      "careAndTreatment": "Cuidados e Tratamento",
+      "misc": "Diversos",
+      "tools": "Ferramentas",
+      "administration": "Administração"
+    },
+    "items": {
+      "patientInfo": "Informações do Paciente",
+      "medications": "Medicamentos",
+      "labResults": "Resultados de Exames",
+      "conditions": "Condições",
+      "allergies": "Alergias",
+      "vitalSigns": "Sinais Vitais",
+      "symptoms": "Sintomas",
+      "treatments": "Tratamentos",
+      "procedures": "Procedimentos",
+      "immunizations": "Imunizações",
+      "visitHistory": "Histórico de Consultas",
+      "familyHistory": "Histórico Familiar",
+      "practitioners": "Profissionais de Saúde",
+      "pharmacies": "Farmácias",
+      "insurance": "Seguro",
+      "emergencyContacts": "Contatos de Emergência",
+      "tagManagement": "Gerenciamento de Tags",
+      "customReports": "Relatórios Personalizados",
+      "exportRecords": "Exportar Registros",
+      "settings": "Configurações",
+      "adminDashboard": "Painel Administrativo",
+      "dataModels": "Modelos de Dados",
+      "backupManagement": "Gerenciamento de Backup",
+      "systemHealth": "Saúde do Sistema",
+      "language": "Idioma",
+      "theme": "Tema"
+    }
+  }
+}
