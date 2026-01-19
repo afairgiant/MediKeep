@@ -13,8 +13,7 @@ const PharmacyCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation('common');
 
   const handleError = (error) => {
     logger.error('pharmacy_card_error', {
@@ -39,46 +38,46 @@ const PharmacyCard = ({
     // Generate dynamic fields for pharmacy information
     const fields = [
       {
-        label: t('pharmacies.streetAddress.label'),
+        label: t('pharmacies.card.address'),
         value: pharmacy.street_address,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value || tCommon('labels.notSpecified')}
+            {value || t('labels.notSpecified')}
           </Text>
         )
       },
       {
-        label: t('pharmacies.city.label'),
+        label: t('pharmacies.card.city'),
         value: pharmacy.city,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value || tCommon('labels.notSpecified')}
+            {value || t('labels.notSpecified')}
           </Text>
         )
       },
       {
-        label: t('pharmacies.storeNumber.label'),
+        label: t('pharmacies.card.storeNumber'),
         value: pharmacy.store_number,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value || tCommon('labels.notSpecified')}
+            {value || t('labels.notSpecified')}
           </Text>
         )
       },
       {
-        label: tCommon('labels.phoneNumber'),
+        label: t('pharmacies.card.phone'),
         value: pharmacy.phone_number,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value ? formatPhoneNumber(value) : tCommon('labels.notSpecified')}
+            {value ? formatPhoneNumber(value) : t('labels.notSpecified')}
           </Text>
         )
       },
       {
-        label: tCommon('labels.website'),
+        label: t('pharmacies.card.website'),
         value: pharmacy.website,
         render: (value) => {
-          if (!value) return <Text size="sm" c="dimmed">{tCommon('labels.notSpecified')}</Text>;
+          if (!value) return <Text size="sm" c="dimmed">{t('labels.notSpecified')}</Text>;
           return (
             <Anchor
               href={value.startsWith('http') ? value : `https://${value}`}
@@ -87,7 +86,7 @@ const PharmacyCard = ({
               size="sm"
               c="blue"
             >
-              {tCommon('pharmacies.card.visitWebsite', 'Visit Website')}
+              {t('pharmacies.card.visitWebsite')}
             </Anchor>
           );
         }
