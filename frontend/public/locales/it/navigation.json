@@ -1,0 +1,166 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "backToDashboard": "Torna alla Dashboard",
+    "patients": "Pazienti",
+    "medicalRecords": "Registri medici",
+    "settings": "Impostazioni",
+    "reports": "Report",
+    "administration": "Amministrazione",
+    "logout": "Esci",
+    "profile": "Profilo",
+    "help": "Aiuto"
+  },
+  "pages": {
+    "dashboard": "Dashboard",
+    "patientList": "Elenco pazienti",
+    "patientDetails": "Dettagli paziente",
+    "medicalHistory": "Storico medico",
+    "settings": "Impostazioni",
+    "userProfile": "Profilo utente",
+    "preferences": "Preferenze",
+    "reports": "Report",
+    "help": "Aiuto e supporto"
+  },
+  "sections": {
+    "overview": "Panoramica",
+    "personalInfo": "Informazioni personali",
+    "medicalInfo": "Informazioni mediche",
+    "documents": "Documenti",
+    "timeline": "Cronologia",
+    "familyHistory": "Storia familiare",
+    "emergencyContacts": "Contatti di emergenza",
+    "insurance": "Assicurazione",
+    "preferences": "Preferenze"
+  },
+  "medicalRecords": {
+    "allergies": "Allergie",
+    "conditions": "Condizioni",
+    "medications": "Farmaci",
+    "labResults": "Risultati di laboratorio",
+    "immunizations": "Vaccinazioni",
+    "procedures": "Procedure",
+    "visits": "Visite",
+    "treatments": "Trattamenti",
+    "symptoms": "Sintomi",
+    "practitioners": "Professionisti sanitari",
+    "pharmacies": "Farmacie"
+  },
+  "dashboard": {
+    "title": "Dashboard MediKeep",
+    "subtitle": "Gestisci in modo sicuro le tue informazioni sanitarie",
+    "hello": "Ciao",
+    "loading": "Caricamento della tua dashboard medica...",
+    "sections": {
+      "coreMedical": "Informazioni mediche principali",
+      "treatments": "Trattamenti e procedure",
+      "healthMonitoring": "Monitoraggio della salute",
+      "prevention": "Prevenzione e storico",
+      "additionalResources": "Risorse aggiuntive",
+      "recentActivity": "Attività recente"
+    },
+    "stats": {
+      "totalRecords": "Totale registri",
+      "activeMedications": "Farmaci attivi",
+      "labResults": "Risultati di laboratorio",
+      "procedures": "Procedure"
+    },
+    "modules": {
+      "patientInfo": "Informazioni del paziente",
+      "medications": "Farmaci",
+      "labResults": "Risultati di laboratorio",
+      "treatments": "Trattamenti",
+      "procedures": "Procedure",
+      "vitalSigns": "Segni vitali",
+      "symptoms": "Sintomi",
+      "conditions": "Condizioni",
+      "allergies": "Allergie",
+      "immunizations": "Vaccinazioni",
+      "visitHistory": "Storico visite",
+      "familyHistory": "Storia familiare",
+      "insurance": "Assicurazione sanitaria",
+      "emergencyContacts": "Contatti di emergenza",
+      "exportRecords": "Esporta registri",
+      "practitioners": "Professionisti sanitari",
+      "pharmacies": "Farmacie",
+      "adminDashboard": "Dashboard amministratore"
+    },
+    "activity": {
+      "noActivity": "Nessuna attività recente",
+      "noActivityDescription": "Le attività della tua cartella medica appariranno qui",
+      "lastUpdated": "Ultimo aggiornamento"
+    },
+    "search": {
+      "placeholder": "Cerca nei registri medici..."
+    }
+  },
+  "invitations": {
+    "title": "Inviti",
+    "lastUpdated": "Ultimo aggiornamento",
+    "from": "Da",
+    "viewAll": "Visualizza tutti i {{count}} inviti",
+    "noPending": "Nessun invito in sospeso",
+    "noPendingDescription": "I nuovi inviti di condivisione appariranno qui",
+    "manageAll": "Gestisci tutti gli inviti",
+    "sharePatient": "Condividi paziente",
+    "confirmTitle": "Conferma accettazione invito",
+    "confirmQuestion": "Sei sicuro di voler accettare questo invito?",
+    "confirmDescription": "Accettando, otterrai l'accesso per visualizzare le informazioni mediche condivise.",
+    "acceptButton": "Accetta invito",
+    "types": {
+      "familyHistory": "Storia familiare",
+      "patientRecord": "Cartella del paziente"
+    }
+  },
+  "activity": {
+    "actions": {
+      "created": "Creato",
+      "updated": "Aggiornato",
+      "deleted": "Eliminato",
+      "added": "Aggiunto",
+      "modified": "Modificato",
+      "removed": "Rimosso",
+      "completed": "Completato",
+      "cancelled": "Annullato",
+      "scheduled": "Programmato",
+      "viewed": "Visualizzato"
+    }
+  },
+  "sidebarNav": {
+    "sections": {
+      "medicalRecords": "Registri medici",
+      "careAndTreatment": "Cura e trattamento",
+      "misc": "Varie",
+      "tools": "Strumenti",
+      "administration": "Amministrazione"
+    },
+    "items": {
+      "patientInfo": "Informazioni del paziente",
+      "medications": "Farmaci",
+      "labResults": "Risultati di laboratorio",
+      "conditions": "Condizioni",
+      "allergies": "Allergie",
+      "vitalSigns": "Segni vitali",
+      "symptoms": "Sintomi",
+      "treatments": "Trattamenti",
+      "procedures": "Procedure",
+      "immunizations": "Vaccinazioni",
+      "visitHistory": "Storico visite",
+      "familyHistory": "Storia familiare",
+      "practitioners": "Professionisti sanitari",
+      "pharmacies": "Farmacie",
+      "insurance": "Assicurazione",
+      "emergencyContacts": "Contatti di emergenza",
+      "tagManagement": "Gestione tag",
+      "customReports": "Report personalizzati",
+      "exportRecords": "Esporta registri",
+      "settings": "Impostazioni",
+      "adminDashboard": "Dashboard amministratore",
+      "dataModels": "Modelli di dati",
+      "backupManagement": "Gestione backup",
+      "systemHealth": "Salute del sistema",
+      "language": "Lingua",
+      "theme": "Tema"
+    }
+  }
+}
