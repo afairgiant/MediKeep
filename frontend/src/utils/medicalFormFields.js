@@ -785,9 +785,9 @@ export const practitionerFormFields = [
   {
     name: 'email',
     type: 'email',
-    label: 'Email Address',
-    placeholder: 'doctor@example.com',
-    description: 'Professional email address',
+    labelKey: 'medical:practitioners.email.label',
+    placeholderKey: 'medical:practitioners.email.placeholder',
+    descriptionKey: 'medical:practitioners.email.description',
     gridColumn: 6,
   },
   {

@@ -423,9 +423,8 @@ const fieldTranslationMap = {
   'Phone Number': 'practitioners.form.phone.label',
   '(555) 123-4567': 'practitioners.form.phone.placeholder',
   'Primary contact number': 'practitioners.form.phone.description',
-  'Email Address': 'practitioners.form.email.label',
-  'doctor@example.com': 'practitioners.form.email.placeholder',
-  'Professional email address': 'practitioners.form.email.description',
+  // Note: Practitioner email uses explicit labelKey/placeholderKey/descriptionKey
+  // to avoid conflict with emergency contacts 'Email Address' mapping
   'Website': 'practitioners.form.website.label',
   'https://www.example.com': 'practitioners.form.website.placeholder',
   'Professional website or practice page': 'practitioners.form.website.description',
