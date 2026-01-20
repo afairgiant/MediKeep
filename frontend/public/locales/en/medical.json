@@ -563,7 +563,12 @@
     "practice": {
       "label": "Practice/Hospital",
       "placeholder": "City General Hospital",
-      "description": "Workplace or medical facility"
+      "description": "Workplace or medical facility (optional)"
+    },
+    "email": {
+      "label": "Email Address",
+      "placeholder": "doctor@example.com",
+      "description": "Professional email address"
     },
     "rating": {
       "label": "Rating",
@@ -1159,12 +1164,17 @@
       "practice": {
         "label": "Practice/Hospital",
         "placeholder": "City General Hospital",
-        "description": "Workplace or medical facility"
+        "description": "Workplace or medical facility (optional)"
       },
       "phone": {
         "label": "Phone Number",
         "placeholder": "(555) 123-4567",
         "description": "Primary contact number"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "doctor@example.com",
+        "description": "Professional email address"
       },
       "website": {
         "label": "Website",

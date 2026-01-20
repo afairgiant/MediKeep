@@ -136,6 +136,27 @@ const PractitionerViewModal = ({
                       : t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
+                <Group>
+                  <Text size="sm" fw={500} w={80}>
+                    {t('practitioners.viewModal.email', 'Email')}:
+                  </Text>
+                  <Text
+                    size="sm"
+                    c={practitioner.email ? 'inherit' : 'dimmed'}
+                  >
+                    {practitioner.email ? (
+                      <Anchor
+                        href={`mailto:${practitioner.email}`}
+                        size="sm"
+                        c="blue"
+                      >
+                        {practitioner.email}
+                      </Anchor>
+                    ) : (
+                      t('common.labels.notSpecified', 'Not specified')
+                    )}
+                  </Text>
+                </Group>
               </Stack>
             </Card>
           </Grid.Col>

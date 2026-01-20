@@ -769,8 +769,8 @@ export const practitionerFormFields = [
     type: 'text',
     label: 'Practice/Hospital',
     placeholder: 'City General Hospital',
-    required: true,
-    description: 'Workplace or medical facility',
+    required: false,
+    description: 'Workplace or medical facility (optional)',
     gridColumn: 6,
   },
   {
@@ -781,6 +781,14 @@ export const practitionerFormFields = [
     description: 'Primary contact number',
     gridColumn: 6,
     maxLength: 20,
+  },
+  {
+    name: 'email',
+    type: 'email',
+    labelKey: 'medical:practitioners.email.label',
+    placeholderKey: 'medical:practitioners.email.placeholder',
+    descriptionKey: 'medical:practitioners.email.description',
+    gridColumn: 6,
   },
   {
     name: 'website',
