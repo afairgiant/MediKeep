@@ -1,0 +1,261 @@
+/**
+ * VitalTrendChart component
+ * Displays historical trend data for a specific vital sign as a line chart
+ * Uses Recharts for visualization
+ */
+
+import React, { useMemo } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
+import { Paper, Stack, Text, Group } from '@mantine/core';
+import { VitalTrendResponse, VitalDataPoint } from './types';
+
+interface VitalTrendChartProps {
+  trendData: VitalTrendResponse;
+}
+
+// Calculate a "nice" tick interval based on the data range
+const calculateNiceInterval = (range: number, targetTickCount: number = 5): number => {
+  const roughInterval = range / targetTickCount;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));
+  const normalized = roughInterval / magnitude;
+
+  // Choose a nice interval: 1, 2, 2.5, 5, or 10
+  let niceInterval: number;
+  if (normalized <= 1) {
+    niceInterval = 1;
+  } else if (normalized <= 2) {
+    niceInterval = 2;
+  } else if (normalized <= 2.5) {
+    niceInterval = 2.5;
+  } else if (normalized <= 5) {
+    niceInterval = 5;
+  } else {
+    niceInterval = 10;
+  }
+
+  return niceInterval * magnitude;
+};
+
+// Round a number down to the nearest multiple of interval
+const floorToInterval = (value: number, interval: number): number => {
+  return Math.floor(value / interval) * interval;
+};
+
+// Round a number up to the nearest multiple of interval
+const ceilToInterval = (value: number, interval: number): number => {
+  return Math.ceil(value / interval) * interval;
+};
+
+const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
+  // Check if this vital type has secondary values (e.g., blood pressure with systolic/diastolic)
+  const hasSecondaryValue = useMemo(() => {
+    return trendData.data_points.some(
+      (point) => point.secondary_value !== null && point.secondary_value !== undefined
+    );
+  }, [trendData.data_points]);
+
+  const chartData = useMemo(() => {
+    return trendData.data_points.map((point: VitalDataPoint) => {
+      const dateStr = point.recorded_date.split('T')[0];
+
+      return {
+        date: dateStr,
+        value: point.value,
+        secondaryValue: point.secondary_value
+      };
+    }).reverse(); // Reverse to show oldest first (left to right)
+  }, [trendData.data_points]);
+
+  // Calculate Y-axis configuration with nice, rounded tick values
+  const yAxisConfig = useMemo(() => {
+    if (chartData.length === 0) {
+      return { domain: [0, 100] as [number, number], ticks: [0, 25, 50, 75, 100] };
+    }
+
+    const primaryValues = chartData.map((d: { value: number }) => d.value);
+    const secondaryValues = chartData
+      .map((d: { secondaryValue?: number | null }) => d.secondaryValue)
+      .filter((v): v is number => v !== null && v !== undefined);
+
+    const allValues = [...primaryValues, ...secondaryValues];
+    const dataMin = Math.min(...allValues);
+    const dataMax = Math.max(...allValues);
+
+    // Handle edge case where all values are identical
+    if (dataMin === dataMax) {
+      const padding = Math.abs(dataMax) * 0.1 || 1;
+      const interval = calculateNiceInterval(padding * 2);
+      const niceMin = floorToInterval(dataMin - padding, interval);
+      const niceMax = ceilToInterval(dataMax + padding, interval);
+      const ticks: number[] = [];
+      for (let tick = niceMin; tick <= niceMax; tick += interval) {
+        ticks.push(Number(tick.toFixed(10))); // Avoid floating point issues
+      }
+      return { domain: [niceMin, niceMax] as [number, number], ticks };
+    }
+
+    // Calculate nice interval and bounds
+    const range = dataMax - dataMin;
+    const interval = calculateNiceInterval(range);
+
+    // Extend bounds slightly and round to nice values
+    const niceMin = floorToInterval(dataMin - range * 0.05, interval);
+    const niceMax = ceilToInterval(dataMax + range * 0.05, interval);
+
+    // Generate tick values
+    const ticks: number[] = [];
+    for (let tick = niceMin; tick <= niceMax + interval * 0.01; tick += interval) {
+      ticks.push(Number(tick.toFixed(10))); // Avoid floating point issues
+    }
+
+    return { domain: [niceMin, niceMax] as [number, number], ticks };
+  }, [chartData]);
+
+  // Custom dot renderer for primary data points (systolic for BP)
+  const renderPrimaryDot = (props: any): React.ReactElement => {
+    const { cx, cy } = props;
+    return <circle cx={cx} cy={cy} r={4} fill="#228be6" stroke="#fff" strokeWidth={2} />;
+  };
+
+  // Custom dot renderer for secondary data points (diastolic for BP)
+  const renderSecondaryDot = (props: any): React.ReactElement => {
+    const { cx, cy } = props;
+    return <circle cx={cx} cy={cy} r={4} fill="#fa5252" stroke="#fff" strokeWidth={2} />;
+  };
+
+  // Get labels for blood pressure or other dual-value vitals
+  const getPrimaryLabel = () => {
+    if (trendData.vital_type === 'blood_pressure') {
+      return 'Systolic';
+    }
+    return trendData.vital_type_label;
+  };
+
+  const getSecondaryLabel = () => {
+    if (trendData.vital_type === 'blood_pressure') {
+      return 'Diastolic';
+    }
+    return 'Secondary';
+  };
+
+  // Custom tooltip
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (!active || !payload || !payload.length) return null;
+
+    const data = payload[0].payload;
+
+    return (
+      <Paper withBorder p="sm" shadow="md" radius="md" bg="white">
+        <Stack gap="xs">
+          <Text size="sm" fw={600}>{data.date}</Text>
+          {hasSecondaryValue ? (
+            <>
+              <Group gap="xs" align="baseline">
+                <Text size="sm" c="blue" fw={600}>{getPrimaryLabel()}:</Text>
+                <Text size="lg" fw={700} c="blue">{data.value}</Text>
+                <Text size="sm" c="dimmed">{trendData.unit}</Text>
+              </Group>
+              {data.secondaryValue !== null && data.secondaryValue !== undefined && (
+                <Group gap="xs" align="baseline">
+                  <Text size="sm" c="red" fw={600}>{getSecondaryLabel()}:</Text>
+                  <Text size="lg" fw={700} c="red">{data.secondaryValue}</Text>
+                  <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                </Group>
+              )}
+            </>
+          ) : (
+            <Group gap="xs" align="baseline">
+              <Text size="lg" fw={700} c="blue">{data.value}</Text>
+              <Text size="sm" c="dimmed">{trendData.unit}</Text>
+            </Group>
+          )}
+        </Stack>
+      </Paper>
+    );
+  };
+
+  if (chartData.length === 0) {
+    return (
+      <Paper withBorder p="xl" radius="md" bg="gray.0">
+        <Text size="sm" c="dimmed" ta="center">
+          No data points to display
+        </Text>
+      </Paper>
+    );
+  }
+
+  return (
+    <Paper withBorder p="md" radius="md">
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
+
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 12 }}
+            tickLine={{ stroke: '#adb5bd' }}
+            stroke="#adb5bd"
+            angle={-45}
+            textAnchor="end"
+            height={80}
+          />
+
+          <YAxis
+            domain={yAxisConfig.domain}
+            ticks={yAxisConfig.ticks}
+            tick={{ fontSize: 12 }}
+            tickLine={{ stroke: '#adb5bd' }}
+            stroke="#adb5bd"
+            label={{ value: trendData.unit, angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+            allowDataOverflow={false}
+          />
+
+          <Tooltip content={<CustomTooltip />} />
+
+          <Legend
+            wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
+            iconType="line"
+          />
+
+          {/* Primary value line (systolic for BP) */}
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke="#228be6"
+            strokeWidth={2}
+            dot={renderPrimaryDot}
+            name={hasSecondaryValue ? getPrimaryLabel() : trendData.vital_type_label}
+            connectNulls
+          />
+
+          {/* Secondary value line (diastolic for BP) - only shown when secondary values exist */}
+          {hasSecondaryValue && (
+            <Line
+              type="monotone"
+              dataKey="secondaryValue"
+              stroke="#fa5252"
+              strokeWidth={2}
+              dot={renderSecondaryDot}
+              name={getSecondaryLabel()}
+              connectNulls
+            />
+          )}
+        </LineChart>
+      </ResponsiveContainer>
+    </Paper>
+  );
+};
+
+export default VitalTrendChart;

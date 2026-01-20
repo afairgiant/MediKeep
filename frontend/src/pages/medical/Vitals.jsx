@@ -37,6 +37,7 @@ import {
   IconAlertTriangle,
   IconCheck,
   IconDroplet,
+  IconChartLine,
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
@@ -45,6 +46,7 @@ import VitalsList from '../../components/medical/VitalsList';
 // Modular components
 import VitalViewModal from '../../components/medical/vital/VitalViewModal';
 import VitalFormWrapper from '../../components/medical/vital/VitalFormWrapper';
+import { VitalTrendsPanel } from '../../components/medical/vitals';
 
 import { apiService } from '../../services/api';
 import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
@@ -73,7 +75,8 @@ const Vitals = () => {
       getCategory: () => null,
       color: 'red',
       filterType: VITAL_FILTER_TYPES.WITH_BLOOD_PRESSURE,
-      description: t('vitals.stats.bloodPressureDesc', 'Click to filter records with blood pressure')
+      vitalType: 'blood_pressure',
+      description: t('vitals.stats.bloodPressureDesc', 'Click to view trend analysis')
     },
     heart_rate: {
       title: t('vitals.stats.heartRate', 'Heart Rate'),
@@ -90,7 +93,8 @@ const Vitals = () => {
       },
       color: 'blue',
       filterType: VITAL_FILTER_TYPES.WITH_HEART_RATE,
-      description: t('vitals.stats.heartRateDesc', 'Click to filter records with heart rate')
+      vitalType: 'heart_rate',
+      description: t('vitals.stats.heartRateDesc', 'Click to view trend analysis')
     },
     temperature: {
       title: t('vitals.stats.temperature', 'Latest Temperature'),
@@ -109,7 +113,8 @@ const Vitals = () => {
       },
       color: 'green',
       filterType: VITAL_FILTER_TYPES.WITH_TEMPERATURE,
-      description: t('vitals.stats.temperatureDesc', 'Click to filter records with temperature')
+      vitalType: 'temperature',
+      description: t('vitals.stats.temperatureDesc', 'Click to view trend analysis')
     },
     weight: {
       title: t('vitals.stats.weight', 'Latest Weight'),
@@ -122,7 +127,8 @@ const Vitals = () => {
       getCategory: () => null,
       color: 'violet',
       filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
-      description: t('vitals.stats.weightDesc', 'Click to filter records with weight measurements')
+      vitalType: 'weight',
+      description: t('vitals.stats.weightDesc', 'Click to view trend analysis')
     },
     bmi: {
       title: t('vitals.stats.bmi', 'BMI'),
@@ -133,7 +139,8 @@ const Vitals = () => {
       getCategory: () => null,
       color: 'yellow',
       filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
-      description: t('vitals.stats.bmiDesc', 'Click to filter records with weight measurements')
+      vitalType: 'bmi',
+      description: t('vitals.stats.bmiDesc', 'Click to view trend analysis')
     },
     blood_glucose: {
       title: t('vitals.modal.bloodGlucose', 'Blood Glucose'),
@@ -150,7 +157,8 @@ const Vitals = () => {
       },
       color: 'orange',
       filterType: VITAL_FILTER_TYPES.WITH_BLOOD_GLUCOSE,
-      description: t('vitals.stats.bloodGlucoseDesc', 'Click to filter records with blood glucose')
+      vitalType: 'blood_glucose',
+      description: t('vitals.stats.bloodGlucoseDesc', 'Click to view trend analysis')
     },
     a1c: {
       title: t('vitals.modal.a1c', 'A1C'),
@@ -161,7 +169,8 @@ const Vitals = () => {
       getCategory: () => null,
       color: 'pink',
       filterType: VITAL_FILTER_TYPES.WITH_A1C,
-      description: t('vitals.stats.a1cDesc', 'Click to filter records with A1C')
+      vitalType: 'a1c',
+      description: t('vitals.stats.a1cDesc', 'Click to view trend analysis')
     },
   }), [t, unitSystem]);
   const navigate = useNavigate();
@@ -178,6 +187,8 @@ const Vitals = () => {
   const [stats, setStats] = useState(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [statsError, setStatsError] = useState(null);
+  const [showTrendsPanel, setShowTrendsPanel] = useState(false);
+  const [selectedVitalType, setSelectedVitalType] = useState(null);
 
   // Global data
   const { practitioners } = usePractitioners();
@@ -264,18 +275,17 @@ const Vitals = () => {
     }
   }, [location.search, filteredVitals, vitalsLoading, showViewModal]);
 
-  // Handle stats card clicks for filtering
+  // Handle stats card clicks to open trends panel
   const handleStatsCardClick = useCallback((vitalType) => {
-    if (!updateFilter) return;
+    setSelectedVitalType(vitalType);
+    setShowTrendsPanel(true);
+  }, []);
 
-    // If the same filter is already active, clear all filters
-    if (filters?.category === vitalType) {
-      clearFilters();
-    } else {
-      // Apply the specific vital type filter (this will clear others automatically)
-      updateFilter('category', vitalType);
-    }
-  }, [updateFilter, clearFilters, filters?.category]);
+  // Handle closing trends panel
+  const handleCloseTrendsPanel = useCallback(() => {
+    setShowTrendsPanel(false);
+    setSelectedVitalType(null);
+  }, []);
 
   // Generate filter options from vitalsData
   const statusOptions = useMemo(() => {
@@ -380,7 +390,7 @@ const Vitals = () => {
     const value = config.getValue(stats);
     const unit = config.getUnit(stats);
     const category = config.getCategory(stats);
-    const isActive = filters?.category === config.filterType;
+    const isSelected = selectedVitalType === config.vitalType && showTrendsPanel;
 
     return (
       <Card
@@ -391,22 +401,22 @@ const Vitals = () => {
         withBorder
         tabIndex={0}
         role="button"
-        aria-label={`Filter by ${config.title}. ${config.description}`}
-        aria-pressed={isActive}
+        aria-label={`${config.title}. ${config.description}`}
+        aria-pressed={isSelected}
         style={{
           cursor: 'pointer',
           transition: 'all 0.2s ease',
-          border: isActive ? `2px solid var(--mantine-color-${config.color}-6)` : undefined,
-          backgroundColor: isActive ? `var(--mantine-color-${config.color}-0)` : undefined,
+          border: isSelected ? `2px solid var(--mantine-color-${config.color}-6)` : undefined,
+          backgroundColor: isSelected ? `var(--mantine-color-${config.color}-0)` : undefined,
         }}
         onMouseEnter={(e) => {
-          if (!isActive) {
+          if (!isSelected) {
             e.currentTarget.style.transform = 'translateY(-2px)';
             e.currentTarget.style.boxShadow = 'var(--mantine-shadow-md)';
           }
         }}
         onMouseLeave={(e) => {
-          if (!isActive) {
+          if (!isSelected) {
             e.currentTarget.style.transform = 'translateY(0)';
             e.currentTarget.style.boxShadow = 'var(--mantine-shadow-sm)';
           }
@@ -414,25 +424,28 @@ const Vitals = () => {
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            handleStatsCardClick(config.filterType);
+            handleStatsCardClick(config.vitalType);
           }
         }}
-        onClick={() => handleStatsCardClick(config.filterType)}
+        onClick={() => handleStatsCardClick(config.vitalType)}
         title={config.description}
       >
         <Flex align="center" gap="md">
           <ActionIcon
             size="xl"
-            variant={isActive ? "filled" : "light"}
+            variant={isSelected ? "filled" : "light"}
             color={config.color}
             radius="md"
           >
             <IconComponent size={24} />
           </ActionIcon>
           <Box flex={1}>
-            <Text size="sm" c="dimmed" fw={500}>
-              {config.title}
-            </Text>
+            <Group justify="space-between" align="flex-start">
+              <Text size="sm" c="dimmed" fw={500}>
+                {config.title}
+              </Text>
+              <IconChartLine size={14} color="var(--mantine-color-gray-5)" />
+            </Group>
             <Group gap="xs" align="baseline">
               <Text size="xl" fw={700}>
                 {value}
@@ -547,7 +560,7 @@ const Vitals = () => {
               <Box>
                 <Title order={3}>{t('vitals.healthSummary', 'Health Summary')}</Title>
                 <Text c="dimmed" size="sm">
-                  {t('vitals.summaryDescription', 'Latest readings and averages • Click any card to filter table below')}
+                  {t('vitals.summaryDescription', 'Latest readings and averages - Click any card to view trend analysis')}
                 </Text>
               </Box>
               <Button
@@ -586,23 +599,7 @@ const Vitals = () => {
                 </Group>
               </Alert>
             ) : stats ? (
-              <>
-                {filters?.category && filters.category !== 'all' && (
-                  <Group justify="center" mb="md">
-                    <Badge
-                      size="lg"
-                      variant="light"
-                      color="blue"
-                      leftSection="🔍"
-                      style={{ cursor: 'pointer' }}
-                      onClick={clearFilters}
-                      title={t('vitals.clearFilter', 'Click to clear filter')}
-                    >
-                      {t('vitals.filteredBy', 'Filtered by')}: {Object.values(STATS_CONFIGS).find(config => config.filterType === filters.category)?.title || filters.category}
-                    </Badge>
-                  </Group>
-                )}
-                <Grid>
+              <Grid>
                   {Object.entries(STATS_CONFIGS).map(([key, config]) => (
                     <Grid.Col
                       key={key}
@@ -612,8 +609,6 @@ const Vitals = () => {
                     </Grid.Col>
                   ))}
                 </Grid>
-              </>
-
             ) : (
               <Center py="xl">
                 <Stack align="center" gap="md">
@@ -694,6 +689,15 @@ const Vitals = () => {
           onEdit={handleEdit}
           practitioners={practitioners}
           navigate={navigate}
+        />
+
+        {/* Vital Trends Panel */}
+        <VitalTrendsPanel
+          opened={showTrendsPanel}
+          onClose={handleCloseTrendsPanel}
+          vitalType={selectedVitalType}
+          patientId={currentPatient?.id}
+          patientHeight={currentPatient?.height}
         />
       </Stack>
     </Container>
