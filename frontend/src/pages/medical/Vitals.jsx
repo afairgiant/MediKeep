@@ -444,7 +444,7 @@ const Vitals = () => {
               <Text size="sm" c="dimmed" fw={500}>
                 {config.title}
               </Text>
-              <IconChartLine size={14} color="var(--mantine-color-gray-5)" />
+              <IconChartLine size={14} color="var(--mantine-color-gray-5)" aria-hidden="true" />
             </Group>
             <Group gap="xs" align="baseline">
               <Text size="xl" fw={700}>
@@ -692,13 +692,15 @@ const Vitals = () => {
         />
 
         {/* Vital Trends Panel */}
-        <VitalTrendsPanel
-          opened={showTrendsPanel}
-          onClose={handleCloseTrendsPanel}
-          vitalType={selectedVitalType}
-          patientId={currentPatient?.id}
-          patientHeight={currentPatient?.height}
-        />
+        {currentPatient && (
+          <VitalTrendsPanel
+            opened={showTrendsPanel}
+            onClose={handleCloseTrendsPanel}
+            vitalType={selectedVitalType}
+            patientId={currentPatient.id}
+            patientHeight={currentPatient.height}
+          />
+        )}
       </Stack>
     </Container>
   );

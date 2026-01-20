@@ -132,7 +132,7 @@ export const VITAL_TYPE_CONFIGS: Record<VitalType, VitalTypeConfig> = {
     type: 'bmi',
     label: 'BMI',
     unit: '',
-    color: 'grape',
+    color: 'yellow',
     referenceRange: { min: 18.5, max: 24.9, warning_min: 16, warning_max: 30 },
     getValue: (vital) => vital.bmi,
   },

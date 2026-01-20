@@ -16,6 +16,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { Paper, Stack, Text, Group } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import { VitalTrendResponse, VitalDataPoint } from './types';
 
 interface VitalTrendChartProps {
@@ -56,6 +57,8 @@ const ceilToInterval = (value: number, interval: number): number => {
 };
 
 const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
+  const { t } = useTranslation('common');
+
   // Check if this vital type has secondary values (e.g., blood pressure with systolic/diastolic)
   const hasSecondaryValue = useMemo(() => {
     return trendData.data_points.some(
@@ -135,16 +138,16 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
   // Get labels for blood pressure or other dual-value vitals
   const getPrimaryLabel = () => {
     if (trendData.vital_type === 'blood_pressure') {
-      return 'Systolic';
+      return t('vitals.systolic', 'Systolic');
     }
     return trendData.vital_type_label;
   };
 
   const getSecondaryLabel = () => {
     if (trendData.vital_type === 'blood_pressure') {
-      return 'Diastolic';
+      return t('vitals.diastolic', 'Diastolic');
     }
-    return 'Secondary';
+    return t('vitals.secondary', 'Secondary');
   };
 
   // Custom tooltip
@@ -187,7 +190,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
     return (
       <Paper withBorder p="xl" radius="md" bg="gray.0">
         <Text size="sm" c="dimmed" ta="center">
-          No data points to display
+          {t('vitals.trends.noDataPoints', 'No data points to display')}
         </Text>
       </Paper>
     );

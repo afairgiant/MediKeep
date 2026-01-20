@@ -134,7 +134,8 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
       // Helper function to calculate BMI from weight (lbs) and height (inches)
       const calculateBMI = (weightLbs: number, heightInches: number): number => {
-        return (weightLbs / (heightInches * heightInches)) * 703;
+        const bmi = (weightLbs / (heightInches * heightInches)) * 703;
+        return Math.round(bmi * 10) / 10; // Round to 1 decimal place
       };
 
       // For BMI, we need to calculate from weight records using patient height
@@ -492,18 +493,24 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
                 <Box>
                   <Text size="xs" c="dimmed">{t('vitals.trends.range', 'Range')}</Text>
                   <Group gap="xs" align="baseline">
-                    <Text fw={600} size="sm">
-                      {trendData.statistics.min?.toFixed(0)}
-                      {trendData.statistics.secondary_min != null && (
-                        <Text span c="dimmed">/{trendData.statistics.secondary_min.toFixed(0)}</Text>
-                      )}
-                      {' - '}
-                      {trendData.statistics.max?.toFixed(0)}
-                      {trendData.statistics.secondary_max != null && (
-                        <Text span c="dimmed">/{trendData.statistics.secondary_max.toFixed(0)}</Text>
-                      )}
-                    </Text>
-                    <Text size="xs" c="dimmed">{trendData.unit}</Text>
+                    {trendData.statistics.min != null && trendData.statistics.max != null ? (
+                      <>
+                        <Text fw={600} size="sm">
+                          {trendData.statistics.min.toFixed(0)}
+                          {trendData.statistics.secondary_min != null && (
+                            <Text span c="dimmed">/{trendData.statistics.secondary_min.toFixed(0)}</Text>
+                          )}
+                          {' - '}
+                          {trendData.statistics.max.toFixed(0)}
+                          {trendData.statistics.secondary_max != null && (
+                            <Text span c="dimmed">/{trendData.statistics.secondary_max.toFixed(0)}</Text>
+                          )}
+                        </Text>
+                        <Text size="xs" c="dimmed">{trendData.unit}</Text>
+                      </>
+                    ) : (
+                      <Text fw={600} size="sm">{t('labels.notAvailable', 'N/A')}</Text>
+                    )}
                   </Group>
                 </Box>
               </Group>

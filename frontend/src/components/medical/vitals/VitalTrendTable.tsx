@@ -14,6 +14,7 @@ import {
   ScrollArea
 } from '@mantine/core';
 import { IconChevronUp, IconChevronDown, IconSelector } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { VitalTrendResponse, VitalDataPoint } from './types';
 
 interface VitalTrendTableProps {
@@ -50,6 +51,7 @@ function Th({ children, sorted, reversed, onSort }: ThProps) {
 }
 
 const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
+  const { t } = useTranslation('common');
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -96,7 +98,7 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
     return (
       <Paper withBorder p="xl" radius="md" bg="gray.0">
         <Text size="sm" c="dimmed" ta="center">
-          No data points to display
+          {t('vitals.trends.noDataPoints', 'No data points to display')}
         </Text>
       </Paper>
     );
@@ -113,14 +115,14 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
                 reversed={sortDirection === 'asc'}
                 onSort={() => handleSort('date')}
               >
-                Date
+                {t('labels.date', 'Date')}
               </Th>
               <Th
                 sorted={sortField === 'value'}
                 reversed={sortDirection === 'asc'}
                 onSort={() => handleSort('value')}
               >
-                Value
+                {t('labels.value', 'Value')}
               </Th>
             </Table.Tr>
           </Table.Thead>
