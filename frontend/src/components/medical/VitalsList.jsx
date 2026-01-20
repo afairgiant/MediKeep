@@ -492,8 +492,8 @@ const VitalsList = ({
                     {selectedVital.practitioner.name}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    {selectedVital.practitioner.specialty} •{' '}
-                    {selectedVital.practitioner.practice}
+                    {selectedVital.practitioner.specialty}
+                    {selectedVital.practitioner.practice ? ` • ${selectedVital.practitioner.practice}` : ''}
                   </Text>
                 </>
               ) : (

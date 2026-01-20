@@ -1266,12 +1266,14 @@
       "specialty": "Specialty",
       "practice": "Practice",
       "phone": "Phone",
+      "email": "Email",
       "rating": "Rating"
     },
     "card": {
       "subtitle": "Healthcare Practitioner",
       "practice": "Practice",
       "phone": "Phone",
+      "email": "Email",
       "website": "Website",
       "visitWebsite": "Visit Website",
       "rating": "Rating"
@@ -1283,6 +1285,7 @@
       "practice": "Practice",
       "specialty": "Specialty",
       "phone": "Phone",
+      "email": "Email",
       "contactRating": "CONTACT & RATING",
       "website": "Website",
       "visitWebsite": "Visit Website",

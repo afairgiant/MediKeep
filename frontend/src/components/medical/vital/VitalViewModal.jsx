@@ -286,7 +286,8 @@ const VitalViewModal = ({
                     {practitioner.name}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    {practitioner.specialty} • {practitioner.practice}
+                    {practitioner.specialty}
+                    {practitioner.practice ? ` • ${practitioner.practice}` : ''}
                   </Text>
                 </>
               ) : (

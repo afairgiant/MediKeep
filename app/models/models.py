@@ -250,8 +250,9 @@ class Practitioner(Base):
 
     name = Column(String, nullable=False)
     specialty = Column(String, nullable=False)
-    practice = Column(String, nullable=False)
+    practice = Column(String, nullable=True)  # Optional - not all practitioners are linked to a practice
     phone_number = Column(String, nullable=True)
+    email = Column(String, nullable=True)
     website = Column(String, nullable=True)
     rating = Column(Float, nullable=True)  # Rating from 0.0 to 5.0
 

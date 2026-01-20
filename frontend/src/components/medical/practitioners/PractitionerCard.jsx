@@ -84,6 +84,19 @@ const PractitionerCard = ({
         render: (value) => value ? formatPhoneNumber(value) : t('common.labels.notSpecified', 'Not specified')
       },
       {
+        label: t('practitioners.card.email', 'Email'),
+        value: practitioner.email,
+        render: (value) => value ? (
+          <Anchor
+            href={`mailto:${value}`}
+            size="sm"
+            c="blue"
+          >
+            {value}
+          </Anchor>
+        ) : t('common.labels.notSpecified', 'Not specified')
+      },
+      {
         label: t('practitioners.card.website', 'Website'),
         value: practitioner.website,
         render: (value) => value ? (
