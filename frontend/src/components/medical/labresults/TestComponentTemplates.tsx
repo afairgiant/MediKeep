@@ -176,10 +176,21 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         { test_name: 'Alanine Aminotransferase', abbreviation: 'ALT', test_code: '1742-6', unit: 'U/L', default_display_order: 1 },
         { test_name: 'Aspartate Aminotransferase', abbreviation: 'AST', test_code: '1920-8', unit: 'U/L', default_display_order: 2 },
         { test_name: 'Alkaline Phosphatase', abbreviation: 'ALP', test_code: '6768-6', unit: 'U/L', default_display_order: 3 },
-        { test_name: 'Total Bilirubin', abbreviation: 'TBIL', test_code: '1975-2', unit: 'mg/dL', default_display_order: 4 },
-        { test_name: 'Direct Bilirubin', abbreviation: 'DBIL', test_code: '1968-7', unit: 'mg/dL', default_display_order: 5 },
-        { test_name: 'Albumin', abbreviation: 'ALB', test_code: '1751-7', unit: 'g/dL', default_display_order: 6 },
-        { test_name: 'Total Protein', abbreviation: 'TP', test_code: '2885-2', unit: 'g/dL', default_display_order: 7 },
+        { test_name: 'Gamma-glutamyl Transferase', abbreviation: 'GGT', test_code: '2324-2', unit: 'U/L', default_display_order: 4 },
+        { test_name: 'Total Bilirubin', abbreviation: 'TBIL', test_code: '1975-2', unit: 'mg/dL', default_display_order: 5 },
+        { test_name: 'Direct Bilirubin', abbreviation: 'DBIL', test_code: '1968-7', unit: 'mg/dL', default_display_order: 6 },
+        { test_name: 'Albumin', abbreviation: 'ALB', test_code: '1751-7', unit: 'g/dL', default_display_order: 7 },
+        { test_name: 'Total Protein', abbreviation: 'TP', test_code: '2885-2', unit: 'g/dL', default_display_order: 8 },
+      ]
+    },
+    {
+      id: 'kidney_function',
+      category: 'chemistry',
+      tests: [
+        { test_name: 'Urea', abbreviation: 'UREA', test_code: '3091-6', unit: 'mg/dL', default_display_order: 1 },
+        { test_name: 'Blood Urea Nitrogen', abbreviation: 'BUN', test_code: '6299-2', unit: 'mg/dL', default_display_order: 2 },
+        { test_name: 'Creatinine', abbreviation: 'CREAT', test_code: '2160-0', unit: 'mg/dL', default_display_order: 3 },
+        { test_name: 'Estimated GFR', abbreviation: 'eGFR', unit: 'mL/min/1.73m²', default_display_order: 4 },
       ]
     }
   ];
@@ -489,7 +500,8 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       complete_blood_count: 'Complete Blood Count (CBC)',
       lipid_panel: 'Lipid Panel',
       thyroid_function: 'Thyroid Function Tests',
-      liver_function: 'Liver Function Panel'
+      liver_function: 'Liver Function Panel',
+      kidney_function: 'Kidney Function Panel'
     };
     return templateNames[templateId] || templateId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };

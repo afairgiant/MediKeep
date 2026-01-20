@@ -280,6 +280,16 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     display_order: 27
   },
   {
+    test_name: "Urea",
+    abbreviation: "UREA",
+    test_code: "3091-6",
+    default_unit: "mg/dL",
+    category: "chemistry",
+    common_names: ["Urea", "Serum Urea", "Blood Urea"],
+    is_common: true,
+    display_order: 28
+  },
+  {
     test_name: "Creatinine",
     abbreviation: "CREA",
     test_code: "2160-0",
@@ -287,7 +297,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Creatinine", "Cr", "Crea"],
     is_common: true,
-    display_order: 28
+    display_order: 29
   },
   {
     test_name: "Estimated GFR",
@@ -296,7 +306,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["eGFR", "GFR"],
     is_common: true,
-    display_order: 29
+    display_order: 30
   },
   {
     test_name: "Calcium",
@@ -306,7 +316,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Ca", "Calcium"],
     is_common: true,
-    display_order: 30
+    display_order: 31
   },
 
   // CHEMISTRY - Liver Function
@@ -318,7 +328,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Total Protein", "TP"],
     is_common: true,
-    display_order: 31
+    display_order: 32
   },
   {
     test_name: "Albumin",
@@ -328,7 +338,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Albumin", "Alb"],
     is_common: true,
-    display_order: 32
+    display_order: 33
   },
   {
     test_name: "Total Bilirubin",
@@ -338,7 +348,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Total Bilirubin", "T Bili"],
     is_common: true,
-    display_order: 33
+    display_order: 34
   },
   {
     test_name: "Direct Bilirubin",
@@ -348,7 +358,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Direct Bilirubin", "D Bili", "Conjugated Bilirubin"],
     is_common: false,
-    display_order: 34
+    display_order: 35
   },
   {
     test_name: "Alkaline Phosphatase",
@@ -358,7 +368,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["ALP", "Alk Phos", "Alkaline Phosphatase"],
     is_common: true,
-    display_order: 35
+    display_order: 36
   },
   {
     test_name: "Alanine Aminotransferase",
@@ -368,7 +378,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["ALT", "SGPT", "Alanine Transaminase"],
     is_common: true,
-    display_order: 36
+    display_order: 37
   },
   {
     test_name: "Aspartate Aminotransferase",
@@ -378,7 +388,17 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["AST", "SGOT", "Aspartate Transaminase"],
     is_common: true,
-    display_order: 37
+    display_order: 38
+  },
+  {
+    test_name: "Gamma-glutamyl Transferase",
+    abbreviation: "GGT",
+    test_code: "2324-2",
+    default_unit: "U/L",
+    category: "chemistry",
+    common_names: ["GGT", "Gamma GT", "GGTP", "Gamma-glutamyl Transpeptidase"],
+    is_common: true,
+    display_order: 39
   },
 
   // LIPIDS - Lipid Panel
@@ -390,7 +410,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "lipids",
     common_names: ["Cholesterol", "Total Chol", "CHOLESTEROL, TOTAL", "Cholesterol Total"],
     is_common: true,
-    display_order: 38
+    display_order: 40
   },
   {
     test_name: "LDL Cholesterol",
@@ -400,7 +420,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "lipids",
     common_names: ["LDL", "LDL-C", "Bad Cholesterol", "LDL-CHOLESTEROL", "LDL Calculated"],
     is_common: true,
-    display_order: 39
+    display_order: 41
   },
   {
     test_name: "HDL Cholesterol",
@@ -410,7 +430,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "lipids",
     common_names: ["HDL", "HDL-C", "Good Cholesterol", "HDL CHOLESTEROL"],
     is_common: true,
-    display_order: 40
+    display_order: 42
   },
   {
     test_name: "Triglycerides",
@@ -420,7 +440,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "lipids",
     common_names: ["Triglycerides", "TG", "Trig", "TRIGLYCERIDES"],
     is_common: true,
-    display_order: 41
+    display_order: 43
   },
   {
     test_name: "VLDL Cholesterol",
@@ -429,7 +449,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "lipids",
     common_names: ["VLDL", "VLDL-C"],
     is_common: false,
-    display_order: 42
+    display_order: 44
   },
   {
     test_name: "Non-HDL Cholesterol",
@@ -438,7 +458,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "lipids",
     common_names: ["Non-HDL", "Non-HDL-C", "NON HDL CHOLESTEROL", "Non HDL-C"],
     is_common: false,
-    display_order: 43
+    display_order: 45
   },
 
   // ENDOCRINOLOGY - Thyroid
@@ -450,7 +470,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["TSH", "Thyrotropin"],
     is_common: true,
-    display_order: 44
+    display_order: 46
   },
   {
     test_name: "Free T4",
@@ -460,7 +480,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["Free T4", "FT4", "Free Thyroxine"],
     is_common: true,
-    display_order: 45
+    display_order: 47
   },
   {
     test_name: "Free T3",
@@ -470,7 +490,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["Free T3", "FT3", "Free Triiodothyronine"],
     is_common: false,
-    display_order: 46
+    display_order: 48
   },
   {
     test_name: "Total T4",
@@ -480,7 +500,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["Total T4", "T4", "Thyroxine"],
     is_common: false,
-    display_order: 47
+    display_order: 49
   },
   {
     test_name: "Total T3",
@@ -490,7 +510,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["Total T3", "T3", "Triiodothyronine"],
     is_common: false,
-    display_order: 48
+    display_order: 50
   },
 
   // ENDOCRINOLOGY - Diabetes
@@ -502,7 +522,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["HbA1c", "A1c", "Glycated Hemoglobin"],
     is_common: true,
-    display_order: 49
+    display_order: 51
   },
   {
     test_name: "Estimated Average Glucose",
@@ -511,7 +531,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["eAG", "Average Glucose"],
     is_common: false,
-    display_order: 50
+    display_order: 52
   },
 
   // CHEMISTRY - Additional Common Tests
@@ -523,7 +543,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Mg", "Magnesium"],
     is_common: false,
-    display_order: 51
+    display_order: 53
   },
   {
     test_name: "Phosphorus",
@@ -533,7 +553,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Phosphorus", "Phos", "Phosphate"],
     is_common: false,
-    display_order: 52
+    display_order: 54
   },
   {
     test_name: "Uric Acid",
@@ -543,7 +563,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Uric Acid", "UA"],
     is_common: false,
-    display_order: 53
+    display_order: 55
   },
   {
     test_name: "Lactate Dehydrogenase",
@@ -553,7 +573,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["LDH", "Lactate Dehydrogenase"],
     is_common: false,
-    display_order: 54
+    display_order: 56
   },
   {
     test_name: "Creatine Kinase",
@@ -563,7 +583,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["CK", "CPK", "Creatine Kinase"],
     is_common: false,
-    display_order: 55
+    display_order: 57
   },
 
   // HEMATOLOGY - Coagulation
@@ -575,7 +595,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "hematology",
     common_names: ["PT", "Prothrombin Time", "ProTime"],
     is_common: false,
-    display_order: 56
+    display_order: 58
   },
   {
     test_name: "INR",
@@ -585,7 +605,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "hematology",
     common_names: ["INR", "International Normalized Ratio"],
     is_common: false,
-    display_order: 57
+    display_order: 59
   },
   {
     test_name: "Partial Thromboplastin Time",
@@ -595,7 +615,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "hematology",
     common_names: ["PTT", "aPTT", "Activated PTT"],
     is_common: false,
-    display_order: 58
+    display_order: 60
   },
 
   // IMMUNOLOGY
@@ -607,7 +627,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "immunology",
     common_names: ["CRP", "C-Reactive Protein"],
     is_common: false,
-    display_order: 59
+    display_order: 61
   },
   {
     test_name: "Erythrocyte Sedimentation Rate",
@@ -617,7 +637,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "immunology",
     common_names: ["ESR", "Sed Rate"],
     is_common: false,
-    display_order: 60
+    display_order: 62
   },
 
   // ENDOCRINOLOGY - Additional
@@ -628,7 +648,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["Testosterone", "Total Testosterone"],
     is_common: false,
-    display_order: 61
+    display_order: 63
   },
   {
     test_name: "Cortisol",
@@ -637,7 +657,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["Cortisol"],
     is_common: false,
-    display_order: 62
+    display_order: 64
   },
   {
     test_name: "Vitamin D",
@@ -647,7 +667,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Vitamin D", "25-OH Vitamin D", "Vitamin D 25-Hydroxy"],
     is_common: false,
-    display_order: 63
+    display_order: 65
   },
   {
     test_name: "Vitamin B12",
@@ -657,7 +677,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Vitamin B12", "B12", "Cobalamin"],
     is_common: false,
-    display_order: 64
+    display_order: 66
   },
   {
     test_name: "Folate",
@@ -667,7 +687,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Folate", "Folic Acid"],
     is_common: false,
-    display_order: 65
+    display_order: 67
   },
   {
     test_name: "Iron",
@@ -677,7 +697,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Iron", "Fe", "Serum Iron"],
     is_common: false,
-    display_order: 66
+    display_order: 68
   },
   {
     test_name: "Ferritin",
@@ -687,7 +707,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Ferritin"],
     is_common: false,
-    display_order: 67
+    display_order: 69
   },
   {
     test_name: "Total Iron Binding Capacity",
@@ -697,7 +717,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["TIBC", "Iron Binding Capacity"],
     is_common: false,
-    display_order: 68
+    display_order: 70
   },
   {
     test_name: "Transferrin Saturation",
@@ -707,7 +727,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Transferrin Saturation", "TSAT"],
     is_common: false,
-    display_order: 69
+    display_order: 71
   },
 
   // CHEMISTRY - Calculated Values
@@ -718,7 +738,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["BUN/Creatinine Ratio", "BUN/Cr"],
     is_common: false,
-    display_order: 70
+    display_order: 72
   },
   {
     test_name: "Globulin Total",
@@ -727,7 +747,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Globulin", "Total Globulin"],
     is_common: false,
-    display_order: 71
+    display_order: 73
   },
   {
     test_name: "LDL/HDL Ratio",
@@ -736,7 +756,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "lipids",
     common_names: ["LDL/HDL Ratio", "Cholesterol Ratio", "CHOL/HDLC RATIO", "Total Cholesterol/HDL Ratio"],
     is_common: false,
-    display_order: 72
+    display_order: 74
   },
 
   // ENDOCRINOLOGY - Reproductive Hormones
@@ -747,7 +767,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["LH", "Luteinizing Hormone"],
     is_common: false,
-    display_order: 73
+    display_order: 75
   },
   {
     test_name: "Follicle Stimulating Hormone",
@@ -756,7 +776,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["FSH", "Follicle Stimulating Hormone"],
     is_common: false,
-    display_order: 74
+    display_order: 76
   },
   {
     test_name: "Free Testosterone (Direct)",
@@ -765,7 +785,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["Free Testosterone", "Free Test"],
     is_common: false,
-    display_order: 75
+    display_order: 77
   },
   {
     test_name: "Estradiol (Sensitive)",
@@ -774,7 +794,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "endocrinology",
     common_names: ["Estradiol", "E2", "Estradiol Sensitive"],
     is_common: false,
-    display_order: 76
+    display_order: 78
   },
   {
     test_name: "Vitamin D, 25-Hydroxy",
@@ -784,7 +804,7 @@ export const TEST_LIBRARY: TestLibraryItem[] = [
     category: "chemistry",
     common_names: ["Vitamin D", "25-OH Vitamin D", "Vitamin D 25-Hydroxy", "25-Hydroxyvitamin D"],
     is_common: true,
-    display_order: 77
+    display_order: 79
   },
 ];
 
