@@ -258,7 +258,7 @@ export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => 
   // No valid format matched
   return {
     date: null,
-    error: 'Unrecognized format. Use DD/MM/YYYY HH:mm:ss or similar'
+    error: 'Unrecognized format. Supported: MM/DD/YYYY HH:mm:ss, DD/MM/YYYY HH:mm:ss, or YYYY-MM-DD HH:mm:ss'
   };
 };
 

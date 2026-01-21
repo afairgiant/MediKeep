@@ -699,10 +699,13 @@ const VitalsForm = ({
         if (!timeStr) return;
         const [hours, minutes] = timeStr.split(':').map(Number);
         if (isNaN(hours) || isNaN(minutes)) return;
-        const newDate = isValidDate ? new Date(value) : new Date();
+        const now = new Date();
+        const newDate = isValidDate ? new Date(value) : new Date(now);
         newDate.setHours(hours, minutes, 0, 0);
-        if (newDate <= new Date()) {
+        if (newDate <= now) {
           handleDatePickerSelect(newDate);
+        } else {
+          toast.error(t('vitals.form.validation.timeInFuture', 'Selected time cannot be in the future'));
         }
       };
 
