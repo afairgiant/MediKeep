@@ -30,6 +30,7 @@ import {
   Loader,
   Center,
   Select,
+  Popover,
 } from '@mantine/core';
 import {
   IconCalendar,
@@ -51,7 +52,7 @@ import {
   IconMoodSad,
   IconDropletFilled,
 } from '@tabler/icons-react';
-import { DateInput, DateTimePicker } from '@mantine/dates';
+import { DateInput, DatePicker, TimeInput } from '@mantine/dates';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useTimezone } from '../../hooks';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
@@ -63,6 +64,10 @@ import {
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
+import {
+  parseDateTimeString,
+  formatDateTimeForInput,
+} from '../../utils/dateUtils';
 
 const VitalsForm = ({
   vitals = null,
@@ -369,6 +374,13 @@ const VitalsForm = ({
   const [warnings, setWarnings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState(new Set());
+  // State for manual datetime text input (for copy-paste support)
+  // Initialize with current datetime formatted for new records
+  const [manualDateTimeText, setManualDateTimeText] = useState(() =>
+    formatDateTimeForInput(new Date(), false)
+  );
+  const [manualDateTimeError, setManualDateTimeError] = useState(null);
+  const [datePickerOpened, setDatePickerOpened] = useState(false);
 
   // Get height from patient profile
   const patientHeight = useMemo(() => {
@@ -378,12 +390,14 @@ const VitalsForm = ({
   // Initialize form data when editing
   useEffect(() => {
     if (vitals && isEdit) {
+      const recordedDate = vitals.recorded_date
+        ? new Date(vitals.recorded_date)
+        : new Date();
+
       setFormData({
         patient_id: vitals.patient_id || patientId || '',
         practitioner_id: vitals.practitioner_id || practitionerId || null,
-        recorded_date: vitals.recorded_date
-          ? new Date(vitals.recorded_date)
-          : new Date(),
+        recorded_date: recordedDate,
         systolic_bp: vitals.systolic_bp || '',
         diastolic_bp: vitals.diastolic_bp || '',
         heart_rate: vitals.heart_rate || '',
@@ -403,6 +417,9 @@ const VitalsForm = ({
         device_used: vitals.device_used || '',
         notes: vitals.notes || '', // Ensure notes is always a string, never null
       });
+
+      // Sync manual datetime text input
+      setManualDateTimeText(formatDateTimeForInput(recordedDate, false));
     }
   }, [vitals, isEdit, patientId, practitionerId]);
 
@@ -495,6 +512,61 @@ const VitalsForm = ({
 
     // Mark field as touched
     setTouchedFields(prev => new Set([...prev, fieldName]));
+
+    // Sync manual text input when DateTimePicker changes
+    if (fieldName === 'recorded_date' && value instanceof Date) {
+      setManualDateTimeText(formatDateTimeForInput(value, false));
+      setManualDateTimeError(null);
+    }
+  }, []);
+
+  // Handle manual datetime text input (for copy-paste from CSV)
+  const handleManualDateTimeChange = useCallback(
+    e => {
+      const text = e.target.value;
+      setManualDateTimeText(text);
+
+      if (!text.trim()) {
+        setManualDateTimeError(null);
+        return;
+      }
+
+      const { date, error } = parseDateTimeString(text);
+
+      if (error) {
+        setManualDateTimeError(error);
+      } else if (date) {
+        // Check if date is in the future
+        if (date > new Date()) {
+          setManualDateTimeError(t('vitals.form.validation.dateInFuture', 'Date cannot be in the future'));
+        } else {
+          setManualDateTimeError(null);
+          // Update the form data with parsed date
+          setFormData(prev => ({
+            ...prev,
+            recorded_date: date,
+          }));
+          setTouchedFields(prev => new Set([...prev, 'recorded_date']));
+        }
+      }
+    },
+    [t]
+  );
+
+  // Handle date selection from the picker popover
+  const handleDatePickerSelect = useCallback((val, closePopover = false) => {
+    if (val) {
+      setFormData(prev => ({
+        ...prev,
+        recorded_date: val,
+      }));
+      setManualDateTimeText(formatDateTimeForInput(val, false));
+      setManualDateTimeError(null);
+      setTouchedFields(prev => new Set([...prev, 'recorded_date']));
+    }
+    if (closePopover) {
+      setDatePickerOpened(false);
+    }
   }, []);
 
   // Handle form submission
@@ -608,20 +680,94 @@ const VitalsForm = ({
     }
 
     if (config.type === 'datetime') {
+      const isValidDate = value instanceof Date && !isNaN(value.getTime());
+      const pad = num => String(num).padStart(2, '0');
+      const timeValue = isValidDate
+        ? `${pad(value.getHours())}:${pad(value.getMinutes())}`
+        : '';
+
+      const handleDateSelect = dateStr => {
+        if (!dateStr) return;
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const currentTime = isValidDate ? value : new Date();
+        const newDate = new Date(year, month - 1, day, currentTime.getHours(), currentTime.getMinutes(), 0, 0);
+        handleDatePickerSelect(newDate);
+      };
+
+      const handleTimeChange = e => {
+        const timeStr = e.target.value;
+        if (!timeStr) return;
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        if (isNaN(hours) || isNaN(minutes)) return;
+        const newDate = isValidDate ? new Date(value) : new Date();
+        newDate.setHours(hours, minutes, 0, 0);
+        if (newDate <= new Date()) {
+          handleDatePickerSelect(newDate);
+        }
+      };
+
+      const getDateString = date => {
+        if (!(date instanceof Date)) return null;
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      };
+
+      const today = new Date();
+      const maxDateStr = getDateString(today);
+
       return (
-        <DateTimePicker
+        <Popover
           key={fieldName}
-          label={config.label}
-          placeholder={t('vitals.form.selectDateTime', 'Select date and time')}
-          value={value}
-          onChange={val => handleInputChange(fieldName, val)}
-          leftSection={<IconComponent size={16} />}
-          required={config.required}
-          error={error}
-          maxDate={new Date()}
-          withSeconds={false}
-          clearable
-        />
+          opened={datePickerOpened}
+          onChange={setDatePickerOpened}
+          position="bottom-start"
+          withinPortal
+        >
+          <Popover.Target>
+            <TextInput
+              label={config.label}
+              placeholder={t('vitals.form.pasteDateTimePlaceholder', 'e.g., 07/29/2015 23:58:21')}
+              description={t(
+                'vitals.form.pasteDateTimeDescription',
+                'Type or paste date/time, or click calendar to select'
+              )}
+              value={manualDateTimeText}
+              onChange={handleManualDateTimeChange}
+              leftSection={<IconComponent size={16} />}
+              rightSection={
+                <ActionIcon
+                  variant="subtle"
+                  onClick={() => setDatePickerOpened(o => !o)}
+                  aria-label={t('vitals.form.openCalendar', 'Open calendar')}
+                >
+                  <IconCalendar size={16} />
+                </ActionIcon>
+              }
+              required={config.required}
+              error={manualDateTimeError || error}
+            />
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Stack gap="sm">
+              <DatePicker
+                value={isValidDate ? getDateString(value) : null}
+                onChange={handleDateSelect}
+                maxDate={maxDateStr}
+              />
+              <TimeInput
+                label={t('vitals.form.selectTime', 'Time')}
+                value={timeValue}
+                onChange={handleTimeChange}
+              />
+              <Button
+                size="xs"
+                variant="light"
+                onClick={() => setDatePickerOpened(false)}
+              >
+                {t('buttons.done', 'Done')}
+              </Button>
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
       );
     }
 
@@ -751,20 +897,14 @@ const VitalsForm = ({
                   </Group>
 
                   <Grid>
-                    {section.fields.map(fieldName => (
-                      <Grid.Col
-                        key={fieldName}
-                        span={
-                          fieldName === 'notes'
-                            ? 12
-                            : fieldName === 'recorded_date'
-                              ? 12
-                              : 6
-                        }
-                      >
-                        {renderField(fieldName)}
-                      </Grid.Col>
-                    ))}
+                    {section.fields.map(fieldName => {
+                      const isFullWidth = fieldName === 'notes' || fieldName === 'recorded_date';
+                      return (
+                        <Grid.Col key={fieldName} span={isFullWidth ? 12 : 6}>
+                          {renderField(fieldName)}
+                        </Grid.Col>
+                      );
+                    })}
                   </Grid>
                 </Stack>
               </Paper>

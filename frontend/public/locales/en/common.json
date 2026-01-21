@@ -101,11 +101,17 @@
     "form": {
       "selectDate": "Select date",
       "selectDateTime": "Select date and time",
+      "pasteDateTime": "Paste or type date/time",
+      "pasteDateTimePlaceholder": "e.g., 07/29/2015 23:58:21",
+      "pasteDateTimeDescription": "Type or paste date/time, or click calendar to select",
+      "openCalendar": "Open calendar",
+      "selectTime": "Time",
       "validation": {
         "bloodGlucoseMin": "Blood glucose must be at least 20 mg/dL",
         "bloodGlucoseMax": "Blood glucose cannot exceed 800 mg/dL",
         "a1cMin": "A1C must be at least 0%",
-        "a1cMax": "A1C cannot exceed 20%"
+        "a1cMax": "A1C cannot exceed 20%",
+        "dateInFuture": "Date cannot be in the future"
       }
     },
     "modal": {

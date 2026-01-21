@@ -567,16 +567,9 @@ const VitalsList = ({
   const rows = sortedVitals.map(vital => (
     <Table.Tr key={vital.id}>
       <Table.Td>
-        <Stack gap={2}>
-          <Text size="sm" fw={500}>
-            {formatDate(vital.recorded_date)}
-          </Text>
-          {vital.created_at && (
-            <Text size="xs" c="dimmed">
-              {formatTime(vital.created_at)}
-            </Text>
-          )}
-        </Stack>
+        <Text size="sm" fw={500}>
+          {formatDate(vital.recorded_date)}
+        </Text>
       </Table.Td>
       <Table.Td>
         {vital.systolic_bp && vital.diastolic_bp ? (
