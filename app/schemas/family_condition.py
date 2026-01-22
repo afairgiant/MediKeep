@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 # Import enums for validation
 from ..models.enums import get_all_condition_types, get_all_severity_levels
@@ -25,7 +25,8 @@ class FamilyConditionBase(BaseModel):
     )
     family_member_id: Optional[int] = Field(None, gt=0, description="ID of the family member")
 
-    @validator("severity")
+    @field_validator("severity")
+    @classmethod
     def validate_severity(cls, v):
         if v is not None:
             valid_severities = get_all_severity_levels()
@@ -34,7 +35,8 @@ class FamilyConditionBase(BaseModel):
             return v.lower()
         return v
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
         if v is not None:
             valid_statuses = ["active", "resolved", "chronic"]
@@ -43,7 +45,8 @@ class FamilyConditionBase(BaseModel):
             return v.lower()
         return v
 
-    @validator("condition_type")
+    @field_validator("condition_type")
+    @classmethod
     def validate_condition_type(cls, v):
         if v is not None:
             valid_types = get_all_condition_types()
@@ -66,7 +69,8 @@ class FamilyConditionUpdate(BaseModel):
     notes: Optional[str] = Field(None, max_length=1000)
     icd10_code: Optional[str] = Field(None, max_length=10)
 
-    @validator("severity")
+    @field_validator("severity")
+    @classmethod
     def validate_severity(cls, v):
         if v is not None:
             valid_severities = get_all_severity_levels()
@@ -75,7 +79,8 @@ class FamilyConditionUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
         if v is not None:
             valid_statuses = ["active", "resolved", "chronic"]
@@ -84,7 +89,8 @@ class FamilyConditionUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("condition_type")
+    @field_validator("condition_type")
+    @classmethod
     def validate_condition_type(cls, v):
         if v is not None:
             valid_types = get_all_condition_types()
@@ -125,7 +131,7 @@ class FamilyConditionSummary(BaseModel):
 
 class FamilyConditionDropdownOption(BaseModel):
     """Minimal family condition data for dropdown selections in forms."""
-    
+
     id: int
     condition_name: str
     severity: Optional[str]

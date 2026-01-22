@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -12,7 +12,8 @@ class LabResultFileBase(BaseModel):
     file_size: Optional[int] = None
     description: Optional[str] = None
 
-    @validator("file_name")
+    @field_validator("file_name")
+    @classmethod
     def validate_file_name(cls, v):
         """Validate file name"""
         if not v or len(v.strip()) < 1:
@@ -25,7 +26,8 @@ class LabResultFileBase(BaseModel):
             raise ValueError("File name contains invalid characters")
         return v.strip()
 
-    @validator("file_path")
+    @field_validator("file_path")
+    @classmethod
     def validate_file_path(cls, v):
         """Validate file path"""
         if not v or len(v.strip()) < 1:
@@ -34,7 +36,8 @@ class LabResultFileBase(BaseModel):
             raise ValueError("File path must be less than 500 characters")
         return v.strip()
 
-    @validator("file_type")
+    @field_validator("file_type")
+    @classmethod
     def validate_file_type(cls, v):
         """Validate file type (MIME type)"""
         valid_types = [
@@ -60,7 +63,8 @@ class LabResultFileBase(BaseModel):
             raise ValueError(f"File type must be one of: {', '.join(valid_types)}")
         return v.lower() if v else None
 
-    @validator("file_size")
+    @field_validator("file_size")
+    @classmethod
     def validate_file_size(cls, v):
         """Validate file size (max 100MB)"""
         if v is not None:
@@ -70,7 +74,8 @@ class LabResultFileBase(BaseModel):
                 raise ValueError("File size cannot exceed 100MB")
         return v
 
-    @validator("description")
+    @field_validator("description")
+    @classmethod
     def validate_description(cls, v):
         """Validate file description"""
         if v and len(v.strip()) > 1000:
@@ -84,7 +89,8 @@ class LabResultFileCreate(LabResultFileBase):
     lab_result_id: int
     uploaded_at: Optional[datetime] = None
 
-    @validator("lab_result_id")
+    @field_validator("lab_result_id")
+    @classmethod
     def validate_lab_result_id(cls, v):
         """Validate lab result ID"""
         if v <= 0:
@@ -101,7 +107,8 @@ class LabResultFileUpdate(BaseModel):
     file_size: Optional[int] = None
     description: Optional[str] = None
 
-    @validator("file_name")
+    @field_validator("file_name")
+    @classmethod
     def validate_file_name(cls, v):
         if v is not None:
             if not v or len(v.strip()) < 1:
@@ -115,7 +122,8 @@ class LabResultFileUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("file_path")
+    @field_validator("file_path")
+    @classmethod
     def validate_file_path(cls, v):
         if v is not None:
             if not v or len(v.strip()) < 1:
@@ -125,7 +133,8 @@ class LabResultFileUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("file_type")
+    @field_validator("file_type")
+    @classmethod
     def validate_file_type(cls, v):
         if v is not None:
             valid_types = [
@@ -152,7 +161,8 @@ class LabResultFileUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("file_size")
+    @field_validator("file_size")
+    @classmethod
     def validate_file_size(cls, v):
         if v is not None:
             if v < 0:
@@ -194,14 +204,16 @@ class FileUploadInfo(BaseModel):
     content_type: str
     file_size: int
 
-    @validator("original_filename")
+    @field_validator("original_filename")
+    @classmethod
     def validate_original_filename(cls, v):
         """Validate original filename"""
         if not v or len(v.strip()) < 1:
             raise ValueError("Original filename is required")
         return v.strip()
 
-    @validator("file_size")
+    @field_validator("file_size")
+    @classmethod
     def validate_file_size(cls, v):
         """Validate file size"""
         if v <= 0:
@@ -230,7 +242,8 @@ class FileBatchOperation(BaseModel):
     operation: str  # 'delete', 'move', 'copy'
     target_path: Optional[str] = None
 
-    @validator("file_ids")
+    @field_validator("file_ids")
+    @classmethod
     def validate_file_ids(cls, v):
         """Validate file IDs list"""
         if not v or len(v) == 0:
@@ -242,7 +255,8 @@ class FileBatchOperation(BaseModel):
                 raise ValueError("All file IDs must be positive integers")
         return v
 
-    @validator("operation")
+    @field_validator("operation")
+    @classmethod
     def validate_operation(cls, v):
         """Validate batch operation type"""
         valid_operations = ["delete", "move", "copy"]

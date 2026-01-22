@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator, ValidationInfo
 
 # Supported languages - single source of truth
 SUPPORTED_LANGUAGES = ["en", "fr", "de"]
@@ -22,17 +22,18 @@ class UserPreferencesBase(BaseModel):
     paperless_auto_sync: Optional[bool] = False
     paperless_sync_tags: Optional[bool] = True
 
-    @validator("session_timeout_minutes")
+    @field_validator("session_timeout_minutes")
+    @classmethod
     def validate_session_timeout(cls, v):
         """
         Validate that the session timeout is within reasonable bounds.
-        
+
         Args:
             v: The session timeout in minutes
-            
+
         Returns:
             Validated timeout value
-            
+
         Raises:
             ValueError: If timeout is not within allowed range
         """
@@ -43,7 +44,8 @@ class UserPreferencesBase(BaseModel):
                 raise ValueError("Session timeout cannot exceed 1440 minutes (24 hours)")
         return v
 
-    @validator("unit_system")
+    @field_validator("unit_system")
+    @classmethod
     def validate_unit_system(cls, v):
         """
         Validate that the unit system is one of the allowed values.
@@ -64,7 +66,8 @@ class UserPreferencesBase(BaseModel):
             )
         return v.lower()
 
-    @validator("language")
+    @field_validator("language")
+    @classmethod
     def validate_language(cls, v):
         """
         Validate that the language is one of the supported values.
@@ -86,36 +89,37 @@ class UserPreferencesBase(BaseModel):
             return v.lower()
         return v
 
-    @validator("paperless_url")
+    @field_validator("paperless_url")
+    @classmethod
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
         if v is None or v == "":
             return v
-            
+
         # Allow HTTP for localhost/local development, require HTTPS for external URLs
         from urllib.parse import urlparse
         parsed = urlparse(v)
-        
+
         if not v.startswith(('http://', 'https://')):
             raise ValueError('URL must start with http:// or https://')
-        
+
         # Check if it's a local development URL
         is_local = (
             parsed.hostname in ['localhost', '127.0.0.1'] or
             (parsed.hostname and (
                 parsed.hostname.startswith('192.168.') or
                 parsed.hostname.startswith('10.') or
-                (parsed.hostname.startswith('172.') and 
+                (parsed.hostname.startswith('172.') and
                  len(parsed.hostname.split('.')) >= 2 and
                  parsed.hostname.split('.')[1].isdigit() and
                  16 <= int(parsed.hostname.split('.')[1]) <= 31)
             ))
         )
-        
+
         # For external URLs, require HTTPS for security
         if not is_local and not v.startswith('https://'):
             raise ValueError('External URLs must use HTTPS for security')
-        
+
         # Basic URL format validation - simplified for local development
         import re
         # More permissive regex that allows IP addresses and domains
@@ -129,18 +133,19 @@ class UserPreferencesBase(BaseModel):
             r'(?::\d+)?'  # optional port
             r'(?:/.*)?$', re.IGNORECASE  # optional path
         )
-        
+
         if not url_pattern.match(v):
             raise ValueError('Invalid URL format')
-        
+
         return v.rstrip('/')
-    
-    @validator("default_storage_backend")
+
+    @field_validator("default_storage_backend")
+    @classmethod
     def validate_storage_backend(cls, v):
         """Validate storage backend selection."""
         if v is None:
             return "local"
-            
+
         allowed_backends = ["local", "paperless"]
         if v not in allowed_backends:
             raise ValueError(
@@ -169,7 +174,8 @@ class UserPreferencesUpdate(BaseModel):
     paperless_auto_sync: Optional[bool] = None
     paperless_sync_tags: Optional[bool] = None
 
-    @validator("session_timeout_minutes")
+    @field_validator("session_timeout_minutes")
+    @classmethod
     def validate_session_timeout(cls, v):
         """Validate session timeout if provided."""
         if v is not None:
@@ -179,7 +185,8 @@ class UserPreferencesUpdate(BaseModel):
                 raise ValueError("Session timeout cannot exceed 1440 minutes (24 hours)")
         return v
 
-    @validator("unit_system")
+    @field_validator("unit_system")
+    @classmethod
     def validate_unit_system(cls, v):
         """Validate unit system if provided."""
         if v is not None:
@@ -191,7 +198,8 @@ class UserPreferencesUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("language")
+    @field_validator("language")
+    @classmethod
     def validate_language(cls, v):
         """Validate language if provided."""
         if v is not None:
@@ -202,36 +210,37 @@ class UserPreferencesUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("paperless_url")
+    @field_validator("paperless_url")
+    @classmethod
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
         if v is None or v == "":
             return v
-            
+
         # Allow HTTP for localhost/local development, require HTTPS for external URLs
         from urllib.parse import urlparse
         parsed = urlparse(v)
-        
+
         if not v.startswith(('http://', 'https://')):
             raise ValueError('URL must start with http:// or https://')
-        
+
         # Check if it's a local development URL
         is_local = (
             parsed.hostname in ['localhost', '127.0.0.1'] or
             (parsed.hostname and (
                 parsed.hostname.startswith('192.168.') or
                 parsed.hostname.startswith('10.') or
-                (parsed.hostname.startswith('172.') and 
+                (parsed.hostname.startswith('172.') and
                  len(parsed.hostname.split('.')) >= 2 and
                  parsed.hostname.split('.')[1].isdigit() and
                  16 <= int(parsed.hostname.split('.')[1]) <= 31)
             ))
         )
-        
+
         # For external URLs, require HTTPS for security
         if not is_local and not v.startswith('https://'):
             raise ValueError('External URLs must use HTTPS for security')
-        
+
         # Basic URL format validation - simplified for local development
         import re
         # More permissive regex that allows IP addresses and domains
@@ -245,18 +254,19 @@ class UserPreferencesUpdate(BaseModel):
             r'(?::\d+)?'  # optional port
             r'(?:/.*)?$', re.IGNORECASE  # optional path
         )
-        
+
         if not url_pattern.match(v):
             raise ValueError('Invalid URL format')
-        
+
         return v.rstrip('/')
-    
-    @validator("default_storage_backend")
+
+    @field_validator("default_storage_backend")
+    @classmethod
     def validate_storage_backend(cls, v):
         """Validate storage backend selection."""
         if v is None:
             return v
-            
+
         allowed_backends = ["local", "paperless"]
         if v not in allowed_backends:
             raise ValueError(
@@ -281,39 +291,40 @@ class UserPreferences(UserPreferencesBase):
 
 class PaperlessConnectionData(BaseModel):
     """Schema for paperless connection data with validation."""
-    
+
     paperless_url: str
     paperless_api_token: Optional[str] = None
     paperless_username: Optional[str] = None
     paperless_password: Optional[str] = None
-    
-    @validator('paperless_url')
+
+    @field_validator('paperless_url')
+    @classmethod
     def validate_url(cls, v):
         """Validate paperless URL format and security."""
         # Allow HTTP for localhost/local development, require HTTPS for external URLs
         from urllib.parse import urlparse
         parsed = urlparse(v)
-        
+
         if not v.startswith(('http://', 'https://')):
             raise ValueError('URL must start with http:// or https://')
-        
+
         # Check if it's a local development URL
         is_local = (
             parsed.hostname in ['localhost', '127.0.0.1'] or
             (parsed.hostname and (
                 parsed.hostname.startswith('192.168.') or
                 parsed.hostname.startswith('10.') or
-                (parsed.hostname.startswith('172.') and 
+                (parsed.hostname.startswith('172.') and
                  len(parsed.hostname.split('.')) >= 2 and
                  parsed.hostname.split('.')[1].isdigit() and
                  16 <= int(parsed.hostname.split('.')[1]) <= 31)
             ))
         )
-        
+
         # For external URLs, require HTTPS for security
         if not is_local and not v.startswith('https://'):
             raise ValueError('External URLs must use HTTPS for security')
-        
+
         # Basic URL format validation - simplified for local development
         import re
         # More permissive regex that allows IP addresses and domains
@@ -327,13 +338,14 @@ class PaperlessConnectionData(BaseModel):
             r'(?::\d+)?'  # optional port
             r'(?:/.*)?$', re.IGNORECASE  # optional path
         )
-        
+
         if not url_pattern.match(v):
             raise ValueError('Invalid URL format')
-        
+
         return v.rstrip('/')
-    
-    @validator('paperless_api_token')
+
+    @field_validator('paperless_api_token')
+    @classmethod
     def validate_api_token(cls, v):
         """Validate API token format if provided."""
         if v is not None and v.strip():
@@ -341,43 +353,42 @@ class PaperlessConnectionData(BaseModel):
                 raise ValueError('API token appears to be too short')
             return v.strip()
         return v
-    
-    @validator('paperless_username')
-    def validate_username(cls, v, values):
+
+    @field_validator('paperless_username')
+    @classmethod
+    def validate_username(cls, v, info: ValidationInfo):
         """Validate username format when provided."""
         # If token is provided, username is optional
-        if values.get('paperless_api_token'):
+        if info.data.get('paperless_api_token'):
             return v.strip() if v else v
-        
+
         # If no token, username is required
         if not v or len(v.strip()) == 0:
             raise ValueError('Username is required when no API token is provided')
         if len(v) < 2:
             raise ValueError('Username too short')
         return v.strip()
-    
-    @validator('paperless_password')
-    def validate_password(cls, v, values):
+
+    @field_validator('paperless_password')
+    @classmethod
+    def validate_password(cls, v, info: ValidationInfo):
         """Validate password format when provided."""
         # If token is provided, password is optional
-        if values.get('paperless_api_token'):
+        if info.data.get('paperless_api_token'):
             return v
-        
+
         # If no token, password is required
         if not v or len(v.strip()) == 0:
             raise ValueError('Password is required when no API token is provided')
         if len(v) < 3:
             raise ValueError('Password too short')
-        return v
-    
-    @validator('paperless_password', always=True)
-    def validate_auth_method(cls, v, values):
-        """Ensure at least one authentication method is provided."""
-        token = values.get('paperless_api_token')
-        username = values.get('paperless_username')
-        
+
+        # Check for valid authentication method
+        token = info.data.get('paperless_api_token')
+        username = info.data.get('paperless_username')
+
         # If no token and no username/password combination
         if not token and (not username or not v):
             raise ValueError('Either API token or username/password combination is required')
-        
+
         return v

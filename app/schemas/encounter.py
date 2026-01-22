@@ -1,9 +1,15 @@
 from datetime import date as DateType
-from typing import Optional, List
+from typing import List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.validators import (
+    validate_date_not_future,
+    validate_positive_id,
+    validate_required_text,
+    validate_text_field,
+)
 
 
 class EncounterBase(TaggedEntityMixin):
@@ -23,86 +29,73 @@ class EncounterBase(TaggedEntityMixin):
     location: Optional[str] = None
     priority: Optional[str] = None
 
-    @validator("reason")
+    @field_validator("reason")
+    @classmethod
     def validate_reason(cls, v):
         """Validate encounter reason"""
-        if not v or len(v.strip()) < 2:
-            raise ValueError("Encounter reason must be at least 2 characters long")
-        if len(v) > 200:
-            raise ValueError("Encounter reason must be less than 200 characters")
-        return v.strip()
+        return validate_required_text(v, max_length=200, min_length=2, field_name="Encounter reason")
 
-    @validator("notes")
+    @field_validator("notes")
+    @classmethod
     def validate_notes(cls, v):
         """Validate notes field"""
-        if v and len(v.strip()) > 1000:
-            raise ValueError("Notes must be less than 1000 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=1000, field_name="Notes")
 
-    @validator("date")
+    @field_validator("date")
+    @classmethod
     def validate_date(cls, v):
         """Validate encounter date"""
-        from datetime import date as date_type
+        return validate_date_not_future(v, field_name="Encounter date")
 
-        if v > date_type.today():
-            raise ValueError("Encounter date cannot be in the future")
-        return v
-
-    @validator("visit_type")
+    @field_validator("visit_type")
+    @classmethod
     def validate_visit_type(cls, v):
         """Validate visit type"""
-        if v and len(v.strip()) > 100:
-            raise ValueError("Visit type must be less than 100 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=100, field_name="Visit type")
 
-    @validator("chief_complaint")
+    @field_validator("chief_complaint")
+    @classmethod
     def validate_chief_complaint(cls, v):
         """Validate chief complaint"""
-        if v and len(v.strip()) > 500:
-            raise ValueError("Chief complaint must be less than 500 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=500, field_name="Chief complaint")
 
-    @validator("diagnosis")
+    @field_validator("diagnosis")
+    @classmethod
     def validate_diagnosis(cls, v):
         """Validate diagnosis"""
-        if v and len(v.strip()) > 1000:
-            raise ValueError("Diagnosis must be less than 1000 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=1000, field_name="Diagnosis")
 
-    @validator("treatment_plan")
+    @field_validator("treatment_plan")
+    @classmethod
     def validate_treatment_plan(cls, v):
         """Validate treatment plan"""
-        if v and len(v.strip()) > 2000:
-            raise ValueError("Treatment plan must be less than 2000 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=2000, field_name="Treatment plan")
 
-    @validator("follow_up_instructions")
+    @field_validator("follow_up_instructions")
+    @classmethod
     def validate_follow_up_instructions(cls, v):
         """Validate follow-up instructions"""
-        if v and len(v.strip()) > 1000:
-            raise ValueError("Follow-up instructions must be less than 1000 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=1000, field_name="Follow-up instructions")
 
-    @validator("duration_minutes")
+    @field_validator("duration_minutes")
+    @classmethod
     def validate_duration_minutes(cls, v):
         """Validate duration in minutes"""
         if v is not None and (v < 1 or v > 600):  # Max 10 hours
             raise ValueError("Duration must be between 1 and 600 minutes")
         return v
 
-    @validator("location")
+    @field_validator("location")
+    @classmethod
     def validate_location(cls, v):
         """Validate location"""
-        if v and len(v.strip()) > 200:
-            raise ValueError("Location must be less than 200 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=200, field_name="Location")
 
-    @validator("priority")
+    @field_validator("priority")
+    @classmethod
     def validate_priority(cls, v):
         """Validate priority"""
-        if v and len(v.strip()) > 50:
-            raise ValueError("Priority must be less than 50 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=50, field_name="Priority")
 
 
 class EncounterCreate(EncounterBase):
@@ -112,26 +105,23 @@ class EncounterCreate(EncounterBase):
     practitioner_id: Optional[int] = None
     condition_id: Optional[int] = None
 
-    @validator("patient_id")
+    @field_validator("patient_id")
+    @classmethod
     def validate_patient_id(cls, v):
         """Validate patient ID"""
-        if v <= 0:
-            raise ValueError("Patient ID must be a positive integer")
-        return v
+        return validate_positive_id(v, field_name="Patient ID", required=True)
 
-    @validator("practitioner_id")
+    @field_validator("practitioner_id")
+    @classmethod
     def validate_practitioner_id(cls, v):
         """Validate practitioner ID"""
-        if v is not None and v <= 0:
-            raise ValueError("Practitioner ID must be a positive integer")
-        return v
+        return validate_positive_id(v, field_name="Practitioner ID")
 
-    @validator("condition_id")
+    @field_validator("condition_id")
+    @classmethod
     def validate_condition_id(cls, v):
         """Validate condition ID"""
-        if v is not None and v <= 0:
-            raise ValueError("Condition ID must be a positive integer")
-        return v
+        return validate_positive_id(v, field_name="Condition ID")
 
 
 class EncounterUpdate(BaseModel):
@@ -154,96 +144,85 @@ class EncounterUpdate(BaseModel):
     priority: Optional[str] = None
     tags: Optional[List[str]] = None
 
-    @validator("reason")
+    @field_validator("reason")
+    @classmethod
     def validate_reason(cls, v):
         """Validate encounter reason if provided"""
-        if v is not None:
-            if len(v.strip()) < 2:
-                raise ValueError("Encounter reason must be at least 2 characters long")
-            if len(v) > 200:
-                raise ValueError("Encounter reason must be less than 200 characters")
-            return v.strip()
-        return v
+        if v is None:
+            return v
+        if len(v.strip()) < 2:
+            raise ValueError("Encounter reason must be at least 2 characters long")
+        if len(v) > 200:
+            raise ValueError("Encounter reason must be less than 200 characters")
+        return v.strip()
 
-    @validator("notes")
+    @field_validator("notes")
+    @classmethod
     def validate_notes(cls, v):
         """Validate notes if provided"""
-        if v is not None and len(v.strip()) > 1000:
-            raise ValueError("Notes must be less than 1000 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=1000, field_name="Notes")
 
-    @validator("date")
+    @field_validator("date")
+    @classmethod
     def validate_date(cls, v):
         """Validate encounter date if provided"""
-        if v is not None:
-            from datetime import date as date_type
+        return validate_date_not_future(v, field_name="Encounter date")
 
-            if v > date_type.today():
-                raise ValueError("Encounter date cannot be in the future")
-        return v
-
-    @validator("practitioner_id")
+    @field_validator("practitioner_id")
+    @classmethod
     def validate_practitioner_id(cls, v):
         """Validate practitioner ID if provided"""
-        if v is not None and v <= 0:
-            raise ValueError("Practitioner ID must be a positive integer")
-        return v
+        return validate_positive_id(v, field_name="Practitioner ID")
 
-    @validator("visit_type")
+    @field_validator("visit_type")
+    @classmethod
     def validate_visit_type(cls, v):
         """Validate visit type if provided"""
-        if v is not None and len(v.strip()) > 100:
-            raise ValueError("Visit type must be less than 100 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=100, field_name="Visit type")
 
-    @validator("chief_complaint")
+    @field_validator("chief_complaint")
+    @classmethod
     def validate_chief_complaint(cls, v):
         """Validate chief complaint if provided"""
-        if v is not None and len(v.strip()) > 500:
-            raise ValueError("Chief complaint must be less than 500 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=500, field_name="Chief complaint")
 
-    @validator("diagnosis")
+    @field_validator("diagnosis")
+    @classmethod
     def validate_diagnosis(cls, v):
         """Validate diagnosis if provided"""
-        if v is not None and len(v.strip()) > 1000:
-            raise ValueError("Diagnosis must be less than 1000 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=1000, field_name="Diagnosis")
 
-    @validator("treatment_plan")
+    @field_validator("treatment_plan")
+    @classmethod
     def validate_treatment_plan(cls, v):
         """Validate treatment plan if provided"""
-        if v is not None and len(v.strip()) > 2000:
-            raise ValueError("Treatment plan must be less than 2000 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=2000, field_name="Treatment plan")
 
-    @validator("follow_up_instructions")
+    @field_validator("follow_up_instructions")
+    @classmethod
     def validate_follow_up_instructions(cls, v):
         """Validate follow-up instructions if provided"""
-        if v is not None and len(v.strip()) > 1000:
-            raise ValueError("Follow-up instructions must be less than 1000 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=1000, field_name="Follow-up instructions")
 
-    @validator("duration_minutes")
+    @field_validator("duration_minutes")
+    @classmethod
     def validate_duration_minutes(cls, v):
         """Validate duration in minutes if provided"""
         if v is not None and (v < 1 or v > 600):  # Max 10 hours
             raise ValueError("Duration must be between 1 and 600 minutes")
         return v
 
-    @validator("location")
+    @field_validator("location")
+    @classmethod
     def validate_location(cls, v):
         """Validate location if provided"""
-        if v is not None and len(v.strip()) > 200:
-            raise ValueError("Location must be less than 200 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=200, field_name="Location")
 
-    @validator("priority")
+    @field_validator("priority")
+    @classmethod
     def validate_priority(cls, v):
         """Validate priority if provided"""
-        if v is not None and len(v.strip()) > 50:
-            raise ValueError("Priority must be less than 50 characters")
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=50, field_name="Priority")
 
 
 class EncounterResponse(EncounterBase):

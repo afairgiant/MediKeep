@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class VitalsBase(BaseModel):
@@ -26,7 +26,8 @@ class VitalsBase(BaseModel):
     patient_id: int
     practitioner_id: Optional[int] = None
 
-    @validator("systolic_bp")
+    @field_validator("systolic_bp")
+    @classmethod
     def validate_systolic_bp(cls, v):
         """Validate systolic blood pressure"""
         if v is not None:
@@ -34,7 +35,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Systolic blood pressure must be between 60-250 mmHg")
         return v
 
-    @validator("diastolic_bp")
+    @field_validator("diastolic_bp")
+    @classmethod
     def validate_diastolic_bp(cls, v):
         """Validate diastolic blood pressure"""
         if v is not None:
@@ -42,7 +44,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Diastolic blood pressure must be between 30-150 mmHg")
         return v
 
-    @validator("heart_rate")
+    @field_validator("heart_rate")
+    @classmethod
     def validate_heart_rate(cls, v):
         """Validate heart rate"""
         if v is not None:
@@ -50,7 +53,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Heart rate must be between 30-250 bpm")
         return v
 
-    @validator("temperature")
+    @field_validator("temperature")
+    @classmethod
     def validate_temperature(cls, v):
         """Validate temperature (stored as Fahrenheit, converted from user's preferred units)"""
         if v is not None:
@@ -58,7 +62,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Temperature must be between 80-115°F")
         return v
 
-    @validator("weight")
+    @field_validator("weight")
+    @classmethod
     def validate_weight(cls, v):
         """Validate weight (stored as pounds, converted from user's preferred units)"""
         if v is not None:
@@ -67,7 +72,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Weight must be between 1-992 lbs")
         return v
 
-    @validator("height")
+    @field_validator("height")
+    @classmethod
     def validate_height(cls, v):
         """Validate height (stored as inches, converted from user's preferred units)"""
         if v is not None:
@@ -76,7 +82,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Height must be between 12-108 inches")
         return v
 
-    @validator("oxygen_saturation")
+    @field_validator("oxygen_saturation")
+    @classmethod
     def validate_oxygen_saturation(cls, v):
         """Validate oxygen saturation percentage"""
         if v is not None:
@@ -84,7 +91,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Oxygen saturation must be between 70-100%")
         return v
 
-    @validator("respiratory_rate")
+    @field_validator("respiratory_rate")
+    @classmethod
     def validate_respiratory_rate(cls, v):
         """Validate respiratory rate"""
         if v is not None:
@@ -92,7 +100,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Respiratory rate must be between 8-50 breaths/min")
         return v
 
-    @validator("blood_glucose")
+    @field_validator("blood_glucose")
+    @classmethod
     def validate_blood_glucose(cls, v):
         """Validate blood glucose (mg/dL)"""
         if v is not None:
@@ -100,7 +109,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("Blood glucose must be between 20-800 mg/dL")
         return v
 
-    @validator("a1c")
+    @field_validator("a1c")
+    @classmethod
     def validate_a1c(cls, v):
         """Validate hemoglobin A1C (%)"""
         if v is not None:
@@ -108,7 +118,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("A1C must be between 0-20%")
         return v
 
-    @validator("bmi")
+    @field_validator("bmi")
+    @classmethod
     def validate_bmi(cls, v):
         """Validate BMI"""
         if v is not None:
@@ -116,7 +127,8 @@ class VitalsBase(BaseModel):
                 raise ValueError("BMI must be between 10-100")
         return v
 
-    @validator("pain_scale")
+    @field_validator("pain_scale")
+    @classmethod
     def validate_pain_scale(cls, v):
         """Validate pain scale (0-10)"""
         if v is not None:
@@ -124,21 +136,24 @@ class VitalsBase(BaseModel):
                 raise ValueError("Pain scale must be between 0-10")
         return v
 
-    @validator("notes")
+    @field_validator("notes")
+    @classmethod
     def validate_notes(cls, v):
         """Validate notes"""
         if v and len(v.strip()) > 1000:
             raise ValueError("Notes must be less than 1000 characters")
         return v.strip() if v else None
 
-    @validator("location")
+    @field_validator("location")
+    @classmethod
     def validate_location(cls, v):
         """Validate location"""
         if v and len(v.strip()) > 100:
             raise ValueError("Location must be less than 100 characters")
         return v.strip() if v else None
 
-    @validator("device_used")
+    @field_validator("device_used")
+    @classmethod
     def validate_device_used(cls, v):
         """Validate device used"""
         if v and len(v.strip()) > 100:

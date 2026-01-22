@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional, List
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
 
@@ -23,21 +23,24 @@ class AllergyBase(TaggedEntityMixin):
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     medication_id: Optional[int] = Field(None, gt=0, description="ID of the medication causing this allergy")
 
-    @validator("severity")
+    @field_validator("severity")
+    @classmethod
     def validate_severity(cls, v):
         valid_severities = ["mild", "moderate", "severe", "life-threatening"]
         if v.lower() not in valid_severities:
             raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
         return v.lower()
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
         valid_statuses = ["active", "inactive", "resolved", "unconfirmed"]
         if v.lower() not in valid_statuses:
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower()
 
-    @validator("onset_date")
+    @field_validator("onset_date")
+    @classmethod
     def validate_onset_date(cls, v):
         if v and v > date.today():
             raise ValueError("Onset date cannot be in the future")
@@ -58,7 +61,8 @@ class AllergyUpdate(BaseModel):
     medication_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None
 
-    @validator("severity")
+    @field_validator("severity")
+    @classmethod
     def validate_severity(cls, v):
         if v is not None:
             valid_severities = ["mild", "moderate", "severe", "life-threatening"]
@@ -69,7 +73,8 @@ class AllergyUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
         if v is not None:
             valid_statuses = ["active", "inactive", "resolved", "unconfirmed"]
@@ -78,7 +83,8 @@ class AllergyUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("onset_date")
+    @field_validator("onset_date")
+    @classmethod
     def validate_onset_date(cls, v):
         if v and v > date.today():
             raise ValueError("Onset date cannot be in the future")

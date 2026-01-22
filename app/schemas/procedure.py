@@ -1,7 +1,7 @@
 from datetime import date as DateType
 from typing import Optional, List
 
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
 from app.models.enums import ProcedureStatus
@@ -55,7 +55,8 @@ class ProcedureBase(TaggedEntityMixin):
         None, max_length=1000, description="Additional notes about the anesthesia"
     )
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def validate_date_with_status(cls, values):
         """Validate procedure date based on status.
 
@@ -64,11 +65,21 @@ class ProcedureBase(TaggedEntityMixin):
         """
         from datetime import timedelta
 
+        if not isinstance(values, dict):
+            return values
+
         date_value = values.get("date")
         status = values.get("status", "").lower() if values.get("status") else ""
 
         if not date_value:
             return values
+
+        # Convert string date to date object if needed
+        if isinstance(date_value, str):
+            try:
+                date_value = DateType.fromisoformat(date_value)
+            except ValueError:
+                return values  # Let field validator handle invalid date
 
         # Skip validation if status is not provided (partial update scenario)
         if not status:
@@ -87,7 +98,8 @@ class ProcedureBase(TaggedEntityMixin):
             raise ValueError(f"Procedure date cannot be in the future for {status} procedures")
         return values
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
         valid_statuses = [s.value for s in ProcedureStatus]
         if v.lower() not in valid_statuses:
@@ -116,7 +128,8 @@ class ProcedureUpdate(BaseModel):
     anesthesia_notes: Optional[str] = Field(None, max_length=1000)
     tags: Optional[List[str]] = None
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode="before")
+    @classmethod
     def validate_date_with_status(cls, values):
         """Validate procedure date based on status.
 
@@ -125,11 +138,21 @@ class ProcedureUpdate(BaseModel):
         """
         from datetime import timedelta
 
+        if not isinstance(values, dict):
+            return values
+
         date_value = values.get("date")
         status = values.get("status", "").lower() if values.get("status") else ""
 
         if not date_value:
             return values
+
+        # Convert string date to date object if needed
+        if isinstance(date_value, str):
+            try:
+                date_value = DateType.fromisoformat(date_value)
+            except ValueError:
+                return values  # Let field validator handle invalid date
 
         # Skip validation if status is not provided (partial update scenario)
         if not status:
@@ -148,7 +171,8 @@ class ProcedureUpdate(BaseModel):
             raise ValueError(f"Procedure date cannot be in the future for {status} procedures")
         return values
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
         if v is not None:
             valid_statuses = [s.value for s in ProcedureStatus]
