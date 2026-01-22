@@ -13,6 +13,8 @@ const ImmunizationCard = ({
   onView,
   practitioners = [],
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError
 }) => {
   const { t } = useTranslation('medical');
@@ -142,12 +144,15 @@ const ImmunizationCard = ({
     return (
       <BaseMedicalCard
         title={immunization.vaccine_name}
-        subtitle={immunization.vaccine_trade_name ? 
-          `${getImmunizationIcon(immunization.vaccine_name)} ${immunization.vaccine_trade_name}` : 
+        subtitle={immunization.vaccine_trade_name ?
+          `${getImmunizationIcon(immunization.vaccine_name)} ${immunization.vaccine_trade_name}` :
           getImmunizationIcon(immunization.vaccine_name)}
         badges={badges}
         fields={fields}
         notes={immunization.notes}
+        entityType="immunization"
+        fileCount={fileCount}
+        fileCountLoading={fileCountLoading}
         onView={() => onView(immunization)}
         onEdit={() => onEdit(immunization)}
         onDelete={() => onDelete(immunization.id)}

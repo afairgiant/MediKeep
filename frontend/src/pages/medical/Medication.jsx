@@ -1,7 +1,6 @@
 import React, {
   useState,
   useEffect,
-  useRef,
   useCallback,
   useMemo,
 } from 'react';
@@ -31,6 +30,7 @@ import {
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -123,6 +123,9 @@ const Medication = () => {
 
   // Use standardized data management
   const dataManagement = useDataManagement(medications, config);
+
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('medication', medications);
 
   // Display medication purpose (indication only, since conditions are now linked via many-to-many)
   const getMedicationPurpose = (medication, asText = false) => {
@@ -264,6 +267,7 @@ const Medication = () => {
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
     if (success) {
+      cleanupFileCount(medicationId);
       await refreshData();
     }
   };
@@ -634,6 +638,8 @@ const Medication = () => {
                         onEdit={handleEditMedication}
                         onDelete={handleDeleteMedication}
                         navigate={navigate}
+                        fileCount={fileCounts[medication.id] || 0}
+                        fileCountLoading={fileCountsLoading[medication.id] || false}
                         onError={setError}
                       />
                     </motion.div>

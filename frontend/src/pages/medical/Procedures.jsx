@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
@@ -88,67 +89,7 @@ const Procedures = () => {
   const dataManagement = useDataManagement(procedures, config);
 
   // File count management for cards
-  const [fileCounts, setFileCounts] = useState({});
-  const [fileCountsLoading, setFileCountsLoading] = useState({});
-
-  // Track which procedures we've already loaded file counts for
-  const loadedFileCountsRef = useRef(new Set());
-
-  // Load file counts for procedures
-  useEffect(() => {
-    const loadFileCountsForProcedures = async () => {
-      if (!procedures || procedures.length === 0) return;
-      
-      // Only load file counts for procedures we haven't loaded yet
-      const proceduresToLoad = procedures.filter(procedure => 
-        !loadedFileCountsRef.current.has(procedure.id)
-      );
-      
-      if (proceduresToLoad.length === 0) return;
-      
-      const countPromises = proceduresToLoad.map(async (procedure) => {
-        // Mark as loading
-        loadedFileCountsRef.current.add(procedure.id);
-        setFileCountsLoading(prev => ({ ...prev, [procedure.id]: true }));
-        
-        try {
-          const files = await apiService.getEntityFiles('procedure', procedure.id);
-          const count = Array.isArray(files) ? files.length : 0;
-          setFileCounts(prev => ({ ...prev, [procedure.id]: count }));
-        } catch (error) {
-          logger.error(`Error loading file count for procedure ${procedure.id}:`, error);
-          setFileCounts(prev => ({ ...prev, [procedure.id]: 0 }));
-        } finally {
-          setFileCountsLoading(prev => ({ ...prev, [procedure.id]: false }));
-        }
-      });
-      
-      await Promise.all(countPromises);
-    };
-
-    loadFileCountsForProcedures();
-  }, [procedures]);
-
-  // Function to refresh file counts for specific procedures
-  const refreshFileCount = useCallback(async (procedureId) => {
-    try {
-      // Force reload by removing from loaded set
-      loadedFileCountsRef.current.delete(procedureId);
-      setFileCountsLoading(prev => ({ ...prev, [procedureId]: true }));
-      
-      const files = await apiService.getEntityFiles('procedure', procedureId);
-      const count = Array.isArray(files) ? files.length : 0;
-      
-      setFileCounts(prev => ({ ...prev, [procedureId]: count }));
-      loadedFileCountsRef.current.add(procedureId);
-    } catch (error) {
-      logger.error(`Error refreshing file count for procedure ${procedureId}:`, error);
-      setFileCounts(prev => ({ ...prev, [procedureId]: 0 }));
-      loadedFileCountsRef.current.add(procedureId);
-    } finally {
-      setFileCountsLoading(prev => ({ ...prev, [procedureId]: false }));
-    }
-  }, []);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('procedure', procedures);
 
   // Form state
   const [showModal, setShowModal] = useState(false);
@@ -325,22 +266,8 @@ const Procedures = () => {
 
   const handleDeleteProcedure = async procedureId => {
     const success = await deleteItem(procedureId);
-    // deleteItem now properly updates local state to remove the deleted item
-    // The useMedicalData hook handles state updates automatically
     if (success) {
-      // Clean up local file counts and tracking for the deleted procedure
-      setFileCounts(prev => {
-        const updated = { ...prev };
-        delete updated[procedureId];
-        return updated;
-      });
-      setFileCountsLoading(prev => {
-        const updated = { ...prev };
-        delete updated[procedureId];
-        return updated;
-      });
-      // Remove from loaded tracking
-      loadedFileCountsRef.current.delete(procedureId);
+      cleanupFileCount(procedureId);
     }
   };
 

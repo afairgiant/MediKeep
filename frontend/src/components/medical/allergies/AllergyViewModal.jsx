@@ -11,6 +11,7 @@ import {
   Box,
   SimpleGrid,
   Title,
+  Paper,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -132,24 +133,46 @@ const AllergyViewModal = ({
       <Modal
         opened={isOpen}
         onClose={onClose}
-        title={
-          <Group>
-            <Text fw={600} size="lg">
-              {allergy.allergen || 'Allergy Details'}
-            </Text>
-            <Badge
-              color={getStatusColor(allergy.status)}
-              variant="light"
-            >
-              {allergy.status}
-            </Badge>
-          </Group>
-        }
+        title={t('allergies.modal.title', 'Allergy Details')}
         size="xl"
         centered
         zIndex={2000}
       >
-        <Tabs value={activeTab} onChange={setActiveTab}>
+        <Stack gap="lg">
+          {/* Header Card */}
+          <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+            <Group justify="space-between" align="center">
+              <div>
+                <Title order={3} mb="xs">{allergy.allergen}</Title>
+                <Group gap="xs">
+                  {allergy.allergy_type && (
+                    <Badge variant="light" color="blue" size="sm">
+                      {allergy.allergy_type}
+                    </Badge>
+                  )}
+                  <Badge
+                    color={getStatusColor(allergy.status)}
+                    variant="light"
+                    size="sm"
+                  >
+                    {allergy.status}
+                  </Badge>
+                </Group>
+              </div>
+              {allergy.severity && (
+                <Badge
+                  color={getSeverityColor(allergy.severity)}
+                  variant="filled"
+                  size="lg"
+                  leftSection={React.createElement(SeverityIcon, { size: 16 })}
+                >
+                  {allergy.severity}
+                </Badge>
+              )}
+            </Group>
+          </Paper>
+
+          <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
               {t('allergies.tabs.overview', 'Overview')}
@@ -298,17 +321,18 @@ const AllergyViewModal = ({
               />
             </Box>
           </Tabs.Panel>
-        </Tabs>
+          </Tabs>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm" mt="lg">
-          <Button variant="default" onClick={onClose}>
-            {tCommon('buttons.close')}
-          </Button>
-          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {tCommon('buttons.edit')}
-          </Button>
-        </Group>
+          {/* Action Buttons */}
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={onClose}>
+              {tCommon('buttons.close')}
+            </Button>
+            <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
+              {tCommon('buttons.edit')}
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     );
   } catch (error) {

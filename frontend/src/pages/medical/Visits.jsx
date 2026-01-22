@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
@@ -23,6 +23,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
@@ -44,7 +45,6 @@ import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-import FileCountBadge from '../../components/shared/FileCountBadge';
 // Import new modular components
 import VisitCard from '../../components/medical/visits/VisitCard';
 import VisitViewModal from '../../components/medical/visits/VisitViewModal';
@@ -145,12 +145,11 @@ const Visits = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(visits, config);
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('visit', visits);
+
   // Get patient conditions for linking
   const [conditions, setConditions] = useState([]);
-  
-  // File count management for cards
-  const [fileCounts, setFileCounts] = useState({});
-  const [fileCountsLoading, setFileCountsLoading] = useState({});
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -158,11 +157,7 @@ const Visits = () => {
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
-  
-  // Debouncing refs for file count loading
-  const fileCountLoadingTimeoutRef = useRef(null);
-  const lastVisitsVersionRef = useRef(null);
-  
+
   useEffect(() => {
     if (currentPatient?.id) {
       apiService.getPatientConditions(currentPatient.id)
@@ -175,75 +170,6 @@ const Visits = () => {
         });
     }
   }, [currentPatient?.id]);
-
-  // Create a memoized version string of visits to detect actual changes
-  const visitsVersion = useMemo(() => {
-    if (!visits || visits.length === 0) return '';
-    return visits.map(v => `${v.id}-${v.updated_at || v.created_at || ''}`).join('|');
-  }, [visits]);
-
-  // Debounced file count loading function
-  const debouncedLoadFileCounts = useCallback(async (visitsToLoad) => {
-    if (!visitsToLoad || visitsToLoad.length === 0) return;
-    
-    const countPromises = visitsToLoad.map(async (visit) => {
-      setFileCountsLoading(prev => {
-        if (prev[visit.id] !== undefined) return prev; // Already loading
-        return { ...prev, [visit.id]: true };
-      });
-      
-      try {
-        const files = await apiService.getEntityFiles('visit', visit.id);
-        const count = Array.isArray(files) ? files.length : 0;
-        setFileCounts(prev => ({ ...prev, [visit.id]: count }));
-      } catch (error) {
-        logger.error(`Error loading file count for visit ${visit.id}:`, error);
-        setFileCounts(prev => ({ ...prev, [visit.id]: 0 }));
-      } finally {
-        setFileCountsLoading(prev => ({ ...prev, [visit.id]: false }));
-      }
-    });
-    
-    await Promise.all(countPromises);
-  }, []);
-
-  // Load file counts for visits with debouncing
-  useEffect(() => {
-    // Only proceed if we have visits and the version has actually changed
-    if (!visits || visits.length === 0 || visitsVersion === lastVisitsVersionRef.current) {
-      return;
-    }
-
-    // Clear any existing timeout
-    if (fileCountLoadingTimeoutRef.current) {
-      clearTimeout(fileCountLoadingTimeoutRef.current);
-    }
-
-    // Set up debounced call
-    fileCountLoadingTimeoutRef.current = setTimeout(() => {
-      lastVisitsVersionRef.current = visitsVersion;
-      debouncedLoadFileCounts(visits);
-    }, 300); // 300ms debounce delay
-
-    // Cleanup function
-    return () => {
-      if (fileCountLoadingTimeoutRef.current) {
-        clearTimeout(fileCountLoadingTimeoutRef.current);
-        fileCountLoadingTimeoutRef.current = null;
-      }
-    };
-  }, [visits, visitsVersion, debouncedLoadFileCounts]);
-
-  // Function to refresh file counts for all visits
-  const refreshFileCount = useCallback(async (visitId) => {
-    try {
-      const files = await apiService.getEntityFiles('visit', visitId);
-      const count = Array.isArray(files) ? files.length : 0;
-      setFileCounts(prev => ({ ...prev, [visitId]: count }));
-    } catch (error) {
-      logger.error(`Error refreshing file count for visit ${visitId}:`, error);
-    }
-  }, []);
 
 
   // Helper function to get condition details
@@ -359,20 +285,8 @@ const Visits = () => {
 
   const handleDeleteVisit = async visitId => {
     const success = await deleteItem(visitId);
-    // Note: deleteItem already updates local state, no need to refresh all data
-    // The useMedicalData hook handles state updates automatically
     if (success) {
-      // Only refresh file counts as they might be affected by deletion
-      setFileCounts(prev => {
-        const updated = { ...prev };
-        delete updated[visitId];
-        return updated;
-      });
-      setFileCountsLoading(prev => {
-        const updated = { ...prev };
-        delete updated[visitId];
-        return updated;
-      });
+      cleanupFileCount(visitId);
     }
   };
 

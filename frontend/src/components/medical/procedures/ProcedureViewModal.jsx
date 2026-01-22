@@ -10,6 +10,7 @@ import {
   Button,
   Box,
   SimpleGrid,
+  Paper,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -98,19 +99,35 @@ const ProcedureViewModal = ({
       <Modal
         opened={isOpen}
         onClose={onClose}
-        title={
-          <Group>
-            <Text fw={600} size="lg">
-              {procedure.procedure_name || t('procedures.viewModal.title', 'Procedure Details')}
-            </Text>
-            <StatusBadge status={procedure.status} />
-          </Group>
-        }
+        title={t('procedures.viewModal.title', 'Procedure Details')}
         size="xl"
         centered
         zIndex={2000}
       >
-        <Tabs value={activeTab} onChange={setActiveTab}>
+        <Stack gap="lg">
+          {/* Header Card */}
+          <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+            <Group justify="space-between" align="center">
+              <div>
+                <Title order={3} mb="xs">{procedure.procedure_name}</Title>
+                <Group gap="xs">
+                  {procedure.procedure_type && (
+                    <Badge variant="light" color="blue" size="sm">
+                      {procedure.procedure_type}
+                    </Badge>
+                  )}
+                  <StatusBadge status={procedure.status} />
+                </Group>
+              </div>
+              {procedure.date && (
+                <Badge variant="light" color="gray" size="lg">
+                  {formatDate(procedure.date)}
+                </Badge>
+              )}
+            </Group>
+          </Paper>
+
+          <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
               {t('procedures.viewModal.tabs.overview', 'Overview')}
@@ -303,17 +320,18 @@ const ProcedureViewModal = ({
               />
             </Box>
           </Tabs.Panel>
-        </Tabs>
+          </Tabs>
 
-        {/* Action Buttons */}
-        <Group justify="flex-end" gap="sm" mt="lg">
-          <Button variant="default" onClick={onClose}>
-            {t('procedures.viewModal.close', 'Close')}
-          </Button>
-          <Button variant="filled" onClick={handleEditClick} leftSection={<IconEdit size={16} />}>
-            {t('procedures.viewModal.edit', 'Edit')}
-          </Button>
-        </Group>
+          {/* Action Buttons */}
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={onClose}>
+              {t('procedures.viewModal.close', 'Close')}
+            </Button>
+            <Button variant="filled" onClick={handleEditClick} leftSection={<IconEdit size={16} />}>
+              {t('procedures.viewModal.edit', 'Edit')}
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     );
   } catch (error) {

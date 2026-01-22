@@ -22,6 +22,8 @@ const ConditionCard = ({
   onDelete,
   onView,
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError
 }) => {
   const { t } = useTranslation('medical');
@@ -173,6 +175,9 @@ const ConditionCard = ({
         badges={badges}
         fields={fields}
         notes={condition.notes}
+        entityType="condition"
+        fileCount={fileCount}
+        fileCountLoading={fileCountLoading}
         onView={() => onView(condition)}
         onEdit={() => onEdit(condition)}
         onDelete={() => onDelete(condition.id)}

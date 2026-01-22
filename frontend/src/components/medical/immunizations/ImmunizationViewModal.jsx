@@ -10,6 +10,7 @@ import {
   Box,
   SimpleGrid,
   Title,
+  Paper,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -67,27 +68,43 @@ const ImmunizationViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={
-        <Group>
-          <Text fw={600} size="lg">
-            {immunization.vaccine_name || t('immunizations.viewModal.title', 'Immunization Details')}
-          </Text>
-          {immunization.dose_number && (
-            <Badge
-              color={getDoseColor(immunization.dose_number)}
-              variant="filled"
-              size="sm"
-            >
-              {t('immunizations.viewModal.dose', 'Dose {{number}}', { number: immunization.dose_number })}
-            </Badge>
-          )}
-        </Group>
-      }
+      title={t('immunizations.viewModal.title', 'Immunization Details')}
       size="xl"
       centered
       zIndex={2000}
     >
-      <Tabs value={activeTab} onChange={setActiveTab}>
+      <Stack gap="lg">
+        {/* Header Card */}
+        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Group justify="space-between" align="center">
+            <div>
+              <Title order={3} mb="xs">{immunization.vaccine_name}</Title>
+              <Group gap="xs">
+                {immunization.manufacturer && (
+                  <Badge variant="light" color="gray" size="sm">
+                    {immunization.manufacturer}
+                  </Badge>
+                )}
+                {immunization.date_administered && (
+                  <Badge variant="light" color="blue" size="sm">
+                    {formatDate(immunization.date_administered)}
+                  </Badge>
+                )}
+              </Group>
+            </div>
+            {immunization.dose_number && (
+              <Badge
+                color={getDoseColor(immunization.dose_number)}
+                variant="filled"
+                size="lg"
+              >
+                {t('immunizations.viewModal.dose', 'Dose {{number}}', { number: immunization.dose_number })}
+              </Badge>
+            )}
+          </Group>
+        </Paper>
+
+        <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
             {t('immunizations.viewModal.tabs.overview', 'Overview')}
@@ -259,17 +276,18 @@ const ImmunizationViewModal = ({
             />
           </Box>
         </Tabs.Panel>
-      </Tabs>
+        </Tabs>
 
-      {/* Action Buttons */}
-      <Group justify="flex-end" gap="sm" mt="lg">
-        <Button variant="default" onClick={onClose}>
-          {t('buttons.close', 'Close')}
-        </Button>
-        <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-          {t('buttons.edit', 'Edit')}
-        </Button>
-      </Group>
+        {/* Action Buttons */}
+        <Group justify="flex-end" gap="sm">
+          <Button variant="default" onClick={onClose}>
+            {t('buttons.close', 'Close')}
+          </Button>
+          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
+            {t('buttons.edit', 'Edit')}
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

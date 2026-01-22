@@ -24,6 +24,7 @@ import {
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -78,7 +79,7 @@ const Allergies = () => {
 
   // Get patient medications for linking
   const [medications, setMedications] = useState([]);
-  
+
   useEffect(() => {
     if (currentPatient?.id) {
       apiService.getPatientMedications(currentPatient.id)
@@ -91,6 +92,9 @@ const Allergies = () => {
         });
     }
   }, [currentPatient?.id]);
+
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('allergy', allergies);
 
   // Get standardized formatters for allergies with medication linking
   const formatters = {
@@ -228,6 +232,7 @@ const Allergies = () => {
   const handleDeleteAllergy = async allergyId => {
     const success = await deleteItem(allergyId);
     if (success) {
+      cleanupFileCount(allergyId);
       await refreshData();
     }
   };
@@ -375,6 +380,8 @@ const Allergies = () => {
                         onDelete={handleDeleteAllergy}
                         medications={medications}
                         navigate={navigate}
+                        fileCount={fileCounts[allergy.id] || 0}
+                        fileCountLoading={fileCountsLoading[allergy.id] || false}
                         onError={setError}
                       />
                     </motion.div>

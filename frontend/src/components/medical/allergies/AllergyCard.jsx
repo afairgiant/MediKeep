@@ -20,6 +20,8 @@ const AllergyCard = ({
   onView,
   medications = [],
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError
 }) => {
   const { t } = useTranslation('medical');
@@ -152,6 +154,9 @@ const AllergyCard = ({
         badges={badges}
         fields={fields}
         notes={allergy.notes}
+        entityType="allergy"
+        fileCount={fileCount}
+        fileCountLoading={fileCountLoading}
         onView={() => onView(allergy)}
         onEdit={() => onEdit(allergy)}
         onDelete={() => onDelete(allergy.id)}

@@ -32,3 +32,6 @@ export {
 // Custom reports hooks
 export { useCustomReports } from './useCustomReports';
 export { useReportTemplates } from './useReportTemplates';
+
+// File count management hooks
+export { useEntityFileCounts } from './useEntityFileCounts';

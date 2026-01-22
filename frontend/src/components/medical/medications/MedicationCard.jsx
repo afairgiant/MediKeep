@@ -12,6 +12,7 @@ import {
 import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
+import FileCountBadge from '../../shared/FileCountBadge';
 import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
 
 const MedicationCard = ({
@@ -20,6 +21,8 @@ const MedicationCard = ({
   onEdit,
   onDelete,
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError,
 }) => {
   const { t } = useTranslation('medical');
@@ -83,8 +86,8 @@ const MedicationCard = ({
                 </Badge>
               )}
             </Group>
-            {medication.tags && medication.tags.length > 0 && (
-              <Group gap="xs">
+            <Group gap="xs">
+              {medication.tags && medication.tags.length > 0 && (
                 <Badge
                   variant="outline"
                   color="gray"
@@ -93,8 +96,16 @@ const MedicationCard = ({
                 >
                   🏷️ {medication.tags[0]}{medication.tags.length > 1 ? ` +${medication.tags.length - 1}` : ''}
                 </Badge>
-              </Group>
-            )}
+              )}
+              <FileCountBadge
+                count={fileCount}
+                entityType="medication"
+                variant="badge"
+                size="sm"
+                loading={fileCountLoading}
+                onClick={() => onView(medication)}
+              />
+            </Group>
           </Stack>
           <StatusBadge status={medication.status} />
         </Group>

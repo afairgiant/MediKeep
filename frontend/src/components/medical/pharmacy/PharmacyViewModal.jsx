@@ -11,6 +11,7 @@ import {
   Card,
   Anchor,
   Title,
+  Paper,
 } from '@mantine/core';
 import { IconEdit } from '@tabler/icons-react';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
@@ -58,18 +59,7 @@ const PharmacyViewModal = ({
     <Modal
       opened={isOpen}
       onClose={handleClose}
-      title={
-        <Group>
-          <Text size="lg" fw={600}>
-            {t('pharmacies.viewModal.title', 'Pharmacy Details')}
-          </Text>
-          {pharmacy.brand && (
-            <Badge color="blue" variant="light" size="lg">
-              {pharmacy.brand}
-            </Badge>
-          )}
-        </Group>
-      }
+      title={t('pharmacies.viewModal.title', 'Pharmacy Details')}
       size="lg"
       centered
       zIndex={2000}
@@ -81,18 +71,31 @@ const PharmacyViewModal = ({
       }}
     >
       <Stack gap="md">
-        <Card withBorder p="md">
-          <Stack gap="sm">
-            <Group justify="space-between" align="flex-start">
-              <Stack gap="xs" style={{ flex: 1 }}>
-                <Title order={3}>{pharmacy.name}</Title>
-                <Text size="sm" c="dimmed">
-                  {t('pharmacies.viewModal.subtitle', 'Pharmacy')}
-                </Text>
-              </Stack>
-            </Group>
-          </Stack>
-        </Card>
+        {/* Header Card */}
+        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Group justify="space-between" align="center">
+            <div>
+              <Title order={3} mb="xs">{pharmacy.name}</Title>
+              <Group gap="xs">
+                {pharmacy.brand && (
+                  <Badge color="blue" variant="light" size="sm">
+                    {pharmacy.brand}
+                  </Badge>
+                )}
+                {pharmacy.city && (
+                  <Badge variant="light" color="gray" size="sm">
+                    {pharmacy.city}
+                  </Badge>
+                )}
+              </Group>
+            </div>
+            {pharmacy.store_number && (
+              <Badge variant="filled" color="gray" size="lg">
+                #{pharmacy.store_number}
+              </Badge>
+            )}
+          </Group>
+        </Paper>
 
         <Grid>
           <Grid.Col span={{ base: 12, sm: 6 }}>

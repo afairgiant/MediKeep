@@ -14,6 +14,8 @@ const TreatmentCard = ({
   conditions = [],
   onConditionClick,
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError
 }) => {
   const { t } = useTranslation('medical');
@@ -146,6 +148,9 @@ const TreatmentCard = ({
         badges={badges.filter(badge => !badge.clickable)} // Only include non-clickable badges
         fields={fields}
         notes={treatment.notes}
+        entityType="treatment"
+        fileCount={fileCount}
+        fileCountLoading={fileCountLoading}
         onView={() => onView(treatment)}
         onEdit={() => onEdit(treatment)}
         onDelete={() => onDelete(treatment.id)}

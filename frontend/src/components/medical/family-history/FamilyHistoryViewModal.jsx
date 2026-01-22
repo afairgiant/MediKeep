@@ -10,7 +10,8 @@ import {
   Card,
   Box,
   ActionIcon,
-  Title
+  Title,
+  Paper,
 } from '@mantine/core';
 import {
   IconEdit,
@@ -173,33 +174,40 @@ const FamilyHistoryViewModal = ({
             overflowY: 'auto'
           }
         }}
-        title={
-          <Group>
-            <Text size="lg" fw={600}>
-              {t('familyHistory.viewModal.title', '{{name}} - Family Medical History', { name: member.name })}
-            </Text>
-            {member.is_shared && (
-              <Badge color="blue" variant="light" size="sm">
-                {t('familyHistory.card.shared', 'Shared')}
-              </Badge>
-            )}
-          </Group>
-        }
+        title={t('familyHistory.viewModal.modalTitle', 'Family Medical History')}
         size="lg"
-        zIndex={1000}
         withinPortal
       >
         <Stack gap="md">
+          {/* Header Card */}
+          <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+            <Group justify="space-between" align="center">
+              <div>
+                <Title order={3} mb="xs">{member.name}</Title>
+                <Group gap="xs">
+                  <Badge variant="light" color="gray" size="sm">
+                    {member.relationship?.replace('_', ' ')}
+                  </Badge>
+                  {member.is_shared && (
+                    <Badge color="blue" variant="light" size="sm">
+                      {t('familyHistory.card.shared', 'Shared')}
+                    </Badge>
+                  )}
+                </Group>
+              </div>
+              {member.family_conditions && member.family_conditions.length > 0 && (
+                <Badge variant="filled" color="orange" size="lg">
+                  {member.family_conditions.length} {t('familyHistory.card.conditions', 'conditions')}
+                </Badge>
+              )}
+            </Group>
+          </Paper>
+
           {/* Family Member Info */}
           <Card withBorder p="md">
             <Group justify="space-between" mb="xs">
               <Text fw={500} size="lg">
-                {member.name}
-                {member.is_shared && (
-                  <Badge color="blue" variant="light" size="sm" ml="xs">
-                    {t('familyHistory.card.shared', 'Shared')}
-                  </Badge>
-                )}
+                {t('familyHistory.viewModal.memberDetails', 'Member Details')}
               </Text>
               <Group gap="xs">
                 <ActionIcon
@@ -228,10 +236,6 @@ const FamilyHistoryViewModal = ({
             </Group>
 
             <Stack gap="xs">
-              <Text size="sm">
-                <strong>{t('familyHistory.viewModal.relationship', 'Relationship')}:</strong>{' '}
-                {member.relationship?.replace('_', ' ')}
-              </Text>
               {member.gender && (
                 <Text size="sm">
                   <strong>{t('familyHistory.card.gender', 'Gender')}:</strong> {member.gender}
