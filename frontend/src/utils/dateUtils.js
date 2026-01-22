@@ -263,6 +263,34 @@ export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => 
 };
 
 /**
+ * Format a time string (HH:MM or HH:MM:SS) to 12-hour AM/PM format
+ *
+ * @param {string} timeString - Time in HH:MM or HH:MM:SS format
+ * @returns {string} - Formatted time string (e.g., "2:30 PM") or empty string if invalid
+ */
+export function formatTimeToAmPm(timeString) {
+  if (!timeString) return '';
+
+  const [hours, minutesPart] = timeString.split(':');
+  const hour = parseInt(hours, 10);
+
+  if (isNaN(hour)) return '';
+
+  // Default minutes to "00" if missing or invalid
+  let minutes = '00';
+  if (minutesPart) {
+    const minutesNum = parseInt(minutesPart, 10);
+    if (!isNaN(minutesNum) && minutesNum >= 0 && minutesNum < 60) {
+      minutes = String(minutesNum).padStart(2, '0');
+    }
+  }
+
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${minutes} ${ampm}`;
+}
+
+/**
  * Format a Date object to a datetime string for display
  *
  * @param {Date} date - The date to format

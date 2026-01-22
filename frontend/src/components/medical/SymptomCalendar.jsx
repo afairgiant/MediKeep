@@ -22,6 +22,7 @@ import {
   IconEye,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { formatTimeToAmPm } from '../../utils/dateUtils';
 import { symptomApi } from '../../services/api/symptomApi';
 import { SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
@@ -463,9 +464,9 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                       <strong>{t('symptoms.calendar.location', 'Location')}:</strong> {occurrence.location}
                     </Text>
                   )}
-                  {occurrence.time_of_day && (
+                  {occurrence.occurrence_time && (
                     <Text size="sm">
-                      <strong>{t('symptoms.calendar.timeOfDay', 'Time of Day')}:</strong> {occurrence.time_of_day}
+                      <strong>{t('symptoms.calendar.time', 'Time')}:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
                     </Text>
                   )}
                   {occurrence.resolved_date && (

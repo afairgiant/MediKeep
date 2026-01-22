@@ -27,6 +27,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { formatDate } from '../../../utils/helpers';
+import { formatTimeToAmPm } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
 import { symptomApi } from '../../../services/api/symptomApi';
@@ -381,9 +382,9 @@ const SymptomViewModal = ({
                               )}
                             </Group>
 
-                            {occurrence.time_of_day && (
+                            {occurrence.occurrence_time && (
                               <Text size="xs" c="dimmed">
-                                {t('symptoms.viewModal.time', 'Time')}: {occurrence.time_of_day}
+                                {t('symptoms.viewModal.time', 'Time')}: {formatTimeToAmPm(occurrence.occurrence_time)}
                               </Text>
                             )}
 
