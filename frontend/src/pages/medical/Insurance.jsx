@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -90,8 +91,7 @@ const Insurance = () => {
   const config = getMedicalPageConfig('insurances');
 
   // File count management for cards
-  const [fileCounts, setFileCounts] = useState({});
-  const [fileCountsLoading, setFileCountsLoading] = useState({});
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('insurance', insurances);
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -171,46 +171,6 @@ const Insurance = () => {
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
   const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
-
-  // Function to refresh file counts for all insurances
-  const refreshFileCount = useCallback(async (insuranceId) => {
-    try {
-      const files = await apiService.getEntityFiles('insurance', insuranceId);
-      const count = Array.isArray(files) ? files.length : 0;
-      setFileCounts(prev => ({ ...prev, [insuranceId]: count }));
-    } catch (error) {
-      logger.error(`Error refreshing file count for insurance ${insuranceId}:`, error);
-    }
-  }, []);
-
-  // Load file counts for insurances
-  useEffect(() => {
-    const loadFileCountsForInsurances = async () => {
-      if (!insurances || insurances.length === 0) return;
-      
-      const countPromises = insurances.map(async (insurance) => {
-        setFileCountsLoading(prev => {
-          if (prev[insurance.id] !== undefined) return prev; // Already loading
-          return { ...prev, [insurance.id]: true };
-        });
-        
-        try {
-          const files = await apiService.getEntityFiles('insurance', insurance.id);
-          const count = Array.isArray(files) ? files.length : 0;
-          setFileCounts(prev => ({ ...prev, [insurance.id]: count }));
-        } catch (error) {
-          logger.error(`Error loading file count for insurance ${insurance.id}:`, error);
-          setFileCounts(prev => ({ ...prev, [insurance.id]: 0 }));
-        } finally {
-          setFileCountsLoading(prev => ({ ...prev, [insurance.id]: false }));
-        }
-      });
-      
-      await Promise.all(countPromises);
-    };
-
-    loadFileCountsForInsurances();
-  }, [insurances]); // Remove fileCounts from dependencies
 
   // Table formatters - consistent with medication table approach
   const formatters = {
@@ -404,20 +364,8 @@ const Insurance = () => {
 
     if (window.confirm(`Are you sure you want to delete this ${insurance.insurance_type} insurance?`)) {
       const success = await deleteItem(insuranceId);
-      // Note: deleteItem already updates local state, no need to refresh all data
-      // The useMedicalData hook handles state updates automatically
       if (success) {
-        // Only refresh file counts as they might be affected by deletion
-        setFileCounts(prev => {
-          const updated = { ...prev };
-          delete updated[insuranceId];
-          return updated;
-        });
-        setFileCountsLoading(prev => {
-          const updated = { ...prev };
-          delete updated[insuranceId];
-          return updated;
-        });
+        cleanupFileCount(insuranceId);
       }
     }
   };

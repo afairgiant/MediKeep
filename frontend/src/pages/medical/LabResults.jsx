@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
@@ -83,8 +84,7 @@ const LabResults = () => {
   const { practitioners, loading: practitionersLoading } = usePractitioners();
 
   // File count management for cards
-  const [fileCounts, setFileCounts] = useState({});
-  const [fileCountsLoading, setFileCountsLoading] = useState({});
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('lab-result', labResults);
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -208,24 +208,6 @@ const LabResults = () => {
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
   const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
 
-  // Function to refresh file counts for all lab results
-  const refreshFileCount = useCallback(async (labResultId) => {
-    try {
-      // Invalidate cache for this lab result
-      delete fileCountCacheRef.current[labResultId];
-
-      const files = await apiService.getEntityFiles('lab-result', labResultId);
-      const count = Array.isArray(files) ? files.length : 0;
-
-      // Update cache
-      fileCountCacheRef.current[labResultId] = count;
-
-      setFileCounts(prev => ({ ...prev, [labResultId]: count }));
-    } catch (error) {
-      logger.error(`Error refreshing file count for lab result ${labResultId}:`, error);
-    }
-  }, []);
-
   // Form and modal state
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -246,94 +228,6 @@ const LabResults = () => {
     notes: '',
     practitioner_id: '',
   });
-
-  // Ref to track file count loading abort controllers
-  const fileCountAbortControllersRef = useRef({});
-  const fileCountCacheRef = useRef({}); // Cache file counts to prevent redundant API calls
-
-  // Load file counts for lab results with abort controller and caching
-  useEffect(() => {
-    const loadFileCountsForLabResults = async () => {
-      if (!labResults || labResults.length === 0) return;
-
-      // Abort any pending requests for lab results that are no longer in the list
-      const currentLabResultIds = new Set(labResults.map(lr => lr.id));
-      Object.keys(fileCountAbortControllersRef.current).forEach(id => {
-        if (!currentLabResultIds.has(parseInt(id))) {
-          fileCountAbortControllersRef.current[id]?.abort();
-          delete fileCountAbortControllersRef.current[id];
-        }
-      });
-
-      // Load file counts with batching and caching
-      const countPromises = labResults.map(async (labResult) => {
-        // Check cache first
-        if (fileCountCacheRef.current[labResult.id] !== undefined) {
-          setFileCounts(prev => {
-            if (prev[labResult.id] === fileCountCacheRef.current[labResult.id]) return prev;
-            return { ...prev, [labResult.id]: fileCountCacheRef.current[labResult.id] };
-          });
-          return;
-        }
-
-        // Check if already loading to prevent duplicate requests
-        if (fileCountAbortControllersRef.current[labResult.id]) {
-          return; // Already loading
-        }
-
-        // Create abort controller for this request
-        const abortController = new AbortController();
-        fileCountAbortControllersRef.current[labResult.id] = abortController;
-
-        setFileCountsLoading(prev => {
-          if (prev[labResult.id] === true) return prev;
-          return { ...prev, [labResult.id]: true };
-        });
-
-        try {
-          const files = await apiService.getEntityFiles('lab-result', labResult.id, abortController.signal);
-          const count = Array.isArray(files) ? files.length : 0;
-
-          // Cache the result
-          fileCountCacheRef.current[labResult.id] = count;
-
-          setFileCounts(prev => {
-            if (prev[labResult.id] === count) return prev;
-            return { ...prev, [labResult.id]: count };
-          });
-        } catch (error) {
-          // Ignore abort errors
-          if (error.name === 'AbortError') return;
-
-          logger.error(`Error loading file count for lab result ${labResult.id}:`, error);
-          setFileCounts(prev => {
-            if (prev[labResult.id] === 0) return prev;
-            return { ...prev, [labResult.id]: 0 };
-          });
-          fileCountCacheRef.current[labResult.id] = 0;
-        } finally {
-          delete fileCountAbortControllersRef.current[labResult.id];
-          setFileCountsLoading(prev => {
-            if (prev[labResult.id] === false) return prev;
-            return { ...prev, [labResult.id]: false };
-          });
-        }
-      });
-
-      await Promise.all(countPromises);
-    };
-
-    loadFileCountsForLabResults();
-
-    // Cleanup: abort all pending requests on unmount
-    return () => {
-      Object.values(fileCountAbortControllersRef.current).forEach(controller => {
-        controller?.abort();
-      });
-      fileCountAbortControllersRef.current = {};
-    };
-  }, [labResults]);
-
 
   // Handle URL parameters for direct linking to specific lab results
   useEffect(() => {
@@ -498,22 +392,10 @@ const LabResults = () => {
 
   const handleDeleteLabResult = useCallback(async labResultId => {
     const success = await deleteItem(labResultId);
-    // Note: deleteItem already updates local state, no need to refresh all data
-    // The useMedicalData hook handles state updates automatically
     if (success) {
-      // Only refresh file counts as they might be affected by deletion
-      setFileCounts(prev => {
-        const updated = { ...prev };
-        delete updated[labResultId];
-        return updated;
-      });
-      setFileCountsLoading(prev => {
-        const updated = { ...prev };
-        delete updated[labResultId];
-        return updated;
-      });
+      cleanupFileCount(labResultId);
     }
-  }, [deleteItem]);
+  }, [deleteItem, cleanupFileCount]);
 
   const handleSubmit = useCallback(async e => {
     e.preventDefault();
@@ -628,7 +510,6 @@ const LabResults = () => {
     completeFileUpload,
     handleSubmissionFailure,
     refreshFileCount,
-    needsRefreshAfterSubmissionRef
   ]);
 
   const handleInputChange = useCallback(e => {

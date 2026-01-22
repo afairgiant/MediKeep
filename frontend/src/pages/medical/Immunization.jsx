@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logger from '../../services/logger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,7 @@ import {
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -88,6 +90,9 @@ const Immunization = () => {
 
   // Use standardized data management
   const dataManagement = useDataManagement(immunizations, config);
+
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('immunization', immunizations);
 
   // Form and UI state
   const [showAddForm, setShowAddForm] = useState(false);
@@ -235,6 +240,7 @@ const Immunization = () => {
   const handleDeleteImmunization = async immunizationId => {
     const success = await deleteItem(immunizationId);
     if (success) {
+      cleanupFileCount(immunizationId);
       await refreshData();
     }
   };
@@ -406,6 +412,8 @@ const Immunization = () => {
                         onDelete={handleDeleteImmunization}
                         practitioners={practitioners}
                         navigate={navigate}
+                        fileCount={fileCounts[immunization.id] || 0}
+                        fileCountLoading={fileCountsLoading[immunization.id] || false}
                       />
                   </Grid.Col>
                 ))}

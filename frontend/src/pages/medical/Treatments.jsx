@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
@@ -93,6 +94,9 @@ const Treatments = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(treatments, config);
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('treatment', treatments);
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -178,6 +182,7 @@ const Treatments = () => {
   const handleDeleteTreatment = async treatmentId => {
     const success = await deleteItem(treatmentId);
     if (success) {
+      cleanupFileCount(treatmentId);
       await refreshData();
     }
   };
@@ -408,6 +413,8 @@ const Treatments = () => {
                     onView={handleViewTreatment}
                     onConditionClick={handleConditionClick}
                     navigate={navigate}
+                    fileCount={fileCounts[treatment.id] || 0}
+                    fileCountLoading={fileCountsLoading[treatment.id] || false}
                     onError={(error) => {
                       logger.error('TreatmentCard error', {
                         treatmentId: treatment.id,

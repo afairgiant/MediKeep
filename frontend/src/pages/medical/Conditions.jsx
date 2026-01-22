@@ -34,7 +34,7 @@ import {
   IconDroplet,
   IconAward,
 } from '@tabler/icons-react';
-import { useMedicalData, useDataManagement } from '../../hooks';
+import { useMedicalData, useDataManagement, useEntityFileCounts } from '../../hooks';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -102,6 +102,9 @@ const Conditions = () => {
   // Standardized filtering and sorting using configuration
   const config = getMedicalPageConfig('conditions');
   const dataManagement = useDataManagement(conditions, config);
+
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('condition', conditions);
 
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
@@ -234,6 +237,7 @@ const Conditions = () => {
   const handleDeleteCondition = async conditionId => {
     const success = await deleteItem(conditionId);
     if (success) {
+      cleanupFileCount(conditionId);
       await refreshData();
     }
   };
@@ -466,6 +470,8 @@ const Conditions = () => {
                         onEdit={handleEditCondition}
                         onDelete={handleDeleteCondition}
                         navigate={navigate}
+                        fileCount={fileCounts[condition.id] || 0}
+                        fileCountLoading={fileCountsLoading[condition.id] || false}
                       />
                     </motion.div>
                   </Grid.Col>
