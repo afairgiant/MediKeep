@@ -12,6 +12,10 @@ i18n
     fallbackLng: 'en',
     debug: isDevelopment(),
 
+    // Only load the primary language code (e.g., 'en' not 'en-US')
+    // This ensures i18n.language always matches our supported language codes
+    load: 'languageOnly',
+
     ns: ['common', 'medical', 'errors', 'navigation'],
     defaultNS: 'common',
 
