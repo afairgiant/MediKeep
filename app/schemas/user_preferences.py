@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, field_validator, ValidationInfo
 
 # Supported languages - single source of truth
-SUPPORTED_LANGUAGES = ["en", "fr", "de"]
+SUPPORTED_LANGUAGES = ["en", "fr", "de", "es", "it", "pt"]
 
 
 class UserPreferencesBase(BaseModel):

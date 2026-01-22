@@ -9,7 +9,7 @@ import { PAPERLESS_SETTING_DEFAULTS } from '../constants/paperlessSettings';
 import i18n from '../i18n';
 
 // Supported languages - must match backend validation
-const SUPPORTED_LANGUAGES = ['en', 'fr', 'de'];
+const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'it', 'pt'];
 
 /**
  * User Preferences Context
@@ -86,12 +86,9 @@ export const UserPreferencesProvider = ({ children }) => {
       setLoading(false);
       setError(null);
 
-      // Only log logout if we're not in the initial loading state
-      if (!authLoading) {
-        frontendLogger.logInfo('User logged out, clearing preferences', {
-          component: 'UserPreferencesContext',
-        });
-      }
+      frontendLogger.logInfo('User logged out, clearing preferences', {
+        component: 'UserPreferencesContext',
+      });
     }
   }, [isAuthenticated, user?.id, authLoading]); // Depend on authentication state, user ID, and auth loading state
 
