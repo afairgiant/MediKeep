@@ -1,0 +1,86 @@
+{
+  "upload": {
+    "failed": "Falha ao enviar o arquivo. Tente novamente.",
+    "connectionError": "Erro de conexão. Verifique sua rede e tente novamente.",
+    "fileTooLarge": "O tamanho do arquivo excede o limite máximo.",
+    "invalidFileType": "Tipo de arquivo não suportado.",
+    "fileProcessingFailed": "Falha ao processar o arquivo. Tente um arquivo diferente.",
+    "duplicateFile": "Este arquivo já foi enviado.",
+    "batchUploadFailed": "Alguns arquivos falharam no envio. Verifique os erros individuais.",
+    "partialUploadSuccess": "Envio concluído com alguns erros. Revise os arquivos que falharam.",
+    "allUploadsFailed": "Todos os envios de arquivos falharam. Verifique sua conexão e tente novamente."
+  },
+  "paperless": {
+    "unavailable": "O serviço de gerenciamento de documentos está indisponível no momento.",
+    "notEnabled": "A integração com o Paperless não está habilitada. Ative nas Configurações.",
+    "configIncomplete": "A configuração do Paperless está incompleta. Verifique suas configurações.",
+    "uploadFailed": "Falha ao enviar para o sistema de gerenciamento de documentos Paperless.",
+    "connectionFailed": "Não foi possível conectar ao serviço Paperless. Verifique a configuração.",
+    "authFailed": "Falha de autenticação com o serviço Paperless. Verifique as credenciais.",
+    "duplicateDocument": "Este documento já existe no Paperless. Documentos idênticos não podem ser enviados duas vezes.",
+    "taskFailed": "O envio do documento para o Paperless falhou. Tente novamente ou contate o suporte.",
+    "taskTimeout": "O processamento do documento expirou. O documento ainda pode estar sendo processado no Paperless."
+  },
+  "form": {
+    "submissionFailed": "Falha ao salvar o formulário. Verifique os dados e tente novamente.",
+    "requiredFieldMissing": "Preencha todos os campos obrigatórios.",
+    "invalidDate": "Informe uma data válida.",
+    "invalidEmail": "Informe um endereço de e-mail válido.",
+    "invalidPhone": "Informe um número de telefone válido.",
+    "invalidPhoneDigits": "Informe um número de telefone válido (10–15 dígitos)",
+    "invalidWebsiteUrl": "Informe uma URL de site válida",
+    "patientNotSelected": "Selecione um paciente.",
+    "entityNotFound": "O item solicitado não foi encontrado.",
+    "medicationNotSelected": "Selecione um medicamento",
+    "conditionNotSelected": "Selecione uma condição",
+    "mustBeValidNumber": "Deve ser um número válido"
+  },
+  "patientForm": {
+    "error": "Erro",
+    "firstNameRequired": "Nome é obrigatório",
+    "lastNameRequired": "Sobrenome é obrigatório",
+    "birthDateRequired": "Data de nascimento é obrigatória",
+    "birthDateFuture": "A data de nascimento não pode estar no futuro",
+    "createFailed": "Falha na criação: {{message}}",
+    "updateFailed": "Falha na atualização: {{message}}"
+  },
+  "file": {
+    "deleteFailed": "Falha ao excluir o arquivo. Tente novamente.",
+    "downloadFailed": "Falha ao baixar o arquivo. Tente novamente.",
+    "viewFailed": "Falha ao abrir o arquivo para visualização. Tente novamente.",
+    "notFound": "Arquivo não encontrado."
+  },
+  "network": {
+    "unavailable": "Rede indisponível. Verifique sua conexão.",
+    "timeout": "A solicitação expirou. Tente novamente.",
+    "serverError": "Ocorreu um erro no servidor. Tente novamente mais tarde.",
+    "connectionError": "Erro de conexão. Verifique sua rede e tente novamente."
+  },
+  "general": {
+    "unknownError": "Ocorreu um erro inesperado. Tente novamente.",
+    "permissionDenied": "Você não tem permissão para realizar esta ação.",
+    "sessionExpired": "Sua sessão expirou. Faça login novamente.",
+    "rateLimitExceeded": "Muitas solicitações. Aguarde um momento e tente novamente.",
+    "maintenanceMode": "O sistema está em manutenção no momento. Tente novamente mais tarde.",
+    "storageFull": "Limite de armazenamento atingido. Libere espaço e tente novamente.",
+    "validationError": "Verifique os dados informados e tente novamente."
+  },
+  "success": {
+    "uploadSuccess": "Arquivo enviado com sucesso!",
+    "uploadMultipleSuccess": "Todos os arquivos foram enviados com sucesso!",
+    "formSaved": "Formulário salvo com sucesso!",
+    "fileDeleted": "Arquivo excluído com sucesso.",
+    "paperlessSyncSuccess": "Sincronizado com sucesso com o gerenciamento de documentos Paperless.",
+    "batchUploadSuccess": "Todos os arquivos foram enviados com sucesso!"
+  },
+  "warnings": {
+    "partialSuccess": "Operação concluída com alguns avisos.",
+    "slowConnection": "O envio está demorando mais que o normal devido à conexão lenta.",
+    "largeFileWarning": "Arquivo grande detectado. O envio pode levar vários minutos.",
+    "duplicateWarning": "Este arquivo parece ser um duplicado."
+  },
+  "relationships": {
+    "addConditionFailed": "Falha ao adicionar relacionamento de condição",
+    "addMedicationFailed": "Falha ao adicionar relacionamento de medicamento"
+  }
+}

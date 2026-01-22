@@ -1,7 +1,62 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
+
+
+# Shared validation helper functions to avoid code duplication
+def _validate_practice_value(v: Optional[str]) -> Optional[str]:
+    """
+    Shared practice validation logic.
+
+    Args:
+        v: The practice value to validate
+
+    Returns:
+        Cleaned practice (stripped whitespace) or None
+
+    Raises:
+        ValueError: If practice is provided but too short or too long
+    """
+    if v is None or v.strip() == "":
+        return None
+    if len(v.strip()) < 2:
+        raise ValueError("Practice must be at least 2 characters long")
+    if len(v) > 100:
+        raise ValueError("Practice must be less than 100 characters")
+    return v.strip()
+
+
+def _validate_email_value(v: Optional[str]) -> Optional[str]:
+    """
+    Shared email validation logic.
+
+    Args:
+        v: The email value to validate
+
+    Returns:
+        Cleaned email (stripped whitespace, lowercase) or None
+
+    Raises:
+        ValueError: If email format is invalid
+    """
+    if v is None or v.strip() == "":
+        return None
+
+    email = v.strip().lower()
+
+    # Basic email validation pattern
+    email_pattern = re.compile(
+        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    )
+
+    if not email_pattern.match(email):
+        raise ValueError("Please enter a valid email address")
+
+    if len(email) > 254:
+        raise ValueError("Email address must be less than 254 characters")
+
+    return email
 
 
 class PractitionerBase(BaseModel):
@@ -14,12 +69,14 @@ class PractitionerBase(BaseModel):
 
     name: str
     specialty: str
-    practice: str
+    practice: Optional[str] = None  # Optional - not all practitioners are linked to a practice
     phone_number: Optional[str] = None
+    email: Optional[str] = None
     website: Optional[str] = None
     rating: Optional[float] = None
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
         """
         Validate practitioner name requirements.
@@ -39,7 +96,8 @@ class PractitionerBase(BaseModel):
             raise ValueError("Practitioner name must be less than 100 characters")
         return v.strip()
 
-    @validator("specialty")
+    @field_validator("specialty")
+    @classmethod
     def validate_specialty(cls, v):
         """
         Validate specialty field.
@@ -59,27 +117,14 @@ class PractitionerBase(BaseModel):
             raise ValueError("Specialty must be less than 100 characters")
         return v.strip()
 
-    @validator("practice")
+    @field_validator("practice")
+    @classmethod
     def validate_practice(cls, v):
-        """
-        Validate practice field.
+        """Validate practice field using shared helper."""
+        return _validate_practice_value(v)
 
-        Args:
-            v: The practice value to validate
-
-        Returns:
-            Cleaned practice (stripped whitespace)
-
-        Raises:
-            ValueError: If practice is empty or too long
-        """
-        if not v or len(v.strip()) < 2:
-            raise ValueError("Practice must be at least 2 characters long")
-        if len(v) > 100:
-            raise ValueError("Practice must be less than 100 characters")
-        return v.strip()
-
-    @validator("phone_number")
+    @field_validator("phone_number")
+    @classmethod
     def validate_phone_number(cls, v):
         """
         Validate and clean phone number field.
@@ -120,7 +165,14 @@ class PractitionerBase(BaseModel):
         # Return digits only for consistent storage
         return digits_only
 
-    @validator("website")
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        """Validate email field using shared helper."""
+        return _validate_email_value(v)
+
+    @field_validator("website")
+    @classmethod
     def validate_website(cls, v):
         """
         Validate website URL field.
@@ -159,7 +211,8 @@ class PractitionerBase(BaseModel):
 
         return cleaned_url
 
-    @validator("rating")
+    @field_validator("rating")
+    @classmethod
     def validate_rating(cls, v):
         """
         Validate rating field.
@@ -209,7 +262,7 @@ class PractitionerUpdate(BaseModel):
     All fields are optional, so practitioners can be updated partially.
 
     Example:
-        update_data = PractitionerUpdate(        update_data = PractitionerUpdate(
+        update_data = PractitionerUpdate(
             specialty="Internal Medicine"
         )
     """
@@ -218,10 +271,12 @@ class PractitionerUpdate(BaseModel):
     specialty: Optional[str] = None
     practice: Optional[str] = None
     phone_number: Optional[str] = None
+    email: Optional[str] = None
     website: Optional[str] = None
     rating: Optional[float] = None
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
         """Validate name if provided."""
         if v is not None:
@@ -232,7 +287,8 @@ class PractitionerUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("specialty")
+    @field_validator("specialty")
+    @classmethod
     def validate_specialty(cls, v):
         """Validate specialty if provided."""
         if v is not None:
@@ -243,18 +299,14 @@ class PractitionerUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("practice")
+    @field_validator("practice")
+    @classmethod
     def validate_practice(cls, v):
-        """Validate practice if provided."""
-        if v is not None:
-            if len(v.strip()) < 2:
-                raise ValueError("Practice must be at least 2 characters long")
-            if len(v) > 100:
-                raise ValueError("Practice must be less than 100 characters")
-            return v.strip()
-        return v
+        """Validate practice if provided using shared helper."""
+        return _validate_practice_value(v)
 
-    @validator("phone_number")
+    @field_validator("phone_number")
+    @classmethod
     def validate_phone_number_update(cls, v):
         """Validate phone number if provided."""
         if v is None or v.strip() == "":
@@ -269,7 +321,14 @@ class PractitionerUpdate(BaseModel):
 
         return v.strip()
 
-    @validator("website")
+    @field_validator("email")
+    @classmethod
+    def validate_email_update(cls, v):
+        """Validate email if provided using shared helper."""
+        return _validate_email_value(v)
+
+    @field_validator("website")
+    @classmethod
     def validate_website_update(cls, v):
         """Validate website URL if provided."""
         if v is None or v.strip() == "":
@@ -297,7 +356,8 @@ class PractitionerUpdate(BaseModel):
 
         return cleaned_url
 
-    @validator("rating")
+    @field_validator("rating")
+    @classmethod
     def validate_rating_update(cls, v):
         """Validate rating if provided."""
         if v is None:
@@ -388,14 +448,16 @@ class PractitionerSearch(BaseModel):
     name: Optional[str] = None
     specialty: Optional[str] = None
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name_search(cls, v):
         """Validate search name parameter."""
         if v is not None and len(v.strip()) < 1:
             raise ValueError("Search name must not be empty")
         return v.strip() if v else v
 
-    @validator("specialty")
+    @field_validator("specialty")
+    @classmethod
     def validate_specialty_search(cls, v):
         """Validate search specialty parameter."""
         if v is not None and len(v.strip()) < 1:

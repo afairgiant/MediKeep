@@ -16,6 +16,7 @@ import {
 } from '@mantine/core';
 import { IconStethoscope, IconEye } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { formatTimeToAmPm } from '../../utils/dateUtils';
 import { symptomApi } from '../../services/api/symptomApi';
 import { SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
@@ -312,9 +313,9 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                       <strong>Location:</strong> {occurrence.location}
                     </Text>
                   )}
-                  {occurrence.time_of_day && (
+                  {occurrence.occurrence_time && (
                     <Text size="sm">
-                      <strong>Time of Day:</strong> {occurrence.time_of_day}
+                      <strong>Time:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
                     </Text>
                   )}
                   {occurrence.resolved_date && (

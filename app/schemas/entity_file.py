@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -30,7 +30,8 @@ class EntityFileBase(BaseModel):
     description: Optional[str] = None
     category: Optional[str] = None
 
-    @validator("file_name")
+    @field_validator("file_name")
+    @classmethod
     def validate_file_name(cls, v):
         """Validate file name"""
         if not v or len(v.strip()) < 1:
@@ -43,7 +44,8 @@ class EntityFileBase(BaseModel):
             raise ValueError("File name contains invalid characters")
         return v.strip()
 
-    @validator("file_path")
+    @field_validator("file_path")
+    @classmethod
     def validate_file_path(cls, v):
         """Validate file path"""
         if not v or len(v.strip()) < 1:
@@ -52,7 +54,8 @@ class EntityFileBase(BaseModel):
             raise ValueError("File path must be less than 500 characters")
         return v.strip()
 
-    @validator("file_type")
+    @field_validator("file_type")
+    @classmethod
     def validate_file_type(cls, v):
         """Validate file type (MIME type)"""
         valid_types = [
@@ -108,7 +111,8 @@ class EntityFileBase(BaseModel):
             raise ValueError(f"File type must be one of: {', '.join(valid_types)}")
         return v.lower() if v else None
 
-    @validator("file_size")
+    @field_validator("file_size")
+    @classmethod
     def validate_file_size(cls, v):
         """Validate file size (max 1GB for archive support)"""
         if v is not None:
@@ -118,14 +122,16 @@ class EntityFileBase(BaseModel):
                 raise ValueError("File size cannot exceed 1GB")
         return v
 
-    @validator("description")
+    @field_validator("description")
+    @classmethod
     def validate_description(cls, v):
         """Validate file description"""
         if v and len(v.strip()) > 1000:
             raise ValueError("Description must be less than 1000 characters")
         return v.strip() if v else None
 
-    @validator("category")
+    @field_validator("category")
+    @classmethod
     def validate_category(cls, v):
         """Validate file category"""
         if v and len(v.strip()) > 100:
@@ -145,7 +151,8 @@ class EntityFileCreate(EntityFileBase):
     paperless_document_id: Optional[str] = None
     paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
 
-    @validator("entity_id")
+    @field_validator("entity_id")
+    @classmethod
     def validate_entity_id(cls, v):
         """Validate entity ID"""
         if v <= 0:
@@ -163,7 +170,8 @@ class EntityFileUpdate(BaseModel):
     description: Optional[str] = None
     category: Optional[str] = None
 
-    @validator("file_name")
+    @field_validator("file_name")
+    @classmethod
     def validate_file_name(cls, v):
         if v is not None:
             if not v or len(v.strip()) < 1:
@@ -177,7 +185,8 @@ class EntityFileUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("file_path")
+    @field_validator("file_path")
+    @classmethod
     def validate_file_path(cls, v):
         if v is not None:
             if not v or len(v.strip()) < 1:
@@ -187,7 +196,8 @@ class EntityFileUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("file_type")
+    @field_validator("file_type")
+    @classmethod
     def validate_file_type(cls, v):
         if v is not None:
             valid_types = [
@@ -244,7 +254,8 @@ class EntityFileUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("file_size")
+    @field_validator("file_size")
+    @classmethod
     def validate_file_size(cls, v):
         if v is not None:
             if v < 0:
@@ -253,13 +264,15 @@ class EntityFileUpdate(BaseModel):
                 raise ValueError("File size cannot exceed 1GB")
         return v
 
-    @validator("description")
+    @field_validator("description")
+    @classmethod
     def validate_description(cls, v):
         if v is not None and len(v.strip()) > 1000:
             raise ValueError("Description must be less than 1000 characters")
         return v.strip() if v else None
 
-    @validator("category")
+    @field_validator("category")
+    @classmethod
     def validate_category(cls, v):
         if v is not None and len(v.strip()) > 100:
             raise ValueError("Category must be less than 100 characters")
@@ -305,7 +318,8 @@ class FileUploadRequest(BaseModel):
     description: Optional[str] = None
     category: Optional[str] = None
 
-    @validator("entity_id")
+    @field_validator("entity_id")
+    @classmethod
     def validate_entity_id(cls, v):
         """Validate entity ID"""
         if v <= 0:
@@ -320,7 +334,8 @@ class EntityFileLinkPaperlessRequest(BaseModel):
     description: Optional[str] = None
     category: Optional[str] = None
 
-    @validator("paperless_document_id")
+    @field_validator("paperless_document_id")
+    @classmethod
     def validate_paperless_document_id(cls, v):
         """Validate Paperless document ID"""
         if not v or not v.strip():
@@ -330,14 +345,16 @@ class EntityFileLinkPaperlessRequest(BaseModel):
             raise ValueError("Paperless document ID must be numeric")
         return v.strip()
 
-    @validator("description")
+    @field_validator("description")
+    @classmethod
     def validate_description(cls, v):
         """Validate description"""
         if v and len(v.strip()) > 1000:
             raise ValueError("Description must be less than 1000 characters")
         return v.strip() if v else None
 
-    @validator("category")
+    @field_validator("category")
+    @classmethod
     def validate_category(cls, v):
         """Validate category"""
         if v and len(v.strip()) > 100:
@@ -363,7 +380,8 @@ class FileBatchCountRequest(BaseModel):
     entity_type: EntityType
     entity_ids: list[int]
 
-    @validator("entity_ids")
+    @field_validator("entity_ids")
+    @classmethod
     def validate_entity_ids(cls, v):
         """Validate entity IDs list"""
         if not v or len(v) == 0:

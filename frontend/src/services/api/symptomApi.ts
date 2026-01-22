@@ -92,13 +92,15 @@ export interface SymptomOccurrence {
   severity: SymptomSeverity;
   pain_scale?: number; // 0-10
   duration?: string;
-  time_of_day?: TimeOfDay;
+  time_of_day?: TimeOfDay; // Legacy field
+  occurrence_time?: string; // HH:MM:SS format
   location?: string;
   triggers?: string[];
   relief_methods?: string[];
   associated_symptoms?: string[];
   impact_level?: ImpactLevel;
   resolved_date?: string; // ISO date string
+  resolved_time?: string; // HH:MM:SS format
   resolution_notes?: string;
   notes?: string;
   created_at: string; // ISO datetime string
@@ -114,13 +116,15 @@ export interface SymptomOccurrenceCreate {
   severity: SymptomSeverity;
   pain_scale?: number;
   duration?: string;
-  time_of_day?: TimeOfDay;
+  time_of_day?: TimeOfDay; // Legacy field
+  occurrence_time?: string; // HH:MM:SS format
   location?: string;
   triggers?: string[];
   relief_methods?: string[];
   associated_symptoms?: string[];
   impact_level?: ImpactLevel;
   resolved_date?: string;
+  resolved_time?: string;
   resolution_notes?: string;
   notes?: string;
 }
@@ -133,13 +137,15 @@ export interface SymptomOccurrenceUpdate {
   severity?: SymptomSeverity;
   pain_scale?: number;
   duration?: string;
-  time_of_day?: TimeOfDay;
+  time_of_day?: TimeOfDay; // Legacy field
+  occurrence_time?: string; // HH:MM:SS format
   location?: string;
   triggers?: string[];
   relief_methods?: string[];
   associated_symptoms?: string[];
   impact_level?: ImpactLevel;
   resolved_date?: string;
+  resolved_time?: string;
   resolution_notes?: string;
   notes?: string;
 }

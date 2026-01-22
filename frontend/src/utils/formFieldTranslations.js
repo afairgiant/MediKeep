@@ -419,10 +419,12 @@ const fieldTranslationMap = {
   'Select from list or type a custom specialty': 'practitioners.form.specialty.description',
   'Practice/Hospital': 'practitioners.form.practice.label',
   'City General Hospital': 'practitioners.form.practice.placeholder',
-  'Workplace or medical facility': 'practitioners.form.practice.description',
+  'Workplace or medical facility (optional)': 'practitioners.form.practice.description',
   'Phone Number': 'practitioners.form.phone.label',
   '(555) 123-4567': 'practitioners.form.phone.placeholder',
   'Primary contact number': 'practitioners.form.phone.description',
+  // Note: Practitioner email uses explicit labelKey/placeholderKey/descriptionKey
+  // to avoid conflict with emergency contacts 'Email Address' mapping
   'Website': 'practitioners.form.website.label',
   'https://www.example.com': 'practitioners.form.website.placeholder',
   'Professional website or practice page': 'practitioners.form.website.description',

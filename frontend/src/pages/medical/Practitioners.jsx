@@ -74,6 +74,7 @@ const Practitioners = () => {
     specialty: '',
     practice: '',
     phone_number: '',
+    email: '',
     website: '',
     rating: '',
   });
@@ -94,6 +95,7 @@ const Practitioners = () => {
       specialty: '',
       practice: '',
       phone_number: '',
+      email: '',
       website: '',
       rating: '',
     });
@@ -130,6 +132,7 @@ const Practitioners = () => {
       specialty: practitioner.specialty || '',
       practice: practitioner.practice || '',
       phone_number: formatPhoneNumber(practitioner.phone_number) || '',
+      email: practitioner.email || '',
       website: practitioner.website || '',
       rating: practitioner.rating || '',
     });
@@ -167,7 +170,15 @@ const Practitioners = () => {
       // Clean the data before sending to API
       const dataToSubmit = {
         ...formData,
+        practice:
+          formData.practice && formData.practice.trim() !== ''
+            ? formData.practice.trim()
+            : null,
         phone_number: cleanPhoneNumber(formData.phone_number) || null,
+        email:
+          formData.email && formData.email.trim() !== ''
+            ? formData.email.trim().toLowerCase()
+            : null,
         website:
           formData.website && formData.website.trim() !== ''
             ? formData.website.trim()
@@ -378,7 +389,8 @@ const Practitioners = () => {
                   { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
                   { header: t('practitioners.table.practice', 'Practice'), accessor: 'practice', priority: 'low', width: 150 },
                   { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                  { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 150 }
+                  { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                  { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                 ]}
                 tableName={t('practitioners.title', 'Healthcare Practitioners')}
                 onView={handleViewPractitioner}
@@ -390,6 +402,7 @@ const Practitioners = () => {
                   practice: getEntityFormatters('default').simple,
                   phone_number: value =>
                     value ? formatPhoneNumber(value) : '-',
+                  email: value => value || '-',
                   rating: value =>
                     value !== null && value !== undefined ? `${value}/5` : '-',
                 }}

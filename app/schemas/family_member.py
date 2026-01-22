@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo
 
 # Import enums for validation
 from ..models.enums import get_all_family_relationships
@@ -27,14 +27,16 @@ class FamilyMemberBase(BaseModel):
     )
     patient_id: int = Field(..., gt=0, description="ID of the patient")
 
-    @validator("relationship")
+    @field_validator("relationship")
+    @classmethod
     def validate_relationship(cls, v):
         valid_relationships = get_all_family_relationships()
         if v.lower() not in valid_relationships:
             raise ValueError(f"Relationship must be one of: {', '.join(valid_relationships)}")
         return v.lower()
 
-    @validator("gender")
+    @field_validator("gender")
+    @classmethod
     def validate_gender(cls, v):
         if v is not None:
             # Accept both full names and single letter abbreviations
@@ -51,20 +53,22 @@ class FamilyMemberBase(BaseModel):
             return gender_mapping[normalized]
         return v
 
-    @validator("death_year")
-    def validate_death_year(cls, v, values):
+    @field_validator("death_year")
+    @classmethod
+    def validate_death_year(cls, v, info: ValidationInfo):
         if v:
-            if "birth_year" in values and values["birth_year"] and v < values["birth_year"]:
+            if info.data.get("birth_year") and v < info.data["birth_year"]:
                 raise ValueError("Death year cannot be before birth year")
             # Only validate is_deceased flag if it's explicitly set to False
             # (don't fail if is_deceased isn't in values yet due to field order)
-            if values.get("is_deceased") is False:
+            if info.data.get("is_deceased") is False:
                 raise ValueError("Death year can only be set if family member is deceased")
         return v
 
-    @validator("is_deceased")
-    def validate_is_deceased(cls, v, values):
-        if not v and "death_year" in values and values["death_year"]:
+    @field_validator("is_deceased")
+    @classmethod
+    def validate_is_deceased(cls, v, info: ValidationInfo):
+        if not v and info.data.get("death_year"):
             raise ValueError("If death year is provided, family member must be marked as deceased")
         return v
 
@@ -82,7 +86,8 @@ class FamilyMemberUpdate(BaseModel):
     is_deceased: Optional[bool] = None
     notes: Optional[str] = Field(None, max_length=1000)
 
-    @validator("relationship")
+    @field_validator("relationship")
+    @classmethod
     def validate_relationship(cls, v):
         if v is not None:
             valid_relationships = get_all_family_relationships()
@@ -91,7 +96,8 @@ class FamilyMemberUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("gender")
+    @field_validator("gender")
+    @classmethod
     def validate_gender(cls, v):
         if v is not None:
             # Accept both full names and single letter abbreviations
@@ -108,12 +114,13 @@ class FamilyMemberUpdate(BaseModel):
             return gender_mapping[normalized]
         return v
 
-    @validator("death_year")
-    def validate_death_year(cls, v, values):
+    @field_validator("death_year")
+    @classmethod
+    def validate_death_year(cls, v, info: ValidationInfo):
         if v:
-            if "birth_year" in values and values["birth_year"] and v < values["birth_year"]:
+            if info.data.get("birth_year") and v < info.data["birth_year"]:
                 raise ValueError("Death year cannot be before birth year")
-            if "is_deceased" in values and not values["is_deceased"]:
+            if info.data.get("is_deceased") is False:
                 raise ValueError("Death year can only be set if family member is deceased")
         return v
 
@@ -152,7 +159,7 @@ class FamilyMemberSummary(BaseModel):
 
 class FamilyMemberDropdownOption(BaseModel):
     """Minimal family member data for dropdown selections in forms."""
-    
+
     id: int
     name: str
     relationship: str

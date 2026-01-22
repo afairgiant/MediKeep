@@ -1,7 +1,15 @@
-from pydantic import BaseModel, validator, EmailStr
-from typing import Optional
 from datetime import datetime
-import re
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr, field_validator
+
+from app.schemas.validators import (
+    validate_phone_number,
+    validate_required_text,
+    validate_text_field,
+    validate_url,
+    validate_zip_code,
+)
 
 
 class PharmacyBase(BaseModel):
@@ -9,7 +17,7 @@ class PharmacyBase(BaseModel):
     Base Pharmacy schema with common fields.
 
     Contains the core fields shared across different Pharmacy schemas.
-    Pharmacies are medication providers that dispense prescriptions and 
+    Pharmacies are medication providers that dispense prescriptions and
     provide pharmaceutical services to patients.
     """
 
@@ -30,328 +38,89 @@ class PharmacyBase(BaseModel):
     twenty_four_hour: Optional[bool] = False
     specialty_services: Optional[str] = None
 
-    @validator('name')
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
-        """
-        Validate pharmacy name requirements.
+        """Validate pharmacy name requirements."""
+        return validate_required_text(v, max_length=150, min_length=3, field_name="Pharmacy name")
 
-        Args:
-            v: The name value to validate
-
-        Returns:
-            Cleaned name (stripped whitespace)
-
-        Raises:
-            ValueError: If name doesn't meet requirements
-        """
-        if not v or len(v.strip()) < 3:
-            raise ValueError('Pharmacy name must be at least 3 characters long')
-        if len(v) > 150:
-            raise ValueError('Pharmacy name must be less than 150 characters')
-        return v.strip()   
-     
-    @validator('brand', pre=True)
+    @field_validator("brand", mode="before")
+    @classmethod
     def validate_brand(cls, v):
-        """
-        Validate pharmacy brand field.
+        """Validate pharmacy brand field."""
+        return validate_text_field(v, max_length=50, min_length=2, field_name="Brand")
 
-        Args:
-            v: The brand value to validate
-
-        Returns:
-            Cleaned brand (stripped whitespace) or None
-
-        Raises:
-            ValueError: If brand is too short or too long
-        """
-        if v is None or v.strip() == "":
-            return None
-        if len(v.strip()) < 2:
-            raise ValueError('Brand must be at least 2 characters long')
-        if len(v) > 50:
-            raise ValueError('Brand must be less than 50 characters')
-        return v.strip()    
-    
-    @validator('street_address', pre=True)
+    @field_validator("street_address", mode="before")
+    @classmethod
     def validate_street_address(cls, v):
-        """
-        Validate street address field.
+        """Validate street address field."""
+        return validate_text_field(v, max_length=200, min_length=5, field_name="Street address")
 
-        Args:
-            v: The street address value to validate
-
-        Returns:
-            Cleaned street address (stripped whitespace) or None
-
-        Raises:
-            ValueError: If street address is too short or too long
-        """
-        if v is None or v.strip() == "":
-            return None
-        if len(v.strip()) < 5:
-            raise ValueError('Street address must be at least 5 characters long')
-        if len(v) > 200:
-            raise ValueError('Street address must be less than 200 characters')
-        return v.strip()    
-    
-    @validator('city', pre=True)
+    @field_validator("city", mode="before")
+    @classmethod
     def validate_city(cls, v):
-        """
-        Validate city field.
+        """Validate city field."""
+        return validate_text_field(v, max_length=100, min_length=2, field_name="City")
 
-        Args:
-            v: The city value to validate
-
-        Returns:
-            Cleaned city (stripped whitespace) or None
-
-        Raises:
-            ValueError: If city is too short or too long
-        """
-        if v is None or v.strip() == "":
-            return None
-        if len(v.strip()) < 2:
-            raise ValueError('City must be at least 2 characters long')
-        if len(v) > 100:
-            raise ValueError('City must be less than 100 characters')
-        return v.strip()    
-    
-    @validator('state', pre=True)
+    @field_validator("state", mode="before")
+    @classmethod
     def validate_state(cls, v):
-        """
-        Validate state field.
+        """Validate state field."""
+        return validate_text_field(v, max_length=50, min_length=2, field_name="State")
 
-        Args:
-            v: The state value to validate
-
-        Returns:
-            Cleaned state (stripped whitespace) or None        Raises:
-            ValueError: If state is too short or too long
-        """
-        if v is None or v.strip() == "":
-            return None
-        if len(v.strip()) < 2:
-            raise ValueError('State must be at least 2 characters long')
-        if len(v) > 50:
-            raise ValueError('State must be less than 50 characters')
-        # Could add specific US state validation here if needed        return v.strip()    
-    
-    @validator('zip_code', pre=True)
+    @field_validator("zip_code", mode="before")
+    @classmethod
     def validate_zip_code(cls, v):
-        """
-        Validate ZIP code field.
+        """Validate ZIP code field."""
+        return validate_zip_code(v)
 
-        Supports US ZIP code formats:
-        - 12345 (5-digit)
-        - 12345-6789 (ZIP+4)
-
-        Args:
-            v: The ZIP code value to validate
-
-        Returns:
-            Cleaned ZIP code (stripped whitespace) or None
-
-        Raises:        ValueError: If ZIP code format is invalid
-        """
-        if v is None or v.strip() == "":
-            return None
-        # Basic US ZIP code validation (5 digits or 5+4 format)
-        zip_pattern = r'^\d{5}(-\d{4})?$'
-        if not re.match(zip_pattern, v.strip()):
-            raise ValueError('ZIP code must be in format 12345 or 12345-6789')
-        return v.strip()    
-    
-    @validator('country', pre=True)
+    @field_validator("country", mode="before")
+    @classmethod
     def validate_country(cls, v):
-        """
-        Validate country field.
+        """Validate country field."""
+        return validate_text_field(v, max_length=50, min_length=2, field_name="Country")
 
-        Args:
-            v: The country value to validate
-
-        Returns:
-            Cleaned country (stripped whitespace) or None
-
-        Raises:
-            ValueError: If country is too short or too long        """
-        if v is None or v.strip() == "":
-            return None
-        if len(v.strip()) < 2:
-            raise ValueError('Country must be at least 2 characters long')
-        if len(v) > 50:
-            raise ValueError('Country must be less than 50 characters')
-        return v.strip()    
-    
-    @validator('phone_number', pre=True)
+    @field_validator("phone_number", mode="before")
+    @classmethod
     def validate_phone_number(cls, v):
-        """
-        Validate and clean phone number field.
-        
-        Accepts various formats like:
-        - (919) 555-1234
-        - 919-555-1234  
-        - 919.555.1234
-        - 9195551234
-        - +1 919 555 1234
-        
-        Stores as digits only for consistency.
+        """Validate and clean phone number field."""
+        return validate_phone_number(v, field_name="Phone number")
 
-        Args:
-            v: The phone number value to validate
-
-        Returns:
-            Cleaned phone number (digits only) or None
-
-        Raises:
-            ValueError: If phone number format is invalid
-        """
-        if v is None or v.strip() == "":
-            return None
-        
-        # Remove all non-digit characters for validation and storage
-        digits_only = re.sub(r'[^\d]', '', v)
-        
-        # Handle international numbers with country code
-        if digits_only.startswith('1') and len(digits_only) == 11:
-            # US/Canada number with country code - remove the leading 1
-            digits_only = digits_only[1:]
-        
-        # Check if it's a reasonable phone number length (10-15 digits)
-        if len(digits_only) < 10 or len(digits_only) > 15:
-            raise ValueError("Phone number must be between 10-15 digits")
-          # Return digits only for consistent storage
-        return digits_only
-
-    @validator('fax_number', pre=True)
+    @field_validator("fax_number", mode="before")
+    @classmethod
     def validate_fax_number(cls, v):
-        """
-        Validate and clean fax number field.
-        
-        Uses same validation logic as phone numbers.
+        """Validate and clean fax number field."""
+        return validate_phone_number(v, field_name="Fax number")
 
-        Args:
-            v: The fax number value to validate
-
-        Returns:
-            Cleaned fax number (digits only) or None
-
-        Raises:
-            ValueError: If fax number format is invalid
-        """
-        if v is None or v.strip() == "":
-            return None
-          # Apply same validation as phone number
-        digits_only = re.sub(r'[^\d]', '', v)
-        
-        if digits_only.startswith('1') and len(digits_only) == 11:
-            digits_only = digits_only[1:]
-        
-        if len(digits_only) < 10 or len(digits_only) > 15:
-            raise ValueError("Fax number must be between 10-15 digits")
-        
-        return digits_only
-
-    @validator('website', pre=True)
+    @field_validator("website", mode="before")
+    @classmethod
     def validate_website(cls, v):
-        """
-        Validate website URL field.
+        """Validate website URL field."""
+        return validate_url(v, field_name="Website URL")
 
-        Args:
-            v: The website URL value to validate
-
-        Returns:
-            Cleaned website URL with https:// prefix if needed
-
-        Raises:
-            ValueError: If website URL format is invalid
-        """
-        if v is None or v.strip() == "":
-            return None
-        
-        # Enhanced URL validation similar to practitioner schema
-        url_pattern = re.compile(
-            r'^https?://'  # http:// or https://
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
-            r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-        
-        cleaned_url = v.strip()
-        
-        # Add https:// if no protocol specified
-        if not cleaned_url.startswith(('http://', 'https://')):
-            cleaned_url = 'https://' + cleaned_url
-        
-        if not url_pattern.match(cleaned_url):
-            raise ValueError('Please enter a valid website URL')
-        
-        return cleaned_url
-
-    @validator('store_number')
+    @field_validator("store_number")
+    @classmethod
     def validate_store_number(cls, v):
-        """
-        Validate store number field.
+        """Validate store number field."""
+        return validate_text_field(v, max_length=20, field_name="Store number")
 
-        Args:
-            v: The store number value to validate
-
-        Returns:
-            Cleaned store number (stripped whitespace) or None
-
-        Raises:
-            ValueError: If store number is too long
-        """
-        if v is None or v.strip() == "":
-            return None
-        if len(v) > 20:
-            raise ValueError('Store number must be less than 20 characters')
-        return v.strip()
-
-    @validator('hours')
+    @field_validator("hours")
+    @classmethod
     def validate_hours(cls, v):
-        """
-        Validate operating hours field.
+        """Validate operating hours field."""
+        return validate_text_field(v, max_length=200, field_name="Hours description")
 
-        Args:
-            v: The hours value to validate
-
-        Returns:
-            Cleaned hours (stripped whitespace) or None
-
-        Raises:
-            ValueError: If hours text is too long
-        """
-        if v is None or v.strip() == "":
-            return None
-        if len(v) > 200:
-            raise ValueError('Hours description must be less than 200 characters')
-        return v.strip()
-
-    @validator('specialty_services')
+    @field_validator("specialty_services")
+    @classmethod
     def validate_specialty_services(cls, v):
-        """
-        Validate specialty services field.
+        """Validate specialty services field."""
+        return validate_text_field(v, max_length=500, field_name="Specialty services description")
 
-        Args:
-            v: The specialty services value to validate
-
-        Returns:
-            Cleaned specialty services (stripped whitespace) or None
-
-        Raises:
-            ValueError: If specialty services text is too long
-        """
-        if v is None or v.strip() == "":
-            return None
-        if len(v) > 500:
-            raise ValueError('Specialty services description must be less than 500 characters')
-        return v.strip()
 
 class PharmacyCreate(PharmacyBase):
     """
     Schema for creating a new pharmacy.
-    
+
     Includes all fields from PharmacyBase.
     Used when adding a new pharmacy to the system.
 
@@ -365,6 +134,7 @@ class PharmacyCreate(PharmacyBase):
             zip_code="27514"
         )
     """
+
     pass
 
 
@@ -380,6 +150,7 @@ class PharmacyUpdate(BaseModel):
             hours="Mon-Fri: 8AM-10PM, Sat-Sun: 9AM-9PM"
         )
     """
+
     name: Optional[str] = None
     brand: Optional[str] = None
     street_address: Optional[str] = None
@@ -397,159 +168,95 @@ class PharmacyUpdate(BaseModel):
     twenty_four_hour: Optional[bool] = None
     specialty_services: Optional[str] = None
 
-    @validator('name')
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
         """Validate name if provided."""
-        if v is not None:
-            if len(v.strip()) < 3:
-                raise ValueError('Pharmacy name must be at least 3 characters long')
-            if len(v) > 150:
-                raise ValueError('Pharmacy name must be less than 150 characters')
-            return v.strip()
-        return v    @validator('brand')
-    def validate_brand(cls, v):
-        """Validate brand if provided."""
-        if v is None or str(v).strip() == "":
-            return None
-        if len(v.strip()) < 2:
-            raise ValueError('Brand must be at least 2 characters long')
-        if len(v) > 50:
-            raise ValueError('Brand must be less than 50 characters')
-        return v.strip()    
-    
-    @validator('street_address')
-    def validate_street_address(cls, v):
-        """Validate street address if provided."""
-        if v is None or str(v).strip() == "":
-            return None
-        if len(v.strip()) < 5:
-            raise ValueError('Street address must be at least 5 characters long')
-        if len(v) > 200:
-            raise ValueError('Street address must be less than 200 characters')
-        return v.strip()    
-    
-    @validator('city')
-    def validate_city(cls, v):
-        """Validate city if provided."""
-        if v is None or str(v).strip() == "":
-            return None
-        if len(v.strip()) < 2:
-            raise ValueError('City must be at least 2 characters long')
-        if len(v) > 100:
-            raise ValueError('City must be less than 100 characters')
+        if v is None:
+            return v
+        if len(v.strip()) < 3:
+            raise ValueError("Pharmacy name must be at least 3 characters long")
+        if len(v) > 150:
+            raise ValueError("Pharmacy name must be less than 150 characters")
         return v.strip()
 
-    @validator('state')
+    @field_validator("brand")
+    @classmethod
+    def validate_brand(cls, v):
+        """Validate brand if provided."""
+        return validate_text_field(v, max_length=50, min_length=2, field_name="Brand")
+
+    @field_validator("street_address")
+    @classmethod
+    def validate_street_address(cls, v):
+        """Validate street address if provided."""
+        return validate_text_field(v, max_length=200, min_length=5, field_name="Street address")
+
+    @field_validator("city")
+    @classmethod
+    def validate_city(cls, v):
+        """Validate city if provided."""
+        return validate_text_field(v, max_length=100, min_length=2, field_name="City")
+
+    @field_validator("state")
+    @classmethod
     def validate_state(cls, v):
         """Validate state if provided."""
-        if v is not None:
-            if len(v.strip()) < 2:
-                raise ValueError('State must be at least 2 characters long')
-            if len(v) > 50:
-                raise ValueError('State must be less than 50 characters')
-            return v.strip()
-        return v
+        if v is None:
+            return v
+        return validate_text_field(v, max_length=50, min_length=2, field_name="State")
 
-    @validator('zip_code')
+    @field_validator("zip_code")
+    @classmethod
     def validate_zip_code(cls, v):
         """Validate ZIP code if provided."""
-        if v is not None:
-            if not v.strip():
-                raise ValueError('ZIP code cannot be empty if provided')
-            zip_pattern = r'^\d{5}(-\d{4})?$'
-            if not re.match(zip_pattern, v.strip()):
-                raise ValueError('ZIP code must be in format 12345 or 12345-6789')
-            return v.strip()
-        return v
+        if v is None:
+            return v
+        return validate_zip_code(v)
 
-    @validator('country')
+    @field_validator("country")
+    @classmethod
     def validate_country(cls, v):
         """Validate country if provided."""
-        if v is not None:
-            if len(v.strip()) < 2:
-                raise ValueError('Country must be at least 2 characters long')
-            if len(v) > 50:
-                raise ValueError('Country must be less than 50 characters')
-            return v.strip()
-        return v
+        if v is None:
+            return v
+        return validate_text_field(v, max_length=50, min_length=2, field_name="Country")
 
-    @validator('phone_number')
+    @field_validator("phone_number")
+    @classmethod
     def validate_phone_number(cls, v):
         """Validate phone number if provided."""
-        if v is None or v.strip() == "":
-            return None
-        
-        digits_only = re.sub(r'[^\d]', '', v)
-        
-        if digits_only.startswith('1') and len(digits_only) == 11:
-            digits_only = digits_only[1:]
-        
-        if len(digits_only) < 10 or len(digits_only) > 15:
-            raise ValueError("Phone number must be between 10-15 digits")
-        
-        return digits_only
+        return validate_phone_number(v, field_name="Phone number")
 
-    @validator('fax_number')
+    @field_validator("fax_number")
+    @classmethod
     def validate_fax_number(cls, v):
         """Validate fax number if provided."""
-        if v is None or v.strip() == "":
-            return None
-        
-        digits_only = re.sub(r'[^\d]', '', v)
-        
-        if digits_only.startswith('1') and len(digits_only) == 11:
-            digits_only = digits_only[1:]
-        
-        if len(digits_only) < 10 or len(digits_only) > 15:
-            raise ValueError("Fax number must be between 10-15 digits")
-        
-        return digits_only
+        return validate_phone_number(v, field_name="Fax number")
 
-    @validator('website')
+    @field_validator("website")
+    @classmethod
     def validate_website(cls, v):
         """Validate website URL if provided."""
-        if v is None or v.strip() == "":
-            return None
-        
-        url_pattern = re.compile(
-            r'^https?://'  # http:// or https://
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
-            r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-        
-        cleaned_url = v.strip()
-        
-        # Add https:// if no protocol specified
-        if not cleaned_url.startswith(('http://', 'https://')):
-            cleaned_url = 'https://' + cleaned_url
-        
-        if not url_pattern.match(cleaned_url):
-            raise ValueError('Please enter a valid website URL')
-        
-        return cleaned_url
+        return validate_url(v, field_name="Website URL")
 
-    @validator('store_number')
+    @field_validator("store_number")
+    @classmethod
     def validate_store_number(cls, v):
         """Validate store number if provided."""
-        if v is not None and len(v) > 20:
-            raise ValueError('Store number must be less than 20 characters')
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=20, field_name="Store number")
 
-    @validator('hours')
+    @field_validator("hours")
+    @classmethod
     def validate_hours(cls, v):
         """Validate hours if provided."""
-        if v is not None and len(v) > 200:
-            raise ValueError('Hours description must be less than 200 characters')
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=200, field_name="Hours description")
 
-    @validator('specialty_services')
+    @field_validator("specialty_services")
+    @classmethod
     def validate_specialty_services(cls, v):
         """Validate specialty services if provided."""
-        if v is not None and len(v) > 500:
-            raise ValueError('Specialty services description must be less than 500 characters')
-        return v.strip() if v else None
+        return validate_text_field(v, max_length=500, field_name="Specialty services description")
 
 
 class Pharmacy(PharmacyBase):
@@ -572,6 +279,7 @@ class Pharmacy(PharmacyBase):
             "updated_at": "2025-06-21T10:00:00"
         }
     """
+
     id: int
     created_at: datetime
     updated_at: datetime
@@ -583,6 +291,7 @@ class Pharmacy(PharmacyBase):
         from_attributes = True allows Pydantic to work with SQLAlchemy models
         by reading data from attributes instead of expecting a dictionary.
         """
+
         from_attributes = True
 
 
@@ -601,6 +310,7 @@ class PharmacySummary(BaseModel):
             "state": "NC"
         }
     """
+
     id: int
     name: str
     brand: Optional[str] = None
@@ -617,6 +327,7 @@ class PharmacyResponse(Pharmacy):
 
     This provides consistency with other model Response schemas.
     """
+
     pass
 
 
@@ -633,6 +344,7 @@ class PharmacySearch(BaseModel):
             state="NC"
         )
     """
+
     name: Optional[str] = None
     brand: Optional[str] = None
     city: Optional[str] = None
@@ -641,42 +353,21 @@ class PharmacySearch(BaseModel):
     drive_through: Optional[bool] = None
     twenty_four_hour: Optional[bool] = None
 
-    @validator("name")
-    def validate_name_search(cls, v):
-        """Validate search name parameter."""
+    @field_validator("name", "brand", "city", "state")
+    @classmethod
+    def validate_search_text(cls, v):
+        """Validate search text parameters are not empty if provided."""
         if v is not None and len(v.strip()) < 1:
-            raise ValueError("Search name must not be empty")
+            raise ValueError("Search value must not be empty")
         return v.strip() if v else v
 
-    @validator("brand")
-    def validate_brand_search(cls, v):
-        """Validate search brand parameter."""
-        if v is not None and len(v.strip()) < 1:
-            raise ValueError("Search brand must not be empty")
-        return v.strip() if v else v
-
-    @validator("city")
-    def validate_city_search(cls, v):
-        """Validate search city parameter."""
-        if v is not None and len(v.strip()) < 1:
-            raise ValueError("Search city must not be empty")
-        return v.strip() if v else v
-
-    @validator("state")
-    def validate_state_search(cls, v):
-        """Validate search state parameter."""
-        if v is not None and len(v.strip()) < 1:
-            raise ValueError("Search state must not be empty")
-        return v.strip() if v else v
-
-    @validator("zip_code")
+    @field_validator("zip_code")
+    @classmethod
     def validate_zip_code_search(cls, v):
         """Validate search ZIP code parameter."""
-        if v is not None:
-            zip_pattern = r'^\d{5}(-\d{4})?$'
-            if not re.match(zip_pattern, v.strip()):
-                raise ValueError('ZIP code must be in format 12345 or 12345-6789')
-        return v.strip() if v else v
+        if v is None:
+            return v
+        return validate_zip_code(v)
 
 
 class PharmacyWithStats(Pharmacy):
@@ -696,6 +387,7 @@ class PharmacyWithStats(Pharmacy):
             "total_patients_served": 120
         }
     """
+
     total_medications: Optional[int] = 0
     active_medications: Optional[int] = 0
     total_patients_served: Optional[int] = 0

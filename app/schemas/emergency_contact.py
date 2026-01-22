@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class EmergencyContactBase(BaseModel):
@@ -33,7 +33,8 @@ class EmergencyContactBase(BaseModel):
         None, max_length=1000, description="Additional notes about the contact"
     )
 
-    @validator("relationship")
+    @field_validator("relationship")
+    @classmethod
     def validate_relationship(cls, v):
         valid_relationships = [
             "spouse",
@@ -68,7 +69,8 @@ class EmergencyContactBase(BaseModel):
             )
         return v.lower()
 
-    @validator("phone_number", "secondary_phone")
+    @field_validator("phone_number", "secondary_phone")
+    @classmethod
     def validate_phone_number(cls, v):
         if v is not None and v.strip():
             # Remove all non-digits
@@ -79,7 +81,8 @@ class EmergencyContactBase(BaseModel):
             return v.strip()
         return v
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email(cls, v):
         if v is not None and v.strip():
             email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -104,7 +107,8 @@ class EmergencyContactUpdate(BaseModel):
     address: Optional[str] = Field(None, max_length=500)
     notes: Optional[str] = Field(None, max_length=1000)
 
-    @validator("relationship")
+    @field_validator("relationship")
+    @classmethod
     def validate_relationship(cls, v):
         if v is not None:
             valid_relationships = [
@@ -141,7 +145,8 @@ class EmergencyContactUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("phone_number", "secondary_phone")
+    @field_validator("phone_number", "secondary_phone")
+    @classmethod
     def validate_phone_number(cls, v):
         if v is not None and v.strip():
             # Remove all non-digits
@@ -152,7 +157,8 @@ class EmergencyContactUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email(cls, v):
         if v is not None and v.strip():
             email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"

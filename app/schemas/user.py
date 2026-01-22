@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -16,7 +16,8 @@ class UserBase(BaseModel):
     full_name: str
     role: str
 
-    @validator("username")
+    @field_validator("username")
+    @classmethod
     def validate_username(cls, v):
         """
         Validate username requirements.
@@ -40,7 +41,8 @@ class UserBase(BaseModel):
             )
         return v.lower().strip()
 
-    @validator("role")
+    @field_validator("role")
+    @classmethod
     def validate_role(cls, v):
         """
         Validate that the role is one of the allowed values.
@@ -59,7 +61,8 @@ class UserBase(BaseModel):
             raise ValueError(f"Role must be one of: {', '.join(allowed_roles)}")
         return v.lower()
 
-    @validator("full_name")
+    @field_validator("full_name")
+    @classmethod
     def validate_full_name(cls, v):
         """
         Validate full name requirements.
@@ -101,7 +104,8 @@ class UserCreate(UserBase):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
 
-    @validator("password")
+    @field_validator("password")
+    @classmethod
     def validate_password(cls, v):
         """
         Validate password requirements.
@@ -129,7 +133,8 @@ class UserCreate(UserBase):
 
         return v
 
-    @validator("first_name")
+    @field_validator("first_name")
+    @classmethod
     def validate_first_name(cls, v):
         """Validate first name if provided."""
         if v is not None:
@@ -140,7 +145,8 @@ class UserCreate(UserBase):
             return v.strip().title()
         return v
 
-    @validator("last_name")
+    @field_validator("last_name")
+    @classmethod
     def validate_last_name(cls, v):
         """Validate last name if provided."""
         if v is not None:
@@ -170,7 +176,8 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     role: Optional[str] = None
 
-    @validator("username")
+    @field_validator("username")
+    @classmethod
     def validate_username(cls, v):
         """Validate username if provided."""
         if v is not None:
@@ -185,7 +192,8 @@ class UserUpdate(BaseModel):
             return v.lower().strip()
         return v
 
-    @validator("role")
+    @field_validator("role")
+    @classmethod
     def validate_role(cls, v):
         """Validate role if provided."""
         if v is not None:
@@ -195,7 +203,8 @@ class UserUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("full_name")
+    @field_validator("full_name")
+    @classmethod
     def validate_full_name(cls, v):
         """Validate full name if provided."""
         if v is not None:
@@ -229,7 +238,7 @@ class User(UserBase):
     """
 
     id: int
-    
+
     # SSO fields
     auth_method: Optional[str] = None
     external_id: Optional[str] = None
@@ -266,7 +275,8 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
-    @validator("username")
+    @field_validator("username")
+    @classmethod
     def validate_username(cls, v):
         """Clean username for login."""
         return v.lower().strip() if v else v
@@ -288,7 +298,8 @@ class UserChangePassword(BaseModel):
     current_password: str
     new_password: str
 
-    @validator("new_password")
+    @field_validator("new_password")
+    @classmethod
     def validate_new_password(cls, v):
         """Validate the new password using same rules as UserCreate."""
         if len(v) < 6:
