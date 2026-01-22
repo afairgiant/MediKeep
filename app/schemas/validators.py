@@ -19,7 +19,7 @@ Usage:
 
 import re
 from datetime import date
-from typing import Any, Optional, List, Set
+from typing import Optional, List
 
 
 def validate_text_field(
