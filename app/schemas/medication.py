@@ -1,7 +1,7 @@
 from datetime import date
 from typing import TYPE_CHECKING, Optional, List
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, model_validator, field_validator, ValidationInfo
 
 from app.models.enums import get_all_medication_statuses, get_all_medication_types
 from app.schemas.base_tags import TaggedEntityMixin
@@ -26,8 +26,9 @@ class MedicationBase(TaggedEntityMixin):
     practitioner_id: Optional[int] = None
     pharmacy_id: Optional[int] = None
 
-    @root_validator(pre=True)
-    def clean_empty_strings(cls, values):  # noqa
+    @model_validator(mode="before")
+    @classmethod
+    def clean_empty_strings(cls, values):
         """Convert empty strings to None for optional date fields"""
         if isinstance(values, dict):
             for field in [
@@ -46,8 +47,9 @@ class MedicationBase(TaggedEntityMixin):
                     values[field] = None
         return values
 
-    @validator("medication_name")
-    def validate_medication_name(cls, v):  # noqa
+    @field_validator("medication_name")
+    @classmethod
+    def validate_medication_name(cls, v):
         """
         Validate medication name requirements.
 
@@ -66,22 +68,25 @@ class MedicationBase(TaggedEntityMixin):
             raise ValueError("Medication name must be less than 100 characters")
         return v.strip()
 
-    @validator("dosage")
-    def validate_dosage(cls, v):  # noqa
+    @field_validator("dosage")
+    @classmethod
+    def validate_dosage(cls, v):
         """Validate dosage format"""
         if v and len(v.strip()) > 50:
             raise ValueError("Dosage must be less than 50 characters")
         return v.strip() if v else None
 
-    @validator("frequency")
-    def validate_frequency(cls, v):  # noqa
+    @field_validator("frequency")
+    @classmethod
+    def validate_frequency(cls, v):
         """Validate frequency format"""
         if v and len(v.strip()) > 50:
             raise ValueError("Frequency must be less than 50 characters")
         return v.strip() if v else None
 
-    @validator("route")
-    def validate_route(cls, v):  # noqa
+    @field_validator("route")
+    @classmethod
+    def validate_route(cls, v):
         """Validate route of administration"""
         valid_routes = [
             "oral",
@@ -99,8 +104,9 @@ class MedicationBase(TaggedEntityMixin):
             raise ValueError(f"Route must be one of: {', '.join(valid_routes)}")
         return v.lower() if v else None
 
-    @validator("medication_type")
-    def validate_medication_type(cls, v):  # noqa
+    @field_validator("medication_type")
+    @classmethod
+    def validate_medication_type(cls, v):
         """Validate medication type using enum"""
         if v is not None:
             valid_types = get_all_medication_types()
@@ -109,8 +115,9 @@ class MedicationBase(TaggedEntityMixin):
             return v
         return 'prescription'
 
-    @validator("status")
-    def validate_status(cls, v):  # noqa
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v):
         """Validate medication status using enum"""
         if v is not None:
             valid_statuses = get_all_medication_statuses()
@@ -119,16 +126,16 @@ class MedicationBase(TaggedEntityMixin):
             return v.lower()
         return v
 
-    @validator("effective_period_end")
-    def validate_effective_period(cls, v, values):
+    @field_validator("effective_period_end")
+    @classmethod
+    def validate_effective_period(cls, v, info: ValidationInfo):
         """Validate that end date is after start date"""
         # Only validate if both dates are provided and not None
         if (
             v
-            and "effective_period_start" in values
-            and values["effective_period_start"]
+            and info.data.get("effective_period_start")
         ):
-            if v < values["effective_period_start"]:
+            if v < info.data["effective_period_start"]:
                 raise ValueError("End date must be after start date")
         return v
 
@@ -157,7 +164,8 @@ class MedicationUpdate(BaseModel):
     pharmacy_id: Optional[int] = None
     tags: Optional[List[str]] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def clean_empty_strings(cls, values):
         """Convert empty strings to None for optional fields"""
         if isinstance(values, dict):
@@ -178,7 +186,8 @@ class MedicationUpdate(BaseModel):
                     values[field] = None
         return values
 
-    @validator("medication_name")
+    @field_validator("medication_name")
+    @classmethod
     def validate_medication_name(cls, v):
         if v is not None:
             if not v or len(v.strip()) < 2:
@@ -188,20 +197,21 @@ class MedicationUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("effective_period_end")
-    def validate_end_date(cls, v, values):
+    @field_validator("effective_period_end")
+    @classmethod
+    def validate_end_date(cls, v, info: ValidationInfo):
         """Validate end date - check against start date"""
         # Only validate if both dates are provided and not None
         if (
             v
-            and "effective_period_start" in values
-            and values["effective_period_start"]
+            and info.data.get("effective_period_start")
         ):
-            if v < values["effective_period_start"]:
+            if v < info.data["effective_period_start"]:
                 raise ValueError("End date must be after start date")
         return v
 
-    @validator("route")
+    @field_validator("route")
+    @classmethod
     def validate_route(cls, v):
         if v is not None:
             valid_routes = [
@@ -221,7 +231,8 @@ class MedicationUpdate(BaseModel):
             return v.lower()
         return v
 
-    @validator("medication_type")
+    @field_validator("medication_type")
+    @classmethod
     def validate_medication_type(cls, v):
         if v is not None:
             valid_types = get_all_medication_types()
@@ -230,7 +241,8 @@ class MedicationUpdate(BaseModel):
             return v
         return v
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
         if v is not None:
             valid_statuses = get_all_medication_statuses()

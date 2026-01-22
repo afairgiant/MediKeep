@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -13,13 +13,15 @@ class PatientPhotoBase(BaseModel):
     width: Optional[int] = None
     height: Optional[int] = None
 
-    @validator("patient_id")
+    @field_validator("patient_id")
+    @classmethod
     def validate_patient_id(cls, v):
         if v <= 0:
             raise ValueError("Patient ID must be a positive integer")
         return v
 
-    @validator("file_name")
+    @field_validator("file_name")
+    @classmethod
     def validate_file_name(cls, v):
         if not v or len(v.strip()) < 1:
             raise ValueError("File name is required")
@@ -27,7 +29,8 @@ class PatientPhotoBase(BaseModel):
             raise ValueError("File name must be less than 255 characters")
         return v.strip()
 
-    @validator("file_size")
+    @field_validator("file_size")
+    @classmethod
     def validate_file_size(cls, v):
         if v is not None:
             if v < 0:
@@ -36,7 +39,8 @@ class PatientPhotoBase(BaseModel):
                 raise ValueError("Photo must be less than 15MB")
         return v
 
-    @validator("mime_type")
+    @field_validator("mime_type")
+    @classmethod
     def validate_mime_type(cls, v):
         if v:
             allowed_types = [
@@ -58,7 +62,8 @@ class PatientPhotoCreate(PatientPhotoBase):
     file_path: str
     uploaded_by: Optional[int] = None
 
-    @validator("file_path")
+    @field_validator("file_path")
+    @classmethod
     def validate_file_path(cls, v):
         if not v or len(v.strip()) < 1:
             raise ValueError("File path is required")

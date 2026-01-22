@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, model_validator, field_validator, ValidationInfo
 
 from app.models.enums import InsuranceStatus, InsuranceType
 
@@ -26,8 +26,9 @@ class InsuranceBase(BaseModel):
     contact_info: Optional[Dict[str, Any]] = None
     notes: Optional[str] = None
 
-    @root_validator(pre=True)
-    def clean_empty_strings(cls, values):  # noqa
+    @model_validator(mode="before")
+    @classmethod
+    def clean_empty_strings(cls, values):
         """Convert empty strings to None for optional fields"""
         if isinstance(values, dict):
             for field in [
@@ -43,22 +44,25 @@ class InsuranceBase(BaseModel):
                     values[field] = None
         return values
 
-    @validator("insurance_type")
-    def validate_insurance_type(cls, v):  # noqa
+    @field_validator("insurance_type")
+    @classmethod
+    def validate_insurance_type(cls, v):
         """Validate insurance type is one of the allowed values"""
         if v not in [t.value for t in InsuranceType]:
             raise ValueError(f"Invalid insurance type. Must be one of: {[t.value for t in InsuranceType]}")
         return v
 
-    @validator("status")
-    def validate_status(cls, v):  # noqa
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v):
         """Validate status is one of the allowed values"""
         if v not in [s.value for s in InsuranceStatus]:
             raise ValueError(f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}")
         return v
 
-    @validator("company_name")
-    def validate_company_name(cls, v):  # noqa
+    @field_validator("company_name")
+    @classmethod
+    def validate_company_name(cls, v):
         """Validate company name requirements"""
         if not v or not v.strip():
             raise ValueError("Company name is required")
@@ -66,8 +70,9 @@ class InsuranceBase(BaseModel):
             raise ValueError("Company name must be 255 characters or less")
         return v.strip()
 
-    @validator("member_name")
-    def validate_member_name(cls, v):  # noqa
+    @field_validator("member_name")
+    @classmethod
+    def validate_member_name(cls, v):
         """Validate member name requirements"""
         if not v or not v.strip():
             raise ValueError("Member name is required")
@@ -75,8 +80,9 @@ class InsuranceBase(BaseModel):
             raise ValueError("Member name must be 255 characters or less")
         return v.strip()
 
-    @validator("member_id")
-    def validate_member_id(cls, v):  # noqa
+    @field_validator("member_id")
+    @classmethod
+    def validate_member_id(cls, v):
         """Validate member ID requirements"""
         if not v or not v.strip():
             raise ValueError("Member ID is required")
@@ -84,8 +90,9 @@ class InsuranceBase(BaseModel):
             raise ValueError("Member ID must be 100 characters or less")
         return v.strip()
 
-    @validator("relationship_to_holder")
-    def validate_relationship_to_holder(cls, v):  # noqa
+    @field_validator("relationship_to_holder")
+    @classmethod
+    def validate_relationship_to_holder(cls, v):
         """Validate relationship to holder"""
         if v is not None:
             allowed_relationships = ["self", "spouse", "child", "dependent", "other"]
@@ -93,19 +100,20 @@ class InsuranceBase(BaseModel):
                 raise ValueError(f"Invalid relationship. Must be one of: {allowed_relationships}")
         return v
 
-    @validator("expiration_date")
-    def validate_expiration_date(cls, v, values):  # noqa
+    @field_validator("expiration_date")
+    @classmethod
+    def validate_expiration_date(cls, v, info: ValidationInfo):
         """Validate expiration date is after effective date"""
-        if v is not None and "effective_date" in values and values["effective_date"] is not None:
-            if v <= values["effective_date"]:
+        if v is not None and info.data.get("effective_date") is not None:
+            if v <= info.data["effective_date"]:
                 raise ValueError("Expiration date must be after effective date")
         return v
 
-    @root_validator(skip_on_failure=True)
-    def validate_coverage_details_by_type(cls, values):  # noqa
+    @model_validator(mode="after")
+    def validate_coverage_details_by_type(self):
         """Validate coverage details based on insurance type"""
-        insurance_type = values.get("insurance_type")
-        coverage_details = values.get("coverage_details", {}) or {}
+        insurance_type = self.insurance_type
+        coverage_details = self.coverage_details or {}
 
         if insurance_type == "medical" and coverage_details:
             # Validate medical insurance specific fields
@@ -133,7 +141,7 @@ class InsuranceBase(BaseModel):
                 if len(str(coverage_details["bin_number"])) > 10:
                     raise ValueError("BIN number must be 10 characters or less")
 
-        return values
+        return self
 
 
 class InsuranceCreate(InsuranceBase):
@@ -143,7 +151,7 @@ class InsuranceCreate(InsuranceBase):
 
 class InsuranceUpdate(BaseModel):
     """Schema for updating insurance"""
-    
+
     insurance_type: Optional[str] = None
     company_name: Optional[str] = None
     employer_group: Optional[str] = None
@@ -161,14 +169,15 @@ class InsuranceUpdate(BaseModel):
     contact_info: Optional[Dict[str, Any]] = None
     notes: Optional[str] = None
 
-    @root_validator(pre=True)
-    def clean_empty_strings(cls, values):  # noqa
+    @model_validator(mode="before")
+    @classmethod
+    def clean_empty_strings(cls, values):
         """Convert empty strings to None for optional fields"""
         if isinstance(values, dict):
             for field in [
                 "employer_group",
                 "group_number",
-                "plan_name", 
+                "plan_name",
                 "policy_holder_name",
                 "relationship_to_holder",
                 "expiration_date",
@@ -178,15 +187,17 @@ class InsuranceUpdate(BaseModel):
                     values[field] = None
         return values
 
-    @validator("insurance_type")
-    def validate_insurance_type(cls, v):  # noqa
+    @field_validator("insurance_type")
+    @classmethod
+    def validate_insurance_type(cls, v):
         """Validate insurance type is one of the allowed values"""
         if v is not None and v not in [t.value for t in InsuranceType]:
             raise ValueError(f"Invalid insurance type. Must be one of: {[t.value for t in InsuranceType]}")
         return v
 
-    @validator("status")
-    def validate_status(cls, v):  # noqa
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v):
         """Validate status is one of the allowed values"""
         if v is not None and v not in [s.value for s in InsuranceStatus]:
             raise ValueError(f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}")
@@ -195,7 +206,7 @@ class InsuranceUpdate(BaseModel):
 
 class Insurance(InsuranceBase):
     """Schema for reading insurance (includes database fields)"""
-    
+
     id: int
     patient_id: int
     created_at: datetime
@@ -207,11 +218,12 @@ class Insurance(InsuranceBase):
 
 class InsuranceStatusUpdate(BaseModel):
     """Schema for updating only insurance status"""
-    
+
     status: str
 
-    @validator("status")
-    def validate_status(cls, v):  # noqa
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v):
         """Validate status is one of the allowed values"""
         if v not in [s.value for s in InsuranceStatus]:
             raise ValueError(f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}")

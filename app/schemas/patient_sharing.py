@@ -4,7 +4,7 @@ Pydantic schemas for patient sharing invitations
 
 from typing import Optional, List, Dict
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class PatientShareInvitationRequest(BaseModel):
@@ -18,21 +18,24 @@ class PatientShareInvitationRequest(BaseModel):
     message: Optional[str] = Field(None, max_length=1000, description="Optional message to recipient")
     expires_hours: Optional[int] = Field(168, ge=1, le=8760, description="Hours until invitation expires (1 hour to 1 year)")
 
-    @validator('patient_id')
+    @field_validator('patient_id')
+    @classmethod
     def validate_patient_id(cls, v):
         # Additional bounds check for reasonable IDs
         if v > 100000000:
             raise ValueError('Patient ID exceeds reasonable bounds')
         return v
 
-    @validator('shared_with_user_identifier')
+    @field_validator('shared_with_user_identifier')
+    @classmethod
     def validate_identifier(cls, v):
         v = v.strip()
         if len(v) == 0:
             raise ValueError('Recipient identifier cannot be empty')
         return v
 
-    @validator('permission_level')
+    @field_validator('permission_level')
+    @classmethod
     def validate_permission_level(cls, v):
         valid_levels = ['view', 'edit', 'full']
         if v not in valid_levels:
@@ -51,7 +54,8 @@ class PatientShareBulkInvitationRequest(BaseModel):
     message: Optional[str] = Field(None, max_length=1000, description="Optional message to recipient")
     expires_hours: Optional[int] = Field(168, ge=1, le=8760, description="Hours until invitation expires (1 hour to 1 year)")
 
-    @validator('patient_ids')
+    @field_validator('patient_ids')
+    @classmethod
     def validate_patient_ids(cls, v):
         if not v or len(v) == 0:
             raise ValueError('At least one patient_id required')
@@ -65,14 +69,16 @@ class PatientShareBulkInvitationRequest(BaseModel):
             raise ValueError('One or more patient IDs exceed reasonable bounds')
         return v
 
-    @validator('shared_with_user_identifier')
+    @field_validator('shared_with_user_identifier')
+    @classmethod
     def validate_identifier(cls, v):
         v = v.strip()
         if len(v) == 0:
             raise ValueError('Recipient identifier cannot be empty')
         return v
 
-    @validator('permission_level')
+    @field_validator('permission_level')
+    @classmethod
     def validate_permission_level(cls, v):
         valid_levels = ['view', 'edit', 'full']
         if v not in valid_levels:

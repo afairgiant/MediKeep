@@ -1,12 +1,43 @@
 from datetime import date, datetime
-from typing import Optional, List
+from typing import List, Optional
 
-from pydantic import BaseModel, Field, validator, field_validator
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 
+from app.models.enums import get_all_condition_statuses, get_all_severity_levels
 from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.validators import validate_date_not_future, validate_text_field
 
-# Import status enums for validation
-from ..models.enums import get_all_condition_statuses, get_all_severity_levels
+
+# Pre-fetch valid values for reuse
+VALID_CONDITION_STATUSES = get_all_condition_statuses()
+VALID_SEVERITY_LEVELS = get_all_severity_levels()
+
+
+def _validate_condition_status(v: Optional[str], required: bool = True) -> Optional[str]:
+    """Validate condition status value."""
+    if v is None:
+        if required:
+            raise ValueError("Status is required")
+        return None
+    lower_v = v.lower()
+    if lower_v not in VALID_CONDITION_STATUSES:
+        raise ValueError(f"Status must be one of: {', '.join(VALID_CONDITION_STATUSES)}")
+    return lower_v
+
+
+def _validate_severity(v: Optional[str]) -> Optional[str]:
+    """Validate severity level value."""
+    if v is None:
+        return None
+    lower_v = v.lower()
+    if lower_v not in VALID_SEVERITY_LEVELS:
+        raise ValueError(f"Severity must be one of: {', '.join(VALID_SEVERITY_LEVELS)}")
+    return lower_v
+
+
+def _validate_relevance_note(v: Optional[str]) -> Optional[str]:
+    """Shared validation for relevance note fields."""
+    return validate_text_field(v, max_length=500, field_name="Relevance note")
 
 
 class ConditionBase(TaggedEntityMixin):
@@ -44,42 +75,32 @@ class ConditionBase(TaggedEntityMixin):
         None, gt=0, description="ID of related medication"
     )
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
-        valid_statuses = get_all_condition_statuses()
-        if v.lower() not in valid_statuses:
-            raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
-        return v.lower()
+        return _validate_condition_status(v)
 
-    @validator("onset_date")
+    @field_validator("onset_date")
+    @classmethod
     def validate_onset_date(cls, v):
-        if v and v > date.today():
-            raise ValueError("Onset date cannot be in the future")
+        return validate_date_not_future(v, field_name="Onset date")
+
+    @field_validator("end_date")
+    @classmethod
+    def validate_end_date(cls, v, info: ValidationInfo):
+        if v is None:
+            return None
+        if v > date.today():
+            raise ValueError("End date cannot be in the future")
+        onset_date = info.data.get("onset_date")
+        if onset_date and v < onset_date:
+            raise ValueError("End date cannot be before onset date")
         return v
 
-    @validator("end_date")
-    def validate_end_date(cls, v, values):
-        if v:
-            if v > date.today():
-                raise ValueError("End date cannot be in the future")
-            if (
-                "onset_date" in values
-                and values["onset_date"]
-                and v < values["onset_date"]
-            ):
-                raise ValueError("End date cannot be before onset date")
-        return v
-
-    @validator("severity")
+    @field_validator("severity")
+    @classmethod
     def validate_severity(cls, v):
-        if v is not None:
-            valid_severities = get_all_severity_levels()
-            if v.lower() not in valid_severities:
-                raise ValueError(
-                    f"Severity must be one of: {', '.join(valid_severities)}"
-                )
-            return v.lower()
-        return v
+        return _validate_severity(v)
 
 
 class ConditionCreate(ConditionBase):
@@ -101,44 +122,32 @@ class ConditionUpdate(BaseModel):
     medication_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def validate_status(cls, v):
-        if v is not None:
-            valid_statuses = get_all_condition_statuses()
-            if v.lower() not in valid_statuses:
-                raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
-            return v.lower()
-        return v
+        return _validate_condition_status(v, required=False)
 
-    @validator("onset_date")
+    @field_validator("onset_date")
+    @classmethod
     def validate_onset_date(cls, v):
-        if v and v > date.today():
-            raise ValueError("Onset date cannot be in the future")
+        return validate_date_not_future(v, field_name="Onset date")
+
+    @field_validator("end_date")
+    @classmethod
+    def validate_end_date(cls, v, info: ValidationInfo):
+        if v is None:
+            return None
+        if v > date.today():
+            raise ValueError("End date cannot be in the future")
+        onset_date = info.data.get("onset_date")
+        if onset_date and v < onset_date:
+            raise ValueError("End date cannot be before onset date")
         return v
 
-    @validator("end_date")
-    def validate_end_date(cls, v, values):
-        if v:
-            if v > date.today():
-                raise ValueError("End date cannot be in the future")
-            if (
-                "onset_date" in values
-                and values["onset_date"]
-                and v < values["onset_date"]
-            ):
-                raise ValueError("End date cannot be before onset date")
-        return v
-
-    @validator("severity")
+    @field_validator("severity")
+    @classmethod
     def validate_severity(cls, v):
-        if v is not None:
-            valid_severities = get_all_severity_levels()
-            if v.lower() not in valid_severities:
-                raise ValueError(
-                    f"Severity must be one of: {', '.join(valid_severities)}"
-                )
-            return v.lower()
-        return v
+        return _validate_severity(v)
 
 
 class ConditionResponse(ConditionBase):
@@ -155,41 +164,39 @@ class ConditionWithRelations(ConditionResponse):
 
     class Config:
         from_attributes = True
-        
-    @field_validator('patient', mode='before')
+
+    @field_validator("patient", mode="before")
     @classmethod
     def validate_patient(cls, v):
         """Convert SQLAlchemy Patient object to dict"""
         if v is None:
             return None
-        if hasattr(v, '__dict__'):
-            # Convert SQLAlchemy object to dict
+        if hasattr(v, "__dict__"):
             return {
-                'id': getattr(v, 'id', None),
-                'first_name': getattr(v, 'first_name', None),
-                'last_name': getattr(v, 'last_name', None),
-                'birth_date': getattr(v, 'birth_date', None),
-                'user_id': getattr(v, 'user_id', None),
+                "id": getattr(v, "id", None),
+                "first_name": getattr(v, "first_name", None),
+                "last_name": getattr(v, "last_name", None),
+                "birth_date": getattr(v, "birth_date", None),
+                "user_id": getattr(v, "user_id", None),
             }
         return v
-    
-    @field_validator('practitioner', mode='before')
+
+    @field_validator("practitioner", mode="before")
     @classmethod
     def validate_practitioner(cls, v):
         """Convert SQLAlchemy Practitioner object to dict"""
         if v is None:
             return None
-        if hasattr(v, '__dict__'):
-            # Convert SQLAlchemy object to dict
+        if hasattr(v, "__dict__"):
             return {
-                'id': getattr(v, 'id', None),
-                'name': getattr(v, 'name', None),
-                'specialty': getattr(v, 'specialty', None),
-                'phone_number': getattr(v, 'phone_number', None),
+                "id": getattr(v, "id", None),
+                "name": getattr(v, "name", None),
+                "specialty": getattr(v, "specialty", None),
+                "phone_number": getattr(v, "phone_number", None),
             }
         return v
-    
-    @field_validator('treatments', mode='before')
+
+    @field_validator("treatments", mode="before")
     @classmethod
     def validate_treatments(cls, v):
         """Convert SQLAlchemy Treatment objects to list of dicts"""
@@ -198,14 +205,16 @@ class ConditionWithRelations(ConditionResponse):
         if isinstance(v, list):
             treatments = []
             for treatment in v:
-                if hasattr(treatment, '__dict__'):
-                    treatments.append({
-                        'id': getattr(treatment, 'id', None),
-                        'treatment_name': getattr(treatment, 'treatment_name', None),
-                        'status': getattr(treatment, 'status', None),
-                        'start_date': getattr(treatment, 'start_date', None),
-                        'end_date': getattr(treatment, 'end_date', None),
-                    })
+                if hasattr(treatment, "__dict__"):
+                    treatments.append(
+                        {
+                            "id": getattr(treatment, "id", None),
+                            "treatment_name": getattr(treatment, "treatment_name", None),
+                            "status": getattr(treatment, "status", None),
+                            "start_date": getattr(treatment, "start_date", None),
+                            "end_date": getattr(treatment, "end_date", None),
+                        }
+                    )
                 else:
                     treatments.append(treatment)
             return treatments
@@ -244,9 +253,10 @@ class ConditionDropdownOption(BaseModel):
 
 # Condition - Medication Relationship Schemas
 
+
 class ConditionMedicationBase(BaseModel):
     """Base schema for condition medication relationship"""
-    
+
     condition_id: int
     medication_id: int
     relevance_note: Optional[str] = None
@@ -254,15 +264,12 @@ class ConditionMedicationBase(BaseModel):
     @field_validator("relevance_note")
     @classmethod
     def validate_relevance_note(cls, v):
-        """Validate relevance note"""
-        if v and len(v.strip()) > 500:
-            raise ValueError("Relevance note must be less than 500 characters")
-        return v.strip() if v else None
+        return _validate_relevance_note(v)
 
 
 class ConditionMedicationCreate(BaseModel):
     """Schema for creating a condition medication relationship"""
-    
+
     medication_id: int
     relevance_note: Optional[str] = None
     condition_id: Optional[int] = None  # Will be set from URL path parameter
@@ -270,29 +277,23 @@ class ConditionMedicationCreate(BaseModel):
     @field_validator("relevance_note")
     @classmethod
     def validate_relevance_note(cls, v):
-        """Validate relevance note"""
-        if v and len(v.strip()) > 500:
-            raise ValueError("Relevance note must be less than 500 characters")
-        return v.strip() if v else None
+        return _validate_relevance_note(v)
 
 
 class ConditionMedicationUpdate(BaseModel):
     """Schema for updating a condition medication relationship"""
-    
+
     relevance_note: Optional[str] = None
 
     @field_validator("relevance_note")
     @classmethod
     def validate_relevance_note(cls, v):
-        """Validate relevance note"""
-        if v and len(v.strip()) > 500:
-            raise ValueError("Relevance note must be less than 500 characters")
-        return v.strip() if v else None
+        return _validate_relevance_note(v)
 
 
 class ConditionMedicationResponse(ConditionMedicationBase):
     """Schema for condition medication relationship response"""
-    
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -302,7 +303,7 @@ class ConditionMedicationResponse(ConditionMedicationBase):
 
 class ConditionMedicationWithDetails(ConditionMedicationResponse):
     """Schema for condition medication relationship with medication details"""
-    
+
     medication: Optional[dict] = None  # Will contain medication details
 
     model_config = {"from_attributes": True}

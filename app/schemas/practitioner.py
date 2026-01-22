@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 # Shared validation helper functions to avoid code duplication
@@ -75,7 +75,8 @@ class PractitionerBase(BaseModel):
     website: Optional[str] = None
     rating: Optional[float] = None
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
         """
         Validate practitioner name requirements.
@@ -95,7 +96,8 @@ class PractitionerBase(BaseModel):
             raise ValueError("Practitioner name must be less than 100 characters")
         return v.strip()
 
-    @validator("specialty")
+    @field_validator("specialty")
+    @classmethod
     def validate_specialty(cls, v):
         """
         Validate specialty field.
@@ -115,12 +117,14 @@ class PractitionerBase(BaseModel):
             raise ValueError("Specialty must be less than 100 characters")
         return v.strip()
 
-    @validator("practice")
+    @field_validator("practice")
+    @classmethod
     def validate_practice(cls, v):
         """Validate practice field using shared helper."""
         return _validate_practice_value(v)
 
-    @validator("phone_number")
+    @field_validator("phone_number")
+    @classmethod
     def validate_phone_number(cls, v):
         """
         Validate and clean phone number field.
@@ -161,12 +165,14 @@ class PractitionerBase(BaseModel):
         # Return digits only for consistent storage
         return digits_only
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email(cls, v):
         """Validate email field using shared helper."""
         return _validate_email_value(v)
 
-    @validator("website")
+    @field_validator("website")
+    @classmethod
     def validate_website(cls, v):
         """
         Validate website URL field.
@@ -205,7 +211,8 @@ class PractitionerBase(BaseModel):
 
         return cleaned_url
 
-    @validator("rating")
+    @field_validator("rating")
+    @classmethod
     def validate_rating(cls, v):
         """
         Validate rating field.
@@ -268,7 +275,8 @@ class PractitionerUpdate(BaseModel):
     website: Optional[str] = None
     rating: Optional[float] = None
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
         """Validate name if provided."""
         if v is not None:
@@ -279,7 +287,8 @@ class PractitionerUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("specialty")
+    @field_validator("specialty")
+    @classmethod
     def validate_specialty(cls, v):
         """Validate specialty if provided."""
         if v is not None:
@@ -290,12 +299,14 @@ class PractitionerUpdate(BaseModel):
             return v.strip()
         return v
 
-    @validator("practice")
+    @field_validator("practice")
+    @classmethod
     def validate_practice(cls, v):
         """Validate practice if provided using shared helper."""
         return _validate_practice_value(v)
 
-    @validator("phone_number")
+    @field_validator("phone_number")
+    @classmethod
     def validate_phone_number_update(cls, v):
         """Validate phone number if provided."""
         if v is None or v.strip() == "":
@@ -310,12 +321,14 @@ class PractitionerUpdate(BaseModel):
 
         return v.strip()
 
-    @validator("email")
+    @field_validator("email")
+    @classmethod
     def validate_email_update(cls, v):
         """Validate email if provided using shared helper."""
         return _validate_email_value(v)
 
-    @validator("website")
+    @field_validator("website")
+    @classmethod
     def validate_website_update(cls, v):
         """Validate website URL if provided."""
         if v is None or v.strip() == "":
@@ -343,7 +356,8 @@ class PractitionerUpdate(BaseModel):
 
         return cleaned_url
 
-    @validator("rating")
+    @field_validator("rating")
+    @classmethod
     def validate_rating_update(cls, v):
         """Validate rating if provided."""
         if v is None:
@@ -434,14 +448,16 @@ class PractitionerSearch(BaseModel):
     name: Optional[str] = None
     specialty: Optional[str] = None
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name_search(cls, v):
         """Validate search name parameter."""
         if v is not None and len(v.strip()) < 1:
             raise ValueError("Search name must not be empty")
         return v.strip() if v else v
 
-    @validator("specialty")
+    @field_validator("specialty")
+    @classmethod
     def validate_specialty_search(cls, v):
         """Validate search specialty parameter."""
         if v is not None and len(v.strip()) < 1:

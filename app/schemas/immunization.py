@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional, List, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 
 from app.schemas.base_tags import TaggedEntityMixin
 
@@ -48,7 +48,8 @@ class ImmunizationBase(TaggedEntityMixin):
         None, gt=0, description="ID of the administering practitioner"
     )
 
-    @validator("date_administered", pre=True)
+    @field_validator("date_administered", mode="before")
+    @classmethod
     def validate_date_administered(cls, v):
         if isinstance(v, str):
             try:
@@ -59,15 +60,16 @@ class ImmunizationBase(TaggedEntityMixin):
             raise ValueError("Administration date cannot be in the future")
         return v
 
-    @validator("expiration_date", pre=True)
-    def validate_expiration_date(cls, v, values):
+    @field_validator("expiration_date", mode="before")
+    @classmethod
+    def validate_expiration_date(cls, v, info: ValidationInfo):
         if v and isinstance(v, str):
             try:
                 v = date.fromisoformat(v)
             except ValueError:
                 raise ValueError("Invalid expiration date format. Use YYYY-MM-DD")
-        if v and "date_administered" in values:
-            admin_date = values["date_administered"]
+        if v and info.data.get("date_administered"):
+            admin_date = info.data["date_administered"]
             if isinstance(admin_date, str):
                 try:
                     admin_date = date.fromisoformat(admin_date)
@@ -77,7 +79,8 @@ class ImmunizationBase(TaggedEntityMixin):
                 raise ValueError("Expiration date cannot be before administration date")
         return v
 
-    @validator("route")
+    @field_validator("route")
+    @classmethod
     def validate_route(cls, v):
         if v:
             valid_routes = [
@@ -113,7 +116,8 @@ class ImmunizationUpdate(BaseModel):
     practitioner_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None
 
-    @validator("date_administered", pre=True)
+    @field_validator("date_administered", mode="before")
+    @classmethod
     def validate_date_administered(cls, v):
         if v and isinstance(v, str):
             try:
@@ -124,8 +128,9 @@ class ImmunizationUpdate(BaseModel):
             raise ValueError("Administration date cannot be in the future")
         return v
 
-    @validator("expiration_date", pre=True)
-    def validate_expiration_date(cls, v, values):
+    @field_validator("expiration_date", mode="before")
+    @classmethod
+    def validate_expiration_date(cls, v, info: ValidationInfo):
         if v and isinstance(v, str):
             try:
                 v = date.fromisoformat(v)
@@ -133,14 +138,14 @@ class ImmunizationUpdate(BaseModel):
                 raise ValueError("Invalid expiration date format. Use YYYY-MM-DD")
         if (
             v
-            and "date_administered" in values
-            and values["date_administered"]
-            and v < values["date_administered"]
+            and info.data.get("date_administered")
+            and v < info.data["date_administered"]
         ):
             raise ValueError("Expiration date cannot be before administration date")
         return v
 
-    @validator("route")
+    @field_validator("route")
+    @classmethod
     def validate_route(cls, v):
         if v:
             valid_routes = [

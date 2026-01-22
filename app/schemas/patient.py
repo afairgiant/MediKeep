@@ -1,10 +1,39 @@
 from datetime import date
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, field_validator, model_validator
+
+from app.schemas.validators import (
+    empty_strings_to_none,
+    validate_blood_type,
+    validate_date_not_future,
+    validate_gender,
+    validate_positive_id,
+    validate_required_text,
+    validate_text_field,
+)
 
 if TYPE_CHECKING:
     from schemas.user import User
+
+
+# Field lists for empty string conversion
+_OPTIONAL_FIELDS = [
+    "gender",
+    "address",
+    "blood_type",
+    "height",
+    "weight",
+    "physician_id",
+    "relationship_to_self",
+]
+
+_ALL_OPTIONAL_FIELDS = [
+    "first_name",
+    "last_name",
+    "birth_date",
+    *_OPTIONAL_FIELDS,
+]
 
 
 class PatientBase(BaseModel):
@@ -31,218 +60,71 @@ class PatientBase(BaseModel):
     physician_id: Optional[int] = None
     relationship_to_self: Optional[str] = None  # Use RelationshipToSelf enum values
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def convert_empty_strings_to_none(cls, values):
         """Convert empty strings to None for optional fields"""
-        if isinstance(values, dict):
-            for field in [
-                "gender",
-                "address",
-                "blood_type",
-                "height",
-                "weight",
-                "physician_id",
-                "relationship_to_self",
-            ]:
-                if field in values and values[field] == "":
-                    values[field] = None
-        return values
+        return empty_strings_to_none(values, _OPTIONAL_FIELDS)
 
-    @validator("first_name")
+    @field_validator("first_name")
+    @classmethod
     def validate_first_name(cls, v):
-        """
-        Validate first name requirements.
+        """Validate first name requirements."""
+        return validate_required_text(v, max_length=50, field_name="First name", normalize_case="title")
 
-        Args:
-            v: The first name value to validate
-
-        Returns:
-            Cleaned first name (stripped whitespace)
-
-        Raises:
-            ValueError: If first name is empty or too long
-        """
-        if not v or len(v.strip()) < 1:
-            raise ValueError("First name is required")
-        if len(v) > 50:
-            raise ValueError("First name must be less than 50 characters")
-        return v.strip().title()  # Capitalize first letter
-
-    @validator("last_name")
+    @field_validator("last_name")
+    @classmethod
     def validate_last_name(cls, v):
-        """
-        Validate last name requirements.
+        """Validate last name requirements."""
+        return validate_required_text(v, max_length=50, field_name="Last name", normalize_case="title")
 
-        Args:
-            v: The last name value to validate
-
-        Returns:
-            Cleaned last name (stripped whitespace)
-
-        Raises:
-            ValueError: If last name is empty or too long
-        """
-        if not v or len(v.strip()) < 1:
-            raise ValueError("Last name is required")
-        if len(v) > 50:
-            raise ValueError("Last name must be less than 50 characters")
-        return v.strip().title()  # Capitalize first letter
-
-    @validator("gender")
+    @field_validator("gender")
+    @classmethod
     def validate_gender(cls, v):
-        """
-        Validate that the gender is one of the allowed values.
+        """Validate that the gender is one of the allowed values."""
+        return validate_gender(v, allow_empty_string=True)
 
-        Args:
-            v: The gender value to validate
-
-        Returns:
-            Cleaned gender (uppercase) or None
-
-        Raises:
-            ValueError: If gender is not in allowed list
-        """
-        if v is not None and v != "":
-            allowed_genders = ["M", "F", "MALE", "FEMALE", "OTHER", "U", "UNKNOWN"]
-            if v.upper() not in allowed_genders:
-                raise ValueError(f"Gender must be one of: {', '.join(allowed_genders)}")
-
-            # Normalize common values
-            gender_map = {"MALE": "M", "FEMALE": "F", "UNKNOWN": "U"}
-            return gender_map.get(v.upper(), v.upper())
-        return None if v == "" else v
-
-    @validator("birth_date")
+    @field_validator("birth_date")
+    @classmethod
     def validate_birth_date(cls, v):
-        """
-        Validate birth date is reasonable.
+        """Validate birth date is reasonable."""
+        return validate_date_not_future(v, field_name="Birth date", max_years_past=150)
 
-        Args:
-            v: The birth date value to validate
-
-        Returns:
-            The birth date (unchanged)
-
-        Raises:
-            ValueError: If birth date is in the future or too far in the past
-        """
-        from datetime import date
-
-        today = date.today()
-        if v > today:
-            raise ValueError("Birth date cannot be in the future")
-
-        # Check if birth date is more than 150 years ago
-        if today.year - v.year > 150:
-            raise ValueError("Birth date cannot be more than 150 years ago")
-
-        return v
-
-    @validator("address")
+    @field_validator("address")
+    @classmethod
     def validate_address(cls, v):
-        """
-        Validate address requirements.
+        """Validate address requirements."""
+        return validate_text_field(v, max_length=200, min_length=5, field_name="Address")
 
-        Args:
-            v: The address value to validate
-
-        Returns:
-            Cleaned address (stripped whitespace) or None
-
-        Raises:
-            ValueError: If address is too long
-        """
-        if v is not None and v.strip():
-            if len(v.strip()) < 5:
-                raise ValueError("Address must be at least 5 characters long")
-            if len(v) > 200:
-                raise ValueError("Address must be less than 200 characters")
-            return v.strip()
-        return None
-
-    @validator("blood_type")
+    @field_validator("blood_type")
+    @classmethod
     def validate_blood_type(cls, v):
-        """
-        Validate blood type format.
+        """Validate blood type format."""
+        return validate_blood_type(v)
 
-        Args:
-            v: The blood type value to validate
-
-        Returns:
-            Cleaned blood type (uppercase) or None
-
-        Raises:
-            ValueError: If blood type is not in valid format
-        """
-        if v is not None and v.strip():
-            # Common blood types
-            valid_blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
-            blood_type_upper = v.upper().strip()
-
-            if blood_type_upper not in valid_blood_types:
-                raise ValueError(
-                    f"Blood type must be one of: {', '.join(valid_blood_types)}"
-                )
-
-            return blood_type_upper
-        return None
-
-    @validator("height")
+    @field_validator("height")
+    @classmethod
     def validate_height(cls, v):
-        """
-        Validate height in inches (stored as imperial, converted from user's preferred units).
-
-        Args:
-            v: The height value to validate
-
-        Returns:
-            Height value or None
-
-        Raises:
-            ValueError: If height is not reasonable
-        """
+        """Validate height in inches (stored as imperial, converted from user's preferred units)."""
         if v is not None:
             if v < 12.0 or v > 108.0:  # 1 foot to 9 feet, consistent with frontend
                 raise ValueError("Height must be between 12 and 108 inches")
         return v
 
-    @validator("weight")
+    @field_validator("weight")
+    @classmethod
     def validate_weight(cls, v):
-        """
-        Validate weight in pounds (stored as imperial, converted from user's preferred units).
-
-        Args:
-            v: The weight value to validate
-
-        Returns:
-            Weight value or None
-
-        Raises:
-            ValueError: If weight is not reasonable
-        """
+        """Validate weight in pounds (stored as imperial, converted from user's preferred units)."""
         if v is not None:
             if v < 1.0 or v > 992.0:  # Consistent with frontend validation ranges
                 raise ValueError("Weight must be between 1 and 992 pounds")
         return v
 
-    @validator("physician_id")
+    @field_validator("physician_id")
+    @classmethod
     def validate_physician_id(cls, v):
-        """
-        Validate physician ID.
-
-        Args:
-            v: The physician ID value to validate
-
-        Returns:
-            Physician ID or None
-
-        Raises:
-            ValueError: If physician ID is not positive
-        """
-        if v is not None:
-            if v <= 0:
-                raise ValueError("Physician ID must be a positive integer")
-        return v
+        """Validate physician ID."""
+        return validate_positive_id(v, field_name="Physician ID")
 
 
 class PatientCreate(PatientBase):
@@ -294,101 +176,64 @@ class PatientUpdate(BaseModel):
     physician_id: Optional[int] = None
     relationship_to_self: Optional[str] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def convert_empty_strings_to_none(cls, values):
         """Convert empty strings to None for optional fields"""
-        if isinstance(values, dict):
-            for field in [
-                "first_name",
-                "last_name",
-                "birth_date",
-                "gender",
-                "address",
-                "blood_type",
-                "height",
-                "weight",
-                "physician_id",
-                "relationship_to_self",
-            ]:
-                if field in values and values[field] == "":
-                    values[field] = None
-        return values
+        return empty_strings_to_none(values, _ALL_OPTIONAL_FIELDS)
 
-    @validator("first_name")
+    @field_validator("first_name")
+    @classmethod
     def validate_first_name(cls, v):
         """Validate first name if provided."""
-        if v is not None:
-            if len(v.strip()) < 1:
-                raise ValueError("First name cannot be empty")
-            if len(v) > 50:
-                raise ValueError("First name must be less than 50 characters")
-            return v.strip().title()
-        return v
+        if v is None:
+            return v
+        if len(v.strip()) < 1:
+            raise ValueError("First name cannot be empty")
+        if len(v) > 50:
+            raise ValueError("First name must be less than 50 characters")
+        return v.strip().title()
 
-    @validator("last_name")
+    @field_validator("last_name")
+    @classmethod
     def validate_last_name(cls, v):
         """Validate last name if provided."""
-        if v is not None:
-            if len(v.strip()) < 1:
-                raise ValueError("Last name cannot be empty")
-            if len(v) > 50:
-                raise ValueError("Last name must be less than 50 characters")
-            return v.strip().title()
-        return v
+        if v is None:
+            return v
+        if len(v.strip()) < 1:
+            raise ValueError("Last name cannot be empty")
+        if len(v) > 50:
+            raise ValueError("Last name must be less than 50 characters")
+        return v.strip().title()
 
-    @validator("gender")
+    @field_validator("gender")
+    @classmethod
     def validate_gender(cls, v):
         """Validate gender if provided."""
-        if v is not None:
-            allowed_genders = ["M", "F", "MALE", "FEMALE", "OTHER", "U", "UNKNOWN"]
-            if v.upper() not in allowed_genders:
-                raise ValueError(f"Gender must be one of: {', '.join(allowed_genders)}")
+        if v is None:
+            return v
+        return validate_gender(v)
 
-            gender_map = {"MALE": "M", "FEMALE": "F", "UNKNOWN": "U"}
-            return gender_map.get(v.upper(), v.upper())
-        return v
-
-    @validator("birth_date")
+    @field_validator("birth_date")
+    @classmethod
     def validate_birth_date(cls, v):
         """Validate birth date if provided."""
-        if v is not None:
-            from datetime import date
+        return validate_date_not_future(v, field_name="Birth date", max_years_past=150)
 
-            today = date.today()
-            if v > today:
-                raise ValueError("Birth date cannot be in the future")
-
-            if today.year - v.year > 150:
-                raise ValueError("Birth date cannot be more than 150 years ago")
-        return v
-
-    @validator("address")
+    @field_validator("address")
+    @classmethod
     def validate_address(cls, v):
         """Validate address if provided."""
-        if v is not None and v.strip():
-            if len(v.strip()) < 5:
-                raise ValueError("Address must be at least 5 characters long")
-            if len(v) > 200:
-                raise ValueError("Address must be less than 200 characters")
-            return v.strip()
-        return None
+        return validate_text_field(v, max_length=200, min_length=5, field_name="Address")
 
-    @validator("blood_type")
+    @field_validator("blood_type")
+    @classmethod
     def validate_blood_type(cls, v):
         """Validate blood type if provided."""
-        if v is not None and v.strip():
-            valid_blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
-            blood_type_upper = v.upper().strip()
+        return validate_blood_type(v)
 
-            if blood_type_upper not in valid_blood_types:
-                raise ValueError(
-                    f"Blood type must be one of: {', '.join(valid_blood_types)}"
-                )
-
-            return blood_type_upper
-        return None
-
-    @validator("height")
+    @field_validator("height")
+    @classmethod
     def validate_height(cls, v):
         """Validate height if provided (stored as inches, converted from user's preferred units)."""
         if v is not None:
@@ -396,7 +241,8 @@ class PatientUpdate(BaseModel):
                 raise ValueError("Height must be between 12 and 108 inches")
         return v
 
-    @validator("weight")
+    @field_validator("weight")
+    @classmethod
     def validate_weight(cls, v):
         """Validate weight if provided (stored as pounds, converted from user's preferred units)."""
         if v is not None:
@@ -404,13 +250,11 @@ class PatientUpdate(BaseModel):
                 raise ValueError("Weight must be between 1 and 992 pounds")
         return v
 
-    @validator("physician_id")
+    @field_validator("physician_id")
+    @classmethod
     def validate_physician_id(cls, v):
         """Validate physician ID if provided."""
-        if v is not None:
-            if v <= 0:
-                raise ValueError("Physician ID must be a positive integer")
-        return v
+        return validate_positive_id(v, field_name="Physician ID")
 
 
 class Patient(PatientBase):
@@ -434,48 +278,37 @@ class Patient(PatientBase):
 
     id: int
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def convert_empty_strings_to_none_for_response(cls, values):
         """Convert empty strings to None for response validation"""
-        if isinstance(values, dict):
-            for field in [
-                "gender",
-                "address",
-                "blood_type",
-                "height",
-                "weight",
-                "physician_id",
-                "relationship_to_self",
-            ]:
-                if field in values and values[field] == "":
-                    values[field] = None
-        return values
+        return empty_strings_to_none(values, _OPTIONAL_FIELDS)
 
-    @validator("gender")
+    @field_validator("gender")
+    @classmethod
     def validate_gender_response(cls, v):
         """Validate gender for response, allowing None for empty values"""
-        if v is not None and v != "":
-            allowed_genders = ["M", "F", "MALE", "FEMALE", "OTHER", "U", "UNKNOWN"]
-            if v.upper() not in allowed_genders:
-                # For response validation, return None instead of raising error
-                return None
-            gender_map = {"MALE": "M", "FEMALE": "F", "UNKNOWN": "U"}
-            return gender_map.get(v.upper(), v.upper())
-        return None
+        if v is None or v == "":
+            return None
+        # For response validation, return None for invalid values instead of raising
+        try:
+            return validate_gender(v)
+        except ValueError:
+            return None
 
-    @validator("address")
+    @field_validator("address")
+    @classmethod
     def validate_address_response(cls, v):
         """Validate address for response, consistent with other validation methods"""
-        if v is not None and v.strip():
-            # Use same validation logic as other classes for consistency
-            if len(v.strip()) < 5:
-                # For response, silently return None for invalid data rather than failing
-                return None
-            if len(v) > 200:
-                # Truncate if too long rather than failing in response validation
-                return v.strip()[:200]
-            return v.strip()
-        return None
+        if v is None or not v.strip():
+            return None
+        stripped = v.strip()
+        # For response, silently handle invalid data rather than failing
+        if len(stripped) < 5:
+            return None
+        if len(stripped) > 200:
+            return stripped[:200]
+        return stripped
 
     class Config:
         """
@@ -532,16 +365,15 @@ class PatientSearch(BaseModel):
     min_birth_year: Optional[int] = None
     max_birth_year: Optional[int] = None
 
-    @validator("min_birth_year", "max_birth_year")
+    @field_validator("min_birth_year", "max_birth_year")
+    @classmethod
     def validate_birth_years(cls, v):
         """Validate birth year is reasonable."""
-        if v is not None:
-            from datetime import date
-
-            current_year = date.today().year
-
-            if v < current_year - 150 or v > current_year:
-                raise ValueError(
-                    f"Birth year must be between {current_year - 150} and {current_year}"
-                )
+        if v is None:
+            return v
+        current_year = date.today().year
+        if v < current_year - 150 or v > current_year:
+            raise ValueError(
+                f"Birth year must be between {current_year - 150} and {current_year}"
+            )
         return v
