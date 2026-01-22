@@ -271,10 +271,19 @@ export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => 
 export function formatTimeToAmPm(timeString) {
   if (!timeString) return '';
 
-  const [hours, minutes] = timeString.split(':');
+  const [hours, minutesPart] = timeString.split(':');
   const hour = parseInt(hours, 10);
 
   if (isNaN(hour)) return '';
+
+  // Default minutes to "00" if missing or invalid
+  let minutes = '00';
+  if (minutesPart) {
+    const minutesNum = parseInt(minutesPart, 10);
+    if (!isNaN(minutesNum) && minutesNum >= 0 && minutesNum < 60) {
+      minutes = String(minutesNum).padStart(2, '0');
+    }
+  }
 
   const ampm = hour >= 12 ? 'PM' : 'AM';
   const hour12 = hour % 12 || 12;

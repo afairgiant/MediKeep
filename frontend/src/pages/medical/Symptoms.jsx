@@ -297,10 +297,16 @@ const Symptoms = () => {
         occurrence_time: occurrenceFormData.occurrence_time || null,
         resolved_date: occurrenceFormData.resolved_date || null,
         resolved_time: occurrenceFormData.resolved_time || null,
-        // Convert text fields to arrays for backend
-        triggers: occurrenceFormData.triggers ? [occurrenceFormData.triggers] : [],
-        relief_methods: occurrenceFormData.relief_methods ? [occurrenceFormData.relief_methods] : [],
-        associated_symptoms: occurrenceFormData.associated_symptoms ? [occurrenceFormData.associated_symptoms] : [],
+        // Convert comma-separated text fields to arrays for backend
+        triggers: occurrenceFormData.triggers
+          ? occurrenceFormData.triggers.split(',').map(s => s.trim()).filter(s => s.length > 0)
+          : [],
+        relief_methods: occurrenceFormData.relief_methods
+          ? occurrenceFormData.relief_methods.split(',').map(s => s.trim()).filter(s => s.length > 0)
+          : [],
+        associated_symptoms: occurrenceFormData.associated_symptoms
+          ? occurrenceFormData.associated_symptoms.split(',').map(s => s.trim()).filter(s => s.length > 0)
+          : [],
       };
 
       if (editingOccurrence) {
