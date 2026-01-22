@@ -73,25 +73,29 @@ const Symptoms = () => {
     tags: [],
   });
 
-  // Occurrence Form state
-  const [showOccurrenceForm, setShowOccurrenceForm] = useState(false);
-  const [selectedSymptomForOccurrence, setSelectedSymptomForOccurrence] = useState(null);
-  const [editingOccurrence, setEditingOccurrence] = useState(null);
-  const [occurrenceFormData, setOccurrenceFormData] = useState({
-    occurrence_date: '',
-    time_of_day: '',
+  // Default occurrence form state - used for both initial state and reset
+  const getDefaultOccurrenceFormData = useCallback((withTodayDate = false) => ({
+    occurrence_date: withTodayDate ? new Date().toISOString().split('T')[0] : '',
+    occurrence_time: '',
     severity: 'moderate',
     pain_scale: '',
     duration: '',
     location: '',
     impact_level: '',
-    triggers: [],
-    relief_methods: [],
-    associated_symptoms: [],
+    triggers: '',
+    relief_methods: '',
+    associated_symptoms: '',
     resolved_date: '',
+    resolved_time: '',
     resolution_notes: '',
     notes: '',
-  });
+  }), []);
+
+  // Occurrence Form state
+  const [showOccurrenceForm, setShowOccurrenceForm] = useState(false);
+  const [selectedSymptomForOccurrence, setSelectedSymptomForOccurrence] = useState(null);
+  const [editingOccurrence, setEditingOccurrence] = useState(null);
+  const [occurrenceFormData, setOccurrenceFormData] = useState(getDefaultOccurrenceFormData());
 
   const fetchSymptoms = useCallback(async () => {
     if (!currentPatient?.id) return;
@@ -241,39 +245,29 @@ const Symptoms = () => {
   const handleLogEpisode = symptom => {
     setSelectedSymptomForOccurrence(symptom);
     setEditingOccurrence(null);
-    setOccurrenceFormData({
-      occurrence_date: new Date().toISOString().split('T')[0],
-      time_of_day: '',
-      severity: 'moderate',
-      pain_scale: '',
-      duration: '',
-      location: '',
-      impact_level: '',
-      triggers: [],
-      relief_methods: [],
-      associated_symptoms: [],
-      resolved_date: '',
-      resolution_notes: '',
-      notes: '',
-    });
+    setOccurrenceFormData(getDefaultOccurrenceFormData(true));
     setShowOccurrenceForm(true);
   };
 
   const handleEditOccurrence = (symptom, occurrence) => {
+    // Helper to convert array fields to comma-separated string for form display
+    const arrayToString = value => Array.isArray(value) ? value.join(', ') : (value || '');
+
     setSelectedSymptomForOccurrence(symptom);
     setEditingOccurrence(occurrence);
     setOccurrenceFormData({
       occurrence_date: occurrence.occurrence_date || '',
-      time_of_day: occurrence.time_of_day || '',
+      occurrence_time: occurrence.occurrence_time || '',
       severity: occurrence.severity || 'moderate',
       pain_scale: occurrence.pain_scale !== null ? occurrence.pain_scale.toString() : '',
       duration: occurrence.duration || '',
       location: occurrence.location || '',
       impact_level: occurrence.impact_level || '',
-      triggers: occurrence.triggers || [],
-      relief_methods: occurrence.relief_methods || [],
-      associated_symptoms: occurrence.associated_symptoms || [],
+      triggers: arrayToString(occurrence.triggers),
+      relief_methods: arrayToString(occurrence.relief_methods),
+      associated_symptoms: arrayToString(occurrence.associated_symptoms),
       resolved_date: occurrence.resolved_date || '',
+      resolved_time: occurrence.resolved_time || '',
       resolution_notes: occurrence.resolution_notes || '',
       notes: occurrence.notes || '',
     });
@@ -300,7 +294,13 @@ const Symptoms = () => {
           occurrenceFormData.pain_scale !== ''
             ? parseInt(occurrenceFormData.pain_scale, 10)
             : null,
+        occurrence_time: occurrenceFormData.occurrence_time || null,
         resolved_date: occurrenceFormData.resolved_date || null,
+        resolved_time: occurrenceFormData.resolved_time || null,
+        // Convert text fields to arrays for backend
+        triggers: occurrenceFormData.triggers ? [occurrenceFormData.triggers] : [],
+        relief_methods: occurrenceFormData.relief_methods ? [occurrenceFormData.relief_methods] : [],
+        associated_symptoms: occurrenceFormData.associated_symptoms ? [occurrenceFormData.associated_symptoms] : [],
       };
 
       if (editingOccurrence) {

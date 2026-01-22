@@ -12,6 +12,7 @@ interface TagInputProps {
   maxTags?: number;
   disabled?: boolean;
   error?: string;
+  disableSuggestions?: boolean;
 }
 
 export function TagInput({
@@ -20,7 +21,8 @@ export function TagInput({
   placeholder = 'Add tags...',
   maxTags = 15,
   disabled = false,
-  error
+  error,
+  disableSuggestions = false
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -41,8 +43,10 @@ export function TagInput({
     }
   }, [validationError]);
 
-  // Fetch popular tags on mount
+  // Fetch popular tags on mount (only if suggestions enabled)
   useEffect(() => {
+    if (disableSuggestions) return;
+
     const fetchPopularTags = async () => {
       try {
         const response = await apiService.get('/tags/suggestions?limit=20');
@@ -55,10 +59,15 @@ export function TagInput({
       }
     };
     fetchPopularTags();
-  }, []);
+  }, [disableSuggestions]);
 
-  // Fetch tag suggestions based on input
+  // Fetch tag suggestions based on input (only if suggestions enabled)
   useEffect(() => {
+    if (disableSuggestions) {
+      setSuggestions([]);
+      return;
+    }
+
     const fetchSuggestions = async () => {
       if (debouncedInput.length < 2) {
         setSuggestions([]);
@@ -68,11 +77,11 @@ export function TagInput({
       setIsLoadingSuggestions(true);
       try {
         const response = await apiService.get(`/tags/autocomplete?q=${encodeURIComponent(debouncedInput)}&limit=10`);
-        
+
         // Filter out already selected tags
         const tags = response.data || response || [];
         const filtered = tags.filter((tag: string) => !value.includes(tag));
-        
+
         setSuggestions(filtered);
         setShowSuggestions(filtered.length > 0);
       } catch (error) {
@@ -87,7 +96,7 @@ export function TagInput({
     };
 
     fetchSuggestions();
-  }, [debouncedInput, value]);
+  }, [debouncedInput, value, disableSuggestions]);
 
   const addTag = (tag: string) => {
     const trimmedTag = tag.trim().toLowerCase();

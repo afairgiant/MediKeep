@@ -17,7 +17,7 @@ import {
   Checkbox,
   Divider,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput, TimeInput } from '@mantine/dates';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
@@ -285,6 +285,22 @@ const BaseMedicalForm = ({
     );
   }, [handleDateChange, formData]);
 
+  // Callback for time input fields
+  const renderTimeField = useCallback((fieldConfig, baseProps) => {
+    const { name } = fieldConfig;
+
+    return (
+      <TimeInput
+        {...baseProps}
+        value={formData[name] || ''}
+        onChange={(event) => {
+          onInputChange({ target: { name, value: event.target.value } });
+        }}
+        clearable
+      />
+    );
+  }, [formData, onInputChange]);
+
   // Main renderField function now uses smaller callbacks - much simpler with fewer dependencies
   const renderField = useCallback((fieldConfig) => {
     // Translate field configuration (labels, placeholders, descriptions, options)
@@ -342,6 +358,9 @@ const BaseMedicalForm = ({
 
       case 'date':
         return renderDateField(fieldConfig, baseProps);
+
+      case 'time':
+        return renderTimeField(fieldConfig, baseProps);
 
       case 'autocomplete':
         // Convert options to simple string array for Autocomplete
@@ -481,12 +500,6 @@ const BaseMedicalForm = ({
 
         return <ComboboxField />;
 
-      case 'number':
-        return renderNumberField(fieldConfig, baseProps);
-
-      case 'date':
-        return renderDateField(fieldConfig, baseProps);
-
       case 'rating':
         return (
           <div>
@@ -566,7 +579,7 @@ const BaseMedicalForm = ({
         logger.warn(`Unknown field type: ${type} for field: ${name}`);
         return null;
     }
-  }, [formData, dynamicOptions, loadingStates, fieldErrors, renderTextInputField, renderTextareaField, renderSelectField, renderNumberField, renderDateField, handleRatingChange, handleCheckboxChange, onInputChange, t]);
+  }, [formData, dynamicOptions, loadingStates, fieldErrors, renderTextInputField, renderTextareaField, renderSelectField, renderNumberField, renderDateField, renderTimeField, handleRatingChange, handleCheckboxChange, onInputChange, t]);
 
   // Group fields by row based on responsive column configuration
   const groupFieldsIntoRows = useCallback((fields) => {

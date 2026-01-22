@@ -12,6 +12,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    Time,
     UniqueConstraint,
     column,
     func,
@@ -1019,7 +1020,8 @@ class SymptomOccurrence(Base):
 
     # Duration and timing
     duration = Column(String(100), nullable=True)  # "30 minutes", "2 hours", "all day"
-    time_of_day = Column(String(50), nullable=True)  # morning, afternoon, evening, night
+    time_of_day = Column(String(50), nullable=True)  # morning, afternoon, evening, night (legacy)
+    occurrence_time = Column(Time, nullable=True)  # Precise time when episode started
 
     # Context
     location = Column(String(200), nullable=True)  # Body part/area affected
@@ -1032,6 +1034,7 @@ class SymptomOccurrence(Base):
 
     # Resolution
     resolved_date = Column(Date, nullable=True)
+    resolved_time = Column(Time, nullable=True)
     resolution_notes = Column(Text, nullable=True)
 
     # Notes for this specific occurrence

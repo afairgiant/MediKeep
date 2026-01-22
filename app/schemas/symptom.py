@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import List, Optional
 
 from pydantic import BaseModel, field_validator, ValidationInfo
@@ -22,7 +22,7 @@ VALID_RELATIONSHIP_TYPES = ["side_effect", "helped_by", "related_to"]
 
 def _validate_enum_field(value: Optional[str], valid_values: List[str], field_name: str) -> Optional[str]:
     """Validate a value is in an allowed list (for optional fields)."""
-    if value is None:
+    if value is None or value == '':
         return None
     if value not in valid_values:
         raise ValueError(f"{field_name} must be one of: {', '.join(valid_values)}")
@@ -158,13 +158,15 @@ class SymptomOccurrenceBase(BaseModel):
     severity: str
     pain_scale: Optional[int] = None
     duration: Optional[str] = None
-    time_of_day: Optional[str] = None
+    time_of_day: Optional[str] = None  # Legacy field, kept for backwards compatibility
+    occurrence_time: Optional[time] = None  # Precise time when episode started
     location: Optional[str] = None
     triggers: Optional[List[str]] = None
     relief_methods: Optional[List[str]] = None
     associated_symptoms: Optional[List[str]] = None
     impact_level: Optional[str] = None
     resolved_date: Optional[date] = None
+    resolved_time: Optional[time] = None
     resolution_notes: Optional[str] = None
     notes: Optional[str] = None
 
@@ -247,13 +249,15 @@ class SymptomOccurrenceUpdate(BaseModel):
     severity: Optional[str] = None
     pain_scale: Optional[int] = None
     duration: Optional[str] = None
-    time_of_day: Optional[str] = None
+    time_of_day: Optional[str] = None  # Legacy field
+    occurrence_time: Optional[time] = None  # Precise time
     location: Optional[str] = None
     triggers: Optional[List[str]] = None
     relief_methods: Optional[List[str]] = None
     associated_symptoms: Optional[List[str]] = None
     impact_level: Optional[str] = None
     resolved_date: Optional[date] = None
+    resolved_time: Optional[time] = None
     resolution_notes: Optional[str] = None
     notes: Optional[str] = None
 
