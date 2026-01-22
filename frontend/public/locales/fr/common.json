@@ -101,11 +101,18 @@
     "form": {
       "selectDate": "Sélectionnez la date",
       "selectDateTime": "Sélectionnez la date et l'heure",
+      "pasteDateTime": "Collez ou saisissez la date/l'heure",
+      "pasteDateTimePlaceholder": "ex : 29/07/2015 23:58:21",
+      "pasteDateTimeDescription": "Saisissez ou collez la date/l'heure, ou cliquez sur le calendrier pour la sélectionner",
+      "openCalendar": "Ouvrir le calendrier",
+      "selectTime": "Heure",
       "validation": {
         "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",
         "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
         "a1cMin": "A1C doit valoir au moins 0 %",
         "a1cMax": "A1C ne peut dépasser 20 %"
+        "dateInFuture": "La date ne peut se situer dans le futur",
+        "timeInFuture": "L'heure sélectionnée ne peut se situer dans le futur"
       }
     },
     "modal": {
@@ -1266,12 +1273,14 @@
       "specialty": "Spécialité",
       "practice": "Cabinet",
       "phone": "Téléphone",
+      "email": "Email",
       "rating": "Avis"
     },
     "card": {
       "subtitle": "Médecin",
       "practice": "Cabinet",
       "phone": "Téléphone",
+      "email": "Email",
       "website": "Site web",
       "visitWebsite": "Visiter le site web",
       "rating": "Avis"
@@ -1283,6 +1292,7 @@
       "practice": "Cabinet",
       "specialty": "Spécialité",
       "phone": "Téléphone",
+      "email": "Email",
       "contactRating": "CONTACT & AVIS",
       "website": "Site web",
       "visitWebsite": "Visiter le site web",
