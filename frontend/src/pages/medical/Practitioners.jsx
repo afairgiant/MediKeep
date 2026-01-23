@@ -27,6 +27,7 @@ import { useResponsive } from '../../hooks/useResponsive';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import EmptyState from '../../components/shared/EmptyState';
 import {
   usePractitioners,
   useCacheManager,
@@ -334,25 +335,13 @@ const Practitioners = () => {
 
         {/* Content */}
           {filteredPractitioners.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconShieldCheck
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('practitioners.empty.title', 'No healthcare practitioners found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')
-                        : t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconShieldCheck}
+              title={t('practitioners.empty.title', 'No healthcare practitioners found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
             <Grid>
               <AnimatePresence>

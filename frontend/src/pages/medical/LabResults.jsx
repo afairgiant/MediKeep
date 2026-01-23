@@ -25,6 +25,7 @@ import ViewToggle from '../../components/shared/ViewToggle';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import FileCountBadge from '../../components/shared/FileCountBadge';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import EmptyState from '../../components/shared/EmptyState';
 // Import new modular components
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
@@ -597,24 +598,18 @@ const LabResults = () => {
           />
 
           {filteredLabResults.length === 0 ? (
-            <Card withBorder p="xl">
-              <Stack align="center" gap="md">
-                <Text size="3rem">🧪</Text>
-                <Text size="xl" fw={600}>
-                  {t('labResults.noResults', 'No Lab Results Found')}
-                </Text>
-                <Text ta="center" c="dimmed">
-                  {dataManagement.hasActiveFilters
-                    ? t('labResults.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                    : t('labResults.startAdding', 'Start by adding your first lab result.')}
-                </Text>
-                {!dataManagement.hasActiveFilters && (
-                  <Button variant="filled" onClick={handleAddLabResult}>
-                    {t('labResults.addFirst', 'Add Your First Lab Result')}
-                  </Button>
-                )}
-              </Stack>
-            </Card>
+            <EmptyState
+              emoji="🧪"
+              title={t('labResults.noResults', 'No Lab Results Found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('labResults.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('labResults.startAdding', 'Start by adding your first lab result.')}
+              actionButton={
+                <Button variant="filled" onClick={handleAddLabResult}>
+                  {t('labResults.addFirst', 'Add Your First Lab Result')}
+                </Button>
+              }
+            />
           ) : viewMode === 'cards' ? (
             <Grid>
               {filteredLabResults.map((result) => (

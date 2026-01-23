@@ -24,6 +24,7 @@ import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
+import EmptyState from '../../components/shared/EmptyState';
 import { usePharmacies } from '../../hooks/useGlobalData';
 import { useTranslation } from 'react-i18next';
 
@@ -284,25 +285,13 @@ const Pharmacies = () => {
 
         {/* Content */}
           {filteredPharmacies.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconShieldCheck
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('pharmacies.empty.title', 'No pharmacies found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('pharmacies.empty.filtered', 'Try adjusting your search or filter criteria.')
-                        : t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconShieldCheck}
+              title={t('pharmacies.empty.title', 'No pharmacies found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('pharmacies.empty.filtered', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
+            />
           ) : (
             <Grid>
                 {filteredPharmacies.map((pharmacy, index) => (

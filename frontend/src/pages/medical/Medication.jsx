@@ -32,6 +32,7 @@ import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
+import EmptyState from '../../components/shared/EmptyState';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -568,25 +569,13 @@ const Medication = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {processedMedications.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconAlertTriangle
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('medications.noMedications', 'No medications or supplements found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('medications.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                        : t('medications.clickToStart', 'Click "Add New Medication" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconAlertTriangle}
+              title={t('medications.noMedications', 'No medications or supplements found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('medications.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('medications.clickToStart', 'Click "Add New Medication" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
             <Grid>
               <AnimatePresence>

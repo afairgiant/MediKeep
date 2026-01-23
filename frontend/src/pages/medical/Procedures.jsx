@@ -25,6 +25,7 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import EmptyState from '../../components/shared/EmptyState';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
@@ -444,24 +445,18 @@ const Procedures = () => {
           />
 
           {filteredProcedures.length === 0 ? (
-            <Card withBorder p="xl">
-              <Stack align="center" gap="md">
-                <Text size="3rem">🔬</Text>
-                <Text size="xl" fw={600}>
-                  {t('procedures.noProceduresFound', 'No Procedures Found')}
-                </Text>
-                <Text ta="center" c="dimmed">
-                  {dataManagement.hasActiveFilters
-                    ? t('procedures.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                    : t('procedures.startAdding', 'Start by adding your first procedure.')}
-                </Text>
-                {!dataManagement.hasActiveFilters && (
-                  <Button variant="filled" onClick={handleAddProcedure}>
-                    {t('procedures.addFirstProcedure', 'Add Your First Procedure')}
-                  </Button>
-                )}
-              </Stack>
-            </Card>
+            <EmptyState
+              emoji="🔬"
+              title={t('procedures.noProceduresFound', 'No Procedures Found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('procedures.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('procedures.startAdding', 'Start by adding your first procedure.')}
+              actionButton={
+                <Button variant="filled" onClick={handleAddProcedure}>
+                  {t('procedures.addFirstProcedure', 'Add Your First Procedure')}
+                </Button>
+              }
+            />
           ) : viewMode === 'cards' ? (
             <Grid>
               {filteredProcedures.map((procedure) => (
