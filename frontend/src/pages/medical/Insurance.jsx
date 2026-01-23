@@ -38,6 +38,7 @@ import InsuranceViewModal from '../../components/medical/insurance/InsuranceView
 import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
@@ -50,7 +51,6 @@ import {
   Text,
   Grid,
   Container,
-  Alert,
   Divider,
   Modal,
   Title,
@@ -69,6 +69,8 @@ const Insurance = () => {
     currentPatient,
     loading = false,
     error,
+    successMessage,
+    clearError,
     createItem = async () => {},
     updateItem = async () => {},
     deleteItem = async () => {},
@@ -444,17 +446,6 @@ const Insurance = () => {
     return <MedicalPageLoading message={t('insurance.loading', 'Loading insurance records...')} />;
   }
 
-  // Error state
-  if (error) {
-    return (
-      <Container size="xl">
-        <Alert color="red" title="Error loading insurance records" style={{ whiteSpace: 'pre-line' }}>
-          {getUserFriendlyError(error, 'load')}
-        </Alert>
-      </Container>
-    );
-  }
-
   return (
     <Container size="xl">
       <PageHeader
@@ -462,7 +453,14 @@ const Insurance = () => {
         description={t('insurance.description', 'Manage your insurance information and digital cards')}
       />
 
-      <Group justify="space-between" align="center">
+      <Stack gap="lg">
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
+
+        <Group justify="space-between" align="center">
         <Button variant="filled" onClick={handleAddNew}>
           {t('insurance.actions.addNew', '+ Add New Insurance')}
         </Button>
@@ -554,6 +552,7 @@ const Insurance = () => {
           )}
         </>
       )}
+      </Stack>
 
       {/* Form Modal */}
       <InsuranceFormWrapper
