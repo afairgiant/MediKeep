@@ -520,6 +520,7 @@ const Vitals = () => {
             leftSection: <IconPlus size={16} />,
           }}
           showViewToggle={false}
+          align="flex-start"
         />
 
         {/* Stats Overview */}

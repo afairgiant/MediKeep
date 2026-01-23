@@ -466,7 +466,7 @@ const Insurance = () => {
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
-          align="center"
+          mb={0}
         />
 
       {/* Mantine Filter Controls */}

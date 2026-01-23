@@ -57,7 +57,7 @@ function MedicalPageActions({
   showPrint = true,
   showViewToggle = true,
   mb = 'lg',
-  align = 'flex-start',
+  align = 'center',
   buttonGap = 'sm',
   children,
 }) {
@@ -69,8 +69,8 @@ function MedicalPageActions({
   // Determine if ViewToggle should be rendered
   const shouldShowViewToggle = showViewToggle && viewMode && onViewModeChange;
 
-  // Don't render if primary action is hidden and no visible secondary actions
-  const primaryVisible = primaryAction?.visible !== false;
+  // Don't render if no visible primary action, no visible secondary actions, no toggle, and no children
+  const primaryVisible = !!primaryAction && primaryAction.visible !== false;
   if (!primaryVisible && visibleSecondaryActions.length === 0 && !shouldShowViewToggle && !children) {
     return null;
   }
@@ -155,7 +155,7 @@ MedicalPageActions.propTypes = {
   showViewToggle: PropTypes.bool,
   /** Margin bottom for the container (defaults to 'lg') */
   mb: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  /** Vertical alignment of items (defaults to 'flex-start') */
+  /** Vertical alignment of items (defaults to 'center') */
   align: PropTypes.string,
   /** Gap between buttons (defaults to 'sm') */
   buttonGap: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
