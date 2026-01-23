@@ -9,7 +9,6 @@ import {
   Paper,
   Group,
   Text,
-  Title,
   Stack,
   Alert,
   Loader,
@@ -34,6 +33,7 @@ import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import EmptyState from '../../components/shared/EmptyState';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -310,25 +310,13 @@ const Allergies = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {processedAllergies.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconAlertTriangle
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('allergies.emptyState.title', 'No allergies found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('allergies.emptyState.filtered', 'Try adjusting your search or filter criteria.')
-                        : t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconAlertTriangle}
+              title={t('allergies.emptyState.title', 'No allergies found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('allergies.emptyState.filtered', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
             <Grid>
               <AnimatePresence>

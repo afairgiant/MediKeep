@@ -35,6 +35,7 @@ import {
   IconAward,
 } from '@tabler/icons-react';
 import { useMedicalData, useDataManagement, useEntityFileCounts, useViewModalNavigation } from '../../hooks';
+import EmptyState from '../../components/shared/EmptyState';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -401,25 +402,13 @@ const Conditions = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {filteredConditions.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconShieldCheck
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('conditions.noResults', 'No medical conditions found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('conditions.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                        : t('conditions.getStarted', 'Click "Add New Condition" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconShieldCheck}
+              title={t('conditions.noResults', 'No medical conditions found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('conditions.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('conditions.getStarted', 'Click "Add New Condition" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
             <Grid>
               <AnimatePresence>

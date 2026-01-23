@@ -45,6 +45,7 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import EmptyState from '../../components/shared/EmptyState';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 // Import new modular components
 import VisitCard from '../../components/medical/visits/VisitCard';
@@ -531,25 +532,13 @@ const Visits = () => {
 
         {/* Content */}
           {filteredVisits.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconShieldCheck
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('visits.noVisitsFound', 'No medical visits found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('visits.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                        : t('visits.clickToGetStarted', 'Click "Add New Visit" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconShieldCheck}
+              title={t('visits.noVisitsFound', 'No medical visits found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('visits.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('visits.clickToGetStarted', 'Click "Add New Visit" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
             <Grid>
               <AnimatePresence>

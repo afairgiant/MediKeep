@@ -16,6 +16,7 @@ import logger from '../../services/logger';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import EmptyState from '../../components/shared/EmptyState';
 
 // Modular components
 import TreatmentCard from '../../components/medical/treatments/TreatmentCard';
@@ -353,24 +354,18 @@ const Treatments = () => {
           />
 
           {filteredTreatments.length === 0 ? (
-            <Card withBorder p="xl">
-              <Stack align="center" gap="md">
-                <Text size="3rem">🩹</Text>
-                <Text size="xl" fw={600}>
-                  {t('treatments.noTreatmentsFound', 'No Treatments Found')}
-                </Text>
-                <Text ta="center" c="dimmed">
-                  {dataManagement.hasActiveFilters
-                    ? t('treatments.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                    : t('treatments.startAdding', 'Start by adding your first treatment.')}
-                </Text>
-                {!dataManagement.hasActiveFilters && (
-                  <Button variant="filled" onClick={handleAddTreatment}>
-                    {t('treatments.addFirstTreatment', 'Add Your First Treatment')}
-                  </Button>
-                )}
-              </Stack>
-            </Card>
+            <EmptyState
+              emoji="🩹"
+              title={t('treatments.noTreatmentsFound', 'No Treatments Found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('treatments.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('treatments.startAdding', 'Start by adding your first treatment.')}
+              actionButton={
+                <Button variant="filled" onClick={handleAddTreatment}>
+                  {t('treatments.addFirstTreatment', 'Add Your First Treatment')}
+                </Button>
+              }
+            />
           ) : viewMode === 'cards' ? (
             <Grid>
               {filteredTreatments.map(treatment => (

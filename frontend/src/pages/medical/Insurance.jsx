@@ -37,6 +37,7 @@ import InsuranceFormWrapper from '../../components/medical/insurance/InsuranceFo
 import InsuranceViewModal from '../../components/medical/insurance/InsuranceViewModal';
 import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import EmptyState from '../../components/shared/EmptyState';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
 import {
@@ -499,24 +500,18 @@ const Insurance = () => {
       />
 
       {processedInsurances.length === 0 ? (
-        <Card withBorder p="xl">
-          <Stack align="center" gap="md">
-            <Text size="3rem">🏥</Text>
-            <Text size="xl" fw={600}>
-              No Insurance Found
-            </Text>
-            <Text ta="center" c="dimmed">
-              {hasActiveFilters
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Start by adding your first insurance.'}
-            </Text>
-            {!hasActiveFilters && (
-              <Button variant="filled" onClick={handleAddNew}>
-                Add Your First Insurance
-              </Button>
-            )}
-          </Stack>
-        </Card>
+        <EmptyState
+          emoji="🏥"
+          title={t('insurance.empty.title', 'No Insurance Found')}
+          hasActiveFilters={hasActiveFilters}
+          filteredMessage={t('insurance.empty.filtered', 'Try adjusting your search or filter criteria.')}
+          noDataMessage={t('insurance.empty.noData', 'Start by adding your first insurance.')}
+          actionButton={
+            <Button variant="filled" onClick={handleAddNew}>
+              {t('insurance.empty.addFirst', 'Add Your First Insurance')}
+            </Button>
+          }
+        />
       ) : (
         <>
           {viewMode === 'cards' ? (
