@@ -14,14 +14,12 @@ import {
   Text,
   Grid,
   Container,
-  Alert,
   Paper,
   Title,
   Badge,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
-  IconCheck,
   IconPlus,
   IconPill,
   IconFilter,
@@ -31,6 +29,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -351,32 +350,11 @@ const Medication = () => {
       <PageHeader title={t('medications.title', 'Medications')} icon="💊" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
-
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
         <Group justify="space-between" mb="lg">
           <Button

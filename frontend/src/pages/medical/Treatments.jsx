@@ -34,6 +34,7 @@ import {
   Alert,
   Paper,
 } from '@mantine/core';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 
 const Treatments = () => {
   const { t } = useTranslation('common');
@@ -288,18 +289,11 @@ const Treatments = () => {
         <PageHeader title={t('treatments.title', 'Treatments')} icon="🩹" />
 
         <Stack gap="lg">
-          {error && (
-            <Alert
-              variant="light"
-              color="red"
-              title={t('labels.error', 'Error')}
-              withCloseButton
-              onClose={clearError}
-              style={{ whiteSpace: 'pre-line' }}
-            >
-              {error}
-            </Alert>
-          )}
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={clearError}
+          />
           {conditionsError && (
             <Alert
               variant="light"
@@ -307,11 +301,6 @@ const Treatments = () => {
               title={t('treatments.conditionsLoadingError', 'Conditions Loading Error')}
             >
               {conditionsError}
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert variant="light" color="green" title={t('labels.success', 'Success')}>
-              {successMessage}
             </Alert>
           )}
 

@@ -13,6 +13,7 @@ import {
   Tabs,
   Badge,
 } from '@mantine/core';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import {
   IconStethoscope,
   IconPlus,
@@ -373,23 +374,11 @@ const Symptoms = () => {
       <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
 
       {/* Success/Error Messages */}
-      {error && (
-        <Alert
-          title={t('labels.error', 'Error')}
-          color="red"
-          onClose={() => setError(null)}
-          withCloseButton
-          mb="md"
-          style={{ whiteSpace: 'pre-line' }}
-        >
-          {error}
-        </Alert>
-      )}
-      {successMessage && (
-        <Alert title={t('labels.success', 'Success')} color="green" mb="md">
-          {successMessage}
-        </Alert>
-      )}
+      <MedicalPageAlerts
+        error={error}
+        successMessage={successMessage}
+        onClearError={() => setError(null)}
+      />
 
       {/* Add Symptom Button */}
       <Group mb="md">

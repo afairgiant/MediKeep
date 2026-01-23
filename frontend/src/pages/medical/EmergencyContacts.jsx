@@ -7,7 +7,6 @@ import {
   Text,
   Title,
   Stack,
-  Alert,
   Center,
   Badge,
   Grid,
@@ -19,8 +18,6 @@ import {
   Button,
 } from '@mantine/core';
 import {
-  IconAlertTriangle,
-  IconCheck,
   IconPlus,
   IconShieldCheck,
   IconStar,
@@ -36,6 +33,7 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
@@ -259,32 +257,11 @@ const EmergencyContacts = () => {
       <PageHeader title={t('emergencyContacts.title')} icon="📞" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
-
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
         <Group justify="space-between" mb="lg">
           <Button

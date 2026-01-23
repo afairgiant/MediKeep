@@ -10,13 +10,11 @@ import {
   Group,
   Text,
   Stack,
-  Alert,
   Grid,
   Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
-  IconCheck,
   IconPlus,
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -32,6 +30,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';
@@ -40,7 +39,6 @@ import { useResponsive } from '../../hooks/useResponsive';
 const Allergies = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
@@ -218,32 +216,11 @@ const Allergies = () => {
       <PageHeader title={t('allergies.title')} icon="⚠️" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={tCommon('labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
-
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={tCommon('labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
         <Group justify="space-between" mb="lg">
           <Button
