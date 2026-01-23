@@ -14,13 +14,12 @@ import {
   Alert,
   ActionIcon,
   Menu,
-  Loader,
-  Center,
   Divider,
   NumberInput,
   Tooltip,
   Progress,
 } from '@mantine/core';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
   IconPlus,
   IconEdit,
@@ -213,16 +212,7 @@ const TagManagement = () => {
   }, [error]);
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={300}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('tagManagement.loading')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('tagManagement.loading', 'Loading tags...')} />;
   }
 
   return (
