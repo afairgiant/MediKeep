@@ -11,8 +11,6 @@ import {
   Text,
   Stack,
   Alert,
-  Loader,
-  Center,
   Grid,
   Button,
 } from '@mantine/core';
@@ -34,6 +32,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -211,16 +210,7 @@ const Allergies = () => {
   const processedAllergies = dataManagement.data;
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('allergies.messages.loading', 'Loading allergies...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('allergies.messages.loading', 'Loading allergies...')} />;
   }
 
   return (

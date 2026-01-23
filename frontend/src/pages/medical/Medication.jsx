@@ -15,8 +15,6 @@ import {
   Grid,
   Container,
   Alert,
-  Loader,
-  Center,
   Paper,
   Title,
   Badge,
@@ -43,6 +41,7 @@ import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
   MedicationCard,
   MedicationViewModal,
@@ -344,16 +343,7 @@ const Medication = () => {
   }, [dataManagement.data, practitioners, pharmacies]);
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('medications.loading', 'Loading medications...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('medications.loading', 'Loading medications...')} />;
   }
 
   return (

@@ -26,6 +26,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
@@ -38,8 +39,6 @@ import {
   Grid,
   Container,
   Alert,
-  Loader,
-  Center,
   Card,
   Paper,
 } from '@mantine/core';
@@ -377,17 +376,10 @@ const Procedures = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('procedures.loadingProcedures', 'Loading procedures...')}</Text>
-            <Text size="sm" c="dimmed">
-              {t('procedures.loadingRefresh', 'If this takes too long, please refresh the page')}
-            </Text>
-          </Stack>
-        </Center>
-      </Container>
+      <MedicalPageLoading
+        message={t('procedures.loadingProcedures', 'Loading procedures...')}
+        hint={t('procedures.loadingRefresh', 'If this takes too long, please refresh the page')}
+      />
     );
   }
 

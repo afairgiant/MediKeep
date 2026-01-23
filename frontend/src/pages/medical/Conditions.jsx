@@ -12,8 +12,6 @@ import {
   Title,
   Stack,
   Alert,
-  Loader,
-  Center,
   Badge,
   Grid,
   Card,
@@ -50,6 +48,7 @@ import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 
@@ -302,16 +301,7 @@ const Conditions = () => {
 
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('conditions.loading', 'Loading conditions...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('conditions.loading', 'Loading conditions...')} />;
   }
 
   return (

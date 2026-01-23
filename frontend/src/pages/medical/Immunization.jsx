@@ -11,8 +11,6 @@ import {
   Title,
   Stack,
   Alert,
-  Loader,
-  Center,
   Badge,
   Grid,
   Card,
@@ -42,6 +40,7 @@ import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 
@@ -240,16 +239,7 @@ const Immunization = () => {
   const practitioners = practitionersObject?.practitioners || [];
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('immunizations.loadingImmunizations', 'Loading immunizations...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('immunizations.loadingImmunizations', 'Loading immunizations...')} />;
   }
 
   return (

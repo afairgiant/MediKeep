@@ -38,6 +38,7 @@ import InsuranceViewModal from '../../components/medical/insurance/InsuranceView
 import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
 import {
@@ -50,8 +51,6 @@ import {
   Grid,
   Container,
   Alert,
-  Loader,
-  Center,
   Divider,
   Modal,
   Title,
@@ -442,13 +441,7 @@ const Insurance = () => {
 
   // Loading state
   if (loading) {
-    return (
-      <Container size="xl">
-        <Center style={{ height: 400 }}>
-          <Loader size="lg" />
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('insurance.loading', 'Loading insurance records...')} />;
   }
 
   // Error state

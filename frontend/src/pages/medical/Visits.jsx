@@ -8,8 +8,6 @@ import {
   Title,
   Stack,
   Alert,
-  Loader,
-  Center,
   Grid,
   Button,
 } from '@mantine/core';
@@ -46,6 +44,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 // Import new modular components
 import VisitCard from '../../components/medical/visits/VisitCard';
@@ -448,16 +447,7 @@ const Visits = () => {
   };
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('visits.loadingVisits', 'Loading visits...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('visits.loadingVisits', 'Loading visits...')} />;
   }
 
   const filteredVisits = dataManagement.data;

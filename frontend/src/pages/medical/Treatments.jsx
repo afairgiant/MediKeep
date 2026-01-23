@@ -17,6 +17,7 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 
 // Modular components
 import TreatmentCard from '../../components/medical/treatments/TreatmentCard';
@@ -31,8 +32,6 @@ import {
   Grid,
   Container,
   Alert,
-  Loader,
-  Center,
   Paper,
 } from '@mantine/core';
 
@@ -276,17 +275,10 @@ const Treatments = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('treatments.loadingTreatments')}</Text>
-            <Text size="sm" c="dimmed">
-              If this takes too long, please refresh the page
-            </Text>
-          </Stack>
-        </Center>
-      </Container>
+      <MedicalPageLoading
+        message={t('treatments.loadingTreatments', 'Loading treatments...')}
+        hint={t('treatments.loadingHint', 'If this takes too long, please refresh the page')}
+      />
     );
   }
 

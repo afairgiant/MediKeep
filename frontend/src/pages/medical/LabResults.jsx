@@ -26,6 +26,7 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import FileCountBadge from '../../components/shared/FileCountBadge';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 // Import new modular components
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
@@ -37,8 +38,6 @@ import {
   Grid,
   Container,
   Alert,
-  Loader,
-  Center,
   Stack,
   Text,
   Card,
@@ -515,17 +514,10 @@ const LabResults = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('labResults.loading', 'Loading lab results...')}</Text>
-            <Text size="sm" c="dimmed">
-              {t('labResults.loadingHint', 'If this takes too long, please refresh the page')}
-            </Text>
-          </Stack>
-        </Center>
-      </Container>
+      <MedicalPageLoading
+        message={t('labResults.loading', 'Loading lab results...')}
+        hint={t('labResults.loadingHint', 'If this takes too long, please refresh the page')}
+      />
     );
   }
 
