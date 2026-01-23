@@ -90,6 +90,9 @@ export function useViewModalNavigation({
     viewingItem,
     openModal,
     closeModal,
+    // Expose setters for advanced use cases (e.g., programmatic modal updates)
+    setIsOpen,
+    setViewingItem,
   };
 }
 
