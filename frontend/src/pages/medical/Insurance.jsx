@@ -502,13 +502,13 @@ const Insurance = () => {
       {processedInsurances.length === 0 ? (
         <EmptyState
           emoji="🏥"
-          title="No Insurance Found"
+          title={t('insurance.empty.title', 'No Insurance Found')}
           hasActiveFilters={hasActiveFilters}
-          filteredMessage="Try adjusting your search or filter criteria."
-          noDataMessage="Start by adding your first insurance."
+          filteredMessage={t('insurance.empty.filtered', 'Try adjusting your search or filter criteria.')}
+          noDataMessage={t('insurance.empty.noData', 'Start by adding your first insurance.')}
           actionButton={
             <Button variant="filled" onClick={handleAddNew}>
-              Add Your First Insurance
+              {t('insurance.empty.addFirst', 'Add Your First Insurance')}
             </Button>
           }
         />

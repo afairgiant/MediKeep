@@ -88,7 +88,7 @@ function EmptyState({
               {displayMessage}
             </Text>
           )}
-          {actionButton && !hasActiveFilters && actionButton}
+          {!hasActiveFilters && actionButton}
         </Stack>
       </Wrapper>
     );

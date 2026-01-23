@@ -84,8 +84,6 @@ describe('EmptyState', () => {
       );
 
       // Should only have the title, no additional Text for message
-      const texts = container.querySelectorAll('[class*="mantine-Text"]');
-      // One for title (in h3/Title)
       expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('No items');
     });
 
