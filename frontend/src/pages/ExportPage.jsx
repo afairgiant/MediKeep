@@ -22,9 +22,9 @@ import {
   Divider,
   ActionIcon,
   Box,
-  Center,
   Collapse,
 } from '@mantine/core';
+import MedicalPageLoading from '../components/shared/MedicalPageLoading';
 import {
   IconDownload,
   IconFileExport,
@@ -237,18 +237,7 @@ const ExportPage = () => {
   };
 
   if (summaryLoading) {
-    return (
-      <Container size="xl" py="xl">
-        <Center style={{ minHeight: '400px' }}>
-          <Stack align="center" gap="md">
-            <Loader size="lg" />
-            <Text size="lg" c="dimmed">
-              {t('exportPage.loading')}
-            </Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('exportPage.loading', 'Loading export options...')} />;
   }
 
   return (
