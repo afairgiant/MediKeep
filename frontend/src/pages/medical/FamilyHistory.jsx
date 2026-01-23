@@ -16,6 +16,7 @@ import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import StatusBadge from '../../components/medical/StatusBadge';
@@ -36,7 +37,6 @@ import {
   Container,
   Alert,
   Title,
-  SimpleGrid,
   Tabs,
   Checkbox,
   Paper,
@@ -1157,10 +1157,11 @@ const FamilyHistory = () => {
                     </Badge>
                   </Group>
 
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                    {group.members.map(member => (
+                  <AnimatedCardGrid
+                    items={group.members}
+                    columns={{ base: 12, sm: 6, md: 4 }}
+                    renderCard={(member) => (
                       <FamilyHistoryCard
-                        key={member.id}
                         member={member}
                         onView={handleViewFamilyMember}
                         onEdit={handleEditMember}
@@ -1176,8 +1177,8 @@ const FamilyHistory = () => {
                         onBulkToggle={handleBulkMemberToggle}
                         onError={setError}
                       />
-                    ))}
-                  </SimpleGrid>
+                    )}
+                  />
                 </div>
               ))}
             </Stack>
@@ -1256,8 +1257,11 @@ const FamilyHistory = () => {
                     </Badge>
                   </Group>
 
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                    {group.members.map(item => {
+                  <AnimatedCardGrid
+                    items={group.members}
+                    columns={{ base: 12, sm: 6, md: 4 }}
+                    keyExtractor={(item) => `shared-${item.family_member.id}`}
+                    renderCard={(item) => {
                       const member = {
                         ...item.family_member,
                         is_shared: true,
@@ -1268,7 +1272,6 @@ const FamilyHistory = () => {
 
                       return (
                         <FamilyHistoryCard
-                          key={`shared-${member.id}`}
                           member={member}
                           onView={handleViewFamilyMember}
                           onEdit={handleEditMember}
@@ -1298,8 +1301,8 @@ const FamilyHistory = () => {
                           onError={setError}
                         />
                       );
-                    })}
-                  </SimpleGrid>
+                    }}
+                  />
                 </div>
               ))}
             </Stack>

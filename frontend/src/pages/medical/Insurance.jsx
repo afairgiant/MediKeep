@@ -40,6 +40,7 @@ import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
 import {
@@ -48,7 +49,6 @@ import {
   Card,
   Stack,
   Text,
-  Grid,
   Container,
   Divider,
   Modal,
@@ -488,21 +488,21 @@ const Insurance = () => {
       ) : (
         <>
           {viewMode === 'cards' ? (
-            <Grid>
-              {processedInsurances.map((insurance) => (
-                <Grid.Col key={insurance.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InsuranceCard
-                    insurance={insurance}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onSetPrimary={handleSetPrimary}
-                    onView={handleViewInsurance}
-                    fileCount={fileCounts[insurance.id] || 0}
-                    fileCountLoading={fileCountsLoading[insurance.id] || false}
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={processedInsurances}
+              columns={{ base: 12, sm: 6, md: 4, lg: 3 }}
+              renderCard={(insurance) => (
+                <InsuranceCard
+                  insurance={insurance}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onSetPrimary={handleSetPrimary}
+                  onView={handleViewInsurance}
+                  fileCount={fileCounts[insurance.id] || 0}
+                  fileCountLoading={fileCountsLoading[insurance.id] || false}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

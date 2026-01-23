@@ -4,7 +4,6 @@ import {
   Paper,
   Text,
   Stack,
-  Grid,
   Title,
 } from '@mantine/core';
 import {
@@ -21,6 +20,7 @@ import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { usePharmacies } from '../../hooks/useGlobalData';
 import { useTranslation } from 'react-i18next';
 
@@ -242,20 +242,20 @@ const Pharmacies = () => {
               noDataMessage={t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
             />
           ) : (
-            <Grid>
-                {filteredPharmacies.map((pharmacy, index) => (
-                  <Grid.Col key={pharmacy.id} span={{ base: 12, md: 6, lg: 4 }}>
-                      <PharmacyCard
-                        pharmacy={pharmacy}
-                        onEdit={handleEditPharmacy}
-                        onDelete={() => handleDeletePharmacy(pharmacy.id)}
-                        onView={handleViewPharmacy}
-                        navigate={navigate}
-                        onError={setError}
-                      />
-                  </Grid.Col>
-                ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredPharmacies}
+              columns={{ base: 12, md: 6, lg: 4 }}
+              renderCard={(pharmacy) => (
+                <PharmacyCard
+                  pharmacy={pharmacy}
+                  onEdit={handleEditPharmacy}
+                  onDelete={() => handleDeletePharmacy(pharmacy.id)}
+                  onView={handleViewPharmacy}
+                  navigate={navigate}
+                  onError={setError}
+                />
+              )}
+            />
           )}
       </Stack>
       </Container>

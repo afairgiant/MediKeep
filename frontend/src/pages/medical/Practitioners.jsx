@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
   Paper,
   Text,
   Title,
   Stack,
-  Grid,
 } from '@mantine/core';
 import {
   IconPlus,
@@ -23,6 +21,7 @@ import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import {
   usePractitioners,
   useCacheManager,
@@ -286,32 +285,27 @@ const Practitioners = () => {
               noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {filteredPractitioners.map((practitioner, index) => (
-                  <Grid.Col
-                    key={practitioner.id}
-                    span={{ base: 12, md: 6, lg: 4 }}
-                  >
-                      <PractitionerCard
-                        practitioner={practitioner}
-                        onEdit={handleEditPractitioner}
-                        onDelete={handleDeletePractitioner}
-                        onView={handleViewPractitioner}
-                        navigate={navigate}
-                        onError={(error) => {
-                          setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
-                          frontendLogger.logError('PractitionerCard error', {
-                            practitionerId: practitioner.id,
-                            error: error.message,
-                            page: 'Practitioners',
-                          });
-                        }}
-                      />
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredPractitioners}
+              columns={{ base: 12, md: 6, lg: 4 }}
+              renderCard={(practitioner) => (
+                <PractitionerCard
+                  practitioner={practitioner}
+                  onEdit={handleEditPractitioner}
+                  onDelete={handleDeletePractitioner}
+                  onView={handleViewPractitioner}
+                  navigate={navigate}
+                  onError={(error) => {
+                    setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
+                    frontendLogger.logError('PractitionerCard error', {
+                      practitionerId: practitioner.id,
+                      error: error.message,
+                      page: 'Practitioners',
+                    });
+                  }}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

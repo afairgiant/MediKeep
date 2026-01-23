@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
   Paper,
   Text,
   Title,
   Stack,
-  Grid,
 } from '@mantine/core';
 import {
   IconPlus,
@@ -41,6 +39,7 @@ import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 // Import new modular components
 import VisitCard from '../../components/medical/visits/VisitCard';
@@ -483,25 +482,23 @@ const Visits = () => {
               noDataMessage={t('visits.clickToGetStarted', 'Click "Add New Visit" to get started.')}
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {filteredVisits.map((visit, index) => (
-                  <Grid.Col key={visit.id} span={{ base: 12, md: 6, lg: 4 }}>
-                      <VisitCard
-                        visit={visit}
-                        onEdit={handleEditVisit}
-                        onDelete={() => handleDeleteVisit(visit.id)}
-                        onView={handleViewVisit}
-                        practitioners={practitioners}
-                        conditions={conditions}
-                        fileCount={fileCounts[visit.id] || 0}
-                        fileCountLoading={fileCountsLoading[visit.id] || false}
-                        navigate={navigate}
-                      />
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredVisits}
+              columns={{ base: 12, md: 6, lg: 4 }}
+              renderCard={(visit) => (
+                <VisitCard
+                  visit={visit}
+                  onEdit={handleEditVisit}
+                  onDelete={() => handleDeleteVisit(visit.id)}
+                  onView={handleViewVisit}
+                  practitioners={practitioners}
+                  conditions={conditions}
+                  fileCount={fileCounts[visit.id] || 0}
+                  fileCountLoading={fileCountsLoading[visit.id] || false}
+                  navigate={navigate}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

@@ -3,13 +3,12 @@ import logger from '../../services/logger';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Container,
   Paper,
   Text,
   Stack,
-  Grid,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -30,6 +29,7 @@ import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -261,35 +261,22 @@ const Allergies = () => {
               noDataMessage={t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {processedAllergies.map((allergy, index) => (
-                  <Grid.Col
-                    key={allergy.id}
-                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <AllergyCard
-                        allergy={allergy}
-                        onView={handleViewAllergy}
-                        onEdit={handleEditAllergy}
-                        onDelete={handleDeleteAllergy}
-                        medications={medications}
-                        navigate={navigate}
-                        fileCount={fileCounts[allergy.id] || 0}
-                        fileCountLoading={fileCountsLoading[allergy.id] || false}
-                        onError={setError}
-                      />
-                    </motion.div>
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={processedAllergies}
+              renderCard={(allergy) => (
+                <AllergyCard
+                  allergy={allergy}
+                  onView={handleViewAllergy}
+                  onEdit={handleEditAllergy}
+                  onDelete={handleDeleteAllergy}
+                  medications={medications}
+                  navigate={navigate}
+                  fileCount={fileCounts[allergy.id] || 0}
+                  fileCountLoading={fileCountsLoading[allergy.id] || false}
+                  onError={setError}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

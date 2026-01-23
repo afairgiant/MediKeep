@@ -6,12 +6,11 @@ import React, {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Button,
   Stack,
   Text,
-  Grid,
   Container,
   Paper,
   Title,
@@ -41,6 +40,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import {
   MedicationCard,
   MedicationViewModal,
@@ -522,36 +522,21 @@ const Medication = () => {
               noDataMessage={t('medications.clickToStart', 'Click "Add New Medication" to get started.')}
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {processedMedications.map((medication, index) => (
-                  <Grid.Col
-                    key={medication.id}
-                    span={
-                      responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4
-                    }
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <MedicationCard
-                        medication={medication}
-                        onView={handleViewMedication}
-                        onEdit={handleEditMedication}
-                        onDelete={handleDeleteMedication}
-                        navigate={navigate}
-                        fileCount={fileCounts[medication.id] || 0}
-                        fileCountLoading={fileCountsLoading[medication.id] || false}
-                        onError={setError}
-                      />
-                    </motion.div>
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={processedMedications}
+              renderCard={(medication) => (
+                <MedicationCard
+                  medication={medication}
+                  onView={handleViewMedication}
+                  onEdit={handleEditMedication}
+                  onDelete={handleDeleteMedication}
+                  navigate={navigate}
+                  fileCount={fileCounts[medication.id] || 0}
+                  fileCountLoading={fileCountsLoading[medication.id] || false}
+                  onError={setError}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

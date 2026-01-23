@@ -28,6 +28,7 @@ import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
@@ -36,7 +37,6 @@ import {
   Button,
   Stack,
   Text,
-  Grid,
   Container,
   Card,
   Paper,
@@ -421,22 +421,22 @@ const Procedures = () => {
               }
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              {filteredProcedures.map((procedure) => (
-                <Grid.Col key={procedure.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <ProcedureCard
-                    procedure={procedure}
-                    onEdit={handleEditProcedure}
-                    onDelete={() => handleDeleteProcedure(procedure.id)}
-                    onView={handleViewProcedure}
-                    practitioners={practitioners}
-                    fileCount={fileCounts[procedure.id] || 0}
-                    fileCountLoading={fileCountsLoading[procedure.id] || false}
-                    navigate={navigate}
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredProcedures}
+              columns={{ base: 12, sm: 6, lg: 4 }}
+              renderCard={(procedure) => (
+                <ProcedureCard
+                  procedure={procedure}
+                  onEdit={handleEditProcedure}
+                  onDelete={() => handleDeleteProcedure(procedure.id)}
+                  onView={handleViewProcedure}
+                  practitioners={practitioners}
+                  fileCount={fileCounts[procedure.id] || 0}
+                  fileCountLoading={fileCountsLoading[procedure.id] || false}
+                  navigate={navigate}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
