@@ -7,11 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Stack,
   Grid,
-  Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -28,7 +26,7 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
@@ -222,22 +220,15 @@ const Allergies = () => {
           onClearError={clearError}
         />
 
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddAllergy}
-            size="md"
-          >
-            {t('allergies.addNew', 'Add New Allergy')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('allergies.addNew', 'Add New Allergy'),
+            onClick: handleAddAllergy,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
         <MedicalPageFilters dataManagement={dataManagement} config={config} />

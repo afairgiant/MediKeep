@@ -3,12 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Title,
   Stack,
   Grid,
-  Button,
 } from '@mantine/core';
 import {
   IconPlus,
@@ -38,7 +36,7 @@ import {
 } from '../../constants/errorMessages';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
@@ -462,22 +460,15 @@ const Visits = () => {
           onClearError={clearError}
         />
 
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddVisit}
-            size="md"
-          >
-            {t('visits.addVisit', 'Add New Visit')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('visits.addVisit', 'Add New Visit'),
+            onClick: handleAddVisit,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
         <MedicalPageFilters dataManagement={dataManagement} config={config} />

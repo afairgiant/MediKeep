@@ -30,7 +30,7 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import StatusBadge from '../../components/medical/StatusBadge';
 import InsuranceCard from '../../components/medical/insurance/InsuranceCard';
 import InsuranceFormWrapper from '../../components/medical/insurance/InsuranceFormWrapper';
@@ -46,7 +46,6 @@ import {
   Badge,
   Button,
   Card,
-  Group,
   Stack,
   Text,
   Grid,
@@ -460,17 +459,15 @@ const Insurance = () => {
           onClearError={clearError}
         />
 
-        <Group justify="space-between" align="center">
-        <Button variant="filled" onClick={handleAddNew}>
-          {t('insurance.actions.addNew', '+ Add New Insurance')}
-        </Button>
-
-        <ViewToggle
+        <MedicalPageActions
+          primaryAction={{
+            label: t('insurance.actions.addNew', '+ Add New Insurance'),
+            onClick: handleAddNew,
+          }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
-          showPrint={true}
+          mb={0}
         />
-      </Group>
 
       {/* Mantine Filter Controls */}
       <MedicalPageFilters dataManagement={dataManagement} config={config} />

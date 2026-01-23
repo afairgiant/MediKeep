@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Button,
-  Group,
   Stack,
   Text,
   Grid,
@@ -17,6 +16,7 @@ import {
   Paper,
   Title,
   Badge,
+  Group,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -39,7 +39,7 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
   MedicationCard,
@@ -356,22 +356,15 @@ const Medication = () => {
           onClearError={clearError}
         />
 
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddMedication}
-            size="md"
-          >
-            {t('medications.addNew', 'Add New Medication')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('medications.addNew', 'Add New Medication'),
+            onClick: handleAddMedication,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Quick Type Filters */}
         <Paper p="md" mb="md" withBorder>

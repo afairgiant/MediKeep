@@ -15,7 +15,7 @@ import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 
@@ -26,7 +26,6 @@ import TreatmentFormWrapper from '../../components/medical/treatments/TreatmentF
 import {
   Button,
   Card,
-  Group,
   Stack,
   Text,
   Grid,
@@ -304,17 +303,15 @@ const Treatments = () => {
             </Alert>
           )}
 
-          <Group justify="space-between" align="center">
-            <Button variant="filled" onClick={handleAddTreatment}>
-              {t('treatments.addTreatment', '+ Add Treatment')}
-            </Button>
-
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </Group>
+          <MedicalPageActions
+            primaryAction={{
+              label: t('treatments.addTreatment', '+ Add Treatment'),
+              onClick: handleAddTreatment,
+            }}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            mb={0}
+          />
 
           {/* Mantine Filter Controls */}
           <MedicalPageFilters dataManagement={dataManagement} config={config} />
