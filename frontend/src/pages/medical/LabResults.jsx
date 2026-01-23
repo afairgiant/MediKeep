@@ -28,6 +28,7 @@ import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 // Import new modular components
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
@@ -36,7 +37,6 @@ import LabResultQuickImportModal from '../../components/medical/labresults/LabRe
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Button,
-  Grid,
   Container,
   Stack,
   Text,
@@ -566,22 +566,22 @@ const LabResults = () => {
               }
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              {filteredLabResults.map((result) => (
-                <Grid.Col key={result.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <LabResultCard
-                    labResult={result}
-                    onEdit={handleEditLabResult}
-                    onDelete={() => handleDeleteLabResult(result.id)}
-                    onView={handleViewLabResult}
-                    practitioners={practitioners}
-                    fileCount={fileCounts[result.id] || 0}
-                    fileCountLoading={fileCountsLoading[result.id] || false}
-                    navigate={navigate}
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredLabResults}
+              columns={{ base: 12, sm: 6, lg: 4 }}
+              renderCard={(result) => (
+                <LabResultCard
+                  labResult={result}
+                  onEdit={handleEditLabResult}
+                  onDelete={() => handleDeleteLabResult(result.id)}
+                  onView={handleViewLabResult}
+                  practitioners={practitioners}
+                  fileCount={fileCounts[result.id] || 0}
+                  fileCountLoading={fileCountsLoading[result.id] || false}
+                  navigate={navigate}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

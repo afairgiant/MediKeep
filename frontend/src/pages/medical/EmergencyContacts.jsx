@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
   Paper,
@@ -34,6 +33,7 @@ import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
@@ -298,176 +298,174 @@ const EmergencyContacts = () => {
               </Center>
             </Paper>
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {filteredContacts.map((contact, index) => (
-                  <Grid.Col key={contact.id} span={{ base: 12, md: 6, lg: 4 }}>
-                      <Card
-                        shadow="sm"
-                        padding="lg"
-                        radius="md"
-                        withBorder
-                        style={{
-                          borderColor: contact.is_primary
-                            ? 'var(--mantine-color-yellow-4)'
-                            : undefined,
-                          borderWidth: contact.is_primary ? '2px' : undefined,
-                        }}
-                      >
-                        <Card.Section withBorder inheritPadding py="xs">
-                          <Group justify="space-between">
-                            <Group gap="xs">
-                              <Text size="lg">
-                                {getRelationshipIcon(contact.relationship)}
-                              </Text>
-                              <Text fw={600} size="lg">
-                                {contact.name}
-                              </Text>
-                            </Group>
-                            <Group gap="xs">
-                              {contact.is_primary && (
-                                <Badge
-                                  color="yellow"
-                                  variant="filled"
-                                  size="sm"
-                                >
-                                  <Group gap="xs">
-                                    <IconStar size={12} />
-                                    {t('emergencyContacts.card.primary')}
-                                  </Group>
-                                </Badge>
-                              )}
-                              <Badge
-                                color={contact.is_active ? 'green' : 'gray'}
-                                variant="light"
-                                size="sm"
-                              >
-                                {contact.is_active ? t('emergencyContacts.card.active') : t('emergencyContacts.card.inactive')}
-                              </Badge>
-                            </Group>
-                          </Group>
-                        </Card.Section>
-
-                        <Stack gap="md" mt="md">
-                          <Group justify="space-between">
-                            <Text size="sm" c="dimmed">
-                              {t('emergencyContacts.card.relationship')}
-                            </Text>
-                            <Badge
-                              color={getRelationshipColor(contact.relationship)}
-                              variant="light"
-                              size="sm"
-                            >
-                              {contact.relationship.charAt(0).toUpperCase() +
-                                contact.relationship.slice(1)}
-                            </Badge>
-                          </Group>
-
-                          <Group justify="space-between">
-                            <Text size="sm" c="dimmed">
-                              {t('emergencyContacts.card.phone')}
-                            </Text>
-                            <Anchor
-                              href={`tel:${contact.phone_number}`}
-                              size="sm"
-                              c="blue"
-                            >
-                              {formatPhoneNumber(contact.phone_number)}
-                            </Anchor>
-                          </Group>
-
-                          {contact.secondary_phone && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                {t('emergencyContacts.card.secondaryPhone')}
-                              </Text>
-                              <Anchor
-                                href={`tel:${contact.secondary_phone}`}
-                                size="sm"
-                                c="blue"
-                              >
-                                {formatPhoneNumber(contact.secondary_phone)}
-                              </Anchor>
-                            </Group>
-                          )}
-
-                          {contact.email && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                {t('emergencyContacts.card.email')}
-                              </Text>
-                              <Anchor
-                                href={`mailto:${contact.email}`}
-                                size="sm"
-                                c="blue"
-                              >
-                                {contact.email}
-                              </Anchor>
-                            </Group>
-                          )}
-
-                          {contact.address && (
-                            <Group justify="space-between">
-                              <Text size="sm" c="dimmed">
-                                {t('emergencyContacts.card.address')}
-                              </Text>
-                              <Text size="sm" fw={500}>
-                                {contact.address}
-                              </Text>
-                            </Group>
-                          )}
-                        </Stack>
-
-                        {contact.notes && (
-                          <Box
-                            mt="md"
-                            pt="md"
-                            style={{
-                              borderTop:
-                                '1px solid var(--mantine-color-gray-3)',
-                            }}
+            <AnimatedCardGrid
+              items={filteredContacts}
+              columns={{ base: 12, md: 6, lg: 4 }}
+              renderCard={(contact) => (
+                <Card
+                  shadow="sm"
+                  padding="lg"
+                  radius="md"
+                  withBorder
+                  style={{
+                    borderColor: contact.is_primary
+                      ? 'var(--mantine-color-yellow-4)'
+                      : undefined,
+                    borderWidth: contact.is_primary ? '2px' : undefined,
+                  }}
+                >
+                  <Card.Section withBorder inheritPadding py="xs">
+                    <Group justify="space-between">
+                      <Group gap="xs">
+                        <Text size="lg">
+                          {getRelationshipIcon(contact.relationship)}
+                        </Text>
+                        <Text fw={600} size="lg">
+                          {contact.name}
+                        </Text>
+                      </Group>
+                      <Group gap="xs">
+                        {contact.is_primary && (
+                          <Badge
+                            color="yellow"
+                            variant="filled"
+                            size="sm"
                           >
-                            <Text size="sm" c="dimmed" mb="xs">
-                              {t('emergencyContacts.card.notes')}
-                            </Text>
-                            <Text size="sm">
-                              {contact.notes}
-                            </Text>
-                          </Box>
+                            <Group gap="xs">
+                              <IconStar size={12} />
+                              {t('emergencyContacts.card.primary')}
+                            </Group>
+                          </Badge>
                         )}
+                        <Badge
+                          color={contact.is_active ? 'green' : 'gray'}
+                          variant="light"
+                          size="sm"
+                        >
+                          {contact.is_active ? t('emergencyContacts.card.active') : t('emergencyContacts.card.inactive')}
+                        </Badge>
+                      </Group>
+                    </Group>
+                  </Card.Section>
 
-                        <Stack gap={0} mt="auto">
-                          <Divider />
-                          <Group justify="flex-end" gap="xs" pt="sm">
-                            <Button
-                              variant="filled"
-                              size="xs"
-                              onClick={() => handleViewContact(contact)}
-                            >
-                              {t('buttons.view')}
-                            </Button>
-                            <Button
-                              variant="filled"
-                              size="xs"
-                              onClick={() => handleEditContact(contact)}
-                            >
-                              {t('buttons.edit')}
-                            </Button>
-                            <Button
-                              variant="filled"
-                              color="red"
-                              size="xs"
-                              onClick={() => handleDeleteContact(contact.id)}
-                            >
-                              {t('buttons.delete')}
-                            </Button>
-                          </Group>
-                        </Stack>
-                      </Card>
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+                  <Stack gap="md" mt="md">
+                    <Group justify="space-between">
+                      <Text size="sm" c="dimmed">
+                        {t('emergencyContacts.card.relationship')}
+                      </Text>
+                      <Badge
+                        color={getRelationshipColor(contact.relationship)}
+                        variant="light"
+                        size="sm"
+                      >
+                        {contact.relationship.charAt(0).toUpperCase() +
+                          contact.relationship.slice(1)}
+                      </Badge>
+                    </Group>
+
+                    <Group justify="space-between">
+                      <Text size="sm" c="dimmed">
+                        {t('emergencyContacts.card.phone')}
+                      </Text>
+                      <Anchor
+                        href={`tel:${contact.phone_number}`}
+                        size="sm"
+                        c="blue"
+                      >
+                        {formatPhoneNumber(contact.phone_number)}
+                      </Anchor>
+                    </Group>
+
+                    {contact.secondary_phone && (
+                      <Group justify="space-between">
+                        <Text size="sm" c="dimmed">
+                          {t('emergencyContacts.card.secondaryPhone')}
+                        </Text>
+                        <Anchor
+                          href={`tel:${contact.secondary_phone}`}
+                          size="sm"
+                          c="blue"
+                        >
+                          {formatPhoneNumber(contact.secondary_phone)}
+                        </Anchor>
+                      </Group>
+                    )}
+
+                    {contact.email && (
+                      <Group justify="space-between">
+                        <Text size="sm" c="dimmed">
+                          {t('emergencyContacts.card.email')}
+                        </Text>
+                        <Anchor
+                          href={`mailto:${contact.email}`}
+                          size="sm"
+                          c="blue"
+                        >
+                          {contact.email}
+                        </Anchor>
+                      </Group>
+                    )}
+
+                    {contact.address && (
+                      <Group justify="space-between">
+                        <Text size="sm" c="dimmed">
+                          {t('emergencyContacts.card.address')}
+                        </Text>
+                        <Text size="sm" fw={500}>
+                          {contact.address}
+                        </Text>
+                      </Group>
+                    )}
+                  </Stack>
+
+                  {contact.notes && (
+                    <Box
+                      mt="md"
+                      pt="md"
+                      style={{
+                        borderTop:
+                          '1px solid var(--mantine-color-gray-3)',
+                      }}
+                    >
+                      <Text size="sm" c="dimmed" mb="xs">
+                        {t('emergencyContacts.card.notes')}
+                      </Text>
+                      <Text size="sm">
+                        {contact.notes}
+                      </Text>
+                    </Box>
+                  )}
+
+                  <Stack gap={0} mt="auto">
+                    <Divider />
+                    <Group justify="flex-end" gap="xs" pt="sm">
+                      <Button
+                        variant="filled"
+                        size="xs"
+                        onClick={() => handleViewContact(contact)}
+                      >
+                        {t('buttons.view')}
+                      </Button>
+                      <Button
+                        variant="filled"
+                        size="xs"
+                        onClick={() => handleEditContact(contact)}
+                      >
+                        {t('buttons.edit')}
+                      </Button>
+                      <Button
+                        variant="filled"
+                        color="red"
+                        size="xs"
+                        onClick={() => handleDeleteContact(contact.id)}
+                      >
+                        {t('buttons.delete')}
+                      </Button>
+                    </Group>
+                  </Stack>
+                </Card>
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

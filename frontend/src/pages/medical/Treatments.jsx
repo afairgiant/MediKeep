@@ -18,6 +18,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 
 // Modular components
 import TreatmentCard from '../../components/medical/treatments/TreatmentCard';
@@ -28,7 +29,6 @@ import {
   Card,
   Stack,
   Text,
-  Grid,
   Container,
   Alert,
   Paper,
@@ -330,30 +330,30 @@ const Treatments = () => {
               }
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              {filteredTreatments.map(treatment => (
-                <Grid.Col key={treatment.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <TreatmentCard
-                    treatment={treatment}
-                    conditions={conditions}
-                    onEdit={handleEditTreatment}
-                    onDelete={handleDeleteTreatment}
-                    onView={handleViewTreatment}
-                    onConditionClick={handleConditionClick}
-                    navigate={navigate}
-                    fileCount={fileCounts[treatment.id] || 0}
-                    fileCountLoading={fileCountsLoading[treatment.id] || false}
-                    onError={(error) => {
-                      logger.error('TreatmentCard error', {
-                        treatmentId: treatment.id,
-                        error: error.message,
-                        page: 'Treatments',
-                      });
-                    }}
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredTreatments}
+              columns={{ base: 12, sm: 6, lg: 4 }}
+              renderCard={(treatment) => (
+                <TreatmentCard
+                  treatment={treatment}
+                  conditions={conditions}
+                  onEdit={handleEditTreatment}
+                  onDelete={handleDeleteTreatment}
+                  onView={handleViewTreatment}
+                  onConditionClick={handleConditionClick}
+                  navigate={navigate}
+                  fileCount={fileCounts[treatment.id] || 0}
+                  fileCountLoading={fileCountsLoading[treatment.id] || false}
+                  onError={(error) => {
+                    logger.error('TreatmentCard error', {
+                      treatmentId: treatment.id,
+                      error: error.message,
+                      page: 'Treatments',
+                    });
+                  }}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

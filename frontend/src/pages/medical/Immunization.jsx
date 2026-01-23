@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import logger from '../../services/logger';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -36,6 +35,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 
@@ -295,27 +295,21 @@ const Immunization = () => {
               noDataMessage={t('immunizations.clickToGetStarted', 'Click "Add New Immunization" to get started.')}
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {processedImmunizations.map((immunization, index) => (
-                  <Grid.Col
-                    key={immunization.id}
-                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
-                  >
-                      <ImmunizationCard
-                        immunization={immunization}
-                        onView={handleViewImmunization}
-                        onEdit={handleEditImmunization}
-                        onDelete={handleDeleteImmunization}
-                        practitioners={practitioners}
-                        navigate={navigate}
-                        fileCount={fileCounts[immunization.id] || 0}
-                        fileCountLoading={fileCountsLoading[immunization.id] || false}
-                      />
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={processedImmunizations}
+              renderCard={(immunization) => (
+                <ImmunizationCard
+                  immunization={immunization}
+                  onView={handleViewImmunization}
+                  onEdit={handleEditImmunization}
+                  onDelete={handleDeleteImmunization}
+                  practitioners={practitioners}
+                  navigate={navigate}
+                  fileCount={fileCounts[immunization.id] || 0}
+                  fileCountLoading={fileCountsLoading[immunization.id] || false}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

@@ -3,7 +3,7 @@ import logger from '../../services/logger';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Container,
   Paper,
@@ -11,7 +11,6 @@ import {
   Title,
   Stack,
   Badge,
-  Grid,
   Card,
   Box,
   Divider,
@@ -45,6 +44,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 
@@ -353,33 +353,20 @@ const Conditions = () => {
               noDataMessage={t('conditions.getStarted', 'Click "Add New Condition" to get started.')}
             />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {filteredConditions.map((condition, index) => (
-                  <Grid.Col
-                    key={condition.id}
-                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <ConditionCard
-                        condition={condition}
-                        onView={handleViewCondition}
-                        onEdit={handleEditCondition}
-                        onDelete={handleDeleteCondition}
-                        navigate={navigate}
-                        fileCount={fileCounts[condition.id] || 0}
-                        fileCountLoading={fileCountsLoading[condition.id] || false}
-                      />
-                    </motion.div>
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredConditions}
+              renderCard={(condition) => (
+                <ConditionCard
+                  condition={condition}
+                  onView={handleViewCondition}
+                  onEdit={handleEditCondition}
+                  onDelete={handleDeleteCondition}
+                  navigate={navigate}
+                  fileCount={fileCounts[condition.id] || 0}
+                  fileCountLoading={fileCountsLoading[condition.id] || false}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
