@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -59,7 +60,6 @@ import {
 const Insurance = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
@@ -92,6 +92,22 @@ const Insurance = () => {
 
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('insurance', insurances);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingInsurance,
+    openModal: handleViewInsurance,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: insurances,
+    loading,
+    onClose: (insurance) => {
+      if (insurance) {
+        refreshFileCount(insurance.id);
+      }
+    },
+  });
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -163,10 +179,6 @@ const Insurance = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingInsurance, setEditingInsurance] = useState(null);
   const [formData, setFormData] = useState({});
-
-  // View modal state management
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingInsurance, setViewingInsurance] = useState(null);
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -426,57 +438,6 @@ const Insurance = () => {
     setDocumentManagerMethods(null); // Reset document manager methods
     setFormData(initializeFormData());
   };
-
-  // Handle view insurance
-  const handleViewInsurance = (insurance) => {
-    try {
-      setViewingInsurance(insurance);
-      setShowViewModal(true);
-      
-      // Add view parameter to URL for deep linking
-      const searchParams = new URLSearchParams(location.search);
-      searchParams.set('view', insurance.id);
-      navigate({ search: searchParams.toString() }, { replace: true });
-    } catch (error) {
-      logger.error('Error opening insurance view modal:', error);
-      notifications.show({
-        title: 'Error',
-        message: ERROR_MESSAGES.ENTITY_NOT_FOUND,
-        color: 'red',
-      });
-    }
-  };
-
-  // Handle close view modal
-  const handleCloseViewModal = () => {
-    // Refresh file count for the viewed insurance before closing
-    if (viewingInsurance) {
-      refreshFileCount(viewingInsurance.id);
-    }
-    
-    setShowViewModal(false);
-    setViewingInsurance(null);
-    
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    navigate({ search: searchParams.toString() }, { replace: true });
-  };
-
-  // Handle URL view parameter for deep linking
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-    
-    if (viewId && insurances.length > 0 && !loading) {
-      const insurance = insurances.find(i => i.id.toString() === viewId);
-      if (insurance && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingInsurance(insurance);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, insurances, loading, showViewModal]);
 
   // Loading state
   if (loading) {

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
@@ -45,7 +46,6 @@ import {
 const Procedures = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
@@ -91,10 +91,24 @@ const Procedures = () => {
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('procedure', procedures);
 
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingProcedure,
+    openModal: handleViewProcedure,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: procedures,
+    loading,
+    onClose: (procedure) => {
+      if (procedure) {
+        refreshFileCount(procedure.id);
+      }
+    },
+  });
+
   // Form state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingProcedure, setViewingProcedure] = useState(null);
   const [editingProcedure, setEditingProcedure] = useState(null);
   const [formData, setFormData] = useState({
     procedure_name: '',
@@ -197,34 +211,6 @@ const Procedures = () => {
     setShowModal(true);
   };
 
-  const handleViewProcedure = procedure => {
-    setViewingProcedure(procedure);
-    setShowViewModal(true);
-    // Update URL with procedure ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', procedure.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    // Refresh file count for the viewed procedure before closing
-    if (viewingProcedure) {
-      refreshFileCount(viewingProcedure.id);
-    }
-    
-    setShowViewModal(false);
-    setViewingProcedure(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   const handleEditProcedure = procedure => {
     resetSubmission();
     setEditingProcedure(procedure);
@@ -247,22 +233,6 @@ const Procedures = () => {
     });
     setShowModal(true);
   };
-
-  // Handle URL parameters for direct linking to specific procedures
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && procedures.length > 0 && !loading) {
-      const procedure = procedures.find(p => p.id.toString() === viewId);
-      if (procedure && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingProcedure(procedure);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, procedures, loading, showViewModal]);
-
 
   const handleDeleteProcedure = async procedureId => {
     const success = await deleteItem(procedureId);

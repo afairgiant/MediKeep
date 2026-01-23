@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
@@ -48,7 +49,6 @@ import { IconFileUpload } from '@tabler/icons-react';
 const LabResults = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
@@ -208,12 +208,28 @@ const LabResults = () => {
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
   const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
 
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingLabResult,
+    openModal: handleViewLabResult,
+    closeModal: handleCloseViewModal,
+    setViewingItem: setViewingLabResult,
+    setIsOpen: setShowViewModal,
+  } = useViewModalNavigation({
+    items: labResults,
+    loading,
+    onClose: (labResult) => {
+      if (labResult) {
+        refreshFileCount(labResult.id);
+      }
+    },
+  });
+
   // Form and modal state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
   const [showQuickImportModal, setShowQuickImportModal] = useState(false);
   const [initialViewTab, setInitialViewTab] = useState('overview');
-  const [viewingLabResult, setViewingLabResult] = useState(null);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [formData, setFormData] = useState({
     test_name: '',
@@ -228,25 +244,6 @@ const LabResults = () => {
     notes: '',
     practitioner_id: '',
   });
-
-  // Handle URL parameters for direct linking to specific lab results
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && labResults && labResults.length > 0 && !loading) {
-      const labResult = labResults.find(lr => lr.id.toString() === viewId);
-      if (labResult && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingLabResult(labResult);
-        setShowViewModal(true);
-
-        // Note: File loading now handled by DocumentManager
-      }
-    }
-  }, [location.search, labResults, loading, showViewModal]);
-
-  // Note: File management functions removed - now handled by DocumentManager component
 
   // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
   const handleAddLabResult = useCallback(() => {
@@ -291,37 +288,6 @@ const LabResults = () => {
     // Note: File loading is now handled by DocumentManager component
     setShowModal(true);
   }, [resetSubmission]);
-
-  const handleViewLabResult = useCallback(async labResult => {
-    setViewingLabResult(labResult);
-    setShowViewModal(true);
-
-    // Note: File loading now handled by DocumentManager
-
-    // Update URL with lab result ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', labResult.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  }, [navigate, location.pathname]);
-
-  const handleCloseViewModal = useCallback(() => {
-    // Refresh file count for the viewed lab result before closing
-    if (viewingLabResult) {
-      refreshFileCount(viewingLabResult.id);
-    }
-
-    setShowViewModal(false);
-    setViewingLabResult(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  }, [viewingLabResult, refreshFileCount, navigate, location.pathname]);
 
   const handleLabResultUpdated = useCallback(async () => {
     // If modal is open, fetch the updated lab result directly

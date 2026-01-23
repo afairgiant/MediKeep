@@ -4,7 +4,7 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -31,6 +31,7 @@ import {
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -57,14 +58,11 @@ import logger from '../../services/logger';
 const Medication = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Form state - moved up to be available for refs logic
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingMedication, setViewingMedication] = useState(null);
   const [editingMedication, setEditingMedication] = useState(null);
 
   // Get practitioners and pharmacies data
@@ -126,6 +124,17 @@ const Medication = () => {
 
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('medication', medications);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingMedication,
+    openModal: handleViewMedication,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: medications,
+    loading,
+  });
 
   // Display medication purpose (indication only, since conditions are now linked via many-to-many)
   const getMedicationPurpose = (medication, asText = false) => {
@@ -225,44 +234,6 @@ const Medication = () => {
     setEditingMedication(medication);
     setShowAddForm(true);
   }, []);
-
-  const handleViewMedication = medication => {
-    setViewingMedication(medication);
-    setShowViewModal(true);
-    // Update URL with medication ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', medication.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingMedication(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
-  // Handle URL parameters for direct linking to specific medications
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && medications.length > 0 && !loading) {
-      const medication = medications.find(m => m.id.toString() === viewId);
-      if (medication && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingMedication(medication);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, medications, loading, showViewModal]);
 
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
