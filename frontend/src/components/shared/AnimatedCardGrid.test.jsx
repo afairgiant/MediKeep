@@ -101,7 +101,7 @@ describe('AnimatedCardGrid', () => {
   });
 
   describe('columns', () => {
-    it('applies default columns { base: 12, sm: 6, lg: 4 }', () => {
+    it('applies default columns { base: 12, md: 6, lg: 4 }', () => {
       const { container } = render(
         <AnimatedCardGrid items={mockItems} renderCard={mockRenderCard} />
       );

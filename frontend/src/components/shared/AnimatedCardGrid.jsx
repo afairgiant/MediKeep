@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
  * <Grid>
  *   <AnimatePresence>
  *     {items.map((item, index) => (
- *       <Grid.Col key={item.id} span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}>
+ *       <Grid.Col key={item.id} span={{ base: 12, md: 6, lg: 4 }}>
  *         <motion.div
  *           initial={{ opacity: 0, y: 20 }}
  *           animate={{ opacity: 1, y: 0 }}
@@ -45,7 +45,7 @@ function AnimatedCardGrid({
   items,
   renderCard,
   keyExtractor = (item) => item.id,
-  columns = { base: 12, sm: 6, lg: 4 },
+  columns = { base: 12, md: 6, lg: 4 },
   animate = true,
   staggerDelay = 0.1,
 }) {
@@ -103,7 +103,7 @@ AnimatedCardGrid.propTypes = {
   renderCard: PropTypes.func.isRequired,
   /** Function to extract a unique key from each item (default: item => item.id) */
   keyExtractor: PropTypes.func,
-  /** Responsive column spans using Mantine's object syntax (default: { base: 12, sm: 6, lg: 4 }) */
+  /** Responsive column spans using Mantine's object syntax (default: { base: 12, md: 6, lg: 4 }) */
   columns: PropTypes.oneOfType([
     PropTypes.number,
     PropTypes.object,
