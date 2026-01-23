@@ -35,7 +35,6 @@ import {
   IconRefresh,
   IconPlus,
   IconAlertTriangle,
-  IconCheck,
   IconDroplet,
   IconChartLine,
 } from '@tabler/icons-react';
@@ -43,6 +42,7 @@ import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import VitalsList from '../../components/medical/VitalsList';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 
 // Modular components
 import VitalViewModal from '../../components/medical/vital/VitalViewModal';
@@ -506,31 +506,11 @@ const Vitals = () => {
       <PageHeader title={t('vitals.title', 'Vital Signs')} icon="❤️" />
 
       <Stack gap="lg">
-        {vitalsError && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {vitalsError}
-          </Alert>
-        )}
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={vitalsError}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
         <Group justify="space-between" mb="lg">
           <Button

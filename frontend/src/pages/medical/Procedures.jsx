@@ -26,6 +26,7 @@ import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
@@ -38,7 +39,6 @@ import {
   Text,
   Grid,
   Container,
-  Alert,
   Card,
   Paper,
 } from '@mantine/core';
@@ -389,23 +389,11 @@ const Procedures = () => {
         <PageHeader title={t('procedures.title', 'Procedures')} icon="🔬" />
 
         <Stack gap="lg">
-          {error && (
-            <Alert
-              variant="light"
-              color="red"
-              title={t('procedures.error', 'Error')}
-              withCloseButton
-              onClose={clearError}
-              style={{ whiteSpace: 'pre-line' }}
-            >
-              {error}
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert variant="light" color="green" title={t('procedures.success', 'Success')}>
-              {successMessage}
-            </Alert>
-          )}
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={clearError}
+          />
 
           <Group justify="space-between" align="center">
             <Button variant="filled" onClick={handleAddProcedure}>

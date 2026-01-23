@@ -10,7 +10,6 @@ import {
   Text,
   Title,
   Stack,
-  Alert,
   Badge,
   Grid,
   Card,
@@ -20,10 +19,7 @@ import {
   Button,
 } from '@mantine/core';
 import {
-  IconAlertTriangle,
-  IconCheck,
   IconPlus,
-  IconShieldCheck,
   IconVaccine,
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -31,6 +27,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -247,32 +244,11 @@ const Immunization = () => {
       <PageHeader title={t('immunizations.title', 'Immunizations')} icon="💉" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('immunizations.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
-
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('immunizations.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
         <Group justify="space-between" mb="lg">
           <Button

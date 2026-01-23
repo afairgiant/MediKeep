@@ -26,6 +26,7 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import FileCountBadge from '../../components/shared/FileCountBadge';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 // Import new modular components
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
@@ -37,7 +38,6 @@ import {
   Button,
   Grid,
   Container,
-  Alert,
   Stack,
   Text,
   Card,
@@ -527,23 +527,11 @@ const LabResults = () => {
         <PageHeader title={t('labResults.title', 'Lab Results')} icon="🧪" />
 
         <Stack gap="lg">
-          {error && (
-            <Alert
-              variant="light"
-              color="red"
-              title={t('labResults.error', 'Error')}
-              withCloseButton
-              onClose={clearError}
-              style={{ whiteSpace: 'pre-line' }}
-            >
-              {error}
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert variant="light" color="green" title={t('labResults.success', 'Success')}>
-              {successMessage}
-            </Alert>
-          )}
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={clearError}
+          />
 
           <Group justify="space-between" align="center">
             <Group gap="sm">
