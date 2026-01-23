@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import logger from '../../services/logger';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Container,
@@ -31,6 +31,7 @@ import {
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -54,7 +55,6 @@ const Immunization = () => {
   const { t } = useTranslation('common');
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
 
   // Standardized data management
@@ -94,10 +94,19 @@ const Immunization = () => {
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('immunization', immunizations);
 
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingImmunization,
+    openModal: handleViewImmunization,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: immunizations,
+    loading,
+  });
+
   // Form and UI state
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingImmunization, setViewingImmunization] = useState(null);
   const [editingImmunization, setEditingImmunization] = useState(null);
   const [formData, setFormData] = useState({
     vaccine_name: '',
@@ -214,29 +223,6 @@ const Immunization = () => {
     }
   };
 
-  const handleViewImmunization = immunization => {
-    setViewingImmunization(immunization);
-    setShowViewModal(true);
-    // Update URL with immunization ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', immunization.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingImmunization(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   const handleDeleteImmunization = async immunizationId => {
     const success = await deleteItem(immunizationId);
     if (success) {
@@ -247,28 +233,6 @@ const Immunization = () => {
 
   // Get processed data from data management
   const processedImmunizations = dataManagement.data;
-
-  // Handle URL parameters for direct linking to specific immunizations
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (
-      viewId &&
-      processedImmunizations &&
-      processedImmunizations.length > 0 &&
-      !loading
-    ) {
-      const immunization = processedImmunizations.find(
-        imm => imm.id.toString() === viewId
-      );
-      if (immunization && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingImmunization(immunization);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, processedImmunizations, loading, showViewModal]);
 
   // Get practitioners data
   const { practitioners: practitionersObject } = usePatientWithStaticData();

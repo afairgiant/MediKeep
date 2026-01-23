@@ -1,7 +1,7 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -34,7 +34,7 @@ import {
   IconDroplet,
   IconAward,
 } from '@tabler/icons-react';
-import { useMedicalData, useDataManagement, useEntityFileCounts } from '../../hooks';
+import { useMedicalData, useDataManagement, useEntityFileCounts, useViewModalNavigation } from '../../hooks';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -62,7 +62,6 @@ import {
 const Conditions = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   
@@ -106,10 +105,19 @@ const Conditions = () => {
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('condition', conditions);
 
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingCondition,
+    openModal: handleViewCondition,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: conditions,
+    loading,
+  });
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingCondition, setViewingCondition] = useState(null);
   const [editingCondition, setEditingCondition] = useState(null);
   const [formData, setFormData] = useState({
     condition_name: '',
@@ -148,29 +156,6 @@ const Conditions = () => {
     setShowModal(true);
   };
 
-  const handleViewCondition = condition => {
-    setViewingCondition(condition);
-    setShowViewModal(true);
-    // Update URL with condition ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', condition.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingCondition(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   // Load medications and practitioners for linking dropdowns
   useEffect(() => {
     if (currentPatient?.id) {
@@ -195,21 +180,6 @@ const Conditions = () => {
         });
     }
   }, [currentPatient?.id]);
-
-  // Handle URL parameters for direct linking to specific conditions
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && conditions.length > 0 && !loading) {
-      const condition = conditions.find(c => c.id.toString() === viewId);
-      if (condition && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingCondition(condition);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, conditions, loading, showViewModal]);
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);

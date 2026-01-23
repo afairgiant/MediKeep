@@ -1,7 +1,7 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -25,6 +25,7 @@ import {
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -39,7 +40,6 @@ import { useResponsive } from '../../hooks/useResponsive';
 
 const Allergies = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
   const responsive = useResponsive();
@@ -96,6 +96,17 @@ const Allergies = () => {
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('allergy', allergies);
 
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingAllergy,
+    openModal: handleViewAllergy,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: allergies,
+    loading,
+  });
+
   // Get standardized formatters for allergies with medication linking
   const formatters = {
     ...getEntityFormatters('allergies', [], navigate),
@@ -107,8 +118,6 @@ const Allergies = () => {
 
   // Form state
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingAllergy, setViewingAllergy] = useState(null);
   const [editingAllergy, setEditingAllergy] = useState(null);
   const [formData, setFormData] = useState({
     allergen: '',
@@ -146,29 +155,6 @@ const Allergies = () => {
     setShowAddForm(true);
   };
 
-  const handleViewAllergy = allergy => {
-    setViewingAllergy(allergy);
-    setShowViewModal(true);
-    // Update URL with allergy ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', allergy.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingAllergy(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   const handleEditAllergy = allergy => {
     setFormData({
       allergen: allergy.allergen || '',
@@ -183,22 +169,6 @@ const Allergies = () => {
     setEditingAllergy(allergy);
     setShowAddForm(true);
   };
-
-  // Handle URL parameters for direct linking to specific allergies
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && allergies.length > 0 && !loading) {
-      const allergy = allergies.find(a => a.id.toString() === viewId);
-      if (allergy && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingAllergy(allergy);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, allergies, loading, showViewModal]);
-
 
   const handleSubmit = async e => {
     e.preventDefault();

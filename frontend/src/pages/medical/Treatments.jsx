@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
@@ -37,7 +38,6 @@ import {
 const Treatments = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
@@ -97,10 +97,19 @@ const Treatments = () => {
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('treatment', treatments);
 
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingTreatment,
+    openModal: handleViewTreatment,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: treatments,
+    loading,
+  });
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingTreatment, setViewingTreatment] = useState(null);
   const [editingTreatment, setEditingTreatment] = useState(null);
   const [formData, setFormData] = useState({
     treatment_name: '',
@@ -153,30 +162,6 @@ const Treatments = () => {
       tags: treatment.tags || [],
     });
     setShowModal(true);
-  };
-
-  const handleViewTreatment = treatment => {
-    // Use existing treatment data - no need to fetch again
-    setViewingTreatment(treatment);
-    setShowViewModal(true);
-    // Update URL with treatment ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', treatment.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingTreatment(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
   };
 
   const handleDeleteTreatment = async treatmentId => {
@@ -284,21 +269,6 @@ const Treatments = () => {
       navigate(`/conditions?view=${conditionId}`);
     }
   };
-
-  // Handle URL parameters for direct linking to specific treatments
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && treatments.length > 0 && !loading) {
-      const treatment = treatments.find(t => t.id.toString() === viewId);
-      if (treatment && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingTreatment(treatment);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, treatments, loading, showViewModal]);
 
   // Get processed data from data management
   const filteredTreatments = dataManagement.data;

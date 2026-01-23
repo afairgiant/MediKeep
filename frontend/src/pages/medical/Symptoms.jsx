@@ -2,7 +2,6 @@ import logger from '../../services/logger';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -27,7 +26,7 @@ import {
   IconNote,
   IconEdit,
 } from '@tabler/icons-react';
-import { useViewNavigation } from '../../hooks/useViewNavigation';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { symptomApi } from '../../services/api/symptomApi';
 import { PageHeader } from '../../components';
@@ -40,9 +39,6 @@ import { SYMPTOM_STATUS_COLORS } from '../../constants/symptomEnums';
 
 const Symptoms = () => {
   const { t } = useTranslation('common');
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { navigateToView, closeView } = useViewNavigation();
 
   // Get current patient from global hook (same as Medication.js)
   const { patient } = usePatientWithStaticData();
@@ -56,8 +52,6 @@ const Symptoms = () => {
 
   // View state
   const [activeTab, setActiveTab] = useState('list');
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [viewingSymptom, setViewingSymptom] = useState(null);
 
   // Symptom Definition Form state
   const [showSymptomForm, setShowSymptomForm] = useState(false);
@@ -97,6 +91,7 @@ const Symptoms = () => {
   const [editingOccurrence, setEditingOccurrence] = useState(null);
   const [occurrenceFormData, setOccurrenceFormData] = useState(getDefaultOccurrenceFormData());
 
+  // Fetch symptoms function defined before hook usage
   const fetchSymptoms = useCallback(async () => {
     if (!currentPatient?.id) return;
 
@@ -139,6 +134,17 @@ const Symptoms = () => {
       setLoading(false);
     }
   }, [currentPatient?.id, fetchSymptoms]);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: viewModalOpen,
+    viewingItem: viewingSymptom,
+    openModal: handleViewSymptom,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: symptoms,
+    loading,
+  });
 
   // Symptom Definition Handlers
   const handleAddSymptom = () => {
@@ -337,33 +343,6 @@ const Symptoms = () => {
       setError(err.message || 'Failed to save episode');
     }
   };
-
-  // View Modal Handlers
-  const handleViewSymptom = symptom => {
-    setViewingSymptom(symptom);
-    setViewModalOpen(true);
-    navigateToView(symptom.id);
-  };
-
-  const handleCloseViewModal = () => {
-    setViewModalOpen(false);
-    setViewingSymptom(null);
-    closeView();
-  };
-
-  // Handle URL parameters for direct linking
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && symptoms.length > 0 && !loading) {
-      const symptom = symptoms.find(s => s.id.toString() === viewId);
-      if (symptom && !viewModalOpen) {
-        setViewingSymptom(symptom);
-        setViewModalOpen(true);
-      }
-    }
-  }, [location.search, symptoms, loading, viewModalOpen]);
 
   // Clear messages after timeout
   useEffect(() => {

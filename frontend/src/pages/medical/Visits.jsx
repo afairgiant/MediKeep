@@ -24,7 +24,8 @@ import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
+import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { usePractitioners } from '../../hooks/useGlobalData';
@@ -54,7 +55,6 @@ const Visits = () => {
   const { t } = useTranslation('common');
   const [viewMode, setViewMode] = useState('cards');
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
 
   // Get practitioners data
@@ -148,6 +148,22 @@ const Visits = () => {
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('visit', visits);
 
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingVisit,
+    openModal: handleViewVisit,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: visits,
+    loading,
+    onClose: (visit) => {
+      if (visit) {
+        refreshFileCount(visit.id);
+      }
+    },
+  });
+
   // Get patient conditions for linking
   const [conditions, setConditions] = useState([]);
 
@@ -189,8 +205,6 @@ const Visits = () => {
 
   // Form state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingVisit, setViewingVisit] = useState(null);
   const [editingVisit, setEditingVisit] = useState(null);
   const [formData, setFormData] = useState({
     reason: '',
@@ -232,17 +246,6 @@ const Visits = () => {
     setShowModal(true);
   };
 
-  const handleViewVisit = visit => {
-    setViewingVisit(visit);
-    setShowViewModal(true);
-    // Update URL with visit ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', visit.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
   const handleEditVisit = visit => {
     resetSubmission(); // Reset submission state
     setEditingVisit(visit);
@@ -264,23 +267,6 @@ const Visits = () => {
       tags: visit.tags || [],
     });
     setShowModal(true);
-  };
-
-  const handleCloseViewModal = () => {
-    // Refresh file count for the viewed visit before closing
-    if (viewingVisit) {
-      refreshFileCount(viewingVisit.id);
-    }
-    
-    setShowViewModal(false);
-    setViewingVisit(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
   };
 
   const handleDeleteVisit = async visitId => {
@@ -459,21 +445,6 @@ const Visits = () => {
         return 'gray';
     }
   };
-
-  // Handle URL parameters for direct linking to specific visits
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && visits && visits.length > 0 && !loading) {
-      const visit = visits.find(v => v.id.toString() === viewId);
-      if (visit && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingVisit(visit);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, visits, loading, showViewModal]);
 
   if (loading) {
     return (
