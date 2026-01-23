@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Title,
   Stack,
@@ -17,7 +16,6 @@ import {
   Box,
   Divider,
   Modal,
-  Button,
 } from '@mantine/core';
 import {
   IconPlus,
@@ -45,7 +43,7 @@ import {
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -313,22 +311,15 @@ const Conditions = () => {
           onClearError={clearError}
         />
 
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddCondition}
-            size="md"
-          >
-            {t('conditions.addNew', 'Add New Condition')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('conditions.addNew', 'Add New Condition'),
+            onClick: handleAddCondition,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
         <MedicalPageFilters dataManagement={dataManagement} config={config} />

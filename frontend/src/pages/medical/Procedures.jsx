@@ -23,7 +23,7 @@ import {
 } from '../../constants/errorMessages';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
@@ -34,7 +34,6 @@ import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureF
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Button,
-  Group,
   Stack,
   Text,
   Grid,
@@ -395,17 +394,15 @@ const Procedures = () => {
             onClearError={clearError}
           />
 
-          <Group justify="space-between" align="center">
-            <Button variant="filled" onClick={handleAddProcedure}>
-              {t('procedures.addProcedure', '+ Add Procedure')}
-            </Button>
-
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </Group>
+          <MedicalPageActions
+            primaryAction={{
+              label: t('procedures.addProcedure', '+ Add Procedure'),
+              onClick: handleAddProcedure,
+            }}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            align="center"
+          />
 
           {/* Mantine Filter Controls */}
           <MedicalPageFilters dataManagement={dataManagement} config={config} />

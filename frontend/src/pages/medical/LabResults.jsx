@@ -21,7 +21,7 @@ import {
   getUserFriendlyError
 } from '../../constants/errorMessages';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import FileCountBadge from '../../components/shared/FileCountBadge';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
@@ -41,7 +41,6 @@ import {
   Stack,
   Text,
   Card,
-  Group,
   Paper,
 } from '@mantine/core';
 import { IconFileUpload } from '@tabler/icons-react';
@@ -533,26 +532,22 @@ const LabResults = () => {
             onClearError={clearError}
           />
 
-          <Group justify="space-between" align="center">
-            <Group gap="sm">
-              <Button variant="filled" onClick={handleAddLabResult}>
-                {t('labResults.addNew', '+ Add New Lab Result')}
-              </Button>
-              <Button
-                variant="light"
-                leftSection={<IconFileUpload size={16} />}
-                onClick={() => setShowQuickImportModal(true)}
-              >
-                {t('labResults.quickPdfImport', 'Quick PDF Import')}
-              </Button>
-            </Group>
-
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </Group>
+          <MedicalPageActions
+            primaryAction={{
+              label: t('labResults.addNew', '+ Add New Lab Result'),
+              onClick: handleAddLabResult,
+            }}
+            secondaryActions={[
+              {
+                label: t('labResults.quickPdfImport', 'Quick PDF Import'),
+                onClick: () => setShowQuickImportModal(true),
+                leftSection: <IconFileUpload size={16} />,
+              },
+            ]}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            align="center"
+          />
 
           {/* Mantine Filter Controls */}
           <MedicalPageFilters dataManagement={dataManagement} config={config} />

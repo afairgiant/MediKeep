@@ -5,15 +5,16 @@ import { useTranslation } from 'react-i18next';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Stack,
   Alert,
-  Button,
   Tabs,
   Badge,
+  Button,
+  Group,
 } from '@mantine/core';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import {
   IconStethoscope,
   IconPlus,
@@ -381,11 +382,15 @@ const Symptoms = () => {
       />
 
       {/* Add Symptom Button */}
-      <Group mb="md">
-        <Button leftSection={<IconPlus size={16} />} onClick={handleAddSymptom}>
-          {t('symptoms.addSymptom', 'Add Symptom')}
-        </Button>
-      </Group>
+      <MedicalPageActions
+        primaryAction={{
+          label: t('symptoms.addSymptom', 'Add Symptom'),
+          onClick: handleAddSymptom,
+          leftSection: <IconPlus size={16} />,
+        }}
+        showViewToggle={false}
+        mb="md"
+      />
 
       {/* Tabs for different views */}
       <Tabs value={activeTab} onChange={setActiveTab}>

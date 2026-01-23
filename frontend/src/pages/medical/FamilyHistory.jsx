@@ -13,8 +13,8 @@ import { PageHeader } from '../../components';
 import logger from '../../services/logger';
 import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -42,6 +42,7 @@ import {
   Paper,
   useMantineColorScheme,
 } from '@mantine/core';
+// Note: Button is still needed for the Alert cancel button
 import {
   IconUsers,
   IconPlus,
@@ -949,58 +950,43 @@ const FamilyHistory = () => {
               : t('familyHistory.sharedMemberCount', '{{filteredCount}} of {{totalCount}} family member(s) shared with you', { filteredCount: sharedDataManagement.filteredCount, totalCount: sharedDataManagement.totalCount })}
         </Text>
 
-        <Group justify="space-between" mb="lg">
-          <Group>
-            {activeTab === 'my-family' && (
-              <Button
-                leftSection={<IconUserPlus size={16} />}
-                onClick={handleAddMember}
-                variant="filled"
-              >
-                {t('familyHistory.addFamilyMember', 'Add Family Member')}
-              </Button>
-            )}
-
-            {activeTab === 'my-family' && (
-              <Button
-                variant={bulkSelectionMode ? 'filled' : 'light'}
-                leftSection={<IconShare size={16} />}
-                onClick={() => {
-                  setBulkSelectionMode(!bulkSelectionMode);
-                  setSelectedMembersForBulkSharing([]);
-                }}
-              >
-                {bulkSelectionMode ? t('familyHistory.endSharingMode', 'End Sharing Mode') : t('familyHistory.sharingMode', 'Sharing Mode')}
-              </Button>
-            )}
-
-            <Button
-              variant="light"
-              leftSection={<IconMail size={16} />}
-              onClick={openInvitationManager}
-            >
-              {t('familyHistory.manageInvitations', 'Manage Invitations')}
-            </Button>
-
-            {bulkSelectionMode && selectedMembersForBulkSharing.length > 0 && (
-              <Button
-                variant="filled"
-                leftSection={<IconSend size={16} />}
-                onClick={() => {
-                  openBulkSharingModal();
-                }}
-              >
-                {t('familyHistory.shareSelected', 'Share Selected ({{count}})', { count: selectedMembersForBulkSharing.length })}
-              </Button>
-            )}
-          </Group>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('familyHistory.addFamilyMember', 'Add Family Member'),
+            onClick: handleAddMember,
+            leftSection: <IconUserPlus size={16} />,
+            visible: activeTab === 'my-family',
+          }}
+          secondaryActions={[
+            {
+              key: 'sharing-mode',
+              label: bulkSelectionMode ? t('familyHistory.endSharingMode', 'End Sharing Mode') : t('familyHistory.sharingMode', 'Sharing Mode'),
+              onClick: () => {
+                setBulkSelectionMode(!bulkSelectionMode);
+                setSelectedMembersForBulkSharing([]);
+              },
+              leftSection: <IconShare size={16} />,
+              variant: bulkSelectionMode ? 'filled' : 'light',
+              visible: activeTab === 'my-family',
+            },
+            {
+              key: 'manage-invitations',
+              label: t('familyHistory.manageInvitations', 'Manage Invitations'),
+              onClick: openInvitationManager,
+              leftSection: <IconMail size={16} />,
+            },
+            {
+              key: 'share-selected',
+              label: t('familyHistory.shareSelected', 'Share Selected ({{count}})', { count: selectedMembersForBulkSharing.length }),
+              onClick: openBulkSharingModal,
+              leftSection: <IconSend size={16} />,
+              variant: 'filled',
+              visible: bulkSelectionMode && selectedMembersForBulkSharing.length > 0,
+            },
+          ]}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {bulkSelectionMode && (
           <Alert

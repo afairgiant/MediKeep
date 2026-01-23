@@ -22,6 +22,7 @@ import {
   IconShieldCheck,
   IconStar,
 } from '@tabler/icons-react';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { useMedicalData, useDataManagement } from '../../hooks';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
@@ -31,7 +32,6 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
@@ -263,22 +263,15 @@ const EmergencyContacts = () => {
           onClearError={clearError}
         />
 
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddContact}
-            size="md"
-          >
-            {t('emergencyContacts.actions.addNew')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('emergencyContacts.actions.addNew'),
+            onClick: handleAddContact,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
         <MedicalPageFilters dataManagement={dataManagement} config={config} />

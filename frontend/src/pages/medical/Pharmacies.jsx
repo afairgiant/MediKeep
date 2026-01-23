@@ -2,17 +2,16 @@ import React, { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Stack,
   Grid,
-  Button,
   Title,
 } from '@mantine/core';
 import {
   IconPlus,
   IconShieldCheck,
 } from '@tabler/icons-react';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
@@ -221,16 +220,14 @@ const Pharmacies = () => {
           onClearError={() => setError('')}
         />
 
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddPharmacy}
-            size="md"
-          >
-            {t('pharmacies.actions.addNew', 'Add New Pharmacy')}
-          </Button>
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('pharmacies.actions.addNew', 'Add New Pharmacy'),
+            onClick: handleAddPharmacy,
+            leftSection: <IconPlus size={16} />,
+          }}
+          showViewToggle={false}
+        />
 
         {/* Mantine Filter Controls */}
         <MedicalPageFilters dataManagement={dataManagement} config={config} />

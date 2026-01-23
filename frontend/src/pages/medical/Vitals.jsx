@@ -11,7 +11,6 @@ import { motion } from 'framer-motion';
 import {
   Button,
   Paper,
-  Group,
   Text,
   Title,
   Stack,
@@ -26,6 +25,7 @@ import {
   Box,
   Divider,
   Container,
+  Group,
 } from '@mantine/core';
 import {
   IconHeart,
@@ -40,6 +40,7 @@ import {
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import VitalsList from '../../components/medical/VitalsList';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
@@ -512,16 +513,14 @@ const Vitals = () => {
           onClearError={clearError}
         />
 
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddNew}
-            size="md"
-          >
-            {t('vitals.addNew', 'Add New Vital Signs')}
-          </Button>
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('vitals.addNew', 'Add New Vital Signs'),
+            onClick: handleAddNew,
+            leftSection: <IconPlus size={16} />,
+          }}
+          showViewToggle={false}
+        />
 
         {/* Stats Overview */}
         <motion.div
