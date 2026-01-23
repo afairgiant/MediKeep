@@ -38,7 +38,7 @@ import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
@@ -499,23 +499,7 @@ const Medication = () => {
         </Paper>
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          medicationTypeOptions={dataManagement.medicationTypeOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Form Modal */}
         <MedicationFormWrapper

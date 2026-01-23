@@ -44,7 +44,7 @@ import {
 } from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { withResponsive } from '../../hoc/withResponsive';
@@ -331,22 +331,7 @@ const Conditions = () => {
         </Group>
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Form Modal */}
         <ConditionFormWrapper

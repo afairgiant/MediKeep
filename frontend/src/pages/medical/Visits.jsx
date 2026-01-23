@@ -36,7 +36,7 @@ import {
   SUCCESS_MESSAGES,
   getUserFriendlyError
 } from '../../constants/errorMessages';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
@@ -480,22 +480,7 @@ const Visits = () => {
         </Group>
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Content */}
           {filteredVisits.length === 0 ? (

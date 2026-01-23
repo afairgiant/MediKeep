@@ -22,7 +22,7 @@ import {
 } from '../../constants/errorMessages';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import FileCountBadge from '../../components/shared/FileCountBadge';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
@@ -555,27 +555,7 @@ const LabResults = () => {
           </Group>
 
           {/* Mantine Filter Controls */}
-          <MantineFilters
-            filters={dataManagement.filters}
-            updateFilter={dataManagement.updateFilter}
-            clearFilters={dataManagement.clearFilters}
-            hasActiveFilters={dataManagement.hasActiveFilters}
-            statusOptions={dataManagement.statusOptions}
-            categoryOptions={dataManagement.categoryOptions}
-            dateRangeOptions={dataManagement.dateRangeOptions}
-            orderedDateOptions={dataManagement.orderedDateOptions}
-            completedDateOptions={dataManagement.completedDateOptions}
-            resultOptions={dataManagement.resultOptions}
-            typeOptions={dataManagement.typeOptions}
-            filesOptions={dataManagement.filesOptions}
-            sortOptions={dataManagement.sortOptions}
-            sortBy={dataManagement.sortBy}
-            sortOrder={dataManagement.sortOrder}
-            handleSortChange={dataManagement.handleSortChange}
-            totalCount={dataManagement.totalCount}
-            filteredCount={dataManagement.filteredCount}
-            config={config.filterControls}
-          />
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
           {filteredLabResults.length === 0 ? (
             <EmptyState

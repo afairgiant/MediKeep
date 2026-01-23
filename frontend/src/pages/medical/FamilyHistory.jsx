@@ -12,7 +12,7 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import logger from '../../services/logger';
 import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
@@ -1036,41 +1036,11 @@ const FamilyHistory = () => {
 
       {/* Filters */}
       {activeTab === 'my-family' && (
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
       )}
 
       {activeTab === 'shared-with-me' && (
-        <MantineFilters
-          filters={sharedDataManagement.filters}
-          updateFilter={sharedDataManagement.updateFilter}
-          clearFilters={sharedDataManagement.clearFilters}
-          hasActiveFilters={sharedDataManagement.hasActiveFilters}
-          statusOptions={sharedDataManagement.statusOptions}
-          categoryOptions={sharedDataManagement.categoryOptions}
-          dateRangeOptions={sharedDataManagement.dateRangeOptions}
-          sortOptions={sharedDataManagement.sortOptions}
-          sortBy={sharedDataManagement.sortBy}
-          sortOrder={sharedDataManagement.sortOrder}
-          handleSortChange={sharedDataManagement.handleSortChange}
-          totalCount={sharedDataManagement.totalCount}
-          filteredCount={sharedDataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={sharedDataManagement} config={config} />
       )}
 
       {/* Tabs for Family History */}
