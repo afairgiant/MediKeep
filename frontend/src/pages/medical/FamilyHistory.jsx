@@ -15,6 +15,7 @@ import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import StatusBadge from '../../components/medical/StatusBadge';
@@ -34,8 +35,6 @@ import {
   Text,
   Container,
   Alert,
-  Loader,
-  Center,
   Title,
   SimpleGrid,
   Tabs,
@@ -908,16 +907,7 @@ const FamilyHistory = () => {
   // Utility functions moved to extracted components
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('familyHistory.loadingFamilyHistory', 'Loading family history...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('familyHistory.loadingFamilyHistory', 'Loading family history...')} />;
   }
 
   return (

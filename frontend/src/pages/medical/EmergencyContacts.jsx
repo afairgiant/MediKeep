@@ -8,7 +8,6 @@ import {
   Title,
   Stack,
   Alert,
-  Loader,
   Center,
   Badge,
   Grid,
@@ -36,6 +35,7 @@ import { useResponsive } from '../../hooks/useResponsive';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
@@ -250,16 +250,7 @@ const EmergencyContacts = () => {
   };
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('emergencyContacts.page.loading')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('emergencyContacts.page.loading')} />;
   }
 
   return (

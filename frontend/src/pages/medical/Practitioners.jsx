@@ -8,8 +8,6 @@ import {
   Title,
   Stack,
   Alert,
-  Loader,
-  Center,
   Grid,
   Button,
 } from '@mantine/core';
@@ -28,6 +26,7 @@ import MantineFilters from '../../components/mantine/MantineFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
   usePractitioners,
   useCacheManager,
@@ -253,16 +252,7 @@ const Practitioners = () => {
 
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('practitioners.loading', 'Loading practitioners...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('practitioners.loading', 'Loading practitioners...')} />;
   }
 
   return (

@@ -9,8 +9,6 @@ import {
   Title,
   Stack,
   Alert,
-  Loader,
-  Center,
   Button,
   Box,
   Progress,
@@ -18,6 +16,7 @@ import {
   TextInput,
   Switch,
 } from '@mantine/core';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
   IconAlertTriangle,
   IconDownload,
@@ -165,16 +164,7 @@ const ReportBuilder = () => {
   };
 
   if (loading || templatesLoading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('reportBuilder.loading')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('reportBuilder.loading', 'Loading reports...')} />;
   }
 
   return (

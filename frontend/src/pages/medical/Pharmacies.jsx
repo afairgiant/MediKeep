@@ -6,8 +6,6 @@ import {
   Text,
   Stack,
   Alert,
-  Loader,
-  Center,
   Grid,
   Button,
   Title,
@@ -25,6 +23,7 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { usePharmacies } from '../../hooks/useGlobalData';
 import { useTranslation } from 'react-i18next';
 
@@ -209,16 +208,7 @@ const Pharmacies = () => {
 
 
   if (loading) {
-    return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
-            <Loader size="lg" />
-            <Text size="lg">{t('pharmacies.loading', 'Loading pharmacies...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('pharmacies.loading', 'Loading pharmacies...')} />;
   }
 
   return (

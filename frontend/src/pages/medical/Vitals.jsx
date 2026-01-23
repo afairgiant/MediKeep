@@ -42,6 +42,7 @@ import {
 import { PageHeader } from '../../components';
 import MantineFilters from '../../components/mantine/MantineFilters';
 import VitalsList from '../../components/medical/VitalsList';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 
 // Modular components
 import VitalViewModal from '../../components/medical/vital/VitalViewModal';
@@ -480,14 +481,7 @@ const Vitals = () => {
 
   // Loading state
   if (vitalsLoading) {
-    return (
-      <Center h="50vh">
-        <Stack align="center" gap="md">
-          <Loader size="lg" />
-          <Text>{t('vitals.loading', 'Loading vital signs...')}</Text>
-        </Stack>
-      </Center>
-    );
+    return <MedicalPageLoading message={t('vitals.loading', 'Loading vital signs...')} />;
   }
 
   // No patient selected

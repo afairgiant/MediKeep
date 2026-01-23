@@ -9,8 +9,6 @@ import {
   Text,
   Stack,
   Alert,
-  Loader,
-  Center,
   Button,
   Tabs,
   Badge,
@@ -34,6 +32,7 @@ import MantineSymptomForm from '../../components/medical/MantineSymptomForm';
 import MantineSymptomOccurrenceForm from '../../components/medical/MantineSymptomOccurrenceForm';
 import SymptomTimeline from '../../components/medical/SymptomTimeline';
 import SymptomCalendar from '../../components/medical/SymptomCalendar';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { SymptomViewModal } from '../../components/medical/symptoms';
 import { SYMPTOM_STATUS_COLORS } from '../../constants/symptomEnums';
 
@@ -354,14 +353,7 @@ const Symptoms = () => {
 
   // Loading state
   if (loading && symptoms.length === 0) {
-    return (
-      <Container size="xl">
-        <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
-        <Center style={{ minHeight: 400 }}>
-          <Loader size="lg" />
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('symptoms.loading', 'Loading symptoms...')} />;
   }
 
   // No patient selected
