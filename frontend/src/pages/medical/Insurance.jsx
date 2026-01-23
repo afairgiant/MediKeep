@@ -28,7 +28,7 @@ import {
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import ViewToggle from '../../components/shared/ViewToggle';
 import StatusBadge from '../../components/medical/StatusBadge';
@@ -473,22 +473,7 @@ const Insurance = () => {
       </Group>
 
       {/* Mantine Filter Controls */}
-      <MantineFilters
-        filters={filters}
-        updateFilter={updateFilter}
-        clearFilters={clearFilters}
-        hasActiveFilters={hasActiveFilters}
-        statusOptions={statusOptions}
-        categoryOptions={categoryOptions}
-        dateRangeOptions={dateRangeOptions}
-        sortOptions={sortOptions}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        handleSortChange={handleSortChange}
-        totalCount={totalCount}
-        filteredCount={filteredCount}
-        config={config.filterControls}
-      />
+      <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
       {processedInsurances.length === 0 ? (
         <EmptyState

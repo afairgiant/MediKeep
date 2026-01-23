@@ -39,7 +39,7 @@ import {
   IconChartLine,
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import VitalsList from '../../components/medical/VitalsList';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
@@ -604,24 +604,7 @@ const Vitals = () => {
         </motion.div>
 
         {/* Mantine Filters */}
-        {dataManagement && filters && (
-          <MantineFilters
-            filters={filters}
-            updateFilter={updateFilter}
-            clearFilters={clearFilters}
-            hasActiveFilters={hasActiveFilters}
-            statusOptions={statusOptions}
-            categoryOptions={categoryOptions}
-            dateRangeOptions={dateRangeOptions}
-            sortOptions={sortOptions}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            handleSortChange={handleSortChange}
-            totalCount={totalCount}
-            filteredCount={filteredCount}
-            config={pageConfig.filterControls}
-          />
-        )}
+        <MedicalPageFilters dataManagement={dataManagement} config={pageConfig} />
 
         <VitalFormWrapper
           isOpen={showForm}
