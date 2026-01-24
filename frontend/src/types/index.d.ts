@@ -26,6 +26,101 @@ declare module '../services/logger' {
   export default logger;
 }
 
+// Medical Page Configs
+declare module '../utils/medicalPageConfigs' {
+  export interface FilterOption {
+    value: string;
+    label: string;
+    description?: string;
+  }
+
+  export interface SortOption {
+    value: string;
+    label: string;
+    description?: string;
+  }
+
+  export interface PageConfigFiltering {
+    searchFields: string[];
+    statusField?: string;
+    statusOptions?: FilterOption[];
+    categoryField?: string;
+    categoryLabel?: string;
+    categoryOptions?: FilterOption[];
+    dateField?: string;
+    startDateField?: string;
+    endDateField?: string;
+    dateRangeOptions?: FilterOption[];
+    customFilters?: Record<string, (item: any, filterValue: string, additionalData?: any) => boolean>;
+    customSearchFunction?: (item: any, searchTerm: string) => boolean;
+    additionalFilters?: Array<{
+      field: string;
+      label: string;
+      options: FilterOption[];
+    }>;
+    [key: string]: any;
+  }
+
+  export interface PageConfigSorting {
+    defaultSortBy: string;
+    defaultSortOrder: 'asc' | 'desc';
+    sortOptions: SortOption[];
+    sortTypes?: Record<string, string>;
+    customSortFunctions?: Record<string, (a: any, b: any, sortOrder?: string) => number>;
+  }
+
+  export interface PageConfigFilterControls {
+    searchPlaceholder: string;
+    title: string;
+    showStatus?: boolean;
+    showCategory?: boolean;
+    showDateRange?: boolean;
+    showAdditionalFilters?: boolean;
+    description?: string;
+    [key: string]: any;
+  }
+
+  export interface TableColumn {
+    key: string;
+    label: string;
+    sortable?: boolean;
+    width?: string;
+    render?: (value: any, row?: any) => any;
+    style?: (row: any) => Record<string, string>;
+  }
+
+  export interface PageConfig {
+    filtering: PageConfigFiltering;
+    sorting: PageConfigSorting;
+    filterControls: PageConfigFilterControls;
+    table?: {
+      columns: TableColumn[];
+      actions?: Record<string, (row: any) => any>;
+    };
+  }
+
+  export const SEARCH_TERM_MAX_LENGTH: number;
+
+  export const conditionsPageConfig: PageConfig;
+  export const insurancesPageConfig: PageConfig;
+  export const medicationsPageConfig: PageConfig;
+  export const proceduresPageConfig: PageConfig;
+  export const treatmentsPageConfig: PageConfig;
+  export const visitsPageConfig: PageConfig;
+  export const immunizationsPageConfig: PageConfig;
+  export const allergiesPageConfig: PageConfig;
+  export const symptomsPageConfig: PageConfig;
+  export const practitionersPageConfig: PageConfig;
+  export const pharmaciesPageConfig: PageConfig;
+  export const labresultsPageConfig: PageConfig;
+  export const vitalsPageConfig: PageConfig;
+  export const emergencyContactsPageConfig: PageConfig;
+  export const familyMembersPageConfig: PageConfig;
+
+  export const medicalPageConfigs: Record<string, PageConfig>;
+  export function getMedicalPageConfig(pageName: string): PageConfig;
+}
+
 // Medical Form Fields
 declare module '../utils/medicalFormFields' {
   export interface FormField {
