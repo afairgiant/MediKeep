@@ -16,6 +16,8 @@ import { treatmentFormFields } from './treatment';
 import { familyMemberFormFields } from './familyMember';
 import { familyConditionFormFields } from './familyCondition';
 import { insuranceFormFields } from './insurance';
+import { symptomParentFormFields } from './symptomParent';
+import { symptomOccurrenceFormFields } from './symptomOccurrence';
 
 export const getFormFields = formType => {
   const fieldConfigs = {
@@ -33,6 +35,8 @@ export const getFormFields = formType => {
     familyMember: familyMemberFormFields,
     familyCondition: familyConditionFormFields,
     insurance: insuranceFormFields,
+    symptomParent: symptomParentFormFields,
+    symptomOccurrence: symptomOccurrenceFormFields,
   };
 
   return fieldConfigs[formType] || [];
