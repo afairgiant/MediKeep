@@ -1,0 +1,191 @@
+/**
+ * Procedure form field configuration
+ */
+
+import { tagsFieldConfig } from './shared';
+
+export const procedureFormFields = [
+  {
+    name: 'procedure_name',
+    type: 'text',
+    label: 'Procedure Name',
+    placeholder: 'e.g., Appendectomy, MRI Scan, Colonoscopy',
+    required: true,
+    description: 'Name of the medical procedure',
+    gridColumn: 8,
+  },
+  {
+    name: 'procedure_type',
+    type: 'select',
+    label: 'Procedure Type',
+    placeholder: 'Select type',
+    description: 'Category of procedure',
+    gridColumn: 4,
+    clearable: true,
+    options: [
+      {
+        value: 'surgical',
+        label: 'Surgical - Invasive procedure',
+      },
+      {
+        value: 'diagnostic',
+        label: 'Diagnostic - Testing/Imaging',
+      },
+      { value: 'therapeutic', label: 'Therapeutic - Treatment' },
+      {
+        value: 'preventive',
+        label: 'Preventive - Prevention care',
+      },
+      { value: 'emergency', label: 'Emergency - Urgent care' },
+    ],
+  },
+  {
+    name: 'procedure_code',
+    type: 'text',
+    label: 'Procedure Code',
+    placeholder: 'e.g., CPT-12345, ICD-10-PCS',
+    description: 'Medical coding (CPT, ICD-10-PCS, etc.)',
+    gridColumn: 6,
+  },
+  {
+    name: 'procedure_setting',
+    type: 'select',
+    label: 'Procedure Setting',
+    placeholder: 'Select setting',
+    description: 'Where the procedure takes place',
+    gridColumn: 6,
+    clearable: true,
+    options: [
+      {
+        value: 'outpatient',
+        label: 'Outpatient - Same day discharge',
+      },
+      {
+        value: 'inpatient',
+        label: 'Inpatient - Hospital stay required',
+      },
+      {
+        value: 'office',
+        label: 'Office - Doctor office/clinic',
+      },
+      {
+        value: 'emergency',
+        label: 'Emergency - ER/urgent care',
+      },
+      {
+        value: 'home',
+        label: 'Home - At patient home',
+      },
+    ],
+  },
+  {
+    name: 'description',
+    type: 'textarea',
+    label: 'Description',
+    placeholder: 'Detailed description of the procedure...',
+    description: 'Detailed description of what the procedure involves',
+    gridColumn: 12,
+    minRows: 3,
+    maxRows: 5,
+  },
+  {
+    name: 'procedure_date',
+    type: 'date',
+    label: 'Procedure Date',
+    placeholder: 'Select procedure date',
+    required: true,
+    description: 'When the procedure is/was performed',
+    gridColumn: 4,
+  },
+  {
+    name: 'status',
+    type: 'select',
+    label: 'Status',
+    description: 'Current status of the procedure',
+    gridColumn: 4,
+    dynamicOptions: 'statuses',
+  },
+  {
+    name: 'procedure_duration',
+    type: 'number',
+    label: 'Duration (minutes)',
+    placeholder: 'e.g., 30, 120',
+    description: 'How long the procedure took/will take',
+    gridColumn: 4,
+    min: 1,
+  },
+  {
+    name: 'facility',
+    type: 'text',
+    label: 'Facility',
+    placeholder: 'e.g., General Hospital, Outpatient Clinic',
+    description: 'Where the procedure is/was performed',
+    gridColumn: 6,
+  },
+  {
+    name: 'practitioner_id',
+    type: 'select',
+    label: 'Performing Practitioner',
+    placeholder: 'Select practitioner',
+    description: 'Doctor performing the procedure',
+    gridColumn: 6,
+    clearable: true,
+    searchable: true,
+    dynamicOptions: 'practitioners',
+  },
+  {
+    name: 'procedure_complications',
+    type: 'textarea',
+    label: 'Complications',
+    placeholder: 'Any complications that occurred during the procedure...',
+    description:
+      'Document any complications, adverse events, or unexpected outcomes',
+    gridColumn: 12,
+    minRows: 2,
+    maxRows: 4,
+  },
+  {
+    name: 'notes',
+    type: 'textarea',
+    label: 'Clinical Notes',
+    placeholder: 'Additional notes about the procedure...',
+    description: 'Any additional clinical notes or observations',
+    gridColumn: 12,
+    minRows: 3,
+    maxRows: 6,
+  },
+  {
+    name: 'anesthesia_type',
+    type: 'select',
+    label: 'Anesthesia Type',
+    placeholder: 'Select anesthesia type',
+    description: 'Type of anesthesia used',
+    gridColumn: 6,
+    clearable: true,
+    options: [
+      {
+        value: 'general',
+        label: 'General - Complete unconsciousness',
+      },
+      { value: 'local', label: 'Local - Numbing specific area' },
+      {
+        value: 'regional',
+        label: 'Regional - Numbing larger area',
+      },
+      {
+        value: 'sedation',
+        label: 'Sedation - Relaxed but conscious',
+      },
+      { value: 'none', label: 'None - No anesthesia required' },
+    ],
+  },
+  {
+    name: 'anesthesia_notes',
+    type: 'text',
+    label: 'Anesthesia Notes',
+    placeholder: 'Anesthesia-related notes...',
+    description: 'Any notes about anesthesia administration',
+    gridColumn: 6,
+  },
+  tagsFieldConfig,
+];

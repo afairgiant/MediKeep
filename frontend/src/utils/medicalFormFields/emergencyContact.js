@@ -1,0 +1,85 @@
+/**
+ * Emergency Contact form field configuration
+ */
+
+export const emergencyContactFormFields = [
+  {
+    name: 'name',
+    type: 'text',
+    label: 'Full Name',
+    placeholder: 'e.g., John Smith',
+    required: true,
+    description: 'Full name of the emergency contact',
+    gridColumn: 7,
+  },
+  {
+    name: 'relationship',
+    type: 'select',
+    label: 'Relationship',
+    placeholder: 'Select relationship',
+    description: 'Relationship to patient',
+    required: true,
+    gridColumn: 5,
+    dynamicOptions: 'relationships',
+  },
+  {
+    name: 'phone_number',
+    type: 'tel',
+    label: 'Primary Phone',
+    placeholder: 'e.g., (555) 123-4567',
+    required: true,
+    description: 'Primary phone number',
+    gridColumn: 6,
+    maxLength: 20,
+  },
+  {
+    name: 'secondary_phone',
+    type: 'tel',
+    label: 'Secondary Phone',
+    placeholder: 'e.g., (555) 987-6543',
+    description: 'Optional secondary phone number',
+    gridColumn: 6,
+    maxLength: 20,
+  },
+  {
+    name: 'email',
+    type: 'email',
+    label: 'Email Address',
+    placeholder: 'e.g., john.smith@email.com',
+    description: 'Optional email address',
+    gridColumn: 12,
+  },
+  {
+    name: 'address',
+    type: 'text',
+    label: 'Address',
+    placeholder: 'e.g., 123 Main St, City, State 12345',
+    description: "Contact's address (optional)",
+    gridColumn: 12,
+  },
+  {
+    name: 'is_primary',
+    type: 'checkbox',
+    label: 'Primary Emergency Contact',
+    description: 'This person will be contacted first in emergencies',
+    gridColumn: 6,
+  },
+  {
+    name: 'is_active',
+    type: 'checkbox',
+    label: 'Active Contact',
+    description: 'This contact is currently available',
+    gridColumn: 6,
+  },
+  {
+    name: 'notes',
+    type: 'textarea',
+    label: 'Notes',
+    placeholder:
+      "Additional information (e.g., 'Available weekdays only', 'Speaks Spanish')",
+    description: 'Any additional notes about this contact',
+    gridColumn: 12,
+    minRows: 3,
+    maxRows: 6,
+  },
+];
