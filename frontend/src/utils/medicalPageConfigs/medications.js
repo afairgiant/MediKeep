@@ -5,7 +5,7 @@
 import {
   MEDICATION_TYPES,
   MEDICATION_TYPE_LABELS,
-} from '../../constants/medicationTypes.js';
+} from '../../constants/medicationTypes';
 
 export const medicationsPageConfig = {
   filtering: {

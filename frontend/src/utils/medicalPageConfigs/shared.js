@@ -2,7 +2,7 @@
  * Shared constants and utilities for medical page configurations
  */
 
-import logger from '../../services/logger.js';
+import logger from '../../services/logger';
 
 // Constants for search functionality
 // Maximum length for search terms to prevent performance issues with large text inputs.
