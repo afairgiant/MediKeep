@@ -39,6 +39,14 @@ import VitalTrendChart from './VitalTrendChart';
 import VitalTrendTable from './VitalTrendTable';
 import { VitalType, VitalTrendResponse, VITAL_TYPE_CONFIGS } from './types';
 import { vitalsService } from '../../../services/medical/vitalsService';
+import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
+import { convertForDisplay, unitLabels } from '../../../utils/unitConversion';
+
+// Maps vital types to their corresponding measurement types for unit conversion
+const CONVERTIBLE_VITAL_TYPES: Record<string, 'weight' | 'temperature'> = {
+  weight: 'weight',
+  temperature: 'temperature'
+};
 
 interface VitalTrendsPanelProps {
   opened: boolean;
@@ -56,6 +64,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   patientHeight
 }) => {
   const { t } = useTranslation('common');
+  const { unitSystem } = useUserPreferences();
   const [trendData, setTrendData] = useState<VitalTrendResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -160,9 +169,15 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
           }
           const secondaryValue = config.getSecondaryValue ? config.getSecondaryValue(vital) : null;
 
+          // Convert values for display based on unit system (weight, temperature)
+          const measurementType = CONVERTIBLE_VITAL_TYPES[vitalType];
+          const displayValue = measurementType
+            ? convertForDisplay(value, measurementType, unitSystem) ?? value
+            : value;
+
           return {
             id: vital.id,
-            value: value,
+            value: displayValue,
             secondary_value: secondaryValue,
             recorded_date: vital.recorded_date
           };
@@ -191,10 +206,16 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         secondaryStdDev = Math.sqrt(squareDiffs.reduce((a: number, b: number) => a + b, 0) / secondaryValues.length);
       }
 
+      // Determine the correct unit label based on user preference
+      const measurementType = CONVERTIBLE_VITAL_TYPES[vitalType];
+      const displayUnit = measurementType
+        ? unitLabels[unitSystem][measurementType]
+        : config.unit;
+
       const response: VitalTrendResponse = {
         vital_type: vitalType,
         vital_type_label: config.label,
-        unit: config.unit,
+        unit: displayUnit,
         data_points: dataPoints,
         statistics: {
           count: dataPoints.length,
@@ -243,7 +264,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [vitalType, patientId, timeRange, patientHeight, t]);
+  }, [vitalType, patientId, timeRange, patientHeight, unitSystem, t]);
 
   useEffect(() => {
     if (opened && vitalType) {
