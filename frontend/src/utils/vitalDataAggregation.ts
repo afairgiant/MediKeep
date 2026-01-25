@@ -82,7 +82,8 @@ function getPeriodStart(date: Date, period: AggregationPeriod): Date {
       const startOfYear = new Date(d.getFullYear(), 0, 1);
       const daysSinceYearStart = Math.floor((d.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
       const biweekNumber = Math.floor(daysSinceYearStart / 14);
-      const biweekStart = new Date(startOfYear.getTime() + biweekNumber * 14 * 24 * 60 * 60 * 1000);
+      const biweekStart = new Date(startOfYear);
+      biweekStart.setDate(biweekStart.getDate() + biweekNumber * 14);
       biweekStart.setHours(0, 0, 0, 0);
       return biweekStart;
     }
@@ -108,8 +109,15 @@ function getPeriodLabel(date: Date, period: AggregationPeriod): string {
     case 'weekly':
       return `Week of ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 
-    case 'biweekly':
-      return `${months[date.getMonth()]} ${date.getDate()}-${date.getDate() + 13}, ${date.getFullYear()}`;
+    case 'biweekly': {
+      const endDate = new Date(date);
+      endDate.setDate(endDate.getDate() + 13);
+      if (date.getMonth() === endDate.getMonth()) {
+        return `${months[date.getMonth()]} ${date.getDate()}-${endDate.getDate()}, ${date.getFullYear()}`;
+      }
+      // Handle month boundary crossing
+      return `${months[date.getMonth()]} ${date.getDate()} - ${months[endDate.getMonth()]} ${endDate.getDate()}, ${endDate.getFullYear()}`;
+    }
 
     case 'monthly':
       return `${months[date.getMonth()]} ${date.getFullYear()}`;
@@ -174,9 +182,9 @@ export function aggregateDataPoints(
     aggregatedPoints.push(aggregatedPoint);
   }
 
-  // Sort by date (newest first for consistency with raw data)
+  // Sort by date (oldest first for chart display)
   return aggregatedPoints.sort((a, b) =>
-    new Date(b.date).getTime() - new Date(a.date).getTime()
+    new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 }
 
@@ -225,6 +233,7 @@ export function convertToChartData(aggregatedPoints: AggregatedDataPoint[]): {
   count: number;
   periodLabel: string;
 }[] {
+  // Data is already sorted oldest-first from aggregateDataPoints
   return aggregatedPoints.map(point => ({
     date: point.date.split('T')[0],
     value: point.average,
@@ -235,7 +244,7 @@ export function convertToChartData(aggregatedPoints: AggregatedDataPoint[]): {
     secondaryMax: point.secondaryMax,
     count: point.count,
     periodLabel: point.periodLabel
-  })).reverse(); // Reverse for chart display (oldest first)
+  }));
 }
 
 /**

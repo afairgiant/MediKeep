@@ -92,6 +92,8 @@ const VitalsList = ({
   // Pagination state
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  // Use ref to track current vitals count for pagination (avoids circular dependency)
+  const vitalsCountRef = React.useRef(0);
 
   const loadVitals = useCallback(async (append = false) => {
     // Only load internally if no data is passed via props
@@ -103,10 +105,11 @@ const VitalsList = ({
       } else {
         setInternalLoading(true);
         setHasMore(true);
+        vitalsCountRef.current = 0;
       }
       setInternalError(null);
 
-      const skip = append ? internalVitals.length : 0;
+      const skip = append ? vitalsCountRef.current : 0;
       let response;
       if (patientId) {
         response = await vitalsService.getPatientVitals(patientId, { limit, skip });
@@ -124,20 +127,26 @@ const VitalsList = ({
       }
 
       if (append) {
-        setInternalVitals(prev => [...prev, ...newData]);
+        setInternalVitals(prev => {
+          const updated = [...prev, ...newData];
+          vitalsCountRef.current = updated.length;
+          return updated;
+        });
       } else {
+        vitalsCountRef.current = newData.length;
         setInternalVitals(newData);
       }
     } catch (err) {
       setInternalError(err.message || 'Failed to load vitals');
       if (!append) {
         setInternalVitals([]);
+        vitalsCountRef.current = 0;
       }
     } finally {
       setInternalLoading(false);
       setLoadingMore(false);
     }
-  }, [patientId, limit, vitalsData, internalVitals.length]);
+  }, [patientId, limit, vitalsData]);
 
   useEffect(() => {
     loadVitals();

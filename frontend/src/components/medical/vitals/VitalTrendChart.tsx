@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import {
   ComposedChart,
   Line,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -192,20 +191,6 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
     return t('vitals.secondary', 'Secondary');
   };
 
-  // Get aggregation period label for tooltip
-  const getAggregationPeriodLabel = () => {
-    switch (aggregationPeriod) {
-      case 'weekly':
-        return t('vitals.trends.weeklyAverage', 'Weekly Avg');
-      case 'biweekly':
-        return t('vitals.trends.biweeklyAverage', 'Bi-weekly Avg');
-      case 'monthly':
-        return t('vitals.trends.monthlyAverage', 'Monthly Avg');
-      default:
-        return t('vitals.trends.average', 'Average');
-    }
-  };
-
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
@@ -322,15 +307,15 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
             iconType="line"
           />
 
-          {/* Min/Max range area for aggregated data (primary values) */}
+          {/* Max line for aggregated data (dashed reference) */}
           {isAggregated && (
-            <Area
+            <Line
               type="monotone"
               dataKey="max"
-              stroke="none"
-              fill="#228be6"
-              fillOpacity={0.1}
-              name={t('vitals.trends.rangeMax', 'Max')}
+              stroke="#228be6"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+              dot={false}
               legendType="none"
             />
           )}
@@ -360,14 +345,15 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
             />
           )}
 
-          {/* Min/Max range area for secondary values (diastolic) when aggregated */}
+          {/* Max line for secondary values (diastolic) when aggregated */}
           {isAggregated && hasSecondaryValue && (
-            <Area
+            <Line
               type="monotone"
               dataKey="secondaryMax"
-              stroke="none"
-              fill="#fa5252"
-              fillOpacity={0.1}
+              stroke="#fa5252"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+              dot={false}
               legendType="none"
             />
           )}
