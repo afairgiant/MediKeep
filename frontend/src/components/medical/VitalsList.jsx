@@ -93,7 +93,6 @@ const VitalsList = ({
   // Pagination state
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [pageSize, setPageSize] = useState(limit);
   // Use ref to track current vitals count for pagination (avoids circular dependency)
   const vitalsCountRef = React.useRef(0);
 
@@ -104,6 +103,31 @@ const VitalsList = ({
     { value: '25', label: '25' },
     { value: '50', label: '50' },
   ];
+  const validPageSizes = [10, 20, 25, 50];
+
+  // Normalize a value to the nearest valid page size option
+  const normalizePageSize = (value) => {
+    if (validPageSizes.includes(value)) return value;
+    // Find the closest valid option
+    return validPageSizes.reduce((prev, curr) =>
+      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+    );
+  };
+
+  const [pageSize, setPageSize] = useState(() => normalizePageSize(limit));
+  const prevLimitRef = React.useRef(limit);
+
+  // Sync pageSize if parent changes limit prop (but preserve user overrides)
+  useEffect(() => {
+    if (prevLimitRef.current !== limit) {
+      setPageSize(prevPageSize =>
+        prevPageSize === normalizePageSize(prevLimitRef.current)
+          ? normalizePageSize(limit)
+          : prevPageSize
+      );
+      prevLimitRef.current = limit;
+    }
+  }, [limit]);
 
   const loadVitals = useCallback(async (append = false) => {
     // Only load internally if no data is passed via props
@@ -844,7 +868,12 @@ const VitalsList = ({
           <Group justify="center" gap="md">
             <Select
               value={String(pageSize)}
-              onChange={(value) => setPageSize(Number(value))}
+              onChange={(value) => {
+                if (value === null || value === undefined) return;
+                const numericValue = Number(value);
+                if (!Number.isFinite(numericValue) || numericValue <= 0) return;
+                setPageSize(numericValue);
+              }}
               data={pageSizeOptions}
               size="sm"
               w={80}
