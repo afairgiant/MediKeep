@@ -28,15 +28,12 @@ import {
 import MedicalPageLoading from '../components/shared/MedicalPageLoading';
 import {
   IconDownload,
-  IconFileExport,
   IconChartBar,
   IconSettings,
   IconInfoCircle,
   IconAlertTriangle,
   IconCheck,
-  IconX,
   IconArchive,
-  IconLock,
   IconChevronDown,
   IconChevronUp,
 } from '@tabler/icons-react';

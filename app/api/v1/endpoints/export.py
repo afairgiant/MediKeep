@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_id, get_db
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_data_access
+from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.core.logging.constants import LogFields
 from app.services.export_service import ExportService
 
@@ -103,7 +103,7 @@ async def export_patient_data(
             "export_data_requested",
             format_type=format.value,
             scope=scope.value,
-            unit_system=unit_system
+            unit_system=unit_system,
         )
 
         export_service = ExportService(db)
@@ -152,7 +152,7 @@ async def export_patient_data(
                     json_error,
                     user_id=current_user_id,
                     scope=scope.value,
-                    format_type=format.value
+                    format_type=format.value,
                 )
                 raise HTTPException(
                     status_code=500,
@@ -213,8 +213,8 @@ async def export_patient_data(
                                             LogFields.CATEGORY: "app",
                                             LogFields.EVENT: "export_file_not_found",
                                             LogFields.USER_ID: current_user_id,
-                                            "file_path": file_path
-                                        }
+                                            "file_path": file_path,
+                                        },
                                     )
                             except Exception as file_error:
                                 logger.error(
@@ -224,8 +224,8 @@ async def export_patient_data(
                                         LogFields.EVENT: "export_file_add_failed",
                                         LogFields.USER_ID: current_user_id,
                                         LogFields.ERROR: str(file_error),
-                                        "file_name": file_info['file_name']
-                                    }
+                                        "file_name": file_info["file_name"],
+                                    },
                                 )
                                 continue
 
@@ -242,7 +242,7 @@ async def export_patient_data(
                         "export_zip_generated",
                         message=f"Generated ZIP export with files",
                         filename=zip_filename,
-                        size_bytes=len(zip_content)
+                        size_bytes=len(zip_content),
                     )
 
                     return Response(
@@ -307,7 +307,7 @@ async def export_patient_data(
             e,
             user_id=current_user_id,
             format_type=format.value,
-            scope=scope.value
+            scope=scope.value,
         )
         raise HTTPException(status_code=400, detail=error_message)
     except Exception as e:
@@ -318,7 +318,7 @@ async def export_patient_data(
             e,
             user_id=current_user_id,
             format_type=format.value,
-            scope=scope.value
+            scope=scope.value,
         )
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
@@ -342,7 +342,7 @@ async def get_export_summary(
             request,
             current_user_id,
             "export_summary_retrieved",
-            record_count=len(summary.get('counts', {}))
+            record_count=len(summary.get("counts", {})),
         )
 
         return {
@@ -359,7 +359,7 @@ async def get_export_summary(
             request,
             f"Export summary validation error: {error_message}",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(status_code=400, detail=error_message)
     except Exception as e:
@@ -368,9 +368,11 @@ async def get_export_summary(
             request,
             "Failed to generate export summary",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
-        raise HTTPException(status_code=500, detail=f"Failed to generate export summary: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate export summary: {str(e)}"
+        )
 
 
 @router.get("/formats")
@@ -484,7 +486,7 @@ async def create_bulk_export(
             current_user_id,
             "bulk_export_requested",
             scope_count=len(request.scopes),
-            format_type=request.format.value
+            format_type=request.format.value,
         )
 
         export_service = ExportService(db)
@@ -510,9 +512,6 @@ async def create_bulk_export(
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             exported_count = 0
 
-            # Validate unit_system
-            unit_system = request.unit_system if request.unit_system in ("imperial", "metric") else "imperial"
-
             for scope in request.scopes:
                 try:
                     # Export each scope
@@ -524,7 +523,7 @@ async def create_bulk_export(
                         end_date=request.end_date,
                         include_files=False,  # Files not supported in bulk export
                         include_patient_info=request.include_patient_info,
-                        unit_system=unit_system,
+                        unit_system=request.unit_system,
                     )
 
                     # Convert to appropriate format
@@ -548,8 +547,8 @@ async def create_bulk_export(
                                 LogFields.EVENT: "bulk_export_unsupported_format",
                                 LogFields.USER_ID: current_user_id,
                                 "scope": scope,
-                                "format": request.format.value
-                            }
+                                "format": request.format.value,
+                            },
                         )
                         continue
 
@@ -572,8 +571,8 @@ async def create_bulk_export(
                             LogFields.EVENT: "bulk_export_scope_failed",
                             LogFields.USER_ID: current_user_id,
                             LogFields.ERROR: str(e),
-                            "scope": scope
-                        }
+                            "scope": scope,
+                        },
                     )
                     continue
 
@@ -598,7 +597,7 @@ async def create_bulk_export(
             "bulk_export_completed",
             message=f"Bulk export completed successfully",
             exported_count=exported_count,
-            filename=zip_filename
+            filename=zip_filename,
         )
 
         return StreamingResponse(
@@ -614,6 +613,6 @@ async def create_bulk_export(
             "Bulk export failed",
             e,
             user_id=current_user_id,
-            scope_count=len(request.scopes)
+            scope_count=len(request.scopes),
         )
         raise HTTPException(status_code=500, detail=f"Bulk export failed: {str(e)}")

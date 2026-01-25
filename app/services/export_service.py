@@ -9,90 +9,9 @@ import csv
 import io
 import json
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional, Union, Literal
+from typing import Any, Dict, List, Optional, Union
 
 from reportlab.lib import colors
-
-
-# Unit conversion utilities
-class UnitConverter:
-    """Utility class for converting between imperial and metric units."""
-
-    @staticmethod
-    def lbs_to_kg(pounds: Optional[float]) -> Optional[float]:
-        """Convert pounds to kilograms."""
-        if pounds is None:
-            return None
-        return round(float(pounds) * 0.453592, 1)
-
-    @staticmethod
-    def inches_to_cm(inches: Optional[float]) -> Optional[float]:
-        """Convert inches to centimeters."""
-        if inches is None:
-            return None
-        return round(float(inches) * 2.54, 1)
-
-    @staticmethod
-    def fahrenheit_to_celsius(fahrenheit: Optional[float]) -> Optional[float]:
-        """Convert Fahrenheit to Celsius."""
-        if fahrenheit is None:
-            return None
-        return round((float(fahrenheit) - 32) * 5 / 9, 1)
-
-    @staticmethod
-    def format_height(
-        inches: Optional[float], unit_system: str
-    ) -> str:
-        """Format height value with appropriate unit."""
-        if inches is None:
-            return "N/A"
-        if unit_system == "metric":
-            cm = UnitConverter.inches_to_cm(inches)
-            return f"{cm} cm"
-        else:
-            return f"{inches} inches"
-
-    @staticmethod
-    def format_weight(
-        pounds: Optional[float], unit_system: str
-    ) -> str:
-        """Format weight value with appropriate unit."""
-        if pounds is None:
-            return "N/A"
-        if unit_system == "metric":
-            kg = UnitConverter.lbs_to_kg(pounds)
-            return f"{kg} kg"
-        else:
-            return f"{pounds} lbs"
-
-    @staticmethod
-    def format_temperature(
-        fahrenheit: Optional[float], unit_system: str
-    ) -> str:
-        """Format temperature value with appropriate unit."""
-        if fahrenheit is None:
-            return "N/A"
-        if unit_system == "metric":
-            celsius = UnitConverter.fahrenheit_to_celsius(fahrenheit)
-            return f"{celsius} °C"
-        else:
-            return f"{fahrenheit} °F"
-
-    @staticmethod
-    def get_unit_labels(unit_system: str) -> Dict[str, str]:
-        """Get unit labels for a given unit system."""
-        if unit_system == "metric":
-            return {
-                "weight": "kg",
-                "height": "cm",
-                "temperature": "°C",
-            }
-        else:
-            return {
-                "weight": "lbs",
-                "height": "inches",
-                "temperature": "°F",
-            }
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
@@ -118,6 +37,42 @@ from app.models.models import (
 )
 
 logger = get_logger(__name__, "app")
+
+# Unit labels for imperial and metric systems
+UNIT_LABELS = {
+    "imperial": {"weight": "lbs", "height": "inches", "temperature": "°F"},
+    "metric": {"weight": "kg", "height": "cm", "temperature": "°C"},
+}
+
+
+class UnitConverter:
+    """Utility class for converting between imperial and metric units."""
+
+    @staticmethod
+    def lbs_to_kg(pounds: Optional[float]) -> Optional[float]:
+        """Convert pounds to kilograms."""
+        if pounds is None:
+            return None
+        return round(float(pounds) * 0.453592, 1)
+
+    @staticmethod
+    def inches_to_cm(inches: Optional[float]) -> Optional[float]:
+        """Convert inches to centimeters."""
+        if inches is None:
+            return None
+        return round(float(inches) * 2.54, 1)
+
+    @staticmethod
+    def fahrenheit_to_celsius(fahrenheit: Optional[float]) -> Optional[float]:
+        """Convert Fahrenheit to Celsius."""
+        if fahrenheit is None:
+            return None
+        return round((float(fahrenheit) - 32) * 5 / 9, 1)
+
+    @staticmethod
+    def get_unit_labels(unit_system: str) -> Dict[str, str]:
+        """Get unit labels for a given unit system."""
+        return UNIT_LABELS.get(unit_system, UNIT_LABELS["imperial"])
 
 
 class ExportService:
@@ -158,11 +113,15 @@ class ExportService:
             user = self.db.query(User).filter(User.id == user_id).first()
             if not user:
                 raise ValueError("User not found")
-            
+
             if not user.active_patient_id:
                 raise ValueError("No active patient selected")
-            
-            patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+            patient = (
+                self.db.query(Patient)
+                .filter(Patient.id == user.active_patient_id)
+                .first()
+            )
             if not patient:
                 raise ValueError("Active patient record not found")
 
@@ -187,7 +146,9 @@ class ExportService:
 
             # Conditionally include patient info
             if include_patient_info:
-                export_data["patient_info"] = self._get_patient_info(patient, unit_system)
+                export_data["patient_info"] = self._get_patient_info(
+                    patient, unit_system
+                )
 
             # Export based on scope
             if scope == "all":
@@ -488,8 +449,10 @@ class ExportService:
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user or not user.active_patient_id:
             return []
-        
-        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
         if not patient:
             return []
 
@@ -723,7 +686,9 @@ class ExportService:
         for vital in vitals:
             # Convert measurements based on unit system
             if unit_system == "metric":
-                temperature_value = UnitConverter.fahrenheit_to_celsius(vital.temperature)
+                temperature_value = UnitConverter.fahrenheit_to_celsius(
+                    vital.temperature
+                )
                 weight_value = UnitConverter.lbs_to_kg(vital.weight)
                 height_value = UnitConverter.inches_to_cm(vital.height)
             else:
@@ -731,30 +696,34 @@ class ExportService:
                 weight_value = vital.weight
                 height_value = vital.height
 
-            result.append({
-                "id": vital.id,
-                "recorded_date": (
-                    vital.recorded_date.isoformat() if vital.recorded_date else None
-                ),
-                "systolic_bp": vital.systolic_bp,
-                "diastolic_bp": vital.diastolic_bp,
-                "heart_rate": vital.heart_rate,
-                "temperature": temperature_value,
-                "temperature_unit": unit_labels["temperature"],
-                "weight": weight_value,
-                "weight_unit": unit_labels["weight"],
-                "height": height_value,
-                "height_unit": unit_labels["height"],
-                "oxygen_saturation": vital.oxygen_saturation,
-                "respiratory_rate": vital.respiratory_rate,
-                "blood_glucose": vital.blood_glucose,
-                "bmi": vital.bmi,
-                "pain_scale": vital.pain_scale,
-                "location": vital.location,
-                "device_used": vital.device_used,
-                "recorded_by": vital.practitioner.name if vital.practitioner else None,
-                "notes": vital.notes,
-            })
+            result.append(
+                {
+                    "id": vital.id,
+                    "recorded_date": (
+                        vital.recorded_date.isoformat() if vital.recorded_date else None
+                    ),
+                    "systolic_bp": vital.systolic_bp,
+                    "diastolic_bp": vital.diastolic_bp,
+                    "heart_rate": vital.heart_rate,
+                    "temperature": temperature_value,
+                    "temperature_unit": unit_labels["temperature"],
+                    "weight": weight_value,
+                    "weight_unit": unit_labels["weight"],
+                    "height": height_value,
+                    "height_unit": unit_labels["height"],
+                    "oxygen_saturation": vital.oxygen_saturation,
+                    "respiratory_rate": vital.respiratory_rate,
+                    "blood_glucose": vital.blood_glucose,
+                    "bmi": vital.bmi,
+                    "pain_scale": vital.pain_scale,
+                    "location": vital.location,
+                    "device_used": vital.device_used,
+                    "recorded_by": (
+                        vital.practitioner.name if vital.practitioner else None
+                    ),
+                    "notes": vital.notes,
+                }
+            )
 
         return result
 
@@ -926,11 +895,13 @@ class ExportService:
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user:
             raise ValueError("User not found")
-        
+
         if not user.active_patient_id:
             raise ValueError("No active patient selected")
-        
-        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
         if not patient:
             raise ValueError("Active patient record not found")
 
