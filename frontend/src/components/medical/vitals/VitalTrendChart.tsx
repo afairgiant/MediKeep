@@ -2,12 +2,15 @@
  * VitalTrendChart component
  * Displays historical trend data for a specific vital sign as a line chart
  * Uses Recharts for visualization
+ *
+ * Supports both raw data display and aggregated data with min/max range bands
  */
 
 import React, { useMemo } from 'react';
 import {
-  LineChart,
+  ComposedChart,
   Line,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -15,12 +18,15 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import { Paper, Stack, Text, Group } from '@mantine/core';
+import { Paper, Stack, Text, Group, Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
-import { VitalTrendResponse, VitalDataPoint } from './types';
+import { VitalTrendResponse, VitalDataPoint, AggregatedDataPoint, AggregationPeriod } from './types';
+import { convertToChartData } from '../../../utils/vitalDataAggregation';
 
 interface VitalTrendChartProps {
   trendData: VitalTrendResponse;
+  aggregatedDataPoints?: AggregatedDataPoint[];
+  aggregationPeriod?: AggregationPeriod | null;
 }
 
 // Calculate a "nice" tick interval based on the data range
@@ -56,17 +62,35 @@ const ceilToInterval = (value: number, interval: number): number => {
   return Math.ceil(value / interval) * interval;
 };
 
-const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
+const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
+  trendData,
+  aggregatedDataPoints = [],
+  aggregationPeriod = null
+}) => {
   const { t } = useTranslation('common');
+
+  // Determine if we're displaying aggregated data
+  const isAggregated = aggregationPeriod !== null && aggregatedDataPoints.length > 0;
 
   // Check if this vital type has secondary values (e.g., blood pressure with systolic/diastolic)
   const hasSecondaryValue = useMemo(() => {
+    if (isAggregated) {
+      return aggregatedDataPoints.some(
+        (point) => point.secondaryAverage !== null && point.secondaryAverage !== undefined
+      );
+    }
     return trendData.data_points.some(
       (point) => point.secondary_value !== null && point.secondary_value !== undefined
     );
-  }, [trendData.data_points]);
+  }, [trendData.data_points, aggregatedDataPoints, isAggregated]);
 
   const chartData = useMemo(() => {
+    if (isAggregated) {
+      // Use aggregated data for display
+      return convertToChartData(aggregatedDataPoints);
+    }
+
+    // Use raw data points
     return trendData.data_points.map((point: VitalDataPoint) => {
       const dateStr = point.recorded_date.split('T')[0];
 
@@ -76,7 +100,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
         secondaryValue: point.secondary_value
       };
     }).reverse(); // Reverse to show oldest first (left to right)
-  }, [trendData.data_points]);
+  }, [trendData.data_points, aggregatedDataPoints, isAggregated]);
 
   // Calculate Y-axis configuration with nice, rounded tick values
   const yAxisConfig = useMemo(() => {
@@ -89,7 +113,25 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
       .map((d: { secondaryValue?: number | null }) => d.secondaryValue)
       .filter((v): v is number => v !== null && v !== undefined);
 
-    const allValues = [...primaryValues, ...secondaryValues];
+    // For aggregated data, also consider min/max values for proper axis range
+    let minMaxValues: number[] = [];
+    if (isAggregated) {
+      const minValues = chartData
+        .map((d: any) => d.min)
+        .filter((v): v is number => v !== undefined);
+      const maxValues = chartData
+        .map((d: any) => d.max)
+        .filter((v): v is number => v !== undefined);
+      const secondaryMinValues = chartData
+        .map((d: any) => d.secondaryMin)
+        .filter((v): v is number => v !== null && v !== undefined);
+      const secondaryMaxValues = chartData
+        .map((d: any) => d.secondaryMax)
+        .filter((v): v is number => v !== null && v !== undefined);
+      minMaxValues = [...minValues, ...maxValues, ...secondaryMinValues, ...secondaryMaxValues];
+    }
+
+    const allValues = [...primaryValues, ...secondaryValues, ...minMaxValues];
     const dataMin = Math.min(...allValues);
     const dataMax = Math.max(...allValues);
 
@@ -150,6 +192,20 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
     return t('vitals.secondary', 'Secondary');
   };
 
+  // Get aggregation period label for tooltip
+  const getAggregationPeriodLabel = () => {
+    switch (aggregationPeriod) {
+      case 'weekly':
+        return t('vitals.trends.weeklyAverage', 'Weekly Avg');
+      case 'biweekly':
+        return t('vitals.trends.biweeklyAverage', 'Bi-weekly Avg');
+      case 'monthly':
+        return t('vitals.trends.monthlyAverage', 'Monthly Avg');
+      default:
+        return t('vitals.trends.average', 'Average');
+    }
+  };
+
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
@@ -159,27 +215,61 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
     return (
       <Paper withBorder p="sm" shadow="md" radius="md" bg="white">
         <Stack gap="xs">
-          <Text size="sm" fw={600}>{data.date}</Text>
+          <Text size="sm" fw={600}>
+            {isAggregated && data.periodLabel ? data.periodLabel : data.date}
+          </Text>
+
+          {isAggregated && data.count && (
+            <Badge size="sm" variant="light" color="gray">
+              {data.count} {t('vitals.trends.readings', 'readings')}
+            </Badge>
+          )}
+
           {hasSecondaryValue ? (
             <>
               <Group gap="xs" align="baseline">
                 <Text size="sm" c="blue" fw={600}>{getPrimaryLabel()}:</Text>
-                <Text size="lg" fw={700} c="blue">{data.value}</Text>
+                <Text size="lg" fw={700} c="blue">
+                  {isAggregated ? Math.round(data.value) : data.value}
+                </Text>
                 <Text size="sm" c="dimmed">{trendData.unit}</Text>
               </Group>
+              {isAggregated && data.min !== undefined && data.max !== undefined && (
+                <Text size="xs" c="dimmed">
+                  {t('vitals.trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
+                </Text>
+              )}
               {data.secondaryValue !== null && data.secondaryValue !== undefined && (
-                <Group gap="xs" align="baseline">
-                  <Text size="sm" c="red" fw={600}>{getSecondaryLabel()}:</Text>
-                  <Text size="lg" fw={700} c="red">{data.secondaryValue}</Text>
-                  <Text size="sm" c="dimmed">{trendData.unit}</Text>
-                </Group>
+                <>
+                  <Group gap="xs" align="baseline">
+                    <Text size="sm" c="red" fw={600}>{getSecondaryLabel()}:</Text>
+                    <Text size="lg" fw={700} c="red">
+                      {isAggregated ? Math.round(data.secondaryValue) : data.secondaryValue}
+                    </Text>
+                    <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                  </Group>
+                  {isAggregated && data.secondaryMin !== undefined && data.secondaryMax !== undefined && (
+                    <Text size="xs" c="dimmed">
+                      {t('vitals.trends.range', 'Range')}: {Math.round(data.secondaryMin)} - {Math.round(data.secondaryMax)}
+                    </Text>
+                  )}
+                </>
               )}
             </>
           ) : (
-            <Group gap="xs" align="baseline">
-              <Text size="lg" fw={700} c="blue">{data.value}</Text>
-              <Text size="sm" c="dimmed">{trendData.unit}</Text>
-            </Group>
+            <>
+              <Group gap="xs" align="baseline">
+                <Text size="lg" fw={700} c="blue">
+                  {isAggregated ? Math.round(data.value) : data.value}
+                </Text>
+                <Text size="sm" c="dimmed">{trendData.unit}</Text>
+              </Group>
+              {isAggregated && data.min !== undefined && data.max !== undefined && (
+                <Text size="xs" c="dimmed">
+                  {t('vitals.trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
+                </Text>
+              )}
+            </>
           )}
         </Stack>
       </Paper>
@@ -199,7 +289,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
   return (
     <Paper withBorder p="md" radius="md">
       <ResponsiveContainer width="100%" height={400}>
-        <LineChart
+        <ComposedChart
           data={chartData}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
@@ -232,16 +322,55 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
             iconType="line"
           />
 
-          {/* Primary value line (systolic for BP) */}
+          {/* Min/Max range area for aggregated data (primary values) */}
+          {isAggregated && (
+            <Area
+              type="monotone"
+              dataKey="max"
+              stroke="none"
+              fill="#228be6"
+              fillOpacity={0.1}
+              name={t('vitals.trends.rangeMax', 'Max')}
+              legendType="none"
+            />
+          )}
+
+          {/* Primary value line (systolic for BP or average for aggregated) */}
           <Line
             type="monotone"
             dataKey="value"
             stroke="#228be6"
             strokeWidth={2}
-            dot={renderPrimaryDot}
+            dot={isAggregated ? { r: 3, fill: '#228be6', stroke: '#fff', strokeWidth: 1 } : renderPrimaryDot}
             name={hasSecondaryValue ? getPrimaryLabel() : trendData.vital_type_label}
             connectNulls
           />
+
+          {/* Min line for aggregated data */}
+          {isAggregated && (
+            <Line
+              type="monotone"
+              dataKey="min"
+              stroke="#228be6"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+              dot={false}
+              name={t('vitals.trends.rangeMin', 'Min')}
+              legendType="none"
+            />
+          )}
+
+          {/* Min/Max range area for secondary values (diastolic) when aggregated */}
+          {isAggregated && hasSecondaryValue && (
+            <Area
+              type="monotone"
+              dataKey="secondaryMax"
+              stroke="none"
+              fill="#fa5252"
+              fillOpacity={0.1}
+              legendType="none"
+            />
+          )}
 
           {/* Secondary value line (diastolic for BP) - only shown when secondary values exist */}
           {hasSecondaryValue && (
@@ -250,12 +379,25 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({ trendData }) => {
               dataKey="secondaryValue"
               stroke="#fa5252"
               strokeWidth={2}
-              dot={renderSecondaryDot}
+              dot={isAggregated ? { r: 3, fill: '#fa5252', stroke: '#fff', strokeWidth: 1 } : renderSecondaryDot}
               name={getSecondaryLabel()}
               connectNulls
             />
           )}
-        </LineChart>
+
+          {/* Min line for secondary values when aggregated */}
+          {isAggregated && hasSecondaryValue && (
+            <Line
+              type="monotone"
+              dataKey="secondaryMin"
+              stroke="#fa5252"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+              dot={false}
+              legendType="none"
+            />
+          )}
+        </ComposedChart>
       </ResponsiveContainer>
     </Paper>
   );
