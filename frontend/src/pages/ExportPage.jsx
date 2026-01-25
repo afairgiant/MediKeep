@@ -3,6 +3,7 @@ import logger from '../services/logger';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import {
   Container,
   Paper,
@@ -45,6 +46,7 @@ import { exportService } from '../services/exportService';
 const ExportPage = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('common');
+  const { unitSystem } = useUserPreferences();
 
   // State management
   const [summary, setSummary] = useState(null);
@@ -125,6 +127,7 @@ const ExportPage = () => {
         scope: exportConfig.scope,
         include_files: exportConfig.includeFiles.toString(),
         include_patient_info: exportConfig.includePatientInfo.toString(),
+        unit_system: unitSystem,
       };
 
       if (exportConfig.startDate) {
@@ -176,6 +179,7 @@ const ExportPage = () => {
         start_date: exportConfig.startDate || undefined,
         end_date: exportConfig.endDate || undefined,
         include_patient_info: exportConfig.includePatientInfo,
+        unit_system: unitSystem,
       };
 
       await exportService.downloadBulkExport(requestData);

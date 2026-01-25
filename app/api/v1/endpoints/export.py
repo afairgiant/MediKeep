@@ -56,6 +56,7 @@ class BulkExportRequest(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     include_patient_info: bool = True
+    unit_system: str = "imperial"
 
 
 @router.get("/data")
@@ -75,6 +76,11 @@ async def export_patient_data(
     include_patient_info: bool = Query(
         True, description="Include patient information in export (all formats)"
     ),
+    unit_system: str = Query(
+        "imperial",
+        description="Unit system for measurements (imperial or metric)",
+        pattern="^(imperial|metric)$",
+    ),
     current_user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
@@ -86,7 +92,8 @@ async def export_patient_data(
     - **start_date**: Filter records from this date onwards
     - **end_date**: Filter records up to this date
     - **include_files**: Whether to include file attachments (PDF exports only)
-    - **include_patient_info**: Whether to include patient information in export"""
+    - **include_patient_info**: Whether to include patient information in export
+    - **unit_system**: Unit system for measurements (imperial or metric)"""
 
     try:
         log_endpoint_access(
@@ -95,7 +102,8 @@ async def export_patient_data(
             current_user_id,
             "export_data_requested",
             format_type=format.value,
-            scope=scope.value
+            scope=scope.value,
+            unit_system=unit_system
         )
 
         export_service = ExportService(db)
@@ -109,6 +117,7 @@ async def export_patient_data(
             end_date=end_date,
             include_files=include_files,
             include_patient_info=include_patient_info,
+            unit_system=unit_system,
         )
 
         # Determine content type and filename
@@ -501,6 +510,9 @@ async def create_bulk_export(
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             exported_count = 0
 
+            # Validate unit_system
+            unit_system = request.unit_system if request.unit_system in ("imperial", "metric") else "imperial"
+
             for scope in request.scopes:
                 try:
                     # Export each scope
@@ -512,6 +524,7 @@ async def create_bulk_export(
                         end_date=request.end_date,
                         include_files=False,  # Files not supported in bulk export
                         include_patient_info=request.include_patient_info,
+                        unit_system=unit_system,
                     )
 
                     # Convert to appropriate format
