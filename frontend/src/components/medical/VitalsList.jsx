@@ -89,30 +89,62 @@ const VitalsList = ({
   });
   const [selectedVital, setSelectedVital] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  // Pagination state
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  // Use ref to track current vitals count for pagination (avoids circular dependency)
+  const vitalsCountRef = React.useRef(0);
 
-  const loadVitals = useCallback(async () => {
+  const loadVitals = useCallback(async (append = false) => {
     // Only load internally if no data is passed via props
     if (vitalsData !== undefined) return;
 
     try {
-      setInternalLoading(true);
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setInternalLoading(true);
+        setHasMore(true);
+        vitalsCountRef.current = 0;
+      }
       setInternalError(null);
+
+      const skip = append ? vitalsCountRef.current : 0;
       let response;
       if (patientId) {
-        response = await vitalsService.getPatientVitals(patientId, { limit });
+        response = await vitalsService.getPatientVitals(patientId, { limit, skip });
       } else {
-        response = await vitalsService.getVitals({ limit });
+        response = await vitalsService.getVitals({ limit, skip });
       }
 
       // Extract the data array from the response
       const data = response?.data || response;
+      const newData = Array.isArray(data) ? data : [];
 
-      setInternalVitals(Array.isArray(data) ? data : []);
+      // Check if there's more data to load
+      if (newData.length < limit) {
+        setHasMore(false);
+      }
+
+      if (append) {
+        setInternalVitals(prev => {
+          const updated = [...prev, ...newData];
+          vitalsCountRef.current = updated.length;
+          return updated;
+        });
+      } else {
+        vitalsCountRef.current = newData.length;
+        setInternalVitals(newData);
+      }
     } catch (err) {
       setInternalError(err.message || 'Failed to load vitals');
-      setInternalVitals([]);
+      if (!append) {
+        setInternalVitals([]);
+        vitalsCountRef.current = 0;
+      }
     } finally {
       setInternalLoading(false);
+      setLoadingMore(false);
     }
   }, [patientId, limit, vitalsData]);
 
@@ -798,10 +830,15 @@ const VitalsList = ({
           </Table>
         </Paper>
 
-        {vitals.length >= limit && (
+        {vitals.length >= limit && hasMore && vitalsData === undefined && (
           <Center>
-            <Button variant="filled" onClick={loadVitals}>
-              Load More
+            <Button
+              variant="filled"
+              onClick={() => loadVitals(true)}
+              loading={loadingMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? t('labels.loading', 'Loading...') : t('buttons.loadMore', 'Load More')}
             </Button>
           </Center>
         )}

@@ -37,10 +37,15 @@ import { useTranslation } from 'react-i18next';
 import logger from '../../../services/logger';
 import VitalTrendChart from './VitalTrendChart';
 import VitalTrendTable from './VitalTrendTable';
-import { VitalType, VitalTrendResponse, VITAL_TYPE_CONFIGS } from './types';
+import { VitalType, VitalTrendResponse, VitalDataPoint, VITAL_TYPE_CONFIGS, AggregationPeriod } from './types';
 import { vitalsService } from '../../../services/medical/vitalsService';
 import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
 import { convertForDisplay, unitLabels } from '../../../utils/unitConversion';
+import {
+  smartAggregateVitalData,
+  getAggregationDescription,
+  AggregatedDataPoint
+} from '../../../utils/vitalDataAggregation';
 
 // Maps vital types to their corresponding measurement types for unit conversion
 const CONVERTIBLE_VITAL_TYPES: Partial<Record<VitalType, 'weight' | 'temperature'>> = {
@@ -65,6 +70,10 @@ interface RawTrendData {
   reference_range: VitalTrendResponse['reference_range'];
 }
 
+// Safety limit to prevent runaway pagination loops
+const MAX_PAGINATION_RECORDS = 50000;
+const PAGE_SIZE = 500;
+
 const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   opened,
   onClose,
@@ -80,6 +89,9 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('chart');
   const [timeRange, setTimeRange] = useState<string>('all');
+  // Aggregation state
+  const [aggregationPeriod, setAggregationPeriod] = useState<AggregationPeriod | null>(null);
+  const [aggregatedDataPoints, setAggregatedDataPoints] = useState<AggregatedDataPoint[]>([]);
 
   const getDateRangeFromSelection = (range: string): { startDate?: string; endDate?: string } => {
     const today = new Date();
@@ -118,6 +130,67 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     }
   };
 
+  /**
+   * Fetch all vitals for a specific type using pagination
+   * This ensures we get complete historical data even for users with 1000+ records
+   */
+  const fetchAllVitalsForType = useCallback(async (
+    targetPatientId: number,
+    targetVitalType: VitalType,
+    dateRange?: { startDate?: string; endDate?: string }
+  ): Promise<any[]> => {
+    const allRecords: any[] = [];
+    const seenIds = new Set<number>();
+    let skip = 0;
+    let hasMore = true;
+
+    // Map vital type to backend field name for filtering
+    // BMI requires fetching weight records
+    const backendVitalType = targetVitalType === 'bmi' ? 'weight' : targetVitalType;
+
+    while (hasMore && allRecords.length < MAX_PAGINATION_RECORDS) {
+      const params: Record<string, any> = {
+        skip: String(skip),
+        limit: String(PAGE_SIZE),
+        vital_type: backendVitalType
+      };
+
+      let records;
+      if (dateRange?.startDate && dateRange?.endDate) {
+        records = await vitalsService.getPatientVitalsDateRange(
+          targetPatientId,
+          dateRange.startDate,
+          dateRange.endDate,
+          params
+        );
+      } else {
+        records = await vitalsService.getPatientVitals(targetPatientId, params);
+      }
+
+      const recordsArray = Array.isArray(records) ? records : records?.data || [];
+
+      // Check for duplicates to detect pagination issues
+      let newRecordsCount = 0;
+      for (const record of recordsArray) {
+        if (!seenIds.has(record.id)) {
+          seenIds.add(record.id);
+          allRecords.push(record);
+          newRecordsCount++;
+        }
+      }
+
+      // Stop if we got fewer records than requested (no more pages)
+      // or if all records were duplicates (pagination issue)
+      if (recordsArray.length < PAGE_SIZE || newRecordsCount === 0) {
+        hasMore = false;
+      } else {
+        skip += PAGE_SIZE;
+      }
+    }
+
+    return allRecords;
+  }, []);
+
   const loadTrendData = useCallback(async () => {
     if (!vitalType || !patientId) return;
 
@@ -130,26 +203,15 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
     setLoading(true);
     setError(null);
+    setAggregationPeriod(null);
+    setAggregatedDataPoints([]);
 
     try {
       const dateRange = getDateRangeFromSelection(timeRange);
       const config = VITAL_TYPE_CONFIGS[vitalType];
 
-      // Fetch vitals data (backend enforces max 100 per request)
-      let vitalsData;
-      if (dateRange.startDate && dateRange.endDate) {
-        vitalsData = await vitalsService.getPatientVitalsDateRange(
-          patientId,
-          dateRange.startDate,
-          dateRange.endDate,
-          { limit: 100 }
-        );
-      } else {
-        vitalsData = await vitalsService.getPatientVitals(patientId, { limit: 100 });
-      }
-
-      // Process the data for the specific vital type
-      const dataArray = Array.isArray(vitalsData) ? vitalsData : vitalsData?.data || [];
+      // Fetch ALL vitals for this type using pagination
+      const vitalsData = await fetchAllVitalsForType(patientId, vitalType, dateRange);
 
       // Helper function to calculate BMI from weight (lbs) and height (inches)
       const calculateBMI = (weightLbs: number, heightInches: number): number => {
@@ -161,7 +223,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       const isBMI = vitalType === 'bmi';
 
       // Filter and transform data points - store raw values in imperial units
-      const dataPoints = dataArray
+      const dataPoints: VitalDataPoint[] = vitalsData
         .filter((vital: any) => {
           if (isBMI) {
             // For BMI, we need weight and patient height
@@ -187,7 +249,14 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
             recorded_date: vital.recorded_date
           };
         })
-        .sort((a: any, b: any) => new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime());
+        .sort((a: VitalDataPoint, b: VitalDataPoint) =>
+          new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime()
+        );
+
+      // Apply smart aggregation for large datasets
+      const aggregationResult = smartAggregateVitalData(dataPoints);
+      setAggregationPeriod(aggregationResult.period);
+      setAggregatedDataPoints(aggregationResult.aggregatedPoints);
 
       // Store raw data - unit conversion and statistics calculated in useMemo
       const rawData: RawTrendData = {
@@ -206,6 +275,8 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         patientId,
         timeRange,
         dataPointCount: dataPoints.length,
+        aggregationPeriod: aggregationResult.period,
+        aggregatedPointCount: aggregationResult.aggregatedPoints.length,
         component: 'VitalTrendsPanel'
       });
     } catch (err: any) {
@@ -229,7 +300,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [vitalType, patientId, timeRange, patientHeight, t]);
+  }, [vitalType, patientId, timeRange, patientHeight, t, fetchAllVitalsForType]);
 
   useEffect(() => {
     if (opened && vitalType) {
@@ -247,6 +318,8 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       setRawTrendData(null);
       setError(null);
       setActiveTab('chart');
+      setAggregationPeriod(null);
+      setAggregatedDataPoints([]);
     }
   }, [opened]);
 
@@ -567,7 +640,10 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
               <Group gap="md">
                 <Badge variant="light" color="blue" size="lg">
-                  {trendData.statistics.count} {t('vitals.trends.dataPoints', 'data points')}
+                  {aggregationPeriod
+                    ? getAggregationDescription(aggregationPeriod, trendData.statistics.count, aggregatedDataPoints.length)
+                    : `${trendData.statistics.count} ${t('vitals.trends.dataPoints', 'data points')}`
+                  }
                 </Badge>
 
                 {trendData.statistics.std_dev !== null && (
@@ -596,7 +672,11 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
             </Tabs.List>
 
             <Tabs.Panel value="chart" pt="md">
-              <VitalTrendChart trendData={trendData} />
+              <VitalTrendChart
+                trendData={trendData}
+                aggregatedDataPoints={aggregatedDataPoints}
+                aggregationPeriod={aggregationPeriod}
+              />
             </Tabs.Panel>
 
             <Tabs.Panel value="table" pt="md">
