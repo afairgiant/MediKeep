@@ -70,6 +70,19 @@ class UnitConverter:
         return round((float(fahrenheit) - 32) * 5 / 9, 1)
 
     @staticmethod
+    def calculate_bmi(
+        weight_kg: Optional[float], height_cm: Optional[float]
+    ) -> Optional[float]:
+        """Calculate BMI from metric units (kg and cm)."""
+        if weight_kg is None or height_cm is None:
+            return None
+        if height_cm <= 0:
+            return None
+        # BMI = weight(kg) / height(m)^2
+        height_m = float(height_cm) / 100
+        return round(float(weight_kg) / (height_m * height_m), 1)
+
+    @staticmethod
     def get_unit_labels(unit_system: str) -> Dict[str, str]:
         """Get unit labels for a given unit system."""
         return UNIT_LABELS.get(unit_system, UNIT_LABELS["imperial"])
@@ -691,10 +704,13 @@ class ExportService:
                 )
                 weight_value = UnitConverter.lbs_to_kg(vital.weight)
                 height_value = UnitConverter.inches_to_cm(vital.height)
+                # Recalculate BMI using metric values
+                bmi_value = UnitConverter.calculate_bmi(weight_value, height_value)
             else:
                 temperature_value = vital.temperature
                 weight_value = vital.weight
                 height_value = vital.height
+                bmi_value = vital.bmi
 
             result.append(
                 {
@@ -714,7 +730,7 @@ class ExportService:
                     "oxygen_saturation": vital.oxygen_saturation,
                     "respiratory_rate": vital.respiratory_rate,
                     "blood_glucose": vital.blood_glucose,
-                    "bmi": vital.bmi,
+                    "bmi": bmi_value,
                     "pain_scale": vital.pain_scale,
                     "location": vital.location,
                     "device_used": vital.device_used,

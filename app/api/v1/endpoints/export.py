@@ -14,7 +14,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_id, get_db
@@ -57,6 +57,14 @@ class BulkExportRequest(BaseModel):
     end_date: Optional[date] = None
     include_patient_info: bool = True
     unit_system: str = "imperial"
+
+    @field_validator("unit_system")
+    @classmethod
+    def validate_unit_system(cls, v: str) -> str:
+        """Validate unit_system is either 'imperial' or 'metric'."""
+        if v not in ("imperial", "metric"):
+            raise ValueError("unit_system must be 'imperial' or 'metric'")
+        return v
 
 
 @router.get("/data")
