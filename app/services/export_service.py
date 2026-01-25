@@ -38,6 +38,55 @@ from app.models.models import (
 
 logger = get_logger(__name__, "app")
 
+# Unit labels for imperial and metric systems
+UNIT_LABELS = {
+    "imperial": {"weight": "lbs", "height": "inches", "temperature": "°F"},
+    "metric": {"weight": "kg", "height": "cm", "temperature": "°C"},
+}
+
+
+class UnitConverter:
+    """Utility class for converting between imperial and metric units."""
+
+    @staticmethod
+    def lbs_to_kg(pounds: Optional[float]) -> Optional[float]:
+        """Convert pounds to kilograms."""
+        if pounds is None:
+            return None
+        return round(float(pounds) * 0.453592, 1)
+
+    @staticmethod
+    def inches_to_cm(inches: Optional[float]) -> Optional[float]:
+        """Convert inches to centimeters."""
+        if inches is None:
+            return None
+        return round(float(inches) * 2.54, 1)
+
+    @staticmethod
+    def fahrenheit_to_celsius(fahrenheit: Optional[float]) -> Optional[float]:
+        """Convert Fahrenheit to Celsius."""
+        if fahrenheit is None:
+            return None
+        return round((float(fahrenheit) - 32) * 5 / 9, 1)
+
+    @staticmethod
+    def calculate_bmi(
+        weight_kg: Optional[float], height_cm: Optional[float]
+    ) -> Optional[float]:
+        """Calculate BMI from metric units (kg and cm)."""
+        if weight_kg is None or height_cm is None:
+            return None
+        if height_cm <= 0:
+            return None
+        # BMI = weight(kg) / height(m)^2
+        height_m = float(height_cm) / 100
+        return round(float(weight_kg) / (height_m * height_m), 1)
+
+    @staticmethod
+    def get_unit_labels(unit_system: str) -> Dict[str, str]:
+        """Get unit labels for a given unit system."""
+        return UNIT_LABELS.get(unit_system, UNIT_LABELS["imperial"])
+
 
 class ExportService:
     """Service for exporting patient medical data in various formats."""
@@ -54,6 +103,7 @@ class ExportService:
         end_date: Optional[date] = None,
         include_files: bool = False,
         include_patient_info: bool = True,
+        unit_system: str = "imperial",
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """
         Export patient data based on specified parameters.
@@ -65,6 +115,8 @@ class ExportService:
             start_date: Filter records from this date
             end_date: Filter records up to this date
             include_files: Whether to include file attachments
+            include_patient_info: Whether to include patient information
+            unit_system: Unit system for measurements ('imperial' or 'metric')
 
         Returns:
             Dictionary containing exported data
@@ -74,13 +126,21 @@ class ExportService:
             user = self.db.query(User).filter(User.id == user_id).first()
             if not user:
                 raise ValueError("User not found")
-            
+
             if not user.active_patient_id:
                 raise ValueError("No active patient selected")
-            
-            patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+            patient = (
+                self.db.query(Patient)
+                .filter(Patient.id == user.active_patient_id)
+                .first()
+            )
             if not patient:
                 raise ValueError("Active patient record not found")
+
+            # Validate unit_system
+            if unit_system not in ("imperial", "metric"):
+                unit_system = "imperial"
 
             export_data = {
                 "export_metadata": {
@@ -89,6 +149,7 @@ class ExportService:
                     "scope": scope,
                     "include_files": include_files,
                     "include_patient_info": include_patient_info,
+                    "unit_system": unit_system,
                     "date_range": {
                         "start": start_date.isoformat() if start_date else None,
                         "end": end_date.isoformat() if end_date else None,
@@ -98,13 +159,15 @@ class ExportService:
 
             # Conditionally include patient info
             if include_patient_info:
-                export_data["patient_info"] = self._get_patient_info(patient)
+                export_data["patient_info"] = self._get_patient_info(
+                    patient, unit_system
+                )
 
             # Export based on scope
             if scope == "all":
                 export_data.update(
                     await self._export_all_data(
-                        patient, start_date, end_date, include_files
+                        patient, start_date, end_date, include_files, unit_system
                     )
                 )
             elif scope == "medications":
@@ -149,7 +212,7 @@ class ExportService:
                 )
             elif scope == "vitals":
                 export_data["vitals"] = self._export_vitals(
-                    patient, start_date, end_date
+                    patient, start_date, end_date, unit_system
                 )
             elif scope == "emergency_contacts":
                 export_data["emergency_contacts"] = self._export_emergency_contacts(
@@ -175,8 +238,21 @@ class ExportService:
             logger.error(f"Export failed for user {user_id}: {str(e)}")
             raise
 
-    def _get_patient_info(self, patient: Patient) -> Dict[str, Any]:
-        """Get basic patient information."""
+    def _get_patient_info(
+        self, patient: Patient, unit_system: str = "imperial"
+    ) -> Dict[str, Any]:
+        """Get basic patient information with unit conversion."""
+        # Get unit labels for the selected system
+        unit_labels = UnitConverter.get_unit_labels(unit_system)
+
+        # Convert height and weight based on unit system
+        if unit_system == "metric":
+            height_value = UnitConverter.inches_to_cm(patient.height)
+            weight_value = UnitConverter.lbs_to_kg(patient.weight)
+        else:
+            height_value = patient.height
+            weight_value = patient.weight
+
         return {
             "id": patient.id,
             "first_name": patient.first_name,
@@ -187,8 +263,10 @@ class ExportService:
                 else None
             ),
             "blood_type": patient.blood_type,
-            "height": patient.height,
-            "weight": patient.weight,
+            "height": height_value,
+            "height_unit": unit_labels["height"],
+            "weight": weight_value,
+            "weight_unit": unit_labels["weight"],
             "gender": patient.gender,
             "address": patient.address,
             "primary_physician": (
@@ -212,6 +290,7 @@ class ExportService:
         start_date: Optional[date],
         end_date: Optional[date],
         include_files: bool = False,
+        unit_system: str = "imperial",
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """Export all patient data."""
         return {
@@ -225,7 +304,7 @@ class ExportService:
             "procedures": self._export_procedures(patient, start_date, end_date),
             "treatments": self._export_treatments(patient, start_date, end_date),
             "encounters": self._export_encounters(patient, start_date, end_date),
-            "vitals": self._export_vitals(patient, start_date, end_date),
+            "vitals": self._export_vitals(patient, start_date, end_date, unit_system),
             "emergency_contacts": self._export_emergency_contacts(
                 patient, start_date, end_date
             ),
@@ -383,8 +462,10 @@ class ExportService:
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user or not user.active_patient_id:
             return []
-        
-        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
         if not patient:
             return []
 
@@ -596,9 +677,13 @@ class ExportService:
         ]
 
     def _export_vitals(
-        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+        self,
+        patient: Patient,
+        start_date: Optional[date],
+        end_date: Optional[date],
+        unit_system: str = "imperial",
     ) -> List[Dict[str, Any]]:
-        """Export vitals data."""
+        """Export vitals data with unit conversion."""
         query = (
             self.db.query(Vitals)
             .options(joinedload(Vitals.practitioner))
@@ -606,30 +691,57 @@ class ExportService:
         )
         query = self._apply_date_filter(query, Vitals, start_date, end_date)
         vitals = query.all()
-        return [
-            {
-                "id": vital.id,
-                "recorded_date": (
-                    vital.recorded_date.isoformat() if vital.recorded_date else None
-                ),
-                "systolic_bp": vital.systolic_bp,
-                "diastolic_bp": vital.diastolic_bp,
-                "heart_rate": vital.heart_rate,
-                "temperature": vital.temperature,
-                "weight": vital.weight,
-                "height": vital.height,
-                "oxygen_saturation": vital.oxygen_saturation,
-                "respiratory_rate": vital.respiratory_rate,
-                "blood_glucose": vital.blood_glucose,
-                "bmi": vital.bmi,
-                "pain_scale": vital.pain_scale,
-                "location": vital.location,
-                "device_used": vital.device_used,
-                "recorded_by": vital.practitioner.name if vital.practitioner else None,
-                "notes": vital.notes,
-            }
-            for vital in vitals
-        ]
+
+        # Get unit labels
+        unit_labels = UnitConverter.get_unit_labels(unit_system)
+
+        result = []
+        for vital in vitals:
+            # Convert measurements based on unit system
+            if unit_system == "metric":
+                temperature_value = UnitConverter.fahrenheit_to_celsius(
+                    vital.temperature
+                )
+                weight_value = UnitConverter.lbs_to_kg(vital.weight)
+                height_value = UnitConverter.inches_to_cm(vital.height)
+                # Recalculate BMI using metric values
+                bmi_value = UnitConverter.calculate_bmi(weight_value, height_value)
+            else:
+                temperature_value = vital.temperature
+                weight_value = vital.weight
+                height_value = vital.height
+                bmi_value = vital.bmi
+
+            result.append(
+                {
+                    "id": vital.id,
+                    "recorded_date": (
+                        vital.recorded_date.isoformat() if vital.recorded_date else None
+                    ),
+                    "systolic_bp": vital.systolic_bp,
+                    "diastolic_bp": vital.diastolic_bp,
+                    "heart_rate": vital.heart_rate,
+                    "temperature": temperature_value,
+                    "temperature_unit": unit_labels["temperature"],
+                    "weight": weight_value,
+                    "weight_unit": unit_labels["weight"],
+                    "height": height_value,
+                    "height_unit": unit_labels["height"],
+                    "oxygen_saturation": vital.oxygen_saturation,
+                    "respiratory_rate": vital.respiratory_rate,
+                    "blood_glucose": vital.blood_glucose,
+                    "bmi": bmi_value,
+                    "pain_scale": vital.pain_scale,
+                    "location": vital.location,
+                    "device_used": vital.device_used,
+                    "recorded_by": (
+                        vital.practitioner.name if vital.practitioner else None
+                    ),
+                    "notes": vital.notes,
+                }
+            )
+
+        return result
 
     def _export_emergency_contacts(
         self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
@@ -799,11 +911,13 @@ class ExportService:
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user:
             raise ValueError("User not found")
-        
+
         if not user.active_patient_id:
             raise ValueError("No active patient selected")
-        
-        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
         if not patient:
             raise ValueError("Active patient record not found")
 
@@ -917,12 +1031,19 @@ class ExportService:
         # Add patient info header if available
         if "patient_info" in export_data:
             patient_info = export_data["patient_info"]
+            height_unit = patient_info.get("height_unit", "inches")
+            weight_unit = patient_info.get("weight_unit", "lbs")
+
             output.write("# PATIENT INFORMATION\n")
             output.write(
                 f"# Name: {patient_info.get('first_name', '')} {patient_info.get('last_name', '')}\n"
             )
             output.write(f"# Birth Date: {patient_info.get('birth_date', '')}\n")
             output.write(f"# Blood Type: {patient_info.get('blood_type', '')}\n")
+            if patient_info.get("height"):
+                output.write(f"# Height: {patient_info.get('height')} {height_unit}\n")
+            if patient_info.get("weight"):
+                output.write(f"# Weight: {patient_info.get('weight')} {weight_unit}\n")
             output.write("\n")
 
         if scope == "all":
@@ -1015,6 +1136,10 @@ class ExportService:
                 patient_info = export_data["patient_info"]
 
                 # Create patient info table with safe data handling
+                # Use unit labels from patient_info if available, otherwise default to imperial
+                height_unit = patient_info.get("height_unit", "inches")
+                weight_unit = patient_info.get("weight_unit", "lbs")
+
                 patient_data = [
                     [
                         "Name",
@@ -1025,7 +1150,7 @@ class ExportService:
                     [
                         "Height",
                         (
-                            f"{patient_info.get('height', 'N/A')} inches"
+                            f"{patient_info.get('height', 'N/A')} {height_unit}"
                             if patient_info.get("height")
                             else "N/A"
                         ),
@@ -1033,7 +1158,7 @@ class ExportService:
                     [
                         "Weight",
                         (
-                            f"{patient_info.get('weight', 'N/A')} lbs"
+                            f"{patient_info.get('weight', 'N/A')} {weight_unit}"
                             if patient_info.get("weight")
                             else "N/A"
                         ),
