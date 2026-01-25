@@ -40,6 +40,7 @@ import VitalTrendTable from './VitalTrendTable';
 import { VitalType, VitalTrendResponse, VitalDataPoint, VITAL_TYPE_CONFIGS, AggregationPeriod } from './types';
 import { vitalsService } from '../../../services/medical/vitalsService';
 import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { convertForDisplay, unitLabels } from '../../../utils/unitConversion';
 import {
   smartAggregateVitalData,
@@ -83,6 +84,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 }) => {
   const { t } = useTranslation('common');
   const { unitSystem } = useUserPreferences();
+  const { formatDate: formatDateWithPref } = useDateFormat();
   // Store raw data in imperial units - conversion happens in useMemo
   const [rawTrendData, setRawTrendData] = useState<RawTrendData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -426,7 +428,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
       const csvContent = [
         [`Vital Signs Trend Data: ${trendData.vital_type_label}`],
-        [`Export Date: ${new Date().toLocaleDateString()}`],
+        [`Export Date: ${formatDateWithPref(new Date())}`],
         [''],
         ['Summary Statistics'],
         ['Count', trendData.statistics.count.toString()],

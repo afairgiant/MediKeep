@@ -109,6 +109,12 @@
   cursor: pointer;
 }
 
+.settings-radio-example {
+  color: var(--color-text-muted, #999);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
 .settings-radio-option:has(input:disabled) .settings-radio-label {
   color: var(--color-text-muted, #999);
   cursor: not-allowed;

@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 // API and utilities
 import patientApi from '../../services/api/patientApi';
-import { formatDate } from '../../utils/helpers';
-import { DATE_FORMATS } from '../../utils/constants';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   formatMeasurement,
   convertForDisplay,
@@ -62,6 +61,7 @@ const PatientInfo = () => {
   const { practitioners, loading: practitionersLoading } = usePractitioners();
   const { invalidatePatientList, invalidatePatient } = useCacheManager();
   const { unitSystem } = useUserPreferences();
+  const { formatLongDate } = useDateFormat();
 
   // Combine loading states
   const loading = patientLoading || practitionersLoading;
@@ -444,10 +444,7 @@ const PatientInfo = () => {
                     <div className="detail-group">
                       <label>{t('patientInfo.fields.birthDate', 'Birth Date')}:</label>
                       <span>
-                        {formatDate(
-                          patientData.birth_date,
-                          DATE_FORMATS.DISPLAY_LONG
-                        )}
+                        {formatLongDate(patientData.birth_date, true)}
                       </span>
                     </div>
                     <div className="detail-group">

@@ -98,3 +98,31 @@ export const DATE_FORMATS = {
   INPUT_WITH_TIME: 'YYYY-MM-DDTHH:mm',
   API: 'YYYY-MM-DDTHH:mm:ss',
 };
+
+// User-selectable date format preferences
+// mdy = MM/DD/YYYY (US), dmy = DD/MM/YYYY (European), ymd = YYYY-MM-DD (ISO)
+export const DATE_FORMAT_OPTIONS = {
+  mdy: {
+    code: 'mdy',
+    label: 'MM/DD/YYYY (US)',
+    locale: 'en-US',
+    pattern: 'MM/DD/YYYY',
+    example: '01/25/2026',
+  },
+  dmy: {
+    code: 'dmy',
+    label: 'DD/MM/YYYY (European)',
+    locale: 'en-GB',
+    pattern: 'DD/MM/YYYY',
+    example: '25/01/2026',
+  },
+  ymd: {
+    code: 'ymd',
+    label: 'YYYY-MM-DD (ISO)',
+    locale: 'sv-SE', // Swedish locale uses ISO format
+    pattern: 'YYYY-MM-DD',
+    example: '2026-01-25',
+  },
+};
+
+export const DEFAULT_DATE_FORMAT = 'mdy';
