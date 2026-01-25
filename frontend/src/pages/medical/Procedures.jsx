@@ -6,7 +6,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -44,6 +44,7 @@ import {
 
 const Procedures = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
@@ -52,7 +53,7 @@ const Procedures = () => {
   const { practitioners } = usePractitioners();
 
   // Get standardized formatters for procedures with linking support
-  const formatters = getEntityFormatters('procedures', practitioners, navigate);
+  const formatters = getEntityFormatters('procedures', practitioners, navigate, null, formatDate);
 
   // Modern data management with useMedicalData
   const {

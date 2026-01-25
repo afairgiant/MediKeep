@@ -9,8 +9,8 @@ import {
   Text,
   Divider,
 } from '@mantine/core';
-import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
@@ -27,6 +27,7 @@ const MedicationCard = ({
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
 
   const getMedicationPurpose = (medication) => {
     const indication = medication.indication?.trim();
@@ -175,7 +176,7 @@ const MedicationCard = ({
                 {tCommon('labels.startDate', 'Start Date')}:
               </Text>
               <Text size="sm">
-                {formatDate(medication.effective_period_start)}
+                {formatLongDate(medication.effective_period_start)}
               </Text>
             </Group>
           )}
@@ -185,7 +186,7 @@ const MedicationCard = ({
                 {tCommon('labels.endDate', 'End Date')}:
               </Text>
               <Text size="sm">
-                {formatDate(medication.effective_period_end)}
+                {formatLongDate(medication.effective_period_end)}
               </Text>
             </Group>
           )}

@@ -33,17 +33,18 @@ import {
   IconChevronRight,
   IconExternalLink
 } from '@tabler/icons-react';
-import { formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { searchService } from '../../services/searchService';
 
-const SearchResults = ({ 
-  results = [], 
-  loading = false, 
-  query = '', 
+const SearchResults = ({
+  results = [],
+  loading = false,
+  query = '',
   onClose,
-  visible = false 
+  visible = false
 }) => {
   const navigate = useNavigate();
+  const { formatDateTime } = useDateFormat();
 
   // Icon mapping
   const iconMap = {

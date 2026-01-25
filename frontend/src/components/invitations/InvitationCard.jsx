@@ -25,16 +25,18 @@ import {
     IconClock,
     IconChevronRight
 } from '@tabler/icons-react';
-import { formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
-const InvitationCard = ({ 
-    invitation, 
+const InvitationCard = ({
+    invitation,
     variant = 'received', // 'received' or 'sent'
     onRespond,
     onCancel,
     onView,
     compact = false
 }) => {
+    const { formatDateTime } = useDateFormat();
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'pending': return 'orange';

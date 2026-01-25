@@ -30,6 +30,7 @@ import {
   SYMPTOM_SEVERITY_COLORS,
   SYMPTOM_STATUS_COLORS,
 } from '../../constants/symptomEnums';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * Pure helper function - outside component to prevent recreation
@@ -62,6 +63,7 @@ const getSeverityColor = (occurrences) => {
  */
 const SymptomCalendar = ({ patientId, hidden }) => {
   const { t } = useTranslation('common');
+  const { formatDate, formatLongDate, locale } = useDateFormat();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [occurrences, setOccurrences] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -201,7 +203,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
 
     if (occurrencesOnDate.length > 0) {
       setSelectedDate(
-        clickedDate.toLocaleDateString('en-US', {
+        clickedDate.toLocaleDateString(locale, {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
@@ -234,7 +236,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
     setModalOpen(true); // Reopen occurrences modal
   };
 
-  const monthName = currentDate.toLocaleDateString('en-US', {
+  const monthName = currentDate.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric',
   });
@@ -471,7 +473,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                   )}
                   {occurrence.resolved_date && (
                     <Text size="sm" c="green">
-                      <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {new Date(occurrence.resolved_date).toLocaleDateString()}
+                      <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
                     </Text>
                   )}
                   {!occurrence.resolved_date && (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatDate, formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   Card,
   Group,
@@ -29,6 +29,8 @@ const MedicalCard = ({
   onDelete,
   ...props
 }) => {
+  const { formatLongDate, formatDateTime } = useDateFormat();
+
   const getStatusColor = (status, type) => {
     if (!status) return 'gray';
 
@@ -129,7 +131,7 @@ const MedicalCard = ({
           <Stack gap="xs">
             {dateInfo.created && (
               <Text size="xs" c="dimmed">
-                Created: {formatDate(dateInfo.created)}
+                Created: {formatLongDate(dateInfo.created)}
               </Text>
             )}
             {dateInfo.updated && (
@@ -139,7 +141,7 @@ const MedicalCard = ({
             )}
             {dateInfo.custom && (
               <Text size="xs" c="dimmed">
-                {dateInfo.custom.label}: {formatDate(dateInfo.custom.date)}
+                {dateInfo.custom.label}: {formatLongDate(dateInfo.custom.date)}
               </Text>
             )}
           </Stack>

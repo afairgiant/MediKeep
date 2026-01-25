@@ -37,9 +37,11 @@ import SymptomCalendar from '../../components/medical/SymptomCalendar';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { SymptomViewModal } from '../../components/medical/symptoms';
 import { SYMPTOM_STATUS_COLORS } from '../../constants/symptomEnums';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 const Symptoms = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
 
   // Get current patient from global hook (same as Medication.js)
   const { patient } = usePatientWithStaticData();
@@ -457,11 +459,11 @@ const Symptoms = () => {
 
                       <Group gap="md">
                         <Text size="sm" c="dimmed">
-                          {t('symptoms.first', 'First')}: {new Date(symptom.first_occurrence_date).toLocaleDateString()}
+                          {t('symptoms.first', 'First')}: {formatDate(symptom.first_occurrence_date)}
                         </Text>
                         {symptom.last_occurrence_date && (
                           <Text size="sm" c="dimmed">
-                            {t('symptoms.last', 'Last')}: {new Date(symptom.last_occurrence_date).toLocaleDateString()}
+                            {t('symptoms.last', 'Last')}: {formatDate(symptom.last_occurrence_date)}
                           </Text>
                         )}
                         <Text size="sm" fw={500} c="blue">

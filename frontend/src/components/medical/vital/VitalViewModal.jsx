@@ -31,7 +31,7 @@ import {
   IconTrendingUp,
   IconUser,
 } from '@tabler/icons-react';
-import { formatDate, formatDateTime } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
@@ -48,6 +48,7 @@ const VitalViewModal = ({
   navigate,
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate, formatDateTime } = useDateFormat();
 
   if (!isOpen || !vital) return null;
 

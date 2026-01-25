@@ -25,8 +25,8 @@ import StatusBadge from '../StatusBadge';
 import ConditionRelationships from '../ConditionRelationships';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import TestComponentsTab from './TestComponentsTab';
-import { formatDate } from '../../../utils/helpers';
 import logger from '../../../services/logger';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 const LabResultViewModal = ({
   isOpen,
@@ -45,6 +45,7 @@ const LabResultViewModal = ({
   initialTab = 'overview'
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
 
   // Reset activeTab when modal opens with new labResult
   const [activeTab, setActiveTab] = useState(initialTab);

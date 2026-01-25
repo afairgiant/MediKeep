@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge, Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
@@ -19,6 +19,7 @@ const VitalCard = ({
 }) => {
   const { t } = useTranslation('common');
   const { unitSystem } = useUserPreferences();
+  const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
     logger.error('vital_card_error', {
@@ -56,7 +57,7 @@ const VitalCard = ({
       {
         label: t('vitals.card.recordedDate', 'Recorded Date'),
         value: vital.recorded_date,
-        render: (value) => value ? formatDate(value) : t('labels.notSpecified', 'Not specified')
+        render: (value) => value ? formatLongDate(value) : t('labels.notSpecified', 'Not specified')
       },
       {
         label: t('vitals.stats.bloodPressure', 'Blood Pressure'),
@@ -119,7 +120,7 @@ const VitalCard = ({
 
     // Generate a display title
     const title = vital.recorded_date
-      ? `${t('vitals.title', 'Vitals')} - ${formatDate(vital.recorded_date)}`
+      ? `${t('vitals.title', 'Vitals')} - ${formatLongDate(vital.recorded_date)}`
       : t('vitals.card.title', 'Vital Signs Record');
 
     return (

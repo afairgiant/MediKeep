@@ -12,7 +12,7 @@ import {
   IconStar,
   IconStarFilled,
 } from '@tabler/icons-react';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { notifications } from '@mantine/notifications';
 import logger from '../../../services/logger';
 import StatusBadge from '../StatusBadge';
@@ -29,6 +29,7 @@ const InsuranceCard = ({
   fileCountLoading = false
 }) => {
   const { t } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
 
   // Get type-specific styling
   const getTypeColor = (type) => {
@@ -196,7 +197,7 @@ const InsuranceCard = ({
             <Text size="sm" fw={500} c="dimmed" w={100}>
               {t('insurance.card.effective', 'Effective')}:
             </Text>
-            <Text size="sm">{formatDate(insurance.effective_date)}</Text>
+            <Text size="sm">{formatLongDate(insurance.effective_date)}</Text>
           </Group>
 
           {insurance.expiration_date && (
@@ -204,7 +205,7 @@ const InsuranceCard = ({
               <Text size="sm" fw={500} c="dimmed" w={100}>
                 {t('insurance.card.expires', 'Expires')}:
               </Text>
-              <Text size="sm">{formatDate(insurance.expiration_date)}</Text>
+              <Text size="sm">{formatLongDate(insurance.expiration_date)}</Text>
             </Group>
           )}
 

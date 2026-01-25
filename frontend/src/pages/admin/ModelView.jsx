@@ -7,12 +7,13 @@ import { adminApiService } from '../../services/api/adminApi';
 import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
 import { Button } from '../../components/ui';
-import { formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import './ModelView.css';
 
 const ModelView = () => {
   const { modelName, recordId } = useParams();
   const navigate = useNavigate();
+  const { formatDateTime } = useDateFormat();
 
   const [record, setRecord] = useState(null);
   const [metadata, setMetadata] = useState(null);

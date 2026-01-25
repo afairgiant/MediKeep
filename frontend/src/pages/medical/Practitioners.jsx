@@ -30,6 +30,7 @@ import {
 import { formatPhoneNumber, cleanPhoneNumber } from '../../utils/phoneUtils';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import frontendLogger from '../../services/frontendLogger';
 import { useTranslation } from 'react-i18next';
 
@@ -40,6 +41,7 @@ import PractitionerFormWrapper from '../../components/medical/practitioners/Prac
 
 const Practitioners = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,6 +65,9 @@ const Practitioners = () => {
   // Standardized filtering and sorting
   const config = getMedicalPageConfig('practitioners');
   const dataManagement = useDataManagement(practitioners, config);
+
+  // Get standardized formatters for practitioners
+  const defaultFormatters = getEntityFormatters('default', [], navigate, null, formatDate);
   const [editingPractitioner, setEditingPractitioner] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -323,9 +328,9 @@ const Practitioners = () => {
                 onEdit={handleEditPractitioner}
                 onDelete={handleDeletePractitioner}
                 formatters={{
-                  name: getEntityFormatters('default').primaryName,
-                  specialty: getEntityFormatters('default').simple,
-                  practice: getEntityFormatters('default').simple,
+                  name: defaultFormatters.primaryName,
+                  specialty: defaultFormatters.simple,
+                  practice: defaultFormatters.simple,
                   phone_number: value =>
                     value ? formatPhoneNumber(value) : '-',
                   email: value => value || '-',

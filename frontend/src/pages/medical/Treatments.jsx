@@ -9,6 +9,7 @@ import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -37,6 +38,7 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 
 const Treatments = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
@@ -46,6 +48,9 @@ const Treatments = () => {
     usePatientWithStaticData();
 
   const practitioners = practitionersObject?.practitioners || [];
+
+  // Get standardized formatters for treatments
+  const treatmentFormatters = getEntityFormatters('treatments', practitioners, navigate, null, formatDate);
 
   // Modern data management with useMedicalData
   const {
@@ -376,10 +381,8 @@ const Treatments = () => {
               onEdit={handleEditTreatment}
               onDelete={handleDeleteTreatment}
               formatters={{
-                treatment_name:
-                  getEntityFormatters('treatments').treatment_name,
-                treatment_type:
-                  getEntityFormatters('treatments').treatment_type,
+                treatment_name: treatmentFormatters.treatment_name,
+                treatment_type: treatmentFormatters.treatment_type,
                 practitioner: (value, row) => {
                   if (row.practitioner_id) {
                     const practitionerInfo = getPractitionerInfo(
@@ -403,12 +406,12 @@ const Treatments = () => {
                   }
                   return 'No condition linked';
                 },
-                start_date: getEntityFormatters('treatments').start_date,
-                end_date: getEntityFormatters('treatments').end_date,
-                status: getEntityFormatters('treatments').status,
-                dosage: getEntityFormatters('treatments').dosage,
-                frequency: getEntityFormatters('treatments').frequency,
-                notes: getEntityFormatters('treatments').notes,
+                start_date: treatmentFormatters.start_date,
+                end_date: treatmentFormatters.end_date,
+                status: treatmentFormatters.status,
+                dosage: treatmentFormatters.dosage,
+                frequency: treatmentFormatters.frequency,
+                notes: treatmentFormatters.notes,
               }}
               dataType="medical"
               responsive={responsive}

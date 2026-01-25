@@ -26,7 +26,7 @@ import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
@@ -48,6 +48,7 @@ import {
 
 const Immunization = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -233,6 +234,9 @@ const Immunization = () => {
   const { practitioners: practitionersObject } = usePatientWithStaticData();
   const practitioners = practitionersObject?.practitioners || [];
 
+  // Get standardized formatters for immunizations
+  const immunizationFormatters = getEntityFormatters('immunizations', practitioners, navigate, null, formatDate);
+
   if (loading) {
     return <MedicalPageLoading message={t('immunizations.loadingImmunizations', 'Loading immunizations...')} />;
   }
@@ -337,19 +341,15 @@ const Immunization = () => {
                 onDelete={handleDeleteImmunization}
                 formatters={{
                   vaccine_name: (value, item) =>
-                    getEntityFormatters('immunizations').immunization_name(
-                      value,
-                      item
-                    ),
-                  date_administered:
-                    getEntityFormatters('immunizations').administration_date,
-                  expiration_date: getEntityFormatters('immunizations').date,
-                  site: getEntityFormatters('immunizations').simple,
-                  dose_number: getEntityFormatters('immunizations').simple,
-                  manufacturer: getEntityFormatters('immunizations').simple,
-                  route: getEntityFormatters('immunizations').simple,
-                  lot_number: getEntityFormatters('immunizations').lot_number,
-                  notes: getEntityFormatters('immunizations').notes,
+                    immunizationFormatters.immunization_name(value, item),
+                  date_administered: immunizationFormatters.administration_date,
+                  expiration_date: immunizationFormatters.date,
+                  site: immunizationFormatters.simple,
+                  dose_number: immunizationFormatters.simple,
+                  manufacturer: immunizationFormatters.simple,
+                  route: immunizationFormatters.simple,
+                  lot_number: immunizationFormatters.lot_number,
+                  notes: immunizationFormatters.notes,
                 }}
                 dataType="medical"
                 responsive={responsive}

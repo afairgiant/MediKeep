@@ -19,7 +19,7 @@ import {
   Paper,
 } from '@mantine/core';
 import { IconEdit, IconPrinter, IconStar, IconInfoCircle, IconShield, IconPhone, IconFileText } from '@tabler/icons-react';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
 import { formatFieldLabel, formatFieldValue } from '../../../utils/fieldFormatters';
 import StatusBadge from '../StatusBadge';
@@ -36,6 +36,7 @@ const InsuranceViewModal = ({
   onFileUploadComplete
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('overview');

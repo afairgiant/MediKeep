@@ -32,7 +32,7 @@ import {
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
-import { formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
 import {
   useErrorHandler,
@@ -50,6 +50,7 @@ const FamilyHistorySharingModal = ({
   bulkMode = false,
   enableErrorQueue = false, // New prop to enable error queue system (addresses reviewer feedback)
 }) => {
+  const { formatDateTime } = useDateFormat();
   const [shares, setShares] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sharesLoading, setSharesLoading] = useState(false);

@@ -20,7 +20,7 @@ import {
   IconEdit,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
@@ -35,6 +35,7 @@ const ImmunizationViewModal = ({
   onError
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or immunization changes
