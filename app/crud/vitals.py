@@ -9,6 +9,18 @@ from app.models.models import Vitals
 from app.schemas.vitals import VitalsCreate, VitalsUpdate
 
 
+# Valid vital types for filtering
+VALID_VITAL_TYPES = {
+    "blood_pressure",
+    "heart_rate",
+    "temperature",
+    "weight",
+    "oxygen_saturation",
+    "blood_glucose",
+    "a1c",
+}
+
+
 class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     """
     CRUD operations for Vitals model.
@@ -31,7 +43,12 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         limit: int = 100,
         vital_type: Optional[str] = None
     ) -> List[Vitals]:
-        """Get vitals readings for a patient within a date range, optionally filtered by vital type"""
+        """Get vitals readings for a patient within a date range, optionally filtered by vital type.
+
+        Args:
+            vital_type: One of: blood_pressure, heart_rate, temperature, weight,
+                       oxygen_saturation, blood_glucose, a1c. Invalid values raise ValueError.
+        """
         query = db.query(self.model).filter(
             Vitals.patient_id == patient_id,
             Vitals.recorded_date >= start_date,
@@ -40,6 +57,11 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
 
         # Apply vital type filter if provided
         if vital_type:
+            if vital_type not in VALID_VITAL_TYPES:
+                raise ValueError(
+                    f"Invalid vital_type '{vital_type}'. "
+                    f"Must be one of: {', '.join(sorted(VALID_VITAL_TYPES))}"
+                )
             if vital_type == "blood_pressure":
                 query = query.filter(
                     Vitals.systolic_bp.isnot(None), Vitals.diastolic_bp.isnot(None)
@@ -83,7 +105,18 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         skip: int = 0,
         limit: int = 100
     ) -> List[Vitals]:
-        """Get vitals readings for a specific vital type (e.g., only blood pressure)"""
+        """Get vitals readings for a specific vital type (e.g., only blood pressure).
+
+        Args:
+            vital_type: One of: blood_pressure, heart_rate, temperature, weight,
+                       oxygen_saturation, blood_glucose, a1c. Invalid values raise ValueError.
+        """
+        if vital_type not in VALID_VITAL_TYPES:
+            raise ValueError(
+                f"Invalid vital_type '{vital_type}'. "
+                f"Must be one of: {', '.join(sorted(VALID_VITAL_TYPES))}"
+            )
+
         query = db.query(self.model).filter(Vitals.patient_id == patient_id)
 
         # Filter based on vital type

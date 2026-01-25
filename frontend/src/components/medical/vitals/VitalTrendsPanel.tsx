@@ -140,6 +140,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     dateRange?: { startDate?: string; endDate?: string }
   ): Promise<any[]> => {
     const allRecords: any[] = [];
+    const seenIds = new Set<number>();
     let skip = 0;
     let hasMore = true;
 
@@ -167,10 +168,20 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       }
 
       const recordsArray = Array.isArray(records) ? records : records?.data || [];
-      allRecords.push(...recordsArray);
+
+      // Check for duplicates to detect pagination issues
+      let newRecordsCount = 0;
+      for (const record of recordsArray) {
+        if (!seenIds.has(record.id)) {
+          seenIds.add(record.id);
+          allRecords.push(record);
+          newRecordsCount++;
+        }
+      }
 
       // Stop if we got fewer records than requested (no more pages)
-      if (recordsArray.length < PAGE_SIZE) {
+      // or if all records were duplicates (pagination issue)
+      if (recordsArray.length < PAGE_SIZE || newRecordsCount === 0) {
         hasMore = false;
       } else {
         skip += PAGE_SIZE;
