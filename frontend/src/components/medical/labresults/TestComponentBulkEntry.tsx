@@ -1169,10 +1169,10 @@ Sodium,140,mEq/L,136-145,Normal`
                         placeholder="Select date"
                         clearable
                         required
+                        allowDeselect={false}
                         maxDate={new Date()}
                         styles={{ input: { maxWidth: 250 } }}
                         popoverProps={{ withinPortal: true, zIndex: 3100 }}
-                        valueFormat="MMMM D, YYYY"
                       />
                     </Stack>
                   </Alert>
