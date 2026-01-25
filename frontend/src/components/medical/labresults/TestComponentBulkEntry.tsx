@@ -361,7 +361,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   const [extractedText, setExtractedText] = useState('');
   const [extractionMetadata, setExtractionMetadata] = useState<any>(null);
   const [extractionError, setExtractionError] = useState('');
-  const [completedDate, setCompletedDate] = useState<Date | null>(null);
+  const [completedDate, setCompletedDate] = useState<Date | string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('input');
 
   const handleError = useCallback((error: Error, context: string) => {
@@ -710,8 +710,35 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       return;
     }
 
+    // Parse the date properly for validation (handle both Date objects and strings)
+    let dateToValidate: Date;
+    if (completedDate instanceof Date) {
+      dateToValidate = completedDate;
+    } else if (typeof completedDate === 'string') {
+      dateToValidate = new Date(completedDate);
+    } else {
+      notifications.show({
+        title: 'Invalid Date',
+        message: 'Please enter a valid date format.',
+        color: 'orange',
+        autoClose: 6000
+      });
+      return;
+    }
+
+    // Validate date is valid
+    if (isNaN(dateToValidate.getTime())) {
+      notifications.show({
+        title: 'Invalid Date',
+        message: 'Please enter a valid date format (e.g., Jan 24, 2026 or 2026-01-24).',
+        color: 'orange',
+        autoClose: 6000
+      });
+      return;
+    }
+
     // Validate date is not in the future
-    if (completedDate > new Date()) {
+    if (dateToValidate > new Date()) {
       notifications.show({
         title: 'Invalid Date',
         message: 'Test completed date cannot be in the future.',
@@ -724,7 +751,35 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
     setIsSubmitting(true);
     try {
       // First, update the lab result with the completed_date
-      const formattedDate = completedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      // Handle both Date objects and string values (from manual text input)
+      let formattedDate: string;
+      if (completedDate instanceof Date && !isNaN(completedDate.getTime())) {
+        formattedDate = completedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      } else if (typeof completedDate === 'string') {
+        // Handle case where completedDate is a string from manual input
+        const parsedDate = new Date(completedDate);
+        if (!isNaN(parsedDate.getTime())) {
+          formattedDate = parsedDate.toISOString().split('T')[0];
+        } else {
+          notifications.show({
+            title: 'Invalid Date',
+            message: 'Please enter a valid date format (e.g., Jan 24, 2026 or 2026-01-24).',
+            color: 'orange',
+            autoClose: 5000
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        notifications.show({
+          title: 'Date Required',
+          message: 'Please specify a valid test completed date.',
+          color: 'orange',
+          autoClose: 5000
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
       logger.info('Updating lab result with completed_date', {
         component: 'TestComponentBulkEntry',
@@ -1149,14 +1204,16 @@ Sodium,140,mEq/L,136-145,Normal`
                         Specify when these lab results were completed. This date is required for tracking trends over time.
                       </Text>
                       <DateInput
-                        value={completedDate}
-                        onChange={(value) => setCompletedDate(value as Date | null)}
+                        value={completedDate instanceof Date ? completedDate : null}
+                        onChange={(value) => setCompletedDate(value)}
                         label="Test Completed Date"
                         placeholder="Select date"
                         clearable
                         required
                         maxDate={new Date()}
                         styles={{ input: { maxWidth: 250 } }}
+                        popoverProps={{ withinPortal: true, zIndex: 3100 }}
+                        valueFormat="MMMM D, YYYY"
                       />
                     </Stack>
                   </Alert>
