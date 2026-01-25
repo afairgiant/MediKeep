@@ -29,6 +29,7 @@ import {
   Divider,
   Grid,
   Card,
+  Select,
 } from '@mantine/core';
 import {
   IconEdit,
@@ -92,8 +93,17 @@ const VitalsList = ({
   // Pagination state
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [pageSize, setPageSize] = useState(limit);
   // Use ref to track current vitals count for pagination (avoids circular dependency)
   const vitalsCountRef = React.useRef(0);
+
+  // Page size options for the dropdown
+  const pageSizeOptions = [
+    { value: '10', label: '10' },
+    { value: '20', label: '20' },
+    { value: '25', label: '25' },
+    { value: '50', label: '50' },
+  ];
 
   const loadVitals = useCallback(async (append = false) => {
     // Only load internally if no data is passed via props
@@ -112,9 +122,9 @@ const VitalsList = ({
       const skip = append ? vitalsCountRef.current : 0;
       let response;
       if (patientId) {
-        response = await vitalsService.getPatientVitals(patientId, { limit, skip });
+        response = await vitalsService.getPatientVitals(patientId, { limit: pageSize, skip });
       } else {
-        response = await vitalsService.getVitals({ limit, skip });
+        response = await vitalsService.getVitals({ limit: pageSize, skip });
       }
 
       // Extract the data array from the response
@@ -122,7 +132,7 @@ const VitalsList = ({
       const newData = Array.isArray(data) ? data : [];
 
       // Check if there's more data to load
-      if (newData.length < limit) {
+      if (newData.length < pageSize) {
         setHasMore(false);
       }
 
@@ -146,7 +156,7 @@ const VitalsList = ({
       setInternalLoading(false);
       setLoadingMore(false);
     }
-  }, [patientId, limit, vitalsData]);
+  }, [patientId, pageSize, vitalsData]);
 
   useEffect(() => {
     loadVitals();
@@ -830,8 +840,17 @@ const VitalsList = ({
           </Table>
         </Paper>
 
-        {vitals.length >= limit && hasMore && vitalsData === undefined && (
-          <Center>
+        {vitals.length >= pageSize && hasMore && vitalsData === undefined && (
+          <Group justify="center" gap="md">
+            <Select
+              value={String(pageSize)}
+              onChange={(value) => setPageSize(Number(value))}
+              data={pageSizeOptions}
+              size="sm"
+              w={80}
+              allowDeselect={false}
+              aria-label={t('vitals.table.resultsPerPage', 'Results per page')}
+            />
             <Button
               variant="filled"
               onClick={() => loadVitals(true)}
@@ -840,7 +859,7 @@ const VitalsList = ({
             >
               {loadingMore ? t('labels.loading', 'Loading...') : t('buttons.loadMore', 'Load More')}
             </Button>
-          </Center>
+          </Group>
         )}
       </Stack>
 
