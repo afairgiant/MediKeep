@@ -4,7 +4,7 @@
  * Shows chart, statistics, and historical data table
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Drawer,
   Stack,
@@ -39,6 +39,14 @@ import VitalTrendChart from './VitalTrendChart';
 import VitalTrendTable from './VitalTrendTable';
 import { VitalType, VitalTrendResponse, VITAL_TYPE_CONFIGS } from './types';
 import { vitalsService } from '../../../services/medical/vitalsService';
+import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
+import { convertForDisplay, unitLabels } from '../../../utils/unitConversion';
+
+// Maps vital types to their corresponding measurement types for unit conversion
+const CONVERTIBLE_VITAL_TYPES: Partial<Record<VitalType, 'weight' | 'temperature'>> = {
+  weight: 'weight',
+  temperature: 'temperature'
+};
 
 interface VitalTrendsPanelProps {
   opened: boolean;
@@ -46,6 +54,15 @@ interface VitalTrendsPanelProps {
   vitalType: VitalType | null;
   patientId: number;
   patientHeight?: number | null;
+}
+
+// Raw data structure before unit conversion (stored in imperial units)
+interface RawTrendData {
+  vital_type: VitalType;
+  vital_type_label: string;
+  base_unit: string;
+  data_points: { id: number; value: number; secondary_value: number | null; recorded_date: string }[];
+  reference_range: VitalTrendResponse['reference_range'];
 }
 
 const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
@@ -56,7 +73,9 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   patientHeight
 }) => {
   const { t } = useTranslation('common');
-  const [trendData, setTrendData] = useState<VitalTrendResponse | null>(null);
+  const { unitSystem } = useUserPreferences();
+  // Store raw data in imperial units - conversion happens in useMemo
+  const [rawTrendData, setRawTrendData] = useState<RawTrendData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('chart');
@@ -141,7 +160,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       // For BMI, we need to calculate from weight records using patient height
       const isBMI = vitalType === 'bmi';
 
-      // Filter and transform data points
+      // Filter and transform data points - store raw values in imperial units
       const dataPoints = dataArray
         .filter((vital: any) => {
           if (isBMI) {
@@ -160,6 +179,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
           }
           const secondaryValue = config.getSecondaryValue ? config.getSecondaryValue(vital) : null;
 
+          // Store raw values - conversion happens in useMemo based on unitSystem
           return {
             id: vital.id,
             value: value,
@@ -169,50 +189,16 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         })
         .sort((a: any, b: any) => new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime());
 
-      // Calculate statistics
-      const values = dataPoints.map((p: any) => p.value);
-      const secondaryValues = dataPoints
-        .map((p: any) => p.secondary_value)
-        .filter((v: any) => v !== null && v !== undefined);
-
-      // Calculate standard deviation for primary values
-      let stdDev: number | null = null;
-      if (values.length > 1) {
-        const mean = values.reduce((a: number, b: number) => a + b, 0) / values.length;
-        const squareDiffs = values.map((v: number) => Math.pow(v - mean, 2));
-        stdDev = Math.sqrt(squareDiffs.reduce((a: number, b: number) => a + b, 0) / values.length);
-      }
-
-      // Calculate secondary statistics (for blood pressure diastolic)
-      let secondaryStdDev: number | null = null;
-      if (secondaryValues.length > 1) {
-        const mean = secondaryValues.reduce((a: number, b: number) => a + b, 0) / secondaryValues.length;
-        const squareDiffs = secondaryValues.map((v: number) => Math.pow(v - mean, 2));
-        secondaryStdDev = Math.sqrt(squareDiffs.reduce((a: number, b: number) => a + b, 0) / secondaryValues.length);
-      }
-
-      const response: VitalTrendResponse = {
+      // Store raw data - unit conversion and statistics calculated in useMemo
+      const rawData: RawTrendData = {
         vital_type: vitalType,
         vital_type_label: config.label,
-        unit: config.unit,
+        base_unit: config.unit,
         data_points: dataPoints,
-        statistics: {
-          count: dataPoints.length,
-          latest: values.length > 0 ? values[0] : null,
-          average: values.length > 0 ? values.reduce((a: number, b: number) => a + b, 0) / values.length : null,
-          min: values.length > 0 ? Math.min(...values) : null,
-          max: values.length > 0 ? Math.max(...values) : null,
-          std_dev: stdDev,
-          secondary_latest: secondaryValues.length > 0 ? secondaryValues[0] : null,
-          secondary_average: secondaryValues.length > 0 ? secondaryValues.reduce((a: number, b: number) => a + b, 0) / secondaryValues.length : null,
-          secondary_min: secondaryValues.length > 0 ? Math.min(...secondaryValues) : null,
-          secondary_max: secondaryValues.length > 0 ? Math.max(...secondaryValues) : null,
-          secondary_std_dev: secondaryStdDev
-        },
         reference_range: config.referenceRange
       };
 
-      setTrendData(response);
+      setRawTrendData(rawData);
 
       logger.info('vital_trends_loaded', {
         message: 'Vital trends loaded successfully',
@@ -258,11 +244,75 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   // Reset state when panel closes
   useEffect(() => {
     if (!opened) {
-      setTrendData(null);
+      setRawTrendData(null);
       setError(null);
       setActiveTab('chart');
     }
   }, [opened]);
+
+  // Derive converted trend data from raw data based on unit system
+  // This allows unit changes to update display without refetching from API
+  const trendData = useMemo((): VitalTrendResponse | null => {
+    if (!rawTrendData) return null;
+
+    const measurementType = CONVERTIBLE_VITAL_TYPES[rawTrendData.vital_type];
+
+    // Convert data points if this vital type needs unit conversion
+    const convertedDataPoints = rawTrendData.data_points.map(point => ({
+      ...point,
+      value: measurementType
+        ? convertForDisplay(point.value, measurementType, unitSystem) ?? point.value
+        : point.value
+    }));
+
+    // Determine display unit based on user preference
+    const displayUnit = measurementType
+      ? unitLabels[unitSystem][measurementType]
+      : rawTrendData.base_unit;
+
+    // Calculate statistics from converted values
+    const values = convertedDataPoints.map(p => p.value);
+    const secondaryValues = convertedDataPoints
+      .map(p => p.secondary_value)
+      .filter((v): v is number => v !== null && v !== undefined);
+
+    // Calculate standard deviation for primary values
+    let stdDev: number | null = null;
+    if (values.length > 1) {
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      const squareDiffs = values.map(v => Math.pow(v - mean, 2));
+      stdDev = Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / values.length);
+    }
+
+    // Calculate secondary statistics (for blood pressure diastolic)
+    let secondaryStdDev: number | null = null;
+    if (secondaryValues.length > 1) {
+      const mean = secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length;
+      const squareDiffs = secondaryValues.map(v => Math.pow(v - mean, 2));
+      secondaryStdDev = Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / secondaryValues.length);
+    }
+
+    return {
+      vital_type: rawTrendData.vital_type,
+      vital_type_label: rawTrendData.vital_type_label,
+      unit: displayUnit,
+      data_points: convertedDataPoints,
+      statistics: {
+        count: convertedDataPoints.length,
+        latest: values.length > 0 ? values[0] : null,
+        average: values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : null,
+        min: values.length > 0 ? Math.min(...values) : null,
+        max: values.length > 0 ? Math.max(...values) : null,
+        std_dev: stdDev,
+        secondary_latest: secondaryValues.length > 0 ? secondaryValues[0] : null,
+        secondary_average: secondaryValues.length > 0 ? secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length : null,
+        secondary_min: secondaryValues.length > 0 ? Math.min(...secondaryValues) : null,
+        secondary_max: secondaryValues.length > 0 ? Math.max(...secondaryValues) : null,
+        secondary_std_dev: secondaryStdDev
+      },
+      reference_range: rawTrendData.reference_range
+    };
+  }, [rawTrendData, unitSystem]);
 
   const getTimeRangeLabel = (range: string): string => {
     switch (range) {
