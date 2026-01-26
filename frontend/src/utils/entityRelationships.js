@@ -23,6 +23,7 @@ export const ENTITY_TYPES = {
   EMERGENCY_CONTACT: 'emergency_contact',
   FAMILY_MEMBER: 'family_member',
   SYMPTOM: 'symptoms',
+  INJURY: 'injury',
 };
 
 // Relationship types

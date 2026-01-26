@@ -22,6 +22,7 @@ const ENTITY_TO_API_PATH = {
   [ENTITY_TYPES.PATIENT]: 'patients',
   [ENTITY_TYPES.FAMILY_MEMBER]: 'family-members',
   [ENTITY_TYPES.SYMPTOM]: 'symptoms',
+  [ENTITY_TYPES.INJURY]: 'injuries',
 };
 
 // Streamlined API service with proper logging integration
@@ -1727,6 +1728,120 @@ class ApiService {
 
   deleteAllergy(allergyId, signal) {
     return this.deleteEntity(ENTITY_TYPES.ALLERGY, allergyId, signal);
+  }
+
+  // =====================================================
+  // Injury Type methods
+  // =====================================================
+  getInjuryTypes(signal) {
+    return this.get('/injury-types/', { signal });
+  }
+
+  getInjuryTypesDropdown(signal) {
+    return this.get('/injury-types/dropdown/', { signal });
+  }
+
+  createInjuryType(injuryTypeData, signal) {
+    return this.post('/injury-types/', injuryTypeData, { signal });
+  }
+
+  deleteInjuryType(injuryTypeId, signal) {
+    return this.delete(`/injury-types/${injuryTypeId}/`, { signal });
+  }
+
+  // =====================================================
+  // Injury methods
+  // =====================================================
+  getInjuries(signal) {
+    return this.getEntities(ENTITY_TYPES.INJURY, signal);
+  }
+
+  getPatientInjuries(patientId, signal) {
+    return this.getPatientEntities(ENTITY_TYPES.INJURY, patientId, signal);
+  }
+
+  getInjury(injuryId, signal) {
+    return this.getEntity(ENTITY_TYPES.INJURY, injuryId, signal);
+  }
+
+  getInjuriesWithFilters(filters = {}, signal) {
+    return this.getEntitiesWithFilters(ENTITY_TYPES.INJURY, filters, signal);
+  }
+
+  createInjury(injuryData, signal) {
+    return this.createEntity(ENTITY_TYPES.INJURY, injuryData, signal);
+  }
+
+  updateInjury(injuryId, injuryData, signal) {
+    return this.updateEntity(ENTITY_TYPES.INJURY, injuryId, injuryData, signal);
+  }
+
+  deleteInjury(injuryId, signal) {
+    return this.deleteEntity(ENTITY_TYPES.INJURY, injuryId, signal);
+  }
+
+  // Injury-Medication relationship methods
+  getInjuryMedications(injuryId, signal) {
+    return this.get(`/injuries/${injuryId}/medications`, { signal });
+  }
+
+  linkInjuryMedication(injuryId, medicationId, relevanceNote = null, signal) {
+    return this.post(`/injuries/${injuryId}/medications`, {
+      medication_id: medicationId,
+      relevance_note: relevanceNote,
+    }, { signal });
+  }
+
+  unlinkInjuryMedication(injuryId, medicationId, signal) {
+    return this.delete(`/injuries/${injuryId}/medications/${medicationId}`, { signal });
+  }
+
+  // Injury-Condition relationship methods
+  getInjuryConditions(injuryId, signal) {
+    return this.get(`/injuries/${injuryId}/conditions`, { signal });
+  }
+
+  linkInjuryCondition(injuryId, conditionId, relevanceNote = null, signal) {
+    return this.post(`/injuries/${injuryId}/conditions`, {
+      condition_id: conditionId,
+      relevance_note: relevanceNote,
+    }, { signal });
+  }
+
+  unlinkInjuryCondition(injuryId, conditionId, signal) {
+    return this.delete(`/injuries/${injuryId}/conditions/${conditionId}`, { signal });
+  }
+
+  // Injury-Treatment relationship methods
+  getInjuryTreatments(injuryId, signal) {
+    return this.get(`/injuries/${injuryId}/treatments`, { signal });
+  }
+
+  linkInjuryTreatment(injuryId, treatmentId, relevanceNote = null, signal) {
+    return this.post(`/injuries/${injuryId}/treatments`, {
+      treatment_id: treatmentId,
+      relevance_note: relevanceNote,
+    }, { signal });
+  }
+
+  unlinkInjuryTreatment(injuryId, treatmentId, signal) {
+    return this.delete(`/injuries/${injuryId}/treatments/${treatmentId}`, { signal });
+  }
+
+  // Injury-Procedure relationship methods
+  getInjuryProcedures(injuryId, signal) {
+    return this.get(`/injuries/${injuryId}/procedures`, { signal });
+  }
+
+  linkInjuryProcedure(injuryId, procedureId, relevanceNote = null, signal) {
+    return this.post(`/injuries/${injuryId}/procedures`, {
+      procedure_id: procedureId,
+      relevance_note: relevanceNote,
+    }, { signal });
+  }
+
+  unlinkInjuryProcedure(injuryId, procedureId, signal) {
+    return this.delete(`/injuries/${injuryId}/procedures/${procedureId}`, { signal });
   }
 
   // Symptom methods - DEPRECATED

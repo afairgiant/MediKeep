@@ -17,6 +17,7 @@ import { labresultsPageConfig } from './labResults.js';
 import { vitalsPageConfig } from './vitals.js';
 import { emergencyContactsPageConfig } from './emergencyContacts.js';
 import { familyMembersPageConfig } from './familyMembers.js';
+import { injuriesPageConfig } from './injuries.js';
 
 /**
  * Standardized configuration templates for medical pages filtering and sorting
@@ -37,6 +38,7 @@ export const medicalPageConfigs = {
   vitals: vitalsPageConfig,
   emergency_contacts: emergencyContactsPageConfig,
   family_members: familyMembersPageConfig,
+  injuries: injuriesPageConfig,
 };
 
 /**

@@ -6,6 +6,7 @@ from .encounter import encounter
 from .family_condition import family_condition
 from .family_member import family_member
 from .immunization import immunization
+from .injury import injury
 from .lab_result import lab_result
 from .lab_result_file import lab_result_file
 from .lab_test_component import lab_test_component
@@ -34,6 +35,7 @@ __all__ = [
     "family_member",
     "family_condition",
     "immunization",
+    "injury",
     "procedure",
     "symptom_parent",
     "symptom_occurrence",

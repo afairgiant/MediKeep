@@ -53,6 +53,7 @@ import {
   IconPhoneCall,
   IconUsers,
   IconShield,
+  IconBandage,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
@@ -386,6 +387,12 @@ const Dashboard = () => {
       icon: IconAlertTriangle,
       color: 'orange',
       link: '/allergies',
+    },
+    {
+      title: t('dashboard.modules.injuries', 'Injuries'),
+      icon: IconBandage,
+      color: 'red',
+      link: '/injuries',
     },
   ];
 
