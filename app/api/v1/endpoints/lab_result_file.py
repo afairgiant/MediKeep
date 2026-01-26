@@ -132,7 +132,7 @@ async def upload_file(
         "lab_result_file_upload_started",
         message=f"Starting file upload for lab result {lab_result_id}",
         lab_result_id=lab_result_id,
-        filename=file.filename
+        uploaded_filename=file.filename
     )
 
     # Verify lab result exists

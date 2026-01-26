@@ -83,7 +83,7 @@ async def create_database_backup(
             f"Database backup created: {backup_result['filename']}",
             user_id=current_user.id,
             backup_id=backup_result["id"],
-            filename=backup_result["filename"],
+            backup_filename=backup_result["filename"],
             size_bytes=backup_result["size_bytes"]
         )
 
@@ -136,7 +136,7 @@ async def create_files_backup(
             f"Files backup created: {backup_result['filename']}",
             user_id=current_user.id,
             backup_id=backup_result["id"],
-            filename=backup_result["filename"],
+            backup_filename=backup_result["filename"],
             size_bytes=backup_result["size_bytes"]
         )
 
@@ -189,7 +189,7 @@ async def create_full_backup(
             f"Full backup created: {backup_result['filename']}",
             user_id=current_user.id,
             backup_id=backup_result["id"],
-            filename=backup_result["filename"],
+            backup_filename=backup_result["filename"],
             size_bytes=backup_result["size_bytes"]
         )
 
@@ -289,7 +289,7 @@ async def download_backup(
             f"Backup downloaded: {backup['filename']}",
             user_id=current_user.id,
             backup_id=backup_id,
-            filename=backup["filename"]
+            backup_filename=backup["filename"]
         )
 
         return FileResponse(
