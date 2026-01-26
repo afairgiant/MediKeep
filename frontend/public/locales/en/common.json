@@ -159,6 +159,7 @@
     "vitals": "Search vitals notes...",
     "emergencyContacts": "Search contacts, relationships, phone, email...",
     "familyHistory": "Search family members, conditions, notes...",
+    "injuries": "Search injuries, body parts, notes, tags...",
     "generic": "Search..."
   },
   "messages": {

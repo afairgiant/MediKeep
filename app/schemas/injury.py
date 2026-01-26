@@ -7,7 +7,7 @@ tracking injuries like sprains, fractures, burns, etc.
 from datetime import date, datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_validator
 
 from app.models.enums import get_all_injury_statuses, get_all_severity_levels, get_all_laterality_values
 from app.schemas.base_tags import TaggedEntityMixin

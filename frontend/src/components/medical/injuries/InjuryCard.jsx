@@ -7,8 +7,6 @@ import {
   IconAlertCircle,
   IconShield,
   IconBandage,
-  IconHeartbeat,
-  IconCheck,
 } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { navigateToEntity } from '../../../utils/linkNavigation';
@@ -73,22 +71,6 @@ const InjuryCard = ({
         return 'blue';
       default:
         return 'gray';
-    }
-  };
-
-  // Helper function to get status icon
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'active':
-        return IconBandage;
-      case 'healing':
-        return IconHeartbeat;
-      case 'resolved':
-        return IconCheck;
-      case 'chronic':
-        return IconAlertCircle;
-      default:
-        return IconBandage;
     }
   };
 

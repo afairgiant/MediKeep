@@ -9,10 +9,10 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.deps import NotFoundException, ForbiddenException, BusinessLogicException
+from app.api.deps import NotFoundException, BusinessLogicException
 from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_data_access, log_security_event
+from app.core.logging.helpers import log_data_access
 from app.models.models import User
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
@@ -35,7 +35,6 @@ from app.crud.procedure import procedure as procedure_crud
 from app.models.activity_log import EntityType
 from app.schemas.injury import (
     InjuryCreate,
-    InjuryResponse,
     InjuryUpdate,
     InjuryWithRelations,
     InjuryMedicationCreate,
@@ -184,7 +183,7 @@ def update_injury(
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Update an injury."""
-    updated = handle_update_with_logging(
+    handle_update_with_logging(
         db=db,
         crud_obj=injury,
         entity_id=injury_id,

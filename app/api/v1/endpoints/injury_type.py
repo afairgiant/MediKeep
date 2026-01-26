@@ -181,9 +181,6 @@ def delete_injury_type(
             )
 
         # Check if any injuries reference this type
-        from app.crud.injury import injury as injury_crud
-        injuries_with_type = injury_crud.get_by_type(db, patient_id=0, injury_type_id=injury_type_id)
-        # Note: The above query won't work well for global check, let's do a direct query
         from app.models.models import Injury
         injuries_count = db.query(Injury).filter(Injury.injury_type_id == injury_type_id).count()
 
@@ -194,7 +191,7 @@ def delete_injury_type(
             )
 
         # Delete the type
-        injury_type.remove(db, id=injury_type_id)
+        injury_type.delete(db, id=injury_type_id)
 
         log_data_access(
             logger,
