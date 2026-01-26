@@ -307,12 +307,21 @@ const EmergencyContacts = () => {
                   padding="lg"
                   radius="md"
                   withBorder
+                  onClick={(e) => {
+                    // Don't trigger if clicking on a button or link
+                    if (e.target.closest('button') || e.target.closest('a')) return;
+                    handleViewContact(contact);
+                  }}
                   style={{
                     borderColor: contact.is_primary
                       ? 'var(--mantine-color-yellow-4)'
                       : undefined,
                     borderWidth: contact.is_primary ? '2px' : undefined,
+                    cursor: 'pointer',
+                    transition: 'background-color 0.15s ease',
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
                 >
                   <Card.Section withBorder inheritPadding py="xs">
                     <Group justify="space-between">
