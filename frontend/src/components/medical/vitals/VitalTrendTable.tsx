@@ -87,10 +87,6 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
     return data;
   }, [trendData.data_points, sortField, sortDirection]);
 
-  const formatDate = (dateStr: string): string => {
-    return formatLongDate(dateStr);
-  };
-
   if (trendData.data_points.length === 0) {
     return (
       <Paper withBorder p="xl" radius="md" bg="gray.0">
@@ -127,7 +123,7 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
             {sortedData.map((point: VitalDataPoint) => (
               <Table.Tr key={point.id}>
                 <Table.Td>
-                  <Text size="sm">{formatDate(point.recorded_date)}</Text>
+                  <Text size="sm">{formatLongDate(point.recorded_date)}</Text>
                 </Table.Td>
                 <Table.Td>
                   <Group gap="xs">

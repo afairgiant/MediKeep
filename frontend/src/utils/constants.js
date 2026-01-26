@@ -119,7 +119,10 @@ export const DATE_FORMAT_OPTIONS = {
   ymd: {
     code: 'ymd',
     label: 'YYYY-MM-DD (ISO)',
-    locale: 'sv-SE', // Swedish locale uses ISO format
+    // Swedish locale (sv-SE) uses ISO 8601 format (YYYY-MM-DD) by default.
+    // This is a reliable workaround since no browser locale explicitly outputs ISO format.
+    // If browser implementations change, consider implementing custom formatting logic.
+    locale: 'sv-SE',
     pattern: 'YYYY-MM-DD',
     example: '2026-01-25',
   },

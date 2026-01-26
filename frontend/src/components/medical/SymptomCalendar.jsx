@@ -63,7 +63,7 @@ const getSeverityColor = (occurrences) => {
  */
 const SymptomCalendar = ({ patientId, hidden }) => {
   const { t } = useTranslation('common');
-  const { formatDate, formatLongDate, locale } = useDateFormat();
+  const { formatDate, locale } = useDateFormat();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [occurrences, setOccurrences] = useState([]);
   const [loading, setLoading] = useState(true);
