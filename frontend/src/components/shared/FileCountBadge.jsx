@@ -11,6 +11,12 @@ const FileCountBadge = ({
   loading = false,
   className = ''
 }) => {
+  // Wrap onClick to stop propagation (prevents double-firing when inside clickable cards)
+  const handleClick = onClick ? (e) => {
+    e.stopPropagation();
+    onClick(e);
+  } : undefined;
+
   // Handle loading state
   if (loading) {
     return (
@@ -31,7 +37,7 @@ const FileCountBadge = ({
             color="gray"
             size={size}
             leftSection={<IconFile size={12} />}
-            onClick={onClick}
+            onClick={handleClick}
             style={{ cursor: onClick ? 'pointer' : 'default' }}
             className={className}
           >
@@ -44,7 +50,7 @@ const FileCountBadge = ({
           <Text
             size={size}
             c="dimmed"
-            onClick={onClick}
+            onClick={handleClick}
             style={{ cursor: onClick ? 'pointer' : 'default' }}
             className={className}
           >
@@ -80,7 +86,7 @@ const FileCountBadge = ({
           color={badgeColor}
           size={size}
           leftSection={React.createElement(icon, { size: 12 })}
-          onClick={onClick}
+          onClick={handleClick}
           style={{ cursor: onClick ? 'pointer' : 'default' }}
           className={className}
           title={onClick ? `Click to view ${displayText}` : undefined}
@@ -93,7 +99,7 @@ const FileCountBadge = ({
       return (
         <Group
           gap="xs"
-          onClick={onClick}
+          onClick={handleClick}
           style={{ cursor: onClick ? 'pointer' : 'default' }}
           className={className}
         >
@@ -116,7 +122,7 @@ const FileCountBadge = ({
             variant="light"
             color={badgeColor}
             size={size}
-            onClick={onClick}
+            onClick={handleClick}
             title={`View ${displayText}`}
             className={className}
           >
