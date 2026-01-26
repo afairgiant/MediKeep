@@ -1025,3 +1025,13 @@
   align-items: center;
   gap: 1rem;
 }
+
+/* Clickable Card Styles */
+.clickable-card {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.clickable-card:hover {
+  background-color: var(--mantine-color-gray-0);
+}

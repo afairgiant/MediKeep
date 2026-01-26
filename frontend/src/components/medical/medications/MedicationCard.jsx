@@ -10,10 +10,12 @@ import {
   Divider,
 } from '@mantine/core';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { createCardClickHandler } from '../../../utils/helpers';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
+import '../../../styles/shared/MedicalPageShared.css';
 
 const MedicationCard = ({
   medication,
@@ -61,6 +63,8 @@ const MedicationCard = ({
       shadow="sm"
       radius="md"
       h="100%"
+      className="clickable-card"
+      onClick={createCardClickHandler(onView, medication)}
       style={{
         display: 'flex',
         flexDirection: 'column',

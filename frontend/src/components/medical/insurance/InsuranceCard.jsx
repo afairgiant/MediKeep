@@ -9,15 +9,14 @@ import {
   Divider,
 } from '@mantine/core';
 import {
-  IconStar,
   IconStarFilled,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { notifications } from '@mantine/notifications';
-import logger from '../../../services/logger';
+import { createCardClickHandler } from '../../../utils/helpers';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { useTranslation } from 'react-i18next';
+import '../../../styles/shared/MedicalPageShared.css';
 
 const InsuranceCard = ({
   insurance,
@@ -116,7 +115,12 @@ const InsuranceCard = ({
       shadow="sm"
       radius="md"
       h="100%"
-      style={{ display: 'flex', flexDirection: 'column' }}
+      className="clickable-card"
+      onClick={createCardClickHandler(onView, insurance)}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
     >
       <Stack gap="sm" style={{ flex: 1 }}>
         {/* Header */}

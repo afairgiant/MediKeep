@@ -26,6 +26,7 @@ import { useMedicalData, useDataManagement } from '../../hooks';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { createCardClickHandler } from '../../utils/helpers';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -35,9 +36,9 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
-import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
 import { formatPhoneNumber } from '../../utils/phoneUtils';
 import { useTranslation } from 'react-i18next';
+import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
   const { t } = useTranslation('common');
@@ -307,6 +308,8 @@ const EmergencyContacts = () => {
                   padding="lg"
                   radius="md"
                   withBorder
+                  className="clickable-card"
+                  onClick={createCardClickHandler(handleViewContact, contact)}
                   style={{
                     borderColor: contact.is_primary
                       ? 'var(--mantine-color-yellow-4)'

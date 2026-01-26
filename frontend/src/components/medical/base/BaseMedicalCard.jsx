@@ -4,6 +4,8 @@ import { Card, Stack, Group, Text, Badge, Button, Divider } from '@mantine/core'
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import logger from '../../../services/logger';
+import { createCardClickHandler } from '../../../utils/helpers';
+import '../../../styles/shared/MedicalPageShared.css';
 
 const BaseMedicalCard = ({
   title,
@@ -61,12 +63,17 @@ const BaseMedicalCard = ({
 
   try {
     return (
-      <Card 
-        withBorder 
-        shadow="sm" 
-        radius="md" 
-        h="100%" 
-        style={{ display: 'flex', flexDirection: 'column' }}
+      <Card
+        withBorder
+        shadow="sm"
+        radius="md"
+        h="100%"
+        className="clickable-card"
+        onClick={createCardClickHandler(safeOnView)}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
         <Stack gap="sm" style={{ flex: 1 }}>
           {/* Header */}
