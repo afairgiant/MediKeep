@@ -5,7 +5,7 @@ Injury represents a physical injury record for a patient.
 """
 from typing import List, Optional
 
-from sqlalchemy import and_
+from sqlalchemy import and_, nullslast
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -125,7 +125,7 @@ class CRUDInjury(CRUDBase[Injury, InjuryCreate, InjuryUpdate], TagFilterMixin):
                     self.model.body_part.ilike(f"%{body_part}%")
                 )
             )
-            .order_by(self.model.date_of_injury.desc())
+            .order_by(nullslast(self.model.date_of_injury.desc()))
             .all()
         )
 

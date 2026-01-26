@@ -179,6 +179,26 @@ class InjuryUpdate(BaseModel):
     def validate_laterality(cls, v):
         return _validate_laterality(v)
 
+    @field_validator("mechanism")
+    @classmethod
+    def validate_mechanism(cls, v):
+        return validate_text_field(v, max_length=500, field_name="Mechanism")
+
+    @field_validator("treatment_received")
+    @classmethod
+    def validate_treatment_received(cls, v):
+        return validate_text_field(v, max_length=2000, field_name="Treatment received")
+
+    @field_validator("recovery_notes")
+    @classmethod
+    def validate_recovery_notes(cls, v):
+        return validate_text_field(v, max_length=2000, field_name="Recovery notes")
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v):
+        return validate_text_field(v, max_length=2000, field_name="Notes")
+
 
 class InjuryResponse(InjuryBase):
     """Schema for Injury response"""

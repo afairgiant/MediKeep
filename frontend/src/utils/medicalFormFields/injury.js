@@ -23,7 +23,6 @@ export const injuryFormFields = [
     gridColumn: 6,
     searchable: true,
     clearable: true,
-    creatable: true,
     dynamicOptions: 'injuryTypes',
   },
   {

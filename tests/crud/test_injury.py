@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from app.crud.injury import injury as injury_crud
 from app.crud.patient import patient as patient_crud
-from app.models.models import Injury
 from app.schemas.injury import InjuryCreate, InjuryUpdate
 from app.schemas.patient import PatientCreate
 
