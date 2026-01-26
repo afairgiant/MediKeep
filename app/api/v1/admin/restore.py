@@ -108,7 +108,7 @@ async def upload_backup_file(
                 f"Backup file uploaded: {file.filename}",
                 user_id=current_user.id,
                 username=current_user.username,
-                filename=file.filename,
+                backup_filename=file.filename,
                 backup_id=backup_record.id
             )
 
