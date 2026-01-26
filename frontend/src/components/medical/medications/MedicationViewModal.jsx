@@ -174,14 +174,14 @@ const MedicationViewModal = ({
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('medications.fields.startDate', 'Start Date')}</Text>
-                      <Text size="sm" c={medication.start_date ? 'inherit' : 'dimmed'}>
-                        {medication.start_date ? formatDate(medication.start_date) : t('medications.modal.notSpecified', 'Not specified')}
+                      <Text size="sm" c={medication.effective_period_start ? 'inherit' : 'dimmed'}>
+                        {medication.effective_period_start ? formatDate(medication.effective_period_start) : t('medications.modal.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('medications.fields.endDate', 'End Date')}</Text>
-                      <Text size="sm" c={medication.end_date ? 'inherit' : 'dimmed'}>
-                        {medication.end_date ? formatDate(medication.end_date) : t('medications.modal.ongoing', 'Ongoing')}
+                      <Text size="sm" c={medication.effective_period_end ? 'inherit' : 'dimmed'}>
+                        {medication.effective_period_end ? formatDate(medication.effective_period_end) : t('medications.modal.ongoing', 'Ongoing')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
