@@ -9,15 +9,14 @@ import {
   Divider,
 } from '@mantine/core';
 import {
-  IconStar,
   IconStarFilled,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { notifications } from '@mantine/notifications';
-import logger from '../../../services/logger';
+import { createCardClickHandler } from '../../../utils/helpers';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { useTranslation } from 'react-i18next';
+import '../../../styles/shared/MedicalPageShared.css';
 
 const InsuranceCard = ({
   insurance,
@@ -110,28 +109,18 @@ const InsuranceCard = ({
   const typeColor = getTypeColor(insurance.insurance_type);
   const displayCoverageDetails = getDisplayCoverageDetails();
 
-  const handleCardClick = (e) => {
-    // Don't trigger if clicking on a button or link
-    const target = e.target;
-    if (target.closest('button') || target.closest('a')) return;
-    if (onView) onView(insurance);
-  };
-
   return (
     <Card
       withBorder
       shadow="sm"
       radius="md"
       h="100%"
-      onClick={handleCardClick}
+      className="clickable-card"
+      onClick={createCardClickHandler(onView, insurance)}
       style={{
         display: 'flex',
         flexDirection: 'column',
-        cursor: 'pointer',
-        transition: 'background-color 0.15s ease',
       }}
-      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)'}
-      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
     >
       <Stack gap="sm" style={{ flex: 1 }}>
         {/* Header */}

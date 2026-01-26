@@ -10,10 +10,12 @@ import {
   Divider,
 } from '@mantine/core';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { createCardClickHandler } from '../../../utils/helpers';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
+import '../../../styles/shared/MedicalPageShared.css';
 
 const MedicationCard = ({
   medication,
@@ -55,31 +57,21 @@ const MedicationCard = ({
     medication.status?.toLowerCase()
   );
 
-  const handleCardClick = (e) => {
-    // Don't trigger if clicking on a button or link
-    const target = e.target;
-    if (target.closest('button') || target.closest('a')) return;
-    if (onView) onView(medication);
-  };
-
   return (
     <Card
       withBorder
       shadow="sm"
       radius="md"
       h="100%"
-      onClick={handleCardClick}
+      className="clickable-card"
+      onClick={createCardClickHandler(onView, medication)}
       style={{
         display: 'flex',
         flexDirection: 'column',
-        cursor: 'pointer',
-        transition: 'background-color 0.15s ease',
         borderLeft: isInactive
           ? '4px solid var(--mantine-color-red-6)'
           : '4px solid var(--mantine-color-green-6)'
       }}
-      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)'}
-      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
     >
       <Stack gap="sm" style={{ flex: 1 }}>
         <Group justify="space-between" align="flex-start">

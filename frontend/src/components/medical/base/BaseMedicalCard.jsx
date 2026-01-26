@@ -4,6 +4,8 @@ import { Card, Stack, Group, Text, Badge, Button, Divider } from '@mantine/core'
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import logger from '../../../services/logger';
+import { createCardClickHandler } from '../../../utils/helpers';
+import '../../../styles/shared/MedicalPageShared.css';
 
 const BaseMedicalCard = ({
   title,
@@ -59,13 +61,6 @@ const BaseMedicalCard = ({
     }
   };
 
-  const handleCardClick = (e) => {
-    // Don't trigger if clicking on a button or link
-    const target = e.target;
-    if (target.closest('button') || target.closest('a')) return;
-    safeOnView();
-  };
-
   try {
     return (
       <Card
@@ -73,15 +68,12 @@ const BaseMedicalCard = ({
         shadow="sm"
         radius="md"
         h="100%"
-        onClick={handleCardClick}
+        className="clickable-card"
+        onClick={createCardClickHandler(safeOnView)}
         style={{
           display: 'flex',
           flexDirection: 'column',
-          cursor: 'pointer',
-          transition: 'background-color 0.15s ease',
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
       >
         <Stack gap="sm" style={{ flex: 1 }}>
           {/* Header */}
