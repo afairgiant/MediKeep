@@ -36,12 +36,13 @@ import { useDisclosure } from '@mantine/hooks';
 import invitationApi from '../../services/api/invitationApi';
 import { InvitationManager } from '../invitations';
 import { PatientSharingModal } from '../medical';
-import { formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { useCacheManager, useCurrentPatient } from '../../hooks/useGlobalData';
 
 const InvitationNotifications = () => {
   const { t } = useTranslation('navigation');
   const { t: tCommon } = useTranslation('common');
+  const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const { invalidatePatientList } = useCacheManager();
   const { patient: currentPatient } = useCurrentPatient();

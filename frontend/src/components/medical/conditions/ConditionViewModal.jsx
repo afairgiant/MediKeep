@@ -20,7 +20,7 @@ import {
   IconFileText,
   IconEdit,
 } from '@tabler/icons-react';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 
@@ -36,6 +36,7 @@ const ConditionViewModal = ({
   onError,
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or condition changes

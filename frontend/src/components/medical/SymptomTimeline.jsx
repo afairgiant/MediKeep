@@ -25,6 +25,7 @@ import {
   SYMPTOM_STATUS_COLORS,
   SYMPTOM_SEVERITY_ORDER,
 } from '../../constants/symptomEnums';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * SymptomTimeline Component
@@ -33,6 +34,7 @@ import {
  */
 const SymptomTimeline = ({ patientId, hidden }) => {
   const { t } = useTranslation('common');
+  const { formatDate, locale } = useDateFormat();
   const [timelineData, setTimelineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
@@ -218,7 +220,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
               title={
                 <Group gap="xs">
                   <Text fw={500}>
-                    {new Date(entry.date).toLocaleDateString('en-US', {
+                    {new Date(entry.date).toLocaleDateString(locale, {
                       weekday: 'short',
                       year: 'numeric',
                       month: 'short',
@@ -257,7 +259,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
         onClose={() => setModalOpen(false)}
         title={`Symptom Episodes on ${
           selectedDate
-            ? new Date(selectedDate).toLocaleDateString('en-US', {
+            ? new Date(selectedDate).toLocaleDateString(locale, {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
@@ -320,7 +322,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                   )}
                   {occurrence.resolved_date && (
                     <Text size="sm" c="green">
-                      <strong>Resolved:</strong> {new Date(occurrence.resolved_date).toLocaleDateString()}
+                      <strong>Resolved:</strong> {formatDate(occurrence.resolved_date)}
                     </Text>
                   )}
                   {!occurrence.resolved_date && (

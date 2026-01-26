@@ -32,7 +32,7 @@ import {
   IconX,
   IconUnlink
 } from '@tabler/icons-react';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 const FileList = ({
   files = [],
@@ -47,6 +47,7 @@ const FileList = ({
   onView,
   className = ''
 }) => {
+  const { formatDate } = useDateFormat();
   const [sortBy, setSortBy] = useState('uploaded_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [searchTerm, setSearchTerm] = useState('');

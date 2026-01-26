@@ -8,7 +8,7 @@ import { useAdminData } from '../../hooks/useAdminData';
 import { useBackupNotifications } from '../../hooks/useBackupNotifications';
 import { adminApiService } from '../../services/api/adminApi';
 import { Loading } from '../../components';
-import { formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import './BackupManagement.css';
 
 // Default retention settings constants
@@ -27,6 +27,7 @@ const MIN_VALUES = {
 
 const BackupManagement = () => {
   const navigate = useNavigate();
+  const { formatDateTime } = useDateFormat();
   const [creating, setCreating] = useState({});
   const [restoring, setRestoring] = useState({});
   const [uploading, setUploading] = useState(false);

@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge, Text, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
@@ -19,6 +19,7 @@ const ProcedureCard = ({
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
   const handleError = (error) => {
     logger.error('procedure_card_error', {
       message: 'Error in ProcedureCard',
@@ -56,7 +57,7 @@ const ProcedureCard = ({
       {
         label: t('procedures.procedureDate.label'),
         value: procedure.date,
-        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
       },
       {
         label: t('procedures.procedureCode.label'),

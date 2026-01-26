@@ -22,7 +22,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
@@ -37,6 +37,7 @@ const ProcedureViewModal = ({
   onError
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or procedure changes

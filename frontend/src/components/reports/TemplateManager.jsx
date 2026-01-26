@@ -25,6 +25,7 @@ import {
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * TemplateManager Component
@@ -40,6 +41,7 @@ const TemplateManager = ({
   onDeleteTemplate,
   isSaving = false,
 }) => {
+  const { formatDate } = useDateFormat();
   const [showSaveModal, { open: openSaveModal, close: closeSaveModal }] = useDisclosure(false);
   const [showEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
@@ -394,7 +396,7 @@ const TemplateCard = ({ template, onLoad, onEdit, onDelete }) => {
           <Group gap="xs">
             <IconClock size={12} />
             <Text size="xs" c="dimmed">
-              {new Date(template.created_at).toLocaleDateString()}
+              {formatDate(template.created_at)}
             </Text>
           </Group>
         </Stack>

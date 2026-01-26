@@ -32,6 +32,7 @@ import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCacheManager } from '../../hooks/useGlobalData';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import invitationApi from '../../services/api/invitationApi';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
 import patientSharingApi from '../../services/api/patientSharingApi';
@@ -42,6 +43,7 @@ import InvitationResponseModal from './InvitationResponseModal';
 const InvitationManager = ({ opened, onClose, onUpdate }) => {
   const { user: authUser } = useAuth();
   const { invalidatePatientList } = useCacheManager();
+  const { formatDate } = useDateFormat();
   const [sentInvitations, setSentInvitations] = useState([]);
   const [receivedInvitations, setReceivedInvitations] = useState([]);
   const [sharedWithMe, setSharedWithMe] = useState([]);
@@ -584,9 +586,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                   {patientShare.created_at && (
                                     <Text size="xs" c="dimmed">
                                       on{' '}
-                                      {new Date(
-                                        patientShare.created_at
-                                      ).toLocaleDateString()}
+                                      {formatDate(patientShare.created_at)}
                                     </Text>
                                   )}
                                 </div>
@@ -603,7 +603,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               {patientShare.expires_at && (
                                 <Text size="xs" c="orange">
-                                  Expires: {new Date(patientShare.expires_at).toLocaleDateString()}
+                                  Expires: {formatDate(patientShare.expires_at)}
                                 </Text>
                               )}
 
@@ -729,9 +729,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                   {shareItem.share_details?.shared_at && (
                                     <Text size="xs" c="dimmed">
                                       on{' '}
-                                      {new Date(
-                                        shareItem.share_details.shared_at
-                                      ).toLocaleDateString()}
+                                      {formatDate(shareItem.share_details.shared_at)}
                                     </Text>
                                   )}
                                 </div>
@@ -810,9 +808,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                   {patientShare.created_at && (
                                     <Text size="xs" c="dimmed">
                                       on{' '}
-                                      {new Date(
-                                        patientShare.created_at
-                                      ).toLocaleDateString()}
+                                      {formatDate(patientShare.created_at)}
                                     </Text>
                                   )}
                                 </div>
@@ -829,7 +825,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               {patientShare.expires_at && (
                                 <Text size="xs" c="orange">
-                                  Expires: {new Date(patientShare.expires_at).toLocaleDateString()}
+                                  Expires: {formatDate(patientShare.expires_at)}
                                 </Text>
                               )}
 

@@ -19,8 +19,8 @@ import {
   IconNotes,
   IconFileText,
 } from '@tabler/icons-react';
-import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
@@ -36,6 +36,7 @@ const MedicationViewModal = ({
   practitioners = [],
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('overview');

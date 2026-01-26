@@ -6,7 +6,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -47,6 +47,7 @@ import { IconFileUpload } from '@tabler/icons-react';
 
 const LabResults = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -142,7 +143,7 @@ const LabResults = () => {
   const config = getMedicalPageConfig('labresults');
 
   // Get standardized formatters for lab results
-  const formatters = getEntityFormatters('lab_results', practitioners);
+  const formatters = getEntityFormatters('lab_results', practitioners, null, null, formatDate);
 
 
   // Use standardized data management

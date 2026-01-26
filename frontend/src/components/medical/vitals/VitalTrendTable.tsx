@@ -16,6 +16,7 @@ import {
 import { IconChevronUp, IconChevronDown, IconSelector } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { VitalTrendResponse, VitalDataPoint } from './types';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface VitalTrendTableProps {
   trendData: VitalTrendResponse;
@@ -52,6 +53,7 @@ function Th({ children, sorted, reversed, onSort }: ThProps) {
 
 const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
   const { t } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
@@ -84,15 +86,6 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
 
     return data;
   }, [trendData.data_points, sortField, sortDirection]);
-
-  const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   if (trendData.data_points.length === 0) {
     return (
@@ -130,7 +123,7 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
             {sortedData.map((point: VitalDataPoint) => (
               <Table.Tr key={point.id}>
                 <Table.Td>
-                  <Text size="sm">{formatDate(point.recorded_date)}</Text>
+                  <Text size="sm">{formatLongDate(point.recorded_date)}</Text>
                 </Table.Td>
                 <Table.Td>
                   <Group gap="xs">

@@ -30,7 +30,7 @@ import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -56,6 +56,7 @@ import logger from '../../services/logger';
 
 const Medication = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
@@ -143,7 +144,7 @@ const Medication = () => {
 
   // Get standardized formatters for medications with linking support
   const formatters = {
-    ...getEntityFormatters('medications', practitioners, navigate),
+    ...getEntityFormatters('medications', practitioners, navigate, null, formatDate),
     // Override indication formatter to use smart display (text version for tables)
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };

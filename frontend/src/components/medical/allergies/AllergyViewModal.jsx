@@ -24,8 +24,8 @@ import {
   IconShield,
   IconShieldCheck,
 } from '@tabler/icons-react';
-import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
 
@@ -40,6 +40,7 @@ const AllergyViewModal = ({
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or allergy changes

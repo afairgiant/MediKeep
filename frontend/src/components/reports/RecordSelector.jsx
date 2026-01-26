@@ -9,6 +9,7 @@ import {
   Switch,
   Alert,
 } from '@mantine/core';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * RecordSelector Component
@@ -24,6 +25,8 @@ const RecordSelector = ({
   onToggleCategory,
   categoryDisplayName,
 }) => {
+  const { formatDate } = useDateFormat();
+
   if (!categoryData || !categoryData.records) {
     return (
       <Paper p="md" withBorder radius="md">
@@ -114,7 +117,7 @@ const RecordItem = ({ record, selected, onToggle }) => {
           <Group gap="xs" wrap="wrap">
             {record.date && (
               <Text size="xs" c="dimmed">
-                📅 {new Date(record.date).toLocaleDateString()}
+                📅 {formatDate(record.date)}
               </Text>
             )}
             {record.practitioner && (

@@ -6,7 +6,7 @@ import { adminApiService } from '../../services/api/adminApi';
 import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
 import { Button } from '../../components/ui';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
 import { IMPORTANT_FIELDS } from '../../constants/modelConstants';
 import './ModelManagement.css';
@@ -14,26 +14,27 @@ import './ModelManagement.css';
 // Constants
 const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
-// Utility function for formatting field values
-const formatFieldValue = (value, fieldType) => {
-  if (value === null || value === undefined) {
-    return '-';
-  }
-
-  if (fieldType === 'datetime' || fieldType === 'date') {
-    return formatDate(value);
-  }
-
-  if (typeof value === 'boolean') {
-    return value ? 'Yes' : 'No';
-  }
-
-  return String(value);
-};
-
 const ModelManagement = () => {
   const { modelName } = useParams();
   const navigate = useNavigate();
+  const { formatDate } = useDateFormat();
+
+  // Utility function for formatting field values - moved inside component to use hook
+  const formatFieldValue = (value, fieldType) => {
+    if (value === null || value === undefined) {
+      return '-';
+    }
+
+    if (fieldType === 'datetime' || fieldType === 'date') {
+      return formatDate(value);
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+
+    return String(value);
+  };
 
   const [records, setRecords] = useState([]);
   const [metadata, setMetadata] = useState(null);

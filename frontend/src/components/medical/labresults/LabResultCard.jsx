@@ -4,8 +4,8 @@ import { Badge, Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
 import TestComponentSummary from './TestComponentSummary';
-import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import logger from '../../../services/logger';
 
 const LabResultCard = React.memo(({
@@ -21,6 +21,7 @@ const LabResultCard = React.memo(({
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
     logger.error('lab_result_card_error', {
@@ -76,12 +77,12 @@ const LabResultCard = React.memo(({
       {
         label: t('labResults.orderedDate.label'),
         value: labResult.ordered_date,
-        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
       },
       {
         label: t('labResults.completedDate.label'),
         value: labResult.completed_date,
-        render: (value) => value ? formatDate(value) : tCommon('labels.notCompleted', 'Not completed')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.notCompleted', 'Not completed')
       },
       {
         label: t('labResults.labResult.label'),

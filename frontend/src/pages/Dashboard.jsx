@@ -62,7 +62,7 @@ import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrentPatient, useCacheManager } from '../hooks/useGlobalData';
-import { formatDateTime } from '../utils/helpers';
+import { useDateFormat } from '../hooks/useDateFormat';
 import {
   getActivityNavigationUrl,
   getActivityIcon,
@@ -77,6 +77,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('navigation');
   const { t: tCommon } = useTranslation('common');
+  const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const {
     user: authUser,

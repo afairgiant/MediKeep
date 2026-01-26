@@ -56,15 +56,12 @@ import {
 } from '@tabler/icons-react';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   formatMeasurement,
   convertForDisplay,
   unitLabels,
 } from '../../utils/unitConversion';
-import {
-  formatDate as formatDateHelper,
-  formatDateTime,
-} from '../../utils/helpers';
 
 const VitalsList = ({
   patientId,
@@ -80,6 +77,7 @@ const VitalsList = ({
 }) => {
   const { t } = useTranslation('common');
   const { unitSystem } = useUserPreferences();
+  const { formatDate, formatDateTime } = useDateFormat();
   // Use passed data if available, otherwise load internally
   const [internalVitals, setInternalVitals] = useState([]);
   const [internalLoading, setInternalLoading] = useState(true);
@@ -238,14 +236,6 @@ const VitalsList = ({
     }
   };
 
-  const formatDate = dateString => {
-    return formatDateHelper(dateString);
-  };
-
-  const formatTime = dateString => {
-    return formatDateTime(dateString);
-  };
-
   const getBPDisplay = (systolic, diastolic) => {
     if (!systolic || !diastolic) return 'N/A';
     return `${systolic}/${diastolic}`;
@@ -355,7 +345,7 @@ const VitalsList = ({
         items: [
           {
             label: 'Recorded Date',
-            value: formatTime(selectedVital.recorded_date),
+            value: formatDateTime(selectedVital.recorded_date),
             icon: IconCalendar,
           },
           {

@@ -26,7 +26,7 @@ import {
   IconTrash,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { formatTimeToAmPm } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
@@ -47,6 +47,7 @@ const SymptomViewModal = ({
   onRefresh,
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
   const [occurrences, setOccurrences] = useState([]);
   const [loadingOccurrences, setLoadingOccurrences] = useState(false);

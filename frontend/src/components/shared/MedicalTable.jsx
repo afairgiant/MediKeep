@@ -1,6 +1,6 @@
 import React from 'react';
-import { formatDate } from '../../utils/helpers';
 import { Table, ScrollArea, ActionIcon, Group, Text, Title, Stack, Card } from '@mantine/core';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
 import MantineResponsiveAdapter from '../../adapters/MantineResponsiveAdapter';
@@ -17,6 +17,7 @@ const MedicalTable = ({
   formatters = {},
 }) => {
   const responsive = useResponsive();
+  const { formatDate } = useDateFormat();
 
   if (!data || data.length === 0) {
     return null;

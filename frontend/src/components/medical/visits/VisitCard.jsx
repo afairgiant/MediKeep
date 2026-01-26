@@ -3,7 +3,7 @@ import { Badge, Text, Group, Box, Divider } from '@mantine/core';
 import { IconCalendar } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
@@ -21,6 +21,7 @@ const VisitCard = ({
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
     logger.error('visit_card_error', {
@@ -118,7 +119,7 @@ const VisitCard = ({
       {
         label: tCommon('labels.date'),
         value: visit.date,
-        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
       },
       {
         label: t('visits.attendingPractitioner.label'),

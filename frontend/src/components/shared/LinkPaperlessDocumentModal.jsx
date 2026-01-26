@@ -27,6 +27,7 @@ import {
 import { useDebouncedValue } from '@mantine/hooks';
 import { searchPaperlessDocuments } from '../../services/api/paperlessApi';
 import logger from '../../services/logger';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * LinkPaperlessDocumentModal Component
@@ -47,6 +48,7 @@ const LinkPaperlessDocumentModal = ({
   entityType,
   entityId,
 }) => {
+  const { formatDate } = useDateFormat();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(searchQuery, 300);
   const [searchResults, setSearchResults] = useState([]);
@@ -168,14 +170,7 @@ const LinkPaperlessDocumentModal = ({
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Unknown date';
-    try {
-      return new Date(dateString).toLocaleDateString();
-    } catch {
-      return 'Unknown date';
-    }
-  };
+  // formatDate is provided by useDateFormat hook
 
   return (
     <Modal

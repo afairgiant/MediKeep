@@ -30,7 +30,7 @@ import { useMedicalData, useDataManagement, useEntityFileCounts, useViewModalNav
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { 
@@ -57,6 +57,7 @@ import {
 
 const Conditions = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
@@ -111,6 +112,9 @@ const Conditions = () => {
     items: conditions,
     loading,
   });
+
+  // Get standardized formatters for conditions
+  const conditionsFormatters = getEntityFormatters('conditions', [], navigate, null, formatDate);
 
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
@@ -386,13 +390,13 @@ const Conditions = () => {
                 onEdit={handleEditCondition}
                 onDelete={handleDeleteCondition}
                 formatters={{
-                  diagnosis: getEntityFormatters('conditions').condition_name,
-                  severity: getEntityFormatters('conditions').severity,
-                  onset_date: getEntityFormatters('conditions').onset_date,
-                  end_date: getEntityFormatters('conditions').end_date,
-                  status: getEntityFormatters('conditions').status,
-                  icd10_code: getEntityFormatters('conditions').simple,
-                  notes: getEntityFormatters('conditions').notes,
+                  diagnosis: conditionsFormatters.condition_name,
+                  severity: conditionsFormatters.severity,
+                  onset_date: conditionsFormatters.onset_date,
+                  end_date: conditionsFormatters.end_date,
+                  status: conditionsFormatters.status,
+                  icd10_code: conditionsFormatters.simple,
+                  notes: conditionsFormatters.notes,
                 }}
                 dataType="medical"
                 responsive={responsive}

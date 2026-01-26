@@ -21,6 +21,7 @@ import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
@@ -37,6 +38,7 @@ import { useResponsive } from '../../hooks/useResponsive';
 const Allergies = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('medical');
+  const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
@@ -104,7 +106,7 @@ const Allergies = () => {
 
   // Get standardized formatters for allergies with medication linking
   const formatters = {
-    ...getEntityFormatters('allergies', [], navigate),
+    ...getEntityFormatters('allergies', [], navigate, null, formatDate),
     medication_name: (value, allergy) => {
       const medication = medications.find(med => med.id === allergy.medication_id);
       return medication?.medication_name || '';

@@ -21,7 +21,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 
 const TreatmentViewModal = ({
@@ -35,6 +35,7 @@ const TreatmentViewModal = ({
   onError,
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or treatment changes

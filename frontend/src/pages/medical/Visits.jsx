@@ -18,7 +18,7 @@ import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -48,6 +48,7 @@ import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
 
 const Visits = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = useState('cards');
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -190,8 +191,9 @@ const Visits = () => {
   };
 
   // Get standardized formatters for visits with condition linking
+  const visitsBaseFormatters = getEntityFormatters('visits', practitioners, navigate, null, formatDate);
   const formatters = {
-    ...getEntityFormatters('visits', [], navigate),
+    ...visitsBaseFormatters,
     condition_name: (value, visit) => {
       const condition = getConditionDetails(visit.condition_id);
       return condition?.diagnosis || '';
@@ -519,18 +521,14 @@ const Visits = () => {
                 onEdit={handleEditVisit}
                 onDelete={handleDeleteVisit}
                 formatters={{
-                  date: getEntityFormatters('visits').date,
-                  reason: getEntityFormatters('visits').text,
-                  visit_type: getEntityFormatters('visits').simple,
-                  location: getEntityFormatters('visits').simple,
-                  practitioner_name: (value, item) =>
-                    getEntityFormatters(
-                      'visits',
-                      practitioners
-                    ).practitioner_name(value, item),
+                  date: visitsBaseFormatters.date,
+                  reason: visitsBaseFormatters.text,
+                  visit_type: visitsBaseFormatters.simple,
+                  location: visitsBaseFormatters.simple,
+                  practitioner_name: visitsBaseFormatters.practitioner_name,
                   condition_name: formatters.condition_name,
-                  diagnosis: getEntityFormatters('visits').text,
-                  notes: getEntityFormatters('visits').text,
+                  diagnosis: visitsBaseFormatters.text,
+                  notes: visitsBaseFormatters.text,
                 }}
                 dataType="medical"
                 responsive={responsive}

@@ -57,6 +57,7 @@ export const UserPreferencesProvider = ({ children }) => {
         const defaultPrefs = {
           unit_system: 'imperial',
           session_timeout_minutes: 30,
+          date_format: 'mdy',
           ...PAPERLESS_SETTING_DEFAULTS,
           // Override the sync tags default for this context
           paperless_sync_tags: true,
@@ -204,10 +205,15 @@ export const UserPreferencesProvider = ({ children }) => {
     updatePreferences, // Now saves to server automatically
     updateLocalPreferences, // Local state update only (for backwards compatibility)
     refreshPreferences,
-    // Convenience getters
+    // Convenience getters for unit system
     unitSystem: preferences?.unit_system || 'imperial',
     isMetric: preferences?.unit_system === 'metric',
     isImperial: preferences?.unit_system === 'imperial',
+    // Convenience getters for date format
+    dateFormat: preferences?.date_format || 'mdy',
+    isUSDateFormat: preferences?.date_format === 'mdy' || !preferences?.date_format,
+    isEuropeanDateFormat: preferences?.date_format === 'dmy',
+    isISODateFormat: preferences?.date_format === 'ymd',
   };
 
   return (
