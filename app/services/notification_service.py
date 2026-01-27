@@ -299,20 +299,20 @@ class NotificationService:
     def get_masked_config(self, channel: NotificationChannel) -> Dict[str, Any]:
         """Get channel config with sensitive fields masked."""
         config = self._decrypt_config(channel.config_encrypted)
-        sensitive_fields = ["smtp_password", "app_token", "auth_token", "webhook_url"]
+        sensitive_fields = {"smtp_password", "app_token", "auth_token", "webhook_url"}
 
-        masked = {}
-        for key, value in config.items():
-            if key in sensitive_fields and value:
-                # Show first and last 2 characters
-                if len(str(value)) > 6:
-                    masked[key] = f"{str(value)[:2]}...{str(value)[-2:]}"
-                else:
-                    masked[key] = "****"
-            else:
-                masked[key] = value
+        return {
+            key: self._mask_value(value) if key in sensitive_fields and value else value
+            for key, value in config.items()
+        }
 
-        return masked
+    @staticmethod
+    def _mask_value(value: Any) -> str:
+        """Mask a sensitive value, showing first and last 2 characters if long enough."""
+        str_value = str(value)
+        if len(str_value) > 6:
+            return f"{str_value[:2]}...{str_value[-2:]}"
+        return "****"
 
     # =========================================================================
     # Notification Sending

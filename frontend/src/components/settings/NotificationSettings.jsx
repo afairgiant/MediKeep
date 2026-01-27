@@ -58,13 +58,7 @@ const NotificationSettings = ({ className = '' }) => {
     fetchData();
   }, []);
 
-  const handleChannelsChange = newChannels => {
-    setChannels(newChannels);
-  };
-
-  const handleTestSuccess = () => {
-    setHistoryRefreshKey(prev => prev + 1);
-  };
+  const refreshHistory = () => setHistoryRefreshKey(prev => prev + 1);
 
   if (loading) {
     return (
@@ -96,8 +90,8 @@ const NotificationSettings = ({ className = '' }) => {
       {/* Channels Section */}
       <NotificationChannels
         channels={channels}
-        onChannelsChange={handleChannelsChange}
-        onTestSuccess={handleTestSuccess}
+        onChannelsChange={setChannels}
+        onTestSuccess={refreshHistory}
       />
 
       {/* Preferences Section - Only show if there are channels */}

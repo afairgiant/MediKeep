@@ -19,20 +19,17 @@ const STATUS_COLORS = {
  * Format relative time
  * Handles UTC timestamps from the backend (with or without 'Z' suffix)
  */
-const formatRelativeTime = dateString => {
+function formatRelativeTime(dateString) {
   if (!dateString) return '';
 
   // Ensure UTC parsing - append 'Z' if no timezone info present
-  let normalizedDate = dateString;
-  if (!dateString.endsWith('Z') && !dateString.includes('+') && !dateString.includes('-', 10)) {
-    normalizedDate = dateString + 'Z';
-  }
+  const hasTimezone = dateString.endsWith('Z') || dateString.includes('+') || dateString.includes('-', 10);
+  const normalizedDate = hasTimezone ? dateString : dateString + 'Z';
 
   const date = new Date(normalizedDate);
   if (isNaN(date.getTime())) return '';
 
-  const now = new Date();
-  const diffMs = now - date;
+  const diffMs = Date.now() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
@@ -43,7 +40,7 @@ const formatRelativeTime = dateString => {
   if (diffDays < 7) return `${diffDays}d ago`;
 
   return date.toLocaleDateString();
-};
+}
 
 /**
  * NotificationHistory Component
@@ -99,11 +96,13 @@ const NotificationHistory = ({ refreshKey = 0 }) => {
 
         {expanded && (
           <>
-            {loading && history.length === 0 ? (
+            {loading && history.length === 0 && (
               <div className="notification-history-loading">{t('common:labels.loading', 'Loading...')}</div>
-            ) : history.length === 0 ? (
+            )}
+            {!loading && history.length === 0 && (
               <div className="notification-history-empty">{t('history.noHistory', 'No notifications sent yet.')}</div>
-            ) : (
+            )}
+            {history.length > 0 && (
               <>
                 <div className="history-list">
                   {history.map(item => (

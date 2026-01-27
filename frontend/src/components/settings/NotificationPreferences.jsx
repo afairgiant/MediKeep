@@ -7,10 +7,8 @@ import frontendLogger from '../../services/frontendLogger';
 import { toast } from 'react-toastify';
 import '../../styles/components/NotificationPreferences.css';
 
-/**
- * Event type categories for grouping
- */
-const EVENT_CATEGORIES = {
+/** Event type category display names */
+const CATEGORY_LABELS = {
   system: 'System',
   medical: 'Medical',
   collaboration: 'Collaboration',
@@ -148,8 +146,8 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
             </thead>
             <tbody>
               {Object.entries(groupedEvents).map(([category, events]) => {
-                const isExpanded = expandedCategories[category] !== false; // Default to expanded
-                const categoryLabel = EVENT_CATEGORIES[category] || category;
+                const isExpanded = expandedCategories[category] !== false;
+                const categoryLabel = CATEGORY_LABELS[category] || category;
 
                 return (
                   <React.Fragment key={category}>

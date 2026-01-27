@@ -9,6 +9,15 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
+def _validate_url_protocol(url: str, allowed_protocols: tuple = ("http://", "https://")) -> str:
+    """Validate that URL starts with an allowed protocol."""
+    url = url.strip().rstrip("/")
+    if not any(url.startswith(p) for p in allowed_protocols):
+        protocols = " or ".join(allowed_protocols)
+        raise ValueError(f"URL must start with {protocols}")
+    return url
+
+
 class ChannelType(str, Enum):
     """Supported notification channel types"""
     DISCORD = "discord"
@@ -101,10 +110,7 @@ class GotifyChannelConfig(BaseModel):
     @field_validator("server_url")
     @classmethod
     def validate_server_url(cls, v):
-        v = v.strip().rstrip("/")
-        if not v.startswith("http://") and not v.startswith("https://"):
-            raise ValueError("Server URL must start with http:// or https://")
-        return v
+        return _validate_url_protocol(v)
 
     @field_validator("app_token")
     @classmethod
@@ -125,16 +131,13 @@ class WebhookChannelConfig(BaseModel):
     @field_validator("url")
     @classmethod
     def validate_url(cls, v):
-        v = v.strip()
-        if not v.startswith("http://") and not v.startswith("https://"):
-            raise ValueError("URL must start with http:// or https://")
-        return v
+        return _validate_url_protocol(v)
 
     @field_validator("method")
     @classmethod
     def validate_method(cls, v):
         v = v.upper()
-        if v not in ["GET", "POST"]:
+        if v not in ("GET", "POST"):
             raise ValueError("Method must be GET or POST")
         return v
 

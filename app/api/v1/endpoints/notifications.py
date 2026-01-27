@@ -43,6 +43,11 @@ logger = get_logger(__name__, "app")
 router = APIRouter()
 
 
+def _build_channels_lookup(service: NotificationService, user_id: int) -> dict:
+    """Build a channel ID to channel object lookup dictionary."""
+    return {c.id: c for c in service.get_user_channels(user_id)}
+
+
 # ============================================================================
 # Event Types
 # ============================================================================
@@ -423,9 +428,7 @@ def list_preferences(
 
         service = NotificationService(db)
         preferences = service.get_user_preferences(current_user.id)
-
-        # Enrich with channel names
-        channels = {c.id: c for c in service.get_user_channels(current_user.id)}
+        channels = _build_channels_lookup(service, current_user.id)
 
         response = []
         for pref in preferences:
@@ -470,22 +473,18 @@ def get_preference_matrix(
         channels = service.get_user_channels(current_user.id)
         preferences = service.get_user_preferences(current_user.id)
 
-        # Build preference lookup
+        # Build preference lookup: event_type -> channel_id -> is_enabled
         pref_lookup = {}
         for pref in preferences:
-            if pref.event_type not in pref_lookup:
-                pref_lookup[pref.event_type] = {}
-            pref_lookup[pref.event_type][pref.channel_id] = pref.is_enabled
-
-        # Get all event types
-        events = [e.value for e in EventType]
+            pref_lookup.setdefault(pref.event_type, {})[pref.channel_id] = pref.is_enabled
 
         # Build matrix with defaults (False for unconfigured)
-        matrix = {}
-        for event in events:
-            matrix[event] = {}
-            for channel in channels:
-                matrix[event][channel.id] = pref_lookup.get(event, {}).get(channel.id, False)
+        events = [e.value for e in EventType]
+        channel_ids = [c.id for c in channels]
+        matrix = {
+            event: {cid: pref_lookup.get(event, {}).get(cid, False) for cid in channel_ids}
+            for event in events
+        }
 
         return PreferenceMatrix(
             channels=[ChannelResponse.model_validate(c) for c in channels],
@@ -603,8 +602,7 @@ def get_history(
             event_type=event_type,
         )
 
-        # Enrich with channel info
-        channels = {c.id: c for c in service.get_user_channels(current_user.id)}
+        channels = _build_channels_lookup(service, current_user.id)
 
         history_items = []
         for item in items:
