@@ -3,8 +3,7 @@ Tests for the notification service.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
+from unittest.mock import patch
 
 from app.services.notification_service import (
     NotificationService,
@@ -15,7 +14,6 @@ from app.services.notification_service import (
     _build_webhook_url,
 )
 from app.services.notification_templates import NotificationTemplates
-from app.models.models import NotificationChannel, NotificationPreference, NotificationHistory
 
 
 class TestNotificationTemplates:

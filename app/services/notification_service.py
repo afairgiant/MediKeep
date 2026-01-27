@@ -28,11 +28,9 @@ from app.models.models import (
     NotificationChannel,
     NotificationHistory,
     NotificationPreference,
-    User,
 )
 from app.schemas.notifications import (
     ChannelType,
-    EventType,
     NotificationStatus,
 )
 from app.services.notification_templates import NotificationTemplates
@@ -95,8 +93,8 @@ def _build_gotify_url(config: Dict) -> str:
 def _build_webhook_url(config: Dict) -> str:
     """Build Apprise URL for generic webhook."""
     url = config.get("url", "")
-    method = config.get("method", "POST").upper()
     auth_token = config.get("auth_token")
+    # Note: method is stored in config but Apprise JSON plugin uses POST by default
 
     # Strip protocol for Apprise format
     host_path = url.replace("https://", "").replace("http://", "")
@@ -297,20 +295,30 @@ class NotificationService:
         return self._decrypt_config(channel.config_encrypted)
 
     def get_masked_config(self, channel: NotificationChannel) -> Dict[str, Any]:
-        """Get channel config with sensitive fields masked."""
+        """Get channel config with sensitive fields masked for display."""
         config = self._decrypt_config(channel.config_encrypted)
-        sensitive_fields = {"smtp_password", "app_token", "auth_token", "webhook_url"}
 
-        return {
-            key: self._mask_value(value) if key in sensitive_fields and value else value
-            for key, value in config.items()
-        }
+        masked = {}
+        for key, value in config.items():
+            if not value:
+                masked[key] = value
+            elif key == "smtp_password":
+                masked[key] = "****"  # Never show passwords
+            elif key in {"app_token", "auth_token"}:
+                masked[key] = self._mask_token(value)
+            else:
+                # Show webhook_url and other fields in full for identification
+                masked[key] = value
+
+        return masked
 
     @staticmethod
-    def _mask_value(value: Any) -> str:
-        """Mask a sensitive value, showing first and last 2 characters if long enough."""
+    def _mask_token(value: str) -> str:
+        """Mask a token, showing first 4 and last 4 characters if long enough."""
         str_value = str(value)
-        if len(str_value) > 6:
+        if len(str_value) > 12:
+            return f"{str_value[:4]}...{str_value[-4:]}"
+        elif len(str_value) > 6:
             return f"{str_value[:2]}...{str_value[-2:]}"
         return "****"
 

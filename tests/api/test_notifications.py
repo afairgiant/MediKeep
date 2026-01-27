@@ -2,7 +2,6 @@
 API tests for notification endpoints.
 """
 
-import pytest
 from fastapi import status
 
 

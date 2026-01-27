@@ -233,10 +233,10 @@ class Settings:  # App Info
     )  # Enable/disable notification system
     NOTIFICATION_RATE_LIMIT_PER_HOUR: int = int(
         os.getenv("NOTIFICATION_RATE_LIMIT_PER_HOUR", "100")
-    )  # Max notifications per user per hour
+    )  # Max notifications per user per hour (TODO: enforce in send_notification)
     NOTIFICATION_HISTORY_RETENTION_DAYS: int = int(
         os.getenv("NOTIFICATION_HISTORY_RETENTION_DAYS", "90")
-    )  # How long to keep notification history
+    )  # How long to keep notification history (TODO: implement cleanup job)
     NOTIFICATION_ENCRYPTION_SALT: str = os.getenv(
         "NOTIFICATION_ENCRYPTION_SALT", "notification_channel_config_salt_v1"
     )  # Salt for encrypting channel configs
@@ -247,6 +247,13 @@ class Settings:  # App Info
 
         # Ensure backup directory exists with proper error handling
         self._ensure_directory_exists(self.BACKUP_DIR, "backup")
+
+        # Warn if using default notification encryption salt
+        if self.NOTIFICATION_ENCRYPTION_SALT == "notification_channel_config_salt_v1":
+            logging.warning(
+                "SECURITY WARNING: Using default NOTIFICATION_ENCRYPTION_SALT. "
+                "Set a unique value via environment variable for production use."
+            )
 
     @property
     def sso_configured(self) -> bool:

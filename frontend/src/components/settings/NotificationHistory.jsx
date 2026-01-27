@@ -23,7 +23,8 @@ function formatRelativeTime(dateString) {
   if (!dateString) return '';
 
   // Ensure UTC parsing - append 'Z' if no timezone info present
-  const hasTimezone = dateString.endsWith('Z') || dateString.includes('+') || dateString.includes('-', 10);
+  // Regex matches: trailing Z/z, or timezone offset like +05:00, -0530, +00
+  const hasTimezone = /[zZ]$|[+-]\d{2}:?\d{2}$/.test(dateString);
   const normalizedDate = hasTimezone ? dateString : dateString + 'Z';
 
   const date = new Date(normalizedDate);
