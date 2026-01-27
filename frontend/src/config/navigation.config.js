@@ -77,6 +77,13 @@ export const NAVIGATION_SECTIONS = {
         icon: '🤒',
         id: 'symptoms',
       },
+      {
+        nameKey: 'sidebarNav.items.injuries',
+        name: 'Injuries',
+        path: buildEntityUrl(ENTITY_TYPES.INJURY),
+        icon: '🩹',
+        id: 'injuries',
+      },
     ],
   },
   careAndTreatment: {

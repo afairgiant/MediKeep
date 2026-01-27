@@ -175,6 +175,22 @@ class SymptomStatus(Enum):
     RECURRING = "recurring"
 
 
+class InjuryStatus(Enum):
+    """Status values for injuries"""
+    ACTIVE = "active"           # Currently being treated
+    HEALING = "healing"         # In recovery
+    RESOLVED = "resolved"       # Fully healed
+    CHRONIC = "chronic"         # Long-term/permanent effects
+
+
+class Laterality(Enum):
+    """Laterality values for body part affected"""
+    LEFT = "left"
+    RIGHT = "right"
+    BILATERAL = "bilateral"
+    NOT_APPLICABLE = "not_applicable"
+
+
 # Helper functions to get status lists for validation
 def get_status_values(status_enum):
     """Get list of status values from enum"""
@@ -259,6 +275,16 @@ def get_all_symptom_severities():
 def get_all_symptom_statuses():
     """Get all valid symptom status values"""
     return get_status_values(SymptomStatus)
+
+
+def get_all_injury_statuses():
+    """Get all valid injury status values"""
+    return get_status_values(InjuryStatus)
+
+
+def get_all_laterality_values():
+    """Get all valid laterality values"""
+    return get_status_values(Laterality)
 
 
 # Status mapping for data migration (old -> new)

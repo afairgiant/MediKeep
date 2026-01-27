@@ -29,9 +29,11 @@ from .enums import (
     ConditionType,
     EncounterPriority,
     FamilyRelationship,
+    InjuryStatus,
     InsuranceStatus,
     InsuranceType,
     LabResultStatus,
+    Laterality,
     MedicationStatus,
     MedicationType,
     ProcedureStatus,
@@ -43,9 +45,11 @@ from .enums import (
     get_all_condition_types,
     get_all_encounter_priorities,
     get_all_family_relationships,
+    get_all_injury_statuses,
     get_all_insurance_statuses,
     get_all_insurance_types,
     get_all_lab_result_statuses,
+    get_all_laterality_values,
     get_all_medication_statuses,
     get_all_medication_types,
     get_all_procedure_statuses,
@@ -224,6 +228,9 @@ class Patient(Base):
     insurances = orm_relationship(
         "Insurance", back_populates="patient", cascade="all, delete-orphan"
     )
+    injuries = orm_relationship(
+        "Injury", back_populates="patient", cascade="all, delete-orphan"
+    )
 
     # V1: Patient sharing relationships
     shares = orm_relationship(
@@ -267,6 +274,7 @@ class Practitioner(Base):
     treatments = orm_relationship("Treatment", back_populates="practitioner")
     conditions = orm_relationship("Condition", back_populates="practitioner")
     vitals = orm_relationship("Vitals", back_populates="practitioner")
+    injuries = orm_relationship("Injury", back_populates="practitioner")
 
 
 class Medication(Base):
@@ -319,6 +327,11 @@ class Medication(Base):
     # Many-to-Many relationship with symptoms through junction table
     symptom_relationships = orm_relationship(
         "SymptomMedication", back_populates="medication", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with injuries through junction table
+    injury_relationships = orm_relationship(
+        "InjuryMedication", back_populates="medication", cascade="all, delete-orphan"
     )
 
     # Indexes for performance
@@ -693,6 +706,11 @@ class Condition(Base):
         "SymptomCondition", back_populates="condition", cascade="all, delete-orphan"
     )
 
+    # Many-to-Many relationship with injuries through junction table
+    injury_relationships = orm_relationship(
+        "InjuryCondition", back_populates="condition", cascade="all, delete-orphan"
+    )
+
     # Indexes for performance
     __table_args__ = (
         Index("idx_conditions_patient_id", "patient_id"),
@@ -795,6 +813,11 @@ class Procedure(Base):
     practitioner = orm_relationship("Practitioner", back_populates="procedures")
     condition = orm_relationship("Condition", back_populates="procedures")
 
+    # Many-to-Many relationship with injuries through junction table
+    injury_relationships = orm_relationship(
+        "InjuryProcedure", back_populates="procedure", cascade="all, delete-orphan"
+    )
+
     # Indexes for performance
     __table_args__ = (Index("idx_procedures_patient_id", "patient_id"),)
 
@@ -846,6 +869,11 @@ class Treatment(Base):
     # Many-to-Many relationship with symptoms through junction table
     symptom_relationships = orm_relationship(
         "SymptomTreatment", back_populates="treatment", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with injuries through junction table
+    injury_relationships = orm_relationship(
+        "InjuryTreatment", back_populates="treatment", cascade="all, delete-orphan"
     )
 
 
@@ -1780,4 +1808,218 @@ class StandardizedTest(Base):
         Index("idx_standardized_tests_category", "category"),
         Index("idx_standardized_tests_is_common", "is_common"),
         Index("idx_standardized_tests_short_name", "short_name"),
+    )
+
+
+class InjuryType(Base):
+    """
+    Reusable injury types that populate the dropdown.
+    Users can select existing types or create new ones.
+    System types (is_system=True) are seeded defaults and cannot be deleted.
+    """
+    __tablename__ = "injury_types"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(String(300), nullable=True)
+    is_system = Column(Boolean, default=False, nullable=False)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    injuries = orm_relationship("Injury", back_populates="injury_type")
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_injury_types_name", "name"),
+        Index("idx_injury_types_is_system", "is_system"),
+    )
+
+
+class Injury(Base):
+    """
+    Represents a physical injury record for a patient.
+    Tracks injuries like sprains, fractures, burns, etc.
+    """
+    __tablename__ = "injuries"
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+
+    # Core injury information
+    injury_name = Column(String(300), nullable=False)
+    injury_type_id = Column(Integer, ForeignKey("injury_types.id"), nullable=True)
+    body_part = Column(String(100), nullable=False)
+    laterality = Column(String(20), nullable=True)  # Use Laterality enum: left, right, bilateral, not_applicable
+    date_of_injury = Column(Date, nullable=True)  # Optional - user may not remember exact date
+
+    # How the injury occurred
+    mechanism = Column(String(500), nullable=True)
+
+    # Severity and status
+    severity = Column(String(50), nullable=True)  # Use SeverityLevel enum
+    status = Column(String(50), nullable=False, default="active")  # Use InjuryStatus enum
+
+    # Treatment and recovery
+    treatment_received = Column(Text, nullable=True)
+    recovery_notes = Column(Text, nullable=True)
+
+    # Related practitioner
+    practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
+
+    # Additional notes and tags
+    notes = Column(Text, nullable=True)
+    tags = Column(JSON, nullable=True, default=list)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    patient = orm_relationship("Patient", back_populates="injuries")
+    injury_type = orm_relationship("InjuryType", back_populates="injuries")
+    practitioner = orm_relationship("Practitioner", back_populates="injuries")
+
+    # Many-to-Many relationships through junction tables
+    medication_relationships = orm_relationship(
+        "InjuryMedication", back_populates="injury", cascade="all, delete-orphan"
+    )
+    condition_relationships = orm_relationship(
+        "InjuryCondition", back_populates="injury", cascade="all, delete-orphan"
+    )
+    treatment_relationships = orm_relationship(
+        "InjuryTreatment", back_populates="injury", cascade="all, delete-orphan"
+    )
+    procedure_relationships = orm_relationship(
+        "InjuryProcedure", back_populates="injury", cascade="all, delete-orphan"
+    )
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_injuries_patient_id", "patient_id"),
+        Index("idx_injuries_patient_status", "patient_id", "status"),
+        Index("idx_injuries_injury_type", "injury_type_id"),
+        Index("idx_injuries_date", "date_of_injury"),
+    )
+
+
+class InjuryMedication(Base):
+    """
+    Junction table for many-to-many relationship between injuries and medications.
+    Allows linking medications used to treat injuries.
+    """
+    __tablename__ = "injury_medications"
+
+    id = Column(Integer, primary_key=True)
+    injury_id = Column(Integer, ForeignKey("injuries.id"), nullable=False)
+    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=False)
+
+    # Optional context about how this medication relates to this injury
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    injury = orm_relationship("Injury", back_populates="medication_relationships")
+    medication = orm_relationship("Medication", back_populates="injury_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_injury_medication_injury_id", "injury_id"),
+        Index("idx_injury_medication_medication_id", "medication_id"),
+        UniqueConstraint("injury_id", "medication_id", name="uq_injury_medication"),
+    )
+
+
+class InjuryCondition(Base):
+    """
+    Junction table for many-to-many relationship between injuries and conditions.
+    Allows linking conditions that resulted from or are related to injuries.
+    """
+    __tablename__ = "injury_conditions"
+
+    id = Column(Integer, primary_key=True)
+    injury_id = Column(Integer, ForeignKey("injuries.id"), nullable=False)
+    condition_id = Column(Integer, ForeignKey("conditions.id"), nullable=False)
+
+    # Optional context about how this condition relates to this injury
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    injury = orm_relationship("Injury", back_populates="condition_relationships")
+    condition = orm_relationship("Condition", back_populates="injury_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_injury_condition_injury_id", "injury_id"),
+        Index("idx_injury_condition_condition_id", "condition_id"),
+        UniqueConstraint("injury_id", "condition_id", name="uq_injury_condition"),
+    )
+
+
+class InjuryTreatment(Base):
+    """
+    Junction table for many-to-many relationship between injuries and treatments.
+    Allows linking treatments used for injury recovery.
+    """
+    __tablename__ = "injury_treatments"
+
+    id = Column(Integer, primary_key=True)
+    injury_id = Column(Integer, ForeignKey("injuries.id"), nullable=False)
+    treatment_id = Column(Integer, ForeignKey("treatments.id"), nullable=False)
+
+    # Optional context about how this treatment relates to this injury
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    injury = orm_relationship("Injury", back_populates="treatment_relationships")
+    treatment = orm_relationship("Treatment", back_populates="injury_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_injury_treatment_injury_id", "injury_id"),
+        Index("idx_injury_treatment_treatment_id", "treatment_id"),
+        UniqueConstraint("injury_id", "treatment_id", name="uq_injury_treatment"),
+    )
+
+
+class InjuryProcedure(Base):
+    """
+    Junction table for many-to-many relationship between injuries and procedures.
+    Allows linking procedures performed to treat injuries.
+    """
+    __tablename__ = "injury_procedures"
+
+    id = Column(Integer, primary_key=True)
+    injury_id = Column(Integer, ForeignKey("injuries.id"), nullable=False)
+    procedure_id = Column(Integer, ForeignKey("procedures.id"), nullable=False)
+
+    # Optional context about how this procedure relates to this injury
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    injury = orm_relationship("Injury", back_populates="procedure_relationships")
+    procedure = orm_relationship("Procedure", back_populates="injury_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_injury_procedure_injury_id", "injury_id"),
+        Index("idx_injury_procedure_procedure_id", "procedure_id"),
+        UniqueConstraint("injury_id", "procedure_id", name="uq_injury_procedure"),
     )

@@ -25,6 +25,12 @@ export { familyConditionFormFields } from './familyCondition';
 export { insuranceFormFields } from './insurance';
 export { symptomParentFormFields } from './symptomParent';
 export { symptomOccurrenceFormFields } from './symptomOccurrence';
+export {
+  injuryFormFields,
+  injuryBasicInfoFields,
+  injuryTreatmentFields,
+  injuryNotesFields,
+} from './injury';
 
 // Utility function
 export { getFormFields } from './getFormFields';

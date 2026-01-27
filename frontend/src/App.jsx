@@ -56,6 +56,7 @@ import Conditions from './pages/medical/Conditions';
 import Visits from './pages/medical/Visits';
 import Vitals from './pages/medical/Vitals';
 import Symptoms from './pages/medical/Symptoms';
+import Injuries from './pages/medical/Injuries';
 import Practitioners from './pages/medical/Practitioners';
 import Pharmacies from './pages/medical/Pharmacies';
 import EmergencyContacts from './pages/medical/EmergencyContacts';
@@ -102,6 +103,7 @@ const ENTITY_COMPONENT_MAP = {
   [ENTITY_TYPES.TREATMENT]: Treatments,
   [ENTITY_TYPES.ENCOUNTER]: Visits,
   [ENTITY_TYPES.VITALS]: Vitals,
+  [ENTITY_TYPES.INJURY]: Injuries,
   [ENTITY_TYPES.PRACTITIONER]: Practitioners,
   [ENTITY_TYPES.PHARMACY]: Pharmacies,
   [ENTITY_TYPES.EMERGENCY_CONTACT]: EmergencyContacts,
@@ -120,6 +122,7 @@ const ENTITY_ROUTE_MAP = {
   [ENTITY_TYPES.TREATMENT]: '/treatments',
   [ENTITY_TYPES.ENCOUNTER]: '/visits',
   [ENTITY_TYPES.VITALS]: '/vitals',
+  [ENTITY_TYPES.INJURY]: '/injuries',
   [ENTITY_TYPES.PRACTITIONER]: '/practitioners',
   [ENTITY_TYPES.PHARMACY]: '/pharmacies',
   [ENTITY_TYPES.EMERGENCY_CONTACT]: '/emergency-contacts',

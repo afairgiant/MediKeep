@@ -25,6 +25,7 @@ const ENTITY_TO_ROUTE_MAP = {
   [ENTITY_TYPES.TREATMENT]: '/treatments',
   [ENTITY_TYPES.ENCOUNTER]: '/visits',
   [ENTITY_TYPES.VITALS]: '/vitals',
+  [ENTITY_TYPES.INJURY]: '/injuries',
   [ENTITY_TYPES.PRACTITIONER]: '/practitioners',
   [ENTITY_TYPES.PHARMACY]: '/pharmacies',
   [ENTITY_TYPES.EMERGENCY_CONTACT]: '/emergency-contacts',
