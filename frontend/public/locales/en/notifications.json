@@ -1,0 +1,263 @@
+{
+  "title": "Notification Settings",
+  "description": "Configure how you receive notifications for important events",
+  "loading": "Loading notification settings...",
+  "error": "Failed to load notification settings",
+
+  "channels": {
+    "title": "Notification Channels",
+    "description": "Add and manage your notification delivery channels",
+    "add": "Add Channel",
+    "edit": "Edit Channel",
+    "delete": "Delete Channel",
+    "test": "Test",
+    "testing": "Testing...",
+    "testSuccess": "Test notification sent successfully!",
+    "testFailed": "Test notification failed",
+    "noChannels": "No notification channels configured",
+    "noChannelsHint": "Add a channel to start receiving notifications",
+    "verified": "Verified",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "lastUsed": "Last used",
+    "notificationsSent": "{{count}} notifications sent",
+    "confirmDelete": "Are you sure you want to delete this channel?",
+    "deleteSuccess": "Channel deleted successfully",
+    "deleteFailed": "Failed to delete channel",
+    "createSuccess": "Channel created successfully",
+    "createFailed": "Failed to create channel",
+    "updateSuccess": "Channel updated successfully",
+    "updateFailed": "Failed to update channel",
+    "types": {
+      "discord": "Discord",
+      "email": "Email",
+      "gotify": "Gotify",
+      "webhook": "Webhook"
+    },
+    "form": {
+      "title": "Channel Details",
+      "name": {
+        "label": "Channel Name",
+        "placeholder": "e.g., My Discord Server",
+        "description": "A friendly name to identify this channel"
+      },
+      "type": {
+        "label": "Channel Type",
+        "placeholder": "Select channel type",
+        "description": "The service to send notifications through"
+      },
+      "enabled": {
+        "label": "Enable Channel",
+        "description": "Receive notifications through this channel"
+      },
+      "configSection": "Channel Configuration"
+    },
+    "discord": {
+      "webhookUrl": {
+        "label": "Webhook URL",
+        "placeholder": "https://discord.com/api/webhooks/...",
+        "description": "Create a webhook in your Discord server settings"
+      },
+      "username": {
+        "label": "Bot Username (Optional)",
+        "placeholder": "MediKeep",
+        "description": "Custom name for the notification bot"
+      },
+      "avatarUrl": {
+        "label": "Avatar URL (Optional)",
+        "placeholder": "https://example.com/avatar.png",
+        "description": "Custom avatar for the notification bot"
+      }
+    },
+    "email": {
+      "smtpHost": {
+        "label": "SMTP Server",
+        "placeholder": "smtp.gmail.com",
+        "description": "Your email provider's SMTP server"
+      },
+      "smtpPort": {
+        "label": "SMTP Port",
+        "placeholder": "587",
+        "description": "Usually 587 (TLS) or 465 (SSL)"
+      },
+      "smtpUser": {
+        "label": "SMTP Username",
+        "placeholder": "your-email@gmail.com",
+        "description": "Your email address or username"
+      },
+      "smtpPassword": {
+        "label": "SMTP Password",
+        "placeholder": "App password or email password",
+        "description": "For Gmail, use an App Password"
+      },
+      "fromEmail": {
+        "label": "From Email",
+        "placeholder": "notifications@example.com",
+        "description": "The sender email address"
+      },
+      "toEmail": {
+        "label": "To Email",
+        "placeholder": "your-email@example.com",
+        "description": "Where to send notifications"
+      },
+      "useTls": {
+        "label": "Use TLS",
+        "description": "Enable TLS encryption (recommended)"
+      }
+    },
+    "gotify": {
+      "serverUrl": {
+        "label": "Server URL",
+        "placeholder": "https://gotify.example.com",
+        "description": "Your Gotify server URL"
+      },
+      "appToken": {
+        "label": "App Token",
+        "placeholder": "Application token from Gotify",
+        "description": "Create an application in Gotify to get a token"
+      },
+      "priority": {
+        "label": "Priority",
+        "placeholder": "5",
+        "description": "Message priority (1-10, default 5)"
+      }
+    },
+    "webhook": {
+      "url": {
+        "label": "Webhook URL",
+        "placeholder": "https://api.example.com/webhook",
+        "description": "URL to receive notification payloads"
+      },
+      "method": {
+        "label": "HTTP Method",
+        "description": "HTTP method for the webhook request"
+      },
+      "headers": {
+        "label": "Custom Headers (Optional)",
+        "placeholder": "{\"Authorization\": \"Bearer token\"}",
+        "description": "JSON object with custom headers"
+      },
+      "authToken": {
+        "label": "Auth Token (Optional)",
+        "placeholder": "Bearer token or API key",
+        "description": "Authorization token for the webhook"
+      }
+    }
+  },
+
+  "preferences": {
+    "title": "Event Notifications",
+    "description": "Choose which events trigger notifications on each channel",
+    "loading": "Loading preferences...",
+    "noChannels": "Add a notification channel first to configure event preferences",
+    "saveSuccess": "Preference saved",
+    "saveFailed": "Failed to save preference",
+    "eventHeader": "Event",
+    "comingSoon": "Coming Soon",
+    "categories": {
+      "system": "System Events",
+      "medical": "Medical Events",
+      "collaboration": "Sharing & Collaboration",
+      "sharing": "Sharing & Invitations",
+      "security": "Security Alerts",
+      "other": "Other Events"
+    }
+  },
+
+  "events": {
+    "test_notification": {
+      "name": "Test Notification",
+      "description": "Manual test notification"
+    },
+    "backup_completed": {
+      "name": "Backup Completed",
+      "description": "When a backup completes successfully"
+    },
+    "backup_failed": {
+      "name": "Backup Failed",
+      "description": "When a backup fails"
+    },
+    "lab_result_available": {
+      "name": "Lab Results Available",
+      "description": "When new lab results are added"
+    },
+    "lab_result_abnormal": {
+      "name": "Abnormal Lab Results",
+      "description": "When lab results are outside normal range"
+    },
+    "immunization_due": {
+      "name": "Immunization Due",
+      "description": "When an immunization is coming due"
+    },
+    "immunization_overdue": {
+      "name": "Immunization Overdue",
+      "description": "When an immunization is past due"
+    },
+    "invitation_received": {
+      "name": "Invitation Received",
+      "description": "When someone shares records with you"
+    },
+    "invitation_accepted": {
+      "name": "Invitation Accepted",
+      "description": "When your sharing invitation is accepted"
+    },
+    "share_revoked": {
+      "name": "Share Revoked",
+      "description": "When access to shared records is revoked"
+    },
+    "login_from_new_device": {
+      "name": "New Device Login",
+      "description": "When your account is accessed from a new device"
+    },
+    "password_changed": {
+      "name": "Password Changed",
+      "description": "When your password is changed"
+    }
+  },
+
+  "history": {
+    "title": "Notification History",
+    "description": "Recent notifications sent through your channels",
+    "loading": "Loading history...",
+    "noHistory": "No notifications sent yet",
+    "noHistoryHint": "Notifications will appear here once sent",
+    "showMore": "Show More",
+    "showLess": "Show Less",
+    "page": "Page {{current}} of {{total}}",
+    "status": {
+      "sent": "Sent",
+      "failed": "Failed",
+      "pending": "Pending"
+    },
+    "fields": {
+      "event": "Event",
+      "channel": "Channel",
+      "time": "Time",
+      "status": "Status",
+      "error": "Error"
+    }
+  },
+
+  "validation": {
+    "nameRequired": "Channel name is required",
+    "nameTooLong": "Name cannot exceed 100 characters",
+    "typeRequired": "Channel type is required",
+    "webhookUrlRequired": "Webhook URL is required",
+    "webhookUrlInvalid": "Invalid webhook URL format",
+    "smtpHostRequired": "SMTP server is required",
+    "smtpPortRequired": "SMTP port is required",
+    "smtpPortInvalid": "Port must be between 1 and 65535",
+    "smtpUserRequired": "SMTP username is required",
+    "smtpPasswordRequired": "SMTP password is required",
+    "fromEmailRequired": "From email is required",
+    "fromEmailInvalid": "Invalid email format",
+    "toEmailRequired": "To email is required",
+    "toEmailInvalid": "Invalid email format",
+    "serverUrlRequired": "Server URL is required",
+    "serverUrlInvalid": "Invalid URL format",
+    "appTokenRequired": "App token is required",
+    "urlRequired": "Webhook URL is required",
+    "urlInvalid": "Invalid URL format",
+    "headersInvalid": "Headers must be valid JSON"
+  }
+}

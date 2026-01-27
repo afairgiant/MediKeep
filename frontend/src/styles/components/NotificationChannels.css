@@ -1,0 +1,160 @@
+/* Notification Channels Styles */
+.notification-channels-card {
+  margin-bottom: 0;
+}
+
+.notification-channels {
+  padding: 0;
+}
+
+.notification-channels-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.notification-channels-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--text-primary, #333);
+}
+
+.notification-channels-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary, #666);
+}
+
+.notification-channels-empty-hint {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+}
+
+.notification-channels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notification-channel-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary, #f8f9fa);
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.notification-channel-item:hover {
+  background: var(--bg-hover, #f0f1f3);
+}
+
+.notification-channel-item.disabled {
+  opacity: 0.6;
+}
+
+.channel-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.channel-icon[data-type="discord"] {
+  background: #5865F2;
+}
+
+.channel-icon[data-type="email"] {
+  background: #EA4335;
+}
+
+.channel-icon[data-type="gotify"] {
+  background: #4CAF50;
+}
+
+.channel-icon[data-type="webhook"] {
+  background: #FF9800;
+}
+
+.channel-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.channel-name {
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.625rem;
+  font-weight: bold;
+}
+
+.channel-type {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #666);
+  text-transform: capitalize;
+}
+
+.channel-stats {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #999);
+}
+
+.channel-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-enabled {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.status-disabled {
+  background: #FFEBEE;
+  color: #C62828;
+}
+
+.channel-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .notification-channel-item {
+    flex-wrap: wrap;
+  }
+
+  .channel-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+  }
+}

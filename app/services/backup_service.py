@@ -24,6 +24,7 @@ from app.core.logging.config import get_logger
 from app.core.utils.security import SecurityValidator
 from app.models.models import BackupRecord
 from app.services.file_management_service import file_management_service
+from app.services.notification_service import notify
 
 logger = get_logger(__name__, "app")
 
@@ -58,9 +59,14 @@ class BackupService:
             return "17"
 
     async def create_database_backup(
-        self, description: Optional[str] = None
+        self, description: Optional[str] = None, user_id: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Create a database backup using pg_dump with direct file output."""
+        """Create a database backup using pg_dump with direct file output.
+
+        Args:
+            description: Optional description for the backup
+            user_id: Optional user ID to send notifications to
+        """
         try:
             # Generate backup filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -106,6 +112,19 @@ class BackupService:
                 f"Database backup completed: {backup_filename} ({file_size} bytes)"
             )
 
+            # Send notification if user_id provided
+            if user_id:
+                await notify(
+                    db=self.db,
+                    user_id=user_id,
+                    event_type="backup_completed",
+                    data={
+                        "filename": backup_filename,
+                        "size_mb": round(file_size / 1024 / 1024, 2),
+                        "backup_type": "database"
+                    }
+                )
+
             return {
                 "id": backup_record.id,
                 "backup_type": "database",
@@ -125,6 +144,19 @@ class BackupService:
                 str(backup_path) if "backup_path" in locals() else "",
                 error_msg,
             )
+
+            # Send failure notification if user_id provided
+            if user_id:
+                await notify(
+                    db=self.db,
+                    user_id=user_id,
+                    event_type="backup_failed",
+                    data={
+                        "error": str(e),
+                        "backup_type": "database"
+                    }
+                )
+
             raise Exception(error_msg)
 
     async def _create_native_database_dump(
@@ -271,13 +303,14 @@ class BackupService:
             logger.error(f"Failed to record backup failure: {str(e)}")
 
     async def create_files_backup(
-        self, description: Optional[str] = None
+        self, description: Optional[str] = None, user_id: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Create a backup of the uploads directory using tar.
 
         Args:
             description: Optional description for the backup
+            user_id: Optional user ID to send notifications to
 
         Returns:
             Dictionary containing backup information
@@ -341,6 +374,19 @@ class BackupService:
                 f"Files backup completed successfully: {backup_filename} ({file_size} bytes)"
             )
 
+            # Send notification if user_id provided
+            if user_id:
+                await notify(
+                    db=self.db,
+                    user_id=user_id,
+                    event_type="backup_completed",
+                    data={
+                        "filename": backup_filename,
+                        "size_mb": round(file_size / 1024 / 1024, 2),
+                        "backup_type": "files"
+                    }
+                )
+
             return {
                 "id": backup_record.id,
                 "backup_type": "files",
@@ -360,6 +406,19 @@ class BackupService:
                 str(backup_path) if "backup_path" in locals() else "",
                 error_msg,
             )
+
+            # Send failure notification if user_id provided
+            if user_id:
+                await notify(
+                    db=self.db,
+                    user_id=user_id,
+                    event_type="backup_failed",
+                    data={
+                        "error": str(e),
+                        "backup_type": "files"
+                    }
+                )
+
             raise Exception(error_msg)
 
     async def list_backups(self) -> List[Dict[str, Any]]:
@@ -786,13 +845,14 @@ class BackupService:
             raise Exception(f"Failed to cleanup orphaned files: {str(e)}")
 
     async def create_full_backup(
-        self, description: Optional[str] = None
+        self, description: Optional[str] = None, user_id: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Create a full system backup (database + files) in a single archive.
 
         Args:
             description: Optional description for the backup
+            user_id: Optional user ID to send notifications to
 
         Returns:
             Dictionary containing backup information
@@ -884,6 +944,19 @@ class BackupService:
                 f"Full backup completed successfully: {backup_filename} ({file_size} bytes)"
             )
 
+            # Send notification if user_id provided
+            if user_id:
+                await notify(
+                    db=self.db,
+                    user_id=user_id,
+                    event_type="backup_completed",
+                    data={
+                        "filename": backup_filename,
+                        "size_mb": round(file_size / 1024 / 1024, 2),
+                        "backup_type": "full"
+                    }
+                )
+
             return {
                 "id": backup_record.id,
                 "backup_type": "full",
@@ -904,6 +977,19 @@ class BackupService:
                 str(backup_path) if "backup_path" in locals() else "",
                 error_msg,
             )
+
+            # Send failure notification if user_id provided
+            if user_id:
+                await notify(
+                    db=self.db,
+                    user_id=user_id,
+                    event_type="backup_failed",
+                    data={
+                        "error": str(e),
+                        "backup_type": "full"
+                    }
+                )
+
             raise Exception(error_msg)
 
     async def _create_database_dump(self, output_path: Path) -> None:

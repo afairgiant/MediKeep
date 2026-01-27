@@ -6,6 +6,7 @@ import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';
 import DeleteAccountModal from '../components/auth/DeleteAccountModal';
 import PaperlessSettings from '../components/settings/PaperlessSettings';
+import NotificationSettings from '../components/settings/NotificationSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import { getVersionInfo } from '../services/systemService';
@@ -18,13 +19,14 @@ import { toast } from 'react-toastify';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'notifications']);
   const { user, updateSessionTimeout } = useAuth();
   const {
     preferences: userPreferences,
     loading: loadingPreferences,
     updateLocalPreferences,
   } = useUserPreferences();
+  const [activeTab, setActiveTab] = useState('general');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
     useState(false);
@@ -341,6 +343,24 @@ const Settings = () => {
         showBackButton={true}
       />
 
+      {/* Settings Tabs */}
+      <div className="settings-tabs">
+        <button
+          className={`settings-tab ${activeTab === 'general' ? 'active' : ''}`}
+          onClick={() => setActiveTab('general')}
+        >
+          {t('settings.tabs.general', 'General')}
+        </button>
+        <button
+          className={`settings-tab ${activeTab === 'notifications' ? 'active' : ''}`}
+          onClick={() => setActiveTab('notifications')}
+        >
+          {t('settings.tabs.notifications', 'Notifications')}
+        </button>
+      </div>
+
+      {/* General Tab Content */}
+      {activeTab === 'general' && (
       <div className="settings-content">
         {/* Security Settings Section */}
         <Card>
@@ -663,6 +683,14 @@ const Settings = () => {
           </Card>
         )}
       </div>
+      )}
+
+      {/* Notifications Tab Content */}
+      {activeTab === 'notifications' && (
+        <div className="settings-content">
+          <NotificationSettings />
+        </div>
+      )}
 
       {/* Change Password Modal */}
       <ChangePasswordModal

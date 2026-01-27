@@ -1842,5 +1842,78 @@
       "pathology": "Tissue & Biopsy Analysis",
       "other": "Other Tests"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your application preferences and settings",
+    "tabs": {
+      "general": "General",
+      "notifications": "Notifications"
+    },
+    "sections": {
+      "security": "Security",
+      "accountManagement": "Account Management",
+      "systemInfo": "System Information",
+      "preferences": "Application Preferences",
+      "documentStorage": "Document Storage"
+    },
+    "security": {
+      "password": {
+        "title": "Password",
+        "description": "Change your account password to keep your account secure",
+        "button": "Change Password"
+      }
+    },
+    "account": {
+      "deleteAccount": {
+        "title": "Delete Account",
+        "description": "Permanently delete your account and all associated medical data. This action cannot be undone.",
+        "button": "Delete Account"
+      }
+    },
+    "system": {
+      "version": {
+        "title": "Application Version",
+        "loading": "Loading version information...",
+        "unavailable": "Version information unavailable",
+        "unknownApp": "Unknown App",
+        "unknownVersion": "Unknown Version"
+      }
+    },
+    "preferences": {
+      "unitSystem": {
+        "title": "Unit System",
+        "description": "Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units",
+        "imperial": "Imperial (lbs, feet, °F)",
+        "metric": "Metric (kg, cm, °C)"
+      },
+      "dateFormat": {
+        "title": "Date Format",
+        "description": "Choose how dates are displayed throughout the application",
+        "mdy": "MM/DD/YYYY (US)",
+        "dmy": "DD/MM/YYYY (European)",
+        "ymd": "YYYY-MM-DD (ISO)"
+      },
+      "sessionTimeout": {
+        "title": "Session Timeout",
+        "description": "Set the duration of inactivity before your session expires (in minutes)",
+        "range": "minutes (5-1440)"
+      }
+    },
+    "documents": {
+      "description": "Configure how your medical documents are stored and managed",
+      "cleanup": {
+        "title": "File Cleanup",
+        "description": "Clean up out-of-sync files and resolve document storage inconsistencies. This will reset failed uploads, clear orphaned tasks, and fix database sync issues.",
+        "button": "Cleanup Files",
+        "cleaning": "Cleaning..."
+      }
+    },
+    "actions": {
+      "unsavedChanges": "You have unsaved changes",
+      "reset": "Reset Changes",
+      "save": "Save All Changes",
+      "saving": "Saving..."
+    }
   }
 }

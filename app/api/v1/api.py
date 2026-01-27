@@ -22,6 +22,7 @@ from app.api.v1.endpoints import (
     lab_result_file,
     lab_test_component,
     medication,
+    notifications,
     paperless,
     patients,
     patient_management,
@@ -130,3 +131,6 @@ api_router.include_router(paperless.router, prefix="/paperless", tags=["paperles
 
 # Admin endpoints
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+
+# Notification endpoints
+api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
