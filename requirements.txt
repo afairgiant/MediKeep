@@ -68,6 +68,9 @@ watchfiles==1.0.5
 websockets==15.0.1
 yarl==1.20.1
 
+# Notification framework
+apprise>=1.9.0           # Multi-channel notification library
+
 # PDF OCR dependencies
 pdfplumber==0.10.3       # PDF text extraction
 pdf2image==1.17.0        # PDF to image conversion for OCR

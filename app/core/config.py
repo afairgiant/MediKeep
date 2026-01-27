@@ -227,6 +227,20 @@ class Settings:  # App Info
     )  # Minimum tests extracted to consider parsing successful
     OCR_FALLBACK_MAX_RETRIES: int = 1  # Prevent infinite loops (fixed at 1)
 
+    # Notification Framework Configuration
+    NOTIFICATIONS_ENABLED: bool = (
+        os.getenv("NOTIFICATIONS_ENABLED", "True").lower() == "true"
+    )  # Enable/disable notification system
+    NOTIFICATION_RATE_LIMIT_PER_HOUR: int = int(
+        os.getenv("NOTIFICATION_RATE_LIMIT_PER_HOUR", "100")
+    )  # Max notifications per user per hour
+    NOTIFICATION_HISTORY_RETENTION_DAYS: int = int(
+        os.getenv("NOTIFICATION_HISTORY_RETENTION_DAYS", "90")
+    )  # How long to keep notification history
+    NOTIFICATION_ENCRYPTION_SALT: str = os.getenv(
+        "NOTIFICATION_ENCRYPTION_SALT", "notification_channel_config_salt_v1"
+    )  # Salt for encrypting channel configs
+
     def __init__(self):
         # Ensure upload directory exists with proper error handling
         self._ensure_directory_exists(self.UPLOAD_DIR, "upload")

@@ -1,6 +1,56 @@
 /* Settings Page Styles */
 @import '../themes/variables.css';
 
+/* Settings Tabs */
+.settings-tabs {
+  display: flex;
+  gap: 0;
+  max-width: 800px;
+  margin: 0 auto 0.5rem;
+  padding: 0 1rem;
+  border-bottom: 2px solid var(--color-border, #e0e0e0);
+}
+
+.settings-tab {
+  padding: 0.875rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary, #666);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.settings-tab:hover {
+  color: var(--color-text-primary, #333);
+}
+
+.settings-tab.active {
+  color: var(--color-primary, #4f46e5);
+}
+
+.settings-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-primary, #4f46e5);
+}
+
+.settings-tab:focus {
+  outline: none;
+}
+
+.settings-tab:focus-visible {
+  outline: 2px solid var(--color-primary, #4f46e5);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
 .settings-content {
   display: flex;
   flex-direction: column;
