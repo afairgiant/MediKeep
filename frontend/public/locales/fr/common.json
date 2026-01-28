@@ -1574,7 +1574,10 @@
       "practitioners": "Médecins",
       "pharmacies": "Pharmacies",
       "emergency_contacts": "Contacts d'urgence",
-      "family_history": "Historique familial"
+      "family_history": "Historique familial",
+      "symptoms": "Symptômes",
+      "injuries": "Blessures",
+      "insurance": "Assurance"
     },
     "settingsModal": {
       "title": "Paramètres de rapport",

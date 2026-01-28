@@ -16,8 +16,8 @@ from sqlalchemy.orm import Session
 from app.core.logging.config import get_logger
 from app.models.models import (
     Allergy, Condition, EmergencyContact, Encounter, FamilyCondition, FamilyMember, Immunization,
-    LabResult, Medication, Patient, Pharmacy, Practitioner, Procedure,
-    ReportGenerationAudit, ReportTemplate, Treatment, User, Vitals
+    Injury, Insurance, LabResult, Medication, Patient, Pharmacy, Practitioner, Procedure,
+    ReportGenerationAudit, ReportTemplate, Symptom, SymptomOccurrence, Treatment, User, Vitals
 )
 from app.schemas.custom_reports import (
     CategorySummary, CustomReportError, CustomReportRequest,
@@ -47,7 +47,10 @@ class CustomReportService:
         'emergency_contacts': EmergencyContact,
         'practitioners': Practitioner,
         'pharmacies': Pharmacy,
-        'family_history': FamilyMember
+        'family_history': FamilyMember,
+        'symptoms': Symptom,
+        'injuries': Injury,
+        'insurance': Insurance
     }
     
     def __init__(self, db: Session):
@@ -370,9 +373,21 @@ class CustomReportService:
             'family_history': {
                 'primary': ['name'],
                 'fallbacks': ['relationship']
+            },
+            'symptoms': {
+                'primary': ['symptom_name'],
+                'fallbacks': ['category', 'general_notes']
+            },
+            'injuries': {
+                'primary': ['injury_name'],
+                'fallbacks': ['body_part', 'mechanism', 'notes']
+            },
+            'insurance': {
+                'primary': ['company_name'],
+                'fallbacks': ['plan_name', 'insurance_type', 'member_name']
             }
         }
-        
+
         # Get field configuration for this category
         field_config = category_field_map.get(category, {
             'primary': ['name', 'title'],
@@ -412,7 +427,7 @@ class CustomReportService:
         category_date_map = {
             'medications': 'effective_period_start',
             'conditions': 'onset_date',
-            'procedures': 'date', 
+            'procedures': 'date',
             'treatments': 'start_date',
             'lab_results': 'ordered_date',
             'immunizations': 'administered_date',
@@ -422,7 +437,10 @@ class CustomReportService:
             'emergency_contacts': 'created_at',
             'practitioners': 'created_at',
             'pharmacies': 'created_at',
-            'family_history': 'created_at'
+            'family_history': 'created_at',
+            'symptoms': 'first_occurrence_date',
+            'injuries': 'date_of_injury',
+            'insurance': 'effective_date'
         }
         
         # Try the specific field first
@@ -639,7 +657,63 @@ class CustomReportService:
                     pass
                 
                 return " | ".join(parts) if parts else "Family member details"
-            
+
+            elif category == 'symptoms':
+                parts = []
+                category_val = getattr(item, 'category', None)
+                status = getattr(item, 'status', None)
+                is_chronic = getattr(item, 'is_chronic', None)
+                typical_triggers = getattr(item, 'typical_triggers', None)
+
+                if category_val:
+                    parts.append(f"Category: {category_val}")
+                if status:
+                    parts.append(f"Status: {status}")
+                if is_chronic:
+                    parts.append("Chronic")
+                if typical_triggers:
+                    triggers_display = typical_triggers[:50] + "..." if len(str(typical_triggers)) > 50 else typical_triggers
+                    parts.append(f"Triggers: {triggers_display}")
+
+                return " | ".join(parts) if parts else "Symptom details"
+
+            elif category == 'injuries':
+                parts = []
+                body_part = getattr(item, 'body_part', None)
+                severity = getattr(item, 'severity', None)
+                status = getattr(item, 'status', None)
+                mechanism = getattr(item, 'mechanism', None)
+
+                if body_part:
+                    parts.append(f"Body Part: {body_part}")
+                if severity:
+                    parts.append(f"Severity: {severity}")
+                if status:
+                    parts.append(f"Status: {status}")
+                if mechanism:
+                    mech_display = mechanism[:30] + "..." if len(str(mechanism)) > 30 else mechanism
+                    parts.append(f"Cause: {mech_display}")
+
+                return " | ".join(parts) if parts else "Injury details"
+
+            elif category == 'insurance':
+                parts = []
+                insurance_type = getattr(item, 'insurance_type', None)
+                plan_name = getattr(item, 'plan_name', None)
+                member_id = getattr(item, 'member_id', None)
+                is_primary = getattr(item, 'is_primary', None)
+
+                if insurance_type:
+                    parts.append(insurance_type)
+                if plan_name:
+                    parts.append(f"Plan: {plan_name}")
+                if member_id:
+                    parts.append(f"Member ID: {member_id}")
+                if is_primary:
+                    parts.append("Primary")
+
+                return " | ".join(parts) if parts else "Insurance details"
+
             return f"{category.replace('_', ' ').title()} record"
         except Exception:
             return "Details not available"

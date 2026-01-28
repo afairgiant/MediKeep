@@ -73,6 +73,7 @@ const RecordSelector = ({
             record={record}
             selected={!!selectedRecords[record.id]}
             onToggle={() => onToggleRecord(category, record.id, record)}
+            formatDate={formatDate}
           />
         ))}
       </Stack>
@@ -93,7 +94,7 @@ const RecordSelector = ({
 /**
  * Individual record item component
  */
-const RecordItem = ({ record, selected, onToggle }) => {
+const RecordItem = ({ record, selected, onToggle, formatDate }) => {
   return (
     <Paper 
       p="md" 

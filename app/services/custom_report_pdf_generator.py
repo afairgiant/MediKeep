@@ -51,7 +51,10 @@ class CustomReportPDFGenerator:
             'practitioners': 'Healthcare Providers',
             'pharmacies': 'Pharmacies',
             'emergency_contacts': 'Emergency Contacts',
-            'family_history': 'Family History'
+            'family_history': 'Family History',
+            'symptoms': 'Symptoms',
+            'injuries': 'Injuries',
+            'insurance': 'Insurance'
         }
 
     def _try_register_font(self, font_name: str, font_paths: List[str]) -> bool:
@@ -606,7 +609,7 @@ class CustomReportPDFGenerator:
         """Get medical icon/symbol for each category"""
         icons = {
             'medications': '[RX]',
-            'conditions': '[MED]', 
+            'conditions': '[MED]',
             'allergies': '[!]',
             'lab_results': '[LAB]',
             'immunizations': '[VAX]',
@@ -616,7 +619,11 @@ class CustomReportPDFGenerator:
             'vitals': '[VITAL]',
             'practitioners': '[DR]',
             'pharmacies': '[PHARM]',
-            'emergency_contacts': '[EMRG]'
+            'emergency_contacts': '[EMRG]',
+            'family_history': '[FAM]',
+            'symptoms': '[SX]',
+            'injuries': '[INJ]',
+            'insurance': '[INS]'
         }
         return icons.get(category, '[INFO]')
     
@@ -864,6 +871,12 @@ class CustomReportPDFGenerator:
             story.extend(self._format_emergency_contacts(records))
         elif category == 'family_history':
             story.extend(self._format_family_history(records))
+        elif category == 'symptoms':
+            story.extend(self._format_symptoms(records))
+        elif category == 'injuries':
+            story.extend(self._format_injuries(records))
+        elif category == 'insurance':
+            story.extend(self._format_insurance(records))
         else:
             # Generic formatting for unknown categories
             story.extend(self._format_generic_records(records))
@@ -1765,15 +1778,246 @@ class CustomReportPDFGenerator:
         """Format date values consistently"""
         if date_value is None:
             return 'Not specified'
-        
+
         if isinstance(date_value, str):
             try:
                 date_obj = datetime.fromisoformat(date_value.replace('Z', '+00:00'))
                 return date_obj.strftime('%B %d, %Y')
             except ValueError:
                 return date_value
-        
+
         try:
             return date_value.strftime('%B %d, %Y')
         except AttributeError:
             return str(date_value)
+
+    def _format_symptoms(self, records: List[Dict[str, Any]]) -> List:
+        """Format symptom records with occurrence information"""
+        story = []
+
+        # Group symptoms by status
+        active_symptoms = [r for r in records if (r.get('status') or '').lower() in ['active', 'ongoing', '']]
+        resolved_symptoms = [r for r in records if (r.get('status') or '').lower() in ['resolved', 'inactive']]
+
+        if active_symptoms:
+            story.append(Paragraph("<b><i>Active Symptoms</i></b>", self.styles['CustomBody']))
+            for record in active_symptoms:
+                story.extend(self._format_single_symptom(record))
+
+        if resolved_symptoms:
+            story.append(Spacer(1, 0.1*inch))
+            story.append(Paragraph("<b><i>Resolved Symptoms</i></b>", self.styles['CustomBody']))
+            for record in resolved_symptoms:
+                story.extend(self._format_single_symptom(record))
+
+        return story
+
+    def _format_single_symptom(self, record: Dict[str, Any]) -> List:
+        """Format a single symptom record"""
+        story = []
+
+        # Symptom name as header
+        name = record.get('symptom_name', 'Unknown Symptom')
+        is_chronic = record.get('is_chronic', False)
+        chronic_badge = " [CHRONIC]" if is_chronic else ""
+        story.append(Paragraph(f"<b>{name}{chronic_badge}</b>", self.styles['CustomBody']))
+
+        # Build info lines
+        info_parts = []
+        if record.get('category'):
+            info_parts.append(f"Category: {record['category']}")
+        if record.get('status'):
+            info_parts.append(f"Status: {record['status']}")
+        if record.get('first_occurrence_date'):
+            info_parts.append(f"First Occurred: {self._format_date(record['first_occurrence_date'])}")
+        if record.get('last_occurrence_date'):
+            info_parts.append(f"Last Occurred: {self._format_date(record['last_occurrence_date'])}")
+
+        if info_parts:
+            story.append(Paragraph(f"  {' | '.join(info_parts)}", self.styles['CustomBody']))
+
+        # Triggers
+        if record.get('typical_triggers'):
+            story.append(Paragraph(f"  Typical Triggers: {record['typical_triggers']}", self.styles['CustomBody']))
+
+        # Notes
+        if record.get('general_notes'):
+            story.append(Paragraph(f"  Notes: {record['general_notes']}", self.styles['CustomBody']))
+
+        # Tags
+        if record.get('tags'):
+            tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+            story.append(Paragraph(f"  Tags: {tags}", self.styles['SmallText']))
+
+        story.append(Spacer(1, 0.08*inch))
+        return story
+
+    def _format_injuries(self, records: List[Dict[str, Any]]) -> List:
+        """Format injury records with recovery information"""
+        story = []
+
+        # Group injuries by status
+        active_injuries = [r for r in records if (r.get('status') or '').lower() in ['active', 'healing', 'ongoing', '']]
+        healed_injuries = [r for r in records if (r.get('status') or '').lower() in ['healed', 'resolved', 'recovered']]
+
+        if active_injuries:
+            story.append(Paragraph("<b><i>Active/Healing Injuries</i></b>", self.styles['CustomBody']))
+            for record in active_injuries:
+                story.extend(self._format_single_injury(record))
+
+        if healed_injuries:
+            story.append(Spacer(1, 0.1*inch))
+            story.append(Paragraph("<b><i>Healed Injuries</i></b>", self.styles['CustomBody']))
+            for record in healed_injuries:
+                story.extend(self._format_single_injury(record))
+
+        return story
+
+    def _format_single_injury(self, record: Dict[str, Any]) -> List:
+        """Format a single injury record"""
+        story = []
+
+        # Injury name as header
+        name = record.get('injury_name', 'Unknown Injury')
+        severity = record.get('severity', '')
+        severity_badge = f" [{severity.upper()}]" if severity else ""
+        story.append(Paragraph(f"<b>{name}{severity_badge}</b>", self.styles['CustomBody']))
+
+        # Build primary info
+        info_parts = []
+        if record.get('injury_type'):
+            injury_type = record['injury_type']
+            if isinstance(injury_type, dict):
+                injury_type = injury_type.get('name', str(injury_type))
+            info_parts.append(f"Type: {injury_type}")
+        if record.get('body_part'):
+            body_part = record['body_part']
+            if record.get('laterality'):
+                body_part = f"{record['laterality']} {body_part}"
+            info_parts.append(f"Location: {body_part}")
+        if record.get('status'):
+            info_parts.append(f"Status: {record['status']}")
+
+        if info_parts:
+            story.append(Paragraph(f"  {' | '.join(info_parts)}", self.styles['CustomBody']))
+
+        # Date and mechanism
+        date_mech_parts = []
+        if record.get('date_of_injury'):
+            date_mech_parts.append(f"Date: {self._format_date(record['date_of_injury'])}")
+        if record.get('mechanism'):
+            date_mech_parts.append(f"Cause: {record['mechanism']}")
+
+        if date_mech_parts:
+            story.append(Paragraph(f"  {' | '.join(date_mech_parts)}", self.styles['CustomBody']))
+
+        # Treatment and recovery
+        if record.get('treatment_received'):
+            story.append(Paragraph(f"  Treatment: {record['treatment_received']}", self.styles['CustomBody']))
+
+        if record.get('recovery_notes'):
+            story.append(Paragraph(f"  Recovery Notes: {record['recovery_notes']}", self.styles['CustomBody']))
+
+        if record.get('practitioner'):
+            story.append(Paragraph(f"  Treating Provider: {record['practitioner']}", self.styles['CustomBody']))
+
+        # Notes
+        if record.get('notes'):
+            story.append(Paragraph(f"  Notes: {record['notes']}", self.styles['CustomBody']))
+
+        # Tags
+        if record.get('tags'):
+            tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+            story.append(Paragraph(f"  Tags: {tags}", self.styles['SmallText']))
+
+        story.append(Spacer(1, 0.08*inch))
+        return story
+
+    def _format_insurance(self, records: List[Dict[str, Any]]) -> List:
+        """Format insurance records with coverage details"""
+        story = []
+
+        # Group by primary status
+        primary_insurance = [r for r in records if r.get('is_primary')]
+        secondary_insurance = [r for r in records if not r.get('is_primary')]
+
+        if primary_insurance:
+            story.append(Paragraph("<b><i>Primary Insurance</i></b>", self.styles['CustomBody']))
+            for record in primary_insurance:
+                story.extend(self._format_single_insurance(record))
+
+        if secondary_insurance:
+            story.append(Spacer(1, 0.1*inch))
+            story.append(Paragraph("<b><i>Secondary/Additional Insurance</i></b>", self.styles['CustomBody']))
+            for record in secondary_insurance:
+                story.extend(self._format_single_insurance(record))
+
+        return story
+
+    def _format_single_insurance(self, record: Dict[str, Any]) -> List:
+        """Format a single insurance record"""
+        story = []
+
+        # Company name as header
+        company = record.get('company_name', 'Unknown Insurance')
+        plan = record.get('plan_name', '')
+        if plan:
+            story.append(Paragraph(f"<b>{company}</b> - {plan}", self.styles['CustomBody']))
+        else:
+            story.append(Paragraph(f"<b>{company}</b>", self.styles['CustomBody']))
+
+        # Insurance type and status
+        info_parts = []
+        if record.get('insurance_type'):
+            info_parts.append(f"Type: {record['insurance_type']}")
+        if record.get('status'):
+            info_parts.append(f"Status: {record['status']}")
+        if record.get('employer_group'):
+            info_parts.append(f"Group: {record['employer_group']}")
+
+        if info_parts:
+            story.append(Paragraph(f"  {' | '.join(info_parts)}", self.styles['CustomBody']))
+
+        # Member information
+        member_parts = []
+        if record.get('member_name'):
+            member_parts.append(f"Member: {record['member_name']}")
+        if record.get('member_id'):
+            member_parts.append(f"Member ID: {record['member_id']}")
+        if record.get('group_number'):
+            member_parts.append(f"Group #: {record['group_number']}")
+
+        if member_parts:
+            story.append(Paragraph(f"  {' | '.join(member_parts)}", self.styles['CustomBody']))
+
+        # Policy holder
+        if record.get('policy_holder_name'):
+            holder_info = f"Policy Holder: {record['policy_holder_name']}"
+            if record.get('relationship_to_holder'):
+                holder_info += f" ({record['relationship_to_holder']})"
+            story.append(Paragraph(f"  {holder_info}", self.styles['CustomBody']))
+
+        # Dates
+        date_parts = []
+        if record.get('effective_date'):
+            date_parts.append(f"Effective: {self._format_date(record['effective_date'])}")
+        if record.get('expiration_date'):
+            date_parts.append(f"Expires: {self._format_date(record['expiration_date'])}")
+
+        if date_parts:
+            story.append(Paragraph(f"  {' | '.join(date_parts)}", self.styles['CustomBody']))
+
+        # Coverage details
+        if record.get('coverage_details'):
+            story.append(Paragraph(f"  Coverage: {record['coverage_details']}", self.styles['CustomBody']))
+
+        # Contact info
+        if record.get('contact_info'):
+            story.append(Paragraph(f"  Contact: {record['contact_info']}", self.styles['CustomBody']))
+
+        # Notes
+        if record.get('notes'):
+            story.append(Paragraph(f"  Notes: {record['notes']}", self.styles['CustomBody']))
+
+        story.append(Spacer(1, 0.08*inch))
+        return story
