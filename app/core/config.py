@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -237,9 +238,8 @@ class Settings:  # App Info
     NOTIFICATION_HISTORY_RETENTION_DAYS: int = int(
         os.getenv("NOTIFICATION_HISTORY_RETENTION_DAYS", "90")
     )  # How long to keep notification history (TODO: implement cleanup job)
-    NOTIFICATION_ENCRYPTION_SALT: str = os.getenv(
-        "NOTIFICATION_ENCRYPTION_SALT", "notification_channel_config_salt_v1"
-    )  # Salt for encrypting channel configs
+    # NOTIFICATION_ENCRYPTION_SALT: Derived from SECRET_KEY by default, or set explicitly via env var.
+    # Note: Rotating SECRET_KEY will invalidate existing channel configs (see property docstring).
 
     def __init__(self):
         # Ensure upload directory exists with proper error handling
@@ -248,12 +248,28 @@ class Settings:  # App Info
         # Ensure backup directory exists with proper error handling
         self._ensure_directory_exists(self.BACKUP_DIR, "backup")
 
-        # Warn if using default notification encryption salt
-        if self.NOTIFICATION_ENCRYPTION_SALT == "notification_channel_config_salt_v1":
-            logging.warning(
-                "SECURITY WARNING: Using default NOTIFICATION_ENCRYPTION_SALT. "
-                "Set a unique value via environment variable for production use."
-            )
+    @property
+    def NOTIFICATION_ENCRYPTION_SALT(self) -> str:
+        """
+        Get notification encryption salt.
+
+        If NOTIFICATION_ENCRYPTION_SALT env var is set, use that value.
+        Otherwise, derive from SECRET_KEY using SHA-256.
+
+        Note: The encryption key is derived from BOTH SECRET_KEY and this salt
+        via PBKDF2. Changing SECRET_KEY will invalidate existing encrypted
+        channel configs regardless of this salt value. Setting an explicit salt
+        only prevents additional breakage if the default derivation changes.
+        """
+        explicit_salt = os.getenv("NOTIFICATION_ENCRYPTION_SALT")
+        if explicit_salt:
+            return explicit_salt
+
+        # Derive from SECRET_KEY with a fixed context
+        derived = hashlib.sha256(
+            f"{self.SECRET_KEY}:notification_channel_config".encode()
+        ).hexdigest()
+        return derived
 
     @property
     def sso_configured(self) -> bool:

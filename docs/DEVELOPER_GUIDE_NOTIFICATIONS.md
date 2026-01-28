@@ -486,17 +486,29 @@ NOTIFICATION_RATE_LIMIT_PER_HOUR=100
 # How long to keep notification history
 NOTIFICATION_HISTORY_RETENTION_DAYS=90
 
-# Salt for encrypting channel configs (change in production!)
-NOTIFICATION_ENCRYPTION_SALT=your_secure_salt_here
+# Optional: Encryption salt for channel configs
+# If not set, automatically derived from SECRET_KEY
+# Note: Changing SECRET_KEY will invalidate existing channel configs (see below)
+# NOTIFICATION_ENCRYPTION_SALT=your_explicit_salt_here
 ```
 
 ## Security Considerations
 
-1. **Channel configs are encrypted** using Fernet symmetric encryption
+1. **Channel configs are encrypted** using Fernet symmetric encryption with a key derived from both `SECRET_KEY` and `NOTIFICATION_ENCRYPTION_SALT`
 2. **Configs are masked** when returned via API (passwords show as `***`)
 3. **Rate limiting** prevents notification spam
 4. **User ownership** is verified for all channel operations
 5. **Test notifications** reveal if credentials are valid, so they're logged
+
+### Rotating SECRET_KEY
+
+The encryption key for notification channel configs is derived from both `SECRET_KEY` and `NOTIFICATION_ENCRYPTION_SALT` via PBKDF2. **Changing `SECRET_KEY` will invalidate all existing encrypted channel configurations.**
+
+If you need to rotate `SECRET_KEY`:
+
+1. Users will need to re-configure their notification channels after the change
+2. Existing channel configs will fail to decrypt and should be deleted
+3. Consider notifying users before the rotation so they can note their channel settings
 
 ## Troubleshooting
 

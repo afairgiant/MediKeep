@@ -885,7 +885,10 @@ const BackupTableRow = ({
   onRestore,
   restoring,
   formatFileSize,
-}) => (
+}) => {
+  const { formatDateTime } = useDateFormat();
+
+  return (
   <tr>
     <td>
       <span className={`backup-type ${backup.backup_type}`}>
@@ -941,6 +944,7 @@ const BackupTableRow = ({
       </div>
     </td>
   </tr>
-);
+  );
+};
 
 export default BackupManagement;
