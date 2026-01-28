@@ -31,12 +31,15 @@ def json_serializer(obj):
     """Custom JSON serializer for complex objects in export data."""
     if hasattr(obj, "isoformat"):
         return obj.isoformat()
-    if hasattr(obj, "__dict__"):
-        return str(obj)
+    if isinstance(obj, BaseModel):
+        # Recursively serialize Pydantic models to preserve their structure
+        return {key: json_serializer(value) for key, value in obj.model_dump().items()}
     if isinstance(obj, (list, tuple)):
         return [json_serializer(item) for item in obj]
     if isinstance(obj, dict):
         return {key: json_serializer(value) for key, value in obj.items()}
+    if hasattr(obj, "__dict__"):
+        return str(obj)
     return str(obj)
 
 
