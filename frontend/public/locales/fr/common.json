@@ -1621,7 +1621,11 @@
       "vitals": "Signes vitaux",
       "emergency_contacts": "Contacts d'urgence",
       "practitioners": "Professionnels de santé",
-      "pharmacies": "Pharmacies"
+      "pharmacies": "Pharmacies",
+      "symptoms": "Symptômes",
+      "injuries": "Blessures",
+      "family_history": "Antécédents familiaux",
+      "insurance": "Assurance"
     },
     "exportMode": {
       "title": "Mode d'exportation",

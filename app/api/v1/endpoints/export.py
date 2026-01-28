@@ -20,7 +20,9 @@ from app.api.deps import get_current_user_id, get_db
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.core.logging.constants import LogFields
+from app.models.models import User
 from app.services.export_service import ExportService
+from app.services.paperless_client import create_paperless_client
 
 logger = get_logger(__name__, "app")
 
@@ -51,18 +53,22 @@ class ExportFormat(str, Enum):
 
 class ExportScope(str, Enum):
     ALL = "all"
-    MEDICATIONS = "medications"
-    LAB_RESULTS = "lab_results"
     ALLERGIES = "allergies"
     CONDITIONS = "conditions"
-    IMMUNIZATIONS = "immunizations"
-    PROCEDURES = "procedures"
-    TREATMENTS = "treatments"
-    ENCOUNTERS = "encounters"
-    VITALS = "vitals"
     EMERGENCY_CONTACTS = "emergency_contacts"
-    PRACTITIONERS = "practitioners"
+    ENCOUNTERS = "encounters"
+    FAMILY_HISTORY = "family_history"
+    IMMUNIZATIONS = "immunizations"
+    INJURIES = "injuries"
+    INSURANCE = "insurance"
+    LAB_RESULTS = "lab_results"
+    MEDICATIONS = "medications"
     PHARMACIES = "pharmacies"
+    PRACTITIONERS = "practitioners"
+    PROCEDURES = "procedures"
+    SYMPTOMS = "symptoms"
+    TREATMENTS = "treatments"
+    VITALS = "vitals"
 
 
 class BulkExportRequest(BaseModel):
@@ -189,6 +195,19 @@ async def export_patient_data(
                 if files_info:
                     # Create ZIP file in memory
                     zip_buffer = io.BytesIO()
+                    files_added = 0
+
+                    # Query user once if there are paperless files to export
+                    has_paperless_files = any(
+                        f.get("storage_backend") == "paperless" for f in files_info
+                    )
+                    paperless_user = None
+                    if has_paperless_files:
+                        paperless_user = (
+                            db.query(User)
+                            .filter(User.id == current_user_id)
+                            .first()
+                        )
 
                     with zipfile.ZipFile(
                         zip_buffer, "w", zipfile.ZIP_DEFLATED
@@ -200,32 +219,79 @@ async def export_patient_data(
                         # Add each lab result file to the ZIP
                         for file_info in files_info:
                             try:
-                                file_path = file_info["file_path"]
-                                if os.path.exists(file_path):
-                                    # Create a safe filename for the ZIP
-                                    safe_filename = f"{file_info['test_name']}_{file_info['file_name']}".replace(
-                                        " ", "_"
-                                    )
-                                    # Remove any potentially problematic characters
-                                    safe_filename = "".join(
-                                        c
-                                        for c in safe_filename
-                                        if c.isalnum() or c in "._-"
-                                    )
+                                storage_backend = file_info.get(
+                                    "storage_backend", "local"
+                                )
 
-                                    zip_file.write(
-                                        file_path, f"lab_files/{safe_filename}"
+                                # Create a safe filename for the ZIP
+                                safe_filename = f"{file_info['test_name']}_{file_info['file_name']}".replace(
+                                    " ", "_"
+                                )
+                                # Remove any potentially problematic characters
+                                safe_filename = "".join(
+                                    c
+                                    for c in safe_filename
+                                    if c.isalnum() or c in "._-"
+                                )
+
+                                if storage_backend == "local":
+                                    # Handle local files
+                                    file_path = file_info["file_path"]
+                                    if file_path and os.path.exists(file_path):
+                                        zip_file.write(
+                                            file_path, f"lab_files/{safe_filename}"
+                                        )
+                                        files_added += 1
+                                    else:
+                                        logger.warning(
+                                            "Lab result file not found during export",
+                                            extra={
+                                                LogFields.CATEGORY: "app",
+                                                LogFields.EVENT: "export_file_not_found",
+                                                LogFields.USER_ID: current_user_id,
+                                                "file_path": file_path,
+                                            },
+                                        )
+                                elif storage_backend == "paperless":
+                                    # Handle paperless documents
+                                    paperless_doc_id = file_info.get(
+                                        "paperless_document_id"
                                     )
-                                else:
-                                    logger.warning(
-                                        "Lab result file not found during export",
-                                        extra={
-                                            LogFields.CATEGORY: "app",
-                                            LogFields.EVENT: "export_file_not_found",
-                                            LogFields.USER_ID: current_user_id,
-                                            "file_path": file_path,
-                                        },
-                                    )
+                                    if paperless_doc_id and paperless_user:
+                                        if (
+                                            paperless_user.paperless_enabled
+                                            and paperless_user.paperless_url
+                                        ):
+                                            try:
+                                                # Use async context manager for proper cleanup
+                                                async with create_paperless_client(
+                                                    url=paperless_user.paperless_url,
+                                                    encrypted_token=paperless_user.paperless_api_token_encrypted,
+                                                    user_id=current_user_id,
+                                                ) as client:
+                                                    doc_content = (
+                                                        await client.download_document(
+                                                            paperless_doc_id
+                                                        )
+                                                    )
+                                                    zip_file.writestr(
+                                                        f"lab_files/{safe_filename}",
+                                                        doc_content,
+                                                    )
+                                                    files_added += 1
+                                            except Exception as paperless_error:
+                                                logger.warning(
+                                                    f"Failed to download paperless document: {paperless_doc_id}",
+                                                    extra={
+                                                        LogFields.CATEGORY: "app",
+                                                        LogFields.EVENT: "export_paperless_download_failed",
+                                                        LogFields.USER_ID: current_user_id,
+                                                        LogFields.ERROR: str(
+                                                            paperless_error
+                                                        ),
+                                                        "paperless_document_id": paperless_doc_id,
+                                                    },
+                                                )
                             except Exception as file_error:
                                 logger.error(
                                     f"Failed to add lab file to export ZIP: {file_info['file_name']}",
@@ -250,9 +316,10 @@ async def export_patient_data(
                         request,
                         current_user_id,
                         "export_zip_generated",
-                        message="Generated ZIP export with files",
+                        message=f"Generated ZIP export with {files_added} files",
                         export_filename=zip_filename,
                         size_bytes=len(zip_content),
+                        files_included=files_added,
                     )
 
                     return Response(
@@ -400,49 +467,9 @@ async def get_supported_formats():
                 "description": "Complete medical history",
             },
             {
-                "value": "medications",
-                "label": "Medications",
-                "description": "Current and past medications",
-            },
-            {
-                "value": "lab_results",
-                "label": "Lab Results",
-                "description": "Laboratory test results",
-            },
-            {
                 "value": "allergies",
                 "label": "Allergies",
                 "description": "Known allergies and reactions",
-            },
-            {
-                "value": "conditions",
-                "label": "Medical Conditions",
-                "description": "Diagnosed conditions",
-            },
-            {
-                "value": "immunizations",
-                "label": "Immunizations",
-                "description": "Vaccination records",
-            },
-            {
-                "value": "procedures",
-                "label": "Procedures",
-                "description": "Medical procedures performed",
-            },
-            {
-                "value": "treatments",
-                "label": "Treatments",
-                "description": "Treatment plans and history",
-            },
-            {
-                "value": "encounters",
-                "label": "Encounters",
-                "description": "Medical visits and consultations",
-            },
-            {
-                "value": "vitals",
-                "label": "Vital Signs",
-                "description": "Blood pressure, weight, etc.",
             },
             {
                 "value": "emergency_contacts",
@@ -450,14 +477,74 @@ async def get_supported_formats():
                 "description": "Emergency contact information",
             },
             {
+                "value": "encounters",
+                "label": "Encounters",
+                "description": "Medical visits and consultations",
+            },
+            {
+                "value": "family_history",
+                "label": "Family History",
+                "description": "Family medical history records",
+            },
+            {
                 "value": "practitioners",
                 "label": "Healthcare Practitioners",
                 "description": "Healthcare providers and specialists",
             },
             {
+                "value": "immunizations",
+                "label": "Immunizations",
+                "description": "Vaccination records",
+            },
+            {
+                "value": "injuries",
+                "label": "Injuries",
+                "description": "Injury records and recovery tracking",
+            },
+            {
+                "value": "insurance",
+                "label": "Insurance",
+                "description": "Insurance information and coverage",
+            },
+            {
+                "value": "lab_results",
+                "label": "Lab Results",
+                "description": "Laboratory test results",
+            },
+            {
+                "value": "conditions",
+                "label": "Medical Conditions",
+                "description": "Diagnosed conditions",
+            },
+            {
+                "value": "medications",
+                "label": "Medications",
+                "description": "Current and past medications",
+            },
+            {
                 "value": "pharmacies",
                 "label": "Pharmacies",
                 "description": "Pharmacy locations and information",
+            },
+            {
+                "value": "procedures",
+                "label": "Procedures",
+                "description": "Medical procedures performed",
+            },
+            {
+                "value": "symptoms",
+                "label": "Symptoms",
+                "description": "Symptom tracking and occurrences",
+            },
+            {
+                "value": "treatments",
+                "label": "Treatments",
+                "description": "Treatment plans and history",
+            },
+            {
+                "value": "vitals",
+                "label": "Vital Signs",
+                "description": "Blood pressure, weight, etc.",
             },
         ],
     }
