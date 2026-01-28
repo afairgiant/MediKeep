@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.logging.config import get_logger
 from app.models.models import (
     Allergy, Condition, EmergencyContact, Encounter, FamilyCondition, FamilyMember, Immunization,
-    Injury, Insurance, LabResult, Medication, Patient, Pharmacy, Practitioner, Procedure,
+    Injury, InjuryType, Insurance, LabResult, Medication, Patient, Pharmacy, Practitioner, Procedure,
     ReportGenerationAudit, ReportTemplate, Symptom, SymptomOccurrence, Treatment, User, Vitals
 )
 from app.schemas.custom_reports import (
@@ -672,7 +672,11 @@ class CustomReportService:
                 if is_chronic:
                     parts.append("Chronic")
                 if typical_triggers:
-                    triggers_display = typical_triggers[:50] + "..." if len(str(typical_triggers)) > 50 else typical_triggers
+                    if isinstance(typical_triggers, (list, tuple)):
+                        triggers_text = ", ".join(str(t) for t in typical_triggers)
+                    else:
+                        triggers_text = str(typical_triggers)
+                    triggers_display = triggers_text[:50] + "..." if len(triggers_text) > 50 else triggers_text
                     parts.append(f"Triggers: {triggers_display}")
 
                 return " | ".join(parts) if parts else "Symptom details"
@@ -1009,19 +1013,35 @@ class CustomReportService:
                 logger.info(f"Procedure {record.id} enhanced with practitioner and condition info")
             
             # Special handling for medications - include pharmacy and prescriber names
+            # Special handling for injuries - include practitioner and injury_type names
+            elif category == 'injuries':
+                # Get practitioner name if linked
+                if hasattr(record, 'practitioner_id') and record.practitioner_id:
+                    practitioner = self.db.query(Practitioner).filter(Practitioner.id == record.practitioner_id).first()
+                    if practitioner:
+                        record_dict['practitioner'] = practitioner.name
+
+                # Get injury type name if linked
+                if hasattr(record, 'injury_type_id') and record.injury_type_id:
+                    injury_type = self.db.query(InjuryType).filter(InjuryType.id == record.injury_type_id).first()
+                    if injury_type:
+                        record_dict['injury_type'] = injury_type.name
+
+                logger.info(f"Injury {record.id} enhanced with practitioner and injury type info")
+
             elif category == 'medications':
                 # Get pharmacy name if linked
                 if hasattr(record, 'pharmacy_id') and record.pharmacy_id:
                     pharmacy = self.db.query(Pharmacy).filter(Pharmacy.id == record.pharmacy_id).first()
                     if pharmacy:
                         record_dict['pharmacy_name'] = pharmacy.name
-                
+
                 # Get prescriber name if linked
                 if hasattr(record, 'practitioner_id') and record.practitioner_id:
                     practitioner = self.db.query(Practitioner).filter(Practitioner.id == record.practitioner_id).first()
                     if practitioner:
                         record_dict['prescribing_practitioner'] = practitioner.name
-                
+
                 logger.info(f"Medication {record.id} enhanced with pharmacy and practitioner info")
             
             logger.debug(f"Processed record {record.id}")

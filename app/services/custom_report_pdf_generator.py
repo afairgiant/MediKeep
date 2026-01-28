@@ -1795,8 +1795,8 @@ class CustomReportPDFGenerator:
         """Format symptom records with occurrence information"""
         story = []
 
-        # Group symptoms by status
-        active_symptoms = [r for r in records if (r.get('status') or '').lower() in ['active', 'ongoing', '']]
+        # Group symptoms by status (chronic symptoms are ongoing, so include with active)
+        active_symptoms = [r for r in records if (r.get('status') or '').lower() in ['active', 'ongoing', 'chronic', '']]
         resolved_symptoms = [r for r in records if (r.get('status') or '').lower() in ['resolved', 'inactive']]
 
         if active_symptoms:
@@ -1838,7 +1838,10 @@ class CustomReportPDFGenerator:
 
         # Triggers
         if record.get('typical_triggers'):
-            story.append(Paragraph(f"  Typical Triggers: {record['typical_triggers']}", self.styles['CustomBody']))
+            typical_triggers = record['typical_triggers']
+            if isinstance(typical_triggers, (list, tuple)):
+                typical_triggers = ', '.join(str(t) for t in typical_triggers)
+            story.append(Paragraph(f"  Typical Triggers: {typical_triggers}", self.styles['CustomBody']))
 
         # Notes
         if record.get('general_notes'):
@@ -2007,13 +2010,23 @@ class CustomReportPDFGenerator:
         if date_parts:
             story.append(Paragraph(f"  {' | '.join(date_parts)}", self.styles['CustomBody']))
 
-        # Coverage details
+        # Coverage details (may be JSON)
         if record.get('coverage_details'):
-            story.append(Paragraph(f"  Coverage: {record['coverage_details']}", self.styles['CustomBody']))
+            coverage = record['coverage_details']
+            if isinstance(coverage, dict):
+                coverage_parts = [f"{k}: {v}" for k, v in coverage.items() if v]
+                coverage = ', '.join(coverage_parts) if coverage_parts else None
+            if coverage:
+                story.append(Paragraph(f"  Coverage: {coverage}", self.styles['CustomBody']))
 
-        # Contact info
+        # Contact info (may be JSON)
         if record.get('contact_info'):
-            story.append(Paragraph(f"  Contact: {record['contact_info']}", self.styles['CustomBody']))
+            contact = record['contact_info']
+            if isinstance(contact, dict):
+                contact_parts = [f"{k}: {v}" for k, v in contact.items() if v]
+                contact = ', '.join(contact_parts) if contact_parts else None
+            if contact:
+                story.append(Paragraph(f"  Contact: {contact}", self.styles['CustomBody']))
 
         # Notes
         if record.get('notes'):
