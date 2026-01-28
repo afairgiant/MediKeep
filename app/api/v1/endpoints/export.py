@@ -13,7 +13,6 @@ from enum import Enum
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
@@ -26,6 +25,22 @@ from app.services.export_service import ExportService
 logger = get_logger(__name__, "app")
 
 router = APIRouter()
+
+
+def json_serializer(obj):
+    """Custom JSON serializer for complex objects in export data."""
+    if hasattr(obj, "isoformat"):
+        return obj.isoformat()
+    if isinstance(obj, BaseModel):
+        # Recursively serialize Pydantic models to preserve their structure
+        return {key: json_serializer(value) for key, value in obj.model_dump().items()}
+    if isinstance(obj, (list, tuple)):
+        return [json_serializer(item) for item in obj]
+    if isinstance(obj, dict):
+        return {key: json_serializer(value) for key, value in obj.items()}
+    if hasattr(obj, "__dict__"):
+        return str(obj)
+    return str(obj)
 
 
 class ExportFormat(str, Enum):
@@ -135,19 +150,6 @@ async def export_patient_data(
             media_type = "application/json"
             filename = f"medical_records_{scope.value}_{timestamp}.json"
 
-            def json_serializer(obj):
-                """Custom JSON serializer for complex objects."""
-                if hasattr(obj, "isoformat"):  # datetime objects
-                    return obj.isoformat()
-                elif hasattr(obj, "__dict__"):  # SQLAlchemy models or other objects
-                    return str(obj)
-                elif isinstance(obj, (list, tuple)):
-                    return [json_serializer(item) for item in obj]
-                elif isinstance(obj, dict):
-                    return {key: json_serializer(value) for key, value in obj.items()}
-                else:
-                    return str(obj)
-
             try:
                 content = json.dumps(
                     export_data, default=json_serializer, indent=2, ensure_ascii=False
@@ -248,8 +250,8 @@ async def export_patient_data(
                         request,
                         current_user_id,
                         "export_zip_generated",
-                        message=f"Generated ZIP export with files",
-                        filename=zip_filename,
+                        message="Generated ZIP export with files",
+                        export_filename=zip_filename,
                         size_bytes=len(zip_content),
                     )
 
@@ -257,7 +259,8 @@ async def export_patient_data(
                         content=zip_content,
                         media_type="application/zip",
                         headers={
-                            "Content-Disposition": f'attachment; filename="{zip_filename}"'
+                            "Content-Disposition": f'attachment; filename="{zip_filename}"',
+                            "Content-Length": str(len(zip_content)),
                         },
                     )
 
@@ -269,41 +272,25 @@ async def export_patient_data(
         else:
             raise HTTPException(status_code=400, detail="Unsupported export format")
 
-        # Create appropriate response based on format
-        if format == ExportFormat.PDF:
-            # For PDF, use Response for binary data
-            if not content:
-                raise HTTPException(
-                    status_code=500, detail="Generated PDF content is empty"
-                )
-
-            return Response(
-                content=content,
-                media_type=media_type,
-                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-            )
+        # Convert content to bytes for response
+        if isinstance(content, str):
+            content_bytes = content.encode("utf-8")
         else:
-            # For text-based formats (JSON, CSV), use StreamingResponse
-            if isinstance(content, str):
-                content_bytes = content.encode("utf-8")
-            else:
-                content_bytes = content
+            content_bytes = content
 
-            # Validate content exists
-            if not content_bytes:
-                raise HTTPException(
-                    status_code=500, detail="Generated content is empty"
-                )
-
-            # Create a generator function for the StreamingResponse
-            def generate():
-                yield content_bytes
-
-            return StreamingResponse(
-                generate(),
-                media_type=media_type,
-                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        if not content_bytes:
+            raise HTTPException(
+                status_code=500, detail="Generated content is empty"
             )
+
+        return Response(
+            content=content_bytes,
+            media_type=media_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Content-Length": str(len(content_bytes)),
+            },
+        )
 
     except ValueError as e:
         # Handle specific validation errors (user not found, no active patient)
@@ -500,22 +487,8 @@ async def create_bulk_export(
         export_service = ExportService(db)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        # Create ZIP file in memory
         zip_buffer = io.BytesIO()
-
-        # Custom JSON serializer (same as single export)
-        def json_serializer(obj):
-            """Custom JSON serializer for complex objects."""
-            if hasattr(obj, "isoformat"):  # datetime objects
-                return obj.isoformat()
-            elif hasattr(obj, "__dict__"):  # SQLAlchemy models or other objects
-                return str(obj)
-            elif isinstance(obj, (list, tuple)):
-                return [json_serializer(item) for item in obj]
-            elif isinstance(obj, dict):
-                return {key: json_serializer(value) for key, value in obj.items()}
-            else:
-                return str(obj)
+        failed_scopes = []
 
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             exported_count = 0
@@ -546,10 +519,14 @@ async def create_bulk_export(
                     elif request.format == ExportFormat.CSV:
                         content = export_service.convert_to_csv(export_data, scope)
                         filename = f"medical_records_{scope}_{timestamp}.csv"
+                    elif request.format == ExportFormat.PDF:
+                        content = await export_service.convert_to_pdf(
+                            export_data, include_files=False
+                        )
+                        filename = f"medical_records_{scope}_{timestamp}.pdf"
                     else:
-                        # PDF not supported in bulk for complexity reasons
                         logger.warning(
-                            "PDF format not supported in bulk export",
+                            f"Unsupported format in bulk export: {request.format.value}",
                             extra={
                                 LogFields.CATEGORY: "app",
                                 LogFields.EVENT: "bulk_export_unsupported_format",
@@ -558,6 +535,7 @@ async def create_bulk_export(
                                 "format": request.format.value,
                             },
                         )
+                        failed_scopes.append((scope, f"Unsupported format: {request.format.value}"))
                         continue
 
                     # Add to ZIP
@@ -572,19 +550,28 @@ async def create_bulk_export(
                     exported_count += 1
 
                 except Exception as e:
+                    error_msg = str(e)
                     logger.warning(
-                        f"Failed to export scope in bulk export: {scope}",
+                        f"Failed to export scope in bulk export: {scope}: {error_msg}",
                         extra={
                             LogFields.CATEGORY: "app",
                             LogFields.EVENT: "bulk_export_scope_failed",
                             LogFields.USER_ID: current_user_id,
-                            LogFields.ERROR: str(e),
+                            LogFields.ERROR: error_msg,
                             "scope": scope,
                         },
                     )
+                    failed_scopes.append((scope, error_msg))
                     continue
 
         if exported_count == 0:
+            # Include the actual failure reasons in the error message
+            if failed_scopes:
+                first_error = failed_scopes[0][1]
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Export failed: {first_error}",
+                )
             raise HTTPException(
                 status_code=400,
                 detail="No data could be exported for the selected scopes",
@@ -593,27 +580,37 @@ async def create_bulk_export(
         zip_buffer.seek(0)
         date_str = datetime.now().strftime("%Y-%m-%d")
         zip_filename = f"medical_records_bulk_{date_str}.zip"
+        zip_content = zip_buffer.getvalue()
 
-        # Create a generator function for the StreamingResponse
-        def generate():
-            yield zip_buffer.getvalue()
+        if not zip_content:
+            raise HTTPException(
+                status_code=500,
+                detail="ZIP file generation produced empty content",
+            )
 
         log_endpoint_access(
             logger,
             http_request,
             current_user_id,
             "bulk_export_completed",
-            message=f"Bulk export completed successfully",
+            message="Bulk export completed successfully",
             exported_count=exported_count,
-            filename=zip_filename,
+            export_filename=zip_filename,
+            size_bytes=len(zip_content),
         )
 
-        return StreamingResponse(
-            generate(),
+        return Response(
+            content=zip_content,
             media_type="application/zip",
-            headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'},
+            headers={
+                "Content-Disposition": f'attachment; filename="{zip_filename}"',
+                "Content-Length": str(len(zip_content)),
+            },
         )
 
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is (don't wrap them)
+        raise
     except Exception as e:
         log_endpoint_error(
             logger,
