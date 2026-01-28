@@ -20,7 +20,9 @@ from app.api.deps import get_current_user_id, get_db
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.core.logging.constants import LogFields
+from app.models.models import User
 from app.services.export_service import ExportService
+from app.services.paperless_client import create_paperless_client
 
 logger = get_logger(__name__, "app")
 
@@ -195,6 +197,18 @@ async def export_patient_data(
                     zip_buffer = io.BytesIO()
                     files_added = 0
 
+                    # Query user once if there are paperless files to export
+                    has_paperless_files = any(
+                        f.get("storage_backend") == "paperless" for f in files_info
+                    )
+                    paperless_user = None
+                    if has_paperless_files:
+                        paperless_user = (
+                            db.query(User)
+                            .filter(User.id == current_user_id)
+                            .first()
+                        )
+
                     with zipfile.ZipFile(
                         zip_buffer, "w", zipfile.ZIP_DEFLATED
                     ) as zip_file:
@@ -243,53 +257,41 @@ async def export_patient_data(
                                     paperless_doc_id = file_info.get(
                                         "paperless_document_id"
                                     )
-                                    if paperless_doc_id:
-                                        try:
-                                            # Import paperless client
-                                            from app.services.paperless_client import (
-                                                PaperlessClient,
-                                            )
-                                            from app.models.models import User
-
-                                            # Get user settings for paperless
-                                            user = (
-                                                db.query(User)
-                                                .filter(User.id == current_user_id)
-                                                .first()
-                                            )
-                                            if (
-                                                user
-                                                and user.paperless_enabled
-                                                and user.paperless_url
-                                            ):
-                                                client = PaperlessClient(
-                                                    url=user.paperless_url,
-                                                    api_token=user.paperless_api_token_encrypted,  # Decrypted in client
-                                                )
-                                                doc_content = (
-                                                    await client.download_document(
-                                                        paperless_doc_id
+                                    if paperless_doc_id and paperless_user:
+                                        if (
+                                            paperless_user.paperless_enabled
+                                            and paperless_user.paperless_url
+                                        ):
+                                            try:
+                                                # Use async context manager for proper cleanup
+                                                async with create_paperless_client(
+                                                    url=paperless_user.paperless_url,
+                                                    encrypted_token=paperless_user.paperless_api_token_encrypted,
+                                                    user_id=current_user_id,
+                                                ) as client:
+                                                    doc_content = (
+                                                        await client.download_document(
+                                                            paperless_doc_id
+                                                        )
                                                     )
+                                                    zip_file.writestr(
+                                                        f"lab_files/{safe_filename}",
+                                                        doc_content,
+                                                    )
+                                                    files_added += 1
+                                            except Exception as paperless_error:
+                                                logger.warning(
+                                                    f"Failed to download paperless document: {paperless_doc_id}",
+                                                    extra={
+                                                        LogFields.CATEGORY: "app",
+                                                        LogFields.EVENT: "export_paperless_download_failed",
+                                                        LogFields.USER_ID: current_user_id,
+                                                        LogFields.ERROR: str(
+                                                            paperless_error
+                                                        ),
+                                                        "paperless_document_id": paperless_doc_id,
+                                                    },
                                                 )
-                                                zip_file.writestr(
-                                                    f"lab_files/{safe_filename}",
-                                                    doc_content,
-                                                )
-                                                files_added += 1
-                                                await client.close()
-                                        except Exception as paperless_error:
-                                            logger.warning(
-                                                f"Failed to download paperless document: {paperless_doc_id}",
-                                                extra={
-                                                    LogFields.CATEGORY: "app",
-                                                    LogFields.EVENT: "export_paperless_download_failed",
-                                                    LogFields.USER_ID: current_user_id,
-                                                    LogFields.ERROR: str(
-                                                        paperless_error
-                                                    ),
-                                                    "paperless_document_id": paperless_doc_id,
-                                                },
-                                            )
                             except Exception as file_error:
                                 logger.error(
                                     f"Failed to add lab file to export ZIP: {file_info['file_name']}",
