@@ -1564,7 +1564,10 @@
       "practitioners": "Profissionais de Saúde",
       "pharmacies": "Farmácias",
       "emergency_contacts": "Contatos de Emergência",
-      "family_history": "Histórico Familiar"
+      "family_history": "Histórico Familiar",
+      "symptoms": "Sintomas",
+      "injuries": "Lesões",
+      "insurance": "Seguro"
     },
     "settingsModal": {
       "title": "Configurações do Relatório",

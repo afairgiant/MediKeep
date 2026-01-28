@@ -2104,7 +2104,10 @@
       "practitioners": "Ärzte",
       "pharmacies": "Apotheken",
       "emergency_contacts": "Notfallkontakte",
-      "family_history": "Familiengeschichte"
+      "family_history": "Familiengeschichte",
+      "symptoms": "Symptome",
+      "injuries": "Verletzungen",
+      "insurance": "Versicherung"
     },
     "settingsModal": {
       "title": "Berichtseinstellungen",

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
 import {
+  Center,
   Container,
   Paper,
   Group,
@@ -119,6 +120,9 @@ const ReportBuilder = () => {
     'pharmacies': t('reportBuilder.categories.pharmacies'),
     'emergency_contacts': t('reportBuilder.categories.emergency_contacts'),
     'family_history': t('reportBuilder.categories.family_history'),
+    'symptoms': t('reportBuilder.categories.symptoms'),
+    'injuries': t('reportBuilder.categories.injuries'),
+    'insurance': t('reportBuilder.categories.insurance'),
   };
 
   // Handle template save

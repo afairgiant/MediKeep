@@ -1575,7 +1575,10 @@
       "practitioners": "Practitioners",
       "pharmacies": "Pharmacies",
       "emergency_contacts": "Emergency Contacts",
-      "family_history": "Family History"
+      "family_history": "Family History",
+      "symptoms": "Symptoms",
+      "injuries": "Injuries",
+      "insurance": "Insurance"
     },
     "settingsModal": {
       "title": "Report Settings",

@@ -1564,7 +1564,10 @@
       "practitioners": "Professionisti",
       "pharmacies": "Farmacie",
       "emergency_contacts": "Contatti di emergenza",
-      "family_history": "Storia familiare"
+      "family_history": "Storia familiare",
+      "symptoms": "Sintomi",
+      "injuries": "Lesioni",
+      "insurance": "Assicurazione"
     },
     "settingsModal": {
       "title": "Impostazioni report",
