@@ -286,5 +286,113 @@
       "pathology": "Análisis de tejidos y biopsia",
       "other": "Otras pruebas"
     }
+  },
+  "exportPage": {
+    "title": "Exportar Registros de Salud",
+    "icon": "📤",
+    "description": "Descargue sus datos médicos en varios formatos para respaldo o para compartir con proveedores de salud",
+    "loading": "Cargando opciones de exportación...",
+    "availableData": {
+      "title": "Datos Disponibles",
+      "moreItems": "+{{count}} más"
+    },
+    "scopes": {
+      "all": "Todos los Registros",
+      "medications": "Medicamentos",
+      "lab_results": "Resultados de Laboratorio",
+      "allergies": "Alergias",
+      "conditions": "Condiciones Médicas",
+      "immunizations": "Inmunizaciones",
+      "procedures": "Procedimientos",
+      "treatments": "Tratamientos",
+      "encounters": "Consultas",
+      "vitals": "Signos Vitales",
+      "emergency_contacts": "Contactos de Emergencia",
+      "practitioners": "Profesionales de Salud",
+      "pharmacies": "Farmacias",
+      "symptoms": "Síntomas",
+      "injuries": "Lesiones",
+      "family_history": "Historial Familiar",
+      "insurance": "Seguro Médico"
+    },
+    "exportMode": {
+      "title": "Modo de Exportación",
+      "singleExport": "Exportación Individual",
+      "bulkExport": "Exportación Masiva",
+      "singleDescription": "Exporte un solo tipo de datos en el formato elegido",
+      "bulkDescription": "Exporte múltiples tipos de datos juntos en un archivo ZIP"
+    },
+    "configuration": {
+      "title": "Configuración de Exportación",
+      "format": {
+        "label": "Formato de Exportación",
+        "placeholder": "Seleccionar formato"
+      },
+      "dataToExport": {
+        "label": "Datos a Exportar",
+        "placeholder": "Seleccionar tipo de datos"
+      },
+      "bulkSelection": {
+        "label": "Seleccionar Tipos de Datos para Exportación Masiva"
+      },
+      "dateRange": {
+        "startDate": "Fecha de Inicio (Opcional)",
+        "endDate": "Fecha de Fin (Opcional)"
+      },
+      "includeFiles": "Incluir archivos adjuntos (crea archivo ZIP)",
+      "includePatientInfo": {
+        "label": "Incluir información del paciente (nombre, datos demográficos, etc.)",
+        "description": "Desmarque para excluir datos personales del paciente por privacidad"
+      }
+    },
+    "buttons": {
+      "exporting": "Exportando...",
+      "creatingZip": "Creando ZIP...",
+      "exportAs": "Exportar {{scope}} como {{format}}",
+      "bulkExport": "Exportación Masiva de {{count}} tipos como ZIP",
+      "refreshPage": "Actualizar Página",
+      "retry": "Reintentar",
+      "goToDashboard": "Ir al Panel"
+    },
+    "information": {
+      "title": "Información de Exportación",
+      "json": {
+        "title": "Formato JSON:",
+        "description": "Formato de datos estructurado legible por máquina, ideal para importar a otros sistemas o aplicaciones."
+      },
+      "csv": {
+        "title": "Formato CSV:",
+        "description": "Valores separados por comas adecuados para aplicaciones de hojas de cálculo como Excel o Google Sheets."
+      },
+      "pdf": {
+        "title": "Formato PDF:",
+        "description": "Formato de documento legible perfecto para imprimir o compartir con proveedores de salud."
+      },
+      "bulk": {
+        "title": "Exportación Masiva:",
+        "description": "Crea un archivo ZIP que contiene múltiples tipos de datos en el formato elegido para respaldo completo de datos."
+      },
+      "fileAttachments": {
+        "title": "Archivos Adjuntos:",
+        "description": "Cuando están disponibles para exportaciones PDF, los archivos de resultados de laboratorio pueden incluirse en un archivo ZIP."
+      }
+    },
+    "errors": {
+      "sessionExpired": "Su sesión ha expirado. Por favor actualice la página o inicie sesión nuevamente para acceder a las funciones de exportación.",
+      "noActivePatient": "No hay perfil de paciente seleccionado. Por favor seleccione un paciente desde el panel para usar la función de exportación.",
+      "loadFailed": "Error al cargar datos de exportación: {{message}}",
+      "validationFailed": "{{errors}}",
+      "exportFailed": "Error en la exportación: {{message}}",
+      "bulkExportFailed": "Error en la exportación masiva: {{message}}",
+      "noDataType": "Por favor seleccione al menos un tipo de datos para la exportación masiva",
+      "invalidSettings": "Por favor verifique su configuración de exportación. Asegúrese de haber seleccionado un tipo de datos y formato válidos.",
+      "noDataFound": "No se encontraron datos para los criterios de exportación seleccionados. Intente seleccionar un tipo de datos diferente o rango de fechas.",
+      "bulkInvalidSettings": "Por favor verifique su configuración de exportación masiva. Asegúrese de haber seleccionado al menos un tipo de datos y un formato válido.",
+      "bulkNoDataFound": "No se encontraron datos para los criterios de exportación seleccionados. Intente seleccionar diferentes tipos de datos o ajustar el rango de fechas."
+    },
+    "success": {
+      "exportComplete": "¡Exportación completada con éxito! Su archivo {{format}} ha sido descargado.",
+      "bulkExportComplete": "¡Exportación masiva completada con éxito! Su archivo ZIP con {{count}} tipos de datos ha sido descargado."
+    }
   }
 }

@@ -1622,7 +1622,11 @@
       "vitals": "Vital Signs",
       "emergency_contacts": "Emergency Contacts",
       "practitioners": "Healthcare Practitioners",
-      "pharmacies": "Pharmacies"
+      "pharmacies": "Pharmacies",
+      "symptoms": "Symptoms",
+      "injuries": "Injuries",
+      "family_history": "Family History",
+      "insurance": "Insurance"
     },
     "exportMode": {
       "title": "Export Mode",
