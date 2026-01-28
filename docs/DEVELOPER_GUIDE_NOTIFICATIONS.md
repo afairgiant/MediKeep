@@ -488,13 +488,13 @@ NOTIFICATION_HISTORY_RETENTION_DAYS=90
 
 # Optional: Encryption salt for channel configs
 # If not set, automatically derived from SECRET_KEY
-# Set this explicitly BEFORE changing SECRET_KEY to preserve existing channels
+# Note: Changing SECRET_KEY will invalidate existing channel configs (see below)
 # NOTIFICATION_ENCRYPTION_SALT=your_explicit_salt_here
 ```
 
 ## Security Considerations
 
-1. **Channel configs are encrypted** using Fernet symmetric encryption with a key derived from `SECRET_KEY` (or explicit `NOTIFICATION_ENCRYPTION_SALT` if set)
+1. **Channel configs are encrypted** using Fernet symmetric encryption with a key derived from both `SECRET_KEY` and `NOTIFICATION_ENCRYPTION_SALT`
 2. **Configs are masked** when returned via API (passwords show as `***`)
 3. **Rate limiting** prevents notification spam
 4. **User ownership** is verified for all channel operations
@@ -502,11 +502,13 @@ NOTIFICATION_HISTORY_RETENTION_DAYS=90
 
 ### Rotating SECRET_KEY
 
-If you need to change your `SECRET_KEY`, notification channel configs will break unless you preserve the encryption salt:
+The encryption key for notification channel configs is derived from both `SECRET_KEY` and `NOTIFICATION_ENCRYPTION_SALT` via PBKDF2. **Changing `SECRET_KEY` will invalidate all existing encrypted channel configurations.**
 
-1. Before changing `SECRET_KEY`, set `NOTIFICATION_ENCRYPTION_SALT` to any value (or the current derived salt)
-2. Change `SECRET_KEY`
-3. Notification channels continue working
+If you need to rotate `SECRET_KEY`:
+
+1. Users will need to re-configure their notification channels after the change
+2. Existing channel configs will fail to decrypt and should be deleted
+3. Consider notifying users before the rotation so they can note their channel settings
 
 ## Troubleshooting
 

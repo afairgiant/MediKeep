@@ -238,8 +238,8 @@ class Settings:  # App Info
     NOTIFICATION_HISTORY_RETENTION_DAYS: int = int(
         os.getenv("NOTIFICATION_HISTORY_RETENTION_DAYS", "90")
     )  # How long to keep notification history (TODO: implement cleanup job)
-    # NOTIFICATION_ENCRYPTION_SALT: Derived from SECRET_KEY by default, or set explicitly via env var
-    # See NOTIFICATION_ENCRYPTION_SALT property below
+    # NOTIFICATION_ENCRYPTION_SALT: Derived from SECRET_KEY by default, or set explicitly via env var.
+    # Note: Rotating SECRET_KEY will invalidate existing channel configs (see property docstring).
 
     def __init__(self):
         # Ensure upload directory exists with proper error handling
@@ -256,9 +256,10 @@ class Settings:  # App Info
         If NOTIFICATION_ENCRYPTION_SALT env var is set, use that value.
         Otherwise, derive from SECRET_KEY using SHA-256.
 
-        This allows zero-config for most users while giving flexibility
-        to those who need to rotate SECRET_KEY independently - they can
-        set an explicit salt before changing SECRET_KEY.
+        Note: The encryption key is derived from BOTH SECRET_KEY and this salt
+        via PBKDF2. Changing SECRET_KEY will invalidate existing encrypted
+        channel configs regardless of this salt value. Setting an explicit salt
+        only prevents additional breakage if the default derivation changes.
         """
         explicit_salt = os.getenv("NOTIFICATION_ENCRYPTION_SALT")
         if explicit_salt:
