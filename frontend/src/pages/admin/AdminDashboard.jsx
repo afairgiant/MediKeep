@@ -516,7 +516,10 @@ const SystemHealthCard = ({
   error,
   getHealthStatusColor,
   isRefreshing = false,
-}) => (
+}) => {
+  const { formatDate } = useDateFormat();
+
+  return (
   <Card shadow="sm" p="lg" withBorder h="100%" style={{ position: 'relative' }}>
     <LoadingOverlay visible={isRefreshing} />
     <Group justify="space-between" mb="md">
@@ -586,7 +589,8 @@ const SystemHealthCard = ({
       </Stack>
     )}
   </Card>
-);
+  );
+};
 
 SystemHealthCard.propTypes = {
   systemHealth: PropTypes.shape({
@@ -789,6 +793,7 @@ HealthMetric.propTypes = {
 
 const ActivityItem = ({ activity, iconData }) => {
   const { IconComponent, color } = iconData;
+  const { formatDateTime } = useDateFormat();
 
   return (
     <Paper p="sm" withBorder>

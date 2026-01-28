@@ -253,6 +253,7 @@ const ModelManagement = () => {
           onSelectRecord={handleSelectRecord}
           onDelete={handleDeleteRecord}
           navigate={navigate}
+          formatFieldValue={formatFieldValue}
         />
 
         {totalPages > 1 && (
@@ -358,6 +359,7 @@ const ModelTable = ({
   onSelectRecord,
   onDelete,
   navigate,
+  formatFieldValue,
 }) => (
   <div className="model-table-container">
     <table className="model-table">
@@ -393,6 +395,7 @@ const ModelTable = ({
             onSelect={onSelectRecord}
             onDelete={onDelete}
             navigate={navigate}
+            formatFieldValue={formatFieldValue}
           />
         ))}
       </tbody>
@@ -415,9 +418,10 @@ ModelTable.propTypes = {
   onSelectRecord: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   navigate: PropTypes.func.isRequired,
+  formatFieldValue: PropTypes.func.isRequired,
 };
 
-const TableRow = React.memo(({ record, displayFields, isSelected, modelName, onSelect, onDelete, navigate }) => (
+const TableRow = React.memo(({ record, displayFields, isSelected, modelName, onSelect, onDelete, navigate, formatFieldValue }) => (
   <tr>
     <td>
       <input
@@ -481,6 +485,7 @@ TableRow.propTypes = {
   onSelect: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   navigate: PropTypes.func.isRequired,
+  formatFieldValue: PropTypes.func.isRequired,
 };
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => (
