@@ -175,7 +175,11 @@ export const useFiltering = (data = [], config = {}) => {
           const currentMonthEnd = new Date(
             now.getFullYear(),
             now.getMonth() + 1,
-            0
+            0,
+            23,
+            59,
+            59,
+            999
           );
 
           // If item has both start and end dates, check for overlap

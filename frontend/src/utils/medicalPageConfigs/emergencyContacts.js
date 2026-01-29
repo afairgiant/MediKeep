@@ -76,7 +76,7 @@ export const emergencyContactsPageConfig = {
         }
         // Finally by name
         const nameDiff = a.name.localeCompare(b.name);
-        return sortOrder === 'asc' ? -nameDiff : nameDiff;
+        return sortOrder === 'asc' ? nameDiff : -nameDiff;
       },
     },
   },

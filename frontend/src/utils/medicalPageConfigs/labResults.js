@@ -96,7 +96,7 @@ export const labresultsPageConfig = {
       },
     ],
     // Additional filter: Lab Results
-    resultField: 'labs_result',
+    // Note: resultField removed - custom filter handles all result filtering including 'pending'
     resultLabel: 'Test Results',
     resultOptions: [
       { value: 'all', label: 'All Results' },

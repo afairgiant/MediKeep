@@ -56,7 +56,7 @@ export const medicationsPageConfig = {
         }
         // Then by medication name
         const nameDiff = a.medication_name.localeCompare(b.medication_name);
-        return sortOrder === 'asc' ? -nameDiff : nameDiff;
+        return sortOrder === 'asc' ? nameDiff : -nameDiff;
       },
     },
   },

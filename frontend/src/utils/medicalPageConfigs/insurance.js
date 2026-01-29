@@ -118,12 +118,12 @@ export const insurancesPageConfig = {
         const bStatusIndex = statusOrder.indexOf(b.status);
         const statusDiff = (aStatusIndex === -1 ? 999 : aStatusIndex) - (bStatusIndex === -1 ? 999 : bStatusIndex);
         if (statusDiff !== 0) {
-          return sortOrder === 'asc' ? -statusDiff : statusDiff;
+          return sortOrder === 'asc' ? statusDiff : -statusDiff;
         }
 
         // Finally by insurance type alphabetically
         const typeDiff = a.insurance_type.localeCompare(b.insurance_type);
-        return sortOrder === 'asc' ? -typeDiff : typeDiff;
+        return sortOrder === 'asc' ? typeDiff : -typeDiff;
       },
     },
   },
