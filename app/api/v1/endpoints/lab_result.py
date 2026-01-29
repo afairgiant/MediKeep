@@ -152,9 +152,12 @@ def get_lab_result(
     request: Request,
     lab_result_id: int,
     db: Session = Depends(get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Get a specific lab result by ID with related data."""
+    from app.services.patient_access import PatientAccessService
+    from app.models.models import Patient
+
     with handle_database_errors(request=request):
         db_lab_result = lab_result.get_with_relations(
             db=db, record_id=lab_result_id, relations=["patient", "practitioner"]
@@ -163,6 +166,25 @@ def get_lab_result(
     assert (
         db_lab_result is not None
     )  # Type checker hint - handle_not_found raises if None
+
+    # SECURITY FIX: Verify user has access to this lab result's patient
+    # Use already-loaded patient relation to avoid redundant DB query
+    patient_record = db_lab_result.patient
+    if not patient_record:
+        raise NotFoundException(
+            resource="Lab result",
+            message="Lab result not found",
+            request=request
+        )
+
+    access_service = PatientAccessService(db)
+    if not access_service.can_access_patient(current_user, patient_record, "view"):
+        # Return 404 to avoid leaking information about existence of records
+        raise NotFoundException(
+            resource="Lab result",
+            message="Lab result not found",
+            request=request
+        )
 
     # Convert to response format with practitioner name
     result_dict = {
@@ -363,7 +385,7 @@ def get_lab_results_by_patient_and_code(
     with handle_database_errors(request=request):
         # Get all results for the patient first, then filter by code
         patient_results = lab_result.get_by_patient(db, patient_id=patient_id)
-        results = [result for result in patient_results if result.code == code]
+        results = [result for result in patient_results if result.test_code == code]
         return results
 
 
@@ -376,13 +398,30 @@ def get_lab_results_by_practitioner(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
 ):
-    """Get all lab results ordered by a specific practitioner."""
+    """Get lab results ordered by a specific practitioner (filtered to accessible patients)."""
+    from app.services.patient_access import PatientAccessService
+
     with handle_database_errors(request=request):
-        results = lab_result.get_by_practitioner(
-            db, practitioner_id=practitioner_id, skip=skip, limit=limit
+        # SECURITY FIX: Get accessible patient IDs for the current user
+        access_service = PatientAccessService(db)
+        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patient_ids = {p.id for p in accessible_patients}
+
+        # Get all results for the practitioner
+        all_results = lab_result.get_by_practitioner(
+            db, practitioner_id=practitioner_id, skip=0, limit=10000
         )
-        return results
+
+        # Filter to only accessible patients
+        filtered_results = [
+            r for r in all_results if r.patient_id in accessible_patient_ids
+        ]
+
+        # Apply pagination
+        paginated_results = filtered_results[skip : skip + limit]
+        return paginated_results
 
 
 # Search endpoints
@@ -394,12 +433,23 @@ def search_lab_results_by_code(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
 ):
-    """Search lab results by test code."""
+    """Search lab results by test code (filtered to accessible patients)."""
+    from app.services.patient_access import PatientAccessService
+
     with handle_database_errors(request=request):
-        # Get all results and filter by code - replace with proper CRUD method if available
+        # SECURITY FIX: Get accessible patient IDs for the current user
+        access_service = PatientAccessService(db)
+        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patient_ids = {p.id for p in accessible_patients}
+
+        # Get all results and filter by code and accessible patients
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
-        filtered_results = [result for result in all_results if result.code == code]
+        filtered_results = [
+            result for result in all_results
+            if result.test_code == code and result.patient_id in accessible_patient_ids
+        ]
         # Apply pagination
         paginated_results = (
             filtered_results[skip : skip + limit] if limit else filtered_results[skip:]
@@ -417,13 +467,22 @@ def search_lab_results_by_code_pattern(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
 ):
-    """Search lab results by code pattern (partial match)."""
+    """Search lab results by code pattern (partial match, filtered to accessible patients)."""
+    from app.services.patient_access import PatientAccessService
+
     with handle_database_errors(request=request):
-        # Get all results and filter by code pattern - replace with proper CRUD method if available
+        # SECURITY FIX: Get accessible patient IDs for the current user
+        access_service = PatientAccessService(db)
+        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patient_ids = {p.id for p in accessible_patients}
+
+        # Get all results and filter by code pattern and accessible patients
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
         filtered_results = [
-            result for result in all_results if code_pattern.lower() in result.code.lower()
+            result for result in all_results
+            if result.test_code and code_pattern.lower() in result.test_code.lower() and result.patient_id in accessible_patient_ids
         ]
         # Apply pagination
         paginated_results = (
@@ -434,12 +493,38 @@ def search_lab_results_by_code_pattern(
 
 # File Management Endpoints
 @router.get("/{lab_result_id}/files", response_model=List[LabResultFileResponse])
-def get_lab_result_files(*, request: Request, lab_result_id: int, db: Session = Depends(get_db)):
+def get_lab_result_files(
+    *,
+    request: Request,
+    lab_result_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
     """Get all files for a specific lab result."""
+    from app.services.patient_access import PatientAccessService
+    from app.models.models import Patient
+
     with handle_database_errors(request=request):
         # Verify lab result exists
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
+
+        # SECURITY FIX: Verify user has access to this lab result's patient
+        patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+        if not patient_record:
+            raise NotFoundException(
+                resource="Lab result",
+                message="Lab result not found",
+                request=request
+            )
+
+        access_service = PatientAccessService(db)
+        if not access_service.can_access_patient(current_user, patient_record, "view"):
+            raise NotFoundException(
+                resource="Lab result",
+                message="Lab result not found",
+                request=request
+            )
 
         files = lab_result_file.get_by_lab_result(db, lab_result_id=lab_result_id)
         return files
@@ -453,12 +538,32 @@ async def upload_lab_result_file(
     file: UploadFile = File(...),
     description: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Upload a new file for a lab result."""
+    from app.services.patient_access import PatientAccessService
+    from app.models.models import Patient
+
     # Verify lab result exists
     db_lab_result = lab_result.get(db, id=lab_result_id)
     handle_not_found(db_lab_result, "Lab result", request)
+
+    # SECURITY FIX: Verify user has access to this lab result's patient (edit permission for upload)
+    patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+    if not patient_record:
+        raise NotFoundException(
+            resource="Lab result",
+            message="Lab result not found",
+            request=request
+        )
+
+    access_service = PatientAccessService(db)
+    if not access_service.can_access_patient(current_user, patient_record, "edit"):
+        raise NotFoundException(
+            resource="Lab result",
+            message="Lab result not found",
+            request=request
+        )
 
     # Validate file
     if not file.filename:
@@ -582,13 +687,38 @@ async def upload_lab_result_file(
 
 @router.delete("/{lab_result_id}/files/{file_id}")
 def delete_lab_result_file(
-    *, request: Request, lab_result_id: int, file_id: int, db: Session = Depends(get_db)
+    *,
+    request: Request,
+    lab_result_id: int,
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Delete a specific file from a lab result."""
+    from app.services.patient_access import PatientAccessService
+    from app.models.models import Patient
+
     with handle_database_errors(request=request):
         # Verify lab result exists
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
+
+        # SECURITY FIX: Verify user has access to this lab result's patient (edit permission for delete)
+        patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+        if not patient_record:
+            raise NotFoundException(
+                resource="Lab result",
+                message="Lab result not found",
+                request=request
+            )
+
+        access_service = PatientAccessService(db)
+        if not access_service.can_access_patient(current_user, patient_record, "edit"):
+            raise NotFoundException(
+                resource="Lab result",
+                message="Lab result not found",
+                request=request
+            )
 
         # Verify file exists and belongs to this lab result
         db_file = lab_result_file.get(db, id=file_id)
@@ -627,20 +757,50 @@ def get_patient_lab_result_count(
 
 @router.get("/stats/practitioner/{practitioner_id}/count")
 def get_practitioner_lab_result_count(
-    *, request: Request, practitioner_id: int, db: Session = Depends(get_db)
+    *,
+    request: Request,
+    practitioner_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
 ):
-    """Get count of lab results ordered by a practitioner."""
+    """Get count of lab results ordered by a practitioner (filtered to accessible patients)."""
+    from app.services.patient_access import PatientAccessService
+
     with handle_database_errors(request=request):
-        results = lab_result.get_by_practitioner(db, practitioner_id=practitioner_id)
-        return {"practitioner_id": practitioner_id, "lab_result_count": len(results)}
+        # SECURITY FIX: Get accessible patient IDs for the current user
+        access_service = PatientAccessService(db)
+        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patient_ids = {p.id for p in accessible_patients}
+
+        # Get all results for the practitioner and filter to accessible patients
+        all_results = lab_result.get_by_practitioner(db, practitioner_id=practitioner_id)
+        filtered_results = [r for r in all_results if r.patient_id in accessible_patient_ids]
+        return {"practitioner_id": practitioner_id, "lab_result_count": len(filtered_results)}
 
 
 @router.get("/stats/code/{code}/count")
-def get_code_usage_count(*, request: Request, code: str, db: Session = Depends(get_db)):
-    """Get count of how many times a specific test code has been used."""
+def get_code_usage_count(
+    *,
+    request: Request,
+    code: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Get count of how many times a specific test code has been used (filtered to accessible patients)."""
+    from app.services.patient_access import PatientAccessService
+
     with handle_database_errors(request=request):
+        # SECURITY FIX: Get accessible patient IDs for the current user
+        access_service = PatientAccessService(db)
+        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patient_ids = {p.id for p in accessible_patients}
+
+        # Get all results and filter by code and accessible patients
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
-        results = [result for result in all_results if result.code == code]
+        results = [
+            result for result in all_results
+            if result.test_code == code and result.patient_id in accessible_patient_ids
+        ]
         return {"code": code, "usage_count": len(results)}
 
 
