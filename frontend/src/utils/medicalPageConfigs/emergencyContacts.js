@@ -65,15 +65,18 @@ export const emergencyContactsPageConfig = {
       is_active: 'boolean',
     },
     customSortFunctions: {
-      priority: (a, b) => {
+      priority: (a, b, sortOrder) => {
         // Primary contacts first
-        if (a.is_primary && !b.is_primary) return -1;
-        if (!a.is_primary && b.is_primary) return 1;
+        if (a.is_primary !== b.is_primary) {
+          return sortOrder === 'asc' ? (a.is_primary ? 1 : -1) : (a.is_primary ? -1 : 1);
+        }
         // Then active contacts
-        if (a.is_active && !b.is_active) return -1;
-        if (!a.is_active && b.is_active) return 1;
+        if (a.is_active !== b.is_active) {
+          return sortOrder === 'asc' ? (a.is_active ? 1 : -1) : (a.is_active ? -1 : 1);
+        }
         // Finally by name
-        return a.name.localeCompare(b.name);
+        const nameDiff = a.name.localeCompare(b.name);
+        return sortOrder === 'asc' ? nameDiff : -nameDiff;
       },
     },
   },

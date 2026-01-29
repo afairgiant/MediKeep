@@ -164,6 +164,7 @@ export const useFiltering = (data = [], config = {}) => {
           }
           // Fallback to single date check
           return itemDate >= weekAgo;
+        case 'current_month':
         case 'month':
           // For current calendar month - check if date range overlaps with current month
           const currentMonthStart = new Date(
@@ -174,7 +175,11 @@ export const useFiltering = (data = [], config = {}) => {
           const currentMonthEnd = new Date(
             now.getFullYear(),
             now.getMonth() + 1,
-            0
+            0,
+            23,
+            59,
+            59,
+            999
           );
 
           // If item has both start and end dates, check for overlap
