@@ -1565,5 +1565,110 @@
         "description": "Tous détails ou notes supplémentaires"
       }
     }
+  },
+  "injuries": {
+    "title": "Blessures",
+    "addNew": "Ajouter une nouvelle blessure",
+    "addTitle": "Ajouter une nouvelle blessure",
+    "editTitle": "Editer une blessure",
+    "cardSubtitle": "Blessure physique",
+    "viewPractitioner": "Voir les détails du médecin",
+    "tabs": {
+      "overview": "Aperçu",
+      "basicInfo": "Informations basiques",
+      "treatment": "Traitement",
+      "recovery": "Convalescence",
+      "documents": "Documents",
+      "notes": "Notes"
+    },
+    "viewModal": {
+      "injuryDetails": "Détails de la blessure",
+      "additionalInfo": "Informations supplémentaires"
+    },
+    "messages": {
+      "loading": "Chargement des blessures...",
+      "saving": "Sauvegarde de la blessure...",
+      "createTypeFailed": "Echec de la création du type de blessure"
+    },
+    "emptyState": {
+      "title": "Aucune blessure trouvée",
+      "noData": "Cliquez sur \"Ajouter une nouvelle blessure\" pour commencer.",
+      "filtered": "Essayez d'ajuster vos critères de recherche ou de tri."
+    },
+    "injuryName": {
+      "label": "Nom de la blessure",
+      "placeholder": "ex : Entorse à la cheville droite",
+      "description": "Nom descriptif de cette blessure"
+    },
+    "injuryType": {
+      "label": "Type de blessure",
+      "placeholder": "Sélectionnez ou créez un type",
+      "description": "Catégorie de blessure (ex : entorse, fracture)",
+      "system": "Système",
+      "createNew": "Créer \"{{name}}\"",
+      "noResults": "Aucun type correspondant trouvé",
+      "noTypes": "Aucun type disponible"
+    },
+    "bodyPart": {
+      "label": "Partie du corps",
+      "placeholder": "ex : Cheville, poignet, genou",
+      "description": "La partie ou zone du corps affectée"
+    },
+    "laterality": {
+      "label": "Côté",
+      "placeholder": "Sélectionnez un côté",
+      "description": "Quel côté du corps est affecté",
+      "options": {
+        "left": "Gauche",
+        "right": "Droit",
+        "bilateral": "Deux côtés",
+        "notApplicable": "N/A"
+      }
+    },
+    "dateOfInjury": {
+      "label": "Date de la blessure",
+      "placeholder": "Quand la blessure s'est produite",
+      "description": "La date où a eu lieu la blessure"
+    },
+    "mechanism": {
+      "label": "Comment elle s'est produite",
+      "placeholder": "ex : Chute lors d'une randonnée",
+      "description": "Décrivez comment la blessure s'est produite"
+    },
+    "severity": {
+      "label": "Sévérité",
+      "placeholder": "Sélectionnez la sévérité",
+      "description": "Le niveau de sévérité de cette blessure"
+    },
+    "status": {
+      "label": "Statut",
+      "description": "Statut actuel de cette blessure",
+      "options": {
+        "active": "Active - En cours de traitement",
+        "healing": "Guérissant - En cours de convalescence",
+        "resolved": "Résolue - Pleinement guérie",
+        "chronic": "Chronique - Effets à long terme"
+      }
+    },
+    "treatmentReceived": {
+      "label": "Traitement reçu",
+      "placeholder": "ex : protocole GREC, application d'un plâtre",
+      "description": "Description du traitement reçu"
+    },
+    "recoveryNotes": {
+      "label": "Notes de convalescence",
+      "placeholder": "Progrès, caps franchis, ou observations",
+      "description": "Notes sur les progrès durant la convalescence"
+    },
+    "practitioner": {
+      "label": "Médecin traitant la blessure",
+      "placeholder": "Sélectionnez un médecin",
+      "description": "Le professionnel de santé traitant la blessure"
+    },
+    "notes": {
+      "label": "Notes supplémentaires",
+      "placeholder": "Toute autre information pertinente...",
+      "description": "Notes générales ou détails supplémentaires"
+    }
   }
 }
