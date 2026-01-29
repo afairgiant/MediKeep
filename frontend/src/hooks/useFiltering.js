@@ -164,6 +164,7 @@ export const useFiltering = (data = [], config = {}) => {
           }
           // Fallback to single date check
           return itemDate >= weekAgo;
+        case 'current_month':
         case 'month':
           // For current calendar month - check if date range overlaps with current month
           const currentMonthStart = new Date(

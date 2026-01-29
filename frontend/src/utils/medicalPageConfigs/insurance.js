@@ -104,25 +104,26 @@ export const insurancesPageConfig = {
       status: 'status',
     },
     customSortFunctions: {
-      priority: (a, b) => {
-        // Primary insurance first (only for medical insurance)
-        if (a.insurance_type === 'medical' && a.is_primary && !(b.insurance_type === 'medical' && b.is_primary)) return -1;
-        if (b.insurance_type === 'medical' && b.is_primary && !(a.insurance_type === 'medical' && a.is_primary)) return 1;
-
-        // Then active insurance
-        if (a.status === 'active' && b.status !== 'active') return -1;
-        if (b.status === 'active' && a.status !== 'active') return 1;
-
-        // Then by insurance type
-        if (a.status === b.status) {
-          return a.insurance_type.localeCompare(b.insurance_type);
+      priority: (a, b, sortOrder) => {
+        // Primary medical insurance first
+        const aIsPrimary = a.insurance_type === 'medical' && a.is_primary;
+        const bIsPrimary = b.insurance_type === 'medical' && b.is_primary;
+        if (aIsPrimary !== bIsPrimary) {
+          return sortOrder === 'asc' ? (aIsPrimary ? 1 : -1) : (aIsPrimary ? -1 : 1);
         }
 
-        // Finally by status priority: active > pending > expired > inactive
+        // Then by status priority: active > pending > expired > inactive
         const statusOrder = ['active', 'pending', 'expired', 'inactive'];
-        const aIndex = statusOrder.indexOf(a.status) !== -1 ? statusOrder.indexOf(a.status) : 999;
-        const bIndex = statusOrder.indexOf(b.status) !== -1 ? statusOrder.indexOf(b.status) : 999;
-        return aIndex - bIndex;
+        const aStatusIndex = statusOrder.indexOf(a.status);
+        const bStatusIndex = statusOrder.indexOf(b.status);
+        const statusDiff = (aStatusIndex === -1 ? 999 : aStatusIndex) - (bStatusIndex === -1 ? 999 : bStatusIndex);
+        if (statusDiff !== 0) {
+          return sortOrder === 'asc' ? -statusDiff : statusDiff;
+        }
+
+        // Finally by insurance type alphabetically
+        const typeDiff = a.insurance_type.localeCompare(b.insurance_type);
+        return sortOrder === 'asc' ? -typeDiff : typeDiff;
       },
     },
   },

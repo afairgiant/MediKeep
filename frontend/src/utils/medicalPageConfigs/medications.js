@@ -47,12 +47,16 @@ export const medicationsPageConfig = {
       { value: 'effective_period_start', label: 'Start Date' },
     ],
     customSortFunctions: {
-      active: (a, b) => {
+      active: (a, b, sortOrder) => {
         const aIsActive = a.status === 'active';
         const bIsActive = b.status === 'active';
-        if (aIsActive && !bIsActive) return -1;
-        if (!aIsActive && bIsActive) return 1;
-        return a.medication_name.localeCompare(b.medication_name);
+        // Active medications first
+        if (aIsActive !== bIsActive) {
+          return sortOrder === 'asc' ? (aIsActive ? 1 : -1) : (aIsActive ? -1 : 1);
+        }
+        // Then by medication name
+        const nameDiff = a.medication_name.localeCompare(b.medication_name);
+        return sortOrder === 'asc' ? -nameDiff : nameDiff;
       },
     },
   },

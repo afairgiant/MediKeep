@@ -275,7 +275,7 @@ export const labresultsPageConfig = {
             return true;
         }
       },
-      labs_result: (item, filterValue) => {
+      result: (item, filterValue) => {
         switch (filterValue) {
           case 'pending':
             return !item.labs_result || item.labs_result.trim() === '';
@@ -348,62 +348,26 @@ export const labresultsPageConfig = {
     },
     // Custom sort functions for complex sorting
     customSortFunctions: {
-      priority: (a, b, sortOrder) => {
-        const priorityOrder = [
-          'emergency',
-          'urgent',
-          'follow-up',
-          'screening',
-          'routine',
-        ];
-        const aIndex =
-          priorityOrder.indexOf(a.test_type) !== -1
-            ? priorityOrder.indexOf(a.test_type)
-            : 999;
-        const bIndex =
-          priorityOrder.indexOf(b.test_type) !== -1
-            ? priorityOrder.indexOf(b.test_type)
-            : 999;
-        return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+      test_type: (a, b, sortOrder) => {
+        const priorityOrder = ['emergency', 'urgent', 'follow-up', 'screening', 'routine'];
+        const aIndex = priorityOrder.indexOf(a.test_type);
+        const bIndex = priorityOrder.indexOf(b.test_type);
+        const diff = (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+        return sortOrder === 'asc' ? diff : -diff;
       },
-      result: (a, b, sortOrder) => {
-        const resultOrder = [
-          'critical',
-          'abnormal',
-          'high',
-          'low',
-          'borderline',
-          'normal',
-          'inconclusive',
-        ];
-        const aResult = a.labs_result || 'pending';
-        const bResult = b.labs_result || 'pending';
-        const aIndex =
-          resultOrder.indexOf(aResult) !== -1
-            ? resultOrder.indexOf(aResult)
-            : 999;
-        const bIndex =
-          resultOrder.indexOf(bResult) !== -1
-            ? resultOrder.indexOf(bResult)
-            : 999;
-        return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+      labs_result: (a, b, sortOrder) => {
+        const resultOrder = ['critical', 'abnormal', 'high', 'low', 'borderline', 'normal', 'inconclusive'];
+        const aIndex = resultOrder.indexOf(a.labs_result || 'pending');
+        const bIndex = resultOrder.indexOf(b.labs_result || 'pending');
+        const diff = (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+        return sortOrder === 'asc' ? diff : -diff;
       },
       status: (a, b, sortOrder) => {
-        const statusOrder = [
-          'in-progress',
-          'ordered',
-          'completed',
-          'cancelled',
-        ];
-        const aIndex =
-          statusOrder.indexOf(a.status) !== -1
-            ? statusOrder.indexOf(a.status)
-            : 999;
-        const bIndex =
-          statusOrder.indexOf(b.status) !== -1
-            ? statusOrder.indexOf(b.status)
-            : 999;
-        return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex;
+        const statusOrder = ['in-progress', 'ordered', 'completed', 'cancelled'];
+        const aIndex = statusOrder.indexOf(a.status);
+        const bIndex = statusOrder.indexOf(b.status);
+        const diff = (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+        return sortOrder === 'asc' ? diff : -diff;
       },
     },
   },
