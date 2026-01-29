@@ -133,7 +133,7 @@
   },
   "medications": {
     "title": "Médicaments",
-    "addNew": "+ Ajouter un nouveau médicament",
+    "addNew": "Ajouter un nouveau médicament",
     "quickFilter": "Filtre rapide",
     "allTypes": "Tous les types",
     "types": {
@@ -159,6 +159,7 @@
     "vitals": "Rechercher parmi les signes vitaux, notes...",
     "emergencyContacts": "Rechercher parmi les contacts, relations, numéros de téléphone, adresses email...",
     "familyHistory": "Rechercher parmi les membres de la famille, conditions, notes...",
+	"injuries": "Rechercher parmi les blessures, parties du corps, notes, étiquettes...",
     "generic": "Rechercher..."
   },
   "messages": {
@@ -487,7 +488,7 @@
   "conditions": {
     "title": "Conditions médicales",
     "loading": "Chargement des conditions...",
-    "addNew": "+ Ajouter condition",
+    "addNew": "Ajouter condition",
     "editTitle": "Editer la condition",
     "addTitle": "Ajouter une nouvelle condition",
     "noResults": "Aucune condition médicale trouvée",
@@ -1047,9 +1048,9 @@
     }
   },
   "familyHistory": {
-    "title": "Historique familial",
-    "loadingFamilyHistory": "Chargement de l'historique familial...",
-    "pageTitle": "Historique médical familial",
+    "title": "Antécédents",
+    "loadingFamilyHistory": "Chargement des antécédents familiaux...",
+    "pageTitle": "Antécédents médicaux familiaux",
     "conditionCountAcrossMembers": "{{conditionCount}} condition(s) parmi {{memberCount}} membre(s) de la famille",
     "memberCountRecorded": "{{count}} membres de la famille enregistré(s)",
     "sharedConditionCountAcrossMembers": "{{conditionCount}} condition(s) parmi {{memberCount}} membre(s) de la famille partagés",
@@ -1062,14 +1063,14 @@
     "sharingModeActive": "Mode de partage activé",
     "clickToSelectForSharing": "Cliquez sur les cartes des membres de la famille pour effectuer le partage. {{count}} sélectionnée(s).",
     "sharedMembersCannotBeSelected": "Les membres de la famille partagés ne peuvent être sélectionnés pour effectuer un partage.",
-    "sharedTableName": "Historique familial partagé",
+    "sharedTableName": "Antécédents familiaux partagés",
     "tabs": {
       "myFamily": "Ma famille",
       "sharedWithMe": "Partagé avec moi"
     },
     "emptyState": {
       "noFamilyMembers": "Aucun membre de la famille",
-      "startBuilding": "Commencez à construire votre historique médical familial en ajoutant votre premier membre de la famille.",
+      "startBuilding": "Commencez à rassembler vos antécédents médicaux familiaux en ajoutant votre premier membre de la famille.",
       "addFirstMember": "Ajoutez votre premier membre de la famille"
     },
     "table": {
@@ -1103,7 +1104,7 @@
       "cannotEditSharedMember": "Impossible d'éditer un membre partagé"
     },
     "viewModal": {
-      "title": "{{name}} - Historique médical familial",
+      "title": "{{name}} - Antécédents médicaux familiaux",
       "relationship": "Lien de parenté",
       "sharedAt": "Partagé le",
       "sharingNote": "Note de partage",
@@ -1119,9 +1120,9 @@
     },
     "notifications": {
       "cannotEdit": "Edition impossible",
-      "cannotEditShared": "Vous ne pouvez pas éditer les données d'historique familial partagées",
+      "cannotEditShared": "Vous ne pouvez pas éditer les données d'antécédents familiaux partagées",
       "cannotDelete": "Suppression impossible",
-      "cannotDeleteShared": "Vous ne pouvez pas supprimer les données d'historique familial partagées"
+      "cannotDeleteShared": "Vous ne pouvez pas supprimer les données d'antécédents familiaux partagées"
     },
     "confirmations": {
       "deleteMember": "Voulez-vous vraiment supprimer ce membre de la famille ?",
@@ -1574,7 +1575,7 @@
       "practitioners": "Médecins",
       "pharmacies": "Pharmacies",
       "emergency_contacts": "Contacts d'urgence",
-      "family_history": "Historique familial",
+      "family_history": "Antécédents familiaux",
       "symptoms": "Symptômes",
       "injuries": "Blessures",
       "insurance": "Assurance"
@@ -1847,6 +1848,78 @@
       "molecular": "Analyses moléculaires et d'ADN",
       "pathology": "Analyses de tissus et de biopsies",
       "other": "Autres analyses"
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez vos préférences et paramètres pour l'application",
+    "tabs": {
+      "general": "Général",
+      "notifications": "Notifications"
+    },
+    "sections": {
+      "security": "Sécurité",
+      "accountManagement": "Gestion des comptes",
+      "systemInfo": "Informations système",
+      "preferences": "Préférences d'application",
+      "documentStorage": "Stockage des documents"
+    },
+    "security": {
+      "password": {
+        "title": "Mot de passe",
+        "description": "Changez le mot de passe de votre compte pour en préserver la sécurité",
+        "button": "Changer de mot de passe"
+      }
+    },
+    "account": {
+      "deleteAccount": {
+        "title": "Supprimer le compte",
+        "description": "Supprime de façon permanente votre compte et toutes les données médicales associées. Cette action est irréversible.",
+        "button": "Supprimer le compte"
+      }
+    },
+    "system": {
+      "version": {
+        "title": "Version de l'application",
+        "loading": "Chargement des informations de version...",
+        "unavailable": "Informations de version indisponibles",
+        "unknownApp": "Application inconnue",
+        "unknownVersion": "Version inconnue"
+      }
+    },
+    "preferences": {
+      "unitSystem": {
+        "title": "Système de mesure",
+        "description": "Choisissez si les mesures doivent être affichées en unités impériales (livres, pieds, degrés Farenheit) ou métriques (kilogrammes, centimètres, degrés Celsius)Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C)",
+        "metric": "Métrique (kg, cm, °C)"
+      },
+      "dateFormat": {
+        "title": "Format des dates",
+        "description": "Choisissez comment les dates sont affichées dans l'application",
+        "mdy": "MM/JJ/AAAA (USA)",
+        "dmy": "JJ/MM/AAAA (Europe)",
+        "ymd": "AAAA-MM-JJ (ISO)"
+      },
+      "sessionTimeout": {
+        "title": "Durée de session",
+        "description": "Définissez la période d'inactivité devant s'écouler avant l'expiration de votre session (en minutes)",
+        "range": "minutes (5-1440)"
+      }
+    },
+    "documents": {
+      "description": "Configurez comment vos documents médicaux sont stockés et gérés",
+      "cleanup": {
+        "title": "Nettoyage des fichiers",
+        "description": "Nettoie les fichiers désyncronisés et résoud les incohérences de stockage de document. Cette action réinitialisera les téléversements en échec, nettoiera les tâches orphelines, et corrigera les problèmes de syncronisation de la base de données.",
+        "button": "Nettoyer les fichiers",
+        "cleaning": "Nettoyage..."
+      }
+    },
+    "actions": {
+      "unsavedChanges": "Changements non sauvegardés",
+      "reset": "Réinitialiser les changements",
+      "save": "Sauvegarder les changements",
+      "saving": "Sauvegarde..."
     }
   }
 }
