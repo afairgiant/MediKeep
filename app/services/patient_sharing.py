@@ -10,8 +10,10 @@ from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.events import get_event_bus
 from app.core.logging.config import get_logger
 from app.core.utils.datetime_utils import get_utc_now
+from app.events.collaboration_events import ShareRevokedEvent
 from app.exceptions.patient_sharing import (
     AlreadySharedError,
     InvalidPermissionLevelError,
@@ -23,7 +25,6 @@ from app.exceptions.patient_sharing import (
 )
 from app.models.models import Invitation, Patient, PatientShare, User
 from app.services.invitation_service import InvitationService
-from app.services.notification_service import notify
 
 logger = get_logger(__name__, "app")
 
@@ -201,16 +202,13 @@ class PatientSharingService:
 
         self.db.commit()
 
-        # Notify the user whose access was revoked
-        await notify(
-            db=self.db,
+        # Publish share revoked event
+        event = ShareRevokedEvent(
             user_id=shared_with_user_id,
-            event_type="share_revoked",
-            data={
-                "by_user": owner.full_name or owner.username,
-                "patient_name": f"{patient.first_name} {patient.last_name}",
-            }
+            by_user=owner.full_name or owner.username,
+            patient_name=f"{patient.first_name} {patient.last_name}"
         )
+        await get_event_bus().publish(event)
 
         logger.info("Revoked patient share", extra={
             "share_id": share.id,

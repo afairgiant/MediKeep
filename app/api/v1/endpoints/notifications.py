@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database.database import get_db
+from app.core.events import get_event_registry
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
@@ -52,65 +53,31 @@ def _build_channels_lookup(service: NotificationService, user_id: int) -> dict:
 # Event Types
 # ============================================================================
 
-EVENT_TYPE_INFO = {
-    EventType.BACKUP_COMPLETED: {
-        "label": "Backup Completed",
-        "description": "Notification when a backup completes successfully",
-        "category": "system",
-        "is_implemented": True,
-    },
-    EventType.BACKUP_FAILED: {
-        "label": "Backup Failed",
-        "description": "Notification when a backup fails",
-        "category": "system",
-        "is_implemented": True,
-    },
-    EventType.INVITATION_RECEIVED: {
-        "label": "Invitation Received",
-        "description": "Notification when you receive a sharing invitation",
-        "category": "collaboration",
-        "is_implemented": True,
-    },
-    EventType.INVITATION_ACCEPTED: {
-        "label": "Invitation Accepted",
-        "description": "Notification when someone accepts your invitation",
-        "category": "collaboration",
-        "is_implemented": True,
-    },
-    EventType.SHARE_REVOKED: {
-        "label": "Share Revoked",
-        "description": "Notification when access to shared records is revoked",
-        "category": "collaboration",
-        "is_implemented": True,
-    },
-    EventType.PASSWORD_CHANGED: {
-        "label": "Password Changed",
-        "description": "Confirmation when your password is changed",
-        "category": "security",
-        "is_implemented": True,
-    },
-}
-
 
 @router.get("/event-types", response_model=EventTypesResponse)
 def get_event_types(
     request: Request,
     current_user: User = Depends(get_current_user),
 ):
-    """Get list of available notification event types."""
+    """Get list of available notification event types from the event registry."""
     log_endpoint_access(
         logger, request, current_user.id, "notification_event_types_accessed"
     )
 
+    # Get all event metadata from the registry
+    registry = get_event_registry()
+    all_events = registry.all()
+
+    # Convert EventMetadata to EventTypeInfo schema
     event_types = [
         EventTypeInfo(
-            value=event_type.value,
-            label=info["label"],
-            description=info["description"],
-            category=info["category"],
-            is_implemented=info.get("is_implemented", True),
+            value=metadata.event_type,
+            label=metadata.label,
+            description=metadata.description,
+            category=metadata.category,
+            is_implemented=metadata.is_implemented,
         )
-        for event_type, info in EVENT_TYPE_INFO.items()
+        for metadata in all_events
     ]
 
     return EventTypesResponse(event_types=event_types)

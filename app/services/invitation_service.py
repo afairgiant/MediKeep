@@ -8,10 +8,11 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from app.core.events import get_event_bus
 from app.core.logging.config import get_logger
 from app.core.utils.datetime_utils import get_utc_now
+from app.events.collaboration_events import InvitationAcceptedEvent, InvitationReceivedEvent
 from app.models.models import Invitation, User
-from app.services.notification_service import notify
 
 logger = get_logger(__name__, "app")
 
@@ -78,17 +79,14 @@ class InvitationService:
             self.db.commit()
             self.db.refresh(invitation)  # Refresh to get the ID
 
-            # Send notification to the recipient
-            await notify(
-                db=self.db,
+            # Publish invitation received event
+            event = InvitationReceivedEvent(
                 user_id=sent_to_user.id,
-                event_type="invitation_received",
-                data={
-                    "from_user": sent_by_user.full_name or sent_by_user.username,
-                    "invitation_type": invitation_type,
-                    "title": title,
-                }
+                from_user=sent_by_user.full_name or sent_by_user.username,
+                invitation_type=invitation_type,
+                title=title
             )
+            await get_event_bus().publish(event)
 
             logger.info(f"Created invitation {invitation.id} of type {invitation_type}")
             return invitation
@@ -177,18 +175,15 @@ class InvitationService:
 
             self.db.commit()
 
-            # Notify the sender if invitation was accepted
+            # Publish invitation accepted event
             if response == 'accepted':
-                await notify(
-                    db=self.db,
+                event = InvitationAcceptedEvent(
                     user_id=invitation.sent_by_user_id,
-                    event_type="invitation_accepted",
-                    data={
-                        "by_user": user.full_name or user.username,
-                        "invitation_type": invitation.invitation_type,
-                        "title": invitation.title,
-                    }
+                    by_user=user.full_name or user.username,
+                    invitation_type=invitation.invitation_type,
+                    title=invitation.title
                 )
+                await get_event_bus().publish(event)
 
             logger.info(f"Invitation {invitation_id} {response} by user {user.id}")
             return invitation

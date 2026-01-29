@@ -7,13 +7,19 @@ from unittest.mock import patch
 
 from app.services.notification_service import (
     NotificationService,
-    notify,
     _build_discord_url,
     _build_email_url,
     _build_gotify_url,
     _build_webhook_url,
 )
-from app.services.notification_templates import NotificationTemplates
+from app.services.notification_templates import (
+    get_template,
+    get_supported_events,
+    backup_completed_template,
+    backup_failed_template,
+    invitation_received_template,
+    password_changed_template,
+)
 
 
 class TestNotificationTemplates:
@@ -21,8 +27,7 @@ class TestNotificationTemplates:
 
     def test_get_supported_events(self):
         """Test that all expected events are supported."""
-        templates = NotificationTemplates()
-        events = templates.get_supported_events()
+        events = get_supported_events()
 
         assert "backup_completed" in events
         assert "backup_failed" in events
@@ -31,8 +36,7 @@ class TestNotificationTemplates:
 
     def test_backup_completed_template(self):
         """Test backup completed template formatting."""
-        templates = NotificationTemplates()
-        title, message = templates.get_template("backup_completed", {
+        title, message = get_template("backup_completed", {
             "filename": "backup_20260127.zip",
             "size_mb": 15.5,
             "backup_type": "full"
@@ -45,8 +49,7 @@ class TestNotificationTemplates:
 
     def test_backup_failed_template(self):
         """Test backup failed template formatting."""
-        templates = NotificationTemplates()
-        title, message = templates.get_template("backup_failed", {
+        title, message = get_template("backup_failed", {
             "error": "Disk full",
             "backup_type": "database"
         })
@@ -57,8 +60,7 @@ class TestNotificationTemplates:
 
     def test_invitation_received_template(self):
         """Test invitation received template formatting."""
-        templates = NotificationTemplates()
-        title, message = templates.get_template("invitation_received", {
+        title, message = get_template("invitation_received", {
             "from_user": "John Doe",
             "invitation_type": "patient share"
         })
@@ -69,8 +71,7 @@ class TestNotificationTemplates:
 
     def test_password_changed_template(self):
         """Test password changed template formatting."""
-        templates = NotificationTemplates()
-        title, message = templates.get_template("password_changed", {
+        title, message = get_template("password_changed", {
             "change_time": "2026-01-27 10:30:00",
         })
 
@@ -80,8 +81,7 @@ class TestNotificationTemplates:
 
     def test_unknown_event_fallback(self):
         """Test that unknown events get a fallback template."""
-        templates = NotificationTemplates()
-        title, message = templates.get_template("unknown_event", {})
+        title, message = get_template("unknown_event", {})
 
         assert "unknown_event" in title
         assert "unknown_event" in message
@@ -492,28 +492,3 @@ class TestNotificationSending:
 
         assert results == []
 
-    @patch("app.services.notification_service.settings")
-    async def test_notify_helper(self, mock_settings, db_session):
-        """Test the notify helper function."""
-        mock_settings.NOTIFICATIONS_ENABLED = False
-
-        from app.models.models import User
-        user = User(
-            username="testuser11",
-            email="test11@example.com",
-            hashed_password="hashedpw",
-            full_name="Test User 11"
-        )
-        db_session.add(user)
-        db_session.commit()
-        db_session.refresh(user)
-
-        results = await notify(
-            db=db_session,
-            user_id=user.id,
-            event_type="backup_completed",
-            data={"filename": "test.zip", "size_mb": 10}
-        )
-
-        # Should return empty list when disabled
-        assert results == []
