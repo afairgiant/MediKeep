@@ -1,19 +1,26 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.deps import UnauthorizedException, ConflictException, BusinessLogicException
+from app.api.deps import BusinessLogicException, ConflictException, UnauthorizedException
 from app.core.config import settings
-from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
-from app.core.utils.security import create_access_token, verify_password
+from app.core.events import get_event_bus
 from app.core.http.error_handling import handle_database_errors
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event,
+)
+from app.core.utils.security import create_access_token, verify_password
 from app.crud.patient import patient
 from app.crud.user import user
-from app.models.models import User as DBUser, Patient
+from app.events.security_events import PasswordChangedEvent
+from app.models.models import Patient, User as DBUser
 from app.schemas.patient import PatientCreate
 from app.schemas.user import Token, User, UserCreate
 
@@ -332,16 +339,13 @@ def login(
     }
 
 
-from pydantic import BaseModel
-
-
 class ChangePasswordRequest(BaseModel):
     currentPassword: str
     newPassword: str
 
 
 @router.post("/change-password")
-def change_password(
+async def change_password(
     password_data: ChangePasswordRequest,
     request: Request,
     db: Session = Depends(deps.get_db),
@@ -352,8 +356,6 @@ def change_password(
 
     Requires the current password to be provided for security.
     """
-    user_ip = request.client.host if request.client else "unknown"
-
     log_security_event(
         logger,
         "password_change_attempt",
@@ -400,5 +402,12 @@ def change_password(
         user_id=current_user.id,
         username=current_user.username,
     )
+
+    # Publish password changed event
+    event = PasswordChangedEvent(
+        user_id=current_user.id,
+        change_time=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    )
+    await get_event_bus().publish(event)
 
     return {"message": "Password changed successfully"}

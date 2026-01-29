@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database.database import get_db
+from app.core.events import get_event_registry
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
@@ -52,95 +53,31 @@ def _build_channels_lookup(service: NotificationService, user_id: int) -> dict:
 # Event Types
 # ============================================================================
 
-EVENT_TYPE_INFO = {
-    EventType.BACKUP_COMPLETED: {
-        "label": "Backup Completed",
-        "description": "Notification when a backup completes successfully",
-        "category": "system",
-        "is_implemented": True,
-    },
-    EventType.BACKUP_FAILED: {
-        "label": "Backup Failed",
-        "description": "Notification when a backup fails",
-        "category": "system",
-        "is_implemented": True,
-    },
-    EventType.LAB_RESULT_AVAILABLE: {
-        "label": "Lab Results Available",
-        "description": "Notification when new lab results are available",
-        "category": "medical",
-        "is_implemented": False,
-    },
-    EventType.LAB_RESULT_ABNORMAL: {
-        "label": "Abnormal Lab Results",
-        "description": "Notification when lab results have abnormal values",
-        "category": "medical",
-        "is_implemented": False,
-    },
-    EventType.IMMUNIZATION_DUE: {
-        "label": "Immunization Due",
-        "description": "Reminder when an immunization is coming due",
-        "category": "medical",
-        "is_implemented": False,
-    },
-    EventType.IMMUNIZATION_OVERDUE: {
-        "label": "Immunization Overdue",
-        "description": "Alert when an immunization is past due",
-        "category": "medical",
-        "is_implemented": False,
-    },
-    EventType.INVITATION_RECEIVED: {
-        "label": "Invitation Received",
-        "description": "Notification when you receive a sharing invitation",
-        "category": "collaboration",
-        "is_implemented": False,
-    },
-    EventType.INVITATION_ACCEPTED: {
-        "label": "Invitation Accepted",
-        "description": "Notification when someone accepts your invitation",
-        "category": "collaboration",
-        "is_implemented": False,
-    },
-    EventType.SHARE_REVOKED: {
-        "label": "Share Revoked",
-        "description": "Notification when access to shared records is revoked",
-        "category": "collaboration",
-        "is_implemented": False,
-    },
-    EventType.LOGIN_FROM_NEW_DEVICE: {
-        "label": "New Device Login",
-        "description": "Security alert when your account is accessed from a new device",
-        "category": "security",
-        "is_implemented": False,
-    },
-    EventType.PASSWORD_CHANGED: {
-        "label": "Password Changed",
-        "description": "Confirmation when your password is changed",
-        "category": "security",
-        "is_implemented": False,
-    },
-}
-
 
 @router.get("/event-types", response_model=EventTypesResponse)
 def get_event_types(
     request: Request,
     current_user: User = Depends(get_current_user),
 ):
-    """Get list of available notification event types."""
+    """Get list of available notification event types from the event registry."""
     log_endpoint_access(
         logger, request, current_user.id, "notification_event_types_accessed"
     )
 
+    # Get all event metadata from the registry
+    registry = get_event_registry()
+    all_events = registry.all()
+
+    # Convert EventMetadata to EventTypeInfo schema
     event_types = [
         EventTypeInfo(
-            value=event_type.value,
-            label=info["label"],
-            description=info["description"],
-            category=info["category"],
-            is_implemented=info.get("is_implemented", True),
+            value=metadata.event_type,
+            label=metadata.label,
+            description=metadata.description,
+            category=metadata.category,
+            is_implemented=metadata.is_implemented,
         )
-        for event_type, info in EVENT_TYPE_INFO.items()
+        for metadata in all_events
     ]
 
     return EventTypesResponse(event_types=event_types)
@@ -165,7 +102,16 @@ def list_channels(
         service = NotificationService(db)
         channels = service.get_user_channels(current_user.id)
 
-        return [ChannelResponse.model_validate(c) for c in channels]
+        # Validate each channel's configuration
+        response = []
+        for channel in channels:
+            channel_data = ChannelResponse.model_validate(channel)
+            is_valid, error_msg = service.is_channel_config_valid(channel)
+            channel_data.config_valid = is_valid
+            channel_data.config_error = error_msg if not is_valid else None
+            response.append(channel_data)
+
+        return response
 
     except Exception as e:
         log_endpoint_error(
@@ -382,6 +328,16 @@ async def test_channel(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Channel not found"
+            )
+
+        # Check if channel config is valid before testing
+        is_valid, error_msg = service.is_channel_config_valid(channel)
+        if not is_valid:
+            return TestNotificationResponse(
+                success=False,
+                message=error_msg,
+                channel_name=channel.name,
+                sent_at=None,
             )
 
         success, message = await service.test_channel(

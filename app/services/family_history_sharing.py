@@ -2,14 +2,22 @@
 Family history sharing service with invitation-based workflow
 """
 
-from typing import List, Dict, Optional
+from datetime import timezone
+from typing import Dict, List, Optional
+
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_
-from app.models.models import User, FamilyMember, FamilyCondition, FamilyHistoryShare, Patient, Invitation
-from app.services.invitation_service import InvitationService
-from app.core.utils.datetime_utils import get_utc_now
-from datetime import datetime, timedelta, timezone
+
 from app.core.logging.config import get_logger
+from app.core.utils.datetime_utils import get_utc_now
+from app.models.models import (
+    FamilyHistoryShare,
+    FamilyMember,
+    Invitation,
+    Patient,
+    User,
+)
+from app.services.invitation_service import InvitationService
 
 logger = get_logger(__name__, "app")
 
@@ -134,8 +142,8 @@ class FamilyHistoryService:
             }
         }
     
-    def send_family_history_share_invitation(self, user: User, family_member_id: int, 
-                                           shared_with_identifier: str, 
+    async def send_family_history_share_invitation(self, user: User, family_member_id: int,
+                                           shared_with_identifier: str,
                                            permission_level: str = 'view',
                                            sharing_note: Optional[str] = None,
                                            expires_hours: Optional[int] = 168) -> Invitation:
@@ -180,8 +188,8 @@ class FamilyHistoryService:
             
             title = f"Family History Share: {family_member.name} ({family_member.relationship})"
             message = sharing_note
-            
-            invitation = self.invitation_service.create_invitation(
+
+            invitation = await self.invitation_service.create_invitation(
                 sent_by_user=user,
                 sent_to_identifier=shared_with_identifier,
                 invitation_type='family_history_share',
@@ -190,7 +198,7 @@ class FamilyHistoryService:
                 message=message,
                 expires_hours=expires_hours
             )
-            
+
             logger.info(f"Sent family history share invitation: {invitation.id}")
             return invitation
             
@@ -340,24 +348,29 @@ class FamilyHistoryService:
             
         except Exception as e:
             self.db.rollback()
-            logger.error(f"Error accepting family history share invitation {invitation_id}: {e}")
-            logger.error(f"Exception type: {type(e).__name__}")
-            logger.error(f"User ID: {user.id}")
-            import traceback
-            logger.error(f"Full traceback: {traceback.format_exc()}")
+            logger.error(
+                "Error accepting family history share invitation",
+                extra={
+                    "invitation_id": invitation_id,
+                    "user_id": user.id,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                    "component": "family_history_sharing",
+                }
+            )
             raise
     
-    def reject_family_history_share_invitation(self, user: User, invitation_id: int,
+    async def reject_family_history_share_invitation(self, user: User, invitation_id: int,
                                              response_note: Optional[str] = None) -> Invitation:
         """Reject a family history share invitation"""
         try:
-            invitation = self.invitation_service.respond_to_invitation(
+            invitation = await self.invitation_service.respond_to_invitation(
                 user, invitation_id, 'rejected', response_note
             )
-            
+
             logger.info(f"Rejected family history share invitation: {invitation.id}")
             return invitation
-            
+
         except Exception as e:
             logger.error(f"Error rejecting family history share invitation: {e}")
             raise
@@ -553,7 +566,7 @@ class FamilyHistoryService:
             logger.error(f"Error removing user's own access to family history (family_member_id={family_member_id}, user_id={user.id}): {e}")
             raise
     
-    def bulk_send_family_history_invitations(self, user: User, family_member_ids: List[int], 
+    async def bulk_send_family_history_invitations(self, user: User, family_member_ids: List[int],
                                            shared_with_identifier: str, permission_level: str = 'view',
                                            sharing_note: Optional[str] = None,
                                            expires_hours: Optional[int] = 168) -> Dict:
@@ -621,9 +634,9 @@ class FamilyHistoryService:
                 title = f"Family History Share: {', '.join(family_names)}"
             
             message = sharing_note
-            
+
             # 5. Create single invitation
-            invitation = self.invitation_service.create_invitation(
+            invitation = await self.invitation_service.create_invitation(
                 sent_by_user=user,
                 sent_to_identifier=shared_with_identifier,
                 invitation_type='family_history_share',
@@ -632,7 +645,7 @@ class FamilyHistoryService:
                 message=message,
                 expires_hours=expires_hours
             )
-            
+
             logger.info(f"Sent bulk family history share invitation: {invitation.id} for {len(family_members)} family members")
             return {
                 "success": True,

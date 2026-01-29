@@ -32,21 +32,12 @@ class EventType(str, Enum):
     BACKUP_COMPLETED = "backup_completed"
     BACKUP_FAILED = "backup_failed"
 
-    # Lab result events
-    LAB_RESULT_AVAILABLE = "lab_result_available"
-    LAB_RESULT_ABNORMAL = "lab_result_abnormal"
-
-    # Immunization events
-    IMMUNIZATION_DUE = "immunization_due"
-    IMMUNIZATION_OVERDUE = "immunization_overdue"
-
     # Sharing/collaboration events
     INVITATION_RECEIVED = "invitation_received"
     INVITATION_ACCEPTED = "invitation_accepted"
     SHARE_REVOKED = "share_revoked"
 
     # Security events
-    LOGIN_FROM_NEW_DEVICE = "login_from_new_device"
     PASSWORD_CHANGED = "password_changed"
 
 
@@ -208,6 +199,8 @@ class ChannelResponse(BaseModel):
     total_notifications_sent: int
     created_at: datetime
     updated_at: datetime
+    config_valid: bool = True
+    config_error: Optional[str] = None
 
     class Config:
         from_attributes = True

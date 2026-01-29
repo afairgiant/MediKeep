@@ -20,11 +20,12 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.events import get_event_bus
 from app.core.logging.config import get_logger
 from app.core.utils.security import SecurityValidator
+from app.events.backup_events import BackupCompletedEvent, BackupFailedEvent
 from app.models.models import BackupRecord
 from app.services.file_management_service import file_management_service
-from app.services.notification_service import notify
 
 logger = get_logger(__name__, "app")
 
@@ -112,18 +113,16 @@ class BackupService:
                 f"Database backup completed: {backup_filename} ({file_size} bytes)"
             )
 
-            # Send notification if user_id provided
+            # Publish backup completed event if user_id provided
             if user_id:
-                await notify(
-                    db=self.db,
+                event = BackupCompletedEvent(
                     user_id=user_id,
-                    event_type="backup_completed",
-                    data={
-                        "filename": backup_filename,
-                        "size_mb": round(file_size / 1024 / 1024, 2),
-                        "backup_type": "database"
-                    }
+                    filename=backup_filename,
+                    size_mb=round(file_size / 1024 / 1024, 2),
+                    backup_type="database",
+                    checksum=checksum,
                 )
+                await get_event_bus().publish(event)
 
             return {
                 "id": backup_record.id,
@@ -145,17 +144,17 @@ class BackupService:
                 error_msg,
             )
 
-            # Send failure notification if user_id provided
+            # Publish backup failed event if user_id provided
             if user_id:
-                await notify(
-                    db=self.db,
+                event = BackupFailedEvent(
                     user_id=user_id,
-                    event_type="backup_failed",
-                    data={
-                        "error": str(e),
-                        "backup_type": "database"
-                    }
+                    error=str(e),
+                    backup_type="database",
+                    partial_file=(
+                        str(backup_path) if "backup_path" in locals() else None
+                    ),
                 )
+                await get_event_bus().publish(event)
 
             raise Exception(error_msg)
 
@@ -374,18 +373,16 @@ class BackupService:
                 f"Files backup completed successfully: {backup_filename} ({file_size} bytes)"
             )
 
-            # Send notification if user_id provided
+            # Publish backup completed event if user_id provided
             if user_id:
-                await notify(
-                    db=self.db,
+                event = BackupCompletedEvent(
                     user_id=user_id,
-                    event_type="backup_completed",
-                    data={
-                        "filename": backup_filename,
-                        "size_mb": round(file_size / 1024 / 1024, 2),
-                        "backup_type": "files"
-                    }
+                    filename=backup_filename,
+                    size_mb=round(file_size / 1024 / 1024, 2),
+                    backup_type="files",
+                    checksum=checksum,
                 )
+                await get_event_bus().publish(event)
 
             return {
                 "id": backup_record.id,
@@ -407,17 +404,17 @@ class BackupService:
                 error_msg,
             )
 
-            # Send failure notification if user_id provided
+            # Publish backup failed event if user_id provided
             if user_id:
-                await notify(
-                    db=self.db,
+                event = BackupFailedEvent(
                     user_id=user_id,
-                    event_type="backup_failed",
-                    data={
-                        "error": str(e),
-                        "backup_type": "files"
-                    }
+                    error=str(e),
+                    backup_type="files",
+                    partial_file=(
+                        str(backup_path) if "backup_path" in locals() else None
+                    ),
                 )
+                await get_event_bus().publish(event)
 
             raise Exception(error_msg)
 
@@ -622,7 +619,8 @@ class BackupService:
             # Step 2: Apply time-based retention to remaining backups
             eligible_for_deletion = all_backups[min_count:]
             old_backups = [
-                backup for backup in eligible_for_deletion 
+                backup
+                for backup in eligible_for_deletion
                 if backup.created_at < cutoff_date
             ]
 
@@ -711,7 +709,9 @@ class BackupService:
                 "retention_stats": {
                     "total_backups_before": len(all_backups),
                     "protected_by_count": len(protected_backups),
-                    "protected_by_time": max(0, len(all_backups) - len(protected_backups) - len(old_backups)),
+                    "protected_by_time": max(
+                        0, len(all_backups) - len(protected_backups) - len(old_backups)
+                    ),
                     "eligible_for_deletion": len(old_backups),
                     "min_count_setting": min_count,
                     "retention_days_setting": retention_days,
@@ -746,17 +746,19 @@ class BackupService:
 
             # Step 1: Identify protected backups (N most recent)
             protected_backups = all_backups[:min_count]
-            
+
             # Step 2: Identify backups eligible for deletion
             eligible_for_deletion = all_backups[min_count:]
             backups_to_delete = [
-                backup for backup in eligible_for_deletion 
+                backup
+                for backup in eligible_for_deletion
                 if backup.created_at < cutoff_date
             ]
 
             # Step 3: Calculate protected by time (within retention period but not in min count)
             protected_by_time = [
-                backup for backup in eligible_for_deletion 
+                backup
+                for backup in eligible_for_deletion
                 if backup.created_at >= cutoff_date
             ]
 
@@ -773,7 +775,11 @@ class BackupService:
                 "backups_to_delete": [
                     {
                         "id": backup.id,
-                        "filename": Path(backup.file_path).name if backup.file_path else "unknown",
+                        "filename": (
+                            Path(backup.file_path).name
+                            if backup.file_path
+                            else "unknown"
+                        ),
                         "created_at": backup.created_at.isoformat(),
                         "size_bytes": backup.size_bytes,
                         "backup_type": backup.backup_type,
@@ -944,18 +950,16 @@ class BackupService:
                 f"Full backup completed successfully: {backup_filename} ({file_size} bytes)"
             )
 
-            # Send notification if user_id provided
+            # Publish backup completed event if user_id provided
             if user_id:
-                await notify(
-                    db=self.db,
+                event = BackupCompletedEvent(
                     user_id=user_id,
-                    event_type="backup_completed",
-                    data={
-                        "filename": backup_filename,
-                        "size_mb": round(file_size / 1024 / 1024, 2),
-                        "backup_type": "full"
-                    }
+                    filename=backup_filename,
+                    size_mb=round(file_size / 1024 / 1024, 2),
+                    backup_type="full",
+                    checksum=checksum,
                 )
+                await get_event_bus().publish(event)
 
             return {
                 "id": backup_record.id,
@@ -978,17 +982,17 @@ class BackupService:
                 error_msg,
             )
 
-            # Send failure notification if user_id provided
+            # Publish backup failed event if user_id provided
             if user_id:
-                await notify(
-                    db=self.db,
+                event = BackupFailedEvent(
                     user_id=user_id,
-                    event_type="backup_failed",
-                    data={
-                        "error": str(e),
-                        "backup_type": "full"
-                    }
+                    error=str(e),
+                    backup_type="full",
+                    partial_file=(
+                        str(backup_path) if "backup_path" in locals() else None
+                    ),
                 )
+                await get_event_bus().publish(event)
 
             raise Exception(error_msg)
 

@@ -2,23 +2,14 @@
 API endpoints for invitation management
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy.orm import Session
-from sqlalchemy import exc as sa
 from typing import List, Optional
 
-from app.core.database.database import get_db
-from app.models.models import User, PatientShare
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
 from app.api.deps import get_current_user
-from app.services.invitation_service import InvitationService
-from app.services.family_history_sharing import FamilyHistoryService
-from app.services.patient_sharing import PatientSharingService
-from app.schemas.invitations import (
-    InvitationCreate,
-    InvitationResponse,
-    InvitationResponseRequest,
-    InvitationSummary
-)
+from app.core.database.database import get_db
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
@@ -26,7 +17,14 @@ from app.core.logging.helpers import (
     log_security_event,
     log_validation_error,
 )
-from datetime import datetime
+from app.models.models import User
+from app.schemas.invitations import (
+    InvitationResponse,
+    InvitationResponseRequest,
+)
+from app.services.family_history_sharing import FamilyHistoryService
+from app.services.invitation_service import InvitationService
+from app.services.patient_sharing import PatientSharingService
 
 logger = get_logger(__name__, "app")
 router = APIRouter()
@@ -155,7 +153,7 @@ def get_sent_invitations(
 
 
 @router.post("/{invitation_id}/respond")
-def respond_to_invitation(
+async def respond_to_invitation(
     invitation_id: int,
     response_data: InvitationResponseRequest,
     request: Request,
@@ -341,9 +339,9 @@ def respond_to_invitation(
 
         # For all other cases (reject, or non-special-type accepts)
         invitation_service = InvitationService(db)
-        invitation = invitation_service.respond_to_invitation(
-            current_user, 
-            invitation_id, 
+        invitation = await invitation_service.respond_to_invitation(
+            current_user,
+            invitation_id,
             response_data.response,
             response_data.response_note
         )

@@ -33,7 +33,6 @@ from app.schemas.notifications import (
     ChannelType,
     NotificationStatus,
 )
-from app.services.notification_templates import NotificationTemplates
 
 logger = get_logger(__name__, "app")
 
@@ -129,7 +128,6 @@ class NotificationService:
 
     def __init__(self, db: Session):
         self.db = db
-        self.templates = NotificationTemplates()
         self._fernet = Fernet(_derive_encryption_key())
 
     # =========================================================================
@@ -213,6 +211,21 @@ class NotificationService:
                 NotificationChannel.user_id == user_id
             )
         ).first()
+
+    def is_channel_config_valid(self, channel: NotificationChannel) -> tuple[bool, str]:
+        """
+        Check if a channel's configuration can be decrypted.
+
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        try:
+            self._decrypt_config(channel.config_encrypted)
+            return True, ""
+        except ValueError as e:
+            return False, str(e)
+        except Exception as e:
+            return False, f"Configuration error: {str(e)}"
 
     def update_channel(
         self,
@@ -717,54 +730,14 @@ class NotificationService:
 
     def _decrypt_config(self, encrypted_config: str) -> Dict[str, Any]:
         """Decrypt channel configuration."""
-        decrypted = self._fernet.decrypt(encrypted_config.encode())
-        return json.loads(decrypted.decode())
+        from cryptography.fernet import InvalidToken
 
-
-# ============================================================================
-# Helper Function for Easy Integration
-# ============================================================================
-
-async def notify(
-    db: Session,
-    user_id: int,
-    event_type: str,
-    data: Optional[Dict] = None,
-) -> List[NotificationHistory]:
-    """
-    Simple helper to send notifications from anywhere in the app.
-
-    Usage:
-        await notify(db, user.id, "backup_completed", {"filename": "backup.zip"})
-
-    Args:
-        db: Database session
-        user_id: User ID to notify
-        event_type: Event type identifier
-        data: Event-specific data for template formatting
-
-    Returns:
-        List of NotificationHistory records
-    """
-    try:
-        service = NotificationService(db)
-        title, message = service.templates.get_template(event_type, data or {})
-
-        return await service.send_notification(
-            user_id=user_id,
-            event_type=event_type,
-            title=title,
-            message=message,
-            event_data=data,
-        )
-    except Exception as e:
-        # Notification errors should never break core operations
-        logger.error(
-            "notify_helper_error",
-            extra={
-                "user_id": user_id,
-                "event_type": event_type,
-                "error": str(e),
-            }
-        )
-        return []
+        try:
+            decrypted = self._fernet.decrypt(encrypted_config.encode())
+            return json.loads(decrypted.decode())
+        except InvalidToken:
+            raise ValueError(
+                "Channel configuration is corrupted or was encrypted with a different key. "
+                "This usually happens when SECRET_KEY or NOTIFICATION_ENCRYPTION_SALT has changed. "
+                "Please delete and re-create this channel."
+            )

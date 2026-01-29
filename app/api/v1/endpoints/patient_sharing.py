@@ -2,12 +2,13 @@
 V1 Patient Sharing API Endpoints - Individual patient sharing functionality
 """
 
-from typing import Any, List, Optional
 from datetime import datetime
+from typing import Any, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, validator
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
 from app.core.logging.config import get_logger
@@ -17,28 +18,57 @@ from app.core.logging.helpers import (
     log_security_event,
     log_validation_error,
 )
-from app.core.logging.constants import LogFields
-from app.services.patient_sharing import PatientSharingService
-from app.services.patient_access import PatientAccessService
-from app.models.models import User, PatientShare
-from app.schemas.patient_sharing import (
-    PatientShareInvitationRequest,
-    PatientShareBulkInvitationRequest,
-    PatientShareInvitationResponse,
-    BulkPatientShareInvitationResponse
-)
 from app.exceptions.patient_sharing import (
-    PatientNotFoundError,
     AlreadySharedError,
+    InvalidPermissionLevelError,
+    PatientNotFoundError,
     PendingInvitationError,
     RecipientNotFoundError,
-    InvalidPermissionLevelError,
-    ShareNotFoundError,
     SelfShareError,
 )
+from app.models.models import PatientShare, User
+from app.schemas.patient_sharing import (
+    BulkPatientShareInvitationResponse,
+    PatientShareBulkInvitationRequest,
+    PatientShareInvitationRequest,
+    PatientShareInvitationResponse,
+)
+from app.services.patient_sharing import PatientSharingService
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
+
+
+def _format_share_to_dict(share: PatientShare) -> dict:
+    """Convert a PatientShare model to a dictionary for JSON response."""
+    return {
+        'id': share.id,
+        'patient_id': share.patient_id,
+        'shared_by_user_id': share.shared_by_user_id,
+        'shared_with_user_id': share.shared_with_user_id,
+        'permission_level': share.permission_level,
+        'custom_permissions': share.custom_permissions,
+        'is_active': share.is_active,
+        'expires_at': share.expires_at.isoformat() if share.expires_at else None,
+        'created_at': share.created_at.isoformat() if share.created_at else None,
+        'updated_at': share.updated_at.isoformat() if share.updated_at else None,
+        'patient': {
+            'id': share.patient.id,
+            'first_name': share.patient.first_name,
+            'last_name': share.patient.last_name,
+            'birth_date': str(share.patient.birth_date) if share.patient.birth_date else None
+        } if share.patient else None,
+        'shared_by_user': {
+            'id': share.shared_by.id,
+            'username': share.shared_by.username,
+            'name': getattr(share.shared_by, 'full_name', None)
+        } if share.shared_by else None,
+        'shared_with_user': {
+            'id': share.shared_with.id,
+            'username': share.shared_with.username,
+            'name': getattr(share.shared_with, 'full_name', None)
+        } if share.shared_with else None
+    }
 
 
 class SharePatientRequest(BaseModel):
@@ -174,7 +204,7 @@ class RevokeShareRequest(BaseModel):
 
 
 @router.post("/", response_model=PatientShareInvitationResponse)
-def send_patient_share_invitation(
+async def send_patient_share_invitation(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
@@ -191,7 +221,7 @@ def send_patient_share_invitation(
 
     try:
         service = PatientSharingService(db)
-        invitation = service.send_patient_share_invitation(
+        invitation = await service.send_patient_share_invitation(
             owner=current_user,
             patient_id=invitation_request.patient_id,
             shared_with_identifier=invitation_request.shared_with_user_identifier,
@@ -293,7 +323,7 @@ def send_patient_share_invitation(
 
 
 @router.post("/bulk-invite", response_model=BulkPatientShareInvitationResponse)
-def bulk_send_patient_share_invitations(
+async def bulk_send_patient_share_invitations(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
@@ -309,7 +339,7 @@ def bulk_send_patient_share_invitations(
 
     try:
         service = PatientSharingService(db)
-        result = service.bulk_send_patient_share_invitations(
+        result = await service.bulk_send_patient_share_invitations(
             owner=current_user,
             patient_ids=bulk_request.patient_ids,
             shared_with_identifier=bulk_request.shared_with_user_identifier,
@@ -452,7 +482,7 @@ def remove_my_access(
 
 
 @router.delete("/revoke", response_model=dict)
-def revoke_patient_share(
+async def revoke_patient_share(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
@@ -468,7 +498,7 @@ def revoke_patient_share(
     
     try:
         service = PatientSharingService(db)
-        success = service.revoke_patient_share(
+        success = await service.revoke_patient_share(
             owner=current_user,
             patient_id=revoke_request.patient_id,
             shared_with_user_id=revoke_request.shared_with_user_id
@@ -584,8 +614,6 @@ def get_shares_received(
             current_user.id,
             "patient_shares_received_accessed"
         )
-        from sqlalchemy.orm import joinedload
-        from app.models.models import Patient
 
         shares = db.query(PatientShare).filter(
             PatientShare.shared_with_user_id == current_user.id,
@@ -596,39 +624,7 @@ def get_shares_received(
             joinedload(PatientShare.shared_with)
         ).all()
 
-        # Convert to response format with proper naming
-        result = []
-        for share in shares:
-            share_dict = {
-                'id': share.id,
-                'patient_id': share.patient_id,
-                'shared_by_user_id': share.shared_by_user_id,
-                'shared_with_user_id': share.shared_with_user_id,
-                'permission_level': share.permission_level,
-                'custom_permissions': share.custom_permissions,
-                'is_active': share.is_active,
-                'expires_at': share.expires_at.isoformat() if share.expires_at else None,
-                'created_at': share.created_at.isoformat() if share.created_at else None,
-                'updated_at': share.updated_at.isoformat() if share.updated_at else None,
-                'patient': {
-                    'id': share.patient.id,
-                    'first_name': share.patient.first_name,
-                    'last_name': share.patient.last_name,
-                    'birth_date': str(share.patient.birth_date) if share.patient.birth_date else None
-                } if share.patient else None,
-                'shared_by_user': {
-                    'id': share.shared_by.id,
-                    'username': share.shared_by.username,
-                    'name': share.shared_by.full_name if hasattr(share.shared_by, 'full_name') else None
-                } if share.shared_by else None,
-                'shared_with_user': {
-                    'id': share.shared_with.id,
-                    'username': share.shared_with.username,
-                    'name': share.shared_with.full_name if hasattr(share.shared_with, 'full_name') else None
-                } if share.shared_with else None
-            }
-            result.append(share_dict)
-
+        result = [_format_share_to_dict(share) for share in shares]
         return JSONResponse(content=result)
 
     except Exception as e:
@@ -662,8 +658,6 @@ def get_shares_created(
             current_user.id,
             "patient_shares_created_accessed"
         )
-        from sqlalchemy.orm import joinedload
-        from app.models.models import Patient
 
         shares = db.query(PatientShare).filter(
             PatientShare.shared_by_user_id == current_user.id,
@@ -674,39 +668,7 @@ def get_shares_created(
             joinedload(PatientShare.shared_with)
         ).all()
 
-        # Convert to response format with proper naming
-        result = []
-        for share in shares:
-            share_dict = {
-                'id': share.id,
-                'patient_id': share.patient_id,
-                'shared_by_user_id': share.shared_by_user_id,
-                'shared_with_user_id': share.shared_with_user_id,
-                'permission_level': share.permission_level,
-                'custom_permissions': share.custom_permissions,
-                'is_active': share.is_active,
-                'expires_at': share.expires_at.isoformat() if share.expires_at else None,
-                'created_at': share.created_at.isoformat() if share.created_at else None,
-                'updated_at': share.updated_at.isoformat() if share.updated_at else None,
-                'patient': {
-                    'id': share.patient.id,
-                    'first_name': share.patient.first_name,
-                    'last_name': share.patient.last_name,
-                    'birth_date': str(share.patient.birth_date) if share.patient.birth_date else None
-                } if share.patient else None,
-                'shared_by_user': {
-                    'id': share.shared_by.id,
-                    'username': share.shared_by.username,
-                    'name': share.shared_by.full_name if hasattr(share.shared_by, 'full_name') else None
-                } if share.shared_by else None,
-                'shared_with_user': {
-                    'id': share.shared_with.id,
-                    'username': share.shared_with.username,
-                    'name': share.shared_with.full_name if hasattr(share.shared_with, 'full_name') else None
-                } if share.shared_with else None
-            }
-            result.append(share_dict)
-
+        result = [_format_share_to_dict(share) for share in shares]
         return JSONResponse(content=result)
 
     except Exception as e:
@@ -717,7 +679,7 @@ def get_shares_created(
             e,
             user_id=current_user.id,
         )
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve created shares: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve created shares")
 
 
 @router.get("/{patient_id}", response_model=PatientSharesResponse)

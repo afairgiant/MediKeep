@@ -11,6 +11,9 @@ from app.core.utils.datetime_utils import set_application_startup_time
 from app.core.logging.config import get_logger
 from app.core.utils.activity_tracker import initialize_activity_tracking
 from app.core.database.migrations import run_startup_data_migrations
+from app.core.events import get_event_registry, setup_event_system
+from app.core.logging.constants import LogFields
+from app.services.notification_handlers import create_notification_handler
 
 logger = get_logger(__name__, "app")
 
@@ -23,9 +26,33 @@ async def startup_event():
     logger.info(
         "Application starting up",
         extra={
-            "category": "app",
-            "event": "application_startup",
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "application_startup",
             "version": settings.VERSION,
+        },
+    )
+
+    # Initialize the event system (event registry and bus)
+    event_bus = setup_event_system()
+    logger.info("Event system initialized")
+
+    # Subscribe notification handler to all registered events
+    from app.core.database.database import SessionLocal
+
+    registry = get_event_registry()
+    notification_handler = create_notification_handler(SessionLocal)
+
+    event_count = 0
+    for event_metadata in registry.all():
+        event_bus.subscribe(event_metadata.event_type, notification_handler)
+        event_count += 1
+
+    logger.info(
+        "Notification handler subscribed to events",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "event_subscriptions_initialized",
+            "event_count": event_count,
         },
     )
 

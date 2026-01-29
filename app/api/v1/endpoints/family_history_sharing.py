@@ -4,29 +4,24 @@ API endpoints for family history sharing
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
-from typing import List
 
-from app.core.database.database import get_db
-from app.models.models import User
 from app.api.deps import get_current_user
-from app.services.family_history_sharing import FamilyHistoryService
-from app.schemas.family_history_sharing import (
-    FamilyHistoryShareInvitationCreate,
-    FamilyHistoryBulkInvite,
-    FamilyHistoryShareResponse,
-    OrganizedFamilyHistory,
-    BulkInviteResponse,
-    BulkInviteResult
-)
+from app.core.database.database import get_db
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
+    log_data_access,
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,
     log_validation_error,
-    log_data_access,
 )
-from app.core.logging.constants import LogFields
+from app.models.models import User
+from app.schemas.family_history_sharing import (
+    FamilyHistoryBulkInvite,
+    FamilyHistoryShareInvitationCreate,
+    OrganizedFamilyHistory,
+)
+from app.services.family_history_sharing import FamilyHistoryService
 
 logger = get_logger(__name__, "app")
 router = APIRouter()
@@ -131,7 +126,7 @@ def get_family_member_shares(
 
 
 @router.post("/{family_member_id}/shares")
-def send_family_history_share_invitation(
+async def send_family_history_share_invitation(
     family_member_id: int,
     invite_data: FamilyHistoryShareInvitationCreate,
     request: Request,
@@ -141,7 +136,7 @@ def send_family_history_share_invitation(
     """Send invitation to share family member's history with another user"""
     try:
         service = FamilyHistoryService(db)
-        invitation = service.send_family_history_share_invitation(
+        invitation = await service.send_family_history_share_invitation(
             current_user,
             family_member_id,
             invite_data.shared_with_identifier,
@@ -295,7 +290,7 @@ def remove_my_access_to_family_history(
 
 
 @router.post("/bulk-invite")
-def bulk_send_family_history_invitations(
+async def bulk_send_family_history_invitations(
     bulk_invite_data: FamilyHistoryBulkInvite,
     request: Request,
     current_user: User = Depends(get_current_user),
@@ -304,7 +299,7 @@ def bulk_send_family_history_invitations(
     """Send ONE invitation to share multiple family members with one user"""
     try:
         service = FamilyHistoryService(db)
-        result = service.bulk_send_family_history_invitations(
+        result = await service.bulk_send_family_history_invitations(
             current_user,
             bulk_invite_data.family_member_ids,
             bulk_invite_data.shared_with_identifier,
