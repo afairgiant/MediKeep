@@ -152,6 +152,8 @@ networks:
 # Database Configuration
 DB_NAME=medical_records
 DB_USER=medapp
+# IMPORTANT: Use quotes if password contains # (e.g., "my#pass")
+# Always escape $ as $$ (e.g., pass$$word). Safe chars: @ % ^ & * ( ) - _ . !
 DB_PASSWORD=your_secure_database_password_here #Change me
 
 # Application port

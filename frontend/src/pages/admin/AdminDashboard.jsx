@@ -57,7 +57,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import ChartErrorBoundary from '../../components/shared/ChartErrorBoundary';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
-import { formatDate, formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import useThemeColors from '../../hooks/useThemeColors';
 import './AdminDashboard.css';
 
@@ -91,6 +91,7 @@ const DASHBOARD_CONFIG = {
 };
 
 const AdminDashboard = () => {
+  const { formatDate, formatDateTime } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const themeColors = useThemeColors();
@@ -515,7 +516,10 @@ const SystemHealthCard = ({
   error,
   getHealthStatusColor,
   isRefreshing = false,
-}) => (
+}) => {
+  const { formatDate } = useDateFormat();
+
+  return (
   <Card shadow="sm" p="lg" withBorder h="100%" style={{ position: 'relative' }}>
     <LoadingOverlay visible={isRefreshing} />
     <Group justify="space-between" mb="md">
@@ -585,7 +589,8 @@ const SystemHealthCard = ({
       </Stack>
     )}
   </Card>
-);
+  );
+};
 
 SystemHealthCard.propTypes = {
   systemHealth: PropTypes.shape({
@@ -788,6 +793,7 @@ HealthMetric.propTypes = {
 
 const ActivityItem = ({ activity, iconData }) => {
   const { IconComponent, color } = iconData;
+  const { formatDateTime } = useDateFormat();
 
   return (
     <Paper p="sm" withBorder>

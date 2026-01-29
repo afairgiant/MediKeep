@@ -46,7 +46,7 @@ import {
 import { PageHeader } from '../components';
 import { searchService } from '../services/searchService';
 import { useCurrentPatient } from '../hooks/useGlobalData';
-import { formatDateTime } from '../utils/helpers';
+import { useDateFormat } from '../hooks/useDateFormat';
 import logger from '../services/logger';
 
 const ITEMS_PER_PAGE = 20;
@@ -67,6 +67,7 @@ const SearchResults = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { patient: currentPatient } = useCurrentPatient();
+  const { formatDateTime } = useDateFormat();
 
   // Search state
   const [query, setQuery] = useState(searchParams.get('q') || '');

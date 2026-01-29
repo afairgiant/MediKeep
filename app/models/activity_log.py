@@ -151,6 +151,8 @@ class EntityType:
     FAMILY_CONDITION = "family_condition"
     VITALS = "vitals"
     SYMPTOM = "symptom"
+    INJURY = "injury"
+    INJURY_TYPE = "injury_type"
 
     # System entities
     SYSTEM = "system"
@@ -180,6 +182,8 @@ class EntityType:
             cls.FAMILY_CONDITION,
             cls.VITALS,
             cls.SYMPTOM,
+            cls.INJURY,
+            cls.INJURY_TYPE,
             cls.SYSTEM,
             cls.BACKUP,
         ]
@@ -287,6 +291,13 @@ class ActivityCategory:
     INSURANCE_DELETED = "insurance_deleted"
     INSURANCE_SET_PRIMARY = "insurance_set_primary"
 
+    INJURY_ADDED = "injury_added"
+    INJURY_UPDATED = "injury_updated"
+    INJURY_DELETED = "injury_deleted"
+
+    INJURY_TYPE_ADDED = "injury_type_added"
+    INJURY_TYPE_DELETED = "injury_type_deleted"
+
     # System events
     USER_LOGIN = "user_login"
     USER_LOGOUT = "user_logout"
@@ -340,6 +351,11 @@ class ActivityCategory:
             cls.INSURANCE_UPDATED,
             cls.INSURANCE_DELETED,
             cls.INSURANCE_SET_PRIMARY,
+            cls.INJURY_ADDED,
+            cls.INJURY_UPDATED,
+            cls.INJURY_DELETED,
+            cls.INJURY_TYPE_ADDED,
+            cls.INJURY_TYPE_DELETED,
         ]
 
     @classmethod

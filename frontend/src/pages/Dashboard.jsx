@@ -53,6 +53,7 @@ import {
   IconPhoneCall,
   IconUsers,
   IconShield,
+  IconBandage,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
@@ -62,7 +63,7 @@ import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrentPatient, useCacheManager } from '../hooks/useGlobalData';
-import { formatDateTime } from '../utils/helpers';
+import { useDateFormat } from '../hooks/useDateFormat';
 import {
   getActivityNavigationUrl,
   getActivityIcon,
@@ -77,6 +78,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('navigation');
   const { t: tCommon } = useTranslation('common');
+  const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const {
     user: authUser,
@@ -385,6 +387,12 @@ const Dashboard = () => {
       icon: IconAlertTriangle,
       color: 'orange',
       link: '/allergies',
+    },
+    {
+      title: t('dashboard.modules.injuries', 'Injuries'),
+      icon: IconBandage,
+      color: 'red',
+      link: '/injuries',
     },
   ];
 

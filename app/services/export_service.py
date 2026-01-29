@@ -24,19 +24,74 @@ from app.models.models import (
     Condition,
     EmergencyContact,
     Encounter,
+    FamilyCondition,
+    FamilyMember,
     Immunization,
+    Injury,
+    Insurance,
     LabResult,
     Medication,
     Patient,
     Pharmacy,
     Practitioner,
     Procedure,
+    Symptom,
+    SymptomOccurrence,
     Treatment,
     User,
     Vitals,
 )
 
 logger = get_logger(__name__, "app")
+
+# Unit labels for imperial and metric systems
+UNIT_LABELS = {
+    "imperial": {"weight": "lbs", "height": "inches", "temperature": "°F"},
+    "metric": {"weight": "kg", "height": "cm", "temperature": "°C"},
+}
+
+
+class UnitConverter:
+    """Utility class for converting between imperial and metric units."""
+
+    @staticmethod
+    def lbs_to_kg(pounds: Optional[float]) -> Optional[float]:
+        """Convert pounds to kilograms."""
+        if pounds is None:
+            return None
+        return round(float(pounds) * 0.453592, 1)
+
+    @staticmethod
+    def inches_to_cm(inches: Optional[float]) -> Optional[float]:
+        """Convert inches to centimeters."""
+        if inches is None:
+            return None
+        return round(float(inches) * 2.54, 1)
+
+    @staticmethod
+    def fahrenheit_to_celsius(fahrenheit: Optional[float]) -> Optional[float]:
+        """Convert Fahrenheit to Celsius."""
+        if fahrenheit is None:
+            return None
+        return round((float(fahrenheit) - 32) * 5 / 9, 1)
+
+    @staticmethod
+    def calculate_bmi(
+        weight_kg: Optional[float], height_cm: Optional[float]
+    ) -> Optional[float]:
+        """Calculate BMI from metric units (kg and cm)."""
+        if weight_kg is None or height_cm is None:
+            return None
+        if height_cm <= 0:
+            return None
+        # BMI = weight(kg) / height(m)^2
+        height_m = float(height_cm) / 100
+        return round(float(weight_kg) / (height_m * height_m), 1)
+
+    @staticmethod
+    def get_unit_labels(unit_system: str) -> Dict[str, str]:
+        """Get unit labels for a given unit system."""
+        return UNIT_LABELS.get(unit_system, UNIT_LABELS["imperial"])
 
 
 class ExportService:
@@ -54,6 +109,7 @@ class ExportService:
         end_date: Optional[date] = None,
         include_files: bool = False,
         include_patient_info: bool = True,
+        unit_system: str = "imperial",
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """
         Export patient data based on specified parameters.
@@ -65,6 +121,8 @@ class ExportService:
             start_date: Filter records from this date
             end_date: Filter records up to this date
             include_files: Whether to include file attachments
+            include_patient_info: Whether to include patient information
+            unit_system: Unit system for measurements ('imperial' or 'metric')
 
         Returns:
             Dictionary containing exported data
@@ -74,13 +132,21 @@ class ExportService:
             user = self.db.query(User).filter(User.id == user_id).first()
             if not user:
                 raise ValueError("User not found")
-            
+
             if not user.active_patient_id:
                 raise ValueError("No active patient selected")
-            
-            patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+            patient = (
+                self.db.query(Patient)
+                .filter(Patient.id == user.active_patient_id)
+                .first()
+            )
             if not patient:
                 raise ValueError("Active patient record not found")
+
+            # Validate unit_system
+            if unit_system not in ("imperial", "metric"):
+                unit_system = "imperial"
 
             export_data = {
                 "export_metadata": {
@@ -89,6 +155,7 @@ class ExportService:
                     "scope": scope,
                     "include_files": include_files,
                     "include_patient_info": include_patient_info,
+                    "unit_system": unit_system,
                     "date_range": {
                         "start": start_date.isoformat() if start_date else None,
                         "end": end_date.isoformat() if end_date else None,
@@ -98,13 +165,15 @@ class ExportService:
 
             # Conditionally include patient info
             if include_patient_info:
-                export_data["patient_info"] = self._get_patient_info(patient)
+                export_data["patient_info"] = self._get_patient_info(
+                    patient, unit_system
+                )
 
             # Export based on scope
             if scope == "all":
                 export_data.update(
                     await self._export_all_data(
-                        patient, start_date, end_date, include_files
+                        patient, start_date, end_date, include_files, unit_system
                     )
                 )
             elif scope == "medications":
@@ -149,7 +218,7 @@ class ExportService:
                 )
             elif scope == "vitals":
                 export_data["vitals"] = self._export_vitals(
-                    patient, start_date, end_date
+                    patient, start_date, end_date, unit_system
                 )
             elif scope == "emergency_contacts":
                 export_data["emergency_contacts"] = self._export_emergency_contacts(
@@ -161,6 +230,22 @@ class ExportService:
                 )
             elif scope == "pharmacies":
                 export_data["pharmacies"] = self._export_pharmacies(
+                    patient, start_date, end_date
+                )
+            elif scope == "symptoms":
+                export_data["symptoms"] = self._export_symptoms(
+                    patient, start_date, end_date
+                )
+            elif scope == "injuries":
+                export_data["injuries"] = self._export_injuries(
+                    patient, start_date, end_date
+                )
+            elif scope == "family_history":
+                export_data["family_history"] = self._export_family_history(
+                    patient, start_date, end_date
+                )
+            elif scope == "insurance":
+                export_data["insurance"] = self._export_insurance(
                     patient, start_date, end_date
                 )
             else:
@@ -175,8 +260,21 @@ class ExportService:
             logger.error(f"Export failed for user {user_id}: {str(e)}")
             raise
 
-    def _get_patient_info(self, patient: Patient) -> Dict[str, Any]:
-        """Get basic patient information."""
+    def _get_patient_info(
+        self, patient: Patient, unit_system: str = "imperial"
+    ) -> Dict[str, Any]:
+        """Get basic patient information with unit conversion."""
+        # Get unit labels for the selected system
+        unit_labels = UnitConverter.get_unit_labels(unit_system)
+
+        # Convert height and weight based on unit system
+        if unit_system == "metric":
+            height_value = UnitConverter.inches_to_cm(patient.height)
+            weight_value = UnitConverter.lbs_to_kg(patient.weight)
+        else:
+            height_value = patient.height
+            weight_value = patient.weight
+
         return {
             "id": patient.id,
             "first_name": patient.first_name,
@@ -187,8 +285,10 @@ class ExportService:
                 else None
             ),
             "blood_type": patient.blood_type,
-            "height": patient.height,
-            "weight": patient.weight,
+            "height": height_value,
+            "height_unit": unit_labels["height"],
+            "weight": weight_value,
+            "weight_unit": unit_labels["weight"],
             "gender": patient.gender,
             "address": patient.address,
             "primary_physician": (
@@ -212,6 +312,7 @@ class ExportService:
         start_date: Optional[date],
         end_date: Optional[date],
         include_files: bool = False,
+        unit_system: str = "imperial",
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """Export all patient data."""
         return {
@@ -225,12 +326,16 @@ class ExportService:
             "procedures": self._export_procedures(patient, start_date, end_date),
             "treatments": self._export_treatments(patient, start_date, end_date),
             "encounters": self._export_encounters(patient, start_date, end_date),
-            "vitals": self._export_vitals(patient, start_date, end_date),
+            "vitals": self._export_vitals(patient, start_date, end_date, unit_system),
             "emergency_contacts": self._export_emergency_contacts(
                 patient, start_date, end_date
             ),
             "practitioners": self._export_practitioners(patient, start_date, end_date),
             "pharmacies": self._export_pharmacies(patient, start_date, end_date),
+            "symptoms": self._export_symptoms(patient, start_date, end_date),
+            "injuries": self._export_injuries(patient, start_date, end_date),
+            "family_history": self._export_family_history(patient, start_date, end_date),
+            "insurance": self._export_insurance(patient, start_date, end_date),
         }
 
     def _apply_date_filter(
@@ -378,13 +483,20 @@ class ExportService:
     def get_lab_result_files(
         self, user_id: int, start_date: Optional[date], end_date: Optional[date]
     ) -> List[Dict[str, Any]]:
-        """Get all lab result files for a patient."""
+        """Get all lab result files for a patient.
+
+        Returns files with storage backend info for proper handling of local vs paperless files.
+        """
+        import os
+
         # Get the active patient for the user
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user or not user.active_patient_id:
             return []
-        
-        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
         if not patient:
             return []
 
@@ -400,6 +512,23 @@ class ExportService:
         files_info = []
         for result in lab_results:
             for file in result.files:
+                storage_backend = getattr(file, "storage_backend", "local") or "local"
+                paperless_doc_id = getattr(file, "paperless_document_id", None)
+
+                # For local files, verify the file exists
+                if storage_backend == "local":
+                    if not file.file_path or not os.path.exists(file.file_path):
+                        logger.warning(
+                            f"Local file not found: {file.file_path}",
+                            extra={
+                                "category": "app",
+                                "event": "export_local_file_missing",
+                                "file_id": file.id,
+                                "file_path": file.file_path,
+                            },
+                        )
+                        continue
+
                 files_info.append(
                     {
                         "file_path": file.file_path,
@@ -407,6 +536,8 @@ class ExportService:
                         "file_type": file.file_type,
                         "test_name": result.test_name,
                         "file_size": file.file_size,
+                        "storage_backend": storage_backend,
+                        "paperless_document_id": paperless_doc_id,
                     }
                 )
 
@@ -596,9 +727,13 @@ class ExportService:
         ]
 
     def _export_vitals(
-        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+        self,
+        patient: Patient,
+        start_date: Optional[date],
+        end_date: Optional[date],
+        unit_system: str = "imperial",
     ) -> List[Dict[str, Any]]:
-        """Export vitals data."""
+        """Export vitals data with unit conversion."""
         query = (
             self.db.query(Vitals)
             .options(joinedload(Vitals.practitioner))
@@ -606,30 +741,57 @@ class ExportService:
         )
         query = self._apply_date_filter(query, Vitals, start_date, end_date)
         vitals = query.all()
-        return [
-            {
-                "id": vital.id,
-                "recorded_date": (
-                    vital.recorded_date.isoformat() if vital.recorded_date else None
-                ),
-                "systolic_bp": vital.systolic_bp,
-                "diastolic_bp": vital.diastolic_bp,
-                "heart_rate": vital.heart_rate,
-                "temperature": vital.temperature,
-                "weight": vital.weight,
-                "height": vital.height,
-                "oxygen_saturation": vital.oxygen_saturation,
-                "respiratory_rate": vital.respiratory_rate,
-                "blood_glucose": vital.blood_glucose,
-                "bmi": vital.bmi,
-                "pain_scale": vital.pain_scale,
-                "location": vital.location,
-                "device_used": vital.device_used,
-                "recorded_by": vital.practitioner.name if vital.practitioner else None,
-                "notes": vital.notes,
-            }
-            for vital in vitals
-        ]
+
+        # Get unit labels
+        unit_labels = UnitConverter.get_unit_labels(unit_system)
+
+        result = []
+        for vital in vitals:
+            # Convert measurements based on unit system
+            if unit_system == "metric":
+                temperature_value = UnitConverter.fahrenheit_to_celsius(
+                    vital.temperature
+                )
+                weight_value = UnitConverter.lbs_to_kg(vital.weight)
+                height_value = UnitConverter.inches_to_cm(vital.height)
+                # Recalculate BMI using metric values
+                bmi_value = UnitConverter.calculate_bmi(weight_value, height_value)
+            else:
+                temperature_value = vital.temperature
+                weight_value = vital.weight
+                height_value = vital.height
+                bmi_value = vital.bmi
+
+            result.append(
+                {
+                    "id": vital.id,
+                    "recorded_date": (
+                        vital.recorded_date.isoformat() if vital.recorded_date else None
+                    ),
+                    "systolic_bp": vital.systolic_bp,
+                    "diastolic_bp": vital.diastolic_bp,
+                    "heart_rate": vital.heart_rate,
+                    "temperature": temperature_value,
+                    "temperature_unit": unit_labels["temperature"],
+                    "weight": weight_value,
+                    "weight_unit": unit_labels["weight"],
+                    "height": height_value,
+                    "height_unit": unit_labels["height"],
+                    "oxygen_saturation": vital.oxygen_saturation,
+                    "respiratory_rate": vital.respiratory_rate,
+                    "blood_glucose": vital.blood_glucose,
+                    "bmi": bmi_value,
+                    "pain_scale": vital.pain_scale,
+                    "location": vital.location,
+                    "device_used": vital.device_used,
+                    "recorded_by": (
+                        vital.practitioner.name if vital.practitioner else None
+                    ),
+                    "notes": vital.notes,
+                }
+            )
+
+        return result
 
     def _export_emergency_contacts(
         self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
@@ -793,17 +955,229 @@ class ExportService:
             for pharmacy in pharmacies
         ]
 
+    def _export_symptoms(
+        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+    ) -> List[Dict[str, Any]]:
+        """Export symptoms data with occurrences."""
+        query = (
+            self.db.query(Symptom)
+            .options(joinedload(Symptom.occurrences))
+            .filter(Symptom.patient_id == patient.id)
+        )
+        if start_date:
+            query = query.filter(Symptom.first_occurrence_date >= start_date)
+        if end_date:
+            query = query.filter(Symptom.first_occurrence_date <= end_date)
+
+        symptoms = query.order_by(Symptom.symptom_name).all()
+
+        logger.info(f"Successfully exported symptoms data for patient {patient.id}")
+
+        return [
+            {
+                "id": symptom.id,
+                "symptom_name": symptom.symptom_name,
+                "category": symptom.category,
+                "status": symptom.status,
+                "is_chronic": symptom.is_chronic,
+                "first_occurrence_date": (
+                    symptom.first_occurrence_date.isoformat()
+                    if symptom.first_occurrence_date
+                    else None
+                ),
+                "last_occurrence_date": (
+                    symptom.last_occurrence_date.isoformat()
+                    if symptom.last_occurrence_date
+                    else None
+                ),
+                "typical_triggers": symptom.typical_triggers,
+                "general_notes": symptom.general_notes,
+                "tags": symptom.tags,
+                "occurrence_count": len(symptom.occurrences) if symptom.occurrences else 0,
+                "occurrences": [
+                    {
+                        "id": occ.id,
+                        "occurrence_date": (
+                            occ.occurrence_date.isoformat()
+                            if occ.occurrence_date
+                            else None
+                        ),
+                        "severity": occ.severity,
+                        "pain_scale": occ.pain_scale,
+                        "duration": occ.duration,
+                        "time_of_day": occ.time_of_day,
+                        "location": occ.location,
+                        "triggers": occ.triggers,
+                        "relief_methods": occ.relief_methods,
+                        "associated_symptoms": occ.associated_symptoms,
+                        "impact_level": occ.impact_level,
+                        "resolved_date": (
+                            occ.resolved_date.isoformat() if occ.resolved_date else None
+                        ),
+                        "resolution_notes": occ.resolution_notes,
+                        "notes": occ.notes,
+                    }
+                    for occ in (symptom.occurrences or [])
+                ],
+            }
+            for symptom in symptoms
+        ]
+
+    def _export_injuries(
+        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+    ) -> List[Dict[str, Any]]:
+        """Export injuries data."""
+        query = (
+            self.db.query(Injury)
+            .options(joinedload(Injury.injury_type))
+            .options(joinedload(Injury.practitioner))
+            .filter(Injury.patient_id == patient.id)
+        )
+        if start_date:
+            query = query.filter(Injury.date_of_injury >= start_date)
+        if end_date:
+            query = query.filter(Injury.date_of_injury <= end_date)
+
+        injuries = query.order_by(Injury.date_of_injury.desc()).all()
+
+        logger.info(f"Successfully exported injuries data for patient {patient.id}")
+
+        return [
+            {
+                "id": injury.id,
+                "injury_name": injury.injury_name,
+                "injury_type": (
+                    injury.injury_type.name if injury.injury_type else None
+                ),
+                "body_part": injury.body_part,
+                "laterality": injury.laterality,
+                "date_of_injury": (
+                    injury.date_of_injury.isoformat()
+                    if injury.date_of_injury
+                    else None
+                ),
+                "mechanism": injury.mechanism,
+                "severity": injury.severity,
+                "status": injury.status,
+                "treatment_received": injury.treatment_received,
+                "recovery_notes": injury.recovery_notes,
+                "practitioner": (
+                    injury.practitioner.name if injury.practitioner else None
+                ),
+                "notes": injury.notes,
+                "tags": injury.tags,
+            }
+            for injury in injuries
+        ]
+
+    def _export_family_history(
+        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+    ) -> List[Dict[str, Any]]:
+        """Export family history data (family members and their conditions)."""
+        query = (
+            self.db.query(FamilyMember)
+            .options(joinedload(FamilyMember.family_conditions))
+            .filter(FamilyMember.patient_id == patient.id)
+            .order_by(FamilyMember.relationship, FamilyMember.name)
+        )
+        if start_date:
+            query = query.filter(FamilyMember.created_at >= start_date)
+        if end_date:
+            query = query.filter(FamilyMember.created_at <= end_date)
+
+        family_members = query.all()
+
+        logger.info(f"Successfully exported family_history data for patient {patient.id}")
+
+        return [
+            {
+                "id": member.id,
+                "name": member.name,
+                "relationship": member.relationship,
+                "gender": member.gender,
+                "birth_year": member.birth_year,
+                "death_year": member.death_year,
+                "is_deceased": member.is_deceased,
+                "notes": member.notes,
+                "conditions": [
+                    {
+                        "id": condition.id,
+                        "condition_name": condition.condition_name,
+                        "diagnosis_age": condition.diagnosis_age,
+                        "severity": condition.severity,
+                        "status": condition.status,
+                        "condition_type": condition.condition_type,
+                        "icd10_code": condition.icd10_code,
+                        "notes": condition.notes,
+                    }
+                    for condition in (member.family_conditions or [])
+                ],
+            }
+            for member in family_members
+        ]
+
+    def _export_insurance(
+        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+    ) -> List[Dict[str, Any]]:
+        """Export insurance data."""
+        query = (
+            self.db.query(Insurance)
+            .filter(Insurance.patient_id == patient.id)
+            .order_by(Insurance.is_primary.desc(), Insurance.insurance_type)
+        )
+        if start_date:
+            query = query.filter(Insurance.effective_date >= start_date)
+        if end_date:
+            query = query.filter(Insurance.effective_date <= end_date)
+
+        insurances = query.all()
+
+        logger.info(f"Successfully exported insurance data for patient {patient.id}")
+
+        return [
+            {
+                "id": insurance.id,
+                "insurance_type": insurance.insurance_type,
+                "company_name": insurance.company_name,
+                "employer_group": insurance.employer_group,
+                "member_name": insurance.member_name,
+                "member_id": insurance.member_id,
+                "group_number": insurance.group_number,
+                "plan_name": insurance.plan_name,
+                "policy_holder_name": insurance.policy_holder_name,
+                "relationship_to_holder": insurance.relationship_to_holder,
+                "effective_date": (
+                    insurance.effective_date.isoformat()
+                    if insurance.effective_date
+                    else None
+                ),
+                "expiration_date": (
+                    insurance.expiration_date.isoformat()
+                    if insurance.expiration_date
+                    else None
+                ),
+                "status": insurance.status,
+                "is_primary": insurance.is_primary,
+                "coverage_details": insurance.coverage_details,
+                "contact_info": insurance.contact_info,
+                "notes": insurance.notes,
+            }
+            for insurance in insurances
+        ]
+
     async def get_export_summary(self, user_id: int) -> Dict[str, Any]:
         """Get summary of available data for export using active patient."""
         # Get the active patient for the user
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user:
             raise ValueError("User not found")
-        
+
         if not user.active_patient_id:
             raise ValueError("No active patient selected")
-        
-        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
         if not patient:
             raise ValueError("Active patient record not found")
 
@@ -850,6 +1224,18 @@ class ExportService:
                 .count(),
                 "practitioners": len(self._get_related_practitioner_ids(patient)),
                 "pharmacies": len(self._get_related_pharmacy_ids(patient)),
+                "symptoms": self.db.query(Symptom)
+                .filter(Symptom.patient_id == patient.id)
+                .count(),
+                "injuries": self.db.query(Injury)
+                .filter(Injury.patient_id == patient.id)
+                .count(),
+                "family_history": self.db.query(FamilyMember)
+                .filter(FamilyMember.patient_id == patient.id)
+                .count(),
+                "insurance": self.db.query(Insurance)
+                .filter(Insurance.patient_id == patient.id)
+                .count(),
             },
         }
 
@@ -917,12 +1303,19 @@ class ExportService:
         # Add patient info header if available
         if "patient_info" in export_data:
             patient_info = export_data["patient_info"]
+            height_unit = patient_info.get("height_unit", "inches")
+            weight_unit = patient_info.get("weight_unit", "lbs")
+
             output.write("# PATIENT INFORMATION\n")
             output.write(
                 f"# Name: {patient_info.get('first_name', '')} {patient_info.get('last_name', '')}\n"
             )
             output.write(f"# Birth Date: {patient_info.get('birth_date', '')}\n")
             output.write(f"# Blood Type: {patient_info.get('blood_type', '')}\n")
+            if patient_info.get("height"):
+                output.write(f"# Height: {patient_info.get('height')} {height_unit}\n")
+            if patient_info.get("weight"):
+                output.write(f"# Weight: {patient_info.get('weight')} {weight_unit}\n")
             output.write("\n")
 
         if scope == "all":
@@ -950,6 +1343,85 @@ class ExportService:
 
         return output.getvalue()
 
+    def _format_csv_value(self, field_name: str, value: Any) -> str:
+        """Format a value for CSV output with human-readable formatting."""
+        if value is None or value == "":
+            return ""
+
+        # Format nested conditions (for family history)
+        if field_name == "conditions" and isinstance(value, list):
+            if not value:
+                return "None recorded"
+            condition_strs = []
+            for cond in value:
+                if isinstance(cond, dict):
+                    name = cond.get("condition_name", "Unknown")
+                    age = cond.get("diagnosis_age")
+                    severity = cond.get("severity", "")
+                    if age:
+                        if severity:
+                            condition_strs.append(f"{name} (age {age}, {severity})")
+                        else:
+                            condition_strs.append(f"{name} (age {age})")
+                    else:
+                        if severity:
+                            condition_strs.append(f"{name} ({severity})")
+                        else:
+                            condition_strs.append(name)
+            return "; ".join(condition_strs)
+
+        # Format nested occurrences (for symptoms)
+        if field_name == "occurrences" and isinstance(value, list):
+            if not value:
+                return "None recorded"
+            return f"{len(value)} occurrence(s) recorded"
+
+        # Format dates (remove timestamps)
+        if field_name in [
+            "start_date",
+            "end_date",
+            "ordered_date",
+            "completed_date",
+            "date_administered",
+            "onset_date",
+            "recorded_date",
+            "date",
+            "created_at",
+            "updated_at",
+            "first_occurrence_date",
+            "last_occurrence_date",
+            "date_of_injury",
+            "effective_date",
+            "expiration_date",
+            "resolved_date",
+        ]:
+            str_value = str(value)
+            if "T" in str_value:
+                return str_value.split("T")[0]
+            elif len(str_value) > 10 and ":" in str_value:
+                return str_value.split(" ")[0]
+
+        # Format boolean values
+        if field_name in [
+            "is_primary",
+            "is_active",
+            "is_primary_physician",
+            "drive_through",
+            "twenty_four_hour",
+            "is_chronic",
+            "is_deceased",
+        ]:
+            if isinstance(value, bool):
+                return "Yes" if value else "No"
+            elif str(value).lower() in ["true", "false"]:
+                return "Yes" if str(value).lower() == "true" else "No"
+
+        # Format other lists/dicts as JSON
+        if isinstance(value, (list, dict)):
+            return json.dumps(value)
+
+        return str(value)
+
     def _write_csv_section(self, output: io.StringIO, records: List[Dict[str, Any]]):
         """Write a section of data to CSV with proper formatting."""
         if not records:
@@ -965,16 +1437,11 @@ class ExportService:
         writer.writeheader()
         # Write each record, handling missing fields gracefully
         for record in records:
-            # Ensure all values are strings and handle None values
+            # Ensure all values are formatted properly
             clean_record = {}
             for field in fieldnames:
                 value = record.get(field)
-                if value is None:
-                    clean_record[field] = ""
-                elif isinstance(value, (list, dict)):
-                    clean_record[field] = json.dumps(value)
-                else:
-                    clean_record[field] = str(value)
+                clean_record[field] = self._format_csv_value(field, value)
             writer.writerow(clean_record)
 
     async def convert_to_pdf(
@@ -1015,6 +1482,10 @@ class ExportService:
                 patient_info = export_data["patient_info"]
 
                 # Create patient info table with safe data handling
+                # Use unit labels from patient_info if available, otherwise default to imperial
+                height_unit = patient_info.get("height_unit", "inches")
+                weight_unit = patient_info.get("weight_unit", "lbs")
+
                 patient_data = [
                     [
                         "Name",
@@ -1025,7 +1496,7 @@ class ExportService:
                     [
                         "Height",
                         (
-                            f"{patient_info.get('height', 'N/A')} inches"
+                            f"{patient_info.get('height', 'N/A')} {height_unit}"
                             if patient_info.get("height")
                             else "N/A"
                         ),
@@ -1033,7 +1504,7 @@ class ExportService:
                     [
                         "Weight",
                         (
-                            f"{patient_info.get('weight', 'N/A')} lbs"
+                            f"{patient_info.get('weight', 'N/A')} {weight_unit}"
                             if patient_info.get("weight")
                             else "N/A"
                         ),
@@ -1180,7 +1651,26 @@ class ExportService:
         """Add a section using card-based format instead of tables for better readability."""
         from reportlab.lib import colors
         from reportlab.lib.units import inch
-        from reportlab.platypus import Table, TableStyle
+        from reportlab.platypus import Paragraph, Table, TableStyle
+        from reportlab.lib.styles import ParagraphStyle
+
+        # Create styles for wrapping text in table cells
+        cell_value_style = ParagraphStyle(
+            "CellValue",
+            parent=styles["Normal"],
+            fontSize=9,
+            leading=12,
+            textColor=colors.Color(0.1, 0.1, 0.1),
+        )
+        cell_label_style = ParagraphStyle(
+            "CellLabel",
+            parent=styles["Normal"],
+            fontSize=9,
+            leading=12,
+            fontName="Helvetica-Bold",
+            textColor=colors.white,
+            alignment=2,  # Right align
+        )
 
         # Create user-friendly field names
         header_mapping = {
@@ -1275,6 +1765,48 @@ class ExportService:
             "drive_through": "Drive Through",
             "twenty_four_hour": "24 Hour Service",
             "specialty_services": "Specialty Services",
+            # Symptoms
+            "symptom_name": "Symptom",
+            "category": "Category",
+            "is_chronic": "Chronic",
+            "first_occurrence_date": "First Occurrence",
+            "last_occurrence_date": "Last Occurrence",
+            "typical_triggers": "Typical Triggers",
+            "general_notes": "General Notes",
+            "occurrence_count": "Occurrence Count",
+            "occurrences": "Occurrences",
+            # Injuries
+            "injury_name": "Injury",
+            "injury_type": "Type",
+            "body_part": "Body Part",
+            "laterality": "Laterality",
+            "date_of_injury": "Date of Injury",
+            "mechanism": "Mechanism",
+            "treatment_received": "Treatment Received",
+            "recovery_notes": "Recovery Notes",
+            # Family History
+            "gender": "Gender",
+            "birth_year": "Birth Year",
+            "death_year": "Death Year",
+            "is_deceased": "Deceased",
+            "conditions": "Conditions",
+            "diagnosis_age": "Diagnosis Age",
+            "condition_type": "Condition Type",
+            "icd10_code": "ICD-10 Code",
+            # Insurance
+            "insurance_type": "Insurance Type",
+            "company_name": "Company",
+            "employer_group": "Employer/Group",
+            "member_name": "Member Name",
+            "member_id": "Member ID",
+            "group_number": "Group Number",
+            "plan_name": "Plan Name",
+            "policy_holder_name": "Policy Holder",
+            "relationship_to_holder": "Relationship",
+            "effective_date": "Effective Date",
+            "expiration_date": "Expiration Date",
+            "coverage_details": "Coverage Details",
+            "contact_info": "Contact Info",
         }
 
         def format_value(field_name, value):
@@ -1297,6 +1829,12 @@ class ExportService:
                 "onset_date",
                 "created_at",
                 "updated_at",
+                "first_occurrence_date",
+                "last_occurrence_date",
+                "date_of_injury",
+                "effective_date",
+                "expiration_date",
+                "resolved_date",
             ]:
                 if "T" in str_value:
                     return str_value.split("T")[0]
@@ -1310,6 +1848,8 @@ class ExportService:
                 "is_primary_physician",
                 "drive_through",
                 "twenty_four_hour",
+                "is_chronic",
+                "is_deceased",
             ]:
                 if isinstance(value, bool):
                     return "Yes" if value else "No"
@@ -1323,6 +1863,28 @@ class ExportService:
                     return f"{rating_num:.1f}/5.0"
                 except (ValueError, TypeError):
                     pass
+
+            # Format nested conditions (for family history)
+            if field_name == "conditions" and isinstance(value, list):
+                if not value:
+                    return "None recorded"
+                condition_strs = []
+                for cond in value:
+                    if isinstance(cond, dict):
+                        name = cond.get("condition_name", "Unknown")
+                        age = cond.get("diagnosis_age")
+                        severity = cond.get("severity", "")
+                        if age:
+                            condition_strs.append(f"• {name} (age {age}, {severity})" if severity else f"• {name} (age {age})")
+                        else:
+                            condition_strs.append(f"• {name} ({severity})" if severity else f"• {name}")
+                return "\n".join(condition_strs)
+
+            # Format nested occurrences (for symptoms)
+            if field_name == "occurrences" and isinstance(value, list):
+                if not value:
+                    return "None recorded"
+                return f"{len(value)} occurrence(s) recorded"
 
             return str_value
 
@@ -1400,6 +1962,65 @@ class ExportService:
                     "recorded_by",
                     "notes",
                 ]
+            elif section_name == "symptoms":
+                field_order = [
+                    "symptom_name",
+                    "category",
+                    "status",
+                    "is_chronic",
+                    "first_occurrence_date",
+                    "last_occurrence_date",
+                    "occurrence_count",
+                    "typical_triggers",
+                    "general_notes",
+                    "tags",
+                ]
+            elif section_name == "injuries":
+                field_order = [
+                    "injury_name",
+                    "injury_type",
+                    "body_part",
+                    "laterality",
+                    "date_of_injury",
+                    "mechanism",
+                    "severity",
+                    "status",
+                    "treatment_received",
+                    "recovery_notes",
+                    "practitioner",
+                    "notes",
+                    "tags",
+                ]
+            elif section_name == "family_history":
+                field_order = [
+                    "name",
+                    "relationship",
+                    "gender",
+                    "birth_year",
+                    "death_year",
+                    "is_deceased",
+                    "conditions",
+                    "notes",
+                ]
+            elif section_name == "insurance":
+                field_order = [
+                    "insurance_type",
+                    "company_name",
+                    "plan_name",
+                    "member_name",
+                    "member_id",
+                    "group_number",
+                    "policy_holder_name",
+                    "relationship_to_holder",
+                    "effective_date",
+                    "expiration_date",
+                    "status",
+                    "is_primary",
+                    "employer_group",
+                    "coverage_details",
+                    "contact_info",
+                    "notes",
+                ]
             else:
                 # Default order - use all available fields
                 field_order = list(record.keys())
@@ -1413,7 +2034,23 @@ class ExportService:
                     formatted_value = format_value(field_name, record[field_name])
 
                     if formatted_value != "N/A":  # Only show fields with values
-                        card_data.append([f"{display_name}:", formatted_value])
+                        # Use Paragraph for values that need text wrapping
+                        # Convert newlines to <br/> tags for proper PDF rendering
+                        if "\n" in formatted_value or len(formatted_value) > 50:
+                            # Escape any HTML-like characters and convert newlines
+                            escaped_value = (
+                                formatted_value.replace("&", "&amp;")
+                                .replace("<", "&lt;")
+                                .replace(">", "&gt;")
+                                .replace("\n", "<br/>")
+                            )
+                            value_paragraph = Paragraph(escaped_value, cell_value_style)
+                            label_paragraph = Paragraph(
+                                f"{display_name}:", cell_label_style
+                            )
+                            card_data.append([label_paragraph, value_paragraph])
+                        else:
+                            card_data.append([f"{display_name}:", formatted_value])
 
             # Create the card as a table with label-value pairs
             if card_data:

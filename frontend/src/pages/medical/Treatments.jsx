@@ -1,19 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 
 // Modular components
 import TreatmentCard from '../../components/medical/treatments/TreatmentCard';
@@ -22,21 +28,18 @@ import TreatmentFormWrapper from '../../components/medical/treatments/TreatmentF
 import {
   Button,
   Card,
-  Group,
   Stack,
   Text,
-  Grid,
   Container,
   Alert,
-  Loader,
-  Center,
   Paper,
 } from '@mantine/core';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 
 const Treatments = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
@@ -45,6 +48,9 @@ const Treatments = () => {
     usePatientWithStaticData();
 
   const practitioners = practitionersObject?.practitioners || [];
+
+  // Get standardized formatters for treatments
+  const treatmentFormatters = getEntityFormatters('treatments', practitioners, navigate, null, formatDate);
 
   // Modern data management with useMedicalData
   const {
@@ -93,10 +99,22 @@ const Treatments = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(treatments, config);
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('treatment', treatments);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingTreatment,
+    openModal: handleViewTreatment,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: treatments,
+    loading,
+  });
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingTreatment, setViewingTreatment] = useState(null);
   const [editingTreatment, setEditingTreatment] = useState(null);
   const [formData, setFormData] = useState({
     treatment_name: '',
@@ -151,33 +169,10 @@ const Treatments = () => {
     setShowModal(true);
   };
 
-  const handleViewTreatment = treatment => {
-    // Use existing treatment data - no need to fetch again
-    setViewingTreatment(treatment);
-    setShowViewModal(true);
-    // Update URL with treatment ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', treatment.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingTreatment(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   const handleDeleteTreatment = async treatmentId => {
     const success = await deleteItem(treatmentId);
     if (success) {
+      cleanupFileCount(treatmentId);
       await refreshData();
     }
   };
@@ -280,37 +275,15 @@ const Treatments = () => {
     }
   };
 
-  // Handle URL parameters for direct linking to specific treatments
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && treatments.length > 0 && !loading) {
-      const treatment = treatments.find(t => t.id.toString() === viewId);
-      if (treatment && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingTreatment(treatment);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, treatments, loading, showViewModal]);
-
   // Get processed data from data management
   const filteredTreatments = dataManagement.data;
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('treatments.loadingTreatments')}</Text>
-            <Text size="sm" c="dimmed">
-              If this takes too long, please refresh the page
-            </Text>
-          </Stack>
-        </Center>
-      </Container>
+      <MedicalPageLoading
+        message={t('treatments.loadingTreatments', 'Loading treatments...')}
+        hint={t('treatments.loadingHint', 'If this takes too long, please refresh the page')}
+      />
     );
   }
 
@@ -320,18 +293,11 @@ const Treatments = () => {
         <PageHeader title={t('treatments.title', 'Treatments')} icon="🩹" />
 
         <Stack gap="lg">
-          {error && (
-            <Alert
-              variant="light"
-              color="red"
-              title={t('labels.error', 'Error')}
-              withCloseButton
-              onClose={clearError}
-              style={{ whiteSpace: 'pre-line' }}
-            >
-              {error}
-            </Alert>
-          )}
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={clearError}
+          />
           {conditionsError && (
             <Alert
               variant="light"
@@ -341,84 +307,58 @@ const Treatments = () => {
               {conditionsError}
             </Alert>
           )}
-          {successMessage && (
-            <Alert variant="light" color="green" title={t('labels.success', 'Success')}>
-              {successMessage}
-            </Alert>
-          )}
 
-          <Group justify="space-between" align="center">
-            <Button variant="filled" onClick={handleAddTreatment}>
-              {t('treatments.addTreatment', '+ Add Treatment')}
-            </Button>
-
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </Group>
-
-          {/* Mantine Filter Controls */}
-          <MantineFilters
-            filters={dataManagement.filters}
-            updateFilter={dataManagement.updateFilter}
-            clearFilters={dataManagement.clearFilters}
-            hasActiveFilters={dataManagement.hasActiveFilters}
-            statusOptions={dataManagement.statusOptions}
-            categoryOptions={dataManagement.categoryOptions}
-            dateRangeOptions={dataManagement.dateRangeOptions}
-            sortOptions={dataManagement.sortOptions}
-            sortBy={dataManagement.sortBy}
-            sortOrder={dataManagement.sortOrder}
-            handleSortChange={dataManagement.handleSortChange}
-            totalCount={dataManagement.totalCount}
-            filteredCount={dataManagement.filteredCount}
-            config={config.filterControls}
+          <MedicalPageActions
+            primaryAction={{
+              label: t('treatments.addTreatment', '+ Add Treatment'),
+              onClick: handleAddTreatment,
+            }}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            mb={0}
           />
 
+          {/* Mantine Filter Controls */}
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
+
           {filteredTreatments.length === 0 ? (
-            <Card withBorder p="xl">
-              <Stack align="center" gap="md">
-                <Text size="3rem">🩹</Text>
-                <Text size="xl" fw={600}>
-                  {t('treatments.noTreatmentsFound', 'No Treatments Found')}
-                </Text>
-                <Text ta="center" c="dimmed">
-                  {dataManagement.hasActiveFilters
-                    ? t('treatments.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                    : t('treatments.startAdding', 'Start by adding your first treatment.')}
-                </Text>
-                {!dataManagement.hasActiveFilters && (
-                  <Button variant="filled" onClick={handleAddTreatment}>
-                    {t('treatments.addFirstTreatment', 'Add Your First Treatment')}
-                  </Button>
-                )}
-              </Stack>
-            </Card>
+            <EmptyState
+              emoji="🩹"
+              title={t('treatments.noTreatmentsFound', 'No Treatments Found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('treatments.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('treatments.startAdding', 'Start by adding your first treatment.')}
+              actionButton={
+                <Button variant="filled" onClick={handleAddTreatment}>
+                  {t('treatments.addFirstTreatment', 'Add Your First Treatment')}
+                </Button>
+              }
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              {filteredTreatments.map(treatment => (
-                <Grid.Col key={treatment.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <TreatmentCard
-                    treatment={treatment}
-                    conditions={conditions}
-                    onEdit={handleEditTreatment}
-                    onDelete={handleDeleteTreatment}
-                    onView={handleViewTreatment}
-                    onConditionClick={handleConditionClick}
-                    navigate={navigate}
-                    onError={(error) => {
-                      logger.error('TreatmentCard error', {
-                        treatmentId: treatment.id,
-                        error: error.message,
-                        page: 'Treatments',
-                      });
-                    }}
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredTreatments}
+              columns={{ base: 12, sm: 6, lg: 4 }}
+              renderCard={(treatment) => (
+                <TreatmentCard
+                  treatment={treatment}
+                  conditions={conditions}
+                  onEdit={handleEditTreatment}
+                  onDelete={handleDeleteTreatment}
+                  onView={handleViewTreatment}
+                  onConditionClick={handleConditionClick}
+                  navigate={navigate}
+                  fileCount={fileCounts[treatment.id] || 0}
+                  fileCountLoading={fileCountsLoading[treatment.id] || false}
+                  onError={(error) => {
+                    logger.error('TreatmentCard error', {
+                      treatmentId: treatment.id,
+                      error: error.message,
+                      page: 'Treatments',
+                    });
+                  }}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
@@ -441,10 +381,8 @@ const Treatments = () => {
               onEdit={handleEditTreatment}
               onDelete={handleDeleteTreatment}
               formatters={{
-                treatment_name:
-                  getEntityFormatters('treatments').treatment_name,
-                treatment_type:
-                  getEntityFormatters('treatments').treatment_type,
+                treatment_name: treatmentFormatters.treatment_name,
+                treatment_type: treatmentFormatters.treatment_type,
                 practitioner: (value, row) => {
                   if (row.practitioner_id) {
                     const practitionerInfo = getPractitionerInfo(
@@ -468,12 +406,12 @@ const Treatments = () => {
                   }
                   return 'No condition linked';
                 },
-                start_date: getEntityFormatters('treatments').start_date,
-                end_date: getEntityFormatters('treatments').end_date,
-                status: getEntityFormatters('treatments').status,
-                dosage: getEntityFormatters('treatments').dosage,
-                frequency: getEntityFormatters('treatments').frequency,
-                notes: getEntityFormatters('treatments').notes,
+                start_date: treatmentFormatters.start_date,
+                end_date: treatmentFormatters.end_date,
+                status: treatmentFormatters.status,
+                dosage: treatmentFormatters.dosage,
+                frequency: treatmentFormatters.frequency,
+                notes: treatmentFormatters.notes,
               }}
               dataType="medical"
               responsive={responsive}

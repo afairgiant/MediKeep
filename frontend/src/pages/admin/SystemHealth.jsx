@@ -4,10 +4,11 @@ import AdminCard from '../../components/admin/AdminCard';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { Loading } from '../../components';
-import { formatDate, formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import './SystemHealth.css';
 
 const SystemHealth = () => {
+  const { formatDate, formatDateTime } = useDateFormat();
   const [lastRefresh, setLastRefresh] = useState(null);
 
   // System Health Data with auto-refresh

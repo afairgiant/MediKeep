@@ -51,6 +51,18 @@ import { searchTests } from '../../../constants/testLibrary';
 import logger from '../../../services/logger';
 
 /**
+ * Validates and normalizes a date value from DateInput.
+ * Returns a valid Date object or null if the value is invalid/missing.
+ * Handles edge cases where Mantine's DateInput may pass non-Date values.
+ */
+function getValidatedDate(value: Date | null | unknown): Date | null {
+  if (!value) return null;
+
+  const date = value instanceof Date ? value : new Date(value as string | number);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+/**
  * Regex patterns for parsing various lab result formats.
  *
  * Supported formats:
@@ -699,19 +711,21 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       return;
     }
 
-    // Validate completed_date is provided
-    if (!completedDate) {
+    // Validate completed_date is provided and valid
+    // Defensive: Mantine's DateInput may occasionally pass non-Date values in edge cases
+    const validatedDate = getValidatedDate(completedDate);
+
+    if (!validatedDate) {
       notifications.show({
         title: 'Date Required',
-        message: 'Please specify the test completed date. This is required for tracking trends over time.',
+        message: 'Please specify a valid test completed date. This is required for tracking trends over time.',
         color: 'orange',
         autoClose: 6000
       });
       return;
     }
 
-    // Validate date is not in the future
-    if (completedDate > new Date()) {
+    if (validatedDate > new Date()) {
       notifications.show({
         title: 'Invalid Date',
         message: 'Test completed date cannot be in the future.',
@@ -723,8 +737,8 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
 
     setIsSubmitting(true);
     try {
-      // First, update the lab result with the completed_date
-      const formattedDate = completedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      // Format date for API - validatedDate is guaranteed valid at this point
+      const formattedDate = validatedDate.toISOString().split('T')[0]; // YYYY-MM-DD format
 
       logger.info('Updating lab result with completed_date', {
         component: 'TestComponentBulkEntry',
@@ -1150,13 +1164,15 @@ Sodium,140,mEq/L,136-145,Normal`
                       </Text>
                       <DateInput
                         value={completedDate}
-                        onChange={(value) => setCompletedDate(value as Date | null)}
+                        onChange={setCompletedDate}
                         label="Test Completed Date"
                         placeholder="Select date"
                         clearable
                         required
+                        allowDeselect={false}
                         maxDate={new Date()}
                         styles={{ input: { maxWidth: 250 } }}
+                        popoverProps={{ withinPortal: true, zIndex: 3100 }}
                       />
                     </Stack>
                   </Alert>

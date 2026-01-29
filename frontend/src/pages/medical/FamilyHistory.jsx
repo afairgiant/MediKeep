@@ -4,7 +4,6 @@ import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
-import { formatDate } from '../../utils/helpers';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -12,9 +11,11 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import logger from '../../services/logger';
 import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import StatusBadge from '../../components/medical/StatusBadge';
@@ -34,15 +35,13 @@ import {
   Text,
   Container,
   Alert,
-  Loader,
-  Center,
   Title,
-  SimpleGrid,
   Tabs,
   Checkbox,
   Paper,
   useMantineColorScheme,
 } from '@mantine/core';
+// Note: Button is still needed for the Alert cancel button
 import {
   IconUsers,
   IconPlus,
@@ -908,16 +907,7 @@ const FamilyHistory = () => {
   // Utility functions moved to extracted components
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('familyHistory.loadingFamilyHistory', 'Loading family history...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('familyHistory.loadingFamilyHistory', 'Loading family history...')} />;
   }
 
   return (
@@ -959,58 +949,43 @@ const FamilyHistory = () => {
               : t('familyHistory.sharedMemberCount', '{{filteredCount}} of {{totalCount}} family member(s) shared with you', { filteredCount: sharedDataManagement.filteredCount, totalCount: sharedDataManagement.totalCount })}
         </Text>
 
-        <Group justify="space-between" mb="lg">
-          <Group>
-            {activeTab === 'my-family' && (
-              <Button
-                leftSection={<IconUserPlus size={16} />}
-                onClick={handleAddMember}
-                variant="filled"
-              >
-                {t('familyHistory.addFamilyMember', 'Add Family Member')}
-              </Button>
-            )}
-
-            {activeTab === 'my-family' && (
-              <Button
-                variant={bulkSelectionMode ? 'filled' : 'light'}
-                leftSection={<IconShare size={16} />}
-                onClick={() => {
-                  setBulkSelectionMode(!bulkSelectionMode);
-                  setSelectedMembersForBulkSharing([]);
-                }}
-              >
-                {bulkSelectionMode ? t('familyHistory.endSharingMode', 'End Sharing Mode') : t('familyHistory.sharingMode', 'Sharing Mode')}
-              </Button>
-            )}
-
-            <Button
-              variant="light"
-              leftSection={<IconMail size={16} />}
-              onClick={openInvitationManager}
-            >
-              {t('familyHistory.manageInvitations', 'Manage Invitations')}
-            </Button>
-
-            {bulkSelectionMode && selectedMembersForBulkSharing.length > 0 && (
-              <Button
-                variant="filled"
-                leftSection={<IconSend size={16} />}
-                onClick={() => {
-                  openBulkSharingModal();
-                }}
-              >
-                {t('familyHistory.shareSelected', 'Share Selected ({{count}})', { count: selectedMembersForBulkSharing.length })}
-              </Button>
-            )}
-          </Group>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('familyHistory.addFamilyMember', 'Add Family Member'),
+            onClick: handleAddMember,
+            leftSection: <IconUserPlus size={16} />,
+            visible: activeTab === 'my-family',
+          }}
+          secondaryActions={[
+            {
+              key: 'sharing-mode',
+              label: bulkSelectionMode ? t('familyHistory.endSharingMode', 'End Sharing Mode') : t('familyHistory.sharingMode', 'Sharing Mode'),
+              onClick: () => {
+                setBulkSelectionMode(!bulkSelectionMode);
+                setSelectedMembersForBulkSharing([]);
+              },
+              leftSection: <IconShare size={16} />,
+              variant: bulkSelectionMode ? 'filled' : 'light',
+              visible: activeTab === 'my-family',
+            },
+            {
+              key: 'manage-invitations',
+              label: t('familyHistory.manageInvitations', 'Manage Invitations'),
+              onClick: openInvitationManager,
+              leftSection: <IconMail size={16} />,
+            },
+            {
+              key: 'share-selected',
+              label: t('familyHistory.shareSelected', 'Share Selected ({{count}})', { count: selectedMembersForBulkSharing.length }),
+              onClick: openBulkSharingModal,
+              leftSection: <IconSend size={16} />,
+              variant: 'filled',
+              visible: bulkSelectionMode && selectedMembersForBulkSharing.length > 0,
+            },
+          ]}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {bulkSelectionMode && (
           <Alert
@@ -1046,41 +1021,11 @@ const FamilyHistory = () => {
 
       {/* Filters */}
       {activeTab === 'my-family' && (
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
       )}
 
       {activeTab === 'shared-with-me' && (
-        <MantineFilters
-          filters={sharedDataManagement.filters}
-          updateFilter={sharedDataManagement.updateFilter}
-          clearFilters={sharedDataManagement.clearFilters}
-          hasActiveFilters={sharedDataManagement.hasActiveFilters}
-          statusOptions={sharedDataManagement.statusOptions}
-          categoryOptions={sharedDataManagement.categoryOptions}
-          dateRangeOptions={sharedDataManagement.dateRangeOptions}
-          sortOptions={sharedDataManagement.sortOptions}
-          sortBy={sharedDataManagement.sortBy}
-          sortOrder={sharedDataManagement.sortOrder}
-          handleSortChange={sharedDataManagement.handleSortChange}
-          totalCount={sharedDataManagement.totalCount}
-          filteredCount={sharedDataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={sharedDataManagement} config={config} />
       )}
 
       {/* Tabs for Family History */}
@@ -1211,10 +1156,11 @@ const FamilyHistory = () => {
                     </Badge>
                   </Group>
 
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                    {group.members.map(member => (
+                  <AnimatedCardGrid
+                    items={group.members}
+                    columns={{ base: 12, sm: 6, md: 4 }}
+                    renderCard={(member) => (
                       <FamilyHistoryCard
-                        key={member.id}
                         member={member}
                         onView={handleViewFamilyMember}
                         onEdit={handleEditMember}
@@ -1230,8 +1176,8 @@ const FamilyHistory = () => {
                         onBulkToggle={handleBulkMemberToggle}
                         onError={setError}
                       />
-                    ))}
-                  </SimpleGrid>
+                    )}
+                  />
                 </div>
               ))}
             </Stack>
@@ -1310,8 +1256,11 @@ const FamilyHistory = () => {
                     </Badge>
                   </Group>
 
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                    {group.members.map(item => {
+                  <AnimatedCardGrid
+                    items={group.members}
+                    columns={{ base: 12, sm: 6, md: 4 }}
+                    keyExtractor={(item) => `shared-${item.family_member.id}`}
+                    renderCard={(item) => {
                       const member = {
                         ...item.family_member,
                         is_shared: true,
@@ -1322,7 +1271,6 @@ const FamilyHistory = () => {
 
                       return (
                         <FamilyHistoryCard
-                          key={`shared-${member.id}`}
                           member={member}
                           onView={handleViewFamilyMember}
                           onEdit={handleEditMember}
@@ -1352,8 +1300,8 @@ const FamilyHistory = () => {
                           onError={setError}
                         />
                       );
-                    })}
-                  </SimpleGrid>
+                    }}
+                  />
                 </div>
               ))}
             </Stack>

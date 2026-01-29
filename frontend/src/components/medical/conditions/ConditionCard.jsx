@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge, Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import {
@@ -22,10 +22,13 @@ const ConditionCard = ({
   onDelete,
   onView,
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
     logger.error('condition_card_error', {
@@ -137,7 +140,7 @@ const ConditionCard = ({
       {
         label: t('common.fields.onsetDate.label'),
         value: condition.onset_date,
-        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
       },
       {
         label: tCommon('labels.duration'),
@@ -149,7 +152,7 @@ const ConditionCard = ({
       condition.end_date && {
         label: t('common.fields.endDate.label'),
         value: condition.end_date,
-        render: (value) => formatDate(value)
+        render: (value) => formatLongDate(value)
       },
       condition.snomed_code && {
         label: t('conditions.snomedCode.label'),
@@ -173,6 +176,9 @@ const ConditionCard = ({
         badges={badges}
         fields={fields}
         notes={condition.notes}
+        entityType="condition"
+        fileCount={fileCount}
+        fileCountLoading={fileCountLoading}
         onView={() => onView(condition)}
         onEdit={() => onEdit(condition)}
         onDelete={() => onDelete(condition.id)}

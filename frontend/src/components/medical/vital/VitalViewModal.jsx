@@ -31,7 +31,7 @@ import {
   IconTrendingUp,
   IconUser,
 } from '@tabler/icons-react';
-import { formatDate, formatDateTime } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
@@ -48,6 +48,7 @@ const VitalViewModal = ({
   navigate,
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate, formatDateTime } = useDateFormat();
 
   if (!isOpen || !vital) return null;
 
@@ -182,14 +183,7 @@ const VitalViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={
-        <Group>
-          <Text fw={600} size="lg">
-            {t('vitals.modal.title', 'Vital Signs Details')}
-          </Text>
-          {vital.status && <StatusBadge status={vital.status} />}
-        </Group>
-      }
+      title={t('vitals.modal.title', 'Vital Signs Details')}
       size="xl"
       centered
       zIndex={2000}
@@ -201,6 +195,33 @@ const VitalViewModal = ({
       }}
     >
       <Stack gap="lg">
+        {/* Header Card */}
+        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Group justify="space-between" align="center">
+            <div>
+              <Title order={3} mb="xs">{t('vitals.modal.vitalSigns', 'Vital Signs')}</Title>
+              <Group gap="xs">
+                {vital.recorded_date && (
+                  <Badge variant="light" color="blue" size="sm">
+                    {formatDate(vital.recorded_date)}
+                  </Badge>
+                )}
+                {vital.location && (
+                  <Badge variant="light" color="gray" size="sm">
+                    {vital.location}
+                  </Badge>
+                )}
+                {vital.status && <StatusBadge status={vital.status} />}
+              </Group>
+            </div>
+            {vital.systolic_bp && vital.diastolic_bp && (
+              <Badge variant="filled" color="red" size="lg">
+                {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)} mmHg
+              </Badge>
+            )}
+          </Group>
+        </Paper>
+
         {/* Vital Signs Sections */}
         {vitalSections.map((section, index) => {
           const SectionIcon = section.icon;

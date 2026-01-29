@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 // API and utilities
 import patientApi from '../../services/api/patientApi';
-import { formatDate } from '../../utils/helpers';
-import { DATE_FORMATS } from '../../utils/constants';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   formatMeasurement,
   convertForDisplay,
@@ -27,6 +26,7 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 import { PageHeader } from '../../components';
 import PatientFormWrapper from '../../components/medical/patient-info/PatientFormWrapper';
 import PatientAvatar from '../../components/shared/PatientAvatar';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 
 // Mantine UI
 import {
@@ -61,6 +61,7 @@ const PatientInfo = () => {
   const { practitioners, loading: practitionersLoading } = usePractitioners();
   const { invalidatePatientList, invalidatePatient } = useCacheManager();
   const { unitSystem } = useUserPreferences();
+  const { formatLongDate } = useDateFormat();
 
   // Combine loading states
   const loading = patientLoading || practitionersLoading;
@@ -364,14 +365,7 @@ const PatientInfo = () => {
   };
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <PageHeader title={t('patientInfo.title', 'Patient Information')} icon="📋" />
-        <Stack align="center" gap="md" py="xl">
-          <Text size="lg">{t('patientInfo.loading', 'Loading patient information...')}</Text>
-        </Stack>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('patientInfo.loading', 'Loading patient information...')} />;
   }
 
   return (
@@ -450,10 +444,7 @@ const PatientInfo = () => {
                     <div className="detail-group">
                       <label>{t('patientInfo.fields.birthDate', 'Birth Date')}:</label>
                       <span>
-                        {formatDate(
-                          patientData.birth_date,
-                          DATE_FORMATS.DISPLAY_LONG
-                        )}
+                        {formatLongDate(patientData.birth_date, true)}
                       </span>
                     </div>
                     <div className="detail-group">

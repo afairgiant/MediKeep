@@ -4,7 +4,11 @@ from typing import Optional
 from pydantic import BaseModel, field_validator, ValidationInfo
 
 # Supported languages - single source of truth
-SUPPORTED_LANGUAGES = ["en", "fr", "de"]
+SUPPORTED_LANGUAGES = ["en", "fr", "de", "es", "it", "pt"]
+
+# Supported date formats - single source of truth
+# mdy = MM/DD/YYYY (US), dmy = DD/MM/YYYY (European), ymd = YYYY-MM-DD (ISO)
+SUPPORTED_DATE_FORMATS = ["mdy", "dmy", "ymd"]
 
 
 class UserPreferencesBase(BaseModel):
@@ -13,6 +17,7 @@ class UserPreferencesBase(BaseModel):
     unit_system: str
     session_timeout_minutes: Optional[int] = 30
     language: Optional[str] = "en"
+    date_format: Optional[str] = "mdy"
     paperless_enabled: Optional[bool] = False
     paperless_url: Optional[str] = None
     paperless_api_token: Optional[str] = None
@@ -85,6 +90,29 @@ class UserPreferencesBase(BaseModel):
             if v.lower() not in SUPPORTED_LANGUAGES:
                 raise ValueError(
                     f"Language must be one of: {', '.join(SUPPORTED_LANGUAGES)}"
+                )
+            return v.lower()
+        return v
+
+    @field_validator("date_format")
+    @classmethod
+    def validate_date_format(cls, v):
+        """
+        Validate that the date format is one of the supported values.
+
+        Args:
+            v: The date format code to validate
+
+        Returns:
+            Validated date format code (lowercase)
+
+        Raises:
+            ValueError: If date format is not in supported list
+        """
+        if v is not None:
+            if v.lower() not in SUPPORTED_DATE_FORMATS:
+                raise ValueError(
+                    f"Date format must be one of: {', '.join(SUPPORTED_DATE_FORMATS)}"
                 )
             return v.lower()
         return v
@@ -166,6 +194,7 @@ class UserPreferencesUpdate(BaseModel):
     unit_system: Optional[str] = None
     session_timeout_minutes: Optional[int] = None
     language: Optional[str] = None
+    date_format: Optional[str] = None
     paperless_enabled: Optional[bool] = None
     paperless_url: Optional[str] = None
     paperless_username: Optional[str] = None
@@ -206,6 +235,18 @@ class UserPreferencesUpdate(BaseModel):
             if v.lower() not in SUPPORTED_LANGUAGES:
                 raise ValueError(
                     f"Language must be one of: {', '.join(SUPPORTED_LANGUAGES)}"
+                )
+            return v.lower()
+        return v
+
+    @field_validator("date_format")
+    @classmethod
+    def validate_date_format(cls, v):
+        """Validate date format if provided."""
+        if v is not None:
+            if v.lower() not in SUPPORTED_DATE_FORMATS:
+                raise ValueError(
+                    f"Date format must be one of: {', '.join(SUPPORTED_DATE_FORMATS)}"
                 )
             return v.lower()
         return v

@@ -148,3 +148,5 @@ dist/
 .gitignore
 test_database.db-shm
 report.html
+
+audit/

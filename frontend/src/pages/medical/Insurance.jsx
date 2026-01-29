@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -26,29 +28,28 @@ import {
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import StatusBadge from '../../components/medical/StatusBadge';
 import InsuranceCard from '../../components/medical/insurance/InsuranceCard';
 import InsuranceFormWrapper from '../../components/medical/insurance/InsuranceFormWrapper';
 import InsuranceViewModal from '../../components/medical/insurance/InsuranceViewModal';
 import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
 import {
   Badge,
   Button,
   Card,
-  Group,
   Stack,
   Text,
-  Grid,
   Container,
-  Alert,
-  Loader,
-  Center,
   Divider,
   Modal,
   Title,
@@ -57,8 +58,8 @@ import {
 
 const Insurance = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
@@ -68,6 +69,8 @@ const Insurance = () => {
     currentPatient,
     loading = false,
     error,
+    successMessage,
+    clearError,
     createItem = async () => {},
     updateItem = async () => {},
     deleteItem = async () => {},
@@ -90,8 +93,23 @@ const Insurance = () => {
   const config = getMedicalPageConfig('insurances');
 
   // File count management for cards
-  const [fileCounts, setFileCounts] = useState({});
-  const [fileCountsLoading, setFileCountsLoading] = useState({});
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('insurance', insurances);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingInsurance,
+    openModal: handleViewInsurance,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: insurances,
+    loading,
+    onClose: (insurance) => {
+      if (insurance) {
+        refreshFileCount(insurance.id);
+      }
+    },
+  });
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -164,53 +182,9 @@ const Insurance = () => {
   const [editingInsurance, setEditingInsurance] = useState(null);
   const [formData, setFormData] = useState({});
 
-  // View modal state management
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingInsurance, setViewingInsurance] = useState(null);
-
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
   const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
-
-  // Function to refresh file counts for all insurances
-  const refreshFileCount = useCallback(async (insuranceId) => {
-    try {
-      const files = await apiService.getEntityFiles('insurance', insuranceId);
-      const count = Array.isArray(files) ? files.length : 0;
-      setFileCounts(prev => ({ ...prev, [insuranceId]: count }));
-    } catch (error) {
-      logger.error(`Error refreshing file count for insurance ${insuranceId}:`, error);
-    }
-  }, []);
-
-  // Load file counts for insurances
-  useEffect(() => {
-    const loadFileCountsForInsurances = async () => {
-      if (!insurances || insurances.length === 0) return;
-      
-      const countPromises = insurances.map(async (insurance) => {
-        setFileCountsLoading(prev => {
-          if (prev[insurance.id] !== undefined) return prev; // Already loading
-          return { ...prev, [insurance.id]: true };
-        });
-        
-        try {
-          const files = await apiService.getEntityFiles('insurance', insurance.id);
-          const count = Array.isArray(files) ? files.length : 0;
-          setFileCounts(prev => ({ ...prev, [insurance.id]: count }));
-        } catch (error) {
-          logger.error(`Error loading file count for insurance ${insurance.id}:`, error);
-          setFileCounts(prev => ({ ...prev, [insurance.id]: 0 }));
-        } finally {
-          setFileCountsLoading(prev => ({ ...prev, [insurance.id]: false }));
-        }
-      });
-      
-      await Promise.all(countPromises);
-    };
-
-    loadFileCountsForInsurances();
-  }, [insurances]); // Remove fileCounts from dependencies
 
   // Table formatters - consistent with medication table approach
   const formatters = {
@@ -404,20 +378,8 @@ const Insurance = () => {
 
     if (window.confirm(`Are you sure you want to delete this ${insurance.insurance_type} insurance?`)) {
       const success = await deleteItem(insuranceId);
-      // Note: deleteItem already updates local state, no need to refresh all data
-      // The useMedicalData hook handles state updates automatically
       if (success) {
-        // Only refresh file counts as they might be affected by deletion
-        setFileCounts(prev => {
-          const updated = { ...prev };
-          delete updated[insuranceId];
-          return updated;
-        });
-        setFileCountsLoading(prev => {
-          const updated = { ...prev };
-          delete updated[insuranceId];
-          return updated;
-        });
+        cleanupFileCount(insuranceId);
       }
     }
   };
@@ -479,77 +441,9 @@ const Insurance = () => {
     setFormData(initializeFormData());
   };
 
-  // Handle view insurance
-  const handleViewInsurance = (insurance) => {
-    try {
-      setViewingInsurance(insurance);
-      setShowViewModal(true);
-      
-      // Add view parameter to URL for deep linking
-      const searchParams = new URLSearchParams(location.search);
-      searchParams.set('view', insurance.id);
-      navigate({ search: searchParams.toString() }, { replace: true });
-    } catch (error) {
-      logger.error('Error opening insurance view modal:', error);
-      notifications.show({
-        title: 'Error',
-        message: ERROR_MESSAGES.ENTITY_NOT_FOUND,
-        color: 'red',
-      });
-    }
-  };
-
-  // Handle close view modal
-  const handleCloseViewModal = () => {
-    // Refresh file count for the viewed insurance before closing
-    if (viewingInsurance) {
-      refreshFileCount(viewingInsurance.id);
-    }
-    
-    setShowViewModal(false);
-    setViewingInsurance(null);
-    
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    navigate({ search: searchParams.toString() }, { replace: true });
-  };
-
-  // Handle URL view parameter for deep linking
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-    
-    if (viewId && insurances.length > 0 && !loading) {
-      const insurance = insurances.find(i => i.id.toString() === viewId);
-      if (insurance && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingInsurance(insurance);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, insurances, loading, showViewModal]);
-
   // Loading state
   if (loading) {
-    return (
-      <Container size="xl">
-        <Center style={{ height: 400 }}>
-          <Loader size="lg" />
-        </Center>
-      </Container>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <Container size="xl">
-        <Alert color="red" title="Error loading insurance records" style={{ whiteSpace: 'pre-line' }}>
-          {getUserFriendlyError(error, 'load')}
-        </Alert>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('insurance.loading', 'Loading insurance records...')} />;
   }
 
   return (
@@ -559,73 +453,57 @@ const Insurance = () => {
         description={t('insurance.description', 'Manage your insurance information and digital cards')}
       />
 
-      <Group justify="space-between" align="center">
-        <Button variant="filled" onClick={handleAddNew}>
-          {t('insurance.actions.addNew', '+ Add New Insurance')}
-        </Button>
+      <Stack gap="lg">
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
-        <ViewToggle
+        <MedicalPageActions
+          primaryAction={{
+            label: t('insurance.actions.addNew', '+ Add New Insurance'),
+            onClick: handleAddNew,
+          }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
-          showPrint={true}
+          mb={0}
         />
-      </Group>
 
       {/* Mantine Filter Controls */}
-      <MantineFilters
-        filters={filters}
-        updateFilter={updateFilter}
-        clearFilters={clearFilters}
-        hasActiveFilters={hasActiveFilters}
-        statusOptions={statusOptions}
-        categoryOptions={categoryOptions}
-        dateRangeOptions={dateRangeOptions}
-        sortOptions={sortOptions}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        handleSortChange={handleSortChange}
-        totalCount={totalCount}
-        filteredCount={filteredCount}
-        config={config.filterControls}
-      />
+      <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
       {processedInsurances.length === 0 ? (
-        <Card withBorder p="xl">
-          <Stack align="center" gap="md">
-            <Text size="3rem">🏥</Text>
-            <Text size="xl" fw={600}>
-              No Insurance Found
-            </Text>
-            <Text ta="center" c="dimmed">
-              {hasActiveFilters
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Start by adding your first insurance.'}
-            </Text>
-            {!hasActiveFilters && (
-              <Button variant="filled" onClick={handleAddNew}>
-                Add Your First Insurance
-              </Button>
-            )}
-          </Stack>
-        </Card>
+        <EmptyState
+          emoji="🏥"
+          title={t('insurance.empty.title', 'No Insurance Found')}
+          hasActiveFilters={hasActiveFilters}
+          filteredMessage={t('insurance.empty.filtered', 'Try adjusting your search or filter criteria.')}
+          noDataMessage={t('insurance.empty.noData', 'Start by adding your first insurance.')}
+          actionButton={
+            <Button variant="filled" onClick={handleAddNew}>
+              {t('insurance.empty.addFirst', 'Add Your First Insurance')}
+            </Button>
+          }
+        />
       ) : (
         <>
           {viewMode === 'cards' ? (
-            <Grid>
-              {processedInsurances.map((insurance) => (
-                <Grid.Col key={insurance.id} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
-                  <InsuranceCard
-                    insurance={insurance}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onSetPrimary={handleSetPrimary}
-                    onView={handleViewInsurance}
-                    fileCount={fileCounts[insurance.id] || 0}
-                    fileCountLoading={fileCountsLoading[insurance.id] || false}
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={processedInsurances}
+              columns={{ base: 12, sm: 6, md: 4, lg: 3 }}
+              renderCard={(insurance) => (
+                <InsuranceCard
+                  insurance={insurance}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onSetPrimary={handleSetPrimary}
+                  onView={handleViewInsurance}
+                  fileCount={fileCounts[insurance.id] || 0}
+                  fileCountLoading={fileCountsLoading[insurance.id] || false}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
@@ -657,6 +535,7 @@ const Insurance = () => {
           )}
         </>
       )}
+      </Stack>
 
       {/* Form Modal */}
       <InsuranceFormWrapper

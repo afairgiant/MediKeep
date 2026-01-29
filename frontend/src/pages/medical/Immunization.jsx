@@ -1,43 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import logger from '../../services/logger';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Title,
   Stack,
-  Alert,
-  Loader,
-  Center,
   Badge,
   Grid,
   Card,
   Divider,
   Modal,
   SimpleGrid,
-  Button,
 } from '@mantine/core';
 import {
-  IconAlertTriangle,
-  IconCheck,
   IconPlus,
-  IconShieldCheck,
   IconVaccine,
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
-import MantineFilters from '../../components/mantine/MantineFilters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 
@@ -50,9 +48,9 @@ import {
 
 const Immunization = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
 
   // Standardized data management
@@ -89,10 +87,22 @@ const Immunization = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(immunizations, config);
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('immunization', immunizations);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingImmunization,
+    openModal: handleViewImmunization,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: immunizations,
+    loading,
+  });
+
   // Form and UI state
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingImmunization, setViewingImmunization] = useState(null);
   const [editingImmunization, setEditingImmunization] = useState(null);
   const [formData, setFormData] = useState({
     vaccine_name: '',
@@ -209,32 +219,10 @@ const Immunization = () => {
     }
   };
 
-  const handleViewImmunization = immunization => {
-    setViewingImmunization(immunization);
-    setShowViewModal(true);
-    // Update URL with immunization ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', immunization.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingImmunization(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   const handleDeleteImmunization = async immunizationId => {
     const success = await deleteItem(immunizationId);
     if (success) {
+      cleanupFileCount(immunizationId);
       await refreshData();
     }
   };
@@ -242,43 +230,15 @@ const Immunization = () => {
   // Get processed data from data management
   const processedImmunizations = dataManagement.data;
 
-  // Handle URL parameters for direct linking to specific immunizations
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (
-      viewId &&
-      processedImmunizations &&
-      processedImmunizations.length > 0 &&
-      !loading
-    ) {
-      const immunization = processedImmunizations.find(
-        imm => imm.id.toString() === viewId
-      );
-      if (immunization && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingImmunization(immunization);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, processedImmunizations, loading, showViewModal]);
-
   // Get practitioners data
   const { practitioners: practitionersObject } = usePatientWithStaticData();
   const practitioners = practitionersObject?.practitioners || [];
 
+  // Get standardized formatters for immunizations
+  const immunizationFormatters = getEntityFormatters('immunizations', practitioners, navigate, null, formatDate);
+
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('immunizations.loadingImmunizations', 'Loading immunizations...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('immunizations.loadingImmunizations', 'Loading immunizations...')} />;
   }
 
   return (
@@ -286,65 +246,24 @@ const Immunization = () => {
       <PageHeader title={t('immunizations.title', 'Immunizations')} icon="💉" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('immunizations.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('immunizations.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
-
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddImmunization}
-            size="md"
-          >
-            {t('immunizations.addImmunization', 'Add New Immunization')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('immunizations.addImmunization', 'Add New Immunization'),
+            onClick: handleAddImmunization,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Form Modal */}
         <ImmunizationFormWrapper
@@ -372,45 +291,29 @@ const Immunization = () => {
 
         {/* Content */}
           {processedImmunizations.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconVaccine
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('immunizations.noImmunizationsFound', 'No immunizations found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('immunizations.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                        : t('immunizations.clickToGetStarted', 'Click "Add New Immunization" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconVaccine}
+              title={t('immunizations.noImmunizationsFound', 'No immunizations found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('immunizations.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('immunizations.clickToGetStarted', 'Click "Add New Immunization" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {processedImmunizations.map((immunization, index) => (
-                  <Grid.Col
-                    key={immunization.id}
-                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
-                  >
-                      <ImmunizationCard
-                        immunization={immunization}
-                        onView={handleViewImmunization}
-                        onEdit={handleEditImmunization}
-                        onDelete={handleDeleteImmunization}
-                        practitioners={practitioners}
-                        navigate={navigate}
-                      />
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={processedImmunizations}
+              renderCard={(immunization) => (
+                <ImmunizationCard
+                  immunization={immunization}
+                  onView={handleViewImmunization}
+                  onEdit={handleEditImmunization}
+                  onDelete={handleDeleteImmunization}
+                  practitioners={practitioners}
+                  navigate={navigate}
+                  fileCount={fileCounts[immunization.id] || 0}
+                  fileCountLoading={fileCountsLoading[immunization.id] || false}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
@@ -438,19 +341,15 @@ const Immunization = () => {
                 onDelete={handleDeleteImmunization}
                 formatters={{
                   vaccine_name: (value, item) =>
-                    getEntityFormatters('immunizations').immunization_name(
-                      value,
-                      item
-                    ),
-                  date_administered:
-                    getEntityFormatters('immunizations').administration_date,
-                  expiration_date: getEntityFormatters('immunizations').date,
-                  site: getEntityFormatters('immunizations').simple,
-                  dose_number: getEntityFormatters('immunizations').simple,
-                  manufacturer: getEntityFormatters('immunizations').simple,
-                  route: getEntityFormatters('immunizations').simple,
-                  lot_number: getEntityFormatters('immunizations').lot_number,
-                  notes: getEntityFormatters('immunizations').notes,
+                    immunizationFormatters.immunization_name(value, item),
+                  date_administered: immunizationFormatters.administration_date,
+                  expiration_date: immunizationFormatters.date,
+                  site: immunizationFormatters.simple,
+                  dose_number: immunizationFormatters.simple,
+                  manufacturer: immunizationFormatters.simple,
+                  route: immunizationFormatters.simple,
+                  lot_number: immunizationFormatters.lot_number,
+                  notes: immunizationFormatters.notes,
                 }}
                 dataType="medical"
                 responsive={responsive}

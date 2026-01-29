@@ -9,7 +9,7 @@ import { PAPERLESS_SETTING_DEFAULTS } from '../constants/paperlessSettings';
 import i18n from '../i18n';
 
 // Supported languages - must match backend validation
-const SUPPORTED_LANGUAGES = ['en', 'fr', 'de'];
+const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'it', 'pt'];
 
 /**
  * User Preferences Context
@@ -57,6 +57,7 @@ export const UserPreferencesProvider = ({ children }) => {
         const defaultPrefs = {
           unit_system: 'imperial',
           session_timeout_minutes: 30,
+          date_format: 'mdy',
           ...PAPERLESS_SETTING_DEFAULTS,
           // Override the sync tags default for this context
           paperless_sync_tags: true,
@@ -86,12 +87,9 @@ export const UserPreferencesProvider = ({ children }) => {
       setLoading(false);
       setError(null);
 
-      // Only log logout if we're not in the initial loading state
-      if (!authLoading) {
-        frontendLogger.logInfo('User logged out, clearing preferences', {
-          component: 'UserPreferencesContext',
-        });
-      }
+      frontendLogger.logInfo('User logged out, clearing preferences', {
+        component: 'UserPreferencesContext',
+      });
     }
   }, [isAuthenticated, user?.id, authLoading]); // Depend on authentication state, user ID, and auth loading state
 
@@ -207,10 +205,15 @@ export const UserPreferencesProvider = ({ children }) => {
     updatePreferences, // Now saves to server automatically
     updateLocalPreferences, // Local state update only (for backwards compatibility)
     refreshPreferences,
-    // Convenience getters
+    // Convenience getters for unit system
     unitSystem: preferences?.unit_system || 'imperial',
     isMetric: preferences?.unit_system === 'metric',
     isImperial: preferences?.unit_system === 'imperial',
+    // Convenience getters for date format
+    dateFormat: preferences?.date_format || 'mdy',
+    isUSDateFormat: preferences?.date_format === 'mdy' || !preferences?.date_format,
+    isEuropeanDateFormat: preferences?.date_format === 'dmy',
+    isISODateFormat: preferences?.date_format === 'ymd',
   };
 
   return (

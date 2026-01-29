@@ -468,16 +468,15 @@ class TestLabResultsAPI:
 
         lab_result_id = create_response.json()["id"]
 
-        # User2 tries to access User1's lab result - should fail
-        # TODO: PRODUCTION BUG - GET returns 200 instead of 404 (patient isolation bypass)
-        # See TECHNICAL_DEBT.md: "Patient Data Isolation Bypass in UPDATE Endpoints"
+        # User2 tries to access User1's lab result - should fail with 404
+        # SECURITY FIX APPLIED: Patient isolation now enforced via PatientAccessService
         response = client.get(
             f"/api/v1/lab-results/{lab_result_id}",
             headers=headers2
         )
-        # TEMPORARY: Expecting 200 due to production bug (should be 404)
-        assert response.status_code == 200, \
-            "SECURITY BUG: User2 can access User1's lab result! This should return 404."
+        # User2 should NOT be able to access User1's lab result
+        assert response.status_code == 404, \
+            f"Patient isolation failed: User2 accessed User1's lab result (got {response.status_code})"
 
     def test_lab_result_validation_errors(self, client: TestClient, authenticated_headers):
         """Test various validation error scenarios."""

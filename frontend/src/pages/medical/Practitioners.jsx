@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Title,
   Stack,
-  Alert,
-  Loader,
-  Center,
-  Grid,
-  Button,
 } from '@mantine/core';
 import {
-  IconAlertTriangle,
-  IconCheck,
   IconPlus,
   IconShieldCheck,
 } from '@tabler/icons-react';
@@ -24,9 +15,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import {
   usePractitioners,
   useCacheManager,
@@ -35,6 +30,7 @@ import {
 import { formatPhoneNumber, cleanPhoneNumber } from '../../utils/phoneUtils';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import frontendLogger from '../../services/frontendLogger';
 import { useTranslation } from 'react-i18next';
 
@@ -45,6 +41,7 @@ import PractitionerFormWrapper from '../../components/medical/practitioners/Prac
 
 const Practitioners = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const navigate = useNavigate();
   const location = useLocation();
@@ -68,6 +65,9 @@ const Practitioners = () => {
   // Standardized filtering and sorting
   const config = getMedicalPageConfig('practitioners');
   const dataManagement = useDataManagement(practitioners, config);
+
+  // Get standardized formatters for practitioners
+  const defaultFormatters = getEntityFormatters('default', [], navigate, null, formatDate);
   const [editingPractitioner, setEditingPractitioner] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -252,16 +252,7 @@ const Practitioners = () => {
 
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('practitioners.loading', 'Loading practitioners...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('practitioners.loading', 'Loading practitioners...')} />;
   }
 
   return (
@@ -270,116 +261,56 @@ const Practitioners = () => {
       <PageHeader title={t('practitioners.title', 'Healthcare Practitioners')} icon="👨‍⚕️" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('common.labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={() => setError('')}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={() => setError('')}
+        />
 
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('common.labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
-
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddPractitioner}
-            size="md"
-          >
-            {t('practitioners.actions.addNew', 'Add New Practitioner')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('practitioners.actions.addNew', 'Add New Practitioner'),
+            onClick: handleAddPractitioner,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Content */}
           {filteredPractitioners.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconShieldCheck
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('practitioners.empty.title', 'No healthcare practitioners found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')
-                        : t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconShieldCheck}
+              title={t('practitioners.empty.title', 'No healthcare practitioners found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {filteredPractitioners.map((practitioner, index) => (
-                  <Grid.Col
-                    key={practitioner.id}
-                    span={{ base: 12, md: 6, lg: 4 }}
-                  >
-                      <PractitionerCard
-                        practitioner={practitioner}
-                        onEdit={handleEditPractitioner}
-                        onDelete={handleDeletePractitioner}
-                        onView={handleViewPractitioner}
-                        navigate={navigate}
-                        onError={(error) => {
-                          setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
-                          frontendLogger.logError('PractitionerCard error', {
-                            practitionerId: practitioner.id,
-                            error: error.message,
-                            page: 'Practitioners',
-                          });
-                        }}
-                      />
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredPractitioners}
+              columns={{ base: 12, md: 6, lg: 4 }}
+              renderCard={(practitioner) => (
+                <PractitionerCard
+                  practitioner={practitioner}
+                  onEdit={handleEditPractitioner}
+                  onDelete={handleDeletePractitioner}
+                  onView={handleViewPractitioner}
+                  navigate={navigate}
+                  onError={(error) => {
+                    setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
+                    frontendLogger.logError('PractitionerCard error', {
+                      practitionerId: practitioner.id,
+                      error: error.message,
+                      page: 'Practitioners',
+                    });
+                  }}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
@@ -397,9 +328,9 @@ const Practitioners = () => {
                 onEdit={handleEditPractitioner}
                 onDelete={handleDeletePractitioner}
                 formatters={{
-                  name: getEntityFormatters('default').primaryName,
-                  specialty: getEntityFormatters('default').simple,
-                  practice: getEntityFormatters('default').simple,
+                  name: defaultFormatters.primaryName,
+                  specialty: defaultFormatters.simple,
+                  practice: defaultFormatters.simple,
                   phone_number: value =>
                     value ? formatPhoneNumber(value) : '-',
                   email: value => value || '-',

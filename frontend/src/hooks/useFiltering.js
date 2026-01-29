@@ -67,6 +67,8 @@ export const useFiltering = (data = [], config = {}) => {
     { value: 'week', label: 'This Week' },
     { value: 'month', label: 'This Month' },
     { value: 'year', label: 'This Year' },
+    { value: 'past_year', label: 'Past 12 Months' },
+    { value: 'last_year', label: 'Last Year' },
   ];
 
   // Result options (for lab results)
@@ -162,6 +164,7 @@ export const useFiltering = (data = [], config = {}) => {
           }
           // Fallback to single date check
           return itemDate >= weekAgo;
+        case 'current_month':
         case 'month':
           // For current calendar month - check if date range overlaps with current month
           const currentMonthStart = new Date(
@@ -172,7 +175,11 @@ export const useFiltering = (data = [], config = {}) => {
           const currentMonthEnd = new Date(
             now.getFullYear(),
             now.getMonth() + 1,
-            0
+            0,
+            23,
+            59,
+            59,
+            999
           );
 
           // If item has both start and end dates, check for overlap
@@ -203,12 +210,23 @@ export const useFiltering = (data = [], config = {}) => {
           );
           return itemDate >= quarterAgo;
         case 'year':
+          // Filter by current calendar year (Jan 1 - Dec 31)
+          const currentYearStart = new Date(now.getFullYear(), 0, 1);
+          const currentYearEnd = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+          return itemDate >= currentYearStart && itemDate <= currentYearEnd;
+        case 'past_year':
+          // Filter by past 12 months from today
           const yearAgo = new Date(
             now.getFullYear() - 1,
             now.getMonth(),
             now.getDate()
           );
           return itemDate >= yearAgo;
+        case 'last_year':
+          // Filter by previous calendar year (e.g., 2025 if now is 2026)
+          const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
+          const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+          return itemDate >= lastYearStart && itemDate <= lastYearEnd;
 
         case 'past_month':
           // For previous calendar month

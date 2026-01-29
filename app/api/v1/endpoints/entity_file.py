@@ -24,7 +24,7 @@ from app.core.logging.helpers import (
     log_security_event,
     log_debug,
 )
-from app.crud import lab_result, insurance, encounter, procedure, medication, immunization, allergy, condition, treatment, symptom_parent
+from app.crud import lab_result, insurance, encounter, procedure, medication, immunization, allergy, condition, treatment, symptom_parent, injury
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import EntityFile, User
 from app.schemas.entity_file import (
@@ -75,6 +75,7 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
         "condition": condition.get,
         "treatment": treatment.get,
         "symptom": symptom_parent.get,
+        "injury": injury.get,
     }
     crud_func = entity_map.get(entity_type)
     if not crud_func:

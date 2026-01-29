@@ -1,46 +1,44 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Container,
   Paper,
-  Group,
   Text,
-  Title,
   Stack,
-  Alert,
-  Loader,
-  Center,
-  Grid,
-  Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
-  IconCheck,
   IconPlus,
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
-import MantineFilters from '../../components/mantine/MantineFilters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 
 const Allergies = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
@@ -78,7 +76,7 @@ const Allergies = () => {
 
   // Get patient medications for linking
   const [medications, setMedications] = useState([]);
-  
+
   useEffect(() => {
     if (currentPatient?.id) {
       apiService.getPatientMedications(currentPatient.id)
@@ -92,9 +90,23 @@ const Allergies = () => {
     }
   }, [currentPatient?.id]);
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('allergy', allergies);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingAllergy,
+    openModal: handleViewAllergy,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: allergies,
+    loading,
+  });
+
   // Get standardized formatters for allergies with medication linking
   const formatters = {
-    ...getEntityFormatters('allergies', [], navigate),
+    ...getEntityFormatters('allergies', [], navigate, null, formatDate),
     medication_name: (value, allergy) => {
       const medication = medications.find(med => med.id === allergy.medication_id);
       return medication?.medication_name || '';
@@ -103,8 +115,6 @@ const Allergies = () => {
 
   // Form state
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingAllergy, setViewingAllergy] = useState(null);
   const [editingAllergy, setEditingAllergy] = useState(null);
   const [formData, setFormData] = useState({
     allergen: '',
@@ -142,29 +152,6 @@ const Allergies = () => {
     setShowAddForm(true);
   };
 
-  const handleViewAllergy = allergy => {
-    setViewingAllergy(allergy);
-    setShowViewModal(true);
-    // Update URL with allergy ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', allergy.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingAllergy(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   const handleEditAllergy = allergy => {
     setFormData({
       allergen: allergy.allergen || '',
@@ -179,22 +166,6 @@ const Allergies = () => {
     setEditingAllergy(allergy);
     setShowAddForm(true);
   };
-
-  // Handle URL parameters for direct linking to specific allergies
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && allergies.length > 0 && !loading) {
-      const allergy = allergies.find(a => a.id.toString() === viewId);
-      if (allergy && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingAllergy(allergy);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, allergies, loading, showViewModal]);
-
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -228,6 +199,7 @@ const Allergies = () => {
   const handleDeleteAllergy = async allergyId => {
     const success = await deleteItem(allergyId);
     if (success) {
+      cleanupFileCount(allergyId);
       await refreshData();
     }
   };
@@ -236,16 +208,7 @@ const Allergies = () => {
   const processedAllergies = dataManagement.data;
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('allergies.messages.loading', 'Loading allergies...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('allergies.messages.loading', 'Loading allergies...')} />;
   }
 
   return (
@@ -253,67 +216,24 @@ const Allergies = () => {
       <PageHeader title={t('allergies.title')} icon="⚠️" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={tCommon('labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={tCommon('labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
-
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddAllergy}
-            size="md"
-          >
-            {t('allergies.addNew', 'Add New Allergy')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('allergies.addNew', 'Add New Allergy'),
+            onClick: handleAddAllergy,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Form Modal */}
         <AllergyFormWrapper
@@ -335,53 +255,30 @@ const Allergies = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {processedAllergies.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconAlertTriangle
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('allergies.emptyState.title', 'No allergies found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('allergies.emptyState.filtered', 'Try adjusting your search or filter criteria.')
-                        : t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconAlertTriangle}
+              title={t('allergies.emptyState.title', 'No allergies found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('allergies.emptyState.filtered', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {processedAllergies.map((allergy, index) => (
-                  <Grid.Col
-                    key={allergy.id}
-                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <AllergyCard
-                        allergy={allergy}
-                        onView={handleViewAllergy}
-                        onEdit={handleEditAllergy}
-                        onDelete={handleDeleteAllergy}
-                        medications={medications}
-                        navigate={navigate}
-                        onError={setError}
-                      />
-                    </motion.div>
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={processedAllergies}
+              renderCard={(allergy) => (
+                <AllergyCard
+                  allergy={allergy}
+                  onView={handleViewAllergy}
+                  onEdit={handleEditAllergy}
+                  onDelete={handleDeleteAllergy}
+                  medications={medications}
+                  navigate={navigate}
+                  fileCount={fileCounts[allergy.id] || 0}
+                  fileCountLoading={fileCountsLoading[allergy.id] || false}
+                  onError={setError}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

@@ -1,46 +1,46 @@
 import React, {
   useState,
   useEffect,
-  useRef,
   useCallback,
   useMemo,
 } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Button,
-  Group,
   Stack,
   Text,
-  Grid,
   Container,
-  Alert,
-  Loader,
-  Center,
   Paper,
   Title,
   Badge,
+  Group,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
-  IconCheck,
   IconPlus,
   IconPill,
   IconFilter,
 } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
-import MantineFilters from '../../components/mantine/MantineFilters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import {
   MedicationCard,
   MedicationViewModal,
@@ -56,15 +56,13 @@ import logger from '../../services/logger';
 
 const Medication = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   // Form state - moved up to be available for refs logic
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingMedication, setViewingMedication] = useState(null);
   const [editingMedication, setEditingMedication] = useState(null);
 
   // Get practitioners and pharmacies data
@@ -124,6 +122,20 @@ const Medication = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(medications, config);
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('medication', medications);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingMedication,
+    openModal: handleViewMedication,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: medications,
+    loading,
+  });
+
   // Display medication purpose (indication only, since conditions are now linked via many-to-many)
   const getMedicationPurpose = (medication, asText = false) => {
     const indication = medication.indication?.trim();
@@ -132,7 +144,7 @@ const Medication = () => {
 
   // Get standardized formatters for medications with linking support
   const formatters = {
-    ...getEntityFormatters('medications', practitioners, navigate),
+    ...getEntityFormatters('medications', practitioners, navigate, null, formatDate),
     // Override indication formatter to use smart display (text version for tables)
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };
@@ -223,47 +235,10 @@ const Medication = () => {
     setShowAddForm(true);
   }, []);
 
-  const handleViewMedication = medication => {
-    setViewingMedication(medication);
-    setShowViewModal(true);
-    // Update URL with medication ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', medication.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingMedication(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
-  // Handle URL parameters for direct linking to specific medications
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && medications.length > 0 && !loading) {
-      const medication = medications.find(m => m.id.toString() === viewId);
-      if (medication && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingMedication(medication);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, medications, loading, showViewModal]);
-
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
     if (success) {
+      cleanupFileCount(medicationId);
       await refreshData();
     }
   };
@@ -368,16 +343,7 @@ const Medication = () => {
   }, [dataManagement.data, practitioners, pharmacies]);
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('medications.loading', 'Loading medications...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('medications.loading', 'Loading medications...')} />;
   }
 
   return (
@@ -385,49 +351,21 @@ const Medication = () => {
       <PageHeader title={t('medications.title', 'Medications')} icon="💊" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
-
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddMedication}
-            size="md"
-          >
-            {t('medications.addNew', 'Add New Medication')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('medications.addNew', 'Add New Medication'),
+            onClick: handleAddMedication,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Quick Type Filters */}
         <Paper p="md" mb="md" withBorder>
@@ -555,23 +493,7 @@ const Medication = () => {
         </Paper>
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          medicationTypeOptions={dataManagement.medicationTypeOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Form Modal */}
         <MedicationFormWrapper
@@ -593,54 +515,29 @@ const Medication = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {processedMedications.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconAlertTriangle
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('medications.noMedications', 'No medications or supplements found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('medications.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                        : t('medications.clickToStart', 'Click "Add New Medication" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconAlertTriangle}
+              title={t('medications.noMedications', 'No medications or supplements found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('medications.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('medications.clickToStart', 'Click "Add New Medication" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {processedMedications.map((medication, index) => (
-                  <Grid.Col
-                    key={medication.id}
-                    span={
-                      responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4
-                    }
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <MedicationCard
-                        medication={medication}
-                        onView={handleViewMedication}
-                        onEdit={handleEditMedication}
-                        onDelete={handleDeleteMedication}
-                        navigate={navigate}
-                        onError={setError}
-                      />
-                    </motion.div>
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={processedMedications}
+              renderCard={(medication) => (
+                <MedicationCard
+                  medication={medication}
+                  onView={handleViewMedication}
+                  onEdit={handleEditMedication}
+                  onDelete={handleDeleteMedication}
+                  navigate={navigate}
+                  fileCount={fileCounts[medication.id] || 0}
+                  fileCountLoading={fileCountsLoading[medication.id] || false}
+                  onError={setError}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

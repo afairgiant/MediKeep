@@ -4,7 +4,7 @@
  * Shows chart, statistics, and historical data table
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Drawer,
   Stack,
@@ -37,8 +37,22 @@ import { useTranslation } from 'react-i18next';
 import logger from '../../../services/logger';
 import VitalTrendChart from './VitalTrendChart';
 import VitalTrendTable from './VitalTrendTable';
-import { VitalType, VitalTrendResponse, VITAL_TYPE_CONFIGS } from './types';
+import { VitalType, VitalTrendResponse, VitalDataPoint, VITAL_TYPE_CONFIGS, AggregationPeriod } from './types';
 import { vitalsService } from '../../../services/medical/vitalsService';
+import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
+import { useDateFormat } from '../../../hooks/useDateFormat';
+import { convertForDisplay, unitLabels } from '../../../utils/unitConversion';
+import {
+  smartAggregateVitalData,
+  getAggregationDescription,
+  AggregatedDataPoint
+} from '../../../utils/vitalDataAggregation';
+
+// Maps vital types to their corresponding measurement types for unit conversion
+const CONVERTIBLE_VITAL_TYPES: Partial<Record<VitalType, 'weight' | 'temperature'>> = {
+  weight: 'weight',
+  temperature: 'temperature'
+};
 
 interface VitalTrendsPanelProps {
   opened: boolean;
@@ -48,6 +62,19 @@ interface VitalTrendsPanelProps {
   patientHeight?: number | null;
 }
 
+// Raw data structure before unit conversion (stored in imperial units)
+interface RawTrendData {
+  vital_type: VitalType;
+  vital_type_label: string;
+  base_unit: string;
+  data_points: { id: number; value: number; secondary_value: number | null; recorded_date: string }[];
+  reference_range: VitalTrendResponse['reference_range'];
+}
+
+// Safety limit to prevent runaway pagination loops
+const MAX_PAGINATION_RECORDS = 50000;
+const PAGE_SIZE = 500;
+
 const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   opened,
   onClose,
@@ -56,11 +83,17 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   patientHeight
 }) => {
   const { t } = useTranslation('common');
-  const [trendData, setTrendData] = useState<VitalTrendResponse | null>(null);
+  const { unitSystem } = useUserPreferences();
+  const { formatDate: formatDateWithPref } = useDateFormat();
+  // Store raw data in imperial units - conversion happens in useMemo
+  const [rawTrendData, setRawTrendData] = useState<RawTrendData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('chart');
   const [timeRange, setTimeRange] = useState<string>('all');
+  // Aggregation state
+  const [aggregationPeriod, setAggregationPeriod] = useState<AggregationPeriod | null>(null);
+  const [aggregatedDataPoints, setAggregatedDataPoints] = useState<AggregatedDataPoint[]>([]);
 
   const getDateRangeFromSelection = (range: string): { startDate?: string; endDate?: string } => {
     const today = new Date();
@@ -99,6 +132,67 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     }
   };
 
+  /**
+   * Fetch all vitals for a specific type using pagination
+   * This ensures we get complete historical data even for users with 1000+ records
+   */
+  const fetchAllVitalsForType = useCallback(async (
+    targetPatientId: number,
+    targetVitalType: VitalType,
+    dateRange?: { startDate?: string; endDate?: string }
+  ): Promise<any[]> => {
+    const allRecords: any[] = [];
+    const seenIds = new Set<number>();
+    let skip = 0;
+    let hasMore = true;
+
+    // Map vital type to backend field name for filtering
+    // BMI requires fetching weight records
+    const backendVitalType = targetVitalType === 'bmi' ? 'weight' : targetVitalType;
+
+    while (hasMore && allRecords.length < MAX_PAGINATION_RECORDS) {
+      const params: Record<string, any> = {
+        skip: String(skip),
+        limit: String(PAGE_SIZE),
+        vital_type: backendVitalType
+      };
+
+      let records;
+      if (dateRange?.startDate && dateRange?.endDate) {
+        records = await vitalsService.getPatientVitalsDateRange(
+          targetPatientId,
+          dateRange.startDate,
+          dateRange.endDate,
+          params
+        );
+      } else {
+        records = await vitalsService.getPatientVitals(targetPatientId, params);
+      }
+
+      const recordsArray = Array.isArray(records) ? records : records?.data || [];
+
+      // Check for duplicates to detect pagination issues
+      let newRecordsCount = 0;
+      for (const record of recordsArray) {
+        if (!seenIds.has(record.id)) {
+          seenIds.add(record.id);
+          allRecords.push(record);
+          newRecordsCount++;
+        }
+      }
+
+      // Stop if we got fewer records than requested (no more pages)
+      // or if all records were duplicates (pagination issue)
+      if (recordsArray.length < PAGE_SIZE || newRecordsCount === 0) {
+        hasMore = false;
+      } else {
+        skip += PAGE_SIZE;
+      }
+    }
+
+    return allRecords;
+  }, []);
+
   const loadTrendData = useCallback(async () => {
     if (!vitalType || !patientId) return;
 
@@ -111,26 +205,15 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
     setLoading(true);
     setError(null);
+    setAggregationPeriod(null);
+    setAggregatedDataPoints([]);
 
     try {
       const dateRange = getDateRangeFromSelection(timeRange);
       const config = VITAL_TYPE_CONFIGS[vitalType];
 
-      // Fetch vitals data (backend enforces max 100 per request)
-      let vitalsData;
-      if (dateRange.startDate && dateRange.endDate) {
-        vitalsData = await vitalsService.getPatientVitalsDateRange(
-          patientId,
-          dateRange.startDate,
-          dateRange.endDate,
-          { limit: 100 }
-        );
-      } else {
-        vitalsData = await vitalsService.getPatientVitals(patientId, { limit: 100 });
-      }
-
-      // Process the data for the specific vital type
-      const dataArray = Array.isArray(vitalsData) ? vitalsData : vitalsData?.data || [];
+      // Fetch ALL vitals for this type using pagination
+      const vitalsData = await fetchAllVitalsForType(patientId, vitalType, dateRange);
 
       // Helper function to calculate BMI from weight (lbs) and height (inches)
       const calculateBMI = (weightLbs: number, heightInches: number): number => {
@@ -141,8 +224,8 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       // For BMI, we need to calculate from weight records using patient height
       const isBMI = vitalType === 'bmi';
 
-      // Filter and transform data points
-      const dataPoints = dataArray
+      // Filter and transform data points - store raw values in imperial units
+      const dataPoints: VitalDataPoint[] = vitalsData
         .filter((vital: any) => {
           if (isBMI) {
             // For BMI, we need weight and patient height
@@ -160,6 +243,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
           }
           const secondaryValue = config.getSecondaryValue ? config.getSecondaryValue(vital) : null;
 
+          // Store raw values - conversion happens in useMemo based on unitSystem
           return {
             id: vital.id,
             value: value,
@@ -167,52 +251,25 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
             recorded_date: vital.recorded_date
           };
         })
-        .sort((a: any, b: any) => new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime());
+        .sort((a: VitalDataPoint, b: VitalDataPoint) =>
+          new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime()
+        );
 
-      // Calculate statistics
-      const values = dataPoints.map((p: any) => p.value);
-      const secondaryValues = dataPoints
-        .map((p: any) => p.secondary_value)
-        .filter((v: any) => v !== null && v !== undefined);
+      // Apply smart aggregation for large datasets
+      const aggregationResult = smartAggregateVitalData(dataPoints);
+      setAggregationPeriod(aggregationResult.period);
+      setAggregatedDataPoints(aggregationResult.aggregatedPoints);
 
-      // Calculate standard deviation for primary values
-      let stdDev: number | null = null;
-      if (values.length > 1) {
-        const mean = values.reduce((a: number, b: number) => a + b, 0) / values.length;
-        const squareDiffs = values.map((v: number) => Math.pow(v - mean, 2));
-        stdDev = Math.sqrt(squareDiffs.reduce((a: number, b: number) => a + b, 0) / values.length);
-      }
-
-      // Calculate secondary statistics (for blood pressure diastolic)
-      let secondaryStdDev: number | null = null;
-      if (secondaryValues.length > 1) {
-        const mean = secondaryValues.reduce((a: number, b: number) => a + b, 0) / secondaryValues.length;
-        const squareDiffs = secondaryValues.map((v: number) => Math.pow(v - mean, 2));
-        secondaryStdDev = Math.sqrt(squareDiffs.reduce((a: number, b: number) => a + b, 0) / secondaryValues.length);
-      }
-
-      const response: VitalTrendResponse = {
+      // Store raw data - unit conversion and statistics calculated in useMemo
+      const rawData: RawTrendData = {
         vital_type: vitalType,
         vital_type_label: config.label,
-        unit: config.unit,
+        base_unit: config.unit,
         data_points: dataPoints,
-        statistics: {
-          count: dataPoints.length,
-          latest: values.length > 0 ? values[0] : null,
-          average: values.length > 0 ? values.reduce((a: number, b: number) => a + b, 0) / values.length : null,
-          min: values.length > 0 ? Math.min(...values) : null,
-          max: values.length > 0 ? Math.max(...values) : null,
-          std_dev: stdDev,
-          secondary_latest: secondaryValues.length > 0 ? secondaryValues[0] : null,
-          secondary_average: secondaryValues.length > 0 ? secondaryValues.reduce((a: number, b: number) => a + b, 0) / secondaryValues.length : null,
-          secondary_min: secondaryValues.length > 0 ? Math.min(...secondaryValues) : null,
-          secondary_max: secondaryValues.length > 0 ? Math.max(...secondaryValues) : null,
-          secondary_std_dev: secondaryStdDev
-        },
         reference_range: config.referenceRange
       };
 
-      setTrendData(response);
+      setRawTrendData(rawData);
 
       logger.info('vital_trends_loaded', {
         message: 'Vital trends loaded successfully',
@@ -220,6 +277,8 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         patientId,
         timeRange,
         dataPointCount: dataPoints.length,
+        aggregationPeriod: aggregationResult.period,
+        aggregatedPointCount: aggregationResult.aggregatedPoints.length,
         component: 'VitalTrendsPanel'
       });
     } catch (err: any) {
@@ -243,7 +302,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [vitalType, patientId, timeRange, patientHeight, t]);
+  }, [vitalType, patientId, timeRange, patientHeight, t, fetchAllVitalsForType]);
 
   useEffect(() => {
     if (opened && vitalType) {
@@ -258,11 +317,77 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   // Reset state when panel closes
   useEffect(() => {
     if (!opened) {
-      setTrendData(null);
+      setRawTrendData(null);
       setError(null);
       setActiveTab('chart');
+      setAggregationPeriod(null);
+      setAggregatedDataPoints([]);
     }
   }, [opened]);
+
+  // Derive converted trend data from raw data based on unit system
+  // This allows unit changes to update display without refetching from API
+  const trendData = useMemo((): VitalTrendResponse | null => {
+    if (!rawTrendData) return null;
+
+    const measurementType = CONVERTIBLE_VITAL_TYPES[rawTrendData.vital_type];
+
+    // Convert data points if this vital type needs unit conversion
+    const convertedDataPoints = rawTrendData.data_points.map(point => ({
+      ...point,
+      value: measurementType
+        ? convertForDisplay(point.value, measurementType, unitSystem) ?? point.value
+        : point.value
+    }));
+
+    // Determine display unit based on user preference
+    const displayUnit = measurementType
+      ? unitLabels[unitSystem][measurementType]
+      : rawTrendData.base_unit;
+
+    // Calculate statistics from converted values
+    const values = convertedDataPoints.map(p => p.value);
+    const secondaryValues = convertedDataPoints
+      .map(p => p.secondary_value)
+      .filter((v): v is number => v !== null && v !== undefined);
+
+    // Calculate standard deviation for primary values
+    let stdDev: number | null = null;
+    if (values.length > 1) {
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      const squareDiffs = values.map(v => Math.pow(v - mean, 2));
+      stdDev = Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / values.length);
+    }
+
+    // Calculate secondary statistics (for blood pressure diastolic)
+    let secondaryStdDev: number | null = null;
+    if (secondaryValues.length > 1) {
+      const mean = secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length;
+      const squareDiffs = secondaryValues.map(v => Math.pow(v - mean, 2));
+      secondaryStdDev = Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / secondaryValues.length);
+    }
+
+    return {
+      vital_type: rawTrendData.vital_type,
+      vital_type_label: rawTrendData.vital_type_label,
+      unit: displayUnit,
+      data_points: convertedDataPoints,
+      statistics: {
+        count: convertedDataPoints.length,
+        latest: values.length > 0 ? values[0] : null,
+        average: values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : null,
+        min: values.length > 0 ? Math.min(...values) : null,
+        max: values.length > 0 ? Math.max(...values) : null,
+        std_dev: stdDev,
+        secondary_latest: secondaryValues.length > 0 ? secondaryValues[0] : null,
+        secondary_average: secondaryValues.length > 0 ? secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length : null,
+        secondary_min: secondaryValues.length > 0 ? Math.min(...secondaryValues) : null,
+        secondary_max: secondaryValues.length > 0 ? Math.max(...secondaryValues) : null,
+        secondary_std_dev: secondaryStdDev
+      },
+      reference_range: rawTrendData.reference_range
+    };
+  }, [rawTrendData, unitSystem]);
 
   const getTimeRangeLabel = (range: string): string => {
     switch (range) {
@@ -303,7 +428,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
       const csvContent = [
         [`Vital Signs Trend Data: ${trendData.vital_type_label}`],
-        [`Export Date: ${new Date().toLocaleDateString()}`],
+        [`Export Date: ${formatDateWithPref(new Date())}`],
         [''],
         ['Summary Statistics'],
         ['Count', trendData.statistics.count.toString()],
@@ -517,7 +642,10 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
               <Group gap="md">
                 <Badge variant="light" color="blue" size="lg">
-                  {trendData.statistics.count} {t('vitals.trends.dataPoints', 'data points')}
+                  {aggregationPeriod
+                    ? getAggregationDescription(aggregationPeriod, trendData.statistics.count, aggregatedDataPoints.length)
+                    : `${trendData.statistics.count} ${t('vitals.trends.dataPoints', 'data points')}`
+                  }
                 </Badge>
 
                 {trendData.statistics.std_dev !== null && (
@@ -546,7 +674,11 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
             </Tabs.List>
 
             <Tabs.Panel value="chart" pt="md">
-              <VitalTrendChart trendData={trendData} />
+              <VitalTrendChart
+                trendData={trendData}
+                aggregatedDataPoints={aggregatedDataPoints}
+                aggregationPeriod={aggregationPeriod}
+              />
             </Tabs.Panel>
 
             <Tabs.Panel value="table" pt="md">

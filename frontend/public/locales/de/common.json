@@ -2104,7 +2104,10 @@
       "practitioners": "Ärzte",
       "pharmacies": "Apotheken",
       "emergency_contacts": "Notfallkontakte",
-      "family_history": "Familiengeschichte"
+      "family_history": "Familiengeschichte",
+      "symptoms": "Symptome",
+      "injuries": "Verletzungen",
+      "insurance": "Versicherung"
     },
     "settingsModal": {
       "title": "Berichtseinstellungen",
@@ -2151,7 +2154,11 @@
       "vitals": "Vitalzeichen",
       "emergency_contacts": "Notfallkontakte",
       "practitioners": "Gesundheitsdienstleister",
-      "pharmacies": "Apotheken"
+      "pharmacies": "Apotheken",
+      "symptoms": "Symptome",
+      "injuries": "Verletzungen",
+      "family_history": "Familiengeschichte",
+      "insurance": "Versicherung"
     },
     "exportMode": {
       "title": "Exportmodus",

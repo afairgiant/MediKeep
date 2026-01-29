@@ -47,6 +47,7 @@ import patientSharingApi from '../../services/api/patientSharingApi';
 import invitationApi from '../../services/api/invitationApi';
 import logger from '../../services/logger';
 import { useCacheManager } from '../../hooks/useGlobalData';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * Safely parse JSON string with error handling
@@ -82,6 +83,7 @@ const PatientSharingModal = ({
   onShareUpdate
 }) => {
   const { invalidatePatientList } = useCacheManager();
+  const { formatDate, formatDateTime } = useDateFormat();
   const [shares, setShares] = useState([]);
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -435,8 +437,7 @@ const PatientSharingModal = ({
    */
   const formatExpirationDate = (dateString) => {
     if (!dateString) return 'Never';
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    return formatDateTime(dateString, { includeTimezone: false });
   };
 
   /**
@@ -667,7 +668,7 @@ const PatientSharingModal = ({
                     <Table.Td>
                       <Text size="sm">
                         {invitation.expires_at
-                          ? new Date(invitation.expires_at).toLocaleDateString()
+                          ? formatDate(invitation.expires_at)
                           : 'No expiration'}
                       </Text>
                     </Table.Td>

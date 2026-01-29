@@ -29,6 +29,7 @@ import {
   Divider,
   Grid,
   Card,
+  Select,
 } from '@mantine/core';
 import {
   IconEdit,
@@ -55,15 +56,12 @@ import {
 } from '@tabler/icons-react';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   formatMeasurement,
   convertForDisplay,
   unitLabels,
 } from '../../utils/unitConversion';
-import {
-  formatDate as formatDateHelper,
-  formatDateTime,
-} from '../../utils/helpers';
 
 const VitalsList = ({
   patientId,
@@ -79,6 +77,7 @@ const VitalsList = ({
 }) => {
   const { t } = useTranslation('common');
   const { unitSystem } = useUserPreferences();
+  const { formatDate, formatDateTime } = useDateFormat();
   // Use passed data if available, otherwise load internally
   const [internalVitals, setInternalVitals] = useState([]);
   const [internalLoading, setInternalLoading] = useState(true);
@@ -89,32 +88,97 @@ const VitalsList = ({
   });
   const [selectedVital, setSelectedVital] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  // Pagination state
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  // Use ref to track current vitals count for pagination (avoids circular dependency)
+  const vitalsCountRef = React.useRef(0);
 
-  const loadVitals = useCallback(async () => {
+  // Page size options for the dropdown
+  const pageSizeOptions = [
+    { value: '10', label: '10' },
+    { value: '20', label: '20' },
+    { value: '25', label: '25' },
+    { value: '50', label: '50' },
+  ];
+  const validPageSizes = [10, 20, 25, 50];
+
+  // Normalize a value to the nearest valid page size option
+  const normalizePageSize = (value) => {
+    if (validPageSizes.includes(value)) return value;
+    // Find the closest valid option
+    return validPageSizes.reduce((prev, curr) =>
+      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+    );
+  };
+
+  const [pageSize, setPageSize] = useState(() => normalizePageSize(limit));
+  const prevLimitRef = React.useRef(limit);
+
+  // Sync pageSize if parent changes limit prop (but preserve user overrides)
+  useEffect(() => {
+    if (prevLimitRef.current !== limit) {
+      setPageSize(prevPageSize =>
+        prevPageSize === normalizePageSize(prevLimitRef.current)
+          ? normalizePageSize(limit)
+          : prevPageSize
+      );
+      prevLimitRef.current = limit;
+    }
+  }, [limit]);
+
+  const loadVitals = useCallback(async (append = false) => {
     // Only load internally if no data is passed via props
     if (vitalsData !== undefined) return;
 
     try {
-      setInternalLoading(true);
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setInternalLoading(true);
+        setHasMore(true);
+        vitalsCountRef.current = 0;
+      }
       setInternalError(null);
+
+      const skip = append ? vitalsCountRef.current : 0;
       let response;
       if (patientId) {
-        response = await vitalsService.getPatientVitals(patientId, { limit });
+        response = await vitalsService.getPatientVitals(patientId, { limit: pageSize, skip });
       } else {
-        response = await vitalsService.getVitals({ limit });
+        response = await vitalsService.getVitals({ limit: pageSize, skip });
       }
 
       // Extract the data array from the response
       const data = response?.data || response;
+      const newData = Array.isArray(data) ? data : [];
 
-      setInternalVitals(Array.isArray(data) ? data : []);
+      // Check if there's more data to load
+      if (newData.length < pageSize) {
+        setHasMore(false);
+      }
+
+      if (append) {
+        setInternalVitals(prev => {
+          const updated = [...prev, ...newData];
+          vitalsCountRef.current = updated.length;
+          return updated;
+        });
+      } else {
+        vitalsCountRef.current = newData.length;
+        setInternalVitals(newData);
+      }
     } catch (err) {
       setInternalError(err.message || 'Failed to load vitals');
-      setInternalVitals([]);
+      if (!append) {
+        setInternalVitals([]);
+        vitalsCountRef.current = 0;
+      }
     } finally {
       setInternalLoading(false);
+      setLoadingMore(false);
     }
-  }, [patientId, limit, vitalsData]);
+  }, [patientId, pageSize, vitalsData]);
 
   useEffect(() => {
     loadVitals();
@@ -170,14 +234,6 @@ const VitalsList = ({
       setSelectedVital(vital);
       setShowDetailsModal(true);
     }
-  };
-
-  const formatDate = dateString => {
-    return formatDateHelper(dateString);
-  };
-
-  const formatTime = dateString => {
-    return formatDateTime(dateString);
   };
 
   const getBPDisplay = (systolic, diastolic) => {
@@ -289,7 +345,7 @@ const VitalsList = ({
         items: [
           {
             label: 'Recorded Date',
-            value: formatTime(selectedVital.recorded_date),
+            value: formatDateTime(selectedVital.recorded_date),
             icon: IconCalendar,
           },
           {
@@ -798,12 +854,31 @@ const VitalsList = ({
           </Table>
         </Paper>
 
-        {vitals.length >= limit && (
-          <Center>
-            <Button variant="filled" onClick={loadVitals}>
-              Load More
+        {vitals.length >= pageSize && hasMore && vitalsData === undefined && (
+          <Group justify="center" gap="md">
+            <Select
+              value={String(pageSize)}
+              onChange={(value) => {
+                if (value === null || value === undefined) return;
+                const numericValue = Number(value);
+                if (!Number.isFinite(numericValue) || numericValue <= 0) return;
+                setPageSize(numericValue);
+              }}
+              data={pageSizeOptions}
+              size="sm"
+              w={80}
+              allowDeselect={false}
+              aria-label={t('vitals.table.resultsPerPage', 'Results per page')}
+            />
+            <Button
+              variant="filled"
+              onClick={() => loadVitals(true)}
+              loading={loadingMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? t('labels.loading', 'Loading...') : t('buttons.loadMore', 'Load More')}
             </Button>
-          </Center>
+          </Group>
         )}
       </Stack>
 

@@ -11,7 +11,6 @@ import { motion } from 'framer-motion';
 import {
   Button,
   Paper,
-  Group,
   Text,
   Title,
   Stack,
@@ -26,6 +25,7 @@ import {
   Box,
   Divider,
   Container,
+  Group,
 } from '@mantine/core';
 import {
   IconHeart,
@@ -35,13 +35,15 @@ import {
   IconRefresh,
   IconPlus,
   IconAlertTriangle,
-  IconCheck,
   IconDroplet,
   IconChartLine,
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import VitalsList from '../../components/medical/VitalsList';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 
 // Modular components
 import VitalViewModal from '../../components/medical/vital/VitalViewModal';
@@ -480,14 +482,7 @@ const Vitals = () => {
 
   // Loading state
   if (vitalsLoading) {
-    return (
-      <Center h="50vh">
-        <Stack align="center" gap="md">
-          <Loader size="lg" />
-          <Text>{t('vitals.loading', 'Loading vital signs...')}</Text>
-        </Stack>
-      </Center>
-    );
+    return <MedicalPageLoading message={t('vitals.loading', 'Loading vital signs...')} />;
   }
 
   // No patient selected
@@ -512,42 +507,21 @@ const Vitals = () => {
       <PageHeader title={t('vitals.title', 'Vital Signs')} icon="❤️" />
 
       <Stack gap="lg">
-        {vitalsError && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {vitalsError}
-          </Alert>
-        )}
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={vitalsError}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddNew}
-            size="md"
-          >
-            {t('vitals.addNew', 'Add New Vital Signs')}
-          </Button>
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('vitals.addNew', 'Add New Vital Signs'),
+            onClick: handleAddNew,
+            leftSection: <IconPlus size={16} />,
+          }}
+          showViewToggle={false}
+          align="flex-start"
+        />
 
         {/* Stats Overview */}
         <motion.div
@@ -630,24 +604,7 @@ const Vitals = () => {
         </motion.div>
 
         {/* Mantine Filters */}
-        {dataManagement && filters && (
-          <MantineFilters
-            filters={filters}
-            updateFilter={updateFilter}
-            clearFilters={clearFilters}
-            hasActiveFilters={hasActiveFilters}
-            statusOptions={statusOptions}
-            categoryOptions={categoryOptions}
-            dateRangeOptions={dateRangeOptions}
-            sortOptions={sortOptions}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            handleSortChange={handleSortChange}
-            totalCount={totalCount}
-            filteredCount={filteredCount}
-            config={pageConfig.filterControls}
-          />
-        )}
+        <MedicalPageFilters dataManagement={dataManagement} config={pageConfig} />
 
         <VitalFormWrapper
           isOpen={showForm}

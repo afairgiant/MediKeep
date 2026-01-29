@@ -54,7 +54,7 @@ def read_vitals(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=100, le=1000),
     vital_type: Optional[str] = Query(None, description="Filter by vital type (blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose)"),
     start_date: Optional[str] = Query(None, description="Start date for date range filter (ISO format)"),
     end_date: Optional[str] = Query(None, description="End date for date range filter (ISO format)"),
@@ -238,31 +238,34 @@ def read_patient_vitals(
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=100, le=1000),
     vital_type: Optional[str] = Query(
         None,
-        description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose",
+        description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
     ),
     days: Optional[int] = Query(None, description="Get readings from last N days"),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get all vitals readings for a specific patient."""
     with handle_database_errors(request=request):
-        if days:
-            # Get recent readings
-            vitals_list = vitals.get_recent_readings(
-                db=db, patient_id=patient_id, days=days
-            )
-        elif vital_type:
-            # Get by specific vital type
-            vitals_list = vitals.get_by_vital_type(
-                db=db, patient_id=patient_id, vital_type=vital_type, skip=skip, limit=limit
-            )
-        else:
-            # Get all readings for patient
-            vitals_list = vitals.get_by_patient(
-                db=db, patient_id=patient_id, skip=skip, limit=limit
-            )
+        try:
+            if days:
+                # Get recent readings
+                vitals_list = vitals.get_recent_readings(
+                    db=db, patient_id=patient_id, days=days
+                )
+            elif vital_type:
+                # Get by specific vital type
+                vitals_list = vitals.get_by_vital_type(
+                    db=db, patient_id=patient_id, vital_type=vital_type, skip=skip, limit=limit
+                )
+            else:
+                # Get all readings for patient
+                vitals_list = vitals.get_by_patient(
+                    db=db, patient_id=patient_id, skip=skip, limit=limit
+                )
+        except ValueError as e:
+            raise BusinessLogicException(message=str(e), request=request)
 
         log_data_access(
             logger,
@@ -345,19 +348,27 @@ def read_patient_vitals_date_range(
     start_date: datetime = Query(..., description="Start date for the range"),
     end_date: datetime = Query(..., description="End date for the range"),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=100, le=1000),
+    vital_type: Optional[str] = Query(
+        None,
+        description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
+    ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Get vitals readings for a patient within a specific date range."""
+    """Get vitals readings for a patient within a specific date range, optionally filtered by vital type."""
     with handle_database_errors(request=request):
-        vitals_list = vitals.get_by_patient_date_range(
-            db=db,
-            patient_id=patient_id,
-            start_date=start_date,
-            end_date=end_date,
-            skip=skip,
-            limit=limit,
-        )
+        try:
+            vitals_list = vitals.get_by_patient_date_range(
+                db=db,
+                patient_id=patient_id,
+                start_date=start_date,
+                end_date=end_date,
+                skip=skip,
+                limit=limit,
+                vital_type=vital_type,
+            )
+        except ValueError as e:
+            raise BusinessLogicException(message=str(e), request=request)
 
         log_data_access(
             logger,
@@ -368,7 +379,8 @@ def read_patient_vitals_date_range(
             patient_id=patient_id,
             count=len(vitals_list),
             start_date=str(start_date),
-            end_date=str(end_date)
+            end_date=str(end_date),
+            vital_type=vital_type
         )
 
         return vitals_list

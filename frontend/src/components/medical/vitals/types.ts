@@ -20,6 +20,23 @@ export interface VitalDataPoint {
   recorded_date: string;
 }
 
+// Re-export aggregation types from utility for convenience
+export type { AggregationPeriod, AggregatedDataPoint, AggregationResult } from '../../../utils/vitalDataAggregation';
+
+// Chart data point type that supports both raw and aggregated data
+export interface ChartDataPoint {
+  date: string;
+  value: number;
+  secondaryValue?: number | null;
+  // Aggregation-specific fields (only present when data is aggregated)
+  min?: number;
+  max?: number;
+  secondaryMin?: number | null;
+  secondaryMax?: number | null;
+  count?: number;
+  periodLabel?: string;
+}
+
 export interface VitalTrendStatistics {
   count: number;
   latest: number | null;

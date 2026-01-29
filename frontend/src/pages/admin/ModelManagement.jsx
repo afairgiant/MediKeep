@@ -6,7 +6,7 @@ import { adminApiService } from '../../services/api/adminApi';
 import { getDeletionConfirmationMessage } from '../../utils/adminDeletionConfig';
 import { Loading } from '../../components';
 import { Button } from '../../components/ui';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
 import { IMPORTANT_FIELDS } from '../../constants/modelConstants';
 import './ModelManagement.css';
@@ -14,26 +14,27 @@ import './ModelManagement.css';
 // Constants
 const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
-// Utility function for formatting field values
-const formatFieldValue = (value, fieldType) => {
-  if (value === null || value === undefined) {
-    return '-';
-  }
-
-  if (fieldType === 'datetime' || fieldType === 'date') {
-    return formatDate(value);
-  }
-
-  if (typeof value === 'boolean') {
-    return value ? 'Yes' : 'No';
-  }
-
-  return String(value);
-};
-
 const ModelManagement = () => {
   const { modelName } = useParams();
   const navigate = useNavigate();
+  const { formatDate } = useDateFormat();
+
+  // Utility function for formatting field values - moved inside component to use hook
+  const formatFieldValue = (value, fieldType) => {
+    if (value === null || value === undefined) {
+      return '-';
+    }
+
+    if (fieldType === 'datetime' || fieldType === 'date') {
+      return formatDate(value);
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+
+    return String(value);
+  };
 
   const [records, setRecords] = useState([]);
   const [metadata, setMetadata] = useState(null);
@@ -252,6 +253,7 @@ const ModelManagement = () => {
           onSelectRecord={handleSelectRecord}
           onDelete={handleDeleteRecord}
           navigate={navigate}
+          formatFieldValue={formatFieldValue}
         />
 
         {totalPages > 1 && (
@@ -357,6 +359,7 @@ const ModelTable = ({
   onSelectRecord,
   onDelete,
   navigate,
+  formatFieldValue,
 }) => (
   <div className="model-table-container">
     <table className="model-table">
@@ -392,6 +395,7 @@ const ModelTable = ({
             onSelect={onSelectRecord}
             onDelete={onDelete}
             navigate={navigate}
+            formatFieldValue={formatFieldValue}
           />
         ))}
       </tbody>
@@ -414,9 +418,10 @@ ModelTable.propTypes = {
   onSelectRecord: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   navigate: PropTypes.func.isRequired,
+  formatFieldValue: PropTypes.func.isRequired,
 };
 
-const TableRow = React.memo(({ record, displayFields, isSelected, modelName, onSelect, onDelete, navigate }) => (
+const TableRow = React.memo(({ record, displayFields, isSelected, modelName, onSelect, onDelete, navigate, formatFieldValue }) => (
   <tr>
     <td>
       <input
@@ -480,6 +485,7 @@ TableRow.propTypes = {
   onSelect: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   navigate: PropTypes.func.isRequired,
+  formatFieldValue: PropTypes.func.isRequired,
 };
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => (

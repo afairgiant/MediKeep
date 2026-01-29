@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge, Text, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
@@ -13,10 +13,13 @@ const ImmunizationCard = ({
   onView,
   practitioners = [],
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
     logger.error('immunization_card_error', {
@@ -86,7 +89,7 @@ const ImmunizationCard = ({
       {
         label: t('immunizations.dateAdministered.label'),
         value: immunization.date_administered,
-        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
       },
       immunization.lot_number && {
         label: t('immunizations.lotNumber.label'),
@@ -116,7 +119,7 @@ const ImmunizationCard = ({
       immunization.expiration_date && {
         label: t('immunizations.expirationDate.label'),
         value: immunization.expiration_date,
-        render: (value) => formatDate(value)
+        render: (value) => formatLongDate(value)
       },
       immunization.practitioner_id && {
         label: tCommon('labels.practitioner'),
@@ -142,12 +145,15 @@ const ImmunizationCard = ({
     return (
       <BaseMedicalCard
         title={immunization.vaccine_name}
-        subtitle={immunization.vaccine_trade_name ? 
-          `${getImmunizationIcon(immunization.vaccine_name)} ${immunization.vaccine_trade_name}` : 
+        subtitle={immunization.vaccine_trade_name ?
+          `${getImmunizationIcon(immunization.vaccine_name)} ${immunization.vaccine_trade_name}` :
           getImmunizationIcon(immunization.vaccine_name)}
         badges={badges}
         fields={fields}
         notes={immunization.notes}
+        entityType="immunization"
+        fileCount={fileCount}
+        fileCountLoading={fileCountLoading}
         onView={() => onView(immunization)}
         onEdit={() => onEdit(immunization)}
         onDelete={() => onDelete(immunization.id)}

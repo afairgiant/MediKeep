@@ -23,7 +23,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
@@ -40,6 +40,7 @@ const VisitViewModal = ({
   onError
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('overview');

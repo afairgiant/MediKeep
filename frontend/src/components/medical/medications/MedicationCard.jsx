@@ -9,10 +9,13 @@ import {
   Text,
   Divider,
 } from '@mantine/core';
-import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { createCardClickHandler } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
+import FileCountBadge from '../../shared/FileCountBadge';
 import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
+import '../../../styles/shared/MedicalPageShared.css';
 
 const MedicationCard = ({
   medication,
@@ -20,10 +23,13 @@ const MedicationCard = ({
   onEdit,
   onDelete,
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError,
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
 
   const getMedicationPurpose = (medication) => {
     const indication = medication.indication?.trim();
@@ -57,6 +63,8 @@ const MedicationCard = ({
       shadow="sm"
       radius="md"
       h="100%"
+      className="clickable-card"
+      onClick={createCardClickHandler(onView, medication)}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -83,8 +91,8 @@ const MedicationCard = ({
                 </Badge>
               )}
             </Group>
-            {medication.tags && medication.tags.length > 0 && (
-              <Group gap="xs">
+            <Group gap="xs">
+              {medication.tags && medication.tags.length > 0 && (
                 <Badge
                   variant="outline"
                   color="gray"
@@ -93,8 +101,16 @@ const MedicationCard = ({
                 >
                   🏷️ {medication.tags[0]}{medication.tags.length > 1 ? ` +${medication.tags.length - 1}` : ''}
                 </Badge>
-              </Group>
-            )}
+              )}
+              <FileCountBadge
+                count={fileCount}
+                entityType="medication"
+                variant="badge"
+                size="sm"
+                loading={fileCountLoading}
+                onClick={() => onView(medication)}
+              />
+            </Group>
           </Stack>
           <StatusBadge status={medication.status} />
         </Group>
@@ -164,7 +180,7 @@ const MedicationCard = ({
                 {tCommon('labels.startDate', 'Start Date')}:
               </Text>
               <Text size="sm">
-                {formatDate(medication.effective_period_start)}
+                {formatLongDate(medication.effective_period_start)}
               </Text>
             </Group>
           )}
@@ -174,7 +190,7 @@ const MedicationCard = ({
                 {tCommon('labels.endDate', 'End Date')}:
               </Text>
               <Text size="sm">
-                {formatDate(medication.effective_period_end)}
+                {formatLongDate(medication.effective_period_end)}
               </Text>
             </Group>
           )}

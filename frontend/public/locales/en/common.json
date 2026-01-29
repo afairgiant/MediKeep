@@ -133,7 +133,7 @@
   },
   "medications": {
     "title": "Medications",
-    "addNew": "+ Add New Medication",
+    "addNew": "Add New Medication",
     "quickFilter": "Quick Filter",
     "allTypes": "All Types",
     "types": {
@@ -159,6 +159,7 @@
     "vitals": "Search vitals notes...",
     "emergencyContacts": "Search contacts, relationships, phone, email...",
     "familyHistory": "Search family members, conditions, notes...",
+    "injuries": "Search injuries, body parts, notes, tags...",
     "generic": "Search..."
   },
   "messages": {
@@ -487,7 +488,7 @@
   "conditions": {
     "title": "Medical Conditions",
     "loading": "Loading conditions...",
-    "addNew": "+ Add New Condition",
+    "addNew": "Add New Condition",
     "editTitle": "Edit Condition",
     "addTitle": "Add New Condition",
     "noResults": "No medical conditions found",
@@ -1574,7 +1575,10 @@
       "practitioners": "Practitioners",
       "pharmacies": "Pharmacies",
       "emergency_contacts": "Emergency Contacts",
-      "family_history": "Family History"
+      "family_history": "Family History",
+      "symptoms": "Symptoms",
+      "injuries": "Injuries",
+      "insurance": "Insurance"
     },
     "settingsModal": {
       "title": "Report Settings",
@@ -1621,7 +1625,11 @@
       "vitals": "Vital Signs",
       "emergency_contacts": "Emergency Contacts",
       "practitioners": "Healthcare Practitioners",
-      "pharmacies": "Pharmacies"
+      "pharmacies": "Pharmacies",
+      "symptoms": "Symptoms",
+      "injuries": "Injuries",
+      "family_history": "Family History",
+      "insurance": "Insurance"
     },
     "exportMode": {
       "title": "Export Mode",
@@ -1840,6 +1848,79 @@
       "molecular": "Molecular & DNA Tests",
       "pathology": "Tissue & Biopsy Analysis",
       "other": "Other Tests"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your application preferences and settings",
+    "tabs": {
+      "general": "General",
+      "notifications": "Notifications"
+    },
+    "sections": {
+      "security": "Security",
+      "accountManagement": "Account Management",
+      "systemInfo": "System Information",
+      "preferences": "Application Preferences",
+      "documentStorage": "Document Storage"
+    },
+    "security": {
+      "password": {
+        "title": "Password",
+        "description": "Change your account password to keep your account secure",
+        "button": "Change Password"
+      }
+    },
+    "account": {
+      "deleteAccount": {
+        "title": "Delete Account",
+        "description": "Permanently delete your account and all associated medical data. This action cannot be undone.",
+        "button": "Delete Account"
+      }
+    },
+    "system": {
+      "version": {
+        "title": "Application Version",
+        "loading": "Loading version information...",
+        "unavailable": "Version information unavailable",
+        "unknownApp": "Unknown App",
+        "unknownVersion": "Unknown Version"
+      }
+    },
+    "preferences": {
+      "unitSystem": {
+        "title": "Unit System",
+        "description": "Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units",
+        "imperial": "Imperial (lbs, feet, °F)",
+        "metric": "Metric (kg, cm, °C)"
+      },
+      "dateFormat": {
+        "title": "Date Format",
+        "description": "Choose how dates are displayed throughout the application",
+        "mdy": "MM/DD/YYYY (US)",
+        "dmy": "DD/MM/YYYY (European)",
+        "ymd": "YYYY-MM-DD (ISO)"
+      },
+      "sessionTimeout": {
+        "title": "Session Timeout",
+        "description": "Set the duration of inactivity before your session expires (in minutes)",
+        "range": "minutes (5-1440)"
+      }
+    },
+    "documents": {
+      "description": "Configure how your medical documents are stored and managed",
+      "cleanup": {
+        "title": "File Cleanup",
+        "description": "Clean up out-of-sync files and resolve document storage inconsistencies. This will reset failed uploads, clear orphaned tasks, and fix database sync issues.",
+        "button": "Cleanup Files",
+        "cleaning": "Cleaning..."
+      }
+    },
+    "actions": {
+      "unsavedChanges": "You have unsaved changes",
+      "reset": "Reset Changes",
+      "save": "Save All Changes",
+      "saving": "Saving..."
     }
   }
 }

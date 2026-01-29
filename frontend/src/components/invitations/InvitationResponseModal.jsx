@@ -26,15 +26,16 @@ import {
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import invitationApi from '../../services/api/invitationApi';
-import { formatDateTime } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { renderFamilyHistoryContextDetails } from '../../utils/invitationUtils';
 
-const InvitationResponseModal = ({ 
-    opened, 
-    onClose, 
-    invitation, 
-    onSuccess 
+const InvitationResponseModal = ({
+    opened,
+    onClose,
+    invitation,
+    onSuccess
 }) => {
+    const { formatDateTime } = useDateFormat();
     const [loading, setLoading] = useState(false);
     const [responseNote, setResponseNote] = useState('');
     const [selectedResponse, setSelectedResponse] = useState(null);

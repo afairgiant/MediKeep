@@ -3,7 +3,7 @@ import { Text, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import logger from '../../../services/logger';
 
 const TreatmentCard = ({
@@ -14,10 +14,13 @@ const TreatmentCard = ({
   conditions = [],
   onConditionClick,
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
     logger.error('treatment_card_error', {
@@ -83,12 +86,12 @@ const TreatmentCard = ({
       {
         label: t('common.fields.startDate.label'),
         value: treatment.start_date,
-        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
       },
       {
         label: t('common.fields.endDate.label'),
         value: treatment.end_date,
-        render: (value) => value ? formatDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
       },
       {
         label: t('treatments.amount.label'),
@@ -146,6 +149,9 @@ const TreatmentCard = ({
         badges={badges.filter(badge => !badge.clickable)} // Only include non-clickable badges
         fields={fields}
         notes={treatment.notes}
+        entityType="treatment"
+        fileCount={fileCount}
+        fileCountLoading={fileCountLoading}
         onView={() => onView(treatment)}
         onEdit={() => onEdit(treatment)}
         onDelete={() => onDelete(treatment.id)}

@@ -9,8 +9,8 @@ import {
   IconShieldCheck,
 } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
-import { formatDate } from '../../../utils/helpers';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import logger from '../../../services/logger';
 
 const AllergyCard = ({
@@ -20,10 +20,14 @@ const AllergyCard = ({
   onView,
   medications = [],
   navigate,
+  fileCount = 0,
+  fileCountLoading = false,
   onError
 }) => {
   const { t } = useTranslation('medical');
   const { t: tCommon } = useTranslation('common');
+  const { formatLongDate } = useDateFormat();
+
   const handleError = (error) => {
     logger.error('allergy_card_error', {
       message: 'Error in AllergyCard',
@@ -108,7 +112,7 @@ const AllergyCard = ({
       {
         label: t('allergies.onsetDate.label'),
         value: allergy.onset_date,
-        render: (value) => value ? formatDate(value) : tCommon('labels.unknown', 'Not specified')
+        render: (value) => value ? formatLongDate(value) : tCommon('labels.unknown', 'Not specified')
       }
     ].filter(field => field.value); // Only show fields with values
 
@@ -152,6 +156,9 @@ const AllergyCard = ({
         badges={badges}
         fields={fields}
         notes={allergy.notes}
+        entityType="allergy"
+        fileCount={fileCount}
+        fileCountLoading={fileCountLoading}
         onView={() => onView(allergy)}
         onEdit={() => onEdit(allergy)}
         onDelete={() => onDelete(allergy.id)}

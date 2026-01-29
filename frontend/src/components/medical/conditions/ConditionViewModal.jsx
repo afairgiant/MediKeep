@@ -11,6 +11,7 @@ import {
   Box,
   SimpleGrid,
   Title,
+  Paper,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -19,7 +20,7 @@ import {
   IconFileText,
   IconEdit,
 } from '@tabler/icons-react';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 
@@ -35,6 +36,7 @@ const ConditionViewModal = ({
   onError,
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or condition changes
@@ -122,19 +124,34 @@ const ConditionViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={
-        <Group>
-          <Text fw={600} size="lg">
-            {condition.diagnosis || t('conditions.modal.title', 'Condition Details')}
-          </Text>
-          <StatusBadge status={condition.status} />
-        </Group>
-      }
+      title={t('conditions.modal.title', 'Condition Details')}
       size="xl"
       centered
       zIndex={2000}
     >
-      <Tabs value={activeTab} onChange={setActiveTab}>
+      <Stack gap="lg">
+        {/* Header Card */}
+        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Group justify="space-between" align="center">
+            <div>
+              <Title order={3} mb="xs">{condition.diagnosis || condition.condition_name}</Title>
+              <Group gap="xs">
+                <StatusBadge status={condition.status} />
+              </Group>
+            </div>
+            {condition.severity && (
+              <Badge
+                color={getSeverityColor(condition.severity)}
+                variant="filled"
+                size="lg"
+              >
+                {condition.severity}
+              </Badge>
+            )}
+          </Group>
+        </Paper>
+
+        <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
             {t('conditions.modal.tabs.overview', 'Overview')}
@@ -341,17 +358,18 @@ const ConditionViewModal = ({
             />
           </Box>
         </Tabs.Panel>
-      </Tabs>
+        </Tabs>
 
-      {/* Action Buttons */}
-      <Group justify="flex-end" gap="sm" mt="lg">
-        <Button variant="default" onClick={onClose}>
-          {t('buttons.close', 'Close')}
-        </Button>
-        <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-          {t('buttons.edit', 'Edit')}
-        </Button>
-      </Group>
+        {/* Action Buttons */}
+        <Group justify="flex-end" gap="sm">
+          <Button variant="default" onClick={onClose}>
+            {t('buttons.close', 'Close')}
+          </Button>
+          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
+            {t('buttons.edit', 'Edit')}
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

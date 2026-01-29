@@ -2,28 +2,25 @@ import React, { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Stack,
-  Alert,
-  Loader,
-  Center,
-  Grid,
-  Button,
   Title,
 } from '@mantine/core';
 import {
-  IconAlertTriangle,
-  IconCheck,
   IconPlus,
   IconShieldCheck,
 } from '@tabler/icons-react';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { PageHeader } from '../../components';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { usePharmacies } from '../../hooks/useGlobalData';
 import { useTranslation } from 'react-i18next';
 
@@ -208,16 +205,7 @@ const Pharmacies = () => {
 
 
   if (loading) {
-    return (
-      <Container size="xl" py="lg">
-        <Center py="xl">
-          <Stack align="center" gap="md">
-            <Loader size="lg" />
-            <Text size="lg">{t('pharmacies.loading', 'Loading pharmacies...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('pharmacies.loading', 'Loading pharmacies...')} />;
   }
 
   return (
@@ -226,98 +214,48 @@ const Pharmacies = () => {
       <PageHeader title={t('pharmacies.title', 'Pharmacies')} icon="💊" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('common.labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={() => setError('')}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={() => setError('')}
+        />
 
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('common.labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
-
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddPharmacy}
-            size="md"
-          >
-            {t('pharmacies.actions.addNew', 'Add New Pharmacy')}
-          </Button>
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('pharmacies.actions.addNew', 'Add New Pharmacy'),
+            onClick: handleAddPharmacy,
+            leftSection: <IconPlus size={16} />,
+          }}
+          showViewToggle={false}
+        />
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Content */}
           {filteredPharmacies.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconShieldCheck
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('pharmacies.empty.title', 'No pharmacies found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('pharmacies.empty.filtered', 'Try adjusting your search or filter criteria.')
-                        : t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconShieldCheck}
+              title={t('pharmacies.empty.title', 'No pharmacies found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('pharmacies.empty.filtered', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
+            />
           ) : (
-            <Grid>
-                {filteredPharmacies.map((pharmacy, index) => (
-                  <Grid.Col key={pharmacy.id} span={{ base: 12, md: 6, lg: 4 }}>
-                      <PharmacyCard
-                        pharmacy={pharmacy}
-                        onEdit={handleEditPharmacy}
-                        onDelete={() => handleDeletePharmacy(pharmacy.id)}
-                        onView={handleViewPharmacy}
-                        navigate={navigate}
-                        onError={setError}
-                      />
-                  </Grid.Col>
-                ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredPharmacies}
+              columns={{ base: 12, md: 6, lg: 4 }}
+              renderCard={(pharmacy) => (
+                <PharmacyCard
+                  pharmacy={pharmacy}
+                  onEdit={handleEditPharmacy}
+                  onDelete={() => handleDeletePharmacy(pharmacy.id)}
+                  onView={handleViewPharmacy}
+                  navigate={navigate}
+                  onError={setError}
+                />
+              )}
+            />
           )}
       </Stack>
       </Container>

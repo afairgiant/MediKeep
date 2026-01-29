@@ -13,19 +13,36 @@ from enum import Enum
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_id, get_db
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_data_access
+from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.core.logging.constants import LogFields
+from app.models.models import User
 from app.services.export_service import ExportService
+from app.services.paperless_client import create_paperless_client
 
 logger = get_logger(__name__, "app")
 
 router = APIRouter()
+
+
+def json_serializer(obj):
+    """Custom JSON serializer for complex objects in export data."""
+    if hasattr(obj, "isoformat"):
+        return obj.isoformat()
+    if isinstance(obj, BaseModel):
+        # Recursively serialize Pydantic models to preserve their structure
+        return {key: json_serializer(value) for key, value in obj.model_dump().items()}
+    if isinstance(obj, (list, tuple)):
+        return [json_serializer(item) for item in obj]
+    if isinstance(obj, dict):
+        return {key: json_serializer(value) for key, value in obj.items()}
+    if hasattr(obj, "__dict__"):
+        return str(obj)
+    return str(obj)
 
 
 class ExportFormat(str, Enum):
@@ -36,18 +53,22 @@ class ExportFormat(str, Enum):
 
 class ExportScope(str, Enum):
     ALL = "all"
-    MEDICATIONS = "medications"
-    LAB_RESULTS = "lab_results"
     ALLERGIES = "allergies"
     CONDITIONS = "conditions"
-    IMMUNIZATIONS = "immunizations"
-    PROCEDURES = "procedures"
-    TREATMENTS = "treatments"
-    ENCOUNTERS = "encounters"
-    VITALS = "vitals"
     EMERGENCY_CONTACTS = "emergency_contacts"
-    PRACTITIONERS = "practitioners"
+    ENCOUNTERS = "encounters"
+    FAMILY_HISTORY = "family_history"
+    IMMUNIZATIONS = "immunizations"
+    INJURIES = "injuries"
+    INSURANCE = "insurance"
+    LAB_RESULTS = "lab_results"
+    MEDICATIONS = "medications"
     PHARMACIES = "pharmacies"
+    PRACTITIONERS = "practitioners"
+    PROCEDURES = "procedures"
+    SYMPTOMS = "symptoms"
+    TREATMENTS = "treatments"
+    VITALS = "vitals"
 
 
 class BulkExportRequest(BaseModel):
@@ -56,6 +77,15 @@ class BulkExportRequest(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     include_patient_info: bool = True
+    unit_system: str = "imperial"
+
+    @field_validator("unit_system")
+    @classmethod
+    def validate_unit_system(cls, v: str) -> str:
+        """Validate unit_system is either 'imperial' or 'metric'."""
+        if v not in ("imperial", "metric"):
+            raise ValueError("unit_system must be 'imperial' or 'metric'")
+        return v
 
 
 @router.get("/data")
@@ -75,6 +105,11 @@ async def export_patient_data(
     include_patient_info: bool = Query(
         True, description="Include patient information in export (all formats)"
     ),
+    unit_system: str = Query(
+        "imperial",
+        description="Unit system for measurements (imperial or metric)",
+        pattern="^(imperial|metric)$",
+    ),
     current_user_id: int = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
@@ -86,7 +121,8 @@ async def export_patient_data(
     - **start_date**: Filter records from this date onwards
     - **end_date**: Filter records up to this date
     - **include_files**: Whether to include file attachments (PDF exports only)
-    - **include_patient_info**: Whether to include patient information in export"""
+    - **include_patient_info**: Whether to include patient information in export
+    - **unit_system**: Unit system for measurements (imperial or metric)"""
 
     try:
         log_endpoint_access(
@@ -95,7 +131,8 @@ async def export_patient_data(
             current_user_id,
             "export_data_requested",
             format_type=format.value,
-            scope=scope.value
+            scope=scope.value,
+            unit_system=unit_system,
         )
 
         export_service = ExportService(db)
@@ -109,6 +146,7 @@ async def export_patient_data(
             end_date=end_date,
             include_files=include_files,
             include_patient_info=include_patient_info,
+            unit_system=unit_system,
         )
 
         # Determine content type and filename
@@ -117,19 +155,6 @@ async def export_patient_data(
         if format == ExportFormat.JSON:
             media_type = "application/json"
             filename = f"medical_records_{scope.value}_{timestamp}.json"
-
-            def json_serializer(obj):
-                """Custom JSON serializer for complex objects."""
-                if hasattr(obj, "isoformat"):  # datetime objects
-                    return obj.isoformat()
-                elif hasattr(obj, "__dict__"):  # SQLAlchemy models or other objects
-                    return str(obj)
-                elif isinstance(obj, (list, tuple)):
-                    return [json_serializer(item) for item in obj]
-                elif isinstance(obj, dict):
-                    return {key: json_serializer(value) for key, value in obj.items()}
-                else:
-                    return str(obj)
 
             try:
                 content = json.dumps(
@@ -143,7 +168,7 @@ async def export_patient_data(
                     json_error,
                     user_id=current_user_id,
                     scope=scope.value,
-                    format_type=format.value
+                    format_type=format.value,
                 )
                 raise HTTPException(
                     status_code=500,
@@ -170,6 +195,19 @@ async def export_patient_data(
                 if files_info:
                     # Create ZIP file in memory
                     zip_buffer = io.BytesIO()
+                    files_added = 0
+
+                    # Query user once if there are paperless files to export
+                    has_paperless_files = any(
+                        f.get("storage_backend") == "paperless" for f in files_info
+                    )
+                    paperless_user = None
+                    if has_paperless_files:
+                        paperless_user = (
+                            db.query(User)
+                            .filter(User.id == current_user_id)
+                            .first()
+                        )
 
                     with zipfile.ZipFile(
                         zip_buffer, "w", zipfile.ZIP_DEFLATED
@@ -181,32 +219,79 @@ async def export_patient_data(
                         # Add each lab result file to the ZIP
                         for file_info in files_info:
                             try:
-                                file_path = file_info["file_path"]
-                                if os.path.exists(file_path):
-                                    # Create a safe filename for the ZIP
-                                    safe_filename = f"{file_info['test_name']}_{file_info['file_name']}".replace(
-                                        " ", "_"
-                                    )
-                                    # Remove any potentially problematic characters
-                                    safe_filename = "".join(
-                                        c
-                                        for c in safe_filename
-                                        if c.isalnum() or c in "._-"
-                                    )
+                                storage_backend = file_info.get(
+                                    "storage_backend", "local"
+                                )
 
-                                    zip_file.write(
-                                        file_path, f"lab_files/{safe_filename}"
+                                # Create a safe filename for the ZIP
+                                safe_filename = f"{file_info['test_name']}_{file_info['file_name']}".replace(
+                                    " ", "_"
+                                )
+                                # Remove any potentially problematic characters
+                                safe_filename = "".join(
+                                    c
+                                    for c in safe_filename
+                                    if c.isalnum() or c in "._-"
+                                )
+
+                                if storage_backend == "local":
+                                    # Handle local files
+                                    file_path = file_info["file_path"]
+                                    if file_path and os.path.exists(file_path):
+                                        zip_file.write(
+                                            file_path, f"lab_files/{safe_filename}"
+                                        )
+                                        files_added += 1
+                                    else:
+                                        logger.warning(
+                                            "Lab result file not found during export",
+                                            extra={
+                                                LogFields.CATEGORY: "app",
+                                                LogFields.EVENT: "export_file_not_found",
+                                                LogFields.USER_ID: current_user_id,
+                                                "file_path": file_path,
+                                            },
+                                        )
+                                elif storage_backend == "paperless":
+                                    # Handle paperless documents
+                                    paperless_doc_id = file_info.get(
+                                        "paperless_document_id"
                                     )
-                                else:
-                                    logger.warning(
-                                        "Lab result file not found during export",
-                                        extra={
-                                            LogFields.CATEGORY: "app",
-                                            LogFields.EVENT: "export_file_not_found",
-                                            LogFields.USER_ID: current_user_id,
-                                            "file_path": file_path
-                                        }
-                                    )
+                                    if paperless_doc_id and paperless_user:
+                                        if (
+                                            paperless_user.paperless_enabled
+                                            and paperless_user.paperless_url
+                                        ):
+                                            try:
+                                                # Use async context manager for proper cleanup
+                                                async with create_paperless_client(
+                                                    url=paperless_user.paperless_url,
+                                                    encrypted_token=paperless_user.paperless_api_token_encrypted,
+                                                    user_id=current_user_id,
+                                                ) as client:
+                                                    doc_content = (
+                                                        await client.download_document(
+                                                            paperless_doc_id
+                                                        )
+                                                    )
+                                                    zip_file.writestr(
+                                                        f"lab_files/{safe_filename}",
+                                                        doc_content,
+                                                    )
+                                                    files_added += 1
+                                            except Exception as paperless_error:
+                                                logger.warning(
+                                                    f"Failed to download paperless document: {paperless_doc_id}",
+                                                    extra={
+                                                        LogFields.CATEGORY: "app",
+                                                        LogFields.EVENT: "export_paperless_download_failed",
+                                                        LogFields.USER_ID: current_user_id,
+                                                        LogFields.ERROR: str(
+                                                            paperless_error
+                                                        ),
+                                                        "paperless_document_id": paperless_doc_id,
+                                                    },
+                                                )
                             except Exception as file_error:
                                 logger.error(
                                     f"Failed to add lab file to export ZIP: {file_info['file_name']}",
@@ -215,8 +300,8 @@ async def export_patient_data(
                                         LogFields.EVENT: "export_file_add_failed",
                                         LogFields.USER_ID: current_user_id,
                                         LogFields.ERROR: str(file_error),
-                                        "file_name": file_info['file_name']
-                                    }
+                                        "file_name": file_info["file_name"],
+                                    },
                                 )
                                 continue
 
@@ -231,16 +316,18 @@ async def export_patient_data(
                         request,
                         current_user_id,
                         "export_zip_generated",
-                        message=f"Generated ZIP export with files",
-                        filename=zip_filename,
-                        size_bytes=len(zip_content)
+                        message=f"Generated ZIP export with {files_added} files",
+                        export_filename=zip_filename,
+                        size_bytes=len(zip_content),
+                        files_included=files_added,
                     )
 
                     return Response(
                         content=zip_content,
                         media_type="application/zip",
                         headers={
-                            "Content-Disposition": f'attachment; filename="{zip_filename}"'
+                            "Content-Disposition": f'attachment; filename="{zip_filename}"',
+                            "Content-Length": str(len(zip_content)),
                         },
                     )
 
@@ -252,41 +339,25 @@ async def export_patient_data(
         else:
             raise HTTPException(status_code=400, detail="Unsupported export format")
 
-        # Create appropriate response based on format
-        if format == ExportFormat.PDF:
-            # For PDF, use Response for binary data
-            if not content:
-                raise HTTPException(
-                    status_code=500, detail="Generated PDF content is empty"
-                )
-
-            return Response(
-                content=content,
-                media_type=media_type,
-                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-            )
+        # Convert content to bytes for response
+        if isinstance(content, str):
+            content_bytes = content.encode("utf-8")
         else:
-            # For text-based formats (JSON, CSV), use StreamingResponse
-            if isinstance(content, str):
-                content_bytes = content.encode("utf-8")
-            else:
-                content_bytes = content
+            content_bytes = content
 
-            # Validate content exists
-            if not content_bytes:
-                raise HTTPException(
-                    status_code=500, detail="Generated content is empty"
-                )
-
-            # Create a generator function for the StreamingResponse
-            def generate():
-                yield content_bytes
-
-            return StreamingResponse(
-                generate(),
-                media_type=media_type,
-                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        if not content_bytes:
+            raise HTTPException(
+                status_code=500, detail="Generated content is empty"
             )
+
+        return Response(
+            content=content_bytes,
+            media_type=media_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Content-Length": str(len(content_bytes)),
+            },
+        )
 
     except ValueError as e:
         # Handle specific validation errors (user not found, no active patient)
@@ -298,7 +369,7 @@ async def export_patient_data(
             e,
             user_id=current_user_id,
             format_type=format.value,
-            scope=scope.value
+            scope=scope.value,
         )
         raise HTTPException(status_code=400, detail=error_message)
     except Exception as e:
@@ -309,7 +380,7 @@ async def export_patient_data(
             e,
             user_id=current_user_id,
             format_type=format.value,
-            scope=scope.value
+            scope=scope.value,
         )
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
@@ -333,7 +404,7 @@ async def get_export_summary(
             request,
             current_user_id,
             "export_summary_retrieved",
-            record_count=len(summary.get('counts', {}))
+            record_count=len(summary.get("counts", {})),
         )
 
         return {
@@ -350,7 +421,7 @@ async def get_export_summary(
             request,
             f"Export summary validation error: {error_message}",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(status_code=400, detail=error_message)
     except Exception as e:
@@ -359,9 +430,11 @@ async def get_export_summary(
             request,
             "Failed to generate export summary",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
-        raise HTTPException(status_code=500, detail=f"Failed to generate export summary: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate export summary: {str(e)}"
+        )
 
 
 @router.get("/formats")
@@ -394,49 +467,9 @@ async def get_supported_formats():
                 "description": "Complete medical history",
             },
             {
-                "value": "medications",
-                "label": "Medications",
-                "description": "Current and past medications",
-            },
-            {
-                "value": "lab_results",
-                "label": "Lab Results",
-                "description": "Laboratory test results",
-            },
-            {
                 "value": "allergies",
                 "label": "Allergies",
                 "description": "Known allergies and reactions",
-            },
-            {
-                "value": "conditions",
-                "label": "Medical Conditions",
-                "description": "Diagnosed conditions",
-            },
-            {
-                "value": "immunizations",
-                "label": "Immunizations",
-                "description": "Vaccination records",
-            },
-            {
-                "value": "procedures",
-                "label": "Procedures",
-                "description": "Medical procedures performed",
-            },
-            {
-                "value": "treatments",
-                "label": "Treatments",
-                "description": "Treatment plans and history",
-            },
-            {
-                "value": "encounters",
-                "label": "Encounters",
-                "description": "Medical visits and consultations",
-            },
-            {
-                "value": "vitals",
-                "label": "Vital Signs",
-                "description": "Blood pressure, weight, etc.",
             },
             {
                 "value": "emergency_contacts",
@@ -444,14 +477,74 @@ async def get_supported_formats():
                 "description": "Emergency contact information",
             },
             {
+                "value": "encounters",
+                "label": "Encounters",
+                "description": "Medical visits and consultations",
+            },
+            {
+                "value": "family_history",
+                "label": "Family History",
+                "description": "Family medical history records",
+            },
+            {
                 "value": "practitioners",
                 "label": "Healthcare Practitioners",
                 "description": "Healthcare providers and specialists",
             },
             {
+                "value": "immunizations",
+                "label": "Immunizations",
+                "description": "Vaccination records",
+            },
+            {
+                "value": "injuries",
+                "label": "Injuries",
+                "description": "Injury records and recovery tracking",
+            },
+            {
+                "value": "insurance",
+                "label": "Insurance",
+                "description": "Insurance information and coverage",
+            },
+            {
+                "value": "lab_results",
+                "label": "Lab Results",
+                "description": "Laboratory test results",
+            },
+            {
+                "value": "conditions",
+                "label": "Medical Conditions",
+                "description": "Diagnosed conditions",
+            },
+            {
+                "value": "medications",
+                "label": "Medications",
+                "description": "Current and past medications",
+            },
+            {
                 "value": "pharmacies",
                 "label": "Pharmacies",
                 "description": "Pharmacy locations and information",
+            },
+            {
+                "value": "procedures",
+                "label": "Procedures",
+                "description": "Medical procedures performed",
+            },
+            {
+                "value": "symptoms",
+                "label": "Symptoms",
+                "description": "Symptom tracking and occurrences",
+            },
+            {
+                "value": "treatments",
+                "label": "Treatments",
+                "description": "Treatment plans and history",
+            },
+            {
+                "value": "vitals",
+                "label": "Vital Signs",
+                "description": "Blood pressure, weight, etc.",
             },
         ],
     }
@@ -475,28 +568,14 @@ async def create_bulk_export(
             current_user_id,
             "bulk_export_requested",
             scope_count=len(request.scopes),
-            format_type=request.format.value
+            format_type=request.format.value,
         )
 
         export_service = ExportService(db)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        # Create ZIP file in memory
         zip_buffer = io.BytesIO()
-
-        # Custom JSON serializer (same as single export)
-        def json_serializer(obj):
-            """Custom JSON serializer for complex objects."""
-            if hasattr(obj, "isoformat"):  # datetime objects
-                return obj.isoformat()
-            elif hasattr(obj, "__dict__"):  # SQLAlchemy models or other objects
-                return str(obj)
-            elif isinstance(obj, (list, tuple)):
-                return [json_serializer(item) for item in obj]
-            elif isinstance(obj, dict):
-                return {key: json_serializer(value) for key, value in obj.items()}
-            else:
-                return str(obj)
+        failed_scopes = []
 
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             exported_count = 0
@@ -512,6 +591,7 @@ async def create_bulk_export(
                         end_date=request.end_date,
                         include_files=False,  # Files not supported in bulk export
                         include_patient_info=request.include_patient_info,
+                        unit_system=request.unit_system,
                     )
 
                     # Convert to appropriate format
@@ -526,18 +606,23 @@ async def create_bulk_export(
                     elif request.format == ExportFormat.CSV:
                         content = export_service.convert_to_csv(export_data, scope)
                         filename = f"medical_records_{scope}_{timestamp}.csv"
+                    elif request.format == ExportFormat.PDF:
+                        content = await export_service.convert_to_pdf(
+                            export_data, include_files=False
+                        )
+                        filename = f"medical_records_{scope}_{timestamp}.pdf"
                     else:
-                        # PDF not supported in bulk for complexity reasons
                         logger.warning(
-                            "PDF format not supported in bulk export",
+                            f"Unsupported format in bulk export: {request.format.value}",
                             extra={
                                 LogFields.CATEGORY: "app",
                                 LogFields.EVENT: "bulk_export_unsupported_format",
                                 LogFields.USER_ID: current_user_id,
                                 "scope": scope,
-                                "format": request.format.value
-                            }
+                                "format": request.format.value,
+                            },
                         )
+                        failed_scopes.append((scope, f"Unsupported format: {request.format.value}"))
                         continue
 
                     # Add to ZIP
@@ -552,19 +637,28 @@ async def create_bulk_export(
                     exported_count += 1
 
                 except Exception as e:
+                    error_msg = str(e)
                     logger.warning(
-                        f"Failed to export scope in bulk export: {scope}",
+                        f"Failed to export scope in bulk export: {scope}: {error_msg}",
                         extra={
                             LogFields.CATEGORY: "app",
                             LogFields.EVENT: "bulk_export_scope_failed",
                             LogFields.USER_ID: current_user_id,
-                            LogFields.ERROR: str(e),
-                            "scope": scope
-                        }
+                            LogFields.ERROR: error_msg,
+                            "scope": scope,
+                        },
                     )
+                    failed_scopes.append((scope, error_msg))
                     continue
 
         if exported_count == 0:
+            # Include the actual failure reasons in the error message
+            if failed_scopes:
+                first_error = failed_scopes[0][1]
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Export failed: {first_error}",
+                )
             raise HTTPException(
                 status_code=400,
                 detail="No data could be exported for the selected scopes",
@@ -573,27 +667,37 @@ async def create_bulk_export(
         zip_buffer.seek(0)
         date_str = datetime.now().strftime("%Y-%m-%d")
         zip_filename = f"medical_records_bulk_{date_str}.zip"
+        zip_content = zip_buffer.getvalue()
 
-        # Create a generator function for the StreamingResponse
-        def generate():
-            yield zip_buffer.getvalue()
+        if not zip_content:
+            raise HTTPException(
+                status_code=500,
+                detail="ZIP file generation produced empty content",
+            )
 
         log_endpoint_access(
             logger,
             http_request,
             current_user_id,
             "bulk_export_completed",
-            message=f"Bulk export completed successfully",
+            message="Bulk export completed successfully",
             exported_count=exported_count,
-            filename=zip_filename
+            export_filename=zip_filename,
+            size_bytes=len(zip_content),
         )
 
-        return StreamingResponse(
-            generate(),
+        return Response(
+            content=zip_content,
             media_type="application/zip",
-            headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'},
+            headers={
+                "Content-Disposition": f'attachment; filename="{zip_filename}"',
+                "Content-Length": str(len(zip_content)),
+            },
         )
 
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is (don't wrap them)
+        raise
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -601,6 +705,6 @@ async def create_bulk_export(
             "Bulk export failed",
             e,
             user_id=current_user_id,
-            scope_count=len(request.scopes)
+            scope_count=len(request.scopes),
         )
         raise HTTPException(status_code=500, detail=f"Bulk export failed: {str(e)}")

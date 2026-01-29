@@ -246,3 +246,19 @@ export const filterBySearch = (array, searchTerm, searchFields) => {
 export const deepClone = obj => {
   return JSON.parse(JSON.stringify(obj));
 };
+
+/**
+ * Creates a click handler for clickable cards that ignores clicks on buttons and links.
+ * Use with the CSS class "clickable-card" from MedicalPageShared.css for hover effects.
+ * @param {Function} onView - The view handler function to call when the card is clicked
+ * @param {*} data - Optional data to pass to the onView handler
+ * @returns {Function} - Click event handler
+ */
+export function createCardClickHandler(onView, data) {
+  return function handleCardClick(e) {
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    if (onView) {
+      data !== undefined ? onView(data) : onView();
+    }
+  };
+}

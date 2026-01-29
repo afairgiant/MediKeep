@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -19,32 +21,31 @@ import {
   SUCCESS_MESSAGES,
   getUserFriendlyError
 } from '../../constants/errorMessages';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Button,
-  Group,
   Stack,
   Text,
-  Grid,
   Container,
-  Alert,
-  Loader,
-  Center,
   Card,
   Paper,
 } from '@mantine/core';
 
 const Procedures = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards');
 
@@ -52,7 +53,7 @@ const Procedures = () => {
   const { practitioners } = usePractitioners();
 
   // Get standardized formatters for procedures with linking support
-  const formatters = getEntityFormatters('procedures', practitioners, navigate);
+  const formatters = getEntityFormatters('procedures', practitioners, navigate, null, formatDate);
 
   // Modern data management with useMedicalData
   const {
@@ -88,72 +89,26 @@ const Procedures = () => {
   const dataManagement = useDataManagement(procedures, config);
 
   // File count management for cards
-  const [fileCounts, setFileCounts] = useState({});
-  const [fileCountsLoading, setFileCountsLoading] = useState({});
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('procedure', procedures);
 
-  // Track which procedures we've already loaded file counts for
-  const loadedFileCountsRef = useRef(new Set());
-
-  // Load file counts for procedures
-  useEffect(() => {
-    const loadFileCountsForProcedures = async () => {
-      if (!procedures || procedures.length === 0) return;
-      
-      // Only load file counts for procedures we haven't loaded yet
-      const proceduresToLoad = procedures.filter(procedure => 
-        !loadedFileCountsRef.current.has(procedure.id)
-      );
-      
-      if (proceduresToLoad.length === 0) return;
-      
-      const countPromises = proceduresToLoad.map(async (procedure) => {
-        // Mark as loading
-        loadedFileCountsRef.current.add(procedure.id);
-        setFileCountsLoading(prev => ({ ...prev, [procedure.id]: true }));
-        
-        try {
-          const files = await apiService.getEntityFiles('procedure', procedure.id);
-          const count = Array.isArray(files) ? files.length : 0;
-          setFileCounts(prev => ({ ...prev, [procedure.id]: count }));
-        } catch (error) {
-          logger.error(`Error loading file count for procedure ${procedure.id}:`, error);
-          setFileCounts(prev => ({ ...prev, [procedure.id]: 0 }));
-        } finally {
-          setFileCountsLoading(prev => ({ ...prev, [procedure.id]: false }));
-        }
-      });
-      
-      await Promise.all(countPromises);
-    };
-
-    loadFileCountsForProcedures();
-  }, [procedures]);
-
-  // Function to refresh file counts for specific procedures
-  const refreshFileCount = useCallback(async (procedureId) => {
-    try {
-      // Force reload by removing from loaded set
-      loadedFileCountsRef.current.delete(procedureId);
-      setFileCountsLoading(prev => ({ ...prev, [procedureId]: true }));
-      
-      const files = await apiService.getEntityFiles('procedure', procedureId);
-      const count = Array.isArray(files) ? files.length : 0;
-      
-      setFileCounts(prev => ({ ...prev, [procedureId]: count }));
-      loadedFileCountsRef.current.add(procedureId);
-    } catch (error) {
-      logger.error(`Error refreshing file count for procedure ${procedureId}:`, error);
-      setFileCounts(prev => ({ ...prev, [procedureId]: 0 }));
-      loadedFileCountsRef.current.add(procedureId);
-    } finally {
-      setFileCountsLoading(prev => ({ ...prev, [procedureId]: false }));
-    }
-  }, []);
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingProcedure,
+    openModal: handleViewProcedure,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: procedures,
+    loading,
+    onClose: (procedure) => {
+      if (procedure) {
+        refreshFileCount(procedure.id);
+      }
+    },
+  });
 
   // Form state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingProcedure, setViewingProcedure] = useState(null);
   const [editingProcedure, setEditingProcedure] = useState(null);
   const [formData, setFormData] = useState({
     procedure_name: '',
@@ -256,34 +211,6 @@ const Procedures = () => {
     setShowModal(true);
   };
 
-  const handleViewProcedure = procedure => {
-    setViewingProcedure(procedure);
-    setShowViewModal(true);
-    // Update URL with procedure ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', procedure.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    // Refresh file count for the viewed procedure before closing
-    if (viewingProcedure) {
-      refreshFileCount(viewingProcedure.id);
-    }
-    
-    setShowViewModal(false);
-    setViewingProcedure(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   const handleEditProcedure = procedure => {
     resetSubmission();
     setEditingProcedure(procedure);
@@ -307,40 +234,10 @@ const Procedures = () => {
     setShowModal(true);
   };
 
-  // Handle URL parameters for direct linking to specific procedures
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && procedures.length > 0 && !loading) {
-      const procedure = procedures.find(p => p.id.toString() === viewId);
-      if (procedure && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingProcedure(procedure);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, procedures, loading, showViewModal]);
-
-
   const handleDeleteProcedure = async procedureId => {
     const success = await deleteItem(procedureId);
-    // deleteItem now properly updates local state to remove the deleted item
-    // The useMedicalData hook handles state updates automatically
     if (success) {
-      // Clean up local file counts and tracking for the deleted procedure
-      setFileCounts(prev => {
-        const updated = { ...prev };
-        delete updated[procedureId];
-        return updated;
-      });
-      setFileCountsLoading(prev => {
-        const updated = { ...prev };
-        delete updated[procedureId];
-        return updated;
-      });
-      // Remove from loaded tracking
-      loadedFileCountsRef.current.delete(procedureId);
+      cleanupFileCount(procedureId);
     }
   };
 
@@ -479,17 +376,10 @@ const Procedures = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('procedures.loadingProcedures', 'Loading procedures...')}</Text>
-            <Text size="sm" c="dimmed">
-              {t('procedures.loadingRefresh', 'If this takes too long, please refresh the page')}
-            </Text>
-          </Stack>
-        </Center>
-      </Container>
+      <MedicalPageLoading
+        message={t('procedures.loadingProcedures', 'Loading procedures...')}
+        hint={t('procedures.loadingRefresh', 'If this takes too long, please refresh the page')}
+      />
     );
   }
 
@@ -499,89 +389,55 @@ const Procedures = () => {
         <PageHeader title={t('procedures.title', 'Procedures')} icon="🔬" />
 
         <Stack gap="lg">
-          {error && (
-            <Alert
-              variant="light"
-              color="red"
-              title={t('procedures.error', 'Error')}
-              withCloseButton
-              onClose={clearError}
-              style={{ whiteSpace: 'pre-line' }}
-            >
-              {error}
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert variant="light" color="green" title={t('procedures.success', 'Success')}>
-              {successMessage}
-            </Alert>
-          )}
-
-          <Group justify="space-between" align="center">
-            <Button variant="filled" onClick={handleAddProcedure}>
-              {t('procedures.addProcedure', '+ Add Procedure')}
-            </Button>
-
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </Group>
-
-          {/* Mantine Filter Controls */}
-          <MantineFilters
-            filters={dataManagement.filters}
-            updateFilter={dataManagement.updateFilter}
-            clearFilters={dataManagement.clearFilters}
-            hasActiveFilters={dataManagement.hasActiveFilters}
-            statusOptions={dataManagement.statusOptions}
-            dateRangeOptions={dataManagement.dateRangeOptions}
-            sortOptions={dataManagement.sortOptions}
-            sortBy={dataManagement.sortBy}
-            sortOrder={dataManagement.sortOrder}
-            handleSortChange={dataManagement.handleSortChange}
-            totalCount={dataManagement.totalCount}
-            filteredCount={dataManagement.filteredCount}
-            config={config.filterControls}
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={clearError}
           />
 
+          <MedicalPageActions
+            primaryAction={{
+              label: t('procedures.addProcedure', '+ Add Procedure'),
+              onClick: handleAddProcedure,
+            }}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            mb={0}
+          />
+
+          {/* Mantine Filter Controls */}
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
+
           {filteredProcedures.length === 0 ? (
-            <Card withBorder p="xl">
-              <Stack align="center" gap="md">
-                <Text size="3rem">🔬</Text>
-                <Text size="xl" fw={600}>
-                  {t('procedures.noProceduresFound', 'No Procedures Found')}
-                </Text>
-                <Text ta="center" c="dimmed">
-                  {dataManagement.hasActiveFilters
-                    ? t('procedures.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                    : t('procedures.startAdding', 'Start by adding your first procedure.')}
-                </Text>
-                {!dataManagement.hasActiveFilters && (
-                  <Button variant="filled" onClick={handleAddProcedure}>
-                    {t('procedures.addFirstProcedure', 'Add Your First Procedure')}
-                  </Button>
-                )}
-              </Stack>
-            </Card>
+            <EmptyState
+              emoji="🔬"
+              title={t('procedures.noProceduresFound', 'No Procedures Found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('procedures.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('procedures.startAdding', 'Start by adding your first procedure.')}
+              actionButton={
+                <Button variant="filled" onClick={handleAddProcedure}>
+                  {t('procedures.addFirstProcedure', 'Add Your First Procedure')}
+                </Button>
+              }
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              {filteredProcedures.map((procedure) => (
-                <Grid.Col key={procedure.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <ProcedureCard
-                    procedure={procedure}
-                    onEdit={handleEditProcedure}
-                    onDelete={() => handleDeleteProcedure(procedure.id)}
-                    onView={handleViewProcedure}
-                    practitioners={practitioners}
-                    fileCount={fileCounts[procedure.id] || 0}
-                    fileCountLoading={fileCountsLoading[procedure.id] || false}
-                    navigate={navigate}
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredProcedures}
+              columns={{ base: 12, sm: 6, lg: 4 }}
+              renderCard={(procedure) => (
+                <ProcedureCard
+                  procedure={procedure}
+                  onEdit={handleEditProcedure}
+                  onDelete={() => handleDeleteProcedure(procedure.id)}
+                  onView={handleViewProcedure}
+                  practitioners={practitioners}
+                  fileCount={fileCounts[procedure.id] || 0}
+                  fileCountLoading={fileCountsLoading[procedure.id] || false}
+                  navigate={navigate}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

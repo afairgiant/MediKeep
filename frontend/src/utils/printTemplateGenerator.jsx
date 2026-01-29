@@ -4,8 +4,6 @@
  */
 import logger from '../services/logger';
 
-
-import { formatDate } from './helpers';
 import { formatFieldLabel, formatFieldValue, formatPhoneFields, insurancePrintLabelMappings, contactInfoLabelMappings } from './fieldFormatters';
 
 /**
@@ -248,15 +246,26 @@ export const generateMedicalRecordPrint = (data, config) => {
   `;
 };
 
+// Default date formatter for backwards compatibility
+const defaultFormatDate = (value) => {
+  if (!value) return '-';
+  try {
+    return new Date(value).toLocaleDateString();
+  } catch {
+    return value;
+  }
+};
+
 /**
  * Insurance-specific print template generator
  * @param {Object} insurance - Insurance data
+ * @param {Function} formatDate - Date formatting function from useDateFormat hook (optional)
  * @returns {string} Complete HTML for insurance printing
  */
-export const generateInsurancePrint = (insurance) => {
+export const generateInsurancePrint = (insurance, formatDate = defaultFormatDate) => {
   const coverageDetails = insurance.coverage_details || {};
   const contactInfo = insurance.contact_info || {};
-  
+
   // Format phone numbers for consistency
   const formattedContactInfo = formatPhoneFields(contactInfo);
 
@@ -342,12 +351,13 @@ export const openPrintWindow = (html, windowTitle = 'Medical Record') => {
  * @param {Object} insurance - Insurance data
  * @param {Function} onSuccess - Success callback
  * @param {Function} onError - Error callback
+ * @param {Function} formatDate - Date formatting function from useDateFormat hook (optional)
  */
-export const printInsuranceRecord = (insurance, onSuccess, onError) => {
+export const printInsuranceRecord = (insurance, onSuccess, onError, formatDate = defaultFormatDate) => {
   try {
-    const html = generateInsurancePrint(insurance);
+    const html = generateInsurancePrint(insurance, formatDate);
     openPrintWindow(html, `Insurance Details - ${insurance.company_name}`);
-    
+
     if (onSuccess) {
       onSuccess();
     }

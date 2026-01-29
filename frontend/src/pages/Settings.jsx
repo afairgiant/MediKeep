@@ -6,6 +6,7 @@ import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';
 import DeleteAccountModal from '../components/auth/DeleteAccountModal';
 import PaperlessSettings from '../components/settings/PaperlessSettings';
+import NotificationSettings from '../components/settings/NotificationSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import { getVersionInfo } from '../services/systemService';
@@ -13,17 +14,19 @@ import { updateUserPreferences } from '../services/api/userPreferencesApi';
 import { cleanupOutOfSyncFiles } from '../services/api/paperlessApi.jsx';
 import frontendLogger from '../services/frontendLogger';
 import { PAPERLESS_SETTING_KEYS, isPaperlessSetting } from '../constants/paperlessSettings';
+import { DEFAULT_DATE_FORMAT } from '../utils/constants';
 import { toast } from 'react-toastify';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'notifications']);
   const { user, updateSessionTimeout } = useAuth();
   const {
     preferences: userPreferences,
     loading: loadingPreferences,
     updateLocalPreferences,
   } = useUserPreferences();
+  const [activeTab, setActiveTab] = useState('general');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
     useState(false);
@@ -54,12 +57,13 @@ const Settings = () => {
   // Initialize local preferences when context loads
   useEffect(() => {
     if (userPreferences && Object.keys(userPreferences).length > 0) {
-      setLocalPreferences({ 
+      setLocalPreferences({
         ...userPreferences,
         // Ensure new fields have default values if they're missing
         paperless_username: userPreferences.paperless_username || '',
         paperless_password: userPreferences.paperless_password || '',
-        session_timeout_minutes: parseInt(userPreferences.session_timeout_minutes) || 30
+        session_timeout_minutes: parseInt(userPreferences.session_timeout_minutes) || 30,
+        date_format: userPreferences.date_format || DEFAULT_DATE_FORMAT
       });
     }
   }, [userPreferences]);
@@ -85,6 +89,18 @@ const Settings = () => {
 
     frontendLogger.logInfo('Unit system preference changed (not saved yet)', {
       newUnitSystem,
+      component: 'Settings',
+    });
+  };
+
+  const handleDateFormatChange = newDateFormat => {
+    setLocalPreferences(prev => ({
+      ...prev,
+      date_format: newDateFormat,
+    }));
+
+    frontendLogger.logInfo('Date format preference changed (not saved yet)', {
+      newDateFormat,
       component: 'Settings',
     });
   };
@@ -239,12 +255,13 @@ const Settings = () => {
   };
 
   const handleResetPreferences = () => {
-    setLocalPreferences({ 
+    setLocalPreferences({
       ...userPreferences,
       // Ensure new fields have default values if they're missing
       paperless_username: userPreferences.paperless_username || '',
       paperless_password: userPreferences.paperless_password || '',
-      session_timeout_minutes: parseInt(userPreferences.session_timeout_minutes) || 30
+      session_timeout_minutes: parseInt(userPreferences.session_timeout_minutes) || 30,
+      date_format: userPreferences.date_format || DEFAULT_DATE_FORMAT
     });
     frontendLogger.logInfo('User preferences reset to original values', {
       component: 'Settings',
@@ -326,6 +343,24 @@ const Settings = () => {
         showBackButton={true}
       />
 
+      {/* Settings Tabs */}
+      <div className="settings-tabs">
+        <button
+          className={`settings-tab ${activeTab === 'general' ? 'active' : ''}`}
+          onClick={() => setActiveTab('general')}
+        >
+          {t('settings.tabs.general', 'General')}
+        </button>
+        <button
+          className={`settings-tab ${activeTab === 'notifications' ? 'active' : ''}`}
+          onClick={() => setActiveTab('notifications')}
+        >
+          {t('settings.tabs.notifications', 'Notifications')}
+        </button>
+      </div>
+
+      {/* General Tab Content */}
+      {activeTab === 'general' && (
       <div className="settings-content">
         {/* Security Settings Section */}
         <Card>
@@ -443,6 +478,68 @@ const Settings = () => {
                       />
                       <span className="settings-radio-label">
                         {t('settings.preferences.unitSystem.metric', 'Metric (kg, cm, °C)')}
+                      </span>
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Date Format Option */}
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-title">{t('settings.preferences.dateFormat.title', 'Date Format')}</div>
+                <div className="settings-option-description">
+                  {t('settings.preferences.dateFormat.description', 'Choose how dates are displayed throughout the application')}
+                </div>
+              </div>
+              <div className="settings-option-control">
+                {loadingPreferences ? (
+                  <div className="settings-loading">{t('labels.loading', 'Loading...')}</div>
+                ) : (
+                  <div className="settings-radio-group">
+                    <label className="settings-radio-option">
+                      <input
+                        type="radio"
+                        name="date-format"
+                        value="mdy"
+                        checked={localPreferences?.date_format === 'mdy' || !localPreferences?.date_format}
+                        onChange={() => handleDateFormatChange('mdy')}
+                        disabled={savingPreferences}
+                      />
+                      <span className="settings-radio-label">
+                        {t('settings.preferences.dateFormat.mdy', 'MM/DD/YYYY (US)')}
+                        <span className="settings-radio-example"> - e.g., 01/25/2026</span>
+                      </span>
+                    </label>
+
+                    <label className="settings-radio-option">
+                      <input
+                        type="radio"
+                        name="date-format"
+                        value="dmy"
+                        checked={localPreferences?.date_format === 'dmy'}
+                        onChange={() => handleDateFormatChange('dmy')}
+                        disabled={savingPreferences}
+                      />
+                      <span className="settings-radio-label">
+                        {t('settings.preferences.dateFormat.dmy', 'DD/MM/YYYY (European)')}
+                        <span className="settings-radio-example"> - e.g., 25/01/2026</span>
+                      </span>
+                    </label>
+
+                    <label className="settings-radio-option">
+                      <input
+                        type="radio"
+                        name="date-format"
+                        value="ymd"
+                        checked={localPreferences?.date_format === 'ymd'}
+                        onChange={() => handleDateFormatChange('ymd')}
+                        disabled={savingPreferences}
+                      />
+                      <span className="settings-radio-label">
+                        {t('settings.preferences.dateFormat.ymd', 'YYYY-MM-DD (ISO)')}
+                        <span className="settings-radio-example"> - e.g., 2026-01-25</span>
                       </span>
                     </label>
                   </div>
@@ -586,6 +683,14 @@ const Settings = () => {
           </Card>
         )}
       </div>
+      )}
+
+      {/* Notifications Tab Content */}
+      {activeTab === 'notifications' && (
+        <div className="settings-content">
+          <NotificationSettings />
+        </div>
+      )}
 
       {/* Change Password Modal */}
       <ChangePasswordModal

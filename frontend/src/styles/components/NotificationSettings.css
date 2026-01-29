@@ -1,0 +1,17 @@
+/* Notification Settings Container */
+.notification-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.notification-settings-loading,
+.notification-settings-error {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary, #666);
+}
+
+.notification-settings-error p {
+  margin-bottom: 1rem;
+}

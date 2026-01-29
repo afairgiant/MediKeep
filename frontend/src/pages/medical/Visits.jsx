@@ -1,21 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Title,
   Stack,
-  Alert,
-  Loader,
-  Center,
-  Grid,
-  Button,
 } from '@mantine/core';
 import {
-  IconAlertTriangle,
-  IconCheck,
   IconPlus,
   IconCalendar,
   IconShieldCheck,
@@ -23,9 +14,11 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
+import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -39,12 +32,15 @@ import {
   SUCCESS_MESSAGES,
   getUserFriendlyError
 } from '../../constants/errorMessages';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-import FileCountBadge from '../../components/shared/FileCountBadge';
 // Import new modular components
 import VisitCard from '../../components/medical/visits/VisitCard';
 import VisitViewModal from '../../components/medical/visits/VisitViewModal';
@@ -52,9 +48,9 @@ import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
 
 const Visits = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = useState('cards');
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
 
   // Get practitioners data
@@ -145,12 +141,27 @@ const Visits = () => {
   // Use standardized data management
   const dataManagement = useDataManagement(visits, config);
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('visit', visits);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingVisit,
+    openModal: handleViewVisit,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: visits,
+    loading,
+    onClose: (visit) => {
+      if (visit) {
+        refreshFileCount(visit.id);
+      }
+    },
+  });
+
   // Get patient conditions for linking
   const [conditions, setConditions] = useState([]);
-  
-  // File count management for cards
-  const [fileCounts, setFileCounts] = useState({});
-  const [fileCountsLoading, setFileCountsLoading] = useState({});
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -158,11 +169,7 @@ const Visits = () => {
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
-  
-  // Debouncing refs for file count loading
-  const fileCountLoadingTimeoutRef = useRef(null);
-  const lastVisitsVersionRef = useRef(null);
-  
+
   useEffect(() => {
     if (currentPatient?.id) {
       apiService.getPatientConditions(currentPatient.id)
@@ -176,75 +183,6 @@ const Visits = () => {
     }
   }, [currentPatient?.id]);
 
-  // Create a memoized version string of visits to detect actual changes
-  const visitsVersion = useMemo(() => {
-    if (!visits || visits.length === 0) return '';
-    return visits.map(v => `${v.id}-${v.updated_at || v.created_at || ''}`).join('|');
-  }, [visits]);
-
-  // Debounced file count loading function
-  const debouncedLoadFileCounts = useCallback(async (visitsToLoad) => {
-    if (!visitsToLoad || visitsToLoad.length === 0) return;
-    
-    const countPromises = visitsToLoad.map(async (visit) => {
-      setFileCountsLoading(prev => {
-        if (prev[visit.id] !== undefined) return prev; // Already loading
-        return { ...prev, [visit.id]: true };
-      });
-      
-      try {
-        const files = await apiService.getEntityFiles('visit', visit.id);
-        const count = Array.isArray(files) ? files.length : 0;
-        setFileCounts(prev => ({ ...prev, [visit.id]: count }));
-      } catch (error) {
-        logger.error(`Error loading file count for visit ${visit.id}:`, error);
-        setFileCounts(prev => ({ ...prev, [visit.id]: 0 }));
-      } finally {
-        setFileCountsLoading(prev => ({ ...prev, [visit.id]: false }));
-      }
-    });
-    
-    await Promise.all(countPromises);
-  }, []);
-
-  // Load file counts for visits with debouncing
-  useEffect(() => {
-    // Only proceed if we have visits and the version has actually changed
-    if (!visits || visits.length === 0 || visitsVersion === lastVisitsVersionRef.current) {
-      return;
-    }
-
-    // Clear any existing timeout
-    if (fileCountLoadingTimeoutRef.current) {
-      clearTimeout(fileCountLoadingTimeoutRef.current);
-    }
-
-    // Set up debounced call
-    fileCountLoadingTimeoutRef.current = setTimeout(() => {
-      lastVisitsVersionRef.current = visitsVersion;
-      debouncedLoadFileCounts(visits);
-    }, 300); // 300ms debounce delay
-
-    // Cleanup function
-    return () => {
-      if (fileCountLoadingTimeoutRef.current) {
-        clearTimeout(fileCountLoadingTimeoutRef.current);
-        fileCountLoadingTimeoutRef.current = null;
-      }
-    };
-  }, [visits, visitsVersion, debouncedLoadFileCounts]);
-
-  // Function to refresh file counts for all visits
-  const refreshFileCount = useCallback(async (visitId) => {
-    try {
-      const files = await apiService.getEntityFiles('visit', visitId);
-      const count = Array.isArray(files) ? files.length : 0;
-      setFileCounts(prev => ({ ...prev, [visitId]: count }));
-    } catch (error) {
-      logger.error(`Error refreshing file count for visit ${visitId}:`, error);
-    }
-  }, []);
-
 
   // Helper function to get condition details
   const getConditionDetails = (conditionId) => {
@@ -253,8 +191,9 @@ const Visits = () => {
   };
 
   // Get standardized formatters for visits with condition linking
+  const visitsBaseFormatters = getEntityFormatters('visits', practitioners, navigate, null, formatDate);
   const formatters = {
-    ...getEntityFormatters('visits', [], navigate),
+    ...visitsBaseFormatters,
     condition_name: (value, visit) => {
       const condition = getConditionDetails(visit.condition_id);
       return condition?.diagnosis || '';
@@ -263,8 +202,6 @@ const Visits = () => {
 
   // Form state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingVisit, setViewingVisit] = useState(null);
   const [editingVisit, setEditingVisit] = useState(null);
   const [formData, setFormData] = useState({
     reason: '',
@@ -306,17 +243,6 @@ const Visits = () => {
     setShowModal(true);
   };
 
-  const handleViewVisit = visit => {
-    setViewingVisit(visit);
-    setShowViewModal(true);
-    // Update URL with visit ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', visit.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
   const handleEditVisit = visit => {
     resetSubmission(); // Reset submission state
     setEditingVisit(visit);
@@ -340,39 +266,10 @@ const Visits = () => {
     setShowModal(true);
   };
 
-  const handleCloseViewModal = () => {
-    // Refresh file count for the viewed visit before closing
-    if (viewingVisit) {
-      refreshFileCount(viewingVisit.id);
-    }
-    
-    setShowViewModal(false);
-    setViewingVisit(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   const handleDeleteVisit = async visitId => {
     const success = await deleteItem(visitId);
-    // Note: deleteItem already updates local state, no need to refresh all data
-    // The useMedicalData hook handles state updates automatically
     if (success) {
-      // Only refresh file counts as they might be affected by deletion
-      setFileCounts(prev => {
-        const updated = { ...prev };
-        delete updated[visitId];
-        return updated;
-      });
-      setFileCountsLoading(prev => {
-        const updated = { ...prev };
-        delete updated[visitId];
-        return updated;
-      });
+      cleanupFileCount(visitId);
     }
   };
 
@@ -546,32 +443,8 @@ const Visits = () => {
     }
   };
 
-  // Handle URL parameters for direct linking to specific visits
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && visits && visits.length > 0 && !loading) {
-      const visit = visits.find(v => v.id.toString() === viewId);
-      if (visit && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingVisit(visit);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, visits, loading, showViewModal]);
-
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('visits.loadingVisits', 'Loading visits...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('visits.loadingVisits', 'Loading visits...')} />;
   }
 
   const filteredVisits = dataManagement.data;
@@ -582,109 +455,52 @@ const Visits = () => {
       <PageHeader title={t('visits.title', 'Medical Visits')} icon="📅" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('visits.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('visits.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
-
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddVisit}
-            size="md"
-          >
-            {t('visits.addVisit', 'Add New Visit')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('visits.addVisit', 'Add New Visit'),
+            onClick: handleAddVisit,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Content */}
           {filteredVisits.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconShieldCheck
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('visits.noVisitsFound', 'No medical visits found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('visits.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                        : t('visits.clickToGetStarted', 'Click "Add New Visit" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconShieldCheck}
+              title={t('visits.noVisitsFound', 'No medical visits found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('visits.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('visits.clickToGetStarted', 'Click "Add New Visit" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {filteredVisits.map((visit, index) => (
-                  <Grid.Col key={visit.id} span={{ base: 12, md: 6, lg: 4 }}>
-                      <VisitCard
-                        visit={visit}
-                        onEdit={handleEditVisit}
-                        onDelete={() => handleDeleteVisit(visit.id)}
-                        onView={handleViewVisit}
-                        practitioners={practitioners}
-                        conditions={conditions}
-                        fileCount={fileCounts[visit.id] || 0}
-                        fileCountLoading={fileCountsLoading[visit.id] || false}
-                        navigate={navigate}
-                      />
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredVisits}
+              columns={{ base: 12, md: 6, lg: 4 }}
+              renderCard={(visit) => (
+                <VisitCard
+                  visit={visit}
+                  onEdit={handleEditVisit}
+                  onDelete={() => handleDeleteVisit(visit.id)}
+                  onView={handleViewVisit}
+                  practitioners={practitioners}
+                  conditions={conditions}
+                  fileCount={fileCounts[visit.id] || 0}
+                  fileCountLoading={fileCountsLoading[visit.id] || false}
+                  navigate={navigate}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
@@ -705,18 +521,14 @@ const Visits = () => {
                 onEdit={handleEditVisit}
                 onDelete={handleDeleteVisit}
                 formatters={{
-                  date: getEntityFormatters('visits').date,
-                  reason: getEntityFormatters('visits').text,
-                  visit_type: getEntityFormatters('visits').simple,
-                  location: getEntityFormatters('visits').simple,
-                  practitioner_name: (value, item) =>
-                    getEntityFormatters(
-                      'visits',
-                      practitioners
-                    ).practitioner_name(value, item),
+                  date: visitsBaseFormatters.date,
+                  reason: visitsBaseFormatters.text,
+                  visit_type: visitsBaseFormatters.simple,
+                  location: visitsBaseFormatters.simple,
+                  practitioner_name: visitsBaseFormatters.practitioner_name,
                   condition_name: formatters.condition_name,
-                  diagnosis: getEntityFormatters('visits').text,
-                  notes: getEntityFormatters('visits').text,
+                  diagnosis: visitsBaseFormatters.text,
+                  notes: visitsBaseFormatters.text,
                 }}
                 dataType="medical"
                 responsive={responsive}

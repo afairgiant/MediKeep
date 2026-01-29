@@ -1,30 +1,22 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Title,
   Stack,
-  Alert,
-  Loader,
-  Center,
   Badge,
-  Grid,
   Card,
   Box,
   Divider,
   Modal,
-  Button,
 } from '@mantine/core';
 import {
-  IconAlertTriangle,
-  IconCheck,
   IconPlus,
   IconShieldCheck,
   IconHeart,
@@ -34,9 +26,11 @@ import {
   IconDroplet,
   IconAward,
 } from '@tabler/icons-react';
-import { useMedicalData, useDataManagement } from '../../hooks';
+import { useMedicalData, useDataManagement, useEntityFileCounts, useViewModalNavigation } from '../../hooks';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { 
@@ -47,8 +41,10 @@ import {
 } from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
-import MantineFilters from '../../components/mantine/MantineFilters';
-import ViewToggle from '../../components/shared/ViewToggle';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 
@@ -61,8 +57,8 @@ import {
 
 const Conditions = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
-  const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   
@@ -103,10 +99,25 @@ const Conditions = () => {
   const config = getMedicalPageConfig('conditions');
   const dataManagement = useDataManagement(conditions, config);
 
+  // File count management for cards
+  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('condition', conditions);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingCondition,
+    openModal: handleViewCondition,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: conditions,
+    loading,
+  });
+
+  // Get standardized formatters for conditions
+  const conditionsFormatters = getEntityFormatters('conditions', [], navigate, null, formatDate);
+
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingCondition, setViewingCondition] = useState(null);
   const [editingCondition, setEditingCondition] = useState(null);
   const [formData, setFormData] = useState({
     condition_name: '',
@@ -145,29 +156,6 @@ const Conditions = () => {
     setShowModal(true);
   };
 
-  const handleViewCondition = condition => {
-    setViewingCondition(condition);
-    setShowViewModal(true);
-    // Update URL with condition ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', condition.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  };
-
-  const handleCloseViewModal = () => {
-    setShowViewModal(false);
-    setViewingCondition(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  };
-
   // Load medications and practitioners for linking dropdowns
   useEffect(() => {
     if (currentPatient?.id) {
@@ -192,21 +180,6 @@ const Conditions = () => {
         });
     }
   }, [currentPatient?.id]);
-
-  // Handle URL parameters for direct linking to specific conditions
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && conditions.length > 0 && !loading) {
-      const condition = conditions.find(c => c.id.toString() === viewId);
-      if (condition && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingCondition(condition);
-        setShowViewModal(true);
-      }
-    }
-  }, [location.search, conditions, loading, showViewModal]);
 
   const handleEditCondition = condition => {
     setEditingCondition(condition);
@@ -234,6 +207,7 @@ const Conditions = () => {
   const handleDeleteCondition = async conditionId => {
     const success = await deleteItem(conditionId);
     if (success) {
+      cleanupFileCount(conditionId);
       await refreshData();
     }
   };
@@ -327,16 +301,7 @@ const Conditions = () => {
 
 
   if (loading) {
-    return (
-      <Container size="xl" py="md">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('conditions.loading', 'Loading conditions...')}</Text>
-          </Stack>
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('conditions.loading', 'Loading conditions...')} />;
   }
 
   return (
@@ -344,67 +309,24 @@ const Conditions = () => {
       <PageHeader title={t('conditions.title', 'Medical Conditions')} icon="🩺" />
 
       <Stack gap="lg">
-        {error && (
-          <Alert
-            variant="light"
-            color="red"
-            title={t('labels.error', 'Error')}
-            icon={<IconAlertTriangle size={16} />}
-            withCloseButton
-            onClose={clearError}
-            mb="md"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {error}
-          </Alert>
-        )}
+        <MedicalPageAlerts
+          error={error}
+          successMessage={successMessage}
+          onClearError={clearError}
+        />
 
-        {successMessage && (
-          <Alert
-            variant="light"
-            color="green"
-            title={t('labels.success', 'Success')}
-            icon={<IconCheck size={16} />}
-            mb="md"
-          >
-            {successMessage}
-          </Alert>
-        )}
-
-        <Group justify="space-between" mb="lg">
-          <Button
-            variant="filled"
-            leftSection={<IconPlus size={16} />}
-            onClick={handleAddCondition}
-            size="md"
-          >
-            {t('conditions.addNew', 'Add New Condition')}
-          </Button>
-
-          <ViewToggle
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            showPrint={true}
-          />
-        </Group>
+        <MedicalPageActions
+          primaryAction={{
+            label: t('conditions.addNew', 'Add New Condition'),
+            onClick: handleAddCondition,
+            leftSection: <IconPlus size={16} />,
+          }}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Mantine Filter Controls */}
-        <MantineFilters
-          filters={dataManagement.filters}
-          updateFilter={dataManagement.updateFilter}
-          clearFilters={dataManagement.clearFilters}
-          hasActiveFilters={dataManagement.hasActiveFilters}
-          statusOptions={dataManagement.statusOptions}
-          categoryOptions={dataManagement.categoryOptions}
-          dateRangeOptions={dataManagement.dateRangeOptions}
-          sortOptions={dataManagement.sortOptions}
-          sortBy={dataManagement.sortBy}
-          sortOrder={dataManagement.sortOrder}
-          handleSortChange={dataManagement.handleSortChange}
-          totalCount={dataManagement.totalCount}
-          filteredCount={dataManagement.filteredCount}
-          config={config.filterControls}
-        />
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
         {/* Form Modal */}
         <ConditionFormWrapper
@@ -427,51 +349,28 @@ const Conditions = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {filteredConditions.length === 0 ? (
-            <Paper shadow="sm" p="xl" radius="md">
-              <Center py="xl">
-                <Stack align="center" gap="md">
-                  <IconShieldCheck
-                    size={64}
-                    stroke={1}
-                    color="var(--mantine-color-gray-5)"
-                  />
-                  <Stack align="center" gap="xs">
-                    <Title order={3}>{t('conditions.noResults', 'No medical conditions found')}</Title>
-                    <Text c="dimmed" ta="center">
-                      {dataManagement.hasActiveFilters
-                        ? t('conditions.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                        : t('conditions.getStarted', 'Click "Add New Condition" to get started.')}
-                    </Text>
-                  </Stack>
-                </Stack>
-              </Center>
-            </Paper>
+            <EmptyState
+              icon={IconShieldCheck}
+              title={t('conditions.noResults', 'No medical conditions found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('conditions.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('conditions.getStarted', 'Click "Add New Condition" to get started.')}
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              <AnimatePresence>
-                {filteredConditions.map((condition, index) => (
-                  <Grid.Col
-                    key={condition.id}
-                    span={responsive.isMobile ? 12 : responsive.isTablet ? 6 : 4}
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.1 }}
-                    >
-                      <ConditionCard
-                        condition={condition}
-                        onView={handleViewCondition}
-                        onEdit={handleEditCondition}
-                        onDelete={handleDeleteCondition}
-                        navigate={navigate}
-                      />
-                    </motion.div>
-                  </Grid.Col>
-                ))}
-              </AnimatePresence>
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredConditions}
+              renderCard={(condition) => (
+                <ConditionCard
+                  condition={condition}
+                  onView={handleViewCondition}
+                  onEdit={handleEditCondition}
+                  onDelete={handleDeleteCondition}
+                  navigate={navigate}
+                  fileCount={fileCounts[condition.id] || 0}
+                  fileCountLoading={fileCountsLoading[condition.id] || false}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
@@ -491,13 +390,13 @@ const Conditions = () => {
                 onEdit={handleEditCondition}
                 onDelete={handleDeleteCondition}
                 formatters={{
-                  diagnosis: getEntityFormatters('conditions').condition_name,
-                  severity: getEntityFormatters('conditions').severity,
-                  onset_date: getEntityFormatters('conditions').onset_date,
-                  end_date: getEntityFormatters('conditions').end_date,
-                  status: getEntityFormatters('conditions').status,
-                  icd10_code: getEntityFormatters('conditions').simple,
-                  notes: getEntityFormatters('conditions').notes,
+                  diagnosis: conditionsFormatters.condition_name,
+                  severity: conditionsFormatters.severity,
+                  onset_date: conditionsFormatters.onset_date,
+                  end_date: conditionsFormatters.end_date,
+                  status: conditionsFormatters.status,
+                  icd10_code: conditionsFormatters.simple,
+                  notes: conditionsFormatters.notes,
                 }}
                 dataType="medical"
                 responsive={responsive}

@@ -1564,7 +1564,10 @@
       "practitioners": "Profissionais de Saúde",
       "pharmacies": "Farmácias",
       "emergency_contacts": "Contatos de Emergência",
-      "family_history": "Histórico Familiar"
+      "family_history": "Histórico Familiar",
+      "symptoms": "Sintomas",
+      "injuries": "Lesões",
+      "insurance": "Seguro"
     },
     "settingsModal": {
       "title": "Configurações do Relatório",
@@ -1611,7 +1614,11 @@
       "vitals": "Sinais Vitais",
       "emergency_contacts": "Contatos de Emergência",
       "practitioners": "Profissionais de Saúde",
-      "pharmacies": "Farmácias"
+      "pharmacies": "Farmácias",
+      "symptoms": "Sintomas",
+      "injuries": "Lesões",
+      "family_history": "Histórico Familiar",
+      "insurance": "Seguro"
     },
     "exportMode": {
       "title": "Modo de Exportação",

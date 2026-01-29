@@ -3,8 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
+import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -19,10 +21,14 @@ import {
   getUserFriendlyError
 } from '../../constants/errorMessages';
 import { ResponsiveTable } from '../../components/adapters';
-import ViewToggle from '../../components/shared/ViewToggle';
-import MantineFilters from '../../components/mantine/MantineFilters';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
+import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import FileCountBadge from '../../components/shared/FileCountBadge';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
+import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 // Import new modular components
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
@@ -31,21 +37,17 @@ import LabResultQuickImportModal from '../../components/medical/labresults/LabRe
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Button,
-  Grid,
   Container,
-  Alert,
-  Loader,
-  Center,
   Stack,
   Text,
   Card,
-  Group,
   Paper,
 } from '@mantine/core';
 import { IconFileUpload } from '@tabler/icons-react';
 
 const LabResults = () => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -83,8 +85,7 @@ const LabResults = () => {
   const { practitioners, loading: practitionersLoading } = usePractitioners();
 
   // File count management for cards
-  const [fileCounts, setFileCounts] = useState({});
-  const [fileCountsLoading, setFileCountsLoading] = useState({});
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('lab-result', labResults);
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -142,7 +143,7 @@ const LabResults = () => {
   const config = getMedicalPageConfig('labresults');
 
   // Get standardized formatters for lab results
-  const formatters = getEntityFormatters('lab_results', practitioners);
+  const formatters = getEntityFormatters('lab_results', practitioners, null, null, formatDate);
 
 
   // Use standardized data management
@@ -208,30 +209,28 @@ const LabResults = () => {
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
   const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
 
-  // Function to refresh file counts for all lab results
-  const refreshFileCount = useCallback(async (labResultId) => {
-    try {
-      // Invalidate cache for this lab result
-      delete fileCountCacheRef.current[labResultId];
-
-      const files = await apiService.getEntityFiles('lab-result', labResultId);
-      const count = Array.isArray(files) ? files.length : 0;
-
-      // Update cache
-      fileCountCacheRef.current[labResultId] = count;
-
-      setFileCounts(prev => ({ ...prev, [labResultId]: count }));
-    } catch (error) {
-      logger.error(`Error refreshing file count for lab result ${labResultId}:`, error);
-    }
-  }, []);
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: showViewModal,
+    viewingItem: viewingLabResult,
+    openModal: handleViewLabResult,
+    closeModal: handleCloseViewModal,
+    setViewingItem: setViewingLabResult,
+    setIsOpen: setShowViewModal,
+  } = useViewModalNavigation({
+    items: labResults,
+    loading,
+    onClose: (labResult) => {
+      if (labResult) {
+        refreshFileCount(labResult.id);
+      }
+    },
+  });
 
   // Form and modal state
   const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
   const [showQuickImportModal, setShowQuickImportModal] = useState(false);
   const [initialViewTab, setInitialViewTab] = useState('overview');
-  const [viewingLabResult, setViewingLabResult] = useState(null);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [formData, setFormData] = useState({
     test_name: '',
@@ -246,113 +245,6 @@ const LabResults = () => {
     notes: '',
     practitioner_id: '',
   });
-
-  // Ref to track file count loading abort controllers
-  const fileCountAbortControllersRef = useRef({});
-  const fileCountCacheRef = useRef({}); // Cache file counts to prevent redundant API calls
-
-  // Load file counts for lab results with abort controller and caching
-  useEffect(() => {
-    const loadFileCountsForLabResults = async () => {
-      if (!labResults || labResults.length === 0) return;
-
-      // Abort any pending requests for lab results that are no longer in the list
-      const currentLabResultIds = new Set(labResults.map(lr => lr.id));
-      Object.keys(fileCountAbortControllersRef.current).forEach(id => {
-        if (!currentLabResultIds.has(parseInt(id))) {
-          fileCountAbortControllersRef.current[id]?.abort();
-          delete fileCountAbortControllersRef.current[id];
-        }
-      });
-
-      // Load file counts with batching and caching
-      const countPromises = labResults.map(async (labResult) => {
-        // Check cache first
-        if (fileCountCacheRef.current[labResult.id] !== undefined) {
-          setFileCounts(prev => {
-            if (prev[labResult.id] === fileCountCacheRef.current[labResult.id]) return prev;
-            return { ...prev, [labResult.id]: fileCountCacheRef.current[labResult.id] };
-          });
-          return;
-        }
-
-        // Check if already loading to prevent duplicate requests
-        if (fileCountAbortControllersRef.current[labResult.id]) {
-          return; // Already loading
-        }
-
-        // Create abort controller for this request
-        const abortController = new AbortController();
-        fileCountAbortControllersRef.current[labResult.id] = abortController;
-
-        setFileCountsLoading(prev => {
-          if (prev[labResult.id] === true) return prev;
-          return { ...prev, [labResult.id]: true };
-        });
-
-        try {
-          const files = await apiService.getEntityFiles('lab-result', labResult.id, abortController.signal);
-          const count = Array.isArray(files) ? files.length : 0;
-
-          // Cache the result
-          fileCountCacheRef.current[labResult.id] = count;
-
-          setFileCounts(prev => {
-            if (prev[labResult.id] === count) return prev;
-            return { ...prev, [labResult.id]: count };
-          });
-        } catch (error) {
-          // Ignore abort errors
-          if (error.name === 'AbortError') return;
-
-          logger.error(`Error loading file count for lab result ${labResult.id}:`, error);
-          setFileCounts(prev => {
-            if (prev[labResult.id] === 0) return prev;
-            return { ...prev, [labResult.id]: 0 };
-          });
-          fileCountCacheRef.current[labResult.id] = 0;
-        } finally {
-          delete fileCountAbortControllersRef.current[labResult.id];
-          setFileCountsLoading(prev => {
-            if (prev[labResult.id] === false) return prev;
-            return { ...prev, [labResult.id]: false };
-          });
-        }
-      });
-
-      await Promise.all(countPromises);
-    };
-
-    loadFileCountsForLabResults();
-
-    // Cleanup: abort all pending requests on unmount
-    return () => {
-      Object.values(fileCountAbortControllersRef.current).forEach(controller => {
-        controller?.abort();
-      });
-      fileCountAbortControllersRef.current = {};
-    };
-  }, [labResults]);
-
-
-  // Handle URL parameters for direct linking to specific lab results
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && labResults && labResults.length > 0 && !loading) {
-      const labResult = labResults.find(lr => lr.id.toString() === viewId);
-      if (labResult && !showViewModal) {
-        // Only auto-open if modal isn't already open
-        setViewingLabResult(labResult);
-        setShowViewModal(true);
-
-        // Note: File loading now handled by DocumentManager
-      }
-    }
-  }, [location.search, labResults, loading, showViewModal]);
-
-  // Note: File management functions removed - now handled by DocumentManager component
 
   // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
   const handleAddLabResult = useCallback(() => {
@@ -397,37 +289,6 @@ const LabResults = () => {
     // Note: File loading is now handled by DocumentManager component
     setShowModal(true);
   }, [resetSubmission]);
-
-  const handleViewLabResult = useCallback(async labResult => {
-    setViewingLabResult(labResult);
-    setShowViewModal(true);
-
-    // Note: File loading now handled by DocumentManager
-
-    // Update URL with lab result ID for sharing/bookmarking
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('view', labResult.id);
-    navigate(`${location.pathname}?${searchParams.toString()}`, {
-      replace: true,
-    });
-  }, [navigate, location.pathname]);
-
-  const handleCloseViewModal = useCallback(() => {
-    // Refresh file count for the viewed lab result before closing
-    if (viewingLabResult) {
-      refreshFileCount(viewingLabResult.id);
-    }
-
-    setShowViewModal(false);
-    setViewingLabResult(null);
-    // Remove view parameter from URL
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.delete('view');
-    const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
-      replace: true,
-    });
-  }, [viewingLabResult, refreshFileCount, navigate, location.pathname]);
 
   const handleLabResultUpdated = useCallback(async () => {
     // If modal is open, fetch the updated lab result directly
@@ -498,22 +359,10 @@ const LabResults = () => {
 
   const handleDeleteLabResult = useCallback(async labResultId => {
     const success = await deleteItem(labResultId);
-    // Note: deleteItem already updates local state, no need to refresh all data
-    // The useMedicalData hook handles state updates automatically
     if (success) {
-      // Only refresh file counts as they might be affected by deletion
-      setFileCounts(prev => {
-        const updated = { ...prev };
-        delete updated[labResultId];
-        return updated;
-      });
-      setFileCountsLoading(prev => {
-        const updated = { ...prev };
-        delete updated[labResultId];
-        return updated;
-      });
+      cleanupFileCount(labResultId);
     }
-  }, [deleteItem]);
+  }, [deleteItem, cleanupFileCount]);
 
   const handleSubmit = useCallback(async e => {
     e.preventDefault();
@@ -628,7 +477,6 @@ const LabResults = () => {
     completeFileUpload,
     handleSubmissionFailure,
     refreshFileCount,
-    needsRefreshAfterSubmissionRef
   ]);
 
   const handleInputChange = useCallback(e => {
@@ -666,17 +514,10 @@ const LabResults = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
-        <Center h={200}>
-          <Stack align="center">
-            <Loader size="lg" />
-            <Text>{t('labResults.loading', 'Loading lab results...')}</Text>
-            <Text size="sm" c="dimmed">
-              {t('labResults.loadingHint', 'If this takes too long, please refresh the page')}
-            </Text>
-          </Stack>
-        </Center>
-      </Container>
+      <MedicalPageLoading
+        message={t('labResults.loading', 'Loading lab results...')}
+        hint={t('labResults.loadingHint', 'If this takes too long, please refresh the page')}
+      />
     );
   }
 
@@ -686,104 +527,62 @@ const LabResults = () => {
         <PageHeader title={t('labResults.title', 'Lab Results')} icon="🧪" />
 
         <Stack gap="lg">
-          {error && (
-            <Alert
-              variant="light"
-              color="red"
-              title={t('labResults.error', 'Error')}
-              withCloseButton
-              onClose={clearError}
-              style={{ whiteSpace: 'pre-line' }}
-            >
-              {error}
-            </Alert>
-          )}
-          {successMessage && (
-            <Alert variant="light" color="green" title={t('labResults.success', 'Success')}>
-              {successMessage}
-            </Alert>
-          )}
-
-          <Group justify="space-between" align="center">
-            <Group gap="sm">
-              <Button variant="filled" onClick={handleAddLabResult}>
-                {t('labResults.addNew', '+ Add New Lab Result')}
-              </Button>
-              <Button
-                variant="light"
-                leftSection={<IconFileUpload size={16} />}
-                onClick={() => setShowQuickImportModal(true)}
-              >
-                {t('labResults.quickPdfImport', 'Quick PDF Import')}
-              </Button>
-            </Group>
-
-            <ViewToggle
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              showPrint={true}
-            />
-          </Group>
-
-          {/* Mantine Filter Controls */}
-          <MantineFilters
-            filters={dataManagement.filters}
-            updateFilter={dataManagement.updateFilter}
-            clearFilters={dataManagement.clearFilters}
-            hasActiveFilters={dataManagement.hasActiveFilters}
-            statusOptions={dataManagement.statusOptions}
-            categoryOptions={dataManagement.categoryOptions}
-            dateRangeOptions={dataManagement.dateRangeOptions}
-            orderedDateOptions={dataManagement.orderedDateOptions}
-            completedDateOptions={dataManagement.completedDateOptions}
-            resultOptions={dataManagement.resultOptions}
-            typeOptions={dataManagement.typeOptions}
-            filesOptions={dataManagement.filesOptions}
-            sortOptions={dataManagement.sortOptions}
-            sortBy={dataManagement.sortBy}
-            sortOrder={dataManagement.sortOrder}
-            handleSortChange={dataManagement.handleSortChange}
-            totalCount={dataManagement.totalCount}
-            filteredCount={dataManagement.filteredCount}
-            config={config.filterControls}
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={clearError}
           />
 
+          <MedicalPageActions
+            primaryAction={{
+              label: t('labResults.addNew', '+ Add New Lab Result'),
+              onClick: handleAddLabResult,
+            }}
+            secondaryActions={[
+              {
+                label: t('labResults.quickPdfImport', 'Quick PDF Import'),
+                onClick: () => setShowQuickImportModal(true),
+                leftSection: <IconFileUpload size={16} />,
+              },
+            ]}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            mb={0}
+          />
+
+          {/* Mantine Filter Controls */}
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
+
           {filteredLabResults.length === 0 ? (
-            <Card withBorder p="xl">
-              <Stack align="center" gap="md">
-                <Text size="3rem">🧪</Text>
-                <Text size="xl" fw={600}>
-                  {t('labResults.noResults', 'No Lab Results Found')}
-                </Text>
-                <Text ta="center" c="dimmed">
-                  {dataManagement.hasActiveFilters
-                    ? t('labResults.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')
-                    : t('labResults.startAdding', 'Start by adding your first lab result.')}
-                </Text>
-                {!dataManagement.hasActiveFilters && (
-                  <Button variant="filled" onClick={handleAddLabResult}>
-                    {t('labResults.addFirst', 'Add Your First Lab Result')}
-                  </Button>
-                )}
-              </Stack>
-            </Card>
+            <EmptyState
+              emoji="🧪"
+              title={t('labResults.noResults', 'No Lab Results Found')}
+              hasActiveFilters={dataManagement.hasActiveFilters}
+              filteredMessage={t('labResults.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              noDataMessage={t('labResults.startAdding', 'Start by adding your first lab result.')}
+              actionButton={
+                <Button variant="filled" onClick={handleAddLabResult}>
+                  {t('labResults.addFirst', 'Add Your First Lab Result')}
+                </Button>
+              }
+            />
           ) : viewMode === 'cards' ? (
-            <Grid>
-              {filteredLabResults.map((result) => (
-                <Grid.Col key={result.id} span={{ base: 12, sm: 6, lg: 4 }}>
-                  <LabResultCard
-                    labResult={result}
-                    onEdit={handleEditLabResult}
-                    onDelete={() => handleDeleteLabResult(result.id)}
-                    onView={handleViewLabResult}
-                    practitioners={practitioners}
-                    fileCount={fileCounts[result.id] || 0}
-                    fileCountLoading={fileCountsLoading[result.id] || false}
-                    navigate={navigate}
-                  />
-                </Grid.Col>
-              ))}
-            </Grid>
+            <AnimatedCardGrid
+              items={filteredLabResults}
+              columns={{ base: 12, sm: 6, lg: 4 }}
+              renderCard={(result) => (
+                <LabResultCard
+                  labResult={result}
+                  onEdit={handleEditLabResult}
+                  onDelete={() => handleDeleteLabResult(result.id)}
+                  onView={handleViewLabResult}
+                  practitioners={practitioners}
+                  fileCount={fileCounts[result.id] || 0}
+                  fileCountLoading={fileCountsLoading[result.id] || false}
+                  navigate={navigate}
+                />
+              )}
+            />
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable

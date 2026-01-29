@@ -11,6 +11,7 @@ import {
   Card,
   Title,
   Anchor,
+  Paper,
 } from '@mantine/core';
 import { IconEdit, IconStar } from '@tabler/icons-react';
 import { formatPhoneNumber } from '../../../utils/phoneUtils';
@@ -53,22 +54,7 @@ const PractitionerViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={
-        <Group>
-          <Text size="lg" fw={600}>
-            {t('practitioners.viewModal.title', 'Practitioner Details')}
-          </Text>
-          {practitioner.specialty && (
-            <Badge
-              color={getSpecialtyColor(practitioner.specialty)}
-              variant="light"
-              size="lg"
-            >
-              {practitioner.specialty}
-            </Badge>
-          )}
-        </Group>
-      }
+      title={t('practitioners.viewModal.title', 'Practitioner Details')}
       size="lg"
       centered
       zIndex={2000}
@@ -80,18 +66,35 @@ const PractitionerViewModal = ({
       }}
     >
       <Stack gap="md">
-        <Card withBorder p="md">
-          <Stack gap="sm">
-            <Group justify="space-between" align="flex-start">
-              <Stack gap="xs" style={{ flex: 1 }}>
-                <Title order={3}>{practitioner.name}</Title>
-                <Text size="sm" c="dimmed">
-                  {t('practitioners.viewModal.subtitle', 'Healthcare Practitioner')}
-                </Text>
-              </Stack>
-            </Group>
-          </Stack>
-        </Card>
+        {/* Header Card */}
+        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Group justify="space-between" align="center">
+            <div>
+              <Title order={3} mb="xs">{practitioner.name}</Title>
+              <Group gap="xs">
+                {practitioner.specialty && (
+                  <Badge
+                    color={getSpecialtyColor(practitioner.specialty)}
+                    variant="light"
+                    size="sm"
+                  >
+                    {practitioner.specialty}
+                  </Badge>
+                )}
+                {practitioner.practice && (
+                  <Badge variant="light" color="gray" size="sm">
+                    {practitioner.practice}
+                  </Badge>
+                )}
+              </Group>
+            </div>
+            {practitioner.rating !== null && practitioner.rating !== undefined && (
+              <Badge variant="filled" color="yellow" size="lg" leftSection={<IconStar size={14} />}>
+                {practitioner.rating}/5
+              </Badge>
+            )}
+          </Group>
+        </Paper>
 
         <Grid>
           <Grid.Col span={{ base: 12, sm: 6 }}>

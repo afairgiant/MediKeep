@@ -2,20 +2,19 @@ import logger from '../../services/logger';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
-  Group,
   Text,
   Stack,
   Alert,
-  Loader,
-  Center,
-  Button,
   Tabs,
   Badge,
+  Button,
+  Group,
 } from '@mantine/core';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import {
   IconStethoscope,
   IconPlus,
@@ -27,7 +26,7 @@ import {
   IconNote,
   IconEdit,
 } from '@tabler/icons-react';
-import { useViewNavigation } from '../../hooks/useViewNavigation';
+import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { symptomApi } from '../../services/api/symptomApi';
 import { PageHeader } from '../../components';
@@ -35,14 +34,14 @@ import MantineSymptomForm from '../../components/medical/MantineSymptomForm';
 import MantineSymptomOccurrenceForm from '../../components/medical/MantineSymptomOccurrenceForm';
 import SymptomTimeline from '../../components/medical/SymptomTimeline';
 import SymptomCalendar from '../../components/medical/SymptomCalendar';
+import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { SymptomViewModal } from '../../components/medical/symptoms';
 import { SYMPTOM_STATUS_COLORS } from '../../constants/symptomEnums';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 const Symptoms = () => {
   const { t } = useTranslation('common');
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { navigateToView, closeView } = useViewNavigation();
+  const { formatDate } = useDateFormat();
 
   // Get current patient from global hook (same as Medication.js)
   const { patient } = usePatientWithStaticData();
@@ -56,8 +55,6 @@ const Symptoms = () => {
 
   // View state
   const [activeTab, setActiveTab] = useState('list');
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [viewingSymptom, setViewingSymptom] = useState(null);
 
   // Symptom Definition Form state
   const [showSymptomForm, setShowSymptomForm] = useState(false);
@@ -97,6 +94,7 @@ const Symptoms = () => {
   const [editingOccurrence, setEditingOccurrence] = useState(null);
   const [occurrenceFormData, setOccurrenceFormData] = useState(getDefaultOccurrenceFormData());
 
+  // Fetch symptoms function defined before hook usage
   const fetchSymptoms = useCallback(async () => {
     if (!currentPatient?.id) return;
 
@@ -139,6 +137,17 @@ const Symptoms = () => {
       setLoading(false);
     }
   }, [currentPatient?.id, fetchSymptoms]);
+
+  // View modal navigation with URL deep linking
+  const {
+    isOpen: viewModalOpen,
+    viewingItem: viewingSymptom,
+    openModal: handleViewSymptom,
+    closeModal: handleCloseViewModal,
+  } = useViewModalNavigation({
+    items: symptoms,
+    loading,
+  });
 
   // Symptom Definition Handlers
   const handleAddSymptom = () => {
@@ -338,33 +347,6 @@ const Symptoms = () => {
     }
   };
 
-  // View Modal Handlers
-  const handleViewSymptom = symptom => {
-    setViewingSymptom(symptom);
-    setViewModalOpen(true);
-    navigateToView(symptom.id);
-  };
-
-  const handleCloseViewModal = () => {
-    setViewModalOpen(false);
-    setViewingSymptom(null);
-    closeView();
-  };
-
-  // Handle URL parameters for direct linking
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const viewId = searchParams.get('view');
-
-    if (viewId && symptoms.length > 0 && !loading) {
-      const symptom = symptoms.find(s => s.id.toString() === viewId);
-      if (symptom && !viewModalOpen) {
-        setViewingSymptom(symptom);
-        setViewModalOpen(true);
-      }
-    }
-  }, [location.search, symptoms, loading, viewModalOpen]);
-
   // Clear messages after timeout
   useEffect(() => {
     if (error) {
@@ -375,14 +357,7 @@ const Symptoms = () => {
 
   // Loading state
   if (loading && symptoms.length === 0) {
-    return (
-      <Container size="xl">
-        <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
-        <Center style={{ minHeight: 400 }}>
-          <Loader size="lg" />
-        </Center>
-      </Container>
-    );
+    return <MedicalPageLoading message={t('symptoms.loading', 'Loading symptoms...')} />;
   }
 
   // No patient selected
@@ -402,30 +377,22 @@ const Symptoms = () => {
       <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
 
       {/* Success/Error Messages */}
-      {error && (
-        <Alert
-          title={t('labels.error', 'Error')}
-          color="red"
-          onClose={() => setError(null)}
-          withCloseButton
-          mb="md"
-          style={{ whiteSpace: 'pre-line' }}
-        >
-          {error}
-        </Alert>
-      )}
-      {successMessage && (
-        <Alert title={t('labels.success', 'Success')} color="green" mb="md">
-          {successMessage}
-        </Alert>
-      )}
+      <MedicalPageAlerts
+        error={error}
+        successMessage={successMessage}
+        onClearError={() => setError(null)}
+      />
 
       {/* Add Symptom Button */}
-      <Group mb="md">
-        <Button leftSection={<IconPlus size={16} />} onClick={handleAddSymptom}>
-          {t('symptoms.addSymptom', 'Add Symptom')}
-        </Button>
-      </Group>
+      <MedicalPageActions
+        primaryAction={{
+          label: t('symptoms.addSymptom', 'Add Symptom'),
+          onClick: handleAddSymptom,
+          leftSection: <IconPlus size={16} />,
+        }}
+        showViewToggle={false}
+        mb="md"
+      />
 
       {/* Tabs for different views */}
       <Tabs value={activeTab} onChange={setActiveTab}>
@@ -492,11 +459,11 @@ const Symptoms = () => {
 
                       <Group gap="md">
                         <Text size="sm" c="dimmed">
-                          {t('symptoms.first', 'First')}: {new Date(symptom.first_occurrence_date).toLocaleDateString()}
+                          {t('symptoms.first', 'First')}: {formatDate(symptom.first_occurrence_date)}
                         </Text>
                         {symptom.last_occurrence_date && (
                           <Text size="sm" c="dimmed">
-                            {t('symptoms.last', 'Last')}: {new Date(symptom.last_occurrence_date).toLocaleDateString()}
+                            {t('symptoms.last', 'Last')}: {formatDate(symptom.last_occurrence_date)}
                           </Text>
                         )}
                         <Text size="sm" fw={500} c="blue">

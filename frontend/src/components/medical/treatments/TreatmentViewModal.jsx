@@ -10,6 +10,7 @@ import {
   Box,
   SimpleGrid,
   Title,
+  Paper,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -20,7 +21,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
-import { formatDate } from '../../../utils/helpers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 
 const TreatmentViewModal = ({
@@ -34,6 +35,7 @@ const TreatmentViewModal = ({
   onError,
 }) => {
   const { t } = useTranslation('common');
+  const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or treatment changes
@@ -78,19 +80,35 @@ const TreatmentViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={
-        <Group>
-          <Text fw={600} size="lg">
-            {treatment.treatment_name || t('treatments.viewModal.title', 'Treatment Details')}
-          </Text>
-          <StatusBadge status={treatment.status} />
-        </Group>
-      }
+      title={t('treatments.viewModal.title', 'Treatment Details')}
       size="xl"
       centered
       zIndex={2000}
     >
-      <Tabs value={activeTab} onChange={setActiveTab}>
+      <Stack gap="lg">
+        {/* Header Card */}
+        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Group justify="space-between" align="center">
+            <div>
+              <Title order={3} mb="xs">{treatment.treatment_name}</Title>
+              <Group gap="xs">
+                {treatment.treatment_type && (
+                  <Badge variant="light" color="blue" size="sm">
+                    {treatment.treatment_type}
+                  </Badge>
+                )}
+                <StatusBadge status={treatment.status} />
+              </Group>
+            </div>
+            {treatment.start_date && (
+              <Badge variant="light" color="gray" size="lg">
+                {formatDate(treatment.start_date)}
+              </Badge>
+            )}
+          </Group>
+        </Paper>
+
+        <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
             {t('treatments.viewModal.tabs.overview', 'Overview')}
@@ -313,17 +331,18 @@ const TreatmentViewModal = ({
             />
           </Box>
         </Tabs.Panel>
-      </Tabs>
+        </Tabs>
 
-      {/* Action Buttons */}
-      <Group justify="flex-end" gap="sm" mt="lg">
-        <Button variant="default" onClick={onClose}>
-          {t('treatments.viewModal.close', 'Close')}
-        </Button>
-        <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-          {t('treatments.viewModal.edit', 'Edit')}
-        </Button>
-      </Group>
+        {/* Action Buttons */}
+        <Group justify="flex-end" gap="sm">
+          <Button variant="default" onClick={onClose}>
+            {t('treatments.viewModal.close', 'Close')}
+          </Button>
+          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
+            {t('treatments.viewModal.edit', 'Edit')}
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

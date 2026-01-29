@@ -1565,5 +1565,110 @@
         "description": "Any additional details or notes"
       }
     }
+  },
+  "injuries": {
+    "title": "Injuries",
+    "addNew": "Add New Injury",
+    "addTitle": "Add New Injury",
+    "editTitle": "Edit Injury",
+    "cardSubtitle": "Physical Injury",
+    "viewPractitioner": "View practitioner details",
+    "tabs": {
+      "overview": "Overview",
+      "basicInfo": "Basic Info",
+      "treatment": "Treatment",
+      "recovery": "Recovery",
+      "documents": "Documents",
+      "notes": "Notes"
+    },
+    "viewModal": {
+      "injuryDetails": "Injury Details",
+      "additionalInfo": "Additional Info"
+    },
+    "messages": {
+      "loading": "Loading injuries...",
+      "saving": "Saving injury...",
+      "createTypeFailed": "Failed to create injury type"
+    },
+    "emptyState": {
+      "title": "No injuries found",
+      "noData": "Click \"Add New Injury\" to get started.",
+      "filtered": "Try adjusting your search or filter criteria."
+    },
+    "injuryName": {
+      "label": "Injury Name",
+      "placeholder": "e.g., Right ankle sprain",
+      "description": "A descriptive name for this injury"
+    },
+    "injuryType": {
+      "label": "Injury Type",
+      "placeholder": "Select or create type",
+      "description": "Category of injury (e.g., Sprain, Fracture)",
+      "system": "System",
+      "createNew": "Create \"{{name}}\"",
+      "noResults": "No matching types found",
+      "noTypes": "No types available"
+    },
+    "bodyPart": {
+      "label": "Body Part",
+      "placeholder": "e.g., Ankle, Wrist, Knee",
+      "description": "The affected body part or area"
+    },
+    "laterality": {
+      "label": "Side",
+      "placeholder": "Select side",
+      "description": "Which side of the body is affected",
+      "options": {
+        "left": "Left",
+        "right": "Right",
+        "bilateral": "Both Sides",
+        "notApplicable": "Not Applicable"
+      }
+    },
+    "dateOfInjury": {
+      "label": "Date of Injury",
+      "placeholder": "When the injury occurred",
+      "description": "The date when the injury happened"
+    },
+    "mechanism": {
+      "label": "How It Happened",
+      "placeholder": "e.g., Fell while hiking",
+      "description": "Describe how the injury occurred"
+    },
+    "severity": {
+      "label": "Severity",
+      "placeholder": "Select severity",
+      "description": "How severe is this injury"
+    },
+    "status": {
+      "label": "Status",
+      "description": "Current status of this injury",
+      "options": {
+        "active": "Active - Currently being treated",
+        "healing": "Healing - In recovery",
+        "resolved": "Resolved - Fully healed",
+        "chronic": "Chronic - Long-term effects"
+      }
+    },
+    "treatmentReceived": {
+      "label": "Treatment Received",
+      "placeholder": "e.g., RICE protocol, cast applied",
+      "description": "Description of treatment received"
+    },
+    "recoveryNotes": {
+      "label": "Recovery Notes",
+      "placeholder": "Progress updates, milestones, or observations",
+      "description": "Notes about recovery progress"
+    },
+    "practitioner": {
+      "label": "Treating Practitioner",
+      "placeholder": "Select practitioner",
+      "description": "The healthcare provider treating this injury"
+    },
+    "notes": {
+      "label": "Additional Notes",
+      "placeholder": "Any other relevant information...",
+      "description": "General notes or additional details"
+    }
   }
 }
