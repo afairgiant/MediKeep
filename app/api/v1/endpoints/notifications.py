@@ -65,59 +65,29 @@ EVENT_TYPE_INFO = {
         "category": "system",
         "is_implemented": True,
     },
-    EventType.LAB_RESULT_AVAILABLE: {
-        "label": "Lab Results Available",
-        "description": "Notification when new lab results are available",
-        "category": "medical",
-        "is_implemented": False,
-    },
-    EventType.LAB_RESULT_ABNORMAL: {
-        "label": "Abnormal Lab Results",
-        "description": "Notification when lab results have abnormal values",
-        "category": "medical",
-        "is_implemented": False,
-    },
-    EventType.IMMUNIZATION_DUE: {
-        "label": "Immunization Due",
-        "description": "Reminder when an immunization is coming due",
-        "category": "medical",
-        "is_implemented": False,
-    },
-    EventType.IMMUNIZATION_OVERDUE: {
-        "label": "Immunization Overdue",
-        "description": "Alert when an immunization is past due",
-        "category": "medical",
-        "is_implemented": False,
-    },
     EventType.INVITATION_RECEIVED: {
         "label": "Invitation Received",
         "description": "Notification when you receive a sharing invitation",
         "category": "collaboration",
-        "is_implemented": False,
+        "is_implemented": True,
     },
     EventType.INVITATION_ACCEPTED: {
         "label": "Invitation Accepted",
         "description": "Notification when someone accepts your invitation",
         "category": "collaboration",
-        "is_implemented": False,
+        "is_implemented": True,
     },
     EventType.SHARE_REVOKED: {
         "label": "Share Revoked",
         "description": "Notification when access to shared records is revoked",
         "category": "collaboration",
-        "is_implemented": False,
-    },
-    EventType.LOGIN_FROM_NEW_DEVICE: {
-        "label": "New Device Login",
-        "description": "Security alert when your account is accessed from a new device",
-        "category": "security",
-        "is_implemented": False,
+        "is_implemented": True,
     },
     EventType.PASSWORD_CHANGED: {
         "label": "Password Changed",
         "description": "Confirmation when your password is changed",
         "category": "security",
-        "is_implemented": False,
+        "is_implemented": True,
     },
 }
 
@@ -165,7 +135,16 @@ def list_channels(
         service = NotificationService(db)
         channels = service.get_user_channels(current_user.id)
 
-        return [ChannelResponse.model_validate(c) for c in channels]
+        # Validate each channel's configuration
+        response = []
+        for channel in channels:
+            channel_data = ChannelResponse.model_validate(channel)
+            is_valid, error_msg = service.is_channel_config_valid(channel)
+            channel_data.config_valid = is_valid
+            channel_data.config_error = error_msg if not is_valid else None
+            response.append(channel_data)
+
+        return response
 
     except Exception as e:
         log_endpoint_error(
@@ -382,6 +361,16 @@ async def test_channel(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Channel not found"
+            )
+
+        # Check if channel config is valid before testing
+        is_valid, error_msg = service.is_channel_config_valid(channel)
+        if not is_valid:
+            return TestNotificationResponse(
+                success=False,
+                message=error_msg,
+                channel_name=channel.name,
+                sent_at=None,
             )
 
         success, message = await service.test_channel(

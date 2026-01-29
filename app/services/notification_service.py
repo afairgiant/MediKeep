@@ -214,6 +214,21 @@ class NotificationService:
             )
         ).first()
 
+    def is_channel_config_valid(self, channel: NotificationChannel) -> tuple[bool, str]:
+        """
+        Check if a channel's configuration can be decrypted.
+
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        try:
+            self._decrypt_config(channel.config_encrypted)
+            return True, ""
+        except ValueError as e:
+            return False, str(e)
+        except Exception as e:
+            return False, f"Configuration error: {str(e)}"
+
     def update_channel(
         self,
         user_id: int,
@@ -717,8 +732,17 @@ class NotificationService:
 
     def _decrypt_config(self, encrypted_config: str) -> Dict[str, Any]:
         """Decrypt channel configuration."""
-        decrypted = self._fernet.decrypt(encrypted_config.encode())
-        return json.loads(decrypted.decode())
+        from cryptography.fernet import InvalidToken
+
+        try:
+            decrypted = self._fernet.decrypt(encrypted_config.encode())
+            return json.loads(decrypted.decode())
+        except InvalidToken:
+            raise ValueError(
+                "Channel configuration is corrupted or was encrypted with a different key. "
+                "This usually happens when SECRET_KEY or NOTIFICATION_ENCRYPTION_SALT has changed. "
+                "Please delete and re-create this channel."
+            )
 
 
 # ============================================================================

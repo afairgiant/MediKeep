@@ -2,26 +2,28 @@
 Patient Sharing Service - Individual patient sharing functionality
 """
 
-from typing import List, Optional, Dict
-from datetime import datetime, timedelta, timezone
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_, cast
-import sqlalchemy as sa
+from datetime import datetime, timezone
+from typing import Dict, List, Optional
 
-from app.models.models import User, Patient, PatientShare, Invitation
-from app.core.utils.datetime_utils import get_utc_now
+import sqlalchemy as sa
+from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
 from app.core.logging.config import get_logger
-from app.services.invitation_service import InvitationService
+from app.core.utils.datetime_utils import get_utc_now
 from app.exceptions.patient_sharing import (
-    PatientNotFoundError,
     AlreadySharedError,
+    InvalidPermissionLevelError,
+    PatientNotFoundError,
     PendingInvitationError,
     RecipientNotFoundError,
-    InvalidPermissionLevelError,
-    ShareNotFoundError,
     SelfShareError,
+    ShareNotFoundError,
 )
+from app.models.models import Invitation, Patient, PatientShare, User
+from app.services.invitation_service import InvitationService
+from app.services.notification_service import notify
 
 logger = get_logger(__name__, "app")
 
@@ -141,7 +143,7 @@ class PatientSharingService:
             })
             raise ValueError("Failed to create patient share due to database constraint")
     
-    def revoke_patient_share(self, owner: User, patient_id: int, shared_with_user_id: int) -> bool:
+    async def revoke_patient_share(self, owner: User, patient_id: int, shared_with_user_id: int) -> bool:
         """
         Revoke patient sharing access
         NOW: Also updates invitation status to 'revoked' if invitation exists
@@ -198,6 +200,17 @@ class PatientSharingService:
                 })
 
         self.db.commit()
+
+        # Notify the user whose access was revoked
+        await notify(
+            db=self.db,
+            user_id=shared_with_user_id,
+            event_type="share_revoked",
+            data={
+                "by_user": owner.full_name or owner.username,
+                "patient_name": f"{patient.first_name} {patient.last_name}",
+            }
+        )
 
         logger.info("Revoked patient share", extra={
             "share_id": share.id,
@@ -411,7 +424,7 @@ class PatientSharingService:
         })
         return True
 
-    def send_patient_share_invitation(
+    async def send_patient_share_invitation(
         self,
         owner: User,
         patient_id: int,
@@ -510,7 +523,7 @@ class PatientSharingService:
 
         # Create invitation using InvitationService
         invitation_service = InvitationService(self.db)
-        invitation = invitation_service.create_invitation(
+        invitation = await invitation_service.create_invitation(
             sent_by_user=owner,
             sent_to_identifier=shared_with_identifier,
             invitation_type='patient_share',
@@ -798,7 +811,7 @@ class PatientSharingService:
             })
             raise
 
-    def bulk_send_patient_share_invitations(
+    async def bulk_send_patient_share_invitations(
         self,
         owner: User,
         patient_ids: List[int],
@@ -933,7 +946,7 @@ class PatientSharingService:
 
         # Create invitation
         invitation_service = InvitationService(self.db)
-        invitation = invitation_service.create_invitation(
+        invitation = await invitation_service.create_invitation(
             sent_by_user=owner,
             sent_to_identifier=shared_with_identifier,
             invitation_type='patient_share',

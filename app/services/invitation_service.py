@@ -2,15 +2,16 @@
 Reusable invitation service for various sharing/collaboration features
 """
 
-from typing import List, Dict, Optional, Any
+from datetime import timedelta
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_
-from app.models.models import User, Invitation
-from app.core.utils.datetime_utils import get_utc_now
-from datetime import datetime, timedelta, timezone
+
 from app.core.logging.config import get_logger
-import json
-import hashlib
+from app.core.utils.datetime_utils import get_utc_now
+from app.models.models import Invitation, User
+from app.services.notification_service import notify
 
 logger = get_logger(__name__, "app")
 
@@ -20,7 +21,7 @@ class InvitationService:
     def __init__(self, db: Session):
         self.db = db
     
-    def create_invitation(self, sent_by_user: User, sent_to_identifier: str, 
+    async def create_invitation(self, sent_by_user: User, sent_to_identifier: str,
                          invitation_type: str, title: str, context_data: Dict[str, Any],
                          message: Optional[str] = None, expires_hours: Optional[int] = 168) -> Invitation:
         """
@@ -76,7 +77,19 @@ class InvitationService:
             self.db.add(invitation)
             self.db.commit()
             self.db.refresh(invitation)  # Refresh to get the ID
-            
+
+            # Send notification to the recipient
+            await notify(
+                db=self.db,
+                user_id=sent_to_user.id,
+                event_type="invitation_received",
+                data={
+                    "from_user": sent_by_user.full_name or sent_by_user.username,
+                    "invitation_type": invitation_type,
+                    "title": title,
+                }
+            )
+
             logger.info(f"Created invitation {invitation.id} of type {invitation_type}")
             return invitation
             
@@ -125,7 +138,7 @@ class InvitationService:
             logger.error(f"Error fetching sent invitations: {e}")
             raise
     
-    def respond_to_invitation(self, user: User, invitation_id: int, 
+    async def respond_to_invitation(self, user: User, invitation_id: int,
                             response: str, response_note: Optional[str] = None) -> Invitation:
         """
         Respond to an invitation
@@ -161,9 +174,22 @@ class InvitationService:
             invitation.status = response
             invitation.responded_at = get_utc_now()
             invitation.response_note = response_note
-            
+
             self.db.commit()
-            
+
+            # Notify the sender if invitation was accepted
+            if response == 'accepted':
+                await notify(
+                    db=self.db,
+                    user_id=invitation.sent_by_user_id,
+                    event_type="invitation_accepted",
+                    data={
+                        "by_user": user.full_name or user.username,
+                        "invitation_type": invitation.invitation_type,
+                        "title": invitation.title,
+                    }
+                )
+
             logger.info(f"Invitation {invitation_id} {response} by user {user.id}")
             return invitation
             

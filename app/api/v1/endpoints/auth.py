@@ -332,7 +332,11 @@ def login(
     }
 
 
+from datetime import datetime
+
 from pydantic import BaseModel
+
+from app.services.notification_service import notify
 
 
 class ChangePasswordRequest(BaseModel):
@@ -341,7 +345,7 @@ class ChangePasswordRequest(BaseModel):
 
 
 @router.post("/change-password")
-def change_password(
+async def change_password(
     password_data: ChangePasswordRequest,
     request: Request,
     db: Session = Depends(deps.get_db),
@@ -352,8 +356,6 @@ def change_password(
 
     Requires the current password to be provided for security.
     """
-    user_ip = request.client.host if request.client else "unknown"
-
     log_security_event(
         logger,
         "password_change_attempt",
@@ -399,6 +401,16 @@ def change_password(
         f"Password changed successfully for user: {current_user.username}",
         user_id=current_user.id,
         username=current_user.username,
+    )
+
+    # Send notification about password change
+    await notify(
+        db=db,
+        user_id=current_user.id,
+        event_type="password_changed",
+        data={
+            "change_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
     )
 
     return {"message": "Password changed successfully"}

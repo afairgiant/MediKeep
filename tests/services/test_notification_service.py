@@ -72,12 +72,11 @@ class TestNotificationTemplates:
         templates = NotificationTemplates()
         title, message = templates.get_template("password_changed", {
             "change_time": "2026-01-27 10:30:00",
-            "ip_address": "192.168.1.100"
         })
 
         assert title == "Password Changed"
         assert "2026-01-27 10:30:00" in message
-        assert "192.168.1.100" in message
+        assert "successfully changed" in message
 
     def test_unknown_event_fallback(self):
         """Test that unknown events get a fallback template."""
