@@ -20,7 +20,6 @@ class TestSearchAPI:
     - populated_patient_data
     """
 
-    @pytest.mark.skip(reason="API bug: searching all types triggers conditions bug (diagnosed_date)")
     def test_search_basic_query(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
@@ -56,7 +55,6 @@ class TestSearchAPI:
         found_items = [item for item in medications["items"] if "Lisinopril" in item["medication_name"]]
         assert len(found_items) > 0, "Search term not found in results"
 
-    @pytest.mark.skip(reason="API bug: Condition model uses 'onset_date' but search.py references 'diagnosed_date'")
     def test_search_conditions(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
@@ -73,7 +71,6 @@ class TestSearchAPI:
         assert conditions["count"] >= 1
         assert any("Hypertension" in item["condition_name"] for item in conditions["items"])
 
-    @pytest.mark.skip(reason="API bug: Allergy model uses 'onset_date' but search.py references 'identified_date'")
     def test_search_allergies(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
@@ -90,7 +87,6 @@ class TestSearchAPI:
         assert allergies["count"] >= 1
         assert any("Penicillin" in item["allergen"] for item in allergies["items"])
 
-    @pytest.mark.skip(reason="API bug: Immunization model has no 'status' attribute but search.py tries to access it")
     def test_search_immunizations(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
@@ -107,7 +103,6 @@ class TestSearchAPI:
         assert immunizations["count"] >= 1
         assert any("COVID" in item["vaccine_name"] for item in immunizations["items"])
 
-    @pytest.mark.skip(reason="API bug: includes conditions which has 'diagnosed_date' bug")
     def test_search_multiple_types(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
@@ -150,7 +145,6 @@ class TestSearchAPI:
         assert data["pagination"]["skip"] == 0
         assert data["pagination"]["limit"] == 1
 
-    @pytest.mark.skip(reason="API bug: date sorting triggers diagnosed_date/identified_date bugs in conditions/allergies")
     def test_search_sort_by_date_desc(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
@@ -164,7 +158,6 @@ class TestSearchAPI:
         data = response.json()
         assert "results" in data
 
-    @pytest.mark.skip(reason="API bug: date sorting triggers diagnosed_date/identified_date bugs in conditions/allergies")
     def test_search_sort_by_date_asc(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
@@ -178,7 +171,6 @@ class TestSearchAPI:
         data = response.json()
         assert "results" in data
 
-    @pytest.mark.skip(reason="API bug: search across all types triggers conditions/allergies/immunizations bugs")
     def test_search_sort_by_relevance(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):

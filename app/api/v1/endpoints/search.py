@@ -193,9 +193,9 @@ def search_patient_records(
         )
 
         if sort == "date_desc":
-            conditions_query = conditions_query.order_by(Condition.diagnosed_date.desc())
+            conditions_query = conditions_query.order_by(Condition.onset_date.desc())
         elif sort == "date_asc":
-            conditions_query = conditions_query.order_by(Condition.diagnosed_date.asc())
+            conditions_query = conditions_query.order_by(Condition.onset_date.asc())
 
         cond_count = conditions_query.count()
         conditions = conditions_query.offset(skip).limit(limit).all()
@@ -209,7 +209,7 @@ def search_patient_records(
                     condition_name=cond.condition_name,
                     diagnosis=cond.diagnosis,
                     status=cond.status,
-                    diagnosed_date=cond.diagnosed_date.isoformat() if cond.diagnosed_date else None,
+                    diagnosed_date=cond.onset_date.isoformat() if cond.onset_date else None,
                     tags=cond.tags or [],
                     highlight=cond.condition_name,
                     score=DEFAULT_SEARCH_SCORE
@@ -330,7 +330,7 @@ def search_patient_records(
                     type="immunization",
                     vaccine_name=imm.vaccine_name,
                     dose_number=imm.dose_number,
-                    status=imm.status,
+                    status=None,  # Immunization model has no status field
                     administered_date=imm.date_administered.isoformat() if imm.date_administered else None,
                     tags=imm.tags or [],
                     highlight=imm.vaccine_name,
@@ -440,9 +440,9 @@ def search_patient_records(
         )
 
         if sort == "date_desc":
-            allergies_query = allergies_query.order_by(Allergy.identified_date.desc())
+            allergies_query = allergies_query.order_by(Allergy.onset_date.desc())
         elif sort == "date_asc":
-            allergies_query = allergies_query.order_by(Allergy.identified_date.asc())
+            allergies_query = allergies_query.order_by(Allergy.onset_date.asc())
 
         allergy_count = allergies_query.count()
         allergies = allergies_query.offset(skip).limit(limit).all()
@@ -456,7 +456,7 @@ def search_patient_records(
                     allergen=allergy.allergen,
                     reaction=allergy.reaction,
                     severity=allergy.severity,
-                    identified_date=allergy.identified_date.isoformat() if allergy.identified_date else None,
+                    identified_date=allergy.onset_date.isoformat() if allergy.onset_date else None,
                     tags=allergy.tags or [],
                     highlight=allergy.allergen,
                     score=DEFAULT_SEARCH_SCORE
