@@ -168,7 +168,8 @@ def get_lab_result(
     )  # Type checker hint - handle_not_found raises if None
 
     # SECURITY FIX: Verify user has access to this lab result's patient
-    patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+    # Use already-loaded patient relation to avoid redundant DB query
+    patient_record = db_lab_result.patient
     if not patient_record:
         raise NotFoundException(
             resource="Lab result",
@@ -384,7 +385,7 @@ def get_lab_results_by_patient_and_code(
     with handle_database_errors(request=request):
         # Get all results for the patient first, then filter by code
         patient_results = lab_result.get_by_patient(db, patient_id=patient_id)
-        results = [result for result in patient_results if result.code == code]
+        results = [result for result in patient_results if result.test_code == code]
         return results
 
 
@@ -447,7 +448,7 @@ def search_lab_results_by_code(
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
         filtered_results = [
             result for result in all_results
-            if result.code == code and result.patient_id in accessible_patient_ids
+            if result.test_code == code and result.patient_id in accessible_patient_ids
         ]
         # Apply pagination
         paginated_results = (
@@ -481,7 +482,7 @@ def search_lab_results_by_code_pattern(
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
         filtered_results = [
             result for result in all_results
-            if code_pattern.lower() in result.code.lower() and result.patient_id in accessible_patient_ids
+            if result.test_code and code_pattern.lower() in result.test_code.lower() and result.patient_id in accessible_patient_ids
         ]
         # Apply pagination
         paginated_results = (
@@ -798,7 +799,7 @@ def get_code_usage_count(
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
         results = [
             result for result in all_results
-            if result.code == code and result.patient_id in accessible_patient_ids
+            if result.test_code == code and result.patient_id in accessible_patient_ids
         ]
         return {"code": code, "usage_count": len(results)}
 
