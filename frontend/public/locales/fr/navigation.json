@@ -43,6 +43,7 @@
     "visits": "Visites",
     "treatments": "Traitements",
     "symptoms": "Symptômes",
+	"injuries": "Blessures",
     "practitioners": "Médecins",
     "pharmacies": "Pharmacies"
   },
@@ -75,6 +76,7 @@
       "symptoms": "Symptômes",
       "conditions": "Conditions",
       "allergies": "Allergies",
+	  "injuries": "Blessures",
       "immunizations": "Immunisations",
       "visitHistory": "Historique des visites",
       "familyHistory": "Historique familial",
@@ -142,6 +144,7 @@
       "allergies": "Allergies",
       "vitalSigns": "Signes vitaux",
       "symptoms": "Symptômes",
+	  "injuries": "Blessures",
       "treatments": "Traitements",
       "procedures": "Procédures",
       "immunizations": "Immunisations",
