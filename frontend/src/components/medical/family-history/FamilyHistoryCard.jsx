@@ -489,6 +489,7 @@ const FamilyHistoryCard = ({
           onEdit={!member.is_shared ? handleEditClick : undefined}
           onDelete={!member.is_shared ? handleDeleteClick : undefined}
           onError={handleError}
+          disableCardClick={bulkSelectionMode}
         >
           {conditionsContent}
           {additionalActionsContent}
