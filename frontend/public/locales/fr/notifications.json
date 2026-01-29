@@ -1,0 +1,263 @@
+{
+  "title": "Paramètres de notification",
+  "description": "Configurez comment vous recevez des notifications pour les événements importants",
+  "loading": "Chargement des paramètres de notification...",
+  "error": "Echec du chargement des paramètres de notification",
+
+  "channels": {
+    "title": "Canaux de notification",
+    "description": "Ajoutez et gérez vos canaux de notification",
+    "add": "Ajouter un canal",
+    "edit": "Editer le canal",
+    "delete": "Supprimer le canal",
+    "test": "Tester",
+    "testing": "Test en cours...",
+    "testSuccess": "Notification de test envoyée avec succès !",
+    "testFailed": "Echec de la notification de test",
+    "noChannels": "Aucun canal de notification configuré",
+    "noChannelsHint": "Ajoutez un canal pour commencer à recevoir des notifications",
+    "verified": "Vérifié",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "lastUsed": "Dernière utilisation",
+    "notificationsSent": "{{count}} notifications envoyées",
+    "confirmDelete": "Souhaitez-vous vraiment supprimer ce canal ?",
+    "deleteSuccess": "Canal supprimé avec succès",
+    "deleteFailed": "Echec de la suppression du canal",
+    "createSuccess": "Canal créé avec succès",
+    "createFailed": "Echec de la création du canal",
+    "updateSuccess": "Canal mis à jour avec succès",
+    "updateFailed": "Echec de la mise à jour du canal",
+    "types": {
+      "discord": "Discord",
+      "email": "Email",
+      "gotify": "Gotify",
+      "webhook": "Webhook"
+    },
+    "form": {
+      "title": "Détails du canal",
+      "name": {
+        "label": "Nom du canal",
+        "placeholder": "ex : Mon serveur Discord",
+        "description": "Un nom simple pour identifier ce canal"
+      },
+      "type": {
+        "label": "Type de canal",
+        "placeholder": "Sélectionnez le type de canal",
+        "description": "La service via lequel envoyer des notifications"
+      },
+      "enabled": {
+        "label": "Activer le canal",
+        "description": "Recevez des notifications via ce canal"
+      },
+      "configSection": "Configuration du canal"
+    },
+    "discord": {
+      "webhookUrl": {
+        "label": "URL du webhook",
+        "placeholder": "https://discord.com/api/webhooks/...",
+        "description": "Créez un webhook dans les paramètres de votre serveur Discord"
+      },
+      "username": {
+        "label": "Nom du bot (optionnel)",
+        "placeholder": "MediKeep",
+        "description": "Nom personnalisé pour le bot de notification"
+      },
+      "avatarUrl": {
+        "label": "URL de l'avatar (optionnel)",
+        "placeholder": "https://example.com/avatar.png",
+        "description": "Avatar personnalisé pour le bot de notification"
+      }
+    },
+    "email": {
+      "smtpHost": {
+        "label": "Serveur SMTP",
+        "placeholder": "smtp.gmail.com",
+        "description": "Le serveur SMTP de votre fournisseur d'adresse email"
+      },
+      "smtpPort": {
+        "label": "Port SMTP",
+        "placeholder": "587",
+        "description": "Habituellement 587 (TLS) ou 465 (SSL)"
+      },
+      "smtpUser": {
+        "label": "Pseudonyme SMTP",
+        "placeholder": "votre-email@gmail.com",
+        "description": "Votre adresse email ou votre pseudonyme"
+      },
+      "smtpPassword": {
+        "label": "Mot de passe SMTP",
+        "placeholder": "Mot de passe d'application ou d'email",
+        "description": "Pour GMail, utilisez un mot de passe d'application"
+      },
+      "fromEmail": {
+        "label": "Adresse de l'expéditeur",
+        "placeholder": "notifications@exemple.com",
+        "description": "L'adresse email de l'expéditeur"
+      },
+      "toEmail": {
+        "label": "Adresse du destinataire",
+        "placeholder": "votre-email@exemple.com",
+        "description": "Où envoyer les notifications"
+      },
+      "useTls": {
+        "label": "Utiliser le TLS",
+        "description": "Activer le chiffrement TLS (recommandé)"
+      }
+    },
+    "gotify": {
+      "serverUrl": {
+        "label": "URL du serveur",
+        "placeholder": "https://gotify.exemple.com",
+        "description": "L'URL de votre serveur Gotify"
+      },
+      "appToken": {
+        "label": "Jeton d'application",
+        "placeholder": "Jeton d'application de gotify",
+        "description": "Créez une application dans Gotify pour obtenir un jeton"
+      },
+      "priority": {
+        "label": "Priorité",
+        "placeholder": "5",
+        "description": "Niveau de priorité des messages(entre 1-10, par défaut : 5)"
+      }
+    },
+    "webhook": {
+      "url": {
+        "label": "URL du webhook",
+        "placeholder": "https://api.exemple.com/webhook",
+        "description": "URL pour recevoir les charges utiles des notifications"
+      },
+      "method": {
+        "label": "Méthode HTTP",
+        "description": "Méthode HTTP pour la requête du webhook"
+      },
+      "headers": {
+        "label": "En-têtes personnalisés (optionnel)",
+        "placeholder": "{\"Authorization\": \"Bearer token\"}",
+        "description": "Objet JSON avec des en-têtes personnalisés"
+      },
+      "authToken": {
+        "label": "Jeton d'authentification (optionnel)",
+        "placeholder": "Jeton Bearer ou clé API",
+        "description": "Jeton d'autorisation pour le webhook"
+      }
+    }
+  },
+
+  "preferences": {
+    "title": "Notifications d'événements",
+    "description": "Choisissez quels événements déclenchent des notifications dans chaque canal",
+    "loading": "Chargement des préférences...",
+    "noChannels": "Ajoutez d'abord un canal de notification pour configurer les préférences d'événements",
+    "saveSuccess": "Préférences sauvegardées",
+    "saveFailed": "Echec de la sauvegarde des préférences",
+    "eventHeader": "Evénement",
+    "comingSoon": "A venir",
+    "categories": {
+      "system": "Evénements système",
+      "medical": "Evénements médicaux",
+      "collaboration": "Partage et collaboration",
+      "sharing": "Partage et invitations",
+      "security": "Alertes de sécurité",
+      "other": "Autres événements"
+    }
+  },
+
+  "events": {
+    "test_notification": {
+      "name": "Notification de test",
+      "description": "Notification de test manuelle"
+    },
+    "backup_completed": {
+      "name": "Succès de backup",
+      "description": "Quand un backup se termine avec succès"
+    },
+    "backup_failed": {
+      "name": "Echec de backup",
+      "description": "Quand un backup échoue"
+    },
+    "lab_result_available": {
+      "name": "Résultat d'analyse disponible",
+      "description": "Quand un nouveau résultat d'analyse est ajouté"
+    },
+    "lab_result_abnormal": {
+      "name": "Résultat d'analyse anormal",
+      "description": "Quand un résultat d'analyse se trouve en dehors des plages habituelles"
+    },
+    "immunization_due": {
+      "name": "Immunisation à réaliser",
+      "description": "Quand une immunisation doit être réalisée"
+    },
+    "immunization_overdue": {
+      "name": "Immunisation en retard",
+      "description": "Quand une immunisation n'a pas été réalisée à la date prévue"
+    },
+    "invitation_received": {
+      "name": "Invitation reçue",
+      "description": "Quand quelqu'un partage un dossier avec vous"
+    },
+    "invitation_accepted": {
+      "name": "Invitation acceptée",
+      "description": "Quand votre invitation de partage est acceptée"
+    },
+    "share_revoked": {
+      "name": "Partage révoqué",
+      "description": "Quand l'accès à un dossier partagé est révoqué"
+    },
+    "login_from_new_device": {
+      "name": "Connexion depuis un nouvel appareil",
+      "description": "Quand votre compte reçoit une connexion depuis un nouvel appareil"
+    },
+    "password_changed": {
+      "name": "Mot de passe modifié",
+      "description": "Quand votre mot de passe est modifié"
+    }
+  },
+
+  "history": {
+    "title": "Historique des notifications",
+    "description": "Notifications récemment envoyées via vos canaux",
+    "loading": "Chargement de l'historique...",
+    "noHistory": "Aucune notification envoyée pour l'instant",
+    "noHistoryHint": "Les notifications apparaîtront ici une fois envoyées",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins",
+    "page": "Page {{current}} sur {{total}}",
+    "status": {
+      "sent": "Envoyée",
+      "failed": "Echec",
+      "pending": "En attente"
+    },
+    "fields": {
+      "event": "Evénement",
+      "channel": "Canal",
+      "time": "Heure",
+      "status": "Statut",
+      "error": "Erreur"
+    }
+  },
+
+  "validation": {
+    "nameRequired": "Le nol du canal est requis",
+    "nameTooLong": "Le nom ne peut dépasser 100 caractères",
+    "typeRequired": "Le type du canal est requis",
+    "webhookUrlRequired": "L'URL du webhook est requise",
+    "webhookUrlInvalid": "Format d'URL du webhook invalide",
+    "smtpHostRequired": "Le serveur SMTP est requis",
+    "smtpPortRequired": "Le port SMTP est requis",
+    "smtpPortInvalid": "Le port doit valoir entre 1 et 65535",
+    "smtpUserRequired": "Le pseudonyme SMTP est requis",
+    "smtpPasswordRequired": "Le mot de passe SMTP est requis",
+    "fromEmailRequired": "L'adresse de l'expéditeur est requise",
+    "fromEmailInvalid": "Format d'adresse email invalide",
+    "toEmailRequired": "L'adresse du destinataire est requise",
+    "toEmailInvalid": "Format d'adresse email invalide",
+    "serverUrlRequired": "L'URL du serveur est requise",
+    "serverUrlInvalid": "Format d'URL invalide",
+    "appTokenRequired": "Le jeton d'application est requis",
+    "urlRequired": "L'URL du webhook est requise",
+    "urlInvalid": "Format d'URL invalide",
+    "headersInvalid": "Les en-têtes doivent constituer du code JSON valide"
+  }
+}
