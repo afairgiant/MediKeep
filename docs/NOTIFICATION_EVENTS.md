@@ -32,7 +32,7 @@ from typing import Optional
 from app.core.events.base import DomainEvent
 
 
-@dataclass
+@dataclass(frozen=True)
 class AppointmentReminderEvent(DomainEvent):
     """Emitted when an appointment reminder should be sent."""
     patient_name: str
@@ -42,7 +42,7 @@ class AppointmentReminderEvent(DomainEvent):
 
 **Rules:**
 - Inherit from `DomainEvent`
-- Use `@dataclass` decorator
+- Use `@dataclass(frozen=True)` decorator for immutability
 - Add fields for data needed in the notification message
 - The class name determines the event type: `AppointmentReminderEvent` → `appointment_reminder`
 

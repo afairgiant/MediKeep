@@ -8,19 +8,16 @@ Tests cover:
 - Template generation
 """
 
-import asyncio
 import pytest
 from datetime import datetime
 
 from app.core.events import (
-    DomainEvent,
     EventBus,
     get_event_bus,
     EventRegistry,
     get_event_registry,
     setup_event_system,
 )
-from app.core.events.base import DomainEvent as BaseDomainEvent
 from app.events.backup_events import BackupCompletedEvent, BackupFailedEvent
 from app.events.collaboration_events import (
     InvitationReceivedEvent,
@@ -238,7 +235,7 @@ class TestSetupEventSystem:
 
     def test_setup_registers_all_events(self):
         """setup_event_system should register all notification events."""
-        bus = setup_event_system()
+        setup_event_system()
         registry = get_event_registry()
 
         # Check all expected events are registered

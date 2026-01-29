@@ -15,10 +15,6 @@ from app.services.notification_service import (
 from app.services.notification_templates import (
     get_template,
     get_supported_events,
-    backup_completed_template,
-    backup_failed_template,
-    invitation_received_template,
-    password_changed_template,
 )
 
 

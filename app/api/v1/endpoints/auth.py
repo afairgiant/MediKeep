@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -406,7 +406,7 @@ async def change_password(
     # Publish password changed event
     event = PasswordChangedEvent(
         user_id=current_user.id,
-        change_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        change_time=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     )
     await get_event_bus().publish(event)
 
