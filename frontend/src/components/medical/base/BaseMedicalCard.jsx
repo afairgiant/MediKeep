@@ -21,7 +21,8 @@ const BaseMedicalCard = ({
   onDelete,
   entityType,
   children,
-  onError
+  onError,
+  disableCardClick = false
 }) => {
   const { t } = useTranslation('common');
   const handleError = (error, action) => {
@@ -68,8 +69,8 @@ const BaseMedicalCard = ({
         shadow="sm"
         radius="md"
         h="100%"
-        className="clickable-card"
-        onClick={createCardClickHandler(safeOnView)}
+        className={disableCardClick ? undefined : "clickable-card"}
+        onClick={disableCardClick ? undefined : createCardClickHandler(safeOnView)}
         style={{
           display: 'flex',
           flexDirection: 'column',
