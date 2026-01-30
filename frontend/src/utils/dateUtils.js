@@ -291,6 +291,13 @@ export function formatTimeToAmPm(timeString) {
 }
 
 /**
+ * Pad a number with leading zeros
+ * @param {number} num - Number to pad
+ * @returns {string} - Zero-padded string
+ */
+const padNumber = num => String(num).padStart(2, '0');
+
+/**
  * Format a Date object to a datetime string for display
  *
  * @param {Date} date - The date to format
@@ -303,16 +310,15 @@ export const formatDateTimeForInput = (date, includeSeconds = true) => {
     return '';
   }
 
-  const pad = num => String(num).padStart(2, '0');
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
+  const month = padNumber(date.getMonth() + 1);
+  const day = padNumber(date.getDate());
   const year = date.getFullYear();
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
+  const hours = padNumber(date.getHours());
+  const minutes = padNumber(date.getMinutes());
 
   const datePart = `${month}/${day}/${year}`;
   const timePart = includeSeconds
-    ? `${hours}:${minutes}:${pad(date.getSeconds())}`
+    ? `${hours}:${minutes}:${padNumber(date.getSeconds())}`
     : `${hours}:${minutes}`;
 
   return `${datePart} ${timePart}`;
@@ -331,12 +337,11 @@ export const formatDateTimeForInputWithPreference = (date, formatCode = 'mdy', i
     return '';
   }
 
-  const pad = num => String(num).padStart(2, '0');
-  const day = pad(date.getDate());
-  const month = pad(date.getMonth() + 1);
+  const day = padNumber(date.getDate());
+  const month = padNumber(date.getMonth() + 1);
   const year = date.getFullYear();
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
+  const hours = padNumber(date.getHours());
+  const minutes = padNumber(date.getMinutes());
 
   let datePart;
   switch (formatCode) {
@@ -352,7 +357,7 @@ export const formatDateTimeForInputWithPreference = (date, formatCode = 'mdy', i
   }
 
   const timePart = includeSeconds
-    ? `${hours}:${minutes}:${pad(date.getSeconds())}`
+    ? `${hours}:${minutes}:${padNumber(date.getSeconds())}`
     : `${hours}:${minutes}`;
 
   return `${datePart} ${timePart}`;

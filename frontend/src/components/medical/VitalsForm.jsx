@@ -380,11 +380,12 @@ const VitalsForm = ({
   const [datePickerOpened, setDatePickerOpened] = useState(false);
 
   // Initialize manualDateTimeText with format-aware formatting once hook is ready
+  // Re-format when date format preference changes (for new records only)
   useEffect(() => {
     if (!isEdit && formData.recorded_date instanceof Date) {
       setManualDateTimeText(formatDateTimeInput(formData.recorded_date, false));
     }
-  }, [dateFormat]); // Re-format when date format preference changes
+  }, [isEdit, formData.recorded_date, formatDateTimeInput]);
 
   // Get height from patient profile
   const patientHeight = useMemo(() => {
@@ -419,13 +420,13 @@ const VitalsForm = ({
         pain_scale: vitals.pain_scale || '',
         location: vitals.location || '',
         device_used: vitals.device_used || '',
-        notes: vitals.notes || '', // Ensure notes is always a string, never null
+        notes: vitals.notes || '',
       });
 
       // Sync manual datetime text input
       setManualDateTimeText(formatDateTimeInput(recordedDate, false));
     }
-  }, [vitals, isEdit, patientId, practitionerId]);
+  }, [vitals, isEdit, patientId, practitionerId, unitSystem, formatDateTimeInput]);
 
   // Calculated values
   const calculatedBMI = useMemo(() => {
@@ -554,7 +555,7 @@ const VitalsForm = ({
         }
       }
     },
-    [t]
+    [dateFormat, t]
   );
 
   // Handle date selection from the picker popover
