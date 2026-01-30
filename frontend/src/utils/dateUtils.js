@@ -296,6 +296,7 @@ export function formatTimeToAmPm(timeString) {
  * @param {Date} date - The date to format
  * @param {boolean} includeSeconds - Whether to include seconds
  * @returns {string} - Formatted datetime string (MM/DD/YYYY HH:mm or MM/DD/YYYY HH:mm:ss)
+ * @deprecated Use formatDateTimeForInputWithPreference instead for format-aware formatting
  */
 export const formatDateTimeForInput = (date, includeSeconds = true) => {
   if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
@@ -315,4 +316,62 @@ export const formatDateTimeForInput = (date, includeSeconds = true) => {
     : `${hours}:${minutes}`;
 
   return `${datePart} ${timePart}`;
+};
+
+/**
+ * Format a Date object to a datetime string for input fields, respecting user's date format preference
+ *
+ * @param {Date} date - The date to format
+ * @param {string} formatCode - User's preferred format: 'mdy' (US), 'dmy' (European), or 'ymd' (ISO)
+ * @param {boolean} includeSeconds - Whether to include seconds
+ * @returns {string} - Formatted datetime string based on preference
+ */
+export const formatDateTimeForInputWithPreference = (date, formatCode = 'mdy', includeSeconds = false) => {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return '';
+  }
+
+  const pad = num => String(num).padStart(2, '0');
+  const day = pad(date.getDate());
+  const month = pad(date.getMonth() + 1);
+  const year = date.getFullYear();
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+
+  let datePart;
+  switch (formatCode) {
+    case 'dmy':
+      datePart = `${day}/${month}/${year}`;
+      break;
+    case 'ymd':
+      datePart = `${year}-${month}-${day}`;
+      break;
+    case 'mdy':
+    default:
+      datePart = `${month}/${day}/${year}`;
+  }
+
+  const timePart = includeSeconds
+    ? `${hours}:${minutes}:${pad(date.getSeconds())}`
+    : `${hours}:${minutes}`;
+
+  return `${datePart} ${timePart}`;
+};
+
+/**
+ * Get placeholder text for datetime input based on user's date format preference
+ *
+ * @param {string} formatCode - User's preferred format: 'mdy' (US), 'dmy' (European), or 'ymd' (ISO)
+ * @returns {string} - Example placeholder text
+ */
+export const getDateTimePlaceholder = (formatCode = 'mdy') => {
+  switch (formatCode) {
+    case 'dmy':
+      return 'e.g., 29/07/2015 23:58';
+    case 'ymd':
+      return 'e.g., 2015-07-29 23:58';
+    case 'mdy':
+    default:
+      return 'e.g., 07/29/2015 23:58';
+  }
 };
