@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationInfo
 
 from app.models.enums import get_all_condition_statuses, get_all_severity_levels
 from app.schemas.base_tags import TaggedEntityMixin
@@ -153,8 +153,7 @@ class ConditionUpdate(BaseModel):
 class ConditionResponse(ConditionBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ConditionWithRelations(ConditionResponse):
@@ -162,8 +161,7 @@ class ConditionWithRelations(ConditionResponse):
     practitioner: Optional[dict] = None
     treatments: Optional[list] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator("patient", mode="before")
     @classmethod
@@ -234,8 +232,7 @@ class ConditionSummary(BaseModel):
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ConditionDropdownOption(BaseModel):
@@ -247,8 +244,7 @@ class ConditionDropdownOption(BaseModel):
     severity: Optional[str] = None
     onset_date: Optional[date] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Condition - Medication Relationship Schemas

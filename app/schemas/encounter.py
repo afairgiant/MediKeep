@@ -1,7 +1,7 @@
 from datetime import date as DateType
 from typing import List, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
 from app.schemas.validators import (
@@ -233,8 +233,7 @@ class EncounterResponse(EncounterBase):
     practitioner_id: Optional[int] = None
     condition_id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EncounterWithRelations(EncounterResponse):
@@ -243,8 +242,7 @@ class EncounterWithRelations(EncounterResponse):
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EncounterSummary(BaseModel):
@@ -255,5 +253,4 @@ class EncounterSummary(BaseModel):
     date: DateType
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

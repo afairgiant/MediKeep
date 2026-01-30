@@ -7,7 +7,7 @@ integrating with the APIException library for standardized error handling.
 
 from enum import Enum
 from typing import Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ExceptionStatus(str, Enum):
@@ -183,12 +183,9 @@ class ResponseModel(BaseModel):
     error_code: Optional[str] = Field(None, description="Specific error code for failures")
     description: Optional[str] = Field(None, description="Detailed description of the response")
     detail: Optional[Any] = Field(None, description="Detailed error information (e.g., validation errors)")
-    
-    class Config:
-        """Pydantic model configuration."""
-        use_enum_values = True
-        validate_assignment = True
-        
+
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+
     def dict(self, **kwargs):
         """Override dict method to maintain compatibility."""
         return self.model_dump(**kwargs)

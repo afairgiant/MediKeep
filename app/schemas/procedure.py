@@ -1,7 +1,7 @@
 from datetime import date as DateType
 from typing import Optional, List
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
 from app.models.enums import ProcedureStatus
@@ -185,16 +185,14 @@ class ProcedureUpdate(BaseModel):
 class ProcedureResponse(ProcedureBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProcedureWithRelations(ProcedureResponse):
     patient: Optional[dict] = None
     practitioner: Optional[dict] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProcedureSummary(BaseModel):
@@ -205,5 +203,4 @@ class ProcedureSummary(BaseModel):
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

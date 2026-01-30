@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -87,8 +87,7 @@ class PatientPhotoResponse(PatientPhotoBase):
     uploaded_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientPhotoWithUrl(PatientPhotoResponse):
@@ -96,5 +95,4 @@ class PatientPhotoWithUrl(PatientPhotoResponse):
     url: str
     thumbnail_url: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

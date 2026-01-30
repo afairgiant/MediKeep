@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Import enums for validation
 from ..models.enums import get_all_condition_types, get_all_severity_levels
@@ -105,15 +105,13 @@ class FamilyConditionResponse(FamilyConditionBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FamilyConditionWithMember(FamilyConditionResponse):
     family_member: Optional[dict] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FamilyConditionSummary(BaseModel):
@@ -125,8 +123,7 @@ class FamilyConditionSummary(BaseModel):
     family_member_name: Optional[str] = None
     family_member_relationship: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FamilyConditionDropdownOption(BaseModel):
@@ -137,5 +134,4 @@ class FamilyConditionDropdownOption(BaseModel):
     severity: Optional[str]
     condition_type: Optional[str]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

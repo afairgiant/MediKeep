@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 def _validate_url_protocol(url: str, allowed_protocols: tuple = ("http://", "https://")) -> str:
@@ -202,8 +202,7 @@ class ChannelResponse(BaseModel):
     config_valid: bool = True
     config_error: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ChannelWithConfigResponse(ChannelResponse):
@@ -234,8 +233,7 @@ class PreferenceResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PreferenceMatrix(BaseModel):
@@ -263,8 +261,7 @@ class HistoryResponse(BaseModel):
     created_at: datetime
     sent_at: Optional[datetime]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class HistoryListResponse(BaseModel):

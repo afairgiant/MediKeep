@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
 
@@ -94,16 +94,14 @@ class AllergyUpdate(BaseModel):
 class AllergyResponse(AllergyBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AllergyWithRelations(AllergyResponse):
     patient: Optional[dict] = None
     medication: Optional[dict] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AllergySummary(BaseModel):
@@ -114,5 +112,4 @@ class AllergySummary(BaseModel):
     onset_date: Optional[date]
     patient_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

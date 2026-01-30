@@ -7,7 +7,7 @@ from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
@@ -116,9 +116,8 @@ class ShareResponse(BaseModel):
     expires_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ShareWithUserInfo(BaseModel):
@@ -139,8 +138,7 @@ class ShareWithUserInfo(BaseModel):
     shared_with_email: Optional[str] = None
     shared_with_full_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientInfo(BaseModel):
@@ -150,8 +148,7 @@ class PatientInfo(BaseModel):
     last_name: str
     birth_date: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserInfo(BaseModel):
@@ -160,8 +157,7 @@ class UserInfo(BaseModel):
     username: str
     name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ShareWithDetails(BaseModel):
@@ -182,8 +178,7 @@ class ShareWithDetails(BaseModel):
     shared_by_user: Optional[UserInfo] = None
     shared_with_user: Optional[UserInfo] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientSharesResponse(BaseModel):

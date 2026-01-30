@@ -6,7 +6,7 @@ from typing import Any, List, Optional
 from datetime import date
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.exceptions import RequestValidationError
-from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -135,8 +135,7 @@ class PatientResponse(BaseModel):
     is_self_record: bool
     privacy_level: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientListResponse(BaseModel):

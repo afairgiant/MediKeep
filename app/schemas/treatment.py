@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional, List
 
-from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, ValidationInfo
 
 from app.schemas.base_tags import TaggedEntityMixin
 from app.models.enums import TreatmentStatus
@@ -196,8 +196,7 @@ class TreatmentUpdate(BaseModel):
 class TreatmentResponse(TreatmentBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TreatmentWithRelations(TreatmentResponse):
@@ -205,8 +204,7 @@ class TreatmentWithRelations(TreatmentResponse):
     practitioner: Optional[dict] = None
     condition: Optional[dict] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TreatmentSummary(BaseModel):
@@ -218,5 +216,4 @@ class TreatmentSummary(BaseModel):
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

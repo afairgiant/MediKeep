@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class VitalsBase(BaseModel):
@@ -196,8 +196,7 @@ class VitalsResponse(VitalsBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class VitalsWithRelations(VitalsResponse):
@@ -206,8 +205,7 @@ class VitalsWithRelations(VitalsResponse):
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class VitalsSummary(BaseModel):
@@ -223,8 +221,7 @@ class VitalsSummary(BaseModel):
     bmi: Optional[float] = None
     patient_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class VitalsStats(BaseModel):
@@ -243,5 +240,4 @@ class VitalsStats(BaseModel):
     current_blood_glucose: Optional[float] = None
     current_a1c: Optional[float] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

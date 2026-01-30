@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from typing import List, Optional
 
-from pydantic import BaseModel, field_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 
 from app.models.enums import SymptomSeverity, SymptomStatus
 from app.schemas.validators import (
@@ -147,8 +147,7 @@ class SymptomResponse(SymptomBase):
     updated_at: datetime
     occurrence_count: Optional[int] = 0  # Can be populated by CRUD
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SymptomOccurrenceBase(BaseModel):
@@ -331,8 +330,7 @@ class SymptomOccurrenceResponse(SymptomOccurrenceBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ============================================================================
@@ -377,8 +375,7 @@ class SymptomConditionResponse(SymptomConditionBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SymptomMedicationBase(BaseModel):
@@ -430,8 +427,7 @@ class SymptomMedicationResponse(SymptomMedicationBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SymptomTreatmentBase(BaseModel):
@@ -471,5 +467,4 @@ class SymptomTreatmentResponse(SymptomTreatmentBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

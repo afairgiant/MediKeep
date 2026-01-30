@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, model_validator, field_validator, ValidationInfo
+from pydantic import BaseModel, model_validator, field_validator, ValidationInfo, ConfigDict
 
 from app.models.enums import InsuranceStatus, InsuranceType
 
@@ -212,8 +212,7 @@ class Insurance(InsuranceBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True  # Updated from orm_mode for Pydantic v2 compatibility
+    model_config = ConfigDict(from_attributes=True)
 
 
 class InsuranceStatusUpdate(BaseModel):

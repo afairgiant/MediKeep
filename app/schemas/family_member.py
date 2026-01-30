@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, ValidationInfo
 
 # Import enums for validation
 from ..models.enums import get_all_family_relationships
@@ -139,8 +139,7 @@ class FamilyMemberResponse(FamilyMemberBase):
             self.is_deceased = True
         return self
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FamilyMemberSummary(BaseModel):
@@ -153,8 +152,7 @@ class FamilyMemberSummary(BaseModel):
     is_deceased: bool
     condition_count: int = 0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FamilyMemberDropdownOption(BaseModel):
@@ -164,8 +162,7 @@ class FamilyMemberDropdownOption(BaseModel):
     name: str
     relationship: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Import this here to avoid circular imports

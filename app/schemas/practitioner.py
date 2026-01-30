@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 # Shared validation helper functions to avoid code duplication
@@ -389,15 +389,7 @@ class Practitioner(PractitionerBase):
 
     id: int
 
-    class Config:
-        """
-        Pydantic configuration.
-
-        from_attributes = True allows Pydantic to work with SQLAlchemy models
-        by reading data from attributes instead of expecting a dictionary.
-        """
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PractitionerSummary(BaseModel):
@@ -418,8 +410,7 @@ class PractitionerSummary(BaseModel):
     name: str
     specialty: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PractitionerResponse(Practitioner):
@@ -490,5 +481,4 @@ class PractitionerWithStats(Practitioner):
     total_conditions: Optional[int] = 0
     total_immunizations: Optional[int] = 0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

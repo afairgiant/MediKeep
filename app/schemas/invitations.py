@@ -2,7 +2,7 @@
 Pydantic schemas for invitation system
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -36,9 +36,8 @@ class InvitationResponse(BaseModel):
     # Related data (populated by API)
     sent_by: Optional[dict] = None
     sent_to: Optional[dict] = None
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class InvitationResponseRequest(BaseModel):
@@ -55,6 +54,5 @@ class InvitationSummary(BaseModel):
     status: str
     created_at: datetime
     expires_at: Optional[datetime]
-    
-    class Config:
-        from_attributes = True
+
+    model_config = ConfigDict(from_attributes=True)

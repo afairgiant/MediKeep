@@ -1,7 +1,7 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class EmergencyContactBase(BaseModel):
@@ -172,15 +172,13 @@ class EmergencyContactResponse(EmergencyContactBase):
     id: int
     patient_id: int = Field(..., gt=0, description="ID of the patient")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EmergencyContactWithRelations(EmergencyContactResponse):
     patient: Optional[dict] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EmergencyContactSummary(BaseModel):
@@ -192,5 +190,4 @@ class EmergencyContactSummary(BaseModel):
     is_active: bool
     patient_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
