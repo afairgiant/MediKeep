@@ -19,7 +19,7 @@ class CRUDLabResultFile(
     def create(self, db: Session, *, obj_in: LabResultFileCreate) -> LabResultFile:
         """Create a new lab result file with proper datetime handling"""
         # Convert to dict and handle datetime fields manually
-        obj_data = obj_in.dict()
+        obj_data = obj_in.model_dump()
 
         # Ensure uploaded_at is set to current time if not provided
         if not obj_data.get("uploaded_at"):

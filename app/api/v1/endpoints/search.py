@@ -172,7 +172,7 @@ def search_patient_records(
                     tags=med.tags or [],
                     highlight=med.medication_name,
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for med in medications
             ]
         )
@@ -213,7 +213,7 @@ def search_patient_records(
                     tags=cond.tags or [],
                     highlight=cond.condition_name,
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for cond in conditions
             ]
         )
@@ -254,7 +254,7 @@ def search_patient_records(
                     tags=lab.tags or [],
                     highlight=lab.test_name,
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for lab in lab_results
             ]
         )
@@ -295,7 +295,7 @@ def search_patient_records(
                     tags=proc.tags or [],
                     highlight=proc.procedure_name,
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for proc in procedures
             ]
         )
@@ -335,7 +335,7 @@ def search_patient_records(
                     tags=imm.tags or [],
                     highlight=imm.vaccine_name,
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for imm in immunizations
             ]
         )
@@ -378,7 +378,7 @@ def search_patient_records(
                     tags=treat.tags or [],
                     highlight=treat.treatment_name,
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for treat in treatments
             ]
         )
@@ -419,7 +419,7 @@ def search_patient_records(
                     tags=enc.tags or [],
                     highlight=enc.visit_type or enc.reason or "Encounter",
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for enc in encounters
             ]
         )
@@ -460,7 +460,7 @@ def search_patient_records(
                     tags=allergy.tags or [],
                     highlight=allergy.allergen,
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for allergy in allergies
             ]
         )
@@ -499,7 +499,7 @@ def search_patient_records(
                     tags=getattr(vital, 'tags', []),
                     highlight=f"BP: {vital.systolic_bp}/{vital.diastolic_bp}" if vital.systolic_bp else "Vitals",
                     score=DEFAULT_SEARCH_SCORE
-                ).dict()
+                ).model_dump()
                 for vital in vitals
             ]
         )

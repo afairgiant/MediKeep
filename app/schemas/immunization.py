@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Optional, List, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationInfo
 
 from app.schemas.base_tags import TaggedEntityMixin
 
@@ -164,16 +164,14 @@ class ImmunizationUpdate(BaseModel):
 class ImmunizationResponse(ImmunizationBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ImmunizationWithRelations(ImmunizationResponse):
     patient: Optional[dict] = None
     practitioner: Optional[dict] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ImmunizationSummary(BaseModel):
@@ -184,5 +182,4 @@ class ImmunizationSummary(BaseModel):
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

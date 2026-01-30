@@ -9,7 +9,7 @@ from app.crud import standardized_test
 from app.models.models import StandardizedTest
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_data_access
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 logger = get_logger(__name__, "app")
 
@@ -27,8 +27,7 @@ class StandardizedTestResponse(BaseModel):
     common_names: Optional[List[str]]
     is_common: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AutocompleteOption(BaseModel):

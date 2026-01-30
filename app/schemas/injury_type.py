@@ -7,7 +7,7 @@ Users can select existing types or create new ones.
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.validators import validate_text_field, validate_required_text
 
@@ -62,8 +62,7 @@ class InjuryTypeResponse(InjuryTypeBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class InjuryTypeDropdownOption(BaseModel):
@@ -72,5 +71,4 @@ class InjuryTypeDropdownOption(BaseModel):
     name: str
     is_system: bool = False
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

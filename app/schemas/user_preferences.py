@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, field_validator, ValidationInfo
+from pydantic import BaseModel, field_validator, ValidationInfo, ConfigDict
 
 # Supported languages - single source of truth
 SUPPORTED_LANGUAGES = ["en", "fr", "de", "es", "it", "pt"]
@@ -324,10 +324,7 @@ class UserPreferences(UserPreferencesBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        """Pydantic configuration for SQLAlchemy compatibility."""
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PaperlessConnectionData(BaseModel):

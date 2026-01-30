@@ -7,7 +7,7 @@ tracking injuries like sprains, fractures, burns, etc.
 from datetime import date, datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.enums import get_all_injury_statuses, get_all_severity_levels, get_all_laterality_values
 from app.schemas.base_tags import TaggedEntityMixin
@@ -207,8 +207,7 @@ class InjuryResponse(InjuryBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class InjuryWithRelations(InjuryResponse):
@@ -216,8 +215,7 @@ class InjuryWithRelations(InjuryResponse):
     injury_type: Optional[InjuryTypeResponse] = None
     practitioner: Optional[dict] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator("injury_type", mode="before")
     @classmethod
@@ -264,8 +262,7 @@ class InjurySummary(BaseModel):
     injury_type_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class InjuryDropdownOption(BaseModel):
@@ -276,8 +273,7 @@ class InjuryDropdownOption(BaseModel):
     status: str
     date_of_injury: Optional[date] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Junction Table Schemas

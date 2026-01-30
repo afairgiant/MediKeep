@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.schemas.validators import (
     validate_phone_number,
@@ -284,15 +284,7 @@ class Pharmacy(PharmacyBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        """
-        Pydantic configuration.
-
-        from_attributes = True allows Pydantic to work with SQLAlchemy models
-        by reading data from attributes instead of expecting a dictionary.
-        """
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PharmacySummary(BaseModel):
@@ -317,8 +309,7 @@ class PharmacySummary(BaseModel):
     city: str
     state: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PharmacyResponse(Pharmacy):
@@ -392,5 +383,4 @@ class PharmacyWithStats(Pharmacy):
     active_medications: Optional[int] = 0
     total_patients_served: Optional[int] = 0
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

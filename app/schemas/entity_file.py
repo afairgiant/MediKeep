@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -295,8 +295,7 @@ class EntityFileResponse(EntityFileBase):
     updated_at: Optional[datetime] = None
     last_sync_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class EntityFileWithDetails(EntityFileResponse):
@@ -306,8 +305,7 @@ class EntityFileWithDetails(EntityFileResponse):
     file_extension: Optional[str] = None
     human_readable_size: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Additional utility schemas
@@ -371,8 +369,7 @@ class FileDownloadResponse(BaseModel):
     content_type: str
     file_size: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FileBatchCountRequest(BaseModel):
@@ -401,8 +398,7 @@ class FileBatchCountResponse(BaseModel):
     entity_id: int
     file_count: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FileOperationResult(BaseModel):

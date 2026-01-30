@@ -1,7 +1,7 @@
 from datetime import date
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from app.schemas.validators import (
     empty_strings_to_none,
@@ -310,15 +310,7 @@ class Patient(PatientBase):
             return stripped[:200]
         return stripped
 
-    class Config:
-        """
-        Pydantic configuration.
-
-        from_attributes = True allows Pydantic to work with SQLAlchemy models
-        by reading data from attributes instead of expecting a dictionary.
-        """
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientWithUser(Patient):
@@ -331,8 +323,7 @@ class PatientWithUser(Patient):
 
     user: "User"
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PatientResponse(Patient):

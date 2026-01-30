@@ -294,7 +294,7 @@ class SSOService:
         _state_storage[conflict_key] = {
             "created_at": datetime.utcnow(),
             "existing_user_id": existing_user.id,
-            "sso_user_info": user_info.dict() if hasattr(user_info, 'dict') else user_info.__dict__ if hasattr(user_info, '__dict__') else user_info,
+            "sso_user_info": user_info.model_dump() if hasattr(user_info, 'model_dump') else user_info.__dict__ if hasattr(user_info, '__dict__') else user_info,
             "expires_at": datetime.utcnow() + timedelta(minutes=10)
         }
         
@@ -324,7 +324,7 @@ class SSOService:
         github_key = f"github_manual_link_{temp_token}"
         _state_storage[github_key] = {
             "created_at": datetime.utcnow(),
-            "sso_user_info": user_info.dict() if hasattr(user_info, 'dict') else user_info.__dict__ if hasattr(user_info, '__dict__') else user_info,
+            "sso_user_info": user_info.model_dump() if hasattr(user_info, 'model_dump') else user_info.__dict__ if hasattr(user_info, '__dict__') else user_info,
             "expires_at": datetime.utcnow() + timedelta(minutes=10)
         }
         

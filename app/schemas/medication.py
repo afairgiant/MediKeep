@@ -1,7 +1,7 @@
 from datetime import date
 from typing import TYPE_CHECKING, Optional, List
 
-from pydantic import BaseModel, model_validator, field_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, model_validator, field_validator, ValidationInfo
 
 from app.models.enums import get_all_medication_statuses, get_all_medication_types
 from app.schemas.base_tags import TaggedEntityMixin
@@ -259,8 +259,7 @@ class MedicationResponse(MedicationBase):
     patient_id: int
     practitioner_id: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MedicationWithRelations(MedicationResponse):
@@ -269,8 +268,7 @@ class MedicationWithRelations(MedicationResponse):
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Enhanced response schema with nested objects
@@ -282,8 +280,7 @@ class MedicationResponseWithNested(MedicationBase):
     practitioner: Optional["Practitioner"] = None
     pharmacy: Optional["Pharmacy"] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 from app.schemas.pharmacy import Pharmacy

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -179,8 +179,7 @@ class LabResultFileResponse(LabResultFileBase):
     lab_result_id: int
     uploaded_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LabResultFileWithDetails(LabResultFileResponse):
@@ -192,8 +191,7 @@ class LabResultFileWithDetails(LabResultFileResponse):
     file_extension: Optional[str] = None
     human_readable_size: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Additional utility schemas
@@ -231,8 +229,7 @@ class FileDownloadInfo(BaseModel):
     content_type: str
     file_size: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FileBatchOperation(BaseModel):

@@ -354,7 +354,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
 
     def create_with_bmi(self, db: Session, *, obj_in: VitalsCreate) -> Vitals:
         """Create vitals record with automatic BMI calculation"""
-        obj_data = obj_in.dict()
+        obj_data = obj_in.model_dump()
 
         # Calculate BMI if weight and height are provided
         if obj_data.get("weight") and obj_data.get("height"):

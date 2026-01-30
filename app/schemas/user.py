@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -248,15 +248,7 @@ class User(UserBase):
     account_linked_at: Optional[datetime] = None
     sso_linking_preference: Optional[str] = None
 
-    class Config:
-        """
-        Pydantic configuration.
-
-        from_attributes = True allows Pydantic to work with SQLAlchemy models
-        by reading data from attributes instead of expecting a dictionary.
-        """
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserLogin(BaseModel):
