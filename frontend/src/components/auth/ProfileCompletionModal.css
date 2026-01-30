@@ -1,4 +1,5 @@
-.profile-completion-modal .modal-content {
+/* Target Mantine Modal content area */
+.profile-completion-modal .mantine-Modal-content {
   max-width: 500px;
 }
 
