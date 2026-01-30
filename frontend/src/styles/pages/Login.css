@@ -177,10 +177,10 @@ button[type="submit"]:disabled {
   transform: none;
 }
 
-/* Make buttons equal fixed width - target both regular and Mantine buttons */
-.form-actions .btn,
-.form-actions button,
-.form-actions .mantine-Button-root {
+/* Make buttons equal fixed width - scoped to login container only */
+.login-container .form-actions .btn,
+.login-container .form-actions button,
+.login-container .form-actions .mantine-Button-root {
   flex: none !important;
   width: 200px !important;
   min-width: 200px !important;
