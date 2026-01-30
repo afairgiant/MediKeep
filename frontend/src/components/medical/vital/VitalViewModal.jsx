@@ -15,8 +15,8 @@ import {
   Card,
   Box,
 } from '@mantine/core';
-import { 
-  IconEdit, 
+import {
+  IconEdit,
   IconCalendar,
   IconHeart,
   IconActivity,
@@ -32,6 +32,8 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
+import { convertForDisplay, unitLabels, convertHeight } from '../../../utils/unitConversion';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
@@ -49,6 +51,7 @@ const VitalViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { formatDate, formatDateTime } = useDateFormat();
+  const { unitSystem } = useUserPreferences();
 
   if (!isOpen || !vital) return null;
 
@@ -113,9 +116,11 @@ const VitalViewModal = ({
         },
         {
           label: t('vitals.stats.temperature', 'Temperature'),
-          value: vital.temperature || t('labels.notAvailable', 'N/A'),
+          value: vital.temperature
+            ? (convertForDisplay(vital.temperature, 'temperature', unitSystem)?.toFixed(1) ?? vital.temperature)
+            : t('labels.notAvailable', 'N/A'),
           icon: IconThermometer,
-          unit: vital.temperature ? t('vitals.units.fahrenheit', '°F') : '',
+          unit: vital.temperature ? unitLabels[unitSystem].temperature : '',
         },
         {
           label: t('vitals.modal.respiratoryRate', 'Respiratory Rate'),
@@ -137,15 +142,22 @@ const VitalViewModal = ({
       items: [
         {
           label: t('vitals.stats.weight', 'Weight'),
-          value: vital.weight || t('labels.notAvailable', 'N/A'),
+          value: vital.weight
+            ? (convertForDisplay(vital.weight, 'weight', unitSystem)?.toFixed(1) ?? vital.weight)
+            : t('labels.notAvailable', 'N/A'),
           icon: IconWeight,
-          unit: vital.weight ? t('vitals.units.lbs', 'lbs') : '',
+          unit: vital.weight ? unitLabels[unitSystem].weight : '',
         },
         {
           label: t('vitals.modal.height', 'Height'),
-          value: vital.height || t('labels.notAvailable', 'N/A'),
+          value: vital.height
+            ? ((unitSystem === 'imperial'
+                ? convertHeight.inchesToFeetInches(vital.height)
+                : convertForDisplay(vital.height, 'height', unitSystem)?.toFixed(1)
+              ) ?? vital.height)
+            : t('labels.notAvailable', 'N/A'),
           icon: IconTrendingUp,
-          unit: vital.height ? t('vitals.units.inches', 'inches') : '',
+          unit: vital.height && unitSystem === 'metric' ? unitLabels[unitSystem].height : '',
         },
         {
           label: t('vitals.stats.bmi', 'BMI'),

@@ -325,12 +325,42 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     }
   }, [opened]);
 
+  // Get measurement type for the current vital (for unit conversion)
+  const measurementType = useMemo(
+    () => rawTrendData ? CONVERTIBLE_VITAL_TYPES[rawTrendData.vital_type] : undefined,
+    [rawTrendData]
+  );
+
+  // Convert aggregated data points based on unit system
+  // This ensures chart displays values in the user's preferred unit
+  const convertedAggregatedDataPoints = useMemo((): AggregatedDataPoint[] => {
+    if (!measurementType || aggregatedDataPoints.length === 0) {
+      return aggregatedDataPoints;
+    }
+
+    // Helper to convert a value, falling back to original if conversion returns null
+    const convert = (value: number): number =>
+      convertForDisplay(value, measurementType, unitSystem) ?? value;
+
+    // Helper for optional values (returns undefined if input is null/undefined)
+    const convertOptional = (value: number | null | undefined): number | null | undefined =>
+      value != null ? convert(value) : value;
+
+    return aggregatedDataPoints.map(point => ({
+      ...point,
+      average: convert(point.average),
+      min: convert(point.min),
+      max: convert(point.max),
+      secondaryAverage: convertOptional(point.secondaryAverage),
+      secondaryMin: convertOptional(point.secondaryMin),
+      secondaryMax: convertOptional(point.secondaryMax),
+    }));
+  }, [aggregatedDataPoints, measurementType, unitSystem]);
+
   // Derive converted trend data from raw data based on unit system
   // This allows unit changes to update display without refetching from API
   const trendData = useMemo((): VitalTrendResponse | null => {
     if (!rawTrendData) return null;
-
-    const measurementType = CONVERTIBLE_VITAL_TYPES[rawTrendData.vital_type];
 
     // Convert data points if this vital type needs unit conversion
     const convertedDataPoints = rawTrendData.data_points.map(point => ({
@@ -387,7 +417,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       },
       reference_range: rawTrendData.reference_range
     };
-  }, [rawTrendData, unitSystem]);
+  }, [rawTrendData, unitSystem, measurementType]);
 
   const getTimeRangeLabel = (range: string): string => {
     switch (range) {
@@ -676,7 +706,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
             <Tabs.Panel value="chart" pt="md">
               <VitalTrendChart
                 trendData={trendData}
-                aggregatedDataPoints={aggregatedDataPoints}
+                aggregatedDataPoints={convertedAggregatedDataPoints}
                 aggregationPeriod={aggregationPeriod}
               />
             </Tabs.Panel>
