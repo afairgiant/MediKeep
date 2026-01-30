@@ -22,11 +22,7 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         Override base create method to properly handle date fields without jsonable_encoder.
         """
         # Convert Pydantic model to dict while preserving date objects
-        # Handle both Pydantic v1 and v2 compatibility
-        if hasattr(obj_in, "model_dump"):
-            obj_data = obj_in.model_dump()
-        else:
-            obj_data = obj_in.dict()
+        obj_data = obj_in.model_dump()
 
         # Create the database object directly from the dict
         db_obj = self.model(**obj_data)
@@ -44,11 +40,7 @@ class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUp
         Override base update method to properly handle date fields without jsonable_encoder.
         """
         # Get the data as dict, excluding None values
-        # Handle both Pydantic v1 and v2 compatibility
-        if hasattr(obj_in, "model_dump"):
-            update_data = obj_in.model_dump(exclude_unset=True)
-        else:
-            update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
 
         # Update the database object
         for field, value in update_data.items():

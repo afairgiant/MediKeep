@@ -7,7 +7,7 @@ from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
@@ -79,7 +79,8 @@ class SharePatientRequest(BaseModel):
     expires_at: Optional[datetime] = Field(None, description="Optional expiration date")
     custom_permissions: Optional[dict] = Field(None, description="Optional custom permissions")
     
-    @validator('permission_level')
+    @field_validator('permission_level')
+    @classmethod
     def validate_permission_level(cls, v):
         valid_levels = ['view', 'edit', 'full']
         if v not in valid_levels:
@@ -92,8 +93,9 @@ class UpdateShareRequest(BaseModel):
     permission_level: Optional[str] = Field(None, description="New permission level")
     expires_at: Optional[datetime] = Field(None, description="New expiration date")
     custom_permissions: Optional[dict] = Field(None, description="New custom permissions")
-    
-    @validator('permission_level')
+
+    @field_validator('permission_level')
+    @classmethod
     def validate_permission_level(cls, v):
         if v is not None:
             valid_levels = ['view', 'edit', 'full']

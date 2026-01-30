@@ -6,7 +6,7 @@ from typing import Any, List, Optional
 from datetime import date
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.exceptions import RequestValidationError
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -58,19 +58,21 @@ class PatientUpdateRequest(BaseModel):
     address: Optional[str] = Field(None, max_length=500)
     physician_id: Optional[int] = Field(None, gt=0, description="Primary care physician ID")
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def convert_empty_strings_to_none(cls, values):
         """Convert empty strings to None for optional fields to prevent validation errors"""
         if isinstance(values, dict):
             for field in [
-                "first_name", "last_name", "birth_date", "gender", 
+                "first_name", "last_name", "birth_date", "gender",
                 "blood_type", "height", "weight", "address", "physician_id"
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
         return values
 
-    @validator("birth_date")
+    @field_validator("birth_date")
+    @classmethod
     def validate_birth_date(cls, v):
         """Validate birth date is reasonable"""
         if v is not None:
@@ -81,14 +83,16 @@ class PatientUpdateRequest(BaseModel):
                 raise ValueError("Birth date cannot be more than 150 years ago")
         return v
 
-    @validator("address")
+    @field_validator("address")
+    @classmethod
     def validate_address(cls, v):
         """Validate address minimum length if provided"""
         if v is not None and v.strip() and len(v.strip()) < 5:
             raise ValueError("Address must be at least 5 characters long")
         return v.strip() if v else v
 
-    @validator("blood_type")
+    @field_validator("blood_type")
+    @classmethod
     def validate_blood_type(cls, v):
         """Validate blood type format"""
         if v is not None and v.strip():
@@ -99,7 +103,8 @@ class PatientUpdateRequest(BaseModel):
             return blood_type_upper
         return v
 
-    @validator("gender")
+    @field_validator("gender")
+    @classmethod
     def validate_gender(cls, v):
         """Validate gender"""
         if v is not None and v.strip():
@@ -193,7 +198,7 @@ def create_patient(
         
         patient = service.create_patient(
             user=current_user,
-            patient_data=patient_in.dict(),
+            patient_data=patient_in.model_dump(),
             is_self_record=patient_in.is_self_record
         )
         
@@ -301,7 +306,7 @@ def update_patient(
     log_endpoint_access(
         logger, request, current_user.id, "patient_update_request",
         patient_id=patient_id,
-        fields_provided=list(patient_in.dict(exclude_unset=True).keys())
+        fields_provided=list(patient_in.model_dump(exclude_unset=True).keys())
     )
     
     with handle_database_errors(request=request):
@@ -326,7 +331,7 @@ def update_patient(
             )
         
         # Filter out None values
-        patient_data = {k: v for k, v in patient_in.dict().items() if v is not None}
+        patient_data = {k: v for k, v in patient_in.model_dump().items() if v is not None}
         
         # Log fields being updated without sensitive values
         if patient_data:

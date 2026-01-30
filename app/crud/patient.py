@@ -146,7 +146,7 @@ class CRUDPatient(CRUDBase[Patient, PatientCreate, PatientUpdate]):
             raise ValueError("User already has a patient record")
 
         # Create patient with the specified user_id
-        patient_dict = patient_data.dict()
+        patient_dict = patient_data.model_dump()
         patient_dict["user_id"] = user_id
         patient_dict["owner_user_id"] = user_id  # Set owner_user_id for constraint compliance
 

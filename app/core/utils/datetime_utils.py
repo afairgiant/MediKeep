@@ -416,9 +416,9 @@ class DateTimeConverter:
         Returns:
             Dictionary with converted datetime fields
         """
-        if hasattr(obj_in, "dict"):
-            # Pydantic model
-            data = obj_in.dict()
+        if hasattr(obj_in, "model_dump"):
+            # Pydantic v2 model
+            data = obj_in.model_dump()
         elif isinstance(obj_in, dict):
             data = obj_in
         else:
@@ -463,9 +463,9 @@ class DateConverter:
         Returns:
             Dictionary with converted date fields
         """
-        if hasattr(obj_in, "dict"):
-            # Pydantic model
-            data = obj_in.dict()
+        if hasattr(obj_in, "model_dump"):
+            # Pydantic v2 model
+            data = obj_in.model_dump()
         elif isinstance(obj_in, dict):
             data = obj_in
         else:

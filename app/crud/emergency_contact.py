@@ -99,7 +99,7 @@ class CRUDEmergencyContact(
             Created emergency contact
         """
         # Set the patient_id
-        create_data = obj_in.dict()
+        create_data = obj_in.model_dump()
         create_data["patient_id"] = patient_id
 
         # If this is marked as primary, unset any existing primary contact

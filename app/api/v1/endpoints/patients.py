@@ -300,7 +300,7 @@ def create_patient_medication(
     from app.crud.medication import medication
 
     # Ensure the medication is associated with the correct patient
-    medication_data = medication_in.dict()
+    medication_data = medication_in.model_dump()
     medication_data["patient_id"] = patient_id
 
     # Create the medication record

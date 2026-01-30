@@ -94,7 +94,7 @@ class CRUDUserPreferences(
             preferences = self.get_or_create_by_user_id(db, user_id=user_id)
 
             # Update preferences
-            update_data = obj_in.dict(exclude_unset=True)
+            update_data = obj_in.model_dump(exclude_unset=True)
             for field, value in update_data.items():
                 setattr(preferences, field, value)
 
