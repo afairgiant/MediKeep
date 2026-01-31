@@ -211,6 +211,7 @@
     "showing": "Mostrando",
     "to": "a",
     "results": "risultati",
+    "showingRange": "Mostrando da {{start}} a {{end}} di {{total}} risultati",
     "itemsPerPage": "Elementi per pagina",
     "previous": "Precedente",
     "next": "Successivo",

@@ -2,9 +2,6 @@
  * VitalsList Component - Enhanced Version with Mantine UI
  * Displays a list of patient vital signs with options to edit/delete/view details
  */
-import logger from '../../services/logger';
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -18,18 +15,16 @@ import {
   Loader,
   Center,
   ActionIcon,
-  Badge,
   Paper,
   Box,
-  Flex,
   UnstyledButton,
   rem,
   Modal,
   Title,
-  Divider,
   Grid,
   Card,
   Select,
+  Pagination,
 } from '@mantine/core';
 import {
   IconEdit,
@@ -62,6 +57,7 @@ import {
   convertForDisplay,
   unitLabels,
 } from '../../utils/unitConversion';
+import logger from '../../services/logger';
 
 const VitalsList = ({
   patientId,
@@ -88,11 +84,6 @@ const VitalsList = ({
   });
   const [selectedVital, setSelectedVital] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  // Pagination state
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  // Use ref to track current vitals count for pagination (avoids circular dependency)
-  const vitalsCountRef = React.useRef(0);
 
   // Page size options for the dropdown
   const pageSizeOptions = [
@@ -113,6 +104,7 @@ const VitalsList = ({
   };
 
   const [pageSize, setPageSize] = useState(() => normalizePageSize(limit));
+  const [currentPage, setCurrentPage] = useState(1);
   const prevLimitRef = React.useRef(limit);
 
   // Sync pageSize if parent changes limit prop (but preserve user overrides)
@@ -127,58 +119,34 @@ const VitalsList = ({
     }
   }, [limit]);
 
-  const loadVitals = useCallback(async (append = false) => {
+  // Reset to page 1 only when pageSize changes (page validation handles data changes)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pageSize]);
+
+  const loadVitals = useCallback(async () => {
     // Only load internally if no data is passed via props
     if (vitalsData !== undefined) return;
 
     try {
-      if (append) {
-        setLoadingMore(true);
-      } else {
-        setInternalLoading(true);
-        setHasMore(true);
-        vitalsCountRef.current = 0;
-      }
+      setInternalLoading(true);
       setInternalError(null);
 
-      const skip = append ? vitalsCountRef.current : 0;
-      let response;
-      if (patientId) {
-        response = await vitalsService.getPatientVitals(patientId, { limit: pageSize, skip });
-      } else {
-        response = await vitalsService.getVitals({ limit: pageSize, skip });
-      }
+      // Fetch all records for client-side pagination (no limit)
+      const response = patientId
+        ? await vitalsService.getPatientVitals(patientId)
+        : await vitalsService.getVitals();
 
       // Extract the data array from the response
       const data = response?.data || response;
-      const newData = Array.isArray(data) ? data : [];
-
-      // Check if there's more data to load
-      if (newData.length < pageSize) {
-        setHasMore(false);
-      }
-
-      if (append) {
-        setInternalVitals(prev => {
-          const updated = [...prev, ...newData];
-          vitalsCountRef.current = updated.length;
-          return updated;
-        });
-      } else {
-        vitalsCountRef.current = newData.length;
-        setInternalVitals(newData);
-      }
+      setInternalVitals(Array.isArray(data) ? data : []);
     } catch (err) {
       setInternalError(err.message || 'Failed to load vitals');
-      if (!append) {
-        setInternalVitals([]);
-        vitalsCountRef.current = 0;
-      }
+      setInternalVitals([]);
     } finally {
       setInternalLoading(false);
-      setLoadingMore(false);
     }
-  }, [patientId, pageSize, vitalsData]);
+  }, [patientId, vitalsData]);
 
   useEffect(() => {
     loadVitals();
@@ -566,6 +534,20 @@ const VitalsList = ({
 
   const sortedVitals = getSortedVitals();
 
+  // Calculate pagination values
+  const totalRecords = sortedVitals.length;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalRecords);
+  const paginatedVitals = sortedVitals.slice(startIndex, endIndex);
+
+  // Ensure currentPage stays valid when data changes (e.g., after deletion)
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   if (isLoading) {
     return (
       <Center py="xl">
@@ -620,7 +602,7 @@ const VitalsList = ({
     );
   }
 
-  const rows = sortedVitals.map(vital => (
+  const rows = paginatedVitals.map(vital => (
     <Table.Tr key={vital.id}>
       <Table.Td>
         <Text size="sm" fw={500}>
@@ -854,30 +836,53 @@ const VitalsList = ({
           </Table>
         </Paper>
 
-        {vitals.length >= pageSize && hasMore && vitalsData === undefined && (
-          <Group justify="center" gap="md">
-            <Select
-              value={String(pageSize)}
-              onChange={(value) => {
-                if (value === null || value === undefined) return;
-                const numericValue = Number(value);
-                if (!Number.isFinite(numericValue) || numericValue <= 0) return;
-                setPageSize(numericValue);
-              }}
-              data={pageSizeOptions}
-              size="sm"
-              w={80}
-              allowDeselect={false}
-              aria-label={t('vitals.table.resultsPerPage', 'Results per page')}
-            />
-            <Button
-              variant="filled"
-              onClick={() => loadVitals(true)}
-              loading={loadingMore}
-              disabled={loadingMore}
-            >
-              {loadingMore ? t('labels.loading', 'Loading...') : t('buttons.loadMore', 'Load More')}
-            </Button>
+        {/* Pagination Controls */}
+        {totalRecords > 0 && (
+          <Group justify={totalPages > 1 ? 'space-between' : 'flex-end'} align="center" mt="md">
+            {/* Left: Record count (only show when multiple pages) */}
+            {totalPages > 1 && (
+              <Text size="sm" c="dimmed">
+                {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
+                  start: startIndex + 1,
+                  end: endIndex,
+                  total: totalRecords,
+                })}
+              </Text>
+            )}
+
+            {/* Center: Page navigation */}
+            {totalPages > 1 && (
+              <Pagination
+                total={totalPages}
+                value={currentPage}
+                onChange={setCurrentPage}
+                size="sm"
+                withEdges
+                siblings={1}
+                boundaries={1}
+              />
+            )}
+
+            {/* Right: Page size selector */}
+            <Group gap="xs">
+              <Text size="sm" c="dimmed">
+                {t('pagination.itemsPerPage', 'Items per page')}:
+              </Text>
+              <Select
+                value={String(pageSize)}
+                onChange={(value) => {
+                  if (value === null || value === undefined) return;
+                  const numericValue = Number(value);
+                  if (!Number.isFinite(numericValue) || numericValue <= 0) return;
+                  setPageSize(numericValue);
+                }}
+                data={pageSizeOptions}
+                size="xs"
+                w={70}
+                allowDeselect={false}
+                aria-label={t('pagination.itemsPerPage', 'Items per page')}
+              />
+            </Group>
           </Group>
         )}
       </Stack>
