@@ -2,12 +2,8 @@
  * VitalsForm Component - Enhanced Version with Mantine UI
  * Modern form for creating and editing patient vital signs with improved UX
  */
-import logger from '../../services/logger';
-
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import {
   TextInput,
@@ -20,15 +16,12 @@ import {
   Title,
   Text,
   Alert,
-  Divider,
   Grid,
   Badge,
   ActionIcon,
   Box,
-  Flex,
   Card,
   Loader,
-  Center,
   Select,
   Popover,
 } from '@mantine/core';
@@ -66,6 +59,8 @@ import {
 } from '../../utils/unitConversion';
 import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import logger from '../../services/logger';
+
 
 const VitalsForm = ({
   vitals = null,
@@ -592,6 +587,7 @@ const VitalsForm = ({
       // Process data for API
       const processedData = {
         ...formData,
+        // Send as UTC - backend stores UTC, frontend converts back to local for display
         recorded_date:
           formData.recorded_date instanceof Date
             ? formData.recorded_date.toISOString()
