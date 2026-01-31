@@ -20,6 +20,34 @@ VALID_VITAL_TYPES = {
     "a1c",
 }
 
+# Mapping of vital type to the column(s) that must be non-null
+VITAL_TYPE_COLUMNS = {
+    "blood_pressure": [Vitals.systolic_bp, Vitals.diastolic_bp],
+    "heart_rate": [Vitals.heart_rate],
+    "temperature": [Vitals.temperature],
+    "weight": [Vitals.weight],
+    "oxygen_saturation": [Vitals.oxygen_saturation],
+    "blood_glucose": [Vitals.blood_glucose],
+    "a1c": [Vitals.a1c],
+}
+
+
+def _validate_vital_type(vital_type: str) -> None:
+    """Validate that vital_type is a known type."""
+    if vital_type not in VALID_VITAL_TYPES:
+        raise ValueError(
+            f"Invalid vital_type '{vital_type}'. "
+            f"Must be one of: {', '.join(sorted(VALID_VITAL_TYPES))}"
+        )
+
+
+def _apply_vital_type_filter(query, vital_type: str):
+    """Apply column filters for a specific vital type."""
+    columns = VITAL_TYPE_COLUMNS.get(vital_type, [])
+    for column in columns:
+        query = query.filter(column.isnot(None))
+    return query
+
 
 class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     """
@@ -30,7 +58,11 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     """
 
     def __init__(self):
-        super().__init__(Vitals, timezone_fields=["recorded_date"])
+        # NOTE: We intentionally do NOT use timezone_fields for recorded_date.
+        # Vitals timestamps should be stored and displayed as-entered by the user.
+        # This avoids the "double timezone conversion" bug where times near midnight
+        # would shift to the previous day.
+        super().__init__(Vitals, timezone_fields=[])
 
     def get_by_patient_date_range(
         self,
@@ -55,29 +87,9 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             Vitals.recorded_date <= end_date
         )
 
-        # Apply vital type filter if provided
         if vital_type:
-            if vital_type not in VALID_VITAL_TYPES:
-                raise ValueError(
-                    f"Invalid vital_type '{vital_type}'. "
-                    f"Must be one of: {', '.join(sorted(VALID_VITAL_TYPES))}"
-                )
-            if vital_type == "blood_pressure":
-                query = query.filter(
-                    Vitals.systolic_bp.isnot(None), Vitals.diastolic_bp.isnot(None)
-                )
-            elif vital_type == "heart_rate":
-                query = query.filter(Vitals.heart_rate.isnot(None))
-            elif vital_type == "temperature":
-                query = query.filter(Vitals.temperature.isnot(None))
-            elif vital_type == "weight":
-                query = query.filter(Vitals.weight.isnot(None))
-            elif vital_type == "oxygen_saturation":
-                query = query.filter(Vitals.oxygen_saturation.isnot(None))
-            elif vital_type == "blood_glucose":
-                query = query.filter(Vitals.blood_glucose.isnot(None))
-            elif vital_type == "a1c":
-                query = query.filter(Vitals.a1c.isnot(None))
+            _validate_vital_type(vital_type)
+            query = _apply_vital_type_filter(query, vital_type)
 
         return (
             query.order_by(desc(Vitals.recorded_date)).offset(skip).limit(limit).all()
@@ -111,31 +123,10 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             vital_type: One of: blood_pressure, heart_rate, temperature, weight,
                        oxygen_saturation, blood_glucose, a1c. Invalid values raise ValueError.
         """
-        if vital_type not in VALID_VITAL_TYPES:
-            raise ValueError(
-                f"Invalid vital_type '{vital_type}'. "
-                f"Must be one of: {', '.join(sorted(VALID_VITAL_TYPES))}"
-            )
+        _validate_vital_type(vital_type)
 
         query = db.query(self.model).filter(Vitals.patient_id == patient_id)
-
-        # Filter based on vital type
-        if vital_type == "blood_pressure":
-            query = query.filter(
-                Vitals.systolic_bp.isnot(None), Vitals.diastolic_bp.isnot(None)
-            )
-        elif vital_type == "heart_rate":
-            query = query.filter(Vitals.heart_rate.isnot(None))
-        elif vital_type == "temperature":
-            query = query.filter(Vitals.temperature.isnot(None))
-        elif vital_type == "weight":
-            query = query.filter(Vitals.weight.isnot(None))
-        elif vital_type == "oxygen_saturation":
-            query = query.filter(Vitals.oxygen_saturation.isnot(None))
-        elif vital_type == "blood_glucose":
-            query = query.filter(Vitals.blood_glucose.isnot(None))
-        elif vital_type == "a1c":
-            query = query.filter(Vitals.a1c.isnot(None))
+        query = _apply_vital_type_filter(query, vital_type)
 
         return (
             query.order_by(desc(Vitals.recorded_date)).offset(skip).limit(limit).all()

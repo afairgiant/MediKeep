@@ -2,12 +2,8 @@
  * VitalsForm Component - Enhanced Version with Mantine UI
  * Modern form for creating and editing patient vital signs with improved UX
  */
-import logger from '../../services/logger';
-
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import {
   TextInput,
@@ -20,15 +16,12 @@ import {
   Title,
   Text,
   Alert,
-  Divider,
   Grid,
   Badge,
   ActionIcon,
   Box,
-  Flex,
   Card,
   Loader,
-  Center,
   Select,
   Popover,
 } from '@mantine/core';
@@ -66,6 +59,22 @@ import {
 } from '../../utils/unitConversion';
 import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import logger from '../../services/logger';
+
+/**
+ * Formats a Date object as an ISO-like string in local time (no UTC conversion).
+ * This preserves the user's intended time (e.g., 00:15 stays 00:15).
+ */
+function formatLocalDateTimeForAPI(date) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
 
 const VitalsForm = ({
   vitals = null,
@@ -592,9 +601,10 @@ const VitalsForm = ({
       // Process data for API
       const processedData = {
         ...formData,
+        // Use local time format instead of toISOString() which converts to UTC
         recorded_date:
           formData.recorded_date instanceof Date
-            ? formData.recorded_date.toISOString()
+            ? formatLocalDateTimeForAPI(formData.recorded_date)
             : formData.recorded_date,
         // Include patient's height from profile for BMI calculation
         height: patientHeight ? parseFloat(patientHeight) : null,
