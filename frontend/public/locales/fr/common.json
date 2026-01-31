@@ -219,6 +219,7 @@
     "showing": "Affichage :",
     "to": "à",
     "results": "résultats",
+    "showingRange": "Affichage de {{start}} à {{end}} sur {{total}} résultats",
     "itemsPerPage": "Objets par page",
     "previous": "Précédent",
     "next": "Suivant",

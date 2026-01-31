@@ -222,6 +222,7 @@
     "showing": "Showing",
     "to": "to",
     "results": "results",
+    "showingRange": "Showing {{start}} to {{end}} of {{total}} results",
     "itemsPerPage": "Items per page",
     "previous": "Previous",
     "next": "Next",

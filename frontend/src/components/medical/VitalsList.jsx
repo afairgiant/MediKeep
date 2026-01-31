@@ -119,10 +119,10 @@ const VitalsList = ({
     }
   }, [limit]);
 
-  // Reset to page 1 when pageSize or external data changes
+  // Reset to page 1 only when pageSize changes (page validation handles data changes)
   useEffect(() => {
     setCurrentPage(1);
-  }, [pageSize, vitalsData]);
+  }, [pageSize]);
 
   const loadVitals = useCallback(async () => {
     // Only load internally if no data is passed via props
@@ -132,9 +132,10 @@ const VitalsList = ({
       setInternalLoading(true);
       setInternalError(null);
 
+      // Fetch all records for client-side pagination (no limit)
       const response = patientId
-        ? await vitalsService.getPatientVitals(patientId, { limit: pageSize, skip: 0 })
-        : await vitalsService.getVitals({ limit: pageSize, skip: 0 });
+        ? await vitalsService.getPatientVitals(patientId)
+        : await vitalsService.getVitals();
 
       // Extract the data array from the response
       const data = response?.data || response;
@@ -145,7 +146,7 @@ const VitalsList = ({
     } finally {
       setInternalLoading(false);
     }
-  }, [patientId, pageSize, vitalsData]);
+  }, [patientId, vitalsData]);
 
   useEffect(() => {
     loadVitals();
@@ -535,7 +536,7 @@ const VitalsList = ({
 
   // Calculate pagination values
   const totalRecords = sortedVitals.length;
-  const totalPages = Math.ceil(totalRecords / pageSize) || 1;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalRecords);
   const paginatedVitals = sortedVitals.slice(startIndex, endIndex);
@@ -837,13 +838,17 @@ const VitalsList = ({
 
         {/* Pagination Controls */}
         {totalRecords > 0 && (
-          <Group justify="space-between" align="center" mt="md">
-            {/* Left: Record count */}
-            <Text size="sm" c="dimmed">
-              {t('pagination.showing', 'Showing')} {startIndex + 1} {t('pagination.to', 'to')}{' '}
-              {endIndex} {t('pagination.of', 'of')}{' '}
-              {totalRecords} {t('pagination.results', 'results')}
-            </Text>
+          <Group justify={totalPages > 1 ? 'space-between' : 'flex-end'} align="center" mt="md">
+            {/* Left: Record count (only show when multiple pages) */}
+            {totalPages > 1 && (
+              <Text size="sm" c="dimmed">
+                {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
+                  start: startIndex + 1,
+                  end: endIndex,
+                  total: totalRecords,
+                })}
+              </Text>
+            )}
 
             {/* Center: Page navigation */}
             {totalPages > 1 && (

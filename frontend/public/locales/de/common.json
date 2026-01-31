@@ -193,6 +193,7 @@
     "showing": "Anzeige",
     "to": "bis",
     "results": "Ergebnisse",
+    "showingRange": "Zeige {{start}} bis {{end}} von {{total}} Ergebnissen",
     "itemsPerPage": "Einträge pro Seite",
     "previous": "Zurück",
     "next": "Weiter",
