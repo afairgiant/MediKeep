@@ -64,10 +64,8 @@ import {
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
-import {
-  parseDateTimeString,
-  formatDateTimeForInput,
-} from '../../utils/dateUtils';
+import { parseDateTimeString } from '../../utils/dateUtils';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 const VitalsForm = ({
   vitals = null,
@@ -86,6 +84,7 @@ const VitalsForm = ({
   const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
+  const { formatDateTimeInput, dateFormat, dateTimePlaceholder } = useDateFormat();
 
   // Generate dynamic configs based on user's unit system
   const FORM_FIELDS = useMemo(() => ({
@@ -375,12 +374,18 @@ const VitalsForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState(new Set());
   // State for manual datetime text input (for copy-paste support)
-  // Initialize with current datetime formatted for new records
-  const [manualDateTimeText, setManualDateTimeText] = useState(() =>
-    formatDateTimeForInput(new Date(), false)
-  );
+  // Initialize empty, will be set by useEffect once hook is ready
+  const [manualDateTimeText, setManualDateTimeText] = useState('');
   const [manualDateTimeError, setManualDateTimeError] = useState(null);
   const [datePickerOpened, setDatePickerOpened] = useState(false);
+
+  // Initialize manualDateTimeText with format-aware formatting once hook is ready
+  // Re-format when date format preference changes (for new records only)
+  useEffect(() => {
+    if (!isEdit && formData.recorded_date instanceof Date) {
+      setManualDateTimeText(formatDateTimeInput(formData.recorded_date, false));
+    }
+  }, [isEdit, formData.recorded_date, formatDateTimeInput]);
 
   // Get height from patient profile
   const patientHeight = useMemo(() => {
@@ -415,13 +420,13 @@ const VitalsForm = ({
         pain_scale: vitals.pain_scale || '',
         location: vitals.location || '',
         device_used: vitals.device_used || '',
-        notes: vitals.notes || '', // Ensure notes is always a string, never null
+        notes: vitals.notes || '',
       });
 
       // Sync manual datetime text input
-      setManualDateTimeText(formatDateTimeForInput(recordedDate, false));
+      setManualDateTimeText(formatDateTimeInput(recordedDate, false));
     }
-  }, [vitals, isEdit, patientId, practitionerId]);
+  }, [vitals, isEdit, patientId, practitionerId, unitSystem, formatDateTimeInput]);
 
   // Calculated values
   const calculatedBMI = useMemo(() => {
@@ -515,10 +520,10 @@ const VitalsForm = ({
 
     // Sync manual text input when DateTimePicker changes
     if (fieldName === 'recorded_date' && value instanceof Date) {
-      setManualDateTimeText(formatDateTimeForInput(value, false));
+      setManualDateTimeText(formatDateTimeInput(value, false));
       setManualDateTimeError(null);
     }
-  }, []);
+  }, [formatDateTimeInput]);
 
   // Handle manual datetime text input (for copy-paste from CSV)
   const handleManualDateTimeChange = useCallback(
@@ -531,7 +536,7 @@ const VitalsForm = ({
         return;
       }
 
-      const { date, error } = parseDateTimeString(text);
+      const { date, error } = parseDateTimeString(text, dateFormat);
 
       if (error) {
         setManualDateTimeError(error);
@@ -550,7 +555,7 @@ const VitalsForm = ({
         }
       }
     },
-    [t]
+    [dateFormat, t]
   );
 
   // Handle date selection from the picker popover
@@ -560,14 +565,14 @@ const VitalsForm = ({
         ...prev,
         recorded_date: val,
       }));
-      setManualDateTimeText(formatDateTimeForInput(val, false));
+      setManualDateTimeText(formatDateTimeInput(val, false));
       setManualDateTimeError(null);
       setTouchedFields(prev => new Set([...prev, 'recorded_date']));
     }
     if (closePopover) {
       setDatePickerOpened(false);
     }
-  }, []);
+  }, [formatDateTimeInput]);
 
   // Handle form submission
   const handleSubmit = async e => {
@@ -728,7 +733,7 @@ const VitalsForm = ({
           <Popover.Target>
             <TextInput
               label={config.label}
-              placeholder={t('vitals.form.pasteDateTimePlaceholder', 'e.g., 07/29/2015 23:58:21')}
+              placeholder={t('vitals.form.dateTimePlaceholder', dateTimePlaceholder)}
               description={t(
                 'vitals.form.pasteDateTimeDescription',
                 'Type or paste date/time, or click calendar to select'

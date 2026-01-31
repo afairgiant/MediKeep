@@ -57,6 +57,23 @@ vi.mock('../utils/constants', () => ({
   DEFAULT_DATE_FORMAT: 'mdy',
 }));
 
+// Mock dateUtils
+vi.mock('../utils/dateUtils', () => ({
+  formatDateTimeForInputWithPreference: vi.fn((date, formatCode, includeSeconds) => {
+    if (!date || !(date instanceof Date)) return '';
+    const formattedDate = formatCode === 'dmy' ? '25/01/2026' : formatCode === 'ymd' ? '2026-01-25' : '01/25/2026';
+    return `${formattedDate} 10:30`;
+  }),
+  getDateTimePlaceholder: vi.fn(formatCode => {
+    const placeholders = {
+      mdy: 'e.g., 07/29/2015 23:58',
+      dmy: 'e.g., 29/07/2015 23:58',
+      ymd: 'e.g., 2015-07-29 23:58',
+    };
+    return placeholders[formatCode] || 'e.g., 07/29/2015 23:58';
+  }),
+}));
+
 describe('useDateFormat', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -69,10 +86,12 @@ describe('useDateFormat', () => {
     expect(result.current).toHaveProperty('formatDateWithTime');
     expect(result.current).toHaveProperty('formatDateTime');
     expect(result.current).toHaveProperty('formatLongDate');
+    expect(result.current).toHaveProperty('formatDateTimeInput');
     expect(result.current).toHaveProperty('dateFormat');
     expect(result.current).toHaveProperty('locale');
     expect(result.current).toHaveProperty('formatLabel');
     expect(result.current).toHaveProperty('formatExample');
+    expect(result.current).toHaveProperty('dateTimePlaceholder');
     expect(result.current).toHaveProperty('formatOptions');
   });
 
@@ -143,6 +162,27 @@ describe('useDateFormat', () => {
     const formatted = result.current.formatDateWithTime('2026-01-25T10:30:00');
     expect(formatted).toBeDefined();
   });
+
+  test('formatDateTimeInput function is callable with Date object', () => {
+    const { result } = renderHook(() => useDateFormat());
+
+    const testDate = new Date(2026, 0, 25, 10, 30, 0);
+    const formatted = result.current.formatDateTimeInput(testDate);
+    expect(formatted).toBe('01/25/2026 10:30');
+  });
+
+  test('formatDateTimeInput returns empty string for null', () => {
+    const { result } = renderHook(() => useDateFormat());
+
+    const formatted = result.current.formatDateTimeInput(null);
+    expect(formatted).toBe('');
+  });
+
+  test('dateTimePlaceholder returns US format placeholder for mdy', () => {
+    const { result } = renderHook(() => useDateFormat());
+
+    expect(result.current.dateTimePlaceholder).toBe('e.g., 07/29/2015 23:58');
+  });
 });
 
 describe('useDateFormat with different format preferences', () => {
@@ -160,11 +200,13 @@ describe('useDateFormat memoization', () => {
 
     const formatDate1 = result.current.formatDate;
     const formatDateTime1 = result.current.formatDateTime;
+    const formatDateTimeInput1 = result.current.formatDateTimeInput;
 
     rerender();
 
     // Functions should be memoized and stable across rerenders
     expect(result.current.formatDate).toBe(formatDate1);
     expect(result.current.formatDateTime).toBe(formatDateTime1);
+    expect(result.current.formatDateTimeInput).toBe(formatDateTimeInput1);
   });
 });

@@ -258,7 +258,7 @@ export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => 
   // No valid format matched
   return {
     date: null,
-    error: 'Unrecognized format. Supported: MM/DD/YYYY HH:mm:ss, DD/MM/YYYY HH:mm:ss, or YYYY-MM-DD HH:mm:ss'
+    error: 'Unrecognized format. Supported: MM/DD/YYYY HH:mm, DD/MM/YYYY HH:mm, or YYYY-MM-DD HH:mm (seconds optional)'
   };
 };
 
@@ -291,28 +291,92 @@ export function formatTimeToAmPm(timeString) {
 }
 
 /**
+ * Pad a number with leading zeros
+ * @param {number} num - Number to pad
+ * @returns {string} - Zero-padded string
+ */
+const padNumber = num => String(num).padStart(2, '0');
+
+/**
  * Format a Date object to a datetime string for display
  *
  * @param {Date} date - The date to format
  * @param {boolean} includeSeconds - Whether to include seconds
  * @returns {string} - Formatted datetime string (MM/DD/YYYY HH:mm or MM/DD/YYYY HH:mm:ss)
+ * @deprecated Use formatDateTimeForInputWithPreference instead for format-aware formatting
  */
 export const formatDateTimeForInput = (date, includeSeconds = true) => {
   if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
     return '';
   }
 
-  const pad = num => String(num).padStart(2, '0');
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
+  const month = padNumber(date.getMonth() + 1);
+  const day = padNumber(date.getDate());
   const year = date.getFullYear();
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
+  const hours = padNumber(date.getHours());
+  const minutes = padNumber(date.getMinutes());
 
   const datePart = `${month}/${day}/${year}`;
   const timePart = includeSeconds
-    ? `${hours}:${minutes}:${pad(date.getSeconds())}`
+    ? `${hours}:${minutes}:${padNumber(date.getSeconds())}`
     : `${hours}:${minutes}`;
 
   return `${datePart} ${timePart}`;
+};
+
+/**
+ * Format a Date object to a datetime string for input fields, respecting user's date format preference
+ *
+ * @param {Date} date - The date to format
+ * @param {string} formatCode - User's preferred format: 'mdy' (US), 'dmy' (European), or 'ymd' (ISO)
+ * @param {boolean} includeSeconds - Whether to include seconds
+ * @returns {string} - Formatted datetime string based on preference
+ */
+export const formatDateTimeForInputWithPreference = (date, formatCode = 'mdy', includeSeconds = false) => {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return '';
+  }
+
+  const day = padNumber(date.getDate());
+  const month = padNumber(date.getMonth() + 1);
+  const year = date.getFullYear();
+  const hours = padNumber(date.getHours());
+  const minutes = padNumber(date.getMinutes());
+
+  let datePart;
+  switch (formatCode) {
+    case 'dmy':
+      datePart = `${day}/${month}/${year}`;
+      break;
+    case 'ymd':
+      datePart = `${year}-${month}-${day}`;
+      break;
+    case 'mdy':
+    default:
+      datePart = `${month}/${day}/${year}`;
+  }
+
+  const timePart = includeSeconds
+    ? `${hours}:${minutes}:${padNumber(date.getSeconds())}`
+    : `${hours}:${minutes}`;
+
+  return `${datePart} ${timePart}`;
+};
+
+/**
+ * Get placeholder text for datetime input based on user's date format preference
+ *
+ * @param {string} formatCode - User's preferred format: 'mdy' (US), 'dmy' (European), or 'ymd' (ISO)
+ * @returns {string} - Example placeholder text
+ */
+export const getDateTimePlaceholder = (formatCode = 'mdy') => {
+  switch (formatCode) {
+    case 'dmy':
+      return 'e.g., 29/07/2015 23:58';
+    case 'ymd':
+      return 'e.g., 2015-07-29 23:58';
+    case 'mdy':
+    default:
+      return 'e.g., 07/29/2015 23:58';
+  }
 };

@@ -13,6 +13,10 @@ import {
   getDateFormatLabel,
   getDateFormatExample,
 } from '../utils/dateFormatUtils';
+import {
+  formatDateTimeForInputWithPreference,
+  getDateTimePlaceholder,
+} from '../utils/dateUtils';
 import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
 
 /**
@@ -69,15 +73,31 @@ export const useDateFormat = () => {
     [effectiveFormat]
   );
 
+  // Format datetime for input fields (respects user's date format preference)
+  const formatDateTimeInput = useCallback(
+    (dateValue, includeSeconds = false) => {
+      return formatDateTimeForInputWithPreference(dateValue, effectiveFormat, includeSeconds);
+    },
+    [effectiveFormat]
+  );
+
+  // Get placeholder text for datetime input based on user's format preference
+  const dateTimePlaceholder = useMemo(
+    () => getDateTimePlaceholder(effectiveFormat),
+    [effectiveFormat]
+  );
+
   return {
     formatDate,
     formatDateWithTime,
     formatDateTime,
     formatLongDate,
+    formatDateTimeInput,
     dateFormat: effectiveFormat,
     locale,
     formatLabel,
     formatExample,
+    dateTimePlaceholder,
     formatOptions: DATE_FORMAT_OPTIONS,
   };
 };
