@@ -58,11 +58,10 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
     """
 
     def __init__(self):
-        # NOTE: We intentionally do NOT use timezone_fields for recorded_date.
-        # Vitals timestamps should be stored and displayed as-entered by the user.
-        # This avoids the "double timezone conversion" bug where times near midnight
-        # would shift to the previous day.
-        super().__init__(Vitals, timezone_fields=[])
+        # Store recorded_date in UTC for consistency.
+        # Frontend sends UTC via toISOString(), backend stores as UTC,
+        # frontend converts back to local for display.
+        super().__init__(Vitals, timezone_fields=["recorded_date"])
 
     def get_by_patient_date_range(
         self,

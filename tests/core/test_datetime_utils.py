@@ -1,12 +1,10 @@
 """
 Tests for datetime_utils module.
 
-These tests specifically cover the UTC preservation behavior that fixes
-the "double timezone conversion" bug where UTC values sent from the frontend
-were incorrectly treated as local timezone values.
+These tests cover the to_utc() function behavior, including proper handling
+of timezone-aware inputs to prevent double conversion bugs.
 """
 
-import pytest
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 

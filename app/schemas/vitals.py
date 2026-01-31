@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_serializer, field_validator
 
 
 class VitalsBase(BaseModel):
@@ -198,6 +198,19 @@ class VitalsResponse(VitalsBase):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_serializer("recorded_date", "created_at", "updated_at")
+    @classmethod
+    def serialize_datetime_as_utc(cls, value: datetime) -> str:
+        """Serialize datetime with Z suffix so frontend knows it's UTC."""
+        if value is None:
+            return None
+        # If naive, assume UTC; if aware, convert to UTC
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        else:
+            value = value.astimezone(timezone.utc)
+        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+
 
 class VitalsWithRelations(VitalsResponse):
     """Schema for vitals with related data"""
@@ -223,6 +236,18 @@ class VitalsSummary(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_serializer("recorded_date")
+    @classmethod
+    def serialize_datetime_as_utc(cls, value: datetime) -> str:
+        """Serialize datetime with Z suffix so frontend knows it's UTC."""
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        else:
+            value = value.astimezone(timezone.utc)
+        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+
 
 class VitalsStats(BaseModel):
     """Schema for vitals statistics"""
@@ -241,3 +266,15 @@ class VitalsStats(BaseModel):
     current_a1c: Optional[float] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("latest_reading_date")
+    @classmethod
+    def serialize_datetime_as_utc(cls, value: Optional[datetime]) -> Optional[str]:
+        """Serialize datetime with Z suffix so frontend knows it's UTC."""
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        else:
+            value = value.astimezone(timezone.utc)
+        return value.strftime("%Y-%m-%dT%H:%M:%SZ")

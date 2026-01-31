@@ -61,20 +61,6 @@ import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
 
-/**
- * Formats a Date object as an ISO-like string in local time (no UTC conversion).
- * This preserves the user's intended time (e.g., 00:15 stays 00:15).
- */
-function formatLocalDateTimeForAPI(date) {
-  const pad = (n) => String(n).padStart(2, '0');
-  const year = date.getFullYear();
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-  const seconds = pad(date.getSeconds());
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-}
 
 const VitalsForm = ({
   vitals = null,
@@ -601,10 +587,10 @@ const VitalsForm = ({
       // Process data for API
       const processedData = {
         ...formData,
-        // Use local time format instead of toISOString() which converts to UTC
+        // Send as UTC - backend stores UTC, frontend converts back to local for display
         recorded_date:
           formData.recorded_date instanceof Date
-            ? formatLocalDateTimeForAPI(formData.recorded_date)
+            ? formData.recorded_date.toISOString()
             : formData.recorded_date,
         // Include patient's height from profile for BMI calculation
         height: patientHeight ? parseFloat(patientHeight) : null,
