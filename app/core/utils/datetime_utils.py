@@ -43,7 +43,24 @@ def get_utc_now() -> datetime:
 
 
 def to_utc(local_datetime: Union[str, datetime]) -> Optional[datetime]:
-    """Convert local datetime to UTC for storage."""
+    """
+    Convert local datetime to UTC for storage.
+
+    IMPORTANT: If the input is already in UTC (has 'Z' suffix, '+00:00' offset,
+    or UTC tzinfo), it will be returned as-is without double conversion.
+    This prevents the "double conversion bug" where frontend sends UTC via
+    toISOString() and backend would incorrectly treat it as local time.
+
+    Args:
+        local_datetime: A datetime string or object. Can be:
+            - A naive datetime (assumed to be in facility timezone)
+            - A timezone-aware datetime (converted to UTC)
+            - An ISO string with 'Z' suffix (already UTC, preserved)
+            - An ISO string with offset (converted to UTC)
+
+    Returns:
+        UTC datetime object, or None if input is None
+    """
     if local_datetime is None:
         return None
 
@@ -51,17 +68,27 @@ def to_utc(local_datetime: Union[str, datetime]) -> Optional[datetime]:
         if isinstance(local_datetime, str):
             from dateutil import parser
 
-            naive_dt = parser.parse(local_datetime).replace(tzinfo=None)
-        else:
-            naive_dt = (
-                local_datetime.replace(tzinfo=None)
-                if local_datetime.tzinfo
-                else local_datetime
-            )
+            # Parse the datetime string (dateutil preserves timezone info)
+            parsed_dt = parser.parse(local_datetime)
 
-        # Simple localization - let zoneinfo handle DST
-        localized_dt = naive_dt.replace(tzinfo=get_facility_timezone())
-        return localized_dt.astimezone(timezone.utc)
+            # Check if the input was already in UTC
+            # This handles ISO strings like "2017-07-03T00:15:00.000Z" or "2017-07-03T00:15:00+00:00"
+            if parsed_dt.tzinfo is not None:
+                # Already has timezone info - convert to UTC properly
+                return parsed_dt.astimezone(timezone.utc)
+            else:
+                # Naive datetime from string - assume facility timezone
+                localized_dt = parsed_dt.replace(tzinfo=get_facility_timezone())
+                return localized_dt.astimezone(timezone.utc)
+        else:
+            # Handle datetime objects
+            if local_datetime.tzinfo is not None:
+                # Already timezone-aware - convert to UTC
+                return local_datetime.astimezone(timezone.utc)
+            else:
+                # Naive datetime - assume facility timezone
+                localized_dt = local_datetime.replace(tzinfo=get_facility_timezone())
+                return localized_dt.astimezone(timezone.utc)
 
     except Exception as e:
         logger.error(f"Failed to convert datetime to UTC: {local_datetime}, error: {e}")
