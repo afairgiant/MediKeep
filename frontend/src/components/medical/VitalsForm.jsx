@@ -733,7 +733,7 @@ const VitalsForm = ({
           <Popover.Target>
             <TextInput
               label={config.label}
-              placeholder={dateTimePlaceholder}
+              placeholder={t('vitals.form.dateTimePlaceholder', dateTimePlaceholder)}
               description={t(
                 'vitals.form.pasteDateTimeDescription',
                 'Type or paste date/time, or click calendar to select'
