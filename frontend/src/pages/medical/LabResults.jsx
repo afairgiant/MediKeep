@@ -282,7 +282,7 @@ const LabResults = () => {
       ordered_date: labResult.ordered_date || '',
       completed_date: labResult.completed_date || '',
       notes: labResult.notes || '',
-      practitioner_id: labResult.practitioner_id || '',
+      practitioner_id: labResult.practitioner_id ? String(labResult.practitioner_id) : '',
       tags: labResult.tags || [],
     });
 
