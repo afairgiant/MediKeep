@@ -5,6 +5,7 @@ These tests cover the to_utc() function behavior, including proper handling
 of timezone-aware inputs to prevent double conversion bugs.
 """
 
+import pytest
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -149,6 +150,21 @@ class TestToUtc:
         assert result.year == 2017
         assert result.hour == 0
         assert result.minute == 15
+
+    def test_invalid_datetime_string_raises_error(self):
+        """Invalid datetime strings should raise ValueError."""
+        with pytest.raises(ValueError):
+            to_utc("not a valid datetime")
+
+    def test_malformed_iso_string_raises_error(self):
+        """Malformed ISO strings should raise ValueError."""
+        with pytest.raises(ValueError):
+            to_utc("2017-13-45T99:99:99")  # Invalid month/day/time
+
+    def test_empty_string_raises_error(self):
+        """Empty strings should raise ValueError."""
+        with pytest.raises(ValueError):
+            to_utc("")
 
 
 class TestToLocal:

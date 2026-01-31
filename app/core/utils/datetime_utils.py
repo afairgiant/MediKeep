@@ -44,18 +44,18 @@ def get_utc_now() -> datetime:
 
 def to_utc(local_datetime: Union[str, datetime]) -> Optional[datetime]:
     """
-    Convert local datetime to UTC for storage.
+    Convert datetime to UTC for storage.
 
-    IMPORTANT: If the input is already in UTC (has 'Z' suffix, '+00:00' offset,
-    or UTC tzinfo), it will be returned as-is without double conversion.
-    This prevents the "double conversion bug" where frontend sends UTC via
-    toISOString() and backend would incorrectly treat it as local time.
+    IMPORTANT: If the input already has timezone info (e.g., 'Z' suffix or offset),
+    it will be properly converted to UTC without first being incorrectly interpreted
+    as facility time. This prevents the "double conversion bug" where frontend sends
+    UTC via toISOString() and backend would incorrectly treat it as local time.
 
     Args:
         local_datetime: A datetime string or object. Can be:
             - A naive datetime (assumed to be in facility timezone)
             - A timezone-aware datetime (converted to UTC)
-            - An ISO string with 'Z' suffix (already UTC, preserved)
+            - An ISO string with 'Z' suffix (converted to UTC)
             - An ISO string with offset (converted to UTC)
 
     Returns:

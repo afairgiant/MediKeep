@@ -4,6 +4,17 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, field_serializer, field_validator
 
 
+def serialize_datetime_utc(value: Optional[datetime]) -> Optional[str]:
+    """Serialize datetime with Z suffix so frontend knows it's UTC."""
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    else:
+        value = value.astimezone(timezone.utc)
+    return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 class VitalsBase(BaseModel):
     """Base schema for Vitals"""
 
@@ -200,16 +211,8 @@ class VitalsResponse(VitalsBase):
 
     @field_serializer("recorded_date", "created_at", "updated_at")
     @classmethod
-    def serialize_datetime_as_utc(cls, value: datetime) -> str:
-        """Serialize datetime with Z suffix so frontend knows it's UTC."""
-        if value is None:
-            return None
-        # If naive, assume UTC; if aware, convert to UTC
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=timezone.utc)
-        else:
-            value = value.astimezone(timezone.utc)
-        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+    def serialize_datetime_as_utc(cls, value: datetime) -> Optional[str]:
+        return serialize_datetime_utc(value)
 
 
 class VitalsWithRelations(VitalsResponse):
@@ -238,15 +241,8 @@ class VitalsSummary(BaseModel):
 
     @field_serializer("recorded_date")
     @classmethod
-    def serialize_datetime_as_utc(cls, value: datetime) -> str:
-        """Serialize datetime with Z suffix so frontend knows it's UTC."""
-        if value is None:
-            return None
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=timezone.utc)
-        else:
-            value = value.astimezone(timezone.utc)
-        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+    def serialize_datetime_as_utc(cls, value: datetime) -> Optional[str]:
+        return serialize_datetime_utc(value)
 
 
 class VitalsStats(BaseModel):
@@ -270,11 +266,4 @@ class VitalsStats(BaseModel):
     @field_serializer("latest_reading_date")
     @classmethod
     def serialize_datetime_as_utc(cls, value: Optional[datetime]) -> Optional[str]:
-        """Serialize datetime with Z suffix so frontend knows it's UTC."""
-        if value is None:
-            return None
-        if value.tzinfo is None:
-            value = value.replace(tzinfo=timezone.utc)
-        else:
-            value = value.astimezone(timezone.utc)
-        return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+        return serialize_datetime_utc(value)

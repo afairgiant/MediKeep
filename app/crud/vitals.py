@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from sqlalchemy import asc, desc, func
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Query, Session, joinedload
 
 from app.crud.base import CRUDBase
 from app.models.models import Vitals
@@ -41,9 +41,15 @@ def _validate_vital_type(vital_type: str) -> None:
         )
 
 
-def _apply_vital_type_filter(query, vital_type: str):
-    """Apply column filters for a specific vital type."""
-    columns = VITAL_TYPE_COLUMNS.get(vital_type, [])
+def _apply_vital_type_filter(query: Query, vital_type: str) -> Query:
+    """
+    Apply column filters for a specific vital type.
+
+    Assumes vital_type has already been validated by _validate_vital_type().
+    """
+    columns = VITAL_TYPE_COLUMNS.get(vital_type)
+    if columns is None:
+        raise ValueError(f"Unknown vital_type '{vital_type}' - call _validate_vital_type first")
     for column in columns:
         query = query.filter(column.isnot(None))
     return query
