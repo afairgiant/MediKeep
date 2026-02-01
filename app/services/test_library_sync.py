@@ -206,6 +206,10 @@ class TestLibrarySyncService:
                     if canonical_name:
                         component.canonical_test_name = canonical_name
                         total_linked += 1
+                    else:
+                        # Mark as processed with no match (empty string)
+                        # This prevents infinite loop - distinguishes from unprocessed (None)
+                        component.canonical_test_name = ""
                     total_processed += 1
 
                 db.commit()
