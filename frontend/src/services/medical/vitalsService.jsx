@@ -99,6 +99,25 @@ class VitalsService {
   }
 
   /**
+   * Get paginated vitals for a specific patient with total count
+   * @param {number} patientId
+   * @param {Object} params - Query parameters (skip, limit, vital_type)
+   * @returns {Promise<{items: Array, total: number, skip: number, limit: number}>}
+   */
+  async getPatientVitalsPaginated(patientId, params = {}) {
+    try {
+      const queryParams = new URLSearchParams(params).toString();
+      const url = queryParams
+        ? `/vitals/patient/${patientId}/paginated?${queryParams}`
+        : `/vitals/patient/${patientId}/paginated`;
+      return await apiClient.get(url);
+    } catch (error) {
+      // Error fetching paginated patient vitals
+      throw error;
+    }
+  }
+
+  /**
    * Get vitals statistics for a patient
    * @param {number} patientId
    * @param {Object} params - Query parameters (start_date, end_date)

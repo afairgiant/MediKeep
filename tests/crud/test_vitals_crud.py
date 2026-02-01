@@ -436,3 +436,190 @@ class TestVitalsCRUD:
 
         assert updated_vitals.a1c == 5.4
         assert updated_vitals.blood_glucose == 95.0  # Unchanged
+
+    def test_count_by_patient(self, db_session: Session, test_patient):
+        """Test counting vitals records for a patient."""
+        # Create multiple vitals records
+        for i in range(5):
+            vitals_data = VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 1 + i, 10, 0, 0),
+                systolic_bp=120 + i,
+                diastolic_bp=80 + i,
+                heart_rate=72 + i
+            )
+            vitals_crud.create(db_session, obj_in=vitals_data)
+
+        # Test count
+        count = vitals_crud.count_by_patient(db_session, patient_id=test_patient.id)
+        assert count == 5
+
+    def test_count_by_patient_with_vital_type_filter(self, db_session: Session, test_patient):
+        """Test counting vitals with vital type filter."""
+        # Create vitals with different measurements
+        vitals_data = [
+            VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 1, 10, 0, 0),
+                systolic_bp=120,
+                diastolic_bp=80,
+                heart_rate=72
+            ),
+            VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 2, 10, 0, 0),
+                temperature=98.6,
+                weight=150.0
+            ),
+            VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 3, 10, 0, 0),
+                systolic_bp=125,
+                diastolic_bp=85,
+                a1c=6.5
+            )
+        ]
+
+        for data in vitals_data:
+            vitals_crud.create(db_session, obj_in=data)
+
+        # Count blood pressure readings only
+        bp_count = vitals_crud.count_by_patient(
+            db_session, patient_id=test_patient.id, vital_type="blood_pressure"
+        )
+        assert bp_count == 2
+
+        # Count temperature readings only
+        temp_count = vitals_crud.count_by_patient(
+            db_session, patient_id=test_patient.id, vital_type="temperature"
+        )
+        assert temp_count == 1
+
+        # Count A1C readings only
+        a1c_count = vitals_crud.count_by_patient(
+            db_session, patient_id=test_patient.id, vital_type="a1c"
+        )
+        assert a1c_count == 1
+
+    def test_count_by_patient_empty(self, db_session: Session, test_patient):
+        """Test counting vitals when no records exist."""
+        count = vitals_crud.count_by_patient(db_session, patient_id=test_patient.id)
+        assert count == 0
+
+    def test_large_dataset_pagination(self, db_session: Session, test_patient):
+        """Test pagination with large dataset (>100 records)."""
+        num_records = 150
+
+        # Create 150 vitals records
+        for i in range(num_records):
+            vitals_data = VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 1, 10, 0, 0) + timedelta(hours=i),
+                systolic_bp=110 + (i % 30),
+                diastolic_bp=70 + (i % 20),
+                heart_rate=60 + (i % 40)
+            )
+            vitals_crud.create(db_session, obj_in=vitals_data)
+
+        # Verify total count
+        total_count = vitals_crud.count_by_patient(
+            db_session, patient_id=test_patient.id
+        )
+        assert total_count == num_records
+
+        # Test pagination - first page
+        page1 = vitals_crud.get_by_patient(
+            db_session, patient_id=test_patient.id, skip=0, limit=50
+        )
+        assert len(page1) == 50
+
+        # Test pagination - second page
+        page2 = vitals_crud.get_by_patient(
+            db_session, patient_id=test_patient.id, skip=50, limit=50
+        )
+        assert len(page2) == 50
+
+        # Test pagination - third page (partial)
+        page3 = vitals_crud.get_by_patient(
+            db_session, patient_id=test_patient.id, skip=100, limit=50
+        )
+        assert len(page3) == 50
+
+        # Verify no overlap between pages
+        page1_ids = {v.id for v in page1}
+        page2_ids = {v.id for v in page2}
+        page3_ids = {v.id for v in page3}
+        assert len(page1_ids & page2_ids) == 0
+        assert len(page2_ids & page3_ids) == 0
+        assert len(page1_ids & page3_ids) == 0
+
+    def test_large_dataset_count_with_date_filter(self, db_session: Session, test_patient):
+        """Test counting large dataset with date range filter."""
+        # Create 200 records spread over 200 days
+        base_date = datetime(2024, 1, 1, 10, 0, 0)
+        for i in range(200):
+            vitals_data = VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=base_date + timedelta(days=i),
+                systolic_bp=110 + (i % 30),
+                diastolic_bp=70 + (i % 20),
+                heart_rate=60 + (i % 40)
+            )
+            vitals_crud.create(db_session, obj_in=vitals_data)
+
+        # Count all records
+        total_count = vitals_crud.count_by_patient(
+            db_session, patient_id=test_patient.id
+        )
+        assert total_count == 200
+
+        # Count records in first month (31 days)
+        first_month_count = vitals_crud.count_by_patient(
+            db_session,
+            patient_id=test_patient.id,
+            start_date=base_date,
+            end_date=base_date + timedelta(days=30)
+        )
+        assert first_month_count == 31
+
+        # Count records in specific date range
+        mid_range_count = vitals_crud.count_by_patient(
+            db_session,
+            patient_id=test_patient.id,
+            start_date=base_date + timedelta(days=50),
+            end_date=base_date + timedelta(days=100)
+        )
+        assert mid_range_count == 51  # Days 50-100 inclusive
+
+    def test_get_by_patient_respects_high_limit(self, db_session: Session, test_patient):
+        """Test that get_by_patient can return more than 100 records when limit is specified."""
+        num_records = 250
+
+        # Create 250 vitals records
+        for i in range(num_records):
+            vitals_data = VitalsCreate(
+                patient_id=test_patient.id,
+                recorded_date=datetime(2024, 1, 1, 10, 0, 0) + timedelta(hours=i),
+                systolic_bp=110 + (i % 30),
+                diastolic_bp=70 + (i % 20),
+                heart_rate=60 + (i % 40)
+            )
+            vitals_crud.create(db_session, obj_in=vitals_data)
+
+        # Request all records with high limit (API endpoints pass limit=10000)
+        all_records = vitals_crud.get_by_patient(
+            db_session, patient_id=test_patient.id, skip=0, limit=500
+        )
+        assert len(all_records) == num_records
+
+        # Verify count method returns correct total
+        total_count = vitals_crud.count_by_patient(
+            db_session, patient_id=test_patient.id
+        )
+        assert total_count == num_records
+
+        # With limit=10000 (what API endpoints use), all records should be returned
+        api_limit_records = vitals_crud.get_by_patient(
+            db_session, patient_id=test_patient.id, skip=0, limit=10000
+        )
+        assert len(api_limit_records) == num_records

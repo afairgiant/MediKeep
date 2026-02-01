@@ -20,7 +20,13 @@ from app.api.v1.endpoints.utils import (
 from app.crud.vitals import vitals
 from app.models.activity_log import EntityType
 from app.models.models import User
-from app.schemas.vitals import VitalsCreate, VitalsResponse, VitalsStats, VitalsUpdate
+from app.schemas.vitals import (
+    VitalsCreate,
+    VitalsPaginatedResponse,
+    VitalsResponse,
+    VitalsStats,
+    VitalsUpdate,
+)
 
 router = APIRouter()
 
@@ -54,7 +60,7 @@ def read_vitals(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=1000),
+    limit: int = Query(default=10000, le=10000),
     vital_type: Optional[str] = Query(None, description="Filter by vital type (blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose)"),
     start_date: Optional[str] = Query(None, description="Start date for date range filter (ISO format)"),
     end_date: Optional[str] = Query(None, description="End date for date range filter (ISO format)"),
@@ -80,7 +86,6 @@ def read_vitals(
             )
         elif start_date and end_date:
             # Date range filtering
-            from datetime import datetime
             start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
             end_dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
             vitals_list = vitals.get_by_patient_date_range(
@@ -231,6 +236,65 @@ def delete_vitals(
     )
 
 
+@router.get("/patient/{patient_id}/paginated", response_model=VitalsPaginatedResponse)
+def read_patient_vitals_paginated(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int = Depends(deps.verify_patient_access),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+    vital_type: Optional[str] = Query(
+        None,
+        description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
+    ),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Get paginated vitals readings for a specific patient with total count.
+
+    Returns a paginated response with:
+    - items: List of vitals records for the current page
+    - total: Total number of records matching the filters
+    - skip: Current offset
+    - limit: Page size
+    """
+    with handle_database_errors(request=request):
+        try:
+            total_count = vitals.count_by_patient(
+                db=db, patient_id=patient_id, vital_type=vital_type
+            )
+
+            if vital_type:
+                vitals_list = vitals.get_by_vital_type(
+                    db=db, patient_id=patient_id, vital_type=vital_type, skip=skip, limit=limit
+                )
+            else:
+                vitals_list = vitals.get_by_patient(
+                    db=db, patient_id=patient_id, skip=skip, limit=limit
+                )
+        except ValueError as e:
+            raise BusinessLogicException(message=str(e), request=request)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
+            patient_id=patient_id,
+            count=len(vitals_list),
+            total=total_count,
+            vital_type=vital_type,
+        )
+
+        return VitalsPaginatedResponse(
+            items=vitals_list,
+            total=total_count,
+            skip=skip,
+            limit=limit,
+        )
+
+
 @router.get("/patient/{patient_id}", response_model=List[VitalsResponse])
 def read_patient_vitals(
     *,
@@ -238,7 +302,7 @@ def read_patient_vitals(
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
-    limit: int = Query(default=100, le=1000),
+    limit: int = Query(default=10000, le=10000),
     vital_type: Optional[str] = Query(
         None,
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
@@ -348,7 +412,7 @@ def read_patient_vitals_date_range(
     start_date: datetime = Query(..., description="Start date for the range"),
     end_date: datetime = Query(..., description="End date for the range"),
     skip: int = 0,
-    limit: int = Query(default=100, le=1000),
+    limit: int = Query(default=10000, le=10000),
     vital_type: Optional[str] = Query(
         None,
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",

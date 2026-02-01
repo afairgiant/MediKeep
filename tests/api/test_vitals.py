@@ -453,3 +453,276 @@ class TestVitalsAPI:
 
         response = authenticated_client.post("/api/v1/vitals/", json=invalid_negative_a1c)
         assert response.status_code == 422
+
+    def test_get_vitals_paginated(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test the paginated vitals endpoint."""
+        patient = test_patient_with_practitioner["patient"]
+        practitioner = test_patient_with_practitioner["practitioner"]
+
+        # Create 25 vitals records
+        from datetime import timedelta
+        base_date = datetime(2024, 1, 1, 10, 0, 0)
+
+        for i in range(25):
+            vitals_data = {
+                "patient_id": patient.id,
+                "practitioner_id": practitioner.id,
+                "recorded_date": (base_date + timedelta(days=i)).isoformat(),
+                "systolic_bp": 110 + (i % 20),
+                "diastolic_bp": 70 + (i % 15),
+                "heart_rate": 60 + (i % 30)
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # Test paginated endpoint - first page
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=0&limit=10"
+        )
+        assert response.status_code == 200
+        data = response.json()
+
+        assert "items" in data
+        assert "total" in data
+        assert "skip" in data
+        assert "limit" in data
+
+        assert len(data["items"]) == 10
+        assert data["total"] == 25
+        assert data["skip"] == 0
+        assert data["limit"] == 10
+
+    def test_get_vitals_paginated_second_page(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test paginated endpoint returns correct second page."""
+        patient = test_patient_with_practitioner["patient"]
+        practitioner = test_patient_with_practitioner["practitioner"]
+
+        # Create 25 vitals records
+        from datetime import timedelta
+        base_date = datetime(2024, 1, 1, 10, 0, 0)
+
+        for i in range(25):
+            vitals_data = {
+                "patient_id": patient.id,
+                "practitioner_id": practitioner.id,
+                "recorded_date": (base_date + timedelta(days=i)).isoformat(),
+                "systolic_bp": 110 + i,  # Unique value to identify records
+                "diastolic_bp": 70,
+                "heart_rate": 72
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # Get first page
+        response1 = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=0&limit=10"
+        )
+        assert response1.status_code == 200
+        page1 = response1.json()
+
+        # Get second page
+        response2 = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=10&limit=10"
+        )
+        assert response2.status_code == 200
+        page2 = response2.json()
+
+        assert len(page1["items"]) == 10
+        assert len(page2["items"]) == 10
+        assert page1["total"] == 25
+        assert page2["total"] == 25
+
+        # Verify no overlap between pages
+        page1_ids = {v["id"] for v in page1["items"]}
+        page2_ids = {v["id"] for v in page2["items"]}
+        assert len(page1_ids & page2_ids) == 0
+
+    def test_get_vitals_paginated_last_page(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test paginated endpoint returns correct partial last page."""
+        patient = test_patient_with_practitioner["patient"]
+        practitioner = test_patient_with_practitioner["practitioner"]
+
+        # Create 25 vitals records
+        from datetime import timedelta
+        base_date = datetime(2024, 1, 1, 10, 0, 0)
+
+        for i in range(25):
+            vitals_data = {
+                "patient_id": patient.id,
+                "practitioner_id": practitioner.id,
+                "recorded_date": (base_date + timedelta(days=i)).isoformat(),
+                "systolic_bp": 120,
+                "diastolic_bp": 80,
+                "heart_rate": 72
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # Get third (last) page - should have only 5 records
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=20&limit=10"
+        )
+        assert response.status_code == 200
+        data = response.json()
+
+        assert len(data["items"]) == 5  # Only 5 remaining records
+        assert data["total"] == 25
+        assert data["skip"] == 20
+        assert data["limit"] == 10
+
+    def test_get_vitals_paginated_with_vital_type_filter(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test paginated endpoint with vital_type filter."""
+        patient = test_patient_with_practitioner["patient"]
+        practitioner = test_patient_with_practitioner["practitioner"]
+
+        # Create vitals with different measurements
+        from datetime import timedelta
+        base_date = datetime(2024, 1, 1, 10, 0, 0)
+
+        # 10 records with blood pressure
+        for i in range(10):
+            vitals_data = {
+                "patient_id": patient.id,
+                "practitioner_id": practitioner.id,
+                "recorded_date": (base_date + timedelta(days=i)).isoformat(),
+                "systolic_bp": 120,
+                "diastolic_bp": 80
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # 5 records with temperature only
+        for i in range(5):
+            vitals_data = {
+                "patient_id": patient.id,
+                "practitioner_id": practitioner.id,
+                "recorded_date": (base_date + timedelta(days=10+i)).isoformat(),
+                "temperature": 98.6
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # Get paginated blood pressure readings
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=0&limit=10&vital_type=blood_pressure"
+        )
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data["total"] == 10  # Only blood pressure records
+        assert len(data["items"]) == 10
+        assert all(v["systolic_bp"] is not None for v in data["items"])
+
+    def test_large_dataset_returns_all_records(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test that non-paginated endpoint can return more than 100 records."""
+        patient = test_patient_with_practitioner["patient"]
+        practitioner = test_patient_with_practitioner["practitioner"]
+
+        num_records = 150
+        from datetime import timedelta
+        base_date = datetime(2024, 1, 1, 10, 0, 0)
+
+        # Create 150 vitals records
+        for i in range(num_records):
+            vitals_data = {
+                "patient_id": patient.id,
+                "practitioner_id": practitioner.id,
+                "recorded_date": (base_date + timedelta(hours=i)).isoformat(),
+                "systolic_bp": 110 + (i % 30),
+                "diastolic_bp": 70 + (i % 20),
+                "heart_rate": 60 + (i % 40)
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # Get all vitals using non-paginated endpoint (should return all 150)
+        response = authenticated_client.get(f"/api/v1/vitals/patient/{patient.id}")
+        assert response.status_code == 200
+        data = response.json()
+
+        # Verify all 150 records are returned (not capped at 100)
+        assert len(data) == num_records
+
+    def test_paginated_endpoint_limit_validation(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test paginated endpoint validates limit parameter."""
+        patient = test_patient_with_practitioner["patient"]
+
+        # Test limit > 100 should be rejected
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=0&limit=150"
+        )
+        assert response.status_code == 422  # Validation error
+
+        # Test limit = 0 should be rejected
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=0&limit=0"
+        )
+        assert response.status_code == 422
+
+        # Test negative skip should be rejected
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=-1&limit=10"
+        )
+        assert response.status_code == 422
+
+    def test_paginated_endpoint_empty_result(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test paginated endpoint with no records."""
+        patient = test_patient_with_practitioner["patient"]
+
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?skip=0&limit=10"
+        )
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data["items"] == []
+        assert data["total"] == 0
+        assert data["skip"] == 0
+        assert data["limit"] == 10
+
+    def test_paginated_large_dataset_consistency(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test that paginated endpoint returns consistent totals across pages."""
+        patient = test_patient_with_practitioner["patient"]
+        practitioner = test_patient_with_practitioner["practitioner"]
+
+        num_records = 55
+        from datetime import timedelta
+        base_date = datetime(2024, 1, 1, 10, 0, 0)
+
+        # Create 55 vitals records
+        for i in range(num_records):
+            vitals_data = {
+                "patient_id": patient.id,
+                "practitioner_id": practitioner.id,
+                "recorded_date": (base_date + timedelta(hours=i)).isoformat(),
+                "systolic_bp": 120,
+                "diastolic_bp": 80,
+                "heart_rate": 72
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # Fetch all pages and verify consistency
+        all_ids = set()
+        total_from_response = None
+
+        for page in range(6):  # 6 pages of 10 to cover 55 records
+            response = authenticated_client.get(
+                f"/api/v1/vitals/patient/{patient.id}/paginated?skip={page*10}&limit=10"
+            )
+            assert response.status_code == 200
+            data = response.json()
+
+            # Verify total is consistent across all pages
+            if total_from_response is None:
+                total_from_response = data["total"]
+            else:
+                assert data["total"] == total_from_response
+
+            # Collect all IDs
+            for item in data["items"]:
+                all_ids.add(item["id"])
+
+        # Verify we got all unique records
+        assert len(all_ids) == num_records
+        assert total_from_response == num_records
