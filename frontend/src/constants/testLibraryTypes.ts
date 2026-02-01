@@ -1,0 +1,38 @@
+/**
+ * TypeScript interfaces for the Test Library
+ *
+ * These types match the structure of shared/data/test_library.json
+ */
+
+// All valid test categories
+// This includes categories used in test_library.json and additional categories
+// supported by the backend for lab test components
+export type TestCategory =
+  | 'chemistry'
+  | 'hematology'
+  | 'lipids'
+  | 'endocrinology'
+  | 'immunology'
+  | 'microbiology'
+  | 'toxicology'
+  | 'genetics'
+  | 'molecular'
+  | 'pathology'
+  | 'other';
+
+export interface TestLibraryItem {
+  test_name: string;
+  abbreviation?: string;
+  test_code?: string;
+  default_unit: string;
+  category: TestCategory;
+  common_names?: string[];
+  is_common: boolean;
+  display_order?: number;
+}
+
+export interface TestLibraryData {
+  version: string;
+  lastUpdated: string;
+  tests: TestLibraryItem[];
+}

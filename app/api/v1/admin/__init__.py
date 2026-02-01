@@ -11,6 +11,7 @@ from app.api.v1.admin import (
     backup,
     bulk_operations,
     dashboard,
+    maintenance,
     models,
     restore,
     trash_management,

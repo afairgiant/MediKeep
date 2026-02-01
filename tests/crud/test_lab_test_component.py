@@ -69,6 +69,28 @@ class TestLabTestComponentCRUD:
         assert component.value == 14.5
         assert component.status == "normal"
         assert component.lab_result_id == test_lab_result.id
+        assert component.canonical_test_name is None  # Not set by default
+
+    def test_create_lab_test_component_with_canonical_name(self, db_session: Session, test_lab_result):
+        """Test creating a lab test component with canonical test name."""
+        component_data = LabTestComponentCreate(
+            lab_result_id=test_lab_result.id,
+            test_name="HGB",
+            abbreviation="HGB",
+            value=14.5,
+            unit="g/dL",
+            ref_range_min=12.0,
+            ref_range_max=16.0,
+            status="normal",
+            category="hematology",
+            canonical_test_name="Hemoglobin"
+        )
+
+        component = lab_test_component_crud.create(db_session, obj_in=component_data)
+
+        assert component is not None
+        assert component.test_name == "HGB"
+        assert component.canonical_test_name == "Hemoglobin"
 
     def test_get_by_lab_result(self, db_session: Session, test_lab_result):
         """Test getting all components for a lab result."""
@@ -370,6 +392,46 @@ class TestLabTestComponentCRUD:
         assert len(created) == 3
         assert all(c.lab_result_id == test_lab_result.id for c in created)
 
+    def test_bulk_create_with_canonical_names(self, db_session: Session, test_lab_result):
+        """Test bulk creating components with canonical test names."""
+        components = [
+            LabTestComponentCreate(
+                lab_result_id=test_lab_result.id,
+                test_name="WBC",
+                value=7.5,
+                unit="K/uL",
+                canonical_test_name="White Blood Cell Count"
+            ),
+            LabTestComponentCreate(
+                lab_result_id=test_lab_result.id,
+                test_name="HGB",
+                value=14.5,
+                unit="g/dL",
+                canonical_test_name="Hemoglobin"
+            ),
+            LabTestComponentCreate(
+                lab_result_id=test_lab_result.id,
+                test_name="PLT",
+                value=250,
+                unit="K/uL",
+                canonical_test_name="Platelet Count"
+            )
+        ]
+
+        bulk_data = LabTestComponentBulkCreate(
+            lab_result_id=test_lab_result.id,
+            components=components
+        )
+
+        created = lab_test_component_crud.bulk_create(
+            db_session, obj_in=bulk_data
+        )
+
+        assert len(created) == 3
+        assert created[0].canonical_test_name == "White Blood Cell Count"
+        assert created[1].canonical_test_name == "Hemoglobin"
+        assert created[2].canonical_test_name == "Platelet Count"
+
     def test_get_statistics_by_lab_result(self, db_session: Session, test_lab_result):
         """Test getting statistics for a lab result."""
         components_data = [
@@ -480,6 +542,31 @@ class TestLabTestComponentCRUD:
         assert updated.status == "high"
         assert updated.notes == "Updated value"
         assert updated.test_name == "Original Test"  # Unchanged
+
+    def test_update_component_canonical_name(self, db_session: Session, test_lab_result):
+        """Test updating a component's canonical test name."""
+        component_data = LabTestComponentCreate(
+            lab_result_id=test_lab_result.id,
+            test_name="WBC",
+            value=7.5,
+            unit="K/uL"
+        )
+        created = lab_test_component_crud.create(db_session, obj_in=component_data)
+
+        # Initially no canonical name
+        assert created.canonical_test_name is None
+
+        # Update with canonical name
+        update_data = LabTestComponentUpdate(
+            canonical_test_name="White Blood Cell Count"
+        )
+
+        updated = lab_test_component_crud.update(
+            db_session, db_obj=created, obj_in=update_data
+        )
+
+        assert updated.canonical_test_name == "White Blood Cell Count"
+        assert updated.test_name == "WBC"  # Original name unchanged
 
     def test_delete_component(self, db_session: Session, test_lab_result):
         """Test deleting a single component."""

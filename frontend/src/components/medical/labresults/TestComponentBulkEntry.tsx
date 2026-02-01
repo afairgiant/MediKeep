@@ -126,6 +126,7 @@ const REGEX_PATTERNS = {
 interface ParsedTestComponent {
   test_name: string;
   abbreviation?: string;
+  canonical_test_name?: string; // Standardized name for trending
   value: number | null;
   unit: string;
   ref_range_min?: number | null;
@@ -221,6 +222,15 @@ const TableRow = React.memo<{
                 <Badge size="xs" variant="outline">
                   {component.abbreviation}
                 </Badge>
+              )}
+              {component.canonical_test_name ? (
+                <Badge size="xs" variant="light" color="green">
+                  Linked: {component.canonical_test_name}
+                </Badge>
+              ) : (
+                <Text size="xs" c="dimmed">
+                  No standard match
+                </Text>
               )}
             </Stack>
           </Table.Td>
@@ -611,8 +621,9 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       const standardizedTest = matches.length > 0 ? matches[0] : null;
 
       if (standardizedTest) {
-        // Use standardized test name for consistency in trends
-        component.test_name = standardizedTest.test_name;
+        // IMPORTANT: Keep original test_name (what the lab PDF said)
+        // Set canonical_test_name to the standardized name for trending
+        component.canonical_test_name = standardizedTest.test_name;
 
         // If no abbreviation was parsed, use the standardized one
         if (!component.abbreviation && standardizedTest.abbreviation) {
@@ -766,6 +777,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           lab_result_id: labResultId,
           test_name: comp.test_name,
           abbreviation: comp.abbreviation || null,
+          canonical_test_name: comp.canonical_test_name || null,
           test_code: null,
           value: comp.value as number,
           unit: (comp.unit || '').trim() || 'ratio',

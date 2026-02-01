@@ -552,3 +552,143 @@
 [data-theme='dark'] .disk-usage-container {
   border-bottom-color: var(--color-border);
 }
+
+/* Test Library Maintenance Section */
+.test-library-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.test-library-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.test-library-actions .action-btn {
+  flex: 1;
+  min-width: 140px;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.test-library-actions .action-btn.primary {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.test-library-actions .action-btn.primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.test-library-actions .action-btn.secondary {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.test-library-actions .action-btn.warning {
+  background: var(--color-warning);
+  color: white;
+  border-color: var(--color-warning);
+}
+
+.test-library-actions .action-btn.warning:hover:not(:disabled) {
+  background: var(--color-warning-dark, #e08600);
+  border-color: var(--color-warning-dark, #e08600);
+}
+
+.test-library-actions .action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.test-library-help {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+}
+
+.test-library-help p {
+  margin: 0 0 8px 0;
+  color: var(--color-text-secondary);
+}
+
+.test-library-help p:last-child {
+  margin-bottom: 0;
+}
+
+.test-library-help strong {
+  color: var(--color-text-primary);
+}
+
+.sync-result {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+}
+
+.sync-result.success {
+  background: var(--color-success-light, rgba(34, 197, 94, 0.1));
+  border-color: var(--color-success);
+}
+
+.sync-result.error {
+  background: var(--color-danger-light);
+  border-color: var(--color-danger);
+}
+
+.sync-result-header {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sync-result.success .sync-result-header {
+  color: var(--color-success);
+}
+
+.sync-result.error .sync-result-header {
+  color: var(--color-danger);
+}
+
+.sync-result-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.sync-result-message {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+/* Dark theme adjustments for test library */
+[data-theme='dark'] .test-library-help {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .test-library-actions {
+  border-top-color: var(--color-border);
+}
+
+[data-theme='dark'] .sync-result.success {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+[data-theme='dark'] .sync-result.error {
+  background: rgba(239, 68, 68, 0.15);
+}

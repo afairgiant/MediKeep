@@ -17,6 +17,7 @@ export interface LabTestComponent {
   category?: 'chemistry' | 'hematology' | 'immunology' | 'microbiology' | 'endocrinology' |
              'toxicology' | 'genetics' | 'molecular' | 'pathology' | 'lipids' | 'other' | null;
   display_order?: number | null;
+  canonical_test_name?: string | null;  // Links to standardized test name for trend matching
   notes?: string | null;
   created_at?: string;
   updated_at?: string;

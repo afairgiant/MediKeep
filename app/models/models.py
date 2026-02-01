@@ -601,6 +601,10 @@ class LabTestComponent(Base):
     category = Column(String, nullable=True)  # hematology, chemistry, etc.
     display_order = Column(Integer, nullable=True)  # For consistent ordering
 
+    # Canonical test name for trend matching - links to standardized test name
+    # Note: Index is created explicitly in migration and __table_args__
+    canonical_test_name = Column(String, nullable=True)
+
     # Notes - using Text like other models
     notes = Column(Text, nullable=True)
 
@@ -616,6 +620,7 @@ class LabTestComponent(Base):
         Index("idx_lab_test_components_lab_result_id", "lab_result_id"),
         Index("idx_lab_test_components_status", "status"),
         Index("idx_lab_test_components_category", "category"),
+        Index("ix_lab_test_components_canonical_test_name", "canonical_test_name"),
         # Compound indexes for common query patterns
         Index("idx_lab_test_components_lab_result_status", "lab_result_id", "status"),
         Index("idx_lab_test_components_lab_result_category", "lab_result_id", "category"),
@@ -2144,3 +2149,25 @@ class NotificationHistory(Base):
         Index("idx_notification_history_created_at", "created_at"),
         Index("idx_notification_history_event_type", "event_type"),
     )
+
+
+class SystemSetting(Base):
+    """
+    System-wide settings stored as key-value pairs.
+
+    Used for storing configuration values, feature flags, migration status,
+    library versions, and other system-level metadata.
+
+    Examples:
+    - test_library_version: "1.2.3"
+    - canonical_name_migration_complete: "true"
+    - last_sync_timestamp: "2026-01-31T12:00:00Z"
+    """
+    __tablename__ = "system_settings"
+
+    key = Column(String(100), primary_key=True)
+    value = Column(Text, nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
