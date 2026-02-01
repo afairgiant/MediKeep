@@ -13,7 +13,7 @@ The handler:
 - Never raises exceptions (notification failures shouldn't break business logic)
 """
 
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Optional
 
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -51,8 +51,7 @@ async def handle_notification_event(
     """
     event_type = event.event_type()
     is_broadcast = event.user_id is None
-
-    db: Session = None
+    db: Optional[Session] = None
 
     try:
         # Get template from registry
