@@ -1183,7 +1183,7 @@
     {
       "test_name": "Total T4",
       "abbreviation": "T4",
-      "test_code": "3053-6",
+      "test_code": "3026-2",
       "default_unit": "ug/dL",
       "category": "endocrinology",
       "common_names": [

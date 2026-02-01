@@ -113,6 +113,9 @@ export default defineConfig({
       // No need to manually add `'@': path.resolve(__dirname, './src')`
 
       // Shared data directory (single source of truth for test library, etc.)
+      // NOTE: This alias is defined for IDE support and potential future use.
+      // In actual imports, we use relative paths (e.g., '../../../shared/data/test_library.json')
+      // for better Docker build compatibility where alias resolution can be unreliable.
       '@shared': path.resolve(__dirname, '../shared'),
     },
   },
