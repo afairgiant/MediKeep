@@ -539,7 +539,7 @@ class TestVitalsCRUD:
         )
         assert len(page2) == 50
 
-        # Test pagination - third page (partial)
+        # Test pagination - third page (full page, 150 records total)
         page3 = vitals_crud.get_by_patient(
             db_session, patient_id=test_patient.id, skip=100, limit=50
         )

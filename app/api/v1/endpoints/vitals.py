@@ -264,13 +264,23 @@ def read_patient_vitals_paginated(
                 db=db, patient_id=patient_id, vital_type=vital_type
             )
 
+            # Order by recorded_date descending for consistent pagination
             if vital_type:
                 vitals_list = vitals.get_by_vital_type(
-                    db=db, patient_id=patient_id, vital_type=vital_type, skip=skip, limit=limit
+                    db=db,
+                    patient_id=patient_id,
+                    vital_type=vital_type,
+                    skip=skip,
+                    limit=limit,
                 )
             else:
                 vitals_list = vitals.get_by_patient(
-                    db=db, patient_id=patient_id, skip=skip, limit=limit
+                    db=db,
+                    patient_id=patient_id,
+                    skip=skip,
+                    limit=limit,
+                    order_by="recorded_date",
+                    order_desc=True,
                 )
         except ValueError as e:
             raise BusinessLogicException(message=str(e), request=request)

@@ -110,7 +110,9 @@ class VitalsService {
       const url = queryParams
         ? `/vitals/patient/${patientId}/paginated?${queryParams}`
         : `/vitals/patient/${patientId}/paginated`;
-      return await apiClient.get(url);
+      const response = await apiClient.get(url);
+      // Unwrap data from API client response wrapper
+      return response?.data ?? response;
     } catch (error) {
       // Error fetching paginated patient vitals
       throw error;

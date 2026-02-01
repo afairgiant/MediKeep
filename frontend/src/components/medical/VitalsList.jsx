@@ -140,8 +140,10 @@ const VitalsList = ({
         });
 
         // Extract data from paginated response (expects { items, total, skip, limit })
-        const items = response?.items ?? [];
-        const total = response?.total ?? items.length;
+        // Handle both direct response and wrapped response formats
+        const data = response?.data ?? response;
+        const items = data?.items ?? [];
+        const total = data?.total ?? items.length;
 
         setInternalVitals(items);
         setTotalRecords(total);
