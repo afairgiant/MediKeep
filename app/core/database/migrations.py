@@ -139,20 +139,50 @@ def run_startup_data_migrations():
     This function is called automatically when the application starts.
     """
     logger.debug("Checking for pending data migrations")
-    
+
     try:
         # Migration 1: Lab result files to entity files
         migrated_count, errors = migrate_lab_result_files_to_entity_files()
-        
+
         if migrated_count > 0:
             logger.info(f"Lab result files migration completed: {migrated_count} files migrated")
             if errors:
                 logger.warning(f"Migration completed with {len(errors)} errors")
         elif migrated_count == 0:
             logger.debug("No migrations were needed")
-        
+
+        # Migration 2: Canonical test name auto-linking for existing LabTestComponents
+        try:
+            from app.services.test_library_sync import test_library_sync
+
+            db = next(get_db())
+            try:
+                result = test_library_sync.run_one_time_migration(db)
+
+                if result.get("skipped"):
+                    logger.debug("Canonical test migration skipped - already completed")
+                elif result.get("error"):
+                    logger.error(f"Canonical test migration failed: {result.get('error')}")
+                else:
+                    logger.info(
+                        "Canonical test migration completed",
+                        extra={
+                            "processed": result.get("processed", 0),
+                            "linked": result.get("linked", 0),
+                            "unlinked": result.get("unlinked", 0)
+                        }
+                    )
+            finally:
+                db.close()
+
+        except ImportError:
+            logger.debug("Test library sync service not yet available - skipping canonical test migration")
+        except Exception as e:
+            logger.error(f"Canonical test migration encountered an error: {str(e)}")
+            # Non-fatal - continue with startup
+
         logger.debug("All startup data migrations completed successfully")
-        
+
     except Exception as e:
         logger.error(f"Startup data migrations failed: {str(e)}")
         # Don't raise here - let the application continue

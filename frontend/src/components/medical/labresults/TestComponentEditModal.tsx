@@ -2,7 +2,7 @@
  * TestComponentEditModal - Modal for editing individual test components
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Modal,
@@ -15,11 +15,13 @@ import {
   Button,
   Text,
   Box,
-  Alert
+  Alert,
+  Divider
 } from '@mantine/core';
-import { IconEdit, IconAlertCircle } from '@tabler/icons-react';
+import { IconEdit, IconAlertCircle, IconLink } from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
+import { TEST_LIBRARY } from '../../../constants/testLibrary';
 
 interface TestComponentEditModalProps {
   component: LabTestComponent | null;
@@ -135,6 +137,16 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
     return undefined;
   };
 
+  // Build dropdown options for canonical test name from test library
+  const canonicalTestOptions = useMemo(() => {
+    const options = TEST_LIBRARY.map(test => ({
+      value: test.test_name,
+      label: test.abbreviation ? `${test.test_name} (${test.abbreviation})` : test.test_name
+    }));
+    // Sort alphabetically
+    return options.sort((a, b) => a.label.localeCompare(b.label));
+  }, []);
+
   // Initialize form when component changes
   useEffect(() => {
     if (component) {
@@ -158,39 +170,46 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
         ref_range_text: component.ref_range_text || '',
         status: calculatedStatus,
         category: categoryToUse,
+        canonical_test_name: component.canonical_test_name || '',
         notes: component.notes || ''
       });
     }
   }, [component]);
 
-  // Combined effect to prevent race conditions between status and category updates
+  // Effect to recalculate status when value or ranges change
+  // Note: formData.status and formData.category are NOT in dependencies since they're outputs, not inputs
   useEffect(() => {
-    const updates: Partial<typeof formData> = {};
-
-    // Recalculate status when value or ranges change
     const newStatus = calculateStatus(
       formData.value as number,
       formData.ref_range_min as number | undefined,
       formData.ref_range_max as number | undefined
     );
 
-    if (newStatus !== formData.status) {
-      updates.status = newStatus;
-    }
+    // Only update if status actually changed to avoid infinite loops
+    setFormData(prev => {
+      if (prev.status === newStatus) {
+        return prev;
+      }
+      return { ...prev, status: newStatus };
+    });
+  }, [formData.value, formData.ref_range_min, formData.ref_range_max]);
 
-    // Auto-suggest category when test name changes (only if category is empty)
-    if (formData.test_name && !formData.category) {
+  // Separate effect for auto-suggesting category when test name changes
+  useEffect(() => {
+    // Only suggest category if test_name exists and category is empty
+    if (!formData.test_name) return;
+
+    setFormData(prev => {
+      // Only suggest if category is currently empty
+      if (prev.category) return prev;
+
       const suggestedCategory = suggestCategory(formData.test_name);
       if (suggestedCategory) {
-        updates.category = suggestedCategory;
+        return { ...prev, category: suggestedCategory };
       }
-    }
-
-    // Only update if we have changes to apply
-    if (Object.keys(updates).length > 0) {
-      setFormData(prev => ({ ...prev, ...updates }));
-    }
-  }, [formData.value, formData.ref_range_min, formData.ref_range_max, formData.test_name, formData.status, formData.category]);
+      return prev;
+    });
+  }, [formData.test_name]);
 
   const handleSubmit = async () => {
     if (!component) return;
@@ -357,6 +376,37 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               }))}
             />
           </Group>
+
+          {/* Trend Linking */}
+          <Divider label={t('testComponents.editModal.trendLinking', 'Trend Linking')} labelPosition="center" />
+
+          <Select
+            label={
+              <Group gap={4}>
+                <IconLink size={14} />
+                <Text size="sm">{t('testComponents.editModal.fields.linkedTest', 'Link to Standard Test')}</Text>
+              </Group>
+            }
+            description={t('testComponents.editModal.descriptions.linkedTest', 'Link this test to a standard test name for trend tracking across different lab naming variations')}
+            placeholder={t('testComponents.editModal.placeholders.linkedTest', 'Select a standard test to link to...')}
+            clearable
+            searchable
+            comboboxProps={{ zIndex: 3001 }}
+            data={canonicalTestOptions}
+            value={formData.canonical_test_name || null}
+            onChange={(value) => setFormData(prev => ({
+              ...prev,
+              canonical_test_name: value || ''
+            }))}
+          />
+
+          {formData.canonical_test_name && (
+            <Alert color="blue" variant="light">
+              <Text size="sm">
+                {t('testComponents.editModal.linkedInfo', 'This test will be grouped with other "{{testName}}" tests in trend charts.', { testName: formData.canonical_test_name })}
+              </Text>
+            </Alert>
+          )}
 
           {/* Notes */}
           <Textarea

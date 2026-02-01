@@ -25,6 +25,7 @@ class LabTestComponentBase(BaseModel):
     status: Optional[str] = None
     category: Optional[str] = None
     display_order: Optional[int] = None
+    canonical_test_name: Optional[str] = None  # Links to standardized test name for trend matching
     notes: Optional[str] = None
     lab_result_id: int
 
@@ -152,6 +153,19 @@ class LabTestComponentBase(BaseModel):
             raise ValueError(f"Notes must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_NOTES_LENGTH']} characters")
         return v.strip() if v else None
 
+    @field_validator("canonical_test_name")
+    @classmethod
+    def validate_canonical_test_name(cls, v):
+        """Validate canonical test name for trend matching"""
+        if v is None:
+            return None
+        stripped = v.strip()
+        if not stripped:
+            return None
+        if len(stripped) > LAB_TEST_COMPONENT_LIMITS["MAX_TEST_NAME_LENGTH"]:
+            raise ValueError(f"Canonical test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters")
+        return stripped
+
     @field_validator("lab_result_id")
     @classmethod
     def validate_lab_result_id(cls, v):
@@ -209,6 +223,7 @@ class LabTestComponentUpdate(BaseModel):
     status: Optional[str] = None
     category: Optional[str] = None
     display_order: Optional[int] = None
+    canonical_test_name: Optional[str] = None  # Links to standardized test name for trend matching
     notes: Optional[str] = None
 
     @field_validator("test_name")

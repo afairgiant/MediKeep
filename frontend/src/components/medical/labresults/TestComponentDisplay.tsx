@@ -153,22 +153,25 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     const statusColor = getStatusColor(component.status, component.value, component.ref_range_min, component.ref_range_max);
     const referenceRange = formatReferenceRange(component);
 
+    // Use canonical_test_name for trend matching if available, otherwise use test_name
+    const trendTestName = component.canonical_test_name || component.test_name;
+
     const handleCardClick = React.useCallback((e: React.MouseEvent) => {
       // Don't trigger if clicking on action buttons
       const target = e.target as HTMLElement;
       if (target.closest('button')) {
         return;
       }
-      onTrendClick?.(component.test_name);
-    }, [component.test_name]);
+      onTrendClick?.(trendTestName);
+    }, [trendTestName]);
 
     const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
       // Support Enter and Space keys for accessibility
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        onTrendClick?.(component.test_name);
+        onTrendClick?.(trendTestName);
       }
-    }, [component.test_name]);
+    }, [trendTestName]);
 
     return (
       <Card
@@ -181,7 +184,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
         onKeyDown={handleKeyDown}
         tabIndex={0}
         role="button"
-        aria-label={`View trends for ${component.test_name}`}
+        aria-label={`View trends for ${trendTestName}`}
       >
         <Stack gap="sm">
           {/* Header */}

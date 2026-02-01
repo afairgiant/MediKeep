@@ -306,6 +306,19 @@ class AdminApiService extends BaseApiService {
       new_password: newPassword,
     });
   }
+
+  // Test Library Maintenance endpoints
+  async getTestLibraryInfo() {
+    return this.get('/maintenance/test-library/info');
+  }
+
+  async reloadTestLibrary() {
+    return this.post('/maintenance/test-library/reload');
+  }
+
+  async syncTestLibrary(forceAll = false) {
+    return this.post('/maintenance/test-library/sync', { force_all: forceAll });
+  }
 }
 
 // Create and export a singleton instance

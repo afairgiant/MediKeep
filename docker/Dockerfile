@@ -22,6 +22,9 @@ RUN --mount=type=cache,target=/root/.npm \
 # Copy frontend source (node_modules is already ignored by .dockerignore)
 COPY frontend/ ./
 
+# Copy shared data directory (test library JSON, etc.) - needed for relative imports
+COPY shared/ ../shared/
+
 # Clean up test files
 RUN find . -name "*.test.js" -o -name "*.test.jsx" -o -name "*.spec.js" -o -name "*.spec.jsx" | xargs rm -f && \
     rm -rf src/__tests__ src/**/__tests__
@@ -76,6 +79,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copy backend source files
 COPY app/ ./app/
 COPY run.py .
+
+# Copy shared data directory (test library JSON, etc.)
+COPY shared/ ./shared/
 
 # Copy Alembic migrations and configuration
 COPY alembic/ ./alembic/

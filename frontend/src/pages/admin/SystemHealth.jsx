@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import AdminCard from '../../components/admin/AdminCard';
 import { useAdminData } from '../../hooks/useAdminData';
@@ -93,6 +93,59 @@ const SystemHealth = () => {
     },
   });
 
+  // Test Library State
+  const [testLibraryInfo, setTestLibraryInfo] = useState(null);
+  const [testLibraryLoading, setTestLibraryLoading] = useState(false);
+  const [testLibrarySyncing, setTestLibrarySyncing] = useState(false);
+  const [testLibraryError, setTestLibraryError] = useState(null);
+  const [syncResult, setSyncResult] = useState(null);
+
+  const loadTestLibraryInfo = useCallback(async () => {
+    setTestLibraryLoading(true);
+    setTestLibraryError(null);
+    try {
+      const info = await adminApiService.getTestLibraryInfo();
+      setTestLibraryInfo(info);
+    } catch (err) {
+      setTestLibraryError(err.message || 'Failed to load test library info');
+    } finally {
+      setTestLibraryLoading(false);
+    }
+  }, []);
+
+  const handleReloadTestLibrary = async () => {
+    setTestLibrarySyncing(true);
+    setTestLibraryError(null);
+    setSyncResult(null);
+    try {
+      const result = await adminApiService.reloadTestLibrary();
+      setSyncResult({ type: 'reload', ...result });
+      await loadTestLibraryInfo();
+    } catch (err) {
+      setTestLibraryError(err.message || 'Failed to reload test library');
+    } finally {
+      setTestLibrarySyncing(false);
+    }
+  };
+
+  const handleSyncTestLibrary = async (forceAll = false) => {
+    setTestLibrarySyncing(true);
+    setTestLibraryError(null);
+    setSyncResult(null);
+    try {
+      const result = await adminApiService.syncTestLibrary(forceAll);
+      setSyncResult({ type: 'sync', ...result });
+      await loadTestLibraryInfo();
+    } catch (err) {
+      setTestLibraryError(err.message || 'Failed to sync test library');
+    } finally {
+      setTestLibrarySyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTestLibraryInfo();
+  }, [loadTestLibraryInfo]);
 
   const loading =
     healthLoading ||
@@ -484,6 +537,103 @@ const SystemHealth = () => {
             </div>
           </AdminCard>
         )}
+
+        {/* Test Library Maintenance */}
+        <AdminCard
+          title="Test Library Maintenance"
+          icon="🧪"
+          status={testLibraryError ? 'error' : 'healthy'}
+          loading={testLibraryLoading}
+          error={testLibraryError}
+        >
+          <div className="test-library-section">
+            {testLibraryInfo && (
+              <div className="health-items">
+                <HealthItem
+                  label="Library Version"
+                  value={testLibraryInfo.version}
+                  status="info"
+                />
+                <HealthItem
+                  label="Total Tests"
+                  value={testLibraryInfo.test_count}
+                  status="info"
+                />
+                <div className="health-item">
+                  <span className="health-label">Categories:</span>
+                  <span className="health-value">
+                    {testLibraryInfo.categories &&
+                      Object.entries(testLibraryInfo.categories)
+                        .map(([cat, count]) => `${cat}: ${count}`)
+                        .join(', ')}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {syncResult && (
+              <div
+                className={`sync-result ${syncResult.success ? 'success' : 'error'}`}
+              >
+                <div className="sync-result-header">
+                  {syncResult.success ? '✓' : '✗'}{' '}
+                  {syncResult.type === 'reload'
+                    ? 'Library Reloaded'
+                    : 'Sync Complete'}
+                </div>
+                {syncResult.type === 'sync' && (
+                  <div className="sync-result-details">
+                    <span>Processed: {syncResult.components_processed}</span>
+                    <span>Names Updated: {syncResult.canonical_names_updated}</span>
+                    <span>Categories Updated: {syncResult.categories_updated}</span>
+                  </div>
+                )}
+                {syncResult.message && (
+                  <div className="sync-result-message">{syncResult.message}</div>
+                )}
+              </div>
+            )}
+
+            <div className="test-library-actions">
+              <button
+                onClick={handleReloadTestLibrary}
+                className="action-btn secondary"
+                disabled={testLibrarySyncing}
+              >
+                {testLibrarySyncing ? 'Working...' : 'Reload Library'}
+              </button>
+              <button
+                onClick={() => handleSyncTestLibrary(false)}
+                className="action-btn primary"
+                disabled={testLibrarySyncing}
+              >
+                {testLibrarySyncing ? 'Syncing...' : 'Sync Unmatched'}
+              </button>
+              <button
+                onClick={() => handleSyncTestLibrary(true)}
+                className="action-btn warning"
+                disabled={testLibrarySyncing}
+              >
+                {testLibrarySyncing ? 'Syncing...' : 'Force Sync All'}
+              </button>
+            </div>
+
+            <div className="test-library-help">
+              <p>
+                <strong>Reload Library:</strong> Refreshes the test library from
+                disk (use after updating test_library.json)
+              </p>
+              <p>
+                <strong>Sync Unmatched:</strong> Updates components that don't have
+                a canonical name yet
+              </p>
+              <p>
+                <strong>Force Sync All:</strong> Re-matches all components
+                (categories and canonical names)
+              </p>
+            </div>
+          </div>
+        </AdminCard>
       </div>
     </AdminLayout>
   );

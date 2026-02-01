@@ -26,13 +26,17 @@
 
     /* Path mapping */
     "baseUrl": "src",
+    "paths": {
+      "@shared/*": ["../../shared/*"]
+    },
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src"
+    "src",
+    "../shared/**/*"
   ],
   "references": [
     {

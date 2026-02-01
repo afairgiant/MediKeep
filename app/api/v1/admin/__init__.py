@@ -11,6 +11,7 @@ from app.api.v1.admin import (
     backup,
     bulk_operations,
     dashboard,
+    maintenance,
     models,
     restore,
     trash_management,
@@ -30,5 +31,7 @@ router.include_router(backup.router, prefix="/backups", tags=["admin-backup"])
 router.include_router(restore.router, prefix="/restore", tags=["admin-restore"])
 
 router.include_router(trash_management.router, prefix="", tags=["admin-trash"])
+
+router.include_router(maintenance.router, prefix="/maintenance", tags=["admin-maintenance"])
 
 __all__ = ["router"]
