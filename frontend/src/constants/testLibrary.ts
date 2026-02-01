@@ -6,7 +6,8 @@
  * Single source of truth: shared/data/test_library.json
  */
 
-import testLibraryData from '@shared/data/test_library.json';
+// Use relative path for CI/CD compatibility (alias may not resolve correctly in Docker builds)
+import testLibraryData from '../../../shared/data/test_library.json';
 import { TestLibraryItem, TestLibraryData } from './testLibraryTypes';
 
 // Cast the imported JSON data to our typed interface
