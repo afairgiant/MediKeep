@@ -422,6 +422,96 @@ class NotificationService:
 
         return history_records
 
+    async def send_broadcast_notification(
+        self,
+        event_type: str,
+        title: str,
+        message: str,
+        event_data: Optional[Dict] = None,
+    ) -> List[NotificationHistory]:
+        """
+        Send notification to ALL users who have the event type enabled.
+
+        This is used for system-wide events like backup completion where
+        any user who has subscribed should receive the notification,
+        regardless of who triggered the action.
+
+        Args:
+            event_type: Event type identifier
+            title: Notification title
+            message: Notification message
+            event_data: Optional event-specific data for history
+
+        Returns:
+            List of NotificationHistory records for all recipients
+        """
+        if not settings.NOTIFICATIONS_ENABLED:
+            logger.debug("Notifications disabled, skipping broadcast")
+            return []
+
+        # Find ALL enabled preferences for this event type (across all users)
+        preferences = self.db.query(NotificationPreference).filter(
+            and_(
+                NotificationPreference.event_type == event_type,
+                NotificationPreference.is_enabled == True
+            )
+        ).all()
+
+        if not preferences:
+            logger.debug(f"No enabled preferences for broadcast event {event_type}")
+            return []
+
+        # Get unique enabled channels
+        channel_ids = list(set(p.channel_id for p in preferences))
+        channels = self.db.query(NotificationChannel).filter(
+            and_(
+                NotificationChannel.id.in_(channel_ids),
+                NotificationChannel.is_enabled == True
+            )
+        ).all()
+
+        if not channels:
+            logger.debug(f"No enabled channels for broadcast event {event_type}")
+            return []
+
+        # Build a map of channel_id to user_id for history records
+        channel_to_user = {p.channel_id: p.user_id for p in preferences}
+
+        # Send to each channel in parallel
+        history_records = []
+        tasks = []
+
+        for channel in channels:
+            user_id = channel_to_user.get(channel.id, channel.user_id)
+            history = NotificationHistory(
+                user_id=user_id,
+                channel_id=channel.id,
+                event_type=event_type,
+                event_data=event_data,
+                title=title,
+                message_preview=message[:500] if message else None,
+                status=NotificationStatus.PENDING.value,
+            )
+            self.db.add(history)
+            history_records.append(history)
+            tasks.append(self._send_to_channel(channel, title, message, history))
+
+        self.db.commit()
+
+        # Execute sends in parallel
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+        logger.info(
+            "broadcast_notification_sent",
+            extra={
+                "event_type": event_type,
+                "recipients_count": len(channels),
+            }
+        )
+
+        return history_records
+
     async def _send_to_channel(
         self,
         channel: NotificationChannel,

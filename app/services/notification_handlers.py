@@ -35,11 +35,12 @@ async def handle_notification_event(
 
     This handler is called by the event bus when a domain event is published.
     It performs the following steps:
-    1. Validates the event has a user_id (skip if None)
-    2. Gets the notification template from the event registry
-    3. Creates a database session
-    4. Sends notification via NotificationService
-    5. Logs success/failure
+    1. Gets the notification template from the event registry
+    2. Creates a database session
+    3. Sends notification via NotificationService:
+       - If user_id is None: broadcasts to ALL users with this event enabled
+       - If user_id is set: sends only to that specific user
+    4. Logs success/failure
 
     Args:
         event: The domain event that was published
@@ -49,19 +50,7 @@ async def handle_notification_event(
         None. Never raises exceptions - logs errors instead.
     """
     event_type = event.event_type()
-
-    # Skip if no user_id (system events without a specific user)
-    if event.user_id is None:
-        logger.debug(
-            f"Skipping notification for event {event_type} - no user_id",
-            extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "notification_skipped_no_user",
-                "event_type": event_type,
-                "event_id": event.event_id,
-            },
-        )
-        return
+    is_broadcast = event.user_id is None
 
     db: Session = None
 
@@ -74,15 +63,26 @@ async def handle_notification_event(
         # Create database session
         db = db_session_factory()
 
-        # Send notification
+        # Send notification (broadcast or user-specific)
         service = NotificationService(db)
-        history_records = await service.send_notification(
-            user_id=event.user_id,
-            event_type=event_type,
-            title=title,
-            message=message,
-            event_data=event_data,
-        )
+
+        if is_broadcast:
+            # System-wide event - send to all users with this event enabled
+            history_records = await service.send_broadcast_notification(
+                event_type=event_type,
+                title=title,
+                message=message,
+                event_data=event_data,
+            )
+        else:
+            # User-specific event - send only to that user
+            history_records = await service.send_notification(
+                user_id=event.user_id,
+                event_type=event_type,
+                title=title,
+                message=message,
+                event_data=event_data,
+            )
 
         # Log success
         logger.info(
@@ -93,6 +93,7 @@ async def handle_notification_event(
                 "event_type": event_type,
                 "event_id": event.event_id,
                 LogFields.USER_ID: event.user_id,
+                "is_broadcast": is_broadcast,
                 "notifications_sent": len(history_records),
             },
         )
@@ -107,6 +108,7 @@ async def handle_notification_event(
                 "event_type": event_type,
                 "event_id": event.event_id,
                 LogFields.USER_ID: event.user_id,
+                "is_broadcast": is_broadcast,
                 LogFields.ERROR: str(e),
             },
             exc_info=True,
