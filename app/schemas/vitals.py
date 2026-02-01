@@ -267,3 +267,14 @@ class VitalsStats(BaseModel):
     @classmethod
     def serialize_datetime_as_utc(cls, value: Optional[datetime]) -> Optional[str]:
         return serialize_datetime_utc(value)
+
+
+class VitalsPaginatedResponse(BaseModel):
+    """Schema for paginated vitals response with total count"""
+
+    items: list[VitalsResponse]
+    total: int
+    skip: int
+    limit: int
+
+    model_config = ConfigDict(from_attributes=True)

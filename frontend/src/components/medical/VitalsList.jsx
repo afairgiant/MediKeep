@@ -78,6 +78,7 @@ const VitalsList = ({
   const [internalVitals, setInternalVitals] = useState([]);
   const [internalLoading, setInternalLoading] = useState(true);
   const [internalError, setInternalError] = useState(null);
+  const [totalRecords, setTotalRecords] = useState(0);
   const [sortConfig, setSortConfig] = useState({
     key: 'recorded_date',
     direction: 'desc',
@@ -119,11 +120,7 @@ const VitalsList = ({
     }
   }, [limit]);
 
-  // Reset to page 1 only when pageSize changes (page validation handles data changes)
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [pageSize]);
-
+  // Server-side pagination: load data when page or pageSize changes
   const loadVitals = useCallback(async () => {
     // Only load internally if no data is passed via props
     if (vitalsData !== undefined) return;
@@ -132,21 +129,39 @@ const VitalsList = ({
       setInternalLoading(true);
       setInternalError(null);
 
-      // Fetch all records for client-side pagination (no limit)
-      const response = patientId
-        ? await vitalsService.getPatientVitals(patientId)
-        : await vitalsService.getVitals();
+      // Calculate skip for server-side pagination
+      const skip = (currentPage - 1) * pageSize;
 
-      // Extract the data array from the response
-      const data = response?.data || response;
-      setInternalVitals(Array.isArray(data) ? data : []);
+      // Use the new paginated endpoint for server-side pagination
+      if (patientId) {
+        const response = await vitalsService.getPatientVitalsPaginated(patientId, {
+          skip,
+          limit: pageSize,
+        });
+
+        // Extract data from paginated response (expects { items, total, skip, limit })
+        // Handle both direct response and wrapped response formats
+        const data = response?.data ?? response;
+        const items = data?.items ?? [];
+        const total = data?.total ?? items.length;
+
+        setInternalVitals(items);
+        setTotalRecords(total);
+      } else {
+        // Fallback to non-paginated endpoint if no patientId
+        const response = await vitalsService.getVitals({ skip, limit: pageSize });
+        const data = response?.data || response;
+        setInternalVitals(Array.isArray(data) ? data : []);
+        setTotalRecords(Array.isArray(data) ? data.length : 0);
+      }
     } catch (err) {
       setInternalError(err.message || 'Failed to load vitals');
       setInternalVitals([]);
+      setTotalRecords(0);
     } finally {
       setInternalLoading(false);
     }
-  }, [patientId, vitalsData]);
+  }, [patientId, vitalsData, currentPage, pageSize]);
 
   useEffect(() => {
     loadVitals();
@@ -158,10 +173,21 @@ const VitalsList = ({
     }
   }, [onRefresh, loadVitals, vitalsData]);
 
+  // Reset to page 1 when pageSize changes
+  const handlePageSizeChange = (newSize) => {
+    if (newSize === null || newSize === undefined) return;
+    const numericValue = Number(newSize);
+    if (!Number.isFinite(numericValue) || numericValue <= 0) return;
+    setPageSize(numericValue);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   // Use passed data or internal data
   const vitals = vitalsData !== undefined ? vitalsData : internalVitals;
   const isLoading = loading !== undefined ? loading : internalLoading;
   const currentError = error !== undefined ? error : internalError;
+  // For external data, use array length; for internal, use tracked total
+  const actualTotalRecords = vitalsData !== undefined ? vitalsData.length : totalRecords;
 
   const handleDelete = async vitalsId => {
     if (
@@ -534,12 +560,30 @@ const VitalsList = ({
 
   const sortedVitals = getSortedVitals();
 
+  // For server-side pagination: data is already paginated, just sort it
+  // For client-side (when vitalsData is provided): slice after sorting
+  const isServerSidePagination = vitalsData === undefined && patientId;
+
   // Calculate pagination values
-  const totalRecords = sortedVitals.length;
-  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, totalRecords);
-  const paginatedVitals = sortedVitals.slice(startIndex, endIndex);
+  const totalPages = Math.max(1, Math.ceil(actualTotalRecords / pageSize));
+
+  // For server-side pagination, show all sorted items (already paginated by server)
+  // For client-side pagination, slice the sorted data
+  let paginatedVitals;
+  let startIndex;
+  let endIndex;
+
+  if (isServerSidePagination) {
+    // Server already returned the correct page of data
+    paginatedVitals = sortedVitals;
+    startIndex = (currentPage - 1) * pageSize;
+    endIndex = Math.min(startIndex + sortedVitals.length, actualTotalRecords);
+  } else {
+    // Client-side pagination for externally provided data
+    startIndex = (currentPage - 1) * pageSize;
+    endIndex = Math.min(startIndex + pageSize, actualTotalRecords);
+    paginatedVitals = sortedVitals.slice(startIndex, endIndex);
+  }
 
   // Ensure currentPage stays valid when data changes (e.g., after deletion)
   useEffect(() => {
@@ -837,7 +881,7 @@ const VitalsList = ({
         </Paper>
 
         {/* Pagination Controls */}
-        {totalRecords > 0 && (
+        {actualTotalRecords > 0 && (
           <Group justify={totalPages > 1 ? 'space-between' : 'flex-end'} align="center" mt="md">
             {/* Left: Record count (only show when multiple pages) */}
             {totalPages > 1 && (
@@ -845,7 +889,7 @@ const VitalsList = ({
                 {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
                   start: startIndex + 1,
                   end: endIndex,
-                  total: totalRecords,
+                  total: actualTotalRecords,
                 })}
               </Text>
             )}
@@ -870,12 +914,7 @@ const VitalsList = ({
               </Text>
               <Select
                 value={String(pageSize)}
-                onChange={(value) => {
-                  if (value === null || value === undefined) return;
-                  const numericValue = Number(value);
-                  if (!Number.isFinite(numericValue) || numericValue <= 0) return;
-                  setPageSize(numericValue);
-                }}
+                onChange={handlePageSizeChange}
                 data={pageSizeOptions}
                 size="xs"
                 w={70}

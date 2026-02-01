@@ -69,6 +69,41 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         # frontend converts back to local for display.
         super().__init__(Vitals, timezone_fields=["recorded_date"])
 
+    def count_by_patient(
+        self,
+        db: Session,
+        *,
+        patient_id: int,
+        vital_type: Optional[str] = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+    ) -> int:
+        """Get total count of vitals records for a patient with optional filters.
+
+        Args:
+            patient_id: The patient ID to count records for.
+            vital_type: Optional filter by vital type.
+            start_date: Optional start date filter.
+            end_date: Optional end date filter.
+
+        Returns:
+            Total count of matching records.
+        """
+        query = db.query(func.count(self.model.id)).filter(
+            Vitals.patient_id == patient_id
+        )
+
+        if vital_type:
+            _validate_vital_type(vital_type)
+            query = _apply_vital_type_filter(query, vital_type)
+
+        if start_date:
+            query = query.filter(Vitals.recorded_date >= start_date)
+        if end_date:
+            query = query.filter(Vitals.recorded_date <= end_date)
+
+        return query.scalar() or 0
+
     def get_by_patient_date_range(
         self,
         db: Session,
@@ -77,7 +112,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         start_date: datetime,
         end_date: datetime,
         skip: int = 0,
-        limit: int = 100,
+        limit: int = 10000,
         vital_type: Optional[str] = None
     ) -> List[Vitals]:
         """Get vitals readings for a patient within a date range, optionally filtered by vital type.
@@ -120,7 +155,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         patient_id: int,
         vital_type: str,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 10000
     ) -> List[Vitals]:
         """Get vitals readings for a specific vital type (e.g., only blood pressure).
 
@@ -326,7 +361,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         )
 
     def get_with_relationships(
-        self, db: Session, *, skip: int = 0, limit: int = 100
+        self, db: Session, *, skip: int = 0, limit: int = 10000
     ) -> List[Vitals]:
         """Get vitals with relationships loaded"""
         return (
