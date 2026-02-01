@@ -197,7 +197,8 @@ class TestNotificationService:
         user = User(
             username="testuser",
             email="test@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User"
         )
         db_session.add(user)
@@ -225,7 +226,8 @@ class TestNotificationService:
         user = User(
             username="testuser2",
             email="test2@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 2"
         )
         db_session.add(user)
@@ -257,7 +259,8 @@ class TestNotificationService:
         user = User(
             username="testuser3",
             email="test3@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 3"
         )
         db_session.add(user)
@@ -291,7 +294,8 @@ class TestNotificationService:
         user = User(
             username="testuser4",
             email="test4@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 4"
         )
         db_session.add(user)
@@ -316,8 +320,8 @@ class TestNotificationService:
         assert masked["smtp_host"] == "smtp.example.com"
         assert masked["smtp_user"] == "user@example.com"
 
-        # Sensitive fields should be masked
-        assert masked["smtp_password"] == "ve...23"
+        # Sensitive fields should be masked (passwords are always fully masked)
+        assert masked["smtp_password"] == "****"
 
     def test_update_channel(self, db_session):
         """Test updating a channel."""
@@ -325,7 +329,8 @@ class TestNotificationService:
         user = User(
             username="testuser5",
             email="test5@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 5"
         )
         db_session.add(user)
@@ -355,7 +360,8 @@ class TestNotificationService:
         user = User(
             username="testuser6",
             email="test6@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 6"
         )
         db_session.add(user)
@@ -382,7 +388,8 @@ class TestNotificationService:
         user = User(
             username="testuser7",
             email="test7@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 7"
         )
         db_session.add(user)
@@ -413,7 +420,8 @@ class TestNotificationService:
         user = User(
             username="testuser8",
             email="test8@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 8"
         )
         db_session.add(user)
@@ -445,7 +453,8 @@ class TestNotificationSending:
         user = User(
             username="testuser9",
             email="test9@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 9"
         )
         db_session.add(user)
@@ -462,16 +471,14 @@ class TestNotificationSending:
 
         assert results == []
 
-    @patch("app.services.notification_service.settings")
-    async def test_send_notification_disabled(self, mock_settings, db_session):
+    async def test_send_notification_disabled(self, db_session):
         """Test that notifications are skipped when disabled."""
-        mock_settings.NOTIFICATIONS_ENABLED = False
-
         from app.models.models import User
         user = User(
             username="testuser10",
             email="test10@example.com",
-            hashed_password="hashedpw",
+            password_hash="hashedpw",
+            role="user",
             full_name="Test User 10"
         )
         db_session.add(user)
@@ -479,12 +486,250 @@ class TestNotificationSending:
         db_session.refresh(user)
 
         service = NotificationService(db_session)
-        results = await service.send_notification(
+
+        # Patch NOTIFICATIONS_ENABLED after service creation
+        with patch("app.services.notification_service.settings.NOTIFICATIONS_ENABLED", False):
+            results = await service.send_notification(
+                user_id=user.id,
+                event_type="backup_completed",
+                title="Test",
+                message="Test message"
+            )
+
+        assert results == []
+
+
+@pytest.mark.asyncio
+class TestBroadcastNotifications:
+    """Tests for broadcast notification functionality."""
+
+    async def test_broadcast_sends_to_all_subscribed_users(self, db_session):
+        """Test that broadcast notifications are sent to all users with the event enabled."""
+        from app.models.models import User
+
+        # Create multiple users
+        users = []
+        for i in range(3):
+            user = User(
+                username=f"broadcast_user{i}",
+                email=f"broadcast{i}@example.com",
+                password_hash="hashedpw",
+            role="user",
+                full_name=f"Broadcast User {i}"
+            )
+            db_session.add(user)
+            users.append(user)
+        db_session.commit()
+        for user in users:
+            db_session.refresh(user)
+
+        service = NotificationService(db_session)
+
+        # Create channels and preferences for each user
+        for user in users:
+            channel = service.create_channel(
+                user_id=user.id,
+                name=f"Channel for {user.username}",
+                channel_type="discord",
+                config={"webhook_url": f"https://discord.com/api/webhooks/{user.id}/abc"}
+            )
+            service.set_preference(user.id, channel.id, "backup_completed", True)
+
+        # Send broadcast notification
+        with patch.object(service, '_send_to_channel') as mock_send:
+            # Make the mock async
+            async def async_noop(*args, **kwargs):
+                pass
+            mock_send.side_effect = async_noop
+
+            results = await service.send_broadcast_notification(
+                event_type="backup_completed",
+                title="Backup Complete",
+                message="Your backup completed successfully"
+            )
+
+        # Should have created history records for all 3 users
+        assert len(results) == 3
+        # Verify _send_to_channel was called for each user's channel
+        assert mock_send.call_count == 3
+
+    async def test_broadcast_only_enabled_preferences_receive(self, db_session):
+        """Test that only users with enabled preferences receive broadcast notifications."""
+        from app.models.models import User
+
+        # Create two users
+        user1 = User(
+            username="enabled_user",
+            email="enabled@example.com",
+            password_hash="hashedpw",
+            role="user",
+            full_name="Enabled User"
+        )
+        user2 = User(
+            username="disabled_user",
+            email="disabled@example.com",
+            password_hash="hashedpw",
+            role="user",
+            full_name="Disabled User"
+        )
+        db_session.add(user1)
+        db_session.add(user2)
+        db_session.commit()
+        db_session.refresh(user1)
+        db_session.refresh(user2)
+
+        service = NotificationService(db_session)
+
+        # Create channels for both users
+        channel1 = service.create_channel(
+            user_id=user1.id,
+            name="Enabled Channel",
+            channel_type="discord",
+            config={"webhook_url": "https://discord.com/api/webhooks/1/abc"}
+        )
+        channel2 = service.create_channel(
+            user_id=user2.id,
+            name="Disabled Channel",
+            channel_type="discord",
+            config={"webhook_url": "https://discord.com/api/webhooks/2/abc"}
+        )
+
+        # Enable preference for user1, disable for user2
+        service.set_preference(user1.id, channel1.id, "backup_completed", True)
+        service.set_preference(user2.id, channel2.id, "backup_completed", False)
+
+        # Send broadcast notification
+        with patch.object(service, '_send_to_channel') as mock_send:
+            async def async_noop(*args, **kwargs):
+                pass
+            mock_send.side_effect = async_noop
+
+            results = await service.send_broadcast_notification(
+                event_type="backup_completed",
+                title="Backup Complete",
+                message="Your backup completed successfully"
+            )
+
+        # Should only have created history record for user1
+        assert len(results) == 1
+        assert results[0].user_id == user1.id
+        assert mock_send.call_count == 1
+
+    async def test_broadcast_no_preferences_returns_empty(self, db_session):
+        """Test that broadcast returns empty list when no users have the event enabled."""
+        from app.models.models import User
+
+        user = User(
+            username="no_pref_user",
+            email="nopref@example.com",
+            password_hash="hashedpw",
+            role="user",
+            full_name="No Pref User"
+        )
+        db_session.add(user)
+        db_session.commit()
+        db_session.refresh(user)
+
+        service = NotificationService(db_session)
+
+        # Create channel but no preference for backup_completed
+        channel = service.create_channel(
             user_id=user.id,
+            name="No Pref Channel",
+            channel_type="discord",
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+        )
+        # Set preference for a different event type
+        service.set_preference(user.id, channel.id, "password_changed", True)
+
+        results = await service.send_broadcast_notification(
             event_type="backup_completed",
-            title="Test",
-            message="Test message"
+            title="Backup Complete",
+            message="Your backup completed successfully"
         )
 
         assert results == []
 
+    async def test_broadcast_disabled_when_notifications_off(self, db_session):
+        """Test that no broadcast notifications are sent when NOTIFICATIONS_ENABLED is False."""
+        from app.models.models import User
+
+        user = User(
+            username="disabled_notif_user",
+            email="disabled_notif@example.com",
+            password_hash="hashedpw",
+            role="user",
+            full_name="Disabled Notif User"
+        )
+        db_session.add(user)
+        db_session.commit()
+        db_session.refresh(user)
+
+        service = NotificationService(db_session)
+
+        # Set up channel and preference first
+        channel = service.create_channel(
+            user_id=user.id,
+            name="Disabled Notif Channel",
+            channel_type="discord",
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+        )
+        service.set_preference(user.id, channel.id, "backup_completed", True)
+
+        # Now patch NOTIFICATIONS_ENABLED and test
+        with patch("app.services.notification_service.settings.NOTIFICATIONS_ENABLED", False):
+            results = await service.send_broadcast_notification(
+                event_type="backup_completed",
+                title="Backup Complete",
+                message="Your backup completed successfully"
+            )
+
+        assert results == []
+
+    async def test_broadcast_logs_recipient_count(self, db_session):
+        """Test that broadcast sends to correct number of recipients."""
+        from app.models.models import User
+
+        # Create two users with preferences enabled
+        users = []
+        for i in range(2):
+            user = User(
+                username=f"log_test_user{i}",
+                email=f"logtest{i}@example.com",
+                password_hash="hashedpw",
+            role="user",
+                full_name=f"Log Test User {i}"
+            )
+            db_session.add(user)
+            users.append(user)
+        db_session.commit()
+        for user in users:
+            db_session.refresh(user)
+
+        service = NotificationService(db_session)
+
+        # Create channels and preferences
+        for user in users:
+            channel = service.create_channel(
+                user_id=user.id,
+                name=f"Log Channel {user.username}",
+                channel_type="discord",
+                config={"webhook_url": f"https://discord.com/api/webhooks/{user.id}/abc"}
+            )
+            service.set_preference(user.id, channel.id, "backup_completed", True)
+
+        # Send broadcast notification
+        with patch.object(service, '_send_to_channel') as mock_send:
+            async def async_noop(*args, **kwargs):
+                pass
+            mock_send.side_effect = async_noop
+
+            results = await service.send_broadcast_notification(
+                event_type="backup_completed",
+                title="Backup Complete",
+                message="Your backup completed successfully"
+            )
+
+        # Verify correct number of recipients
+        assert len(results) == 2
+        assert mock_send.call_count == 2
