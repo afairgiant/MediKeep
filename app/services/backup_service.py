@@ -60,13 +60,12 @@ class BackupService:
             return "17"
 
     async def create_database_backup(
-        self, description: Optional[str] = None, user_id: Optional[int] = None
+        self, description: Optional[str] = None
     ) -> Dict[str, Any]:
         """Create a database backup using pg_dump with direct file output.
 
         Args:
             description: Optional description for the backup
-            user_id: Optional user ID to send notifications to
         """
         try:
             # Generate backup filename with timestamp
@@ -113,16 +112,14 @@ class BackupService:
                 f"Database backup completed: {backup_filename} ({file_size} bytes)"
             )
 
-            # Publish backup completed event if user_id provided
-            if user_id:
-                event = BackupCompletedEvent(
-                    user_id=user_id,
-                    filename=backup_filename,
-                    size_mb=round(file_size / 1024 / 1024, 2),
-                    backup_type="database",
-                    checksum=checksum,
-                )
-                await get_event_bus().publish(event)
+            # Publish backup completed event (broadcasts to all subscribers)
+            event = BackupCompletedEvent(
+                filename=backup_filename,
+                size_mb=round(file_size / 1024 / 1024, 2),
+                backup_type="database",
+                checksum=checksum,
+            )
+            await get_event_bus().publish(event)
 
             return {
                 "id": backup_record.id,
@@ -144,17 +141,15 @@ class BackupService:
                 error_msg,
             )
 
-            # Publish backup failed event if user_id provided
-            if user_id:
-                event = BackupFailedEvent(
-                    user_id=user_id,
-                    error=str(e),
-                    backup_type="database",
-                    partial_file=(
-                        str(backup_path) if "backup_path" in locals() else None
-                    ),
-                )
-                await get_event_bus().publish(event)
+            # Publish backup failed event (broadcasts to all subscribers)
+            event = BackupFailedEvent(
+                error=str(e),
+                backup_type="database",
+                partial_file=(
+                    str(backup_path) if "backup_path" in locals() else None
+                ),
+            )
+            await get_event_bus().publish(event)
 
             raise Exception(error_msg)
 
@@ -302,14 +297,13 @@ class BackupService:
             logger.error(f"Failed to record backup failure: {str(e)}")
 
     async def create_files_backup(
-        self, description: Optional[str] = None, user_id: Optional[int] = None
+        self, description: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Create a backup of the uploads directory using tar.
 
         Args:
             description: Optional description for the backup
-            user_id: Optional user ID to send notifications to
 
         Returns:
             Dictionary containing backup information
@@ -373,16 +367,14 @@ class BackupService:
                 f"Files backup completed successfully: {backup_filename} ({file_size} bytes)"
             )
 
-            # Publish backup completed event if user_id provided
-            if user_id:
-                event = BackupCompletedEvent(
-                    user_id=user_id,
-                    filename=backup_filename,
-                    size_mb=round(file_size / 1024 / 1024, 2),
-                    backup_type="files",
-                    checksum=checksum,
-                )
-                await get_event_bus().publish(event)
+            # Publish backup completed event (broadcasts to all subscribers)
+            event = BackupCompletedEvent(
+                filename=backup_filename,
+                size_mb=round(file_size / 1024 / 1024, 2),
+                backup_type="files",
+                checksum=checksum,
+            )
+            await get_event_bus().publish(event)
 
             return {
                 "id": backup_record.id,
@@ -404,17 +396,15 @@ class BackupService:
                 error_msg,
             )
 
-            # Publish backup failed event if user_id provided
-            if user_id:
-                event = BackupFailedEvent(
-                    user_id=user_id,
-                    error=str(e),
-                    backup_type="files",
-                    partial_file=(
-                        str(backup_path) if "backup_path" in locals() else None
-                    ),
-                )
-                await get_event_bus().publish(event)
+            # Publish backup failed event (broadcasts to all subscribers)
+            event = BackupFailedEvent(
+                error=str(e),
+                backup_type="files",
+                partial_file=(
+                    str(backup_path) if "backup_path" in locals() else None
+                ),
+            )
+            await get_event_bus().publish(event)
 
             raise Exception(error_msg)
 
@@ -851,14 +841,13 @@ class BackupService:
             raise Exception(f"Failed to cleanup orphaned files: {str(e)}")
 
     async def create_full_backup(
-        self, description: Optional[str] = None, user_id: Optional[int] = None
+        self, description: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Create a full system backup (database + files) in a single archive.
 
         Args:
             description: Optional description for the backup
-            user_id: Optional user ID to send notifications to
 
         Returns:
             Dictionary containing backup information
@@ -950,16 +939,14 @@ class BackupService:
                 f"Full backup completed successfully: {backup_filename} ({file_size} bytes)"
             )
 
-            # Publish backup completed event if user_id provided
-            if user_id:
-                event = BackupCompletedEvent(
-                    user_id=user_id,
-                    filename=backup_filename,
-                    size_mb=round(file_size / 1024 / 1024, 2),
-                    backup_type="full",
-                    checksum=checksum,
-                )
-                await get_event_bus().publish(event)
+            # Publish backup completed event (broadcasts to all subscribers)
+            event = BackupCompletedEvent(
+                filename=backup_filename,
+                size_mb=round(file_size / 1024 / 1024, 2),
+                backup_type="full",
+                checksum=checksum,
+            )
+            await get_event_bus().publish(event)
 
             return {
                 "id": backup_record.id,
@@ -982,17 +969,15 @@ class BackupService:
                 error_msg,
             )
 
-            # Publish backup failed event if user_id provided
-            if user_id:
-                event = BackupFailedEvent(
-                    user_id=user_id,
-                    error=str(e),
-                    backup_type="full",
-                    partial_file=(
-                        str(backup_path) if "backup_path" in locals() else None
-                    ),
-                )
-                await get_event_bus().publish(event)
+            # Publish backup failed event (broadcasts to all subscribers)
+            event = BackupFailedEvent(
+                error=str(e),
+                backup_type="full",
+                partial_file=(
+                    str(backup_path) if "backup_path" in locals() else None
+                ),
+            )
+            await get_event_bus().publish(event)
 
             raise Exception(error_msg)
 

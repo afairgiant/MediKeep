@@ -370,7 +370,7 @@ class NotificationService:
             logger.debug("Notifications disabled, skipping send")
             return []
 
-        # Find enabled preferences for this event type
+        # Find enabled preferences for this event type (user-specific)
         preferences = self.db.query(NotificationPreference).filter(
             and_(
                 NotificationPreference.user_id == user_id,
@@ -379,12 +379,98 @@ class NotificationService:
             )
         ).all()
 
+        return await self._send_to_preferences(
+            preferences=preferences,
+            event_type=event_type,
+            title=title,
+            message=message,
+            event_data=event_data,
+        )
+
+    async def send_broadcast_notification(
+        self,
+        event_type: str,
+        title: str,
+        message: str,
+        event_data: Optional[Dict] = None,
+    ) -> List[NotificationHistory]:
+        """
+        Send notification to ALL users who have the event type enabled.
+
+        This is used for system-wide events like backup completion where
+        any user who has subscribed should receive the notification,
+        regardless of who triggered the action.
+
+        Args:
+            event_type: Event type identifier
+            title: Notification title
+            message: Notification message
+            event_data: Optional event-specific data for history
+
+        Returns:
+            List of NotificationHistory records for all recipients
+        """
+        if not settings.NOTIFICATIONS_ENABLED:
+            logger.debug("Notifications disabled, skipping broadcast")
+            return []
+
+        # Find ALL enabled preferences for this event type (across all users)
+        preferences = self.db.query(NotificationPreference).filter(
+            and_(
+                NotificationPreference.event_type == event_type,
+                NotificationPreference.is_enabled == True
+            )
+        ).all()
+
+        history_records = await self._send_to_preferences(
+            preferences=preferences,
+            event_type=event_type,
+            title=title,
+            message=message,
+            event_data=event_data,
+        )
+
+        if history_records:
+            logger.info(
+                "broadcast_notification_sent",
+                extra={
+                    "event_type": event_type,
+                    "recipients_count": len(history_records),
+                }
+            )
+
+        return history_records
+
+    async def _send_to_preferences(
+        self,
+        preferences: List[NotificationPreference],
+        event_type: str,
+        title: str,
+        message: str,
+        event_data: Optional[Dict] = None,
+    ) -> List[NotificationHistory]:
+        """
+        Send notifications to channels based on preferences.
+
+        This is the shared implementation used by both send_notification
+        and send_broadcast_notification.
+
+        Args:
+            preferences: List of enabled preferences to send to
+            event_type: Event type identifier
+            title: Notification title
+            message: Notification message
+            event_data: Optional event-specific data for history
+
+        Returns:
+            List of NotificationHistory records
+        """
         if not preferences:
             logger.debug(f"No enabled preferences for event {event_type}")
             return []
 
         # Get unique enabled channels
-        channel_ids = list(set(p.channel_id for p in preferences))
+        channel_ids = list({p.channel_id for p in preferences})
         channels = self.db.query(NotificationChannel).filter(
             and_(
                 NotificationChannel.id.in_(channel_ids),
@@ -396,11 +482,15 @@ class NotificationService:
             logger.debug(f"No enabled channels for event {event_type}")
             return []
 
-        # Send to each channel in parallel
+        # Build a map of channel_id to user_id for history records
+        channel_to_user = {p.channel_id: p.user_id for p in preferences}
+
+        # Create history records and send tasks
         history_records = []
         tasks = []
 
         for channel in channels:
+            user_id = channel_to_user.get(channel.id, channel.user_id)
             history = NotificationHistory(
                 user_id=user_id,
                 channel_id=channel.id,
