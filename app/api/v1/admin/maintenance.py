@@ -4,8 +4,6 @@ Admin Maintenance API Endpoints
 Provides admin-only endpoints for system maintenance tasks.
 """
 
-from typing import Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -121,6 +119,10 @@ async def reload_test_library_endpoint(
         )
 
 
+# Batch size for processing components to prevent memory issues and timeouts
+SYNC_BATCH_SIZE = 100
+
+
 @router.post("/test-library/sync", response_model=TestLibrarySyncResponse)
 async def sync_test_library(
     sync_request: TestLibrarySyncRequest,
@@ -136,6 +138,9 @@ async def sync_test_library(
     2. Re-match all lab test components to canonical names
     3. Update categories based on the test library
 
+    Processing is done in batches to prevent memory issues and timeouts
+    on large datasets.
+
     Args:
         force_all: If True, re-process all components. If False, only process
                    components without a canonical_test_name.
@@ -145,36 +150,80 @@ async def sync_test_library(
     try:
         reload_test_library()
 
-        if sync_request.force_all:
-            components = db.query(LabTestComponent).all()
-        else:
-            components = (
-                db.query(LabTestComponent)
-                .filter(LabTestComponent.canonical_test_name.is_(None))
-                .all()
-            )
-
-        total_processed = len(components)
+        total_processed = 0
         canonical_updated = 0
         category_updated = 0
 
-        for component in components:
-            canonical_name = canonical_test_matching.find_canonical_match(
-                component.test_name
-            )
+        if sync_request.force_all:
+            # Force mode: process ALL components using offset-based pagination
+            # (since we're not filtering by NULL, offset is safe here)
+            total_count = db.query(LabTestComponent).count()
+            offset = 0
 
-            if canonical_name:
-                if component.canonical_test_name != canonical_name:
-                    component.canonical_test_name = canonical_name
-                    canonical_updated += 1
+            while offset < total_count:
+                batch = (
+                    db.query(LabTestComponent)
+                    .order_by(LabTestComponent.id)
+                    .offset(offset)
+                    .limit(SYNC_BATCH_SIZE)
+                    .all()
+                )
 
-                test_info = canonical_test_matching.get_test_info(canonical_name)
-                if test_info and test_info.get("category"):
-                    if component.category != test_info["category"]:
-                        component.category = test_info["category"]
-                        category_updated += 1
+                if not batch:
+                    break
 
-        db.commit()
+                for component in batch:
+                    canonical_name = canonical_test_matching.find_canonical_match(
+                        component.test_name
+                    )
+
+                    if canonical_name:
+                        if component.canonical_test_name != canonical_name:
+                            component.canonical_test_name = canonical_name
+                            canonical_updated += 1
+
+                        test_info = canonical_test_matching.get_test_info(canonical_name)
+                        if test_info and test_info.get("category"):
+                            if component.category != test_info["category"]:
+                                component.category = test_info["category"]
+                                category_updated += 1
+
+                    total_processed += 1
+
+                db.commit()
+                offset += SYNC_BATCH_SIZE
+        else:
+            # Non-force mode: only process components without canonical names
+            # Re-query each batch since filter changes after commit
+            while True:
+                batch = (
+                    db.query(LabTestComponent)
+                    .filter(LabTestComponent.canonical_test_name.is_(None))
+                    .limit(SYNC_BATCH_SIZE)
+                    .all()
+                )
+
+                if not batch:
+                    break
+
+                for component in batch:
+                    canonical_name = canonical_test_matching.find_canonical_match(
+                        component.test_name
+                    )
+
+                    if canonical_name:
+                        component.canonical_test_name = canonical_name
+                        canonical_updated += 1
+
+                        test_info = canonical_test_matching.get_test_info(canonical_name)
+                        if test_info and test_info.get("category"):
+                            if component.category != test_info["category"]:
+                                component.category = test_info["category"]
+                                category_updated += 1
+
+                    total_processed += 1
+
+                db.commit()
 
         log_security_event(
             logger,

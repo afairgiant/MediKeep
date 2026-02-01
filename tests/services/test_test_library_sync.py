@@ -10,7 +10,7 @@ from app.crud.lab_test_component import lab_test_component as lab_test_component
 from app.crud.lab_result import lab_result as lab_result_crud
 from app.crud.patient import patient as patient_crud
 from app.crud.system_setting import system_setting
-from app.models.models import LabTestComponent, SystemSetting
+from app.models.models import SystemSetting
 from app.schemas.lab_test_component import LabTestComponentCreate
 from app.schemas.lab_result import LabResultCreate
 from app.schemas.patient import PatientCreate
@@ -340,12 +340,11 @@ class TestTestLibrarySyncService:
         result = sync_service.run_one_time_migration(db_session)
 
         assert result["skipped"] is False
-        # The batching should process ALL components regardless of batch size
-        # However, due to the query filtering on NULL canonical_test_name and using offset,
-        # it may only process BATCH_SIZE items in the first iteration
-        # This is a known limitation of the current implementation
-        assert result["processed"] >= sync_service.BATCH_SIZE
-        assert result["linked"] >= sync_service.BATCH_SIZE
+        # The batching processes all matching components regardless of batch size.
+        # After each batch commits, the query re-filters for NULL canonical_test_name,
+        # naturally excluding already-processed records without offset issues.
+        assert result["processed"] == num_components
+        assert result["linked"] == num_components
 
     def test_run_one_time_migration_partial_success(self, sync_service, db_session, test_patient, test_lab_result):
         """Test migration with mix of successful and unsuccessful matches."""

@@ -7,7 +7,6 @@ Create Date: 2026-01-31 17:30:00.000000
 """
 from alembic import op
 import sqlalchemy as sa
-from datetime import datetime, timezone
 
 
 # revision identifiers, used by Alembic.
@@ -15,11 +14,6 @@ revision = 'add_system_settings_table'
 down_revision = '4ae4496ad1c6'
 branch_labels = None
 depends_on = None
-
-
-def get_utc_now():
-    """Get the current UTC datetime with timezone awareness."""
-    return datetime.now(timezone.utc)
 
 
 def upgrade() -> None:

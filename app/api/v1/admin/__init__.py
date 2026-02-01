@@ -32,4 +32,6 @@ router.include_router(restore.router, prefix="/restore", tags=["admin-restore"])
 
 router.include_router(trash_management.router, prefix="", tags=["admin-trash"])
 
+router.include_router(maintenance.router, prefix="/maintenance", tags=["admin-maintenance"])
+
 __all__ = ["router"]
