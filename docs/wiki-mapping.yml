@@ -1,0 +1,104 @@
+# Wiki Mapping Configuration
+# Maps documentation files to GitHub wiki pages
+#
+# Format:
+#   source: path to source file (relative to repo root)
+#   wiki_page: name of wiki page (will become Page-Name.md in wiki)
+#   title: optional title override for the wiki page
+
+pages:
+  # Developer Guide - Core Documentation
+  - source: docs/developer-guide/README.md
+    wiki_page: Home
+    title: MediKeep Developer Documentation
+
+  - source: docs/developer-guide/DOCUMENTATION_INDEX.md
+    wiki_page: Documentation-Index
+    title: Documentation Index
+
+  - source: docs/developer-guide/00-quickstart.md
+    wiki_page: Quick-Start-Guide
+    title: Quick Start Guide
+
+  - source: docs/developer-guide/01-architecture.md
+    wiki_page: Architecture
+    title: Architecture Overview
+
+  - source: docs/developer-guide/02-api-reference.md
+    wiki_page: API-Reference
+    title: API Reference
+
+  - source: docs/developer-guide/03-database-schema.md
+    wiki_page: Database-Schema
+    title: Database Schema
+
+  - source: docs/developer-guide/04-deployment.md
+    wiki_page: Deployment-Guide
+    title: Deployment Guide
+
+  - source: docs/developer-guide/05-contributing.md
+    wiki_page: Contributing-Guide
+    title: Contributing Guide
+
+  # Feature Documentation
+  - source: docs/SSO_QUICK_START.md
+    wiki_page: SSO-Quick-Start
+    title: SSO Quick Start
+
+  - source: docs/SSO_SETUP_GUIDE.md
+    wiki_page: SSO-Setup-Guide
+    title: SSO Setup Guide
+
+  - source: docs/api/PATIENT_SHARING_INVITATIONS_API.md
+    wiki_page: Patient-Sharing-API
+    title: Patient Sharing API
+
+  - source: docs/workflows/PATIENT_SHARE_INVITATION_WORKFLOW.md
+    wiki_page: Patient-Sharing-Workflow
+    title: Patient Sharing Workflow
+
+# Link transformations
+# Maps internal doc links to wiki page links
+link_mappings:
+  # Developer guide internal links
+  "00-quickstart.md": "Quick-Start-Guide"
+  "01-architecture.md": "Architecture"
+  "02-api-reference.md": "API-Reference"
+  "03-database-schema.md": "Database-Schema"
+  "04-deployment.md": "Deployment-Guide"
+  "05-contributing.md": "Contributing-Guide"
+  "README.md": "Home"
+  "DOCUMENTATION_INDEX.md": "Documentation-Index"
+
+  # Feature docs
+  "../SSO_QUICK_START.md": "SSO-Quick-Start"
+  "../SSO_SETUP_GUIDE.md": "SSO-Setup-Guide"
+  "SSO_QUICK_START.md": "SSO-Quick-Start"
+  "SSO_SETUP_GUIDE.md": "SSO-Setup-Guide"
+
+# Sidebar configuration (optional)
+# Defines the wiki sidebar structure
+sidebar:
+  - section: Getting Started
+    pages:
+      - Home
+      - Documentation-Index
+      - Quick-Start-Guide
+
+  - section: Technical Documentation
+    pages:
+      - Architecture
+      - API-Reference
+      - Database-Schema
+
+  - section: Operations
+    pages:
+      - Deployment-Guide
+      - Contributing-Guide
+
+  - section: Features
+    pages:
+      - SSO-Quick-Start
+      - SSO-Setup-Guide
+      - Patient-Sharing-API
+      - Patient-Sharing-Workflow

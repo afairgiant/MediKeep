@@ -1,5 +1,7 @@
 # MediKeep Architecture Documentation
 
+**Last Updated:** February 2, 2026
+
 ## System Architecture Overview
 
 ### Architecture Diagram
@@ -18,12 +20,21 @@
 ```
 
 ### Technology Stack
-- **Frontend**: React 18, Mantine UI
-- **Backend**: FastAPI, Python 3.12+
-- **Database**: PostgreSQL 15+
+- **Frontend**: React 18.3, Mantine UI 8.x
+- **Build Tool**: Vite 7.x (migrated from Create React App, October 2025)
+- **Backend**: FastAPI 0.115, Python 3.12+
+- **Database**: PostgreSQL 15+, SQLAlchemy 2.0
 - **Authentication**: JWT-based SSO
 - **Deployment**: Docker, Nginx
-- **Testing**: Jest (Frontend), Pytest (Backend)
+- **Testing**: Vitest (Frontend), Pytest (Backend)
+
+### Build Tool Migration Notes
+The project migrated from Create React App to Vite in October 2025 for significant performance improvements:
+- Dev server startup: 15s to ~287ms (98% faster)
+- Production builds: 90s to ~10s (88% faster)
+- Hot reload: 3s to <100ms (97% faster)
+- Build output directory: `frontend/build/`
+- Environment variables now use `VITE_` prefix (not `REACT_APP_`)
 
 ### Communication Patterns
 - RESTful API communication

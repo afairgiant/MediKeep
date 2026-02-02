@@ -1,6 +1,6 @@
 # Developer Quick Start Guide
 
-**Last Updated:** October 5, 2025
+**Last Updated:** February 2, 2026
 
 Get MediKeep up and running on your local machine in under 10 minutes for active development.
 
@@ -29,7 +29,7 @@ Ensure you have installed:
 
 **Verify installations:**
 ```bash
-python --version  # Should be 3.11+
+python --version  # Should be 3.12+
 node --version    # Should be 18+
 git --version     # Any recent version
 ```
@@ -153,8 +153,12 @@ npm install
 #### 3.2 Configure Environment
 
 ```bash
-# Create .env.local
-echo "REACT_APP_API_URL=http://localhost:8000" > .env.local
+# Create .env.local (Vite uses VITE_ prefix for environment variables)
+cat > .env.local << EOF
+VITE_API_URL=/api/v1
+VITE_NAME=MediKeep
+VITE_DEBUG=true
+EOF
 ```
 
 #### 3.3 Start Development Server
@@ -310,18 +314,21 @@ pytest --cov=app --cov-report=html
 pytest tests/api/test_medications.py -v
 ```
 
-**Frontend:**
+**Frontend (Vitest):**
 ```bash
 cd frontend
 
-# All tests
+# Watch mode (default)
 npm test
 
-# With coverage
-npm test -- --coverage
+# Run once
+npm run test:run
 
-# Watch mode
-npm test -- --watch
+# With UI
+npm run test:ui
+
+# With coverage
+npm run test:coverage
 ```
 
 ### 4. Make Your First Change
@@ -426,7 +433,7 @@ npm install
 # Check .env.local has correct API URL
 cat .env.local
 
-# Should be: REACT_APP_API_URL=http://localhost:8000
+# Should be: VITE_API_URL=/api/v1
 ```
 
 ### Database Issues
@@ -474,11 +481,16 @@ pytest -v                                # Run tests (verbose)
 black .                                  # Format code
 pylint app/                              # Lint code
 
-# Frontend
-npm start                                # Start dev server
-npm test                                 # Run tests
+# Frontend (Vite + Vitest)
+npm start                                # Start dev server (Vite)
+npm run dev                              # Alias for npm start
+npm test                                 # Run tests in watch mode (Vitest)
+npm run test:run                         # Run tests once
+npm run test:ui                          # Run tests with UI
+npm run test:coverage                    # Run tests with coverage
 npm run lint                             # Lint code
 npm run build                            # Build for production
+npm run preview                          # Preview production build
 ```
 
 ### Database
