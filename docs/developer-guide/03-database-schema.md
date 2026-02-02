@@ -5,12 +5,16 @@
 - [Entity Relationship Diagram](#entity-relationship-diagram)
 - [Core Tables](#core-tables)
 - [Medical Record Tables](#medical-record-tables)
+- [Symptom System Tables](#symptom-system-tables)
+- [Injury System Tables](#injury-system-tables)
 - [Reference Tables](#reference-tables)
 - [Family History Tables](#family-history-tables)
 - [File Management Tables](#file-management-tables)
 - [Sharing & Collaboration Tables](#sharing--collaboration-tables)
+- [Notification System Tables](#notification-system-tables)
 - [Reporting Tables](#reporting-tables)
 - [Admin Tables](#admin-tables)
+- [System Tables](#system-tables)
 - [Junction Tables](#junction-tables)
 - [Data Types Reference](#data-types-reference)
 - [Indexes & Performance](#indexes--performance)
@@ -154,6 +158,7 @@ JUNCTION TABLES (Many-to-Many)
 - `shared_patients_by_me`: One-to-many with PatientShare
 - `shared_patients_with_me`: One-to-many with PatientShare
 - `preferences`: One-to-one with UserPreferences (cascade delete)
+- `notification_channels`: One-to-many with NotificationChannel (cascade delete)
 
 **Indexes**:
 - `idx_users_email` on email
@@ -173,7 +178,7 @@ JUNCTION TABLES (Many-to-Many)
 | owner_user_id | Integer | FK(users.id), NOT NULL | Patient record owner |
 | is_self_record | Boolean | NOT NULL, DEFAULT FALSE | Is this the user's own record |
 | family_id | Integer | | Family group ID (future use) |
-| relationship_to_family | String | | self, spouse, child, parent |
+| relationship_to_self | String | | Use RelationshipToSelf enum (see Enum Reference) |
 | privacy_level | String | NOT NULL, DEFAULT 'owner' | Privacy access level |
 | external_account_id | Integer | | External account link (future) |
 | is_externally_accessible | Boolean | NOT NULL, DEFAULT FALSE | Allow external access |
@@ -205,6 +210,8 @@ JUNCTION TABLES (Many-to-Many)
 - `emergency_contacts`: One-to-many with EmergencyContact (cascade delete)
 - `family_members`: One-to-many with FamilyMember (cascade delete)
 - `insurances`: One-to-many with Insurance (cascade delete)
+- `symptoms`: One-to-many with Symptom (cascade delete)
+- `injuries`: One-to-many with Injury (cascade delete)
 - `shares`: One-to-many with PatientShare (cascade delete)
 - `photo`: One-to-one with PatientPhoto (cascade delete)
 
@@ -264,6 +271,7 @@ JUNCTION TABLES (Many-to-Many)
 | practitioner_id | Integer | FK(practitioners.id) | Prescribing practitioner |
 | pharmacy_id | Integer | FK(pharmacies.id) | Dispensing pharmacy |
 | medication_name | String | NOT NULL | Name of medication |
+| medication_type | String(20) | NOT NULL, DEFAULT 'prescription' | Use MedicationType enum |
 | dosage | String | | Dosage amount (e.g., "10mg") |
 | frequency | String | | Frequency (e.g., "twice daily") |
 | route | String | | Administration route (oral, injection) |
@@ -282,16 +290,25 @@ JUNCTION TABLES (Many-to-Many)
 - completed
 - cancelled
 
+**Type Values** (MedicationType enum):
+- prescription
+- otc
+- supplement
+- herbal
+
 **Relationships**:
 - `patient`: Many-to-one with Patient
 - `practitioner`: Many-to-one with Practitioner
 - `pharmacy`: Many-to-one with Pharmacy
 - `allergies`: One-to-many with Allergy
 - `condition_relationships`: One-to-many with ConditionMedication
+- `symptom_relationships`: One-to-many with SymptomMedication
+- `injury_relationships`: One-to-many with InjuryMedication
 
 **Indexes**:
 - `idx_medications_patient_id` on patient_id
 - `idx_medications_patient_status` on (patient_id, status)
+- `idx_medications_patient_type` on (patient_id, medication_type)
 
 **Business Rules**:
 - Patient is required, practitioner is optional (OTC medications)
@@ -343,6 +360,8 @@ JUNCTION TABLES (Many-to-Many)
 - `procedures`: One-to-many with Procedure
 - `lab_result_relationships`: One-to-many with LabResultCondition
 - `medication_relationships`: One-to-many with ConditionMedication
+- `symptom_relationships`: One-to-many with SymptomCondition
+- `injury_relationships`: One-to-many with InjuryCondition
 
 **Indexes**:
 - `idx_conditions_patient_id` on patient_id
@@ -415,6 +434,7 @@ JUNCTION TABLES (Many-to-Many)
 | status | String | | normal, high, low, critical |
 | category | String | | hematology, chemistry, etc. |
 | display_order | Integer | | Sort order for display |
+| canonical_test_name | String | | Standardized test name for trending |
 | notes | Text | | Component-specific notes |
 | created_at | DateTime | NOT NULL | Record creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
@@ -426,6 +446,7 @@ JUNCTION TABLES (Many-to-Many)
 - `idx_lab_test_components_lab_result_id` on lab_result_id
 - `idx_lab_test_components_status` on status
 - `idx_lab_test_components_category` on category
+- `ix_lab_test_components_canonical_test_name` on canonical_test_name
 - `idx_lab_test_components_lab_result_status` on (lab_result_id, status)
 - `idx_lab_test_components_lab_result_category` on (lab_result_id, category)
 - `idx_lab_test_components_test_name_text` on test_name
@@ -435,6 +456,7 @@ JUNCTION TABLES (Many-to-Many)
 - Cascade deletes with parent lab_result
 - Status auto-calculated from value vs. reference range
 - display_order used for consistent UI presentation
+- canonical_test_name links to standardized_tests for consistent trending across lab results
 
 ### lab_result_files
 **Purpose**: File attachments for lab results (PDFs, images)
@@ -512,6 +534,7 @@ JUNCTION TABLES (Many-to-Many)
 | oxygen_saturation | Float | | SpO2 percentage |
 | respiratory_rate | Integer | | Breaths per minute |
 | blood_glucose | Float | | Blood glucose (mg/dL) |
+| a1c | Float | | Hemoglobin A1C (%) |
 | bmi | Float | | Body Mass Index (calculated) |
 | pain_scale | Integer | | Pain scale 0-10 |
 | notes | Text | | Additional notes |
@@ -598,11 +621,13 @@ JUNCTION TABLES (Many-to-Many)
 - in_progress
 - completed
 - cancelled
+- postponed
 
 **Relationships**:
 - `patient`: Many-to-one with Patient
 - `practitioner`: Many-to-one with Practitioner
 - `condition`: Many-to-one with Condition
+- `injury_relationships`: One-to-many with InjuryProcedure
 
 **Indexes**:
 - `idx_procedures_patient_id` on patient_id
@@ -610,7 +635,7 @@ JUNCTION TABLES (Many-to-Many)
 **Business Rules**:
 - Procedure name and date required
 - condition_id links procedure to diagnosis
-- Status workflow: scheduled -> in_progress -> completed
+- Status workflow: scheduled -> in_progress -> completed (or postponed/cancelled)
 
 ### treatments
 **Purpose**: Patient treatment plans and therapies
@@ -638,6 +663,7 @@ JUNCTION TABLES (Many-to-Many)
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
 
 **Status Values** (TreatmentStatus enum):
+- planned
 - active
 - in_progress
 - completed
@@ -648,6 +674,8 @@ JUNCTION TABLES (Many-to-Many)
 - `patient`: Many-to-one with Patient
 - `practitioner`: Many-to-one with Practitioner
 - `condition`: Many-to-one with Condition
+- `symptom_relationships`: One-to-many with SymptomTreatment
+- `injury_relationships`: One-to-many with InjuryTreatment
 
 **Business Rules**:
 - Treatment name, type, and start date required
@@ -769,6 +797,178 @@ JUNCTION TABLES (Many-to-Many)
 - Only one is_primary insurance per insurance_type per patient
 - coverage_details stores type-specific data (BIN/PCN for prescription)
 
+## Symptom System Tables
+
+### symptoms
+**Purpose**: Parent symptom definitions/types (e.g., "Migraine", "Back Pain")
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique symptom ID |
+| patient_id | Integer | FK(patients.id), NOT NULL | Associated patient |
+| symptom_name | String(200) | NOT NULL | Name of the symptom |
+| category | String(100) | | Category (e.g., "Neurological", "Gastrointestinal") |
+| status | String(50) | NOT NULL, DEFAULT 'active' | SymptomStatus enum value |
+| is_chronic | Boolean | NOT NULL, DEFAULT FALSE | Whether symptom is chronic |
+| first_occurrence_date | Date | NOT NULL | Date of first occurrence |
+| last_occurrence_date | Date | | Date of most recent occurrence |
+| typical_triggers | JSON | DEFAULT [] | Common triggers for this symptom |
+| general_notes | Text | | General notes about the symptom |
+| tags | JSON | DEFAULT [] | User tags |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Status Values** (SymptomStatus enum):
+- active
+- resolved
+- recurring
+
+**Relationships**:
+- `patient`: Many-to-one with Patient
+- `occurrences`: One-to-many with SymptomOccurrence (cascade delete)
+- `condition_relationships`: One-to-many with SymptomCondition (cascade delete)
+- `medication_relationships`: One-to-many with SymptomMedication (cascade delete)
+- `treatment_relationships`: One-to-many with SymptomTreatment (cascade delete)
+
+**Indexes**:
+- `idx_symptoms_patient_id` on patient_id
+- `idx_symptoms_patient_name` on (patient_id, symptom_name)
+- `idx_symptoms_status` on status
+- `idx_symptoms_is_chronic` on is_chronic
+
+**Business Rules**:
+- Symptom name and first occurrence date are required
+- Individual episodes tracked in SymptomOccurrence table
+- Chronic symptoms flagged with is_chronic
+- Cascade deletes all related occurrences and junction table entries
+
+### symptom_occurrences
+**Purpose**: Individual episodes/occurrences of a symptom
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique occurrence ID |
+| symptom_id | Integer | FK(symptoms.id), NOT NULL | Parent symptom |
+| occurrence_date | Date | NOT NULL | Date of this episode |
+| severity | String(50) | NOT NULL | SymptomSeverity enum value |
+| pain_scale | Integer | | Pain scale 0-10 |
+| duration | String(100) | | Duration description (e.g., "30 minutes", "2 hours") |
+| time_of_day | String(50) | | morning, afternoon, evening, night (legacy) |
+| occurrence_time | Time | | Precise time when episode started |
+| location | String(200) | | Body part/area affected |
+| triggers | JSON | DEFAULT [] | Specific triggers for this occurrence |
+| relief_methods | JSON | DEFAULT [] | What helped relieve symptoms |
+| associated_symptoms | JSON | DEFAULT [] | Other symptoms present during episode |
+| impact_level | String(50) | | no_impact, mild, moderate, severe, debilitating |
+| resolved_date | Date | | When episode resolved |
+| resolved_time | Time | | Time when episode resolved |
+| resolution_notes | Text | | Notes about resolution |
+| notes | Text | | Notes specific to this occurrence |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Severity Values** (SymptomSeverity enum):
+- mild
+- moderate
+- severe
+- critical
+
+**Relationships**:
+- `symptom`: Many-to-one with Symptom
+
+**Indexes**:
+- `idx_symptom_occ_symptom_id` on symptom_id
+- `idx_symptom_occ_date` on occurrence_date
+- `idx_symptom_occ_severity` on severity
+- `idx_symptom_occ_symptom_date` on (symptom_id, occurrence_date)
+
+**Business Rules**:
+- Each occurrence is linked to a parent symptom
+- Cascade deletes with parent symptom
+- Tracks detailed episode information including triggers, relief methods, and impact
+
+## Injury System Tables
+
+### injury_types
+**Purpose**: Reusable injury type definitions for dropdown selection
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique injury type ID |
+| name | String(100) | NOT NULL, UNIQUE | Injury type name |
+| description | String(300) | | Description of injury type |
+| is_system | Boolean | NOT NULL, DEFAULT FALSE | System-defined (cannot be deleted) |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `injuries`: One-to-many with Injury
+
+**Indexes**:
+- `idx_injury_types_name` on name
+- `idx_injury_types_is_system` on is_system
+
+**Business Rules**:
+- Injury type names must be unique
+- System types (is_system=True) are seeded defaults and cannot be deleted
+- Users can create custom injury types
+
+### injuries
+**Purpose**: Patient injury records (sprains, fractures, burns, etc.)
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique injury ID |
+| patient_id | Integer | FK(patients.id), NOT NULL | Associated patient |
+| injury_name | String(300) | NOT NULL | Name/description of injury |
+| injury_type_id | Integer | FK(injury_types.id) | Injury type reference |
+| body_part | String(100) | NOT NULL | Affected body part |
+| laterality | String(20) | | Laterality enum value |
+| date_of_injury | Date | | Date injury occurred |
+| mechanism | String(500) | | How the injury occurred |
+| severity | String(50) | | SeverityLevel enum value |
+| status | String(50) | NOT NULL, DEFAULT 'active' | InjuryStatus enum value |
+| treatment_received | Text | | Treatment description |
+| recovery_notes | Text | | Recovery progress notes |
+| practitioner_id | Integer | FK(practitioners.id) | Treating practitioner |
+| notes | Text | | Additional notes |
+| tags | JSON | DEFAULT [] | User tags |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Status Values** (InjuryStatus enum):
+- active - Currently being treated
+- healing - In recovery
+- resolved - Fully healed
+- chronic - Long-term/permanent effects
+
+**Laterality Values** (Laterality enum):
+- left
+- right
+- bilateral
+- not_applicable
+
+**Relationships**:
+- `patient`: Many-to-one with Patient
+- `injury_type`: Many-to-one with InjuryType
+- `practitioner`: Many-to-one with Practitioner
+- `medication_relationships`: One-to-many with InjuryMedication (cascade delete)
+- `condition_relationships`: One-to-many with InjuryCondition (cascade delete)
+- `treatment_relationships`: One-to-many with InjuryTreatment (cascade delete)
+- `procedure_relationships`: One-to-many with InjuryProcedure (cascade delete)
+
+**Indexes**:
+- `idx_injuries_patient_id` on patient_id
+- `idx_injuries_patient_status` on (patient_id, status)
+- `idx_injuries_injury_type` on injury_type_id
+- `idx_injuries_date` on date_of_injury
+
+**Business Rules**:
+- Injury name and body part are required
+- Date of injury is optional (user may not remember exact date)
+- Laterality specifies which side of body (left, right, bilateral, or not applicable)
+- Can be linked to medications, conditions, treatments, and procedures through junction tables
+
 ## Reference Tables
 
 ### practitioners
@@ -779,8 +979,9 @@ JUNCTION TABLES (Many-to-Many)
 | id | Integer | PRIMARY KEY | Unique practitioner ID |
 | name | String | NOT NULL | Practitioner's name |
 | specialty | String | NOT NULL | Medical specialty |
-| practice | String | NOT NULL | Practice/clinic name |
+| practice | String | | Practice/clinic name (optional) |
 | phone_number | String | | Contact phone |
+| email | String | | Email address |
 | website | String | | Website URL |
 | rating | Float | | Rating 0.0-5.0 |
 
@@ -794,9 +995,11 @@ JUNCTION TABLES (Many-to-Many)
 - `treatments`: One-to-many with Treatment
 - `conditions`: One-to-many with Condition
 - `vitals`: One-to-many with Vitals
+- `injuries`: One-to-many with Injury
 
 **Business Rules**:
-- Name, specialty, and practice required
+- Name and specialty are required
+- Practice is optional (not all practitioners are linked to a practice)
 - Shared across all users (global reference data)
 - Rating optional for user feedback
 
@@ -1127,6 +1330,126 @@ JUNCTION TABLES (Many-to-Many)
 - custom_permissions for granular control (future)
 - is_active allows soft delete
 
+## Notification System Tables
+
+### notification_channels
+**Purpose**: User notification channels (Discord, Email, Gotify, Webhook)
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique channel ID |
+| user_id | Integer | FK(users.id), NOT NULL | Channel owner |
+| name | String(100) | NOT NULL | Channel display name |
+| channel_type | String(20) | NOT NULL | discord, email, gotify, webhook |
+| config_encrypted | Text | NOT NULL | Encrypted JSON configuration |
+| is_enabled | Boolean | NOT NULL, DEFAULT TRUE | Channel enabled status |
+| is_verified | Boolean | NOT NULL, DEFAULT FALSE | Verification status |
+| last_test_at | DateTime | | Last test notification timestamp |
+| last_test_status | String(20) | | Last test result status |
+| last_used_at | DateTime | | Last successful notification |
+| total_notifications_sent | Integer | NOT NULL, DEFAULT 0 | Total notifications sent |
+| created_at | DateTime | NOT NULL | Channel creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Channel Types**:
+- discord - Discord webhook integration
+- email - Email notification
+- gotify - Gotify push notification
+- webhook - Generic HTTP webhook
+
+**Relationships**:
+- `user`: Many-to-one with User
+- `preferences`: One-to-many with NotificationPreference (cascade delete)
+- `history`: One-to-many with NotificationHistory
+
+**Indexes**:
+- `idx_notification_channels_user_id` on user_id
+
+**Constraints**:
+- `uq_user_channel_name` UNIQUE on (user_id, name)
+
+**Business Rules**:
+- Configuration stored encrypted for security
+- Channel must be verified before sending notifications
+- Cascade deletes with user account
+- Channel name unique per user
+
+### notification_preferences
+**Purpose**: Event-channel preferences (which events go to which channels)
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique preference ID |
+| user_id | Integer | FK(users.id), NOT NULL | Preference owner |
+| channel_id | Integer | FK(notification_channels.id), NOT NULL | Target channel |
+| event_type | String(50) | NOT NULL | Event type identifier |
+| is_enabled | Boolean | NOT NULL, DEFAULT TRUE | Preference enabled status |
+| remind_before_minutes | Integer | | Reminder lead time in minutes |
+| created_at | DateTime | NOT NULL | Preference creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Event Types** (examples):
+- backup_completed
+- backup_failed
+- medication_reminder
+- appointment_reminder
+- lab_result_ready
+
+**Relationships**:
+- `user`: Many-to-one with User
+- `channel`: Many-to-one with NotificationChannel
+
+**Indexes**:
+- `idx_notification_prefs_user_id` on user_id
+- `idx_notification_prefs_channel_id` on channel_id
+- `idx_notification_prefs_event_type` on event_type
+
+**Constraints**:
+- `uq_user_channel_event` UNIQUE on (user_id, channel_id, event_type)
+
+**Business Rules**:
+- Each event can be sent to multiple channels
+- Cascade deletes with channel
+- remind_before_minutes for advance notifications
+
+### notification_history
+**Purpose**: Sent notification audit trail
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique history ID |
+| user_id | Integer | FK(users.id) | Target user (SET NULL on delete) |
+| channel_id | Integer | FK(notification_channels.id) | Delivery channel (SET NULL on delete) |
+| event_type | String(50) | NOT NULL | Event type that triggered notification |
+| event_data | JSON | | Event-specific data |
+| title | String(255) | NOT NULL | Notification title |
+| message_preview | String(500) | | Message preview text |
+| status | String(20) | NOT NULL | pending, sent, failed |
+| attempt_count | Integer | NOT NULL, DEFAULT 1 | Delivery attempts |
+| error_message | Text | | Error details if failed |
+| created_at | DateTime | NOT NULL | Notification creation timestamp |
+| sent_at | DateTime | | Successful delivery timestamp |
+
+**Status Values**:
+- pending - Awaiting delivery
+- sent - Successfully delivered
+- failed - Delivery failed
+
+**Relationships**:
+- `user`: Many-to-one with User (SET NULL on delete)
+- `channel`: Many-to-one with NotificationChannel (SET NULL on delete)
+
+**Indexes**:
+- `idx_notification_history_user_id` on user_id
+- `idx_notification_history_status` on status
+- `idx_notification_history_created_at` on created_at
+- `idx_notification_history_event_type` on event_type
+
+**Business Rules**:
+- Preserves audit trail even if user/channel deleted (SET NULL)
+- Tracks delivery attempts and errors for troubleshooting
+- sent_at populated only on successful delivery
+
 ## Reporting Tables
 
 ### report_templates
@@ -1195,6 +1518,55 @@ JUNCTION TABLES (Many-to-Many)
 
 ## Admin Tables
 
+### activity_logs
+**Purpose**: Centralized activity logging for audit trails
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique log entry ID |
+| user_id | Integer | FK(users.id) | User who performed action |
+| patient_id | Integer | FK(patients.id) | Affected patient (if applicable) |
+| action | String | NOT NULL | Action type (created, updated, deleted, viewed, etc.) |
+| entity_type | String | NOT NULL | Type of entity affected |
+| entity_id | Integer | | ID of affected record |
+| description | Text | NOT NULL | Human-readable description |
+| event_metadata | JSON | | Additional context (changes, etc.) |
+| timestamp | DateTime | NOT NULL | When action occurred |
+| ip_address | String | | Client IP address |
+| user_agent | String | | Client user agent |
+
+**Action Types**:
+- created, updated, deleted, viewed
+- uploaded, downloaded
+- login, logout
+- activated, deactivated, completed, cancelled
+- backup_created, maintenance_started, maintenance_completed
+
+**Entity Types**:
+- user, patient, practitioner
+- medication, lab_result, lab_result_file, lab_test_component
+- condition, treatment, immunization, allergy, procedure, encounter
+- emergency_contact, pharmacy, family_member, insurance, family_condition
+- vitals, symptom, injury, injury_type
+- entity_file, system, backup
+
+**Relationships**:
+- `user`: Many-to-one with User
+- `patient`: Many-to-one with Patient
+
+**Indexes**:
+- `idx_activity_user_timestamp` on (user_id, timestamp)
+- `idx_activity_patient_timestamp` on (patient_id, timestamp)
+- `idx_activity_entity` on (entity_type, entity_id)
+- `idx_activity_timestamp` on timestamp
+- `idx_activity_action` on action
+
+**Business Rules**:
+- Logs all critical user actions
+- Maintains audit trail for compliance
+- event_metadata stores additional context as JSON
+- Preserves logs even if user/patient deleted
+
 ### backup_records
 **Purpose**: Backup operation tracking and management
 
@@ -1214,6 +1586,64 @@ JUNCTION TABLES (Many-to-Many)
 - Tracks all backup operations
 - checksum for integrity verification
 - Retention policy managed by admin scripts
+
+## System Tables
+
+### system_settings
+**Purpose**: System-wide key-value configuration store
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| key | String(100) | PRIMARY KEY | Setting key name |
+| value | Text | | Setting value |
+| created_at | DateTime | NOT NULL | Setting creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Example Keys**:
+- `test_library_version` - Version of standardized test library
+- `canonical_name_migration_complete` - Migration status flag
+- `last_sync_timestamp` - Last synchronization time
+- Feature flags and configuration values
+
+**Business Rules**:
+- Key is the primary key (no auto-increment ID)
+- Value stored as text, application interprets type
+- Used for feature flags, migration status, library versions
+
+### standardized_tests
+**Purpose**: LOINC test definitions for autocomplete and validation
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique test definition ID |
+| loinc_code | String(20) | UNIQUE | LOINC code identifier |
+| test_name | String(255) | NOT NULL | Full test name |
+| short_name | String(100) | | Abbreviated name |
+| default_unit | String(50) | | Default unit of measurement |
+| category | String(50) | | Test category |
+| common_names | JSON | | Alternative test names |
+| is_common | Boolean | NOT NULL, DEFAULT FALSE | Commonly used test flag |
+| system | String(100) | | Body system/specimen |
+| loinc_class | String(100) | | LOINC classification |
+| display_order | Integer | | Sort order for display |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- Referenced by LabTestComponent.canonical_test_name for trending
+
+**Indexes**:
+- `idx_standardized_tests_loinc_code` on loinc_code (UNIQUE)
+- `idx_standardized_tests_test_name` on test_name
+- `idx_standardized_tests_category` on category
+- `idx_standardized_tests_is_common` on is_common
+- `idx_standardized_tests_short_name` on short_name
+
+**Business Rules**:
+- LOINC codes provide standardized test identification
+- Used for autocomplete in lab test component entry
+- is_common flag prioritizes frequently used tests
+- Enables consistent trending across different lab results
 
 ## Junction Tables
 
@@ -1258,6 +1688,208 @@ JUNCTION TABLES (Many-to-Many)
 - Links medications to conditions they treat
 - relevance_note provides clinical context (e.g., "Primary treatment")
 - Cascade deletes with either parent
+
+### symptom_conditions
+**Purpose**: Many-to-many relationship between symptoms and conditions
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| symptom_id | Integer | FK(symptoms.id), NOT NULL | Associated symptom |
+| condition_id | Integer | FK(conditions.id), NOT NULL | Associated condition |
+| relevance_note | String | | How symptom relates to condition |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `symptom`: Many-to-one with Symptom
+- `condition`: Many-to-one with Condition
+
+**Indexes**:
+- `idx_symptom_condition_symptom_id` on symptom_id
+- `idx_symptom_condition_condition_id` on condition_id
+
+**Constraints**:
+- `uq_symptom_condition` UNIQUE on (symptom_id, condition_id)
+
+**Business Rules**:
+- Links symptoms to related conditions
+- Cascade deletes with either parent
+- Only one relationship per symptom/condition pair
+
+### symptom_medications
+**Purpose**: Many-to-many relationship between symptoms and medications
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| symptom_id | Integer | FK(symptoms.id), NOT NULL | Associated symptom |
+| medication_id | Integer | FK(medications.id), NOT NULL | Associated medication |
+| relationship_type | String | NOT NULL, DEFAULT 'related_to' | side_effect, helped_by, related_to |
+| relevance_note | String | | How medication relates to symptom |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationship Types**:
+- side_effect - Medication may cause this symptom
+- helped_by - Medication helps relieve this symptom
+- related_to - General relationship
+
+**Relationships**:
+- `symptom`: Many-to-one with Symptom
+- `medication`: Many-to-one with Medication
+
+**Indexes**:
+- `idx_symptom_medication_symptom_id` on symptom_id
+- `idx_symptom_medication_medication_id` on medication_id
+
+**Constraints**:
+- `uq_symptom_medication` UNIQUE on (symptom_id, medication_id)
+
+**Business Rules**:
+- Tracks whether medication causes, helps, or is related to symptom
+- Cascade deletes with either parent
+- Only one relationship per symptom/medication pair
+
+### symptom_treatments
+**Purpose**: Many-to-many relationship between symptoms and treatments
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| symptom_id | Integer | FK(symptoms.id), NOT NULL | Associated symptom |
+| treatment_id | Integer | FK(treatments.id), NOT NULL | Associated treatment |
+| relevance_note | String | | How treatment relates to symptom |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `symptom`: Many-to-one with Symptom
+- `treatment`: Many-to-one with Treatment
+
+**Indexes**:
+- `idx_symptom_treatment_symptom_id` on symptom_id
+- `idx_symptom_treatment_treatment_id` on treatment_id
+
+**Constraints**:
+- `uq_symptom_treatment` UNIQUE on (symptom_id, treatment_id)
+
+**Business Rules**:
+- Links symptoms to treatments addressing them
+- Cascade deletes with either parent
+- Only one relationship per symptom/treatment pair
+
+### injury_medications
+**Purpose**: Many-to-many relationship between injuries and medications
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| injury_id | Integer | FK(injuries.id), NOT NULL | Associated injury |
+| medication_id | Integer | FK(medications.id), NOT NULL | Associated medication |
+| relevance_note | String | | How medication relates to injury |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `injury`: Many-to-one with Injury
+- `medication`: Many-to-one with Medication
+
+**Indexes**:
+- `idx_injury_medication_injury_id` on injury_id
+- `idx_injury_medication_medication_id` on medication_id
+
+**Constraints**:
+- `uq_injury_medication` UNIQUE on (injury_id, medication_id)
+
+**Business Rules**:
+- Links medications used to treat injuries
+- Cascade deletes with either parent
+- Only one relationship per injury/medication pair
+
+### injury_conditions
+**Purpose**: Many-to-many relationship between injuries and conditions
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| injury_id | Integer | FK(injuries.id), NOT NULL | Associated injury |
+| condition_id | Integer | FK(conditions.id), NOT NULL | Associated condition |
+| relevance_note | String | | How condition relates to injury |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `injury`: Many-to-one with Injury
+- `condition`: Many-to-one with Condition
+
+**Indexes**:
+- `idx_injury_condition_injury_id` on injury_id
+- `idx_injury_condition_condition_id` on condition_id
+
+**Constraints**:
+- `uq_injury_condition` UNIQUE on (injury_id, condition_id)
+
+**Business Rules**:
+- Links conditions that resulted from or are related to injuries
+- Cascade deletes with either parent
+- Only one relationship per injury/condition pair
+
+### injury_treatments
+**Purpose**: Many-to-many relationship between injuries and treatments
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| injury_id | Integer | FK(injuries.id), NOT NULL | Associated injury |
+| treatment_id | Integer | FK(treatments.id), NOT NULL | Associated treatment |
+| relevance_note | String | | How treatment relates to injury |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `injury`: Many-to-one with Injury
+- `treatment`: Many-to-one with Treatment
+
+**Indexes**:
+- `idx_injury_treatment_injury_id` on injury_id
+- `idx_injury_treatment_treatment_id` on treatment_id
+
+**Constraints**:
+- `uq_injury_treatment` UNIQUE on (injury_id, treatment_id)
+
+**Business Rules**:
+- Links treatments used for injury recovery
+- Cascade deletes with either parent
+- Only one relationship per injury/treatment pair
+
+### injury_procedures
+**Purpose**: Many-to-many relationship between injuries and procedures
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| injury_id | Integer | FK(injuries.id), NOT NULL | Associated injury |
+| procedure_id | Integer | FK(procedures.id), NOT NULL | Associated procedure |
+| relevance_note | String | | How procedure relates to injury |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `injury`: Many-to-one with Injury
+- `procedure`: Many-to-one with Procedure
+
+**Indexes**:
+- `idx_injury_procedure_injury_id` on injury_id
+- `idx_injury_procedure_procedure_id` on procedure_id
+
+**Constraints**:
+- `uq_injury_procedure` UNIQUE on (injury_id, procedure_id)
+
+**Business Rules**:
+- Links procedures performed to treat injuries
+- Cascade deletes with either parent
+- Only one relationship per injury/procedure pair
 
 ## Data Types Reference
 
@@ -1336,6 +1968,7 @@ def get_utc_now():
 - `idx_lab_test_components_lab_result_id` on lab_result_id
 - `idx_lab_test_components_status` on status
 - `idx_lab_test_components_category` on category
+- `ix_lab_test_components_canonical_test_name` on canonical_test_name
 - `idx_lab_test_components_lab_result_status` on (lab_result_id, status)
 - `idx_lab_test_components_lab_result_category` on (lab_result_id, category)
 - `idx_lab_test_components_test_name_text` on test_name
@@ -1386,6 +2019,56 @@ def get_utc_now():
 **Family History Shares**:
 - `unique_active_family_history_share_partial` UNIQUE on (family_member_id, shared_with_user_id) WHERE is_active = TRUE
 
+**Symptoms**:
+- `idx_symptoms_patient_id` on patient_id
+- `idx_symptoms_patient_name` on (patient_id, symptom_name)
+- `idx_symptoms_status` on status
+- `idx_symptoms_is_chronic` on is_chronic
+
+**Symptom Occurrences**:
+- `idx_symptom_occ_symptom_id` on symptom_id
+- `idx_symptom_occ_date` on occurrence_date
+- `idx_symptom_occ_severity` on severity
+- `idx_symptom_occ_symptom_date` on (symptom_id, occurrence_date)
+
+**Injury Types**:
+- `idx_injury_types_name` on name
+- `idx_injury_types_is_system` on is_system
+
+**Injuries**:
+- `idx_injuries_patient_id` on patient_id
+- `idx_injuries_patient_status` on (patient_id, status)
+- `idx_injuries_injury_type` on injury_type_id
+- `idx_injuries_date` on date_of_injury
+
+**Notification Channels**:
+- `idx_notification_channels_user_id` on user_id
+
+**Notification Preferences**:
+- `idx_notification_prefs_user_id` on user_id
+- `idx_notification_prefs_channel_id` on channel_id
+- `idx_notification_prefs_event_type` on event_type
+
+**Notification History**:
+- `idx_notification_history_user_id` on user_id
+- `idx_notification_history_status` on status
+- `idx_notification_history_created_at` on created_at
+- `idx_notification_history_event_type` on event_type
+
+**Activity Logs**:
+- `idx_activity_user_timestamp` on (user_id, timestamp)
+- `idx_activity_patient_timestamp` on (patient_id, timestamp)
+- `idx_activity_entity` on (entity_type, entity_id)
+- `idx_activity_timestamp` on timestamp
+- `idx_activity_action` on action
+
+**Standardized Tests**:
+- `idx_standardized_tests_loinc_code` on loinc_code (UNIQUE)
+- `idx_standardized_tests_test_name` on test_name
+- `idx_standardized_tests_category` on category
+- `idx_standardized_tests_is_common` on is_common
+- `idx_standardized_tests_short_name` on short_name
+
 ### Query Performance Recommendations
 
 1. **Always filter by patient_id first** for patient-specific queries
@@ -1424,15 +2107,23 @@ lab_results = session.query(LabResult)\
 ### Foreign Key Constraints
 
 **CASCADE DELETE**:
-- Patient → All medical records (medications, conditions, lab_results, etc.)
-- User → UserPreferences
+- Patient → All medical records (medications, conditions, lab_results, symptoms, injuries, etc.)
+- User → UserPreferences, NotificationChannels
 - LabResult → LabResultFile, LabTestComponent, LabResultCondition
-- Condition → ConditionMedication, LabResultCondition
+- Condition → ConditionMedication, LabResultCondition, SymptomCondition, InjuryCondition
+- Medication → SymptomMedication, InjuryMedication
+- Treatment → SymptomTreatment, InjuryTreatment
+- Procedure → InjuryProcedure
+- Symptom → SymptomOccurrence, SymptomCondition, SymptomMedication, SymptomTreatment
+- Injury → InjuryMedication, InjuryCondition, InjuryTreatment, InjuryProcedure
 - FamilyMember → FamilyCondition, FamilyHistoryShare
 - PatientPhoto → Patient (ON DELETE CASCADE)
+- NotificationChannel → NotificationPreference
 
 **SET NULL**:
 - ReportGenerationAudit.user_id (preserve audit if user deleted)
+- NotificationHistory.user_id (preserve history if user deleted)
+- NotificationHistory.channel_id (preserve history if channel deleted)
 
 **RESTRICT** (default):
 - Most FK constraints prevent deletion if referenced
@@ -1450,6 +2141,17 @@ lab_results = session.query(LabResult)\
 | user_tags | (user_id, tag) | uq_user_tag |
 | report_templates | (user_id, name) | unique_user_template_name |
 | family_history_shares | (family_member_id, shared_with_user_id) WHERE is_active | unique_active_family_history_share_partial |
+| injury_types | name | Built-in UNIQUE |
+| notification_channels | (user_id, name) | uq_user_channel_name |
+| notification_preferences | (user_id, channel_id, event_type) | uq_user_channel_event |
+| symptom_conditions | (symptom_id, condition_id) | uq_symptom_condition |
+| symptom_medications | (symptom_id, medication_id) | uq_symptom_medication |
+| symptom_treatments | (symptom_id, treatment_id) | uq_symptom_treatment |
+| injury_medications | (injury_id, medication_id) | uq_injury_medication |
+| injury_conditions | (injury_id, condition_id) | uq_injury_condition |
+| injury_treatments | (injury_id, treatment_id) | uq_injury_treatment |
+| injury_procedures | (injury_id, procedure_id) | uq_injury_procedure |
+| standardized_tests | loinc_code | Built-in UNIQUE |
 
 ### Check Constraints
 
@@ -1601,16 +2303,26 @@ def upgrade():
 - medications, conditions, lab_results
 - encounters, immunizations, procedures
 - treatments, allergies, vitals
+- symptoms, injuries
 - emergency_contacts, family_members
 - insurances, shares, photo
 
 **Partial Cascade**:
 - LabResult → files, test_components, condition_relationships
-- Condition → medication_relationships, lab_result_relationships
+- Condition → medication_relationships, lab_result_relationships, symptom_relationships, injury_relationships
+- Medication → symptom_relationships, injury_relationships
+- Treatment → symptom_relationships, injury_relationships
+- Procedure → injury_relationships
+- Symptom → occurrences, condition_relationships, medication_relationships, treatment_relationships
+- Injury → medication_relationships, condition_relationships, treatment_relationships, procedure_relationships
 - FamilyMember → family_conditions, shares
+- User → notification_channels, preferences
+- NotificationChannel → preferences
 
 **Preserve Audit**:
 - ReportGenerationAudit.user_id SET NULL on user delete
+- NotificationHistory.user_id SET NULL on user delete
+- NotificationHistory.channel_id SET NULL on channel delete
 - ActivityLog preserves user actions after user deletion
 
 ### Soft Delete Patterns
@@ -1758,6 +2470,9 @@ stmt = select(Patient)\
 **MedicationStatus**:
 - active, stopped, on-hold, completed, cancelled
 
+**MedicationType**:
+- prescription, otc, supplement, herbal
+
 **AllergyStatus**:
 - active, inactive, resolved, unconfirmed
 
@@ -1765,10 +2480,10 @@ stmt = select(Patient)\
 - ordered, in_progress, completed, cancelled
 
 **ProcedureStatus**:
-- scheduled, in_progress, completed, cancelled
+- scheduled, in_progress, completed, cancelled, postponed
 
 **TreatmentStatus**:
-- active, in_progress, completed, cancelled, on_hold
+- planned, active, in_progress, completed, cancelled, on_hold
 
 **EncounterPriority**:
 - routine, urgent, emergency
@@ -1776,7 +2491,30 @@ stmt = select(Patient)\
 **SeverityLevel**:
 - mild, moderate, severe, life-threatening
 
-**FamilyRelationship**:
+**SymptomStatus**:
+- active, resolved, recurring
+
+**SymptomSeverity**:
+- mild, moderate, severe, critical
+
+**InjuryStatus**:
+- active (currently being treated)
+- healing (in recovery)
+- resolved (fully healed)
+- chronic (long-term/permanent effects)
+
+**Laterality**:
+- left, right, bilateral, not_applicable
+
+**RelationshipToSelf** (patient relationship to account owner):
+- self, spouse, partner
+- child, son, daughter
+- parent, father, mother
+- sibling, brother, sister
+- grandparent, grandchild
+- other_family, friend, other
+
+**FamilyRelationship** (for family history):
 - father, mother, brother, sister
 - paternal_grandfather, paternal_grandmother
 - maternal_grandfather, maternal_grandmother
@@ -1811,8 +2549,8 @@ INDEX  Index exists
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2024-01-04
+**Document Version**: 2.0
+**Last Updated**: 2026-02-02
 **Maintained By**: Development Team
 **Related Documentation**:
 - [01-architecture.md](01-architecture.md)

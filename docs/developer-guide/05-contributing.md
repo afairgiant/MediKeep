@@ -1,6 +1,6 @@
 # Development Guide
 
-**Last Updated:** October 4, 2025
+**Last Updated:** February 2, 2026
 
 Personal development guide for MediKeep - a medical records management system built with FastAPI and React.
 
@@ -262,31 +262,35 @@ def test_create_medication(db: Session):
     assert response.json()["name"] == "Aspirin"
 ```
 
-### Frontend Tests
+### Frontend Tests (Vitest)
 
 **Run tests:**
 
 ```bash
 cd frontend
 
-# All tests
+# Watch mode (default)
 npm test
 
-# With coverage
-npm test -- --coverage
+# Single run
+npm run test:run
 
-# Watch mode
-npm test -- --watch
+# With coverage
+npm run test:coverage
+
+# Vitest UI (interactive browser interface)
+npm run test:ui
 ```
 
 **Example test:**
 
 ```javascript
 import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 import MedicationCard from '../MedicationCard';
 
 test('calls onEdit when button clicked', () => {
-  const handleEdit = jest.fn();
+  const handleEdit = vi.fn();
   const med = { id: 1, name: 'Aspirin' };
 
   render(<MedicationCard medication={med} onEdit={handleEdit} />);
@@ -306,7 +310,8 @@ pylint app/            # No critical issues
 
 # Frontend
 npm run lint           # Linting passes
-npm run build          # Build succeeds
+npm run build          # Build succeeds (Vite)
+npm run test:run       # Tests pass (Vitest)
 ```
 
 ---
@@ -485,7 +490,7 @@ python --version  # Should be 3.12+
 **Build fails:**
 
 ```bash
-# Clear cache
+# Clear cache and reinstall
 rm -rf node_modules package-lock.json
 npm install
 
@@ -493,12 +498,16 @@ npm install
 npm run build
 ```
 
-**React errors:**
+**Vite/React errors:**
 
 ```bash
-# Clear React cache
-rm -rf node_modules/.cache
-npm start
+# Clear Vite cache
+rm -rf node_modules/.vite
+npm run dev
+
+# Full cache clear
+rm -rf node_modules/.vite node_modules/.cache
+npm run dev
 ```
 
 ### Test Issues
@@ -604,8 +613,10 @@ DB_PASSWORD=your_password
 SECRET_KEY=dev-secret-key
 DEBUG=True
 
-# Frontend (.env.local)
-REACT_APP_API_URL=http://localhost:8000
+# Frontend (.env) - Vite uses VITE_ prefix
+VITE_API_URL=/api/v1
+VITE_NAME=MediKeep
+VITE_DEBUG=true
 ```
 
 ### Useful Commands
@@ -622,10 +633,15 @@ alembic upgrade head                # Run migrations
 pytest --cov=app                    # Run tests with coverage
 black . && pylint app/              # Format and lint
 
-# Frontend
-npm start                           # Start dev server
+# Frontend (Vite + Vitest)
+npm run dev                         # Start Vite dev server (port 3000)
+npm start                           # Alias for npm run dev
 npm run build                       # Build for production
-npm test -- --coverage              # Run tests with coverage
+npm run preview                     # Preview production build
+npm test                            # Run tests in watch mode
+npm run test:run                    # Run tests once
+npm run test:coverage               # Run tests with coverage
+npm run test:ui                     # Vitest UI (interactive)
 ```
 
 ### Key Files

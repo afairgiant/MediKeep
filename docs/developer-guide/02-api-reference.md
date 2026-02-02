@@ -1,6 +1,6 @@
 # MediKeep API Reference (v1.0)
 
-**Last Updated:** November 1, 2025
+**Last Updated:** February 2, 2026
 **API Version:** 1.0
 **Base URL:** `http://localhost:8000/api/v1`
 
@@ -15,12 +15,14 @@
 5. [Patient Management](#5-patient-management)
 6. [Medical Records](#6-medical-records)
 7. [Related Information](#7-related-information)
-8. [Files & Attachments](#8-files--attachments)
-9. [Sharing & Collaboration](#9-sharing--collaboration)
-10. [Search & Tags](#10-search--tags)
-11. [Reports & Export](#11-reports--export)
-12. [Integrations](#12-integrations)
-13. [System & Admin](#13-system--admin)
+8. [Notifications](#8-notifications)
+9. [Files & Attachments](#9-files--attachments)
+10. [Sharing & Collaboration](#10-sharing--collaboration)
+11. [Search & Tags](#11-search--tags)
+12. [Reports & Export](#12-reports--export)
+13. [Integrations](#13-integrations)
+14. [System & Utilities](#14-system--utilities)
+15. [Admin Dashboard](#15-admin-dashboard)
 
 ---
 
@@ -131,27 +133,20 @@ Base path: `/api/v1/auth`
 `POST /auth/login`
 - **Purpose**: Authenticate and receive JWT token
 - **Authentication**: No
-- **Request Body**:
-```json
-{
-  "username": "johndoe",
-  "password": "SecurePass123!"
-}
+- **Content-Type**: `application/x-www-form-urlencoded`
+- **Request Body** (form data):
+```
+username=johndoe&password=SecurePass123!
 ```
 - **Success Response** (200):
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "token_type": "bearer",
-  "expires_in": 3600,
-  "user": {
-    "id": 1,
-    "username": "johndoe",
-    "email": "john@example.com",
-    "role": "user"
-  }
+  "session_timeout_minutes": 60
 }
 ```
+- **Note**: The response does NOT include a user object. Use `GET /users/me` to retrieve user details after login. The `session_timeout_minutes` reflects the user's session timeout preference (or system default if not set).
 - **Error Responses**:
   - `401`: Invalid credentials
   - `429`: Too many login attempts (rate limited)
@@ -228,6 +223,7 @@ Base path: `/api/v1/auth/sso`
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "token_type": "bearer",
+  "session_timeout_minutes": 60,
   "user": {
     "id": 1,
     "username": "john.doe",
@@ -828,12 +824,130 @@ Base path: `/api/v1/conditions`
 - **Query Parameters**:
   - `status` (string, optional): Filter by status
   - `tags` (array, optional): Filter by tags
+  - `tag_match_all` (boolean, default: false): Match all tags (AND) vs any tag (OR)
 
-#### Get Chronic Conditions
-`GET /conditions/patient/{patient_id}/chronic`
+#### Get Conditions for Dropdown
+`GET /conditions/dropdown`
+- **Purpose**: Get conditions formatted for dropdown selection in forms
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `active_only` (boolean, default: false): Only return active conditions
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "condition_name": "Hypertension",
+    "status": "active"
+  }
+]
+```
+
+#### Get Condition by ID
+`GET /conditions/{condition_id}`
+- **Purpose**: Get condition with related information (patient, practitioner, treatments)
+- **Authentication**: Yes
+- **Success Response** (200): Condition object with relations
+
+#### Update Condition
+`PUT /conditions/{condition_id}`
+- **Request Body**: Same as create (all fields optional)
+- **Success Response** (200): Updated condition object
+
+#### Delete Condition
+`DELETE /conditions/{condition_id}`
+- **Success Response** (200): `{"message": "Condition deleted successfully"}`
 
 #### Get Active Conditions
 `GET /conditions/patient/{patient_id}/active`
+- **Purpose**: Get all active conditions for a patient
+- **Authentication**: Yes
+- **Success Response** (200): Array of active condition objects
+
+#### Get Patient Conditions
+`GET /conditions/patients/{patient_id}/conditions/`
+- **Purpose**: Get all conditions for a specific patient
+- **Authentication**: Yes
+- **Query Parameters**: `skip`, `limit`
+- **Success Response** (200): Array of condition objects
+
+#### Condition-Medication Linking
+
+##### Get Condition Medications
+`GET /conditions/condition-medications/{condition_id}`
+- **Purpose**: Get all medications linked to a condition
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "medication_id": 5,
+    "condition_id": 1,
+    "relevance_note": "Primary treatment",
+    "created_at": "2025-10-01T00:00:00Z",
+    "updated_at": "2025-10-01T00:00:00Z"
+  }
+]
+```
+
+##### Link Medication to Condition
+`POST /conditions/{condition_id}/medications`
+- **Purpose**: Create a relationship between a condition and medication
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "medication_id": 5,
+  "relevance_note": "Primary treatment for this condition"
+}
+```
+- **Success Response** (201): Created relationship object
+- **Error Responses**:
+  - `400`: Relationship already exists or medication belongs to different patient
+  - `404`: Condition or medication not found
+
+##### Update Condition-Medication Link
+`PUT /conditions/{condition_id}/medications/{relationship_id}`
+- **Purpose**: Update the relevance note for a condition-medication relationship
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "relevance_note": "Updated note about the relationship"
+}
+```
+- **Success Response** (200): Updated relationship object
+
+##### Remove Medication Link from Condition
+`DELETE /conditions/{condition_id}/medications/{relationship_id}`
+- **Purpose**: Remove the link between a condition and medication
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "Condition medication relationship deleted successfully"}`
+
+##### Get Medication Conditions
+`GET /conditions/medication/{medication_id}/conditions`
+- **Purpose**: Get all conditions linked to a specific medication (reverse lookup)
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "condition_id": 3,
+    "medication_id": 5,
+    "relevance_note": "Treatment for this condition",
+    "created_at": "2025-10-01T00:00:00Z",
+    "updated_at": "2025-10-01T00:00:00Z",
+    "condition": {
+      "id": 3,
+      "diagnosis": "Hypertension",
+      "status": "active",
+      "severity": "moderate"
+    }
+  }
+]
+```
 
 ### 6.4 Immunizations
 
@@ -871,6 +985,7 @@ Base path: `/api/v1/vitals`
 
 #### Create Vitals Record
 `POST /vitals/`
+- **Authentication**: Yes
 - **Request Body**:
 ```json
 {
@@ -903,13 +1018,114 @@ Base path: `/api/v1/vitals`
 
 #### List Vitals
 `GET /vitals/`
+- **Authentication**: Yes
 - **Query Parameters**:
-  - `start_date` (string, optional): Filter from date
-  - `end_date` (string, optional): Filter to date
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 10000, max: 10000): Items per page
+  - `vital_type` (string, optional): Filter by vital type (blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose)
+  - `start_date` (string, optional): Start date for date range filter (ISO format)
+  - `end_date` (string, optional): End date for date range filter (ISO format)
+  - `days` (integer, optional): Get readings from last N days
+- **Success Response** (200): Array of vitals records
+
+#### Get Vitals by ID
+`GET /vitals/{vitals_id}`
+- **Purpose**: Get vitals reading with related information
+- **Authentication**: Yes
+- **Success Response** (200): Vitals object with patient and practitioner details
+
+#### Update Vitals
+`PUT /vitals/{vitals_id}`
+- **Authentication**: Yes
+- **Request Body**: Same as create (all fields optional)
+- **Success Response** (200): Updated vitals object
+
+#### Delete Vitals
+`DELETE /vitals/{vitals_id}`
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "Vitals deleted successfully"}`
+
+#### Get Vitals Statistics
+`GET /vitals/stats`
+- **Purpose**: Get vitals statistics for the current user
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `patient_id` (integer, optional): Patient ID for patient switching
+- **Success Response** (200):
+```json
+{
+  "total_readings": 50,
+  "latest_reading_date": "2025-10-04T10:30:00Z",
+  "blood_pressure_avg": {
+    "systolic": 120,
+    "diastolic": 80
+  },
+  "heart_rate_avg": 72,
+  "weight_trend": "stable"
+}
+```
+
+#### Get Patient Vitals (Paginated)
+`GET /vitals/patient/{patient_id}/paginated`
+- **Purpose**: Get paginated vitals readings with total count
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 10, max: 100): Items per page
+  - `vital_type` (string, optional): Filter by vital type
+- **Success Response** (200):
+```json
+{
+  "items": [...],
+  "total": 100,
+  "skip": 0,
+  "limit": 10
+}
+```
+
+#### Get Patient Vitals
+`GET /vitals/patient/{patient_id}`
+- **Purpose**: Get all vitals for a specific patient
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 10000, max: 10000): Items per page
+  - `vital_type` (string, optional): Filter by vital type
+  - `days` (integer, optional): Get readings from last N days
+- **Success Response** (200): Array of vitals records
 
 #### Get Latest Vitals
 `GET /vitals/patient/{patient_id}/latest`
-- **Purpose**: Get most recent vital signs
+- **Purpose**: Get most recent vital signs for a patient
+- **Authentication**: Yes
+- **Success Response** (200): Single vitals object
+- **Error Response** (404): No vitals readings found
+
+#### Get Patient Vitals Statistics
+`GET /vitals/patient/{patient_id}/stats`
+- **Purpose**: Get vitals statistics for a specific patient
+- **Authentication**: Yes
+- **Success Response** (200): Statistics object with averages and trends
+
+#### Get Vitals by Date Range
+`GET /vitals/patient/{patient_id}/date-range`
+- **Purpose**: Get vitals readings within a specific date range
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `start_date` (datetime, required): Start date for the range
+  - `end_date` (datetime, required): End date for the range
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 10000, max: 10000): Items per page
+  - `vital_type` (string, optional): Filter by vital type
+- **Success Response** (200): Array of vitals records
+
+#### Create Patient Vitals
+`POST /vitals/patient/{patient_id}/vitals/`
+- **Purpose**: Create a new vitals reading for a specific patient
+- **Authentication**: Yes
+- **Request Body**: Same as main create endpoint
+- **Note**: Patient ID in URL must match patient_id in request body
+- **Success Response** (201): Created vitals object
 
 ### 6.6 Lab Results
 
@@ -917,35 +1133,253 @@ Base path: `/api/v1/lab-results`
 
 #### Create Lab Result
 `POST /lab-results/`
+- **Authentication**: Yes
 - **Request Body**:
 ```json
 {
   "patient_id": 1,
   "test_name": "Complete Blood Count",
-  "test_date": "2025-10-01",
-  "result_date": "2025-10-02",
+  "test_code": "CBC",
+  "test_category": "Hematology",
+  "test_type": "routine",
+  "facility": "LabCorp",
+  "ordered_date": "2025-10-01",
+  "completed_date": "2025-10-02",
   "practitioner_id": 5,
-  "lab_name": "LabCorp",
   "status": "final",
-  "notes": "All values within normal range"
+  "labs_result": "All values within normal range",
+  "notes": "Routine checkup",
+  "tags": ["annual", "routine"]
 }
 ```
 - **Status values**: `pending`, `preliminary`, `final`, `corrected`
+- **Success Response** (201): Lab result object
 
 #### List Lab Results
 `GET /lab-results/`
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 100, max: 1000): Items per page
+  - `tags` (array, optional): Filter by tags
+  - `tag_match_all` (boolean, default: false): Match all tags (AND) vs any tag (OR)
+- **Success Response** (200): Array of lab results with practitioner and patient details
 
-#### Get Lab Result with Components
+#### Get Lab Result by ID
 `GET /lab-results/{lab_result_id}`
-- **Success Response**: Lab result with all test components
+- **Purpose**: Get lab result with related data (patient, practitioner, files)
+- **Authentication**: Yes
+- **Success Response** (200): Lab result with relations
 
-#### Lab Result File Upload
-`POST /lab-results/{lab_result_id}/files`
-- **Content-Type**: `multipart/form-data`
-- **Request**: File upload (PDF, images)
+#### Update Lab Result
+`PUT /lab-results/{lab_result_id}`
+- **Authentication**: Yes
+- **Request Body**: Same as create (all fields optional)
+- **Success Response** (200): Updated lab result
 
-#### Get Lab Result Files
+#### Delete Lab Result
+`DELETE /lab-results/{lab_result_id}`
+- **Purpose**: Delete lab result and associated files
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "message": "Lab result and associated files deleted successfully",
+  "files_deleted": 2,
+  "files_preserved": 1
+}
+```
+
+#### Get Patient Lab Results
+`GET /lab-results/patient/{patient_id}`
+- **Purpose**: Get all lab results for a specific patient
+- **Authentication**: Yes
+- **Query Parameters**: `skip`, `limit`, `tags`, `tag_match_all`
+- **Success Response** (200): Array of lab results
+
+#### Get Patient Lab Results by Code
+`GET /lab-results/patient/{patient_id}/code/{code}`
+- **Purpose**: Get lab results for a patient filtered by test code
+- **Authentication**: Yes
+- **Success Response** (200): Array of lab results
+
+#### Get Practitioner Lab Results
+`GET /lab-results/practitioner/{practitioner_id}`
+- **Purpose**: Get lab results ordered by a specific practitioner (filtered to accessible patients)
+- **Authentication**: Yes
+- **Query Parameters**: `skip`, `limit`
+- **Success Response** (200): Array of lab results
+
+#### Search Lab Results by Code
+`GET /lab-results/search/code/{code}`
+- **Purpose**: Search lab results by exact test code
+- **Authentication**: Yes
+- **Query Parameters**: `skip`, `limit`
+- **Success Response** (200): Array of matching lab results
+
+#### Search Lab Results by Code Pattern
+`GET /lab-results/search/code-pattern/{code_pattern}`
+- **Purpose**: Search lab results by partial test code match
+- **Authentication**: Yes
+- **Query Parameters**: `skip`, `limit`
+- **Success Response** (200): Array of matching lab results
+
+#### Lab Result File Management
+
+##### Get Lab Result Files
 `GET /lab-results/{lab_result_id}/files`
+- **Purpose**: Get all files attached to a lab result
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "lab_result_id": 1,
+    "file_name": "cbc_results.pdf",
+    "file_path": "/uploads/lab_result_files/abc123.pdf",
+    "file_type": "application/pdf",
+    "file_size": 245678,
+    "description": "Original lab report",
+    "uploaded_at": "2025-10-04T10:30:00Z"
+  }
+]
+```
+
+##### Upload Lab Result File
+`POST /lab-results/{lab_result_id}/files`
+- **Purpose**: Upload a file to a lab result
+- **Authentication**: Yes
+- **Content-Type**: `multipart/form-data`
+- **Request Body**:
+  - `file`: File to upload
+  - `description` (optional): File description
+- **Max Size**: 1GB
+- **Allowed Extensions**: PDF, images, documents, medical imaging (DICOM, NIfTI), video, audio, archives
+- **Success Response** (201): Created file object
+
+##### Delete Lab Result File
+`DELETE /lab-results/{lab_result_id}/files/{file_id}`
+- **Purpose**: Delete a specific file from a lab result
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "File deleted successfully"}`
+
+#### Lab Result Statistics
+
+##### Get Patient Lab Result Count
+`GET /lab-results/stats/patient/{patient_id}/count`
+- **Purpose**: Get count of lab results for a patient
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "patient_id": 1,
+  "lab_result_count": 25
+}
+```
+
+##### Get Practitioner Lab Result Count
+`GET /lab-results/stats/practitioner/{practitioner_id}/count`
+- **Purpose**: Get count of lab results ordered by a practitioner
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "practitioner_id": 5,
+  "lab_result_count": 150
+}
+```
+
+##### Get Code Usage Count
+`GET /lab-results/stats/code/{code}/count`
+- **Purpose**: Get count of how many times a specific test code has been used
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "code": "CBC",
+  "usage_count": 50
+}
+```
+
+#### Lab Result - Condition Relationships
+
+##### Get Lab Result Conditions
+`GET /lab-results/{lab_result_id}/conditions`
+- **Purpose**: Get all conditions linked to a lab result
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "lab_result_id": 1,
+    "condition_id": 3,
+    "relevance_note": "Monitoring for diabetes",
+    "created_at": "2025-10-01T00:00:00Z",
+    "condition": {
+      "id": 3,
+      "diagnosis": "Type 2 Diabetes",
+      "status": "active",
+      "severity": "moderate"
+    }
+  }
+]
+```
+
+##### Link Condition to Lab Result
+`POST /lab-results/{lab_result_id}/conditions`
+- **Purpose**: Create a relationship between a lab result and condition
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "condition_id": 3,
+  "relevance_note": "Monitoring glucose levels for diabetes management"
+}
+```
+- **Success Response** (201): Created relationship object
+
+##### Update Lab Result-Condition Link
+`PUT /lab-results/{lab_result_id}/conditions/{relationship_id}`
+- **Request Body**:
+```json
+{
+  "relevance_note": "Updated relevance note"
+}
+```
+- **Success Response** (200): Updated relationship object
+
+##### Remove Condition Link from Lab Result
+`DELETE /lab-results/{lab_result_id}/conditions/{relationship_id}`
+- **Success Response** (200): `{"message": "Lab result condition relationship deleted successfully"}`
+
+#### PDF OCR Extraction
+`POST /lab-results/{lab_result_id}/ocr-parse`
+- **Purpose**: Extract text from lab PDF using hybrid OCR approach
+- **Authentication**: Yes
+- **Content-Type**: `multipart/form-data`
+- **Request Body**: PDF file
+- **Max Size**: 15MB
+- **Success Response** (200):
+```json
+{
+  "status": "success",
+  "extracted_text": "Extracted text content...",
+  "metadata": {
+    "method": "hybrid",
+    "confidence": 0.95,
+    "page_count": 3,
+    "char_count": 5000,
+    "filename": "lab_report.pdf",
+    "lab_name": "LabCorp",
+    "test_count": 15,
+    "test_date": "2025-10-01"
+  },
+  "error": null
+}
+```
+- **Note**: Returns raw text for client-side parsing. Does NOT save to database.
 
 ### Lab Test Components
 
@@ -1171,7 +1605,229 @@ Base path: `/api/v1/symptoms`
 #### Unlink Symptom from Treatment
 `DELETE /symptoms/{symptom_id}/unlink-treatment/{treatment_id}`
 
-### 6.11 Standardized Tests (LOINC)
+### 6.11 Injuries
+
+Base path: `/api/v1/injuries`
+
+**Purpose**: Track physical injuries like sprains, fractures, burns, etc. with links to related medications, conditions, treatments, and procedures.
+
+#### Injury Types
+
+Base path: `/api/v1/injury-types`
+
+##### List All Injury Types
+`GET /injury-types/`
+- **Purpose**: Get all injury types for dropdown selection
+- **Authentication**: Yes
+- **Success Response** (200): Array of injury type objects
+```json
+[
+  {
+    "id": 1,
+    "name": "Sprain",
+    "description": "Ligament injury",
+    "is_system": true,
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  }
+]
+```
+
+##### Get Injury Types Dropdown
+`GET /injury-types/dropdown`
+- **Purpose**: Get injury types formatted for dropdown (minimal response)
+- **Authentication**: Yes
+- **Success Response** (200): Array of dropdown options
+
+##### Create Injury Type
+`POST /injury-types/`
+- **Purpose**: Create a user-defined injury type
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "name": "Custom Injury Type",
+  "description": "Description of the injury type"
+}
+```
+- **Note**: System types can only be created via database migration
+- **Error Responses**:
+  - `400`: Name already exists
+
+##### Get Injury Type
+`GET /injury-types/{injury_type_id}`
+- **Purpose**: Get a specific injury type by ID
+- **Success Response** (200): Injury type object
+
+##### Delete Injury Type
+`DELETE /injury-types/{injury_type_id}`
+- **Purpose**: Delete a user-created injury type
+- **Note**: Cannot delete system types or types referenced by injuries
+- **Error Responses**:
+  - `400`: Cannot delete system type or type in use
+  - `404`: Injury type not found
+
+#### Injuries CRUD
+
+##### Create Injury
+`POST /injuries/`
+- **Purpose**: Create a new injury record
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "patient_id": 1,
+  "injury_name": "Left Ankle Sprain",
+  "injury_type_id": 1,
+  "body_part": "Ankle",
+  "laterality": "left",
+  "date_of_injury": "2025-10-01",
+  "mechanism": "Twisted while running",
+  "severity": "moderate",
+  "status": "active",
+  "treatment_received": "Ice, compression, elevation",
+  "recovery_notes": "Improving with physical therapy",
+  "practitioner_id": 5,
+  "notes": "Patient advised to avoid running for 2 weeks",
+  "tags": ["sports", "acute"]
+}
+```
+- **Laterality values**: `left`, `right`, `bilateral`, `not_applicable`
+- **Severity values**: `mild`, `moderate`, `severe`, `life-threatening`
+- **Status values**: `active`, `healing`, `resolved`, `chronic`
+- **Success Response** (201): Injury with relations
+
+##### List Injuries
+`GET /injuries/`
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 100, max: 100): Items per page
+  - `status` (string, optional): Filter by status
+  - `injury_type_id` (integer, optional): Filter by injury type
+  - `tags` (array, optional): Filter by tags
+  - `tag_match_all` (boolean, default: false): Match ALL tags vs ANY
+- **Success Response** (200): Array of injuries with relations
+
+##### Get Injury
+`GET /injuries/{injury_id}`
+- **Purpose**: Get injury by ID with related information
+- **Success Response** (200): Injury with relations
+
+##### Update Injury
+`PUT /injuries/{injury_id}`
+- **Request Body**: Same fields as create (all optional)
+- **Success Response** (200): Updated injury with relations
+
+##### Delete Injury
+`DELETE /injuries/{injury_id}`
+- **Success Response** (200): `{"message": "Injury deleted successfully"}`
+
+##### Get Active Injuries
+`GET /injuries/patient/{patient_id}/active`
+- **Purpose**: Get all active injuries for a patient
+- **Success Response** (200): Array of active injuries with relations
+
+#### Injury Relationships
+
+##### Injury-Medication Links
+
+**Get Linked Medications**
+`GET /injuries/{injury_id}/medications`
+- **Purpose**: Get all medications linked to an injury
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "injury_id": 1,
+    "medication_id": 5,
+    "relevance_note": "Pain management",
+    "created_at": "2025-10-01T00:00:00Z",
+    "medication": {
+      "id": 5,
+      "medication_name": "Ibuprofen",
+      "dosage": "400mg",
+      "status": "active"
+    }
+  }
+]
+```
+
+**Link Medication to Injury**
+`POST /injuries/{injury_id}/medications`
+- **Request Body**:
+```json
+{
+  "medication_id": 5,
+  "relevance_note": "Pain management"
+}
+```
+- **Error Responses**:
+  - `400`: Already linked or different patient
+  - `404`: Medication not found
+
+**Unlink Medication from Injury**
+`DELETE /injuries/{injury_id}/medications/{medication_id}`
+- **Success Response** (200): `{"message": "Medication unlinked from injury"}`
+
+##### Injury-Condition Links
+
+**Get Linked Conditions**
+`GET /injuries/{injury_id}/conditions`
+
+**Link Condition to Injury**
+`POST /injuries/{injury_id}/conditions`
+- **Request Body**:
+```json
+{
+  "condition_id": 3,
+  "relevance_note": "Underlying condition"
+}
+```
+
+**Unlink Condition from Injury**
+`DELETE /injuries/{injury_id}/conditions/{condition_id}`
+
+##### Injury-Treatment Links
+
+**Get Linked Treatments**
+`GET /injuries/{injury_id}/treatments`
+
+**Link Treatment to Injury**
+`POST /injuries/{injury_id}/treatments`
+- **Request Body**:
+```json
+{
+  "treatment_id": 2,
+  "relevance_note": "Physical therapy for recovery"
+}
+```
+
+**Unlink Treatment from Injury**
+`DELETE /injuries/{injury_id}/treatments/{treatment_id}`
+
+##### Injury-Procedure Links
+
+**Get Linked Procedures**
+`GET /injuries/{injury_id}/procedures`
+
+**Link Procedure to Injury**
+`POST /injuries/{injury_id}/procedures`
+- **Request Body**:
+```json
+{
+  "procedure_id": 4,
+  "relevance_note": "Surgery to repair damage"
+}
+```
+
+**Unlink Procedure from Injury**
+`DELETE /injuries/{injury_id}/procedures/{procedure_id}`
+
+---
+
+### 6.12 Standardized Tests (LOINC)
 
 Base path: `/api/v1/standardized-tests`
 
@@ -1329,6 +1985,7 @@ Base path: `/api/v1/family-members`
 
 #### Create Family Member
 `POST /family-members/`
+- **Authentication**: Yes
 - **Request Body**:
 ```json
 {
@@ -1340,6 +1997,101 @@ Base path: `/api/v1/family-members`
   "medical_history": "Diabetes, Hypertension"
 }
 ```
+- **Success Response** (201): Family member object
+
+#### List Family Members
+`GET /family-members/`
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 100, max: 100): Items per page
+  - `relationship` (string, optional): Filter by relationship type
+- **Success Response** (200): Array of family member objects with conditions
+
+#### Get Family Members for Dropdown
+`GET /family-members/dropdown`
+- **Purpose**: Get family members formatted for dropdown selection in forms
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "name": "John Doe Sr.",
+    "relationship": "Father"
+  }
+]
+```
+
+#### Get Family Member by ID
+`GET /family-members/{family_member_id}`
+- **Purpose**: Get family member with conditions
+- **Authentication**: Yes
+- **Success Response** (200): Family member object with conditions
+
+#### Update Family Member
+`PUT /family-members/{family_member_id}`
+- **Authentication**: Yes
+- **Request Body**: Same as create (all fields optional)
+- **Success Response** (200): Updated family member object
+
+#### Delete Family Member
+`DELETE /family-members/{family_member_id}`
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "Family Member deleted successfully"}`
+
+#### Search Family Members
+`GET /family-members/search/`
+- **Purpose**: Search family members by name
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `name` (string, required, min 2 chars): Name search term
+- **Success Response** (200): Array of matching family member objects
+
+#### Family Condition Management
+
+##### Get Family Member Conditions
+`GET /family-members/{family_member_id}/conditions`
+- **Purpose**: Get all medical conditions for a specific family member
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "family_member_id": 1,
+    "condition_name": "Diabetes Type 2",
+    "diagnosis_age": 55,
+    "notes": "Controlled with medication",
+    "created_at": "2025-10-01T00:00:00Z"
+  }
+]
+```
+
+##### Create Family Condition
+`POST /family-members/{family_member_id}/conditions`
+- **Purpose**: Add a medical condition to a family member's history
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "condition_name": "Hypertension",
+  "diagnosis_age": 45,
+  "notes": "Started medication at 50"
+}
+```
+- **Success Response** (201): Created condition object
+
+##### Update Family Condition
+`PUT /family-members/{family_member_id}/conditions/{condition_id}`
+- **Authentication**: Yes
+- **Request Body**: Same fields as create (all optional)
+- **Success Response** (200): Updated condition object
+
+##### Delete Family Condition
+`DELETE /family-members/{family_member_id}/conditions/{condition_id}`
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "Family Condition deleted successfully"}`
 
 ### 7.4 Pharmacies
 
@@ -1391,7 +2143,253 @@ Base path: `/api/v1/practitioners`
 
 ---
 
-## 8. Files & Attachments
+## 8. Notifications
+
+Base path: `/api/v1/notifications`
+
+**Purpose**: Manage notification channels, preferences, and view notification history.
+
+### 8.1 Event Types
+
+#### Get Available Event Types
+`GET /notifications/event-types`
+- **Purpose**: Get list of available notification event types
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "event_types": [
+    {
+      "value": "medication_reminder",
+      "label": "Medication Reminder",
+      "description": "Reminders for taking medications",
+      "category": "reminders",
+      "is_implemented": true
+    },
+    {
+      "value": "lab_result_available",
+      "label": "Lab Result Available",
+      "description": "Notification when lab results are ready",
+      "category": "results",
+      "is_implemented": true
+    }
+  ]
+}
+```
+
+### 8.2 Channel Management
+
+#### List Channels
+`GET /notifications/channels`
+- **Purpose**: List all notification channels for current user
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "name": "My Email",
+    "channel_type": "email",
+    "is_enabled": true,
+    "is_verified": true,
+    "last_test_at": "2025-10-01T10:00:00Z",
+    "last_test_status": "success",
+    "last_used_at": "2025-10-04T08:00:00Z",
+    "total_notifications_sent": 25,
+    "config_valid": true,
+    "config_error": null,
+    "created_at": "2025-09-01T00:00:00Z",
+    "updated_at": "2025-10-01T00:00:00Z"
+  }
+]
+```
+
+#### Create Channel
+`POST /notifications/channels`
+- **Purpose**: Create a new notification channel
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "name": "My Telegram",
+  "channel_type": "telegram",
+  "config": {
+    "chat_id": "123456789",
+    "bot_token": "your_bot_token"
+  },
+  "is_enabled": true
+}
+```
+- **Channel types**: `email`, `telegram`, `discord`, `slack`, `webhook`, `pushover`
+- **Success Response** (201): Created channel object
+
+#### Get Channel Details
+`GET /notifications/channels/{channel_id}`
+- **Purpose**: Get channel with masked configuration
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "id": 1,
+  "name": "My Telegram",
+  "channel_type": "telegram",
+  "is_enabled": true,
+  "is_verified": true,
+  "last_test_at": "2025-10-01T10:00:00Z",
+  "last_test_status": "success",
+  "config_masked": {
+    "chat_id": "123***789",
+    "bot_token": "***masked***"
+  }
+}
+```
+
+#### Update Channel
+`PUT /notifications/channels/{channel_id}`
+- **Purpose**: Update notification channel
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "name": "Updated Name",
+  "config": {
+    "chat_id": "new_chat_id"
+  },
+  "is_enabled": false
+}
+```
+- **Success Response** (200): Updated channel object
+
+#### Delete Channel
+`DELETE /notifications/channels/{channel_id}`
+- **Purpose**: Delete a notification channel
+- **Authentication**: Yes
+- **Success Response** (204): No content
+
+#### Test Channel
+`POST /notifications/channels/{channel_id}/test`
+- **Purpose**: Send a test notification to verify channel configuration
+- **Authentication**: Yes
+- **Request Body** (optional):
+```json
+{
+  "message": "Custom test message"
+}
+```
+- **Success Response** (200):
+```json
+{
+  "success": true,
+  "message": "Test notification sent successfully",
+  "channel_name": "My Telegram",
+  "sent_at": "2025-10-04T10:30:00Z"
+}
+```
+- **Failure Response** (200):
+```json
+{
+  "success": false,
+  "message": "Channel configuration is invalid: missing bot_token",
+  "channel_name": "My Telegram",
+  "sent_at": null
+}
+```
+
+### 8.3 Preference Management
+
+#### List Preferences
+`GET /notifications/preferences`
+- **Purpose**: List all notification preferences for current user
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "channel_id": 1,
+    "channel_name": "My Email",
+    "event_type": "medication_reminder",
+    "is_enabled": true,
+    "remind_before_minutes": 30,
+    "created_at": "2025-09-01T00:00:00Z",
+    "updated_at": "2025-10-01T00:00:00Z"
+  }
+]
+```
+
+#### Get Preference Matrix
+`GET /notifications/preferences/matrix`
+- **Purpose**: Get full preference matrix (events x channels)
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "channels": [
+    {"id": 1, "name": "My Email", "channel_type": "email", ...},
+    {"id": 2, "name": "My Telegram", "channel_type": "telegram", ...}
+  ],
+  "events": ["medication_reminder", "lab_result_available", "appointment_reminder"],
+  "preferences": {
+    "medication_reminder": {"1": true, "2": false},
+    "lab_result_available": {"1": true, "2": true},
+    "appointment_reminder": {"1": false, "2": true}
+  }
+}
+```
+
+#### Set Preference
+`POST /notifications/preferences`
+- **Purpose**: Set or update a notification preference
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "channel_id": 1,
+  "event_type": "medication_reminder",
+  "is_enabled": true,
+  "remind_before_minutes": 30
+}
+```
+- **Success Response** (200): Updated preference object
+
+### 8.4 Notification History
+
+#### Get History
+`GET /notifications/history`
+- **Purpose**: Get notification history for current user
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `page` (integer, default: 1): Page number
+  - `page_size` (integer, default: 20, max: 100): Items per page
+  - `status_filter` (string, optional): Filter by status
+  - `event_type` (string, optional): Filter by event type
+- **Success Response** (200):
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "event_type": "medication_reminder",
+      "title": "Medication Reminder",
+      "message_preview": "Time to take your Aspirin...",
+      "channel_name": "My Email",
+      "channel_type": "email",
+      "status": "sent",
+      "attempt_count": 1,
+      "error_message": null,
+      "created_at": "2025-10-04T08:00:00Z",
+      "sent_at": "2025-10-04T08:00:05Z"
+    }
+  ],
+  "total": 50,
+  "page": 1,
+  "page_size": 20
+}
+```
+
+---
+
+## 9. Files & Attachments
 
 Base path: `/api/v1/entity-files`
 
@@ -1417,14 +2415,16 @@ Base path: `/api/v1/entity-files`
 
 ---
 
-## 9. Sharing & Collaboration
+## 10. Sharing & Collaboration
 
-### 9.1 Patient Sharing
+### 10.1 Patient Sharing
 
 Base path: `/api/v1/patient-sharing`
 
 #### Share Patient Record
-`POST /patient-sharing/share`
+`POST /patient-sharing/`
+- **Purpose**: Share a patient record with another user via email invitation
+- **Authentication**: Yes
 - **Request Body**:
 ```json
 {
@@ -1436,32 +2436,144 @@ Base path: `/api/v1/patient-sharing`
 }
 ```
 - **Access levels**: `view`, `edit`, `full`
+- **Success Response** (201): Share invitation object
+
+#### Bulk Invite
+`POST /patient-sharing/bulk-invite`
+- **Purpose**: Send sharing invitations to multiple recipients at once
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "patient_id": 1,
+  "recipient_emails": ["doctor1@example.com", "doctor2@example.com"],
+  "access_level": "view",
+  "expiration_date": "2025-12-31",
+  "message": "Sharing medical records for consultation"
+}
+```
+- **Success Response** (200):
+```json
+{
+  "successful_invites": 2,
+  "failed_invites": 0,
+  "results": [...]
+}
+```
 
 #### Revoke Access
 `DELETE /patient-sharing/{share_id}`
+- **Purpose**: Revoke a user's access to a shared patient record
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "Access revoked successfully"}`
 
-#### List Shared Patients
+#### Remove My Access
+`DELETE /patient-sharing/remove-my-access/{patient_id}`
+- **Purpose**: Remove your own access to a patient record shared with you
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "Access removed successfully"}`
+
+#### List Patients Shared With Me
 `GET /patient-sharing/shared-with-me`
+- **Purpose**: Get all patient records that others have shared with you
+- **Authentication**: Yes
+- **Success Response** (200): Array of shared patient access objects
 
-### 9.2 Invitations
+#### List Patients I've Shared
+`GET /patient-sharing/shared-by-me`
+- **Purpose**: Get all patient records you have shared with others
+- **Authentication**: Yes
+- **Success Response** (200): Array of patient sharing objects with recipient info
+
+#### Get Sharing Statistics
+`GET /patient-sharing/stats/user`
+- **Purpose**: Get statistics about patient sharing for current user
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "total_shared_with_me": 3,
+  "total_shared_by_me": 5,
+  "active_shares": 4,
+  "pending_invitations": 2
+}
+```
+
+#### Cleanup Expired Shares
+`POST /patient-sharing/cleanup-expired`
+- **Purpose**: Remove expired sharing invitations (admin/scheduled task)
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "expired_shares_removed": 5,
+  "cleanup_date": "2025-10-04T10:30:00Z"
+}
+```
+
+### 10.2 Invitations
 
 Base path: `/api/v1/invitations`
 
-#### List Invitations
-`GET /invitations/`
-- **Query Parameters**:
-  - `status` (string, optional): `pending`, `accepted`, `rejected`
+#### Get Pending Invitations
+`GET /invitations/pending`
+- **Purpose**: Get all pending invitations for the current user
+- **Authentication**: Yes
+- **Success Response** (200): Array of pending invitation objects
 
-#### Accept Invitation
-`POST /invitations/{invitation_id}/accept`
+#### Get Sent Invitations
+`GET /invitations/sent`
+- **Purpose**: Get all invitations sent by the current user
+- **Authentication**: Yes
+- **Success Response** (200): Array of sent invitation objects
 
-#### Reject Invitation
-`POST /invitations/{invitation_id}/reject`
+#### Respond to Invitation
+`POST /invitations/{invitation_id}/respond`
+- **Purpose**: Accept or reject an invitation
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "action": "accept"
+}
+```
+- **Actions**: `accept`, `reject`
+- **Success Response** (200): Updated invitation object
 
 #### Revoke Invitation
-`DELETE /invitations/{invitation_id}`
+`POST /invitations/{invitation_id}/revoke`
+- **Purpose**: Revoke an invitation you sent (before it's accepted)
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "Invitation revoked successfully"}`
 
-### 9.3 Family History Sharing (V1.5)
+#### Cleanup Expired Invitations
+`POST /invitations/cleanup`
+- **Purpose**: Remove expired invitations (admin/scheduled task)
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "message": "Expired 10 old invitations",
+  "expired_count": 10
+}
+```
+
+#### Get Invitation Summary
+`GET /invitations/summary`
+- **Purpose**: Get summary counts of invitations by status
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+{
+  "pending_received": 2,
+  "pending_sent": 3,
+  "accepted": 10,
+  "rejected": 1,
+  "expired": 5
+}
+```
+
+### 10.3 Family History Sharing (V1.5)
 
 Base path: `/api/v1/family-history-sharing`
 
@@ -1552,9 +2664,9 @@ Base path: `/api/v1/family-history-sharing`
 
 ---
 
-## 10. Search & Tags
+## 11. Search & Tags
 
-### 10.1 Search
+### 11.1 Search
 
 Base path: `/api/v1/search`
 
@@ -1579,41 +2691,147 @@ Base path: `/api/v1/search`
 }
 ```
 
-### 10.2 Tags
+### 11.2 Tags
 
 Base path: `/api/v1/tags`
 
+**Note**: Tags are stored directly on entities (medications, lab results, conditions, etc.) as arrays. The tags API provides cross-entity tag management, search, and autocomplete functionality.
+
+#### Get Popular Tags
+`GET /tags/popular`
+- **Purpose**: Get most popular tags across multiple entity types
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `entity_types` (array, default: all types): Entity types to search (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy)
+  - `limit` (integer, default: 20, max: 50): Maximum number of tags
+- **Success Response** (200):
+```json
+[
+  {
+    "tag": "cardiology",
+    "count": 25,
+    "entity_types": ["medication", "condition"]
+  },
+  {
+    "tag": "routine",
+    "count": 18,
+    "entity_types": ["lab_result", "immunization"]
+  }
+]
+```
+
+#### Search by Tags
+`GET /tags/search`
+- **Purpose**: Search across entity types by tags
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `tags` (array, required): Tags to search for
+  - `entity_types` (array, default: all types): Entity types to search
+  - `limit_per_entity` (integer, default: 10, max: 20): Max results per entity type
+- **Success Response** (200):
+```json
+{
+  "medication": [
+    {"id": 1, "medication_name": "Aspirin", "tags": ["cardiology", "daily"]}
+  ],
+  "condition": [
+    {"id": 3, "diagnosis": "Hypertension", "tags": ["cardiology", "chronic"]}
+  ],
+  "lab_result": []
+}
+```
+
+#### Autocomplete Tags
+`GET /tags/autocomplete`
+- **Purpose**: Get tag suggestions for autocomplete as user types
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `q` (string, required, min: 1, max: 50): Query string
+  - `limit` (integer, default: 10, max: 20): Maximum suggestions
+- **Success Response** (200):
+```json
+["cardiology", "cardiac", "cardio-checkup"]
+```
+
+#### Get Tag Suggestions
+`GET /tags/suggestions`
+- **Purpose**: Get tag suggestions based on what users have actually created
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `entity_type` (string, optional): Suggest tags for specific entity type
+  - `limit` (integer, default: 20, max: 50): Maximum suggestions
+- **Success Response** (200):
+```json
+["routine", "annual", "follow-up", "urgent", "cardiology"]
+```
+
+#### Rename Tag
+`PUT /tags/rename`
+- **Purpose**: Rename a tag across all entities
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `old_tag` (string, required): Current tag name to rename
+  - `new_tag` (string, required): New tag name
+- **Success Response** (200):
+```json
+{
+  "message": "Successfully renamed 'cardio' to 'cardiology'",
+  "records_updated": 15
+}
+```
+
+#### Delete Tag
+`DELETE /tags/delete`
+- **Purpose**: Delete a tag from all entities
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `tag` (string, required): Tag name to delete
+- **Success Response** (200):
+```json
+{
+  "message": "Successfully deleted tag 'old-tag'",
+  "records_updated": 8
+}
+```
+
+#### Replace Tag
+`PUT /tags/replace`
+- **Purpose**: Replace one tag with another across all entities
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `old_tag` (string, required): Tag to replace
+  - `new_tag` (string, required): Replacement tag
+- **Success Response** (200):
+```json
+{
+  "message": "Successfully replaced 'cardio' with 'cardiology'",
+  "records_updated": 15
+}
+```
+
 #### Create Tag
-`POST /tags/`
+`POST /tags/create`
+- **Purpose**: Create a new tag in the user tags registry
+- **Authentication**: Yes
 - **Request Body**:
 ```json
 {
-  "name": "Cardiology",
-  "color": "#FF5733"
+  "tag": "new-category"
 }
 ```
-
-#### List Tags
-`GET /tags/`
-
-#### Apply Tag to Entity
-`POST /tags/{tag_id}/apply`
-- **Request Body**:
+- **Success Response** (200):
 ```json
 {
-  "entity_type": "medication",
-  "entity_id": 1
+  "message": "Successfully created tag 'new-category'",
+  "tag": "new-category"
 }
 ```
-
-#### Remove Tag from Entity
-`DELETE /tags/{tag_id}/remove/{entity_type}/{entity_id}`
 
 ---
 
-## 11. Reports & Export
+## 12. Reports & Export
 
-### 11.1 Custom Reports
+### 12.1 Custom Reports
 
 Base path: `/api/v1/custom-reports`
 
@@ -1638,7 +2856,7 @@ Base path: `/api/v1/custom-reports`
 #### Download Report
 `GET /custom-reports/{report_id}/download`
 
-### 11.2 Export
+### 12.2 Export
 
 Base path: `/api/v1/export`
 
@@ -1653,9 +2871,9 @@ Base path: `/api/v1/export`
 
 ---
 
-## 12. Integrations
+## 13. Integrations
 
-### 12.1 Paperless-ngx
+### 13.1 Paperless-ngx
 
 Base path: `/api/v1/paperless`
 
@@ -1678,9 +2896,9 @@ Base path: `/api/v1/paperless`
 
 ---
 
-## 13. System & Admin
+## 14. System & Utilities
 
-### 13.1 System
+### 14.1 System
 
 Base path: `/api/v1/system`
 
@@ -1818,7 +3036,7 @@ Base path: `/api/v1/system`
 `POST /system/restore`
 - **Authentication**: Yes (Admin only)
 
-### 13.2 Utils
+### 14.2 Utils
 
 Base path: `/api/v1/utils`
 
@@ -1836,28 +3054,761 @@ Base path: `/api/v1/utils`
 }
 ```
 
-### 13.3 Frontend Logs
+### 14.3 Frontend Logs
 
 Base path: `/api/v1/frontend-logs`
 
-#### Submit Frontend Log
-`POST /frontend-logs/`
-- **Purpose**: Submit client-side logs to server for monitoring
+**Purpose**: Centralized logging for frontend events, errors, and user actions.
+
+#### Log Frontend Event
+`POST /frontend-logs/log`
+- **Purpose**: Log frontend events and errors from the React frontend
+- **Authentication**: Optional (user_id can be provided in request)
 - **Request Body**:
 ```json
 {
   "level": "error",
   "message": "JavaScript error occurred",
-  "context": {
-    "url": "/dashboard",
-    "user_agent": "Mozilla/5.0...",
-    "error_stack": "Error: ...",
-    "timestamp": "2025-10-19T14:30:00Z"
+  "category": "error",
+  "timestamp": "2025-10-19T14:30:00Z",
+  "url": "/dashboard",
+  "user_agent": "Mozilla/5.0...",
+  "stack_trace": "Error: Something went wrong\n    at Component.render...",
+  "user_id": 1,
+  "session_id": "abc123",
+  "component": "PatientList",
+  "action": "load_data",
+  "details": {
+    "patient_id": 123,
+    "attempt": 3
   }
 }
 ```
-- **Log levels**: `debug`, `info`, `warning`, `error`, `critical`
-- **Success Response** (201): `{"message": "Log submitted successfully"}`
+- **Log levels**: `error`, `warn`, `info`, `debug`
+- **Categories**: `error`, `user_action`, `performance`, `security`
+- **Success Response** (200):
+```json
+{
+  "status": "logged",
+  "timestamp": "2025-10-19T14:30:00Z"
+}
+```
+
+#### Log Frontend Error
+`POST /frontend-logs/error`
+- **Purpose**: Log frontend errors with detailed context (for React error boundaries)
+- **Authentication**: Optional
+- **Request Body**:
+```json
+{
+  "error_message": "Cannot read property 'id' of undefined",
+  "error_type": "TypeError",
+  "stack_trace": "TypeError: Cannot read property 'id'...",
+  "component_name": "MedicationList",
+  "props": {
+    "patientId": 123
+  },
+  "user_id": 1,
+  "url": "/medications",
+  "timestamp": "2025-10-19T14:30:00Z",
+  "user_agent": "Mozilla/5.0...",
+  "browser_info": {
+    "name": "Chrome",
+    "version": "118.0"
+  }
+}
+```
+- **Success Response** (200):
+```json
+{
+  "status": "error_logged",
+  "timestamp": "2025-10-19T14:30:00Z"
+}
+```
+
+#### Log User Action
+`POST /frontend-logs/user-action`
+- **Purpose**: Log user actions for analytics and audit purposes
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "action": "medication_created",
+  "component": "MedicationForm",
+  "details": {
+    "medication_name": "Aspirin",
+    "dosage": "100mg"
+  },
+  "user_id": 1,
+  "timestamp": "2025-10-19T14:30:00Z",
+  "url": "/medications/new"
+}
+```
+- **Success Response** (200):
+```json
+{
+  "status": "action_logged",
+  "timestamp": "2025-10-19T14:30:00Z"
+}
+```
+
+#### Health Check
+`GET /frontend-logs/health`
+- **Purpose**: Health check endpoint for frontend logging service
+- **Authentication**: No
+- **Success Response** (200):
+```json
+{
+  "status": "healthy",
+  "service": "frontend_logging",
+  "timestamp": "2025-10-19T14:30:00Z"
+}
+```
+
+---
+
+## 15. Admin Dashboard
+
+Base path: `/api/v1/admin`
+
+**Purpose**: Admin-only endpoints for system management, backups, restores, and maintenance operations. All endpoints in this section require admin role authentication.
+
+### 15.1 Dashboard & Statistics
+
+#### Get Dashboard Statistics
+`GET /admin/dashboard/stats`
+- **Purpose**: Get comprehensive dashboard statistics
+- **Authentication**: Yes (Admin only)
+- **Success Response** (200):
+```json
+{
+  "total_users": 150,
+  "total_patients": 145,
+  "total_practitioners": 25,
+  "total_medications": 450,
+  "total_lab_results": 1200,
+  "total_vitals": 800,
+  "total_conditions": 350,
+  "total_allergies": 180,
+  "total_immunizations": 220,
+  "total_procedures": 150,
+  "total_treatments": 100,
+  "total_encounters": 500,
+  "recent_registrations": 12,
+  "active_medications": 280,
+  "pending_lab_results": 15
+}
+```
+
+#### Get Recent Activity
+`GET /admin/dashboard/recent-activity`
+- **Purpose**: Get recent activity across all models
+- **Authentication**: Yes (Admin only)
+- **Query Parameters**:
+  - `limit` (integer, default: 20): Number of items
+  - `action_filter` (string, optional): Filter by action (`created`, `updated`, `deleted`)
+  - `entity_filter` (string, optional): Filter by entity type (`medication`, `patient`, etc.)
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 123,
+    "model_name": "Medication",
+    "action": "created",
+    "description": "Created Medication: Aspirin 100mg",
+    "timestamp": "2025-10-04T10:30:00Z",
+    "user_info": "johndoe"
+  }
+]
+```
+
+#### Get System Health
+`GET /admin/dashboard/system-health`
+- **Purpose**: Get comprehensive system health information
+- **Authentication**: Yes (Admin only)
+- **Success Response** (200):
+```json
+{
+  "database_status": "healthy",
+  "total_records": 5000,
+  "last_backup": "2025-10-03T02:00:00Z",
+  "system_uptime": "5 days, 3 hours",
+  "database_connection_test": true,
+  "memory_usage": "Normal",
+  "disk_usage": "Database: 45.5 MB"
+}
+```
+
+#### Get System Metrics
+`GET /admin/dashboard/system-metrics`
+- **Purpose**: Get detailed system performance metrics
+- **Authentication**: Yes (Admin only)
+- **Success Response** (200):
+```json
+{
+  "timestamp": "2025-10-04T10:30:00Z",
+  "services": {
+    "api": {"status": "operational", "response_time_ms": 15.2},
+    "authentication": {"status": "operational"},
+    "frontend_logging": {"status": "operational"},
+    "admin_interface": {"status": "operational"}
+  },
+  "database": {
+    "connection_pool_size": "Available",
+    "active_connections": 1,
+    "query_performance": "fast"
+  },
+  "application": {
+    "memory_usage": "normal",
+    "cpu_usage": "low",
+    "response_time": "< 100ms",
+    "system_load": "normal"
+  },
+  "storage": {
+    "database_size": "45.5 MB",
+    "upload_directory_size": "120.3 MB",
+    "available_space": "Available"
+  },
+  "security": {
+    "ssl_enabled": true,
+    "authentication_method": "JWT",
+    "environment": "production",
+    "authentication_status": "operational",
+    "authorization_status": "operational",
+    "session_status": "operational"
+  }
+}
+```
+
+#### Quick Health Check
+`GET /admin/dashboard/health-check`
+- **Purpose**: Quick health check for monitoring services
+- **Authentication**: No
+- **Success Response** (200):
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-10-04T10:30:00Z",
+  "service": "medical_records_api",
+  "version": "2.0",
+  "uptime": "432000s",
+  "startup_time": "2025-09-29T07:30:00Z"
+}
+```
+
+#### Get Storage Health
+`GET /admin/dashboard/storage-health`
+- **Purpose**: Check storage system health
+- **Authentication**: Yes (Admin only)
+- **Success Response** (200):
+```json
+{
+  "status": "healthy",
+  "directories": {
+    "uploads": {"path": "uploads/lab_result_files", "exists": true, "write_permission": true, "size_mb": 120.3, "file_count": 450},
+    "backups": {"path": "backups", "exists": true, "write_permission": true, "size_mb": 250.0, "file_count": 10},
+    "logs": {"path": "logs", "exists": true, "write_permission": true, "size_mb": 15.5, "file_count": 5}
+  },
+  "disk_space": {
+    "total_gb": 500.0,
+    "used_gb": 150.5,
+    "free_gb": 349.5,
+    "usage_percent": 30.1
+  }
+}
+```
+
+#### Get Analytics Data
+`GET /admin/dashboard/analytics-data`
+- **Purpose**: Get analytics data for dashboard charts
+- **Authentication**: Yes (Admin only)
+- **Query Parameters**:
+  - `days` (integer, default: 7): Number of days to analyze
+- **Success Response** (200):
+```json
+{
+  "weekly_activity": {
+    "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "data": [45, 52, 48, 55, 60, 30, 25],
+    "total": 315
+  },
+  "model_activity": {
+    "medication": 45,
+    "lab_result": 60,
+    "vitals": 80
+  },
+  "hourly_activity": {
+    "labels": ["00:00", "01:00", ...],
+    "data": [5, 2, 1, 0, 0, 3, ...]
+  }
+}
+```
+
+#### Test Admin Access
+`GET /admin/dashboard/test-access`
+- **Purpose**: Verify admin access and token validity
+- **Authentication**: Yes (Admin only)
+- **Success Response** (200):
+```json
+{
+  "message": "Admin access verified",
+  "user": "admin_user",
+  "role": "admin",
+  "timestamp": "2025-10-04T10:30:00Z"
+}
+```
+
+### 15.2 Model Management
+
+Base path: `/api/v1/admin/models`
+
+**Purpose**: Django-style generic CRUD operations for all models
+
+#### List Available Models
+`GET /admin/models/`
+- **Purpose**: Get list of all available models for management
+- **Authentication**: Yes (Admin only)
+- **Success Response** (200):
+```json
+["user", "patient", "medication", "lab_result", "condition", "allergy", ...]
+```
+
+#### Get Model Metadata
+`GET /admin/models/{model_name}/metadata`
+- **Purpose**: Get metadata for a specific model (fields, types, relationships)
+- **Success Response** (200):
+```json
+{
+  "name": "medication",
+  "table_name": "medications",
+  "fields": [
+    {"name": "id", "type": "integer", "nullable": false, "primary_key": true},
+    {"name": "medication_name", "type": "string", "nullable": false, "max_length": 255},
+    {"name": "status", "type": "string", "choices": ["active", "stopped", "on-hold"]}
+  ],
+  "relationships": {"patient": "Patient", "practitioner": "Practitioner"},
+  "display_name": "Medication",
+  "verbose_name_plural": "Medications"
+}
+```
+
+#### List Model Records
+`GET /admin/models/{model_name}/`
+- **Purpose**: Get paginated list of records
+- **Query Parameters**:
+  - `page` (integer, default: 1): Page number
+  - `per_page` (integer, default: 25, max: 100): Items per page
+  - `search` (string, optional): Search term
+- **Success Response** (200):
+```json
+{
+  "items": [...],
+  "total": 450,
+  "page": 1,
+  "per_page": 25,
+  "total_pages": 18
+}
+```
+
+#### Get Model Record
+`GET /admin/models/{model_name}/{record_id}`
+- **Purpose**: Get a specific record by ID
+- **Success Response** (200): Record object with all fields
+
+#### Create Model Record
+`POST /admin/models/{model_name}/`
+- **Purpose**: Create a new record
+- **Request Body**: Model-specific fields
+- **Success Response** (201): Created record object
+
+#### Update Model Record
+`PUT /admin/models/{model_name}/{record_id}`
+- **Purpose**: Update a record
+- **Note**: Password fields cannot be updated through this endpoint
+- **Request Body**: Fields to update
+- **Success Response** (200): Updated record object
+
+#### Delete Model Record
+`DELETE /admin/models/{model_name}/{record_id}`
+- **Purpose**: Delete a record
+- **Note**: Protects against deleting last user or last admin
+- **Success Response** (200):
+```json
+{
+  "message": "medication record 123 deleted successfully",
+  "deleted_id": 123
+}
+```
+
+#### Admin Reset Password
+`POST /admin/models/users/{user_id}/reset-password`
+- **Purpose**: Admin reset of any user's password
+- **Request Body**:
+```json
+{
+  "new_password": "NewSecurePass123!"
+}
+```
+- **Validation**: Min 6 chars, must contain letter and number
+- **Success Response** (200): `{"message": "Password reset successfully"}`
+
+### 15.3 Backup Operations
+
+Base path: `/api/v1/admin/backup`
+
+#### Create Database Backup
+`POST /admin/backup/create-database`
+- **Purpose**: Create a database-only backup
+- **Request Body**:
+```json
+{
+  "description": "Weekly backup"
+}
+```
+- **Success Response** (200):
+```json
+{
+  "id": 1,
+  "backup_type": "database",
+  "filename": "backup_db_2025-10-04_103000.sql",
+  "size_bytes": 5242880,
+  "status": "completed",
+  "created_at": "2025-10-04T10:30:00Z",
+  "description": "Weekly backup"
+}
+```
+
+#### Create Files Backup
+`POST /admin/backup/create-files`
+- **Purpose**: Create a files-only backup (uploads directory)
+- **Request Body**: Same as database backup
+- **Success Response** (200): Backup response object
+
+#### Create Full Backup
+`POST /admin/backup/create-full`
+- **Purpose**: Create a full system backup (database + files)
+- **Request Body**: Same as database backup
+- **Success Response** (200): Backup response object
+
+#### List Backups
+`GET /admin/backup/`
+- **Purpose**: List all backup records
+- **Success Response** (200):
+```json
+{
+  "backups": [
+    {
+      "id": 1,
+      "backup_type": "full",
+      "filename": "backup_full_2025-10-04.zip",
+      "size_bytes": 15728640,
+      "status": "completed",
+      "file_exists": true,
+      "file_path": "/backups/backup_full_2025-10-04.zip",
+      "created_at": "2025-10-04T02:00:00Z"
+    }
+  ],
+  "total": 5
+}
+```
+
+#### Download Backup
+`GET /admin/backup/{backup_id}/download`
+- **Purpose**: Download a backup file
+- **Success Response**: File download (application/octet-stream)
+- **Error Responses**:
+  - `404`: Backup or file not found
+
+#### Verify Backup
+`POST /admin/backup/{backup_id}/verify`
+- **Purpose**: Verify backup integrity
+- **Success Response** (200):
+```json
+{
+  "valid": true,
+  "backup_id": 1,
+  "verification_details": {...}
+}
+```
+
+#### Delete Backup
+`DELETE /admin/backup/{backup_id}`
+- **Purpose**: Delete a backup record and file
+- **Success Response** (200): Deletion confirmation
+
+#### Cleanup Old Backups
+`POST /admin/backup/cleanup`
+- **Purpose**: Clean up old backups based on retention policy
+- **Success Response** (200): Cleanup results
+
+#### Cleanup Orphaned Files
+`POST /admin/backup/cleanup-orphaned`
+- **Purpose**: Clean up orphaned backup files
+- **Success Response** (200): Cleanup results
+
+#### Cleanup All Old Data
+`POST /admin/backup/cleanup-all`
+- **Purpose**: Clean up old backups, orphaned files, and old trash
+- **Success Response** (200): Combined cleanup results
+
+#### Get Retention Settings
+`GET /admin/backup/settings/retention`
+- **Purpose**: Get current retention settings
+- **Success Response** (200):
+```json
+{
+  "backup_retention_days": 30,
+  "trash_retention_days": 7,
+  "backup_min_count": 3,
+  "backup_max_count": 10,
+  "allow_user_registration": true
+}
+```
+
+#### Update Retention Settings
+`POST /admin/backup/settings/retention`
+- **Purpose**: Update retention and admin settings
+- **Request Body**:
+```json
+{
+  "backup_retention_days": 45,
+  "trash_retention_days": 14,
+  "backup_min_count": 5,
+  "backup_max_count": 20,
+  "allow_user_registration": false
+}
+```
+- **Success Response** (200): Updated settings
+
+#### Get Retention Stats
+`GET /admin/backup/retention/stats`
+- **Purpose**: Get backup retention statistics
+- **Success Response** (200): Statistics and cleanup preview
+
+### 15.4 Restore Operations
+
+Base path: `/api/v1/admin/restore`
+
+#### Upload Backup File
+`POST /admin/restore/upload`
+- **Purpose**: Upload an external backup file for restore
+- **Content-Type**: `multipart/form-data`
+- **Supported Files**: `.sql` (database), `.zip` (files or full)
+- **Success Response** (200):
+```json
+{
+  "success": true,
+  "message": "Backup file 'backup.zip' uploaded successfully",
+  "backup_id": 5,
+  "backup_type": "full",
+  "backup_size": 15728640,
+  "backup_description": "Uploaded backup"
+}
+```
+
+#### Preview Restore
+`POST /admin/restore/preview/{backup_id}`
+- **Purpose**: Preview what will be affected by restore
+- **Success Response** (200):
+```json
+{
+  "backup_id": 5,
+  "backup_type": "full",
+  "backup_created": "2025-10-04T02:00:00Z",
+  "backup_size": 15728640,
+  "backup_description": "Full backup",
+  "warnings": ["This will replace all current data"],
+  "affected_data": {
+    "users": 150,
+    "patients": 145,
+    "medications": 450
+  }
+}
+```
+
+#### Get Confirmation Token
+`GET /admin/restore/confirmation-token/{backup_id}`
+- **Purpose**: Generate confirmation token for restore
+- **Success Response** (200):
+```json
+{
+  "backup_id": 5,
+  "confirmation_token": "abc123...",
+  "expires_at": "End of day (UTC)",
+  "warning": "This token allows irreversible restore operations. Use with caution."
+}
+```
+
+#### Execute Restore
+`POST /admin/restore/execute/{backup_id}`
+- **Purpose**: Execute restore with confirmation token
+- **Request Body**:
+```json
+{
+  "confirmation_token": "abc123..."
+}
+```
+- **Success Response** (200):
+```json
+{
+  "success": true,
+  "message": "Restore completed successfully",
+  "backup_id": 5,
+  "backup_type": "full",
+  "safety_backup_id": 6,
+  "restore_completed": "2025-10-04T10:30:00Z",
+  "warnings": null
+}
+```
+
+### 15.5 Bulk Operations
+
+Base path: `/api/v1/admin/bulk`
+
+#### Bulk Delete
+`POST /admin/bulk/delete`
+- **Purpose**: Delete multiple records at once
+- **Request Body**:
+```json
+{
+  "model_name": "medication",
+  "record_ids": [1, 2, 3, 4, 5]
+}
+```
+- **Success Response** (200):
+```json
+{
+  "success": true,
+  "affected_records": 5,
+  "failed_records": [],
+  "message": "Successfully deleted 5 medication records"
+}
+```
+
+#### Bulk Update
+`POST /admin/bulk/update`
+- **Purpose**: Update multiple records with same data
+- **Request Body**:
+```json
+{
+  "model_name": "medication",
+  "record_ids": [1, 2, 3],
+  "update_data": {
+    "status": "stopped"
+  }
+}
+```
+- **Success Response** (200):
+```json
+{
+  "success": true,
+  "affected_records": 3,
+  "failed_records": [],
+  "message": "Successfully updated 3 medication records"
+}
+```
+
+### 15.6 Trash Management
+
+Base path: `/api/v1/admin/trash`
+
+#### List Trash Contents
+`GET /admin/trash/`
+- **Purpose**: List all files currently in trash
+- **Success Response** (200): Array of trash file objects
+
+#### Cleanup Old Trash
+`POST /admin/trash/cleanup`
+- **Purpose**: Clean up old files based on retention policy
+- **Success Response** (200):
+```json
+{
+  "deleted_count": 15,
+  "freed_bytes": 52428800
+}
+```
+
+#### Restore File from Trash
+`POST /admin/trash/restore`
+- **Purpose**: Restore a file from trash
+- **Query Parameters**:
+  - `trash_path` (string, required): Path to file in trash
+  - `restore_path` (string, optional): Target restore path
+- **Success Response** (200):
+```json
+{
+  "status": "success",
+  "message": "File restored to original location"
+}
+```
+
+#### Permanently Delete from Trash
+`DELETE /admin/trash/permanently-delete`
+- **Purpose**: Permanently delete a file (cannot be recovered)
+- **Query Parameters**:
+  - `trash_path` (string, required): Path to file in trash
+- **Success Response** (200):
+```json
+{
+  "status": "success",
+  "message": "File permanently deleted"
+}
+```
+
+### 15.7 Maintenance
+
+Base path: `/api/v1/admin/maintenance`
+
+#### Get Test Library Info
+`GET /admin/maintenance/test-library/info`
+- **Purpose**: Get information about the current test library
+- **Success Response** (200):
+```json
+{
+  "version": "1.2.0",
+  "test_count": 4500,
+  "categories": {
+    "chemistry": 1200,
+    "hematology": 800,
+    "urinalysis": 500
+  }
+}
+```
+
+#### Reload Test Library
+`POST /admin/maintenance/test-library/reload`
+- **Purpose**: Reload the test library from disk
+- **Use Case**: After updating test library JSON file
+- **Success Response** (200):
+```json
+{
+  "success": true,
+  "version": "1.2.1",
+  "test_count": 4520,
+  "message": "Test library reloaded successfully"
+}
+```
+
+#### Sync Test Library
+`POST /admin/maintenance/test-library/sync`
+- **Purpose**: Sync lab test components with the test library
+- **Request Body**:
+```json
+{
+  "force_all": false
+}
+```
+- **Note**: If `force_all` is true, re-processes all components. If false, only processes components without canonical names.
+- **Success Response** (200):
+```json
+{
+  "success": true,
+  "components_processed": 1200,
+  "canonical_names_updated": 350,
+  "categories_updated": 120,
+  "message": "Successfully synced 1200 components"
+}
+```
 
 ---
 

@@ -2275,5 +2275,5 @@ If issues persist:
 
 ---
 
-**Last Updated**: 2025-10-05
-**MediKeep Version**: 0.33.1
+**Last Updated**: 2026-02-02
+**MediKeep Version**: 0.49.1
