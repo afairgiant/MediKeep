@@ -12,14 +12,21 @@ The documentation migration is **99% complete**. All files have been:
 
 ## 📍 Current Status
 
-The wiki files are ready and waiting at:
+The wiki files are ready and available in TWO locations:
+
+**In the repository (easy to access):**
+```
+wiki-staging/
+```
+
+**In /tmp (for direct push):**
 ```
 /tmp/MediKeep.wiki/
 ```
 
-Git status:
+Git status in /tmp:
 ```
-Your branch is ahead of 'origin/master' by 1 commit.
+Your branch is ahead of 'origin/master' by 2 commits.
 ```
 
 ## 🔑 Authentication Required
@@ -73,6 +80,23 @@ git push origin master
 
 If you're not in the CI/CD environment where this was prepared:
 
+**Using wiki-staging directory (easier):**
+```bash
+# Clone the wiki
+git clone https://github.com/afairgiant/MediKeep.wiki.git
+
+# Copy files from the staging directory
+cd MediKeep
+cp -r wiki-staging/* ../MediKeep.wiki/
+
+# Commit and push
+cd ../MediKeep.wiki
+git add .
+git commit -m "Reorganize wiki with new homepage structure"
+git push origin master
+```
+
+**Or re-run migration script:**
 ```bash
 # Clone the main repository
 git clone https://github.com/afairgiant/MediKeep.git
