@@ -222,3 +222,16 @@ ODIC SSO(keycloak, authlia, etc) should be supported but I haven't tested them y
 See [SSO Quick Start](app/docs/SSO_QUICK_START.md) for google/github.
 
 See [SSO Full Guide](app/docs/SSO_SETUP_GUIDE.md) for a more detailed guide.
+
+## Documentation
+
+MediKeep has comprehensive documentation available on the [GitHub Wiki](https://github.com/afairgiant/MediKeep/wiki):
+
+- **[Quick Start Guide](https://github.com/afairgiant/MediKeep/wiki/Quick-Start)** - Get your development environment set up in 10 minutes
+- **[Architecture Overview](https://github.com/afairgiant/MediKeep/wiki/Architecture)** - Understanding the system design
+- **[API Reference](https://github.com/afairgiant/MediKeep/wiki/API-Reference)** - Complete API documentation with 95%+ coverage
+- **[Database Schema](https://github.com/afairgiant/MediKeep/wiki/Database-Schema)** - Detailed database documentation
+- **[Deployment Guide](https://github.com/afairgiant/MediKeep/wiki/Deployment)** - Production deployment instructions
+- **[Contributing Guide](https://github.com/afairgiant/MediKeep/wiki/Contributing)** - Development workflow and code standards
+
+All documentation is also available in the [`docs/developer-guide`](docs/developer-guide) directory.
