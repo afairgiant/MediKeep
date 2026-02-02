@@ -5,9 +5,9 @@ on:
     branches:
       - main
     paths:
-      - 'docs/developer-guide/**'
-      - 'docs/wiki-mapping.yml'
-  workflow_dispatch:  # Allow manual trigger
+      - "docs/developer-guide/**"
+      - "docs/wiki-mapping.yml"
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
   sync-wiki:
@@ -21,12 +21,12 @@ jobs:
         with:
           repository: ${{ github.repository }}.wiki
           path: wiki
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.WIKI_PUSH_TOKEN }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: pip install pyyaml
