@@ -9,6 +9,7 @@ import {
   Paper,
   Stack,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import {
   IconPlus,
   IconShieldCheck,
@@ -300,7 +301,11 @@ const Conditions = () => {
         await fetchConditionMedications(result.id);
       } catch (err) {
         logger.error('Failed to link medications to new condition:', err);
-        // Don't show error to user - the condition was created successfully
+        notifications.show({
+          title: t('conditions.notifications.medicationLinkWarning', 'Medication Linking Issue'),
+          message: t('conditions.notifications.medicationLinkFailed', 'Condition was created, but some medications could not be linked. You can link them manually by editing the condition.'),
+          color: 'yellow',
+        });
       }
     }
   };

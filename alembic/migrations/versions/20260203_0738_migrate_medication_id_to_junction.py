@@ -5,12 +5,11 @@ to the ConditionMedication junction table. This is a data-only migration that
 preserves the original medication_id column for safety.
 
 Revision ID: f8a2c3d4e5b6
-Revises: 4ae4496ad1c6
+Revises: add_system_settings_table
 Create Date: 2026-02-03 07:38:00.000000
 
 """
 from alembic import op
-import sqlalchemy as sa
 from sqlalchemy import text
 
 # revision identifiers, used by Alembic.
@@ -48,7 +47,7 @@ def upgrade() -> None:
             conn.execute(text("""
                 INSERT INTO condition_medications
                 (condition_id, medication_id, relevance_note, created_at, updated_at)
-                VALUES (:condition_id, :medication_id, :note, NOW(), NOW())
+                VALUES (:condition_id, :medication_id, :note, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             """), {
                 'condition_id': condition_id,
                 'medication_id': medication_id,
@@ -68,9 +67,9 @@ def downgrade() -> None:
     """
     conn = op.get_bind()
 
-    result = conn.execute(text("""
+    conn.execute(text("""
         DELETE FROM condition_medications
         WHERE relevance_note = 'Migrated from legacy single medication link'
     """))
 
-    print(f"Removed migrated entries from junction table")
+    print("Removed migrated entries from junction table")
