@@ -23,6 +23,7 @@ import {
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import MedicationRelationships from '../MedicationRelationships';
 
 const ConditionViewModal = ({
   isOpen,
@@ -31,9 +32,11 @@ const ConditionViewModal = ({
   onEdit,
   medications = [],
   practitioners = [],
-  onMedicationClick,
   onPractitionerClick,
   onError,
+  conditionMedications = {},
+  fetchConditionMedications,
+  navigate,
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
@@ -48,15 +51,6 @@ const ConditionViewModal = ({
 
   if (!isOpen || !condition) return null;
 
-  // Helper function to get medication name from ID
-  const getMedicationName = (medicationId) => {
-    if (!medicationId || !medications || medications.length === 0) {
-      return null;
-    }
-    const medication = medications.find(m => m.id === medicationId);
-    return medication ? medication.medication_name || medication.name : null;
-  };
-
   // Helper function to get practitioner name from ID
   const getPractitionerName = (practitionerId) => {
     if (!practitionerId || !practitioners || practitioners.length === 0) {
@@ -64,12 +58,6 @@ const ConditionViewModal = ({
     }
     const practitioner = practitioners.find(p => p.id === practitionerId);
     return practitioner ? practitioner.name || `${practitioner.first_name || ''} ${practitioner.last_name || ''}`.trim() : null;
-  };
-
-  const handleMedicationClick = (medicationId) => {
-    if (onMedicationClick) {
-      onMedicationClick(medicationId);
-    }
   };
 
   const handlePractitionerClick = (practitionerId) => {
@@ -229,53 +217,42 @@ const ConditionViewModal = ({
                 </SimpleGrid>
               </div>
 
-              {/* Related Medication & Practitioner */}
+              {/* Practitioner */}
               <div>
-                <Title order={4} mb="sm">{t('conditions.modal.sections.relatedInfo', 'Related Information')}</Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.relatedMedication', 'Related Medication')}</Text>
-                    {condition.medication_id ? (
-                      <Text
-                        size="sm"
-                        fw={600}
-                        style={{
-                          cursor: 'pointer',
-                          color: 'var(--mantine-color-blue-6)',
-                          textDecoration: 'underline',
-                        }}
-                        onClick={() => handleMedicationClick(condition.medication_id)}
-                      >
-                        {condition.medication?.medication_name ||
-                          getMedicationName(condition.medication_id) ||
-                          `Medication #${condition.medication_id}`}
-                      </Text>
-                    ) : (
-                      <Text size="sm" c="dimmed">{t('conditions.modal.noMedicationLinked', 'No medication linked')}</Text>
-                    )}
-                  </Stack>
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.practitioner', 'Practitioner')}</Text>
-                    {condition.practitioner_id ? (
-                      <Text
-                        size="sm"
-                        fw={600}
-                        style={{
-                          cursor: 'pointer',
-                          color: 'var(--mantine-color-blue-6)',
-                          textDecoration: 'underline',
-                        }}
-                        onClick={() => handlePractitionerClick(condition.practitioner_id)}
-                      >
-                        {condition.practitioner?.name ||
-                          getPractitionerName(condition.practitioner_id) ||
-                          `Practitioner #${condition.practitioner_id}`}
-                      </Text>
-                    ) : (
-                      <Text size="sm" c="dimmed">{t('conditions.modal.noPractitionerAssigned', 'No practitioner assigned')}</Text>
-                    )}
-                  </Stack>
-                </SimpleGrid>
+                <Title order={4} mb="sm">{t('conditions.modal.sections.practitioner', 'Practitioner')}</Title>
+                <Stack gap="xs">
+                  {condition.practitioner_id ? (
+                    <Text
+                      size="sm"
+                      fw={600}
+                      style={{
+                        cursor: 'pointer',
+                        color: 'var(--mantine-color-blue-6)',
+                        textDecoration: 'underline',
+                      }}
+                      onClick={() => handlePractitionerClick(condition.practitioner_id)}
+                    >
+                      {condition.practitioner?.name ||
+                        getPractitionerName(condition.practitioner_id) ||
+                        `Practitioner #${condition.practitioner_id}`}
+                    </Text>
+                  ) : (
+                    <Text size="sm" c="dimmed">{t('conditions.modal.noPractitionerAssigned', 'No practitioner assigned')}</Text>
+                  )}
+                </Stack>
+              </div>
+
+              {/* Linked Medications */}
+              <div>
+                <Title order={4} mb="sm">{t('labels.linkedMedications', 'Linked Medications')}</Title>
+                <MedicationRelationships
+                  conditionId={condition.id}
+                  conditionMedications={conditionMedications}
+                  medications={medications}
+                  fetchConditionMedications={fetchConditionMedications}
+                  navigate={navigate}
+                  isViewMode={false}
+                />
               </div>
 
               {/* Tags Section */}

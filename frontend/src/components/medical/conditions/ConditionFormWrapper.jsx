@@ -12,6 +12,7 @@ import {
   Textarea,
   Select,
   Text,
+  MultiSelect,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
@@ -19,6 +20,7 @@ import {
   IconStethoscope,
   IconFileText,
   IconNotes,
+  IconPill,
 } from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
@@ -26,6 +28,7 @@ import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
+import MedicationRelationships from '../MedicationRelationships';
 
 const ConditionFormWrapper = ({
   isOpen,
@@ -35,10 +38,14 @@ const ConditionFormWrapper = ({
   onInputChange,
   onSubmit,
   editingCondition = null,
-  medications = [],
   practitioners = [],
   isLoading = false,
   statusMessage,
+  // Medication relationship props (only used when editing)
+  medications = [],
+  conditionMedications = {},
+  fetchConditionMedications,
+  navigate,
 }) => {
   const { t } = useTranslation('common');
 
@@ -56,21 +63,14 @@ const ConditionFormWrapper = ({
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
 
-  // Reset tab when modal opens/closes
+  // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setActiveTab('basic');
-    }
-    if (!isOpen) {
+    } else {
       setIsSubmitting(false);
     }
   }, [isOpen]);
-
-  // Convert medications to options
-  const medicationOptions = medications.map(med => ({
-    value: med.id.toString(),
-    label: med.medication_name || med.name || `Medication #${med.id}`,
-  }));
 
   // Convert practitioners to options
   const practitionerOptions = practitioners.map(prac => ({
@@ -85,8 +85,7 @@ const ConditionFormWrapper = ({
 
     try {
       await onSubmit(e);
-      setIsSubmitting(false);
-    } catch (error) {
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -116,6 +115,9 @@ const ConditionFormWrapper = ({
               </Tabs.Tab>
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
                 {t('conditions.form.tabs.clinical', 'Clinical Details')}
+              </Tabs.Tab>
+              <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
+                {t('conditions.form.tabs.medications', 'Medications')}
               </Tabs.Tab>
               {editingCondition && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
@@ -160,9 +162,7 @@ const ConditionFormWrapper = ({
                         { value: 'severe', label: t('conditions.form.severity.severe', 'Severe') },
                         { value: 'critical', label: t('conditions.form.severity.critical', 'Critical') },
                       ]}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'severity', value: value || '' } });
-                      }}
+                      onChange={handleSelectChange('severity')}
                       placeholder={t('conditions.form.placeholders.severity', 'Select severity')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -178,9 +178,7 @@ const ConditionFormWrapper = ({
                         { value: 'resolved', label: t('conditions.form.status.resolved', 'Resolved') },
                         { value: 'chronic', label: t('conditions.form.status.chronic', 'Chronic') },
                       ]}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'status', value: value || '' } });
-                      }}
+                      onChange={handleSelectChange('status')}
                       placeholder={t('conditions.form.placeholders.status', 'Select status')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -215,27 +213,10 @@ const ConditionFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('conditions.form.fields.relatedMedication', 'Related Medication')}
-                      value={formData.medication_id || null}
-                      data={medicationOptions}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'medication_id', value: value || '' } });
-                      }}
-                      placeholder={t('conditions.form.placeholders.medication', 'Select medication')}
-                      description={t('conditions.form.descriptions.medication', 'Link this condition to a medication')}
-                      searchable
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
                       label={t('conditions.form.fields.practitioner', 'Practitioner')}
                       value={formData.practitioner_id || null}
                       data={practitionerOptions}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
-                      }}
+                      onChange={handleSelectChange('practitioner_id')}
                       placeholder={t('conditions.form.placeholders.practitioner', 'Select practitioner')}
                       description={t('conditions.form.descriptions.practitioner', 'Associated healthcare provider')}
                       searchable
@@ -299,6 +280,41 @@ const ConditionFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
+            {/* Medications Tab */}
+            <Tabs.Panel value="medications">
+              <Box mt="md">
+                <Text size="sm" c="dimmed" mb="md">
+                  {t('conditions.form.medicationsDescription', 'Link medications used to treat or manage this condition.')}
+                </Text>
+                {editingCondition ? (
+                  <MedicationRelationships
+                    conditionId={editingCondition.id}
+                    conditionMedications={conditionMedications}
+                    medications={medications}
+                    fetchConditionMedications={fetchConditionMedications}
+                    navigate={navigate}
+                    isViewMode={false}
+                  />
+                ) : (
+                  <MultiSelect
+                    label={t('modals.selectMedications', 'Select Medications')}
+                    placeholder={t('modals.chooseMedicationToLink', 'Choose medications to link')}
+                    data={medications.map(med => ({
+                      value: med.id.toString(),
+                      label: `${med.medication_name}${med.dosage ? ` (${med.dosage})` : ''}${med.status ? ` - ${med.status}` : ''}`,
+                    }))}
+                    value={formData.pending_medication_ids || []}
+                    onChange={(values) => {
+                      onInputChange({ target: { name: 'pending_medication_ids', value: values } });
+                    }}
+                    searchable
+                    clearable
+                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                  />
+                )}
+              </Box>
+            </Tabs.Panel>
+
             {/* Documents Tab (only when editing) */}
             {editingCondition && (
               <Tabs.Panel value="documents">
@@ -306,9 +322,6 @@ const ConditionFormWrapper = ({
                   <DocumentManagerWithProgress
                     entityType="condition"
                     entityId={editingCondition.id}
-                    onError={(error) => {
-                      // Error handling can be passed up through onError prop if needed
-                    }}
                   />
                 </Box>
               </Tabs.Panel>

@@ -71,9 +71,7 @@ class ConditionBase(TaggedEntityMixin):
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the practitioner"
     )
-    medication_id: Optional[int] = Field(
-        None, gt=0, description="ID of related medication"
-    )
+    # Note: medication_id removed - use ConditionMedication junction table instead
 
     @field_validator("status")
     @classmethod
@@ -119,7 +117,7 @@ class ConditionUpdate(BaseModel):
     snomed_code: Optional[str] = Field(None, max_length=20)
     code_description: Optional[str] = Field(None, max_length=500)
     practitioner_id: Optional[int] = Field(None, gt=0)
-    medication_id: Optional[int] = Field(None, gt=0)
+    # Note: medication_id removed - use ConditionMedication junction table instead
     tags: Optional[List[str]] = None
 
     @field_validator("status")
@@ -303,3 +301,35 @@ class ConditionMedicationWithDetails(ConditionMedicationResponse):
     medication: Optional[dict] = None  # Will contain medication details
 
     model_config = {"from_attributes": True}
+
+
+class ConditionMedicationBulkCreate(BaseModel):
+    """Schema for bulk creating condition medication relationships.
+
+    Allows linking multiple medications to a condition at once,
+    with an optional shared relevance note.
+    """
+
+    medication_ids: List[int] = Field(
+        ..., min_length=1, description="List of medication IDs to link"
+    )
+    relevance_note: Optional[str] = Field(
+        None, max_length=500, description="Optional note describing relevance"
+    )
+
+    @field_validator("medication_ids")
+    @classmethod
+    def validate_medication_ids(cls, v):
+        if not v:
+            raise ValueError("At least one medication ID is required")
+        if len(v) != len(set(v)):
+            raise ValueError("Duplicate medication IDs are not allowed")
+        for med_id in v:
+            if med_id <= 0:
+                raise ValueError("Medication IDs must be positive integers")
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
