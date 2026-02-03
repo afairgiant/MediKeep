@@ -6,21 +6,104 @@ This guide covers how to install and set up MediKeep for personal or family use.
 
 ## Quick Start (Docker)
 
-The fastest way to get MediKeep running:
+The fastest way to get MediKeep running - no need to clone the repository.
+
+### 1. Create a project folder
 
 ```bash
-# Clone the repository
-git clone https://github.com/afairgiant/MediKeep.git
-cd MediKeep
+mkdir medikeep
+cd medikeep
+```
 
-# Copy and configure environment
-cp docker/.env.example .env
+### 2. Create docker-compose.yml
 
-# Start MediKeep
+Create a file named `docker-compose.yml` with this content:
+
+```yaml
+services:
+  postgres:
+    image: postgres:15.8-alpine
+    container_name: medikeep-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-medical_records}
+      POSTGRES_USER: ${DB_USER:-medapp}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - medikeep-network
+
+  medikeep-app:
+    image: ghcr.io/afairgiant/medikeep:latest
+    container_name: medikeep-app
+    ports:
+      - ${APP_PORT:-8005}:8000
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-medical_records}
+      DB_USER: ${DB_USER:-medapp}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - app_uploads:/app/uploads
+      - app_logs:/app/logs
+      - app_backups:/app/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - medikeep-network
+
+volumes:
+  postgres_data:
+  app_uploads:
+  app_logs:
+  app_backups:
+
+networks:
+  medikeep-network:
+    driver: bridge
+```
+
+### 3. Create .env file
+
+Create a file named `.env` with your configuration:
+
+```bash
+# Database
+DB_NAME=medical_records
+DB_USER=medapp
+DB_PASSWORD=choose-a-secure-password
+
+# Application
+APP_PORT=8005
+SECRET_KEY=generate-a-random-secret-key
+LOG_LEVEL=INFO
+TZ=America/New_York
+```
+
+> **Tip:** Generate a secure secret key with: `openssl rand -hex 32`
+
+### 4. Start MediKeep
+
+```bash
 docker compose up -d
 ```
 
-Access MediKeep at: **http://localhost:8005**
+### 5. Access MediKeep
+
+Open **http://localhost:8005** in your browser.
 
 Default credentials: `admin` / `admin123`
 
@@ -37,7 +120,7 @@ Default credentials: `admin` / `admin123`
 | CPU | 2 cores |
 | RAM | 2 GB |
 | Disk | 20 GB |
-| OS | Linux, macOS, or Windows with Docker |
+| Docker | 24.0+ with Compose v2 |
 
 ### Recommended
 
@@ -49,118 +132,38 @@ Default credentials: `admin` / `admin123`
 
 ---
 
-## Installation Options
-
-### Option 1: Docker (Recommended)
-
-**Prerequisites:**
-- Docker 24.0+
-- Docker Compose v2
-
-**Steps:**
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/afairgiant/MediKeep.git
-   cd MediKeep
-   ```
-
-2. **Configure environment**
-   ```bash
-   cp docker/.env.example .env
-   ```
-
-   Edit `.env` and set:
-   - `SECRET_KEY` - A random secure string
-   - `DB_PASSWORD` - Database password
-   - Any other settings you want to customize
-
-3. **Start the application**
-   ```bash
-   docker compose up -d
-   ```
-
-4. **Verify it's running**
-   ```bash
-   docker compose ps
-   ```
-
-5. **Access MediKeep**
-   - URL: http://localhost:8005
-   - Login: admin / admin123
-
-### Option 2: Manual Installation
-
-For development or when Docker isn't available.
-
-**Prerequisites:**
-- Python 3.12+
-- Node.js 18+
-- PostgreSQL 15+
-
-**Backend Setup:**
-
-```bash
-# Create virtual environment
-python -m venv .venv
-
-# Activate (Windows)
-.venv\Scripts\activate
-
-# Activate (Linux/macOS)
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your database settings
-
-# Run migrations
-alembic upgrade head
-
-# Start backend
-python run.py
-```
-
-**Frontend Setup:**
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-```
-
----
-
-## Configuration
+## Configuration Options
 
 ### Essential Settings
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SECRET_KEY` | JWT signing key | (required) |
-| `DB_HOST` | Database host | localhost |
-| `DB_PORT` | Database port | 5432 |
-| `DB_NAME` | Database name | medikeep |
-| `DB_USER` | Database user | medikeep |
-| `DB_PASSWORD` | Database password | (required) |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DB_PASSWORD` | Database password | Yes |
+| `SECRET_KEY` | JWT signing key (use random string) | Yes |
 
 ### Optional Settings
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `LOG_LEVEL` | Logging verbosity | INFO |
-| `MAX_UPLOAD_SIZE` | Max file upload size | 15MB |
-| `CORS_ORIGINS` | Allowed frontend URLs | * |
-| `SSO_ENABLED` | Enable SSO login | false |
+| `APP_PORT` | Port to access MediKeep | 8005 |
+| `DB_NAME` | Database name | medical_records |
+| `DB_USER` | Database user | medapp |
+| `LOG_LEVEL` | Logging level | INFO |
+| `TZ` | Timezone | UTC |
 
-See the [Deployment Guide](Deployment-Guide#environment-variables-reference) for all options.
+### SSO Configuration (Optional)
+
+To enable Google/GitHub login, add these to your `.env`:
+
+```bash
+SSO_ENABLED=true
+SSO_PROVIDER_TYPE=github  # or google, oidc
+SSO_CLIENT_ID=your-client-id
+SSO_CLIENT_SECRET=your-client-secret
+SSO_REDIRECT_URI=http://localhost:8005/api/v1/sso/callback
+```
+
+See [SSO Quick Start](SSO-Quick-Start) for detailed setup.
 
 ---
 
@@ -169,68 +172,35 @@ See the [Deployment Guide](Deployment-Guide#environment-variables-reference) for
 ### 1. Change Default Password
 
 Immediately after first login:
-1. Click your username → **Profile**
-2. Go to **Security**
+1. Click your username in the top right
+2. Go to **Profile** → **Security**
 3. Change your password
 
 ### 2. Create Patient Profiles
 
-1. Go to **Patients**
+1. Go to **Patients** in the sidebar
 2. Click **Add Patient**
 3. Add yourself and any family members
 
-### 3. Configure Backups
+### 3. Set Up Backups
 
-Set up regular backups:
+MediKeep includes built-in backup functionality. You can also manually backup:
+
 ```bash
 # Database backup
-docker compose exec db pg_dump -U medikeep medikeep > backup.sql
-
-# Or use the built-in backup feature in Admin panel
+docker compose exec postgres pg_dump -U medapp medical_records > backup.sql
 ```
-
-### 4. (Optional) Enable HTTPS
-
-For production use, configure SSL. See [Deployment Guide](Deployment-Guide#sslhttps-setup).
-
-### 5. (Optional) Configure SSO
-
-Enable Google/GitHub login. See [SSO Quick Start](SSO-Quick-Start).
 
 ---
 
-## Updating
-
-### Docker
+## Updating MediKeep
 
 ```bash
-# Pull latest code
-git pull
+# Pull the latest image
+docker compose pull
 
-# Rebuild and restart
-docker compose down
-docker compose up -d --build
-
-# Run any new migrations
-docker compose exec app alembic upgrade head
-```
-
-### Manual Installation
-
-```bash
-# Pull latest code
-git pull
-
-# Update backend dependencies
-pip install -r requirements.txt
-
-# Run migrations
-alembic upgrade head
-
-# Update frontend
-cd frontend
-npm install
-npm run build
+# Restart with the new version
+docker compose up -d
 ```
 
 ---
@@ -241,37 +211,47 @@ npm run build
 
 Check logs:
 ```bash
-docker compose logs app
-docker compose logs db
+docker compose logs medikeep-app
+docker compose logs postgres
 ```
 
 ### Database connection error
 
-Verify PostgreSQL is running:
-```bash
-docker compose ps db
-```
-
-Check credentials in `.env` match the database.
+1. Make sure PostgreSQL is healthy:
+   ```bash
+   docker compose ps
+   ```
+2. Verify `DB_PASSWORD` in `.env` matches what PostgreSQL was initialized with
 
 ### Port already in use
 
-Change the port in `.env`:
-```
+Change `APP_PORT` in your `.env`:
+```bash
 APP_PORT=8006
 ```
 
-### Permission denied on uploads
+### Reset everything and start fresh
 
-Fix volume permissions:
 ```bash
-sudo chown -R 1000:1000 ./uploads
+# Stop and remove containers and volumes
+docker compose down -v
+
+# Start fresh
+docker compose up -d
 ```
+
+> **Warning:** This deletes all data!
+
+---
+
+## Advanced: Development Setup
+
+If you want to contribute to MediKeep or run from source, see the [Developer Guide](Developer-Guide) and [Quick Start Guide](Quick-Start-Guide).
 
 ---
 
 ## Next Steps
 
 - [User Guide](User-Guide) - Learn how to use MediKeep
-- [Deployment Guide](Deployment-Guide) - Production deployment
+- [Deployment Guide](Deployment-Guide) - Production deployment with HTTPS
 - [FAQ](FAQ) - Common questions
