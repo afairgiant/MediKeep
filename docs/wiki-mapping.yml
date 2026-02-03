@@ -7,10 +7,27 @@
 #   title: optional title override for the wiki page
 
 pages:
-  # Developer Guide - Core Documentation
-  - source: docs/developer-guide/README.md
+  # ===== General Pages =====
+  - source: docs/wiki/Home.md
     wiki_page: Home
-    title: MediKeep Developer Documentation
+    title: MediKeep Wiki
+
+  - source: docs/wiki/User-Guide.md
+    wiki_page: User-Guide
+    title: User Guide
+
+  - source: docs/wiki/FAQ.md
+    wiki_page: FAQ
+    title: Frequently Asked Questions
+
+  - source: docs/wiki/Installation-Guide.md
+    wiki_page: Installation-Guide
+    title: Installation Guide
+
+  # ===== Developer Guide =====
+  - source: docs/developer-guide/README.md
+    wiki_page: Developer-Guide
+    title: Developer Guide
 
   - source: docs/developer-guide/DOCUMENTATION_INDEX.md
     wiki_page: Documentation-Index
@@ -40,7 +57,7 @@ pages:
     wiki_page: Contributing-Guide
     title: Contributing Guide
 
-  # Feature Documentation
+  # ===== Feature Documentation =====
   - source: docs/SSO_QUICK_START.md
     wiki_page: SSO-Quick-Start
     title: SSO Quick Start
@@ -67,7 +84,7 @@ link_mappings:
   "03-database-schema.md": "Database-Schema"
   "04-deployment.md": "Deployment-Guide"
   "05-contributing.md": "Contributing-Guide"
-  "README.md": "Home"
+  "README.md": "Developer-Guide"
   "DOCUMENTATION_INDEX.md": "Documentation-Index"
 
   # Feature docs
@@ -76,29 +93,41 @@ link_mappings:
   "SSO_QUICK_START.md": "SSO-Quick-Start"
   "SSO_SETUP_GUIDE.md": "SSO-Setup-Guide"
 
-# Sidebar configuration (optional)
+  # Wiki pages
+  "User-Guide": "User-Guide"
+  "FAQ": "FAQ"
+  "Installation-Guide": "Installation-Guide"
+  "Developer-Guide": "Developer-Guide"
+
+# Sidebar configuration
 # Defines the wiki sidebar structure
 sidebar:
-  - section: Getting Started
+  - section: Welcome
     pages:
       - Home
-      - Documentation-Index
-      - Quick-Start-Guide
 
-  - section: Technical Documentation
+  - section: Users
     pages:
+      - User-Guide
+      - Installation-Guide
+      - FAQ
+
+  - section: Developers
+    pages:
+      - Developer-Guide
+      - Quick-Start-Guide
       - Architecture
       - API-Reference
       - Database-Schema
+      - Contributing-Guide
 
   - section: Operations
     pages:
       - Deployment-Guide
-      - Contributing-Guide
+      - SSO-Quick-Start
+      - SSO-Setup-Guide
 
   - section: Features
     pages:
-      - SSO-Quick-Start
-      - SSO-Setup-Guide
       - Patient-Sharing-API
       - Patient-Sharing-Workflow

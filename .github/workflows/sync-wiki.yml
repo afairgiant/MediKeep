@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "docs/developer-guide/**"
+      - "docs/wiki/**"
       - "docs/wiki-mapping.yml"
   workflow_dispatch: # Allow manual trigger
 
