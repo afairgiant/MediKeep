@@ -1959,6 +1959,11 @@ class ApiService {
       signal,
     });
   }
+  createConditionMedicationsBulk(conditionId, bulkData, signal) {
+    return this.post(`/conditions/${conditionId}/medications/bulk`, bulkData, {
+      signal,
+    });
+  }
   updateConditionMedication(
     conditionId,
     relationshipId,

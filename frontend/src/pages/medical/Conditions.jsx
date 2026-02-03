@@ -7,24 +7,11 @@ import { motion } from 'framer-motion';
 import {
   Container,
   Paper,
-  Text,
-  Title,
   Stack,
-  Badge,
-  Card,
-  Box,
-  Divider,
-  Modal,
 } from '@mantine/core';
 import {
   IconPlus,
   IconShieldCheck,
-  IconHeart,
-  IconBrain,
-  IconLungs,
-  IconBone,
-  IconDroplet,
-  IconAward,
 } from '@tabler/icons-react';
 import { useMedicalData, useDataManagement, useEntityFileCounts, useViewModalNavigation } from '../../hooks';
 import EmptyState from '../../components/shared/EmptyState';
@@ -65,6 +52,9 @@ const Conditions = () => {
   // Load medications and practitioners for linking dropdowns
   const [medications, setMedications] = useState([]);
   const [practitioners, setPractitioners] = useState([]);
+
+  // Condition-medication relationships (for the junction table)
+  const [conditionMedications, setConditionMedications] = useState({});
   
 
   // Standardized data management
@@ -125,7 +115,6 @@ const Conditions = () => {
     notes: '',
     status: 'active',
     severity: '',
-    medication_id: '',
     practitioner_id: '',
     icd10_code: '',
     snomed_code: '',
@@ -133,6 +122,7 @@ const Conditions = () => {
     onset_date: '', // Form field name
     end_date: '', // Form field name
     tags: [],
+    pending_medication_ids: [], // For linking medications during creation
   });
 
   const handleAddCondition = () => {
@@ -144,7 +134,6 @@ const Conditions = () => {
       notes: '',
       status: 'active', // Default status applied early
       severity: '',
-      medication_id: '',
       practitioner_id: '',
       icd10_code: '',
       snomed_code: '',
@@ -152,6 +141,7 @@ const Conditions = () => {
       onset_date: '',
       end_date: '',
       tags: [],
+      pending_medication_ids: [],
     });
     setShowModal(true);
   };
@@ -168,7 +158,7 @@ const Conditions = () => {
           logger.error('Failed to fetch medications:', error);
           setMedications([]);
         });
-      
+
       // Load practitioners
       apiService.getPractitioners()
         .then(response => {
@@ -181,6 +171,21 @@ const Conditions = () => {
     }
   }, [currentPatient?.id]);
 
+  // Function to fetch condition-medication relationships
+  const fetchConditionMedications = async (conditionId) => {
+    try {
+      const relationships = await apiService.getConditionMedications(conditionId);
+      setConditionMedications(prev => ({
+        ...prev,
+        [conditionId]: relationships || []
+      }));
+      return relationships;
+    } catch (error) {
+      logger.error('Failed to fetch condition medications:', error);
+      return [];
+    }
+  };
+
   const handleEditCondition = condition => {
     setEditingCondition(condition);
     // Apply default status early if condition doesn't have one
@@ -190,7 +195,6 @@ const Conditions = () => {
       notes: condition.notes || '',
       status: condition.status || 'active', // Default status applied early for consistency
       severity: condition.severity || '',
-      medication_id: condition.medication_id ? condition.medication_id.toString() : '',
       practitioner_id: condition.practitioner_id ? condition.practitioner_id.toString() : '',
       icd10_code: condition.icd10_code || '',
       snomed_code: condition.snomed_code || '',
@@ -200,6 +204,7 @@ const Conditions = () => {
         : '',
       end_date: condition.end_date ? condition.end_date.split('T')[0] : '',
       tags: condition.tags || [],
+      pending_medication_ids: [], // Not used during edit, but keeps formData shape consistent
     });
     setShowModal(true);
   };
@@ -210,10 +215,6 @@ const Conditions = () => {
       cleanupFileCount(conditionId);
       await refreshData();
     }
-  };
-
-  const handleMedicationClick = (medicationId) => {
-    navigate(`/medications?view=${medicationId}`);
   };
 
   const handlePractitionerClick = (practitionerId) => {
@@ -264,7 +265,6 @@ const Conditions = () => {
       notes: formData.notes || null,
       status: formData.status || 'active', // Ensure status has a default
       severity: formData.severity || null,
-      medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
       practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
       icd10_code: formData.icd10_code || null,
       snomed_code: formData.snomed_code || null,
@@ -276,16 +276,32 @@ const Conditions = () => {
     };
 
 
-    let success;
-    if (editingCondition) {
-      success = await updateItem(editingCondition.id, conditionData);
-    } else {
-      success = await createItem(conditionData);
+    const pendingMedications = formData.pending_medication_ids || [];
+
+    const result = editingCondition
+      ? await updateItem(editingCondition.id, conditionData)
+      : await createItem(conditionData);
+
+    if (!result) {
+      return;
     }
 
-    if (success) {
-      setShowModal(false);
-      await refreshData();
+    setShowModal(false);
+    await refreshData();
+
+    // If creating a new condition with pending medications, link them after creation
+    // The createItem hook returns the created entity directly
+    if (!editingCondition && pendingMedications.length > 0 && result.id) {
+      try {
+        await apiService.createConditionMedicationsBulk(result.id, {
+          medication_ids: pendingMedications.map(id => parseInt(id)),
+          relevance_note: null,
+        });
+        await fetchConditionMedications(result.id);
+      } catch (err) {
+        logger.error('Failed to link medications to new condition:', err);
+        // Don't show error to user - the condition was created successfully
+      }
     }
   };
 
@@ -337,8 +353,10 @@ const Conditions = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           editingCondition={editingCondition}
-          medications={medications}
           practitioners={practitioners}
+          medications={medications}
+          conditionMedications={conditionMedications}
+          fetchConditionMedications={fetchConditionMedications}
           navigate={navigate}
         />
 
@@ -413,8 +431,10 @@ const Conditions = () => {
           onEdit={handleEditCondition}
           medications={medications}
           practitioners={practitioners}
-          onMedicationClick={handleMedicationClick}
           onPractitionerClick={handlePractitionerClick}
+          conditionMedications={conditionMedications}
+          fetchConditionMedications={fetchConditionMedications}
+          navigate={navigate}
         />
       </Stack>
     </Container>

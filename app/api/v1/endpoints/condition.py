@@ -35,6 +35,7 @@ from app.schemas.condition import (
     ConditionMedicationResponse,
     ConditionMedicationUpdate,
     ConditionMedicationWithDetails,
+    ConditionMedicationBulkCreate,
 )
 
 router = APIRouter()
@@ -316,6 +317,110 @@ def create_condition_medication(
         )
 
         return relationship
+
+
+@router.post("/{condition_id}/medications/bulk", response_model=List[ConditionMedicationResponse])
+def create_condition_medications_bulk(
+    *,
+    condition_id: int,
+    bulk_data: ConditionMedicationBulkCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Create multiple condition medication relationships at once.
+
+    This endpoint allows linking multiple medications to a condition in a single
+    request, with an optional shared relevance note.
+
+    Returns:
+        List of created relationships. Medications that are already linked
+        will be silently skipped.
+    """
+    with handle_database_errors(request=request):
+        # Verify condition exists and belongs to the current user
+        db_condition = condition.get(db, id=condition_id)
+        if not db_condition:
+            log_security_event(
+                logger,
+                "condition_not_found",
+                request,
+                f"Condition with ID {condition_id} not found",
+                user_id=current_user_id
+            )
+            raise NotFoundException(
+                resource="Condition",
+                message=f"Condition with ID {condition_id} not found",
+                request=request
+            )
+
+        # Verify condition belongs to current user
+        if db_condition.patient_id != current_user_patient_id:
+            log_security_event(
+                logger,
+                "unauthorized_condition_access",
+                request,
+                f"User attempted to access condition {condition_id} without permission",
+                user_id=current_user_id,
+                condition_id=condition_id
+            )
+            raise NotFoundException(
+                resource="Condition",
+                message="Condition not found",
+                request=request
+            )
+
+        # Verify all medications exist and belong to the same patient
+        for med_id in bulk_data.medication_ids:
+            db_medication = medication_crud.get(db, id=med_id)
+            if not db_medication:
+                log_security_event(
+                    logger,
+                    "medication_not_found",
+                    request,
+                    f"Medication with ID {med_id} not found",
+                    user_id=current_user_id
+                )
+                raise NotFoundException(
+                    resource="Medication",
+                    message=f"Medication with ID {med_id} not found",
+                    request=request
+                )
+
+            if db_medication.patient_id != current_user_patient_id:
+                log_security_event(
+                    logger,
+                    "cross_patient_medication_link",
+                    request,
+                    f"User attempted to link medication {med_id} from different patient",
+                    user_id=current_user_id,
+                    medication_id=med_id,
+                    condition_id=condition_id
+                )
+                raise BusinessLogicException(
+                    message="Cannot link medication that doesn't belong to the same patient",
+                    request=request
+                )
+
+        # Create bulk relationships
+        created, skipped = condition_medication.create_bulk(
+            db, condition_id=condition_id, bulk_data=bulk_data
+        )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "ConditionMedication",
+            patient_id=current_user_patient_id,
+            condition_id=condition_id,
+            created_count=len(created),
+            skipped_count=len(skipped)
+        )
+
+        return created
 
 
 @router.put("/{condition_id}/medications/{relationship_id}", response_model=ConditionMedicationResponse)

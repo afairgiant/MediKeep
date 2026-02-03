@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session, joinedload
@@ -7,10 +7,11 @@ from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import Condition, ConditionMedication
 from app.schemas.condition import (
-    ConditionCreate, 
+    ConditionCreate,
     ConditionUpdate,
     ConditionMedicationCreate,
-    ConditionMedicationUpdate
+    ConditionMedicationUpdate,
+    ConditionMedicationBulkCreate,
 )
 
 
@@ -93,6 +94,53 @@ class CRUDConditionMedication(CRUDBase[ConditionMedication, ConditionMedicationC
             db.commit()
             return True
         return False
+
+    def create_bulk(
+        self,
+        db: Session,
+        *,
+        condition_id: int,
+        bulk_data: ConditionMedicationBulkCreate,
+    ) -> Tuple[List[ConditionMedication], List[int]]:
+        """Create multiple condition-medication relationships at once.
+
+        Args:
+            db: Database session
+            condition_id: ID of the condition to link medications to
+            bulk_data: Bulk create schema with medication_ids and optional note
+
+        Returns:
+            Tuple of (created_relationships, skipped_medication_ids)
+            - created_relationships: List of newly created ConditionMedication objects
+            - skipped_medication_ids: List of medication IDs that were already linked
+        """
+        created = []
+        skipped = []
+
+        for medication_id in bulk_data.medication_ids:
+            # Check if relationship already exists
+            existing = self.get_by_condition_and_medication(
+                db, condition_id=condition_id, medication_id=medication_id
+            )
+            if existing:
+                skipped.append(medication_id)
+                continue
+
+            # Create new relationship
+            relationship = ConditionMedication(
+                condition_id=condition_id,
+                medication_id=medication_id,
+                relevance_note=bulk_data.relevance_note,
+            )
+            db.add(relationship)
+            created.append(relationship)
+
+        if created:
+            db.commit()
+            for rel in created:
+                db.refresh(rel)
+
+        return created, skipped
 
 
 # Create the CRUD instances

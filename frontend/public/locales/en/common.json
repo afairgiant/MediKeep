@@ -33,6 +33,7 @@
     "skip": "Skip",
     "done": "Done",
     "linkMedication": "Link Medication",
+    "linkMedications": "Link Medications",
     "linkCondition": "Link Condition"
   },
   "labels": {
@@ -182,15 +183,18 @@
   },
   "modals": {
     "linkMedicationToCondition": "Link Medication to Condition",
+    "linkMedicationsToCondition": "Link Medications to Condition",
     "linkConditionToLabResult": "Link Condition to Lab Result",
     "selectMedication": "Select Medication",
+    "selectMedications": "Select Medications",
     "selectCondition": "Select Condition",
-    "chooseMedicationToLink": "Choose a medication to link",
+    "chooseMedicationToLink": "Choose medications to link",
     "chooseConditionToLink": "Choose a condition to link",
     "relevanceNoteOptional": "Relevance note (optional)",
     "noRelevanceNoteProvided": "No relevance note provided",
     "relevanceNote": "Relevance Note",
-    "describeConditionRelevance": "Describe how this condition relates to the lab result (optional)"
+    "describeConditionRelevance": "Describe how this condition relates to the lab result (optional)",
+    "describeMedicationRelevance": "Describe how these medications relate to the condition (optional)"
   },
   "time": {
     "today": "Today",

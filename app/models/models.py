@@ -664,7 +664,7 @@ class Condition(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
     practitioner_id = Column(Integer, ForeignKey("practitioners.id"), nullable=True)
-    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=True)
+    # Note: medication_id removed - use medication_relationships (ConditionMedication) instead
 
     # Condition details
     condition_name = Column(String, nullable=True)  # Name of the condition
@@ -698,7 +698,7 @@ class Condition(Base):
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="conditions")
     practitioner = orm_relationship("Practitioner", back_populates="conditions")
-    medication = orm_relationship("Medication", foreign_keys=[medication_id])
+    # Note: medication relationship removed - use medication_relationships instead
     treatments = orm_relationship("Treatment", back_populates="condition")
     # encounters relationship removed - use queries instead due to potential high volume
     procedures = orm_relationship("Procedure", back_populates="condition")

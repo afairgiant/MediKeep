@@ -1,6 +1,6 @@
 # MediKeep API Reference (v1.0)
 
-**Last Updated:** February 2, 2026
+**Last Updated:** February 3, 2026
 **API Version:** 1.0
 **Base URL:** `http://localhost:8000/api/v1`
 
@@ -906,6 +906,47 @@ Base path: `/api/v1/conditions`
 - **Error Responses**:
   - `400`: Relationship already exists or medication belongs to different patient
   - `404`: Condition or medication not found
+
+##### Bulk Link Medications to Condition
+`POST /conditions/{condition_id}/medications/bulk`
+- **Purpose**: Create multiple condition-medication relationships at once
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "medication_ids": [5, 8, 12],
+  "relevance_note": "Treatments for managing this condition"
+}
+```
+- **Success Response** (200): Array of created relationship objects
+```json
+[
+  {
+    "id": 1,
+    "condition_id": 1,
+    "medication_id": 5,
+    "relevance_note": "Treatments for managing this condition",
+    "created_at": "2026-02-03T00:00:00Z",
+    "updated_at": "2026-02-03T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "condition_id": 1,
+    "medication_id": 8,
+    "relevance_note": "Treatments for managing this condition",
+    "created_at": "2026-02-03T00:00:00Z",
+    "updated_at": "2026-02-03T00:00:00Z"
+  }
+]
+```
+- **Notes**:
+  - Medications that are already linked to the condition are silently skipped
+  - All medications must belong to the same patient as the condition
+  - `relevance_note` is optional and applies to all created relationships
+- **Error Responses**:
+  - `400`: Medication belongs to different patient
+  - `404`: Condition or medication not found
+  - `422`: Validation error (empty array, duplicate IDs, invalid IDs)
 
 ##### Update Condition-Medication Link
 `PUT /conditions/{condition_id}/medications/{relationship_id}`
