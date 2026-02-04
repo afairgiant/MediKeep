@@ -104,7 +104,7 @@ class SymptomUpdate(BaseModel):
     is_chronic: Optional[bool] = None
     typical_triggers: Optional[List[str]] = None
     general_notes: Optional[str] = None
-    tags: Optional[str] = None
+    tags: Optional[List[str]] = None
 
     @field_validator("symptom_name")
     @classmethod
