@@ -18,11 +18,13 @@ import {
   IconNotes,
   IconFileText,
   IconEdit,
+  IconLink,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import TreatmentRelationshipsManager from './TreatmentRelationshipsManager';
 
 const TreatmentViewModal = ({
   isOpen,
@@ -32,6 +34,10 @@ const TreatmentViewModal = ({
   conditions = [],
   practitioners = [],
   onConditionClick,
+  onMedicationClick,
+  onEncounterClick,
+  onLabResultClick,
+  onEquipmentClick,
   onError,
 }) => {
   const { t } = useTranslation('common');
@@ -76,6 +82,26 @@ const TreatmentViewModal = ({
     }
   };
 
+  // Treatment category labels mapping
+  const TREATMENT_CATEGORY_LABELS = {
+    medication_therapy: 'Medication Therapy',
+    physical_therapy: 'Physical Therapy',
+    surgery_procedure: 'Surgery / Procedure',
+    lifestyle_dietary: 'Lifestyle / Dietary',
+    monitoring: 'Monitoring / Observation',
+    mental_health: 'Mental Health / Counseling',
+    rehabilitation: 'Rehabilitation',
+    alternative: 'Alternative / Complementary',
+    combination: 'Combination Therapy',
+    other: 'Other',
+  };
+
+  // Get display label for treatment type (supports both predefined and custom values)
+  const getTreatmentTypeLabel = (type) => {
+    if (!type) return null;
+    return TREATMENT_CATEGORY_LABELS[type] || type; // Return mapped label or raw value for custom entries
+  };
+
   return (
     <Modal
       opened={isOpen}
@@ -94,7 +120,7 @@ const TreatmentViewModal = ({
               <Group gap="xs">
                 {treatment.treatment_type && (
                   <Badge variant="light" color="blue" size="sm">
-                    {treatment.treatment_type}
+                    {getTreatmentTypeLabel(treatment.treatment_type)}
                   </Badge>
                 )}
                 <StatusBadge status={treatment.status} />
@@ -122,6 +148,9 @@ const TreatmentViewModal = ({
           <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
             {t('treatments.viewModal.tabs.documents', 'Documents')}
           </Tabs.Tab>
+          <Tabs.Tab value="relationships" leftSection={<IconLink size={16} />}>
+            {t('treatments.viewModal.tabs.relationships', 'Relationships')}
+          </Tabs.Tab>
         </Tabs.List>
 
         {/* Overview Tab */}
@@ -137,9 +166,9 @@ const TreatmentViewModal = ({
                     <Text size="sm">{treatment.treatment_name}</Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.treatmentType', 'Treatment Type')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.treatmentType', 'Treatment Category')}</Text>
                     <Text size="sm" c={treatment.treatment_type ? 'inherit' : 'dimmed'}>
-                      {treatment.treatment_type || t('treatments.viewModal.notSpecified', 'Not specified')}
+                      {getTreatmentTypeLabel(treatment.treatment_type) || t('treatments.viewModal.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
@@ -328,6 +357,20 @@ const TreatmentViewModal = ({
               entityType="treatment"
               entityId={treatment.id}
               onError={onError}
+            />
+          </Box>
+        </Tabs.Panel>
+
+        {/* Relationships Tab */}
+        <Tabs.Panel value="relationships">
+          <Box mt="md">
+            <TreatmentRelationshipsManager
+              treatmentId={treatment.id}
+              isViewMode={true}
+              onMedicationClick={onMedicationClick}
+              onEncounterClick={onEncounterClick}
+              onLabResultClick={onLabResultClick}
+              onEquipmentClick={onEquipmentClick}
             />
           </Box>
         </Tabs.Panel>

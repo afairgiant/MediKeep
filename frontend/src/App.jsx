@@ -57,6 +57,7 @@ import Visits from './pages/medical/Visits';
 import Vitals from './pages/medical/Vitals';
 import Symptoms from './pages/medical/Symptoms';
 import Injuries from './pages/medical/Injuries';
+import MedicalEquipment from './pages/medical/MedicalEquipment';
 import Practitioners from './pages/medical/Practitioners';
 import Pharmacies from './pages/medical/Pharmacies';
 import EmergencyContacts from './pages/medical/EmergencyContacts';
@@ -432,6 +433,15 @@ function App() {
                           element={
                             <ProtectedRoute>
                               <Symptoms />
+                            </ProtectedRoute>
+                          }
+                        />
+                        {/* Medical Equipment Route */}
+                        <Route
+                          path="/medical-equipment"
+                          element={
+                            <ProtectedRoute>
+                              <MedicalEquipment />
                             </ProtectedRoute>
                           }
                         />

@@ -54,6 +54,7 @@ import {
   IconUsers,
   IconShield,
   IconBandage,
+  IconDeviceDesktop,
 } from '@tabler/icons-react';
 import { PageHeader } from '../components';
 import { PatientSelector } from '../components/medical';
@@ -448,6 +449,12 @@ const Dashboard = () => {
       icon: IconBuilding,
       color: 'green',
       link: '/pharmacies',
+    },
+    {
+      title: t('dashboard.modules.medicalEquipment', 'Medical Equipment'),
+      icon: IconDeviceDesktop,
+      color: 'orange',
+      link: '/medical-equipment',
     },
   ];
 

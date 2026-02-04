@@ -180,22 +180,13 @@ const Treatments = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    // Validation
+    // Validation - only treatment_name is required
     if (!formData.treatment_name.trim()) {
       setError('Treatment name is required');
       return;
     }
 
-    if (!formData.treatment_type.trim()) {
-      setError('Treatment type is required');
-      return;
-    }
-
-    if (!formData.start_date) {
-      setError('Start date is required');
-      return;
-    }
-
+    // Validate end date is after start date (only if both are provided)
     if (
       formData.end_date &&
       formData.start_date &&
@@ -212,8 +203,8 @@ const Treatments = () => {
 
     const treatmentData = {
       treatment_name: formData.treatment_name,
-      treatment_type: formData.treatment_type,
-      description: formData.description,
+      treatment_type: formData.treatment_type || null,
+      description: formData.description || null,
       start_date: formData.start_date || null,
       end_date: formData.end_date || null,
       status: formData.status,
@@ -267,13 +258,18 @@ const Treatments = () => {
     return practitioner;
   };
 
-  // Handler to navigate to condition page and open view modal
-  const handleConditionClick = conditionId => {
-    if (conditionId) {
-      // Navigate to conditions page with view parameter to auto-open the modal
-      navigate(`/conditions?view=${conditionId}`);
+  // Generic handler factory for navigating to entity pages with view modal
+  const createEntityClickHandler = (path) => (entityId) => {
+    if (entityId) {
+      navigate(`${path}?view=${entityId}`);
     }
   };
+
+  const handleConditionClick = createEntityClickHandler('/conditions');
+  const handleMedicationClick = createEntityClickHandler('/medications');
+  const handleEncounterClick = createEntityClickHandler('/visits');
+  const handleLabResultClick = createEntityClickHandler('/lab-results');
+  const handleEquipmentClick = createEntityClickHandler('/medical-equipment');
 
   // Get processed data from data management
   const filteredTreatments = dataManagement.data;
@@ -444,6 +440,10 @@ const Treatments = () => {
         conditions={conditions}
         practitioners={practitioners}
         onConditionClick={handleConditionClick}
+        onMedicationClick={handleMedicationClick}
+        onEncounterClick={handleEncounterClick}
+        onLabResultClick={handleLabResultClick}
+        onEquipmentClick={handleEquipmentClick}
         navigate={navigate}
       />
     </>

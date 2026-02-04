@@ -156,6 +156,13 @@ export const NAVIGATION_SECTIONS = {
         id: 'insurance',
       },
       {
+        nameKey: 'sidebarNav.items.medicalEquipment',
+        name: 'Medical Equipment',
+        path: buildEntityUrl(ENTITY_TYPES.MEDICAL_EQUIPMENT),
+        icon: '🩺',
+        id: 'medical-equipment',
+      },
+      {
         nameKey: 'sidebarNav.items.emergencyContacts',
         name: 'Emergency Contacts',
         path: buildEntityUrl(ENTITY_TYPES.EMERGENCY_CONTACT),

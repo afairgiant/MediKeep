@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Optional, List
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, ValidationInfo
@@ -7,17 +7,29 @@ from app.schemas.base_tags import TaggedEntityMixin
 from app.models.enums import TreatmentStatus
 
 
+# Helper function for validating relevance notes
+def _validate_relevance_note(v: Optional[str]) -> Optional[str]:
+    """Validate and clean relevance note."""
+    if v is not None:
+        v = v.strip()
+        if len(v) > 500:
+            raise ValueError("Relevance note must be 500 characters or less")
+        if len(v) == 0:
+            return None
+    return v
+
+
 class TreatmentBase(TaggedEntityMixin):
     treatment_name: str = Field(
         ..., min_length=2, max_length=300, description="Name of the treatment"
     )
-    treatment_type: str = Field(
-        ..., min_length=2, max_length=300, description="Type of treatment"
+    treatment_type: Optional[str] = Field(
+        None, max_length=300, description="Category of treatment (optional)"
     )
     description: Optional[str] = Field(
         None, max_length=1000, description="Detailed description of the treatment"
     )
-    start_date: date = Field(..., description="Start date of the treatment")
+    start_date: Optional[date] = Field(None, description="Start date of the treatment (optional)")
     end_date: Optional[date] = Field(None, description="End date of the treatment")
     frequency: Optional[str] = Field(
         None, max_length=100, description="Frequency of the treatment"
@@ -45,6 +57,21 @@ class TreatmentBase(TaggedEntityMixin):
     condition_id: Optional[int] = Field(
         None, gt=0, description="ID of the related condition"
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_empty_strings_to_none(cls, values):
+        """Convert empty strings to None for optional fields."""
+        if isinstance(values, dict):
+            # Fields that should convert empty string to None
+            optional_string_fields = [
+                "treatment_type", "description", "frequency", "treatment_category",
+                "outcome", "location", "dosage", "notes"
+            ]
+            for field in optional_string_fields:
+                if field in values and values[field] == "":
+                    values[field] = None
+        return values
 
     @model_validator(mode="before")
     @classmethod
@@ -113,7 +140,7 @@ class TreatmentCreate(TreatmentBase):
 
 class TreatmentUpdate(BaseModel):
     treatment_name: Optional[str] = Field(None, min_length=2, max_length=300)
-    treatment_type: Optional[str] = Field(None, min_length=2, max_length=300)
+    treatment_type: Optional[str] = Field(None, max_length=300)  # No min_length - optional field
     description: Optional[str] = Field(None, max_length=1000)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
@@ -127,6 +154,20 @@ class TreatmentUpdate(BaseModel):
     practitioner_id: Optional[int] = Field(None, gt=0)
     condition_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def convert_empty_strings_to_none(cls, values):
+        """Convert empty strings to None for optional fields."""
+        if isinstance(values, dict):
+            optional_string_fields = [
+                "treatment_type", "description", "frequency", "treatment_category",
+                "outcome", "location", "dosage", "notes"
+            ]
+            for field in optional_string_fields:
+                if field in values and values[field] == "":
+                    values[field] = None
+        return values
 
     @model_validator(mode="before")
     @classmethod
@@ -210,10 +251,442 @@ class TreatmentWithRelations(TreatmentResponse):
 class TreatmentSummary(BaseModel):
     id: int
     treatment_name: str
-    start_date: date
-    end_date: Optional[date]
+    treatment_type: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     status: str
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# =============================================================================
+# Treatment-Medication Relationship Schemas
+# =============================================================================
+
+
+class TreatmentMedicationBase(BaseModel):
+    """Base schema for treatment medication relationship."""
+    treatment_id: int
+    medication_id: int
+    specific_dosage: Optional[str] = Field(None, max_length=200)
+    specific_frequency: Optional[str] = Field(None, max_length=100)
+    specific_duration: Optional[str] = Field(None, max_length=100)
+    timing_instructions: Optional[str] = Field(None, max_length=300)
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentMedicationCreate(BaseModel):
+    """Schema for creating a treatment medication relationship."""
+    medication_id: int
+    specific_dosage: Optional[str] = Field(None, max_length=200)
+    specific_frequency: Optional[str] = Field(None, max_length=100)
+    specific_duration: Optional[str] = Field(None, max_length=100)
+    timing_instructions: Optional[str] = Field(None, max_length=300)
+    relevance_note: Optional[str] = None
+    treatment_id: Optional[int] = None  # Will be set from URL path parameter
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentMedicationUpdate(BaseModel):
+    """Schema for updating a treatment medication relationship."""
+    specific_dosage: Optional[str] = Field(None, max_length=200)
+    specific_frequency: Optional[str] = Field(None, max_length=100)
+    specific_duration: Optional[str] = Field(None, max_length=100)
+    timing_instructions: Optional[str] = Field(None, max_length=300)
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentMedicationResponse(TreatmentMedicationBase):
+    """Schema for treatment medication relationship response."""
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TreatmentMedicationWithDetails(TreatmentMedicationResponse):
+    """Schema for treatment medication relationship with medication details."""
+    medication: Optional[dict] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TreatmentMedicationBulkCreate(BaseModel):
+    """Schema for bulk creating treatment medication relationships."""
+    medication_ids: List[int] = Field(
+        ..., min_length=1, description="List of medication IDs to link"
+    )
+    relevance_note: Optional[str] = Field(
+        None, max_length=500, description="Optional note describing relevance"
+    )
+
+    @field_validator("medication_ids")
+    @classmethod
+    def validate_medication_ids(cls, v):
+        if not v:
+            raise ValueError("At least one medication ID is required")
+        if len(v) != len(set(v)):
+            raise ValueError("Duplicate medication IDs are not allowed")
+        for med_id in v:
+            if med_id <= 0:
+                raise ValueError("Medication IDs must be positive integers")
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+# =============================================================================
+# Treatment-Encounter Relationship Schemas
+# =============================================================================
+
+
+class TreatmentEncounterBase(BaseModel):
+    """Base schema for treatment encounter relationship."""
+    treatment_id: int
+    encounter_id: int
+    visit_label: Optional[str] = Field(None, max_length=50)
+    visit_sequence: Optional[int] = Field(None, ge=1)
+    relevance_note: Optional[str] = None
+
+    @field_validator("visit_label")
+    @classmethod
+    def validate_visit_label(cls, v):
+        if v is not None:
+            valid_labels = ["initial", "follow_up", "review", "final", "other"]
+            if v.lower() not in valid_labels:
+                raise ValueError(f"Visit label must be one of: {', '.join(valid_labels)}")
+            return v.lower()
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentEncounterCreate(BaseModel):
+    """Schema for creating a treatment encounter relationship."""
+    encounter_id: int
+    visit_label: Optional[str] = Field(None, max_length=50)
+    visit_sequence: Optional[int] = Field(None, ge=1)
+    relevance_note: Optional[str] = None
+    treatment_id: Optional[int] = None  # Will be set from URL path parameter
+
+    @field_validator("visit_label")
+    @classmethod
+    def validate_visit_label(cls, v):
+        if v is not None:
+            valid_labels = ["initial", "follow_up", "review", "final", "other"]
+            if v.lower() not in valid_labels:
+                raise ValueError(f"Visit label must be one of: {', '.join(valid_labels)}")
+            return v.lower()
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentEncounterUpdate(BaseModel):
+    """Schema for updating a treatment encounter relationship."""
+    visit_label: Optional[str] = Field(None, max_length=50)
+    visit_sequence: Optional[int] = Field(None, ge=1)
+    relevance_note: Optional[str] = None
+
+    @field_validator("visit_label")
+    @classmethod
+    def validate_visit_label(cls, v):
+        if v is not None:
+            valid_labels = ["initial", "follow_up", "review", "final", "other"]
+            if v.lower() not in valid_labels:
+                raise ValueError(f"Visit label must be one of: {', '.join(valid_labels)}")
+            return v.lower()
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentEncounterResponse(TreatmentEncounterBase):
+    """Schema for treatment encounter relationship response."""
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TreatmentEncounterWithDetails(TreatmentEncounterResponse):
+    """Schema for treatment encounter relationship with encounter details."""
+    encounter: Optional[dict] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TreatmentEncounterBulkCreate(BaseModel):
+    """Schema for bulk creating treatment encounter relationships."""
+    encounter_ids: List[int] = Field(
+        ..., min_length=1, description="List of encounter IDs to link"
+    )
+    relevance_note: Optional[str] = Field(
+        None, max_length=500, description="Optional note describing relevance"
+    )
+
+    @field_validator("encounter_ids")
+    @classmethod
+    def validate_encounter_ids(cls, v):
+        if not v:
+            raise ValueError("At least one encounter ID is required")
+        if len(v) != len(set(v)):
+            raise ValueError("Duplicate encounter IDs are not allowed")
+        for enc_id in v:
+            if enc_id <= 0:
+                raise ValueError("Encounter IDs must be positive integers")
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+# =============================================================================
+# Treatment-LabResult Relationship Schemas
+# =============================================================================
+
+
+class TreatmentLabResultBase(BaseModel):
+    """Base schema for treatment lab result relationship."""
+    treatment_id: int
+    lab_result_id: int
+    purpose: Optional[str] = Field(None, max_length=50)
+    expected_frequency: Optional[str] = Field(None, max_length=100)
+    relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        if v is not None:
+            valid_purposes = ["baseline", "monitoring", "outcome", "safety", "other"]
+            if v.lower() not in valid_purposes:
+                raise ValueError(f"Purpose must be one of: {', '.join(valid_purposes)}")
+            return v.lower()
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentLabResultCreate(BaseModel):
+    """Schema for creating a treatment lab result relationship."""
+    lab_result_id: int
+    purpose: Optional[str] = Field(None, max_length=50)
+    expected_frequency: Optional[str] = Field(None, max_length=100)
+    relevance_note: Optional[str] = None
+    treatment_id: Optional[int] = None  # Will be set from URL path parameter
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        if v is not None:
+            valid_purposes = ["baseline", "monitoring", "outcome", "safety", "other"]
+            if v.lower() not in valid_purposes:
+                raise ValueError(f"Purpose must be one of: {', '.join(valid_purposes)}")
+            return v.lower()
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentLabResultUpdate(BaseModel):
+    """Schema for updating a treatment lab result relationship."""
+    purpose: Optional[str] = Field(None, max_length=50)
+    expected_frequency: Optional[str] = Field(None, max_length=100)
+    relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        if v is not None:
+            valid_purposes = ["baseline", "monitoring", "outcome", "safety", "other"]
+            if v.lower() not in valid_purposes:
+                raise ValueError(f"Purpose must be one of: {', '.join(valid_purposes)}")
+            return v.lower()
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentLabResultResponse(TreatmentLabResultBase):
+    """Schema for treatment lab result relationship response."""
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TreatmentLabResultWithDetails(TreatmentLabResultResponse):
+    """Schema for treatment lab result relationship with lab result details."""
+    lab_result: Optional[dict] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TreatmentLabResultBulkCreate(BaseModel):
+    """Schema for bulk creating treatment lab result relationships."""
+    lab_result_ids: List[int] = Field(
+        ..., min_length=1, description="List of lab result IDs to link"
+    )
+    purpose: Optional[str] = Field(
+        None, max_length=50, description="Purpose of these lab results"
+    )
+    relevance_note: Optional[str] = Field(
+        None, max_length=500, description="Optional note describing relevance"
+    )
+
+    @field_validator("lab_result_ids")
+    @classmethod
+    def validate_lab_result_ids(cls, v):
+        if not v:
+            raise ValueError("At least one lab result ID is required")
+        if len(v) != len(set(v)):
+            raise ValueError("Duplicate lab result IDs are not allowed")
+        for lab_id in v:
+            if lab_id <= 0:
+                raise ValueError("Lab result IDs must be positive integers")
+        return v
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        if v is not None:
+            valid_purposes = ["baseline", "monitoring", "outcome", "safety", "other"]
+            if v.lower() not in valid_purposes:
+                raise ValueError(f"Purpose must be one of: {', '.join(valid_purposes)}")
+            return v.lower()
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+# =============================================================================
+# Treatment-Equipment Relationship Schemas
+# =============================================================================
+
+
+class TreatmentEquipmentBase(BaseModel):
+    """Base schema for treatment equipment relationship."""
+    treatment_id: int
+    equipment_id: int
+    usage_frequency: Optional[str] = Field(None, max_length=100)
+    specific_settings: Optional[str] = Field(None, max_length=300)
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentEquipmentCreate(BaseModel):
+    """Schema for creating a treatment equipment relationship."""
+    equipment_id: int
+    usage_frequency: Optional[str] = Field(None, max_length=100)
+    specific_settings: Optional[str] = Field(None, max_length=300)
+    relevance_note: Optional[str] = None
+    treatment_id: Optional[int] = None  # Will be set from URL path parameter
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentEquipmentUpdate(BaseModel):
+    """Schema for updating a treatment equipment relationship."""
+    usage_frequency: Optional[str] = Field(None, max_length=100)
+    specific_settings: Optional[str] = Field(None, max_length=300)
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class TreatmentEquipmentResponse(TreatmentEquipmentBase):
+    """Schema for treatment equipment relationship response."""
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TreatmentEquipmentWithDetails(TreatmentEquipmentResponse):
+    """Schema for treatment equipment relationship with equipment details."""
+    equipment: Optional[dict] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TreatmentEquipmentBulkCreate(BaseModel):
+    """Schema for bulk creating treatment equipment relationships."""
+    equipment_ids: List[int] = Field(
+        ..., min_length=1, description="List of equipment IDs to link"
+    )
+    relevance_note: Optional[str] = Field(
+        None, max_length=500, description="Optional note describing relevance"
+    )
+
+    @field_validator("equipment_ids")
+    @classmethod
+    def validate_equipment_ids(cls, v):
+        if not v:
+            raise ValueError("At least one equipment ID is required")
+        if len(v) != len(set(v)):
+            raise ValueError("Duplicate equipment IDs are not allowed")
+        for eq_id in v:
+            if eq_id <= 0:
+                raise ValueError("Equipment IDs must be positive integers")
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)

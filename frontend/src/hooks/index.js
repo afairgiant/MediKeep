@@ -38,3 +38,6 @@ export { useEntityFileCounts } from './useEntityFileCounts';
 
 // View modal navigation hooks
 export { useViewModalNavigation } from './useViewModalNavigation';
+
+// Treatment relationship management hooks
+export { useTreatmentRelationships } from './useTreatmentRelationships';
