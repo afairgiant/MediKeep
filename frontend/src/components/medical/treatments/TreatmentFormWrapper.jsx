@@ -11,6 +11,8 @@ import {
   Textarea,
   Select,
   Text,
+  Badge,
+  Alert,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
@@ -18,15 +20,26 @@ import {
   IconCalendar,
   IconFileText,
   IconNotes,
+  IconLink,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import { parseDateInput, getTodayEndOfDay, formatDateInputChange } from '../../../utils/dateUtils';
+import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
+import TreatmentRelationshipsManager from './TreatmentRelationshipsManager';
+import TreatmentPlanSetup from './TreatmentPlanSetup';
+import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
+
+const EMPTY_PENDING_RELATIONSHIPS = {
+  medications: [],
+  encounters: [],
+  labResults: [],
+  equipment: [],
+};
 
 const TreatmentFormWrapper = ({
   isOpen,
@@ -48,31 +61,123 @@ const TreatmentFormWrapper = ({
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Track relationship counts for badge display (edit mode)
+  const [relationshipCount, setRelationshipCount] = useState(0);
+
+  // Track pending relationships for creation mode
+  const [pendingRelationships, setPendingRelationships] = useState(EMPTY_PENDING_RELATIONSHIPS);
+
   // Form handlers
   const {
     handleTextInputChange,
   } = useFormHandlers(onInputChange);
 
-  // Get today's date for date picker constraints
-  const today = getTodayEndOfDay();
-
-  // Reset tab when modal opens/closes
+  // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setActiveTab('basic');
+      setPendingRelationships(EMPTY_PENDING_RELATIONSHIPS);
     }
     if (!isOpen) {
       setIsSubmitting(false);
+      setRelationshipCount(0);
+      setPendingRelationships(EMPTY_PENDING_RELATIONSHIPS);
     }
   }, [isOpen]);
 
-  // Handle form submission
+  // Calculate pending relationship count for badge
+  const pendingCount =
+    (pendingRelationships.medications?.length || 0) +
+    (pendingRelationships.encounters?.length || 0) +
+    (pendingRelationships.labResults?.length || 0) +
+    (pendingRelationships.equipment?.length || 0);
+
+  // Handle form submission with pending relationships
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      await onSubmit(e);
+      // First, create/update the treatment
+      const result = await onSubmit(e);
+
+      // If this is a new treatment and we have pending relationships, create them
+      if (!editingTreatment && result?.id && pendingCount > 0) {
+        const treatmentId = result.id;
+
+        // Create all pending relationships in parallel
+        const promises = [];
+
+        // Handle medications - create each individually to preserve metadata
+        const meds = pendingRelationships.medications || [];
+        for (const med of meds) {
+          const medData = typeof med === 'object' ? med : { id: med };
+          promises.push(
+            apiService.linkTreatmentMedication(treatmentId, {
+              medication_id: parseInt(medData.id),
+              specific_dosage: medData.specific_dosage || null,
+              specific_frequency: medData.specific_frequency || null,
+              specific_duration: medData.specific_duration || null,
+              timing_instructions: medData.timing_instructions || null,
+              relevance_note: medData.relevance_note || null,
+            }).catch(err => {
+              logger.error('Failed to link medication', { error: err.message });
+            })
+          );
+        }
+
+        // Handle encounters - create each individually to preserve metadata
+        const encs = pendingRelationships.encounters || [];
+        for (const enc of encs) {
+          const encData = typeof enc === 'object' ? enc : { id: enc };
+          promises.push(
+            apiService.linkTreatmentEncounter(treatmentId, {
+              encounter_id: parseInt(encData.id),
+              visit_label: encData.visit_label || null,
+              visit_sequence: encData.visit_sequence ? parseInt(encData.visit_sequence) : null,
+              relevance_note: encData.relevance_note || null,
+            }).catch(err => {
+              logger.error('Failed to link encounter', { error: err.message });
+            })
+          );
+        }
+
+        // Handle lab results - create each individually to preserve metadata
+        const labs = pendingRelationships.labResults || [];
+        for (const lab of labs) {
+          const labData = typeof lab === 'object' ? lab : { id: lab };
+          promises.push(
+            apiService.linkTreatmentLabResult(treatmentId, {
+              lab_result_id: parseInt(labData.id),
+              purpose: labData.purpose || null,
+              expected_frequency: labData.expected_frequency || null,
+              relevance_note: labData.relevance_note || null,
+            }).catch(err => {
+              logger.error('Failed to link lab result', { error: err.message });
+            })
+          );
+        }
+
+        // Handle equipment - create each individually
+        const equips = pendingRelationships.equipment || [];
+        for (const equip of equips) {
+          const equipData = typeof equip === 'object' ? equip : { id: equip };
+          promises.push(
+            apiService.linkTreatmentEquipment(treatmentId, {
+              equipment_id: parseInt(equipData.id),
+              usage_frequency: equipData.usage_frequency || null,
+              specific_settings: equipData.specific_settings || null,
+              relevance_note: equipData.relevance_note || null,
+            }).catch(err => {
+              logger.error('Failed to link equipment', { error: err.message });
+            })
+          );
+        }
+
+        // Wait for all relationships to be created
+        await Promise.all(promises);
+      }
+
       setIsSubmitting(false);
     } catch (error) {
       logger.error('treatment_form_wrapper_error', {
@@ -87,6 +192,9 @@ const TreatmentFormWrapper = ({
 
   if (!isOpen) return null;
 
+  // Badge count: show pending count during creation, actual count when editing
+  const badgeCount = editingTreatment ? relationshipCount : pendingCount;
+
   return (
     <Modal
       opened={isOpen}
@@ -98,11 +206,17 @@ const TreatmentFormWrapper = ({
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={t('treatments.form.savingTreatment', 'Saving treatment...')} />
+      <FormLoadingOverlay
+        visible={isSubmitting || isLoading}
+        message={
+          isSubmitting && pendingCount > 0 && !editingTreatment
+            ? t('treatments.form.creatingWithLinks', 'Creating treatment and linking items...')
+            : t('treatments.form.savingTreatment', 'Saving treatment...')
+        }
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
-          {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
@@ -110,6 +224,17 @@ const TreatmentFormWrapper = ({
               </Tabs.Tab>
               <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
                 {t('treatments.form.tabs.scheduleDosage', 'Schedule & Dosage')}
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="relationships"
+                leftSection={<IconLink size={16} />}
+                rightSection={badgeCount > 0 ? (
+                  <Badge size="sm" variant="filled" color="blue" circle>
+                    {badgeCount}
+                  </Badge>
+                ) : null}
+              >
+                Treatment Plan
               </Tabs.Tab>
               {editingTreatment && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
@@ -136,12 +261,43 @@ const TreatmentFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <TextInput
-                      label={t('treatments.form.treatmentType', 'Treatment Type')}
-                      value={formData.treatment_type || ''}
-                      onChange={handleTextInputChange('treatment_type')}
-                      placeholder={t('treatments.form.treatmentTypePlaceholder', 'e.g., Physical Therapy, Surgery')}
-                      description={t('treatments.form.treatmentTypeDesc', 'Type or category of treatment')}
+                    <Select
+                      label={t('treatments.form.treatmentType', 'Treatment Category')}
+                      value={formData.treatment_type || null}
+                      data={(() => {
+                        const predefinedOptions = [
+                          { value: 'medication_therapy', label: 'Medication Therapy' },
+                          { value: 'physical_therapy', label: 'Physical Therapy' },
+                          { value: 'surgery_procedure', label: 'Surgery / Procedure' },
+                          { value: 'lifestyle_dietary', label: 'Lifestyle / Dietary' },
+                          { value: 'monitoring', label: 'Monitoring / Observation' },
+                          { value: 'mental_health', label: 'Mental Health / Counseling' },
+                          { value: 'rehabilitation', label: 'Rehabilitation' },
+                          { value: 'alternative', label: 'Alternative / Complementary' },
+                          { value: 'combination', label: 'Combination Therapy' },
+                          { value: 'other', label: 'Other' },
+                        ];
+                        // If current value is custom (not in predefined list), add it
+                        const currentValue = formData.treatment_type;
+                        if (currentValue && !predefinedOptions.find(o => o.value === currentValue)) {
+                          return [{ value: currentValue, label: currentValue }, ...predefinedOptions];
+                        }
+                        return predefinedOptions;
+                      })()}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'treatment_type', value: value || '' } });
+                      }}
+                      placeholder={t('treatments.form.treatmentTypePlaceholder', 'Select or type category')}
+                      description={t('treatments.form.treatmentTypeDesc', 'Select a category or type your own')}
+                      clearable
+                      searchable
+                      creatable
+                      getCreateLabel={(query) => `+ Use "${query}"`}
+                      onCreate={(query) => {
+                        onInputChange({ target: { name: 'treatment_type', value: query } });
+                        return { value: query, label: query };
+                      }}
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -232,6 +388,32 @@ const TreatmentFormWrapper = ({
                     </Box>
                   </Grid.Col>
                 </Grid>
+
+                {/* Show relationship indicator if relationships exist (edit mode) or pending (create mode) */}
+                {badgeCount > 0 && (
+                  <Alert
+                    variant="light"
+                    color="blue"
+                    icon={<IconLink size={16} />}
+                    mt="md"
+                  >
+                    <Group justify="space-between">
+                      <Text size="sm">
+                        {editingTreatment
+                          ? `This treatment has ${badgeCount} linked item${badgeCount !== 1 ? 's' : ''} in the Treatment Plan`
+                          : `${badgeCount} item${badgeCount !== 1 ? 's' : ''} selected to link when treatment is created`
+                        }
+                      </Text>
+                      <Button
+                        variant="subtle"
+                        size="xs"
+                        onClick={() => setActiveTab('relationships')}
+                      >
+                        {editingTreatment ? 'View' : 'Edit'}
+                      </Button>
+                    </Group>
+                  </Alert>
+                )}
               </Box>
             </Tabs.Panel>
 
@@ -292,6 +474,25 @@ const TreatmentFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
+            {/* Treatment Plan (Relationships) Tab */}
+            <Tabs.Panel value="relationships">
+              <Box mt="md">
+                {editingTreatment ? (
+                  <TreatmentRelationshipsManager
+                    treatmentId={editingTreatment.id}
+                    patientId={editingTreatment.patient_id}
+                    isViewMode={false}
+                    onCountsChange={setRelationshipCount}
+                  />
+                ) : (
+                  <TreatmentPlanSetup
+                    pendingRelationships={pendingRelationships}
+                    onRelationshipsChange={setPendingRelationships}
+                  />
+                )}
+              </Box>
+            </Tabs.Panel>
+
             {/* Documents Tab (only when editing) */}
             {editingTreatment && (
               <Tabs.Panel value="documents">
@@ -333,7 +534,12 @@ const TreatmentFormWrapper = ({
               loading={isLoading || isSubmitting}
               disabled={!formData.treatment_name?.trim()}
             >
-              {editingTreatment ? t('treatments.form.updateTreatment', 'Update Treatment') : t('treatments.form.createTreatment', 'Create Treatment')}
+              {editingTreatment
+                ? t('treatments.form.updateTreatment', 'Update Treatment')
+                : pendingCount > 0
+                  ? t('treatments.form.createWithLinks', `Create Treatment & Link ${pendingCount} Item${pendingCount !== 1 ? 's' : ''}`)
+                  : t('treatments.form.createTreatment', 'Create Treatment')
+              }
             </SubmitButton>
           </Group>
         </Stack>

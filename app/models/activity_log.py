@@ -153,6 +153,7 @@ class EntityType:
     SYMPTOM = "symptom"
     INJURY = "injury"
     INJURY_TYPE = "injury_type"
+    MEDICAL_EQUIPMENT = "medical_equipment"
 
     # System entities
     SYSTEM = "system"

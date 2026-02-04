@@ -50,14 +50,34 @@ const TreatmentCard = ({
     }
   };
 
+  // Treatment category labels mapping
+  const TREATMENT_CATEGORY_LABELS = {
+    medication_therapy: 'Medication Therapy',
+    physical_therapy: 'Physical Therapy',
+    surgery_procedure: 'Surgery / Procedure',
+    lifestyle_dietary: 'Lifestyle / Dietary',
+    monitoring: 'Monitoring / Observation',
+    mental_health: 'Mental Health / Counseling',
+    rehabilitation: 'Rehabilitation',
+    alternative: 'Alternative / Complementary',
+    combination: 'Combination Therapy',
+    other: 'Other',
+  };
+
+  // Get display label for treatment type (supports both predefined and custom values)
+  const getTreatmentTypeLabel = (type) => {
+    if (!type) return null;
+    return TREATMENT_CATEGORY_LABELS[type] || type;
+  };
+
   try {
     // Generate badges based on treatment properties
     const badges = [];
-    
+
     if (treatment.treatment_type) {
-      badges.push({ 
-        label: treatment.treatment_type, 
-        color: 'blue' 
+      badges.push({
+        label: getTreatmentTypeLabel(treatment.treatment_type),
+        color: 'blue'
       });
     }
 
@@ -145,7 +165,7 @@ const TreatmentCard = ({
     return (
       <BaseMedicalCard
         title={titleContent}
-        subtitle={tCommon('treatments.card.subtitle', 'Medical Treatment')}
+        subtitle={treatment.treatment_type ? getTreatmentTypeLabel(treatment.treatment_type) : null}
         badges={badges.filter(badge => !badge.clickable)} // Only include non-clickable badges
         fields={fields}
         notes={treatment.notes}

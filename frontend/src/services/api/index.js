@@ -23,6 +23,7 @@ const ENTITY_TO_API_PATH = {
   [ENTITY_TYPES.FAMILY_MEMBER]: 'family-members',
   [ENTITY_TYPES.SYMPTOM]: 'symptoms',
   [ENTITY_TYPES.INJURY]: 'injuries',
+  [ENTITY_TYPES.MEDICAL_EQUIPMENT]: 'medical-equipment',
 };
 
 // Streamlined API service with proper logging integration
@@ -1880,6 +1881,132 @@ class ApiService {
 
   deleteTreatment(treatmentId, signal) {
     return this.deleteEntity(ENTITY_TYPES.TREATMENT, treatmentId, signal);
+  }
+
+  // Treatment-Medication relationship methods
+  getTreatmentMedications(treatmentId, signal) {
+    return this.get(`/treatments/${treatmentId}/medications`, { signal });
+  }
+
+  linkTreatmentMedication(treatmentId, data, signal) {
+    return this.post(`/treatments/${treatmentId}/medications`, data, { signal });
+  }
+
+  linkTreatmentMedicationsBulk(treatmentId, medicationIds, relevanceNote = null, signal) {
+    return this.post(`/treatments/${treatmentId}/medications/bulk`, {
+      medication_ids: medicationIds,
+      relevance_note: relevanceNote,
+    }, { signal });
+  }
+
+  updateTreatmentMedication(treatmentId, relationshipId, data, signal) {
+    return this.put(`/treatments/${treatmentId}/medications/${relationshipId}`, data, { signal });
+  }
+
+  unlinkTreatmentMedication(treatmentId, relationshipId, signal) {
+    return this.delete(`/treatments/${treatmentId}/medications/${relationshipId}`, { signal });
+  }
+
+  // Treatment-Encounter relationship methods
+  getTreatmentEncounters(treatmentId, signal) {
+    return this.get(`/treatments/${treatmentId}/encounters`, { signal });
+  }
+
+  linkTreatmentEncounter(treatmentId, data, signal) {
+    return this.post(`/treatments/${treatmentId}/encounters`, data, { signal });
+  }
+
+  linkTreatmentEncountersBulk(treatmentId, encounterIds, relevanceNote = null, signal) {
+    return this.post(`/treatments/${treatmentId}/encounters/bulk`, {
+      encounter_ids: encounterIds,
+      relevance_note: relevanceNote,
+    }, { signal });
+  }
+
+  updateTreatmentEncounter(treatmentId, relationshipId, data, signal) {
+    return this.put(`/treatments/${treatmentId}/encounters/${relationshipId}`, data, { signal });
+  }
+
+  unlinkTreatmentEncounter(treatmentId, relationshipId, signal) {
+    return this.delete(`/treatments/${treatmentId}/encounters/${relationshipId}`, { signal });
+  }
+
+  // Treatment-LabResult relationship methods
+  getTreatmentLabResults(treatmentId, signal) {
+    return this.get(`/treatments/${treatmentId}/lab-results`, { signal });
+  }
+
+  linkTreatmentLabResult(treatmentId, data, signal) {
+    return this.post(`/treatments/${treatmentId}/lab-results`, data, { signal });
+  }
+
+  linkTreatmentLabResultsBulk(treatmentId, labResultIds, purpose = null, relevanceNote = null, signal) {
+    return this.post(`/treatments/${treatmentId}/lab-results/bulk`, {
+      lab_result_ids: labResultIds,
+      purpose: purpose,
+      relevance_note: relevanceNote,
+    }, { signal });
+  }
+
+  updateTreatmentLabResult(treatmentId, relationshipId, data, signal) {
+    return this.put(`/treatments/${treatmentId}/lab-results/${relationshipId}`, data, { signal });
+  }
+
+  unlinkTreatmentLabResult(treatmentId, relationshipId, signal) {
+    return this.delete(`/treatments/${treatmentId}/lab-results/${relationshipId}`, { signal });
+  }
+
+  // Treatment-Equipment relationship methods
+  getTreatmentEquipment(treatmentId, signal) {
+    return this.get(`/treatments/${treatmentId}/equipment`, { signal });
+  }
+
+  linkTreatmentEquipment(treatmentId, data, signal) {
+    return this.post(`/treatments/${treatmentId}/equipment`, data, { signal });
+  }
+
+  linkTreatmentEquipmentBulk(treatmentId, equipmentIds, relevanceNote = null, signal) {
+    return this.post(`/treatments/${treatmentId}/equipment/bulk`, {
+      equipment_ids: equipmentIds,
+      relevance_note: relevanceNote,
+    }, { signal });
+  }
+
+  updateTreatmentEquipment(treatmentId, relationshipId, data, signal) {
+    return this.put(`/treatments/${treatmentId}/equipment/${relationshipId}`, data, { signal });
+  }
+
+  unlinkTreatmentEquipment(treatmentId, relationshipId, signal) {
+    return this.delete(`/treatments/${treatmentId}/equipment/${relationshipId}`, { signal });
+  }
+
+  // Medical Equipment methods
+  getMedicalEquipment(signal) {
+    return this.get('/medical-equipment/', { signal });
+  }
+
+  getMedicalEquipmentById(equipmentId, signal) {
+    return this.get(`/medical-equipment/${equipmentId}`, { signal });
+  }
+
+  getActiveMedicalEquipment(signal) {
+    return this.get('/medical-equipment/active/', { signal });
+  }
+
+  getMedicalEquipmentNeedingService(signal) {
+    return this.get('/medical-equipment/needing-service/', { signal });
+  }
+
+  createMedicalEquipment(equipmentData, signal) {
+    return this.post('/medical-equipment/', equipmentData, { signal });
+  }
+
+  updateMedicalEquipment(equipmentId, equipmentData, signal) {
+    return this.put(`/medical-equipment/${equipmentId}`, equipmentData, { signal });
+  }
+
+  deleteMedicalEquipment(equipmentId, signal) {
+    return this.delete(`/medical-equipment/${equipmentId}`, { signal });
   }
 
   // Procedure methods

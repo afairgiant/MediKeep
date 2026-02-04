@@ -21,6 +21,7 @@ from app.api.v1.endpoints import (
     lab_result,
     lab_result_file,
     lab_test_component,
+    medical_equipment,
     medication,
     notifications,
     paperless,
@@ -94,6 +95,7 @@ api_router.include_router(
 api_router.include_router(insurance.router, prefix="/insurances", tags=["insurance"])
 api_router.include_router(procedure.router, prefix="/procedures", tags=["procedures"])
 api_router.include_router(treatment.router, prefix="/treatments", tags=["treatments"])
+api_router.include_router(medical_equipment.router, prefix="/medical-equipment", tags=["medical-equipment"])
 api_router.include_router(allergy.router, prefix="/allergies", tags=["allergies"])
 api_router.include_router(vitals.router, prefix="/vitals", tags=["vitals"])
 api_router.include_router(symptom.router, prefix="/symptoms", tags=["symptoms"])

@@ -5,11 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.core.http.error_handling import (
-    handle_database_errors
+    handle_database_errors,
+    NotFoundException,
+    BusinessLogicException,
 )
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.core.logging.helpers import log_data_access
+from app.core.logging.helpers import log_data_access, log_security_event
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -17,7 +19,17 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.crud.treatment import treatment
+from app.crud.treatment import (
+    treatment,
+    treatment_medication,
+    treatment_encounter,
+    treatment_lab_result,
+    treatment_equipment,
+)
+from app.crud.medication import medication as medication_crud
+from app.crud.encounter import encounter as encounter_crud
+from app.crud.lab_result import lab_result as lab_result_crud
+from app.crud.medical_equipment import medical_equipment as equipment_crud
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.treatment import (
@@ -25,6 +37,30 @@ from app.schemas.treatment import (
     TreatmentResponse,
     TreatmentUpdate,
     TreatmentWithRelations,
+    # Treatment-Medication schemas
+    TreatmentMedicationCreate,
+    TreatmentMedicationUpdate,
+    TreatmentMedicationResponse,
+    TreatmentMedicationWithDetails,
+    TreatmentMedicationBulkCreate,
+    # Treatment-Encounter schemas
+    TreatmentEncounterCreate,
+    TreatmentEncounterUpdate,
+    TreatmentEncounterResponse,
+    TreatmentEncounterWithDetails,
+    TreatmentEncounterBulkCreate,
+    # Treatment-LabResult schemas
+    TreatmentLabResultCreate,
+    TreatmentLabResultUpdate,
+    TreatmentLabResultResponse,
+    TreatmentLabResultWithDetails,
+    TreatmentLabResultBulkCreate,
+    # Treatment-Equipment schemas
+    TreatmentEquipmentCreate,
+    TreatmentEquipmentUpdate,
+    TreatmentEquipmentResponse,
+    TreatmentEquipmentWithDetails,
+    TreatmentEquipmentBulkCreate,
 )
 
 router = APIRouter()
@@ -285,3 +321,939 @@ def get_patient_treatments(
         )
 
         return treatments
+
+
+# =============================================================================
+# Treatment-Medication Relationship Endpoints
+# =============================================================================
+
+
+def _verify_treatment_access(
+    db: Session,
+    treatment_id: int,
+    current_user_patient_id: int,
+    current_user_id: int,
+    request: Request,
+):
+    """Helper to verify treatment exists and user has access."""
+    db_treatment = treatment.get(db, id=treatment_id)
+    if not db_treatment:
+        log_security_event(
+            logger,
+            "treatment_not_found",
+            request,
+            f"Treatment with ID {treatment_id} not found",
+            user_id=current_user_id
+        )
+        raise NotFoundException(
+            resource="Treatment",
+            message=f"Treatment with ID {treatment_id} not found",
+            request=request
+        )
+    if db_treatment.patient_id != current_user_patient_id:
+        log_security_event(
+            logger,
+            "unauthorized_treatment_access",
+            request,
+            f"User attempted to access treatment {treatment_id} without permission",
+            user_id=current_user_id,
+            treatment_id=treatment_id
+        )
+        raise NotFoundException(
+            resource="Treatment",
+            message="Treatment not found",
+            request=request
+        )
+    return db_treatment
+
+
+@router.get("/{treatment_id}/medications", response_model=List[TreatmentMedicationWithDetails])
+def get_treatment_medications(
+    *,
+    treatment_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Get all medications linked to a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationships = treatment_medication.get_by_treatment(db, treatment_id=treatment_id)
+
+        # Enrich with medication details
+        result = []
+        for rel in relationships:
+            rel_dict = {
+                "id": rel.id,
+                "treatment_id": rel.treatment_id,
+                "medication_id": rel.medication_id,
+                "specific_dosage": rel.specific_dosage,
+                "specific_frequency": rel.specific_frequency,
+                "specific_duration": rel.specific_duration,
+                "timing_instructions": rel.timing_instructions,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "medication": None,
+            }
+            if rel.medication:
+                rel_dict["medication"] = {
+                    "id": rel.medication.id,
+                    "medication_name": rel.medication.medication_name,
+                    "dosage": rel.medication.dosage,
+                    "frequency": rel.medication.frequency,
+                    "status": rel.medication.status,
+                }
+            result.append(rel_dict)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "TreatmentMedication",
+            treatment_id=treatment_id,
+            count=len(result)
+        )
+
+        return result
+
+
+@router.post("/{treatment_id}/medications", response_model=TreatmentMedicationResponse)
+def create_treatment_medication(
+    *,
+    treatment_id: int,
+    medication_in: TreatmentMedicationCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Link a medication to a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        # Verify medication exists and belongs to same patient
+        db_medication = medication_crud.get(db, id=medication_in.medication_id)
+        if not db_medication:
+            raise NotFoundException(
+                resource="Medication",
+                message=f"Medication with ID {medication_in.medication_id} not found",
+                request=request
+            )
+        if db_medication.patient_id != current_user_patient_id:
+            raise BusinessLogicException(
+                message="Cannot link medication from a different patient",
+                request=request
+            )
+
+        medication_in.treatment_id = treatment_id
+        relationship = treatment_medication.create(db, obj_in=medication_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "TreatmentMedication",
+            record_id=relationship.id,
+            treatment_id=treatment_id,
+            medication_id=medication_in.medication_id
+        )
+
+        return relationship
+
+
+@router.post("/{treatment_id}/medications/bulk", response_model=List[TreatmentMedicationResponse])
+def create_treatment_medications_bulk(
+    *,
+    treatment_id: int,
+    bulk_data: TreatmentMedicationBulkCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Link multiple medications to a treatment at once."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        # Verify all medications exist and belong to same patient
+        for med_id in bulk_data.medication_ids:
+            db_medication = medication_crud.get(db, id=med_id)
+            if not db_medication:
+                raise NotFoundException(
+                    resource="Medication",
+                    message=f"Medication with ID {med_id} not found",
+                    request=request
+                )
+            if db_medication.patient_id != current_user_patient_id:
+                raise BusinessLogicException(
+                    message="Cannot link medication from a different patient",
+                    request=request
+                )
+
+        created, skipped = treatment_medication.create_bulk(
+            db, treatment_id=treatment_id, bulk_data=bulk_data
+        )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "TreatmentMedication",
+            treatment_id=treatment_id,
+            created_count=len(created),
+            skipped_count=len(skipped)
+        )
+
+        return created
+
+
+@router.put("/{treatment_id}/medications/{relationship_id}", response_model=TreatmentMedicationResponse)
+def update_treatment_medication(
+    *,
+    treatment_id: int,
+    relationship_id: int,
+    medication_in: TreatmentMedicationUpdate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Update a treatment medication relationship."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationship = treatment_medication.get(db, id=relationship_id)
+        if not relationship or relationship.treatment_id != treatment_id:
+            raise NotFoundException(
+                resource="TreatmentMedication",
+                message="Relationship not found",
+                request=request
+            )
+
+        updated = treatment_medication.update(db, db_obj=relationship, obj_in=medication_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "update",
+            "TreatmentMedication",
+            record_id=relationship_id,
+            treatment_id=treatment_id
+        )
+
+        return updated
+
+
+@router.delete("/{treatment_id}/medications/{relationship_id}")
+def delete_treatment_medication(
+    *,
+    treatment_id: int,
+    relationship_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Remove a medication link from a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationship = treatment_medication.get(db, id=relationship_id)
+        if not relationship or relationship.treatment_id != treatment_id:
+            raise NotFoundException(
+                resource="TreatmentMedication",
+                message="Relationship not found",
+                request=request
+            )
+
+        treatment_medication.delete(db, id=relationship_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "TreatmentMedication",
+            record_id=relationship_id,
+            treatment_id=treatment_id
+        )
+
+        return {"status": "success", "message": "Medication link removed"}
+
+
+# =============================================================================
+# Treatment-Encounter Relationship Endpoints
+# =============================================================================
+
+
+@router.get("/{treatment_id}/encounters", response_model=List[TreatmentEncounterWithDetails])
+def get_treatment_encounters(
+    *,
+    treatment_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Get all encounters linked to a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationships = treatment_encounter.get_by_treatment(db, treatment_id=treatment_id)
+
+        # Enrich with encounter details
+        result = []
+        for rel in relationships:
+            rel_dict = {
+                "id": rel.id,
+                "treatment_id": rel.treatment_id,
+                "encounter_id": rel.encounter_id,
+                "visit_label": rel.visit_label,
+                "visit_sequence": rel.visit_sequence,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "encounter": None,
+            }
+            if rel.encounter:
+                rel_dict["encounter"] = {
+                    "id": rel.encounter.id,
+                    "reason": rel.encounter.reason,
+                    "date": rel.encounter.date.isoformat() if rel.encounter.date else None,
+                    "visit_type": rel.encounter.visit_type,
+                }
+            result.append(rel_dict)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "TreatmentEncounter",
+            treatment_id=treatment_id,
+            count=len(result)
+        )
+
+        return result
+
+
+@router.post("/{treatment_id}/encounters", response_model=TreatmentEncounterResponse)
+def create_treatment_encounter(
+    *,
+    treatment_id: int,
+    encounter_in: TreatmentEncounterCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Link an encounter to a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        # Verify encounter exists and belongs to same patient
+        db_encounter = encounter_crud.get(db, id=encounter_in.encounter_id)
+        if not db_encounter:
+            raise NotFoundException(
+                resource="Encounter",
+                message=f"Encounter with ID {encounter_in.encounter_id} not found",
+                request=request
+            )
+        if db_encounter.patient_id != current_user_patient_id:
+            raise BusinessLogicException(
+                message="Cannot link encounter from a different patient",
+                request=request
+            )
+
+        encounter_in.treatment_id = treatment_id
+        relationship = treatment_encounter.create(db, obj_in=encounter_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "TreatmentEncounter",
+            record_id=relationship.id,
+            treatment_id=treatment_id,
+            encounter_id=encounter_in.encounter_id
+        )
+
+        return relationship
+
+
+@router.post("/{treatment_id}/encounters/bulk", response_model=List[TreatmentEncounterResponse])
+def create_treatment_encounters_bulk(
+    *,
+    treatment_id: int,
+    bulk_data: TreatmentEncounterBulkCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Link multiple encounters to a treatment at once."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        # Verify all encounters exist and belong to same patient
+        for enc_id in bulk_data.encounter_ids:
+            db_encounter = encounter_crud.get(db, id=enc_id)
+            if not db_encounter:
+                raise NotFoundException(
+                    resource="Encounter",
+                    message=f"Encounter with ID {enc_id} not found",
+                    request=request
+                )
+            if db_encounter.patient_id != current_user_patient_id:
+                raise BusinessLogicException(
+                    message="Cannot link encounter from a different patient",
+                    request=request
+                )
+
+        created, skipped = treatment_encounter.create_bulk(
+            db, treatment_id=treatment_id, bulk_data=bulk_data
+        )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "TreatmentEncounter",
+            treatment_id=treatment_id,
+            created_count=len(created),
+            skipped_count=len(skipped)
+        )
+
+        return created
+
+
+@router.put("/{treatment_id}/encounters/{relationship_id}", response_model=TreatmentEncounterResponse)
+def update_treatment_encounter(
+    *,
+    treatment_id: int,
+    relationship_id: int,
+    encounter_in: TreatmentEncounterUpdate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Update a treatment encounter relationship."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationship = treatment_encounter.get(db, id=relationship_id)
+        if not relationship or relationship.treatment_id != treatment_id:
+            raise NotFoundException(
+                resource="TreatmentEncounter",
+                message="Relationship not found",
+                request=request
+            )
+
+        updated = treatment_encounter.update(db, db_obj=relationship, obj_in=encounter_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "update",
+            "TreatmentEncounter",
+            record_id=relationship_id,
+            treatment_id=treatment_id
+        )
+
+        return updated
+
+
+@router.delete("/{treatment_id}/encounters/{relationship_id}")
+def delete_treatment_encounter(
+    *,
+    treatment_id: int,
+    relationship_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Remove an encounter link from a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationship = treatment_encounter.get(db, id=relationship_id)
+        if not relationship or relationship.treatment_id != treatment_id:
+            raise NotFoundException(
+                resource="TreatmentEncounter",
+                message="Relationship not found",
+                request=request
+            )
+
+        treatment_encounter.delete(db, id=relationship_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "TreatmentEncounter",
+            record_id=relationship_id,
+            treatment_id=treatment_id
+        )
+
+        return {"status": "success", "message": "Encounter link removed"}
+
+
+# =============================================================================
+# Treatment-LabResult Relationship Endpoints
+# =============================================================================
+
+
+@router.get("/{treatment_id}/lab-results", response_model=List[TreatmentLabResultWithDetails])
+def get_treatment_lab_results(
+    *,
+    treatment_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Get all lab results linked to a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationships = treatment_lab_result.get_by_treatment(db, treatment_id=treatment_id)
+
+        # Enrich with lab result details
+        result = []
+        for rel in relationships:
+            rel_dict = {
+                "id": rel.id,
+                "treatment_id": rel.treatment_id,
+                "lab_result_id": rel.lab_result_id,
+                "purpose": rel.purpose,
+                "expected_frequency": rel.expected_frequency,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "lab_result": None,
+            }
+            if rel.lab_result:
+                rel_dict["lab_result"] = {
+                    "id": rel.lab_result.id,
+                    "test_name": rel.lab_result.test_name,
+                    "status": rel.lab_result.status,
+                    "completed_date": rel.lab_result.completed_date.isoformat() if rel.lab_result.completed_date else None,
+                    "labs_result": rel.lab_result.labs_result,
+                }
+            result.append(rel_dict)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "TreatmentLabResult",
+            treatment_id=treatment_id,
+            count=len(result)
+        )
+
+        return result
+
+
+@router.post("/{treatment_id}/lab-results", response_model=TreatmentLabResultResponse)
+def create_treatment_lab_result(
+    *,
+    treatment_id: int,
+    lab_result_in: TreatmentLabResultCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Link a lab result to a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        # Verify lab result exists and belongs to same patient
+        db_lab_result = lab_result_crud.get(db, id=lab_result_in.lab_result_id)
+        if not db_lab_result:
+            raise NotFoundException(
+                resource="LabResult",
+                message=f"Lab result with ID {lab_result_in.lab_result_id} not found",
+                request=request
+            )
+        if db_lab_result.patient_id != current_user_patient_id:
+            raise BusinessLogicException(
+                message="Cannot link lab result from a different patient",
+                request=request
+            )
+
+        lab_result_in.treatment_id = treatment_id
+        relationship = treatment_lab_result.create(db, obj_in=lab_result_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "TreatmentLabResult",
+            record_id=relationship.id,
+            treatment_id=treatment_id,
+            lab_result_id=lab_result_in.lab_result_id
+        )
+
+        return relationship
+
+
+@router.post("/{treatment_id}/lab-results/bulk", response_model=List[TreatmentLabResultResponse])
+def create_treatment_lab_results_bulk(
+    *,
+    treatment_id: int,
+    bulk_data: TreatmentLabResultBulkCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Link multiple lab results to a treatment at once."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        # Verify all lab results exist and belong to same patient
+        for lab_id in bulk_data.lab_result_ids:
+            db_lab_result = lab_result_crud.get(db, id=lab_id)
+            if not db_lab_result:
+                raise NotFoundException(
+                    resource="LabResult",
+                    message=f"Lab result with ID {lab_id} not found",
+                    request=request
+                )
+            if db_lab_result.patient_id != current_user_patient_id:
+                raise BusinessLogicException(
+                    message="Cannot link lab result from a different patient",
+                    request=request
+                )
+
+        created, skipped = treatment_lab_result.create_bulk(
+            db, treatment_id=treatment_id, bulk_data=bulk_data
+        )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "TreatmentLabResult",
+            treatment_id=treatment_id,
+            created_count=len(created),
+            skipped_count=len(skipped)
+        )
+
+        return created
+
+
+@router.put("/{treatment_id}/lab-results/{relationship_id}", response_model=TreatmentLabResultResponse)
+def update_treatment_lab_result(
+    *,
+    treatment_id: int,
+    relationship_id: int,
+    lab_result_in: TreatmentLabResultUpdate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Update a treatment lab result relationship."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationship = treatment_lab_result.get(db, id=relationship_id)
+        if not relationship or relationship.treatment_id != treatment_id:
+            raise NotFoundException(
+                resource="TreatmentLabResult",
+                message="Relationship not found",
+                request=request
+            )
+
+        updated = treatment_lab_result.update(db, db_obj=relationship, obj_in=lab_result_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "update",
+            "TreatmentLabResult",
+            record_id=relationship_id,
+            treatment_id=treatment_id
+        )
+
+        return updated
+
+
+@router.delete("/{treatment_id}/lab-results/{relationship_id}")
+def delete_treatment_lab_result(
+    *,
+    treatment_id: int,
+    relationship_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Remove a lab result link from a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationship = treatment_lab_result.get(db, id=relationship_id)
+        if not relationship or relationship.treatment_id != treatment_id:
+            raise NotFoundException(
+                resource="TreatmentLabResult",
+                message="Relationship not found",
+                request=request
+            )
+
+        treatment_lab_result.delete(db, id=relationship_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "TreatmentLabResult",
+            record_id=relationship_id,
+            treatment_id=treatment_id
+        )
+
+        return {"status": "success", "message": "Lab result link removed"}
+
+
+# =============================================================================
+# Treatment-Equipment Relationship Endpoints
+# =============================================================================
+
+
+@router.get("/{treatment_id}/equipment", response_model=List[TreatmentEquipmentWithDetails])
+def get_treatment_equipment(
+    *,
+    treatment_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Get all equipment linked to a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationships = treatment_equipment.get_by_treatment(db, treatment_id=treatment_id)
+
+        # Enrich with equipment details
+        result = []
+        for rel in relationships:
+            rel_dict = {
+                "id": rel.id,
+                "treatment_id": rel.treatment_id,
+                "equipment_id": rel.equipment_id,
+                "usage_frequency": rel.usage_frequency,
+                "specific_settings": rel.specific_settings,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "equipment": None,
+            }
+            if rel.equipment:
+                rel_dict["equipment"] = {
+                    "id": rel.equipment.id,
+                    "equipment_name": rel.equipment.equipment_name,
+                    "equipment_type": rel.equipment.equipment_type,
+                    "status": rel.equipment.status,
+                    "manufacturer": rel.equipment.manufacturer,
+                }
+            result.append(rel_dict)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "TreatmentEquipment",
+            treatment_id=treatment_id,
+            count=len(result)
+        )
+
+        return result
+
+
+@router.post("/{treatment_id}/equipment", response_model=TreatmentEquipmentResponse)
+def create_treatment_equipment_link(
+    *,
+    treatment_id: int,
+    equipment_in: TreatmentEquipmentCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Link equipment to a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        # Verify equipment exists and belongs to same patient
+        db_equipment = equipment_crud.get(db, id=equipment_in.equipment_id)
+        if not db_equipment:
+            raise NotFoundException(
+                resource="MedicalEquipment",
+                message=f"Equipment with ID {equipment_in.equipment_id} not found",
+                request=request
+            )
+        if db_equipment.patient_id != current_user_patient_id:
+            raise BusinessLogicException(
+                message="Cannot link equipment from a different patient",
+                request=request
+            )
+
+        equipment_in.treatment_id = treatment_id
+        relationship = treatment_equipment.create(db, obj_in=equipment_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "TreatmentEquipment",
+            record_id=relationship.id,
+            treatment_id=treatment_id,
+            equipment_id=equipment_in.equipment_id
+        )
+
+        return relationship
+
+
+@router.post("/{treatment_id}/equipment/bulk", response_model=List[TreatmentEquipmentResponse])
+def create_treatment_equipment_bulk(
+    *,
+    treatment_id: int,
+    bulk_data: TreatmentEquipmentBulkCreate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Link multiple equipment to a treatment at once."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        # Verify all equipment exists and belongs to same patient
+        for eq_id in bulk_data.equipment_ids:
+            db_equipment = equipment_crud.get(db, id=eq_id)
+            if not db_equipment:
+                raise NotFoundException(
+                    resource="MedicalEquipment",
+                    message=f"Equipment with ID {eq_id} not found",
+                    request=request
+                )
+            if db_equipment.patient_id != current_user_patient_id:
+                raise BusinessLogicException(
+                    message="Cannot link equipment from a different patient",
+                    request=request
+                )
+
+        created, skipped = treatment_equipment.create_bulk(
+            db, treatment_id=treatment_id, bulk_data=bulk_data
+        )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "TreatmentEquipment",
+            treatment_id=treatment_id,
+            created_count=len(created),
+            skipped_count=len(skipped)
+        )
+
+        return created
+
+
+@router.put("/{treatment_id}/equipment/{relationship_id}", response_model=TreatmentEquipmentResponse)
+def update_treatment_equipment_link(
+    *,
+    treatment_id: int,
+    relationship_id: int,
+    equipment_in: TreatmentEquipmentUpdate,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Update a treatment equipment relationship."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationship = treatment_equipment.get(db, id=relationship_id)
+        if not relationship or relationship.treatment_id != treatment_id:
+            raise NotFoundException(
+                resource="TreatmentEquipment",
+                message="Relationship not found",
+                request=request
+            )
+
+        updated = treatment_equipment.update(db, db_obj=relationship, obj_in=equipment_in)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "update",
+            "TreatmentEquipment",
+            record_id=relationship_id,
+            treatment_id=treatment_id
+        )
+
+        return updated
+
+
+@router.delete("/{treatment_id}/equipment/{relationship_id}")
+def delete_treatment_equipment_link(
+    *,
+    treatment_id: int,
+    relationship_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Remove an equipment link from a treatment."""
+    with handle_database_errors(request=request):
+        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request)
+
+        relationship = treatment_equipment.get(db, id=relationship_id)
+        if not relationship or relationship.treatment_id != treatment_id:
+            raise NotFoundException(
+                resource="TreatmentEquipment",
+                message="Relationship not found",
+                request=request
+            )
+
+        treatment_equipment.delete(db, id=relationship_id)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "TreatmentEquipment",
+            record_id=relationship_id,
+            treatment_id=treatment_id
+        )
+
+        return {"status": "success", "message": "Equipment link removed"}

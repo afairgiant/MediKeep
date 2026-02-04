@@ -238,6 +238,9 @@ class Patient(Base):
     injuries = orm_relationship(
         "Injury", back_populates="patient", cascade="all, delete-orphan"
     )
+    medical_equipment = orm_relationship(
+        "MedicalEquipment", back_populates="patient", cascade="all, delete-orphan"
+    )
 
     # V1: Patient sharing relationships
     shares = orm_relationship(
@@ -282,6 +285,7 @@ class Practitioner(Base):
     conditions = orm_relationship("Condition", back_populates="practitioner")
     vitals = orm_relationship("Vitals", back_populates="practitioner")
     injuries = orm_relationship("Injury", back_populates="practitioner")
+    medical_equipment = orm_relationship("MedicalEquipment", back_populates="practitioner")
 
 
 class Medication(Base):
@@ -339,6 +343,11 @@ class Medication(Base):
     # Many-to-Many relationship with injuries through junction table
     injury_relationships = orm_relationship(
         "InjuryMedication", back_populates="medication", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with treatments through junction table
+    treatment_relationships = orm_relationship(
+        "TreatmentMedication", back_populates="medication", cascade="all, delete-orphan"
     )
 
     # Indexes for performance
@@ -405,6 +414,11 @@ class Encounter(Base):
     practitioner = orm_relationship("Practitioner", back_populates="encounters")
     condition = orm_relationship("Condition")
 
+    # Many-to-Many relationship with treatments through junction table
+    treatment_relationships = orm_relationship(
+        "TreatmentEncounter", back_populates="encounter", cascade="all, delete-orphan"
+    )
+
     # Indexes for performance
     __table_args__ = (Index("idx_encounters_patient_id", "patient_id"),)
 
@@ -461,6 +475,11 @@ class LabResult(Base):
     # One-to-Many relationship with individual test components
     test_components = orm_relationship(
         "LabTestComponent", back_populates="lab_result", cascade="all, delete-orphan"
+    )
+
+    # Many-to-Many relationship with treatments through junction table
+    treatment_relationships = orm_relationship(
+        "TreatmentLabResult", back_populates="lab_result", cascade="all, delete-orphan"
     )
 
     # Indexes for performance
@@ -843,9 +862,9 @@ class Treatment(Base):
 
     treatment_name = Column(String, nullable=False)  # Name of the treatment
     treatment_type = Column(
-        String, nullable=False
-    )  # Type of treatment (e.g., 'physical therapy', 'surgery')
-    start_date = Column(Date, nullable=False)  # Start date of the treatment
+        String, nullable=True
+    )  # Type of treatment (e.g., 'physical therapy', 'surgery') - optional
+    start_date = Column(Date, nullable=True)  # Start date of the treatment (optional)
     end_date = Column(Date, nullable=True)  # End date of the treatment (if applicable)
     status = Column(
         String, nullable=True
@@ -886,6 +905,20 @@ class Treatment(Base):
     # Many-to-Many relationship with injuries through junction table
     injury_relationships = orm_relationship(
         "InjuryTreatment", back_populates="treatment", cascade="all, delete-orphan"
+    )
+
+    # Treatment Plan relationships (Phase: Treatment Plans Expansion)
+    medication_relationships = orm_relationship(
+        "TreatmentMedication", back_populates="treatment", cascade="all, delete-orphan"
+    )
+    encounter_relationships = orm_relationship(
+        "TreatmentEncounter", back_populates="treatment", cascade="all, delete-orphan"
+    )
+    lab_result_relationships = orm_relationship(
+        "TreatmentLabResult", back_populates="treatment", cascade="all, delete-orphan"
+    )
+    equipment_relationships = orm_relationship(
+        "TreatmentEquipment", back_populates="treatment", cascade="all, delete-orphan"
     )
 
 
@@ -2034,6 +2067,193 @@ class InjuryProcedure(Base):
         Index("idx_injury_procedure_injury_id", "injury_id"),
         Index("idx_injury_procedure_procedure_id", "procedure_id"),
         UniqueConstraint("injury_id", "procedure_id", name="uq_injury_procedure"),
+    )
+
+
+# =============================================================================
+# Treatment Plan Relationship Tables (Phase: Treatment Plans Expansion)
+# =============================================================================
+
+
+class MedicalEquipment(Base):
+    """
+    Represents medical equipment prescribed to or used by a patient.
+    Examples: CPAP machines, nebulizers, inhalers, blood pressure monitors, etc.
+    """
+    __tablename__ = "medical_equipment"
+
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
+    practitioner_id = Column(Integer, ForeignKey("practitioners.id", ondelete="SET NULL"), nullable=True)
+
+    # Equipment identification
+    equipment_name = Column(String, nullable=False)
+    equipment_type = Column(String, nullable=False)  # CPAP, Nebulizer, Inhaler, Monitor, etc.
+    manufacturer = Column(String, nullable=True)
+    model_number = Column(String, nullable=True)
+    serial_number = Column(String, nullable=True)
+
+    # Dates
+    prescribed_date = Column(Date, nullable=True)
+    last_service_date = Column(Date, nullable=True)
+    next_service_date = Column(Date, nullable=True)
+
+    # Usage information
+    usage_instructions = Column(String, nullable=True)
+    status = Column(String, nullable=False, default="active")  # active, inactive, replaced
+
+    # Additional info
+    supplier = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    tags = Column(JSON, nullable=True, default=list)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    patient = orm_relationship("Patient", back_populates="medical_equipment")
+    practitioner = orm_relationship("Practitioner", back_populates="medical_equipment")
+
+    # Many-to-Many relationship with treatments through junction table
+    treatment_relationships = orm_relationship(
+        "TreatmentEquipment", back_populates="equipment", cascade="all, delete-orphan"
+    )
+
+    # Indexes for performance
+    __table_args__ = (
+        Index("idx_medical_equipment_patient_id", "patient_id"),
+        Index("idx_medical_equipment_status", "status"),
+    )
+
+
+class TreatmentMedication(Base):
+    """
+    Junction table for many-to-many relationship between treatments and medications.
+    Allows linking medications to treatment plans with specific dosing instructions.
+    """
+    __tablename__ = "treatment_medications"
+
+    id = Column(Integer, primary_key=True)
+    treatment_id = Column(Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False)
+    medication_id = Column(Integer, ForeignKey("medications.id", ondelete="CASCADE"), nullable=False)
+
+    # Treatment-specific medication details (overrides)
+    specific_dosage = Column(String, nullable=True)
+    specific_frequency = Column(String, nullable=True)
+    specific_duration = Column(String, nullable=True)
+    timing_instructions = Column(String, nullable=True)
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    treatment = orm_relationship("Treatment", back_populates="medication_relationships")
+    medication = orm_relationship("Medication", back_populates="treatment_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_treatment_medication_treatment_id", "treatment_id"),
+        Index("idx_treatment_medication_medication_id", "medication_id"),
+        UniqueConstraint("treatment_id", "medication_id", name="uq_treatment_medication"),
+    )
+
+
+class TreatmentEncounter(Base):
+    """
+    Junction table for many-to-many relationship between treatments and encounters.
+    Allows linking visits to treatment plans with labels (initial, follow-up, etc.).
+    """
+    __tablename__ = "treatment_encounters"
+
+    id = Column(Integer, primary_key=True)
+    treatment_id = Column(Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False)
+    encounter_id = Column(Integer, ForeignKey("encounters.id", ondelete="CASCADE"), nullable=False)
+
+    # Encounter context within treatment
+    visit_label = Column(String, nullable=True)  # initial, follow_up, review, final
+    visit_sequence = Column(Integer, nullable=True)  # Order of visits: 1, 2, 3...
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    treatment = orm_relationship("Treatment", back_populates="encounter_relationships")
+    encounter = orm_relationship("Encounter", back_populates="treatment_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_treatment_encounter_treatment_id", "treatment_id"),
+        Index("idx_treatment_encounter_encounter_id", "encounter_id"),
+        UniqueConstraint("treatment_id", "encounter_id", name="uq_treatment_encounter"),
+    )
+
+
+class TreatmentLabResult(Base):
+    """
+    Junction table for many-to-many relationship between treatments and lab results.
+    Allows linking lab results to treatment plans with purpose labels.
+    """
+    __tablename__ = "treatment_lab_results"
+
+    id = Column(Integer, primary_key=True)
+    treatment_id = Column(Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False)
+    lab_result_id = Column(Integer, ForeignKey("lab_results.id", ondelete="CASCADE"), nullable=False)
+
+    # Lab result context within treatment
+    purpose = Column(String, nullable=True)  # baseline, monitoring, outcome, safety
+    expected_frequency = Column(String, nullable=True)  # e.g., "Monthly", "Every 3 months"
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    treatment = orm_relationship("Treatment", back_populates="lab_result_relationships")
+    lab_result = orm_relationship("LabResult", back_populates="treatment_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_treatment_lab_result_treatment_id", "treatment_id"),
+        Index("idx_treatment_lab_result_lab_result_id", "lab_result_id"),
+        UniqueConstraint("treatment_id", "lab_result_id", name="uq_treatment_lab_result"),
+    )
+
+
+class TreatmentEquipment(Base):
+    """
+    Junction table for many-to-many relationship between treatments and medical equipment.
+    Allows linking equipment to treatment plans with usage details.
+    """
+    __tablename__ = "treatment_equipment"
+
+    id = Column(Integer, primary_key=True)
+    treatment_id = Column(Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False)
+    equipment_id = Column(Integer, ForeignKey("medical_equipment.id", ondelete="CASCADE"), nullable=False)
+
+    # Equipment usage context within treatment
+    usage_frequency = Column(String, nullable=True)  # e.g., "Nightly", "As needed"
+    specific_settings = Column(String, nullable=True)  # e.g., "Pressure: 10 cmH2O"
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    treatment = orm_relationship("Treatment", back_populates="equipment_relationships")
+    equipment = orm_relationship("MedicalEquipment", back_populates="treatment_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_treatment_equipment_treatment_id", "treatment_id"),
+        Index("idx_treatment_equipment_equipment_id", "equipment_id"),
+        UniqueConstraint("treatment_id", "equipment_id", name="uq_treatment_equipment"),
     )
 
 
