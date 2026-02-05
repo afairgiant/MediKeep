@@ -548,55 +548,6 @@
       "description": "Any notes about anesthesia administration"
     }
   },
-  "practitioners": {
-    "title": "Practitioners",
-    "name": {
-      "label": "Full Name",
-      "placeholder": "Dr. Jane Smith",
-      "description": "Doctor's full name including title"
-    },
-    "specialty": {
-      "label": "Medical Specialty",
-      "placeholder": "Search specialties or type custom...",
-      "description": "Select from list or type a custom specialty"
-    },
-    "practice": {
-      "label": "Practice/Hospital",
-      "placeholder": "City General Hospital",
-      "description": "Workplace or medical facility (optional)"
-    },
-    "email": {
-      "label": "Email Address",
-      "placeholder": "doctor@example.com",
-      "description": "Professional email address"
-    },
-    "rating": {
-      "label": "Rating",
-      "description": "Rate this practitioner's overall care quality"
-    }
-  },
-  "emergencyContacts": {
-    "title": "Emergency Contacts",
-    "primaryPhone": {
-      "label": "Primary Phone",
-      "placeholder": "e.g., (555) 123-4567",
-      "description": "Primary phone number"
-    },
-    "secondaryPhone": {
-      "label": "Secondary Phone",
-      "placeholder": "e.g., (555) 987-6543",
-      "description": "Optional secondary phone number"
-    },
-    "isPrimary": {
-      "label": "Primary Emergency Contact",
-      "description": "This person will be contacted first in emergencies"
-    },
-    "isActive": {
-      "label": "Active Contact",
-      "description": "This contact is currently available"
-    },
-    "notesPlaceholder": "Additional information (e.g., 'Available weekdays only', 'Speaks Spanish')"
-  },
   "visits": {
     "title": "Visits",
     "reason": {
@@ -679,34 +630,6 @@
       "label": "Follow-up Instructions",
       "placeholder": "Follow-up care instructions...",
       "description": "Instructions for ongoing care and follow-up appointments"
-    }
-  },
-  "pharmacies": {
-    "title": "Pharmacies",
-    "pharmacyBrand": {
-      "label": "Pharmacy Brand",
-      "placeholder": "Select pharmacy chain or type",
-      "description": "Major pharmacy chain or independent type"
-    },
-    "pharmacyName": {
-      "label": "Pharmacy Name",
-      "placeholder": "CVS Pharmacy - Main Street",
-      "description": "Specific name or location identifier"
-    },
-    "streetAddress": {
-      "label": "Street Address",
-      "placeholder": "123 Main Street",
-      "description": "Physical street address"
-    },
-    "city": {
-      "label": "City",
-      "placeholder": "San Francisco",
-      "description": "City location"
-    },
-    "storeNumber": {
-      "label": "Store Number",
-      "placeholder": "e.g., 1234, #5678, Store A",
-      "description": "Internal store identifier"
     }
   },
   "treatments": {
@@ -858,66 +781,6 @@
       "label": "Diagnosis Age",
       "placeholder": "e.g., 45",
       "description": "Age at diagnosis"
-    }
-  },
-  "insurance": {
-    "title": "Insurance",
-    "dividers": {
-      "basic": "Basic Insurance Information",
-      "member": "Member Information",
-      "coverage": "Coverage Period & Status",
-      "contact": "Contact Information",
-      "coverageDetails": "Coverage Details",
-      "notes": "Additional Information"
-    },
-    "insuranceTypeOptions": {
-      "medical": "Medical Insurance",
-      "dental": "Dental Insurance",
-      "vision": "Vision Insurance",
-      "prescription": "Prescription Insurance"
-    },
-    "companyName": {
-      "label": "Insurance Company",
-      "placeholder": "e.g., Blue Cross Blue Shield",
-      "description": "Name of the insurance company"
-    },
-    "planName": {
-      "label": "Plan Name",
-      "placeholder": "e.g., PPO Gold Plus",
-      "description": "Name of the specific insurance plan"
-    },
-    "memberId": {
-      "label": "Member ID",
-      "placeholder": "e.g., ABC123456789",
-      "description": "Member ID number from insurance card"
-    },
-    "groupNumber": {
-      "label": "Group Number",
-      "placeholder": "e.g., GRP123",
-      "description": "Group number (if applicable)"
-    },
-    "isPrimary": {
-      "label": "Primary Insurance",
-      "description": "Check if this is your primary insurance (for medical only)"
-    },
-    "deductibleIndividual": {
-      "label": "Individual Deductible",
-      "placeholder": "e.g., 1000",
-      "description": "Annual deductible amount for individual"
-    },
-    "copayPrimaryCare": {
-      "label": "Primary Care Copay",
-      "placeholder": "e.g., 25",
-      "description": "Copay amount for primary care visits"
-    },
-    "planTypeOptions": {
-      "ppo": "PPO (Preferred Provider Organization)",
-      "hmo": "HMO (Health Maintenance Organization)",
-      "epo": "EPO (Exclusive Provider Organization)",
-      "pos": "POS (Point of Service)",
-      "hdhp": "HDHP (High Deductible Health Plan)",
-      "indemnity": "Indemnity (Fee-for-Service)",
-      "other": "Other"
     }
   },
   "symptoms": {
@@ -1150,6 +1013,7 @@
     }
   },
   "practitioners": {
+    "title": "Practitioners",
     "form": {
       "name": {
         "label": "Full Name",
@@ -1187,6 +1051,7 @@
     }
   },
   "pharmacies": {
+    "title": "Pharmacies",
     "form": {
       "brand": {
         "label": "Pharmacy Brand",
@@ -1222,6 +1087,7 @@
     }
   },
   "emergencyContacts": {
+    "title": "Emergency Contacts",
     "form": {
       "name": {
         "label": "Full Name",
@@ -1295,6 +1161,7 @@
     }
   },
   "insurance": {
+    "title": "Insurance",
     "form": {
       "dividers": {
         "basicInfo": "Basic Insurance Information",

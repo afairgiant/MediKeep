@@ -548,50 +548,6 @@
       "description": "Quaisquer notas sobre a administração de anestesia"
     }
   },
-  "practitioners": {
-    "title": "Profissionais",
-    "name": {
-      "label": "Nome Completo",
-      "placeholder": "Dr. Jane Smith",
-      "description": "Nome completo do médico, incluindo título"
-    },
-    "specialty": {
-      "label": "Especialidade Médica",
-      "placeholder": "Pesquise especialidades ou digite personalizada...",
-      "description": "Selecione da lista ou digite uma especialidade personalizada"
-    },
-    "practice": {
-      "label": "Prática/Hospital",
-      "placeholder": "Hospital Geral da Cidade",
-      "description": "Local de trabalho ou instituição médica"
-    },
-    "rating": {
-      "label": "Avaliação",
-      "description": "Avalie a qualidade geral do atendimento deste profissional"
-    }
-  },
-  "emergencyContacts": {
-    "title": "Contatos de Emergência",
-    "primaryPhone": {
-      "label": "Telefone Principal",
-      "placeholder": "ex.: (11) 9876-5432",
-      "description": "Número de telefone principal"
-    },
-    "secondaryPhone": {
-      "label": "Telefone Secundário",
-      "placeholder": "ex.: (11) 9876-5432",
-      "description": "Número de telefone secundário opcional"
-    },
-    "isPrimary": {
-      "label": "Contato de Emergência Principal",
-      "description": "Esta pessoa será contatada primeiro em emergências"
-    },
-    "isActive": {
-      "label": "Contato Ativo",
-      "description": "Este contato está atualmente disponível"
-    },
-    "notesPlaceholder": "Informações adicionais (ex., 'Disponível apenas em dias úteis', 'Fala espanhol')"
-  },
   "visits": {
     "title": "Visitas",
     "reason": {
@@ -674,34 +630,6 @@
       "label": "Instruções de Follow-up",
       "placeholder": "Instruções para cuidados de follow-up...",
       "description": "Instruções para cuidados contínuos e consultas de acompanhamento"
-    }
-  },
-  "pharmacies": {
-    "title": "Farmácias",
-    "pharmacyBrand": {
-      "label": "Marca da Farmácia",
-      "placeholder": "Selecione a rede ou tipo de farmácia",
-      "description": "Principal rede de farmácias ou tipo independente"
-    },
-    "pharmacyName": {
-      "label": "Nome da Farmácia",
-      "placeholder": "CVS Pharmacy - Rua Principal",
-      "description": "Nome específico ou identificador de localização"
-    },
-    "streetAddress": {
-      "label": "Endereço",
-      "placeholder": "123 Rua Principal",
-      "description": "Endereço físico"
-    },
-    "city": {
-      "label": "Cidade",
-      "placeholder": "São Francisco",
-      "description": "Localização da cidade"
-    },
-    "storeNumber": {
-      "label": "Número da Loja",
-      "placeholder": "ex.: 1234, #5678, Loja A",
-      "description": "Identificador interno da loja"
     }
   },
   "treatments": {
@@ -853,66 +781,6 @@
       "label": "Idade ao Diagnosticar",
       "placeholder": "ex.: 45",
       "description": "Idade ao diagnosticar"
-    }
-  },
-  "insurance": {
-    "title": "Seguro",
-    "dividers": {
-      "basic": "Informações Básicas do Seguro",
-      "member": "Informações do Membro",
-      "coverage": "Período e Status da Cobertura",
-      "contact": "Informações de Contato",
-      "coverageDetails": "Detalhes da Cobertura",
-      "notes": "Informações Adicionais"
-    },
-    "insuranceTypeOptions": {
-      "medical": "Seguro Médico",
-      "dental": "Seguro Odontológico",
-      "vision": "Seguro de Visão",
-      "prescription": "Seguro de Prescrição"
-    },
-    "companyName": {
-      "label": "Nome da Seguradora",
-      "placeholder": "ex.: Blue Cross Blue Shield",
-      "description": "Nome da companhia de seguros"
-    },
-    "planName": {
-      "label": "Nome do Plano",
-      "placeholder": "ex.: PPO Ouro Plus",
-      "description": "Nome do plano de seguro específico"
-    },
-    "memberId": {
-      "label": "ID do Membro",
-      "placeholder": "ex.: ABC123456789",
-      "description": "Número de identificação do membro no cartão de seguro"
-    },
-    "groupNumber": {
-      "label": "Número do Grupo",
-      "placeholder": "ex.: GRP123",
-      "description": "Número do grupo (se aplicável)"
-    },
-    "isPrimary": {
-      "label": "Seguro Primário",
-      "description": "Marque se este é seu seguro primário (apenas para seguro médico)"
-    },
-    "deductibleIndividual": {
-      "label": "Franquia Individual",
-      "placeholder": "ex.: 1000",
-      "description": "Valor anual da franquia para indivíduo"
-    },
-    "copayPrimaryCare": {
-      "label": "Coparticipação em Cuidados Primários",
-      "placeholder": "ex.: 25",
-      "description": "Valor da coparticipação para consultas de cuidados primários"
-    },
-    "planTypeOptions": {
-      "ppo": "PPO (Preferred Provider Organization)",
-      "hmo": "HMO (Health Maintenance Organization)",
-      "epo": "EPO (Exclusive Provider Organization)",
-      "pos": "POS (Point of Service)",
-      "hdhp": "HDHP (High Deductible Health Plan)",
-      "indemnity": "Indemnity (Fee-for-Service)",
-      "other": "Outro"
     }
   },
   "symptoms": {
@@ -1145,6 +1013,7 @@
     }
   },
   "practitioners": {
+    "title": "Profissionais",
     "form": {
       "name": {
         "label": "Nome Completo",
@@ -1166,6 +1035,11 @@
         "placeholder": "(555) 123-4567",
         "description": "Número de contato principal"
       },
+      "email": {
+        "label": "Endereço de E-mail",
+        "placeholder": "doutor@exemplo.com",
+        "description": "Endereço de e-mail profissional"
+      },
       "website": {
         "label": "Website",
         "placeholder": "https://www.example.com",
@@ -1177,6 +1051,7 @@
     }
   },
   "pharmacies": {
+    "title": "Farmácias",
     "form": {
       "brand": {
         "label": "Marca da Farmácia",
@@ -1212,6 +1087,7 @@
     }
   },
   "emergencyContacts": {
+    "title": "Contatos de Emergência",
     "form": {
       "name": {
         "label": "Nome Completo",
@@ -1285,6 +1161,7 @@
     }
   },
   "insurance": {
+    "title": "Seguro",
     "form": {
       "dividers": {
         "basicInfo": "Informações Básicas do Seguro",

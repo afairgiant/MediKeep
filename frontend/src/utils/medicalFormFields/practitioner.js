@@ -44,9 +44,9 @@ export const practitionerFormFields = [
   {
     name: 'email',
     type: 'email',
-    labelKey: 'medical:practitioners.email.label',
-    placeholderKey: 'medical:practitioners.email.placeholder',
-    descriptionKey: 'medical:practitioners.email.description',
+    labelKey: 'medical:practitioners.form.email.label',
+    placeholderKey: 'medical:practitioners.form.email.placeholder',
+    descriptionKey: 'medical:practitioners.form.email.description',
     gridColumn: 6,
   },
   {
