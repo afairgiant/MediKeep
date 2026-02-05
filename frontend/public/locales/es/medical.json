@@ -758,7 +758,7 @@
       "medical": "Seguro médico",
       "dental": "Seguro dental",
       "vision": "Seguro de visión",
-      "prescription": "Seguro de prescripciónes médicas",
+      "prescription": "Seguro de prescripciónes médicas"
     },
     "companyName": {
       "label": "Compañía de seguros",
