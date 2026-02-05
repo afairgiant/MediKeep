@@ -301,6 +301,9 @@ const fieldTranslationMap = {
   'Specialist Referral': 'visits.visitType.options.specialistReferral',
 
   // Visit Priority options
+  // Note: 'Emergency' is already mapped above under visit type options.
+  // Both visits.visitType.options.emergency and visits.priority.options.emergency
+  // resolve to the same translated text, so the shared mapping works for both.
   'Routine': 'visits.priority.options.routine',
   'Urgent': 'visits.priority.options.urgent',
 
