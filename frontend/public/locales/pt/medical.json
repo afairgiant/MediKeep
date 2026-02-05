@@ -604,6 +604,11 @@
       "placeholder": "Duração da visita",
       "description": "Duração da visita em minutos"
     },
+    "location": {
+      "label": "Local",
+      "placeholder": "Onde a consulta ocorreu",
+      "description": "Onde a consulta foi realizada"
+    },
     "locationOptions": {
       "office": "Consultório Médico",
       "hospital": "Hospital",
@@ -630,6 +635,11 @@
       "label": "Instruções de Follow-up",
       "placeholder": "Instruções para cuidados de follow-up...",
       "description": "Instruções para cuidados contínuos e consultas de acompanhamento"
+    },
+    "additionalNotes": {
+      "label": "Notas adicionais",
+      "placeholder": "Outros detalhes importantes sobre a consulta...",
+      "description": "Observações adicionais, notas ou detalhes importantes"
     }
   },
   "treatments": {

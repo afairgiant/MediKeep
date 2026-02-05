@@ -238,81 +238,83 @@ const fieldTranslationMap = {
   'One time only': 'treatments.frequencyOptions.oneTime',
   'Continuous/ongoing': 'treatments.frequencyOptions.continuous',
 
-  // Visit Form
-  'Reason for Visit': 'visits.form.fields.reason.label',
-  'e.g., Annual Checkup, Follow-up, Symptoms Review': 'visits.form.fields.reason.placeholder',
-  'Primary purpose of this medical visit': 'visits.form.fields.reason.description',
+  // Visit Form - keys match medical.json visits.* structure
+  'Reason for Visit': 'visits.reason.label',
+  'e.g., Annual Checkup, Follow-up, Symptoms Review': 'visits.reason.placeholder',
+  'Primary purpose of this medical visit': 'visits.reason.description',
 
-  'Visit Date': 'visits.form.fields.visitDate.label',
-  'Select visit date': 'visits.form.fields.visitDate.placeholder',
-  'When the visit occurred': 'visits.form.fields.visitDate.description',
+  'Visit Date': 'visits.visitDate.label',
+  'Select visit date': 'visits.visitDate.placeholder',
+  'When the visit occurred': 'visits.visitDate.description',
 
-  'Attending Practitioner': 'visits.form.fields.attendingPractitioner.label',
-  'Select practitioner (optional)': 'visits.form.fields.attendingPractitioner.placeholder',
-  'Doctor who conducted the visit': 'visits.form.fields.attendingPractitioner.description',
+  'Attending Practitioner': 'visits.attendingPractitioner.label',
+  'Select practitioner (optional)': 'visits.attendingPractitioner.placeholder',
+  'Doctor who conducted the visit': 'visits.attendingPractitioner.description',
 
-  'Visit Type': 'visits.table.visitType',
-  'Select visit type': 'visits.form.fields.visitType.placeholder',
-  'Type of medical visit': 'visits.form.fields.visitType.description',
+  'Visit Type': 'visits.visitType.label',
+  'Select visit type': 'visits.visitType.placeholder',
+  'Type of medical visit': 'visits.visitType.description',
 
-  'Priority': 'visits.viewModal.priority',
-  'Select priority level': 'visits.form.fields.priority.placeholder',
-  'Priority level of the visit': 'visits.form.fields.priority.description',
+  'Priority': 'visits.priority.label',
+  'Select priority level': 'visits.priority.placeholder',
+  'Priority level of the visit': 'visits.priority.description',
 
-  'Related Condition (Optional)': 'visits.form.fields.relatedCondition.label',
-  'Select a condition this visit is related to': 'visits.form.fields.relatedCondition.placeholder',
-  'Link this visit to a specific condition if applicable': 'visits.form.fields.relatedCondition.description',
+  'Related Condition (Optional)': 'visits.relatedCondition.label',
+  'Select a condition this visit is related to': 'visits.relatedCondition.placeholder',
+  'Link this visit to a specific condition if applicable': 'visits.relatedCondition.description',
 
-  'Chief Complaint': 'visits.viewModal.chiefComplaint',
-  'Primary concern or symptom reported': 'visits.form.fields.chiefComplaint.placeholder',
-  'Main health concern or symptom that prompted the visit': 'visits.form.fields.chiefComplaint.description',
+  'Chief Complaint': 'visits.chiefComplaint.label',
+  'Primary concern or symptom reported': 'visits.chiefComplaint.placeholder',
+  'Main health concern or symptom that prompted the visit': 'visits.chiefComplaint.description',
 
-  'Duration (minutes)': 'visits.form.fields.durationMinutes.label',
-  'Visit duration': 'visits.form.fields.durationMinutes.placeholder',
-  'How long the visit lasted': 'visits.form.fields.durationMinutes.description',
+  'Duration (minutes)': 'visits.durationMinutes.label',
+  'Visit duration': 'visits.durationMinutes.placeholder',
+  'How long the visit lasted': 'visits.durationMinutes.description',
 
-  'Location': 'visits.viewModal.location',
-  'Where the visit occurred': 'visits.form.fields.location.placeholder',
-  'Where the visit took place': 'visits.form.fields.location.description',
+  // Note: 'Location' label conflicts with symptoms - visits use labelKey in visit.js instead
+  'Where the visit occurred': 'visits.location.placeholder',
+  'Where the visit took place': 'visits.location.description',
 
-  'Diagnosis/Assessment': 'visits.form.fields.diagnosisAssessment.label',
-  'Clinical assessment or diagnosis from the visit...': 'visits.form.fields.diagnosisAssessment.placeholder',
-  'Medical diagnosis or clinical assessment': 'visits.form.fields.diagnosisAssessment.description',
+  'Diagnosis/Assessment': 'visits.diagnosisAssessment.label',
+  'Clinical assessment or diagnosis from the visit...': 'visits.diagnosisAssessment.placeholder',
+  'Medical diagnosis or clinical assessment': 'visits.diagnosisAssessment.description',
 
-  'Treatment Plan': 'visits.viewModal.treatmentPlan',
-  'Recommended treatment or next steps...': 'visits.form.fields.treatmentPlan.placeholder',
-  'Treatment recommendations and prescribed interventions': 'visits.form.fields.treatmentPlan.description',
+  'Treatment Plan': 'visits.treatmentPlan.label',
+  'Recommended treatment or next steps...': 'visits.treatmentPlan.placeholder',
+  'Treatment recommendations and prescribed interventions': 'visits.treatmentPlan.description',
 
-  'Follow-up Instructions': 'visits.viewModal.followUpInstructions',
-  'Follow-up care instructions...': 'visits.form.fields.followUpInstructions.placeholder',
-  'Instructions for ongoing care and follow-up appointments': 'visits.form.fields.followUpInstructions.description',
+  'Follow-up Instructions': 'visits.followUpInstructions.label',
+  'Follow-up care instructions...': 'visits.followUpInstructions.placeholder',
+  'Instructions for ongoing care and follow-up appointments': 'visits.followUpInstructions.description',
 
-  // Note: "Additional Notes" mapping for visits removed to avoid conflict with symptom occurrences
-  // Visits should use a more specific label like "Visit Notes" or use labelKey
-  'Any other important details about the visit...': 'visits.form.fields.additionalNotes.placeholder',
-  'Any additional observations, notes, or important details': 'visits.form.fields.additionalNotes.description',
+  // Note: "Additional Notes" label conflicts with symptom occurrences - visits use labelKey in visit.js
+  'Any other important details about the visit...': 'visits.additionalNotes.placeholder',
+  'Any additional observations, notes, or important details': 'visits.additionalNotes.description',
 
   // Visit Type options
-  'Annual Checkup': 'visits.form.visitTypeOptions.annualCheckup',
-  'Follow-up': 'visits.form.visitTypeOptions.followUp',
-  'Consultation': 'visits.form.visitTypeOptions.consultation',
-  'Emergency': 'visits.form.visitTypeOptions.emergency',
-  'Preventive Care': 'visits.form.visitTypeOptions.preventiveCare',
-  'Routine Visit': 'visits.form.visitTypeOptions.routineVisit',
-  'Specialist Referral': 'visits.form.visitTypeOptions.specialistReferral',
+  'Annual Checkup': 'visits.visitType.options.annualCheckup',
+  'Follow-up': 'visits.visitType.options.followUp',
+  'Consultation': 'visits.visitType.options.consultation',
+  'Emergency': 'visits.visitType.options.emergency',
+  'Preventive Care': 'visits.visitType.options.preventiveCare',
+  'Routine Visit': 'visits.visitType.options.routineVisit',
+  'Specialist Referral': 'visits.visitType.options.specialistReferral',
 
   // Visit Priority options
-  'Routine': 'visits.form.priorityOptions.routine',
-  'Urgent': 'visits.form.priorityOptions.urgent',
+  // Note: 'Emergency' is already mapped above under visit type options.
+  // Both visits.visitType.options.emergency and visits.priority.options.emergency
+  // resolve to the same translated text, so the shared mapping works for both.
+  'Routine': 'visits.priority.options.routine',
+  'Urgent': 'visits.priority.options.urgent',
 
   // Visit Location options
-  "Doctor's Office": 'visits.form.locationOptions.doctorsOffice',
-  'Hospital': 'visits.form.locationOptions.hospital',
-  'Clinic': 'visits.form.locationOptions.clinic',
-  'Telehealth/Virtual': 'visits.form.locationOptions.telehealth',
-  'Urgent Care': 'visits.form.locationOptions.urgentCare',
-  'Emergency Room': 'visits.form.locationOptions.emergencyRoom',
-  'Home Visit': 'visits.form.locationOptions.homeVisit',
+  "Doctor's Office": 'visits.locationOptions.office',
+  'Hospital': 'visits.locationOptions.hospital',
+  'Clinic': 'visits.locationOptions.clinic',
+  'Telehealth/Virtual': 'visits.locationOptions.telehealth',
+  'Urgent Care': 'visits.locationOptions.urgentCare',
+  'Emergency Room': 'visits.locationOptions.emergencyRoom',
+  'Home Visit': 'visits.locationOptions.home',
 
   // Family Member Form
   'Full Name': 'familyHistory.form.member.name.label',
