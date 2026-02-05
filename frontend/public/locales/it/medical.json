@@ -1035,6 +1035,11 @@
         "placeholder": "(555) 123-4567",
         "description": "Numero di contatto principale"
       },
+      "email": {
+        "label": "Indirizzo email",
+        "placeholder": "dottore@esempio.com",
+        "description": "Indirizzo email professionale"
+      },
       "website": {
         "label": "Sito web",
         "placeholder": "https://www.example.com",
