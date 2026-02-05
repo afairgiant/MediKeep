@@ -65,6 +65,8 @@
     "endDate": "Datee de fin",
     "duration": "Durée",
     "notes": "Notes",
+    "tags": "Tags",
+    "location": "Lieu",
     "name": "Nom",
     "date": "Date",
     "time": "Heure",
@@ -86,6 +88,13 @@
     "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
     "linkedMedications": "Médicaments connectés",
     "visitWebsite": "Visiter le site web ↗"
+  },
+  "fields": {
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Ajouter des tags pour organiser cet enregistrement",
+      "description": "Ajouter des tags pour retrouver cet enregistrement plus tard"
+    }
   },
   "viewToggle": {
     "cards": "Cartes",
@@ -110,7 +119,7 @@
         "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",
         "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
         "a1cMin": "A1C doit valoir au moins 0 %",
-        "a1cMax": "A1C ne peut dépasser 20 %"
+        "a1cMax": "A1C ne peut dépasser 20 %",
         "dateInFuture": "La date ne peut se situer dans le futur",
         "timeInFuture": "L'heure sélectionnée ne peut se situer dans le futur"
       }

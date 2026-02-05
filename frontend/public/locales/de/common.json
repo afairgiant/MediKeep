@@ -66,6 +66,8 @@
     "endDate": "Enddatum",
     "duration": "Dauer",
     "notes": "Notizen",
+    "tags": "Tags",
+    "location": "Standort",
     "name": "Name",
     "date": "Datum",
     "time": "Zeit",
@@ -89,6 +91,13 @@
     "conditionsAvailableToLink": "{{count}} Erkrankungen zum Verknüpfen verfügbar",
     "linkedMedications": "Verknüpfte Medikamente",
     "visitWebsite": "Website besuchen ↗"
+  },
+  "fields": {
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Tags hinzufügen, um diesen Eintrag zu organisieren",
+      "description": "Tags hinzufügen, um diesen Eintrag später zu finden"
+    }
   },
   "viewToggle": {
     "cards": "Karten",

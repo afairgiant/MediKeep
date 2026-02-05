@@ -46,7 +46,9 @@ const MantineVisitForm = ({
   statusMessage,
   children,
 }) => {
-  const { t } = useTranslation('common');
+  // Translation hooks - medical for field translations, common for UI elements
+  const { t } = useTranslation('medical');
+  const { t: tCommon } = useTranslation('common');
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('info');
@@ -240,7 +242,7 @@ const MantineVisitForm = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={t('visits.form.savingVisit', 'Saving visit...')} />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={tCommon('visits.form.savingVisit', 'Saving visit...')} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -248,18 +250,18 @@ const MantineVisitForm = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="info" leftSection={<IconInfoCircle size={16} />}>
-                {t('visits.form.tabs.visitInfo', 'Visit Info')}
+                {tCommon('visits.form.tabs.visitInfo', 'Visit Info')}
               </Tabs.Tab>
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-                {t('visits.form.tabs.clinical', 'Clinical')}
+                {tCommon('visits.form.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
               {editingVisit && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('visits.form.tabs.documents', 'Documents')}
+                  {tCommon('visits.form.tabs.documents', 'Documents')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('visits.form.tabs.notes', 'Notes')}
+                {tCommon('visits.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -290,7 +292,7 @@ const MantineVisitForm = ({
               <Tabs.Panel value="documents">
                 <Box mt="md">
                   <Stack gap="md">
-                    <Title order={4}>{t('visits.viewModal.attachedDocuments', 'Attached Documents')}</Title>
+                    <Title order={4}>{tCommon('visits.viewModal.attachedDocuments', 'Attached Documents')}</Title>
                     <DocumentManagerWithProgress
                       entityType="visit"
                       entityId={editingVisit.id}
@@ -319,10 +321,10 @@ const MantineVisitForm = ({
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting || isLoading}>
-              {t('buttons.cancel', 'Cancel')}
+              {tCommon('buttons.cancel', 'Cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting || isLoading}>
-              {editingVisit ? t('visits.form.updateVisit', 'Update Visit') : t('visits.form.addVisit', 'Add Visit')}
+              {editingVisit ? tCommon('visits.form.updateVisit', 'Update Visit') : tCommon('visits.form.addVisit', 'Add Visit')}
             </Button>
           </Group>
         </Stack>
