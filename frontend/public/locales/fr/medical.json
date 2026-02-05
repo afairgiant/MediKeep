@@ -604,6 +604,11 @@
       "placeholder": "Durée de la visite",
       "description": "Combien de temps a duré la visite"
     },
+    "location": {
+      "label": "Lieu",
+      "placeholder": "Où la visite a eu lieu",
+      "description": "Où la visite s'est déroulée"
+    },
     "locationOptions": {
       "office": "Cabinet du médecin",
       "hospital": "Hôpital",
@@ -630,6 +635,11 @@
       "label": "Instructions de suivi",
       "placeholder": "Instructions de suivi des soins...",
       "description": "Instructions pour les soins à poursuivre et les visites de suivi"
+    },
+    "additionalNotes": {
+      "label": "Notes supplémentaires",
+      "placeholder": "Tout autre détail important concernant la visite...",
+      "description": "Observations supplémentaires, notes ou détails importants"
     }
   },
   "treatments": {

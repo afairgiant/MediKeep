@@ -604,6 +604,11 @@
       "placeholder": "Visit duration",
       "description": "How long the visit lasted"
     },
+    "location": {
+      "label": "Location",
+      "placeholder": "Where the visit occurred",
+      "description": "Where the visit took place"
+    },
     "locationOptions": {
       "office": "Doctor's Office",
       "hospital": "Hospital",
@@ -630,6 +635,11 @@
       "label": "Follow-up Instructions",
       "placeholder": "Follow-up care instructions...",
       "description": "Instructions for ongoing care and follow-up appointments"
+    },
+    "additionalNotes": {
+      "label": "Additional Notes",
+      "placeholder": "Any other important details about the visit...",
+      "description": "Any additional observations, notes, or important details"
     }
   },
   "treatments": {

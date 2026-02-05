@@ -654,6 +654,11 @@
 			"placeholder": "Dauer des Besuchs",
 			"description": "Wie lange der Besuch gedauert hat"
 		},
+		"location": {
+			"label": "Standort",
+			"placeholder": "Wo der Besuch stattfand",
+			"description": "Wo der Besuch stattgefunden hat"
+		},
 		"locationOptions": {
 			"office": "Arztpraxis",
 			"hospital": "Krankenhaus",
@@ -680,6 +685,11 @@
 			"label": "Nachsorgeanweisungen",
 			"placeholder": "Anweisungen für die weitere Versorgung...",
 			"description": "Anweisungen für die weitere Pflege und Folgetermine"
+		},
+		"additionalNotes": {
+			"label": "Zusätzliche Notizen",
+			"placeholder": "Weitere wichtige Details zum Besuch...",
+			"description": "Zusätzliche Beobachtungen, Notizen oder wichtige Details"
 		}
 	},
 	"pharmacies": {

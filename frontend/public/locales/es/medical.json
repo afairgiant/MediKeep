@@ -557,6 +557,11 @@
       "placeholder": "Duración de la visita",
       "description": "Cuánto tiempo duró la visita"
     },
+    "location": {
+      "label": "Ubicación",
+      "placeholder": "Donde tuvo lugar la visita",
+      "description": "Donde se realizó la visita"
+    },
     "locationOptions": {
       "office": "Consultorio del médico",
       "hospital": "Hospital",
@@ -583,6 +588,11 @@
       "label": "Instrucciones de seguimiento",
       "placeholder": "Instrucciones para el seguimiento del cuidado...",
       "description": "Instrucciones para el cuidado continuo y visitas de seguimiento"
+    },
+    "additionalNotes": {
+      "label": "Notas adicionales",
+      "placeholder": "Otros detalles importantes sobre la visita...",
+      "description": "Observaciones adicionales, notas o detalles importantes"
     }
   },
   "pharmacies": {
