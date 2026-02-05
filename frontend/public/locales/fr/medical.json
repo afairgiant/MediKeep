@@ -548,55 +548,6 @@
       "description": "Toute note sur l'administration de l'anesthésie"
     }
   },
-  "practitioners": {
-    "title": "Médecins",
-    "name": {
-      "label": "Nom complet",
-      "placeholder": "Dr. Jane Smith",
-      "description": "Nom complet du médecin, dont son titre"
-    },
-    "specialty": {
-      "label": "Spécialité médicale",
-      "placeholder": "Cherchez parmi les spécialités ou ajoutez-en une...",
-      "description": "Sélectionnez dans la liste ou saisissez une spécialité supplémentaire"
-    },
-    "practice": {
-      "label": "Cabinet/Hôpital",
-      "placeholder": "Hôpital général de la cité",
-      "description": "Lieu de travail ou établissement médical (optionnel)"
-    },
-    "email": {
-      "label": "Adresse email",
-      "placeholder": "docteur@exemple.com",
-      "description": "Adresse email professionnelle"
-    },
-    "rating": {
-      "label": "Avis",
-      "description": "Notez la qualité des soins de ce médecin"
-    }
-  },
-  "emergencyContacts": {
-    "title": "Contacts d'urgence",
-    "primaryPhone": {
-      "label": "Téléphone principal",
-      "placeholder": "ex : (555) 123-4567",
-      "description": "Numéro de téléphone principal"
-    },
-    "secondaryPhone": {
-      "label": "Téléphone secondaire",
-      "placeholder": "ex : (555) 987-6543",
-      "description": "Numéro de téléphone secondaire optionnel"
-    },
-    "isPrimary": {
-      "label": "Contact d'urgence primaire",
-      "description": "Cette personne sera contactée en premier en cas d'urgence"
-    },
-    "isActive": {
-      "label": "Contact actif",
-      "description": "Ce contact est actuellement disponible"
-    },
-    "notesPlaceholder": "Informations supplémentaires (ex : 'Disponible seulement en semaine', 'Parle espagnol')"
-  },
   "visits": {
     "title": "Visites",
     "reason": {
@@ -679,34 +630,6 @@
       "label": "Instructions de suivi",
       "placeholder": "Instructions de suivi des soins...",
       "description": "Instructions pour les soins à poursuivre et les visites de suivi"
-    }
-  },
-  "pharmacies": {
-    "title": "Pharmacies",
-    "pharmacyBrand": {
-      "label": "Marque de pharmacie",
-      "placeholder": "Sélectionnez la chaîne ou le type de pharmacie",
-      "description": "Chaîne de pharmacie majeure ou type indépendant"
-    },
-    "pharmacyName": {
-      "label": "Nom de la pharmacie",
-      "placeholder": "Pharmacie CVS - Grand-rue",
-      "description": "Nom spécifique ou identification de l'emplacement"
-    },
-    "streetAddress": {
-      "label": "Adresse",
-      "placeholder": "123 Grand-rue",
-      "description": "Adresse physique"
-    },
-    "city": {
-      "label": "Ville",
-      "placeholder": "Paris",
-      "description": "Emplacement de la ville"
-    },
-    "storeNumber": {
-      "label": "Numéro de la pharmacie",
-      "placeholder": "ex : 1234, N°5678, Magasin A",
-      "description": "Identificateur interne de la pharmacie"
     }
   },
   "treatments": {
@@ -858,66 +781,6 @@
       "label": "Age au diagnostic",
       "placeholder": "ex : 45",
       "description": "Age lors du diagnostic"
-    }
-  },
-  "insurance": {
-    "title": "Assurances",
-    "dividers": {
-      "basic": "Informations de base de l'assurance",
-      "member": "Informations de membre",
-      "coverage": "Période de couverture & statut",
-      "contact": "Informations de contact",
-      "coverageDetails": "Détails de la couverture",
-      "notes": "Informations supplémentaires"
-    },
-    "insuranceTypeOptions": {
-      "medical": "Assurance médicale",
-      "dental": "Assurance dentaire",
-      "vision": "Assurance optique",
-      "prescription": "Assurance de prescription"
-    },
-    "companyName": {
-      "label": "Compagnie d'assurances",
-      "placeholder": "ex : MMA",
-      "description": "Nom de la compagnie d'assurances"
-    },
-    "planName": {
-      "label": "Nom de la formule",
-      "placeholder": "ex : Santé essentielle",
-      "description": "Nom de la formule d'assurance spécifique"
-    },
-    "memberId": {
-      "label": "ID de membre",
-      "placeholder": "ex : ABC123456789",
-      "description": "Numéro d'identification de membre sur la carte d'assurance"
-    },
-    "groupNumber": {
-      "label": "Nombre du groupe",
-      "placeholder": "ex : GRP123",
-      "description": "Nombre du groupe (si applicable)"
-    },
-    "isPrimary": {
-      "label": "Assurance primaire",
-      "description": "Cochez s'il s'agit de votre assurance primaire (médicale uniquement)"
-    },
-    "deductibleIndividual": {
-      "label": "Franchise individuelle",
-      "placeholder": "ex : 1000",
-      "description": "Somme de la franchise annuelle pour l'individu"
-    },
-    "copayPrimaryCare": {
-      "label": "Ticket modérateur pour soins médicaux",
-      "placeholder": "ex : 25",
-      "description": "Somme du ticket modérateur pour les visites pour soins médicaux"
-    },
-    "planTypeOptions": {
-      "ppo": "PPO (Preferred Provider Organization)",
-      "hmo": "HMO (Health Maintenance Organization)",
-      "epo": "EPO (Exclusive Provider Organization)",
-      "pos": "POS (Point of Service)",
-      "hdhp": "HDHP (High Deductible Health Plan)",
-      "indemnity": "Indemnité (Honoraires pour services)",
-      "other": "Autre"
     }
   },
   "symptoms": {
@@ -1150,6 +1013,7 @@
     }
   },
   "practitioners": {
+    "title": "Médecins",
     "form": {
       "name": {
         "label": "Nom complet",
@@ -1187,6 +1051,7 @@
     }
   },
   "pharmacies": {
+    "title": "Pharmacies",
     "form": {
       "brand": {
         "label": "Marque de la pharmacie",
@@ -1222,6 +1087,7 @@
     }
   },
   "emergencyContacts": {
+    "title": "Contacts d'urgence",
     "form": {
       "name": {
         "label": "Nom complet",
@@ -1295,6 +1161,7 @@
     }
   },
   "insurance": {
+    "title": "Assurances",
     "form": {
       "dividers": {
         "basicInfo": "Informations de base de l'assurance",

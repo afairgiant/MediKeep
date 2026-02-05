@@ -548,50 +548,6 @@
       "description": "Eventuali note sulla somministrazione dell'anestesia"
     }
   },
-  "practitioners": {
-    "title": "Professionisti",
-    "name": {
-      "label": "Nome completo",
-      "placeholder": "Dr. Jane Smith",
-      "description": "Nome completo del medico, incluso il titolo"
-    },
-    "specialty": {
-      "label": "Specialità medica",
-      "placeholder": "Cerca specialità o inserisci personalizzata...",
-      "description": "Seleziona dall'elenco o inserisci una specialità personalizzata"
-    },
-    "practice": {
-      "label": "Studio/Ospedale",
-      "placeholder": "Ospedale Generale della Città",
-      "description": "Luogo di lavoro o struttura medica"
-    },
-    "rating": {
-      "label": "Valutazione",
-      "description": "Valuta la qualità complessiva dell'assistenza di questo professionista"
-    }
-  },
-  "emergencyContacts": {
-    "title": "Contatti di emergenza",
-    "primaryPhone": {
-      "label": "Telefono principale",
-      "placeholder": "es.: (11) 9876-5432",
-      "description": "Numero di telefono principale"
-    },
-    "secondaryPhone": {
-      "label": "Telefono secondario",
-      "placeholder": "es.: (11) 9876-5432",
-      "description": "Numero di telefono secondario opzionale"
-    },
-    "isPrimary": {
-      "label": "Contatto di emergenza principale",
-      "description": "Questa persona sarà contattata per prima in caso di emergenza"
-    },
-    "isActive": {
-      "label": "Contatto attivo",
-      "description": "Questo contatto è attualmente disponibile"
-    },
-    "notesPlaceholder": "Informazioni aggiuntive (es., 'Disponibile solo nei giorni feriali', 'Parla spagnolo')"
-  },
   "visits": {
     "title": "Visite",
     "reason": {
@@ -674,34 +630,6 @@
       "label": "Istruzioni di follow-up",
       "placeholder": "Istruzioni per le cure di follow-up...",
       "description": "Istruzioni per cure continuative e visite di controllo"
-    }
-  },
-  "pharmacies": {
-    "title": "Farmacie",
-    "pharmacyBrand": {
-      "label": "Marchio della farmacia",
-      "placeholder": "Seleziona la rete o tipo di farmacia",
-      "description": "Principale rete di farmacie o tipo indipendente"
-    },
-    "pharmacyName": {
-      "label": "Nome della farmacia",
-      "placeholder": "CVS Pharmacy - Via Principale",
-      "description": "Nome specifico o identificatore di localizzazione"
-    },
-    "streetAddress": {
-      "label": "Indirizzo",
-      "placeholder": "Via Principale 123",
-      "description": "Indirizzo fisico"
-    },
-    "city": {
-      "label": "Città",
-      "placeholder": "San Francisco",
-      "description": "Localizzazione della città"
-    },
-    "storeNumber": {
-      "label": "Numero negozio",
-      "placeholder": "es.: 1234, #5678, Negozio A",
-      "description": "Identificatore interno del negozio"
     }
   },
   "treatments": {
@@ -853,66 +781,6 @@
       "label": "Età alla diagnosi",
       "placeholder": "es.: 45",
       "description": "Età al momento della diagnosi"
-    }
-  },
-  "insurance": {
-    "title": "Assicurazione",
-    "dividers": {
-      "basic": "Informazioni di base dell'assicurazione",
-      "family": "Informazioni del membro",
-      "coverage": "Periodo e stato della copertura",
-      "contact": "Informazioni di contatto",
-      "coverageDetails": "Dettagli della copertura",
-      "notes": "Informazioni aggiuntive"
-    },
-    "insuranceTypeOptions": {
-      "medical": "Assicurazione medica",
-      "dental": "Assicurazione odontoiatrica",
-      "vision": "Assicurazione visiva",
-      "prescription": "Assicurazione per prescrizioni"
-    },
-    "companyName": {
-      "label": "Nome della compagnia",
-      "placeholder": "es.: Blue Cross Blue Shield",
-      "description": "Nome della compagnia di assicurazioni"
-    },
-    "planName": {
-      "label": "Nome del piano",
-      "placeholder": "es.: PPO Gold Plus",
-      "description": "Nome del piano assicurativo specifico"
-    },
-    "memberId": {
-      "label": "ID del membro",
-      "placeholder": "es.: ABC123456789",
-      "description": "Numero identificativo del membro sulla tessera assicurativa"
-    },
-    "groupNumber": {
-      "label": "Numero del gruppo",
-      "placeholder": "es.: GRP123",
-      "description": "Numero del gruppo (se applicabile)"
-    },
-    "isPrimary": {
-      "label": "Assicurazione primaria",
-      "description": "Seleziona se questa è la tua assicurazione primaria (solo per medica)"
-    },
-    "deductibleIndividual": {
-      "label": "Franchigia individuale",
-      "placeholder": "es.: 1000",
-      "description": "Importo annuo della franchigia per individuo"
-    },
-    "copayPrimaryCare": {
-      "label": "Copay per cure primarie",
-      "placeholder": "es.: 25",
-      "description": "Importo del copay per visite di cure primarie"
-    },
-    "planTypeOptions": {
-      "ppo": "PPO (Preferred Provider Organization)",
-      "hmo": "HMO (Health Maintenance Organization)",
-      "epo": "EPO (Exclusive Provider Organization)",
-      "pos": "POS (Point of Service)",
-      "hdhp": "HDHP (High Deductible Health Plan)",
-      "indemnity": "Indemnity (Fee-for-Service)",
-      "other": "Altro"
     }
   },
   "symptoms": {
@@ -1145,6 +1013,7 @@
     }
   },
   "practitioners": {
+    "title": "Professionisti",
     "form": {
       "name": {
         "label": "Nome completo",
@@ -1177,6 +1046,7 @@
     }
   },
   "pharmacies": {
+    "title": "Farmacie",
     "form": {
       "brand": {
         "label": "Marchio della farmacia",
@@ -1212,6 +1082,7 @@
     }
   },
   "emergencyContacts": {
+    "title": "Contatti di emergenza",
     "form": {
       "name": {
         "label": "Nome completo",
@@ -1285,6 +1156,7 @@
     }
   },
   "insurance": {
+    "title": "Assicurazione",
     "form": {
       "dividers": {
         "basicInfo": "Informazioni di base dell'assicurazione",
