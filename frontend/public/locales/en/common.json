@@ -439,6 +439,7 @@
     "timeline": {
       "title": "Symptom Timeline",
       "noEpisodes": "No symptom episodes recorded in this period",
+      "recorded": "recorded",
       "filters": {
         "allDates": "All Dates",
         "lastWeek": "Last Week",
@@ -457,6 +458,7 @@
       "viewSymptom": "View Symptom",
       "duration": "Duration",
       "location": "Location",
+      "time": "Time",
       "timeOfDay": "Time of Day",
       "resolved": "Resolved",
       "occurrenceId": "Occurrence ID",

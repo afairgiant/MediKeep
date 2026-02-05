@@ -424,6 +424,7 @@
     "timeline": {
       "title": "Cronologia dei sintomi",
       "noEpisodes": "Nessun episodio di sintomo registrato in questo periodo",
+      "recorded": "registrato/i",
       "filters": {
         "allDates": "Tutte le date",
         "lastWeek": "Ultima settimana",
@@ -442,6 +443,7 @@
       "viewSymptom": "Visualizza sintomo",
       "duration": "Durata",
       "location": "Posizione",
+      "time": "Ora",
       "timeOfDay": "Momento della giornata",
       "resolved": "Risolto",
       "occurrenceId": "ID occorrenza",

@@ -15,6 +15,7 @@ const MantineSymptomForm = ({
   onInputChange,
   onSubmit,
   editingSymptom = null,
+  submitButtonText,
 }) => {
   return (
     <BaseMedicalForm
@@ -26,6 +27,7 @@ const MantineSymptomForm = ({
       onSubmit={onSubmit}
       editingItem={editingSymptom}
       fields={symptomParentFormFields}
+      submitButtonText={submitButtonText}
     />
   );
 };

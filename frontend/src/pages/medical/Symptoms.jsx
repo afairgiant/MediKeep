@@ -226,7 +226,7 @@ const Symptoms = () => {
   };
 
   const handleDeleteSymptom = async symptomId => {
-    if (!window.confirm(t('symptoms.confirmDeleteSymptom'))) {
+    if (!window.confirm(t('symptoms.confirmDeleteSymptom', 'Are you sure you want to delete this symptom and all its occurrences?'))) {
       return;
     }
 
@@ -577,11 +577,12 @@ const Symptoms = () => {
           setShowSymptomForm(false);
           setEditingSymptom(null);
         }}
-        title={editingSymptom ? t('symptoms.editSymptomTitle') : t('symptoms.addSymptomTitle')}
+        title={editingSymptom ? t('symptoms.editSymptomTitle', 'Edit Symptom') : t('symptoms.addSymptomTitle', 'Add New Symptom')}
         formData={symptomFormData}
         onInputChange={handleSymptomInputChange}
         onSubmit={handleSymptomSubmit}
         editingSymptom={editingSymptom}
+        submitButtonText={editingSymptom ? t('buttons.update', 'Update') : t('buttons.save', 'Save')}
       />
 
       {/* Occurrence Form Modal */}
@@ -594,13 +595,14 @@ const Symptoms = () => {
         }}
         title={
           editingOccurrence
-            ? `${t('symptoms.editEpisodeTitle')}: ${selectedSymptomForOccurrence?.symptom_name}`
-            : `${t('symptoms.logEpisodeTitle')}: ${selectedSymptomForOccurrence?.symptom_name}`
+            ? `${t('symptoms.editEpisodeTitle', 'Edit Episode')}: ${selectedSymptomForOccurrence?.symptom_name}`
+            : `${t('symptoms.logEpisodeTitle', 'Log Episode')}: ${selectedSymptomForOccurrence?.symptom_name}`
         }
         formData={occurrenceFormData}
         onInputChange={handleOccurrenceInputChange}
         onSubmit={handleOccurrenceSubmit}
         editingOccurrence={editingOccurrence}
+        submitButtonText={editingOccurrence ? t('buttons.update', 'Update') : t('symptoms.logEpisode', 'Log Episode')}
       />
     </Container>
   );

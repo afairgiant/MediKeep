@@ -432,6 +432,7 @@
     "timeline": {
       "title": "Chronologie des symptômes",
       "noEpisodes": "Aucune crise symptomatique enregistrée durant cette période",
+      "recorded": "enregistrée(s)",
       "filters": {
         "allDates": "Toutes les dates",
         "lastWeek": "La semaine dernière",
@@ -450,6 +451,7 @@
       "viewSymptom": "Voir le symtôme",
       "duration": "Durée",
       "location": "Emplacement",
+      "time": "Heure",
       "timeOfDay": "Moment de la journée",
       "resolved": "Résolu",
       "occurrenceId": "ID de l'occurrence",

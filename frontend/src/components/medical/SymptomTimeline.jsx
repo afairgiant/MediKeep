@@ -236,8 +236,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
               onClick={() => handleTimelineClick(entry.date)}
             >
               <Text c="dimmed" size="sm">
-                {entry.occurrences.length} episode
-                {entry.occurrences.length !== 1 ? 's' : ''} recorded
+                {entry.occurrences.length} {entry.occurrences.length !== 1 ? t('symptoms.episodes', 'episodes') : t('symptoms.episode', 'episode')} {t('symptoms.timeline.recorded', 'recorded')}
               </Text>
               {entry.occurrences.length <= 3 && (
                 <Group gap="xs" mt="xs">
@@ -257,8 +256,8 @@ const SymptomTimeline = ({ patientId, hidden }) => {
       <Modal
         opened={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={`Symptom Episodes on ${
-          selectedDate
+        title={t('symptoms.calendar.episodesOn', 'Symptom Episodes on {{date}}', {
+          date: selectedDate
             ? new Date(selectedDate).toLocaleDateString(locale, {
                 weekday: 'long',
                 year: 'numeric',
@@ -266,11 +265,11 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                 day: 'numeric',
               })
             : ''
-        }`}
+        })}
         size="lg"
       >
         {selectedOccurrences.length === 0 ? (
-          <Text c="dimmed">No occurrences found for this date</Text>
+          <Text c="dimmed">{t('symptoms.calendar.noOccurrences', 'No occurrences found for this date')}</Text>
         ) : (
           <Stack gap="md">
             {selectedOccurrences.map((occurrence, idx) => (
@@ -291,7 +290,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                       {occurrence.pain_scale !== null &&
                         occurrence.pain_scale !== undefined && (
                           <Badge color="red" variant="outline" size="sm">
-                            Pain: {occurrence.pain_scale}/10
+                            {t('symptoms.calendar.pain', 'Pain')}: {occurrence.pain_scale}/10
                           </Badge>
                         )}
                     </Group>
@@ -301,33 +300,33 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                       leftSection={<IconEye size={14} />}
                       onClick={() => handleViewSymptom(occurrence.symptom_id)}
                     >
-                      View Symptom
+                      {t('symptoms.calendar.viewSymptom', 'View Symptom')}
                     </Button>
                   </Group>
 
                   {occurrence.duration && (
                     <Text size="sm">
-                      <strong>Duration:</strong> {occurrence.duration}
+                      <strong>{t('symptoms.calendar.duration', 'Duration')}:</strong> {occurrence.duration}
                     </Text>
                   )}
                   {occurrence.location && (
                     <Text size="sm">
-                      <strong>Location:</strong> {occurrence.location}
+                      <strong>{t('symptoms.calendar.location', 'Location')}:</strong> {occurrence.location}
                     </Text>
                   )}
                   {occurrence.occurrence_time && (
                     <Text size="sm">
-                      <strong>Time:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
+                      <strong>{t('symptoms.calendar.time', 'Time')}:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
                     </Text>
                   )}
                   {occurrence.resolved_date && (
                     <Text size="sm" c="green">
-                      <strong>Resolved:</strong> {formatDate(occurrence.resolved_date)}
+                      <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
                     </Text>
                   )}
                   {!occurrence.resolved_date && (
                     <Badge size="sm" color="blue" variant="light">
-                      Ongoing
+                      {t('symptoms.calendar.ongoing', 'Ongoing')}
                     </Badge>
                   )}
                   {occurrence.notes && (
@@ -338,7 +337,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
 
                   <Divider />
                   <Text size="xs" c="dimmed">
-                    Occurrence ID: {occurrence.occurrence_id}
+                    {t('symptoms.calendar.occurrenceId', 'Occurrence ID')}: {occurrence.occurrence_id}
                   </Text>
                 </Stack>
               </Paper>

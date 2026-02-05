@@ -14,6 +14,7 @@ const MantineSymptomOccurrenceForm = ({
   onInputChange,
   onSubmit,
   editingOccurrence = null,
+  submitButtonText,
 }) => {
   return (
     <BaseMedicalForm
@@ -25,6 +26,7 @@ const MantineSymptomOccurrenceForm = ({
       onSubmit={onSubmit}
       editingItem={editingOccurrence}
       fields={symptomOccurrenceFormFields}
+      submitButtonText={submitButtonText}
     />
   );
 };

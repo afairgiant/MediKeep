@@ -984,6 +984,7 @@
       "timeline": {
         "title": "Symptomverlauf",
         "noEpisodes": "In diesem Zeitraum wurden keine Symptom-Episoden aufgezeichnet",
+        "recorded": "aufgezeichnet",
         "filters": {
           "allDates": "Alle Daten",
           "lastWeek": "Letzte Woche",
@@ -1002,6 +1003,7 @@
         "viewSymptom": "Symptom Ansehen",
         "duration": "Dauer",
         "location": "Ort",
+        "time": "Uhrzeit",
         "timeOfDay": "Tageszeit",
         "resolved": "Aufgelöst",
         "occurrenceId": "Vorkommnis-ID",
