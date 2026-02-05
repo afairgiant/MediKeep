@@ -65,6 +65,8 @@
     "endDate": "Data de Término",
     "duration": "Duração",
     "notes": "Notas",
+    "tags": "Tags",
+    "location": "Local",
     "name": "Nome",
     "date": "Data",
     "time": "Hora",
@@ -86,6 +88,13 @@
     "conditionsAvailableToLink": "{{count}} condições disponíveis para vincular",
     "linkedMedications": "Medicações Vinculadas",
     "visitWebsite": "Visitar Site ↗"
+  },
+  "fields": {
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Adicionar tags para organizar este registro",
+      "description": "Adicionar tags para encontrar este registro mais tarde"
+    }
   },
   "viewToggle": {
     "cards": "Cards",

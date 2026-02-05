@@ -65,6 +65,8 @@
     "endDate": "Data di fine",
     "duration": "Durata",
     "notes": "Note",
+    "tags": "Tag",
+    "location": "Posizione",
     "name": "Nome",
     "date": "Data",
     "time": "Ora",
@@ -86,6 +88,13 @@
     "conditionsAvailableToLink": "{{count}} condizioni disponibili da collegare",
     "linkedMedications": "Farmaci collegati",
     "visitWebsite": "Visita il sito ↗"
+  },
+  "fields": {
+    "tags": {
+      "label": "Tag",
+      "placeholder": "Aggiungi tag per organizzare questo record",
+      "description": "Aggiungi tag per trovare questo record più tardi"
+    }
   },
   "viewToggle": {
     "cards": "Schede",

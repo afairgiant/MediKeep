@@ -61,6 +61,8 @@
     "endDate": "Fecha de fin",
     "duration": "Duración",
     "notes": "Notas",
+    "tags": "Etiquetas",
+    "location": "Ubicación",
     "name": "Nombre",
     "date": "Fecha",
     "time": "Hora",
@@ -72,6 +74,13 @@
     "account": "Cuenta",
     "help": "Ayuda",
     "support": "Soporte"
+  },
+  "fields": {
+    "tags": {
+      "label": "Etiquetas",
+      "placeholder": "Agregar etiquetas para organizar este registro",
+      "description": "Agregar etiquetas para encontrar este registro más tarde"
+    }
   },
   "viewToggle": {
     "cards": "Tarjetas",

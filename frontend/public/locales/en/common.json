@@ -66,6 +66,8 @@
     "endDate": "End Date",
     "duration": "Duration",
     "notes": "Notes",
+    "tags": "Tags",
+    "location": "Location",
     "name": "Name",
     "date": "Date",
     "time": "Time",
@@ -87,6 +89,13 @@
     "conditionsAvailableToLink": "{{count}} conditions available to link",
     "linkedMedications": "Linked Medications",
     "visitWebsite": "Visit Website ↗"
+  },
+  "fields": {
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Add tags to organize and find this record",
+      "description": "Add tags to help organize and search for this record later"
+    }
   },
   "viewToggle": {
     "cards": "Cards",
