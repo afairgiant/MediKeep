@@ -1,123 +1,4 @@
 {
-	"common": {
-		"labels": {
-			"patientRecord": "Patientenakte",
-			"medicalHistory": "Medizinische Vorgeschichte",
-			"notes": "Notizen",
-			"tags": "Tags",
-			"status": "Status",
-			"severity": "Schweregrad",
-			"description": "Beschreibung",
-			"startDate": "Anfangsdatum",
-			"endDate": "Enddatum",
-			"onsetDate": "Beginnsdatum",
-			"facility": "Einrichtung",
-			"location": "Ort",
-			"duration": "Dauer",
-			"phoneNumber": "Telefonnummer",
-			"website": "Webseite",
-			"fullName": "Vollständiger Name",
-			"relationship": "Verwandtschaft",
-			"email": "E-Mail-Adresse",
-			"address": "Adresse",
-			"required": "Erforderlich",
-			"optional": "Optional"
-		},
-		"fields": {
-			"notes": {
-				"label": "Notizen",
-				"placeholder": "Zusätzliche Informationen...",
-				"description": "Weitere Details oder Notizen"
-			},
-			"tags": {
-				"label": "Tags",
-				"placeholder": "Füge Tags hinzu, um diesen Eintrag zu organisieren und wiederzufinden",
-				"description": "Tags hinzufügen, um diesen Eintrag später zu organisieren und zu suchen"
-			},
-			"status": {
-				"label": "Status",
-				"description": "Aktueller Status"
-			},
-			"severity": {
-				"label": "Schweregrad",
-				"placeholder": "Wähle den Schweregrad",
-				"description": "Schweregrad"
-			},
-			"startDate": {
-				"label": "Anfangsdatum",
-				"placeholder": "Wähle das Anfangsdatum",
-				"description": "Wann dies begonnen hat"
-			},
-			"endDate": {
-				"label": "Enddatum",
-				"placeholder": "Wähle das Enddatum",
-				"description": "Wann dies geendet hat (falls zutreffend)"
-			},
-			"onsetDate": {
-				"label": "Beginnsdatum",
-				"placeholder": "Wann trat dies zuerst auf",
-				"description": "Wann dies erstmals entdeckt wurde"
-			},
-			"phoneNumber": {
-				"label": "Telefonnummer",
-				"placeholder": "(555) 123-4567",
-				"description": "Hauptkontaktnummer"
-			},
-			"website": {
-				"label": "Webseite",
-				"placeholder": "https://www.beispiel.de",
-				"description": "Webseiten-URL"
-			},
-			"fullName": {
-				"label": "Vollständiger Name",
-				"placeholder": "Vollen Namen eingeben",
-				"description": "Vollständiger Name"
-			},
-			"email": {
-				"label": "E-Mail-Adresse",
-				"placeholder": "z. B. name@email.com",
-				"description": "E-Mail-Adresse"
-			},
-			"address": {
-				"label": "Adresse",
-				"placeholder": "Adresse eingeben",
-				"description": "Physische Adresse"
-			}
-		},
-		"severity": {
-			"mild": "Leicht - Geringe Beschwerden",
-			"moderate": "Mäßig - Wahrnehmbare Symptome",
-			"severe": "Schwer - Bedeutende Reaktion",
-			"lifeThreatening": "Lebensbedrohlich - Anaphylaxierisiko",
-			"critical": "Kritisch - Lebensbedrohlich",
-			"mildImpact": "Leicht - Geringe Beeinträchtigung",
-			"moderateImpact": "Mäßig - Wahrnehmbare Beeinträchtigung",
-			"severeImpact": "Schwer - Bedeutende Beeinträchtigung"
-		},
-		"status": {
-			"active": "Aktiv",
-			"inactive": "Inaktiv",
-			"resolved": "Behoben",
-			"stopped": "Beendet",
-			"onHold": "Pausiert",
-			"completed": "Abgeschlossen",
-			"planned": "Geplant",
-			"cancelled": "Abgesagt",
-			"pending": "Ausstehend",
-			"expired": "Abgelaufen"
-		},
-		"statusDescriptions": {
-			"activeAllergic": "Aktiv - Derzeit allergisch",
-			"inactiveAllergic": "Inaktiv - Nicht mehr allergisch",
-			"resolvedAllergy": "Behoben - Allergie überwunden",
-			"activeCondition": "Aktiv - Laufende Erkrankung",
-			"resolvedCondition": "Behoben - Nicht mehr vorhanden",
-			"chronicCondition": "Chronisch - Langfristige Erkrankung",
-			"activeExperiencing": "Aktiv - Derzeit betroffen",
-			"resolvedExperiencing": "Behoben - Nicht mehr betroffen",
-			"recurring": "Wiederkehrend - Kommt und geht"
-		}
-	},
 	"allergies": {
 		"title": "Allergien",
 		"addNew": "Neue Allergie hinzufügen",
@@ -307,11 +188,9 @@
 			"other": "Sonstiges"
 		},
 		"testType": {
-			"routine": "Routine - Standardverarbeitung",
-			"urgent": "Dringend - Beschleunigte Verarbeitung",
-			"emergency": "Notfall - Kritische Priorität",
-			"followUp": "Nachuntersuchung - Wiederholungstest",
-			"screening": "Screening - Präventivtest"
+			"label": "Testtyp",
+			"placeholder": "Dringlichkeitsstufe auswählen",
+			"description": "Priorität oder Dringlichkeit des Tests"
 		},
 		"result": {
 			"normal": "Normal - Innerhalb des Referenzbereichs",
@@ -344,11 +223,6 @@
 			"label": "Testkategorie",
 			"placeholder": "Kategorie auswählen",
 			"description": "Art des Labortests"
-		},
-		"testType": {
-			"label": "Testtyp",
-			"placeholder": "Dringlichkeitsstufe auswählen",
-			"description": "Priorität oder Dringlichkeit des Tests"
 		},
 		"testingFacility": {
 			"label": "Testeinrichtung",
@@ -555,48 +429,109 @@
 		}
 	},
 	"practitioners": {
-		"title": "Behandler",
-		"name": {
-			"label": "Vollständiger Name",
-			"placeholder": "Dr. Jane Mustermann",
-			"description": "Vollständiger Name des Arztes mit Titel"
-		},
-		"specialty": {
-			"label": "Fachrichtung",
-			"placeholder": "Fachgebiete durchsuchen oder eigenen Begriff eingeben...",
-			"description": "Aus Liste auswählen oder eine eigene Fachrichtung eingeben"
-		},
-		"practice": {
-			"label": "Praxis/Krankenhaus",
-			"placeholder": "Stadtkrankenhaus",
-			"description": "Arbeitsstätte oder medizinische Einrichtung"
-		},
-		"rating": {
-			"label": "Bewertung",
-			"description": "Bewerte die allgemeine Behandlungsqualität dieses Arztes"
+		"form": {
+			"name": {
+				"label": "Vollständiger Name",
+				"placeholder": "Dr. med. Anna Müller",
+				"description": "Vollständiger Name des Arztes inklusive Titel"
+			},
+			"specialty": {
+				"label": "Medizinisches Fachgebiet",
+				"placeholder": "Fachgebiete durchsuchen oder eigenes eingeben...",
+				"description": "Aus Liste auswählen oder eigenes Fachgebiet eingeben"
+			},
+			"practice": {
+				"label": "Praxis/Krankenhaus",
+				"placeholder": "Städtisches Krankenhaus",
+				"description": "Arbeitsplatz oder medizinische Einrichtung"
+			},
+			"phone": {
+				"label": "Telefonnummer",
+				"placeholder": "(555) 123-4567",
+				"description": "Primäre Kontaktnummer"
+			},
+			"website": {
+				"label": "Webseite",
+				"placeholder": "https://www.beispiel.de",
+				"description": "Professionelle Webseite oder Praxisseite"
+			},
+			"rating": {
+				"label": "Bewertung"
+			}
 		}
 	},
 	"emergencyContacts": {
-		"title": "Notfallkontakte",
-		"primaryPhone": {
-			"label": "Primäres Telefon",
-			"placeholder": "z. B. (555) 123-4567",
-			"description": "Primäre Telefonnummer"
-		},
-		"secondaryPhone": {
-			"label": "Sekundäres Telefon",
-			"placeholder": "z. B. (555) 987-6543",
-			"description": "Optional: Sekundäre Telefonnummer"
-		},
-		"isPrimary": {
-			"label": "Haupt-Notfallkontakt",
-			"description": "Diese Person wird im Notfall zuerst kontaktiert"
-		},
-		"isActive": {
-			"label": "Aktiver Kontakt",
-			"description": "Dieser Kontakt ist derzeit erreichbar"
-		},
-		"notesPlaceholder": "Zusätzliche Informationen (z. B. 'Nur werktags erreichbar', 'Spricht Spanisch')"
+		"form": {
+			"name": {
+				"label": "Vollständiger Name",
+				"placeholder": "z.B. Max Mustermann",
+				"description": "Vollständiger Name des Notfallkontakts"
+			},
+			"relationship": {
+				"label": "Beziehung",
+				"placeholder": "Beziehung auswählen",
+				"description": "Beziehung zum Patienten",
+				"options": {
+					"spouse": "Ehepartner",
+					"partner": "Partner",
+					"parent": "Elternteil",
+					"mother": "Mutter",
+					"father": "Vater",
+					"child": "Kind",
+					"son": "Sohn",
+					"daughter": "Tochter",
+					"sibling": "Geschwister",
+					"brother": "Bruder",
+					"sister": "Schwester",
+					"grandparent": "Großelternteil",
+					"grandmother": "Großmutter",
+					"grandfather": "Großvater",
+					"grandchild": "Enkelkind",
+					"grandson": "Enkel",
+					"granddaughter": "Enkelin",
+					"aunt": "Tante",
+					"uncle": "Onkel",
+					"cousin": "Cousin/Cousine",
+					"friend": "Freund",
+					"neighbor": "Nachbar",
+					"caregiver": "Betreuer",
+					"guardian": "Vormund",
+					"other": "Sonstiges"
+				}
+			},
+			"primaryPhone": {
+				"label": "Haupttelefon",
+				"placeholder": "z.B. (555) 123-4567",
+				"description": "Haupttelefonnummer"
+			},
+			"secondaryPhone": {
+				"label": "Zweites Telefon",
+				"placeholder": "z.B. (555) 987-6543",
+				"description": "Optionale zweite Telefonnummer"
+			},
+			"email": {
+				"label": "E-Mail-Adresse",
+				"placeholder": "z.B. max.mustermann@email.com",
+				"description": "Optionale E-Mail-Adresse"
+			},
+			"address": {
+				"label": "Adresse",
+				"placeholder": "z.B. Hauptstraße 123, Stadt, PLZ 12345",
+				"description": "Adresse des Kontakts (optional)"
+			},
+			"isPrimary": {
+				"label": "Haupt-Notfallkontakt",
+				"description": "Diese Person wird im Notfall zuerst kontaktiert"
+			},
+			"isActive": {
+				"label": "Aktiver Kontakt",
+				"description": "Dieser Kontakt ist derzeit verfügbar"
+			},
+			"notes": {
+				"placeholder": "Zusätzliche Informationen (z.B. 'Nur werktags erreichbar', 'Spricht Spanisch')",
+				"description": "Zusätzliche Notizen zu diesem Kontakt"
+			}
+		}
 	},
 	"visits": {
 		"title": "Besuche",
@@ -693,31 +628,38 @@
 		}
 	},
 	"pharmacies": {
-		"title": "Apotheken",
-		"pharmacyBrand": {
-			"label": "Apothekenkette",
-			"placeholder": "Apothekenkette auswählen oder eingeben",
-			"description": "Große Apothekenkette oder unabhängige Apotheke"
-		},
-		"pharmacyName": {
-			"label": "Apothekenname",
-			"placeholder": "CVS Apotheke - Hauptstraße",
-			"description": "Spezifische Filiale oder Standortname"
-		},
-		"streetAddress": {
-			"label": "Straßenadresse",
-			"placeholder": "Hauptstraße 123",
-			"description": "Physische Straßenadresse"
-		},
-		"city": {
-			"label": "Stadt",
-			"placeholder": "Berlin",
-			"description": "Stadt"
-		},
-		"storeNumber": {
-			"label": "Filialnummer",
-			"placeholder": "z. B. 1234, #5678, Filiale A",
-			"description": "Interne Filialkennung"
+		"form": {
+			"brand": {
+				"label": "Apothekenkette",
+				"placeholder": "Apothekenkette oder Typ auswählen",
+				"description": "Große Apothekenkette oder unabhängiger Typ"
+			},
+			"name": {
+				"label": "Apothekenname",
+				"placeholder": "CVS Apotheke - Hauptstraße",
+				"description": "Spezifischer Name oder Standortkennung"
+			},
+			"locationDivider": "Standortinformationen",
+			"streetAddress": {
+				"label": "Straßenadresse",
+				"placeholder": "Hauptstraße 123",
+				"description": "Physische Straßenadresse"
+			},
+			"city": {
+				"label": "Stadt",
+				"placeholder": "München",
+				"description": "Stadt"
+			},
+			"storeNumber": {
+				"label": "Filialnummer",
+				"placeholder": "z.B. 1234, #5678, Filiale A",
+				"description": "Interne Filialkennung"
+			},
+			"phone": {
+				"label": "Telefonnummer",
+				"placeholder": "(555) 123-4567",
+				"description": "Primäre Telefonnummer der Apotheke"
+			}
 		}
 	},
 	"treatments": {
@@ -859,451 +801,6 @@
 			"label": "Alter bei Diagnose",
 			"placeholder": "z. B. 45",
 			"description": "Alter bei Diagnosestellung"
-		}
-	},
-	"insurance": {
-		"title": "Versicherung",
-		"dividers": {
-			"basic": "Basis-Informationen zur Versicherung",
-			"member": "Mitgliedsinformationen",
-			"coverage": "Deckungszeitraum & Status",
-			"contact": "Kontaktinformationen",
-			"coverageDetails": "Deckungsdetails",
-			"notes": "Zusätzliche Informationen"
-		},
-		"insuranceTypeOptions": {
-			"medical": "Krankenversicherung",
-			"dental": "Zahnversicherung",
-			"vision": "Sehversicherung",
-			"prescription": "Arzneimittelversicherung"
-		},
-		"companyName": {
-			"label": "Versicherungsgesellschaft",
-			"placeholder": "z. B. Techniker Krankenkasse",
-			"description": "Name der Versicherungsgesellschaft"
-		},
-		"planName": {
-			"label": "Tarifname",
-			"placeholder": "z. B. Tarif A Plus",
-			"description": "Name des spezifischen Tarifs"
-		},
-		"memberId": {
-			"label": "Mitgliedsnummer",
-			"placeholder": "z. B. ABC123456789",
-			"description": "Mitgliedsnummer von der Versicherungskarte"
-		},
-		"groupNumber": {
-			"label": "Gruppennummer",
-			"placeholder": "z. B. GRP123",
-			"description": "Gruppennummer (falls zutreffend)"
-		},
-		"isPrimary": {
-			"label": "Primäre Versicherung",
-			"description": "Ankreuzen, wenn dies Ihre primäre Versicherung ist (nur medizinisch)"
-		},
-		"deductibleIndividual": {
-			"label": "Individueller Selbstbehalt",
-			"placeholder": "z. B. 1000",
-			"description": "Jährlicher Selbstbehalt für Einzelpersonen"
-		},
-		"copayPrimaryCare": {
-			"label": "Eigenanteil für Hausarzt",
-			"placeholder": "z. B. 25",
-			"description": "Eigenanteil für Hausarztbesuche"
-		},
-		"planTypeOptions": {
-			"ppo": "PPO (Preferred Provider Organization)",
-			"hmo": "HMO (Health Maintenance Organization)",
-			"epo": "EPO (Exclusive Provider Organization)",
-			"pos": "POS (Point of Service)",
-			"hdhp": "HDHP (High Deductible Health Plan)",
-			"indemnity": "Indemnity (Fee-for-Service)",
-			"other": "Andere"
-		}
-	},
-	"symptoms": {
-		"title": "Symptome",
-		"parent": {
-			"symptomName": {
-				"label": "Symptomname",
-				"placeholder": "z. B. Migräne, Chronische Rückenschmerzen",
-				"description": "Name des Symptoms, das Sie verfolgen möchten"
-			},
-			"category": {
-				"label": "Kategorie",
-				"placeholder": "z. B. Schmerz, Verdauung, Atmung",
-				"description": "Optionale Kategorie zur Organisation von Symptomen"
-			},
-			"firstOccurrenceDate": {
-				"label": "Erstes Auftreten",
-				"placeholder": "Wann haben Sie dies zuerst bemerkt",
-				"description": "Wann Sie dieses Symptom erstmals bemerkt haben"
-			},
-			"isChronic": {
-				"label": "Chronischer Zustand",
-				"description": "Ankreuzen, falls es sich um ein andauerndes/langfristiges Symptom handelt"
-			},
-			"typicalTriggers": {
-				"label": "Typische Auslöser",
-				"placeholder": "Gängige Auslöser hinzufügen (Stress, Wetter, Lebensmittel, etc.)",
-				"description": "Was dieses Symptom typischerweise auslöst"
-			},
-			"status": {
-				"label": "Gesamtstatus",
-				"placeholder": "Status auswählen",
-				"description": "Aktueller Gesamtstatus dieses Symptoms"
-			},
-			"statusOptions": {
-				"active": "Aktiv - Derzeit auftretend",
-				"resolved": "Aufgelöst - Nicht mehr auftretend",
-				"recurring": "Wiederkehrend - Kommt und geht"
-			},
-			"generalNotes": {
-				"label": "Allgemeine Notizen",
-				"placeholder": "Gesamtnotizen zu diesem Symptom...",
-				"description": "Allgemeine Informationen über Muster, Historie oder Beobachtungen"
-			}
-		},
-		"occurrence": {
-			"occurrenceDate": {
-				"label": "Ereignisdatum",
-				"placeholder": "Wann trat diese Episode auf",
-				"description": "Datum dieser speziellen Episode"
-			},
-			"timeOfDay": {
-				"label": "Tageszeit",
-				"placeholder": "Tageszeit auswählen",
-				"description": "Wann während des Tages trat dies auf"
-			},
-			"painScale": {
-				"label": "Schmerzskala (0-10)",
-				"placeholder": "0 = kein Schmerz, 10 = schlimmster Schmerz",
-				"description": "Schmerzstärke von 0 (kein Schmerz) bis 10 (stärkster vorstellbarer Schmerz)"
-			},
-			"duration": {
-				"label": "Dauer",
-				"placeholder": "z.B. 2 Stunden, 30 Minuten, den ganzen Tag",
-				"description": "Wie lange dauerte diese Episode"
-			},
-			"location": {
-				"label": "Ort",
-				"placeholder": "z.B. Linke Schläfe, Unterer Rücken, Ganzer Körper",
-				"description": "Wo an Ihrem Körper spürten Sie dies"
-			},
-			"impactLevel": {
-				"label": "Auswirkung auf das tägliche Leben",
-				"placeholder": "Auswirkungsgrad auswählen",
-				"description": "Wie stark beeinträchtigte dies Ihre täglichen Aktivitäten"
-			},
-			"impactLevelOptions": {
-				"noImpact": "Keine Auswirkung - Normale Funktion möglich",
-				"mild": "Leicht - Leichte Einschränkungen bei Aktivitäten",
-				"moderate": "Mäßig - Einige Aktivitäten eingeschränkt",
-				"severe": "Schwer - Die meisten Aktivitäten sind schwierig",
-				"debilitating": "Verheerend - Funktionsunfähig"
-			},
-			"triggers": {
-				"label": "Auslöser",
-				"placeholder": "Was diese Episode ausgelöst hat (Stress, Nahrung, Wetter, etc.)",
-				"description": "Faktoren, die diese Episode verursacht oder verschlechtert haben könnten"
-			},
-			"reliefMethods": {
-				"label": "Linderungsmethoden",
-				"placeholder": "Was geholfen hat (Medikament, Ruhe, Eis, etc.)",
-				"description": "Maßnahmen, die Linderung gebracht haben"
-			},
-			"associatedSymptoms": {
-				"label": "Begleitsymptome",
-				"placeholder": "Andere Symptome (Übelkeit, Schwindel, etc.)",
-				"description": "Weitere Symptome, die zusammen mit dieser Episode auftraten"
-			},
-			"resolvedDate": {
-				"label": "Datum der Besserung",
-				"placeholder": "Wann hat sich diese Episode gebessert",
-				"description": "Leer lassen, wenn die Episode noch andauert"
-			},
-			"resolutionNotes": {
-				"label": "Notizen zur Auflösung",
-				"placeholder": "Wie wurde diese Episode gelöst...",
-				"description": "Details darüber, wie die Episode endete oder behandelt wurde"
-			},
-			"additionalNotes": {
-				"label": "Zusätzliche Notizen",
-				"placeholder": "Weitere Details zu dieser Episode...",
-				"description": "Alle anderen relevanten Informationen zu diesem Vorkommnis"
-			}
-		}
-	},
-	"familyHistory": {
-			"form": {
-				"member": {
-					"name": {
-						"label": "Vollständiger Name",
-						"placeholder": "Name des Familienmitglieds eingeben",
-						"description": "Vollständiger Name des Familienmitglieds"
-					},
-					"relationship": {
-						"label": "Beziehung",
-						"placeholder": "Beziehung auswählen",
-						"description": "Beziehung zu Ihnen"
-					},
-					"gender": {
-						"label": "Geschlecht",
-						"placeholder": "Geschlecht auswählen",
-						"description": "Geschlecht des Familienmitglieds"
-					},
-					"birthYear": {
-						"label": "Geburtsjahr",
-						"placeholder": "z.B. 1950",
-						"description": "Geburtsjahr des Familienmitglieds (optional)"
-					},
-					"deceased": {
-						"label": "Verstorben",
-						"description": "Geben Sie an, ob dieses Familienmitglied verstorben ist"
-					},
-					"deathYear": {
-						"label": "Sterbejahr",
-						"placeholder": "z.B. 2020",
-						"description": "Jahr des Todes (falls zutreffend)"
-					},
-					"notes": {
-						"label": "Notizen",
-						"placeholder": "Zusätzliche Informationen über dieses Familienmitglied...",
-						"description": "Alle weiteren relevanten Details"
-					},
-					"relationshipOptions": {
-						"father": "Vater",
-						"mother": "Mutter",
-						"son": "Sohn",
-						"daughter": "Tochter",
-						"brother": "Bruder",
-						"sister": "Schwester",
-						"grandfather_paternal": "Großvater (väterlicherseits)",
-						"grandmother_paternal": "Großmutter (väterlicherseits)",
-						"grandfather_maternal": "Großvater (mütterlicherseits)",
-						"grandmother_maternal": "Großmutter (mütterlicherseits)",
-						"uncle_paternal": "Onkel (väterlicherseits)",
-						"aunt_paternal": "Tante (väterlicherseits)",
-						"uncle_maternal": "Onkel (mütterlicherseits)",
-						"aunt_maternal": "Tante (mütterlicherseits)",
-						"cousin": "Cousin/Cousine",
-						"nephew": "Neffe",
-						"niece": "Nichte",
-						"grandson": "Enkel",
-						"granddaughter": "Enkelin",
-						"other": "Andere"
-					},
-					"genderOptions": {
-						"male": "Männlich",
-						"female": "Weiblich"
-					}
-				},
-				"condition": {
-					"conditionName": {
-						"label": "Name der Erkrankung",
-						"placeholder": "z.B. Diabetes, Herzerkrankung, Krebs",
-						"description": "Name der medizinischen Erkrankung"
-					},
-					"conditionType": {
-						"label": "Erkrankungstyp",
-						"placeholder": "Kategorie auswählen",
-						"description": "Kategorie der Erkrankung"
-					},
-					"severity": {
-						"label": "Schweregrad",
-						"placeholder": "Schweregrad auswählen",
-						"description": "Schwere der Erkrankung"
-					},
-					"diagnosisAge": {
-						"label": "Alter bei Diagnose",
-						"placeholder": "z.B. 45",
-						"description": "Alter des Familienmitglieds bei der Diagnose"
-					},
-					"status": {
-						"label": "Status",
-						"placeholder": "Status auswählen",
-						"description": "Aktueller Status der Erkrankung"
-					},
-					"icd10Code": {
-						"label": "ICD-10-Code",
-						"placeholder": "z.B. E11.9",
-						"description": "Medizinischer Diagnosecode (optional)"
-					},
-					"notes": {
-						"label": "Notizen",
-						"placeholder": "Zusätzliche Details zu dieser Erkrankung...",
-						"description": "Alle weiteren relevanten Informationen"
-					},
-					"typeOptions": {
-						"cardiovascular": "Kardiovaskulär - Herz & Blutgefäße",
-						"cancer": "Krebs - Bösartige Neubildungen",
-						"diabetes": "Diabetes - Blutzuckererkrankungen",
-						"respiratory": "Respiratorisch - Lungenerkrankungen",
-						"neurological": "Neurologisch - Nerven- & Hirnerkrankungen",
-						"mental_health": "Psychische Gesundheit - Psychiatrische Erkrankungen",
-						"autoimmune": "Autoimmun - Immunsystemerkrankungen",
-						"genetic": "Genetisch - Vererbte Erkrankungen",
-						"musculoskeletal": "Muskuloskeletal - Knochen & Muskeln",
-						"endocrine": "Endokrin - Hormonelle Erkrankungen",
-						"gastrointestinal": "Gastrointestinal - Verdauungssystem",
-						"kidney": "Nieren - Nierenerkrankungen",
-						"liver": "Leber - Lebererkrankungen",
-						"blood": "Blut - Hämatologische Erkrankungen",
-						"other": "Andere"
-					},
-					"severityOptions": {
-						"mild": "💛 Leicht - Geringe Auswirkung",
-						"moderate": "🧡 Mäßig - Moderate Auswirkung",
-						"severe": "❤️ Schwer - Erhebliche Auswirkung",
-						"fatal": "🖤 Tödlich - Todesursache"
-					},
-					"statusOptions": {
-						"active": "Aktiv - Andauernde Erkrankung",
-						"managed": "Verwaltet - Unter Kontrolle mit Behandlung",
-						"resolved": "Aufgelöst - Nicht mehr vorhanden",
-						"fatal": "Tödlich - Todesursache"
-					}
-			}
-		}
-	},
-	"practitioners": {
-		"form": {
-			"name": {
-				"label": "Vollständiger Name",
-				"placeholder": "Dr. med. Anna Müller",
-				"description": "Vollständiger Name des Arztes inklusive Titel"
-			},
-			"specialty": {
-				"label": "Medizinisches Fachgebiet",
-				"placeholder": "Fachgebiete durchsuchen oder eigenes eingeben...",
-				"description": "Aus Liste auswählen oder eigenes Fachgebiet eingeben"
-			},
-			"practice": {
-				"label": "Praxis/Krankenhaus",
-				"placeholder": "Städtisches Krankenhaus",
-				"description": "Arbeitsplatz oder medizinische Einrichtung"
-			},
-			"phone": {
-				"label": "Telefonnummer",
-				"placeholder": "(555) 123-4567",
-				"description": "Primäre Kontaktnummer"
-			},
-			"website": {
-				"label": "Webseite",
-				"placeholder": "https://www.beispiel.de",
-				"description": "Professionelle Webseite oder Praxisseite"
-			},
-			"rating": {
-				"label": "Bewertung"
-			}
-		}
-	},
-	"pharmacies": {
-		"form": {
-			"brand": {
-				"label": "Apothekenkette",
-				"placeholder": "Apothekenkette oder Typ auswählen",
-				"description": "Große Apothekenkette oder unabhängiger Typ"
-			},
-			"name": {
-				"label": "Apothekenname",
-				"placeholder": "CVS Apotheke - Hauptstraße",
-				"description": "Spezifischer Name oder Standortkennung"
-			},
-			"locationDivider": "Standortinformationen",
-			"streetAddress": {
-				"label": "Straßenadresse",
-				"placeholder": "Hauptstraße 123",
-				"description": "Physische Straßenadresse"
-			},
-			"city": {
-				"label": "Stadt",
-				"placeholder": "München",
-				"description": "Stadt"
-			},
-			"storeNumber": {
-				"label": "Filialnummer",
-				"placeholder": "z.B. 1234, #5678, Filiale A",
-				"description": "Interne Filialkennung"
-			},
-			"phone": {
-				"label": "Telefonnummer",
-				"placeholder": "(555) 123-4567",
-				"description": "Primäre Telefonnummer der Apotheke"
-			}
-		}
-	},
-	"emergencyContacts": {
-		"form": {
-			"name": {
-				"label": "Vollständiger Name",
-				"placeholder": "z.B. Max Mustermann",
-				"description": "Vollständiger Name des Notfallkontakts"
-			},
-			"relationship": {
-				"label": "Beziehung",
-				"placeholder": "Beziehung auswählen",
-				"description": "Beziehung zum Patienten",
-				"options": {
-					"spouse": "Ehepartner",
-					"partner": "Partner",
-					"parent": "Elternteil",
-					"mother": "Mutter",
-					"father": "Vater",
-					"child": "Kind",
-					"son": "Sohn",
-					"daughter": "Tochter",
-					"sibling": "Geschwister",
-					"brother": "Bruder",
-					"sister": "Schwester",
-					"grandparent": "Großelternteil",
-					"grandmother": "Großmutter",
-					"grandfather": "Großvater",
-					"grandchild": "Enkelkind",
-					"grandson": "Enkel",
-					"granddaughter": "Enkelin",
-					"aunt": "Tante",
-					"uncle": "Onkel",
-					"cousin": "Cousin/Cousine",
-					"friend": "Freund",
-					"neighbor": "Nachbar",
-					"caregiver": "Betreuer",
-					"guardian": "Vormund",
-					"other": "Sonstiges"
-				}
-			},
-			"primaryPhone": {
-				"label": "Haupttelefon",
-				"placeholder": "z.B. (555) 123-4567",
-				"description": "Haupttelefonnummer"
-			},
-			"secondaryPhone": {
-				"label": "Zweites Telefon",
-				"placeholder": "z.B. (555) 987-6543",
-				"description": "Optionale zweite Telefonnummer"
-			},
-			"email": {
-				"label": "E-Mail-Adresse",
-				"placeholder": "z.B. max.mustermann@email.com",
-				"description": "Optionale E-Mail-Adresse"
-			},
-			"address": {
-				"label": "Adresse",
-				"placeholder": "z.B. Hauptstraße 123, Stadt, PLZ 12345",
-				"description": "Adresse des Kontakts (optional)"
-			},
-			"isPrimary": {
-				"label": "Haupt-Notfallkontakt",
-				"description": "Diese Person wird im Notfall zuerst kontaktiert"
-			},
-			"isActive": {
-				"label": "Aktiver Kontakt",
-				"description": "Dieser Kontakt ist derzeit verfügbar"
-			},
-			"notes": {
-				"placeholder": "Zusätzliche Informationen (z.B. 'Nur werktags erreichbar', 'Spricht Spanisch')",
-				"description": "Zusätzliche Notizen zu diesem Kontakt"
-			}
 		}
 	},
 	"insurance": {
@@ -1575,6 +1072,251 @@
 			"notes": {
 				"placeholder": "Zusätzliche Informationen über diese Versicherung...",
 				"description": "Weitere Details oder Notizen"
+			}
+		}
+	},
+	"symptoms": {
+		"title": "Symptome",
+		"parent": {
+			"symptomName": {
+				"label": "Symptomname",
+				"placeholder": "z. B. Migräne, Chronische Rückenschmerzen",
+				"description": "Name des Symptoms, das Sie verfolgen möchten"
+			},
+			"category": {
+				"label": "Kategorie",
+				"placeholder": "z. B. Schmerz, Verdauung, Atmung",
+				"description": "Optionale Kategorie zur Organisation von Symptomen"
+			},
+			"firstOccurrenceDate": {
+				"label": "Erstes Auftreten",
+				"placeholder": "Wann haben Sie dies zuerst bemerkt",
+				"description": "Wann Sie dieses Symptom erstmals bemerkt haben"
+			},
+			"isChronic": {
+				"label": "Chronischer Zustand",
+				"description": "Ankreuzen, falls es sich um ein andauerndes/langfristiges Symptom handelt"
+			},
+			"typicalTriggers": {
+				"label": "Typische Auslöser",
+				"placeholder": "Gängige Auslöser hinzufügen (Stress, Wetter, Lebensmittel, etc.)",
+				"description": "Was dieses Symptom typischerweise auslöst"
+			},
+			"status": {
+				"label": "Gesamtstatus",
+				"placeholder": "Status auswählen",
+				"description": "Aktueller Gesamtstatus dieses Symptoms"
+			},
+			"statusOptions": {
+				"active": "Aktiv - Derzeit auftretend",
+				"resolved": "Aufgelöst - Nicht mehr auftretend",
+				"recurring": "Wiederkehrend - Kommt und geht"
+			},
+			"generalNotes": {
+				"label": "Allgemeine Notizen",
+				"placeholder": "Gesamtnotizen zu diesem Symptom...",
+				"description": "Allgemeine Informationen über Muster, Historie oder Beobachtungen"
+			}
+		},
+		"occurrence": {
+			"occurrenceDate": {
+				"label": "Ereignisdatum",
+				"placeholder": "Wann trat diese Episode auf",
+				"description": "Datum dieser speziellen Episode"
+			},
+			"timeOfDay": {
+				"label": "Tageszeit",
+				"placeholder": "Tageszeit auswählen",
+				"description": "Wann während des Tages trat dies auf"
+			},
+			"painScale": {
+				"label": "Schmerzskala (0-10)",
+				"placeholder": "0 = kein Schmerz, 10 = schlimmster Schmerz",
+				"description": "Schmerzstärke von 0 (kein Schmerz) bis 10 (stärkster vorstellbarer Schmerz)"
+			},
+			"duration": {
+				"label": "Dauer",
+				"placeholder": "z.B. 2 Stunden, 30 Minuten, den ganzen Tag",
+				"description": "Wie lange dauerte diese Episode"
+			},
+			"location": {
+				"label": "Ort",
+				"placeholder": "z.B. Linke Schläfe, Unterer Rücken, Ganzer Körper",
+				"description": "Wo an Ihrem Körper spürten Sie dies"
+			},
+			"impactLevel": {
+				"label": "Auswirkung auf das tägliche Leben",
+				"placeholder": "Auswirkungsgrad auswählen",
+				"description": "Wie stark beeinträchtigte dies Ihre täglichen Aktivitäten"
+			},
+			"impactLevelOptions": {
+				"noImpact": "Keine Auswirkung - Normale Funktion möglich",
+				"mild": "Leicht - Leichte Einschränkungen bei Aktivitäten",
+				"moderate": "Mäßig - Einige Aktivitäten eingeschränkt",
+				"severe": "Schwer - Die meisten Aktivitäten sind schwierig",
+				"debilitating": "Verheerend - Funktionsunfähig"
+			},
+			"triggers": {
+				"label": "Auslöser",
+				"placeholder": "Was diese Episode ausgelöst hat (Stress, Nahrung, Wetter, etc.)",
+				"description": "Faktoren, die diese Episode verursacht oder verschlechtert haben könnten"
+			},
+			"reliefMethods": {
+				"label": "Linderungsmethoden",
+				"placeholder": "Was geholfen hat (Medikament, Ruhe, Eis, etc.)",
+				"description": "Maßnahmen, die Linderung gebracht haben"
+			},
+			"associatedSymptoms": {
+				"label": "Begleitsymptome",
+				"placeholder": "Andere Symptome (Übelkeit, Schwindel, etc.)",
+				"description": "Weitere Symptome, die zusammen mit dieser Episode auftraten"
+			},
+			"resolvedDate": {
+				"label": "Datum der Besserung",
+				"placeholder": "Wann hat sich diese Episode gebessert",
+				"description": "Leer lassen, wenn die Episode noch andauert"
+			},
+			"resolutionNotes": {
+				"label": "Notizen zur Auflösung",
+				"placeholder": "Wie wurde diese Episode gelöst...",
+				"description": "Details darüber, wie die Episode endete oder behandelt wurde"
+			},
+			"additionalNotes": {
+				"label": "Zusätzliche Notizen",
+				"placeholder": "Weitere Details zu dieser Episode...",
+				"description": "Alle anderen relevanten Informationen zu diesem Vorkommnis"
+			}
+		}
+	},
+	"familyHistory": {
+		"form": {
+			"member": {
+				"name": {
+					"label": "Vollständiger Name",
+					"placeholder": "Name des Familienmitglieds eingeben",
+					"description": "Vollständiger Name des Familienmitglieds"
+				},
+				"relationship": {
+					"label": "Beziehung",
+					"placeholder": "Beziehung auswählen",
+					"description": "Beziehung zu Ihnen"
+				},
+				"gender": {
+					"label": "Geschlecht",
+					"placeholder": "Geschlecht auswählen",
+					"description": "Geschlecht des Familienmitglieds"
+				},
+				"birthYear": {
+					"label": "Geburtsjahr",
+					"placeholder": "z.B. 1950",
+					"description": "Geburtsjahr des Familienmitglieds (optional)"
+				},
+				"deceased": {
+					"label": "Verstorben",
+					"description": "Geben Sie an, ob dieses Familienmitglied verstorben ist"
+				},
+				"deathYear": {
+					"label": "Sterbejahr",
+					"placeholder": "z.B. 2020",
+					"description": "Jahr des Todes (falls zutreffend)"
+				},
+				"notes": {
+					"label": "Notizen",
+					"placeholder": "Zusätzliche Informationen über dieses Familienmitglied...",
+					"description": "Alle weiteren relevanten Details"
+				},
+				"relationshipOptions": {
+					"father": "Vater",
+					"mother": "Mutter",
+					"son": "Sohn",
+					"daughter": "Tochter",
+					"brother": "Bruder",
+					"sister": "Schwester",
+					"grandfather_paternal": "Großvater (väterlicherseits)",
+					"grandmother_paternal": "Großmutter (väterlicherseits)",
+					"grandfather_maternal": "Großvater (mütterlicherseits)",
+					"grandmother_maternal": "Großmutter (mütterlicherseits)",
+					"uncle_paternal": "Onkel (väterlicherseits)",
+					"aunt_paternal": "Tante (väterlicherseits)",
+					"uncle_maternal": "Onkel (mütterlicherseits)",
+					"aunt_maternal": "Tante (mütterlicherseits)",
+					"cousin": "Cousin/Cousine",
+					"nephew": "Neffe",
+					"niece": "Nichte",
+					"grandson": "Enkel",
+					"granddaughter": "Enkelin",
+					"other": "Andere"
+				},
+				"genderOptions": {
+					"male": "Männlich",
+					"female": "Weiblich"
+				}
+			},
+			"condition": {
+				"conditionName": {
+					"label": "Name der Erkrankung",
+					"placeholder": "z.B. Diabetes, Herzerkrankung, Krebs",
+					"description": "Name der medizinischen Erkrankung"
+				},
+				"conditionType": {
+					"label": "Erkrankungstyp",
+					"placeholder": "Kategorie auswählen",
+					"description": "Kategorie der Erkrankung"
+				},
+				"severity": {
+					"label": "Schweregrad",
+					"placeholder": "Schweregrad auswählen",
+					"description": "Schwere der Erkrankung"
+				},
+				"diagnosisAge": {
+					"label": "Alter bei Diagnose",
+					"placeholder": "z.B. 45",
+					"description": "Alter des Familienmitglieds bei der Diagnose"
+				},
+				"status": {
+					"label": "Status",
+					"placeholder": "Status auswählen",
+					"description": "Aktueller Status der Erkrankung"
+				},
+				"icd10Code": {
+					"label": "ICD-10-Code",
+					"placeholder": "z.B. E11.9",
+					"description": "Medizinischer Diagnosecode (optional)"
+				},
+				"notes": {
+					"label": "Notizen",
+					"placeholder": "Zusätzliche Details zu dieser Erkrankung...",
+					"description": "Alle weiteren relevanten Informationen"
+				},
+				"typeOptions": {
+					"cardiovascular": "Kardiovaskulär - Herz & Blutgefäße",
+					"cancer": "Krebs - Bösartige Neubildungen",
+					"diabetes": "Diabetes - Blutzuckererkrankungen",
+					"respiratory": "Respiratorisch - Lungenerkrankungen",
+					"neurological": "Neurologisch - Nerven- & Hirnerkrankungen",
+					"mental_health": "Psychische Gesundheit - Psychiatrische Erkrankungen",
+					"autoimmune": "Autoimmun - Immunsystemerkrankungen",
+					"genetic": "Genetisch - Vererbte Erkrankungen",
+					"musculoskeletal": "Muskuloskeletal - Knochen & Muskeln",
+					"endocrine": "Endokrin - Hormonelle Erkrankungen",
+					"gastrointestinal": "Gastrointestinal - Verdauungssystem",
+					"kidney": "Nieren - Nierenerkrankungen",
+					"liver": "Leber - Lebererkrankungen",
+					"blood": "Blut - Hämatologische Erkrankungen",
+					"other": "Andere"
+				},
+				"severityOptions": {
+					"mild": "💛 Leicht - Geringe Auswirkung",
+					"moderate": "🧡 Mäßig - Moderate Auswirkung",
+					"severe": "❤️ Schwer - Erhebliche Auswirkung",
+					"fatal": "🖤 Tödlich - Todesursache"
+				},
+				"statusOptions": {
+					"active": "Aktiv - Andauernde Erkrankung",
+					"managed": "Verwaltet - Unter Kontrolle mit Behandlung",
+					"resolved": "Aufgelöst - Nicht mehr vorhanden",
+					"fatal": "Tödlich - Todesursache"
+				}
 			}
 		}
 	}

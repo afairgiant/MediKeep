@@ -75,14 +75,112 @@
     "profile": "Perfil",
     "account": "Cuenta",
     "help": "Ayuda",
-    "support": "Soporte"
+    "support": "Soporte",
+    "severity": "Gravedad",
+    "onsetDate": "Fecha de aparición",
+    "facility": "Centro",
+    "phoneNumber": "Número de teléfono",
+    "website": "Sitio web",
+    "fullName": "Nombre completo",
+    "relationship": "Relación",
+    "email": "Correo electrónico",
+    "address": "Dirección",
+    "patientRecord": "Historial del paciente",
+    "medicalHistory": "Historial médico"
   },
   "fields": {
     "tags": {
       "label": "Etiquetas",
       "placeholder": "Agregar etiquetas para organizar este registro",
       "description": "Agregar etiquetas para encontrar este registro más tarde"
+    },
+    "notes": {
+      "label": "Notas",
+      "placeholder": "Información adicional...",
+      "description": "Todo detalle o nota adicional"
+    },
+    "status": {
+      "label": "Estado",
+      "description": "Estado actual"
+    },
+    "severity": {
+      "label": "Gravedad",
+      "placeholder": "Seleccione el nivel de gravedad",
+      "description": "Nivel de gravedad"
+    },
+    "startDate": {
+      "label": "Fecha de inicio",
+      "placeholder": "Seleccione la fecha de inicio  ",
+      "description": "Cuando esto comenzó"
+    },
+    "endDate": {
+      "label": "Fecha de fin",
+      "placeholder": "Seleccione la fecha de fin",
+      "description": "Cuando esto terminó (si aplica)"
+    },
+    "onsetDate": {
+      "label": "Fecha de aparición",
+      "placeholder": "Cuando esto ocurrió por primera vez",
+      "description": "Cuando esto fue descubierto por primera vez"
+    },
+    "phoneNumber": {
+      "label": "Número de teléfono",
+      "placeholder": "91 234 56 78",
+      "description": "Número de contacto principal"
+    },
+    "website": {
+      "label": "Sitio web",
+      "placeholder": "https://www.ejemplo.com",
+      "description": "URL del sitio web"
+    },
+    "fullName": {
+      "label": "Nombre completo",
+      "placeholder": "Introduzca el nombre completo",
+      "description": "Nombre completo de la persona"
+    },
+    "email": {
+      "label": "Correo electrónico",
+      "placeholder": "nombre@correo.com",
+      "description": "Correo electrónico de contacto"
+    },
+    "address": {
+      "label": "Dirección",
+      "placeholder": "Introduzca la dirección",
+      "description": "Dirección física completa"
     }
+  },
+  "severity": {
+    "mild": "Leve - Molestia menor",
+    "moderate": "Moderada - Síntomas notables",
+    "severe": "Severa - Reacción significativa",
+    "lifeThreatening": "Amenaza para la vida - Riesgo de choque anafiláctico",
+    "critical": "Crítica - Peligro de muerte",
+    "mildImpact": "Leve - Impacto menor",
+    "moderateImpact": "Moderada - Impacto notable",
+    "severeImpact": "Severa - Impacto significativo"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "resolved": "Resuelto",
+    "stopped": "Detenido",
+    "onHold": "En espera",
+    "completed": "Completado",
+    "planned": "Planificado",
+    "cancelled": "Cancelado",
+    "pending": "Pendiente",
+    "expired": "Expirado"
+  },
+  "statusDescriptions": {
+    "activeAllergic": "Activo - Actualmente alérgico",
+    "inactiveAllergic": "Inactivo - Ya no es alérgico",
+    "resolvedAllergy": "Resuelto - Alergia superada",
+    "activeCondition": "Activo - Condición en curso",
+    "resolvedCondition": "Resuelto - Ya no presente",
+    "chronicCondition": "Crónica - Condición a largo plazo",
+    "activeExperiencing": "Activo - En curso",
+    "resolvedExperiencing": "Resuelto - Terminado",
+    "recurring": "Recurrente - Va y viene"
   },
   "viewToggle": {
     "cards": "Tarjetas",

@@ -1,123 +1,4 @@
 {
-  "common": {
-    "labels": {
-      "patientRecord": "Dossier de patient",
-      "medicalHistory": "Historique médical",
-      "notes": "Notes",
-      "tags": "Etiquettes",
-      "status": "Statut",
-      "severity": "Sévérité",
-      "description": "Description",
-      "startDate": "Date de début",
-      "endDate": "Date de fin",
-      "onsetDate": "Date de survenue",
-      "facility": "Etablissement",
-      "location": "Emplacement",
-      "duration": "Durée",
-      "phoneNumber": "Numéro de téléphone",
-      "website": "Site web",
-      "fullName": "Nom complet",
-      "relationship": "Lien de parenté",
-      "email": "Adresse email",
-      "address": "Adresse",
-      "required": "Requis",
-      "optional": "Optionnel"
-    },
-    "fields": {
-      "notes": {
-        "label": "Notes",
-        "placeholder": "Informations supplémentaires...",
-        "description": "Tout détail ou note supplémentaire"
-      },
-      "tags": {
-        "label": "Etiquettes",
-        "placeholder": "Ajoutez des étiquettes pour organiser et trouver cette entrée",
-        "description": "Ajoutez des étiquettes pour vous aider à organiser et rechercher cette entrée ultérieurement."
-      },
-      "status": {
-        "label": "Statut",
-        "description": "Statut actuel"
-      },
-      "severity": {
-        "label": "Sévérité",
-        "placeholder": "Sélectionnez le niveau de sévérité",
-        "description": "Niveau de sévérité"
-      },
-      "startDate": {
-        "label": "Date de début",
-        "placeholder": "Sélectionnez la date de début",
-        "description": "Quand cela a commencé"
-      },
-      "endDate": {
-        "label": "Date de fin",
-        "placeholder": "Sélectionnez la date de fin",
-        "description": "Quand cela s'est terminé (si applicable)"
-      },
-      "onsetDate": {
-        "label": "Date de survenue",
-        "placeholder": "Quand cela s'est produit pour la première fois",
-        "description": "Quand cela fut découvert pour la première fois"
-      },
-      "phoneNumber": {
-        "label": "Numéro de téléphone",
-        "placeholder": "(555) 123-4567",
-        "description": "Numéro de contact primaire"
-      },
-      "website": {
-        "label": "Site web",
-        "placeholder": "https://www.example.com",
-        "description": "URL du site web"
-      },
-      "fullName": {
-        "label": "Nom complet",
-        "placeholder": "Saisissez le nom complet",
-        "description": "Nom complet"
-      },
-      "email": {
-        "label": "Adresse email",
-        "placeholder": "name@email.com",
-        "description": "Adresse email"
-      },
-      "address": {
-        "label": "Adresse",
-        "placeholder": "Saisissez l'adresse",
-        "description": "Adresse physique"
-      }
-    },
-    "severity": {
-      "mild": "Bénigne - Gêne mineure",
-      "moderate": "Modérée - Symptômes notables",
-      "severe": "Sévère - Réaction significative",
-      "lifeThreatening": "Dangereux - Risque de choc anaphylactique",
-      "critical": "Critique - Danger de mort",
-      "mildImpact": "Bénigne - Impact mineur",
-      "moderateImpact": "Modérée - Impact notable",
-      "severeImpact": "Sévère - Impact significatif"
-    },
-    "status": {
-      "active": "Actif",
-      "inactive": "Inactif",
-      "resolved": "Résolu",
-      "stopped": "Arrêté",
-      "onHold": "En suspens",
-      "completed": "Complété",
-      "planned": "Planifié",
-      "cancelled": "Annulé",
-      "pending": "En attente",
-      "expired": "Expiré"
-    },
-    "statusDescriptions": {
-      "activeAllergic": "Actif - Actuellement allergique",
-      "inactiveAllergic": "Inactif - N'est plus allergique",
-      "resolvedAllergy": "Résolu - Allergie dépassée",
-      "activeCondition": "Actif - Condition en cours",
-      "resolvedCondition": "Résolu - N'est plus présente",
-      "chronicCondition": "Chronique - Condition à long terme",
-      "activeExperiencing": "Actif - En cours",
-      "resolvedExperiencing": "Résolu - Terminé",
-      "recurring": "Récurrent - Va et vient"
-    }
-  },
   "allergies": {
     "title": "Allergies",
     "addNew": "Ajouter une allergie",
@@ -307,11 +188,9 @@
       "other": "Autre"
     },
     "testType": {
-      "routine": "Routine - Analyse standard",
-      "urgent": "Urgente - Analyse rapide",
-      "emergency": "Critique - Priorité maximale",
-      "followUp": "Suivi - Analyse répétée",
-      "screening": "Préventive - Analyse à titre préventif"
+      "label": "Type d'analyse",
+      "placeholder": "Sélectionnez le niveau d'urgence",
+      "description": "Priorité ou urgence de l'analyse"
     },
     "result": {
       "normal": "Normal - Dans la plage de référence",
@@ -344,11 +223,6 @@
       "label": "Catégorie d'analyse",
       "placeholder": "Sélectionnez une catégorie",
       "description": "Type d'analyse"
-    },
-    "testType": {
-      "label": "Type d'analyse",
-      "placeholder": "Sélectionnez le niveau d'urgence",
-      "description": "Priorité ou urgence de l'analyse"
     },
     "testingFacility": {
       "label": "Etablissement d'analyse",

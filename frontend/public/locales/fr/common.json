@@ -87,13 +87,78 @@
     "medicationsAvailableToLink": "{{count}} médicaments pouvant être connectés",
     "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
     "linkedMedications": "Médicaments connectés",
-    "visitWebsite": "Visiter le site web ↗"
+    "visitWebsite": "Visiter le site web ↗",
+    "severity": "Sévérité",
+    "onsetDate": "Date de survenue",
+    "facility": "Etablissement",
+    "phoneNumber": "Numéro de téléphone",
+    "website": "Site web",
+    "fullName": "Nom complet",
+    "relationship": "Lien de parenté",
+    "email": "Adresse email",
+    "address": "Adresse",
+    "patientRecord": "Dossier de patient",
+    "medicalHistory": "Historique médical"
   },
   "fields": {
     "tags": {
       "label": "Tags",
       "placeholder": "Ajouter des tags pour organiser cet enregistrement",
       "description": "Ajouter des tags pour retrouver cet enregistrement plus tard"
+    },
+    "notes": {
+      "label": "Notes",
+      "placeholder": "Informations supplémentaires...",
+      "description": "Tout détail ou note supplémentaire"
+    },
+    "status": {
+      "label": "Statut",
+      "description": "Statut actuel"
+    },
+    "severity": {
+      "label": "Sévérité",
+      "placeholder": "Sélectionnez le niveau de sévérité",
+      "description": "Niveau de sévérité"
+    },
+    "startDate": {
+      "label": "Date de début",
+      "placeholder": "Sélectionnez la date de début",
+      "description": "Quand cela a commencé"
+    },
+    "endDate": {
+      "label": "Date de fin",
+      "placeholder": "Sélectionnez la date de fin",
+      "description": "Quand cela s'est terminé (si applicable)"
+    },
+    "onsetDate": {
+      "label": "Date de survenue",
+      "placeholder": "Quand cela s'est produit pour la première fois",
+      "description": "Quand cela fut découvert pour la première fois"
+    },
+    "phoneNumber": {
+      "label": "Numéro de téléphone",
+      "placeholder": "(555) 123-4567",
+      "description": "Numéro de contact primaire"
+    },
+    "website": {
+      "label": "Site web",
+      "placeholder": "https://www.example.com",
+      "description": "URL du site web"
+    },
+    "fullName": {
+      "label": "Nom complet",
+      "placeholder": "Saisissez le nom complet",
+      "description": "Nom complet"
+    },
+    "email": {
+      "label": "Adresse email",
+      "placeholder": "name@email.com",
+      "description": "Adresse email"
+    },
+    "address": {
+      "label": "Adresse",
+      "placeholder": "Saisissez l'adresse",
+      "description": "Adresse physique"
     }
   },
   "viewToggle": {
@@ -168,7 +233,7 @@
     "vitals": "Rechercher parmi les signes vitaux, notes...",
     "emergencyContacts": "Rechercher parmi les contacts, relations, numéros de téléphone, adresses email...",
     "familyHistory": "Rechercher parmi les membres de la famille, conditions, notes...",
-	"injuries": "Rechercher parmi les blessures, parties du corps, notes, étiquettes...",
+    "injuries": "Rechercher parmi les blessures, parties du corps, notes, étiquettes...",
     "generic": "Rechercher..."
   },
   "messages": {
@@ -1267,7 +1332,7 @@
     }
   },
   "practitioners": {
-   "title": "Professionels de santé",
+    "title": "Professionels de santé",
     "loading": "Chargement des médecins...",
     "errors": {
       "loadFailed": "Echec du chargement des médecins. Veuillez réessayer.",
@@ -1933,5 +1998,38 @@
       "save": "Sauvegarder les changements",
       "saving": "Sauvegarde..."
     }
+  },
+  "severity": {
+    "mild": "Bénigne - Gêne mineure",
+    "moderate": "Modérée - Symptômes notables",
+    "severe": "Sévère - Réaction significative",
+    "lifeThreatening": "Dangereux - Risque de choc anaphylactique",
+    "critical": "Critique - Danger de mort",
+    "mildImpact": "Bénigne - Impact mineur",
+    "moderateImpact": "Modérée - Impact notable",
+    "severeImpact": "Sévère - Impact significatif"
+  },
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif",
+    "resolved": "Résolu",
+    "stopped": "Arrêté",
+    "onHold": "En suspens",
+    "completed": "Complété",
+    "planned": "Planifié",
+    "cancelled": "Annulé",
+    "pending": "En attente",
+    "expired": "Expiré"
+  },
+  "statusDescriptions": {
+    "activeAllergic": "Actif - Actuellement allergique",
+    "inactiveAllergic": "Inactif - N'est plus allergique",
+    "resolvedAllergy": "Résolu - Allergie dépassée",
+    "activeCondition": "Actif - Condition en cours",
+    "resolvedCondition": "Résolu - N'est plus présente",
+    "chronicCondition": "Chronique - Condition à long terme",
+    "activeExperiencing": "Actif - En cours",
+    "resolvedExperiencing": "Résolu - Terminé",
+    "recurring": "Récurrent - Va et vient"
   }
 }

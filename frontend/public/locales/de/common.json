@@ -79,8 +79,6 @@
     "account": "Konto",
     "help": "Hilfe",
     "support": "Support",
-    "notes": "Notizen",
-    "notSpecified": "Nicht angegeben",
     "loadingOption": "{{option}} wird geladen...",
     "addCustom": "+ \"{{value}}\" hinzufügen",
     "ratingStars": "{{count}}/5 Sterne",
@@ -90,13 +88,78 @@
     "medicationsAvailableToLink": "{{count}} Medikamente zum Verknüpfen verfügbar",
     "conditionsAvailableToLink": "{{count}} Erkrankungen zum Verknüpfen verfügbar",
     "linkedMedications": "Verknüpfte Medikamente",
-    "visitWebsite": "Website besuchen ↗"
+    "visitWebsite": "Website besuchen ↗",
+    "severity": "Schweregrad",
+    "onsetDate": "Beginnsdatum",
+    "facility": "Einrichtung",
+    "phoneNumber": "Telefonnummer",
+    "website": "Webseite",
+    "fullName": "Vollständiger Name",
+    "relationship": "Verwandtschaft",
+    "email": "E-Mail-Adresse",
+    "address": "Adresse",
+    "patientRecord": "Patientenakte",
+    "medicalHistory": "Medizinische Vorgeschichte"
   },
   "fields": {
     "tags": {
       "label": "Tags",
       "placeholder": "Tags hinzufügen, um diesen Eintrag zu organisieren",
       "description": "Tags hinzufügen, um diesen Eintrag später zu finden"
+    },
+    "notes": {
+      "label": "Notizen",
+      "placeholder": "Zusätzliche Informationen...",
+      "description": "Weitere Details oder Notizen"
+    },
+    "status": {
+      "label": "Status",
+      "description": "Aktueller Status"
+    },
+    "severity": {
+      "label": "Schweregrad",
+      "placeholder": "Wähle den Schweregrad",
+      "description": "Schweregrad"
+    },
+    "startDate": {
+      "label": "Anfangsdatum",
+      "placeholder": "Wähle das Anfangsdatum",
+      "description": "Wann dies begonnen hat"
+    },
+    "endDate": {
+      "label": "Enddatum",
+      "placeholder": "Wähle das Enddatum",
+      "description": "Wann dies geendet hat (falls zutreffend)"
+    },
+    "onsetDate": {
+      "label": "Beginnsdatum",
+      "placeholder": "Wann trat dies zuerst auf",
+      "description": "Wann dies erstmals entdeckt wurde"
+    },
+    "phoneNumber": {
+      "label": "Telefonnummer",
+      "placeholder": "(555) 123-4567",
+      "description": "Hauptkontaktnummer"
+    },
+    "website": {
+      "label": "Webseite",
+      "placeholder": "https://www.beispiel.de",
+      "description": "Webseiten-URL"
+    },
+    "fullName": {
+      "label": "Vollständiger Name",
+      "placeholder": "Vollen Namen eingeben",
+      "description": "Vollständiger Name"
+    },
+    "email": {
+      "label": "E-Mail-Adresse",
+      "placeholder": "z. B. name@email.com",
+      "description": "E-Mail-Adresse"
+    },
+    "address": {
+      "label": "Adresse",
+      "placeholder": "Adresse eingeben",
+      "description": "Physische Adresse"
     }
   },
   "viewToggle": {
@@ -105,26 +168,213 @@
   },
   "filters": {
     "title": "Filter & Suche",
+    "active": "Aktiv",
     "itemCount": "{{filtered}} von {{total}} Einträgen",
     "moreFilters": "{{count}} weitere Filter",
-    "active": "Aktiv"
+    "clear": "Löschen"
   },
   "vitals": {
+    "title": "Vitalzeichen",
+    "loading": "Vitalzeichen werden geladen...",
+    "noPatientSelected": "Kein Patient Ausgewählt",
+    "selectPatientPrompt": "Bitte wählen Sie einen Patienten aus, um Vitalzeichen anzuzeigen und zu verwalten.",
+    "addNew": "Neue Vitalzeichen Hinzufügen",
+    "addTitle": "Vitalzeichen Hinzufügen",
+    "editTitle": "Vitalzeichen Bearbeiten",
+    "healthSummary": "Gesundheitsübersicht",
+    "summaryDescription": "Neueste Messwerte und Durchschnittswerte • Klicken Sie auf eine Karte, um die Tabelle unten zu filtern",
+    "loadingStats": "Gesundheitsstatistiken werden geladen...",
+    "statsLoadError": "Gesundheitsstatistiken können nicht geladen werden",
+    "filteredBy": "Gefiltert nach",
+    "clearFilter": "Filter löschen",
+    "noDataAvailable": "Keine Vitalzeichendaten verfügbar",
+    "recordVitalsPrompt": "Erfassen Sie Ihre erste Vitalzeichenmessung, um mit der Verfolgung von Gesundheitsmetriken zu beginnen.",
+    "stats": {
+      "bloodPressure": "Blutdruck",
+      "bloodPressureDesc": "Klicken, um Datensätze mit Blutdruck zu filtern",
+      "heartRate": "Herzfrequenz",
+      "heartRateDesc": "Klicken, um Datensätze mit Herzfrequenz zu filtern",
+      "temperature": "Letzte Temperatur",
+      "temperatureDesc": "Klicken, um Datensätze mit Temperatur zu filtern",
+      "weight": "Letztes Gewicht",
+      "weightDesc": "Klicken, um Datensätze mit Gewicht zu filtern",
+      "bmi": "BMI",
+      "bmiDesc": "Body-Mass-Index"
+    },
+    "units": {
+      "mmHg": "mmHg",
+      "bpm": "BPM",
+      "fahrenheit": "°F",
+      "celsius": "°C",
+      "lbs": "lbs",
+      "kg": "kg",
+      "inches": "Zoll",
+      "cm": "cm",
+      "perMin": "/Min",
+      "mgdl": "mg/dL"
+    },
+    "categories": {
+      "low": "Niedrig",
+      "high": "Hoch",
+      "normal": "Normal"
+    },
+    "card": {
+      "recordedDate": "Aufzeichnungsdatum",
+      "location": "Standort",
+      "recordedBy": "Aufgezeichnet Von",
+      "oxygenSaturation": "Sauerstoffsättigung",
+      "notRecorded": "Nicht aufgezeichnet",
+      "title": "Vitalzeichen-Datensatz"
+    },
+    "table": {
+      "date": "Datum",
+      "oxygenSat": "O2-Sättigung",
+      "errorLoading": "Fehler beim Laden der Vitalzeichen",
+      "noRecords": "Keine Vitalzeichen-Datensätze gefunden",
+      "noRecordsDesc": "Vitalzeichen werden hier angezeigt, sobald sie aufgezeichnet wurden"
+    },
+    "modal": {
+      "title": "Vitalzeichen-Details",
+      "basicInfo": "Grundinformationen",
+      "vitalSigns": "Vitalzeichen",
+      "physicalMeasurements": "Körperliche Messungen",
+      "additionalMeasurements": "Zusätzliche Messungen",
+      "recordedDate": "Aufzeichnungsdatum",
+      "deviceUsed": "Verwendetes Gerät",
+      "respiratoryRate": "Atemfrequenz",
+      "height": "Größe",
+      "bloodGlucose": "Blutzucker",
+      "painScale": "Schmerzskala",
+      "notes": "Notizen",
+      "recordedBy": "Aufgezeichnet Von",
+      "practitionerId": "Arzt-ID"
+    },
     "form": {
+      "sections": {
+        "basicInfo": "Grundinformationen",
+        "physicalMeasurements": "Körperliche Messungen",
+        "recordingInfo": "Aufzeichnungsinformationen",
+        "additionalInfo": "Zusätzliche Informationen"
+      },
+      "bloodPressureDesc": "Gemessen in mmHg",
+      "weightDesc": "Gewicht in {{unit}}",
+      "vitalSignsDesc": "Kernphysiologische Messungen",
+      "additionalMeasurementsDesc": "Ergänzende Gesundheitsindikatoren",
+      "contextDesc": "Kontext zu den Messungen",
+      "recordedDateTime": "Messdatum & -zeit",
+      "systolicBP": "Systolischer BD",
+      "diastolicBP": "Diastolischer BD",
+      "measurementLocation": "Messort",
+      "locationPlaceholder": "Wo wurden diese Messungen durchgeführt?",
+      "deviceUsed": "Verwendetes Gerät/Ausrüstung",
+      "devicePlaceholder": "z.B. Digitales Blutdruckmessgerät, Thermometermodell...",
+      "notesPlaceholder": "Zusätzliche Notizen zur Vitalzeichenmessung...",
+      "painScaleUnit": "(0-10)",
       "selectDate": "Datum auswählen",
-      "selectDateTime": "Datum und Uhrzeit auswählen"
+      "selectDateTime": "Datum und Uhrzeit auswählen",
+      "timezoneInfo": "Zeitzoneninformationen",
+      "timesShownIn": "Zeiten angezeigt in {{timezone}}",
+      "healthAlerts": "Gesundheitswarnungen",
+      "patientInfo": "Patienteninformationen",
+      "patientHeight": "Patientengröße: {{height}} Zoll (aus Profil)",
+      "missingPatientInfo": "Fehlende Patienteninformationen",
+      "heightNotSet": "Größe nicht im Patientenprofil festgelegt - BMI-Berechnung nicht verfügbar",
+      "calculatedValues": "Berechnete Werte",
+      "updateVitals": "Vitalzeichen Aktualisieren",
+      "saveVitals": "Vitalzeichen Speichern",
+      "locations": {
+        "home": "Zuhause",
+        "clinic": "Klinik",
+        "hospital": "Krankenhaus",
+        "urgentCare": "Notfallversorgung",
+        "pharmacy": "Apotheke",
+        "ambulatory": "Ambulante Versorgung",
+        "other": "Andere"
+      },
+      "validation": {
+        "dateRequired": "Messdatum und -zeit sind erforderlich",
+        "systolicMin": "Systolischer BD muss mindestens 50 mmHg betragen",
+        "systolicMax": "Systolischer BD darf 300 mmHg nicht überschreiten",
+        "diastolicMin": "Diastolischer BD muss mindestens 30 mmHg betragen",
+        "diastolicMax": "Diastolischer BD darf 200 mmHg nicht überschreiten",
+        "heartRateMin": "Herzfrequenz muss mindestens 30 BPM betragen",
+        "heartRateMax": "Herzfrequenz darf 250 BPM nicht überschreiten",
+        "temperatureMin": "Temperatur muss mindestens {{min}}{{unit}} betragen",
+        "temperatureMax": "Temperatur darf {{max}}{{unit}} nicht überschreiten",
+        "weightMin": "Gewicht muss mindestens {{min}} {{unit}} betragen",
+        "weightMax": "Gewicht darf {{max}} {{unit}} nicht überschreiten",
+        "respiratoryRateMin": "Atemfrequenz muss mindestens 5/Min betragen",
+        "respiratoryRateMax": "Atemfrequenz darf 100/Min nicht überschreiten",
+        "oxygenMin": "Sauerstoffsättigung muss mindestens 50% betragen",
+        "oxygenMax": "Sauerstoffsättigung darf 100% nicht überschreiten",
+        "bloodGlucoseMin": "Blutzucker muss mindestens 20 mg/dL betragen",
+        "bloodGlucoseMax": "Blutzucker darf 800 mg/dL nicht überschreiten",
+        "painScaleMin": "Schmerzskala muss mindestens 0 sein",
+        "painScaleMax": "Schmerzskala darf 10 nicht überschreiten",
+        "deviceMaxLength": "Gerätename darf 100 Zeichen nicht überschreiten",
+        "notesMaxLength": "Notizen dürfen 1000 Zeichen nicht überschreiten"
+      }
     }
   },
   "medications": {
     "title": "Medikamente",
-    "addNew": "+ Neues Medikament hinzufügen",
+    "loading": "Medikamente werden geladen...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "addNew": "Neues Medikament hinzufügen",
     "quickFilter": "Schnellfilter",
     "allTypes": "Alle Typen",
+    "noMedications": "Keine Medikamente oder Nahrungsergänzungsmittel gefunden",
+    "tryAdjustingFilters": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen.",
+    "clickToStart": "Klicken Sie auf \"Neues Medikament hinzufügen\", um zu beginnen.",
+    "fields": {
+      "frequency": "Häufigkeit",
+      "route": "Verabreichungsweg",
+      "purpose": "Zweck",
+      "prescriber": "Verschreibender Arzt",
+      "pharmacy": "Apotheke",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "noIndication": "Keine Indikation angegeben",
+      "viewPractitioner": "Arztdetails anzeigen",
+      "viewPharmacy": "Apothekendetails anzeigen"
+    },
     "types": {
       "prescription": "Verschreibungspflichtig",
       "otc": "Rezeptfrei",
       "supplement": "Nahrungsergänzung/Vitamin",
       "herbal": "Pflanzlich/Natürlich"
+    },
+    "modal": {
+      "details": "Details",
+      "tabs": {
+        "overview": "Übersicht",
+        "dosageRefills": "Dosierung & Nachfüllungen",
+        "notes": "Notizen",
+        "documents": "Dokumente"
+      },
+      "sections": {
+        "basicInfo": "Grundinformationen",
+        "timeline": "Zeitplan",
+        "prescriberPharmacy": "Verschreibender Arzt & Apotheke",
+        "tags": "Tags",
+        "dosageInfo": "Dosierungsinformationen",
+        "additionalNotes": "Zusätzliche Notizen",
+        "sideEffects": "Nebenwirkungen",
+        "attachedDocuments": "Angehängte Dokumente"
+      },
+      "labels": {
+        "medicationName": "Medikamentenname",
+        "purposeIndication": "Zweck/Indikation",
+        "medicationType": "Medikamententyp",
+        "dosage": "Dosierung",
+        "form": "Form"
+      },
+      "notSpecified": "Nicht spezifiziert",
+      "ongoing": "Laufend",
+      "noNotes": "Keine Notizen verfügbar",
+      "noSideEffects": "Keine Nebenwirkungen gemeldet",
+      "editMedication": "Medikament bearbeiten"
     }
   },
   "searchPlaceholders": {
@@ -467,67 +717,6 @@
     "editTitle": "Patienteninformationen bearbeiten",
     "createTitle": "Patientenprofil erstellen"
   },
-  "medications": {
-    "title": "Medikamente",
-    "loading": "Medikamente werden geladen...",
-    "error": "Fehler",
-    "success": "Erfolg",
-    "addNew": "Neues Medikament hinzufügen",
-    "quickFilter": "Schnellfilter",
-    "allTypes": "Alle Typen",
-    "noMedications": "Keine Medikamente oder Nahrungsergänzungsmittel gefunden",
-    "tryAdjustingFilters": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen.",
-    "clickToStart": "Klicken Sie auf \"Neues Medikament hinzufügen\", um zu beginnen.",
-    "fields": {
-      "frequency": "Häufigkeit",
-      "route": "Verabreichungsweg",
-      "purpose": "Zweck",
-      "prescriber": "Verschreibender Arzt",
-      "pharmacy": "Apotheke",
-      "startDate": "Startdatum",
-      "endDate": "Enddatum",
-      "noIndication": "Keine Indikation angegeben",
-      "viewPractitioner": "Arztdetails anzeigen",
-      "viewPharmacy": "Apothekendetails anzeigen"
-    },
-    "types": {
-      "prescription": "Verschreibungspflichtig",
-      "otc": "Rezeptfrei",
-      "supplement": "Nahrungsergänzung/Vitamin",
-      "herbal": "Pflanzlich/Natürlich"
-    },
-    "modal": {
-      "details": "Details",
-      "tabs": {
-        "overview": "Übersicht",
-        "dosageRefills": "Dosierung & Nachfüllungen",
-        "notes": "Notizen",
-        "documents": "Dokumente"
-      },
-      "sections": {
-        "basicInfo": "Grundinformationen",
-        "timeline": "Zeitplan",
-        "prescriberPharmacy": "Verschreibender Arzt & Apotheke",
-        "tags": "Tags",
-        "dosageInfo": "Dosierungsinformationen",
-        "additionalNotes": "Zusätzliche Notizen",
-        "sideEffects": "Nebenwirkungen",
-        "attachedDocuments": "Angehängte Dokumente"
-      },
-      "labels": {
-        "medicationName": "Medikamentenname",
-        "purposeIndication": "Zweck/Indikation",
-        "medicationType": "Medikamententyp",
-        "dosage": "Dosierung",
-        "form": "Form"
-      },
-      "notSpecified": "Nicht spezifiziert",
-      "ongoing": "Laufend",
-      "noNotes": "Keine Notizen verfügbar",
-      "noSideEffects": "Keine Nebenwirkungen gemeldet",
-      "editMedication": "Medikament bearbeiten"
-    }
-  },
   "labResults": {
     "title": "Laborergebnisse",
     "loading": "Laborergebnisse werden geladen...",
@@ -599,17 +788,6 @@
       "manageFiles": "Dateien verwalten",
       "addFilesOptional": "Dateien hinzufügen (Optional)"
     }
-  },
-  "viewToggle": {
-    "cards": "Karten",
-    "table": "Tabelle"
-  },
-  "filters": {
-    "title": "Filter & Suche",
-    "active": "Aktiv",
-    "itemCount": "{{filtered}} von {{total}} Einträgen",
-    "moreFilters": "{{count}} weitere Filter",
-    "clear": "Löschen"
   },
   "testComponents": {
     "title": "Testkomponenten",
@@ -804,250 +982,107 @@
       }
     }
   },
-  "vitals": {
-      "title": "Vitalzeichen",
-      "loading": "Vitalzeichen werden geladen...",
-      "noPatientSelected": "Kein Patient Ausgewählt",
-      "selectPatientPrompt": "Bitte wählen Sie einen Patienten aus, um Vitalzeichen anzuzeigen und zu verwalten.",
-      "addNew": "Neue Vitalzeichen Hinzufügen",
-      "addTitle": "Vitalzeichen Hinzufügen",
-      "editTitle": "Vitalzeichen Bearbeiten",
-      "healthSummary": "Gesundheitsübersicht",
-      "summaryDescription": "Neueste Messwerte und Durchschnittswerte • Klicken Sie auf eine Karte, um die Tabelle unten zu filtern",
-      "loadingStats": "Gesundheitsstatistiken werden geladen...",
-      "statsLoadError": "Gesundheitsstatistiken können nicht geladen werden",
-      "filteredBy": "Gefiltert nach",
-      "clearFilter": "Filter löschen",
-      "noDataAvailable": "Keine Vitalzeichendaten verfügbar",
-      "recordVitalsPrompt": "Erfassen Sie Ihre erste Vitalzeichenmessung, um mit der Verfolgung von Gesundheitsmetriken zu beginnen.",
-      "stats": {
-        "bloodPressure": "Blutdruck",
-        "bloodPressureDesc": "Klicken, um Datensätze mit Blutdruck zu filtern",
-        "heartRate": "Herzfrequenz",
-        "heartRateDesc": "Klicken, um Datensätze mit Herzfrequenz zu filtern",
-        "temperature": "Letzte Temperatur",
-        "temperatureDesc": "Klicken, um Datensätze mit Temperatur zu filtern",
-        "weight": "Letztes Gewicht",
-        "weightDesc": "Klicken, um Datensätze mit Gewicht zu filtern",
-        "bmi": "BMI",
-        "bmiDesc": "Body-Mass-Index"
-      },
-      "units": {
-        "mmHg": "mmHg",
-        "bpm": "BPM",
-        "fahrenheit": "°F",
-        "celsius": "°C",
-        "lbs": "lbs",
-        "kg": "kg",
-        "inches": "Zoll",
-        "cm": "cm",
-        "perMin": "/Min",
-        "mgdl": "mg/dL"
-      },
-      "categories": {
-        "low": "Niedrig",
-        "high": "Hoch",
-        "normal": "Normal"
-      },
-      "card": {
-        "recordedDate": "Aufzeichnungsdatum",
-        "location": "Standort",
-        "recordedBy": "Aufgezeichnet Von",
-        "oxygenSaturation": "Sauerstoffsättigung",
-        "notRecorded": "Nicht aufgezeichnet",
-        "title": "Vitalzeichen-Datensatz"
-      },
-      "table": {
-        "date": "Datum",
-        "oxygenSat": "O2-Sättigung",
-        "errorLoading": "Fehler beim Laden der Vitalzeichen",
-        "noRecords": "Keine Vitalzeichen-Datensätze gefunden",
-        "noRecordsDesc": "Vitalzeichen werden hier angezeigt, sobald sie aufgezeichnet wurden"
-      },
-      "modal": {
-        "title": "Vitalzeichen-Details",
-        "basicInfo": "Grundinformationen",
-        "vitalSigns": "Vitalzeichen",
-        "physicalMeasurements": "Körperliche Messungen",
-        "additionalMeasurements": "Zusätzliche Messungen",
-        "recordedDate": "Aufzeichnungsdatum",
-        "deviceUsed": "Verwendetes Gerät",
-        "respiratoryRate": "Atemfrequenz",
-        "height": "Größe",
-        "bloodGlucose": "Blutzucker",
-        "painScale": "Schmerzskala",
-        "notes": "Notizen",
-        "recordedBy": "Aufgezeichnet Von",
-        "practitionerId": "Arzt-ID"
-      },
-      "form": {
-        "sections": {
-          "basicInfo": "Grundinformationen",
-          "physicalMeasurements": "Körperliche Messungen",
-          "recordingInfo": "Aufzeichnungsinformationen",
-          "additionalInfo": "Zusätzliche Informationen"
-        },
-        "bloodPressureDesc": "Gemessen in mmHg",
-        "weightDesc": "Gewicht in {{unit}}",
-        "vitalSignsDesc": "Kernphysiologische Messungen",
-        "additionalMeasurementsDesc": "Ergänzende Gesundheitsindikatoren",
-        "contextDesc": "Kontext zu den Messungen",
-        "recordedDateTime": "Messdatum & -zeit",
-        "systolicBP": "Systolischer BD",
-        "diastolicBP": "Diastolischer BD",
-        "measurementLocation": "Messort",
-        "locationPlaceholder": "Wo wurden diese Messungen durchgeführt?",
-        "deviceUsed": "Verwendetes Gerät/Ausrüstung",
-        "devicePlaceholder": "z.B. Digitales Blutdruckmessgerät, Thermometermodell...",
-        "notesPlaceholder": "Zusätzliche Notizen zur Vitalzeichenmessung...",
-        "painScaleUnit": "(0-10)",
-        "selectDate": "Datum auswählen",
-        "selectDateTime": "Datum und Uhrzeit auswählen",
-        "timezoneInfo": "Zeitzoneninformationen",
-        "timesShownIn": "Zeiten angezeigt in {{timezone}}",
-        "healthAlerts": "Gesundheitswarnungen",
-        "patientInfo": "Patienteninformationen",
-        "patientHeight": "Patientengröße: {{height}} Zoll (aus Profil)",
-        "missingPatientInfo": "Fehlende Patienteninformationen",
-        "heightNotSet": "Größe nicht im Patientenprofil festgelegt - BMI-Berechnung nicht verfügbar",
-        "calculatedValues": "Berechnete Werte",
-        "updateVitals": "Vitalzeichen Aktualisieren",
-        "saveVitals": "Vitalzeichen Speichern",
-        "locations": {
-          "home": "Zuhause",
-          "clinic": "Klinik",
-          "hospital": "Krankenhaus",
-          "urgentCare": "Notfallversorgung",
-          "pharmacy": "Apotheke",
-          "ambulatory": "Ambulante Versorgung",
-          "other": "Andere"
-        },
-        "validation": {
-          "dateRequired": "Messdatum und -zeit sind erforderlich",
-          "systolicMin": "Systolischer BD muss mindestens 50 mmHg betragen",
-          "systolicMax": "Systolischer BD darf 300 mmHg nicht überschreiten",
-          "diastolicMin": "Diastolischer BD muss mindestens 30 mmHg betragen",
-          "diastolicMax": "Diastolischer BD darf 200 mmHg nicht überschreiten",
-          "heartRateMin": "Herzfrequenz muss mindestens 30 BPM betragen",
-          "heartRateMax": "Herzfrequenz darf 250 BPM nicht überschreiten",
-          "temperatureMin": "Temperatur muss mindestens {{min}}{{unit}} betragen",
-          "temperatureMax": "Temperatur darf {{max}}{{unit}} nicht überschreiten",
-          "weightMin": "Gewicht muss mindestens {{min}} {{unit}} betragen",
-          "weightMax": "Gewicht darf {{max}} {{unit}} nicht überschreiten",
-          "respiratoryRateMin": "Atemfrequenz muss mindestens 5/Min betragen",
-          "respiratoryRateMax": "Atemfrequenz darf 100/Min nicht überschreiten",
-          "oxygenMin": "Sauerstoffsättigung muss mindestens 50% betragen",
-          "oxygenMax": "Sauerstoffsättigung darf 100% nicht überschreiten",
-          "bloodGlucoseMin": "Blutzucker muss mindestens 20 mg/dL betragen",
-          "bloodGlucoseMax": "Blutzucker darf 800 mg/dL nicht überschreiten",
-          "painScaleMin": "Schmerzskala muss mindestens 0 sein",
-          "painScaleMax": "Schmerzskala darf 10 nicht überschreiten",
-          "deviceMaxLength": "Gerätename darf 100 Zeichen nicht überschreiten",
-          "notesMaxLength": "Notizen dürfen 1000 Zeichen nicht überschreiten"
-        }
+  "symptoms": {
+    "title": "Symptome",
+    "noPatientSelected": "Kein Patient Ausgewählt",
+    "selectPatientPrompt": "Bitte wählen Sie einen Patienten aus oder erstellen Sie einen, um Symptome zu verfolgen.",
+    "addSymptom": "Symptom Hinzufügen",
+    "logEpisode": "Episode Protokollieren",
+    "logEpisodeTitle": "Episode Protokollieren",
+    "editEpisode": "Episode Bearbeiten",
+    "addSymptomTitle": "Neues Symptom hinzufügen",
+    "editSymptomTitle": "Symptom bearbeiten",
+    "editEpisodeTitle": "Episode bearbeiten",
+    "confirmDeleteSymptom": "Möchten Sie dieses Symptom und alle seine Vorkommen wirklich löschen?",
+    "chronic": "Chronisch",
+    "category": "Kategorie",
+    "first": "Erste",
+    "last": "Letzte",
+    "episode": "Episode",
+    "episodes": "Episoden",
+    "commonTriggers": "Häufige Auslöser",
+    "moreCount": "+{{count}} weitere",
+    "noRecords": "Noch keine Symptome aufgezeichnet",
+    "noRecordsPrompt": "Klicken Sie auf \"Symptom Hinzufügen\", um ein neues Symptom zu verfolgen",
+    "occurrence": {
+      "additionalNotes": {
+        "label": "Zusätzliche Notizen",
+        "placeholder": "Zusätzliche Details zu dieser Episode...",
+        "description": "Alle anderen relevanten Informationen zu diesem Vorkommnis"
       }
     },
-    "symptoms": {
-      "title": "Symptome",
-      "noPatientSelected": "Kein Patient Ausgewählt",
-      "selectPatientPrompt": "Bitte wählen Sie einen Patienten aus oder erstellen Sie einen, um Symptome zu verfolgen.",
-      "addSymptom": "Symptom Hinzufügen",
-      "logEpisode": "Episode Protokollieren",
-      "logEpisodeTitle": "Episode Protokollieren",
-      "editEpisode": "Episode Bearbeiten",
-      "addSymptomTitle": "Neues Symptom hinzufügen",
-      "editSymptomTitle": "Symptom bearbeiten",
-      "editEpisodeTitle": "Episode bearbeiten",
-      "confirmDeleteSymptom": "Möchten Sie dieses Symptom und alle seine Vorkommen wirklich löschen?",
-      "chronic": "Chronisch",
-      "category": "Kategorie",
-      "first": "Erste",
-      "last": "Letzte",
-      "episode": "Episode",
-      "episodes": "Episoden",
-      "commonTriggers": "Häufige Auslöser",
-      "moreCount": "+{{count}} weitere",
-      "noRecords": "Noch keine Symptome aufgezeichnet",
-      "noRecordsPrompt": "Klicken Sie auf \"Symptom Hinzufügen\", um ein neues Symptom zu verfolgen",
-      "occurrence": {
-        "additionalNotes": {
-          "label": "Zusätzliche Notizen",
-          "placeholder": "Zusätzliche Details zu dieser Episode...",
-          "description": "Alle anderen relevanten Informationen zu diesem Vorkommnis"
-        }
-      },
-      "tabs": {
-        "list": "Liste",
-        "timeline": "Zeitachse",
-        "calendar": "Kalender"
-      },
-      "timeline": {
-        "title": "Symptomverlauf",
-        "noEpisodes": "In diesem Zeitraum wurden keine Symptom-Episoden aufgezeichnet",
-        "recorded": "aufgezeichnet",
-        "filters": {
-          "allDates": "Alle Daten",
-          "lastWeek": "Letzte Woche",
-          "lastMonth": "Letzter Monat",
-          "last3Months": "Letzte 3 Monate",
-          "lastYear": "Letztes Jahr"
-        }
-      },
-      "calendar": {
-        "title": "Symptomkalender",
-        "ongoing": "Andauernd",
-        "noEpisodes": "Diesen Monat wurden keine Symptom-Episoden aufgezeichnet",
-        "episodesOn": "Symptom-Episoden am {{date}}",
-        "noOccurrences": "Für dieses Datum wurden keine Vorkommnisse gefunden",
-        "pain": "Schmerz",
-        "viewSymptom": "Symptom Ansehen",
-        "duration": "Dauer",
-        "location": "Ort",
-        "time": "Uhrzeit",
-        "timeOfDay": "Tageszeit",
-        "resolved": "Aufgelöst",
-        "occurrenceId": "Vorkommnis-ID",
-        "weekDays": {
-          "sun": "So",
-          "mon": "Mo",
-          "tue": "Di",
-          "wed": "Mi",
-          "thu": "Do",
-          "fri": "Fr",
-          "sat": "Sa"
-        }
-      },
-      "viewModal": {
-        "title": "{{name}} - Details",
-        "confirmDeleteEpisode": "Sind Sie sicher, dass Sie diese Episode löschen möchten?",
-        "basicInfo": "Grundlegende Informationen",
-        "symptomName": "Symptomname",
-        "notSpecified": "Nicht angegeben",
-        "type": "Typ",
-        "acute": "Akut",
-        "timeline": "Zeitverlauf",
-        "noEpisodesLogged": "Keine Episoden protokolliert",
-        "totalEpisodes": "Gesamte Episoden",
-        "episodeHistory": "Episodenverlauf",
-        "logNewEpisode": "Neue Episode Protokollieren",
-        "noEpisodesYet": "Noch keine Episoden protokolliert",
-        "logFirstEpisode": "Erste Episode Protokollieren",
-        "time": "Zeit",
-        "impact": "Auswirkung",
-        "triggers": "Auslöser",
-        "relief": "Linderung",
-        "generalNotes": "Allgemeine Notizen",
-        "noNotesProvided": "Keine Notizen vorhanden",
-        "attachedDocuments": "Angehängte Dokumente",
-        "deleteSymptom": "Symptom Löschen",
-        "editSymptom": "Symptom Bearbeiten",
-        "tabs": {
-          "overview": "Übersicht",
-          "episodes": "Episoden ({{count}})",
-          "notes": "Notizen",
-          "documents": "Dokumente"
-        }
+    "tabs": {
+      "list": "Liste",
+      "timeline": "Zeitachse",
+      "calendar": "Kalender"
+    },
+    "timeline": {
+      "title": "Symptomverlauf",
+      "noEpisodes": "In diesem Zeitraum wurden keine Symptom-Episoden aufgezeichnet",
+      "recorded": "aufgezeichnet",
+      "filters": {
+        "allDates": "Alle Daten",
+        "lastWeek": "Letzte Woche",
+        "lastMonth": "Letzter Monat",
+        "last3Months": "Letzte 3 Monate",
+        "lastYear": "Letztes Jahr"
       }
+    },
+    "calendar": {
+      "title": "Symptomkalender",
+      "ongoing": "Andauernd",
+      "noEpisodes": "Diesen Monat wurden keine Symptom-Episoden aufgezeichnet",
+      "episodesOn": "Symptom-Episoden am {{date}}",
+      "noOccurrences": "Für dieses Datum wurden keine Vorkommnisse gefunden",
+      "pain": "Schmerz",
+      "viewSymptom": "Symptom Ansehen",
+      "duration": "Dauer",
+      "location": "Ort",
+      "time": "Uhrzeit",
+      "timeOfDay": "Tageszeit",
+      "resolved": "Aufgelöst",
+      "occurrenceId": "Vorkommnis-ID",
+      "weekDays": {
+        "sun": "So",
+        "mon": "Mo",
+        "tue": "Di",
+        "wed": "Mi",
+        "thu": "Do",
+        "fri": "Fr",
+        "sat": "Sa"
+      }
+    },
+    "viewModal": {
+      "title": "{{name}} - Details",
+      "confirmDeleteEpisode": "Sind Sie sicher, dass Sie diese Episode löschen möchten?",
+      "basicInfo": "Grundlegende Informationen",
+      "symptomName": "Symptomname",
+      "notSpecified": "Nicht angegeben",
+      "type": "Typ",
+      "acute": "Akut",
+      "timeline": "Zeitverlauf",
+      "noEpisodesLogged": "Keine Episoden protokolliert",
+      "totalEpisodes": "Gesamte Episoden",
+      "episodeHistory": "Episodenverlauf",
+      "logNewEpisode": "Neue Episode Protokollieren",
+      "noEpisodesYet": "Noch keine Episoden protokolliert",
+      "logFirstEpisode": "Erste Episode Protokollieren",
+      "time": "Zeit",
+      "impact": "Auswirkung",
+      "triggers": "Auslöser",
+      "relief": "Linderung",
+      "generalNotes": "Allgemeine Notizen",
+      "noNotesProvided": "Keine Notizen vorhanden",
+      "attachedDocuments": "Angehängte Dokumente",
+      "deleteSymptom": "Symptom Löschen",
+      "editSymptom": "Symptom Bearbeiten",
+      "tabs": {
+        "overview": "Übersicht",
+        "episodes": "Episoden ({{count}})",
+        "notes": "Notizen",
+        "documents": "Dokumente"
+      }
+    }
   },
   "treatments": {
     "title": "Behandlungen",
@@ -2251,5 +2286,38 @@
       "exportComplete": "Export erfolgreich abgeschlossen! Ihre {{format}}-Datei wurde heruntergeladen.",
       "bulkExportComplete": "Massenexport erfolgreich abgeschlossen! Ihre ZIP-Datei mit {{count}} Datentypen wurde heruntergeladen."
     }
+  },
+  "severity": {
+    "mild": "Leicht - Geringe Beschwerden",
+    "moderate": "Mäßig - Wahrnehmbare Symptome",
+    "severe": "Schwer - Bedeutende Reaktion",
+    "lifeThreatening": "Lebensbedrohlich - Anaphylaxierisiko",
+    "critical": "Kritisch - Lebensbedrohlich",
+    "mildImpact": "Leicht - Geringe Beeinträchtigung",
+    "moderateImpact": "Mäßig - Wahrnehmbare Beeinträchtigung",
+    "severeImpact": "Schwer - Bedeutende Beeinträchtigung"
+  },
+  "status": {
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "resolved": "Behoben",
+    "stopped": "Beendet",
+    "onHold": "Pausiert",
+    "completed": "Abgeschlossen",
+    "planned": "Geplant",
+    "cancelled": "Abgesagt",
+    "pending": "Ausstehend",
+    "expired": "Abgelaufen"
+  },
+  "statusDescriptions": {
+    "activeAllergic": "Aktiv - Derzeit allergisch",
+    "inactiveAllergic": "Inaktiv - Nicht mehr allergisch",
+    "resolvedAllergy": "Behoben - Allergie überwunden",
+    "activeCondition": "Aktiv - Laufende Erkrankung",
+    "resolvedCondition": "Behoben - Nicht mehr vorhanden",
+    "chronicCondition": "Chronisch - Langfristige Erkrankung",
+    "activeExperiencing": "Aktiv - Derzeit betroffen",
+    "resolvedExperiencing": "Behoben - Nicht mehr betroffen",
+    "recurring": "Wiederkehrend - Kommt und geht"
   }
 }

@@ -33,7 +33,7 @@ import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgres
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
-import { translateFieldConfig } from '../../../utils/formFieldTranslations';
+import { translateField } from '../../../utils/translateField';
 
 const InsuranceFormWrapper = ({
   isOpen,
@@ -367,7 +367,7 @@ const InsuranceFormWrapper = ({
     }
 
     // Translate field configuration
-    const translatedField = translateFieldConfig(field, tMedical);
+    const translatedField = translateField(field, tMedical);
 
     const commonProps = {
       key: translatedField.name,
