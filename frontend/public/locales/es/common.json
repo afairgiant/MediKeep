@@ -8,6 +8,8 @@
     "submit": "Enviar",
     "add": "Añadir",
     "addNew": "Añadir nuevo",
+    "create": "Crear",
+    "update": "Actualizar",
     "remove": "Retirar",
     "confirm": "Confirmar",
     "back": "Atrás",
@@ -153,6 +155,108 @@
     "next": "Siguiente",
     "first": "Primero",
     "last": "Último"
+  },
+  "symptoms": {
+    "title": "Síntomas",
+    "noPatientSelected": "Ningún paciente seleccionado",
+    "selectPatientPrompt": "Por favor seleccione o cree un paciente para realizar el seguimiento de síntomas.",
+    "addSymptom": "Añadir síntoma",
+    "addSymptomTitle": "Añadir nuevo síntoma",
+    "editSymptomTitle": "Editar síntoma",
+    "logEpisode": "Registrar episodio",
+    "logEpisodeTitle": "Registrar episodio",
+    "editEpisode": "Editar episodio",
+    "editEpisodeTitle": "Editar episodio",
+    "confirmDeleteSymptom": "¿Está seguro de que desea eliminar este síntoma y todas sus ocurrencias?",
+    "chronic": "Crónico",
+    "category": "Categoría",
+    "first": "Primero",
+    "last": "Último",
+    "episode": "episodio",
+    "episodes": "episodios",
+    "commonTriggers": "Desencadenantes comunes",
+    "moreCount": "+{{count}} más",
+    "noRecords": "Aún no se han registrado síntomas",
+    "noRecordsPrompt": "Haga clic en \"Añadir síntoma\" para comenzar a seguir un nuevo síntoma",
+    "occurrence": {
+      "additionalNotes": {
+        "label": "Notas adicionales",
+        "placeholder": "Detalles adicionales sobre este episodio...",
+        "description": "Cualquier otra información relevante sobre esta ocurrencia"
+      }
+    },
+    "tabs": {
+      "list": "Lista",
+      "timeline": "Línea de tiempo",
+      "calendar": "Calendario"
+    },
+    "timeline": {
+      "title": "Línea de tiempo de síntomas",
+      "noEpisodes": "No se registraron episodios de síntomas en este período",
+      "recorded": "registrado(s)",
+      "filters": {
+        "allDates": "Todas las fechas",
+        "lastWeek": "Última semana",
+        "lastMonth": "Último mes",
+        "last3Months": "Últimos 3 meses",
+        "lastYear": "Último año"
+      }
+    },
+    "calendar": {
+      "title": "Calendario de síntomas",
+      "ongoing": "En curso",
+      "noEpisodes": "No se registraron episodios de síntomas este mes",
+      "episodesOn": "Episodios de síntomas el {{date}}",
+      "noOccurrences": "No se encontraron ocurrencias para esta fecha",
+      "pain": "Dolor",
+      "viewSymptom": "Ver síntoma",
+      "duration": "Duración",
+      "location": "Ubicación",
+      "time": "Hora",
+      "timeOfDay": "Hora del día",
+      "resolved": "Resuelto",
+      "occurrenceId": "ID de ocurrencia",
+      "weekDays": {
+        "sun": "Dom",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mié",
+        "thu": "Jue",
+        "fri": "Vie",
+        "sat": "Sáb"
+      }
+    },
+    "viewModal": {
+      "title": "{{name}} - Detalles",
+      "confirmDeleteEpisode": "¿Está seguro de que desea eliminar este episodio?",
+      "basicInfo": "Información básica",
+      "symptomName": "Nombre del síntoma",
+      "notSpecified": "No especificado",
+      "type": "Tipo",
+      "acute": "Agudo",
+      "timeline": "Línea de tiempo",
+      "noEpisodesLogged": "No se han registrado episodios",
+      "totalEpisodes": "Episodios totales",
+      "episodeHistory": "Historial de episodios",
+      "logNewEpisode": "Registrar nuevo episodio",
+      "noEpisodesYet": "Aún no se han registrado episodios",
+      "logFirstEpisode": "Registrar primer episodio",
+      "time": "Hora",
+      "impact": "Impacto",
+      "triggers": "Desencadenantes",
+      "relief": "Alivio",
+      "generalNotes": "Notas generales",
+      "noNotesProvided": "No se proporcionaron notas",
+      "attachedDocuments": "Documentos adjuntos",
+      "deleteSymptom": "Eliminar síntoma",
+      "editSymptom": "Editar síntoma",
+      "tabs": {
+        "overview": "Resumen",
+        "episodes": "Episodios ({{count}})",
+        "notes": "Notas",
+        "documents": "Documentos"
+      }
+    }
   },
   "conditions": {
     "title": "Condiciones médicas",

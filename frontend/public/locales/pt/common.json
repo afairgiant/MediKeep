@@ -424,6 +424,7 @@
     "timeline": {
       "title": "Linha do Tempo dos Sintomas",
       "noEpisodes": "Nenhum episódio de sintoma registrado neste período",
+      "recorded": "registrado(s)",
       "filters": {
         "allDates": "Todas as Datas",
         "lastWeek": "Última Semana",
@@ -442,6 +443,7 @@
       "viewSymptom": "Ver Sintoma",
       "duration": "Duração",
       "location": "Localização",
+      "time": "Hora",
       "timeOfDay": "Hora do Dia",
       "resolved": "Resolvido",
       "occurrenceId": "ID da Ocorrência",
