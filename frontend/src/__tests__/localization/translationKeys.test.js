@@ -3,6 +3,9 @@
  *
  * Ensures all translation keys are consistent across language files
  * and that no keys are missing between locales.
+ *
+ * Covers all 6 supported locales (en, de, es, fr, it, pt)
+ * and all 5 namespaces (common, medical, errors, navigation, notifications).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -53,8 +56,8 @@ const findMissingKeys = (baseKeys, compareKeys) => {
 };
 
 describe('Translation Key Consistency', () => {
-  const locales = ['en', 'de', 'fr'];
-  const namespaces = ['common', 'medical', 'errors', 'navigation'];
+  const locales = ['en', 'de', 'es', 'fr', 'it', 'pt'];
+  const namespaces = ['common', 'medical', 'errors', 'navigation', 'notifications'];
 
   describe('All language files exist', () => {
     locales.forEach(locale => {
@@ -69,52 +72,95 @@ describe('Translation Key Consistency', () => {
   });
 
   describe('Key consistency between languages', () => {
+    const nonEnLocales = locales.filter(l => l !== 'en');
+
     namespaces.forEach(namespace => {
-      it(`should have matching keys in all languages for ${namespace}`, () => {
-        const enTranslations = loadTranslations('en', namespace);
-        const deTranslations = loadTranslations('de', namespace);
-        const frTranslations = loadTranslations('fr', namespace);
+      nonEnLocales.forEach(locale => {
+        it(`should have matching keys in ${locale.toUpperCase()} for ${namespace}`, () => {
+          const enTranslations = loadTranslations('en', namespace);
+          const localeTranslations = loadTranslations(locale, namespace);
 
-        if (!enTranslations || !deTranslations || !frTranslations) {
-          return; // Skip if namespace doesn't exist
-        }
+          if (!enTranslations || !localeTranslations) {
+            return; // Skip if namespace doesn't exist
+          }
 
-        const enKeys = extractKeys(enTranslations).sort();
-        const deKeys = extractKeys(deTranslations).sort();
-        const frKeys = extractKeys(frTranslations).sort();
+          const enKeys = extractKeys(enTranslations).sort();
+          const localeKeys = extractKeys(localeTranslations).sort();
 
-        // Check DE vs EN
-        const missingInDe = findMissingKeys(enKeys, deKeys);
-        const extraInDe = findMissingKeys(deKeys, enKeys);
+          const missing = findMissingKeys(enKeys, localeKeys);
+          const extra = findMissingKeys(localeKeys, enKeys);
 
-        // Check FR vs EN
-        const missingInFr = findMissingKeys(enKeys, frKeys);
-        const extraInFr = findMissingKeys(frKeys, enKeys);
+          if (missing.length > 0) {
+            console.warn(`⚠️  Missing in ${locale.toUpperCase()} (${namespace}):`, missing);
+          }
+          if (extra.length > 0) {
+            console.warn(`⚠️  Extra in ${locale.toUpperCase()} (${namespace}):`, extra);
+          }
 
-        // Report missing keys
-        if (missingInDe.length > 0) {
-          console.warn(`⚠️  Missing in DE (${namespace}):`, missingInDe);
-        }
-        if (extraInDe.length > 0) {
-          console.warn(`⚠️  Extra in DE (${namespace}):`, extraInDe);
-        }
-        if (missingInFr.length > 0) {
-          console.warn(`⚠️  Missing in FR (${namespace}):`, missingInFr);
-        }
-        if (extraInFr.length > 0) {
-          console.warn(`⚠️  Extra in FR (${namespace}):`, extraInFr);
-        }
-
-        // Test assertions
-        expect(missingInDe, `Missing keys in DE/${namespace}.json`).toEqual([]);
-        expect(extraInDe, `Extra keys in DE/${namespace}.json`).toEqual([]);
-        expect(missingInFr, `Missing keys in FR/${namespace}.json`).toEqual([]);
-        expect(extraInFr, `Extra keys in FR/${namespace}.json`).toEqual([]);
+          expect(missing, `Missing keys in ${locale.toUpperCase()}/${namespace}.json`).toEqual([]);
+          expect(extra, `Extra keys in ${locale.toUpperCase()}/${namespace}.json`).toEqual([]);
+        });
       });
     });
   });
 
-  describe('New PR #350 features', () => {
+  describe('No empty translation values', () => {
+    locales.forEach(locale => {
+      namespaces.forEach(namespace => {
+        it(`should not have empty values in ${locale}/${namespace}.json`, () => {
+          const translations = loadTranslations(locale, namespace);
+          if (!translations) return;
+
+          const checkForEmptyValues = (obj, keyPath = '') => {
+            for (const key in obj) {
+              const currentPath = keyPath ? `${keyPath}.${key}` : key;
+
+              if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+                checkForEmptyValues(obj[key], currentPath);
+              } else if (typeof obj[key] === 'string') {
+                expect(
+                  obj[key].trim().length,
+                  `Empty value at ${currentPath} in ${locale}/${namespace}.json`
+                ).toBeGreaterThan(0);
+              }
+            }
+          };
+
+          checkForEmptyValues(translations);
+        });
+      });
+    });
+  });
+
+  describe('Valid JSON structure', () => {
+    locales.forEach(locale => {
+      namespaces.forEach(namespace => {
+        it(`should have valid JSON in ${locale}/${namespace}.json`, () => {
+          const filePath = path.join(
+            __dirname,
+            '../../../public/locales',
+            locale,
+            `${namespace}.json`
+          );
+
+          if (!fs.existsSync(filePath)) return;
+
+          const content = fs.readFileSync(filePath, 'utf8');
+
+          // Should not throw
+          expect(() => JSON.parse(content)).not.toThrow();
+
+          // Should be a non-null object
+          const parsed = JSON.parse(content);
+          expect(parsed).not.toBeNull();
+          expect(typeof parsed).toBe('object');
+          expect(Array.isArray(parsed)).toBe(false);
+        });
+      });
+    });
+  });
+
+  describe('Feature-specific key existence', () => {
     it('should have modal translations for medication/condition linking', () => {
       locales.forEach(locale => {
         const common = loadTranslations(locale, 'common');
@@ -219,33 +265,37 @@ describe('Translation Key Consistency', () => {
         expect(errors.relationships.addMedicationFailed).toBeDefined();
       });
     });
-  });
 
-  describe('No empty translation values', () => {
-    locales.forEach(locale => {
-      namespaces.forEach(namespace => {
-        it(`should not have empty values in ${locale}/${namespace}.json`, () => {
-          const translations = loadTranslations(locale, namespace);
-          if (!translations) return;
+    // Notification toast tests are EN-only until non-English notification files are populated.
+    // The key consistency tests above will catch missing keys once translations are added.
+    it('should have notification toast translations for auth (EN)', () => {
+      const notifications = loadTranslations('en', 'notifications');
 
-          const checkForEmptyValues = (obj, path = '') => {
-            for (const key in obj) {
-              const currentPath = path ? `${path}.${key}` : key;
+      expect(notifications.toasts).toBeDefined();
+      expect(notifications.toasts.auth).toBeDefined();
+      expect(notifications.toasts.auth.sessionExpired).toBeDefined();
+      expect(notifications.toasts.auth.loginSuccess).toBeDefined();
+      expect(notifications.toasts.auth.loginFailed).toBeDefined();
+      expect(notifications.toasts.auth.logoutSuccess).toBeDefined();
+      expect(notifications.toasts.auth.loginRequired).toBeDefined();
+    });
 
-              if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-                checkForEmptyValues(obj[key], currentPath);
-              } else if (typeof obj[key] === 'string') {
-                expect(
-                  obj[key].trim().length,
-                  `Empty value at ${currentPath} in ${locale}/${namespace}.json`
-                ).toBeGreaterThan(0);
-              }
-            }
-          };
+    it('should have notification toast translations for patient operations (EN)', () => {
+      const notifications = loadTranslations('en', 'notifications');
 
-          checkForEmptyValues(translations);
-        });
-      });
+      expect(notifications.toasts.patient).toBeDefined();
+      expect(notifications.toasts.patient.nowViewing).toBeDefined();
+      expect(notifications.toasts.patient.deletedSuccess).toBeDefined();
+      expect(notifications.toasts.patient.createdSuccess).toBeDefined();
+    });
+
+    it('should have notification toast translations for vitals (EN)', () => {
+      const notifications = loadTranslations('en', 'notifications');
+
+      expect(notifications.toasts.vitals).toBeDefined();
+      expect(notifications.toasts.vitals.savedSuccess).toBeDefined();
+      expect(notifications.toasts.vitals.deleteSuccess).toBeDefined();
+      expect(notifications.toasts.vitals.deleteFailed).toBeDefined();
     });
   });
 });

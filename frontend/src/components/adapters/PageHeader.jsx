@@ -26,7 +26,6 @@ import {
 } from '@tabler/icons-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTranslation } from 'react-i18next';
 import LayoutPageHeader from '../layout/PageHeader';
 import LanguageSwitcher from '../shared/LanguageSwitcher';
 
