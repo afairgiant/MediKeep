@@ -46,8 +46,7 @@ const InsuranceFormWrapper = ({
   children,
   onFileUploadComplete,
 }) => {
-  const { t } = useTranslation('common');
-  const { t: tMedical } = useTranslation('medical');
+  const { t } = useTranslation(['medical', 'common']);
 
   // Get insurance form fields
   const fields = getFormFields('insurance');
@@ -367,7 +366,7 @@ const InsuranceFormWrapper = ({
     }
 
     // Translate field configuration
-    const translatedField = translateField(field, tMedical);
+    const translatedField = translateField(field, t);
 
     const commonProps = {
       key: translatedField.name,

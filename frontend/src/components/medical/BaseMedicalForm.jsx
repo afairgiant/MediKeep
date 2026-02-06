@@ -92,8 +92,7 @@ const BaseMedicalForm = ({
   const responsiveState = responsive || responsiveFromHook;
 
   // Translation hooks
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
 
   const {
     handleTextInputChange,
@@ -192,7 +191,7 @@ const BaseMedicalForm = ({
         clearable={clearable}
         maxDropdownHeight={dropdownHeight}
         disabled={isFieldLoading}
-        placeholder={isFieldLoading ? tCommon('labels.loadingOption', { option: dynamicOptionsKey }) : baseProps.placeholder}
+        placeholder={isFieldLoading ? t('common:labels.loadingOption', { option: dynamicOptionsKey }) : baseProps.placeholder}
         limit={itemLimit}
         comboboxProps={{ withinPortal: true, zIndex: 3000 }}
       />
@@ -379,7 +378,7 @@ const BaseMedicalForm = ({
             value={formData[name] || ''}
             maxDropdownHeight={getDropdownHeight()}
             disabled={isFieldLoading}
-            placeholder={isFieldLoading ? tCommon('labels.loadingOption', { option: dynamicOptionsKey }) : placeholder}
+            placeholder={isFieldLoading ? t('common:labels.loadingOption', { option: dynamicOptionsKey }) : placeholder}
             limit={50}
             comboboxProps={{ withinPortal: true, zIndex: 3000 }}
           />
@@ -472,7 +471,7 @@ const BaseMedicalForm = ({
                     combobox.closeDropdown();
                     setSearch(value || '');
                   }}
-                  placeholder={isFieldLoading ? tCommon('labels.loadingOption', { option: dynamicOptionsKey }) : placeholder}
+                  placeholder={isFieldLoading ? t('common:labels.loadingOption', { option: dynamicOptionsKey }) : placeholder}
                   rightSectionPointerEvents="none"
                   disabled={isFieldLoading}
                 />
@@ -488,7 +487,7 @@ const BaseMedicalForm = ({
                 >
                   {search.trim() && !exactOptionMatch && (
                     <Combobox.Option value="$create" style={{ fontWeight: 'bold', borderBottom: '1px solid #e9ecef' }}>
-                      {tCommon('labels.addCustom', { value: search })}
+                      {t('common:labels.addCustom', { value: search })}
                     </Combobox.Option>
                   )}
                   {options}
@@ -514,7 +513,7 @@ const BaseMedicalForm = ({
                 size="lg"
               />
               <Text size="sm" c="dimmed">
-                {formData[name] ? tCommon('labels.ratingStars', { count: formData[name] }) : tCommon('labels.noRating')}
+                {formData[name] ? t('common:labels.ratingStars', { count: formData[name] }) : t('common:labels.noRating')}
               </Text>
             </div>
             {description && (
@@ -714,7 +713,7 @@ const BaseMedicalForm = ({
                 justifyContent: 'center',
               }}
             >
-              {tCommon('buttons.cancel')}
+              {t('common:buttons.cancel')}
             </Button>
             <Button
               type="submit"

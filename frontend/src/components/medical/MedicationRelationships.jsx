@@ -1,9 +1,5 @@
-import logger from '../../services/logger';
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { apiService } from '../../services/api';
-import { navigateToEntity } from '../../utils/linkNavigation';
 import {
   Badge,
   Button,
@@ -26,6 +22,9 @@ import {
   IconInfoCircle,
   IconPill,
 } from '@tabler/icons-react';
+import { apiService } from '../../services/api';
+import { navigateToEntity } from '../../utils/linkNavigation';
+import logger from '../../services/logger';
 
 const INITIAL_RELATIONSHIP_STATE = {
   medication_ids: [],
@@ -40,8 +39,7 @@ const MedicationRelationships = ({
   navigate,
   isViewMode = false,
 }) => {
-  const { t } = useTranslation('common');
-  const { t: tErrors } = useTranslation('errors');
+  const { t } = useTranslation(['common', 'errors']);
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -77,7 +75,7 @@ const MedicationRelationships = ({
 
   const handleAddRelationship = async () => {
     if (!newRelationship.medication_ids || newRelationship.medication_ids.length === 0) {
-      setError(tErrors('form.medicationNotSelected'));
+      setError(t('errors:form.medicationNotSelected'));
       return;
     }
 
@@ -108,7 +106,7 @@ const MedicationRelationships = ({
       resetAndCloseModal();
     } catch (err) {
       logger.error('Error adding medication relationship:', err);
-      setError(err.response?.data?.detail || err.message || tErrors('relationships.addMedicationFailed'));
+      setError(err.response?.data?.detail || err.message || t('errors:relationships.addMedicationFailed'));
     } finally {
       setLoading(false);
     }

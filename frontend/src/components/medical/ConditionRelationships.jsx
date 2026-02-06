@@ -35,8 +35,7 @@ const ConditionRelationships = ({
   navigate,
   isViewMode = false, // New prop to distinguish between view and edit modes
 }) => {
-  const { t } = useTranslation('common');
-  const { t: tErrors } = useTranslation('errors');
+  const { t } = useTranslation(['common', 'errors']);
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -62,7 +61,7 @@ const ConditionRelationships = ({
 
   const handleAddRelationship = async () => {
     if (!newRelationship.condition_id) {
-      setError(tErrors('form.conditionNotSelected'));
+      setError(t('errors:form.conditionNotSelected'));
       return;
     }
 
@@ -85,7 +84,7 @@ const ConditionRelationships = ({
       setNewRelationship({ condition_id: '', relevance_note: '' });
       setShowAddModal(false);
     } catch (err) {
-      setError(err.message || tErrors('relationships.addConditionFailed'));
+      setError(err.message || t('errors:relationships.addConditionFailed'));
     } finally {
       setLoading(false);
     }

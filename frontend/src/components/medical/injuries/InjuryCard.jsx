@@ -25,8 +25,7 @@ const InjuryCard = ({
   fileCountLoading = false,
   onError,
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -151,13 +150,13 @@ const InjuryCard = ({
       {
         label: t('injuries.bodyPart.label', 'Body Part'),
         value: injury.body_part,
-        render: (value) => value || tCommon('labels.unknown', 'Not specified'),
+        render: (value) => value || t('common:labels.unknown', 'Not specified'),
       },
       {
         label: t('injuries.dateOfInjury.label', 'Date of Injury'),
         value: injury.date_of_injury,
         render: (value) =>
-          value ? formatLongDate(value) : tCommon('labels.unknown', 'Not specified'),
+          value ? formatLongDate(value) : t('common:labels.unknown', 'Not specified'),
       },
     ].filter((field) => field.value); // Only show fields with values
 

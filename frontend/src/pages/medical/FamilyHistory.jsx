@@ -372,7 +372,7 @@ const FamilyHistory = () => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
-      setError(t('errors.patientNotAvailable', 'Patient information not available'));
+      setError(t('errors:patientNotAvailable', 'Patient information not available'));
       return;
     }
 

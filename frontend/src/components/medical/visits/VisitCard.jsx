@@ -19,8 +19,7 @@ const VisitCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -37,7 +36,7 @@ const VisitCard = ({
   };
 
   const getPractitionerDisplay = (practitionerId) => {
-    if (!practitionerId) return tCommon('visits.card.noPractitionerAssigned', 'No practitioner assigned');
+    if (!practitionerId) return t('common:visits.card.noPractitionerAssigned', 'No practitioner assigned');
 
     const practitioner = practitioners.find(
       p => p.id === parseInt(practitionerId)
@@ -45,7 +44,7 @@ const VisitCard = ({
     if (practitioner) {
       return `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
     }
-    return tCommon('visits.card.practitionerId', 'Practitioner ID: {{id}}', { id: practitionerId });
+    return t('common:visits.card.practitionerId', 'Practitioner ID: {{id}}', { id: practitionerId });
   };
 
   const getConditionDetails = (conditionId) => {
@@ -117,15 +116,15 @@ const VisitCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: tCommon('labels.date'),
+        label: t('common:labels.date'),
         value: visit.date,
-        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
       },
       {
         label: t('visits.attendingPractitioner.label'),
         value: visit.practitioner_id,
         render: (value) => {
-          if (!value) return tCommon('visits.card.noPractitionerAssigned', 'No practitioner assigned');
+          if (!value) return t('common:visits.card.noPractitionerAssigned', 'No practitioner assigned');
 
           const practitionerDisplay = getPractitionerDisplay(value);
           if (practitioner) {
@@ -135,7 +134,7 @@ const VisitCard = ({
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => navigateToEntity('practitioner', value, navigate)}
-                title={tCommon('visits.card.viewPractitioner', 'View practitioner details')}
+                title={t('common:visits.card.viewPractitioner', 'View practitioner details')}
               >
                 {practitionerDisplay}
               </Text>
@@ -149,13 +148,13 @@ const VisitCard = ({
         value: visit.chief_complaint
       },
       {
-        label: tCommon('labels.location'),
+        label: t('common:labels.location'),
         value: visit.location
       },
       {
         label: t('visits.durationMinutes.label'),
         value: visit.duration_minutes,
-        render: (value) => value ? tCommon('visits.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : tCommon('labels.notSpecified')
+        render: (value) => value ? t('common:visits.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : t('common:labels.notSpecified')
       }
     ];
 
@@ -170,7 +169,7 @@ const VisitCard = ({
             c="blue"
             style={{ cursor: 'pointer', textDecoration: 'underline' }}
             onClick={() => navigateToEntity('condition', value, navigate)}
-            title={tCommon('visits.card.viewCondition', 'View condition details')}
+            title={t('common:visits.card.viewCondition', 'View condition details')}
           >
             {condition.diagnosis}
           </Text>
@@ -240,7 +239,7 @@ const VisitCard = ({
           <Group gap="xs">
             <IconCalendar size={20} color="var(--mantine-color-blue-6)" />
             <Text fw={600} size="lg">
-              {visit.reason || tCommon('visits.card.generalVisit', 'General Visit')}
+              {visit.reason || t('common:visits.card.generalVisit', 'General Visit')}
             </Text>
           </Group>
         }

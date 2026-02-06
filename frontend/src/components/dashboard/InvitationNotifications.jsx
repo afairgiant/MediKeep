@@ -1,5 +1,3 @@
-import logger from '../../services/logger';
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -38,10 +36,10 @@ import { InvitationManager } from '../invitations';
 import { PatientSharingModal } from '../medical';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useCacheManager, useCurrentPatient } from '../../hooks/useGlobalData';
+import logger from '../../services/logger';
 
 const InvitationNotifications = () => {
-  const { t } = useTranslation('navigation');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['navigation', 'common']);
   const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const { invalidatePatientList } = useCacheManager();
@@ -402,7 +400,7 @@ const InvitationNotifications = () => {
                 setSelectedInvitation(null);
               }}
             >
-              {tCommon('buttons.cancel')}
+              {t('common:buttons.cancel')}
             </Button>
             <Button
               color="green"

@@ -76,8 +76,7 @@ function TreatmentEquipmentRelationships({
   // Ensure equipment is always an array
   const safeEquipment = Array.isArray(equipment) ? equipment : [];
   const safePractitioners = Array.isArray(practitioners) ? practitioners : [];
-  const { t } = useTranslation('common');
-  const { t: tErrors } = useTranslation('errors');
+  const { t } = useTranslation(['common', 'errors']);
 
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -149,7 +148,7 @@ function TreatmentEquipmentRelationships({
   // Create new equipment and link it
   const handleCreateAndLinkEquipment = async () => {
     if (!newEquipment.equipment_name?.trim() || !newEquipment.equipment_type) {
-      setError(tErrors('form.equipmentFieldsRequired', 'Equipment name and type are required'));
+      setError(t('errors:form.equipmentFieldsRequired', 'Equipment name and type are required'));
       return;
     }
 
@@ -228,7 +227,7 @@ function TreatmentEquipmentRelationships({
     }
 
     if (!newRelationship.equipment_ids || newRelationship.equipment_ids.length === 0) {
-      setError(tErrors('form.equipmentNotSelected', 'Please select at least one equipment'));
+      setError(t('errors:form.equipmentNotSelected', 'Please select at least one equipment'));
       return;
     }
 

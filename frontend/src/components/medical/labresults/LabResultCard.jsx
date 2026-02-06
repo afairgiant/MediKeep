@@ -19,8 +19,7 @@ const LabResultCard = React.memo(({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -68,7 +67,7 @@ const LabResultCard = React.memo(({
           <Badge variant="light" color="cyan" size="sm">
             {value}
           </Badge>
-        ) : tCommon('labels.notSpecified')
+        ) : t('common:labels.notSpecified')
       },
       {
         label: t('labResults.testingFacility.label'),
@@ -77,25 +76,25 @@ const LabResultCard = React.memo(({
       {
         label: t('labResults.orderedDate.label'),
         value: labResult.ordered_date,
-        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
       },
       {
         label: t('labResults.completedDate.label'),
         value: labResult.completed_date,
-        render: (value) => value ? formatLongDate(value) : tCommon('labels.notCompleted', 'Not completed')
+        render: (value) => value ? formatLongDate(value) : t('common:labels.notCompleted', 'Not completed')
       },
       {
         label: t('labResults.labResult.label'),
         value: labResult.labs_result,
         render: (value) => value ? (
           <StatusBadge status={value} />
-        ) : tCommon('labels.pending', 'Pending')
+        ) : t('common:labels.pending', 'Pending')
       },
       {
         label: t('labResults.orderingPractitioner.label'),
         value: labResult.practitioner_id,
         render: (value) => {
-          if (!value) return tCommon('labels.notSpecified');
+          if (!value) return t('common:labels.notSpecified');
 
           const practitionerName = practitioner?.name || `Practitioner ID: ${value}`;
           return (
@@ -104,7 +103,7 @@ const LabResultCard = React.memo(({
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={tCommon('labels.viewPractitionerDetails', 'View practitioner details')}
+              title={t('common:labels.viewPractitionerDetails', 'View practitioner details')}
             >
               {practitionerName}
             </Text>

@@ -5,16 +5,6 @@ import BaseMedicalCard from '../base/BaseMedicalCard';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
-import {
-  IconShieldCheck,
-  IconHeart,
-  IconBrain,
-  IconLungs,
-  IconBone,
-  IconDroplet,
-  IconAward,
-  IconAlertTriangle,
-} from '@tabler/icons-react';
 
 const ConditionCard = ({
   condition,
@@ -26,8 +16,7 @@ const ConditionCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -88,23 +77,23 @@ const ConditionCard = ({
 
     let duration;
     if (diffDays < 30) {
-      const unit = diffDays === 1 ? tCommon('time.day') : tCommon('time.days');
+      const unit = diffDays === 1 ? t('common:time.day') : t('common:time.days');
       duration = `${diffDays} ${unit}`;
     } else if (diffDays < 365) {
       const months = Math.floor(diffDays / 30);
-      const unit = months === 1 ? tCommon('time.month') : tCommon('time.months');
+      const unit = months === 1 ? t('common:time.month') : t('common:time.months');
       duration = `${months} ${unit}`;
     } else {
       const years = Math.floor(diffDays / 365);
-      const unit = years === 1 ? tCommon('time.year') : tCommon('time.years');
+      const unit = years === 1 ? t('common:time.year') : t('common:time.years');
       duration = `${years} ${unit}`;
     }
 
     // Add appropriate suffix based on condition status
     if (endDate || status === 'resolved' || status === 'inactive') {
-      return `${duration} (${tCommon('time.ended')})`;
+      return `${duration} (${t('common:time.ended')})`;
     } else {
-      return `${duration} (${tCommon('time.ongoing')})`;
+      return `${duration} (${t('common:time.ongoing')})`;
     }
   };
 
@@ -138,19 +127,19 @@ const ConditionCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('common.fields.onsetDate.label'),
+        label: t('common:fields.onsetDate.label'),
         value: condition.onset_date,
-        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
       },
       {
-        label: tCommon('labels.duration'),
+        label: t('common:labels.duration'),
         value: condition.onset_date,
         render: () => condition.onset_date
           ? getConditionDuration(condition.onset_date, condition.end_date, condition.status)
-          : tCommon('labels.notSpecified')
+          : t('common:labels.notSpecified')
       },
       condition.end_date && {
-        label: t('common.fields.endDate.label'),
+        label: t('common:fields.endDate.label'),
         value: condition.end_date,
         render: (value) => formatLongDate(value)
       },

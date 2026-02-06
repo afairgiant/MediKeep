@@ -41,8 +41,7 @@ const AllergyFormWrapper = ({
   isLoading = false,
 }) => {
   // Translation hooks
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -157,18 +156,18 @@ const AllergyFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('common.fields.severity.label')}
+                      label={t('common:fields.severity.label')}
                       value={formData.severity || null}
                       data={[
-                        { value: 'mild', label: t('common.severity.mild') },
-                        { value: 'moderate', label: t('common.severity.moderate') },
-                        { value: 'severe', label: t('common.severity.severe') },
-                        { value: 'life-threatening', label: t('common.severity.lifeThreatening') },
+                        { value: 'mild', label: t('common:severity.mild') },
+                        { value: 'moderate', label: t('common:severity.moderate') },
+                        { value: 'severe', label: t('common:severity.severe') },
+                        { value: 'life-threatening', label: t('common:severity.lifeThreatening') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'severity', value: value || '' } });
                       }}
-                      placeholder={t('common.fields.severity.placeholder')}
+                      placeholder={t('common:fields.severity.placeholder')}
                       description={t('allergies.severity.description')}
                       withAsterisk
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -176,17 +175,17 @@ const AllergyFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('common.fields.status.label')}
+                      label={t('common:fields.status.label')}
                       value={formData.status || null}
                       data={[
-                        { value: 'active', label: t('common.status.active') },
-                        { value: 'inactive', label: t('common.status.inactive') },
-                        { value: 'resolved', label: t('common.status.resolved') },
+                        { value: 'active', label: t('common:status.active') },
+                        { value: 'inactive', label: t('common:status.inactive') },
+                        { value: 'resolved', label: t('common:status.resolved') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder={t('common.fields.status.placeholder')}
+                      placeholder={t('common:fields.status.placeholder')}
                       description={t('allergies.status.description')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -230,17 +229,17 @@ const AllergyFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('common.fields.tags.label')}
+                        {t('common:fields.tags.label')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
-                        {t('common.fields.tags.description')}
+                        {t('common:fields.tags.description')}
                       </Text>
                       <TagInput
                         value={formData.tags || []}
                         onChange={(tags) => {
                           onInputChange({ target: { name: 'tags', value: tags } });
                         }}
-                        placeholder={t('common.fields.tags.placeholder')}
+                        placeholder={t('common:fields.tags.placeholder')}
                       />
                     </Box>
                   </Grid.Col>
@@ -307,11 +306,11 @@ const AllergyFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('common.fields.notes.label')}
+                  label={t('common:fields.notes.label')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
-                  placeholder={t('common.fields.notes.placeholder')}
-                  description={t('common.fields.notes.description')}
+                  placeholder={t('common:fields.notes.placeholder')}
+                  description={t('common:fields.notes.description')}
                   rows={5}
                   minRows={3}
                   autosize
@@ -323,13 +322,13 @@ const AllergyFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {tCommon('buttons.cancel')}
+              {t('common:buttons.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.allergen?.trim()}
             >
-              {editingAllergy ? tCommon('buttons.update') : tCommon('buttons.create')} {t('allergies.title')}
+              {editingAllergy ? t('common:buttons.update') : t('common:buttons.create')} {t('allergies.title')}
             </SubmitButton>
           </Group>
         </Stack>
