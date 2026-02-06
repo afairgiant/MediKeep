@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { toast } from 'react-toastify';
+import { notifyError } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
 import { Button } from '../../components/ui';
@@ -68,10 +68,10 @@ const Login = () => {
         const from = location.state?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
-        toast.error(result.error || 'Login failed');
+        notifyError(result.error || 'notifications:toasts.auth.loginFailed');
       }
     } catch (error) {
-      toast.error(error.message || 'Login failed');
+      notifyError(error.message || 'notifications:toasts.auth.loginFailed');
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +96,7 @@ const Login = () => {
         error: error.message,
         component: 'Login',
       });
-      toast.error(error.message || 'Failed to start SSO login');
+      notifyError(error.message || 'notifications:toasts.auth.ssoFailed');
     } finally {
       setSSOLoading(false);
     }

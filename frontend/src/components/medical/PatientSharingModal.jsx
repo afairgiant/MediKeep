@@ -42,7 +42,7 @@ import {
   IconRefresh,
 } from '@tabler/icons-react';
 // Note: Using simple date input instead of @mantine/dates DateTimePicker
-import { toast } from 'react-toastify';
+import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import patientSharingApi from '../../services/api/patientSharingApi';
 import invitationApi from '../../services/api/invitationApi';
 import logger from '../../services/logger';
@@ -71,7 +71,7 @@ const safeParseJSON = (jsonString, fieldName = 'custom_permissions') => {
     });
     
     // Show user-friendly error
-    toast.error(`Invalid JSON format in ${fieldName}. Please check your syntax.`);
+    notifyError('notifications:toasts.sharing.invalidJson', { interpolation: { fieldName } });
     throw new Error(`Invalid JSON format in ${fieldName}`);
   }
 };
@@ -233,7 +233,7 @@ const PatientSharingModal = ({
 
       await invitationApi.cancelInvitation(invitationId);
 
-      toast.success('Invitation cancelled successfully');
+      notifySuccess('notifications:toasts.sharing.invitationCancelled');
 
       await loadPendingInvitations();
 
@@ -255,7 +255,7 @@ const PatientSharingModal = ({
         error: error.message
       });
 
-      toast.error(`Failed to cancel invitation: ${error.message}`);
+      notifyError('notifications:toasts.sharing.cancelFailed', { interpolation: { message: error.message } });
     } finally {
       setLoading(false);
     }
@@ -282,7 +282,7 @@ const PatientSharingModal = ({
 
       await patientSharingApi.sendInvitation(invitationData);
 
-      toast.success(`Invitation sent successfully to ${values.shared_with_user_identifier}`);
+      notifySuccess('notifications:toasts.sharing.invitationSent', { interpolation: { recipient: values.shared_with_user_identifier } });
 
       // Reload invitations and reset form
       await loadPendingInvitations();
@@ -309,7 +309,7 @@ const PatientSharingModal = ({
         error: error.message
       });
 
-      toast.error(`Invitation Failed: ${error.message}`);
+      notifyError('notifications:toasts.sharing.invitationFailed', { interpolation: { message: error.message } });
     } finally {
       setLoading(false);
     }
@@ -336,7 +336,7 @@ const PatientSharingModal = ({
         updateData
       );
       
-      toast.success('Patient share updated successfully');
+      notifySuccess('notifications:toasts.sharing.shareUpdated');
       
       // Reload shares and reset form
       await loadPatientShares();
@@ -360,7 +360,7 @@ const PatientSharingModal = ({
         error: error.message
       });
       
-      toast.error(`Update Failed: ${error.message}`);
+      notifyError('notifications:toasts.sharing.updateFailed', { interpolation: { message: error.message } });
     } finally {
       setLoading(false);
     }
@@ -377,7 +377,7 @@ const PatientSharingModal = ({
       
       await patientSharingApi.revokePatientShare(patient.id, share.shared_with_user_id);
       
-      toast.success(`Access revoked for user ${share.shared_with_user_id}`);
+      notifySuccess('notifications:toasts.sharing.accessRevoked', { interpolation: { userId: share.shared_with_user_id } });
       
       // Reload shares
       await loadPatientShares();
@@ -399,7 +399,7 @@ const PatientSharingModal = ({
         error: error.message
       });
       
-      toast.error(`Revoke Failed: ${error.message}`);
+      notifyError('notifications:toasts.sharing.revokeFailed', { interpolation: { message: error.message } });
     } finally {
       setLoading(false);
     }

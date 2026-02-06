@@ -30,7 +30,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import { DateInput } from '@mantine/dates';
-import { toast } from 'react-toastify';
+import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import patientApi from '../../services/api/patientApi';
 import logger from '../../services/logger';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
@@ -125,7 +125,7 @@ const PatientForm = ({
       let result;
       if (isEditing) {
         result = await patientApi.updatePatient(patient.id, submitData);
-        toast.success(
+        notifySuccess(
           t('patients.form.messages.updateSuccess', {
             firstName: result.first_name,
             lastName: result.last_name
@@ -139,7 +139,7 @@ const PatientForm = ({
         });
       } else {
         result = await patientApi.createPatient(submitData);
-        toast.success(
+        notifySuccess(
           t('patients.form.messages.createSuccess', {
             firstName: result.first_name,
             lastName: result.last_name
@@ -165,7 +165,7 @@ const PatientForm = ({
       });
 
       setError(error.message);
-      toast.error(
+      notifyError(
         t(isEditing ? 'errors:patientForm.updateFailed' : 'errors:patientForm.createFailed', {
           message: error.message
         })

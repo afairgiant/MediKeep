@@ -5,7 +5,7 @@ import api from '../services/api';
 import logger from '../services/logger';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { showNotification } from '@mantine/notifications';
+import { notifyError, notifyWarning } from '../utils/notifyTranslated';
 
 interface SearchResult {
   id: number;
@@ -68,11 +68,7 @@ export function TagSearch() {
         component: 'TagSearch',
         error
       });
-      showNotification({
-        title: 'Error',
-        message: 'Failed to load popular tags',
-        color: 'red'
-      });
+      notifyError('notifications:toasts.tagSearch.loadFailed');
     } finally {
       setIsLoadingTags(false);
     }
@@ -80,11 +76,7 @@ export function TagSearch() {
 
   const handleSearch = async () => {
     if (selectedTags.length === 0) {
-      showNotification({
-        title: 'No tags selected',
-        message: 'Please select at least one tag to search',
-        color: 'yellow'
-      });
+      notifyWarning('notifications:toasts.tagSearch.noTagsSelected', { title: 'notifications:toasts.tagSearch.noTagsSelectedTitle' });
       return;
     }
 
@@ -108,11 +100,7 @@ export function TagSearch() {
         tags: selectedTags,
         error
       });
-      showNotification({
-        title: 'Search Error',
-        message: 'Failed to search records by tags',
-        color: 'red'
-      });
+      notifyError('notifications:toasts.tagSearch.searchFailed');
     } finally {
       setIsLoading(false);
     }

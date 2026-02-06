@@ -15,7 +15,7 @@ import { cleanupOutOfSyncFiles } from '../services/api/paperlessApi.jsx';
 import frontendLogger from '../services/frontendLogger';
 import { PAPERLESS_SETTING_KEYS, isPaperlessSetting } from '../constants/paperlessSettings';
 import { DEFAULT_DATE_FORMAT } from '../utils/constants';
-import { toast } from 'react-toastify';
+import { notifySuccess, notifyError, notifyInfo } from '../utils/notifyTranslated';
 import '../styles/pages/Settings.css';
 
 const Settings = () => {
@@ -188,7 +188,7 @@ const Settings = () => {
           });
 
           // Show user-friendly message
-          toast.success(`Session timeout updated to ${generalResponse.session_timeout_minutes} minutes. Your session has been refreshed.`);
+          notifySuccess('notifications:toasts.settings.sessionTimeoutUpdated', { interpolation: { minutes: generalResponse.session_timeout_minutes } });
         }
 
         // Debug the API response specifically for timeout
@@ -287,12 +287,9 @@ const Settings = () => {
       const totalDeleted = results.files_deleted || 0;
       
       if (totalCleaned > 0 || totalDeleted > 0) {
-        toast.success(
-          `Cleanup completed: ${totalCleaned} files cleaned, ${totalDeleted} files deleted`, 
-          { autoClose: 5000 }
-        );
+        notifySuccess('notifications:toasts.settings.cleanupComplete', { interpolation: { cleaned: totalCleaned, deleted: totalDeleted }, autoClose: 5000 });
       } else {
-        toast.info('No out-of-sync files found to clean up', { autoClose: 3000 });
+        notifyInfo('notifications:toasts.settings.noOutOfSync', { autoClose: 3000 });
       }
       
     } catch (error) {
@@ -301,7 +298,7 @@ const Settings = () => {
         component: 'Settings'
       });
       
-      toast.error('Failed to cleanup files. Please try again later.', { autoClose: 5000 });
+      notifyError('notifications:toasts.settings.cleanupFailed', { autoClose: 5000 });
     } finally {
       setCleaningFiles(false);
     }

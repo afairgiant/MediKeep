@@ -259,5 +259,153 @@
     "urlRequired": "Webhook URL is required",
     "urlInvalid": "Invalid URL format",
     "headersInvalid": "Headers must be valid JSON"
+  },
+
+  "toasts": {
+    "auth": {
+      "sessionExpired": "Session expired due to inactivity",
+      "sessionExpiredLogin": "Session expired. Please log in again.",
+      "loginSuccess": "Login successful!",
+      "loginFailed": "Login failed",
+      "logoutSuccess": "Logged out successfully",
+      "ssoFailed": "Failed to start SSO login",
+      "accessDeniedAdmin": "Access denied: Administrator privileges required",
+      "accessDeniedRole": "Access denied: {{role}} role required",
+      "accessDeniedRoles": "Access denied: One of these roles required: {{roles}}"
+    },
+    "patient": {
+      "nowViewing": "Now viewing {{name}}",
+      "switchFailed": "Switch Failed: {{message}}",
+      "deleteOwnOnly": "You can only delete patients that you own",
+      "deletedSwitched": "Deleted {{name}} successfully. Switched to {{fallbackName}}.",
+      "deletedNoOthers": "Deleted {{name}} successfully. No other patients available.",
+      "deletedSuccess": "Deleted {{name}} successfully",
+      "deleteFailed": "Delete Failed: {{message}}",
+      "removeOwnOnly": "You cannot remove access to patients that you own",
+      "removedAccess": "Removed access to {{name}}",
+      "removeAccessFailed": "Remove Access Failed: {{message}}",
+      "updatedSuccess": "Updated {{name}} successfully",
+      "createdSuccess": "Created {{name}} successfully"
+    },
+    "sharing": {
+      "invalidJson": "Invalid JSON format in {{fieldName}}. Please check your syntax.",
+      "invitationCancelled": "Invitation cancelled successfully",
+      "cancelFailed": "Failed to cancel invitation: {{message}}",
+      "invitationSent": "Invitation sent successfully to {{recipient}}",
+      "invitationFailed": "Invitation Failed: {{message}}",
+      "shareUpdated": "Patient share updated successfully",
+      "updateFailed": "Update Failed: {{message}}",
+      "accessRevoked": "Access revoked for user {{userId}}",
+      "revokeFailed": "Revoke Failed: {{message}}"
+    },
+    "vitals": {
+      "formErrors": "Please correct the form errors",
+      "savedSuccess": "Vitals {{action}} successfully!",
+      "saveFailed": "Failed to {{action}} vitals",
+      "deleteSuccess": "Vitals record deleted successfully",
+      "deleteFailed": "Failed to delete vitals record"
+    },
+    "settings": {
+      "sessionTimeoutUpdated": "Session timeout updated to {{minutes}} minutes. Your session has been refreshed.",
+      "cleanupComplete": "Cleanup completed: {{cleaned}} files cleaned, {{deleted}} files deleted",
+      "noOutOfSync": "No out-of-sync files found to clean up",
+      "cleanupFailed": "Failed to cleanup files. Please try again later."
+    },
+    "files": {
+      "downloadFailed": "File download failed"
+    },
+    "tagSearch": {
+      "loadFailed": "Failed to load popular tags",
+      "noTagsSelected": "Please select at least one tag to search",
+      "noTagsSelectedTitle": "No tags selected",
+      "searchFailed": "Failed to search records by tags"
+    },
+    "invitations": {
+      "respondFailed": "Failed to respond to invitation",
+      "cancelled": "Invitation Cancelled",
+      "cancelledMessage": "The invitation has been cancelled.",
+      "cancelFailed": "Failed to cancel invitation",
+      "accessRevoked": "Access Revoked",
+      "accessRevokedMessage": "Access has been revoked.",
+      "revokeFailed": "Failed to revoke access",
+      "alreadyRevoked": "Already Revoked",
+      "alreadyRevokedMessage": "This invitation has already been revoked."
+    },
+    "photo": {
+      "pleaseWait": "Please Wait",
+      "photoBeingUploaded": "A photo is currently being uploaded. Please wait for it to complete.",
+      "uploadSuccess": "Photo uploaded successfully",
+      "uploadFailed": "Upload Failed",
+      "deleteFailed": "Delete Failed"
+    },
+    "reports": {
+      "noRecordsSelected": "No Records Selected",
+      "noRecordsMessage": "Please select at least one record from the categories below to generate a report.",
+      "validationError": "Validation Error",
+      "templateNameRequired": "Template name is required",
+      "templateSaved": "Template saved successfully",
+      "templateSaveFailed": "Failed to save template",
+      "templateDeleted": "Template deleted successfully",
+      "templateDeleteFailed": "Failed to delete template",
+      "templateLoaded": "Template \"{{name}}\" loaded"
+    },
+    "labResults": {
+      "parseWarning": "Some Lines Could Not Be Parsed",
+      "noTextToParse": "No Text to Parse",
+      "noTextMessage": "Please paste lab results text in the input area.",
+      "textParsed": "Text Parsed",
+      "parsedCount": "Found {{count}} test components. Review them in the Preview tab.",
+      "addedSuccess": "Success!",
+      "addedMessage": "Added {{count}} test components to the lab result.",
+      "addFailed": "Failed to add test components",
+      "deletedSuccess": "Component deleted",
+      "deletedMessage": "{{name}} has been deleted",
+      "updateFailed": "Failed to update component",
+      "templateApplied": "Template Applied",
+      "templateAppliedMessage": "Added {{count}} components from \"{{name}}\" template.",
+      "trendExportSuccess": "Chart exported successfully",
+      "trendExportFailed": "Failed to export chart"
+    },
+    "documents": {
+      "uploadFailed": "Upload Failed",
+      "deleteFailed": "Delete Failed",
+      "linkSuccess": "Document linked successfully",
+      "linkFailed": "Failed to link document",
+      "unlinkSuccess": "Document unlinked successfully",
+      "unlinkFailed": "Failed to unlink document"
+    },
+    "familySharing": {
+      "loadFailed": "Failed to load sharing information",
+      "invitationSent": "Invitation sent successfully!",
+      "invitationFailed": "Failed to send invitation",
+      "accessRevoked": "Access revoked",
+      "revokeFailed": "Failed to revoke access"
+    },
+    "upload": {
+      "failed": "Upload Failed",
+      "completedWithErrors": "Upload Completed with Errors",
+      "partialSuccess": "{{completed}}/{{total}} files uploaded successfully. {{failed}} failed.",
+      "documentAdded": "Document Added to Paperless",
+      "fileUploadedSuccess": "\"{{fileName}}\" uploaded to Paperless successfully!",
+      "backgroundProcessing": "\"{{fileName}}\" is being processed in the background. You will be notified when complete.",
+      "duplicateDocument": "Duplicate Document",
+      "paperlessUploadFailed": "Paperless Upload Failed",
+      "fileUploadFailed": "File Upload Failed"
+    },
+    "generic": {
+      "operationFailed": "Operation Failed",
+      "saveFailed": "Save Failed",
+      "deleteFailed": "Delete Failed",
+      "downloadFailed": "Download Failed",
+      "success": "Success!",
+      "warning": "Warning",
+      "error": "Error",
+      "operationSuccess": "{{operation}} completed successfully!",
+      "allOperationsSuccess": "All {{total}} {{operation}}s completed successfully!",
+      "operationPartial": "{{success}}/{{total}} {{operation}}s completed successfully. {{failed}} failed.",
+      "operationPartialTitle": "{{operation}} Completed with Errors",
+      "allOperationsFailed": "All {{operation}}s failed. Please try again.",
+      "operationFailedTitle": "{{operation}} Failed"
+    }
   }
 }

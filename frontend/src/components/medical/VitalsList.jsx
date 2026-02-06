@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-toastify';
+import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import {
   Table,
   Button,
@@ -210,11 +210,11 @@ const VitalsList = ({
     // Otherwise, handle deletion internally
     try {
       await vitalsService.deleteVitals(vitalsId);
-      toast.success('Vitals record deleted successfully');
+      notifySuccess('notifications:toasts.vitals.deleteSuccess');
       loadVitals(); // Refresh the list
     } catch (err) {
-      toast.error(
-        err.response?.data?.detail || 'Failed to delete vitals record'
+      notifyError(
+        err.response?.data?.detail || 'notifications:toasts.vitals.deleteFailed'
       );
     }
   };

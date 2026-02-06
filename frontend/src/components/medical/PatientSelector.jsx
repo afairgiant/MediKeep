@@ -43,7 +43,7 @@ import {
   IconChevronUp,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import { toast } from 'react-toastify';
+import { notifySuccess, notifyError, notifyInfo } from '../../utils/notifyTranslated';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePatientList, useCacheManager } from '../../hooks/useGlobalData';
 import { formatRelationshipLabel } from '../../constants/relationshipOptions';
@@ -290,7 +290,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         onPatientChange(switchedPatient);
       }
       
-      toast.success(`Now viewing ${switchedPatient.first_name} ${switchedPatient.last_name}`);
+      notifySuccess('notifications:toasts.patient.nowViewing', { interpolation: { name: `${switchedPatient.first_name} ${switchedPatient.last_name}` } });
       
       logger.info('patient_selector_switched', {
         message: 'Patient switched successfully',
@@ -304,7 +304,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         error: error.message
       });
       
-      toast.error(`Switch Failed: ${error.message}`);
+      notifyError('notifications:toasts.patient.switchFailed', { interpolation: { message: error.message } });
     } finally {
       setLoading(false);
     }
@@ -413,7 +413,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
    */
   const deletePatient = async (patient) => {
     if (!isPatientOwned(patient)) {
-      toast.error('You can only delete patients that you own');
+      notifyError('notifications:toasts.patient.deleteOwnOnly');
       return;
     }
 
@@ -469,19 +469,19 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             onPatientChange(fallbackPatient);
           }
           
-          toast.success(`Deleted ${patient.first_name} ${patient.last_name} successfully. Switched to ${fallbackPatient.first_name} ${fallbackPatient.last_name}.`);
+          notifySuccess('notifications:toasts.patient.deletedSwitched', { interpolation: { name: `${patient.first_name} ${patient.last_name}`, fallbackName: `${fallbackPatient.first_name} ${fallbackPatient.last_name}` } });
         } else {
           logger.info('patient_selector_delete_no_fallback', {
             message: 'No fallback patient available after deletion',
             deletedPatientId: patient.id
           });
           
-          toast.success(`Deleted ${patient.first_name} ${patient.last_name} successfully. No other patients available.`);
+          notifySuccess('notifications:toasts.patient.deletedNoOthers', { interpolation: { name: `${patient.first_name} ${patient.last_name}` } });
         }
       } else {
         // Just invalidate the list if we didn't delete the active patient
         await invalidatePatientList();
-        toast.success(`Deleted ${patient.first_name} ${patient.last_name} successfully`);
+        notifySuccess('notifications:toasts.patient.deletedSuccess', { interpolation: { name: `${patient.first_name} ${patient.last_name}` } });
       }
       
       logger.info('patient_selector_deleted', {
@@ -497,7 +497,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         errorStack: error.stack
       });
       
-      toast.error(`Delete Failed: ${error.message || 'Unknown error occurred'}`);
+      notifyError('notifications:toasts.patient.deleteFailed', { interpolation: { message: error.message || 'Unknown error occurred' } });
     } finally {
       setLoading(false);
     }
@@ -508,7 +508,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
    */
   const removeSharedAccess = async (patient) => {
     if (isPatientOwned(patient)) {
-      toast.error('You cannot remove access to patients that you own');
+      notifyError('notifications:toasts.patient.removeOwnOnly');
       return;
     }
 
@@ -522,7 +522,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       // Remove my access to the shared patient
       await patientSharingApi.removeMyAccess(patient.id);
       
-      toast.success(`Removed access to ${patient.first_name} ${patient.last_name}`);
+      notifySuccess('notifications:toasts.patient.removedAccess', { interpolation: { name: `${patient.first_name} ${patient.last_name}` } });
       
       // Invalidate patient list cache to force fresh data
       await invalidatePatientList();
@@ -545,7 +545,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             onPatientChange(fallbackPatient);
           }
           
-          toast.info(`Switched to ${fallbackPatient.first_name} ${fallbackPatient.last_name}`);
+          notifyInfo('notifications:toasts.patient.nowViewing', { interpolation: { name: `${fallbackPatient.first_name} ${fallbackPatient.last_name}` } });
         } else {
           logger.info('patient_selector_no_fallback', {
             message: 'No fallback patient available, clearing active patient',
@@ -571,7 +571,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         error: error.message
       });
       
-      toast.error(`Remove Access Failed: ${error.message}`);
+      notifyError('notifications:toasts.patient.removeAccessFailed', { interpolation: { message: error.message } });
     } finally {
       setLoading(false);
     }
@@ -1052,7 +1052,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               onPatientChange(newPatient);
             }
             closeCreateModal();
-            toast.success(`Now viewing ${newPatient.first_name} ${newPatient.last_name}`);
+            notifySuccess('notifications:toasts.patient.nowViewing', { interpolation: { name: `${newPatient.first_name} ${newPatient.last_name}` } });
           }}
           onCancel={closeCreateModal}
           isModal={true}
@@ -1083,7 +1083,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             }
             closeEditModal();
             setEditingPatient(null);
-            toast.success(`Updated ${updatedPatient.first_name} ${updatedPatient.last_name} successfully`);
+            notifySuccess('notifications:toasts.patient.updatedSuccess', { interpolation: { name: `${updatedPatient.first_name} ${updatedPatient.last_name}` } });
           }}
           onCancel={() => {
             closeEditModal();

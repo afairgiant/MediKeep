@@ -9,7 +9,6 @@ import React, {
 import { apiService } from '../services/api';
 import patientApi from '../services/api/patientApi';
 import { useAuth } from './AuthContext';
-import { toast } from 'react-toastify';
 import logger from '../services/logger';
 
 // App version for cache busting

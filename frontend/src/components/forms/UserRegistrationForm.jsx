@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { toast } from 'react-toastify';
+import { notifySuccess } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
 import { Button } from '../ui';
@@ -81,7 +81,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           ? 'User account created successfully!'
           : 'Account created successfully! Logging you in...';
         
-        toast.success(successMessage);
+        notifySuccess(successMessage);
         
         // Call success callback with user data and context info
         onSuccess && onSuccess({
