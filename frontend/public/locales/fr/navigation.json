@@ -15,7 +15,7 @@
     "dashboard": "Tableau de bord",
     "patientList": "Liste des patients",
     "patientDetails": "Détails du patient",
-    "medicalHistory": "Historique médical",
+    "medicalHistory": "Antécédents médicaux",
     "settings": "Paramètres",
     "userProfile": "Profil utilisateur",
     "preferences": "Préférences",
@@ -28,9 +28,9 @@
     "medicalInfo": "Informations médicales",
     "documents": "Documents",
     "timeline": "Chronologie",
-    "familyHistory": "Historique familial",
+    "familyHistory": "Antécédents familiaux",
     "emergencyContacts": "Contacts d'urgence",
-    "insurance": "Assurance",
+    "insurance": "Assurances",
     "preferences": "Préférences"
   },
   "medicalRecords": {
@@ -45,7 +45,8 @@
     "symptoms": "Symptômes",
 	"injuries": "Blessures",
     "practitioners": "Médecins",
-    "pharmacies": "Pharmacies"
+    "pharmacies": "Pharmacies",
+	"medicalEquipement": "Equipement médical"
   },
   "dashboard": {
     "title": "Tableau de bord de MediKeep",
@@ -79,12 +80,13 @@
 	  "injuries": "Blessures",
       "immunizations": "Immunisations",
       "visitHistory": "Historique des visites",
-      "familyHistory": "Historique familial",
-      "insurance": "Assurance",
+      "familyHistory": "Antécédents familiaux",
+      "insurance": "Assurances",
       "emergencyContacts": "Contacts d'urgence",
       "exportRecords": "Exporter les données",
       "practitioners": "Médecins",
       "pharmacies": "Pharmacies",
+	  "medicalEquipment": "Equipement médical",
       "adminDashboard": "Tableau de bord administrateur"
     },
     "activity": {
@@ -106,11 +108,11 @@
     "manageAll": "Gérer toutes les invitations",
     "sharePatient": "Partager un patient",
     "confirmTitle": "Confirmer l'acceptation de l'invitation",
-    "confirmQuestion": "Souhaietz-vous vraiment accepter cette invitation ?",
+    "confirmQuestion": "Souhaitez-vous vraiment accepter cette invitation ?",
     "confirmDescription": "En acceptant ceci, vous obtiendrez l'accès aux informations médicales partagées.",
     "acceptButton": "Accepter l'invitation",
     "types": {
-      "familyHistory": "Historique familial",
+      "familyHistory": "Antécédents familiaux",
       "patientRecord": "Données du patient"
     }
   },
@@ -149,10 +151,11 @@
       "procedures": "Procédures",
       "immunizations": "Immunisations",
       "visitHistory": "Historique des visites",
-      "familyHistory": "Historique familial",
+      "familyHistory": "Antécédents familiaux",
       "practitioners": "Médecins",
       "pharmacies": "Pharmacies",
-      "insurance": "Assurance",
+      "insurance": "Assurances",
+	  "medicalEquipment": "Equipement médical",
       "emergencyContacts": "Contacts d'urgence",
       "tagManagement": "Gestion des étiquettes",
       "customReports": "Rapports personnalisés",
