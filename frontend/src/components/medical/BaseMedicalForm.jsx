@@ -26,7 +26,7 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { MedicalFormLayoutStrategy } from '../../strategies/MedicalFormLayoutStrategy';
 import { TagInput } from '../common/TagInput';
-import { translateFieldConfig } from '../../utils/formFieldTranslations';
+import { translateField } from '../../utils/translateField';
 import logger from '../../services/logger';
 
 // Initialize medical form layout strategy
@@ -304,7 +304,7 @@ const BaseMedicalForm = ({
   // Main renderField function now uses smaller callbacks - much simpler with fewer dependencies
   const renderField = useCallback((fieldConfig) => {
     // Translate field configuration (labels, placeholders, descriptions, options)
-    const translatedFieldConfig = translateFieldConfig(fieldConfig, t);
+    const translatedFieldConfig = translateField(fieldConfig, t);
 
     const {
       name,

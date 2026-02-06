@@ -25,7 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { visitFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
-import { translateFieldConfig } from '../../utils/formFieldTranslations';
+import { translateField } from '../../utils/translateField';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
@@ -102,7 +102,7 @@ const MantineVisitForm = ({
     }
 
     // Translate the field configuration
-    const translatedField = translateFieldConfig(field, t);
+    const translatedField = translateField(field, t);
 
     const commonProps = {
       key: translatedField.name,
