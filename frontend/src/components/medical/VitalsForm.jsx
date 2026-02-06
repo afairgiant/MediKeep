@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-toastify';
+import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import {
   TextInput,
   NumberInput,
@@ -577,7 +577,7 @@ const VitalsForm = ({
     setTouchedFields(new Set(Object.keys(FIELD_CONFIGS)));
 
     if (!validateForm()) {
-      toast.error('Please correct the form errors');
+      notifyError('notifications:toasts.vitals.formErrors');
       return;
     }
 
@@ -644,10 +644,10 @@ const VitalsForm = ({
       });
 
       await onSave(processedData);
-      toast.success(`Vitals ${isEdit ? 'updated' : 'recorded'} successfully!`);
+      notifySuccess('notifications:toasts.vitals.savedSuccess', { interpolation: { action: isEdit ? 'updated' : 'recorded' } });
     } catch (error) {
       logger.error('Error saving vitals:', error);
-      toast.error(`Failed to ${isEdit ? 'update' : 'save'} vitals`);
+      notifyError('notifications:toasts.vitals.saveFailed', { interpolation: { action: isEdit ? 'update' : 'save' } });
     } finally {
       setIsLoading(false);
     }

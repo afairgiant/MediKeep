@@ -3,7 +3,7 @@
  * Provides centralized API communication with automatic token handling
  */
 import { authService } from './auth/simpleAuthService';
-import { toast } from 'react-toastify';
+import { notifyError } from '../utils/notifyTranslated';
 import logger from './logger';
 import { createRaceSafeWrapper } from '../utils/throttleUtils';
 import secureActivityLogger from '../utils/secureActivityLogger';
@@ -119,7 +119,7 @@ class APIClient {
       );
       
       if (isCriticalEndpoint) {
-        toast.error('Session expired. Please log in again.');
+        notifyError('notifications:toasts.auth.sessionExpiredLogin');
         window.location.href = '/login';
       } else {
         // For non-critical endpoints, just add a header to indicate auth failure
@@ -392,7 +392,7 @@ class APIClient {
 
       return response;
     } catch (error) {
-      toast.error('File download failed');
+      notifyError('notifications:toasts.files.downloadFailed');
       throw error;
     }
   }

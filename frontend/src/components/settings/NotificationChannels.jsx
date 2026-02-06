@@ -5,7 +5,7 @@ import { Card, Button } from '../ui';
 import ChannelFormModal from './ChannelFormModal';
 import { notificationApi } from '../../services/api/notificationApi';
 import frontendLogger from '../../services/frontendLogger';
-import { toast } from 'react-toastify';
+import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import '../../styles/components/NotificationChannels.css';
 
 /**
@@ -42,7 +42,7 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
       setEditingChannel(channelWithConfig);
       setIsModalOpen(true);
     } catch (err) {
-      toast.error(t('channels.loadError', 'Failed to load channel details'));
+      notifyError(t('channels.loadError', 'Failed to load channel details'));
       frontendLogger.logError('Failed to load channel for editing', {
         component: 'NotificationChannels',
         channelId: channel.id,
@@ -60,9 +60,9 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
       setDeletingChannelId(channelId);
       await notificationApi.deleteChannel(channelId);
       onChannelsChange(channels.filter(c => c.id !== channelId));
-      toast.success(t('channels.deleteSuccess', 'Channel deleted successfully'));
+      notifySuccess(t('channels.deleteSuccess', 'Channel deleted successfully'));
     } catch (err) {
-      toast.error(t('channels.deleteError', 'Failed to delete channel'));
+      notifyError(t('channels.deleteError', 'Failed to delete channel'));
       frontendLogger.logError('Failed to delete channel', {
         component: 'NotificationChannels',
         channelId,
@@ -79,7 +79,7 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
       const result = await notificationApi.testChannel(channelId);
 
       if (result.success) {
-        toast.success(t('channels.testSuccess', 'Test notification sent!'));
+        notifySuccess(t('channels.testSuccess', 'Test notification sent!'));
         // Refresh channels to get updated verification status
         const updatedChannels = await notificationApi.getChannels();
         onChannelsChange(updatedChannels);
@@ -88,10 +88,17 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
           onTestSuccess();
         }
       } else {
-        toast.error(result.message || t('channels.testFailed', 'Test notification failed'));
+        notifyError(t('channels.testFailed', 'Test notification failed'));
+        if (result.message) {
+          frontendLogger.logError('Channel test failed', {
+            component: 'NotificationChannels',
+            channelId,
+            backendMessage: result.message,
+          });
+        }
       }
     } catch (err) {
-      toast.error(t('channels.testError', 'Failed to send test notification'));
+      notifyError(t('channels.testError', 'Failed to send test notification'));
       frontendLogger.logError('Failed to test channel', {
         component: 'NotificationChannels',
         channelId,
@@ -114,17 +121,17 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
       if (isEditing && editingChannel) {
         updatedChannel = await notificationApi.updateChannel(editingChannel.id, channelData);
         onChannelsChange(channels.map(c => (c.id === editingChannel.id ? updatedChannel : c)));
-        toast.success(t('channels.updateSuccess', 'Channel updated successfully'));
+        notifySuccess(t('channels.updateSuccess', 'Channel updated successfully'));
       } else {
         updatedChannel = await notificationApi.createChannel(channelData);
         onChannelsChange([...channels, updatedChannel]);
-        toast.success(t('channels.createSuccess', 'Channel created successfully'));
+        notifySuccess(t('channels.createSuccess', 'Channel created successfully'));
       }
 
       handleModalClose();
     } catch (err) {
-      const errorMsg = err.message || (isEditing ? t('channels.updateError', 'Failed to update channel') : t('channels.createError', 'Failed to create channel'));
-      toast.error(errorMsg);
+      const errorKey = isEditing ? t('channels.updateError', 'Failed to update channel') : t('channels.createError', 'Failed to create channel');
+      notifyError(errorKey);
       frontendLogger.logError('Failed to save channel', {
         component: 'NotificationChannels',
         isEditing,

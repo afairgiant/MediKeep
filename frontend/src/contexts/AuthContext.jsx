@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService } from '../services/auth/simpleAuthService';
-import { toast } from 'react-toastify';
+import { notifySuccess, notifyInfo } from '../utils/notifyTranslated';
 import { env } from '../config/env';
 import {
   shouldShowPatientProfileCompletionPrompt,
@@ -393,7 +393,7 @@ export function AuthProvider({ children }) {
             timestamp: new Date().toISOString()
           });
 
-          toast.info('Session expired due to inactivity');
+          notifyInfo('notifications:toasts.auth.sessionExpired');
           clearAuthData();
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
@@ -661,7 +661,7 @@ export function AuthProvider({ children }) {
         });
       }
 
-      toast.success('Login successful!');
+      notifySuccess('notifications:toasts.auth.loginSuccess');
 
       return {
         success: true,
@@ -673,7 +673,7 @@ export function AuthProvider({ children }) {
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: errorMessage,
       });
-      toast.error(errorMessage);
+      notifyInfo('notifications:toasts.auth.loginFailed');
       return { success: false, error: errorMessage };
     }
   };
@@ -702,7 +702,7 @@ export function AuthProvider({ children }) {
       // Dispatch logout action to update state
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
       
-      toast.info('Logged out successfully');
+      notifyInfo('notifications:toasts.auth.logoutSuccess');
     }
   };
 

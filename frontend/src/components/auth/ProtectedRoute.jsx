@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { toast } from 'react-toastify';
+import { notifyError, notifyWarning } from '../../utils/notifyTranslated';
 
 /**
  * Enhanced Protected Route Component
@@ -60,18 +60,16 @@ function ProtectedRoute({
       
       switch (redirectInfo.reason) {
         case 'unauthenticated':
-          toast.warn('Please log in to access this page');
+          notifyWarning('notifications:toasts.auth.loginRequired');
           break;
         case 'admin-required':
-          toast.error('Access denied: Administrator privileges required');
+          notifyError('notifications:toasts.auth.accessDeniedAdmin');
           break;
         case 'role-required':
-          toast.error(`Access denied: ${redirectInfo.role} role required`);
+          notifyError('notifications:toasts.auth.accessDeniedRole', { interpolation: { role: redirectInfo.role } });
           break;
         case 'roles-required':
-          toast.error(
-            `Access denied: One of these roles required: ${redirectInfo.roles.join(', ')}`
-          );
+          notifyError('notifications:toasts.auth.accessDeniedRoles', { interpolation: { roles: redirectInfo.roles.join(', ') } });
           break;
         default:
           break;

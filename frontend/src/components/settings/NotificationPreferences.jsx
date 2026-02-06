@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '../ui';
 import { notificationApi } from '../../services/api/notificationApi';
 import frontendLogger from '../../services/frontendLogger';
-import { toast } from 'react-toastify';
+import { notifyError } from '../../utils/notifyTranslated';
 import '../../styles/components/NotificationPreferences.css';
 
 /** Event type category display names */
@@ -97,7 +97,7 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
             [channelId]: currentValue,
           },
         }));
-        toast.error(t('preferences.updateError', 'Failed to update preference'));
+        notifyError(t('preferences.updateError', 'Failed to update preference'));
         frontendLogger.logError('Failed to update preference', {
           component: 'NotificationPreferences',
           eventType,

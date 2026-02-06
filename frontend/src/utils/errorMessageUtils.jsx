@@ -14,6 +14,7 @@ import {
   enhancePaperlessError,
   getErrorCategory,
 } from '../constants/errorMessages';
+import i18n from '../i18n/config';
 import { notifications } from '@mantine/notifications';
 import {
   IconCheck,
@@ -46,16 +47,18 @@ export const showErrorNotification = (
     errorMessage = formatErrorWithContext(errorMessage, context);
   }
 
-  const defaultTitle =
+  const defaultTitleKey =
     operation === 'upload'
-      ? 'Upload Failed'
+      ? 'notifications:toasts.upload.failed'
       : operation === 'save'
-        ? 'Save Failed'
+        ? 'notifications:toasts.generic.saveFailed'
         : operation === 'delete'
-          ? 'Delete Failed'
+          ? 'notifications:toasts.generic.deleteFailed'
           : operation === 'download'
-            ? 'Download Failed'
-            : 'Operation Failed';
+            ? 'notifications:toasts.generic.downloadFailed'
+            : 'notifications:toasts.generic.operationFailed';
+
+  const defaultTitle = i18n.t(defaultTitleKey);
 
   notifications.show({
     title: title || defaultTitle,
@@ -76,12 +79,12 @@ export const showErrorNotification = (
  * @param {number} options.autoClose - Auto close time in ms
  */
 export const showSuccessNotification = (message, options = {}) => {
-  const { title = 'Success!', context, autoClose = 5000 } = options;
+  const { title = i18n.t('notifications:toasts.generic.success'), context, autoClose = 5000 } = options;
 
   let finalMessage = message;
 
   if (context && message === SUCCESS_MESSAGES.UPLOAD_SUCCESS) {
-    finalMessage = `"${context}" uploaded successfully!`;
+    finalMessage = i18n.t('notifications:toasts.upload.fileUploadedSuccess', { fileName: context });
   }
 
   notifications.show({
@@ -99,7 +102,7 @@ export const showSuccessNotification = (message, options = {}) => {
  * @param {Object} options - Additional options
  */
 export const showWarningNotification = (message, options = {}) => {
-  const { title = 'Warning', autoClose = 7000 } = options;
+  const { title = i18n.t('notifications:toasts.generic.warning'), autoClose = 7000 } = options;
 
   notifications.show({
     title,
@@ -134,13 +137,13 @@ export const handleUploadCompletion = (
   } else if (completedCount > 0 && failedCount > 0) {
     // Partial success
     showWarningNotification(
-      `${completedCount}/${totalCount} files uploaded successfully. ${failedCount} failed.`,
-      { title: 'Upload Completed with Errors' }
+      i18n.t('notifications:toasts.upload.partialSuccess', { completed: completedCount, total: totalCount, failed: failedCount }),
+      { title: i18n.t('notifications:toasts.upload.completedWithErrors') }
     );
   } else {
     // Complete failure
     showErrorNotification(ERROR_MESSAGES.ALL_UPLOADS_FAILED, 'upload', {
-      title: 'Upload Failed',
+      title: i18n.t('notifications:toasts.upload.failed'),
     });
   }
 };
@@ -308,7 +311,7 @@ export const handleFileUploadError = (
   // Show notification unless disabled
   if (!options.skipNotification) {
     showErrorNotification(errorMessage, 'upload', {
-      title: 'File Upload Failed',
+      title: i18n.t('notifications:toasts.upload.fileUploadFailed'),
       ...options.notificationOptions,
     });
   }
@@ -335,26 +338,26 @@ export const handleBatchResults = (
     // All successful
     const message =
       total === 1
-        ? `${operation} completed successfully!`
-        : `All ${total} ${operation}s completed successfully!`;
+        ? i18n.t('notifications:toasts.generic.operationSuccess', { operation })
+        : i18n.t('notifications:toasts.generic.allOperationsSuccess', { total, operation });
 
     showSuccessNotification(message, options.successOptions);
   } else if (successful > 0) {
     // Partial success
     showWarningNotification(
-      `${successful}/${total} ${operation}s completed successfully. ${failed} failed.`,
+      i18n.t('notifications:toasts.generic.operationPartial', { success: successful, total, operation, failed }),
       {
-        title: `${operation} Completed with Errors`,
+        title: i18n.t('notifications:toasts.generic.operationPartialTitle', { operation }),
         ...options.warningOptions,
       }
     );
   } else {
     // All failed
     showErrorNotification(
-      `All ${operation}s failed. Please try again.`,
+      i18n.t('notifications:toasts.generic.allOperationsFailed', { operation }),
       operation,
       {
-        title: `${operation} Failed`,
+        title: i18n.t('notifications:toasts.generic.operationFailedTitle', { operation }),
         ...options.errorOptions,
       }
     );
@@ -469,7 +472,7 @@ export const handlePaperlessTaskCompletion = (
 ) => {
   // Handle background processing status
   if (taskResult?.status === 'PROCESSING_BACKGROUND') {
-    const message = `"${fileName}" is being processed in the background. You will be notified when complete.`;
+    const message = i18n.t('notifications:toasts.upload.backgroundProcessing', { fileName });
 
     // Don't show duplicate notifications - the API service already handles this
     // Just return success=null to indicate "processing" state
@@ -484,11 +487,11 @@ export const handlePaperlessTaskCompletion = (
 
   if (isPaperlessTaskSuccessful(taskResult)) {
     const documentId = extractDocumentIdFromTaskResult(taskResult);
-    const message = `"${fileName}" uploaded to Paperless successfully!`;
+    const message = i18n.t('notifications:toasts.upload.fileUploadedSuccess', { fileName });
 
     if (!options.skipNotification) {
       showSuccessNotification(message, {
-        title: 'Document Added to Paperless',
+        title: i18n.t('notifications:toasts.upload.documentAdded'),
         ...options.notificationOptions,
       });
     }
@@ -506,7 +509,7 @@ export const handlePaperlessTaskCompletion = (
 
     if (!options.skipNotification) {
       showWarningNotification(message, {
-        title: 'Duplicate Document',
+        title: i18n.t('notifications:toasts.upload.duplicateDocument'),
         ...options.notificationOptions,
       });
     }
@@ -524,7 +527,7 @@ export const handlePaperlessTaskCompletion = (
 
   if (!options.skipNotification) {
     showErrorNotification(message, 'upload', {
-      title: 'Paperless Upload Failed',
+      title: i18n.t('notifications:toasts.upload.paperlessUploadFailed'),
       ...options.notificationOptions,
     });
   }
