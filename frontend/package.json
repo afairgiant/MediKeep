@@ -49,7 +49,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "i18n:check": "node scripts/check-translations.js",
+    "i18n:fix": "node scripts/check-translations.js --fix"
   },
   "browserslist": {
     "production": [
