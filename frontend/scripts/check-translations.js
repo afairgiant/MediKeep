@@ -88,8 +88,12 @@ function getNestedValue(obj, dotPath) {
   return dotPath.split('.').reduce((acc, part) => acc && acc[part], obj);
 }
 
+const PROTO_POLLUTE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 function setNestedValue(obj, dotPath, value) {
   const parts = dotPath.split('.');
+  // Guard against prototype pollution
+  if (parts.some(p => PROTO_POLLUTE_KEYS.has(p))) return;
   let current = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     if (!current[parts[i]] || typeof current[parts[i]] !== 'object') {
