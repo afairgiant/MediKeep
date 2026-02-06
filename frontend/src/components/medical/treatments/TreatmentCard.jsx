@@ -18,8 +18,7 @@ const TreatmentCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -85,7 +84,7 @@ const TreatmentCard = ({
       badges.push({
         label: treatment.condition?.diagnosis ||
                 getConditionName(treatment.condition_id) ||
-                tCommon('treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id }),
+                t('common:treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id }),
         color: 'teal',
         clickable: true,
         onClick: () => handleConditionClick(treatment.condition_id)
@@ -104,29 +103,29 @@ const TreatmentCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('common.fields.startDate.label'),
+        label: t('common:fields.startDate.label'),
         value: treatment.start_date,
-        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
       },
       {
-        label: t('common.fields.endDate.label'),
+        label: t('common:fields.endDate.label'),
         value: treatment.end_date,
-        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
       },
       {
         label: t('treatments.amount.label'),
         value: treatment.dosage,
-        render: (value) => value || tCommon('labels.notSpecified')
+        render: (value) => value || t('common:labels.notSpecified')
       },
       {
         label: t('treatments.frequency.label'),
         value: treatment.frequency,
-        render: (value) => value || tCommon('labels.notSpecified')
+        render: (value) => value || t('common:labels.notSpecified')
       },
       {
-        label: tCommon('labels.description'),
+        label: t('common:labels.description'),
         value: treatment.description,
-        render: (value) => value || tCommon('labels.notSpecified'),
+        render: (value) => value || t('common:labels.notSpecified'),
         style: { flex: 1 }
       }
     ].filter(field => field.value); // Only show fields with values
@@ -145,7 +144,7 @@ const TreatmentCard = ({
     const customContent = treatment.condition_id ? (
       <Group gap="xs" style={{ marginBottom: '8px' }}>
         <Text size="sm" c="dimmed">
-          {tCommon('treatments.card.relatedCondition', 'Related Condition')}:
+          {t('common:treatments.card.relatedCondition', 'Related Condition')}:
         </Text>
         <Text
           size="sm"
@@ -153,11 +152,11 @@ const TreatmentCard = ({
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={() => handleConditionClick(treatment.condition_id)}
-          title={tCommon('treatments.card.viewConditionDetails', 'View condition details')}
+          title={t('common:treatments.card.viewConditionDetails', 'View condition details')}
         >
           {treatment.condition?.diagnosis ||
            getConditionName(treatment.condition_id) ||
-           tCommon('treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id })}
+           t('common:treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id })}
         </Text>
       </Group>
     ) : null;

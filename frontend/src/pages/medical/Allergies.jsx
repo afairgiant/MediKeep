@@ -286,11 +286,11 @@ const Allergies = () => {
                 columns={[
                   { header: t('allergies.allergen.label'), accessor: 'allergen', priority: 'high', width: 150 },
                   { header: t('allergies.reaction.label'), accessor: 'reaction', priority: 'high', width: 180 },
-                  { header: t('common.fields.severity.label'), accessor: 'severity', priority: 'high', width: 100 },
+                  { header: t('common:fields.severity.label'), accessor: 'severity', priority: 'high', width: 100 },
                   { header: t('allergies.onsetDate.label'), accessor: 'onset_date', priority: 'medium', width: 120 },
                   { header: t('allergies.relatedMedication.label'), accessor: 'medication_name', priority: 'low', width: 150 },
-                  { header: t('common.fields.status.label'), accessor: 'status', priority: 'medium', width: 100 },
-                  { header: t('common.fields.notes.label'), accessor: 'notes', priority: 'low', width: 200 },
+                  { header: t('common:fields.status.label'), accessor: 'status', priority: 'medium', width: 100 },
+                  { header: t('common:fields.notes.label'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
                 tableName={t('allergies.title')}

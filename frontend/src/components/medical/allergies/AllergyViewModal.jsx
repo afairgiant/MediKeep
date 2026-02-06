@@ -38,8 +38,7 @@ const AllergyViewModal = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -204,22 +203,22 @@ const AllergyViewModal = ({
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('allergies.allergyType.label')}</Text>
                       <Text size="sm" c={allergy.allergy_type ? 'inherit' : 'dimmed'}>
-                        {allergy.allergy_type || tCommon('labels.unknown', 'Not specified')}
+                        {allergy.allergy_type || t('common:labels.unknown', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('common.fields.severity.label')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('common:fields.severity.label')}</Text>
                       <Badge
                         color={getSeverityColor(allergy.severity)}
                         variant="filled"
                         leftSection={React.createElement(SeverityIcon, { size: 16 })}
                         size="sm"
                       >
-                        {allergy.severity || tCommon('labels.unknown', 'Not specified')}
+                        {allergy.severity || t('common:labels.unknown', 'Not specified')}
                       </Badge>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('common.fields.status.label')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('common:fields.status.label')}</Text>
                       <Badge color={getStatusColor(allergy.status)} variant="light" size="sm">
                         {allergy.status}
                       </Badge>
@@ -227,7 +226,7 @@ const AllergyViewModal = ({
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('allergies.onsetDate.label')}</Text>
                       <Text size="sm" c={allergy.onset_date ? 'inherit' : 'dimmed'}>
-                        {allergy.onset_date ? formatDate(allergy.onset_date) : tCommon('labels.unknown', 'Not specified')}
+                        {allergy.onset_date ? formatDate(allergy.onset_date) : t('common:labels.unknown', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
@@ -253,7 +252,7 @@ const AllergyViewModal = ({
                 {/* Tags Section */}
                 {allergy.tags && allergy.tags.length > 0 && (
                   <div>
-                    <Title order={4} mb="sm">{t('common.fields.tags.label')}</Title>
+                    <Title order={4} mb="sm">{t('common:fields.tags.label')}</Title>
                     <Group gap="xs">
                       {allergy.tags.map((tag, index) => (
                         <Badge
@@ -283,13 +282,13 @@ const AllergyViewModal = ({
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('allergies.reactionType.label')}</Text>
                       <Text size="sm" c={allergy.reaction_type ? 'inherit' : 'dimmed'}>
-                        {allergy.reaction_type || tCommon('labels.unknown', 'Not specified')}
+                        {allergy.reaction_type || t('common:labels.unknown', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
                       <Text fw={500} size="sm" c="dimmed">{t('allergies.reaction.label')}</Text>
                       <Text size="sm" c={allergy.reaction ? 'inherit' : 'dimmed'}>
-                        {allergy.reaction || tCommon('labels.unknown', 'Not specified')}
+                        {allergy.reaction || t('common:labels.unknown', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -327,10 +326,10 @@ const AllergyViewModal = ({
           {/* Action Buttons */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose}>
-              {tCommon('buttons.close')}
+              {t('common:buttons.close')}
             </Button>
             <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-              {tCommon('buttons.edit')}
+              {t('common:buttons.edit')}
             </Button>
           </Group>
         </Stack>

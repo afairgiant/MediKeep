@@ -17,8 +17,7 @@ const ProcedureCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
   const handleError = (error) => {
     logger.error('procedure_card_error', {
@@ -57,7 +56,7 @@ const ProcedureCard = ({
       {
         label: t('procedures.procedureDate.label'),
         value: procedure.date,
-        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
       },
       {
         label: t('procedures.procedureCode.label'),
@@ -70,31 +69,31 @@ const ProcedureCard = ({
           <Badge variant="light" color="cyan" size="sm">
             {value}
           </Badge>
-        ) : tCommon('labels.notSpecified')
+        ) : t('common:labels.notSpecified')
       },
       {
         label: t('procedures.procedureDuration.label'),
         value: procedure.procedure_duration,
-        render: (value) => value ? tCommon('procedures.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : tCommon('labels.notSpecified')
+        render: (value) => value ? t('common:procedures.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : t('common:labels.notSpecified')
       },
       {
-        label: tCommon('labels.facility'),
+        label: t('common:labels.facility'),
         value: procedure.facility
       },
       {
         label: t('procedures.performingPractitioner.label'),
         value: procedure.practitioner_id,
         render: (value) => {
-          if (!value) return tCommon('labels.notSpecified');
+          if (!value) return t('common:labels.notSpecified');
 
-          const practitionerName = practitioner?.name || tCommon('procedures.card.practitionerId', 'Practitioner ID: {{id}}', { id: value });
+          const practitionerName = practitioner?.name || t('common:procedures.card.practitionerId', 'Practitioner ID: {{id}}', { id: value });
           return (
             <Text
               size="sm"
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={tCommon('procedures.card.viewPractitioner', 'View practitioner details')}
+              title={t('common:procedures.card.viewPractitioner', 'View practitioner details')}
             >
               {practitionerName}
             </Text>
@@ -102,7 +101,7 @@ const ProcedureCard = ({
         }
       },
       {
-        label: tCommon('labels.description'),
+        label: t('common:labels.description'),
         value: procedure.description,
         align: 'flex-start',
         style: { flex: 1 }

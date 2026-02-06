@@ -17,8 +17,7 @@ const ImmunizationCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -63,7 +62,7 @@ const ImmunizationCard = ({
     
     if (immunization.dose_number) {
       badges.push({
-        label: tCommon('immunizations.card.dose', 'Dose {{number}}', { number: immunization.dose_number }),
+        label: t('common:immunizations.card.dose', 'Dose {{number}}', { number: immunization.dose_number }),
         color: getDoseColor(immunization.dose_number)
       });
     }
@@ -89,7 +88,7 @@ const ImmunizationCard = ({
       {
         label: t('immunizations.dateAdministered.label'),
         value: immunization.date_administered,
-        render: (value) => value ? formatLongDate(value) : tCommon('labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
       },
       immunization.lot_number && {
         label: t('immunizations.lotNumber.label'),
@@ -122,10 +121,10 @@ const ImmunizationCard = ({
         render: (value) => formatLongDate(value)
       },
       immunization.practitioner_id && {
-        label: tCommon('labels.practitioner'),
+        label: t('common:labels.practitioner'),
         value: immunization.practitioner_id,
         render: (value) => {
-          if (!value) return tCommon('labels.notSpecified');
+          if (!value) return t('common:labels.notSpecified');
           const practitioner = practitioners.find(p => p.id === value);
           return (
             <Text
@@ -133,9 +132,9 @@ const ImmunizationCard = ({
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={tCommon('immunizations.card.viewPractitioner', 'View practitioner details')}
+              title={t('common:immunizations.card.viewPractitioner', 'View practitioner details')}
             >
-              {practitioner?.name || tCommon('immunizations.card.practitionerId', 'ID: {{id}}', { id: value })}
+              {practitioner?.name || t('common:immunizations.card.practitionerId', 'ID: {{id}}', { id: value })}
             </Text>
           );
         }

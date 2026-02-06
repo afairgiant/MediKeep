@@ -27,26 +27,25 @@ const MedicationCard = ({
   fileCountLoading = false,
   onError,
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
 
   const getMedicationPurpose = (medication) => {
     const indication = medication.indication?.trim();
-    return indication || tCommon('labels.notSpecified');
+    return indication || t('common:labels.notSpecified');
   };
 
   const getMedicationTypeLabel = (type) => {
     const typeKey = `medications.types.${type}`;
     switch(type) {
       case MEDICATION_TYPES.PRESCRIPTION:
-        return tCommon(typeKey, 'Prescription');
+        return t('common:' + typeKey, 'Prescription');
       case MEDICATION_TYPES.OTC:
-        return tCommon(typeKey, 'Over-the-Counter');
+        return t('common:' + typeKey, 'Over-the-Counter');
       case MEDICATION_TYPES.SUPPLEMENT:
-        return tCommon(typeKey, 'Supplement/Vitamin');
+        return t('common:' + typeKey, 'Supplement/Vitamin');
       case MEDICATION_TYPES.HERBAL:
-        return tCommon(typeKey, 'Herbal/Natural');
+        return t('common:' + typeKey, 'Herbal/Natural');
       default:
         return type;
     }
@@ -152,7 +151,7 @@ const MedicationCard = ({
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
-                title={tCommon('labels.viewPractitionerDetails')}
+                title={t('common:labels.viewPractitionerDetails')}
               >
                 {medication.practitioner.name}
               </Text>
@@ -168,7 +167,7 @@ const MedicationCard = ({
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
-                title={tCommon('labels.viewPharmacyDetails', 'View pharmacy details')}
+                title={t('common:labels.viewPharmacyDetails', 'View pharmacy details')}
               >
                 {medication.pharmacy.name}
               </Text>
@@ -177,7 +176,7 @@ const MedicationCard = ({
           {medication.effective_period_start && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {tCommon('labels.startDate', 'Start Date')}:
+                {t('common:labels.startDate', 'Start Date')}:
               </Text>
               <Text size="sm">
                 {formatLongDate(medication.effective_period_start)}
@@ -187,7 +186,7 @@ const MedicationCard = ({
           {medication.effective_period_end && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {tCommon('labels.endDate', 'End Date')}:
+                {t('common:labels.endDate', 'End Date')}:
               </Text>
               <Text size="sm">
                 {formatLongDate(medication.effective_period_end)}
@@ -205,14 +204,14 @@ const MedicationCard = ({
             size="xs"
             onClick={() => onView(medication)}
           >
-            {tCommon('buttons.view')}
+            {t('common:buttons.view')}
           </Button>
           <Button
             variant="filled"
             size="xs"
             onClick={() => onEdit(medication)}
           >
-            {tCommon('buttons.edit')}
+            {t('common:buttons.edit')}
           </Button>
           <Button
             variant="filled"
@@ -220,7 +219,7 @@ const MedicationCard = ({
             size="xs"
             onClick={() => onDelete(medication.id)}
           >
-            {tCommon('buttons.delete')}
+            {t('common:buttons.delete')}
           </Button>
         </Group>
       </Stack>

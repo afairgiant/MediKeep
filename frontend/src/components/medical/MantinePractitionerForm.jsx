@@ -16,8 +16,7 @@ const MantinePractitionerForm = ({
   onSubmit,
   editingPractitioner = null,
 }) => {
-  const { t } = useTranslation('errors');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
 
   // State for dynamic specialties
   const [specialtyOptions, setSpecialtyOptions] = useState([]);
@@ -146,7 +145,7 @@ const MantinePractitionerForm = ({
             rel="noopener noreferrer"
             style={{ fontSize: '12px', color: 'var(--mantine-color-blue-6)' }}
           >
-            {tCommon('labels.visitWebsite')}
+            {t('common:labels.visitWebsite')}
           </Anchor>
         </div>
       )}

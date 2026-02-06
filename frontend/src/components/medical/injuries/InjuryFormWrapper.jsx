@@ -46,8 +46,7 @@ const InjuryFormWrapper = ({
   isLoading = false,
 }) => {
   // Translation hooks
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -317,7 +316,7 @@ const InjuryFormWrapper = ({
                       clearable
                       searchable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                      nothingFoundMessage={tCommon('noResults', 'No practitioners found')}
+                      nothingFoundMessage={t('common:noResults', 'No practitioners found')}
                       description={t(
                         'injuries.practitioner.description',
                         'The healthcare provider treating this injury'
@@ -423,19 +422,19 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <TagInput
-                      label={tCommon('fields.tags.label', 'Tags')}
+                      label={t('common:fields.tags.label', 'Tags')}
                       value={formData.tags || []}
                       onChange={(tags) => {
                         onInputChange({
                           target: { name: 'tags', value: tags },
                         });
                       }}
-                      placeholder={tCommon(
-                        'fields.tags.placeholder',
+                      placeholder={t(
+                        'common:fields.tags.placeholder',
                         'Add tags to organize...'
                       )}
-                      description={tCommon(
-                        'fields.tags.description',
+                      description={t(
+                        'common:fields.tags.description',
                         'Add tags to help organize and search'
                       )}
                       maxTags={15}
@@ -449,12 +448,12 @@ const InjuryFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" mt="xl">
             <Button variant="subtle" onClick={onClose} disabled={isSubmitting}>
-              {tCommon('buttons.cancel', 'Cancel')}
+              {t('common:buttons.cancel', 'Cancel')}
             </Button>
             <SubmitButton isLoading={isSubmitting}>
               {editingInjury
-                ? tCommon('buttons.saveChanges', 'Save Changes')
-                : tCommon('buttons.create', 'Create')}
+                ? t('common:buttons.saveChanges', 'Save Changes')
+                : t('common:buttons.create', 'Create')}
             </SubmitButton>
           </Group>
         </Stack>

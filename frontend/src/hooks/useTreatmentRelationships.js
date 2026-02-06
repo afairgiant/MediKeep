@@ -67,8 +67,7 @@ export function useTreatmentRelationships({
   buildSinglePayload,
   buildBulkPayload,
 }) {
-  const { t } = useTranslation('common');
-  const { t: tErrors } = useTranslation('errors');
+  const { t } = useTranslation(['common', 'errors']);
 
   const config = RELATIONSHIP_CONFIGS[type];
   if (!config) {
@@ -140,7 +139,7 @@ export function useTreatmentRelationships({
   const handleAddRelationship = useCallback(async () => {
     const ids = newRelationship[config.idsField];
     if (!ids || ids.length === 0) {
-      setError(tErrors(`form.${config.entityName.replace(' ', '')}NotSelected`, `Please select at least one ${config.entityName}`));
+      setError(t(`errors:form.${config.entityName.replace(' ', '')}NotSelected`, `Please select at least one ${config.entityName}`));
       return;
     }
 
@@ -176,7 +175,7 @@ export function useTreatmentRelationships({
     buildBulkPayload,
     fetchRelationships,
     resetAndCloseModal,
-    tErrors,
+    t,
   ]);
 
   const handleEditRelationship = useCallback(async (relationshipId, updates) => {

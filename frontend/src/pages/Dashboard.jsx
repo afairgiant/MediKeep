@@ -1,5 +1,3 @@
-import logger from '../services/logger';
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -62,6 +60,7 @@ import { GlobalSearch } from '../components/common';
 import { InvitationNotifications } from '../components/dashboard';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
+import logger from '../services/logger';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrentPatient, useCacheManager } from '../hooks/useGlobalData';
 import { useDateFormat } from '../hooks/useDateFormat';
@@ -77,8 +76,7 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('navigation');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['navigation', 'common']);
   const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const {

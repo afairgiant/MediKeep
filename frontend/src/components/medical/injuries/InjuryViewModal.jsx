@@ -34,8 +34,7 @@ const InjuryViewModal = ({
   injuryTypes = [],
   navigate,
 }) => {
-  const { t } = useTranslation('medical');
-  const { t: tCommon } = useTranslation('common');
+  const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -89,10 +88,10 @@ const InjuryViewModal = ({
   // Format severity display
   const formatSeverity = (severity) => {
     const map = {
-      mild: t('common.severity.mild', 'Mild'),
-      moderate: t('common.severity.moderate', 'Moderate'),
-      severe: t('common.severity.severe', 'Severe'),
-      'life-threatening': t('common.severity.lifeThreatening', 'Life-threatening'),
+      mild: t('common:severity.mild', 'Mild'),
+      moderate: t('common:severity.moderate', 'Moderate'),
+      severe: t('common:severity.severe', 'Severe'),
+      'life-threatening': t('common:severity.lifeThreatening', 'Life-threatening'),
     };
     return map[severity] || severity;
   };
@@ -116,7 +115,7 @@ const InjuryViewModal = ({
       </Text>
       {children || (
         <Text size="sm" fw={500}>
-          {value || tCommon('labels.notSpecified', 'Not specified')}
+          {value || t('common:labels.notSpecified', 'Not specified')}
         </Text>
       )}
     </Box>
@@ -196,7 +195,7 @@ const InjuryViewModal = ({
                         <Text size="sm" fw={500}>
                           {injury.date_of_injury
                             ? formatLongDate(injury.date_of_injury)
-                            : tCommon('labels.notSpecified', 'Not specified')}
+                            : t('common:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Group>
                     </FieldDisplay>
@@ -226,7 +225,7 @@ const InjuryViewModal = ({
                         </Text>
                       ) : (
                         <Text size="sm" fw={500}>
-                          {tCommon('labels.notSpecified', 'Not specified')}
+                          {t('common:labels.notSpecified', 'Not specified')}
                         </Text>
                       )}
                     </FieldDisplay>
@@ -234,7 +233,7 @@ const InjuryViewModal = ({
                     {injury.tags && injury.tags.length > 0 && (
                       <Box mt="sm">
                         <Text size="xs" c="dimmed" mb={4}>
-                          {tCommon('fields.tags.label', 'Tags')}
+                          {t('common:fields.tags.label', 'Tags')}
                         </Text>
                         <Group gap="xs">
                           {injury.tags.map((tag, index) => (
@@ -301,10 +300,10 @@ const InjuryViewModal = ({
         <Divider />
         <Group justify="flex-end">
           <Button variant="subtle" onClick={onClose}>
-            {tCommon('buttons.close', 'Close')}
+            {t('common:buttons.close', 'Close')}
           </Button>
           <Button leftSection={<IconEdit size={16} />} onClick={() => onEdit(injury)}>
-            {tCommon('buttons.edit', 'Edit')}
+            {t('common:buttons.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>
