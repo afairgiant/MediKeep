@@ -68,10 +68,14 @@ const Login = () => {
         const from = location.state?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
-        notifyError(result.error || 'notifications:toasts.auth.loginFailed');
+        notifyError('notifications:toasts.auth.loginFailed');
       }
     } catch (error) {
-      notifyError(error.message || 'notifications:toasts.auth.loginFailed');
+      frontendLogger.logError('Login failed', {
+        error: error && error.message ? error.message : String(error),
+        component: 'Login',
+      });
+      notifyError('notifications:toasts.auth.loginFailed');
     } finally {
       setIsLoading(false);
     }
@@ -96,7 +100,7 @@ const Login = () => {
         error: error.message,
         component: 'Login',
       });
-      notifyError(error.message || 'notifications:toasts.auth.ssoFailed');
+      notifyError('notifications:toasts.auth.ssoFailed');
     } finally {
       setSSOLoading(false);
     }

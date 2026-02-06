@@ -24,19 +24,22 @@ import {
 
 /**
  * Resolve a value through i18n if it looks like a translation key, otherwise return as-is.
- * Keys are detected by containing a colon (namespace separator) or a dot (nested key).
+ * Keys are detected by containing a colon (namespace separator) or a deeply nested dot path.
  * Literal strings without dots/colons pass through unchanged.
  */
 const resolve = (keyOrLiteral, interpolation) => {
   if (!keyOrLiteral) return '';
-  // If it contains a colon (namespace:key) or looks like a dotted path with no spaces,
-  // treat it as a translation key.
-  if (
-    typeof keyOrLiteral === 'string' &&
-    (keyOrLiteral.includes(':') ||
-      (keyOrLiteral.includes('.') && !/\s/.test(keyOrLiteral)))
-  ) {
-    return i18n.t(keyOrLiteral, interpolation);
+  // If it contains a colon (namespace:key) or looks like a deeply nested dotted path
+  // (at least two dots) with no spaces, treat it as a translation key.
+  if (typeof keyOrLiteral === 'string') {
+    const hasNamespace = keyOrLiteral.includes(':');
+    const dotMatches = keyOrLiteral.match(/\./g);
+    const dotCount = dotMatches ? dotMatches.length : 0;
+    const looksLikeDottedKey = dotCount >= 2 && !/\s/.test(keyOrLiteral);
+
+    if (hasNamespace || looksLikeDottedKey) {
+      return i18n.t(keyOrLiteral, interpolation);
+    }
   }
   return keyOrLiteral;
 };

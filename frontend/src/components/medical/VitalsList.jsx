@@ -213,9 +213,8 @@ const VitalsList = ({
       notifySuccess('notifications:toasts.vitals.deleteSuccess');
       loadVitals(); // Refresh the list
     } catch (err) {
-      notifyError(
-        err.response?.data?.detail || 'notifications:toasts.vitals.deleteFailed'
-      );
+      logger.error('Delete vitals failed:', err.response?.data?.detail || err);
+      notifyError('notifications:toasts.vitals.deleteFailed');
     }
   };
 

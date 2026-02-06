@@ -271,7 +271,10 @@
       "ssoFailed": "Failed to start SSO login",
       "accessDeniedAdmin": "Access denied: Administrator privileges required",
       "accessDeniedRole": "Access denied: {{role}} role required",
-      "accessDeniedRoles": "Access denied: One of these roles required: {{roles}}"
+      "accessDeniedRoles": "Access denied: One of these roles required: {{roles}}",
+      "loginRequired": "Please log in to access this page",
+      "userCreatedSuccess": "User account created successfully!",
+      "accountCreatedSuccess": "Account created successfully! Logging you in..."
     },
     "patient": {
       "nowViewing": "Now viewing {{name}}",

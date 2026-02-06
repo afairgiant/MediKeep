@@ -77,11 +77,11 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       });
 
       if (registerResult.success) {
-        const successMessage = isAdminContext 
-          ? 'User account created successfully!'
-          : 'Account created successfully! Logging you in...';
-        
-        notifySuccess(successMessage);
+        const successKey = isAdminContext
+          ? 'notifications:toasts.auth.userCreatedSuccess'
+          : 'notifications:toasts.auth.accountCreatedSuccess';
+
+        notifySuccess(successKey);
         
         // Call success callback with user data and context info
         onSuccess && onSuccess({

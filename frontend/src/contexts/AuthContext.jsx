@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService } from '../services/auth/simpleAuthService';
-import { notifySuccess, notifyError, notifyInfo } from '../utils/notifyTranslated';
+import { notifySuccess, notifyInfo } from '../utils/notifyTranslated';
 import { env } from '../config/env';
 import {
   shouldShowPatientProfileCompletionPrompt,
@@ -673,7 +673,7 @@ export function AuthProvider({ children }) {
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: errorMessage,
       });
-      toast.error(errorMessage);
+      notifyInfo('notifications:toasts.auth.loginFailed');
       return { success: false, error: errorMessage };
     }
   };

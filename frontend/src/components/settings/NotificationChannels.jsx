@@ -88,7 +88,14 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
           onTestSuccess();
         }
       } else {
-        notifyError(result.message || t('channels.testFailed', 'Test notification failed'));
+        notifyError(t('channels.testFailed', 'Test notification failed'));
+        if (result.message) {
+          frontendLogger.logError('Channel test failed', {
+            component: 'NotificationChannels',
+            channelId,
+            backendMessage: result.message,
+          });
+        }
       }
     } catch (err) {
       notifyError(t('channels.testError', 'Failed to send test notification'));
@@ -123,8 +130,8 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
 
       handleModalClose();
     } catch (err) {
-      const errorMsg = err.message || (isEditing ? t('channels.updateError', 'Failed to update channel') : t('channels.createError', 'Failed to create channel'));
-      notifyError(errorMsg);
+      const errorKey = isEditing ? t('channels.updateError', 'Failed to update channel') : t('channels.createError', 'Failed to create channel');
+      notifyError(errorKey);
       frontendLogger.logError('Failed to save channel', {
         component: 'NotificationChannels',
         isEditing,
