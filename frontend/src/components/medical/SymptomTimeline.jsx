@@ -11,18 +11,14 @@ import {
   Loader,
   Center,
   Modal,
-  Button,
-  Divider,
 } from '@mantine/core';
-import { IconStethoscope, IconEye } from '@tabler/icons-react';
+import { IconStethoscope } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { formatTimeToAmPm } from '../../utils/dateUtils';
 import { symptomApi } from '../../services/api/symptomApi';
-import { SymptomViewModal } from './symptoms';
+import { OccurrenceDetailCard, SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
 import {
   SYMPTOM_SEVERITY_COLORS,
-  SYMPTOM_STATUS_COLORS,
   SYMPTOM_SEVERITY_ORDER,
 } from '../../constants/symptomEnums';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -34,7 +30,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
  */
 const SymptomTimeline = ({ patientId, hidden }) => {
   const { t } = useTranslation('common');
-  const { formatDate, locale } = useDateFormat();
+  const { locale } = useDateFormat();
   const [timelineData, setTimelineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
@@ -281,79 +277,11 @@ const SymptomTimeline = ({ patientId, hidden }) => {
         ) : (
           <Stack gap="md">
             {selectedOccurrences.map((occurrence, idx) => (
-              <Paper key={idx} p="md" withBorder>
-                <Stack gap="xs">
-                  <Group gap="sm" justify="space-between">
-                    <Group gap="sm">
-                      <Text fw={600} size="lg">
-                        {occurrence.symptom_name}
-                      </Text>
-                      <Badge
-                        color={SYMPTOM_SEVERITY_COLORS[occurrence.severity]}
-                        size="sm"
-                        tt="uppercase"
-                      >
-                        {occurrence.severity}
-                      </Badge>
-                      {occurrence.pain_scale !== null &&
-                        occurrence.pain_scale !== undefined && (
-                          <Badge color="red" variant="outline" size="sm">
-                            {t('symptoms.calendar.pain', 'Pain')}: {occurrence.pain_scale}/10
-                          </Badge>
-                        )}
-                    </Group>
-                    <Button
-                      size="xs"
-                      variant="light"
-                      leftSection={<IconEye size={14} />}
-                      onClick={() => handleViewSymptom(occurrence.symptom_id)}
-                    >
-                      {t('symptoms.calendar.viewSymptom', 'View Symptom')}
-                    </Button>
-                  </Group>
-
-                  {occurrence.duration && (
-                    <Text size="sm">
-                      <strong>{t('symptoms.calendar.duration', 'Duration')}:</strong> {occurrence.duration}
-                    </Text>
-                  )}
-                  {occurrence.location && (
-                    <Text size="sm">
-                      <strong>{t('symptoms.calendar.location', 'Location')}:</strong> {occurrence.location}
-                    </Text>
-                  )}
-                  {occurrence.occurrence_time && (
-                    <Text size="sm">
-                      <strong>{t('symptoms.calendar.time', 'Time')}:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
-                    </Text>
-                  )}
-                  {occurrence.resolved_date && (
-                    <Text size="sm" c="green">
-                      <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
-                    </Text>
-                  )}
-                  {!occurrence.resolved_date && occurrence.symptom_status === 'resolved' && (
-                    <Badge size="sm" color="green" variant="light">
-                      {t('symptoms.calendar.resolved', 'Resolved')}
-                    </Badge>
-                  )}
-                  {!occurrence.resolved_date && occurrence.symptom_status !== 'resolved' && (
-                    <Badge size="sm" color="blue" variant="light">
-                      {t('symptoms.calendar.ongoing', 'Ongoing')}
-                    </Badge>
-                  )}
-                  {occurrence.notes && (
-                    <Text size="sm" c="dimmed">
-                      {occurrence.notes}
-                    </Text>
-                  )}
-
-                  <Divider />
-                  <Text size="xs" c="dimmed">
-                    {t('symptoms.calendar.occurrenceId', 'Occurrence ID')}: {occurrence.occurrence_id}
-                  </Text>
-                </Stack>
-              </Paper>
+              <OccurrenceDetailCard
+                key={idx}
+                occurrence={occurrence}
+                onViewSymptom={handleViewSymptom}
+              />
             ))}
           </Stack>
         )}

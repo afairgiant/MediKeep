@@ -60,9 +60,12 @@ class SymptomBase(BaseModel):
 
     @field_validator("resolved_date")
     @classmethod
-    def validate_resolved_date(cls, v):
+    def validate_resolved_date(cls, v, info: ValidationInfo):
         if v is not None:
-            return validate_date_not_future(v, field_name="Resolved date")
+            v = validate_date_not_future(v, field_name="Resolved date")
+            first_occurrence = info.data.get("first_occurrence_date") if info else None
+            if first_occurrence is not None and v is not None and v < first_occurrence:
+                raise ValueError("Resolved date cannot be before first occurrence date")
         return v
 
     @field_validator("symptom_name")
@@ -159,7 +162,6 @@ class SymptomResponse(SymptomBase):
     patient_id: int
     first_occurrence_date: date
     last_occurrence_date: Optional[date] = None
-    resolved_date: Optional[date] = None
     created_at: datetime
     updated_at: datetime
     occurrence_count: Optional[int] = 0  # Can be populated by CRUD

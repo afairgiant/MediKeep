@@ -187,9 +187,14 @@ const Symptoms = () => {
     const { name, value, type, checked } = e.target;
     setSymptomFormData(prev => {
       const updated = { ...prev, [name]: type === 'checkbox' ? checked : value };
-      // Auto-fill resolved_date with today when status changes to resolved
-      if (name === 'status' && value === 'resolved' && !prev.resolved_date) {
-        updated.resolved_date = new Date().toISOString().split('T')[0];
+      if (name === 'status') {
+        if (value === 'resolved' && !prev.resolved_date) {
+          // Auto-fill resolved_date with today when status changes to resolved
+          updated.resolved_date = new Date().toISOString().split('T')[0];
+        } else if (value !== 'resolved') {
+          // Clear resolved_date when status changes away from resolved
+          updated.resolved_date = '';
+        }
       }
       return updated;
     });
