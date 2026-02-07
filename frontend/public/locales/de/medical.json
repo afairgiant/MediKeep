@@ -1112,6 +1112,11 @@
 				"resolved": "Aufgelöst - Nicht mehr auftretend",
 				"recurring": "Wiederkehrend - Kommt und geht"
 			},
+			"resolvedDate": {
+				"label": "Auflösungsdatum",
+				"placeholder": "Wann wurde dieses Symptom aufgelöst",
+				"description": "Das Datum, an dem dieses Symptom vollständig aufgelöst wurde"
+			},
 			"generalNotes": {
 				"label": "Allgemeine Notizen",
 				"placeholder": "Gesamtnotizen zu diesem Symptom...",
@@ -1175,6 +1180,11 @@
 				"label": "Datum der Besserung",
 				"placeholder": "Wann hat sich diese Episode gebessert",
 				"description": "Leer lassen, wenn die Episode noch andauert"
+			},
+			"resolvedTime": {
+				"label": "Auflösungszeit",
+				"placeholder": "Zeitpunkt der Auflösung der Episode",
+				"description": "Der Zeitpunkt, zu dem diese Episode aufgelöst wurde"
 			},
 			"resolutionNotes": {
 				"label": "Notizen zur Auflösung",

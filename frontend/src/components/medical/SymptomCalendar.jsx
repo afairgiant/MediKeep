@@ -153,10 +153,12 @@ const SymptomCalendar = ({ patientId, hidden }) => {
         if (!grouped[startDate]) {
           grouped[startDate] = [];
         }
+        // Only mark as ongoing if no resolved_date AND parent symptom is not resolved
+        const isOngoing = occurrence.symptom_status !== 'resolved';
         grouped[startDate].push({
           ...occurrence,
           isDuration: false,
-          isOngoing: true, // Ongoing since no resolved_date
+          isOngoing,
         });
       }
     });
@@ -269,6 +271,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
       // Check if this day has duration-based symptoms
       const hasDuration = occurrencesOnDate.some(o => o.isDuration);
       const hasOngoing = occurrencesOnDate.some(o => o.isOngoing);
+      const allResolved = hasOccurrences && !hasOngoing;
       const isStart = occurrencesOnDate.some(o => o.isStart);
       const isEnd = occurrencesOnDate.some(o => o.isEnd);
       const isMid = occurrencesOnDate.some(o => o.isMid);
@@ -286,6 +289,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
         severityColor,
         hasDuration,
         hasOngoing,
+        allResolved,
         isStart,
         isEnd,
         isMid,
@@ -347,6 +351,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
               severityColor,
               hasDuration,
               hasOngoing,
+              allResolved,
               isStart,
               isEnd,
               isMid,
@@ -370,10 +375,13 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                     : '4px',
                   cursor: hasOccurrences ? 'pointer' : 'default',
                   backgroundColor: hasOccurrences
-                    ? hasDuration
-                      ? `var(--mantine-color-${severityColor}-1)`
-                      : `var(--mantine-color-${severityColor}-0)`
+                    ? allResolved
+                      ? 'var(--mantine-color-gray-1)'
+                      : hasDuration
+                        ? `var(--mantine-color-${severityColor}-1)`
+                        : `var(--mantine-color-${severityColor}-0)`
                     : 'transparent',
+                  opacity: allResolved ? 0.7 : 1,
                   position: 'relative',
                   minHeight: '60px',
                   borderLeft: hasDuration && !isStart ? 'none' : '1px solid #e9ecef',
@@ -387,12 +395,17 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                   </Text>
                   {hasOccurrences && (
                     <Group gap={4} justify="center">
-                      <Badge size="xs" color={severityColor}>
+                      <Badge size="xs" color={allResolved ? 'gray' : severityColor}>
                         {uniqueSymptoms}
                       </Badge>
                       {hasOngoing && (
                         <Badge size="xs" color="blue" variant="dot">
                           {t('symptoms.calendar.ongoing', 'Ongoing')}
+                        </Badge>
+                      )}
+                      {allResolved && (
+                        <Badge size="xs" color="green" variant="light">
+                          {t('symptoms.calendar.resolved', 'Resolved')}
                         </Badge>
                       )}
                     </Group>
@@ -476,7 +489,12 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                       <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
                     </Text>
                   )}
-                  {!occurrence.resolved_date && (
+                  {!occurrence.resolved_date && occurrence.symptom_status === 'resolved' && (
+                    <Badge size="sm" color="green" variant="light">
+                      {t('symptoms.calendar.resolved', 'Resolved')}
+                    </Badge>
+                  )}
+                  {!occurrence.resolved_date && occurrence.symptom_status !== 'resolved' && (
                     <Badge size="sm" color="blue" variant="light">
                       {t('symptoms.calendar.ongoing', 'Ongoing')}
                     </Badge>

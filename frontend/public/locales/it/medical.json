@@ -711,6 +711,11 @@
         "resolved": "Risolto - Non più in corso",
         "recurring": "Ricorrente - Va e viene"
       },
+      "resolvedDate": {
+        "label": "Data di Risoluzione",
+        "placeholder": "Quando è stato risolto questo sintomo",
+        "description": "La data in cui questo sintomo è stato completamente risolto"
+      },
       "generalNotes": {
         "label": "Note generali",
         "placeholder": "Note generali su questo sintomo...",
@@ -774,6 +779,11 @@
         "label": "Data di risoluzione",
         "placeholder": "Quando questo episodio è stato risolto",
         "description": "Lascia vuoto se stai ancora sperimentando questo episodio"
+      },
+      "resolvedTime": {
+        "label": "Ora di Risoluzione",
+        "placeholder": "Ora in cui l'episodio si è risolto",
+        "description": "L'ora in cui questo episodio si è risolto"
       },
       "resolutionNotes": {
         "label": "Note di risoluzione",

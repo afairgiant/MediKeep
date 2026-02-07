@@ -711,6 +711,11 @@
         "label": "Desencadenantes comunes",
         "placeholder": "Agregue los desencadenantes comunes (estrés, clima, alimentos, etc.)",
         "description": "Lo que típicamente desencadena este síntoma"
+      },
+      "resolvedDate": {
+        "label": "Fecha de Resolución",
+        "placeholder": "Cuándo se resolvió este síntoma",
+        "description": "La fecha en que este síntoma se resolvió completamente"
       }
     },
     "occurrence": {
@@ -755,6 +760,11 @@
         "label": "Fecha de resolución",
         "placeholder": "Cuándo se resolvió la crisis",
         "description": "Deje en blanco si la crisis aún está en curso"
+      },
+      "resolvedTime": {
+        "label": "Hora de Resolución",
+        "placeholder": "Hora en que se resolvió el episodio",
+        "description": "La hora en que se resolvió este episodio"
       },
       "resolutionNotes": {
         "label": "Notas sobre la resolución",

@@ -1024,6 +1024,7 @@ class Symptom(Base):
     # Occurrence tracking
     first_occurrence_date = Column(Date, nullable=False)
     last_occurrence_date = Column(Date, nullable=True)
+    resolved_date = Column(Date, nullable=True)  # Date when symptom was resolved
 
     # General information
     typical_triggers = Column(JSON, nullable=True, default=list)  # Common triggers

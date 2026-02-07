@@ -53,9 +53,17 @@ class SymptomBase(BaseModel):
     category: Optional[str] = None
     status: str = "active"
     is_chronic: bool = False
+    resolved_date: Optional[date] = None
     typical_triggers: Optional[List[str]] = None
     general_notes: Optional[str] = None
     tags: Optional[List[str]] = None
+
+    @field_validator("resolved_date")
+    @classmethod
+    def validate_resolved_date(cls, v):
+        if v is not None:
+            return validate_date_not_future(v, field_name="Resolved date")
+        return v
 
     @field_validator("symptom_name")
     @classmethod
@@ -102,9 +110,17 @@ class SymptomUpdate(BaseModel):
     category: Optional[str] = None
     status: Optional[str] = None
     is_chronic: Optional[bool] = None
+    resolved_date: Optional[date] = None
     typical_triggers: Optional[List[str]] = None
     general_notes: Optional[str] = None
     tags: Optional[List[str]] = None
+
+    @field_validator("resolved_date")
+    @classmethod
+    def validate_resolved_date(cls, v):
+        if v is not None:
+            return validate_date_not_future(v, field_name="Resolved date")
+        return v
 
     @field_validator("symptom_name")
     @classmethod
@@ -143,6 +159,7 @@ class SymptomResponse(SymptomBase):
     patient_id: int
     first_occurrence_date: date
     last_occurrence_date: Optional[date] = None
+    resolved_date: Optional[date] = None
     created_at: datetime
     updated_at: datetime
     occurrence_count: Optional[int] = 0  # Can be populated by CRUD

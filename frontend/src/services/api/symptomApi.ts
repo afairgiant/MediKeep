@@ -246,6 +246,8 @@ export interface TimelineDataPoint {
   pain_scale?: number;
   occurrence_id: number;
   symptom_id: number;
+  resolved_date?: string;
+  symptom_status?: string;
 }
 
 /**

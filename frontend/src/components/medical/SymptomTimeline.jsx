@@ -240,11 +240,19 @@ const SymptomTimeline = ({ patientId, hidden }) => {
               </Text>
               {entry.occurrences.length <= 3 && (
                 <Group gap="xs" mt="xs">
-                  {entry.occurrences.map((occ, idx) => (
-                    <Badge key={idx} size="xs" variant="dot">
-                      {occ.symptom_name}
-                    </Badge>
-                  ))}
+                  {entry.occurrences.map((occ, idx) => {
+                    const isResolved = occ.symptom_status === 'resolved';
+                    return (
+                      <Badge
+                        key={idx}
+                        size="xs"
+                        variant={isResolved ? 'light' : 'dot'}
+                        color={isResolved ? 'green' : undefined}
+                      >
+                        {occ.symptom_name}{isResolved ? ` (${t('symptoms.calendar.resolved', 'Resolved')})` : ''}
+                      </Badge>
+                    );
+                  })}
                 </Group>
               )}
             </Timeline.Item>
@@ -324,7 +332,12 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                       <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
                     </Text>
                   )}
-                  {!occurrence.resolved_date && (
+                  {!occurrence.resolved_date && occurrence.symptom_status === 'resolved' && (
+                    <Badge size="sm" color="green" variant="light">
+                      {t('symptoms.calendar.resolved', 'Resolved')}
+                    </Badge>
+                  )}
+                  {!occurrence.resolved_date && occurrence.symptom_status !== 'resolved' && (
                     <Badge size="sm" color="blue" variant="light">
                       {t('symptoms.calendar.ongoing', 'Ongoing')}
                     </Badge>

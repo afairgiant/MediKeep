@@ -704,6 +704,11 @@
         "resolved": "Résolu - N'est plus ressenti",
         "recurring": "Récurrent - Va et vient"
       },
+      "resolvedDate": {
+        "label": "Date de Résolution",
+        "placeholder": "Quand ce symptôme a-t-il été résolu",
+        "description": "La date à laquelle ce symptôme a été entièrement résolu"
+      },
       "generalNotes": {
         "label": "Notes générales",
         "placeholder": "Notes générales à propos de ce symptôme...",
@@ -767,6 +772,11 @@
         "label": "Date de résolution",
         "placeholder": "Quand la crise s'est résolue",
         "description": "Laissez vide si la crise est encore en cours"
+      },
+      "resolvedTime": {
+        "label": "Heure de Résolution",
+        "placeholder": "Heure à laquelle l'épisode s'est résolu",
+        "description": "L'heure à laquelle cet épisode s'est résolu"
       },
       "resolutionNotes": {
         "label": "Notes sur la résolution",
