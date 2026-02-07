@@ -44,7 +44,7 @@
       "type": {
         "label": "Type de canal",
         "placeholder": "Sélectionnez le type de canal",
-        "description": "La service via lequel envoyer des notifications"
+        "description": "Le service via lequel envoyer des notifications"
       },
       "enabled": {
         "label": "Activer le canal",
@@ -65,7 +65,7 @@
       },
       "avatarUrl": {
         "label": "URL de l'avatar (optionnel)",
-        "placeholder": "https://example.com/avatar.png",
+        "placeholder": "https://exemple.com/avatar.png",
         "description": "Avatar personnalisé pour le bot de notification"
       }
     },
@@ -113,7 +113,7 @@
       },
       "appToken": {
         "label": "Jeton d'application",
-        "placeholder": "Jeton d'application de gotify",
+        "placeholder": "Jeton d'application de Gotify",
         "description": "Créez une application dans Gotify pour obtenir un jeton"
       },
       "priority": {
@@ -216,30 +216,30 @@
   },
 
   "history": {
-    "title": "Historique des notifications",
-    "description": "Notifications récemment envoyées via vos canaux",
-    "loading": "Chargement de l'historique...",
-    "noHistory": "Aucune notification envoyée pour l'instant",
-    "noHistoryHint": "Les notifications apparaîtront ici une fois envoyées",
-    "showMore": "Afficher plus",
-    "showLess": "Afficher moins",
-    "page": "Page {{current}} sur {{total}}",
+    "title": "Notification History",
+    "description": "Recent notifications sent through your channels",
+    "loading": "Loading history...",
+    "noHistory": "No notifications sent yet",
+    "noHistoryHint": "Notifications will appear here once sent",
+    "showMore": "Show More",
+    "showLess": "Show Less",
+    "page": "Page {{current}} of {{total}}",
     "status": {
-      "sent": "Envoyée",
-      "failed": "Echec",
-      "pending": "En attente"
+      "sent": "Sent",
+      "failed": "Failed",
+      "pending": "Pending"
     },
     "fields": {
-      "event": "Evénement",
-      "channel": "Canal",
-      "time": "Heure",
-      "status": "Statut",
-      "error": "Erreur"
+      "event": "Event",
+      "channel": "Channel",
+      "time": "Time",
+      "status": "Status",
+      "error": "Error"
     }
   },
 
   "validation": {
-    "nameRequired": "Le nol du canal est requis",
+    "nameRequired": "Le nom du canal est requis",
     "nameTooLong": "Le nom ne peut dépasser 100 caractères",
     "typeRequired": "Le type du canal est requis",
     "webhookUrlRequired": "L'URL du webhook est requise",
@@ -259,5 +259,156 @@
     "urlRequired": "L'URL du webhook est requise",
     "urlInvalid": "Format d'URL invalide",
     "headersInvalid": "Les en-têtes doivent constituer du code JSON valide"
+  },
+
+  "toasts": {
+    "auth": {
+      "sessionExpired": "La session a expiré pour cause d'inactivité.",
+      "sessionExpiredLogin": "Session expirée. Veuillez vous reconnecter.",
+      "loginSuccess": "Connexion réussie !",
+      "loginFailed": "Echec de la connexion",
+      "logoutSuccess": "Déconnexion réussie",
+      "ssoFailed": "Echec du lancement de la connexion SSO",
+      "accessDeniedAdmin": "Accès refusé : privilèges d'administrateur requis",
+      "accessDeniedRole": "Accès refusé : rôle {{role}} requis",
+      "accessDeniedRoles": "Accès refusé : un des rôles suivants est requis : {{roles}}",
+      "loginRequired": "Veuillez vous connecter pour accéder à cette page",
+      "userCreatedSuccess": "Compte utilisateur créé avec succès !",
+      "accountCreatedSuccess": "Compte créé avec succès ! Connexion en cours..."
+    },
+    "patient": {
+      "nowViewing": "Affichage : {{name}}",
+      "switchFailed": "Echec du changement : {{message}}",
+      "deleteOwnOnly": "Vous ne pouvez supprimer que les patients que vous possédez",
+      "deletedSwitched": "Suppression réussie : {{name}}. Changement vers {{fallbackName}}.",
+      "deletedNoOthers": "Suppression réussie : {{name}}. Aucun autre patient disponible.",
+      "deletedSuccess": "Suppression réussie : {{name}}.",
+      "deleteFailed": "Echec de la supperssion : {{message}}",
+      "removeOwnOnly": "Vous ne pouvez pas retirer l'accès aux patients que vous possédez.",
+      "removedAccess": "Accès à {{name}} retiré",
+      "removeAccessFailed": "Echec du retrait de l'accès : {{message}}",
+      "updatedSuccess": "Mise à jour réussie : {{name}}",
+      "createdSuccess": "Création réussie : {{name}}"
+    },
+    "sharing": {
+      "invalidJson": "Format JSON invalide dans {{fieldName}}. Veuillez vérifier votre syntaxe.",
+      "invitationCancelled": "Invitation annulée avec succès",
+      "cancelFailed": "Echec de l'annulation de l'invitation : {{message}}",
+      "invitationSent": "Invitation envoyée avec succès à {{recipient}}",
+      "invitationFailed": "Echec de l'invitation : {{message}}",
+      "shareUpdated": "Partage des patients mis à jour avec succès",
+      "updateFailed": "Echec de la mise à jour : {{message}}",
+      "accessRevoked": "Accès révoqué pour l'utilisateur {{userId}}",
+      "revokeFailed": "Echec de la révocation : {{message}}"
+    },
+    "vitals": {
+      "formErrors": "Veuillez corriger les erreurs de formulation",
+      "savedSuccess": "Signes vitaux {{action}} avec succès !",
+      "saveFailed": "Echec : {{action}} des signes vitaux",
+      "deleteSuccess": "Signes vitaux supprimés avec succès",
+      "deleteFailed": "Echec de la suppression des signes vitaux"
+    },
+    "settings": {
+      "sessionTimeoutUpdated": "Expiration de session mis à jour pour durer désormais {{minutes}} minutes. Votre session a été rafraîchie.",
+      "cleanupComplete": "Nettoyage complété : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
+      "noOutOfSync": "Aucun fichier désynchronisé à nettoyer",
+      "cleanupFailed": "Echec du nettoyage des fichiers. Veuillez réessayer ultérieurement."
+    },
+    "files": {
+      "downloadFailed": "Echec du téléchargement du fichier"
+    },
+    "tagSearch": {
+      "loadFailed": "Echec du chargement des étiquettes populaires",
+      "noTagsSelected": "Veuillez sélectionner au moins une étiquette à rechercher",
+      "noTagsSelectedTitle": "Aucune étiquette sélectionnée",
+      "searchFailed": "Echec de la recherche des données par étiquettes"
+    },
+    "invitations": {
+      "respondFailed": "Echec de réponse à l'invitation",
+      "cancelled": "Invitation annulée",
+      "cancelledMessage": "L'invitation a été annulée.",
+      "cancelFailed": "Echec de l'annulation de l'invitation",
+      "accessRevoked": "Accès révoqué",
+      "accessRevokedMessage": "L'accès a été révoqué.",
+      "revokeFailed": "Echec de révocation de l'accès",
+      "alreadyRevoked": "Déjà révoqué",
+      "alreadyRevokedMessage": "Cette invitation a déjà été révoquée."
+    },
+    "photo": {
+      "pleaseWait": "Veuillez patienter",
+      "photoBeingUploaded": "Une photo est en cours de téléversement. Veuillez attendre la fin de l'opération.",
+      "uploadSuccess": "Photo téléversée avec succès",
+      "uploadFailed": "Echec du téléversement",
+      "deleteFailed": "Echec de la suppression"
+    },
+    "reports": {
+      "noRecordsSelected": "Aucune entrée sélectionnée",
+      "noRecordsMessage": "Veuillez sélectionner au moins une entrée dans les catégories ci-dessous pour générer un rapport.",
+      "validationError": "Erreur de validation",
+      "templateNameRequired": "Un nom est requis pour le modèle",
+      "templateSaved": "Modèle sauvegardé avec succès",
+      "templateSaveFailed": "Echec de la sauvegarde du modèle",
+      "templateDeleted": "Moddèle supprimé avec succès",
+      "templateDeleteFailed": "Echec de la suppression du modèle",
+      "templateLoaded": "Le modèle \"{{name}}\" a été chargé"
+    },
+    "labResults": {
+      "parseWarning": "Certaines lignes n'ont pas pu être analysées",
+      "noTextToParse": "Aucun texte à analyser",
+      "noTextMessage": "Veuillez coller les résultats d'analyse dans la zone de saisie.",
+      "textParsed": "Texte analysé",
+      "parsedCount": "{{count}} composants d'analyse trouvés. Passez-les en revue dans l'onglet Aperçu.",
+      "addedSuccess": "Succès !",
+      "addedMessage": "Ajout de {{count}} composant(s) d'analyse au résultat d'analyse.",
+      "addFailed": "Echec de l'ajout des composants d'analyse",
+      "deletedSuccess": "Composant supprimé",
+      "deletedMessage": "{{name}} a été supprimé",
+      "updateFailed": "Echec de la mise à jour du composant",
+      "templateApplied": "Modèle appliqué",
+      "templateAppliedMessage": "Ajout de {{count}} composant(s) à partir du modèle \"{{name}}\".",
+      "trendExportSuccess": "Graphique exporté avec succès",
+      "trendExportFailed": "Echec de l'exportation du graphique"
+    },
+    "documents": {
+      "uploadFailed": "Echec du téléversement",
+      "deleteFailed": "Echec de la suppression",
+      "linkSuccess": "Document connecté avec succès",
+      "linkFailed": "Echec de la connexion du document",
+      "unlinkSuccess": "Document déconnecté avec succès",
+      "unlinkFailed": "Echec de la déconnexion du document"
+    },
+    "familySharing": {
+      "loadFailed": "Echec du chargement des informations de partage",
+      "invitationSent": "Invitation envoyée avec succès !",
+      "invitationFailed": "Echec de l'envoi de l'invitation",
+      "accessRevoked": "Accès révoqué",
+      "revokeFailed": "Echec de la révocation de l'accès"
+    },
+    "upload": {
+      "failed": "Echec du téléversement",
+      "completedWithErrors": "Téléversement complété avec des erreurs",
+      "partialSuccess": "{{completed}}/{{total}} fichiers téléversés avec succès. {{failed}} fichiers en échec.",
+      "documentAdded": "Document ajouté à Paperless",
+      "fileUploadedSuccess": "\"{{fileName}}\" téléversé vers Paperless avec succès !",
+      "backgroundProcessing": "\"{{fileName}}\" est en cours de traitement en arrière-plan. Vous recevrez une notification une fois le traitement terminé.",
+      "duplicateDocument": "Document dupliqué",
+      "paperlessUploadFailed": "Echec du téléversement vers Paperless",
+      "fileUploadFailed": "Echec du téléversement du fichier"
+    },
+    "generic": {
+      "operationFailed": "Echec de l'opération",
+      "saveFailed": "Echec de la sauvegarde",
+      "deleteFailed": "Echec de la suppression",
+      "downloadFailed": "Echec du téléchargement",
+      "success": "Succès !",
+      "warning": "Avertissement",
+      "error": "Erreur",
+      "operationSuccess": "{{operation}} complété(e) avec succès !",
+      "allOperationsSuccess": "{{total}} {{operation}}s : toutes complété(e)s avec succès !",
+      "operationPartial": "{{success}}/{{total}} {{operation}}s complété(e)s avec succès. {{failed}} en échec.",
+      "operationPartialTitle": "{{operation}} complété(e) avec des erreurs",
+      "allOperationsFailed": "{{operation}}s : toutes ont échoué. Veuillez réessayer.",
+      "operationFailedTitle": "Echec : {{operation}}"
+    }
   }
 }
