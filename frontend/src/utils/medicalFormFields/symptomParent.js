@@ -59,6 +59,15 @@ export const symptomParentFormFields = [
     ],
   },
   {
+    name: 'resolved_date',
+    type: 'date',
+    labelKey: 'medical:symptoms.parent.resolvedDate.label',
+    placeholderKey: 'medical:symptoms.parent.resolvedDate.placeholder',
+    descriptionKey: 'medical:symptoms.parent.resolvedDate.description',
+    gridColumn: 6,
+    maxDate: getTodayEndOfDay,
+  },
+  {
     name: 'is_chronic',
     type: 'checkbox',
     labelKey: 'medical:symptoms.parent.isChronic.label',

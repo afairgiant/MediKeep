@@ -12,24 +12,16 @@ import {
   Box,
   ActionIcon,
   Modal,
-  Button,
-  Divider,
 } from '@mantine/core';
 import {
   IconChevronLeft,
   IconChevronRight,
   IconStethoscope,
-  IconEye,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { formatTimeToAmPm } from '../../utils/dateUtils';
 import { symptomApi } from '../../services/api/symptomApi';
-import { SymptomViewModal } from './symptoms';
+import { OccurrenceDetailCard, SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
-import {
-  SYMPTOM_SEVERITY_COLORS,
-  SYMPTOM_STATUS_COLORS,
-} from '../../constants/symptomEnums';
 import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
@@ -38,6 +30,27 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 const getDateKey = (year, month, day) => {
   const date = new Date(year, month, day);
   return date.toISOString().split('T')[0];
+};
+
+/**
+ * Compute border radius for a calendar cell based on duration position
+ */
+const getCellBorderRadius = (hasDuration, isStart, isEnd, isMid) => {
+  if (!hasDuration) return '4px';
+  if (isMid) return '0px';
+  if (isStart) return '4px 0px 0px 4px';
+  if (isEnd) return '0px 4px 4px 0px';
+  return '4px';
+};
+
+/**
+ * Compute background color for a calendar cell
+ */
+const getCellBackgroundColor = (hasOccurrences, allResolved, hasDuration, severityColor) => {
+  if (!hasOccurrences) return 'transparent';
+  if (allResolved) return 'var(--mantine-color-gray-1)';
+  if (hasDuration) return `var(--mantine-color-${severityColor}-1)`;
+  return `var(--mantine-color-${severityColor}-0)`;
 };
 
 /**
@@ -63,7 +76,7 @@ const getSeverityColor = (occurrences) => {
  */
 const SymptomCalendar = ({ patientId, hidden }) => {
   const { t } = useTranslation('common');
-  const { formatDate, locale } = useDateFormat();
+  const { locale } = useDateFormat();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [occurrences, setOccurrences] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,10 +166,12 @@ const SymptomCalendar = ({ patientId, hidden }) => {
         if (!grouped[startDate]) {
           grouped[startDate] = [];
         }
+        // Only mark as ongoing if the parent symptom is not resolved (this branch only runs when there is no resolved_date)
+        const isOngoing = occurrence.symptom_status !== 'resolved';
         grouped[startDate].push({
           ...occurrence,
           isDuration: false,
-          isOngoing: true, // Ongoing since no resolved_date
+          isOngoing,
         });
       }
     });
@@ -269,6 +284,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
       // Check if this day has duration-based symptoms
       const hasDuration = occurrencesOnDate.some(o => o.isDuration);
       const hasOngoing = occurrencesOnDate.some(o => o.isOngoing);
+      const allResolved = hasOccurrences && !hasOngoing;
       const isStart = occurrencesOnDate.some(o => o.isStart);
       const isEnd = occurrencesOnDate.some(o => o.isEnd);
       const isMid = occurrencesOnDate.some(o => o.isMid);
@@ -286,6 +302,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
         severityColor,
         hasDuration,
         hasOngoing,
+        allResolved,
         isStart,
         isEnd,
         isMid,
@@ -347,6 +364,7 @@ const SymptomCalendar = ({ patientId, hidden }) => {
               severityColor,
               hasDuration,
               hasOngoing,
+              allResolved,
               isStart,
               isEnd,
               isMid,
@@ -359,21 +377,10 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                 p="xs"
                 style={{
                   border: '1px solid #e9ecef',
-                  borderRadius: hasDuration
-                    ? isMid
-                      ? '0px'
-                      : isStart
-                      ? '4px 0px 0px 4px'
-                      : isEnd
-                      ? '0px 4px 4px 0px'
-                      : '4px'
-                    : '4px',
+                  borderRadius: getCellBorderRadius(hasDuration, isStart, isEnd, isMid),
                   cursor: hasOccurrences ? 'pointer' : 'default',
-                  backgroundColor: hasOccurrences
-                    ? hasDuration
-                      ? `var(--mantine-color-${severityColor}-1)`
-                      : `var(--mantine-color-${severityColor}-0)`
-                    : 'transparent',
+                  backgroundColor: getCellBackgroundColor(hasOccurrences, allResolved, hasDuration, severityColor),
+                  opacity: allResolved ? 0.7 : 1,
                   position: 'relative',
                   minHeight: '60px',
                   borderLeft: hasDuration && !isStart ? 'none' : '1px solid #e9ecef',
@@ -387,12 +394,17 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                   </Text>
                   {hasOccurrences && (
                     <Group gap={4} justify="center">
-                      <Badge size="xs" color={severityColor}>
+                      <Badge size="xs" color={allResolved ? 'gray' : severityColor}>
                         {uniqueSymptoms}
                       </Badge>
                       {hasOngoing && (
                         <Badge size="xs" color="blue" variant="dot">
                           {t('symptoms.calendar.ongoing', 'Ongoing')}
+                        </Badge>
+                      )}
+                      {allResolved && (
+                        <Badge size="xs" color="green" variant="light">
+                          {t('symptoms.calendar.resolved', 'Resolved')}
                         </Badge>
                       )}
                     </Group>
@@ -425,74 +437,11 @@ const SymptomCalendar = ({ patientId, hidden }) => {
         ) : (
           <Stack gap="md">
             {selectedOccurrences.map((occurrence, idx) => (
-              <Paper key={idx} p="md" withBorder>
-                <Stack gap="xs">
-                  <Group gap="sm" justify="space-between">
-                    <Group gap="sm">
-                      <Text fw={600} size="lg">
-                        {occurrence.symptom_name}
-                      </Text>
-                      <Badge
-                        color={SYMPTOM_SEVERITY_COLORS[occurrence.severity]}
-                        size="sm"
-                        tt="uppercase"
-                      >
-                        {occurrence.severity}
-                      </Badge>
-                      {occurrence.pain_scale !== null &&
-                        occurrence.pain_scale !== undefined && (
-                          <Badge color="red" variant="outline" size="sm">
-                            {t('symptoms.calendar.pain', 'Pain')}: {occurrence.pain_scale}/10
-                          </Badge>
-                        )}
-                    </Group>
-                    <Button
-                      size="xs"
-                      variant="light"
-                      leftSection={<IconEye size={14} />}
-                      onClick={() => handleViewSymptom(occurrence.symptom_id)}
-                    >
-                      {t('symptoms.calendar.viewSymptom', 'View Symptom')}
-                    </Button>
-                  </Group>
-
-                  {occurrence.duration && (
-                    <Text size="sm">
-                      <strong>{t('symptoms.calendar.duration', 'Duration')}:</strong> {occurrence.duration}
-                    </Text>
-                  )}
-                  {occurrence.location && (
-                    <Text size="sm">
-                      <strong>{t('symptoms.calendar.location', 'Location')}:</strong> {occurrence.location}
-                    </Text>
-                  )}
-                  {occurrence.occurrence_time && (
-                    <Text size="sm">
-                      <strong>{t('symptoms.calendar.time', 'Time')}:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
-                    </Text>
-                  )}
-                  {occurrence.resolved_date && (
-                    <Text size="sm" c="green">
-                      <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
-                    </Text>
-                  )}
-                  {!occurrence.resolved_date && (
-                    <Badge size="sm" color="blue" variant="light">
-                      {t('symptoms.calendar.ongoing', 'Ongoing')}
-                    </Badge>
-                  )}
-                  {occurrence.notes && (
-                    <Text size="sm" c="dimmed">
-                      {occurrence.notes}
-                    </Text>
-                  )}
-
-                  <Divider />
-                  <Text size="xs" c="dimmed">
-                    {t('symptoms.calendar.occurrenceId', 'Occurrence ID')}: {occurrence.occurrence_id}
-                  </Text>
-                </Stack>
-              </Paper>
+              <OccurrenceDetailCard
+                key={idx}
+                occurrence={occurrence}
+                onViewSymptom={handleViewSymptom}
+              />
             ))}
           </Stack>
         )}

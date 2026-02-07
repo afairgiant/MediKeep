@@ -711,6 +711,11 @@
         "resolved": "Resolved - No longer experiencing",
         "recurring": "Recurring - Comes and goes"
       },
+      "resolvedDate": {
+        "label": "Resolved Date",
+        "placeholder": "When was this symptom resolved",
+        "description": "The date when this symptom was fully resolved"
+      },
       "generalNotes": {
         "label": "General Notes",
         "placeholder": "Overall notes about this symptom...",
@@ -774,6 +779,11 @@
         "label": "Resolved Date",
         "placeholder": "When did this episode resolve",
         "description": "Leave blank if still experiencing this episode"
+      },
+      "resolvedTime": {
+        "label": "Resolved Time",
+        "placeholder": "Time when episode resolved",
+        "description": "The time when this episode resolved"
       },
       "resolutionNotes": {
         "label": "Resolution Notes",

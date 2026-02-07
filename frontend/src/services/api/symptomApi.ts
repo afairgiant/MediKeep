@@ -45,6 +45,7 @@ export interface Symptom {
   tags?: string[];
   first_occurrence_date: string; // ISO date string
   last_occurrence_date?: string; // ISO date string
+  resolved_date?: string; // ISO date string
   occurrence_count?: number;
   created_at: string; // ISO datetime string
   updated_at: string; // ISO datetime string
@@ -63,6 +64,7 @@ export interface SymptomCreate {
   general_notes?: string;
   tags?: string[];
   first_occurrence_date: string; // ISO date string
+  resolved_date?: string; // ISO date string
 }
 
 /**
@@ -73,6 +75,7 @@ export interface SymptomUpdate {
   category?: string;
   status?: SymptomStatus;
   is_chronic?: boolean;
+  resolved_date?: string | null; // ISO date string, null to clear
   typical_triggers?: string[];
   general_notes?: string;
   tags?: string[];
@@ -246,6 +249,8 @@ export interface TimelineDataPoint {
   pain_scale?: number;
   occurrence_id: number;
   symptom_id: number;
+  resolved_date?: string;
+  symptom_status: SymptomStatus;
 }
 
 /**

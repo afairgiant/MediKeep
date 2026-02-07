@@ -501,8 +501,10 @@ class CRUDSymptomOccurrence(CRUDBase[SymptomOccurrence, SymptomOccurrenceCreate,
                 self.model.time_of_day,
                 self.model.impact_level,
                 self.model.notes,
+                self.model.resolved_date,
                 Symptom.symptom_name,
-                Symptom.id.label("symptom_id")
+                Symptom.id.label("symptom_id"),
+                Symptom.status.label("symptom_status")
             )
             .join(Symptom)
             .filter(Symptom.patient_id == patient_id)
@@ -533,6 +535,8 @@ class CRUDSymptomOccurrence(CRUDBase[SymptomOccurrence, SymptomOccurrenceCreate,
                 "time_of_day": row.time_of_day,
                 "impact_level": row.impact_level,
                 "notes": row.notes,
+                "resolved_date": row.resolved_date.isoformat() if row.resolved_date else None,
+                "symptom_status": row.symptom_status,
             })
 
         return timeline_data

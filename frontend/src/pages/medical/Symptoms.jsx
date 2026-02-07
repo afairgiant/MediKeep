@@ -65,6 +65,7 @@ const Symptoms = () => {
     first_occurrence_date: '',
     status: 'active',
     is_chronic: false,
+    resolved_date: '',
     typical_triggers: [],
     general_notes: '',
     tags: [],
@@ -157,6 +158,7 @@ const Symptoms = () => {
       first_occurrence_date: new Date().toISOString().split('T')[0],
       status: 'active',
       is_chronic: false,
+      resolved_date: '',
       typical_triggers: [],
       general_notes: '',
       tags: [],
@@ -172,6 +174,7 @@ const Symptoms = () => {
       first_occurrence_date: symptom.first_occurrence_date || '',
       status: symptom.status || 'active',
       is_chronic: symptom.is_chronic || false,
+      resolved_date: symptom.resolved_date || '',
       typical_triggers: symptom.typical_triggers || [],
       general_notes: symptom.general_notes || '',
       tags: symptom.tags || [],
@@ -182,10 +185,19 @@ const Symptoms = () => {
 
   const handleSymptomInputChange = e => {
     const { name, value, type, checked } = e.target;
-    setSymptomFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setSymptomFormData(prev => {
+      const updated = { ...prev, [name]: type === 'checkbox' ? checked : value };
+      if (name === 'status') {
+        if (value === 'resolved' && !prev.resolved_date) {
+          // Auto-fill resolved_date with today when status changes to resolved
+          updated.resolved_date = new Date().toISOString().split('T')[0];
+        } else if (value !== 'resolved') {
+          // Clear resolved_date when status changes away from resolved
+          updated.resolved_date = '';
+        }
+      }
+      return updated;
+    });
   };
 
   const handleSymptomSubmit = async e => {
@@ -200,6 +212,7 @@ const Symptoms = () => {
       const submitData = {
         ...symptomFormData,
         patient_id: currentPatient.id,
+        resolved_date: symptomFormData.resolved_date || null,
       };
 
       if (editingSymptom) {
@@ -464,6 +477,11 @@ const Symptoms = () => {
                         {symptom.last_occurrence_date && (
                           <Text size="sm" c="dimmed">
                             {t('symptoms.last', 'Last')}: {formatDate(symptom.last_occurrence_date)}
+                          </Text>
+                        )}
+                        {symptom.resolved_date && (
+                          <Text size="sm" c="green">
+                            {t('symptoms.resolved', 'Resolved')}: {formatDate(symptom.resolved_date)}
                           </Text>
                         )}
                         <Text size="sm" fw={500} c="blue">
