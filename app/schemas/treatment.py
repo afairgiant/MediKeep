@@ -48,6 +48,9 @@ class TreatmentBase(TaggedEntityMixin):
     dosage: Optional[str] = Field(
         None, max_length=200, description="Dosage of the treatment"
     )
+    mode: str = Field(
+        "simple", description="Treatment mode: 'simple' or 'advanced'"
+    )
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     status: Optional[str] = Field("active", description="Status of the treatment")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
@@ -133,6 +136,14 @@ class TreatmentBase(TaggedEntityMixin):
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower()
 
+    @field_validator("mode")
+    @classmethod
+    def validate_mode(cls, v):
+        valid_modes = ["simple", "advanced"]
+        if v not in valid_modes:
+            raise ValueError(f"Mode must be one of: {', '.join(valid_modes)}")
+        return v
+
 
 class TreatmentCreate(TreatmentBase):
     pass
@@ -149,6 +160,7 @@ class TreatmentUpdate(BaseModel):
     outcome: Optional[str] = Field(None, max_length=200)
     location: Optional[str] = Field(None, max_length=200)
     dosage: Optional[str] = Field(None, max_length=200)
+    mode: Optional[str] = None
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
     practitioner_id: Optional[int] = Field(None, gt=0)
@@ -233,6 +245,15 @@ class TreatmentUpdate(BaseModel):
             return v.lower()
         return v
 
+    @field_validator("mode")
+    @classmethod
+    def validate_mode(cls, v):
+        if v is not None:
+            valid_modes = ["simple", "advanced"]
+            if v not in valid_modes:
+                raise ValueError(f"Mode must be one of: {', '.join(valid_modes)}")
+        return v
+
 
 class TreatmentResponse(TreatmentBase):
     id: int
@@ -275,6 +296,10 @@ class TreatmentMedicationBase(BaseModel):
     specific_duration: Optional[str] = Field(None, max_length=100)
     timing_instructions: Optional[str] = Field(None, max_length=300)
     relevance_note: Optional[str] = None
+    specific_prescriber_id: Optional[int] = None
+    specific_pharmacy_id: Optional[int] = None
+    specific_start_date: Optional[date] = None
+    specific_end_date: Optional[date] = None
 
     @field_validator("relevance_note")
     @classmethod
@@ -290,12 +315,23 @@ class TreatmentMedicationCreate(BaseModel):
     specific_duration: Optional[str] = Field(None, max_length=100)
     timing_instructions: Optional[str] = Field(None, max_length=300)
     relevance_note: Optional[str] = None
+    specific_prescriber_id: Optional[int] = Field(None, gt=0)
+    specific_pharmacy_id: Optional[int] = Field(None, gt=0)
+    specific_start_date: Optional[date] = None
+    specific_end_date: Optional[date] = None
     treatment_id: Optional[int] = None  # Will be set from URL path parameter
 
     @field_validator("relevance_note")
     @classmethod
     def validate_relevance_note(cls, v):
         return _validate_relevance_note(v)
+
+    @field_validator("specific_end_date")
+    @classmethod
+    def validate_specific_end_date(cls, v, info: ValidationInfo):
+        if v and info.data.get("specific_start_date") and v < info.data["specific_start_date"]:
+            raise ValueError("Specific end date cannot be before specific start date")
+        return v
 
 
 class TreatmentMedicationUpdate(BaseModel):
@@ -305,11 +341,22 @@ class TreatmentMedicationUpdate(BaseModel):
     specific_duration: Optional[str] = Field(None, max_length=100)
     timing_instructions: Optional[str] = Field(None, max_length=300)
     relevance_note: Optional[str] = None
+    specific_prescriber_id: Optional[int] = Field(None, gt=0)
+    specific_pharmacy_id: Optional[int] = Field(None, gt=0)
+    specific_start_date: Optional[date] = None
+    specific_end_date: Optional[date] = None
 
     @field_validator("relevance_note")
     @classmethod
     def validate_relevance_note(cls, v):
         return _validate_relevance_note(v)
+
+    @field_validator("specific_end_date")
+    @classmethod
+    def validate_specific_end_date(cls, v, info: ValidationInfo):
+        if v and info.data.get("specific_start_date") and v < info.data["specific_start_date"]:
+            raise ValueError("Specific end date cannot be before specific start date")
+        return v
 
 
 class TreatmentMedicationResponse(TreatmentMedicationBase):
@@ -322,8 +369,16 @@ class TreatmentMedicationResponse(TreatmentMedicationBase):
 
 
 class TreatmentMedicationWithDetails(TreatmentMedicationResponse):
-    """Schema for treatment medication relationship with medication details."""
+    """Schema for treatment medication relationship with medication details and effective values."""
     medication: Optional[dict] = None
+    specific_prescriber: Optional[dict] = None
+    specific_pharmacy: Optional[dict] = None
+    effective_dosage: Optional[str] = None
+    effective_frequency: Optional[str] = None
+    effective_start_date: Optional[date] = None
+    effective_end_date: Optional[date] = None
+    effective_prescriber: Optional[dict] = None
+    effective_pharmacy: Optional[dict] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -690,3 +745,49 @@ class TreatmentEquipmentBulkCreate(BaseModel):
     @classmethod
     def validate_relevance_note(cls, v):
         return _validate_relevance_note(v)
+
+
+# =============================================================================
+# Medication-Treatment Response (for medication/{id}/treatments endpoint)
+# =============================================================================
+
+
+class MedicationTreatmentCondition(BaseModel):
+    """Condition summary nested in treatment."""
+    id: int
+    condition_name: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MedicationTreatmentInfo(BaseModel):
+    """Treatment summary nested in medication-treatment response."""
+    id: int
+    treatment_name: str
+    treatment_type: Optional[str] = None
+    status: Optional[str] = None
+    mode: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    condition: Optional[MedicationTreatmentCondition] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MedicationTreatmentResponse(BaseModel):
+    """Response schema for GET /medications/{id}/treatments."""
+    id: int
+    treatment_id: int
+    medication_id: int
+    specific_dosage: Optional[str] = None
+    specific_frequency: Optional[str] = None
+    specific_duration: Optional[str] = None
+    timing_instructions: Optional[str] = None
+    relevance_note: Optional[str] = None
+    specific_prescriber_id: Optional[int] = None
+    specific_pharmacy_id: Optional[int] = None
+    specific_start_date: Optional[date] = None
+    specific_end_date: Optional[date] = None
+    treatment: Optional[MedicationTreatmentInfo] = None
+
+    model_config = ConfigDict(from_attributes=True)

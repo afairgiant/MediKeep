@@ -647,8 +647,8 @@ JUNCTION TABLES (Many-to-Many)
 | practitioner_id | Integer | FK(practitioners.id) | Prescribing practitioner |
 | condition_id | Integer | FK(conditions.id) | Related condition |
 | treatment_name | String | NOT NULL | Treatment name |
-| treatment_type | String | NOT NULL | Type of treatment |
-| start_date | Date | NOT NULL | Treatment start date |
+| treatment_type | String | | Type of treatment (optional) |
+| start_date | Date | | Treatment start date (optional) |
 | end_date | Date | | Treatment end date |
 | status | String | | TreatmentStatus enum value |
 | treatment_category | String | | inpatient, outpatient |
@@ -658,9 +658,14 @@ JUNCTION TABLES (Many-to-Many)
 | description | String | | Treatment description |
 | location | String | | Where administered |
 | dosage | String | | Treatment dosage |
+| mode | String | NOT NULL, DEFAULT 'simple' | Treatment mode: 'simple' or 'advanced' |
 | tags | JSONB | DEFAULT [] | User tags |
 | created_at | DateTime | NOT NULL | Record creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Mode Values**:
+- `simple` (default) - Basic treatment tracking with schedule and dosage on the treatment itself
+- `advanced` - Medication-centric treatment plan where dosage/schedule lives on per-medication overrides
 
 **Status Values** (TreatmentStatus enum):
 - planned
@@ -674,13 +679,18 @@ JUNCTION TABLES (Many-to-Many)
 - `patient`: Many-to-one with Patient
 - `practitioner`: Many-to-one with Practitioner
 - `condition`: Many-to-one with Condition
+- `medication_relationships`: One-to-many with TreatmentMedication
+- `encounter_relationships`: One-to-many with TreatmentEncounter
+- `lab_result_relationships`: One-to-many with TreatmentLabResult
+- `equipment_relationships`: One-to-many with TreatmentEquipment
 - `symptom_relationships`: One-to-many with SymptomTreatment
 - `injury_relationships`: One-to-many with InjuryTreatment
 
 **Business Rules**:
-- Treatment name, type, and start date required
+- Treatment name is required; type and start date are optional
 - end_date set when status changes to completed
 - condition_id links treatment to diagnosis
+- Mode defaults to 'simple' for backwards compatibility; existing treatments are unaffected
 
 ### encounters
 **Purpose**: Medical encounters/visits between patient and practitioner
@@ -1688,6 +1698,124 @@ JUNCTION TABLES (Many-to-Many)
 - Links medications to conditions they treat
 - relevance_note provides clinical context (e.g., "Primary treatment")
 - Cascade deletes with either parent
+
+### treatment_medications
+**Purpose**: Many-to-many relationship between treatments and medications, with optional treatment-specific overrides
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| treatment_id | Integer | FK(treatments.id), NOT NULL | Associated treatment |
+| medication_id | Integer | FK(medications.id), NOT NULL | Associated medication |
+| specific_dosage | String | | Treatment-specific dosage override |
+| specific_frequency | String | | Treatment-specific frequency override |
+| specific_duration | String | | Treatment-specific duration |
+| timing_instructions | String | | When/how to take medication |
+| relevance_note | String | | Clinical context for this relationship |
+| specific_prescriber_id | Integer | FK(practitioners.id), ON DELETE SET NULL | Treatment-specific prescriber override |
+| specific_pharmacy_id | Integer | FK(pharmacies.id), ON DELETE SET NULL | Treatment-specific pharmacy override |
+| specific_start_date | Date | | Treatment-specific start date override |
+| specific_end_date | Date | | Treatment-specific end date override |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `treatment`: Many-to-one with Treatment
+- `medication`: Many-to-one with Medication
+- `specific_prescriber`: Many-to-one with Practitioner
+- `specific_pharmacy`: Many-to-one with Pharmacy
+
+**Indexes**:
+- `idx_treatment_medication_treatment_id` on treatment_id
+- `idx_treatment_medication_medication_id` on medication_id
+- `idx_treatment_medication_prescriber_id` on specific_prescriber_id
+- `idx_treatment_medication_pharmacy_id` on specific_pharmacy_id
+
+**Constraints**:
+- `uq_treatment_medication` UNIQUE on (treatment_id, medication_id)
+
+**Business Rules**:
+- Links medications to treatment plans
+- Override fields (`specific_*`) are optional; when null, the API computes effective values by falling back to the base medication's corresponding field
+- `specific_end_date` must be on or after `specific_start_date` if both are set
+- Smart end date logic: if `specific_start_date` is set but `specific_end_date` is not, and the medication's `effective_period_end` is before the overridden start, the effective end date is returned as null (ongoing)
+- Cascade deletes with either parent
+- Only one relationship per treatment/medication pair
+
+### treatment_encounters
+**Purpose**: Many-to-many relationship between treatments and encounters
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| treatment_id | Integer | FK(treatments.id), NOT NULL | Associated treatment |
+| encounter_id | Integer | FK(encounters.id), NOT NULL | Associated encounter |
+| relevance_note | String | | Clinical context for this relationship |
+| visit_label | String | | Visit type: initial, follow_up, review, final |
+| visit_sequence | Integer | | Order of visits: 1, 2, 3... |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `treatment`: Many-to-one with Treatment
+- `encounter`: Many-to-one with Encounter
+
+**Indexes**:
+- `idx_treatment_encounter_treatment_id` on treatment_id
+- `idx_treatment_encounter_encounter_id` on encounter_id
+
+**Constraints**:
+- `uq_treatment_encounter` UNIQUE on (treatment_id, encounter_id)
+
+### treatment_lab_results
+**Purpose**: Many-to-many relationship between treatments and lab results
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| treatment_id | Integer | FK(treatments.id), NOT NULL | Associated treatment |
+| lab_result_id | Integer | FK(lab_results.id), NOT NULL | Associated lab result |
+| relevance_note | String | | Clinical context for this relationship |
+| purpose | String | | baseline, monitoring, outcome, safety |
+| expected_frequency | String | | e.g., "Monthly", "Every 3 months" |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `treatment`: Many-to-one with Treatment
+- `lab_result`: Many-to-one with LabResult
+
+**Indexes**:
+- `idx_treatment_lab_result_treatment_id` on treatment_id
+- `idx_treatment_lab_result_lab_result_id` on lab_result_id
+
+**Constraints**:
+- `uq_treatment_lab_result` UNIQUE on (treatment_id, lab_result_id)
+
+### treatment_equipment
+**Purpose**: Many-to-many relationship between treatments and medical equipment
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| treatment_id | Integer | FK(treatments.id), NOT NULL | Associated treatment |
+| equipment_id | Integer | FK(medical_equipment.id), NOT NULL | Associated equipment |
+| relevance_note | String | | Clinical context for this relationship |
+| usage_frequency | String | | e.g., "Nightly", "As needed" |
+| specific_settings | String | | e.g., "Pressure: 10 cmH2O" |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `treatment`: Many-to-one with Treatment
+- `equipment`: Many-to-one with MedicalEquipment
+
+**Indexes**:
+- `idx_treatment_equipment_treatment_id` on treatment_id
+- `idx_treatment_equipment_equipment_id` on equipment_id
+
+**Constraints**:
+- `uq_treatment_equipment` UNIQUE on (treatment_id, equipment_id)
 
 ### symptom_conditions
 **Purpose**: Many-to-many relationship between symptoms and conditions

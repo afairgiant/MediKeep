@@ -882,6 +882,7 @@ class Treatment(Base):
         String, nullable=True
     )  # Location where the treatment is administered
     dosage = Column(String, nullable=True)  # Dosage of the treatment
+    mode = Column(String, nullable=False, default="simple")  # "simple" or "advanced"
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
@@ -2146,6 +2147,16 @@ class TreatmentMedication(Base):
     timing_instructions = Column(String, nullable=True)
     relevance_note = Column(String, nullable=True)
 
+    # Treatment-specific prescriber/pharmacy/dates (overrides for advanced mode)
+    specific_prescriber_id = Column(
+        Integer, ForeignKey("practitioners.id", ondelete="SET NULL"), nullable=True
+    )
+    specific_pharmacy_id = Column(
+        Integer, ForeignKey("pharmacies.id", ondelete="SET NULL"), nullable=True
+    )
+    specific_start_date = Column(Date, nullable=True)
+    specific_end_date = Column(Date, nullable=True)
+
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
@@ -2153,11 +2164,19 @@ class TreatmentMedication(Base):
     # Table Relationships
     treatment = orm_relationship("Treatment", back_populates="medication_relationships")
     medication = orm_relationship("Medication", back_populates="treatment_relationships")
+    specific_prescriber = orm_relationship(
+        "Practitioner", foreign_keys=[specific_prescriber_id]
+    )
+    specific_pharmacy = orm_relationship(
+        "Pharmacy", foreign_keys=[specific_pharmacy_id]
+    )
 
     # Indexes and constraints
     __table_args__ = (
         Index("idx_treatment_medication_treatment_id", "treatment_id"),
         Index("idx_treatment_medication_medication_id", "medication_id"),
+        Index("idx_treatment_medication_prescriber_id", "specific_prescriber_id"),
+        Index("idx_treatment_medication_pharmacy_id", "specific_pharmacy_id"),
         UniqueConstraint("treatment_id", "medication_id", name="uq_treatment_medication"),
     )
 

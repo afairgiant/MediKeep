@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -18,13 +18,19 @@ import {
   IconNotes,
   IconFileText,
   IconEdit,
-  IconLink,
+  IconPill,
+  IconStethoscope,
+  IconTestPipe,
+  IconDeviceDesktop,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import TreatmentRelationshipsManager from './TreatmentRelationshipsManager';
+import TreatmentMedicationsViewTab from './TreatmentMedicationsViewTab';
+import TreatmentEncounterRelationships from './TreatmentEncounterRelationships';
+import TreatmentLabResultRelationships from './TreatmentLabResultRelationships';
+import TreatmentEquipmentRelationships from './TreatmentEquipmentRelationships';
 
 const TreatmentViewModal = ({
   isOpen,
@@ -74,12 +80,6 @@ const TreatmentViewModal = ({
     }
     const practitioner = practitioners.find(p => p.id === practitionerId);
     return practitioner;
-  };
-
-  const handleConditionClick = (conditionId) => {
-    if (onConditionClick) {
-      onConditionClick(conditionId);
-    }
   };
 
   // Treatment category labels mapping
@@ -139,17 +139,32 @@ const TreatmentViewModal = ({
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
             {t('treatments.viewModal.tabs.overview', 'Overview')}
           </Tabs.Tab>
-          <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
-            {t('treatments.viewModal.tabs.schedule', 'Schedule & Dosage')}
-          </Tabs.Tab>
-          <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-            {t('treatments.viewModal.tabs.notes', 'Notes')}
-          </Tabs.Tab>
+          {treatment.mode !== 'advanced' && (
+            <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
+              {t('treatments.viewModal.tabs.schedule', 'Schedule & Dosage')}
+            </Tabs.Tab>
+          )}
+          {treatment.mode === 'advanced' && (
+            <>
+              <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
+                {t('treatments.viewModal.tabs.medications', 'Medications')}
+              </Tabs.Tab>
+              <Tabs.Tab value="visits" leftSection={<IconStethoscope size={16} />}>
+                {t('treatments.viewModal.tabs.visits', 'Visits')}
+              </Tabs.Tab>
+              <Tabs.Tab value="labs" leftSection={<IconTestPipe size={16} />}>
+                {t('treatments.viewModal.tabs.labs', 'Labs')}
+              </Tabs.Tab>
+              <Tabs.Tab value="equipment" leftSection={<IconDeviceDesktop size={16} />}>
+                {t('treatments.viewModal.tabs.equipment', 'Equipment')}
+              </Tabs.Tab>
+            </>
+          )}
           <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
             {t('treatments.viewModal.tabs.documents', 'Documents')}
           </Tabs.Tab>
-          <Tabs.Tab value="relationships" leftSection={<IconLink size={16} />}>
-            {t('treatments.viewModal.tabs.relationships', 'Relationships')}
+          <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+            {t('treatments.viewModal.tabs.notes', 'Notes')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -174,6 +189,18 @@ const TreatmentViewModal = ({
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.status', 'Status')}</Text>
                     <StatusBadge status={treatment.status} />
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.startDate', 'Start Date')}</Text>
+                    <Text size="sm" c={treatment.start_date ? 'inherit' : 'dimmed'}>
+                      {treatment.start_date ? formatDate(treatment.start_date) : t('treatments.viewModal.notSpecified', 'Not specified')}
+                    </Text>
+                  </Stack>
+                  <Stack gap="xs">
+                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.endDate', 'End Date')}</Text>
+                    <Text size="sm" c={treatment.end_date ? 'inherit' : 'dimmed'}>
+                      {treatment.end_date ? formatDate(treatment.end_date) : t('treatments.viewModal.ongoing', 'Ongoing')}
+                    </Text>
                   </Stack>
                   <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
                     <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.description', 'Description')}</Text>
@@ -235,7 +262,7 @@ const TreatmentViewModal = ({
                           color: 'var(--mantine-color-blue-6)',
                           textDecoration: 'underline',
                         }}
-                        onClick={() => handleConditionClick(treatment.condition_id)}
+                        onClick={() => onConditionClick?.(treatment.condition_id)}
                       >
                         {treatment.condition?.diagnosis ||
                           getConditionName(treatment.condition_id) ||
@@ -291,50 +318,96 @@ const TreatmentViewModal = ({
           </Box>
         </Tabs.Panel>
 
-        {/* Schedule & Dosage Tab */}
-        <Tabs.Panel value="schedule">
-          <Box mt="md">
-            <Stack gap="lg">
-              {/* Schedule */}
-              <div>
-                <Title order={4} mb="sm">{t('treatments.viewModal.schedule', 'Schedule')}</Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.startDate', 'Start Date')}</Text>
-                    <Text size="sm" c={treatment.start_date ? 'inherit' : 'dimmed'}>
-                      {treatment.start_date ? formatDate(treatment.start_date) : t('treatments.viewModal.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.endDate', 'End Date')}</Text>
-                    <Text size="sm" c={treatment.end_date ? 'inherit' : 'dimmed'}>
-                      {treatment.end_date ? formatDate(treatment.end_date) : t('treatments.viewModal.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                </SimpleGrid>
-              </div>
+        {/* Schedule & Dosage Tab (simple mode only) */}
+        {treatment.mode !== 'advanced' && (
+          <Tabs.Panel value="schedule">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">{t('treatments.viewModal.schedule', 'Schedule')}</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.startDate', 'Start Date')}</Text>
+                      <Text size="sm" c={treatment.start_date ? 'inherit' : 'dimmed'}>
+                        {treatment.start_date ? formatDate(treatment.start_date) : t('treatments.viewModal.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.endDate', 'End Date')}</Text>
+                      <Text size="sm" c={treatment.end_date ? 'inherit' : 'dimmed'}>
+                        {treatment.end_date ? formatDate(treatment.end_date) : t('treatments.viewModal.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+                <div>
+                  <Title order={4} mb="sm">{t('treatments.viewModal.dosageFrequency', 'Dosage & Frequency')}</Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.amountDosage', 'Amount/Dosage')}</Text>
+                      <Text size="sm" c={treatment.dosage ? 'inherit' : 'dimmed'}>
+                        {treatment.dosage || t('treatments.viewModal.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.frequency', 'Frequency')}</Text>
+                      <Text size="sm" c={treatment.frequency ? 'inherit' : 'dimmed'}>
+                        {treatment.frequency || t('treatments.viewModal.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+        )}
 
-              {/* Dosage & Frequency */}
-              <div>
-                <Title order={4} mb="sm">{t('treatments.viewModal.dosageFrequency', 'Dosage & Frequency')}</Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.amountDosage', 'Amount/Dosage')}</Text>
-                    <Text size="sm" c={treatment.dosage ? 'inherit' : 'dimmed'}>
-                      {treatment.dosage || t('treatments.viewModal.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.frequency', 'Frequency')}</Text>
-                    <Text size="sm" c={treatment.frequency ? 'inherit' : 'dimmed'}>
-                      {treatment.frequency || t('treatments.viewModal.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                </SimpleGrid>
-              </div>
-            </Stack>
-          </Box>
-        </Tabs.Panel>
+        {/* Advanced mode: Relationship Tabs */}
+        {treatment.mode === 'advanced' && (
+          <>
+            <Tabs.Panel value="medications">
+              <Box mt="md">
+                <TreatmentMedicationsViewTab
+                  treatmentId={treatment.id}
+                  onMedicationClick={onMedicationClick}
+                />
+              </Box>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="visits">
+              <Box mt="md">
+                <TreatmentEncounterRelationships
+                  treatmentId={treatment.id}
+                  encounters={[]}
+                  isViewMode={true}
+                  onEntityClick={onEncounterClick}
+                />
+              </Box>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="labs">
+              <Box mt="md">
+                <TreatmentLabResultRelationships
+                  treatmentId={treatment.id}
+                  labResults={[]}
+                  isViewMode={true}
+                  onEntityClick={onLabResultClick}
+                />
+              </Box>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="equipment">
+              <Box mt="md">
+                <TreatmentEquipmentRelationships
+                  treatmentId={treatment.id}
+                  equipment={[]}
+                  isViewMode={true}
+                  onEntityClick={onEquipmentClick}
+                />
+              </Box>
+            </Tabs.Panel>
+          </>
+        )}
 
         {/* Notes Tab */}
         <Tabs.Panel value="notes">
@@ -361,19 +434,6 @@ const TreatmentViewModal = ({
           </Box>
         </Tabs.Panel>
 
-        {/* Relationships Tab */}
-        <Tabs.Panel value="relationships">
-          <Box mt="md">
-            <TreatmentRelationshipsManager
-              treatmentId={treatment.id}
-              isViewMode={true}
-              onMedicationClick={onMedicationClick}
-              onEncounterClick={onEncounterClick}
-              onLabResultClick={onLabResultClick}
-              onEquipmentClick={onEquipmentClick}
-            />
-          </Box>
-        </Tabs.Panel>
         </Tabs>
 
         {/* Action Buttons */}

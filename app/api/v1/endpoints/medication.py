@@ -21,7 +21,9 @@ from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
 from app.crud.medication import medication
+from app.crud.treatment import treatment_medication
 from app.models.activity_log import EntityType
+from app.schemas.treatment import MedicationTreatmentResponse
 from app.models.models import User
 from app.schemas.medication import (
     MedicationCreate,
@@ -277,3 +279,81 @@ def read_patient_medications(
         )
 
         return medications
+
+
+@router.get("/{medication_id}/treatments", response_model=list[MedicationTreatmentResponse])
+def get_medication_treatments(
+    *,
+    medication_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Get all treatments that use a specific medication."""
+    with handle_database_errors(request=request):
+        medication_obj = medication.get(db, id=medication_id)
+        if not medication_obj:
+            raise NotFoundException(
+                resource="Medication",
+                message="Medication not found",
+                request=request,
+            )
+        if medication_obj.patient_id != current_user_patient_id:
+            raise ForbiddenException(
+                message="Not authorized to access this medication",
+                request=request,
+            )
+
+        relationships = treatment_medication.get_by_medication(db, medication_id=medication_id)
+
+        result = []
+        for rel in relationships:
+            trt = rel.treatment
+            if not trt:
+                continue
+
+            entry = {
+                "id": rel.id,
+                "treatment_id": rel.treatment_id,
+                "medication_id": rel.medication_id,
+                "specific_dosage": rel.specific_dosage,
+                "specific_frequency": rel.specific_frequency,
+                "specific_duration": rel.specific_duration,
+                "timing_instructions": rel.timing_instructions,
+                "relevance_note": rel.relevance_note,
+                "specific_prescriber_id": rel.specific_prescriber_id,
+                "specific_pharmacy_id": rel.specific_pharmacy_id,
+                "specific_start_date": rel.specific_start_date,
+                "specific_end_date": rel.specific_end_date,
+                "treatment": {
+                    "id": trt.id,
+                    "treatment_name": trt.treatment_name,
+                    "treatment_type": trt.treatment_type,
+                    "status": trt.status,
+                    "mode": trt.mode,
+                    "start_date": trt.start_date,
+                    "end_date": trt.end_date,
+                    "condition": None,
+                },
+            }
+
+            if trt.condition:
+                entry["treatment"]["condition"] = {
+                    "id": trt.condition.id,
+                    "condition_name": trt.condition.condition_name,
+                }
+
+            result.append(entry)
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "MedicationTreatments",
+            record_id=medication_id,
+            count=len(result),
+        )
+
+        return result

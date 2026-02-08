@@ -611,6 +611,50 @@
       "label": "Additional Notes",
       "placeholder": "Progress notes, side effects, adjustments, outcomes...",
       "description": "Progress updates, observations, or important notes"
+    },
+    "mode": {
+      "label": "Treatment Mode",
+      "description": "Choose how to track this treatment",
+      "simple": "Simple",
+      "simpleOption": "Simple",
+      "advanced": "Treatment Plan",
+      "advancedOption": "Treatment Plan",
+      "simpleDescription": "Basic tracking with schedule and dosage",
+      "advancedDescription": "Medication-centric plan with per-medication overrides"
+    },
+    "advancedOverview": {
+      "title": "Treatment Plan Overview",
+      "medicationsCount": "{{count}} medication(s)",
+      "visitsCount": "{{count}} visit(s)",
+      "labsCount": "{{count}} lab(s)",
+      "equipmentCount": "{{count}} equipment"
+    },
+    "medications": {
+      "effectiveValue": "Effective",
+      "overridden": "Treatment-specific",
+      "default": "(from medication)",
+      "specificPrescriber": "Treatment Prescriber",
+      "specificPharmacy": "Treatment Pharmacy",
+      "specificStartDate": "Treatment Start Date",
+      "specificEndDate": "Treatment End Date",
+      "noMedicationsLinked": "No medications linked to this treatment",
+      "linkDescription": "Link medications to track what is prescribed for this treatment plan.",
+      "specificDosage": "Specific Dosage",
+      "specificFrequency": "Specific Frequency",
+      "duration": "Duration",
+      "timingInstructions": "Timing Instructions",
+      "relevanceNote": "Relevance Note"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "medications": "Medications",
+      "visits": "Visits",
+      "labs": "Labs",
+      "equipment": "Equipment",
+      "scheduleAndDosage": "Schedule & Dosage",
+      "documents": "Documents",
+      "notes": "Notes",
+      "relationships": "Relationships"
     }
   },
   "familyMembers": {

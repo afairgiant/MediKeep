@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Tabs,
   Badge,
   Stack,
   Box,
@@ -16,6 +15,7 @@ import {
   Collapse,
   UnstyledButton,
 } from '@mantine/core';
+import { DateInput } from '@mantine/dates';
 import {
   IconPill,
   IconStethoscope,
@@ -24,8 +24,10 @@ import {
   IconChevronDown,
   IconChevronRight,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
+import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import {
   createDateSortedOptions,
   formatDateDisplay,
@@ -89,10 +91,11 @@ ItemDetailsCard.propTypes = {
  * Selections are stored locally and passed to parent for bulk creation after treatment is created.
  */
 const TreatmentPlanSetup = ({
+  activeSection = 'medications',
   pendingRelationships,
   onRelationshipsChange,
 }) => {
-  const [activeTab, setActiveTab] = useState('medications');
+  const { t } = useTranslation('medical');
   const [loading, setLoading] = useState(true);
 
   // Available entities for selection
@@ -100,6 +103,8 @@ const TreatmentPlanSetup = ({
   const [encounters, setEncounters] = useState([]);
   const [labResults, setLabResults] = useState([]);
   const [equipment, setEquipment] = useState([]);
+  const [practitioners, setPractitioners] = useState([]);
+  const [pharmacies, setPharmacies] = useState([]);
 
   const isMountedRef = useRef(true);
 
@@ -107,11 +112,13 @@ const TreatmentPlanSetup = ({
   const fetchEntities = useCallback(async (signal) => {
     setLoading(true);
     try {
-      const [medsData, encountersData, labsData, equipmentData] = await Promise.all([
+      const [medsData, encountersData, labsData, equipmentData, practitionersData, pharmaciesData] = await Promise.all([
         apiService.getMedications(signal).catch(() => []),
         apiService.getEncounters(signal).catch(() => []),
         apiService.getLabResults(signal).catch(() => []),
         apiService.getMedicalEquipment(signal).catch(() => []),
+        apiService.getPractitioners(signal).catch(() => []),
+        apiService.getPharmacies(signal).catch(() => []),
       ]);
 
       if (!signal?.aborted && isMountedRef.current) {
@@ -119,6 +126,8 @@ const TreatmentPlanSetup = ({
         setEncounters(Array.isArray(encountersData) ? encountersData : []);
         setLabResults(Array.isArray(labsData) ? labsData : []);
         setEquipment(Array.isArray(equipmentData) ? equipmentData : []);
+        setPractitioners(Array.isArray(practitionersData) ? practitionersData : []);
+        setPharmacies(Array.isArray(pharmaciesData) ? pharmaciesData : []);
         setLoading(false);
       }
     } catch (err) {
@@ -247,12 +256,6 @@ const TreatmentPlanSetup = ({
     });
   };
 
-  // Counts for badges
-  const medicationCount = (pendingRelationships.medications || []).length;
-  const encounterCount = (pendingRelationships.encounters || []).length;
-  const labResultCount = (pendingRelationships.labResults || []).length;
-  const equipmentCount = (pendingRelationships.equipment || []).length;
-
   // Get selected IDs for rendering
   const selectedMedIds = getSelectedIds('medications');
   const selectedEncIds = getSelectedIds('encounters');
@@ -264,57 +267,8 @@ const TreatmentPlanSetup = ({
       <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: 'sm', blur: 2 }} />
 
       <Stack gap="md">
-        <Tabs value={activeTab} onChange={setActiveTab}>
-          <Tabs.List>
-            <Tabs.Tab
-              value="medications"
-              leftSection={<IconPill size={16} />}
-              rightSection={medicationCount > 0 ? (
-                <Badge size="sm" variant="filled" color="teal" circle>
-                  {medicationCount}
-                </Badge>
-              ) : null}
-            >
-              Medications
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="encounters"
-              leftSection={<IconStethoscope size={16} />}
-              rightSection={encounterCount > 0 ? (
-                <Badge size="sm" variant="filled" color="blue" circle>
-                  {encounterCount}
-                </Badge>
-              ) : null}
-            >
-              Visits
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="labs"
-              leftSection={<IconTestPipe size={16} />}
-              rightSection={labResultCount > 0 ? (
-                <Badge size="sm" variant="filled" color="violet" circle>
-                  {labResultCount}
-                </Badge>
-              ) : null}
-            >
-              Labs
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="equipment"
-              leftSection={<IconDeviceDesktop size={16} />}
-              rightSection={equipmentCount > 0 ? (
-                <Badge size="sm" variant="filled" color="orange" circle>
-                  {equipmentCount}
-                </Badge>
-              ) : null}
-            >
-              Equipment
-            </Tabs.Tab>
-          </Tabs.List>
-
-          <Box mt="md">
-            {/* Medications Tab */}
-            <Tabs.Panel value="medications">
+            {/* Medications Section */}
+            <Box style={{ display: activeSection === 'medications' ? 'block' : 'none' }}>
               <Stack gap="md">
                 <MultiSelect
                   label="Medications to Link"
@@ -365,6 +319,55 @@ const TreatmentPlanSetup = ({
                             value={metadata.timing_instructions || ''}
                             onChange={(e) => updateItemMetadata('medications', medId, 'timing_instructions', e.target.value)}
                           />
+                          <Group grow gap="xs">
+                            <Select
+                              size="xs"
+                              placeholder="Treatment prescriber"
+                              data={practitioners.map(p => ({
+                                value: p.id.toString(),
+                                label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
+                              }))}
+                              value={metadata.specific_prescriber_id || ''}
+                              onChange={(value) => updateItemMetadata('medications', medId, 'specific_prescriber_id', value || '')}
+                              clearable
+                              searchable
+                              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                            />
+                            <Select
+                              size="xs"
+                              placeholder="Treatment pharmacy"
+                              data={pharmacies.map(p => ({
+                                value: p.id.toString(),
+                                label: p.name || p.brand || `Pharmacy #${p.id}`,
+                              }))}
+                              value={metadata.specific_pharmacy_id || ''}
+                              onChange={(value) => updateItemMetadata('medications', medId, 'specific_pharmacy_id', value || '')}
+                              clearable
+                              searchable
+                              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                            />
+                          </Group>
+                          <Group grow gap="xs">
+                            <DateInput
+                              size="xs"
+                              label={t('treatments.medications.specificStartDate', 'Treatment Start Date')}
+                              value={parseDateInput(metadata.specific_start_date)}
+                              onChange={(date) => updateItemMetadata('medications', medId, 'specific_start_date', formatDateInputChange(date))}
+                              clearable
+                              firstDayOfWeek={0}
+                              popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                            />
+                            <DateInput
+                              size="xs"
+                              label={t('treatments.medications.specificEndDate', 'Treatment End Date')}
+                              value={parseDateInput(metadata.specific_end_date)}
+                              onChange={(date) => updateItemMetadata('medications', medId, 'specific_end_date', formatDateInputChange(date))}
+                              clearable
+                              firstDayOfWeek={0}
+                              minDate={parseDateInput(metadata.specific_start_date) || undefined}
+                              popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                            />
+                          </Group>
                           <Textarea
                             size="xs"
                             placeholder="Relevance note"
@@ -385,10 +388,10 @@ const TreatmentPlanSetup = ({
                   </Text>
                 )}
               </Stack>
-            </Tabs.Panel>
+            </Box>
 
-            {/* Visits Tab */}
-            <Tabs.Panel value="encounters">
+            {/* Visits Section */}
+            <Box style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}>
               <Stack gap="md">
                 <MultiSelect
                   label="Visits to Link"
@@ -451,10 +454,10 @@ const TreatmentPlanSetup = ({
                   </Text>
                 )}
               </Stack>
-            </Tabs.Panel>
+            </Box>
 
-            {/* Labs Tab */}
-            <Tabs.Panel value="labs">
+            {/* Labs Section */}
+            <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
               <Stack gap="md">
                 <MultiSelect
                   label="Lab Results to Link"
@@ -516,10 +519,10 @@ const TreatmentPlanSetup = ({
                   </Text>
                 )}
               </Stack>
-            </Tabs.Panel>
+            </Box>
 
-            {/* Equipment Tab */}
-            <Tabs.Panel value="equipment">
+            {/* Equipment Section */}
+            <Box style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}>
               <Stack gap="md">
                 <MultiSelect
                   label="Equipment to Link"
@@ -578,15 +581,14 @@ const TreatmentPlanSetup = ({
                   </Text>
                 )}
               </Stack>
-            </Tabs.Panel>
-          </Box>
-        </Tabs>
+            </Box>
       </Stack>
     </Box>
   );
 };
 
 TreatmentPlanSetup.propTypes = {
+  activeSection: PropTypes.oneOf(['medications', 'encounters', 'labs', 'equipment']),
   pendingRelationships: PropTypes.shape({
     medications: PropTypes.array,
     encounters: PropTypes.array,

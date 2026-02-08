@@ -140,6 +140,11 @@ class CRUDTreatmentMedication(CRUDBase[TreatmentMedication, TreatmentMedicationC
         """Get all medication relationships for a specific treatment."""
         return (
             db.query(self.model)
+            .options(
+                joinedload(TreatmentMedication.medication),
+                joinedload(TreatmentMedication.specific_prescriber),
+                joinedload(TreatmentMedication.specific_pharmacy),
+            )
             .filter(self.model.treatment_id == treatment_id)
             .all()
         )
@@ -150,6 +155,11 @@ class CRUDTreatmentMedication(CRUDBase[TreatmentMedication, TreatmentMedicationC
         """Get all treatment relationships for a specific medication."""
         return (
             db.query(self.model)
+            .options(
+                joinedload(TreatmentMedication.medication),
+                joinedload(TreatmentMedication.specific_prescriber),
+                joinedload(TreatmentMedication.specific_pharmacy),
+            )
             .filter(self.model.medication_id == medication_id)
             .all()
         )

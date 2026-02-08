@@ -75,6 +75,38 @@ Store and track lab test results:
 - Track trends over time
 - Link to LOINC standardized codes
 
+### Treatments
+
+Track treatment plans and therapies. Treatments support two modes:
+
+#### Simple Mode (default)
+
+Basic tracking for physical therapy, exercises, or any treatment that doesn't need per-medication detail:
+
+- **Treatment Name**: What the treatment is
+- **Type/Category**: Physical therapy, surgery, etc.
+- **Schedule & Dosage**: Frequency, dosage, and timing set directly on the treatment
+- **Status**: Planned, Active, In Progress, Completed, Cancelled, On Hold
+- **Practitioner**: Doctor managing the treatment
+- **Condition**: Related diagnosis
+
+#### Treatment Plan Mode (Advanced)
+
+Medication-centric treatment plans where each linked medication can have its own treatment-specific overrides:
+
+- **Linked Medications**: Add medications from your existing medication records
+- **Per-Medication Overrides**: Set treatment-specific dosage, frequency, duration, start/end dates, prescriber, and pharmacy for each medication
+- **Fallback to Defaults**: When an override is not set, the base medication's value is used automatically
+- **Linked Encounters**: Associate doctor visits with the treatment plan
+- **Linked Lab Results**: Track lab tests related to the treatment
+- **Linked Equipment**: Track medical devices or equipment used
+
+**Switching Modes**: You can switch between Simple and Treatment Plan mode at any time using the toggle on the treatment form. Existing treatments default to Simple mode.
+
+#### Medication Profile
+
+Each medication's detail view includes a "Used in Treatments" section showing all treatment plans that use it. Click a treatment name to navigate directly to that treatment plan.
+
 ---
 
 ## Documents & Files

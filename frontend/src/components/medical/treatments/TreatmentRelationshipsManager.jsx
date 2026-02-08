@@ -1,18 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import {
-  Tabs,
-  Badge,
   Stack,
   Box,
 } from '@mantine/core';
-import {
-  IconPill,
-  IconStethoscope,
-  IconTestPipe,
-  IconDeviceDesktop,
-} from '@tabler/icons-react';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 import TreatmentMedicationRelationships from './TreatmentMedicationRelationships';
@@ -25,6 +17,7 @@ import TreatmentEquipmentRelationships from './TreatmentEquipmentRelationships';
  * This component displays the relationship tabs directly - mode control is handled by the parent.
  */
 const TreatmentRelationshipsManager = ({
+  activeSection = 'medications',
   treatmentId,
   patientId,
   isViewMode = false,
@@ -35,7 +28,6 @@ const TreatmentRelationshipsManager = ({
   onEquipmentClick,
 }) => {
   const { t } = useTranslation('common');
-  const [activeTab, setActiveTab] = useState('medications');
 
   // Relationship counts for badges
   const [medicationCount, setMedicationCount] = useState(0);
@@ -48,49 +40,45 @@ const TreatmentRelationshipsManager = ({
   const [encounters, setEncounters] = useState([]);
   const [labResults, setLabResults] = useState([]);
   const [equipment, setEquipment] = useState([]);
+  const [practitioners, setPractitioners] = useState([]);
+  const [pharmacies, setPharmacies] = useState([]);
 
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
+
+  // Silently catch fetch errors, logging non-abort failures and returning empty array
+  const safeFetch = useCallback((fetchFn, label) =>
+    fetchFn.catch((err) => {
+      if (err.name !== 'AbortError') {
+        logger.error(`Failed to fetch ${label}`, { error: err.message });
+      }
+      return [];
+    }), []);
+
+  // Ensure value is an array, defaulting to empty
+  const toArray = (val) => (Array.isArray(val) ? val : []);
 
   // Fetch available entities for linking with abort signal
   const fetchAvailableEntities = useCallback(async (signal) => {
     if (!treatmentId) return;
 
     try {
-      // Fetch all in parallel with abort signal
-      const [medsData, encountersData, labsData, equipmentData] = await Promise.all([
-        apiService.getMedications(signal).catch((err) => {
-          if (err.name !== 'AbortError') {
-            logger.error('Failed to fetch medications', { error: err.message });
-          }
-          return [];
-        }),
-        apiService.getEncounters(signal).catch((err) => {
-          if (err.name !== 'AbortError') {
-            logger.error('Failed to fetch encounters', { error: err.message });
-          }
-          return [];
-        }),
-        apiService.getLabResults(signal).catch((err) => {
-          if (err.name !== 'AbortError') {
-            logger.error('Failed to fetch lab results', { error: err.message });
-          }
-          return [];
-        }),
-        apiService.getMedicalEquipment(signal).catch((err) => {
-          if (err.name !== 'AbortError') {
-            logger.error('Failed to fetch equipment', { error: err.message });
-          }
-          return [];
-        }),
+      const [medsData, encountersData, labsData, equipmentData, practitionersData, pharmaciesData] = await Promise.all([
+        safeFetch(apiService.getMedications(signal), 'medications'),
+        safeFetch(apiService.getEncounters(signal), 'encounters'),
+        safeFetch(apiService.getLabResults(signal), 'lab results'),
+        safeFetch(apiService.getMedicalEquipment(signal), 'equipment'),
+        safeFetch(apiService.getPractitioners(signal), 'practitioners'),
+        safeFetch(apiService.getPharmacies(signal), 'pharmacies'),
       ]);
 
-      // Only update state if not aborted - ensure arrays
       if (!signal?.aborted && isMountedRef.current) {
-        setMedications(Array.isArray(medsData) ? medsData : []);
-        setEncounters(Array.isArray(encountersData) ? encountersData : []);
-        setLabResults(Array.isArray(labsData) ? labsData : []);
-        setEquipment(Array.isArray(equipmentData) ? equipmentData : []);
+        setMedications(toArray(medsData));
+        setEncounters(toArray(encountersData));
+        setLabResults(toArray(labsData));
+        setEquipment(toArray(equipmentData));
+        setPractitioners(toArray(practitionersData));
+        setPharmacies(toArray(pharmaciesData));
       }
     } catch (err) {
       if (err.name !== 'AbortError' && isMountedRef.current) {
@@ -101,7 +89,7 @@ const TreatmentRelationshipsManager = ({
         });
       }
     }
-  }, [treatmentId]);
+  }, [treatmentId, safeFetch]);
 
   // Fetch relationship counts with abort signal
   const fetchCounts = useCallback(async (signal) => {
@@ -109,38 +97,17 @@ const TreatmentRelationshipsManager = ({
 
     try {
       const [meds, encs, labs, equip] = await Promise.all([
-        apiService.getTreatmentMedications(treatmentId, signal).catch((err) => {
-          if (err.name !== 'AbortError') {
-            logger.error('Failed to fetch treatment medications', { error: err.message });
-          }
-          return [];
-        }),
-        apiService.getTreatmentEncounters(treatmentId, signal).catch((err) => {
-          if (err.name !== 'AbortError') {
-            logger.error('Failed to fetch treatment encounters', { error: err.message });
-          }
-          return [];
-        }),
-        apiService.getTreatmentLabResults(treatmentId, signal).catch((err) => {
-          if (err.name !== 'AbortError') {
-            logger.error('Failed to fetch treatment lab results', { error: err.message });
-          }
-          return [];
-        }),
-        apiService.getTreatmentEquipment(treatmentId, signal).catch((err) => {
-          if (err.name !== 'AbortError') {
-            logger.error('Failed to fetch treatment equipment', { error: err.message });
-          }
-          return [];
-        }),
+        safeFetch(apiService.getTreatmentMedications(treatmentId, signal), 'treatment medications'),
+        safeFetch(apiService.getTreatmentEncounters(treatmentId, signal), 'treatment encounters'),
+        safeFetch(apiService.getTreatmentLabResults(treatmentId, signal), 'treatment lab results'),
+        safeFetch(apiService.getTreatmentEquipment(treatmentId, signal), 'treatment equipment'),
       ]);
 
-      // Only update state if not aborted - ensure arrays before getting length
       if (!signal?.aborted && isMountedRef.current) {
-        setMedicationCount(Array.isArray(meds) ? meds.length : 0);
-        setEncounterCount(Array.isArray(encs) ? encs.length : 0);
-        setLabResultCount(Array.isArray(labs) ? labs.length : 0);
-        setEquipmentCount(Array.isArray(equip) ? equip.length : 0);
+        setMedicationCount(toArray(meds).length);
+        setEncounterCount(toArray(encs).length);
+        setLabResultCount(toArray(labs).length);
+        setEquipmentCount(toArray(equip).length);
       }
     } catch (err) {
       if (err.name !== 'AbortError' && isMountedRef.current) {
@@ -151,55 +118,44 @@ const TreatmentRelationshipsManager = ({
         });
       }
     }
-  }, [treatmentId]);
+  }, [treatmentId, safeFetch]);
 
   // Effect with proper cleanup using AbortController
   useEffect(() => {
     isMountedRef.current = true;
+    const controller = new AbortController();
 
     if (treatmentId) {
-      const controller = new AbortController();
-
       fetchAvailableEntities(controller.signal);
       fetchCounts(controller.signal);
-
-      return () => {
-        controller.abort();
-      };
     }
 
     return () => {
       isMountedRef.current = false;
+      controller.abort();
     };
   }, [treatmentId, fetchAvailableEntities, fetchCounts]);
 
-  // Memoized callbacks to prevent infinite re-renders in child components
-  const handleMedicationCountChange = useCallback((rels) => {
-    setMedicationCount(rels?.length || 0);
-  }, []);
-
-  const handleEncounterCountChange = useCallback((rels) => {
-    setEncounterCount(rels?.length || 0);
-  }, []);
-
-  const handleLabResultCountChange = useCallback((rels) => {
-    setLabResultCount(rels?.length || 0);
-  }, []);
-
-  const handleEquipmentCountChange = useCallback((rels) => {
-    setEquipmentCount(rels?.length || 0);
-  }, []);
+  // Memoized count-change callbacks to prevent infinite re-renders in child components
+  const handleMedicationCountChange = useCallback((rels) => setMedicationCount(rels?.length || 0), []);
+  const handleEncounterCountChange = useCallback((rels) => setEncounterCount(rels?.length || 0), []);
+  const handleLabResultCountChange = useCallback((rels) => setLabResultCount(rels?.length || 0), []);
+  const handleEquipmentCountChange = useCallback((rels) => setEquipmentCount(rels?.length || 0), []);
 
   // When new equipment is created inline, refresh the equipment list
   const handleEquipmentCreated = useCallback((newEquip) => {
     setEquipment(prev => [...prev, newEquip]);
   }, []);
 
-  // Report total counts to parent when they change
+  // Report per-type counts to parent when they change
   useEffect(() => {
     if (onCountsChange) {
-      const total = medicationCount + encounterCount + labResultCount + equipmentCount;
-      onCountsChange(total);
+      onCountsChange({
+        medications: medicationCount,
+        encounters: encounterCount,
+        labResults: labResultCount,
+        equipment: equipmentCount,
+      });
     }
   }, [medicationCount, encounterCount, labResultCount, equipmentCount, onCountsChange]);
 
@@ -209,106 +165,55 @@ const TreatmentRelationshipsManager = ({
 
   return (
     <Stack gap="md">
-      {/* Relationship Tabs */}
-      <Box>
-        <Tabs value={activeTab} onChange={setActiveTab}>
-          <Tabs.List>
-            <Tabs.Tab
-              value="medications"
-              leftSection={<IconPill size={16} />}
-              rightSection={medicationCount > 0 ? (
-                <Badge size="sm" variant="filled" color="teal" circle>
-                  {medicationCount}
-                </Badge>
-              ) : null}
-            >
-              Medications
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="encounters"
-              leftSection={<IconStethoscope size={16} />}
-              rightSection={encounterCount > 0 ? (
-                <Badge size="sm" variant="filled" color="blue" circle>
-                  {encounterCount}
-                </Badge>
-              ) : null}
-            >
-              Visits
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="labs"
-              leftSection={<IconTestPipe size={16} />}
-              rightSection={labResultCount > 0 ? (
-                <Badge size="sm" variant="filled" color="violet" circle>
-                  {labResultCount}
-                </Badge>
-              ) : null}
-            >
-              Labs
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="equipment"
-              leftSection={<IconDeviceDesktop size={16} />}
-              rightSection={equipmentCount > 0 ? (
-                <Badge size="sm" variant="filled" color="orange" circle>
-                  {equipmentCount}
-                </Badge>
-              ) : null}
-            >
-              Equipment
-            </Tabs.Tab>
-          </Tabs.List>
+      <Box style={{ display: activeSection === 'medications' ? 'block' : 'none' }}>
+        <TreatmentMedicationRelationships
+          treatmentId={treatmentId}
+          medications={medications}
+          practitioners={practitioners}
+          pharmacies={pharmacies}
+          isViewMode={isViewMode}
+          onRelationshipsChange={handleMedicationCountChange}
+          onEntityClick={onMedicationClick}
+        />
+      </Box>
 
-          <Box mt="md">
-            <Tabs.Panel value="medications">
-              <TreatmentMedicationRelationships
-                treatmentId={treatmentId}
-                medications={medications}
-                isViewMode={isViewMode}
-                onRelationshipsChange={handleMedicationCountChange}
-                onEntityClick={onMedicationClick}
-              />
-            </Tabs.Panel>
+      <Box style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}>
+        <TreatmentEncounterRelationships
+          treatmentId={treatmentId}
+          encounters={encounters}
+          isViewMode={isViewMode}
+          onRelationshipsChange={handleEncounterCountChange}
+          onEntityClick={onEncounterClick}
+        />
+      </Box>
 
-            <Tabs.Panel value="encounters">
-              <TreatmentEncounterRelationships
-                treatmentId={treatmentId}
-                encounters={encounters}
-                isViewMode={isViewMode}
-                onRelationshipsChange={handleEncounterCountChange}
-                onEntityClick={onEncounterClick}
-              />
-            </Tabs.Panel>
+      <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
+        <TreatmentLabResultRelationships
+          treatmentId={treatmentId}
+          labResults={labResults}
+          isViewMode={isViewMode}
+          onRelationshipsChange={handleLabResultCountChange}
+          onEntityClick={onLabResultClick}
+        />
+      </Box>
 
-            <Tabs.Panel value="labs">
-              <TreatmentLabResultRelationships
-                treatmentId={treatmentId}
-                labResults={labResults}
-                isViewMode={isViewMode}
-                onRelationshipsChange={handleLabResultCountChange}
-                onEntityClick={onLabResultClick}
-              />
-            </Tabs.Panel>
-
-            <Tabs.Panel value="equipment">
-              <TreatmentEquipmentRelationships
-                treatmentId={treatmentId}
-                patientId={patientId}
-                equipment={equipment}
-                isViewMode={isViewMode}
-                onRelationshipsChange={handleEquipmentCountChange}
-                onEquipmentCreated={handleEquipmentCreated}
-                onEntityClick={onEquipmentClick}
-              />
-            </Tabs.Panel>
-          </Box>
-        </Tabs>
+      <Box style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}>
+        <TreatmentEquipmentRelationships
+          treatmentId={treatmentId}
+          patientId={patientId}
+          equipment={equipment}
+          isViewMode={isViewMode}
+          onRelationshipsChange={handleEquipmentCountChange}
+          onEquipmentCreated={handleEquipmentCreated}
+          onEntityClick={onEquipmentClick}
+        />
       </Box>
     </Stack>
   );
 };
 
 TreatmentRelationshipsManager.propTypes = {
+  activeSection: PropTypes.oneOf(['medications', 'encounters', 'labs', 'equipment']),
   treatmentId: PropTypes.number,
   patientId: PropTypes.number,
   isViewMode: PropTypes.bool,

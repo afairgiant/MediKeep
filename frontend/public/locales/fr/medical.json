@@ -604,6 +604,50 @@
       "label": "Notes supplémentaires",
       "placeholder": "Notes de progrès, effets secondaires, ajustements, résultats...",
       "description": "Progrès, observations, ou notes importantes"
+    },
+    "mode": {
+      "label": "Mode de traitement",
+      "description": "Choisissez comment suivre ce traitement",
+      "simple": "Simple",
+      "simpleOption": "Simple",
+      "advanced": "Plan de traitement",
+      "advancedOption": "Plan de traitement",
+      "simpleDescription": "Suivi de base avec calendrier et dosage",
+      "advancedDescription": "Plan centré sur les médicaments avec ajustements par médicament"
+    },
+    "advancedOverview": {
+      "title": "Aperçu du plan de traitement",
+      "medicationsCount": "{{count}} médicament(s)",
+      "visitsCount": "{{count}} visite(s)",
+      "labsCount": "{{count}} laboratoire(s)",
+      "equipmentCount": "{{count}} équipement(s)"
+    },
+    "medications": {
+      "effectiveValue": "Effectif",
+      "overridden": "Spécifique au traitement",
+      "default": "(du médicament)",
+      "specificPrescriber": "Prescripteur du traitement",
+      "specificPharmacy": "Pharmacie du traitement",
+      "specificStartDate": "Date de début du traitement",
+      "specificEndDate": "Date de fin du traitement",
+      "noMedicationsLinked": "Aucun médicament lié à ce traitement",
+      "linkDescription": "Liez des médicaments pour suivre ce qui est prescrit pour ce plan de traitement.",
+      "specificDosage": "Dosage spécifique",
+      "specificFrequency": "Fréquence spécifique",
+      "duration": "Durée",
+      "timingInstructions": "Instructions de calendrier",
+      "relevanceNote": "Note de pertinence"
+    },
+    "tabs": {
+      "overview": "Aperçu",
+      "medications": "Médicaments",
+      "visits": "Visites",
+      "labs": "Laboratoires",
+      "equipment": "Équipement",
+      "scheduleAndDosage": "Calendrier et dosage",
+      "documents": "Documents",
+      "notes": "Notes",
+      "relationships": "Relations"
     }
   },
   "familyMembers": {

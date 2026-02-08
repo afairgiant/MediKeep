@@ -611,6 +611,50 @@
       "label": "Notas Adicionais",
       "placeholder": "Notas de progresso, efeitos colaterais, ajustes, resultados...",
       "description": "Atualizações de progresso, observações ou notas importantes"
+    },
+    "mode": {
+      "label": "Modo de Tratamento",
+      "description": "Escolha como acompanhar este tratamento",
+      "simple": "Simples",
+      "simpleOption": "Simples",
+      "advanced": "Plano de Tratamento",
+      "advancedOption": "Plano de Tratamento",
+      "simpleDescription": "Acompanhamento básico com horário e dosagem",
+      "advancedDescription": "Plano centrado em medicamentos com personalizações por medicamento"
+    },
+    "advancedOverview": {
+      "title": "Visão Geral do Plano de Tratamento",
+      "medicationsCount": "{{count}} medicamento(s)",
+      "visitsCount": "{{count}} consulta(s)",
+      "labsCount": "{{count}} exame(s)",
+      "equipmentCount": "{{count}} equipamento(s)"
+    },
+    "medications": {
+      "effectiveValue": "Efetivo",
+      "overridden": "Específico do tratamento",
+      "default": "(do medicamento)",
+      "specificPrescriber": "Prescritor do Tratamento",
+      "specificPharmacy": "Farmácia do Tratamento",
+      "specificStartDate": "Data de Início do Tratamento",
+      "specificEndDate": "Data de Término do Tratamento",
+      "noMedicationsLinked": "Nenhum medicamento vinculado a este tratamento",
+      "linkDescription": "Vincule medicamentos para acompanhar o que é prescrito para este plano de tratamento.",
+      "specificDosage": "Dosagem Específica",
+      "specificFrequency": "Frequência Específica",
+      "duration": "Duração",
+      "timingInstructions": "Instruções de Horário",
+      "relevanceNote": "Nota de Relevância"
+    },
+    "tabs": {
+      "overview": "Visão Geral",
+      "medications": "Medicamentos",
+      "visits": "Consultas",
+      "labs": "Exames",
+      "equipment": "Equipamentos",
+      "scheduleAndDosage": "Horário e Dosagem",
+      "documents": "Documentos",
+      "notes": "Notas",
+      "relationships": "Relações"
     }
   },
   "familyMembers": {

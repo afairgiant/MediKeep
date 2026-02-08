@@ -375,6 +375,9 @@
       "noNotes": "Keine Notizen verfügbar",
       "noSideEffects": "Keine Nebenwirkungen gemeldet",
       "editMedication": "Medikament bearbeiten"
+    },
+    "treatments": {
+      "treatmentPlan": "Behandlungsplan"
     }
   },
   "searchPlaceholders": {

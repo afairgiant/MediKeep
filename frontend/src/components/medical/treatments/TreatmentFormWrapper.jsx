@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -13,6 +13,7 @@ import {
   Text,
   Badge,
   Alert,
+  SegmentedControl,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
@@ -21,8 +22,13 @@ import {
   IconFileText,
   IconNotes,
   IconLink,
+  IconPill,
+  IconStethoscope,
+  IconTestPipe,
+  IconDeviceDesktop,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -62,7 +68,7 @@ const TreatmentFormWrapper = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Track relationship counts for badge display (edit mode)
-  const [relationshipCount, setRelationshipCount] = useState(0);
+  const [relationshipCounts, setRelationshipCounts] = useState({ medications: 0, encounters: 0, labResults: 0, equipment: 0 });
 
   // Track pending relationships for creation mode
   const [pendingRelationships, setPendingRelationships] = useState(EMPTY_PENDING_RELATIONSHIPS);
@@ -80,7 +86,7 @@ const TreatmentFormWrapper = ({
     }
     if (!isOpen) {
       setIsSubmitting(false);
-      setRelationshipCount(0);
+      setRelationshipCounts({ medications: 0, encounters: 0, labResults: 0, equipment: 0 });
       setPendingRelationships(EMPTY_PENDING_RELATIONSHIPS);
     }
   }, [isOpen]);
@@ -105,8 +111,14 @@ const TreatmentFormWrapper = ({
       if (!editingTreatment && result?.id && pendingCount > 0) {
         const treatmentId = result.id;
 
-        // Create all pending relationships in parallel
+        // Create all pending relationships in parallel, tracking failures
         const promises = [];
+        let failedCount = 0;
+
+        const trackFailure = (label) => (err) => {
+          failedCount++;
+          logger.error(`Failed to link ${label}`, { error: err.message });
+        };
 
         // Handle medications - create each individually to preserve metadata
         const meds = pendingRelationships.medications || [];
@@ -120,9 +132,11 @@ const TreatmentFormWrapper = ({
               specific_duration: medData.specific_duration || null,
               timing_instructions: medData.timing_instructions || null,
               relevance_note: medData.relevance_note || null,
-            }).catch(err => {
-              logger.error('Failed to link medication', { error: err.message });
-            })
+              specific_prescriber_id: medData.specific_prescriber_id ? parseInt(medData.specific_prescriber_id) : null,
+              specific_pharmacy_id: medData.specific_pharmacy_id ? parseInt(medData.specific_pharmacy_id) : null,
+              specific_start_date: medData.specific_start_date || null,
+              specific_end_date: medData.specific_end_date || null,
+            }).catch(trackFailure('medication'))
           );
         }
 
@@ -136,9 +150,7 @@ const TreatmentFormWrapper = ({
               visit_label: encData.visit_label || null,
               visit_sequence: encData.visit_sequence ? parseInt(encData.visit_sequence) : null,
               relevance_note: encData.relevance_note || null,
-            }).catch(err => {
-              logger.error('Failed to link encounter', { error: err.message });
-            })
+            }).catch(trackFailure('encounter'))
           );
         }
 
@@ -152,9 +164,7 @@ const TreatmentFormWrapper = ({
               purpose: labData.purpose || null,
               expected_frequency: labData.expected_frequency || null,
               relevance_note: labData.relevance_note || null,
-            }).catch(err => {
-              logger.error('Failed to link lab result', { error: err.message });
-            })
+            }).catch(trackFailure('lab result'))
           );
         }
 
@@ -168,14 +178,24 @@ const TreatmentFormWrapper = ({
               usage_frequency: equipData.usage_frequency || null,
               specific_settings: equipData.specific_settings || null,
               relevance_note: equipData.relevance_note || null,
-            }).catch(err => {
-              logger.error('Failed to link equipment', { error: err.message });
-            })
+            }).catch(trackFailure('equipment'))
           );
         }
 
         // Wait for all relationships to be created
         await Promise.all(promises);
+
+        if (failedCount > 0) {
+          notifications.show({
+            title: t('treatments.form.linkingPartialFailure', 'Some items could not be linked'),
+            message: t(
+              'treatments.form.linkingPartialFailureMessage',
+              `Treatment was created, but ${failedCount} item${failedCount !== 1 ? 's' : ''} failed to link. You can add them from the edit form.`,
+            ),
+            color: 'yellow',
+            autoClose: 8000,
+          });
+        }
       }
 
       setIsSubmitting(false);
@@ -192,8 +212,24 @@ const TreatmentFormWrapper = ({
 
   if (!isOpen) return null;
 
-  // Badge count: show pending count during creation, actual count when editing
-  const badgeCount = editingTreatment ? relationshipCount : pendingCount;
+  // Relationship tab values and their corresponding child activeSection values
+  const RELATIONSHIP_TABS = ['medications', 'visits', 'labs', 'equipment'];
+  const TAB_TO_SECTION = { medications: 'medications', visits: 'encounters', labs: 'labs', equipment: 'equipment' };
+  const TAB_TO_COUNT_KEY = { medications: 'medications', visits: 'encounters', labs: 'labResults', equipment: 'equipment' };
+
+  // Get badge count for a specific relationship tab
+  const getTabBadgeCount = (tabValue) => {
+    const countKey = TAB_TO_COUNT_KEY[tabValue];
+    if (editingTreatment) {
+      return relationshipCounts[countKey] || 0;
+    }
+    return (pendingRelationships[countKey] || []).length;
+  };
+
+  // Total badge count for Basic Info alert
+  const totalBadgeCount = editingTreatment
+    ? (relationshipCounts.medications + relationshipCounts.encounters + relationshipCounts.labResults + relationshipCounts.equipment)
+    : pendingCount;
 
   return (
     <Modal
@@ -222,20 +258,59 @@ const TreatmentFormWrapper = ({
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
                 {t('treatments.form.tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
-              <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
-                {t('treatments.form.tabs.scheduleDosage', 'Schedule & Dosage')}
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="relationships"
-                leftSection={<IconLink size={16} />}
-                rightSection={badgeCount > 0 ? (
-                  <Badge size="sm" variant="filled" color="blue" circle>
-                    {badgeCount}
-                  </Badge>
-                ) : null}
-              >
-                Treatment Plan
-              </Tabs.Tab>
+              {formData.mode !== 'advanced' && (
+                <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
+                  {t('treatments.form.tabs.scheduleDosage', 'Schedule & Dosage')}
+                </Tabs.Tab>
+              )}
+              {formData.mode === 'advanced' && (
+                <>
+                  <Tabs.Tab
+                    value="medications"
+                    leftSection={<IconPill size={16} />}
+                    rightSection={getTabBadgeCount('medications') > 0 ? (
+                      <Badge size="sm" variant="filled" color="teal" circle>
+                        {getTabBadgeCount('medications')}
+                      </Badge>
+                    ) : null}
+                  >
+                    Medications
+                  </Tabs.Tab>
+                  <Tabs.Tab
+                    value="visits"
+                    leftSection={<IconStethoscope size={16} />}
+                    rightSection={getTabBadgeCount('visits') > 0 ? (
+                      <Badge size="sm" variant="filled" color="blue" circle>
+                        {getTabBadgeCount('visits')}
+                      </Badge>
+                    ) : null}
+                  >
+                    Visits
+                  </Tabs.Tab>
+                  <Tabs.Tab
+                    value="labs"
+                    leftSection={<IconTestPipe size={16} />}
+                    rightSection={getTabBadgeCount('labs') > 0 ? (
+                      <Badge size="sm" variant="filled" color="violet" circle>
+                        {getTabBadgeCount('labs')}
+                      </Badge>
+                    ) : null}
+                  >
+                    Labs
+                  </Tabs.Tab>
+                  <Tabs.Tab
+                    value="equipment"
+                    leftSection={<IconDeviceDesktop size={16} />}
+                    rightSection={getTabBadgeCount('equipment') > 0 ? (
+                      <Badge size="sm" variant="filled" color="orange" circle>
+                        {getTabBadgeCount('equipment')}
+                      </Badge>
+                    ) : null}
+                  >
+                    Equipment
+                  </Tabs.Tab>
+                </>
+              )}
               {editingTreatment && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                   {t('treatments.form.tabs.documents', 'Documents')}
@@ -250,6 +325,42 @@ const TreatmentFormWrapper = ({
             <Tabs.Panel value="basic">
               <Box mt="md">
                 <Grid>
+                  <Grid.Col span={12}>
+                    <Stack gap={4}>
+                      <Text size="sm" fw={500}>
+                        {t('treatments.mode.label', 'Treatment Mode')}
+                      </Text>
+                      <SegmentedControl
+                        value={formData.mode || 'simple'}
+                        onChange={(value) => {
+                          onInputChange({ target: { name: 'mode', value } });
+                          // Reset to basic tab when hiding current tab
+                          if (value === 'simple' && RELATIONSHIP_TABS.includes(activeTab)) {
+                            setActiveTab('basic');
+                          }
+                          if (value === 'advanced' && activeTab === 'schedule') {
+                            setActiveTab('basic');
+                          }
+                        }}
+                        data={[
+                          {
+                            value: 'simple',
+                            label: t('treatments.mode.simple', 'Simple'),
+                          },
+                          {
+                            value: 'advanced',
+                            label: t('treatments.mode.advanced', 'Treatment Plan'),
+                          },
+                        ]}
+                        size="sm"
+                      />
+                      <Text size="xs" c="dimmed">
+                        {formData.mode === 'advanced'
+                          ? t('treatments.mode.advancedDescription', 'Medication-centric plan with per-medication overrides')
+                          : t('treatments.mode.simpleDescription', 'Basic tracking with schedule and dosage')}
+                      </Text>
+                    </Stack>
+                  </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
                       label={t('treatments.form.treatmentName', 'Treatment Name')}
@@ -358,69 +469,6 @@ const TreatmentFormWrapper = ({
                       disabled={practitionersLoading}
                     />
                   </Grid.Col>
-                  <Grid.Col span={12}>
-                    <Textarea
-                      label={t('treatments.form.description', 'Description')}
-                      value={formData.description || ''}
-                      onChange={handleTextInputChange('description')}
-                      placeholder={t('treatments.form.descriptionPlaceholder', 'Describe the treatment')}
-                      description={t('treatments.form.descriptionDesc', 'Brief description of the treatment')}
-                      rows={3}
-                      minRows={2}
-                      autosize
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('treatments.form.tags', 'Tags')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t('treatments.form.tagsDesc', 'Add tags to categorize and organize treatments')}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={(tags) => {
-                          onInputChange({ target: { name: 'tags', value: tags } });
-                        }}
-                        placeholder={t('treatments.form.tagsPlaceholder', 'Add tags...')}
-                      />
-                    </Box>
-                  </Grid.Col>
-                </Grid>
-
-                {/* Show relationship indicator if relationships exist (edit mode) or pending (create mode) */}
-                {badgeCount > 0 && (
-                  <Alert
-                    variant="light"
-                    color="blue"
-                    icon={<IconLink size={16} />}
-                    mt="md"
-                  >
-                    <Group justify="space-between">
-                      <Text size="sm">
-                        {editingTreatment
-                          ? `This treatment has ${badgeCount} linked item${badgeCount !== 1 ? 's' : ''} in the Treatment Plan`
-                          : `${badgeCount} item${badgeCount !== 1 ? 's' : ''} selected to link when treatment is created`
-                        }
-                      </Text>
-                      <Button
-                        variant="subtle"
-                        size="xs"
-                        onClick={() => setActiveTab('relationships')}
-                      >
-                        {editingTreatment ? 'View' : 'Edit'}
-                      </Button>
-                    </Group>
-                  </Alert>
-                )}
-              </Box>
-            </Tabs.Panel>
-
-            {/* Schedule & Dosage Tab */}
-            <Tabs.Panel value="schedule">
-              <Box mt="md">
-                <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
                       label={t('treatments.form.startDate', 'Start Date')}
@@ -452,46 +500,92 @@ const TreatmentFormWrapper = ({
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <TextInput
-                      label={t('treatments.form.dosageAmount', 'Dosage/Amount')}
-                      value={formData.dosage || ''}
-                      onChange={handleTextInputChange('dosage')}
-                      placeholder={t('treatments.form.dosagePlaceholder', 'e.g., 10mg, 1 session')}
-                      description={t('treatments.form.dosageDesc', 'Amount or dosage per treatment')}
+                  <Grid.Col span={12}>
+                    <Textarea
+                      label={t('treatments.form.description', 'Description')}
+                      value={formData.description || ''}
+                      onChange={handleTextInputChange('description')}
+                      placeholder={t('treatments.form.descriptionPlaceholder', 'Describe the treatment')}
+                      description={t('treatments.form.descriptionDesc', 'Brief description of the treatment')}
+                      rows={3}
+                      minRows={2}
+                      autosize
                     />
                   </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <TextInput
-                      label={t('treatments.form.frequency', 'Frequency')}
-                      value={formData.frequency || ''}
-                      onChange={handleTextInputChange('frequency')}
-                      placeholder={t('treatments.form.frequencyPlaceholder', 'e.g., Daily, Twice weekly')}
-                      description={t('treatments.form.frequencyDesc', 'How often treatment is administered')}
-                    />
+                  <Grid.Col span={12}>
+                    <Box>
+                      <Text size="sm" fw={500} mb="xs">
+                        {t('treatments.form.tags', 'Tags')}
+                      </Text>
+                      <Text size="xs" c="dimmed" mb="xs">
+                        {t('treatments.form.tagsDesc', 'Add tags to categorize and organize treatments')}
+                      </Text>
+                      <TagInput
+                        value={formData.tags || []}
+                        onChange={(tags) => {
+                          onInputChange({ target: { name: 'tags', value: tags } });
+                        }}
+                        placeholder={t('treatments.form.tagsPlaceholder', 'Add tags...')}
+                      />
+                    </Box>
                   </Grid.Col>
                 </Grid>
-              </Box>
-            </Tabs.Panel>
 
-            {/* Treatment Plan (Relationships) Tab */}
-            <Tabs.Panel value="relationships">
-              <Box mt="md">
-                {editingTreatment ? (
-                  <TreatmentRelationshipsManager
-                    treatmentId={editingTreatment.id}
-                    patientId={editingTreatment.patient_id}
-                    isViewMode={false}
-                    onCountsChange={setRelationshipCount}
-                  />
-                ) : (
-                  <TreatmentPlanSetup
-                    pendingRelationships={pendingRelationships}
-                    onRelationshipsChange={setPendingRelationships}
-                  />
+                {/* Show relationship indicator if relationships exist (edit mode) or pending (create mode) - only in advanced mode */}
+                {formData.mode === 'advanced' && totalBadgeCount > 0 && (
+                  <Alert
+                    variant="light"
+                    color="blue"
+                    icon={<IconLink size={16} />}
+                    mt="md"
+                  >
+                    <Group justify="space-between">
+                      <Text size="sm">
+                        {editingTreatment
+                          ? `This treatment has ${totalBadgeCount} linked item${totalBadgeCount !== 1 ? 's' : ''} in the Treatment Plan`
+                          : `${totalBadgeCount} item${totalBadgeCount !== 1 ? 's' : ''} selected to link when treatment is created`
+                        }
+                      </Text>
+                      <Button
+                        variant="subtle"
+                        size="xs"
+                        onClick={() => setActiveTab('medications')}
+                      >
+                        {editingTreatment ? 'View' : 'Edit'}
+                      </Button>
+                    </Group>
+                  </Alert>
                 )}
               </Box>
             </Tabs.Panel>
+
+            {/* Schedule & Dosage Tab (simple mode only) */}
+            {formData.mode !== 'advanced' && (
+              <Tabs.Panel value="schedule">
+                <Box mt="md">
+                  <Grid>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <TextInput
+                        label={t('treatments.form.dosageAmount', 'Dosage/Amount')}
+                        value={formData.dosage || ''}
+                        onChange={handleTextInputChange('dosage')}
+                        placeholder={t('treatments.form.dosagePlaceholder', 'e.g., 10mg, 1 session')}
+                        description={t('treatments.form.dosageDesc', 'Amount or dosage per treatment')}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <TextInput
+                        label={t('treatments.form.frequency', 'Frequency')}
+                        value={formData.frequency || ''}
+                        onChange={handleTextInputChange('frequency')}
+                        placeholder={t('treatments.form.frequencyPlaceholder', 'e.g., Daily, Twice weekly')}
+                        description={t('treatments.form.frequencyDesc', 'How often treatment is administered')}
+                      />
+                    </Grid.Col>
+                  </Grid>
+                </Box>
+              </Tabs.Panel>
+            )}
 
             {/* Documents Tab (only when editing) */}
             {editingTreatment && (
@@ -524,6 +618,29 @@ const TreatmentFormWrapper = ({
               </Box>
             </Tabs.Panel>
           </Tabs>
+
+          {/* Relationship content - rendered outside Tabs to preserve state across tab switches */}
+          {formData.mode === 'advanced' && (
+            <Box mt="md" style={{
+              display: RELATIONSHIP_TABS.includes(activeTab) ? 'block' : 'none'
+            }}>
+              {editingTreatment ? (
+                <TreatmentRelationshipsManager
+                  activeSection={TAB_TO_SECTION[activeTab] || 'medications'}
+                  treatmentId={editingTreatment.id}
+                  patientId={editingTreatment.patient_id}
+                  isViewMode={false}
+                  onCountsChange={setRelationshipCounts}
+                />
+              ) : (
+                <TreatmentPlanSetup
+                  activeSection={TAB_TO_SECTION[activeTab] || 'medications'}
+                  pendingRelationships={pendingRelationships}
+                  onRelationshipsChange={setPendingRelationships}
+                />
+              )}
+            </Box>
+          )}
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">

@@ -562,6 +562,55 @@
       "label": "Descripción del tratamiento",
       "placeholder": "Descripción detallada del tratamiento...",
       "description": "Detalles exhaustivos del enfoque del tratamiento"
+    },
+    "notes": {
+      "label": "Notas adicionales",
+      "placeholder": "Notas de progreso, efectos secundarios, ajustes, resultados...",
+      "description": "Actualizaciones de progreso, observaciones o notas importantes"
+    },
+    "mode": {
+      "label": "Modo de tratamiento",
+      "description": "Elija cómo rastrear este tratamiento",
+      "simple": "Simple",
+      "simpleOption": "Simple",
+      "advanced": "Plan de tratamiento",
+      "advancedOption": "Plan de tratamiento",
+      "simpleDescription": "Seguimiento básico con horario y dosificación",
+      "advancedDescription": "Plan centrado en medicamentos con ajustes por medicamento"
+    },
+    "advancedOverview": {
+      "title": "Resumen del plan de tratamiento",
+      "medicationsCount": "{{count}} medicamento(s)",
+      "visitsCount": "{{count}} visita(s)",
+      "labsCount": "{{count}} laboratorio(s)",
+      "equipmentCount": "{{count}} equipo(s)"
+    },
+    "medications": {
+      "effectiveValue": "Efectivo",
+      "overridden": "Específico del tratamiento",
+      "default": "(del medicamento)",
+      "specificPrescriber": "Prescriptor del tratamiento",
+      "specificPharmacy": "Farmacia del tratamiento",
+      "specificStartDate": "Fecha de inicio del tratamiento",
+      "specificEndDate": "Fecha de fin del tratamiento",
+      "noMedicationsLinked": "No hay medicamentos vinculados a este tratamiento",
+      "linkDescription": "Vincule medicamentos para rastrear lo prescrito para este plan de tratamiento.",
+      "specificDosage": "Dosificación específica",
+      "specificFrequency": "Frecuencia específica",
+      "duration": "Duración",
+      "timingInstructions": "Instrucciones de horario",
+      "relevanceNote": "Nota de relevancia"
+    },
+    "tabs": {
+      "overview": "Resumen",
+      "medications": "Medicamentos",
+      "visits": "Visitas",
+      "labs": "Laboratorios",
+      "equipment": "Equipos",
+      "scheduleAndDosage": "Horario y dosificación",
+      "documents": "Documentos",
+      "notes": "Notas",
+      "relationships": "Relaciones"
     }
   },
   "familyMembers": {

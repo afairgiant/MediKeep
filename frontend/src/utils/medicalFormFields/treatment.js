@@ -6,6 +6,17 @@ import { tagsFieldConfig } from './shared';
 
 export const treatmentFormFields = [
   {
+    name: 'mode',
+    type: 'select',
+    labelKey: 'medical:treatments.mode.label',
+    descriptionKey: 'medical:treatments.mode.description',
+    gridColumn: 12,
+    options: [
+      { value: 'simple', labelKey: 'medical:treatments.mode.simpleOption' },
+      { value: 'advanced', labelKey: 'medical:treatments.mode.advancedOption' },
+    ],
+  },
+  {
     name: 'treatment_name',
     type: 'text',
     labelKey: 'medical:treatments.treatmentName.label',

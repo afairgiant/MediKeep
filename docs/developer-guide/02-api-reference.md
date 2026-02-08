@@ -1,6 +1,6 @@
 # MediKeep API Reference (v1.0)
 
-**Last Updated:** February 3, 2026
+**Last Updated:** February 7, 2026
 **API Version:** 1.0
 **Base URL:** `http://localhost:8000/api/v1`
 
@@ -752,6 +752,41 @@ Base path: `/api/v1/medications`
 - **Query Parameters**:
   - `active_only` (boolean): Filter only active medications
 
+#### Get Medication Treatments
+`GET /medications/{medication_id}/treatments`
+- **Purpose**: Get all treatments that use a specific medication (medication profile / treatment history)
+- **Authentication**: Yes
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "treatment_id": 5,
+    "medication_id": 12,
+    "specific_dosage": "20mg",
+    "specific_frequency": null,
+    "specific_duration": null,
+    "timing_instructions": null,
+    "relevance_note": "Primary medication",
+    "specific_prescriber_id": null,
+    "specific_pharmacy_id": null,
+    "specific_start_date": "2026-01-09",
+    "specific_end_date": null,
+    "treatment": {
+      "id": 5,
+      "treatment_name": "Cardiac Rehabilitation",
+      "treatment_type": "Rehabilitation",
+      "status": "active",
+      "mode": "advanced",
+      "start_date": "2026-01-01",
+      "end_date": null,
+      "condition": { "id": 2, "condition_name": "Hypertension" }
+    }
+  }
+]
+```
+- Includes treatment details with condition, plus any treatment-specific overrides for this medication
+
 ### 6.2 Allergies
 
 Base path: `/api/v1/allergies`
@@ -1484,6 +1519,10 @@ Base path: `/api/v1/procedures`
 
 Base path: `/api/v1/treatments`
 
+Treatments support two modes:
+- **Simple** (`"simple"`): Basic treatment tracking with schedule and dosage fields on the treatment itself.
+- **Advanced** (`"advanced"`): Medication-centric treatment plans where dosage, schedule, prescriber, and pharmacy can be overridden per linked medication.
+
 #### Create Treatment
 `POST /treatments/`
 - **Request Body**:
@@ -1497,9 +1536,158 @@ Base path: `/api/v1/treatments`
   "practitioner_id": 5,
   "frequency": "3 times per week",
   "status": "active",
+  "mode": "simple",
   "notes": "For lower back pain"
 }
 ```
+- **Mode values**: `simple` (default), `advanced`
+
+#### List Treatments
+`GET /treatments/`
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 100, max: 100): Items per page
+  - `condition_id` (integer, optional): Filter by condition
+  - `status` (string, optional): Filter by status
+  - `tags` (array, optional): Filter by tags
+  - `tag_match_all` (boolean, default: false): Match ALL tags vs ANY tag
+- **Success Response** (200): Array of treatment objects
+
+#### Get Treatment by ID
+`GET /treatments/{treatment_id}`
+- **Authentication**: Yes
+- **Success Response** (200): Treatment object with patient, practitioner, and condition relations
+
+#### Update Treatment
+`PUT /treatments/{treatment_id}`
+- **Authentication**: Yes
+- **Request Body**: Same as create (all fields optional)
+
+#### Delete Treatment
+`DELETE /treatments/{treatment_id}`
+- **Authentication**: Yes
+- **Success Response** (200): `{"message": "Treatment deleted successfully"}`
+
+#### Get Active Treatments for Patient
+`GET /treatments/patient/{patient_id}/active`
+- **Purpose**: Get only active treatments for a specific patient
+- **Success Response** (200): Array of treatment objects
+
+#### Get Ongoing Treatments
+`GET /treatments/ongoing`
+- **Purpose**: Get treatments with status active or in_progress
+- **Query Parameters**:
+  - `patient_id` (integer, optional): Filter by patient ID (defaults to current user's patient)
+- **Success Response** (200): Array of treatment objects
+
+#### Treatment-Medication Relationships
+
+These endpoints manage the many-to-many relationship between treatments and medications. In **advanced mode**, each linked medication can have treatment-specific overrides for dosage, frequency, dates, prescriber, and pharmacy.
+
+##### Get Treatment Medications (with Effective Values)
+`GET /treatments/{treatment_id}/medications`
+- **Purpose**: Get all medications linked to a treatment, with computed effective values
+- **Success Response** (200):
+```json
+[
+  {
+    "id": 1,
+    "treatment_id": 5,
+    "medication_id": 12,
+    "specific_dosage": "20mg",
+    "specific_frequency": null,
+    "specific_duration": "6 weeks",
+    "timing_instructions": "Take with food",
+    "relevance_note": "Primary medication for this plan",
+    "specific_prescriber_id": 3,
+    "specific_pharmacy_id": null,
+    "specific_start_date": "2026-01-09",
+    "specific_end_date": null,
+    "specific_prescriber": { "id": 3, "name": "Dr. Smith", "specialty": "Cardiology" },
+    "specific_pharmacy": null,
+    "medication": {
+      "id": 12,
+      "medication_name": "Lisinopril",
+      "dosage": "10mg",
+      "frequency": "Once daily",
+      "route": "Oral",
+      "status": "active",
+      "effective_period_start": "2025-06-01",
+      "effective_period_end": "2025-09-25",
+      "practitioner": { "id": 2, "name": "Dr. Jones", "specialty": "Internal Medicine" },
+      "pharmacy": { "id": 1, "name": "CVS", "brand": null }
+    },
+    "effective_dosage": "20mg",
+    "effective_frequency": "Once daily",
+    "effective_start_date": "2026-01-09",
+    "effective_end_date": null,
+    "effective_prescriber": { "id": 3, "name": "Dr. Smith", "specialty": "Cardiology" },
+    "effective_pharmacy": { "id": 1, "name": "CVS", "brand": null },
+    "created_at": "2026-02-07T10:00:00Z",
+    "updated_at": "2026-02-07T10:00:00Z"
+  }
+]
+```
+
+**Effective value logic**:
+- `effective_*` fields use the treatment-specific override (`specific_*`) if set, otherwise fall back to the base medication's value.
+- **Smart end date**: If `specific_start_date` is set but `specific_end_date` is not, and the medication's `effective_period_end` is before the overridden start date, `effective_end_date` is set to `null` (treated as "Ongoing") to avoid displaying a stale end date.
+
+##### Link Medication to Treatment
+`POST /treatments/{treatment_id}/medications`
+- **Request Body**:
+```json
+{
+  "medication_id": 12,
+  "specific_dosage": "20mg",
+  "specific_frequency": "Twice daily",
+  "specific_duration": "6 weeks",
+  "timing_instructions": "Take with food",
+  "relevance_note": "Primary medication for this plan",
+  "specific_prescriber_id": 3,
+  "specific_pharmacy_id": 1,
+  "specific_start_date": "2026-01-09",
+  "specific_end_date": "2026-03-01"
+}
+```
+- All fields except `medication_id` are optional
+- **Validation**: `specific_end_date` must be on or after `specific_start_date` if both are provided
+- **Success Response** (200): Created relationship object
+
+##### Bulk Link Medications
+`POST /treatments/{treatment_id}/medications/bulk`
+- **Purpose**: Link multiple medications to a treatment at once
+- **Request Body**:
+```json
+{
+  "medication_ids": [12, 15, 18],
+  "relevance_note": "Medications for treatment plan"
+}
+```
+- Skips medications that are already linked (no error)
+- **Success Response** (200): Array of created relationship objects
+
+##### Update Medication Link
+`PUT /treatments/{treatment_id}/medications/{relationship_id}`
+- **Request Body**: Same fields as create (all optional, except `medication_id` which is not updatable)
+- **Success Response** (200): Updated relationship object
+
+##### Remove Medication from Treatment
+`DELETE /treatments/{treatment_id}/medications/{relationship_id}`
+- **Success Response** (200): `{"status": "success", "message": "Medication link removed"}`
+
+#### Treatment-Encounter, Lab Result, and Equipment Relationships
+
+Treatments also support relationships with encounters, lab results, and equipment using the same CRUD pattern:
+
+| Relationship | Base Path | Purpose |
+|---|---|---|
+| Encounters | `/{treatment_id}/encounters` | Link visits/encounters to treatment |
+| Lab Results | `/{treatment_id}/lab-results` | Link lab results to treatment |
+| Equipment | `/{treatment_id}/equipment` | Link medical equipment to treatment |
+
+Each supports: `GET` (list), `POST` (link), `POST /bulk` (bulk link), `PUT /{id}` (update), `DELETE /{id}` (remove).
 
 ### 6.10 Symptoms
 
