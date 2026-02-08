@@ -3,7 +3,6 @@
   "description": "Configurez comment vous recevez des notifications pour les événements importants",
   "loading": "Chargement des paramètres de notification...",
   "error": "Echec du chargement des paramètres de notification",
-
   "channels": {
     "title": "Canaux de notification",
     "description": "Ajoutez et gérez vos canaux de notification",
@@ -144,7 +143,6 @@
       }
     }
   },
-
   "preferences": {
     "title": "Notifications d'événements",
     "description": "Choisissez quels événements déclenchent des notifications dans chaque canal",
@@ -163,7 +161,6 @@
       "other": "Autres événements"
     }
   },
-
   "events": {
     "test_notification": {
       "name": "Notification de test",
@@ -214,7 +211,6 @@
       "description": "Quand votre mot de passe est modifié"
     }
   },
-
   "history": {
     "title": "Historique des notifications",
     "description": "Notifications récemment envoyées via vos canaux",
@@ -237,7 +233,6 @@
       "error": "Erreur"
     }
   },
-
   "validation": {
     "nameRequired": "Le nom du canal est requis",
     "nameTooLong": "Le nom ne peut dépasser 100 caractères",
@@ -260,7 +255,6 @@
     "urlInvalid": "Format d'URL invalide",
     "headersInvalid": "Les en-têtes doivent constituer du code JSON valide"
   },
-
   "toasts": {
     "auth": {
       "sessionExpired": "La session a expiré pour cause d'inactivité.",

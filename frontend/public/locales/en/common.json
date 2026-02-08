@@ -34,7 +34,8 @@
     "done": "Done",
     "linkMedication": "Link Medication",
     "linkMedications": "Link Medications",
-    "linkCondition": "Link Condition"
+    "linkCondition": "Link Condition",
+    "saveChanges": "Save Changes"
   },
   "labels": {
     "loading": "Loading...",
@@ -99,7 +100,8 @@
     "email": "Email Address",
     "address": "Address",
     "patientRecord": "Patient Record",
-    "medicalHistory": "Medical History"
+    "medicalHistory": "Medical History",
+    "practitioner": "Practitioner"
   },
   "fields": {
     "notes": {
@@ -114,7 +116,8 @@
     },
     "status": {
       "label": "Status",
-      "description": "Current status"
+      "description": "Current status",
+      "placeholder": "Select status"
     },
     "severity": {
       "label": "Severity",
@@ -203,7 +206,8 @@
     "title": "Filters & Search",
     "itemCount": "{{filtered}} of {{total}} items",
     "moreFilters": "{{count}} more filters",
-    "active": "Active"
+    "active": "Active",
+    "clear": "Clear"
   },
   "vitals": {
     "form": {
@@ -223,23 +227,146 @@
         "a1cMin": "A1C must be at least 0%",
         "a1cMax": "A1C cannot exceed 20%",
         "dateInFuture": "Date cannot be in the future",
-        "timeInFuture": "Selected time cannot be in the future"
+        "timeInFuture": "Selected time cannot be in the future",
+        "dateRequired": "Measurement date and time are required",
+        "systolicMin": "Systolic BP must be at least 50 mmHg",
+        "systolicMax": "Systolic BP cannot exceed 300 mmHg",
+        "diastolicMin": "Diastolic BP must be at least 30 mmHg",
+        "diastolicMax": "Diastolic BP cannot exceed 200 mmHg",
+        "heartRateMin": "Heart rate must be at least 30 BPM",
+        "heartRateMax": "Heart rate cannot exceed 250 BPM",
+        "temperatureMin": "Temperature must be at least {{min}}{{unit}}",
+        "temperatureMax": "Temperature cannot exceed {{max}}{{unit}}",
+        "weightMin": "Weight must be at least {{min}} {{unit}}",
+        "weightMax": "Weight cannot exceed {{max}} {{unit}}",
+        "respiratoryRateMin": "Respiratory rate must be at least 5/min",
+        "respiratoryRateMax": "Respiratory rate cannot exceed 100/min",
+        "oxygenMin": "Oxygen saturation must be at least 50%",
+        "oxygenMax": "Oxygen saturation cannot exceed 100%",
+        "painScaleMin": "Pain scale must be at least 0",
+        "painScaleMax": "Pain scale cannot exceed 10",
+        "deviceMaxLength": "Device name cannot exceed 100 characters",
+        "notesMaxLength": "Notes cannot exceed 1000 characters"
+      },
+      "sections": {
+        "basicInfo": "Basic Information",
+        "physicalMeasurements": "Physical Measurements",
+        "recordingInfo": "Recording Information",
+        "additionalInfo": "Additional Information"
+      },
+      "bloodPressureDesc": "Measured in mmHg",
+      "weightDesc": "Weight in {{unit}}",
+      "vitalSignsDesc": "Core physiological measurements",
+      "additionalMeasurementsDesc": "Supplementary health indicators",
+      "contextDesc": "Context about the measurements",
+      "recordedDateTime": "Measurement Date & Time",
+      "systolicBP": "Systolic BP",
+      "diastolicBP": "Diastolic BP",
+      "measurementLocation": "Measurement Location",
+      "locationPlaceholder": "Where were these measurements taken?",
+      "deviceUsed": "Device/Equipment Used",
+      "devicePlaceholder": "e.g., Digital BP monitor, Thermometer model...",
+      "notesPlaceholder": "Additional notes about the vital signs measurement...",
+      "painScaleUnit": "(0-10)",
+      "timezoneInfo": "Timezone Information",
+      "timesShownIn": "Times shown in {{timezone}}",
+      "healthAlerts": "Health Alerts",
+      "patientInfo": "Patient Information",
+      "patientHeight": "Patient height: {{height}} inches (from profile)",
+      "missingPatientInfo": "Missing Patient Information",
+      "heightNotSet": "Height not set in patient profile - BMI calculation not available",
+      "calculatedValues": "Calculated Values",
+      "updateVitals": "Update Vitals",
+      "saveVitals": "Save Vitals",
+      "locations": {
+        "home": "Home",
+        "clinic": "Clinic",
+        "hospital": "Hospital",
+        "urgentCare": "Urgent Care",
+        "pharmacy": "Pharmacy",
+        "ambulatory": "Ambulatory Care",
+        "other": "Other"
       }
     },
     "modal": {
       "bloodGlucose": "Blood Glucose",
-      "a1c": "A1C"
+      "a1c": "A1C",
+      "title": "Vital Signs Details",
+      "basicInfo": "Basic Information",
+      "vitalSigns": "Vital Signs",
+      "physicalMeasurements": "Physical Measurements",
+      "additionalMeasurements": "Additional Measurements",
+      "recordedDate": "Recorded Date",
+      "deviceUsed": "Device Used",
+      "respiratoryRate": "Respiratory Rate",
+      "height": "Height",
+      "painScale": "Pain Scale",
+      "notes": "Notes",
+      "recordedBy": "Recorded By",
+      "practitionerId": "Practitioner ID"
     },
     "units": {
-      "mgdl": "mg/dL"
+      "mgdl": "mg/dL",
+      "mmHg": "mmHg",
+      "bpm": "BPM",
+      "fahrenheit": "°F",
+      "celsius": "°C",
+      "lbs": "lbs",
+      "kg": "kg",
+      "inches": "inches",
+      "cm": "cm",
+      "perMin": "/min"
     },
     "stats": {
       "bloodGlucoseDesc": "Click to filter records with blood glucose",
-      "a1cDesc": "Click to filter records with A1C"
+      "a1cDesc": "Click to filter records with A1C",
+      "bloodPressure": "Blood Pressure",
+      "bloodPressureDesc": "Click to filter records with blood pressure",
+      "heartRate": "Heart Rate",
+      "heartRateDesc": "Click to filter records with heart rate",
+      "temperature": "Last Temperature",
+      "temperatureDesc": "Click to filter records with temperature",
+      "weight": "Last Weight",
+      "weightDesc": "Click to filter records with weight",
+      "bmi": "BMI",
+      "bmiDesc": "Body Mass Index"
     },
     "categories": {
       "prediabetes": "Pre-diabetes",
-      "diabetes": "Diabetes"
+      "diabetes": "Diabetes",
+      "low": "Low",
+      "high": "High",
+      "normal": "Normal"
+    },
+    "title": "Vital Signs",
+    "loading": "Loading vital signs...",
+    "noPatientSelected": "No Patient Selected",
+    "selectPatientPrompt": "Please select a patient to view and manage vital signs.",
+    "addNew": "Add New Vital Signs",
+    "addTitle": "Add Vital Signs",
+    "editTitle": "Edit Vital Signs",
+    "healthSummary": "Health Summary",
+    "summaryDescription": "Latest readings and averages - Click a card to filter the table below",
+    "loadingStats": "Loading health statistics...",
+    "statsLoadError": "Unable to load health statistics",
+    "filteredBy": "Filtered by",
+    "clearFilter": "Clear filter",
+    "noDataAvailable": "No vital signs data available",
+    "recordVitalsPrompt": "Record your first vital signs measurement to start tracking health metrics.",
+    "card": {
+      "recordedDate": "Recorded Date",
+      "location": "Location",
+      "recordedBy": "Recorded By",
+      "oxygenSaturation": "Oxygen Saturation",
+      "notRecorded": "Not recorded",
+      "title": "Vital Signs Record"
+    },
+    "table": {
+      "date": "Date",
+      "oxygenSat": "O2 Sat",
+      "errorLoading": "Error loading vital signs",
+      "noRecords": "No vital signs records found",
+      "noRecordsDesc": "Vital signs will appear here once they have been recorded"
     }
   },
   "medications": {
@@ -255,6 +382,55 @@
     },
     "treatments": {
       "treatmentPlan": "Treatment Plan"
+    },
+    "loading": "Loading medications...",
+    "error": "Error",
+    "success": "Success",
+    "noMedications": "No medications or supplements found",
+    "tryAdjustingFilters": "Try adjusting your search or filter criteria.",
+    "clickToStart": "Click \"Add New Medication\" to get started.",
+    "fields": {
+      "frequency": "Frequency",
+      "route": "Route",
+      "purpose": "Purpose",
+      "prescriber": "Prescriber",
+      "pharmacy": "Pharmacy",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "noIndication": "No indication specified",
+      "viewPractitioner": "View practitioner details",
+      "viewPharmacy": "View pharmacy details"
+    },
+    "modal": {
+      "details": "Details",
+      "tabs": {
+        "overview": "Overview",
+        "dosageRefills": "Dosage & Refills",
+        "notes": "Notes",
+        "documents": "Documents"
+      },
+      "sections": {
+        "basicInfo": "Basic Information",
+        "timeline": "Timeline",
+        "prescriberPharmacy": "Prescriber & Pharmacy",
+        "tags": "Tags",
+        "dosageInfo": "Dosage Information",
+        "additionalNotes": "Additional Notes",
+        "sideEffects": "Side Effects",
+        "attachedDocuments": "Attached Documents"
+      },
+      "labels": {
+        "medicationName": "Medication Name",
+        "purposeIndication": "Purpose/Indication",
+        "medicationType": "Medication Type",
+        "dosage": "Dosage",
+        "form": "Form"
+      },
+      "notSpecified": "Not specified",
+      "ongoing": "Ongoing",
+      "noNotes": "No notes available",
+      "noSideEffects": "No side effects reported",
+      "editMedication": "Edit Medication"
     }
   },
   "searchPlaceholders": {
@@ -622,6 +798,114 @@
       "status": "Status",
       "icd10": "ICD-10",
       "notes": "Notes"
+    },
+    "card": {
+      "onsetDate": "Onset",
+      "endDate": "End",
+      "duration": "Duration",
+      "snomedCode": "SNOMED Code",
+      "codeDescription": "Code Description",
+      "durationEnded": "{{duration}} (ended)",
+      "durationOngoing": "{{duration}} (ongoing)"
+    },
+    "modal": {
+      "title": "Condition Details",
+      "tabs": {
+        "overview": "Overview",
+        "clinical": "Clinical Details",
+        "notes": "Notes",
+        "documents": "Documents"
+      },
+      "sections": {
+        "basicInfo": "Basic Information",
+        "timeline": "Timeline",
+        "relatedInfo": "Related Information",
+        "tags": "Tags",
+        "medicalCodes": "Medical Codes",
+        "clinicalNotes": "Clinical Notes"
+      },
+      "labels": {
+        "diagnosis": "Diagnosis",
+        "conditionName": "Condition Name",
+        "severity": "Severity",
+        "onsetDate": "Onset",
+        "endDate": "End",
+        "duration": "Duration",
+        "relatedMedication": "Related Medication",
+        "practitioner": "Practitioner",
+        "icd10Code": "ICD-10 Code",
+        "snomedCode": "SNOMED Code",
+        "codeDescription": "Code Description"
+      },
+      "noMedicationLinked": "No medication linked",
+      "noPractitionerAssigned": "No practitioner assigned",
+      "noNotesAvailable": "No clinical notes available"
+    },
+    "form": {
+      "saving": "Saving condition...",
+      "createCondition": "Create Condition",
+      "updateCondition": "Update Condition",
+      "tabs": {
+        "basicInfo": "Basic Information",
+        "clinical": "Clinical Details",
+        "documents": "Documents",
+        "notes": "Notes"
+      },
+      "fields": {
+        "diagnosis": "Diagnosis",
+        "conditionName": "Condition Name",
+        "severity": "Severity",
+        "status": "Status",
+        "onsetDate": "Onset Date",
+        "endDate": "End Date",
+        "relatedMedication": "Related Medication",
+        "practitioner": "Practitioner",
+        "tags": "Tags",
+        "icd10Code": "ICD-10 Code",
+        "snomedCode": "SNOMED Code",
+        "codeDescription": "Code Description",
+        "clinicalNotes": "Clinical Notes"
+      },
+      "placeholders": {
+        "diagnosis": "Enter diagnosis",
+        "conditionName": "Enter condition name",
+        "severity": "Select severity",
+        "status": "Select status",
+        "onsetDate": "Select onset date",
+        "endDate": "Select end date",
+        "medication": "Select medication",
+        "practitioner": "Select practitioner",
+        "tags": "Add tags...",
+        "icd10Code": "e.g., E11.9",
+        "snomedCode": "e.g., 44054006",
+        "codeDescription": "Description of the medical code",
+        "notes": "Enter clinical notes, observations, or additional details"
+      },
+      "descriptions": {
+        "diagnosis": "Primary diagnosis or condition",
+        "conditionName": "Optional alternative name",
+        "onsetDate": "When the condition started",
+        "endDate": "When the condition ended (if applicable)",
+        "medication": "Link this condition to a medication",
+        "practitioner": "Associated healthcare provider",
+        "tags": "Add tags to categorize and organize conditions",
+        "icd10Code": "International Classification of Diseases code",
+        "snomedCode": "SNOMED CT code",
+        "codeDescription": "Human-readable description of the medical codes",
+        "notes": "Additional information about this condition"
+      },
+      "severity": {
+        "mild": "Mild",
+        "moderate": "Moderate",
+        "severe": "Severe",
+        "critical": "Critical"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "resolved": "Resolved",
+        "chronic": "Chronic"
+      }
     }
   },
   "treatments": {
@@ -896,7 +1180,9 @@
       "route": "Route",
       "lotNumber": "Lot Number",
       "expirationDate": "Expiration Date",
-      "notes": "Notes"
+      "notes": "Notes",
+      "tradeName": "Trade Name",
+      "practitioner": "Practitioner"
     },
     "card": {
       "dose": "Dose {{number}}",
@@ -909,7 +1195,8 @@
       "expirationDate": "Expiration Date",
       "practitioner": "Practitioner",
       "viewPractitioner": "View practitioner details",
-      "practitionerId": "ID: {{id}}"
+      "practitionerId": "ID: {{id}}",
+      "notSpecified": "Not specified"
     },
     "viewModal": {
       "title": "Immunization Details",
@@ -1002,7 +1289,9 @@
       "clinicalNotesPlaceholder": "Enter clinical notes, reactions, or additional details",
       "clinicalNotesDesc": "Additional information about this immunization",
       "createImmunization": "Create Immunization",
-      "updateImmunization": "Update Immunization"
+      "updateImmunization": "Update Immunization",
+      "siteOther": "Other",
+      "cancel": "Cancel"
     }
   },
   "visits": {
@@ -1902,7 +2191,42 @@
       "editLabResult": "Edit Lab Result"
     },
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "loading": "Loading lab results...",
+    "loadingHint": "If this takes too long, please reload the page",
+    "addTitle": "Add New Lab Result",
+    "editTitle": "Edit Lab Result",
+    "noResults": "No lab results found",
+    "tryAdjustingFilters": "Try adjusting your search or filter criteria.",
+    "startAdding": "Start adding your first lab result.",
+    "addFirst": "Add your first lab result",
+    "table": {
+      "testName": "Test Name",
+      "category": "Category",
+      "type": "Type",
+      "facility": "Facility",
+      "orderingPractitioner": "Ordering Practitioner",
+      "orderedDate": "Ordered Date",
+      "completedDate": "Completed Date",
+      "files": "Files"
+    },
+    "card": {
+      "testCode": "Test Code",
+      "type": "Type",
+      "facility": "Facility",
+      "ordered": "Ordered",
+      "completed": "Completed",
+      "result": "Result",
+      "doctor": "Doctor",
+      "notSpecified": "Not specified",
+      "notCompleted": "Not completed",
+      "pending": "Pending",
+      "viewPractitioner": "View practitioner details"
+    },
+    "form": {
+      "manageFiles": "Manage Files",
+      "addFilesOptional": "Add Files (Optional)"
+    }
   },
   "testComponents": {
     "title": "Test Components",
@@ -2041,6 +2365,48 @@
       "reset": "Reset Changes",
       "save": "Save All Changes",
       "saving": "Saving..."
+    }
+  },
+  "patientInfo": {
+    "title": "Patient Information",
+    "loading": "Loading patient information...",
+    "personalInfo": "Personal Information",
+    "editProfile": "Edit Profile",
+    "error": "Error",
+    "welcome": {
+      "title": "Welcome to MediKeep!",
+      "message": "Your account has been successfully created. Please complete your patient profile below to start managing your medical records."
+    },
+    "fields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "birthDate": "Birth Date",
+      "gender": "Gender",
+      "relationship": "Relationship to You",
+      "address": "Address",
+      "bloodType": "Blood Type",
+      "height": "Height",
+      "weight": "Weight",
+      "physician": "Primary Physician",
+      "patientId": "Patient ID"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "notProvided": "Not provided",
+    "notSpecified": "Not specified",
+    "notAssigned": "Not assigned",
+    "noProfile": "No patient profile found",
+    "createPrompt": "Please create your patient profile to get started.",
+    "createProfile": "Create Profile",
+    "editTitle": "Edit Patient Information",
+    "createTitle": "Create Patient Profile"
+  },
+  "allergies": {
+    "addNew": "Add New Allergy",
+    "messages": {
+      "loading": "Loading allergies..."
     }
   }
 }

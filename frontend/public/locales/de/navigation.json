@@ -44,7 +44,9 @@
     "treatments": "Behandlungen",
     "symptoms": "Symptome",
     "practitioners": "Ärzte",
-    "pharmacies": "Apotheken"
+    "pharmacies": "Apotheken",
+    "injuries": "Verletzungen",
+    "medicalEquipment": "Medizinische Geräte"
   },
   "dashboard": {
     "title": "MediKeep Dashboard",
@@ -83,7 +85,9 @@
       "exportRecords": "Daten exportieren",
       "practitioners": "Ärzte",
       "pharmacies": "Apotheken",
-      "adminDashboard": "Admin-Dashboard"
+      "adminDashboard": "Admin-Dashboard",
+      "injuries": "Verletzungen",
+      "medicalEquipment": "Medizinische Geräte"
     },
     "activity": {
       "noActivity": "Keine aktuellen Aktivitäten",
@@ -160,7 +164,9 @@
       "backupManagement": "Backup-Verwaltung",
       "systemHealth": "Systemzustand",
       "language": "Sprache",
-      "theme": "Design"
+      "theme": "Design",
+      "injuries": "Verletzungen",
+      "medicalEquipment": "Medizinische Geräte"
     }
   }
 }
