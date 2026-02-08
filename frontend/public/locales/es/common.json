@@ -100,7 +100,8 @@
     "noMedicationsLinked": "No hay medicamentos vinculados a esta condición",
     "noRating": "Sin valoración",
     "ratingStars": "{{count}}/5 estrellas",
-    "visitWebsite": "Visitar sitio web ↗"
+    "visitWebsite": "Visitar sitio web ↗",
+    "practitioner": "Profesional"
   },
   "fields": {
     "tags": {
@@ -115,7 +116,8 @@
     },
     "status": {
       "label": "Estado",
-      "description": "Estado actual"
+      "description": "Estado actual",
+      "placeholder": "Seleccione estado"
     },
     "severity": {
       "label": "Gravedad",
@@ -2399,6 +2401,12 @@
       "mgdl": "mg/dL",
       "mmHg": "mmHg",
       "perMin": "/min"
+    }
+  },
+  "allergies": {
+    "addNew": "Agregar Nueva Alergia",
+    "messages": {
+      "loading": "Cargando alergias..."
     }
   }
 }

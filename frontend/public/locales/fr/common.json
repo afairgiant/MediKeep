@@ -100,7 +100,8 @@
     "email": "Adresse email",
     "address": "Adresse",
     "patientRecord": "Dossier du patient",
-    "medicalHistory": "Antécédents médicaux"
+    "medicalHistory": "Antécédents médicaux",
+    "practitioner": "Praticien"
   },
   "fields": {
     "tags": {
@@ -115,7 +116,8 @@
     },
     "status": {
       "label": "Statut",
-      "description": "Statut actuel"
+      "description": "Statut actuel",
+      "placeholder": "Sélectionnez le statut"
     },
     "severity": {
       "label": "Sévérité",
@@ -2399,6 +2401,12 @@
     "welcome": {
       "message": "Votre compte a été créé avec succès. Veuillez compléter votre profil patient ci-dessous pour commencer à gérer vos dossiers médicaux.",
       "title": "Bienvenue sur MediKeep !"
+    }
+  },
+  "allergies": {
+    "addNew": "Ajouter une nouvelle allergie",
+    "messages": {
+      "loading": "Chargement des allergies..."
     }
   }
 }

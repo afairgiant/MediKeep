@@ -37,7 +37,8 @@
       }
     },
     "severity": {
-      "description": "Severity of allergic reaction"
+      "description": "Severity of allergic reaction",
+      "placeholder": "Select severity level"
     },
     "status": {
       "description": "Current allergy status"
@@ -96,6 +97,24 @@
       "label": "Code Description",
       "placeholder": "Description of the medical code",
       "description": "Human-readable description of the code"
+    },
+    "status": {
+      "description": "Current status of this condition"
+    },
+    "severity": {
+      "placeholder": "Select severity level",
+      "description": "How severe the condition is"
+    },
+    "onsetDate": {
+      "placeholder": "Select onset date",
+      "description": "When the condition first appeared"
+    },
+    "endDate": {
+      "placeholder": "Select end date",
+      "description": "When the condition was resolved (if applicable)"
+    },
+    "notes": {
+      "description": "Additional details about the condition, treatment history, or observations"
     }
   },
   "medications": {
@@ -361,6 +380,11 @@
       "astrazeneca": "AstraZeneca",
       "glaxosmithkline": "GlaxoSmithKline",
       "novartis": "Novartis"
+    },
+    "notes": {
+      "label": "Notes",
+      "placeholder": "Additional notes about this immunization...",
+      "description": "Any relevant details about the immunization"
     }
   },
   "procedures": {
@@ -440,6 +464,29 @@
       "label": "Anesthesia Notes",
       "placeholder": "Anesthesia-related notes...",
       "description": "Any notes about anesthesia administration"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Describe the procedure in detail...",
+      "description": "Detailed description of what the procedure involves"
+    },
+    "status": {
+      "description": "Current status of the procedure"
+    },
+    "facility": {
+      "label": "Facility",
+      "placeholder": "e.g., General Hospital, Outpatient Center",
+      "description": "Where the procedure was or will be performed"
+    },
+    "practitioner": {
+      "label": "Performing Practitioner",
+      "placeholder": "Select practitioner",
+      "description": "Doctor or specialist performing the procedure"
+    },
+    "notes": {
+      "label": "Notes",
+      "placeholder": "Additional notes about the procedure...",
+      "description": "Any relevant observations, pre/post-op instructions, or details"
     }
   },
   "visits": {
@@ -534,6 +581,103 @@
       "label": "Additional Notes",
       "placeholder": "Any other important details about the visit...",
       "description": "Any additional observations, notes, or important details"
+    },
+    "form": {
+      "fields": {
+        "reason": {
+          "label": "Reason for Visit",
+          "placeholder": "e.g., Annual Checkup, Follow-up, Symptoms Review",
+          "description": "Primary purpose of this medical visit"
+        },
+        "visitDate": {
+          "label": "Visit Date",
+          "placeholder": "Select visit date",
+          "description": "When the visit occurred"
+        },
+        "attendingPractitioner": {
+          "label": "Attending Practitioner",
+          "placeholder": "Select practitioner (optional)",
+          "description": "Doctor who conducted the visit"
+        },
+        "visitType": {
+          "placeholder": "Select visit type",
+          "description": "Type of medical visit"
+        },
+        "priority": {
+          "placeholder": "Select priority level",
+          "description": "Priority level of the visit"
+        },
+        "relatedCondition": {
+          "label": "Related Condition (Optional)",
+          "placeholder": "Select a condition this visit is related to",
+          "description": "Link this visit to a specific condition if applicable"
+        },
+        "chiefComplaint": {
+          "placeholder": "Primary concern or symptom reported",
+          "description": "Main health concern or symptom that prompted the visit"
+        },
+        "durationMinutes": {
+          "label": "Duration (minutes)",
+          "placeholder": "Visit duration",
+          "description": "How long the visit lasted"
+        },
+        "location": {
+          "placeholder": "Where the visit occurred",
+          "description": "Where the visit took place"
+        },
+        "diagnosisAssessment": {
+          "label": "Diagnosis/Assessment",
+          "placeholder": "Clinical assessment or diagnosis from the visit...",
+          "description": "Medical diagnosis or clinical assessment"
+        },
+        "treatmentPlan": {
+          "placeholder": "Recommended treatment or next steps...",
+          "description": "Treatment recommendations and prescribed interventions"
+        },
+        "followUpInstructions": {
+          "placeholder": "Follow-up care instructions...",
+          "description": "Instructions for ongoing care and follow-up appointments"
+        },
+        "additionalNotes": {
+          "placeholder": "Any other important details about the visit...",
+          "description": "Any additional observations, notes, or important details"
+        }
+      },
+      "visitTypeOptions": {
+        "annualCheckup": "Annual Checkup",
+        "followUp": "Follow-up",
+        "consultation": "Consultation",
+        "emergency": "Emergency",
+        "preventiveCare": "Preventive Care",
+        "routineVisit": "Routine Visit",
+        "specialistReferral": "Specialist Referral"
+      },
+      "priorityOptions": {
+        "routine": "Routine",
+        "urgent": "Urgent"
+      },
+      "locationOptions": {
+        "doctorsOffice": "Doctor's Office",
+        "hospital": "Hospital",
+        "clinic": "Clinic",
+        "telehealth": "Telehealth/Virtual",
+        "urgentCare": "Urgent Care",
+        "emergencyRoom": "Emergency Room",
+        "homeVisit": "Home Visit"
+      },
+      "dividers": {
+        "clinicalInformation": "Clinical Information"
+      }
+    },
+    "table": {
+      "visitType": "Visit Type"
+    },
+    "viewModal": {
+      "priority": "Priority",
+      "chiefComplaint": "Chief Complaint",
+      "location": "Location",
+      "treatmentPlan": "Treatment Plan",
+      "followUpInstructions": "Follow-up Instructions"
     }
   },
   "treatments": {
@@ -856,6 +1000,10 @@
         "label": "Additional Notes",
         "placeholder": "Additional details about this episode...",
         "description": "Any other relevant information about this occurrence"
+      },
+      "severity": {
+        "placeholder": "Select severity level",
+        "description": "How severe the symptom is during this occurrence"
       }
     }
   },
@@ -926,7 +1074,8 @@
         },
         "genderOptions": {
           "male": "Male",
-          "female": "Female"
+          "female": "Female",
+          "other": "Other"
         }
       },
       "condition": {
@@ -1034,7 +1183,8 @@
         "description": "Professional website or practice page"
       },
       "rating": {
-        "label": "Rating"
+        "label": "Rating",
+        "description": "Your overall rating of this practitioner (0-5)"
       }
     },
     "name": {
@@ -1063,7 +1213,28 @@
       "brand": {
         "label": "Pharmacy Brand",
         "placeholder": "Select pharmacy chain or type",
-        "description": "Major pharmacy chain or independent type"
+        "description": "Major pharmacy chain or independent type",
+        "options": {
+          "amazonPharmacy": "Amazon Pharmacy",
+          "cvs": "CVS",
+          "walgreens": "Walgreens",
+          "riteAid": "Rite Aid",
+          "walmartPharmacy": "Walmart Pharmacy",
+          "targetPharmacy": "Target Pharmacy",
+          "costcoPharmacy": "Costco Pharmacy",
+          "krogerPharmacy": "Kroger Pharmacy",
+          "safewayPharmacy": "Safeway Pharmacy",
+          "publixPharmacy": "Publix Pharmacy",
+          "meijerPharmacy": "Meijer Pharmacy",
+          "hebPharmacy": "H-E-B Pharmacy",
+          "kaiserPermanente": "Kaiser Permanente",
+          "hospitalPharmacy": "Hospital Pharmacy",
+          "independent": "Independent",
+          "specialtyPharmacy": "Specialty Pharmacy",
+          "compoundingPharmacy": "Compounding Pharmacy",
+          "onlinePharmacy": "Online Pharmacy",
+          "other": "Other"
+        }
       },
       "name": {
         "label": "Pharmacy Name",
@@ -1090,6 +1261,10 @@
         "label": "Phone Number",
         "placeholder": "(555) 123-4567",
         "description": "Primary pharmacy phone number"
+      },
+      "website": {
+        "placeholder": "https://www.example.com",
+        "description": "Pharmacy website for online ordering or information"
       }
     },
     "pharmacyBrand": {
@@ -1372,7 +1547,8 @@
           "epo": "EPO (Exclusive Provider Organization)",
           "pos": "POS (Point of Service)",
           "hdhp": "HDHP (High Deductible Health Plan)",
-          "indemnity": "Indemnity (Fee-for-Service)"
+          "indemnity": "Indemnity (Fee-for-Service)",
+          "other": "Other"
         }
       },
       "dentalPlanType": {
@@ -1432,7 +1608,8 @@
       },
       "contactAllowance": {
         "label": "Contact Lens Allowance",
-        "description": "Annual allowance for contact lenses"
+        "description": "Annual allowance for contact lenses",
+        "placeholder": "e.g., 150"
       },
       "prescriptionPlanType": {
         "label": "Prescription Plan Type",
@@ -1462,7 +1639,8 @@
       },
       "copayGeneric": {
         "label": "Generic Copay",
-        "description": "Copay amount for generic medications"
+        "description": "Copay amount for generic medications",
+        "placeholder": "e.g., 10"
       },
       "copayBrand": {
         "label": "Brand Name Copay",
@@ -1471,7 +1649,8 @@
       },
       "copaySpecialty": {
         "label": "Specialty Copay",
-        "description": "Copay amount for specialty medications"
+        "description": "Copay amount for specialty medications",
+        "placeholder": "e.g., 50"
       },
       "pharmacyNetworkInfo": {
         "label": "Pharmacy Network Info",
@@ -1644,6 +1823,30 @@
       "label": "Additional Notes",
       "placeholder": "Any other relevant information...",
       "description": "General notes or additional details"
+    },
+    "bodyLocation": {
+      "label": "Body Location",
+      "placeholder": "e.g., Left knee, Right shoulder",
+      "description": "Specific body part affected by the injury"
+    },
+    "injuryDate": {
+      "label": "Date of Injury",
+      "placeholder": "Select injury date",
+      "description": "When the injury occurred"
+    },
+    "cause": {
+      "label": "Cause / Mechanism",
+      "placeholder": "Describe how the injury occurred...",
+      "description": "How the injury happened (fall, sports, accident, etc.)"
+    },
+    "treatment": {
+      "label": "Treatment Received",
+      "placeholder": "Describe treatment received...",
+      "description": "Medical treatment provided for the injury"
     }
+  },
+  "form": {
+    "invalidPhoneDigits": "Phone number must contain only digits, spaces, dashes, or parentheses",
+    "invalidWebsiteUrl": "Please enter a valid website URL"
   }
 }

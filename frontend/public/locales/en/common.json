@@ -100,7 +100,8 @@
     "email": "Email Address",
     "address": "Address",
     "patientRecord": "Patient Record",
-    "medicalHistory": "Medical History"
+    "medicalHistory": "Medical History",
+    "practitioner": "Practitioner"
   },
   "fields": {
     "notes": {
@@ -115,7 +116,8 @@
     },
     "status": {
       "label": "Status",
-      "description": "Current status"
+      "description": "Current status",
+      "placeholder": "Select status"
     },
     "severity": {
       "label": "Severity",
@@ -2400,5 +2402,11 @@
     "createProfile": "Create Profile",
     "editTitle": "Edit Patient Information",
     "createTitle": "Create Patient Profile"
+  },
+  "allergies": {
+    "addNew": "Add New Allergy",
+    "messages": {
+      "loading": "Loading allergies..."
+    }
   }
 }

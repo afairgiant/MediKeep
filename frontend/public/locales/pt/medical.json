@@ -37,7 +37,8 @@
       }
     },
     "severity": {
-      "description": "Gravidade da reação alérgica"
+      "description": "Gravidade da reação alérgica",
+      "placeholder": "Selecione o nível de gravidade"
     },
     "status": {
       "description": "Status atual da alergia"
@@ -96,6 +97,24 @@
       "label": "Descrição do Código",
       "placeholder": "Descrição do código médico",
       "description": "Descrição legível do código"
+    },
+    "endDate": {
+      "description": "Quando a condição foi resolvida (se aplicável)",
+      "placeholder": "Selecione a data de término"
+    },
+    "notes": {
+      "description": "Detalhes adicionais sobre a condição, histórico de tratamento ou observações"
+    },
+    "onsetDate": {
+      "description": "Quando a condição apareceu pela primeira vez",
+      "placeholder": "Selecione a data de início"
+    },
+    "severity": {
+      "description": "Quão grave é a condição",
+      "placeholder": "Selecione o nível de gravidade"
+    },
+    "status": {
+      "description": "Status atual desta condição"
     }
   },
   "medications": {
@@ -361,6 +380,11 @@
       "jj": "Johnson & Johnson",
       "novartis": "Novartis",
       "pfizer": "Pfizer-BioNTech"
+    },
+    "notes": {
+      "description": "Quaisquer detalhes relevantes sobre a imunização",
+      "label": "Notas",
+      "placeholder": "Notas adicionais sobre esta imunização..."
     }
   },
   "procedures": {
@@ -440,6 +464,29 @@
       "label": "Notas de Anestesia",
       "placeholder": "Notas relacionadas à anestesia...",
       "description": "Quaisquer notas sobre a administração de anestesia"
+    },
+    "description": {
+      "description": "Descrição detalhada do que o procedimento envolve",
+      "label": "Descrição",
+      "placeholder": "Descreva o procedimento em detalhes..."
+    },
+    "facility": {
+      "description": "Onde o procedimento foi ou será realizado",
+      "label": "Instalação",
+      "placeholder": "ex., Hospital Geral, Centro Ambulatorial"
+    },
+    "notes": {
+      "description": "Quaisquer observações relevantes, instruções pré/pós-operatórias ou detalhes",
+      "label": "Notas",
+      "placeholder": "Notas adicionais sobre o procedimento..."
+    },
+    "practitioner": {
+      "description": "Médico ou especialista realizando o procedimento",
+      "label": "Profissional Executor",
+      "placeholder": "Selecione o profissional"
+    },
+    "status": {
+      "description": "Status atual do procedimento"
     }
   },
   "visits": {
@@ -534,6 +581,103 @@
       "label": "Notas adicionais",
       "placeholder": "Outros detalhes importantes sobre a consulta...",
       "description": "Observações adicionais, notas ou detalhes importantes"
+    },
+    "form": {
+      "dividers": {
+        "clinicalInformation": "Informações Clínicas"
+      },
+      "fields": {
+        "additionalNotes": {
+          "description": "Quaisquer observações adicionais, notas ou detalhes importantes",
+          "placeholder": "Quaisquer outros detalhes importantes sobre a consulta..."
+        },
+        "attendingPractitioner": {
+          "description": "Médico que realizou a consulta",
+          "label": "Profissional Responsável",
+          "placeholder": "Selecione o profissional (opcional)"
+        },
+        "chiefComplaint": {
+          "description": "Principal preocupação ou sintoma de saúde que motivou a consulta",
+          "placeholder": "Queixa principal ou sintoma relatado"
+        },
+        "diagnosisAssessment": {
+          "description": "Diagnóstico médico ou avaliação clínica",
+          "label": "Diagnóstico/Avaliação",
+          "placeholder": "Avaliação clínica ou diagnóstico da consulta..."
+        },
+        "durationMinutes": {
+          "description": "Quanto tempo durou a consulta",
+          "label": "Duração (minutos)",
+          "placeholder": "Duração da consulta"
+        },
+        "followUpInstructions": {
+          "description": "Instruções para cuidados contínuos e consultas de acompanhamento",
+          "placeholder": "Instruções de acompanhamento..."
+        },
+        "location": {
+          "description": "Local onde a consulta foi realizada",
+          "placeholder": "Onde a consulta ocorreu"
+        },
+        "priority": {
+          "description": "Nível de prioridade da consulta",
+          "placeholder": "Selecione o nível de prioridade"
+        },
+        "reason": {
+          "description": "Propósito principal desta consulta médica",
+          "label": "Motivo da Consulta",
+          "placeholder": "ex. Check-up Anual, Retorno, Revisão de Sintomas"
+        },
+        "relatedCondition": {
+          "description": "Vincule esta consulta a uma condição específica, se aplicável",
+          "label": "Condição Relacionada (Opcional)",
+          "placeholder": "Selecione uma condição relacionada a esta consulta"
+        },
+        "treatmentPlan": {
+          "description": "Recomendações de tratamento e intervenções prescritas",
+          "placeholder": "Tratamento recomendado ou próximas etapas..."
+        },
+        "visitDate": {
+          "description": "Quando a consulta ocorreu",
+          "label": "Data da Consulta",
+          "placeholder": "Selecione a data da consulta"
+        },
+        "visitType": {
+          "description": "Tipo de consulta médica",
+          "placeholder": "Selecione o tipo de consulta"
+        }
+      },
+      "locationOptions": {
+        "clinic": "Clínica",
+        "doctorsOffice": "Consultório Médico",
+        "emergencyRoom": "Pronto Socorro",
+        "homeVisit": "Visita Domiciliar",
+        "hospital": "Hospital",
+        "telehealth": "Telemedicina/Virtual",
+        "urgentCare": "Pronto Atendimento"
+      },
+      "priorityOptions": {
+        "routine": "Rotina",
+        "urgent": "Urgente"
+      },
+      "visitTypeOptions": {
+        "annualCheckup": "Check-up Anual",
+        "consultation": "Consulta",
+        "emergency": "Emergência",
+        "followUp": "Retorno",
+        "preventiveCare": "Cuidados Preventivos",
+        "routineVisit": "Consulta de Rotina",
+        "specialistReferral": "Encaminhamento para Especialista"
+      }
+    },
+    "table": {
+      "visitType": "Tipo de Consulta"
+    },
+    "viewModal": {
+      "chiefComplaint": "Queixa Principal",
+      "followUpInstructions": "Instruções de Acompanhamento",
+      "location": "Local",
+      "priority": "Prioridade",
+      "treatmentPlan": "Plano de Tratamento"
     }
   },
   "treatments": {
@@ -856,6 +1000,10 @@
         "label": "Notas Adicionais",
         "placeholder": "Detalhes adicionais sobre este episódio...",
         "description": "Qualquer outra informação relevante sobre esta ocorrência"
+      },
+      "severity": {
+        "description": "Quão grave é o sintoma durante esta ocorrência",
+        "placeholder": "Selecione o nível de gravidade"
       }
     }
   },
@@ -926,7 +1074,8 @@
         },
         "genderOptions": {
           "male": "Masculino",
-          "female": "Feminino"
+          "female": "Feminino",
+          "other": "Outro"
         }
       },
       "condition": {
@@ -1034,7 +1183,8 @@
         "description": "Website profissional ou página da prática"
       },
       "rating": {
-        "label": "Avaliação"
+        "label": "Avaliação",
+        "description": "Sua avaliação geral deste profissional (0-5)"
       }
     },
     "name": {
@@ -1063,7 +1213,28 @@
       "brand": {
         "label": "Marca da Farmácia",
         "placeholder": "Selecione a rede de farmácias ou digite",
-        "description": "Principal rede de farmácias ou tipo independente"
+        "description": "Principal rede de farmácias ou tipo independente",
+        "options": {
+          "amazonPharmacy": "Amazon Pharmacy",
+          "compoundingPharmacy": "Compounding Pharmacy",
+          "costcoPharmacy": "Costco Pharmacy",
+          "cvs": "CVS",
+          "hebPharmacy": "H-E-B Pharmacy",
+          "hospitalPharmacy": "Hospital Pharmacy",
+          "independent": "Independent",
+          "kaiserPermanente": "Kaiser Permanente",
+          "krogerPharmacy": "Kroger Pharmacy",
+          "meijerPharmacy": "Meijer Pharmacy",
+          "onlinePharmacy": "Online Pharmacy",
+          "other": "Other",
+          "publixPharmacy": "Publix Pharmacy",
+          "riteAid": "Rite Aid",
+          "safewayPharmacy": "Safeway Pharmacy",
+          "specialtyPharmacy": "Specialty Pharmacy",
+          "targetPharmacy": "Target Pharmacy",
+          "walgreens": "Walgreens",
+          "walmartPharmacy": "Walmart Pharmacy"
+        }
       },
       "name": {
         "label": "Nome da Farmácia",
@@ -1090,6 +1261,10 @@
         "label": "Número de Telefone",
         "placeholder": "(11) 1234-5678",
         "description": "Número de telefone principal da farmácia"
+      },
+      "website": {
+        "description": "Site da farmácia para pedidos online ou informações",
+        "placeholder": "https://www.example.com"
       }
     },
     "city": {
@@ -1372,7 +1547,8 @@
           "epo": "EPO (Organização de Provedores Exclusivos)",
           "pos": "POS (Ponto de Serviço)",
           "hdhp": "HDHP (Plano de Alta Franquia)",
-          "indemnity": "Indenização (Pagamento por Serviço)"
+          "indemnity": "Indenização (Pagamento por Serviço)",
+          "other": "Outro"
         }
       },
       "dentalPlanType": {
@@ -1432,7 +1608,8 @@
       },
       "contactAllowance": {
         "label": "Subsídio para Lentes de Contato",
-        "description": "Subsídio anual para lentes de contato"
+        "description": "Subsídio anual para lentes de contato",
+        "placeholder": "ex., 150"
       },
       "prescriptionPlanType": {
         "label": "Tipo de Plano de Prescrição",
@@ -1462,7 +1639,8 @@
       },
       "copayGeneric": {
         "label": "Copagamento Genérico",
-        "description": "Valor do copagamento para medicamentos genéricos"
+        "description": "Valor do copagamento para medicamentos genéricos",
+        "placeholder": "ex., 10"
       },
       "copayBrand": {
         "label": "Copagamento para Marca",
@@ -1471,7 +1649,8 @@
       },
       "copaySpecialty": {
         "label": "Copagamento para Especialidades",
-        "description": "Valor do copagamento para medicamentos especializados"
+        "description": "Valor do copagamento para medicamentos especializados",
+        "placeholder": "ex., 50"
       },
       "pharmacyNetworkInfo": {
         "label": "Informações da Rede de Farmácias",
@@ -1644,6 +1823,30 @@
       "additionalInfo": "Informações Adicionais",
       "injuryDetails": "Detalhes da Lesão"
     },
-    "viewPractitioner": "Ver detalhes do profissional"
+    "viewPractitioner": "Ver detalhes do profissional",
+    "bodyLocation": {
+      "description": "Parte específica do corpo afetada pela lesão",
+      "label": "Localização no Corpo",
+      "placeholder": "ex., Joelho esquerdo, Ombro direito"
+    },
+    "cause": {
+      "description": "Como a lesão aconteceu (queda, esportes, acidente, etc.)",
+      "label": "Causa / Mecanismo",
+      "placeholder": "Descreva como a lesão ocorreu..."
+    },
+    "injuryDate": {
+      "description": "Quando a lesão ocorreu",
+      "label": "Data da Lesão",
+      "placeholder": "Selecione a data da lesão"
+    },
+    "treatment": {
+      "description": "Tratamento médico fornecido para a lesão",
+      "label": "Tratamento Recebido",
+      "placeholder": "Descreva o tratamento recebido..."
+    }
+  },
+  "form": {
+    "invalidPhoneDigits": "O número de telefone deve conter apenas dígitos, espaços, traços ou parênteses",
+    "invalidWebsiteUrl": "Por favor, insira uma URL válida"
   }
 }

@@ -37,7 +37,8 @@
       }
     },
     "severity": {
-      "description": "Schweregrad der allergischen Reaktion"
+      "description": "Schweregrad der allergischen Reaktion",
+      "placeholder": "Schweregrad auswählen"
     },
     "status": {
       "description": "Aktueller Allergiestatus"
@@ -96,6 +97,24 @@
       "label": "Code-Beschreibung",
       "placeholder": "Beschreibung des medizinischen Codes",
       "description": "Menschlich lesbare Beschreibung des Codes"
+    },
+    "endDate": {
+      "description": "Wann die Erkrankung behoben wurde (falls zutreffend)",
+      "placeholder": "Enddatum auswählen"
+    },
+    "notes": {
+      "description": "Zusätzliche Details zur Erkrankung, Behandlungsverlauf oder Beobachtungen"
+    },
+    "onsetDate": {
+      "description": "Wann die Erkrankung erstmals auftrat",
+      "placeholder": "Ausbruchsdatum auswählen"
+    },
+    "severity": {
+      "description": "Wie schwerwiegend die Erkrankung ist",
+      "placeholder": "Schweregrad auswählen"
+    },
+    "status": {
+      "description": "Aktueller Status dieser Erkrankung"
     }
   },
   "medications": {
@@ -361,6 +380,11 @@
       "glaxoSmithKline": "GlaxoSmithKline",
       "johnsonJohnson": "Johnson & Johnson",
       "pfizerBioNTech": "Pfizer-BioNTech"
+    },
+    "notes": {
+      "description": "Alle relevanten Details zur Impfung",
+      "label": "Notizen",
+      "placeholder": "Zusätzliche Notizen zu dieser Impfung..."
     }
   },
   "procedures": {
@@ -440,6 +464,29 @@
       "label": "Anästhesie-Notizen",
       "placeholder": "Notizen zur Anästhesie...",
       "description": "Notizen zur Verabreichung der Anästhesie"
+    },
+    "description": {
+      "description": "Detaillierte Beschreibung dessen, was der Eingriff beinhaltet",
+      "label": "Beschreibung",
+      "placeholder": "Beschreiben Sie den Eingriff detailliert..."
+    },
+    "facility": {
+      "description": "Wo der Eingriff durchgeführt wurde oder durchgeführt wird",
+      "label": "Einrichtung",
+      "placeholder": "z.B. Allgemeines Krankenhaus, Ambulantes Zentrum"
+    },
+    "notes": {
+      "description": "Alle relevanten Beobachtungen, prä-/postoperative Anweisungen oder Details",
+      "label": "Notizen",
+      "placeholder": "Zusätzliche Notizen zum Eingriff..."
+    },
+    "practitioner": {
+      "description": "Arzt oder Facharzt, der den Eingriff durchführt",
+      "label": "Durchführender Arzt",
+      "placeholder": "Arzt auswählen"
+    },
+    "status": {
+      "description": "Aktueller Status des Eingriffs"
     }
   },
   "practitioners": {
@@ -470,7 +517,8 @@
         "description": "Professionelle Webseite oder Praxisseite"
       },
       "rating": {
-        "label": "Bewertung"
+        "label": "Bewertung",
+        "description": "Ihre Gesamtbewertung dieses Arztes (0-5)"
       },
       "email": {
         "description": "Berufliche E-Mail-Adresse",
@@ -684,6 +732,103 @@
       "label": "Zusätzliche Notizen",
       "placeholder": "Weitere wichtige Details zum Besuch...",
       "description": "Zusätzliche Beobachtungen, Notizen oder wichtige Details"
+    },
+    "form": {
+      "dividers": {
+        "clinicalInformation": "Klinische Informationen"
+      },
+      "fields": {
+        "additionalNotes": {
+          "description": "Zusätzliche Beobachtungen, Notizen oder wichtige Details",
+          "placeholder": "Weitere wichtige Details zum Besuch..."
+        },
+        "attendingPractitioner": {
+          "description": "Arzt, der den Besuch durchführte",
+          "label": "Behandelnder Arzt",
+          "placeholder": "Arzt auswählen (optional)"
+        },
+        "chiefComplaint": {
+          "description": "Hauptgesundheitsproblem oder Symptom, das den Besuch veranlasst hat",
+          "placeholder": "Hauptanliegen oder Symptom angeben"
+        },
+        "diagnosisAssessment": {
+          "description": "Medizinische Diagnose oder klinische Einschätzung",
+          "label": "Diagnose/Bewertung",
+          "placeholder": "Klinische Bewertung oder Diagnose des Besuchs..."
+        },
+        "durationMinutes": {
+          "description": "Wie lange der Besuch gedauert hat",
+          "label": "Dauer (Minuten)",
+          "placeholder": "Dauer des Besuchs"
+        },
+        "followUpInstructions": {
+          "description": "Anweisungen für die weitere Pflege und Folgetermine",
+          "placeholder": "Anweisungen für die weitere Versorgung..."
+        },
+        "location": {
+          "description": "Wo der Besuch stattgefunden hat",
+          "placeholder": "Wo der Besuch stattfand"
+        },
+        "priority": {
+          "description": "Prioritätsstufe des Besuchs",
+          "placeholder": "Prioritätsstufe auswählen"
+        },
+        "reason": {
+          "description": "Hauptzweck dieses Arztbesuchs",
+          "label": "Grund des Besuchs",
+          "placeholder": "z.B. Jahresuntersuchung, Nachsorge, Symptombesprechung"
+        },
+        "relatedCondition": {
+          "description": "Verknüpfen Sie diesen Besuch mit einer bestimmten Erkrankung, falls zutreffend",
+          "label": "Zugehörige Erkrankung (optional)",
+          "placeholder": "Wählen Sie eine zugehörige Erkrankung"
+        },
+        "treatmentPlan": {
+          "description": "Behandlungsempfehlungen und verschriebene Maßnahmen",
+          "placeholder": "Empfohlene Behandlung oder nächste Schritte..."
+        },
+        "visitDate": {
+          "description": "Wann der Besuch stattfand",
+          "label": "Besuchsdatum",
+          "placeholder": "Besuchsdatum auswählen"
+        },
+        "visitType": {
+          "description": "Art des medizinischen Besuchs",
+          "placeholder": "Besuchsart auswählen"
+        }
+      },
+      "locationOptions": {
+        "clinic": "Klinik",
+        "doctorsOffice": "Arztpraxis",
+        "emergencyRoom": "Notaufnahme",
+        "homeVisit": "Hausbesuch",
+        "hospital": "Krankenhaus",
+        "telehealth": "Telemedizin/Virtuell",
+        "urgentCare": "Ambulante Notfallversorgung"
+      },
+      "priorityOptions": {
+        "routine": "Routine",
+        "urgent": "Dringend"
+      },
+      "visitTypeOptions": {
+        "annualCheckup": "Jahresuntersuchung",
+        "consultation": "Beratung",
+        "emergency": "Notfall",
+        "followUp": "Nachsorge",
+        "preventiveCare": "Vorsorge",
+        "routineVisit": "Routinebesuch",
+        "specialistReferral": "Überweisung zum Spezialisten"
+      }
+    },
+    "table": {
+      "visitType": "Besuchsart"
+    },
+    "viewModal": {
+      "chiefComplaint": "Hauptbeschwerde",
+      "followUpInstructions": "Nachsorgeanweisungen",
+      "location": "Standort",
+      "priority": "Priorität",
+      "treatmentPlan": "Behandlungsplan"
     }
   },
   "pharmacies": {
@@ -691,7 +836,28 @@
       "brand": {
         "label": "Apothekenkette",
         "placeholder": "Apothekenkette oder Typ auswählen",
-        "description": "Große Apothekenkette oder unabhängiger Typ"
+        "description": "Große Apothekenkette oder unabhängiger Typ",
+        "options": {
+          "amazonPharmacy": "Amazon Pharmacy",
+          "compoundingPharmacy": "Compounding Pharmacy",
+          "costcoPharmacy": "Costco Pharmacy",
+          "cvs": "CVS",
+          "hebPharmacy": "H-E-B Pharmacy",
+          "hospitalPharmacy": "Hospital Pharmacy",
+          "independent": "Independent",
+          "kaiserPermanente": "Kaiser Permanente",
+          "krogerPharmacy": "Kroger Pharmacy",
+          "meijerPharmacy": "Meijer Pharmacy",
+          "onlinePharmacy": "Online Pharmacy",
+          "other": "Andere",
+          "publixPharmacy": "Publix Pharmacy",
+          "riteAid": "Rite Aid",
+          "safewayPharmacy": "Safeway Pharmacy",
+          "specialtyPharmacy": "Specialty Pharmacy",
+          "targetPharmacy": "Target Pharmacy",
+          "walgreens": "Walgreens",
+          "walmartPharmacy": "Walmart Pharmacy"
+        }
       },
       "name": {
         "label": "Apothekenname",
@@ -718,6 +884,10 @@
         "label": "Telefonnummer",
         "placeholder": "(555) 123-4567",
         "description": "Primäre Telefonnummer der Apotheke"
+      },
+      "website": {
+        "description": "Apotheken-Website für Online-Bestellungen oder Informationen",
+        "placeholder": "https://www.example.com"
       }
     },
     "city": {
@@ -1107,7 +1277,8 @@
           "epo": "EPO (Exklusive Anbieterorganisation)",
           "pos": "POS (Point of Service)",
           "hdhp": "HDHP (Gesundheitsplan mit hohem Selbstbehalt)",
-          "indemnity": "Schadenersatz (Gebühr für Service)"
+          "indemnity": "Schadenersatz (Gebühr für Service)",
+          "other": "Andere"
         }
       },
       "dentalPlanType": {
@@ -1167,7 +1338,8 @@
       },
       "contactAllowance": {
         "label": "Kontaktlinsenzuschuss",
-        "description": "Jährlicher Zuschuss für Kontaktlinsen"
+        "description": "Jährlicher Zuschuss für Kontaktlinsen",
+        "placeholder": "z.B. 150"
       },
       "prescriptionPlanType": {
         "label": "Rezeptplantyp",
@@ -1197,7 +1369,8 @@
       },
       "copayGeneric": {
         "label": "Generikum-Zuzahlung",
-        "description": "Zuzahlungsbetrag für generische Medikamente"
+        "description": "Zuzahlungsbetrag für generische Medikamente",
+        "placeholder": "z.B. 10"
       },
       "copayBrand": {
         "label": "Markenname-Zuzahlung",
@@ -1206,7 +1379,8 @@
       },
       "copaySpecialty": {
         "label": "Spezialitäten-Zuzahlung",
-        "description": "Zuzahlungsbetrag für Spezialmedikamente"
+        "description": "Zuzahlungsbetrag für Spezialmedikamente",
+        "placeholder": "z.B. 50"
       },
       "pharmacyNetworkInfo": {
         "label": "Apothekennetzwerkinfo",
@@ -1397,6 +1571,10 @@
         "label": "Zusätzliche Notizen",
         "placeholder": "Weitere Details zu dieser Episode...",
         "description": "Alle anderen relevanten Informationen zu diesem Vorkommnis"
+      },
+      "severity": {
+        "description": "Wie schwer das Symptom während dieses Auftretens ist",
+        "placeholder": "Schweregrad auswählen"
       }
     }
   },
@@ -1467,7 +1645,8 @@
         },
         "genderOptions": {
           "male": "Männlich",
-          "female": "Weiblich"
+          "female": "Weiblich",
+          "other": "Andere"
         }
       },
       "condition": {
@@ -1644,6 +1823,30 @@
       "additionalInfo": "Zusätzliche Informationen",
       "injuryDetails": "Verletzungsdetails"
     },
-    "viewPractitioner": "Arztdetails anzeigen"
+    "viewPractitioner": "Arztdetails anzeigen",
+    "bodyLocation": {
+      "description": "Spezifischer Körperteil, der von der Verletzung betroffen ist",
+      "label": "Körperstelle",
+      "placeholder": "z.B. Linkes Knie, Rechte Schulter"
+    },
+    "cause": {
+      "description": "Wie die Verletzung geschah (Sturz, Sport, Unfall, etc.)",
+      "label": "Ursache / Mechanismus",
+      "placeholder": "Beschreiben Sie, wie die Verletzung auftrat..."
+    },
+    "injuryDate": {
+      "description": "Wann die Verletzung auftrat",
+      "label": "Verletzungsdatum",
+      "placeholder": "Verletzungsdatum auswählen"
+    },
+    "treatment": {
+      "description": "Medizinische Behandlung für die Verletzung",
+      "label": "Erhaltene Behandlung",
+      "placeholder": "Beschreiben Sie die erhaltene Behandlung..."
+    }
+  },
+  "form": {
+    "invalidPhoneDigits": "Telefonnummer darf nur Ziffern, Leerzeichen, Bindestriche oder Klammern enthalten",
+    "invalidWebsiteUrl": "Bitte geben Sie eine gültige Website-URL ein"
   }
 }

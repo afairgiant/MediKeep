@@ -100,7 +100,8 @@
     "email": "Indirizzo email",
     "address": "Indirizzo",
     "patientRecord": "Cartella del paziente",
-    "medicalHistory": "Storico medico"
+    "medicalHistory": "Storico medico",
+    "practitioner": "Professionista"
   },
   "fields": {
     "notes": {
@@ -115,7 +116,8 @@
     },
     "status": {
       "label": "Stato",
-      "description": "Stato attuale"
+      "description": "Stato attuale",
+      "placeholder": "Selezioni lo stato"
     },
     "severity": {
       "label": "Gravità",
@@ -2400,5 +2402,11 @@
       "notifications": "Notifiche"
     },
     "title": "Impostazioni"
+  },
+  "allergies": {
+    "addNew": "Aggiungi Nuova Allergia",
+    "messages": {
+      "loading": "Caricamento allergie..."
+    }
   }
 }

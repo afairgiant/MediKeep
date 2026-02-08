@@ -100,7 +100,8 @@
     "email": "E-Mail-Adresse",
     "address": "Adresse",
     "patientRecord": "Patientenakte",
-    "medicalHistory": "Medizinische Vorgeschichte"
+    "medicalHistory": "Medizinische Vorgeschichte",
+    "practitioner": "Arzt"
   },
   "fields": {
     "tags": {
@@ -115,7 +116,8 @@
     },
     "status": {
       "label": "Status",
-      "description": "Aktueller Status"
+      "description": "Aktueller Status",
+      "placeholder": "Status auswählen"
     },
     "severity": {
       "label": "Schweregrad",
@@ -2400,5 +2402,11 @@
     "activeExperiencing": "Aktiv - Derzeit betroffen",
     "resolvedExperiencing": "Behoben - Nicht mehr betroffen",
     "recurring": "Wiederkehrend - Kommt und geht"
+  },
+  "allergies": {
+    "addNew": "Neue Allergie hinzufügen",
+    "messages": {
+      "loading": "Lade Allergien..."
+    }
   }
 }
