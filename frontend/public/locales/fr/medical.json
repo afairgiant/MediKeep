@@ -43,8 +43,8 @@
       "description": "Statut actuel de l'allergie"
     },
     "onsetDate": {
-      "label": "Date de déclenchement",
-      "placeholder": "Sélectionnez la date de déclenchement",
+      "label": "Date de survenue",
+      "placeholder": "Sélectionnez la date de survenue",
       "description": "Quand l'allergie a été pour la première fois identifiée"
     },
     "relatedMedication": {
@@ -126,7 +126,7 @@
     "dosage": {
       "label": "Dosage",
       "placeholder": "ex : 10mg, 1 tablette",
-      "description": "Poids et quantité par dose"
+      "description": "Masse et quantité par dose"
     },
     "frequency": {
       "label": "Fréquence",
@@ -172,7 +172,7 @@
       "ordered": "Prescrite - L'analyse a été demandée",
       "inProgress": "En cours - Analyse en cours",
       "completed": "Complétée - Résultats disponibles",
-      "cancelled": "Annulée - Analyse Annulée"
+      "cancelled": "Annulée - Analyse annulée"
     },
     "category": {
       "bloodWork": "Test sanguin",
@@ -315,7 +315,7 @@
     "additionalNotes": {
       "label": "Notes supplémentaires",
       "placeholder": "Réactions, effets secondaires, ou observations supplémentaires...",
-      "description": "Notez tout réaction délétère ou autres informations importantes"
+      "description": "Notez toute réaction délétère ou autres informations importantes"
     },
     "siteOptions": {
       "leftArm": "Bras gauche",
@@ -481,7 +481,7 @@
     "location": {
       "label": "Lieu",
       "placeholder": "Où la visite a eu lieu",
-      "description": "Où la visite s'est déroulée"
+      "description": "Où la visite a eu lieu"
     },
     "locationOptions": {
       "office": "Cabinet du médecin",
@@ -513,7 +513,7 @@
     "additionalNotes": {
       "label": "Notes supplémentaires",
       "placeholder": "Tout autre détail important concernant la visite...",
-      "description": "Observations supplémentaires, notes ou détails importants"
+      "description": "Toutes observations supplémentaires, notes, ou détails importants"
     }
   },
   "treatments": {
@@ -698,7 +698,7 @@
       "diabetes": "Diabète - Problèmes du taux de sucre dans le sang",
       "cancer": "Cancer - Conditions malignes",
       "mentalHealth": "Santé mentale - Maladies psychologiques",
-      "neurological": "Neurologiques - Cerveau et système nerveux",
+      "neurological": "Neurologique - Cerveau et système nerveux",
       "autoimmune": "Auto-immune - Problèmes du système immunitaire",
       "genetic": "Génétique - Maladies héréditaires",
       "respiratory": "Respiratoire - Problèmes pulmonaires et respiratoires",
@@ -706,7 +706,7 @@
       "other": "Autre - Spécifier dans les notes"
     },
     "diagnosisAge": {
-      "label": "Age au diagnostic",
+      "label": "Age de diagnostic",
       "placeholder": "ex : 45",
       "description": "Age lors du diagnostic"
     }
@@ -929,7 +929,7 @@
           "diabetes": "Diabète - Problèmes du taux de sucre dans le sang",
           "cancer": "Cancer - Conditions malignes",
           "mentalHealth": "Santé mentale - Conditions psychologiques",
-          "neurological": "Neurologiques - Cerveau et système nerveux",
+          "neurological": "Neurologique - Cerveau et système nerveux",
           "autoimmune": "Auto-immune - Problèmes du système immunitaire",
           "genetic": "Génétique - Conditions héréditaires",
           "respiratory": "Respiratoire - Problèmes pulmonaires et respiratoires",
@@ -970,7 +970,7 @@
       },
       "phone": {
         "label": "Numéro de téléphone",
-        "placeholder": "(555) 123-4567",
+        "placeholder": "01 12 34 56 78",
         "description": "Numéro de contact principal"
       },
       "email": {
@@ -980,7 +980,7 @@
       },
       "website": {
         "label": "Site web",
-        "placeholder": "https://www.example.com",
+        "placeholder": "https://www.exemple.com",
         "description": "Site web professionel ou page du cabinet"
       },
       "rating": {
@@ -1019,7 +1019,7 @@
       },
       "phone": {
         "label": "Numéro de téléphone",
-        "placeholder": "(555) 123-4567",
+        "placeholder": "01 12 34 56 78",
         "description": "Numéro de téléphone principal de la pharmacie"
       }
     }
@@ -1029,7 +1029,7 @@
     "form": {
       "name": {
         "label": "Nom complet",
-        "placeholder": "ex : John Smith",
+        "placeholder": "ex : Jean Martin",
         "description": "Nom complet du contact d'urgence"
       },
       "relationship": {
@@ -1066,17 +1066,17 @@
       },
       "primaryPhone": {
         "label": "Téléphone principal",
-        "placeholder": "ex : (555) 123-4567",
+        "placeholder": "ex : 06 12 34 56 78",
         "description": "Numéro de téléphone principal"
       },
       "secondaryPhone": {
         "label": "Téléphone secondaire",
-        "placeholder": "ex : (555) 987-6543",
+        "placeholder": "ex : 06 12 34 56 78",
         "description": "Numéro de téléphone secondaire optionnel"
       },
       "email": {
         "label": "Adresse email",
-        "placeholder": "ex : john.smith@email.com",
+        "placeholder": "ex : jean.martin@email.com",
         "description": "Adresse email optionnelle"
       },
       "address": {
@@ -1137,7 +1137,7 @@
       },
       "memberName": {
         "label": "Nom du membre",
-        "placeholder": "ex : John Doe",
+        "placeholder": "ex : Jean Martin",
         "description": "Nom tel qu'il apparaît sur la carte d'assurance"
       },
       "memberId": {
@@ -1147,7 +1147,7 @@
       },
       "policyHolderName": {
         "label": "Nom de l'assuré",
-        "placeholder": "ex : Jane Doe (laissez vide si identique au membre)",
+        "placeholder": "ex : Jeanne Dupont (laissez vide si identique au membre)",
         "description": "Nom de l'assuré (si différent du membre)"
       },
       "relationshipToHolder": {
@@ -1193,7 +1193,7 @@
       },
       "customerServicePhone": {
         "label": "Téléphone du service client",
-        "placeholder": "ex : 1-800-123-4567",
+        "placeholder": "ex : 01 12 34 56 78",
         "description": "Numéro de téléphone du service client"
       },
       "preauthPhone": {
@@ -1206,7 +1206,7 @@
       },
       "websiteUrl": {
         "label": "URL du site web",
-        "placeholder": "ex : https://member.insurance.com",
+        "placeholder": "ex : https://membre.assurance.com",
         "description": "Portail de membre ou URL du site web"
       },
       "claimsAddress": {
@@ -1216,7 +1216,7 @@
       },
       "primaryCarePhysician": {
         "label": "Médecin traitant",
-        "placeholder": "ex : Dr. Smith",
+        "placeholder": "ex : Dr. Dupont",
         "description": "Nom de votre médecin traitant"
       },
       "deductibleIndividual": {
@@ -1284,7 +1284,7 @@
       },
       "basicCoverage": {
         "label": "Pourcentage de couverture basique",
-        "placeholder": "ex 80",
+        "placeholder": "ex : 80",
         "description": "Pourcentage de couverture pour les procédures basiques"
       },
       "majorCoverage": {
