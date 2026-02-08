@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Tabs,
   Badge,
   Stack,
   Box,
@@ -92,11 +91,11 @@ ItemDetailsCard.propTypes = {
  * Selections are stored locally and passed to parent for bulk creation after treatment is created.
  */
 const TreatmentPlanSetup = ({
+  activeSection = 'medications',
   pendingRelationships,
   onRelationshipsChange,
 }) => {
   const { t } = useTranslation('medical');
-  const [activeTab, setActiveTab] = useState('medications');
   const [loading, setLoading] = useState(true);
 
   // Available entities for selection
@@ -257,12 +256,6 @@ const TreatmentPlanSetup = ({
     });
   };
 
-  // Counts for badges
-  const medicationCount = (pendingRelationships.medications || []).length;
-  const encounterCount = (pendingRelationships.encounters || []).length;
-  const labResultCount = (pendingRelationships.labResults || []).length;
-  const equipmentCount = (pendingRelationships.equipment || []).length;
-
   // Get selected IDs for rendering
   const selectedMedIds = getSelectedIds('medications');
   const selectedEncIds = getSelectedIds('encounters');
@@ -274,57 +267,8 @@ const TreatmentPlanSetup = ({
       <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: 'sm', blur: 2 }} />
 
       <Stack gap="md">
-        <Tabs value={activeTab} onChange={setActiveTab}>
-          <Tabs.List>
-            <Tabs.Tab
-              value="medications"
-              leftSection={<IconPill size={16} />}
-              rightSection={medicationCount > 0 ? (
-                <Badge size="sm" variant="filled" color="teal" circle>
-                  {medicationCount}
-                </Badge>
-              ) : null}
-            >
-              Medications
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="encounters"
-              leftSection={<IconStethoscope size={16} />}
-              rightSection={encounterCount > 0 ? (
-                <Badge size="sm" variant="filled" color="blue" circle>
-                  {encounterCount}
-                </Badge>
-              ) : null}
-            >
-              Visits
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="labs"
-              leftSection={<IconTestPipe size={16} />}
-              rightSection={labResultCount > 0 ? (
-                <Badge size="sm" variant="filled" color="violet" circle>
-                  {labResultCount}
-                </Badge>
-              ) : null}
-            >
-              Labs
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="equipment"
-              leftSection={<IconDeviceDesktop size={16} />}
-              rightSection={equipmentCount > 0 ? (
-                <Badge size="sm" variant="filled" color="orange" circle>
-                  {equipmentCount}
-                </Badge>
-              ) : null}
-            >
-              Equipment
-            </Tabs.Tab>
-          </Tabs.List>
-
-          <Box mt="md">
-            {/* Medications Tab */}
-            <Tabs.Panel value="medications">
+            {/* Medications Section */}
+            <Box style={{ display: activeSection === 'medications' ? 'block' : 'none' }}>
               <Stack gap="md">
                 <MultiSelect
                   label="Medications to Link"
@@ -444,10 +388,10 @@ const TreatmentPlanSetup = ({
                   </Text>
                 )}
               </Stack>
-            </Tabs.Panel>
+            </Box>
 
-            {/* Visits Tab */}
-            <Tabs.Panel value="encounters">
+            {/* Visits Section */}
+            <Box style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}>
               <Stack gap="md">
                 <MultiSelect
                   label="Visits to Link"
@@ -510,10 +454,10 @@ const TreatmentPlanSetup = ({
                   </Text>
                 )}
               </Stack>
-            </Tabs.Panel>
+            </Box>
 
-            {/* Labs Tab */}
-            <Tabs.Panel value="labs">
+            {/* Labs Section */}
+            <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
               <Stack gap="md">
                 <MultiSelect
                   label="Lab Results to Link"
@@ -575,10 +519,10 @@ const TreatmentPlanSetup = ({
                   </Text>
                 )}
               </Stack>
-            </Tabs.Panel>
+            </Box>
 
-            {/* Equipment Tab */}
-            <Tabs.Panel value="equipment">
+            {/* Equipment Section */}
+            <Box style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}>
               <Stack gap="md">
                 <MultiSelect
                   label="Equipment to Link"
@@ -637,15 +581,14 @@ const TreatmentPlanSetup = ({
                   </Text>
                 )}
               </Stack>
-            </Tabs.Panel>
-          </Box>
-        </Tabs>
+            </Box>
       </Stack>
     </Box>
   );
 };
 
 TreatmentPlanSetup.propTypes = {
+  activeSection: PropTypes.oneOf(['medications', 'encounters', 'labs', 'equipment']),
   pendingRelationships: PropTypes.shape({
     medications: PropTypes.array,
     encounters: PropTypes.array,

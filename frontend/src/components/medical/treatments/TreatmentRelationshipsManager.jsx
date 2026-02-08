@@ -2,17 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import {
-  Tabs,
-  Badge,
   Stack,
   Box,
 } from '@mantine/core';
-import {
-  IconPill,
-  IconStethoscope,
-  IconTestPipe,
-  IconDeviceDesktop,
-} from '@tabler/icons-react';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 import TreatmentMedicationRelationships from './TreatmentMedicationRelationships';
@@ -25,6 +17,7 @@ import TreatmentEquipmentRelationships from './TreatmentEquipmentRelationships';
  * This component displays the relationship tabs directly - mode control is handled by the parent.
  */
 const TreatmentRelationshipsManager = ({
+  activeSection = 'medications',
   treatmentId,
   patientId,
   isViewMode = false,
@@ -35,7 +28,6 @@ const TreatmentRelationshipsManager = ({
   onEquipmentClick,
 }) => {
   const { t } = useTranslation('common');
-  const [activeTab, setActiveTab] = useState('medications');
 
   // Relationship counts for badges
   const [medicationCount, setMedicationCount] = useState(0);
@@ -155,11 +147,15 @@ const TreatmentRelationshipsManager = ({
     setEquipment(prev => [...prev, newEquip]);
   }, []);
 
-  // Report total counts to parent when they change
+  // Report per-type counts to parent when they change
   useEffect(() => {
     if (onCountsChange) {
-      const total = medicationCount + encounterCount + labResultCount + equipmentCount;
-      onCountsChange(total);
+      onCountsChange({
+        medications: medicationCount,
+        encounters: encounterCount,
+        labResults: labResultCount,
+        equipment: equipmentCount,
+      });
     }
   }, [medicationCount, encounterCount, labResultCount, equipmentCount, onCountsChange]);
 
@@ -169,108 +165,55 @@ const TreatmentRelationshipsManager = ({
 
   return (
     <Stack gap="md">
-      {/* Relationship Tabs */}
-      <Box>
-        <Tabs value={activeTab} onChange={setActiveTab}>
-          <Tabs.List>
-            <Tabs.Tab
-              value="medications"
-              leftSection={<IconPill size={16} />}
-              rightSection={medicationCount > 0 ? (
-                <Badge size="sm" variant="filled" color="teal" circle>
-                  {medicationCount}
-                </Badge>
-              ) : null}
-            >
-              Medications
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="encounters"
-              leftSection={<IconStethoscope size={16} />}
-              rightSection={encounterCount > 0 ? (
-                <Badge size="sm" variant="filled" color="blue" circle>
-                  {encounterCount}
-                </Badge>
-              ) : null}
-            >
-              Visits
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="labs"
-              leftSection={<IconTestPipe size={16} />}
-              rightSection={labResultCount > 0 ? (
-                <Badge size="sm" variant="filled" color="violet" circle>
-                  {labResultCount}
-                </Badge>
-              ) : null}
-            >
-              Labs
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="equipment"
-              leftSection={<IconDeviceDesktop size={16} />}
-              rightSection={equipmentCount > 0 ? (
-                <Badge size="sm" variant="filled" color="orange" circle>
-                  {equipmentCount}
-                </Badge>
-              ) : null}
-            >
-              Equipment
-            </Tabs.Tab>
-          </Tabs.List>
+      <Box style={{ display: activeSection === 'medications' ? 'block' : 'none' }}>
+        <TreatmentMedicationRelationships
+          treatmentId={treatmentId}
+          medications={medications}
+          practitioners={practitioners}
+          pharmacies={pharmacies}
+          isViewMode={isViewMode}
+          onRelationshipsChange={handleMedicationCountChange}
+          onEntityClick={onMedicationClick}
+        />
+      </Box>
 
-          <Box mt="md">
-            <Tabs.Panel value="medications">
-              <TreatmentMedicationRelationships
-                treatmentId={treatmentId}
-                medications={medications}
-                practitioners={practitioners}
-                pharmacies={pharmacies}
-                isViewMode={isViewMode}
-                onRelationshipsChange={handleMedicationCountChange}
-                onEntityClick={onMedicationClick}
-              />
-            </Tabs.Panel>
+      <Box style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}>
+        <TreatmentEncounterRelationships
+          treatmentId={treatmentId}
+          encounters={encounters}
+          isViewMode={isViewMode}
+          onRelationshipsChange={handleEncounterCountChange}
+          onEntityClick={onEncounterClick}
+        />
+      </Box>
 
-            <Tabs.Panel value="encounters">
-              <TreatmentEncounterRelationships
-                treatmentId={treatmentId}
-                encounters={encounters}
-                isViewMode={isViewMode}
-                onRelationshipsChange={handleEncounterCountChange}
-                onEntityClick={onEncounterClick}
-              />
-            </Tabs.Panel>
+      <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
+        <TreatmentLabResultRelationships
+          treatmentId={treatmentId}
+          labResults={labResults}
+          isViewMode={isViewMode}
+          onRelationshipsChange={handleLabResultCountChange}
+          onEntityClick={onLabResultClick}
+        />
+      </Box>
 
-            <Tabs.Panel value="labs">
-              <TreatmentLabResultRelationships
-                treatmentId={treatmentId}
-                labResults={labResults}
-                isViewMode={isViewMode}
-                onRelationshipsChange={handleLabResultCountChange}
-                onEntityClick={onLabResultClick}
-              />
-            </Tabs.Panel>
-
-            <Tabs.Panel value="equipment">
-              <TreatmentEquipmentRelationships
-                treatmentId={treatmentId}
-                patientId={patientId}
-                equipment={equipment}
-                isViewMode={isViewMode}
-                onRelationshipsChange={handleEquipmentCountChange}
-                onEquipmentCreated={handleEquipmentCreated}
-                onEntityClick={onEquipmentClick}
-              />
-            </Tabs.Panel>
-          </Box>
-        </Tabs>
+      <Box style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}>
+        <TreatmentEquipmentRelationships
+          treatmentId={treatmentId}
+          patientId={patientId}
+          equipment={equipment}
+          isViewMode={isViewMode}
+          onRelationshipsChange={handleEquipmentCountChange}
+          onEquipmentCreated={handleEquipmentCreated}
+          onEntityClick={onEquipmentClick}
+        />
       </Box>
     </Stack>
   );
 };
 
 TreatmentRelationshipsManager.propTypes = {
+  activeSection: PropTypes.oneOf(['medications', 'encounters', 'labs', 'equipment']),
   treatmentId: PropTypes.number,
   patientId: PropTypes.number,
   isViewMode: PropTypes.bool,
