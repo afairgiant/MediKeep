@@ -1883,6 +1883,11 @@ class ApiService {
     return this.deleteEntity(ENTITY_TYPES.TREATMENT, treatmentId, signal);
   }
 
+  // Medication-Treatment reverse lookup
+  getMedicationTreatments(medicationId, signal) {
+    return this.get(`/medications/${medicationId}/treatments`, { signal });
+  }
+
   // Treatment-Medication relationship methods
   getTreatmentMedications(treatmentId, signal) {
     return this.get(`/treatments/${treatmentId}/medications`, { signal });

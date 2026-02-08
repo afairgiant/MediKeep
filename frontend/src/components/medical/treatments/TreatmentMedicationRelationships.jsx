@@ -4,12 +4,15 @@ import {
   Badge,
   Group,
   MultiSelect,
+  Select,
   Stack,
   Text,
   Textarea,
   TextInput,
 } from '@mantine/core';
+import { DateInput } from '@mantine/dates';
 import { IconPill } from '@tabler/icons-react';
+import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import { useTreatmentRelationships } from '../../../hooks/useTreatmentRelationships';
 import {
   RelationshipContainer,
@@ -31,9 +34,17 @@ const INITIAL_RELATIONSHIP_STATE = {
   specific_duration: '',
   timing_instructions: '',
   relevance_note: '',
+  specific_prescriber_id: '',
+  specific_pharmacy_id: '',
+  specific_start_date: '',
+  specific_end_date: '',
 };
 
-const EDIT_FIELDS = ['specific_dosage', 'specific_frequency', 'relevance_note'];
+const EDIT_FIELDS = [
+  'specific_dosage', 'specific_frequency', 'relevance_note',
+  'specific_prescriber_id', 'specific_pharmacy_id',
+  'specific_start_date', 'specific_end_date',
+];
 
 function buildSinglePayload(newRelationship) {
   return {
@@ -43,6 +54,10 @@ function buildSinglePayload(newRelationship) {
     specific_duration: newRelationship.specific_duration || null,
     timing_instructions: newRelationship.timing_instructions || null,
     relevance_note: newRelationship.relevance_note || null,
+    specific_prescriber_id: newRelationship.specific_prescriber_id ? parseInt(newRelationship.specific_prescriber_id) : null,
+    specific_pharmacy_id: newRelationship.specific_pharmacy_id ? parseInt(newRelationship.specific_pharmacy_id) : null,
+    specific_start_date: newRelationship.specific_start_date || null,
+    specific_end_date: newRelationship.specific_end_date || null,
   };
 }
 
@@ -67,6 +82,8 @@ function formatMedicationLabel(medication) {
 function TreatmentMedicationRelationships({
   treatmentId,
   medications,
+  practitioners = [],
+  pharmacies = [],
   isViewMode = false,
   onRelationshipsChange,
   onEntityClick,
@@ -175,6 +192,52 @@ function TreatmentMedicationRelationships({
                           value={editingRelationship?.specific_frequency || ''}
                           onChange={(e) => updateEditingRelationship('specific_frequency', e.target.value)}
                         />
+                        <Group grow gap="xs">
+                          <Select
+                            size="xs"
+                            placeholder="Treatment prescriber"
+                            data={practitioners.map(p => ({
+                              value: p.id.toString(),
+                              label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
+                            }))}
+                            value={editingRelationship?.specific_prescriber_id?.toString() || ''}
+                            onChange={(value) => updateEditingRelationship('specific_prescriber_id', value || '')}
+                            clearable
+                            searchable
+                            comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                          />
+                          <Select
+                            size="xs"
+                            placeholder="Treatment pharmacy"
+                            data={pharmacies.map(p => ({
+                              value: p.id.toString(),
+                              label: p.name || p.brand || `Pharmacy #${p.id}`,
+                            }))}
+                            value={editingRelationship?.specific_pharmacy_id?.toString() || ''}
+                            onChange={(value) => updateEditingRelationship('specific_pharmacy_id', value || '')}
+                            clearable
+                            searchable
+                            comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                          />
+                        </Group>
+                        <Group grow gap="xs">
+                          <DateInput
+                            size="xs"
+                            placeholder="Start date"
+                            value={parseDateInput(editingRelationship?.specific_start_date)}
+                            onChange={(date) => updateEditingRelationship('specific_start_date', formatDateInputChange(date))}
+                            clearable
+                            popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                          />
+                          <DateInput
+                            size="xs"
+                            placeholder="End date"
+                            value={parseDateInput(editingRelationship?.specific_end_date)}
+                            onChange={(date) => updateEditingRelationship('specific_end_date', formatDateInputChange(date))}
+                            clearable
+                            popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                          />
+                        </Group>
                         <Textarea
                           size="xs"
                           placeholder="Relevance note"
@@ -200,6 +263,10 @@ function TreatmentMedicationRelationships({
                         specific_dosage: editingRelationship?.specific_dosage || null,
                         specific_frequency: editingRelationship?.specific_frequency || null,
                         relevance_note: editingRelationship?.relevance_note || null,
+                        specific_prescriber_id: editingRelationship?.specific_prescriber_id ? parseInt(editingRelationship.specific_prescriber_id) : null,
+                        specific_pharmacy_id: editingRelationship?.specific_pharmacy_id ? parseInt(editingRelationship.specific_pharmacy_id) : null,
+                        specific_start_date: editingRelationship?.specific_start_date || null,
+                        specific_end_date: editingRelationship?.specific_end_date || null,
                       })}
                       onCancel={cancelEditing}
                       onEdit={() => startEditing(relationship, EDIT_FIELDS)}
@@ -269,6 +336,54 @@ function TreatmentMedicationRelationships({
                 value={newRelationship.timing_instructions}
                 onChange={(e) => updateNewRelationship('timing_instructions', e.target.value)}
               />
+
+              <Group grow gap="sm">
+                <Select
+                  label="Treatment Prescriber"
+                  placeholder="Override prescriber"
+                  data={practitioners.map(p => ({
+                    value: p.id.toString(),
+                    label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
+                  }))}
+                  value={newRelationship.specific_prescriber_id || null}
+                  onChange={(value) => updateNewRelationship('specific_prescriber_id', value || '')}
+                  clearable
+                  searchable
+                  comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                />
+                <Select
+                  label="Treatment Pharmacy"
+                  placeholder="Override pharmacy"
+                  data={pharmacies.map(p => ({
+                    value: p.id.toString(),
+                    label: p.name || p.brand || `Pharmacy #${p.id}`,
+                  }))}
+                  value={newRelationship.specific_pharmacy_id || null}
+                  onChange={(value) => updateNewRelationship('specific_pharmacy_id', value || '')}
+                  clearable
+                  searchable
+                  comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                />
+              </Group>
+
+              <Group grow gap="sm">
+                <DateInput
+                  label="Treatment Start Date"
+                  placeholder="Override start date"
+                  value={parseDateInput(newRelationship.specific_start_date)}
+                  onChange={(date) => updateNewRelationship('specific_start_date', formatDateInputChange(date))}
+                  clearable
+                  popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                />
+                <DateInput
+                  label="Treatment End Date"
+                  placeholder="Override end date"
+                  value={parseDateInput(newRelationship.specific_end_date)}
+                  onChange={(date) => updateNewRelationship('specific_end_date', formatDateInputChange(date))}
+                  clearable
+                  popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                />
+              </Group>
             </>
           )}
 
@@ -297,6 +412,8 @@ function TreatmentMedicationRelationships({
 TreatmentMedicationRelationships.propTypes = {
   treatmentId: PropTypes.number,
   medications: PropTypes.array,
+  practitioners: PropTypes.array,
+  pharmacies: PropTypes.array,
   isViewMode: PropTypes.bool,
   onRelationshipsChange: PropTypes.func,
   onEntityClick: PropTypes.func,

@@ -69,6 +69,28 @@ router = APIRouter()
 logger = get_logger(__name__, "app")
 
 
+def _serialize_practitioner(practitioner) -> dict | None:
+    """Serialize a practitioner relationship to a dict summary."""
+    if not practitioner:
+        return None
+    return {
+        "id": practitioner.id,
+        "name": practitioner.name,
+        "specialty": getattr(practitioner, "specialty", None),
+    }
+
+
+def _serialize_pharmacy(pharmacy) -> dict | None:
+    """Serialize a pharmacy relationship to a dict summary."""
+    if not pharmacy:
+        return None
+    return {
+        "id": pharmacy.id,
+        "name": pharmacy.name,
+        "brand": getattr(pharmacy, "brand", None),
+    }
+
+
 @router.post("/", response_model=TreatmentResponse)
 def create_treatment(
     *,
@@ -382,9 +404,13 @@ def get_treatment_medications(
 
         relationships = treatment_medication.get_by_treatment(db, treatment_id=treatment_id)
 
-        # Enrich with medication details
+        # Enrich with medication details and compute effective values
         result = []
         for rel in relationships:
+            med = rel.medication
+            specific_prescriber = _serialize_practitioner(rel.specific_prescriber)
+            specific_pharmacy = _serialize_pharmacy(rel.specific_pharmacy)
+
             rel_dict = {
                 "id": rel.id,
                 "treatment_id": rel.treatment_id,
@@ -394,18 +420,56 @@ def get_treatment_medications(
                 "specific_duration": rel.specific_duration,
                 "timing_instructions": rel.timing_instructions,
                 "relevance_note": rel.relevance_note,
+                "specific_prescriber_id": rel.specific_prescriber_id,
+                "specific_pharmacy_id": rel.specific_pharmacy_id,
+                "specific_start_date": rel.specific_start_date,
+                "specific_end_date": rel.specific_end_date,
                 "created_at": rel.created_at,
                 "updated_at": rel.updated_at,
+                "specific_prescriber": specific_prescriber,
+                "specific_pharmacy": specific_pharmacy,
                 "medication": None,
             }
-            if rel.medication:
+
+            if med:
+                med_practitioner = _serialize_practitioner(med.practitioner)
+                med_pharmacy = _serialize_pharmacy(med.pharmacy)
+
                 rel_dict["medication"] = {
-                    "id": rel.medication.id,
-                    "medication_name": rel.medication.medication_name,
-                    "dosage": rel.medication.dosage,
-                    "frequency": rel.medication.frequency,
-                    "status": rel.medication.status,
+                    "id": med.id,
+                    "medication_name": med.medication_name,
+                    "dosage": med.dosage,
+                    "frequency": med.frequency,
+                    "route": med.route,
+                    "status": med.status,
+                    "effective_period_start": med.effective_period_start,
+                    "effective_period_end": med.effective_period_end,
+                    "practitioner": med_practitioner,
+                    "pharmacy": med_pharmacy,
                 }
+
+                # Compute effective values (specific overrides fall back to medication defaults)
+                rel_dict["effective_dosage"] = rel.specific_dosage or med.dosage
+                rel_dict["effective_frequency"] = rel.specific_frequency or med.frequency
+                effective_start = rel.specific_start_date or med.effective_period_start
+                rel_dict["effective_start_date"] = effective_start
+                # Discard fallback end date that falls before the overridden start
+                if rel.specific_end_date:
+                    rel_dict["effective_end_date"] = rel.specific_end_date
+                elif med.effective_period_end and effective_start and med.effective_period_end < effective_start:
+                    rel_dict["effective_end_date"] = None
+                else:
+                    rel_dict["effective_end_date"] = med.effective_period_end
+                rel_dict["effective_prescriber"] = specific_prescriber or med_practitioner
+                rel_dict["effective_pharmacy"] = specific_pharmacy or med_pharmacy
+            else:
+                rel_dict["effective_dosage"] = rel.specific_dosage
+                rel_dict["effective_frequency"] = rel.specific_frequency
+                rel_dict["effective_start_date"] = rel.specific_start_date
+                rel_dict["effective_end_date"] = rel.specific_end_date
+                rel_dict["effective_prescriber"] = specific_prescriber
+                rel_dict["effective_pharmacy"] = specific_pharmacy
+
             result.append(rel_dict)
 
         log_data_access(

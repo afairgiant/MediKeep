@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Modal,
@@ -23,6 +23,7 @@ import { navigateToEntity } from '../../../utils/linkNavigation';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import MedicationTreatmentsList from './MedicationTreatmentsList';
 import logger from '../../../services/logger';
 
 const MedicationViewModal = ({
@@ -42,7 +43,7 @@ const MedicationViewModal = ({
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens with new medication
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setActiveTab('overview');
     }
@@ -229,6 +230,20 @@ const MedicationViewModal = ({
                     </Group>
                   </div>
                 )}
+
+                {/* Used in Treatments */}
+                <div>
+                  <Title order={4} mb="sm">{t('medications.modal.sections.usedInTreatments', 'Used in Treatments')}</Title>
+                  <MedicationTreatmentsList
+                    medicationId={medication.id}
+                    onTreatmentClick={(treatmentId) => {
+                      if (navigate) {
+                        onClose();
+                        navigateToEntity('treatment', treatmentId, navigate);
+                      }
+                    }}
+                  />
+                </div>
               </Stack>
             </Box>
           </Tabs.Panel>

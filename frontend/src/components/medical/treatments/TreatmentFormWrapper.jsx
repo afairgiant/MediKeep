@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -13,6 +13,7 @@ import {
   Text,
   Badge,
   Alert,
+  SegmentedControl,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
@@ -120,6 +121,10 @@ const TreatmentFormWrapper = ({
               specific_duration: medData.specific_duration || null,
               timing_instructions: medData.timing_instructions || null,
               relevance_note: medData.relevance_note || null,
+              specific_prescriber_id: medData.specific_prescriber_id ? parseInt(medData.specific_prescriber_id) : null,
+              specific_pharmacy_id: medData.specific_pharmacy_id ? parseInt(medData.specific_pharmacy_id) : null,
+              specific_start_date: medData.specific_start_date || null,
+              specific_end_date: medData.specific_end_date || null,
             }).catch(err => {
               logger.error('Failed to link medication', { error: err.message });
             })
@@ -222,20 +227,24 @@ const TreatmentFormWrapper = ({
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
                 {t('treatments.form.tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
-              <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
-                {t('treatments.form.tabs.scheduleDosage', 'Schedule & Dosage')}
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="relationships"
-                leftSection={<IconLink size={16} />}
-                rightSection={badgeCount > 0 ? (
-                  <Badge size="sm" variant="filled" color="blue" circle>
-                    {badgeCount}
-                  </Badge>
-                ) : null}
-              >
-                Treatment Plan
-              </Tabs.Tab>
+              {formData.mode !== 'advanced' && (
+                <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
+                  {t('treatments.form.tabs.scheduleDosage', 'Schedule & Dosage')}
+                </Tabs.Tab>
+              )}
+              {formData.mode === 'advanced' && (
+                <Tabs.Tab
+                  value="relationships"
+                  leftSection={<IconLink size={16} />}
+                  rightSection={badgeCount > 0 ? (
+                    <Badge size="sm" variant="filled" color="blue" circle>
+                      {badgeCount}
+                    </Badge>
+                  ) : null}
+                >
+                  Treatment Plan
+                </Tabs.Tab>
+              )}
               {editingTreatment && (
                 <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                   {t('treatments.form.tabs.documents', 'Documents')}
@@ -250,6 +259,42 @@ const TreatmentFormWrapper = ({
             <Tabs.Panel value="basic">
               <Box mt="md">
                 <Grid>
+                  <Grid.Col span={12}>
+                    <Stack gap={4}>
+                      <Text size="sm" fw={500}>
+                        {t('treatments.mode.label', 'Treatment Mode')}
+                      </Text>
+                      <SegmentedControl
+                        value={formData.mode || 'simple'}
+                        onChange={(value) => {
+                          onInputChange({ target: { name: 'mode', value } });
+                          // Reset to basic tab when hiding current tab
+                          if (value === 'simple' && activeTab === 'relationships') {
+                            setActiveTab('basic');
+                          }
+                          if (value === 'advanced' && activeTab === 'schedule') {
+                            setActiveTab('basic');
+                          }
+                        }}
+                        data={[
+                          {
+                            value: 'simple',
+                            label: t('treatments.mode.simple', 'Simple'),
+                          },
+                          {
+                            value: 'advanced',
+                            label: t('treatments.mode.advanced', 'Treatment Plan'),
+                          },
+                        ]}
+                        size="sm"
+                      />
+                      <Text size="xs" c="dimmed">
+                        {formData.mode === 'advanced'
+                          ? t('treatments.mode.advancedDescription', 'Medication-centric plan with per-medication overrides')
+                          : t('treatments.mode.simpleDescription', 'Basic tracking with schedule and dosage')}
+                      </Text>
+                    </Stack>
+                  </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
                       label={t('treatments.form.treatmentName', 'Treatment Name')}
@@ -389,8 +434,8 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                 </Grid>
 
-                {/* Show relationship indicator if relationships exist (edit mode) or pending (create mode) */}
-                {badgeCount > 0 && (
+                {/* Show relationship indicator if relationships exist (edit mode) or pending (create mode) - only in advanced mode */}
+                {formData.mode === 'advanced' && badgeCount > 0 && (
                   <Alert
                     variant="light"
                     color="blue"
@@ -417,62 +462,64 @@ const TreatmentFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Schedule & Dosage Tab */}
-            <Tabs.Panel value="schedule">
-              <Box mt="md">
-                <Grid>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <DateInput
-                      label={t('treatments.form.startDate', 'Start Date')}
-                      value={parseDateInput(formData.start_date)}
-                      onChange={(date) => {
-                        const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'start_date', value: formattedDate } });
-                      }}
-                      placeholder={t('treatments.form.selectStartDate', 'Select start date')}
-                      description={t('treatments.form.startDateDesc', 'When treatment is planned to begin or began')}
-                      clearable
-                      firstDayOfWeek={0}
-                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <DateInput
-                      label={t('treatments.form.endDate', 'End Date')}
-                      value={parseDateInput(formData.end_date)}
-                      onChange={(date) => {
-                        const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'end_date', value: formattedDate } });
-                      }}
-                      placeholder={t('treatments.form.selectEndDate', 'Select end date')}
-                      description={t('treatments.form.endDateDesc', 'When treatment ends (if applicable)')}
-                      clearable
-                      firstDayOfWeek={0}
-                      minDate={parseDateInput(formData.start_date) || undefined}
-                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <TextInput
-                      label={t('treatments.form.dosageAmount', 'Dosage/Amount')}
-                      value={formData.dosage || ''}
-                      onChange={handleTextInputChange('dosage')}
-                      placeholder={t('treatments.form.dosagePlaceholder', 'e.g., 10mg, 1 session')}
-                      description={t('treatments.form.dosageDesc', 'Amount or dosage per treatment')}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <TextInput
-                      label={t('treatments.form.frequency', 'Frequency')}
-                      value={formData.frequency || ''}
-                      onChange={handleTextInputChange('frequency')}
-                      placeholder={t('treatments.form.frequencyPlaceholder', 'e.g., Daily, Twice weekly')}
-                      description={t('treatments.form.frequencyDesc', 'How often treatment is administered')}
-                    />
-                  </Grid.Col>
-                </Grid>
-              </Box>
-            </Tabs.Panel>
+            {/* Schedule & Dosage Tab (simple mode only) */}
+            {formData.mode !== 'advanced' && (
+              <Tabs.Panel value="schedule">
+                <Box mt="md">
+                  <Grid>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <DateInput
+                        label={t('treatments.form.startDate', 'Start Date')}
+                        value={parseDateInput(formData.start_date)}
+                        onChange={(date) => {
+                          const formattedDate = formatDateInputChange(date);
+                          onInputChange({ target: { name: 'start_date', value: formattedDate } });
+                        }}
+                        placeholder={t('treatments.form.selectStartDate', 'Select start date')}
+                        description={t('treatments.form.startDateDesc', 'When treatment is planned to begin or began')}
+                        clearable
+                        firstDayOfWeek={0}
+                        popoverProps={{ withinPortal: true, zIndex: 3000 }}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <DateInput
+                        label={t('treatments.form.endDate', 'End Date')}
+                        value={parseDateInput(formData.end_date)}
+                        onChange={(date) => {
+                          const formattedDate = formatDateInputChange(date);
+                          onInputChange({ target: { name: 'end_date', value: formattedDate } });
+                        }}
+                        placeholder={t('treatments.form.selectEndDate', 'Select end date')}
+                        description={t('treatments.form.endDateDesc', 'When treatment ends (if applicable)')}
+                        clearable
+                        firstDayOfWeek={0}
+                        minDate={parseDateInput(formData.start_date) || undefined}
+                        popoverProps={{ withinPortal: true, zIndex: 3000 }}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <TextInput
+                        label={t('treatments.form.dosageAmount', 'Dosage/Amount')}
+                        value={formData.dosage || ''}
+                        onChange={handleTextInputChange('dosage')}
+                        placeholder={t('treatments.form.dosagePlaceholder', 'e.g., 10mg, 1 session')}
+                        description={t('treatments.form.dosageDesc', 'Amount or dosage per treatment')}
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <TextInput
+                        label={t('treatments.form.frequency', 'Frequency')}
+                        value={formData.frequency || ''}
+                        onChange={handleTextInputChange('frequency')}
+                        placeholder={t('treatments.form.frequencyPlaceholder', 'e.g., Daily, Twice weekly')}
+                        description={t('treatments.form.frequencyDesc', 'How often treatment is administered')}
+                      />
+                    </Grid.Col>
+                  </Grid>
+                </Box>
+              </Tabs.Panel>
+            )}
 
             {/* Treatment Plan (Relationships) Tab */}
             <Tabs.Panel value="relationships">

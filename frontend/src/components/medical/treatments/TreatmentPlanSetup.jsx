@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Tabs,
@@ -100,6 +100,8 @@ const TreatmentPlanSetup = ({
   const [encounters, setEncounters] = useState([]);
   const [labResults, setLabResults] = useState([]);
   const [equipment, setEquipment] = useState([]);
+  const [practitioners, setPractitioners] = useState([]);
+  const [pharmacies, setPharmacies] = useState([]);
 
   const isMountedRef = useRef(true);
 
@@ -107,11 +109,13 @@ const TreatmentPlanSetup = ({
   const fetchEntities = useCallback(async (signal) => {
     setLoading(true);
     try {
-      const [medsData, encountersData, labsData, equipmentData] = await Promise.all([
+      const [medsData, encountersData, labsData, equipmentData, practitionersData, pharmaciesData] = await Promise.all([
         apiService.getMedications(signal).catch(() => []),
         apiService.getEncounters(signal).catch(() => []),
         apiService.getLabResults(signal).catch(() => []),
         apiService.getMedicalEquipment(signal).catch(() => []),
+        apiService.getPractitioners(signal).catch(() => []),
+        apiService.getPharmacies(signal).catch(() => []),
       ]);
 
       if (!signal?.aborted && isMountedRef.current) {
@@ -119,6 +123,8 @@ const TreatmentPlanSetup = ({
         setEncounters(Array.isArray(encountersData) ? encountersData : []);
         setLabResults(Array.isArray(labsData) ? labsData : []);
         setEquipment(Array.isArray(equipmentData) ? equipmentData : []);
+        setPractitioners(Array.isArray(practitionersData) ? practitionersData : []);
+        setPharmacies(Array.isArray(pharmaciesData) ? pharmaciesData : []);
         setLoading(false);
       }
     } catch (err) {
@@ -365,6 +371,34 @@ const TreatmentPlanSetup = ({
                             value={metadata.timing_instructions || ''}
                             onChange={(e) => updateItemMetadata('medications', medId, 'timing_instructions', e.target.value)}
                           />
+                          <Group grow gap="xs">
+                            <Select
+                              size="xs"
+                              placeholder="Treatment prescriber"
+                              data={practitioners.map(p => ({
+                                value: p.id.toString(),
+                                label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
+                              }))}
+                              value={metadata.specific_prescriber_id || ''}
+                              onChange={(value) => updateItemMetadata('medications', medId, 'specific_prescriber_id', value || '')}
+                              clearable
+                              searchable
+                              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                            />
+                            <Select
+                              size="xs"
+                              placeholder="Treatment pharmacy"
+                              data={pharmacies.map(p => ({
+                                value: p.id.toString(),
+                                label: p.name || p.brand || `Pharmacy #${p.id}`,
+                              }))}
+                              value={metadata.specific_pharmacy_id || ''}
+                              onChange={(value) => updateItemMetadata('medications', medId, 'specific_pharmacy_id', value || '')}
+                              clearable
+                              searchable
+                              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                            />
+                          </Group>
                           <Textarea
                             size="xs"
                             placeholder="Relevance note"
