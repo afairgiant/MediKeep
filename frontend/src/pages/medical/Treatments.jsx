@@ -231,6 +231,7 @@ const Treatments = () => {
     if (success) {
       setShowModal(false);
       await refreshData();
+      return success;
     }
   };
 
