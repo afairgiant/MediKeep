@@ -115,7 +115,7 @@ const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
                   )}
                   {trt.mode === 'advanced' && (
                     <Badge variant="light" color="grape" size="xs">
-                      Treatment Plan
+                      {t('medications.treatments.treatmentPlan', 'Treatment Plan')}
                     </Badge>
                   )}
                 </Group>

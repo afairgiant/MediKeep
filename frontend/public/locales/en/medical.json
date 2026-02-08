@@ -614,8 +614,11 @@
     },
     "mode": {
       "label": "Treatment Mode",
+      "description": "Choose how to track this treatment",
       "simple": "Simple",
+      "simpleOption": "Simple",
       "advanced": "Treatment Plan",
+      "advancedOption": "Treatment Plan",
       "simpleDescription": "Basic tracking with schedule and dosage",
       "advancedDescription": "Medication-centric plan with per-medication overrides"
     },

@@ -241,6 +241,9 @@
       "otc": "Over-the-Counter",
       "supplement": "Supplement/Vitamin",
       "herbal": "Herbal/Natural"
+    },
+    "treatments": {
+      "treatmentPlan": "Plano de Tratamento"
     }
   },
   "searchPlaceholders": {

@@ -215,6 +215,9 @@
       "otc": "Sans ordonnance",
       "supplement": "Supplément/Vitamines",
       "herbal": "A base de plantes/Naturel"
+    },
+    "treatments": {
+      "treatmentPlan": "Plan de traitement"
     }
   },
   "searchPlaceholders": {

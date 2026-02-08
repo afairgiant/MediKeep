@@ -241,6 +241,9 @@
       "otc": "Da banco",
       "supplement": "Integratore/Vitamina",
       "herbal": "Erboristico/Naturale"
+    },
+    "treatments": {
+      "treatmentPlan": "Piano di trattamento"
     }
   },
   "searchPlaceholders": {

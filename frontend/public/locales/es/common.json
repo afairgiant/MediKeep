@@ -202,6 +202,9 @@
       "otc": "Medicamento sin receta",
       "supplement": "Suplemento/Vitamina",
       "herbal": "Herbal/Natural"
+    },
+    "treatments": {
+      "treatmentPlan": "Plan de tratamiento"
     }
   },
   "messages": {

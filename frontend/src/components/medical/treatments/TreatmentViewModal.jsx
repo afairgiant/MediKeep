@@ -27,7 +27,6 @@ import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import TreatmentRelationshipsManager from './TreatmentRelationshipsManager';
 import TreatmentMedicationsViewTab from './TreatmentMedicationsViewTab';
 import TreatmentEncounterRelationships from './TreatmentEncounterRelationships';
 import TreatmentLabResultRelationships from './TreatmentLabResultRelationships';
@@ -435,21 +434,6 @@ const TreatmentViewModal = ({
           </Box>
         </Tabs.Panel>
 
-        {/* Relationships Tab (simple mode only) */}
-        {treatment.mode !== 'advanced' && (
-          <Tabs.Panel value="relationships">
-            <Box mt="md">
-              <TreatmentRelationshipsManager
-                treatmentId={treatment.id}
-                isViewMode={true}
-                onMedicationClick={onMedicationClick}
-                onEncounterClick={onEncounterClick}
-                onLabResultClick={onLabResultClick}
-                onEquipmentClick={onEquipmentClick}
-              />
-            </Box>
-          </Tabs.Panel>
-        )}
         </Tabs>
 
         {/* Action Buttons */}

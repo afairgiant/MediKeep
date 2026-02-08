@@ -745,3 +745,49 @@ class TreatmentEquipmentBulkCreate(BaseModel):
     @classmethod
     def validate_relevance_note(cls, v):
         return _validate_relevance_note(v)
+
+
+# =============================================================================
+# Medication-Treatment Response (for medication/{id}/treatments endpoint)
+# =============================================================================
+
+
+class MedicationTreatmentCondition(BaseModel):
+    """Condition summary nested in treatment."""
+    id: int
+    condition_name: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MedicationTreatmentInfo(BaseModel):
+    """Treatment summary nested in medication-treatment response."""
+    id: int
+    treatment_name: str
+    treatment_type: Optional[str] = None
+    status: Optional[str] = None
+    mode: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    condition: Optional[MedicationTreatmentCondition] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MedicationTreatmentResponse(BaseModel):
+    """Response schema for GET /medications/{id}/treatments."""
+    id: int
+    treatment_id: int
+    medication_id: int
+    specific_dosage: Optional[str] = None
+    specific_frequency: Optional[str] = None
+    specific_duration: Optional[str] = None
+    timing_instructions: Optional[str] = None
+    relevance_note: Optional[str] = None
+    specific_prescriber_id: Optional[int] = None
+    specific_pharmacy_id: Optional[int] = None
+    specific_start_date: Optional[date] = None
+    specific_end_date: Optional[date] = None
+    treatment: Optional[MedicationTreatmentInfo] = None
+
+    model_config = ConfigDict(from_attributes=True)

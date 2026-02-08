@@ -740,6 +740,55 @@
 			"label": "Behandlungsbeschreibung",
 			"placeholder": "Detaillierte Beschreibung des Behandlungsplans...",
 			"description": "Ausführliche Informationen zur Behandlungsstrategie"
+		},
+		"notes": {
+			"label": "Zusätzliche Notizen",
+			"placeholder": "Fortschrittsnotizen, Nebenwirkungen, Anpassungen, Ergebnisse...",
+			"description": "Fortschrittsaktualisierungen, Beobachtungen oder wichtige Notizen"
+		},
+		"mode": {
+			"label": "Behandlungsmodus",
+			"description": "Wählen Sie, wie diese Behandlung verfolgt werden soll",
+			"simple": "Einfach",
+			"simpleOption": "Einfach",
+			"advanced": "Behandlungsplan",
+			"advancedOption": "Behandlungsplan",
+			"simpleDescription": "Einfache Nachverfolgung mit Zeitplan und Dosierung",
+			"advancedDescription": "Medikamentenorientierter Plan mit medikamentenspezifischen Überschreibungen"
+		},
+		"advancedOverview": {
+			"title": "Behandlungsplan-Übersicht",
+			"medicationsCount": "{{count}} Medikament(e)",
+			"visitsCount": "{{count}} Besuch(e)",
+			"labsCount": "{{count}} Labor(e)",
+			"equipmentCount": "{{count}} Ausrüstung"
+		},
+		"medications": {
+			"effectiveValue": "Wirksam",
+			"overridden": "Behandlungsspezifisch",
+			"default": "(vom Medikament)",
+			"specificPrescriber": "Behandlungsarzt",
+			"specificPharmacy": "Behandlungsapotheke",
+			"specificStartDate": "Behandlungsstartdatum",
+			"specificEndDate": "Behandlungsenddatum",
+			"noMedicationsLinked": "Keine Medikamente mit dieser Behandlung verknüpft",
+			"linkDescription": "Verknüpfen Sie Medikamente, um zu verfolgen, was für diesen Behandlungsplan verschrieben wird.",
+			"specificDosage": "Spezifische Dosierung",
+			"specificFrequency": "Spezifische Häufigkeit",
+			"duration": "Dauer",
+			"timingInstructions": "Zeitliche Anweisungen",
+			"relevanceNote": "Relevanzhinweis"
+		},
+		"tabs": {
+			"overview": "Übersicht",
+			"medications": "Medikamente",
+			"visits": "Besuche",
+			"labs": "Labore",
+			"equipment": "Ausrüstung",
+			"scheduleAndDosage": "Zeitplan & Dosierung",
+			"documents": "Dokumente",
+			"notes": "Notizen",
+			"relationships": "Verknüpfungen"
 		}
 	},
 	"familyMembers": {

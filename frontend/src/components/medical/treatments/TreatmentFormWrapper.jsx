@@ -403,6 +403,37 @@ const TreatmentFormWrapper = ({
                       disabled={practitionersLoading}
                     />
                   </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <DateInput
+                      label={t('treatments.form.startDate', 'Start Date')}
+                      value={parseDateInput(formData.start_date)}
+                      onChange={(date) => {
+                        const formattedDate = formatDateInputChange(date);
+                        onInputChange({ target: { name: 'start_date', value: formattedDate } });
+                      }}
+                      placeholder={t('treatments.form.selectStartDate', 'Select start date')}
+                      description={t('treatments.form.startDateDesc', 'When treatment is planned to begin or began')}
+                      clearable
+                      firstDayOfWeek={0}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <DateInput
+                      label={t('treatments.form.endDate', 'End Date')}
+                      value={parseDateInput(formData.end_date)}
+                      onChange={(date) => {
+                        const formattedDate = formatDateInputChange(date);
+                        onInputChange({ target: { name: 'end_date', value: formattedDate } });
+                      }}
+                      placeholder={t('treatments.form.selectEndDate', 'Select end date')}
+                      description={t('treatments.form.endDateDesc', 'When treatment ends (if applicable)')}
+                      clearable
+                      firstDayOfWeek={0}
+                      minDate={parseDateInput(formData.start_date) || undefined}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
                       label={t('treatments.form.description', 'Description')}
@@ -467,37 +498,6 @@ const TreatmentFormWrapper = ({
               <Tabs.Panel value="schedule">
                 <Box mt="md">
                   <Grid>
-                    <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <DateInput
-                        label={t('treatments.form.startDate', 'Start Date')}
-                        value={parseDateInput(formData.start_date)}
-                        onChange={(date) => {
-                          const formattedDate = formatDateInputChange(date);
-                          onInputChange({ target: { name: 'start_date', value: formattedDate } });
-                        }}
-                        placeholder={t('treatments.form.selectStartDate', 'Select start date')}
-                        description={t('treatments.form.startDateDesc', 'When treatment is planned to begin or began')}
-                        clearable
-                        firstDayOfWeek={0}
-                        popoverProps={{ withinPortal: true, zIndex: 3000 }}
-                      />
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <DateInput
-                        label={t('treatments.form.endDate', 'End Date')}
-                        value={parseDateInput(formData.end_date)}
-                        onChange={(date) => {
-                          const formattedDate = formatDateInputChange(date);
-                          onInputChange({ target: { name: 'end_date', value: formattedDate } });
-                        }}
-                        placeholder={t('treatments.form.selectEndDate', 'Select end date')}
-                        description={t('treatments.form.endDateDesc', 'When treatment ends (if applicable)')}
-                        clearable
-                        firstDayOfWeek={0}
-                        minDate={parseDateInput(formData.start_date) || undefined}
-                        popoverProps={{ withinPortal: true, zIndex: 3000 }}
-                      />
-                    </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <TextInput
                         label={t('treatments.form.dosageAmount', 'Dosage/Amount')}

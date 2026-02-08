@@ -23,6 +23,7 @@ from app.core.logging.helpers import log_data_access
 from app.crud.medication import medication
 from app.crud.treatment import treatment_medication
 from app.models.activity_log import EntityType
+from app.schemas.treatment import MedicationTreatmentResponse
 from app.models.models import User
 from app.schemas.medication import (
     MedicationCreate,
@@ -280,7 +281,7 @@ def read_patient_medications(
         return medications
 
 
-@router.get("/{medication_id}/treatments")
+@router.get("/{medication_id}/treatments", response_model=list[MedicationTreatmentResponse])
 def get_medication_treatments(
     *,
     medication_id: int,

@@ -16,6 +16,7 @@ import {
   Collapse,
   UnstyledButton,
 } from '@mantine/core';
+import { DateInput } from '@mantine/dates';
 import {
   IconPill,
   IconStethoscope,
@@ -24,8 +25,10 @@ import {
   IconChevronDown,
   IconChevronRight,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
+import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import {
   createDateSortedOptions,
   formatDateDisplay,
@@ -92,6 +95,7 @@ const TreatmentPlanSetup = ({
   pendingRelationships,
   onRelationshipsChange,
 }) => {
+  const { t } = useTranslation('medical');
   const [activeTab, setActiveTab] = useState('medications');
   const [loading, setLoading] = useState(true);
 
@@ -397,6 +401,27 @@ const TreatmentPlanSetup = ({
                               clearable
                               searchable
                               comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                            />
+                          </Group>
+                          <Group grow gap="xs">
+                            <DateInput
+                              size="xs"
+                              label={t('treatments.medications.specificStartDate', 'Treatment Start Date')}
+                              value={parseDateInput(metadata.specific_start_date)}
+                              onChange={(date) => updateItemMetadata('medications', medId, 'specific_start_date', formatDateInputChange(date))}
+                              clearable
+                              firstDayOfWeek={0}
+                              popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                            />
+                            <DateInput
+                              size="xs"
+                              label={t('treatments.medications.specificEndDate', 'Treatment End Date')}
+                              value={parseDateInput(metadata.specific_end_date)}
+                              onChange={(date) => updateItemMetadata('medications', medId, 'specific_end_date', formatDateInputChange(date))}
+                              clearable
+                              firstDayOfWeek={0}
+                              minDate={parseDateInput(metadata.specific_start_date) || undefined}
+                              popoverProps={{ withinPortal: true, zIndex: 4000 }}
                             />
                           </Group>
                           <Textarea
