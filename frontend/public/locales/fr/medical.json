@@ -124,7 +124,7 @@
       "description": "Catégorie de médicament"
     },
     "dosage": {
-      "label": "Dosage",
+      "label": "Posologie",
       "placeholder": "ex : 10mg, 1 tablette",
       "description": "Masse et quantité par dose"
     },
@@ -190,7 +190,12 @@
     "testType": {
       "label": "Type d'analyse",
       "placeholder": "Sélectionnez le niveau d'urgence",
-      "description": "Priorité ou urgence de l'analyse"
+      "description": "Priorité ou urgence de l'analyse",
+      "emergency": "Urgence - Priorité critique",
+      "followUp": "Suivi - Test de contrôle",
+      "routine": "Routine - Traitement standard",
+      "screening": "Dépistage - Test préventif",
+      "urgent": "Urgent - Traitement accéléré"
     },
     "result": {
       "normal": "Normal - Dans la plage de référence",
@@ -258,6 +263,11 @@
       "label": "Notes supplémentaires",
       "placeholder": "Toute information supplémentaire sur l'analyse, instructions spéciales, ou observations...",
       "description": "Notes cliniques ou instructions spéciales"
+    },
+    "testTypeField": {
+      "description": "Priorité ou urgence du test",
+      "label": "Type de test",
+      "placeholder": "Sélectionnez le niveau d'urgence"
     }
   },
   "immunizations": {
@@ -323,14 +333,19 @@
       "leftDeltoid": "Deltoïde gauche",
       "rightDeltoid": "Deltoïde droit",
       "leftThigh": "Cuisse gauche",
-      "rightThigh": "Cuisse droite"
+      "rightThigh": "Cuisse droite",
+      "abdomen": "Abdomen",
+      "leftGluteal": "Fessier gauche",
+      "other": "Autre",
+      "rightGluteal": "Fessier droit"
     },
     "routeOptions": {
       "intramuscular": "Intramusculaire (IM)",
       "subcutaneous": "Sous-cutané (SC)",
       "intradermal": "Intradermique (ID)",
       "oral": "Orale",
-      "nasal": "Nasale"
+      "nasal": "Nasale",
+      "other": "Autre"
     },
     "manufacturerOptions": {
       "pfizerBioNTech": "Pfizer-BioNTech",
@@ -340,7 +355,12 @@
       "merck": "Merck",
       "glaxoSmithKline": "GlaxoSmithKline",
       "sanofi": "Sanofi",
-      "other": "Autre"
+      "other": "Autre",
+      "astrazeneca": "AstraZeneca",
+      "glaxosmithkline": "GlaxoSmithKline",
+      "jj": "Johnson & Johnson",
+      "novartis": "Novartis",
+      "pfizer": "Pfizer-BioNTech"
     }
   },
   "procedures": {
@@ -648,6 +668,11 @@
       "documents": "Documents",
       "notes": "Notes",
       "relationships": "Relations"
+    },
+    "performingPractitioner": {
+      "description": "Assigner un médecin à ce traitement",
+      "label": "Médecin traitant",
+      "placeholder": "Sélectionnez un médecin (optionnel)"
     }
   },
   "familyMembers": {
@@ -663,7 +688,7 @@
       "maternalGrandmother": "Grand-mère maternelle",
       "uncle": "Oncle",
       "aunt": "Tante",
-      "cousin": "Cousin",
+      "cousin": "Cousin(e)",
       "other": "Autre"
     },
     "genderOptions": {
@@ -868,7 +893,8 @@
         },
         "notes": {
           "placeholder": "Informations supplémentaires sur le membre de la famille...",
-          "description": "Toutes notes supplémentaires ou informations importantes"
+          "description": "Toutes notes supplémentaires ou informations importantes",
+          "label": "Notes"
         },
         "relationshipOptions": {
           "father": "Père",
@@ -881,8 +907,22 @@
           "maternalGrandmother": "Grand-mère maternelle",
           "uncle": "Oncle",
           "aunt": "Tante",
-          "cousin": "Cousin",
-          "other": "Autre"
+          "cousin": "Cousin(e)",
+          "other": "Autre",
+          "aunt_maternal": "Tante (maternelle)",
+          "aunt_paternal": "Tante (paternelle)",
+          "daughter": "Fille",
+          "granddaughter": "Petite-fille",
+          "grandfather_maternal": "Grand-père (maternel)",
+          "grandfather_paternal": "Grand-père (paternel)",
+          "grandmother_maternal": "Grand-mère (maternelle)",
+          "grandmother_paternal": "Grand-mère (paternelle)",
+          "grandson": "Petit-fils",
+          "nephew": "Neveu",
+          "niece": "Nièce",
+          "son": "Fils",
+          "uncle_maternal": "Oncle (maternel)",
+          "uncle_paternal": "Oncle (paternel)"
         },
         "genderOptions": {
           "male": "Homme",
@@ -922,7 +962,8 @@
         },
         "notes": {
           "placeholder": "Détails supplémentaires sur la condition...",
-          "description": "Détails de traitement, résultats, ou autres informations pertinentes"
+          "description": "Détails de traitement, résultats, ou autres informations pertinentes",
+          "label": "Notes"
         },
         "typeOptions": {
           "cardiovascular": "Cardiovasculaire - Coeur et circulation sanguine",
@@ -934,18 +975,27 @@
           "genetic": "Génétique - Conditions héréditaires",
           "respiratory": "Respiratoire - Problèmes pulmonaires et respiratoires",
           "endocrine": "Endocrinien - Problèmes hormonaux",
-          "other": "Autre - Spécifier dans les notes"
+          "other": "Autre - Spécifier dans les notes",
+          "blood": "Sang - Troubles hématologiques",
+          "gastrointestinal": "Gastro-intestinal - Système digestif",
+          "kidney": "Reins - Maladies rénales",
+          "liver": "Foie - Maladies hépatiques",
+          "mental_health": "Santé mentale - Troubles psychiatriques",
+          "musculoskeletal": "Musculosquelettique - Os et muscles"
         },
         "severityOptions": {
           "mild": "💛 Bénigne - Impact mineur",
           "moderate": "⚡ Modérée - Impact notable",
           "severe": "⚠️ Sévère - Impact significatif",
-          "critical": "🚨 Critique - Danger de mort"
+          "critical": "🚨 Critique - Danger de mort",
+          "fatal": "Fatal - Cause du décès"
         },
         "statusOptions": {
           "active": "Actif - Condition en cours",
           "resolved": "Résolu - N'est plus présente",
-          "chronic": "Chronique - Condition à long terme"
+          "chronic": "Chronique - Condition à long terme",
+          "fatal": "Fatal - Cause du décès",
+          "managed": "Contrôlé - Sous traitement"
         }
       }
     }
@@ -955,7 +1005,7 @@
     "form": {
       "name": {
         "label": "Nom complet",
-        "placeholder": "Dr. Jane Smith",
+        "placeholder": "Dr. Marie Dupont",
         "description": "Nom complet du docteur, dont son titre"
       },
       "specialty": {
@@ -986,6 +1036,25 @@
       "rating": {
         "label": "Avis"
       }
+    },
+    "name": {
+      "description": "Nom complet du médecin, incluant son titre",
+      "label": "Nom complet",
+      "placeholder": "Dr. Marie Dupont"
+    },
+    "practice": {
+      "description": "Lieu de travail ou complexe médical",
+      "label": "Cabinet/Hôpital",
+      "placeholder": "Hôpital général de la ville"
+    },
+    "rating": {
+      "description": "Evaluez la qualité des soins de ce médecin",
+      "label": "Evaluation"
+    },
+    "specialty": {
+      "description": "Sélectionnez dans la liste ou saisissez une spécialité supplémentaire",
+      "label": "Spécialité médicale",
+      "placeholder": "Rechercher des spécialités ou en ajouter une..."
     }
   },
   "pharmacies": {
@@ -1022,6 +1091,31 @@
         "placeholder": "01 12 34 56 78",
         "description": "Numéro de téléphone principal de la pharmacie"
       }
+    },
+    "city": {
+      "description": "Localisation de la pharmacie",
+      "label": "Ville",
+      "placeholder": "Paris"
+    },
+    "pharmacyBrand": {
+      "description": "Chaîne de pharmacie principale ou type indépendant",
+      "label": "Enseigne de la pharmacie",
+      "placeholder": "Sélectionnez la chaîne ou le type de pharmacie"
+    },
+    "pharmacyName": {
+      "description": "Nom spécifique ou identifiant de l'emplacement",
+      "label": "Nom de la pharmacie",
+      "placeholder": "Pharmacie Centrale - Rue Principale"
+    },
+    "storeNumber": {
+      "description": "Numéro d'officine ou de licence",
+      "label": "Numéro d'officine",
+      "placeholder": "ex. : 1234"
+    },
+    "streetAddress": {
+      "description": "Adresse physique",
+      "label": "Adresse",
+      "placeholder": "123 Rue Principale"
     }
   },
   "emergencyContacts": {
@@ -1056,7 +1150,7 @@
           "granddaughter": "Petite-fille",
           "aunt": "Tante",
           "uncle": "Oncle",
-          "cousin": "Cousin",
+          "cousin": "Cousin(e)",
           "friend": "Ami",
           "neighbor": "Voisin",
           "caregiver": "Aidant",
@@ -1096,6 +1190,25 @@
         "placeholder": "Informations supplémentaires (ex : 'Disponible uniquement en semaine', 'Parle espagnol')",
         "description": "Toute note supplémentaires au sujet de ce contact"
       }
+    },
+    "isActive": {
+      "description": "Ce contact est actuellement disponible",
+      "label": "Contact actif"
+    },
+    "isPrimary": {
+      "description": "Cette personne sera contactée en premier en cas d'urgence",
+      "label": "Contact d'urgence principal"
+    },
+    "notesPlaceholder": "Informations supplémentaires (ex. : 'Disponible en semaine uniquement', 'Parle espagnol')",
+    "primaryPhone": {
+      "description": "Numéro de téléphone principal",
+      "label": "Téléphone principal",
+      "placeholder": "ex. : 06 12 34 56 78"
+    },
+    "secondaryPhone": {
+      "description": "Numéro de téléphone secondaire optionnel",
+      "label": "Téléphone secondaire",
+      "placeholder": "ex. : 06 12 34 56 78"
     }
   },
   "insurance": {
@@ -1181,8 +1294,8 @@
         "placeholder": "Sélectionnez le statut",
         "description": "Statut actuel de l'assurance",
         "options": {
-          "active": "Active",
-          "inactive": "Inactive",
+          "active": "Actif",
+          "inactive": "Inactif",
           "expired": "Expirée",
           "pending": "En attente"
         }
@@ -1326,8 +1439,8 @@
         "placeholder": "Sélectionnez le type de formule de prescription",
         "description": "Type de formule de prescription de médicaments",
         "options": {
-          "formulary": "Formulary-Based Plan",
-          "tieredCopay": "Tiered Copay Plan",
+          "formulary": "Régime basé sur un formulaire",
+          "tieredCopay": "Régime à reste à charge par paliers",
           "medicarePartD": "Medicare Part D",
           "integrated": "Intégré avec la formule médicale"
         }
@@ -1369,6 +1482,63 @@
         "placeholder": "Informations supplémentaires sur cette assurance...",
         "description": "Tous détails ou notes supplémentaires"
       }
+    },
+    "companyName": {
+      "description": "Nom de la compagnie d'assurance",
+      "label": "Compagnie d'assurance",
+      "placeholder": "ex. : AXA, Groupama, MAIF"
+    },
+    "copayPrimaryCare": {
+      "description": "Reste à charge pour les consultations de médecine générale",
+      "label": "Reste à charge médecin traitant",
+      "placeholder": "ex. : 25"
+    },
+    "deductibleIndividual": {
+      "description": "Montant annuel de la franchise individuelle",
+      "label": "Franchise individuelle",
+      "placeholder": "ex. : 1000"
+    },
+    "dividers": {
+      "basic": "Informations de base de l'assurance",
+      "contact": "Coordonnées de l'assurance",
+      "coverage": "Période et statut de couverture",
+      "coverageDetails": "Détails de la couverture",
+      "member": "Informations de l'assuré",
+      "notes": "Informations supplémentaires"
+    },
+    "groupNumber": {
+      "description": "Numéro de groupe (si applicable)",
+      "label": "Numéro de groupe",
+      "placeholder": "ex. : GRP123"
+    },
+    "insuranceTypeOptions": {
+      "dental": "Assurance dentaire",
+      "medical": "Assurance maladie",
+      "prescription": "Assurance médicaments",
+      "vision": "Assurance optique"
+    },
+    "isPrimary": {
+      "description": "Cochez si c'est votre assurance principale (médicale uniquement)",
+      "label": "Assurance principale"
+    },
+    "memberId": {
+      "description": "Numéro d'identification de l'assuré sur la carte d'assurance",
+      "label": "Numéro d'assuré",
+      "placeholder": "ex. : ABC123456789"
+    },
+    "planName": {
+      "description": "Nom du contrat spécifique",
+      "label": "Nom du contrat",
+      "placeholder": "ex. : Santé Basic Plus"
+    },
+    "planTypeOptions": {
+      "epo": "EPO (Exclusive Provider Organization)",
+      "hdhp": "HDHP (High Deductible Health Plan)",
+      "hmo": "HMO (Health Maintenance Organization)",
+      "indemnity": "Indemnité (paiement à l'acte)",
+      "other": "Autre",
+      "pos": "POS (Point of Service)",
+      "ppo": "PPO (Preferred Provider Organization)"
     }
   },
   "injuries": {

@@ -1,1 +1,408 @@
-{}
+{
+  "channels": {
+    "add": "Kanal hinzufügen",
+    "confirmDelete": "Möchten Sie diesen Kanal wirklich löschen?",
+    "createFailed": "Kanal konnte nicht erstellt werden",
+    "createSuccess": "Kanal erfolgreich erstellt",
+    "delete": "Kanal löschen",
+    "deleteFailed": "Kanal konnte nicht gelöscht werden",
+    "deleteSuccess": "Kanal erfolgreich gelöscht",
+    "description": "Benachrichtigungskanäle hinzufügen und verwalten",
+    "disabled": "Deaktiviert",
+    "discord": {
+      "avatarUrl": {
+        "description": "Benutzerdefinierter Avatar für den Benachrichtigungs-Bot",
+        "label": "Avatar-URL (optional)",
+        "placeholder": "https://beispiel.de/avatar.png"
+      },
+      "username": {
+        "description": "Benutzerdefinierter Name für den Benachrichtigungs-Bot",
+        "label": "Bot-Benutzername (optional)",
+        "placeholder": "MediKeep"
+      },
+      "webhookUrl": {
+        "description": "Erstellen Sie einen Webhook in Ihren Discord-Servereinstellungen",
+        "label": "Webhook-URL",
+        "placeholder": "https://discord.com/api/webhooks/..."
+      }
+    },
+    "edit": "Kanal bearbeiten",
+    "email": {
+      "fromEmail": {
+        "description": "Die Absender-E-Mail-Adresse",
+        "label": "Absender-E-Mail",
+        "placeholder": "benachrichtigungen@beispiel.de"
+      },
+      "smtpHost": {
+        "description": "SMTP-Server Ihres E-Mail-Anbieters",
+        "label": "SMTP-Server",
+        "placeholder": "smtp.gmail.com"
+      },
+      "smtpPassword": {
+        "description": "Für Gmail verwenden Sie ein App-Passwort",
+        "label": "SMTP-Passwort",
+        "placeholder": "App-Passwort oder E-Mail-Passwort"
+      },
+      "smtpPort": {
+        "description": "Normalerweise 587 (TLS) oder 465 (SSL)",
+        "label": "SMTP-Port",
+        "placeholder": "587"
+      },
+      "smtpUser": {
+        "description": "Ihre E-Mail-Adresse oder Benutzername",
+        "label": "SMTP-Benutzername",
+        "placeholder": "ihre-email@gmail.com"
+      },
+      "toEmail": {
+        "description": "Wohin Benachrichtigungen gesendet werden",
+        "label": "Empfänger-E-Mail",
+        "placeholder": "ihre-email@beispiel.de"
+      },
+      "useTls": {
+        "description": "TLS-Verschlüsselung aktivieren (empfohlen)",
+        "label": "TLS verwenden"
+      }
+    },
+    "enabled": "Aktiviert",
+    "form": {
+      "configSection": "Kanalkonfiguration",
+      "enabled": {
+        "description": "Benachrichtigungen über diesen Kanal empfangen",
+        "label": "Kanal aktivieren"
+      },
+      "name": {
+        "description": "Ein beschreibender Name zur Identifizierung dieses Kanals",
+        "label": "Kanalname",
+        "placeholder": "z. B. Mein Discord-Server"
+      },
+      "title": "Kanaldetails",
+      "type": {
+        "description": "Der Dienst, über den Benachrichtigungen gesendet werden",
+        "label": "Kanaltyp",
+        "placeholder": "Kanaltyp auswählen"
+      }
+    },
+    "gotify": {
+      "appToken": {
+        "description": "Erstellen Sie eine Anwendung in Gotify, um ein Token zu erhalten",
+        "label": "App-Token",
+        "placeholder": "Anwendungstoken aus Gotify"
+      },
+      "priority": {
+        "description": "Nachrichtenpriorität (1-10, Standard 5)",
+        "label": "Priorität",
+        "placeholder": "5"
+      },
+      "serverUrl": {
+        "description": "URL Ihres Gotify-Servers",
+        "label": "Server-URL",
+        "placeholder": "https://gotify.beispiel.de"
+      }
+    },
+    "lastUsed": "Zuletzt verwendet",
+    "noChannels": "Keine Benachrichtigungskanäle konfiguriert",
+    "noChannelsHint": "Fügen Sie einen Kanal hinzu, um Benachrichtigungen zu erhalten",
+    "notificationsSent": "{{count}} Benachrichtigungen gesendet",
+    "test": "Testen",
+    "testFailed": "Testbenachrichtigung fehlgeschlagen",
+    "testSuccess": "Testbenachrichtigung erfolgreich gesendet!",
+    "testing": "Wird getestet...",
+    "title": "Benachrichtigungskanäle",
+    "types": {
+      "discord": "Discord",
+      "email": "E-Mail",
+      "gotify": "Gotify",
+      "webhook": "Webhook"
+    },
+    "updateFailed": "Kanal konnte nicht aktualisiert werden",
+    "updateSuccess": "Kanal erfolgreich aktualisiert",
+    "verified": "Verifiziert",
+    "webhook": {
+      "authToken": {
+        "description": "Autorisierungstoken für den Webhook",
+        "label": "Auth-Token (optional)",
+        "placeholder": "Bearer-Token oder API-Schlüssel"
+      },
+      "headers": {
+        "description": "JSON-Objekt mit benutzerdefinierten Headern",
+        "label": "Benutzerdefinierte Header (optional)",
+        "placeholder": "{\"Authorization\": \"Bearer token\"}"
+      },
+      "method": {
+        "description": "HTTP-Methode für die Webhook-Anfrage",
+        "label": "HTTP-Methode"
+      },
+      "url": {
+        "description": "URL zum Empfang der Benachrichtigungs-Payloads",
+        "label": "Webhook-URL",
+        "placeholder": "https://api.beispiel.de/webhook"
+      }
+    }
+  },
+  "description": "Konfigurieren Sie, wie Sie Benachrichtigungen für wichtige Ereignisse erhalten",
+  "error": "Benachrichtigungseinstellungen konnten nicht geladen werden",
+  "events": {
+    "backup_completed": {
+      "description": "Wenn eine Sicherung erfolgreich abgeschlossen wurde",
+      "name": "Sicherung abgeschlossen"
+    },
+    "backup_failed": {
+      "description": "Wenn eine Sicherung fehlgeschlagen ist",
+      "name": "Sicherung fehlgeschlagen"
+    },
+    "immunization_due": {
+      "description": "Wenn eine Impfung bald fällig ist",
+      "name": "Impfung fällig"
+    },
+    "immunization_overdue": {
+      "description": "Wenn eine Impfung überfällig ist",
+      "name": "Impfung überfällig"
+    },
+    "invitation_accepted": {
+      "description": "Wenn Ihre Freigabeeinladung angenommen wurde",
+      "name": "Einladung angenommen"
+    },
+    "invitation_received": {
+      "description": "Wenn jemand Datensätze mit Ihnen teilt",
+      "name": "Einladung erhalten"
+    },
+    "lab_result_abnormal": {
+      "description": "Wenn Laborergebnisse außerhalb des Normalbereichs liegen",
+      "name": "Auffällige Laborergebnisse"
+    },
+    "lab_result_available": {
+      "description": "Wenn neue Laborergebnisse hinzugefügt wurden",
+      "name": "Laborergebnisse verfügbar"
+    },
+    "login_from_new_device": {
+      "description": "Wenn von einem neuen Gerät auf Ihr Konto zugegriffen wird",
+      "name": "Anmeldung von neuem Gerät"
+    },
+    "password_changed": {
+      "description": "Wenn Ihr Passwort geändert wurde",
+      "name": "Passwort geändert"
+    },
+    "share_revoked": {
+      "description": "Wenn der Zugriff auf freigegebene Datensätze widerrufen wurde",
+      "name": "Freigabe widerrufen"
+    },
+    "test_notification": {
+      "description": "Manuelle Testbenachrichtigung",
+      "name": "Testbenachrichtigung"
+    }
+  },
+  "history": {
+    "description": "Kürzlich über Ihre Kanäle gesendete Benachrichtigungen",
+    "fields": {
+      "channel": "Kanal",
+      "error": "Fehler",
+      "event": "Ereignis",
+      "status": "Status",
+      "time": "Uhrzeit"
+    },
+    "loading": "Verlauf wird geladen...",
+    "noHistory": "Noch keine Benachrichtigungen gesendet",
+    "noHistoryHint": "Benachrichtigungen werden hier angezeigt, sobald sie gesendet wurden",
+    "page": "Seite {{current}} von {{total}}",
+    "showLess": "Weniger anzeigen",
+    "showMore": "Mehr anzeigen",
+    "status": {
+      "failed": "Fehlgeschlagen",
+      "pending": "Ausstehend",
+      "sent": "Gesendet"
+    },
+    "title": "Benachrichtigungsverlauf"
+  },
+  "loading": "Benachrichtigungseinstellungen werden geladen...",
+  "preferences": {
+    "categories": {
+      "collaboration": "Teilen & Zusammenarbeit",
+      "medical": "Medizinische Ereignisse",
+      "other": "Sonstige Ereignisse",
+      "security": "Sicherheitswarnungen",
+      "sharing": "Teilen & Einladungen",
+      "system": "Systemereignisse"
+    },
+    "comingSoon": "Demnächst verfügbar",
+    "description": "Wählen Sie, welche Ereignisse Benachrichtigungen auf jedem Kanal auslösen",
+    "eventHeader": "Ereignis",
+    "loading": "Einstellungen werden geladen...",
+    "noChannels": "Fügen Sie zuerst einen Benachrichtigungskanal hinzu, um Ereigniseinstellungen zu konfigurieren",
+    "saveFailed": "Einstellung konnte nicht gespeichert werden",
+    "saveSuccess": "Einstellung gespeichert",
+    "title": "Ereignisbenachrichtigungen"
+  },
+  "title": "Benachrichtigungseinstellungen",
+  "toasts": {
+    "auth": {
+      "accessDeniedAdmin": "Zugriff verweigert: Administratorrechte erforderlich",
+      "accessDeniedRole": "Zugriff verweigert: Rolle {{role}} erforderlich",
+      "accessDeniedRoles": "Zugriff verweigert: Eine dieser Rollen erforderlich: {{roles}}",
+      "accountCreatedSuccess": "Konto erfolgreich erstellt! Sie werden angemeldet...",
+      "loginFailed": "Anmeldung fehlgeschlagen",
+      "loginRequired": "Bitte melden Sie sich an, um auf diese Seite zuzugreifen",
+      "loginSuccess": "Anmeldung erfolgreich!",
+      "logoutSuccess": "Erfolgreich abgemeldet",
+      "sessionExpired": "Sitzung aufgrund von Inaktivität abgelaufen",
+      "sessionExpiredLogin": "Sitzung abgelaufen. Bitte melden Sie sich erneut an.",
+      "ssoFailed": "SSO-Anmeldung konnte nicht gestartet werden",
+      "userCreatedSuccess": "Benutzerkonto erfolgreich erstellt!"
+    },
+    "documents": {
+      "deleteFailed": "Löschen fehlgeschlagen",
+      "linkFailed": "Dokument konnte nicht verknüpft werden",
+      "linkSuccess": "Dokument erfolgreich verknüpft",
+      "unlinkFailed": "Dokumentverknüpfung konnte nicht aufgehoben werden",
+      "unlinkSuccess": "Dokumentverknüpfung erfolgreich aufgehoben",
+      "uploadFailed": "Hochladen fehlgeschlagen"
+    },
+    "familySharing": {
+      "accessRevoked": "Zugriff widerrufen",
+      "invitationFailed": "Einladung konnte nicht gesendet werden",
+      "invitationSent": "Einladung erfolgreich gesendet!",
+      "loadFailed": "Freigabeinformationen konnten nicht geladen werden",
+      "revokeFailed": "Zugriff konnte nicht widerrufen werden"
+    },
+    "files": {
+      "downloadFailed": "Dateidownload fehlgeschlagen"
+    },
+    "generic": {
+      "allOperationsFailed": "Alle {{operation}} fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "allOperationsSuccess": "Alle {{total}} {{operation}} erfolgreich abgeschlossen!",
+      "deleteFailed": "Löschen fehlgeschlagen",
+      "downloadFailed": "Download fehlgeschlagen",
+      "error": "Fehler",
+      "operationFailed": "Vorgang fehlgeschlagen",
+      "operationFailedTitle": "{{operation}} fehlgeschlagen",
+      "operationPartial": "{{success}}/{{total}} {{operation}} erfolgreich abgeschlossen. {{failed}} fehlgeschlagen.",
+      "operationPartialTitle": "{{operation}} mit Fehlern abgeschlossen",
+      "operationSuccess": "{{operation}} erfolgreich abgeschlossen!",
+      "saveFailed": "Speichern fehlgeschlagen",
+      "success": "Erfolgreich!",
+      "warning": "Warnung"
+    },
+    "invitations": {
+      "accessRevoked": "Zugriff widerrufen",
+      "accessRevokedMessage": "Der Zugriff wurde widerrufen.",
+      "alreadyRevoked": "Bereits widerrufen",
+      "alreadyRevokedMessage": "Diese Einladung wurde bereits widerrufen.",
+      "cancelFailed": "Einladung konnte nicht storniert werden",
+      "cancelled": "Einladung storniert",
+      "cancelledMessage": "Die Einladung wurde storniert.",
+      "respondFailed": "Antwort auf Einladung fehlgeschlagen",
+      "revokeFailed": "Zugriff konnte nicht widerrufen werden"
+    },
+    "labResults": {
+      "addFailed": "Testkomponenten konnten nicht hinzugefügt werden",
+      "addedMessage": "{{count}} Testkomponenten zum Laborergebnis hinzugefügt.",
+      "addedSuccess": "Erfolgreich!",
+      "deletedMessage": "{{name}} wurde gelöscht",
+      "deletedSuccess": "Komponente gelöscht",
+      "noTextMessage": "Bitte fügen Sie Laborergebnis-Text in das Eingabefeld ein.",
+      "noTextToParse": "Kein Text zum Analysieren",
+      "parseWarning": "Einige Zeilen konnten nicht analysiert werden",
+      "parsedCount": "{{count}} Testkomponenten gefunden. Überprüfen Sie diese im Vorschau-Tab.",
+      "templateApplied": "Vorlage angewendet",
+      "templateAppliedMessage": "{{count}} Komponenten aus Vorlage \"{{name}}\" hinzugefügt.",
+      "textParsed": "Text analysiert",
+      "trendExportFailed": "Diagramm konnte nicht exportiert werden",
+      "trendExportSuccess": "Diagramm erfolgreich exportiert",
+      "updateFailed": "Komponente konnte nicht aktualisiert werden"
+    },
+    "patient": {
+      "createdSuccess": "{{name}} erfolgreich erstellt",
+      "deleteFailed": "Löschen fehlgeschlagen: {{message}}",
+      "deleteOwnOnly": "Sie können nur Patienten löschen, die Ihnen gehören",
+      "deletedNoOthers": "{{name}} erfolgreich gelöscht. Keine weiteren Patienten verfügbar.",
+      "deletedSuccess": "{{name}} erfolgreich gelöscht",
+      "deletedSwitched": "{{name}} erfolgreich gelöscht. Zu {{fallbackName}} gewechselt.",
+      "nowViewing": "{{name}} wird jetzt angezeigt",
+      "removeAccessFailed": "Zugriffsentfernung fehlgeschlagen: {{message}}",
+      "removeOwnOnly": "Sie können den Zugriff auf Patienten, die Ihnen gehören, nicht entfernen",
+      "removedAccess": "Zugriff auf {{name}} entfernt",
+      "switchFailed": "Wechsel fehlgeschlagen: {{message}}",
+      "updatedSuccess": "{{name}} erfolgreich aktualisiert"
+    },
+    "photo": {
+      "deleteFailed": "Löschen fehlgeschlagen",
+      "photoBeingUploaded": "Ein Foto wird gerade hochgeladen. Bitte warten Sie, bis der Vorgang abgeschlossen ist.",
+      "pleaseWait": "Bitte warten",
+      "uploadFailed": "Hochladen fehlgeschlagen",
+      "uploadSuccess": "Foto erfolgreich hochgeladen"
+    },
+    "reports": {
+      "noRecordsMessage": "Bitte wählen Sie mindestens einen Datensatz aus den untenstehenden Kategorien aus, um einen Bericht zu erstellen.",
+      "noRecordsSelected": "Keine Datensätze ausgewählt",
+      "templateDeleteFailed": "Vorlage konnte nicht gelöscht werden",
+      "templateDeleted": "Vorlage erfolgreich gelöscht",
+      "templateLoaded": "Vorlage \"{{name}}\" geladen",
+      "templateNameRequired": "Vorlagenname ist erforderlich",
+      "templateSaveFailed": "Vorlage konnte nicht gespeichert werden",
+      "templateSaved": "Vorlage erfolgreich gespeichert",
+      "validationError": "Validierungsfehler"
+    },
+    "settings": {
+      "cleanupComplete": "Bereinigung abgeschlossen: {{cleaned}} Dateien bereinigt, {{deleted}} Dateien gelöscht",
+      "cleanupFailed": "Dateibereinigung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+      "noOutOfSync": "Keine nicht synchronisierten Dateien zur Bereinigung gefunden",
+      "sessionTimeoutUpdated": "Sitzungs-Timeout auf {{minutes}} Minuten aktualisiert. Ihre Sitzung wurde erneuert."
+    },
+    "sharing": {
+      "accessRevoked": "Zugriff für Benutzer {{userId}} widerrufen",
+      "cancelFailed": "Einladung konnte nicht storniert werden: {{message}}",
+      "invalidJson": "Ungültiges JSON-Format in {{fieldName}}. Bitte überprüfen Sie die Syntax.",
+      "invitationCancelled": "Einladung erfolgreich storniert",
+      "invitationFailed": "Einladung fehlgeschlagen: {{message}}",
+      "invitationSent": "Einladung erfolgreich an {{recipient}} gesendet",
+      "revokeFailed": "Widerruf fehlgeschlagen: {{message}}",
+      "shareUpdated": "Patientenfreigabe erfolgreich aktualisiert",
+      "updateFailed": "Aktualisierung fehlgeschlagen: {{message}}"
+    },
+    "tagSearch": {
+      "loadFailed": "Beliebte Tags konnten nicht geladen werden",
+      "noTagsSelected": "Bitte wählen Sie mindestens ein Tag für die Suche aus",
+      "noTagsSelectedTitle": "Keine Tags ausgewählt",
+      "searchFailed": "Suche nach Datensätzen anhand von Tags fehlgeschlagen"
+    },
+    "upload": {
+      "backgroundProcessing": "\"{{fileName}}\" wird im Hintergrund verarbeitet. Sie werden benachrichtigt, wenn der Vorgang abgeschlossen ist.",
+      "completedWithErrors": "Hochladen mit Fehlern abgeschlossen",
+      "documentAdded": "Dokument zu Paperless hinzugefügt",
+      "duplicateDocument": "Doppeltes Dokument",
+      "failed": "Hochladen fehlgeschlagen",
+      "fileUploadFailed": "Datei-Upload fehlgeschlagen",
+      "fileUploadedSuccess": "\"{{fileName}}\" erfolgreich nach Paperless hochgeladen!",
+      "paperlessUploadFailed": "Paperless-Upload fehlgeschlagen",
+      "partialSuccess": "{{completed}}/{{total}} Dateien erfolgreich hochgeladen. {{failed}} fehlgeschlagen."
+    },
+    "vitals": {
+      "deleteFailed": "Vitalwerte-Eintrag konnte nicht gelöscht werden",
+      "deleteSuccess": "Vitalwerte-Eintrag erfolgreich gelöscht",
+      "formErrors": "Bitte korrigieren Sie die Formularfehler",
+      "saveFailed": "Vitalwerte konnten nicht {{action}} werden",
+      "savedSuccess": "Vitalwerte erfolgreich {{action}}!"
+    }
+  },
+  "validation": {
+    "appTokenRequired": "App-Token ist erforderlich",
+    "fromEmailInvalid": "Ungültiges E-Mail-Format",
+    "fromEmailRequired": "Absender-E-Mail ist erforderlich",
+    "headersInvalid": "Header müssen gültiges JSON sein",
+    "nameRequired": "Kanalname ist erforderlich",
+    "nameTooLong": "Name darf 100 Zeichen nicht überschreiten",
+    "serverUrlInvalid": "Ungültiges URL-Format",
+    "serverUrlRequired": "Server-URL ist erforderlich",
+    "smtpHostRequired": "SMTP-Server ist erforderlich",
+    "smtpPasswordRequired": "SMTP-Passwort ist erforderlich",
+    "smtpPortInvalid": "Port muss zwischen 1 und 65535 liegen",
+    "smtpPortRequired": "SMTP-Port ist erforderlich",
+    "smtpUserRequired": "SMTP-Benutzername ist erforderlich",
+    "toEmailInvalid": "Ungültiges E-Mail-Format",
+    "toEmailRequired": "Empfänger-E-Mail ist erforderlich",
+    "typeRequired": "Kanaltyp ist erforderlich",
+    "urlInvalid": "Ungültiges URL-Format",
+    "urlRequired": "Webhook-URL ist erforderlich",
+    "webhookUrlInvalid": "Ungültiges Webhook-URL-Format",
+    "webhookUrlRequired": "Webhook-URL ist erforderlich"
+  }
+}

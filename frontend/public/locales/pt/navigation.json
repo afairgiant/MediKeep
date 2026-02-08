@@ -44,7 +44,9 @@
     "treatments": "Tratamentos",
     "symptoms": "Sintomas",
     "practitioners": "Profissionais de Saúde",
-    "pharmacies": "Farmácias"
+    "pharmacies": "Farmácias",
+    "injuries": "Lesões",
+    "medicalEquipment": "Equipamentos Médicos"
   },
   "dashboard": {
     "title": "Painel MediKeep",
@@ -83,7 +85,9 @@
       "exportRecords": "Exportar Registros",
       "practitioners": "Profissionais de Saúde",
       "pharmacies": "Farmácias",
-      "adminDashboard": "Painel Administrativo"
+      "adminDashboard": "Painel Administrativo",
+      "injuries": "Lesões",
+      "medicalEquipment": "Equipamentos Médicos"
     },
     "activity": {
       "noActivity": "Nenhuma atividade recente",
@@ -98,7 +102,7 @@
     "title": "Convites",
     "lastUpdated": "Última atualização",
     "from": "De",
-    "viewAll": "View all {{count}} invitations",
+    "viewAll": "Ver todos os {{count}} convites",
     "noPending": "Nenhum convite pendente",
     "noPendingDescription": "Novos convites de compartilhamento aparecerão aqui",
     "manageAll": "Gerenciar Todos os Convites",
@@ -160,7 +164,9 @@
       "backupManagement": "Gerenciamento de Backup",
       "systemHealth": "Saúde do Sistema",
       "language": "Idioma",
-      "theme": "Tema"
+      "theme": "Tema",
+      "injuries": "Lesões",
+      "medicalEquipment": "Equipamentos Médicos"
     }
   }
 }

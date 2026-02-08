@@ -34,7 +34,8 @@
     "done": "Fertig",
     "saveChanges": "Änderungen speichern",
     "linkMedication": "Medikament verknüpfen",
-    "linkCondition": "Erkrankung verknüpfen"
+    "linkCondition": "Erkrankung verknüpfen",
+    "linkMedications": "Medikamente verknüpfen"
   },
   "labels": {
     "loading": "Lädt...",
@@ -199,7 +200,9 @@
       "weight": "Letztes Gewicht",
       "weightDesc": "Klicken, um Datensätze mit Gewicht zu filtern",
       "bmi": "BMI",
-      "bmiDesc": "Body-Mass-Index"
+      "bmiDesc": "Body-Mass-Index",
+      "a1cDesc": "Klicken, um Datensätze mit A1C zu filtern",
+      "bloodGlucoseDesc": "Klicken, um Datensätze mit Blutzucker zu filtern"
     },
     "units": {
       "mmHg": "mmHg",
@@ -216,7 +219,9 @@
     "categories": {
       "low": "Niedrig",
       "high": "Hoch",
-      "normal": "Normal"
+      "normal": "Normal",
+      "diabetes": "Diabetes",
+      "prediabetes": "Pre-diabetes"
     },
     "card": {
       "recordedDate": "Aufzeichnungsdatum",
@@ -247,7 +252,8 @@
       "painScale": "Schmerzskala",
       "notes": "Notizen",
       "recordedBy": "Aufgezeichnet Von",
-      "practitionerId": "Arzt-ID"
+      "practitionerId": "Arzt-ID",
+      "a1c": "A1C"
     },
     "form": {
       "sections": {
@@ -312,8 +318,20 @@
         "painScaleMin": "Schmerzskala muss mindestens 0 sein",
         "painScaleMax": "Schmerzskala darf 10 nicht überschreiten",
         "deviceMaxLength": "Gerätename darf 100 Zeichen nicht überschreiten",
-        "notesMaxLength": "Notizen dürfen 1000 Zeichen nicht überschreiten"
-      }
+        "notesMaxLength": "Notizen dürfen 1000 Zeichen nicht überschreiten",
+        "a1cMax": "A1C darf 20% nicht überschreiten",
+        "a1cMin": "A1C muss mindestens 0% betragen",
+        "dateInFuture": "Datum darf nicht in der Zukunft liegen",
+        "timeInFuture": "Ausgewählte Uhrzeit darf nicht in der Zukunft liegen"
+      },
+      "dateTimePlaceholder": "z. B. 29.07.2015 23:58",
+      "dateTimePlaceholder_dmy": "z. B. 29/07/2015 23:58",
+      "dateTimePlaceholder_ymd": "z. B. 2015-07-29 23:58",
+      "openCalendar": "Kalender öffnen",
+      "pasteDateTime": "Datum/Uhrzeit einfügen oder eingeben",
+      "pasteDateTimeDescription": "Datum/Uhrzeit eingeben oder einfügen, oder Kalender zum Auswählen klicken",
+      "pasteDateTimePlaceholder": "z. B. 29.07.2015 23:58:21",
+      "selectTime": "Uhrzeit"
     }
   },
   "medications": {
@@ -368,7 +386,7 @@
         "purposeIndication": "Zweck/Indikation",
         "medicationType": "Medikamententyp",
         "dosage": "Dosierung",
-        "form": "Form"
+        "form": "Darreichungsform"
       },
       "notSpecified": "Nicht spezifiziert",
       "ongoing": "Laufend",
@@ -396,7 +414,8 @@
     "vitals": "Vitalwerte-Notizen durchsuchen...",
     "emergencyContacts": "Kontakte, Beziehungen, Telefon, E-Mail durchsuchen...",
     "familyHistory": "Familienmitglieder, Erkrankungen, Notizen durchsuchen...",
-    "generic": "Suchen..."
+    "generic": "Suchen...",
+    "injuries": "Verletzungen, Körperteile, Notizen, Tags durchsuchen..."
   },
   "messages": {
     "confirmDelete": "Möchten Sie diesen Eintrag wirklich löschen?",
@@ -423,7 +442,10 @@
     "relevanceNoteOptional": "Relevanznotiz (optional)",
     "noRelevanceNoteProvided": "Keine Relevanznotiz angegeben",
     "relevanceNote": "Relevanznotiz",
-    "describeConditionRelevance": "Beschreiben Sie, wie diese Erkrankung mit dem Laborergebnis zusammenhängt (optional)"
+    "describeConditionRelevance": "Beschreiben Sie, wie diese Erkrankung mit dem Laborergebnis zusammenhängt (optional)",
+    "describeMedicationRelevance": "Beschreiben Sie, wie diese Medikamente mit der Erkrankung zusammenhängen (optional)",
+    "linkMedicationsToCondition": "Medikamente mit Erkrankung verknüpfen",
+    "selectMedications": "Medikamente auswählen"
   },
   "time": {
     "today": "Heute",
@@ -666,6 +688,13 @@
         "title": "Sitzungs-Timeout",
         "description": "Legen Sie die Dauer der Inaktivität fest, bevor Ihre Sitzung abläuft (in Minuten)",
         "range": "Minuten (5-1440)"
+      },
+      "dateFormat": {
+        "description": "Wählen Sie, wie Daten in der Anwendung angezeigt werden",
+        "dmy": "TT/MM/JJJJ (Europäisch)",
+        "mdy": "MM/TT/JJJJ (US)",
+        "title": "Datumsformat",
+        "ymd": "JJJJ-MM-TT (ISO)"
       }
     },
     "documents": {
@@ -682,6 +711,10 @@
       "reset": "Änderungen zurücksetzen",
       "save": "Alle Änderungen speichern",
       "saving": "Speichern..."
+    },
+    "tabs": {
+      "general": "Allgemein",
+      "notifications": "Benachrichtigungen"
     }
   },
   "patientInfo": {
@@ -790,7 +823,43 @@
     "form": {
       "manageFiles": "Dateien verwalten",
       "addFilesOptional": "Dateien hinzufügen (Optional)"
-    }
+    },
+    "continueEditing": "Weiter bearbeiten",
+    "createAndContinue": "Erstellen & PDF hochladen",
+    "createFailed": "Laborergebnis konnte nicht erstellt werden",
+    "createFailedTryAgain": "Laborergebnis konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+    "creatingLabResult": "Laborergebnis wird erstellt...",
+    "deleteEmptyLabResult": "Laborergebnis löschen",
+    "deleteFailed": "Laborergebnis konnte nicht gelöscht werden",
+    "discardParsedData": "Analysierte Daten verwerfen",
+    "emptyLabResultMessage": "Sie haben ein Laborergebnis erstellt, aber keine Testkomponenten hinzugefügt. Möchten Sie dieses Laborergebnis löschen?",
+    "emptyLabResultWarning": "Laborergebnis erstellt, aber leer",
+    "errorOccurred": "Ein Fehler ist aufgetreten",
+    "keepEmptyLabResult": "Laborergebnis behalten",
+    "labResultCreated": "Laborergebnis \"{{testName}}\" wurde erstellt. Jetzt können Sie Ihr PDF hochladen und analysieren.",
+    "labResultDeleted": "Laborergebnis gelöscht",
+    "networkError": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "patientIdRequired": "Patienten-ID ist erforderlich. Bitte wählen Sie zuerst einen Patienten aus.",
+    "quickFormInstructions": "Geben Sie einen Namen für dieses Laborergebnis ein, dann können Sie Ihr PDF hochladen und analysieren.",
+    "quickImportModalTitle": "Schneller PDF-Import - Schritt {{step}} von 2",
+    "quickImportSuccess": "Laborergebnis und Testkomponenten wurden erfolgreich importiert",
+    "quickPdfImport": "Schneller PDF-Import",
+    "stepperLabels": {
+      "enterTestName": "Testname eingeben",
+      "importFromPdf": "Aus PDF importieren",
+      "labResultInfo": "Laborergebnis-Info",
+      "uploadParse": "Hochladen & Analysieren"
+    },
+    "testNameDescription": "Dies ist das einzige Pflichtfeld - weitere Details können Sie später hinzufügen",
+    "testNameLabel": "Name des Labortests",
+    "testNamePlaceholder": "z. B. Endokrinologisches Blutbild etc.",
+    "testNameRequired": "Testname ist erforderlich",
+    "testNameTooLong": "Testname darf {{maxLength}} Zeichen nicht überschreiten",
+    "testNameTooShort": "Testname muss mindestens {{minLength}} Zeichen lang sein",
+    "timeoutError": "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
+    "unsavedDataInstructions": "Klicken Sie auf \"Komponenten hinzufügen\" im Vorschau-Tab, um Ihre analysierten Daten vor dem Schließen zu speichern.",
+    "unsavedDataMessage": "Sie haben {{count}} analysierte Testkomponente(n), die noch nicht hinzugefügt wurden. Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
+    "unsavedDataWarning": "Nicht gespeicherte analysierte Daten"
   },
   "testComponents": {
     "title": "Testkomponenten",
@@ -1357,7 +1426,9 @@
       "lotNumber": "Chargennummer",
       "site": "Verabreichungsort",
       "practitioner": "Praktiker",
-      "expirationDate": "Ablaufdatum"
+      "expirationDate": "Ablaufdatum",
+      "notes": "Notizen",
+      "route": "Verabreichungsweg"
     },
     "card": {
       "dose": "Dosis {{number}}",
@@ -1464,8 +1535,12 @@
       "clinicalNotesDesc": "Zusätzliche Informationen zu dieser Impfung",
       "cancel": "Abbrechen",
       "createImmunization": "Impfung Erstellen",
-      "updateImmunization": "Impfung Aktualisieren"
-    }
+      "updateImmunization": "Impfung Aktualisieren",
+      "siteLeftDeltoid": "Linker Deltamuskel",
+      "siteRightDeltoid": "Rechter Deltamuskel"
+    },
+    "addNewImmunization": "Neue Impfung hinzufügen",
+    "editImmunization": "Impfung bearbeiten"
   },
   "visits": {
     "title": "Arztbesuche",
@@ -1856,7 +1931,8 @@
       "specialty": "Fachgebiet",
       "practice": "Praxis",
       "phone": "Telefon",
-      "rating": "Bewertung"
+      "rating": "Bewertung",
+      "email": "Email"
     },
     "card": {
       "subtitle": "Medizinische Fachkraft",
@@ -1864,7 +1940,8 @@
       "phone": "Telefon",
       "website": "Webseite",
       "visitWebsite": "Webseite besuchen",
-      "rating": "Bewertung"
+      "rating": "Bewertung",
+      "email": "Email"
     },
     "viewModal": {
       "title": "Details der medizinischen Fachkraft",
@@ -1877,7 +1954,8 @@
       "website": "Webseite",
       "visitWebsite": "Webseite besuchen",
       "rating": "Bewertung",
-      "editButton": "Medizinische Fachkraft bearbeiten"
+      "editButton": "Medizinische Fachkraft bearbeiten",
+      "email": "Email"
     },
     "form": {
       "addTitle": "Neue medizinische Fachkraft hinzufügen",

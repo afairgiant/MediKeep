@@ -192,7 +192,10 @@
       "urgent": "Urgent - Expedited processing",
       "emergency": "Emergency - Critical priority",
       "followUp": "Follow-up - Repeat testing",
-      "screening": "Screening - Preventive testing"
+      "screening": "Screening - Preventive testing",
+      "label": "Test Type",
+      "placeholder": "Select urgency level",
+      "description": "Priority or urgency of the test"
     },
     "result": {
       "normal": "Normal - Within reference range",
@@ -330,14 +333,19 @@
       "leftDeltoid": "Left Deltoid",
       "rightDeltoid": "Right Deltoid",
       "leftThigh": "Left Thigh",
-      "rightThigh": "Right Thigh"
+      "rightThigh": "Right Thigh",
+      "leftGluteal": "Left Gluteal",
+      "rightGluteal": "Right Gluteal",
+      "abdomen": "Abdomen",
+      "other": "Other"
     },
     "routeOptions": {
       "intramuscular": "Intramuscular (IM)",
       "subcutaneous": "Subcutaneous (SC)",
       "intradermal": "Intradermal (ID)",
       "oral": "Oral",
-      "nasal": "Nasal"
+      "nasal": "Nasal",
+      "other": "Other"
     },
     "manufacturerOptions": {
       "pfizerBioNTech": "Pfizer-BioNTech",
@@ -347,7 +355,12 @@
       "merck": "Merck",
       "glaxoSmithKline": "GlaxoSmithKline",
       "sanofi": "Sanofi",
-      "other": "Other"
+      "other": "Other",
+      "pfizer": "Pfizer-BioNTech",
+      "jj": "Johnson & Johnson",
+      "astrazeneca": "AstraZeneca",
+      "glaxosmithkline": "GlaxoSmithKline",
+      "novartis": "Novartis"
     }
   },
   "procedures": {
@@ -655,6 +668,11 @@
       "documents": "Documents",
       "notes": "Notes",
       "relationships": "Relationships"
+    },
+    "performingPractitioner": {
+      "label": "Performing Practitioner",
+      "placeholder": "Select practitioner (optional)",
+      "description": "Assign a practitioner to this treatment"
     }
   },
   "familyMembers": {
@@ -875,7 +893,8 @@
         },
         "notes": {
           "placeholder": "Additional information about family member...",
-          "description": "Any additional notes or important information"
+          "description": "Any additional notes or important information",
+          "label": "Notes"
         },
         "relationshipOptions": {
           "father": "Father",
@@ -889,7 +908,21 @@
           "uncle": "Uncle",
           "aunt": "Aunt",
           "cousin": "Cousin",
-          "other": "Other"
+          "other": "Other",
+          "son": "Son",
+          "daughter": "Daughter",
+          "grandfather_paternal": "Grandfather (Paternal)",
+          "grandmother_paternal": "Grandmother (Paternal)",
+          "grandfather_maternal": "Grandfather (Maternal)",
+          "grandmother_maternal": "Grandmother (Maternal)",
+          "uncle_paternal": "Uncle (Paternal)",
+          "aunt_paternal": "Aunt (Paternal)",
+          "uncle_maternal": "Uncle (Maternal)",
+          "aunt_maternal": "Aunt (Maternal)",
+          "nephew": "Nephew",
+          "niece": "Niece",
+          "grandson": "Grandson",
+          "granddaughter": "Granddaughter"
         },
         "genderOptions": {
           "male": "Male",
@@ -929,7 +962,8 @@
         },
         "notes": {
           "placeholder": "Additional details about the condition...",
-          "description": "Treatment details, outcomes, or other relevant information"
+          "description": "Treatment details, outcomes, or other relevant information",
+          "label": "Notes"
         },
         "typeOptions": {
           "cardiovascular": "Cardiovascular - Heart & blood vessels",
@@ -941,18 +975,27 @@
           "genetic": "Genetic - Hereditary conditions",
           "respiratory": "Respiratory - Lung & breathing conditions",
           "endocrine": "Endocrine - Hormone disorders",
-          "other": "Other - Specify in notes"
+          "other": "Other - Specify in notes",
+          "mental_health": "Mental Health - Psychiatric Conditions",
+          "musculoskeletal": "Musculoskeletal - Bones & Muscles",
+          "gastrointestinal": "Gastrointestinal - Digestive System",
+          "kidney": "Kidney - Renal Diseases",
+          "liver": "Liver - Hepatic Diseases",
+          "blood": "Blood - Hematological Disorders"
         },
         "severityOptions": {
           "mild": "💛 Mild - Minor impact",
           "moderate": "⚡ Moderate - Noticeable impact",
           "severe": "⚠️ Severe - Significant impact",
-          "critical": "🚨 Critical - Life-threatening"
+          "critical": "🚨 Critical - Life-threatening",
+          "fatal": "🖤 Fatal - Cause of Death"
         },
         "statusOptions": {
           "active": "Active - Ongoing condition",
           "resolved": "Resolved - No longer present",
-          "chronic": "Chronic - Long-term condition"
+          "chronic": "Chronic - Long-term condition",
+          "managed": "Managed - Under Control with Treatment",
+          "fatal": "Fatal - Cause of Death"
         }
       }
     }
@@ -993,6 +1036,25 @@
       "rating": {
         "label": "Rating"
       }
+    },
+    "name": {
+      "label": "Full Name",
+      "placeholder": "Dr. Jane Smith",
+      "description": "Full name of the doctor, including their title"
+    },
+    "specialty": {
+      "label": "Medical Specialty",
+      "placeholder": "Search specialties or add one...",
+      "description": "Select from the list or enter an additional specialty"
+    },
+    "practice": {
+      "label": "Practice/Hospital",
+      "placeholder": "City General Hospital",
+      "description": "Workplace or medical complex"
+    },
+    "rating": {
+      "label": "Rating",
+      "description": "Rate the quality of care from this doctor"
     }
   },
   "pharmacies": {
@@ -1029,6 +1091,31 @@
         "placeholder": "(555) 123-4567",
         "description": "Primary pharmacy phone number"
       }
+    },
+    "pharmacyBrand": {
+      "label": "Pharmacy Brand",
+      "placeholder": "Select the pharmacy chain or type",
+      "description": "Main pharmacy chain or independent type"
+    },
+    "pharmacyName": {
+      "label": "Pharmacy Name",
+      "placeholder": "CVS Pharmacy - Main Street",
+      "description": "Specific name or location identifier"
+    },
+    "streetAddress": {
+      "label": "Street Address",
+      "placeholder": "123 Main Street",
+      "description": "Physical address"
+    },
+    "city": {
+      "label": "City",
+      "placeholder": "New York",
+      "description": "Pharmacy location"
+    },
+    "storeNumber": {
+      "label": "Store Number",
+      "placeholder": "e.g., 1234",
+      "description": "Store or license number"
     }
   },
   "emergencyContacts": {
@@ -1103,7 +1190,26 @@
         "placeholder": "Additional information (e.g., 'Available weekdays only', 'Speaks Spanish')",
         "description": "Any additional notes about this contact"
       }
-    }
+    },
+    "primaryPhone": {
+      "label": "Primary Phone",
+      "placeholder": "e.g., (555) 123-4567",
+      "description": "Primary phone number"
+    },
+    "secondaryPhone": {
+      "label": "Secondary Phone",
+      "placeholder": "e.g., (555) 123-4567",
+      "description": "Optional secondary phone number"
+    },
+    "isPrimary": {
+      "label": "Primary Emergency Contact",
+      "description": "This person will be contacted first in case of emergency"
+    },
+    "isActive": {
+      "label": "Active Contact",
+      "description": "This contact is currently available"
+    },
+    "notesPlaceholder": "Additional information (e.g., 'Available weekdays only', 'Speaks Spanish')"
   },
   "insurance": {
     "title": "Insurance",
@@ -1376,6 +1482,63 @@
         "placeholder": "Additional information about this insurance...",
         "description": "Any additional details or notes"
       }
+    },
+    "dividers": {
+      "basic": "Basic Insurance Information",
+      "member": "Member Information",
+      "coverage": "Coverage Period and Status",
+      "contact": "Insurance Contact Information",
+      "coverageDetails": "Coverage Details",
+      "notes": "Additional Information"
+    },
+    "insuranceTypeOptions": {
+      "medical": "Medical Insurance",
+      "dental": "Dental Insurance",
+      "vision": "Vision Insurance",
+      "prescription": "Prescription Insurance"
+    },
+    "companyName": {
+      "label": "Insurance Company",
+      "placeholder": "e.g., Blue Cross Blue Shield",
+      "description": "Name of the insurance company"
+    },
+    "planName": {
+      "label": "Plan Name",
+      "placeholder": "e.g., Health Basic Plus",
+      "description": "Specific plan name"
+    },
+    "memberId": {
+      "label": "Member ID",
+      "placeholder": "e.g., ABC123456789",
+      "description": "Member identification number on insurance card"
+    },
+    "groupNumber": {
+      "label": "Group Number",
+      "placeholder": "e.g., GRP123",
+      "description": "Group number (if applicable)"
+    },
+    "isPrimary": {
+      "label": "Primary Insurance",
+      "description": "Check if this is your primary insurance (medical only)"
+    },
+    "deductibleIndividual": {
+      "label": "Individual Deductible",
+      "placeholder": "e.g., 1000",
+      "description": "Annual individual deductible amount"
+    },
+    "copayPrimaryCare": {
+      "label": "Primary Care Copay",
+      "placeholder": "e.g., 25",
+      "description": "Copay for primary care visits"
+    },
+    "planTypeOptions": {
+      "ppo": "PPO (Preferred Provider Organization)",
+      "hmo": "HMO (Health Maintenance Organization)",
+      "epo": "EPO (Exclusive Provider Organization)",
+      "pos": "POS (Point of Service)",
+      "hdhp": "HDHP (High Deductible Health Plan)",
+      "indemnity": "Indemnity (Fee for Service)",
+      "other": "Other"
     }
   },
   "injuries": {

@@ -28,7 +28,12 @@
     "invalidEmail": "Por favor, introduzca una dirección de correo electrónico válida.",
     "invalidPhone": "Por favor, introduzca un número de teléfono válido.",
     "patientNotSelected": "Por favor, seleccione un paciente.",
-    "entityNotFound": "El objeto solicitado no se puede encontrar."
+    "entityNotFound": "El objeto solicitado no se puede encontrar.",
+    "conditionNotSelected": "Por favor, seleccione una condición",
+    "invalidPhoneDigits": "Por favor, introduzca un número de teléfono válido (10-15 dígitos)",
+    "invalidWebsiteUrl": "Por favor, introduzca una URL de sitio web válida",
+    "medicationNotSelected": "Por favor, seleccione un medicamento",
+    "mustBeValidNumber": "Debe ser un número válido"
   },
   "file": {
     "deleteFailed": "Error al eliminar el archivo.",
@@ -64,5 +69,18 @@
     "slowConnection": "La carga está tardando más de lo habitual debido a una conexión lenta.",
     "largeFileWarning": "Archivo grande detectado. La carga puede tardar varios minutos.",
     "duplicateWarning": "Este archivo parece ser un duplicado."
+  },
+  "patientForm": {
+    "birthDateFuture": "La fecha de nacimiento no puede ser en el futuro",
+    "birthDateRequired": "La fecha de nacimiento es obligatoria",
+    "createFailed": "Error en la creación: {{message}}",
+    "error": "Error",
+    "firstNameRequired": "El nombre es obligatorio",
+    "lastNameRequired": "El apellido es obligatorio",
+    "updateFailed": "Error en la actualización: {{message}}"
+  },
+  "relationships": {
+    "addConditionFailed": "Error al añadir la relación con la condición",
+    "addMedicationFailed": "Error al añadir la relación con el medicamento"
   }
 }

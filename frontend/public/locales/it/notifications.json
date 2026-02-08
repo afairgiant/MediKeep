@@ -1,1 +1,408 @@
-{}
+{
+  "channels": {
+    "add": "Aggiungi canale",
+    "confirmDelete": "Conferma l'eliminazione di questo canale?",
+    "createFailed": "Impossibile creare il canale",
+    "createSuccess": "Canale creato con successo",
+    "delete": "Elimina canale",
+    "deleteFailed": "Impossibile eliminare il canale",
+    "deleteSuccess": "Canale eliminato con successo",
+    "description": "Aggiungi e gestisci i canali di consegna delle notifiche",
+    "disabled": "Disabilitato",
+    "discord": {
+      "avatarUrl": {
+        "description": "Avatar personalizzato per il bot di notifica",
+        "label": "URL avatar (opzionale)",
+        "placeholder": "https://example.com/avatar.png"
+      },
+      "username": {
+        "description": "Nome personalizzato per il bot di notifica",
+        "label": "Nome utente bot (opzionale)",
+        "placeholder": "MediKeep"
+      },
+      "webhookUrl": {
+        "description": "Crea un webhook nelle impostazioni del tuo server Discord",
+        "label": "URL Webhook",
+        "placeholder": "https://discord.com/api/webhooks/..."
+      }
+    },
+    "edit": "Modifica canale",
+    "email": {
+      "fromEmail": {
+        "description": "L'indirizzo email del mittente",
+        "label": "Email mittente",
+        "placeholder": "notifications@example.com"
+      },
+      "smtpHost": {
+        "description": "Il server SMTP del tuo provider email",
+        "label": "Server SMTP",
+        "placeholder": "smtp.gmail.com"
+      },
+      "smtpPassword": {
+        "description": "Per Gmail, utilizza una password per le app",
+        "label": "Password SMTP",
+        "placeholder": "Password dell'app o password email"
+      },
+      "smtpPort": {
+        "description": "Solitamente 587 (TLS) o 465 (SSL)",
+        "label": "Porta SMTP",
+        "placeholder": "587"
+      },
+      "smtpUser": {
+        "description": "Il tuo indirizzo email o nome utente",
+        "label": "Nome utente SMTP",
+        "placeholder": "your-email@gmail.com"
+      },
+      "toEmail": {
+        "description": "Dove inviare le notifiche",
+        "label": "Email destinatario",
+        "placeholder": "your-email@example.com"
+      },
+      "useTls": {
+        "description": "Abilita la crittografia TLS (consigliato)",
+        "label": "Usa TLS"
+      }
+    },
+    "enabled": "Abilitato",
+    "form": {
+      "configSection": "Configurazione del canale",
+      "enabled": {
+        "description": "Ricevi notifiche attraverso questo canale",
+        "label": "Abilita canale"
+      },
+      "name": {
+        "description": "Un nome descrittivo per identificare questo canale",
+        "label": "Nome del canale",
+        "placeholder": "es., Il mio server Discord"
+      },
+      "title": "Dettagli del canale",
+      "type": {
+        "description": "Il servizio attraverso cui inviare le notifiche",
+        "label": "Tipo di canale",
+        "placeholder": "Seleziona il tipo di canale"
+      }
+    },
+    "gotify": {
+      "appToken": {
+        "description": "Crea un'applicazione in Gotify per ottenere un token",
+        "label": "Token dell'app",
+        "placeholder": "Token dell'applicazione da Gotify"
+      },
+      "priority": {
+        "description": "Priorita del messaggio (1-10, predefinito 5)",
+        "label": "Priorita",
+        "placeholder": "5"
+      },
+      "serverUrl": {
+        "description": "L'URL del tuo server Gotify",
+        "label": "URL del server",
+        "placeholder": "https://gotify.example.com"
+      }
+    },
+    "lastUsed": "Ultimo utilizzo",
+    "noChannels": "Nessun canale di notifica configurato",
+    "noChannelsHint": "Aggiungi un canale per iniziare a ricevere notifiche",
+    "notificationsSent": "{{count}} notifiche inviate",
+    "test": "Testa",
+    "testFailed": "Notifica di test non riuscita",
+    "testSuccess": "Notifica di test inviata con successo!",
+    "testing": "Test in corso...",
+    "title": "Canali di notifica",
+    "types": {
+      "discord": "Discord",
+      "email": "Email",
+      "gotify": "Gotify",
+      "webhook": "Webhook"
+    },
+    "updateFailed": "Impossibile aggiornare il canale",
+    "updateSuccess": "Canale aggiornato con successo",
+    "verified": "Verificato",
+    "webhook": {
+      "authToken": {
+        "description": "Token di autorizzazione per il webhook",
+        "label": "Token di autenticazione (opzionale)",
+        "placeholder": "Bearer token o chiave API"
+      },
+      "headers": {
+        "description": "Oggetto JSON con intestazioni personalizzate",
+        "label": "Intestazioni personalizzate (opzionale)",
+        "placeholder": "{\"Authorization\": \"Bearer token\"}"
+      },
+      "method": {
+        "description": "Metodo HTTP per la richiesta webhook",
+        "label": "Metodo HTTP"
+      },
+      "url": {
+        "description": "URL per ricevere i payload delle notifiche",
+        "label": "URL Webhook",
+        "placeholder": "https://api.example.com/webhook"
+      }
+    }
+  },
+  "description": "Configura come ricevere le notifiche per eventi importanti",
+  "error": "Impossibile caricare le impostazioni delle notifiche",
+  "events": {
+    "backup_completed": {
+      "description": "Quando un backup viene completato con successo",
+      "name": "Backup completato"
+    },
+    "backup_failed": {
+      "description": "Quando un backup non riesce",
+      "name": "Backup non riuscito"
+    },
+    "immunization_due": {
+      "description": "Quando una vaccinazione sta per scadere",
+      "name": "Vaccinazione in scadenza"
+    },
+    "immunization_overdue": {
+      "description": "Quando una vaccinazione e oltre la data prevista",
+      "name": "Vaccinazione scaduta"
+    },
+    "invitation_accepted": {
+      "description": "Quando il Suo invito di condivisione viene accettato",
+      "name": "Invito accettato"
+    },
+    "invitation_received": {
+      "description": "Quando qualcuno condivide cartelle cliniche con Lei",
+      "name": "Invito ricevuto"
+    },
+    "lab_result_abnormal": {
+      "description": "Quando i risultati di laboratorio sono fuori dall'intervallo normale",
+      "name": "Risultati di laboratorio anomali"
+    },
+    "lab_result_available": {
+      "description": "Quando vengono aggiunti nuovi risultati di laboratorio",
+      "name": "Risultati di laboratorio disponibili"
+    },
+    "login_from_new_device": {
+      "description": "Quando si accede al Suo account da un nuovo dispositivo",
+      "name": "Accesso da nuovo dispositivo"
+    },
+    "password_changed": {
+      "description": "Quando la Sua password viene modificata",
+      "name": "Password modificata"
+    },
+    "share_revoked": {
+      "description": "Quando l'accesso alle cartelle condivise viene revocato",
+      "name": "Condivisione revocata"
+    },
+    "test_notification": {
+      "description": "Notifica di test manuale",
+      "name": "Notifica di test"
+    }
+  },
+  "history": {
+    "description": "Notifiche recenti inviate attraverso i Suoi canali",
+    "fields": {
+      "channel": "Canale",
+      "error": "Errore",
+      "event": "Evento",
+      "status": "Stato",
+      "time": "Ora"
+    },
+    "loading": "Caricamento cronologia...",
+    "noHistory": "Nessuna notifica inviata",
+    "noHistoryHint": "Le notifiche appariranno qui una volta inviate",
+    "page": "Pagina {{current}} di {{total}}",
+    "showLess": "Mostra meno",
+    "showMore": "Mostra di piu",
+    "status": {
+      "failed": "Non riuscita",
+      "pending": "In attesa",
+      "sent": "Inviata"
+    },
+    "title": "Cronologia notifiche"
+  },
+  "loading": "Caricamento impostazioni notifiche...",
+  "preferences": {
+    "categories": {
+      "collaboration": "Condivisione e collaborazione",
+      "medical": "Eventi medici",
+      "other": "Altri eventi",
+      "security": "Avvisi di sicurezza",
+      "sharing": "Condivisione e inviti",
+      "system": "Eventi di sistema"
+    },
+    "comingSoon": "In arrivo",
+    "description": "Scegli quali eventi attivano le notifiche su ciascun canale",
+    "eventHeader": "Evento",
+    "loading": "Caricamento preferenze...",
+    "noChannels": "Aggiungi prima un canale di notifica per configurare le preferenze degli eventi",
+    "saveFailed": "Impossibile salvare la preferenza",
+    "saveSuccess": "Preferenza salvata",
+    "title": "Notifiche eventi"
+  },
+  "title": "Impostazioni notifiche",
+  "toasts": {
+    "auth": {
+      "accessDeniedAdmin": "Accesso negato: privilegi di amministratore richiesti",
+      "accessDeniedRole": "Accesso negato: ruolo {{role}} richiesto",
+      "accessDeniedRoles": "Accesso negato: uno di questi ruoli e richiesto: {{roles}}",
+      "accountCreatedSuccess": "Account creato con successo! Accesso in corso...",
+      "loginFailed": "Accesso non riuscito",
+      "loginRequired": "Effettui l'accesso per visualizzare questa pagina",
+      "loginSuccess": "Accesso effettuato con successo!",
+      "logoutSuccess": "Disconnessione avvenuta con successo",
+      "sessionExpired": "Sessione scaduta per inattivita",
+      "sessionExpiredLogin": "Sessione scaduta. Effettui nuovamente l'accesso.",
+      "ssoFailed": "Impossibile avviare l'accesso SSO",
+      "userCreatedSuccess": "Account utente creato con successo!"
+    },
+    "documents": {
+      "deleteFailed": "Eliminazione non riuscita",
+      "linkFailed": "Impossibile collegare il documento",
+      "linkSuccess": "Documento collegato con successo",
+      "unlinkFailed": "Impossibile scollegare il documento",
+      "unlinkSuccess": "Documento scollegato con successo",
+      "uploadFailed": "Caricamento non riuscito"
+    },
+    "familySharing": {
+      "accessRevoked": "Accesso revocato",
+      "invitationFailed": "Impossibile inviare l'invito",
+      "invitationSent": "Invito inviato con successo!",
+      "loadFailed": "Impossibile caricare le informazioni di condivisione",
+      "revokeFailed": "Impossibile revocare l'accesso"
+    },
+    "files": {
+      "downloadFailed": "Download del file non riuscito"
+    },
+    "generic": {
+      "allOperationsFailed": "Tutte le {{operation}} non riuscite. Riprovi.",
+      "allOperationsSuccess": "Tutte le {{total}} {{operation}} completate con successo!",
+      "deleteFailed": "Eliminazione non riuscita",
+      "downloadFailed": "Download non riuscito",
+      "error": "Errore",
+      "operationFailed": "Operazione non riuscita",
+      "operationFailedTitle": "{{operation}} non riuscita",
+      "operationPartial": "{{success}}/{{total}} {{operation}} completate con successo. {{failed}} non riuscite.",
+      "operationPartialTitle": "{{operation}} completata con errori",
+      "operationSuccess": "{{operation}} completata con successo!",
+      "saveFailed": "Salvataggio non riuscito",
+      "success": "Operazione riuscita!",
+      "warning": "Attenzione"
+    },
+    "invitations": {
+      "accessRevoked": "Accesso revocato",
+      "accessRevokedMessage": "L'accesso e stato revocato.",
+      "alreadyRevoked": "Gia revocato",
+      "alreadyRevokedMessage": "Questo invito e stato gia revocato.",
+      "cancelFailed": "Impossibile annullare l'invito",
+      "cancelled": "Invito annullato",
+      "cancelledMessage": "L'invito e stato annullato.",
+      "respondFailed": "Impossibile rispondere all'invito",
+      "revokeFailed": "Impossibile revocare l'accesso"
+    },
+    "labResults": {
+      "addFailed": "Impossibile aggiungere i componenti del test",
+      "addedMessage": "Aggiunti {{count}} componenti del test al risultato di laboratorio.",
+      "addedSuccess": "Operazione riuscita!",
+      "deletedMessage": "{{name}} e stato eliminato",
+      "deletedSuccess": "Componente eliminato",
+      "noTextMessage": "Incolla il testo dei risultati di laboratorio nell'area di inserimento.",
+      "noTextToParse": "Nessun testo da analizzare",
+      "parseWarning": "Alcune righe non sono state analizzate",
+      "parsedCount": "Trovati {{count}} componenti del test. Li revisioni nella scheda Anteprima.",
+      "templateApplied": "Modello applicato",
+      "templateAppliedMessage": "Aggiunti {{count}} componenti dal modello \"{{name}}\".",
+      "textParsed": "Testo analizzato",
+      "trendExportFailed": "Impossibile esportare il grafico",
+      "trendExportSuccess": "Grafico esportato con successo",
+      "updateFailed": "Impossibile aggiornare il componente"
+    },
+    "patient": {
+      "createdSuccess": "{{name}} creato con successo",
+      "deleteFailed": "Eliminazione non riuscita: {{message}}",
+      "deleteOwnOnly": "E possibile eliminare solo i pazienti di cui si e proprietari",
+      "deletedNoOthers": "{{name}} eliminato con successo. Nessun altro paziente disponibile.",
+      "deletedSuccess": "{{name}} eliminato con successo",
+      "deletedSwitched": "{{name}} eliminato con successo. Passaggio a {{fallbackName}}.",
+      "nowViewing": "Visualizzazione di {{name}}",
+      "removeAccessFailed": "Rimozione accesso non riuscita: {{message}}",
+      "removeOwnOnly": "Non e possibile rimuovere l'accesso ai pazienti di cui si e proprietari",
+      "removedAccess": "Accesso a {{name}} rimosso",
+      "switchFailed": "Cambio non riuscito: {{message}}",
+      "updatedSuccess": "{{name}} aggiornato con successo"
+    },
+    "photo": {
+      "deleteFailed": "Eliminazione non riuscita",
+      "photoBeingUploaded": "Una foto e attualmente in fase di caricamento. Attenda il completamento.",
+      "pleaseWait": "Attendere",
+      "uploadFailed": "Caricamento non riuscito",
+      "uploadSuccess": "Foto caricata con successo"
+    },
+    "reports": {
+      "noRecordsMessage": "Selezioni almeno una registrazione dalle categorie sottostanti per generare un report.",
+      "noRecordsSelected": "Nessuna registrazione selezionata",
+      "templateDeleteFailed": "Impossibile eliminare il modello",
+      "templateDeleted": "Modello eliminato con successo",
+      "templateLoaded": "Modello \"{{name}}\" caricato",
+      "templateNameRequired": "Il nome del modello e obbligatorio",
+      "templateSaveFailed": "Impossibile salvare il modello",
+      "templateSaved": "Modello salvato con successo",
+      "validationError": "Errore di validazione"
+    },
+    "settings": {
+      "cleanupComplete": "Pulizia completata: {{cleaned}} file ripuliti, {{deleted}} file eliminati",
+      "cleanupFailed": "Impossibile ripulire i file. Riprovi piu tardi.",
+      "noOutOfSync": "Nessun file non sincronizzato trovato da ripulire",
+      "sessionTimeoutUpdated": "Timeout sessione aggiornato a {{minutes}} minuti. La sessione e stata aggiornata."
+    },
+    "sharing": {
+      "accessRevoked": "Accesso revocato per l'utente {{userId}}",
+      "cancelFailed": "Impossibile annullare l'invito: {{message}}",
+      "invalidJson": "Formato JSON non valido in {{fieldName}}. Verifichi la sintassi.",
+      "invitationCancelled": "Invito annullato con successo",
+      "invitationFailed": "Invito non riuscito: {{message}}",
+      "invitationSent": "Invito inviato con successo a {{recipient}}",
+      "revokeFailed": "Revoca non riuscita: {{message}}",
+      "shareUpdated": "Condivisione paziente aggiornata con successo",
+      "updateFailed": "Aggiornamento non riuscito: {{message}}"
+    },
+    "tagSearch": {
+      "loadFailed": "Impossibile caricare i tag popolari",
+      "noTagsSelected": "Selezioni almeno un tag per la ricerca",
+      "noTagsSelectedTitle": "Nessun tag selezionato",
+      "searchFailed": "Impossibile cercare le registrazioni per tag"
+    },
+    "upload": {
+      "backgroundProcessing": "\"{{fileName}}\" e in fase di elaborazione in background. Ricevera una notifica al completamento.",
+      "completedWithErrors": "Caricamento completato con errori",
+      "documentAdded": "Documento aggiunto a Paperless",
+      "duplicateDocument": "Documento duplicato",
+      "failed": "Caricamento non riuscito",
+      "fileUploadFailed": "Caricamento file non riuscito",
+      "fileUploadedSuccess": "\"{{fileName}}\" caricato su Paperless con successo!",
+      "paperlessUploadFailed": "Caricamento su Paperless non riuscito",
+      "partialSuccess": "{{completed}}/{{total}} file caricati con successo. {{failed}} non riusciti."
+    },
+    "vitals": {
+      "deleteFailed": "Impossibile eliminare la registrazione dei parametri vitali",
+      "deleteSuccess": "Registrazione parametri vitali eliminata con successo",
+      "formErrors": "Corregga gli errori nel modulo",
+      "saveFailed": "Impossibile {{action}} i parametri vitali",
+      "savedSuccess": "Parametri vitali {{action}} con successo!"
+    }
+  },
+  "validation": {
+    "appTokenRequired": "Il token dell'app e obbligatorio",
+    "fromEmailInvalid": "Formato email non valido",
+    "fromEmailRequired": "L'email del mittente e obbligatoria",
+    "headersInvalid": "Le intestazioni devono essere in formato JSON valido",
+    "nameRequired": "Il nome del canale e obbligatorio",
+    "nameTooLong": "Il nome non puo superare i 100 caratteri",
+    "serverUrlInvalid": "Formato URL non valido",
+    "serverUrlRequired": "L'URL del server e obbligatorio",
+    "smtpHostRequired": "Il server SMTP e obbligatorio",
+    "smtpPasswordRequired": "La password SMTP e obbligatoria",
+    "smtpPortInvalid": "La porta deve essere compresa tra 1 e 65535",
+    "smtpPortRequired": "La porta SMTP e obbligatoria",
+    "smtpUserRequired": "Il nome utente SMTP e obbligatorio",
+    "toEmailInvalid": "Formato email non valido",
+    "toEmailRequired": "L'email del destinatario e obbligatoria",
+    "typeRequired": "Il tipo di canale e obbligatorio",
+    "urlInvalid": "Formato URL non valido",
+    "urlRequired": "L'URL del webhook e obbligatorio",
+    "webhookUrlInvalid": "Formato URL webhook non valido",
+    "webhookUrlRequired": "L'URL del webhook e obbligatorio"
+  }
+}

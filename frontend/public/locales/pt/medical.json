@@ -175,14 +175,14 @@
       "cancelled": "Cancelado - Teste foi cancelado"
     },
     "category": {
-      "bloodWork": "Blood Work",
-      "imaging": "Imaging (X-ray, MRI, CT)",
-      "pathology": "Pathology",
-      "microbiology": "Microbiology",
-      "chemistry": "Chemistry",
-      "hematology": "Hematology",
-      "immunology": "Immunology",
-      "genetics": "Genetics",
+      "bloodWork": "Exames de Sangue",
+      "imaging": "Imagem (Raio-X, RM, TC)",
+      "pathology": "Patologia",
+      "microbiology": "Microbiologia",
+      "chemistry": "Bioquímica",
+      "hematology": "Hematologia",
+      "immunology": "Imunologia",
+      "genetics": "Genética",
       "cardiology": "Cardiologia",
       "pulmonology": "Pulmonologia",
       "other": "Outro"
@@ -191,8 +191,11 @@
       "routine": "Rotina - Processamento padrão",
       "urgent": "Urgente - Processamento acelerado",
       "emergency": "Emergência - Prioridade crítica",
-      "followUp": "Follow-up - Repeat testing",
-      "screening": "Screening - Preventive testing"
+      "followUp": "Acompanhamento - Teste de repetição",
+      "screening": "Rastreamento - Teste preventivo",
+      "description": "Prioridade ou urgência do teste",
+      "label": "Tipo de Teste",
+      "placeholder": "Selecione o nível de urgência"
     },
     "result": {
       "normal": "Normal - Dentro da faixa de referência",
@@ -330,14 +333,19 @@
       "leftDeltoid": "Deltóide Esquerdo",
       "rightDeltoid": "Deltóide Direito",
       "leftThigh": "Coxa Esquerda",
-      "rightThigh": "Coxa Direita"
+      "rightThigh": "Coxa Direita",
+      "abdomen": "Abdômen",
+      "leftGluteal": "Glúteo Esquerdo",
+      "other": "Outro",
+      "rightGluteal": "Glúteo Direito"
     },
     "routeOptions": {
       "intramuscular": "Intramuscular (IM)",
       "subcutaneous": "Subcutânea (SC)",
       "intradermal": "Intradérmica (ID)",
       "oral": "Oral",
-      "nasal": "Nasal"
+      "nasal": "Nasal",
+      "other": "Outro"
     },
     "manufacturerOptions": {
       "pfizerBioNTech": "Pfizer-BioNTech",
@@ -347,7 +355,12 @@
       "merck": "Merck",
       "glaxoSmithKline": "GlaxoSmithKline",
       "sanofi": "Sanofi",
-      "other": "Other"
+      "other": "Outro",
+      "astrazeneca": "AstraZeneca",
+      "glaxosmithkline": "GlaxoSmithKline",
+      "jj": "Johnson & Johnson",
+      "novartis": "Novartis",
+      "pfizer": "Pfizer-BioNTech"
     }
   },
   "procedures": {
@@ -655,6 +668,11 @@
       "documents": "Documentos",
       "notes": "Notas",
       "relationships": "Relações"
+    },
+    "performingPractitioner": {
+      "description": "Atribua um profissional a este tratamento",
+      "label": "Profissional Responsável",
+      "placeholder": "Selecione o profissional (opcional)"
     }
   },
   "familyMembers": {
@@ -875,7 +893,8 @@
         },
         "notes": {
           "placeholder": "Informações adicionais sobre o membro da família...",
-          "description": "Quaisquer notas adicionais ou informações importantes"
+          "description": "Quaisquer notas adicionais ou informações importantes",
+          "label": "Notas"
         },
         "relationshipOptions": {
           "father": "Pai",
@@ -889,7 +908,21 @@
           "uncle": "Tio",
           "aunt": "Tia",
           "cousin": "Primo/Prima",
-          "other": "Outro"
+          "other": "Outro",
+          "aunt_maternal": "Tia (Materna)",
+          "aunt_paternal": "Tia (Paterna)",
+          "daughter": "Filha",
+          "granddaughter": "Neta",
+          "grandfather_maternal": "Avô (Materno)",
+          "grandfather_paternal": "Avô (Paterno)",
+          "grandmother_maternal": "Avó (Materna)",
+          "grandmother_paternal": "Avó (Paterna)",
+          "grandson": "Neto",
+          "nephew": "Sobrinho",
+          "niece": "Sobrinha",
+          "son": "Filho",
+          "uncle_maternal": "Tio (Materno)",
+          "uncle_paternal": "Tio (Paterno)"
         },
         "genderOptions": {
           "male": "Masculino",
@@ -929,7 +962,8 @@
         },
         "notes": {
           "placeholder": "Detalhes adicionais sobre a condição...",
-          "description": "Detalhes do tratamento, resultados ou outras informações relevantes"
+          "description": "Detalhes do tratamento, resultados ou outras informações relevantes",
+          "label": "Notas"
         },
         "typeOptions": {
           "cardiovascular": "Cardiovascular - Coração e vasos sanguíneos",
@@ -941,18 +975,27 @@
           "genetic": "Genético - Condições hereditárias",
           "respiratory": "Respiratório - Condições pulmonares e respiratórias",
           "endocrine": "Endócrino - Distúrbios hormonais",
-          "other": "Outro - Especifique nas notas"
+          "other": "Outro - Especifique nas notas",
+          "blood": "Sangue - Distúrbios Hematológicos",
+          "gastrointestinal": "Gastrointestinal - Sistema Digestivo",
+          "kidney": "Renal - Doenças Renais",
+          "liver": "Fígado - Doenças Hepáticas",
+          "mental_health": "Saúde Mental - Condições Psiquiátricas",
+          "musculoskeletal": "Musculoesquelético - Ossos e Músculos"
         },
         "severityOptions": {
           "mild": "💛 Leve - Impacto menor",
           "moderate": "⚡ Moderado - Impacto perceptível",
           "severe": "⚠️ Grave - Impacto significativo",
-          "critical": "🚨 Crítico - Ameaça à vida"
+          "critical": "🚨 Crítico - Ameaça à vida",
+          "fatal": "🖤 Fatal - Causa do Óbito"
         },
         "statusOptions": {
           "active": "Ativo - Condição em andamento",
           "resolved": "Resolvido - Não mais presente",
-          "chronic": "Crônico - Condição de longo prazo"
+          "chronic": "Crônico - Condição de longo prazo",
+          "fatal": "Fatal - Causa do Óbito",
+          "managed": "Controlado - Sob Controle com Tratamento"
         }
       }
     }
@@ -962,7 +1005,7 @@
     "form": {
       "name": {
         "label": "Nome Completo",
-        "placeholder": "Dr. Jane Smith",
+        "placeholder": "Dra. Maria Silva",
         "description": "Nome completo do médico, incluindo título"
       },
       "specialty": {
@@ -977,7 +1020,7 @@
       },
       "phone": {
         "label": "Número de Telefone",
-        "placeholder": "(555) 123-4567",
+        "placeholder": "(11) 1234-5678",
         "description": "Número de contato principal"
       },
       "email": {
@@ -987,12 +1030,31 @@
       },
       "website": {
         "label": "Website",
-        "placeholder": "https://www.example.com",
+        "placeholder": "https://www.exemplo.com",
         "description": "Website profissional ou página da prática"
       },
       "rating": {
         "label": "Avaliação"
       }
+    },
+    "name": {
+      "description": "Nome completo do médico, incluindo o título",
+      "label": "Nome Completo",
+      "placeholder": "Dra. Maria Silva"
+    },
+    "practice": {
+      "description": "Local de trabalho ou complexo médico",
+      "label": "Consultório/Hospital",
+      "placeholder": "Hospital Geral da Cidade"
+    },
+    "rating": {
+      "description": "Avalie a qualidade do atendimento deste médico",
+      "label": "Avaliação"
+    },
+    "specialty": {
+      "description": "Selecione da lista ou insira uma especialidade adicional",
+      "label": "Especialidade Médica",
+      "placeholder": "Pesquise especialidades ou adicione uma..."
     }
   },
   "pharmacies": {
@@ -1005,7 +1067,7 @@
       },
       "name": {
         "label": "Nome da Farmácia",
-        "placeholder": "CVS Pharmacy - Main Street",
+        "placeholder": "Farmácia Raia - Centro",
         "description": "Nome específico ou identificador de localização"
       },
       "locationDivider": "Informações de Localização",
@@ -1026,9 +1088,34 @@
       },
       "phone": {
         "label": "Número de Telefone",
-        "placeholder": "(555) 123-4567",
+        "placeholder": "(11) 1234-5678",
         "description": "Número de telefone principal da farmácia"
       }
+    },
+    "city": {
+      "description": "Localização da farmácia",
+      "label": "Cidade",
+      "placeholder": "São Paulo"
+    },
+    "pharmacyBrand": {
+      "description": "Principal rede de farmácia ou tipo independente",
+      "label": "Rede de Farmácia",
+      "placeholder": "Selecione a rede de farmácia ou tipo"
+    },
+    "pharmacyName": {
+      "description": "Nome específico ou identificador do local",
+      "label": "Nome da Farmácia",
+      "placeholder": "Farmácia Raia - Centro"
+    },
+    "storeNumber": {
+      "description": "Número da loja ou licença",
+      "label": "Número da Loja",
+      "placeholder": "ex.: 1234"
+    },
+    "streetAddress": {
+      "description": "Endereço físico",
+      "label": "Endereço",
+      "placeholder": "Rua Principal, 123"
     }
   },
   "emergencyContacts": {
@@ -1103,6 +1190,25 @@
         "placeholder": "Informações adicionais (ex.: 'Disponível apenas em dias úteis', 'Fala espanhol')",
         "description": "Quaisquer notas adicionais sobre este contato"
       }
+    },
+    "isActive": {
+      "description": "Este contato está disponível atualmente",
+      "label": "Contato Ativo"
+    },
+    "isPrimary": {
+      "description": "Esta pessoa será contatada primeiro em caso de emergência",
+      "label": "Contato de Emergência Principal"
+    },
+    "notesPlaceholder": "Informações adicionais (ex.: 'Disponível apenas em dias úteis', 'Fala espanhol')",
+    "primaryPhone": {
+      "description": "Número de telefone principal",
+      "label": "Telefone Principal",
+      "placeholder": "ex.: (11) 1234-5678"
+    },
+    "secondaryPhone": {
+      "description": "Número de telefone secundário opcional",
+      "label": "Telefone Secundário",
+      "placeholder": "ex.: (11) 1234-5678"
     }
   },
   "insurance": {
@@ -1262,11 +1368,11 @@
         "description": "Tipo de plano de seguro médico",
         "options": {
           "ppo": "PPO (Preferred Provider Organization  )",
-          "hmo": "HMO (Health Maintenance Organization)",
-          "epo": "EPO (Exclusive Provider Organization)",
-          "pos": "POS (Point of Service)",
-          "hdhp": "HDHP (High Deductible Health Plan)",
-          "indemnity": "Indemnity (Fee-for-Service)"
+          "hmo": "HMO (Organização de Manutenção da Saúde)",
+          "epo": "EPO (Organização de Provedores Exclusivos)",
+          "pos": "POS (Ponto de Serviço)",
+          "hdhp": "HDHP (Plano de Alta Franquia)",
+          "indemnity": "Indenização (Pagamento por Serviço)"
         }
       },
       "dentalPlanType": {
@@ -1274,9 +1380,9 @@
         "placeholder": "Selecione o tipo de plano dental",
         "description": "Tipo de plano de seguro dental",
         "options": {
-          "dppo": "DPPO (Dental Preferred Provider Organization)",
-          "dhmo": "DHMO (Dental Health Maintenance Organization)",
-          "discount": "Discount Plan"
+          "dppo": "DPPO (Organização de Provedores Preferenciais Odontológicos)",
+          "dhmo": "DHMO (Organização de Manutenção da Saúde Odontológica)",
+          "discount": "Plano de Desconto"
         }
       },
       "annualMaximum": {
@@ -1304,8 +1410,8 @@
         "placeholder": "Selecione o tipo de plano de visão",
         "description": "Tipo de plano de seguro de visão",
         "options": {
-          "visionPpo": "Vision PPO",
-          "visionHmo": "Vision HMO",
+          "visionPpo": "PPO de Visão",
+          "visionHmo": "HMO de Visão",
           "visionDiscount": "Plano de Desconto de Visão"
         }
       },
@@ -1376,6 +1482,168 @@
         "placeholder": "Informações adicionais sobre este seguro...",
         "description": "Quaisquer detalhes ou notas adicionais"
       }
+    },
+    "companyName": {
+      "description": "Nome da seguradora",
+      "label": "Seguradora",
+      "placeholder": "ex.: Unimed"
+    },
+    "copayPrimaryCare": {
+      "description": "Copagamento para consultas de cuidados primários",
+      "label": "Copagamento de Cuidados Primários",
+      "placeholder": "ex.: 25"
+    },
+    "deductibleIndividual": {
+      "description": "Valor da franquia anual individual",
+      "label": "Franquia Individual",
+      "placeholder": "ex.: 1000"
+    },
+    "dividers": {
+      "basic": "Informações Básicas do Seguro",
+      "contact": "Informações de Contato do Seguro",
+      "coverage": "Período e Status da Cobertura",
+      "coverageDetails": "Detalhes da Cobertura",
+      "member": "Informações do Membro",
+      "notes": "Informações Adicionais"
+    },
+    "groupNumber": {
+      "description": "Número do grupo (se aplicável)",
+      "label": "Número do Grupo",
+      "placeholder": "ex.: GRP123"
+    },
+    "insuranceTypeOptions": {
+      "dental": "Seguro Odontológico",
+      "medical": "Seguro Médico",
+      "prescription": "Seguro de Prescrição",
+      "vision": "Seguro de Visão"
+    },
+    "isPrimary": {
+      "description": "Marque se este é seu seguro principal (apenas médico)",
+      "label": "Seguro Principal"
+    },
+    "memberId": {
+      "description": "Número de identificação do membro no cartão do seguro",
+      "label": "ID do Membro",
+      "placeholder": "ex.: ABC123456789"
+    },
+    "planName": {
+      "description": "Nome específico do plano",
+      "label": "Nome do Plano",
+      "placeholder": "ex.: Plano Básico Plus"
+    },
+    "planTypeOptions": {
+      "epo": "EPO (Organização de Provedores Exclusivos)",
+      "hdhp": "HDHP (Plano de Alta Franquia)",
+      "hmo": "HMO (Organização de Manutenção da Saúde)",
+      "indemnity": "Indenização (Pagamento por Serviço)",
+      "other": "Outro",
+      "pos": "POS (Ponto de Serviço)",
+      "ppo": "PPO (Organização de Provedores Preferenciais)"
     }
+  },
+  "injuries": {
+    "addNew": "Adicionar Nova Lesão",
+    "addTitle": "Adicionar Nova Lesão",
+    "bodyPart": {
+      "description": "A parte ou área do corpo afetada",
+      "label": "Parte do Corpo",
+      "placeholder": "ex.: Tornozelo, Pulso, Joelho"
+    },
+    "cardSubtitle": "Lesão Física",
+    "dateOfInjury": {
+      "description": "A data em que a lesão aconteceu",
+      "label": "Data da Lesão",
+      "placeholder": "Quando a lesão ocorreu"
+    },
+    "editTitle": "Editar Lesão",
+    "emptyState": {
+      "filtered": "Tente ajustar seus critérios de busca ou filtro.",
+      "noData": "Clique em \"Adicionar Nova Lesão\" para começar.",
+      "title": "Nenhuma lesão encontrada"
+    },
+    "injuryName": {
+      "description": "Um nome descritivo para esta lesão",
+      "label": "Nome da Lesão",
+      "placeholder": "ex.: Entorse no tornozelo direito"
+    },
+    "injuryType": {
+      "createNew": "Criar \"{{name}}\"",
+      "description": "Categoria da lesão (ex.: Entorse, Fratura)",
+      "label": "Tipo de Lesão",
+      "noResults": "Nenhum tipo correspondente encontrado",
+      "noTypes": "Nenhum tipo disponível",
+      "placeholder": "Selecione ou crie um tipo",
+      "system": "Sistema"
+    },
+    "laterality": {
+      "description": "Qual lado do corpo é afetado",
+      "label": "Lado",
+      "options": {
+        "bilateral": "Ambos os Lados",
+        "left": "Esquerdo",
+        "notApplicable": "Não Aplicável",
+        "right": "Direito"
+      },
+      "placeholder": "Selecione o lado"
+    },
+    "mechanism": {
+      "description": "Descreva como a lesão ocorreu",
+      "label": "Como Aconteceu",
+      "placeholder": "ex.: Caiu durante uma caminhada"
+    },
+    "messages": {
+      "createTypeFailed": "Falha ao criar tipo de lesão",
+      "loading": "Carregando lesões...",
+      "saving": "Salvando lesão..."
+    },
+    "notes": {
+      "description": "Notas gerais ou detalhes adicionais",
+      "label": "Notas Adicionais",
+      "placeholder": "Qualquer outra informação relevante..."
+    },
+    "practitioner": {
+      "description": "O profissional de saúde que trata esta lesão",
+      "label": "Profissional Responsável",
+      "placeholder": "Selecione o profissional"
+    },
+    "recoveryNotes": {
+      "description": "Notas sobre o progresso da recuperação",
+      "label": "Notas de Recuperação",
+      "placeholder": "Atualizações de progresso, marcos ou observações"
+    },
+    "severity": {
+      "description": "Qual a gravidade desta lesão",
+      "label": "Gravidade",
+      "placeholder": "Selecione a gravidade"
+    },
+    "status": {
+      "description": "Status atual desta lesão",
+      "label": "Status",
+      "options": {
+        "active": "Ativo - Em tratamento atualmente",
+        "chronic": "Crônico - Efeitos de longo prazo",
+        "healing": "Em Recuperação - Em processo de cura",
+        "resolved": "Resolvido - Completamente curado"
+      }
+    },
+    "tabs": {
+      "basicInfo": "Informações Básicas",
+      "documents": "Documentos",
+      "notes": "Notas",
+      "overview": "Visão Geral",
+      "recovery": "Recuperação",
+      "treatment": "Tratamento"
+    },
+    "title": "Lesões",
+    "treatmentReceived": {
+      "description": "Descrição do tratamento recebido",
+      "label": "Tratamento Recebido",
+      "placeholder": "ex.: Protocolo RICE, gesso aplicado"
+    },
+    "viewModal": {
+      "additionalInfo": "Informações Adicionais",
+      "injuryDetails": "Detalhes da Lesão"
+    },
+    "viewPractitioner": "Ver detalhes do profissional"
   }
 }
