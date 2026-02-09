@@ -1511,6 +1511,7 @@ Base path: `/api/v1/procedures`
   "procedure_date": "2025-10-04",
   "practitioner_id": 5,
   "status": "completed",
+  "outcome": "successful",
   "notes": "Routine lab work"
 }
 ```

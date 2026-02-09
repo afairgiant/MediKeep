@@ -47,6 +47,11 @@ const StatusBadge = ({
       abnormal: { icon: '⚠️', label: 'Abnormal', color: 'yellow' },
       critical: { icon: '🔴', label: 'Critical', color: 'red' },
 
+      // Procedure outcome statuses (abnormal and pending reuse existing configs above)
+      successful: { icon: '✅', label: 'Successful', color: 'green' },
+      complications: { icon: '⚠️', label: 'Complications', color: 'red' },
+      inconclusive: { icon: '❓', label: 'Inconclusive', color: 'yellow' },
+
       // General statuses
       scheduled: { icon: '📅', label: 'Scheduled', color: 'blue' },
       'in-progress': { icon: '🔄', label: 'In Progress', color: 'blue' },

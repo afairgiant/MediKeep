@@ -226,6 +226,26 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
+                      label={t('procedures.form.outcome', 'Outcome')}
+                      value={formData.outcome || null}
+                      data={[
+                        { value: 'successful', label: t('procedures.form.outcomeSuccessful', 'Successful') },
+                        { value: 'abnormal', label: t('procedures.form.outcomeAbnormal', 'Abnormal') },
+                        { value: 'complications', label: t('procedures.form.outcomeComplications', 'Complications') },
+                        { value: 'inconclusive', label: t('procedures.form.outcomeInconclusive', 'Inconclusive') },
+                        { value: 'pending', label: t('procedures.form.outcomePending', 'Pending') },
+                      ]}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'outcome', value: value || '' } });
+                      }}
+                      placeholder={t('procedures.form.outcomePlaceholder', 'Select outcome')}
+                      description={t('procedures.form.outcomeDesc', 'Result or outcome of the procedure')}
+                      clearable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
                       label={t('procedures.form.practitioner', 'Practitioner')}
                       value={formData.practitioner_id || null}
                       data={practitioners.map(prac => ({

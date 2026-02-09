@@ -4,7 +4,7 @@ from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
-from app.models.enums import ProcedureStatus
+from app.models.enums import ProcedureStatus, get_all_procedure_outcomes
 
 
 class ProcedureBase(TaggedEntityMixin):
@@ -25,6 +25,9 @@ class ProcedureBase(TaggedEntityMixin):
     date: DateType = Field(..., description="Date when the procedure was performed")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     status: str = Field(..., description="Status of the procedure")
+    outcome: Optional[str] = Field(
+        None, max_length=50, description="Outcome of the procedure"
+    )
     facility: Optional[str] = Field(
         None, max_length=300, description="Facility where the procedure was performed"
     )
@@ -106,6 +109,16 @@ class ProcedureBase(TaggedEntityMixin):
             raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
         return v.lower()
 
+    @field_validator("outcome")
+    @classmethod
+    def validate_outcome(cls, v):
+        if v is not None:
+            valid = get_all_procedure_outcomes()
+            if v.lower() not in valid:
+                raise ValueError(f"Outcome must be one of: {', '.join(valid)}")
+            return v.lower()
+        return v
+
 
 class ProcedureCreate(ProcedureBase):
     pass
@@ -119,6 +132,7 @@ class ProcedureUpdate(BaseModel):
     date: Optional[DateType] = None
     notes: Optional[str] = Field(None, max_length=1000)
     status: Optional[str] = None
+    outcome: Optional[str] = Field(None, max_length=50)
     facility: Optional[str] = Field(None, max_length=300)
     procedure_setting: Optional[str] = Field(None, max_length=100)
     procedure_complications: Optional[str] = Field(None, max_length=500)
@@ -181,6 +195,16 @@ class ProcedureUpdate(BaseModel):
             return v.lower()
         return v
 
+    @field_validator("outcome")
+    @classmethod
+    def validate_outcome(cls, v):
+        if v is not None:
+            valid = get_all_procedure_outcomes()
+            if v.lower() not in valid:
+                raise ValueError(f"Outcome must be one of: {', '.join(valid)}")
+            return v.lower()
+        return v
+
 
 class ProcedureResponse(ProcedureBase):
     id: int
@@ -200,7 +224,18 @@ class ProcedureSummary(BaseModel):
     procedure_name: str
     date: DateType
     status: str
+    outcome: Optional[str] = None
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
+
+    @field_validator("outcome")
+    @classmethod
+    def validate_outcome(cls, v):
+        if v is not None:
+            valid = get_all_procedure_outcomes()
+            if v.lower() not in valid:
+                raise ValueError(f"Outcome must be one of: {', '.join(valid)}")
+            return v.lower()
+        return v
 
     model_config = ConfigDict(from_attributes=True)

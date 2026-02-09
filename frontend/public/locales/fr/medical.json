@@ -487,6 +487,18 @@
     },
     "status": {
       "description": "État actuel de la procédure"
+    },
+    "outcome": {
+      "label": "Outcome",
+      "placeholder": "Select outcome",
+      "description": "Result or outcome of the procedure",
+      "options": {
+        "successful": "Successful",
+        "abnormal": "Abnormal",
+        "complications": "Complications",
+        "inconclusive": "Inconclusive",
+        "pending": "Pending"
+      }
     }
   },
   "visits": {

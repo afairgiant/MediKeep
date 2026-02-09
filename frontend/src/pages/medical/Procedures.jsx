@@ -117,6 +117,7 @@ const Procedures = () => {
     description: '',
     procedure_date: '',
     status: 'scheduled',
+    outcome: '',
     notes: '',
     facility: '',
     procedure_setting: '',
@@ -160,6 +161,7 @@ const Procedures = () => {
         description: '',
         procedure_date: '',
         status: 'scheduled',
+        outcome: '',
         notes: '',
         facility: '',
         procedure_setting: '',
@@ -170,7 +172,7 @@ const Procedures = () => {
         anesthesia_notes: '',
         tags: [],
       });
-      
+
       // Only refresh if we created a new procedure during form submission
       // Don't refresh after uploads complete to prevent resource exhaustion
       if (needsRefreshAfterSubmissionRef.current) {
@@ -198,6 +200,7 @@ const Procedures = () => {
       description: '',
       procedure_date: '',
       status: 'scheduled',
+      outcome: '',
       notes: '',
       facility: '',
       procedure_setting: '',
@@ -221,6 +224,7 @@ const Procedures = () => {
       description: procedure.description || '',
       procedure_date: procedure.date || '',
       status: procedure.status || 'scheduled',
+      outcome: procedure.outcome || '',
       notes: procedure.notes || '',
       facility: procedure.facility || '',
       procedure_setting: procedure.procedure_setting || '',
@@ -280,6 +284,7 @@ const Procedures = () => {
       description: formData.description,
       date: formData.procedure_date || null,
       status: formData.status,
+      outcome: formData.outcome || null,
       notes: formData.notes || null,
       facility: formData.facility || null,
       procedure_setting: formData.procedure_setting || null,

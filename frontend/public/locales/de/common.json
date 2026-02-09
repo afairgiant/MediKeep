@@ -1343,6 +1343,7 @@
       "noComplications": "Keine Komplikationen gemeldet",
       "clinicalNotes": "Klinische Notizen",
       "noClinicalNotes": "Keine klinischen Notizen verfügbar",
+      "outcome": "Outcome",
       "notSpecified": "Nicht angegeben",
       "close": "Schließen",
       "edit": "Bearbeiten"
@@ -1405,6 +1406,14 @@
       "clinicalNotes": "Klinische Notizen",
       "clinicalNotesPlaceholder": "Klinische Notizen, Beobachtungen oder zusätzliche Details eingeben",
       "clinicalNotesDesc": "Zusätzliche Informationen zu diesem Verfahren",
+      "outcome": "Outcome",
+      "outcomePlaceholder": "Select outcome",
+      "outcomeDesc": "Result or outcome of the procedure",
+      "outcomeSuccessful": "Successful",
+      "outcomeAbnormal": "Abnormal",
+      "outcomeComplications": "Complications",
+      "outcomeInconclusive": "Inconclusive",
+      "outcomePending": "Pending",
       "cancel": "Abbrechen",
       "createProcedure": "Verfahren Erstellen",
       "updateProcedure": "Verfahren Aktualisieren"

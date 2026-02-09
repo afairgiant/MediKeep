@@ -179,6 +179,14 @@ const ProcedureViewModal = ({
                       <StatusBadge status={procedure.status} />
                     </Stack>
                     <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.outcome', 'Outcome')}</Text>
+                      {procedure.outcome ? (
+                        <StatusBadge status={procedure.outcome} />
+                      ) : (
+                        <Text size="sm" c="dimmed">{t('procedures.viewModal.notSpecified', 'Not specified')}</Text>
+                      )}
+                    </Stack>
+                    <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.setting', 'Setting')}</Text>
                       <Text size="sm" c={procedure.procedure_setting ? 'inherit' : 'dimmed'}>
                         {procedure.procedure_setting || t('procedures.viewModal.notSpecified', 'Not specified')}

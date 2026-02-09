@@ -605,6 +605,7 @@ JUNCTION TABLES (Many-to-Many)
 | date | Date | NOT NULL | Procedure date |
 | description | String | | Procedure description |
 | status | String | | ProcedureStatus enum value |
+| outcome | String | | ProcedureOutcome enum value |
 | notes | String | | Additional notes |
 | facility | String | | Facility where performed |
 | procedure_setting | String | | outpatient, inpatient, office |
@@ -622,6 +623,13 @@ JUNCTION TABLES (Many-to-Many)
 - completed
 - cancelled
 - postponed
+
+**Outcome Values** (ProcedureOutcome enum):
+- successful
+- abnormal
+- complications
+- inconclusive
+- pending
 
 **Relationships**:
 - `patient`: Many-to-one with Patient
@@ -2609,6 +2617,9 @@ stmt = select(Patient)\
 
 **ProcedureStatus**:
 - scheduled, in_progress, completed, cancelled, postponed
+
+**ProcedureOutcome**:
+- successful, abnormal, complications, inconclusive, pending
 
 **TreatmentStatus**:
 - planned, active, in_progress, completed, cancelled, on_hold
