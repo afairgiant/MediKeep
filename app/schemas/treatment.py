@@ -268,6 +268,56 @@ class TreatmentWithRelations(TreatmentResponse):
 
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("patient", mode="before")
+    @classmethod
+    def validate_patient(cls, v):
+        """Convert SQLAlchemy Patient object to dict"""
+        if v is None:
+            return None
+        if hasattr(v, "__dict__"):
+            return {
+                "id": getattr(v, "id", None),
+                "first_name": getattr(v, "first_name", None),
+                "last_name": getattr(v, "last_name", None),
+                "birth_date": getattr(v, "birth_date", None),
+                "user_id": getattr(v, "user_id", None),
+            }
+        return v
+
+    @field_validator("practitioner", mode="before")
+    @classmethod
+    def validate_practitioner(cls, v):
+        """Convert SQLAlchemy Practitioner object to dict"""
+        if v is None:
+            return None
+        if hasattr(v, "__dict__"):
+            return {
+                "id": getattr(v, "id", None),
+                "name": getattr(v, "name", None),
+                "specialty": getattr(v, "specialty", None),
+                "phone_number": getattr(v, "phone_number", None),
+            }
+        return v
+
+    @field_validator("condition", mode="before")
+    @classmethod
+    def validate_condition(cls, v):
+        """Convert SQLAlchemy Condition object to dict"""
+        if v is None:
+            return None
+        if hasattr(v, "__dict__"):
+            return {
+                "id": getattr(v, "id", None),
+                "diagnosis": getattr(v, "diagnosis", None),
+                "status": getattr(v, "status", None),
+                "severity": getattr(v, "severity", None),
+                "onset_date": getattr(v, "onset_date", None),
+                "end_date": getattr(v, "end_date", None),
+                "icd10_code": getattr(v, "icd10_code", None),
+                "snomed_code": getattr(v, "snomed_code", None),
+            }
+        return v
+
 
 class TreatmentSummary(BaseModel):
     id: int

@@ -64,12 +64,17 @@ const TreatmentViewModal = ({
     onClose();
   };
 
-  // Helper function to get condition name from ID
-  const getConditionName = (conditionId) => {
+  // Helper function to get condition data from ID (using conditions array prop)
+  const getConditionById = (conditionId) => {
     if (!conditionId || !conditions || conditions.length === 0) {
       return null;
     }
-    const condition = conditions.find(c => c.id === conditionId);
+    return conditions.find(c => c.id === conditionId) || null;
+  };
+
+  // Helper function to get condition name from ID
+  const getConditionName = (conditionId) => {
+    const condition = getConditionById(conditionId);
     return condition ? condition.diagnosis || condition.name : null;
   };
 
@@ -274,9 +279,9 @@ const TreatmentViewModal = ({
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.severity', 'Severity')}</Text>
-                    {treatment.condition?.severity ? (
+                    {(treatment.condition?.severity || getConditionById(treatment.condition_id)?.severity) ? (
                       <Badge variant="light" color="orange" size="sm">
-                        {treatment.condition.severity}
+                        {treatment.condition?.severity || getConditionById(treatment.condition_id)?.severity}
                       </Badge>
                     ) : (
                       <Text size="sm" c="dimmed">{t('treatments.viewModal.notSpecified', 'Not specified')}</Text>
@@ -284,9 +289,9 @@ const TreatmentViewModal = ({
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.conditionStatus', 'Condition Status')}</Text>
-                    {treatment.condition?.status ? (
+                    {(treatment.condition?.status || getConditionById(treatment.condition_id)?.status) ? (
                       <Badge variant="light" color="blue" size="sm">
-                        {treatment.condition.status}
+                        {treatment.condition?.status || getConditionById(treatment.condition_id)?.status}
                       </Badge>
                     ) : (
                       <Text size="sm" c="dimmed">{t('treatments.viewModal.notSpecified', 'Not specified')}</Text>
