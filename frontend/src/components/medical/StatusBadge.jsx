@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Badge, Group } from '@mantine/core';
+import { Badge } from '@mantine/core';
 
 const StatusBadge = ({
   status,
@@ -54,6 +54,7 @@ const StatusBadge = ({
 
       // General statuses
       scheduled: { icon: '📅', label: 'Scheduled', color: 'blue' },
+      in_progress: { icon: '🔄', label: 'In Progress', color: 'blue' },
       'in-progress': { icon: '🔄', label: 'In Progress', color: 'blue' },
       ordered: { icon: '📋', label: 'Ordered', color: 'cyan' },
     };

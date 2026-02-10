@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
+from app.models.enums import get_all_procedure_outcomes
 from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user, create_user_token_headers
 
@@ -792,7 +793,7 @@ class TestProceduresAPI:
 
     def test_create_procedure_all_outcome_values(self, client: TestClient, user_with_patient, authenticated_headers):
         """Test that all valid outcome values are accepted."""
-        valid_outcomes = ["successful", "abnormal", "complications", "inconclusive", "pending"]
+        valid_outcomes = get_all_procedure_outcomes()
 
         for outcome in valid_outcomes:
             procedure_data = {

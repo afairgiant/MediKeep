@@ -489,15 +489,15 @@
       "description": "Aktueller Status des Eingriffs"
     },
     "outcome": {
-      "label": "Outcome",
-      "placeholder": "Select outcome",
-      "description": "Result or outcome of the procedure",
+      "label": "Ergebnis",
+      "placeholder": "Ergebnis auswählen",
+      "description": "Resultat oder Ausgang des Eingriffs",
       "options": {
-        "successful": "Successful",
-        "abnormal": "Abnormal",
-        "complications": "Complications",
-        "inconclusive": "Inconclusive",
-        "pending": "Pending"
+        "successful": "Erfolgreich",
+        "abnormal": "Auffällig",
+        "complications": "Komplikationen",
+        "inconclusive": "Nicht eindeutig",
+        "pending": "Ausstehend"
       }
     }
   },

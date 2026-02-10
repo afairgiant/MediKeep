@@ -210,7 +210,7 @@ const ProcedureFormWrapper = ({
                       value={formData.status || null}
                       data={[
                         { value: 'scheduled', label: t('procedures.form.statusScheduled', 'Scheduled') },
-                        { value: 'in-progress', label: t('procedures.form.statusInProgress', 'In Progress') },
+                        { value: 'in_progress', label: t('procedures.form.statusInProgress', 'In Progress') },
                         { value: 'completed', label: t('procedures.form.statusCompleted', 'Completed') },
                         { value: 'postponed', label: t('procedures.form.statusPostponed', 'Postponed') },
                         { value: 'cancelled', label: t('procedures.form.statusCancelled', 'Cancelled') },
