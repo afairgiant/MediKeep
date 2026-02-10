@@ -1858,7 +1858,7 @@
     }
   },
   "form": {
-    "invalidPhoneDigits": "Le numéro de téléphone ne doit contenir que des chiffres, des espaces, des tirets ou des parenthèses",
+    "invalidPhoneDigits": "Le numéro de téléphone ne peut contenir que des chiffres, des espaces, des tirets, des parenthèses, des points et +",
     "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide"
   }
 }

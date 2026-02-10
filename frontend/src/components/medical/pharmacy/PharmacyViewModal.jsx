@@ -14,7 +14,6 @@ import {
   Paper,
 } from '@mantine/core';
 import { IconEdit } from '@tabler/icons-react';
-import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
 
@@ -154,9 +153,7 @@ const PharmacyViewModal = ({
                     size="sm"
                     c={pharmacy.phone_number ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.phone_number
-                      ? formatPhoneNumber(pharmacy.phone_number)
-                      : t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.phone_number || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>

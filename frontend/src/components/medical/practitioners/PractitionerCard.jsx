@@ -2,7 +2,6 @@ import React from 'react';
 import { Badge, Text, Group, Anchor } from '@mantine/core';
 import { IconStethoscope, IconUser, IconStar } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
-import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
 
@@ -81,7 +80,7 @@ const PractitionerCard = ({
       {
         label: t('practitioners.card.phone', 'Phone'),
         value: practitioner.phone_number,
-        render: (value) => value ? formatPhoneNumber(value) : t('common.labels.notSpecified', 'Not specified')
+        render: (value) => value || t('common.labels.notSpecified', 'Not specified')
       },
       {
         label: t('practitioners.card.email', 'Email'),

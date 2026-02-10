@@ -27,7 +27,6 @@ import {
   useCacheManager,
   useDataManagement,
 } from '../../hooks';
-import { formatPhoneNumber, cleanPhoneNumber } from '../../utils/phoneUtils';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -131,7 +130,7 @@ const Practitioners = () => {
       name: practitioner.name || '',
       specialty: practitioner.specialty || '',
       practice: practitioner.practice || '',
-      phone_number: formatPhoneNumber(practitioner.phone_number) || '',
+      phone_number: practitioner.phone_number || '',
       email: practitioner.email || '',
       website: practitioner.website || '',
       rating: practitioner.rating || '',
@@ -174,7 +173,7 @@ const Practitioners = () => {
           formData.practice && formData.practice.trim() !== ''
             ? formData.practice.trim()
             : null,
-        phone_number: cleanPhoneNumber(formData.phone_number) || null,
+        phone_number: formData.phone_number?.trim() || null,
         email:
           formData.email && formData.email.trim() !== ''
             ? formData.email.trim().toLowerCase()
@@ -331,8 +330,7 @@ const Practitioners = () => {
                   name: defaultFormatters.primaryName,
                   specialty: defaultFormatters.simple,
                   practice: defaultFormatters.simple,
-                  phone_number: value =>
-                    value ? formatPhoneNumber(value) : '-',
+                  phone_number: value => value || '-',
                   email: value => value || '-',
                   rating: value =>
                     value !== null && value !== undefined ? `${value}/5` : '-',

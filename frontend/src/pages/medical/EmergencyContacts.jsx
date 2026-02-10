@@ -36,7 +36,6 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
-import { formatPhoneNumber } from '../../utils/phoneUtils';
 import { useTranslation } from 'react-i18next';
 import '../../styles/shared/MedicalPageShared.css';
 
@@ -375,7 +374,7 @@ const EmergencyContacts = () => {
                         size="sm"
                         c="blue"
                       >
-                        {formatPhoneNumber(contact.phone_number)}
+                        {contact.phone_number}
                       </Anchor>
                     </Group>
 
@@ -389,7 +388,7 @@ const EmergencyContacts = () => {
                           size="sm"
                           c="blue"
                         >
-                          {formatPhoneNumber(contact.secondary_phone)}
+                          {contact.secondary_phone}
                         </Anchor>
                       </Group>
                     )}
@@ -504,7 +503,7 @@ const EmergencyContacts = () => {
                   phone_number: value =>
                     value ? (
                       <Anchor href={`tel:${value}`} size="sm" c="blue">
-                        {formatPhoneNumber(value)}
+                        {value}
                       </Anchor>
                     ) : (
                       '-'
@@ -633,7 +632,7 @@ const EmergencyContacts = () => {
                       c="blue"
                       fw={500}
                     >
-                      {formatPhoneNumber(viewingContact.phone_number)}
+                      {viewingContact.phone_number}
                     </Anchor>
                   </Stack>
                 </Grid.Col>
@@ -649,7 +648,7 @@ const EmergencyContacts = () => {
                         c="blue"
                         fw={500}
                       >
-                        {formatPhoneNumber(viewingContact.secondary_phone)}
+                        {viewingContact.secondary_phone}
                       </Anchor>
                     ) : (
                       <Text size="md" c="dimmed">

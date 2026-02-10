@@ -27,7 +27,7 @@
     "invalidDate": "Veuillez saisir une date valide.",
     "invalidEmail": "Veuillez saisir une adresse email valide.",
     "invalidPhone": "Veuillez saisir un numéro de téléphone valide.",
-    "invalidPhoneDigits": "Veuillez saisir un numéro de téléphone valide (10-15 numéros)",
+    "invalidPhoneDigits": "Veuillez saisir un numéro de téléphone valide",
     "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide",
     "patientNotSelected": "Veuillez sélectionner un patient.",
     "entityNotFound": "L'objet demandé ne peut pas être trouvé.",

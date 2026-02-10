@@ -172,45 +172,38 @@ def validate_date_not_future(
 def validate_phone_number(
     value: Optional[str],
     field_name: str = "Phone number",
-    min_digits: int = 10,
-    max_digits: int = 15,
+    max_length: int = 20,
 ) -> Optional[str]:
     """
-    Validate and normalize a phone number to digits only.
+    Validate a phone number with light character-set validation.
 
-    Handles various formats including:
-    - (919) 555-1234
-    - 919-555-1234
-    - 919.555.1234
-    - 9195551234
-    - +1 919 555 1234
+    Stores the value as-entered (free-form international-friendly text).
+    Only validates that the input contains allowed characters.
 
     Args:
         value: The phone number to validate
         field_name: Name of the field for error messages
-        min_digits: Minimum digits required
-        max_digits: Maximum digits allowed
+        max_length: Maximum total length allowed
 
     Returns:
-        Digits-only phone number or None
+        Stripped phone number as-entered, or None
 
     Raises:
-        ValueError: If phone number format is invalid
+        ValueError: If phone number contains invalid characters or exceeds max length
     """
     if value is None or str(value).strip() == "":
         return None
 
-    # Extract digits only
-    digits_only = re.sub(r"[^\d]", "", value)
+    cleaned = str(value).strip()
 
-    # Handle US/Canada numbers with country code
-    if digits_only.startswith("1") and len(digits_only) == 11:
-        digits_only = digits_only[1:]
+    if len(cleaned) > max_length:
+        raise ValueError(f"{field_name} must be {max_length} characters or less")
 
-    if len(digits_only) < min_digits or len(digits_only) > max_digits:
-        raise ValueError(f"{field_name} must be between {min_digits}-{max_digits} digits")
+    # Allow digits, spaces, dashes, parentheses, periods, and +
+    if not re.match(r'^[0-9\s\-\+\(\)\.]+$', cleaned):
+        raise ValueError(f"{field_name} contains invalid characters")
 
-    return digits_only
+    return cleaned
 
 
 def validate_list_field(

@@ -25,7 +25,7 @@ import {
   IconFileText,
 } from '@tabler/icons-react';
 import { getFormFields } from '../../../utils/medicalFormFields';
-import { formatPhoneInput, cleanPhoneNumber, isValidPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
+import { isValidPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
 import { formatDateInputChange, parseDateInput } from '../../../utils/dateUtils';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
@@ -77,7 +77,7 @@ const InsuranceFormWrapper = ({
     }
   }, [isOpen]);
 
-  // Enhanced input change handler with phone formatting, validation, and logging
+  // Input change handler with phone validation and logging
   const handleInputChange = (e) => {
     try {
       const { name, value } = e.target;
@@ -90,31 +90,18 @@ const InsuranceFormWrapper = ({
         }));
       }
       
-      // Handle phone number formatting and validation using centralized detection
+      // Handle phone number validation using centralized detection
       const fieldInfo = fields.find(f => f.name === name);
       const isPhoneFieldCheck = isPhoneField(name, fieldInfo?.type);
       if (isPhoneFieldCheck) {
-        // Validate phone number if not empty
         if (value.trim() !== '' && !isValidPhoneNumber(value)) {
           setFieldErrors(prev => ({
             ...prev,
-            [name]: 'Please enter a valid phone number (10-15 digits)'
+            [name]: t('common:errors.invalidPhone', 'Please enter a valid phone number')
           }));
         }
-        
-        // Format phone number as user types
-        const formattedValue = formatPhoneInput(value);
-        
-        // Create a new event with formatted value
-        const formattedEvent = {
-          ...e,
-          target: {
-            ...e.target,
-            value: formattedValue
-          }
-        };
-        
-        onInputChange(formattedEvent);
+
+        onInputChange(e);
         return;
       }
       
@@ -236,7 +223,7 @@ const InsuranceFormWrapper = ({
                             
         if (isPhoneFieldCheck && formData[fieldName] && formData[fieldName].trim() !== '') {
           if (!isValidPhoneNumber(formData[fieldName])) {
-            newFieldErrors[fieldName] = 'Please enter a valid phone number (10-15 digits)';
+            newFieldErrors[fieldName] = t('common:errors.invalidPhone', 'Please enter a valid phone number');
             hasErrors = true;
           }
         }
@@ -386,10 +373,7 @@ const InsuranceFormWrapper = ({
         return (
           <TextInput
             {...commonProps}
-            onChange={field.type === 'tel' ? (e) => {
-              const formattedValue = formatPhoneInput(e.target.value);
-              onInputChange({ target: { name: field.name, value: formattedValue } });
-            } : handleTextInputChange(field.name)}
+            onChange={handleTextInputChange(field.name)}
             type={field.type === 'email' ? 'email' : 'text'}
             maxLength={field.maxLength}
           />

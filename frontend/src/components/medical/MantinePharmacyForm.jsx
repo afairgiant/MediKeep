@@ -4,7 +4,7 @@ import { Text } from '@mantine/core';
 
 import BaseMedicalForm from './BaseMedicalForm';
 import { pharmacyFormFields } from '../../utils/medicalFormFields';
-import { formatPhoneInput, isValidPhoneNumber } from '../../utils/phoneUtils';
+import { isValidPhoneNumber } from '../../utils/phoneUtils';
 
 const MantinePharmacyForm = ({
   isOpen,
@@ -51,7 +51,7 @@ const MantinePharmacyForm = ({
     }
   }, [isOpen]);
 
-  // Enhanced input change handler with phone formatting and validation
+  // Input change handler with phone validation
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     
@@ -65,31 +65,17 @@ const MantinePharmacyForm = ({
     
     if (name === 'store_number') {
       handleStoreNumberChange(event);
-    } else if (name === 'phone_number') {
-      // Validate phone number if not empty
-      if (value.trim() !== '' && !isValidPhoneNumber(value)) {
-        setFieldErrors(prev => ({
-          ...prev,
-          [name]: t('form.invalidPhoneDigits')
-        }));
-      }
-      
-      // Format phone number as user types
-      const formattedValue = formatPhoneInput(value);
-      
-      // Create a new event with formatted value
-      const formattedEvent = {
-        ...event,
-        target: {
-          ...event.target,
-          value: formattedValue
-        }
-      };
-      
-      onInputChange(formattedEvent);
-    } else {
-      onInputChange(event);
+      return;
     }
+
+    if (name === 'phone_number' && value.trim() !== '' && !isValidPhoneNumber(value)) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: t('form.invalidPhoneDigits')
+      }));
+    }
+
+    onInputChange(event);
   };
 
   // Validate website URL

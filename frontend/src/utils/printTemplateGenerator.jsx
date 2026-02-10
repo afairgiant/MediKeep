@@ -4,7 +4,7 @@
  */
 import logger from '../services/logger';
 
-import { formatFieldLabel, formatFieldValue, formatPhoneFields, insurancePrintLabelMappings, contactInfoLabelMappings } from './fieldFormatters';
+import { formatFieldLabel, formatFieldValue, insurancePrintLabelMappings, contactInfoLabelMappings } from './fieldFormatters';
 
 /**
  * Cached CSS styles for medical record printing
@@ -266,9 +266,6 @@ export const generateInsurancePrint = (insurance, formatDate = defaultFormatDate
   const coverageDetails = insurance.coverage_details || {};
   const contactInfo = insurance.contact_info || {};
 
-  // Format phone numbers for consistency
-  const formattedContactInfo = formatPhoneFields(contactInfo);
-
   const config = {
     title: insurance.company_name,
     type: `${insurance.insurance_type} Insurance`,
@@ -309,9 +306,9 @@ export const generateInsurancePrint = (insurance, formatDate = defaultFormatDate
           labelMappings: insurancePrintLabelMappings
         }
       }] : []),
-      ...(Object.keys(formattedContactInfo).length > 0 ? [{
+      ...(Object.keys(contactInfo).length > 0 ? [{
         title: 'Contact Information',
-        data: formattedContactInfo,
+        data: contactInfo,
         options: {
           labelMappings: contactInfoLabelMappings
         }

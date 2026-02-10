@@ -1858,7 +1858,7 @@
     }
   },
   "form": {
-    "invalidPhoneDigits": "Telefonnummer darf nur Ziffern, Leerzeichen, Bindestriche oder Klammern enthalten",
+    "invalidPhoneDigits": "Telefonnummer darf nur Ziffern, Leerzeichen, Bindestriche, Klammern, Punkte und + enthalten",
     "invalidWebsiteUrl": "Bitte geben Sie eine gültige Website-URL ein"
   }
 }

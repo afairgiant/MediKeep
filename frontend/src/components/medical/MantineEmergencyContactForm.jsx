@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from './BaseMedicalForm';
 import { emergencyContactFormFields } from '../../utils/medicalFormFields';
 import { EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS } from '../../utils/statusConfig';
-import { formatPhoneInput, isValidPhoneNumber } from '../../utils/phoneUtils';
+import { isValidPhoneNumber } from '../../utils/phoneUtils';
 
 const MantineEmergencyContactForm = ({
   isOpen,
@@ -26,7 +26,7 @@ const MantineEmergencyContactForm = ({
     }
   }, [isOpen]);
 
-  // Enhanced input change handler with phone formatting and validation
+  // Input change handler with phone validation
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
@@ -38,33 +38,15 @@ const MantineEmergencyContactForm = ({
       }));
     }
     
-    // Handle phone number formatting and validation
-    const isPhoneField = name === 'phone_number' || name === 'secondary_phone';
-    if (isPhoneField) {
-      // Validate phone number if not empty
-      if (value.trim() !== '' && !isValidPhoneNumber(value)) {
-        setFieldErrors(prev => ({
-          ...prev,
-          [name]: t('form.invalidPhoneDigits')
-        }));
-      }
-      
-      // Format phone number as user types
-      const formattedValue = formatPhoneInput(value);
-      
-      // Create a new event with formatted value
-      const formattedEvent = {
-        ...e,
-        target: {
-          ...e.target,
-          value: formattedValue
-        }
-      };
-      
-      onInputChange(formattedEvent);
-      return;
+    // Handle phone number validation
+    const isPhoneFieldCheck = name === 'phone_number' || name === 'secondary_phone';
+    if (isPhoneFieldCheck && value.trim() !== '' && !isValidPhoneNumber(value)) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: t('form.invalidPhoneDigits')
+      }));
     }
-    
+
     onInputChange(e);
   };
 

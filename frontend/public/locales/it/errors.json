@@ -27,7 +27,7 @@
     "invalidDate": "Inserisci una data valida.",
     "invalidEmail": "Inserisci un indirizzo email valido.",
     "invalidPhone": "Inserisci un numero di telefono valido.",
-    "invalidPhoneDigits": "Inserisci un numero di telefono valido (10–15 cifre)",
+    "invalidPhoneDigits": "Inserisci un numero di telefono valido",
     "invalidWebsiteUrl": "Inserisci un URL del sito valido",
     "patientNotSelected": "Seleziona un paziente.",
     "entityNotFound": "L'elemento richiesto non è stato trovato.",

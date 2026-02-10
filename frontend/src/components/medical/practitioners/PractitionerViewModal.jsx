@@ -14,7 +14,6 @@ import {
   Paper,
 } from '@mantine/core';
 import { IconEdit, IconStar } from '@tabler/icons-react';
-import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
 
@@ -134,9 +133,7 @@ const PractitionerViewModal = ({
                     size="sm"
                     c={practitioner.phone_number ? 'inherit' : 'dimmed'}
                   >
-                    {practitioner.phone_number
-                      ? formatPhoneNumber(practitioner.phone_number)
-                      : t('common.labels.notSpecified', 'Not specified')}
+                    {practitioner.phone_number || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>

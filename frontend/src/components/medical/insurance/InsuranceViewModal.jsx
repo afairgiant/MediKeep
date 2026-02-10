@@ -20,7 +20,6 @@ import {
 } from '@mantine/core';
 import { IconEdit, IconPrinter, IconStar, IconInfoCircle, IconShield, IconPhone, IconFileText } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
 import { formatFieldLabel, formatFieldValue } from '../../../utils/fieldFormatters';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
@@ -292,13 +291,13 @@ const InsuranceViewModal = ({
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.customerServicePhone', 'Customer Service Phone')}</Text>
                       <Text size="sm" c={contactInfo.customer_service_phone ? 'inherit' : 'dimmed'}>
-                        {contactInfo.customer_service_phone ? formatPhoneNumber(cleanPhoneNumber(contactInfo.customer_service_phone)) : t('common.labels.notSpecified', 'Not specified')}
+                        {contactInfo.customer_service_phone || t('common.labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.claimsPhone', 'Claims Phone')}</Text>
                       <Text size="sm" c={contactInfo.claims_phone ? 'inherit' : 'dimmed'}>
-                        {contactInfo.claims_phone ? formatPhoneNumber(cleanPhoneNumber(contactInfo.claims_phone)) : t('common.labels.notSpecified', 'Not specified')}
+                        {contactInfo.claims_phone || t('common.labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
