@@ -203,6 +203,10 @@ def validate_phone_number(
     if not re.match(r'^[0-9\s\-\+\(\)\.]+$', cleaned):
         raise ValueError(f"{field_name} contains invalid characters")
 
+    # Require at least one digit
+    if not re.search(r'\d', cleaned):
+        raise ValueError(f"{field_name} must contain at least one digit")
+
     return cleaned
 
 

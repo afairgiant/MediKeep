@@ -48,5 +48,21 @@ export const isValidPhoneNumber = phoneNumber => {
 
   if (value.length > 20) return false;
 
-  return /^[0-9\s\-+().]*$/.test(value);
+  if (!/^[0-9\s\-+().]*$/.test(value)) return false;
+
+  // Require at least one digit
+  return /\d/.test(value);
+};
+
+/**
+ * Build a tel: URI from a free-form phone string.
+ * Strips everything except digits and a leading +.
+ *
+ * @param {string} phone - Display phone number
+ * @returns {string} tel: URI safe for href
+ */
+export const phoneTelHref = phone => {
+  if (!phone) return '';
+  const digits = String(phone).replace(/[^\d+]/g, '');
+  return `tel:${digits}`;
 };
