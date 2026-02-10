@@ -3,8 +3,6 @@
  * Handles flattening nested objects for forms and restructuring for API submission
  */
 
-import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from './phoneUtils';
-
 /**
  * Flattens nested object properties into a flat form data structure
  * @param {Object} item - The item containing nested data
@@ -27,12 +25,7 @@ export const flattenNestedObject = (item, nestedFieldConfig) => {
   nestedFieldConfig.nestedFields?.forEach(nestedField => {
     const nestedData = item[nestedField] || {};
     Object.entries(nestedData).forEach(([key, value]) => {
-      // Handle phone number formatting for display using centralized detection
-      if (isPhoneField(key) && value) {
-        flatData[key] = formatPhoneNumber(value);
-      } else {
-        flatData[key] = value || '';
-      }
+      flatData[key] = value || '';
     });
   });
 
@@ -72,15 +65,7 @@ export const restructureFormData = (formData, fieldConfig) => {
       const value = formData[field];
       // Include field if it has a value (not undefined, null, or empty string)
       if (value !== undefined && value !== null && value !== '') {
-        // Clean phone numbers before saving using centralized detection
-        if (isPhoneField(field)) {
-          const cleanedPhone = cleanPhoneNumber(value);
-          if (cleanedPhone) { // Only add if cleanPhoneNumber returns a valid result
-            groupData[field] = cleanedPhone;
-          }
-        } else {
-          groupData[field] = value;
-        }
+        groupData[field] = value;
       }
     });
 

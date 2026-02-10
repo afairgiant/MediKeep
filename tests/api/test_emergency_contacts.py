@@ -295,12 +295,12 @@ class TestEmergencyContactAPI:
         response = authenticated_client.post("/api/v1/emergency-contacts/", json=invalid_relationship_contact)
         assert response.status_code == 422
 
-        # Test invalid phone number format
+        # Test invalid phone number format (contains letters)
         invalid_phone_contact = {
             "patient_id": patient.id,
             "name": "Test Contact",
             "relationship": "friend",
-            "phone_number": "123"  # Too short
+            "phone_number": "abc-def-ghij"  # Invalid characters
         }
 
         response = authenticated_client.post("/api/v1/emergency-contacts/", json=invalid_phone_contact)

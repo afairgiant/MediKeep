@@ -36,8 +36,8 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
-import { formatPhoneNumber } from '../../utils/phoneUtils';
 import { useTranslation } from 'react-i18next';
+import { phoneTelHref } from '../../utils/phoneUtils';
 import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
@@ -371,11 +371,11 @@ const EmergencyContacts = () => {
                         {t('emergencyContacts.card.phone')}
                       </Text>
                       <Anchor
-                        href={`tel:${contact.phone_number}`}
+                        href={phoneTelHref(contact.phone_number)}
                         size="sm"
                         c="blue"
                       >
-                        {formatPhoneNumber(contact.phone_number)}
+                        {contact.phone_number}
                       </Anchor>
                     </Group>
 
@@ -385,11 +385,11 @@ const EmergencyContacts = () => {
                           {t('emergencyContacts.card.secondaryPhone')}
                         </Text>
                         <Anchor
-                          href={`tel:${contact.secondary_phone}`}
+                          href={phoneTelHref(contact.secondary_phone)}
                           size="sm"
                           c="blue"
                         >
-                          {formatPhoneNumber(contact.secondary_phone)}
+                          {contact.secondary_phone}
                         </Anchor>
                       </Group>
                     )}
@@ -503,8 +503,8 @@ const EmergencyContacts = () => {
                   ),
                   phone_number: value =>
                     value ? (
-                      <Anchor href={`tel:${value}`} size="sm" c="blue">
-                        {formatPhoneNumber(value)}
+                      <Anchor href={phoneTelHref(value)} size="sm" c="blue">
+                        {value}
                       </Anchor>
                     ) : (
                       '-'
@@ -628,12 +628,12 @@ const EmergencyContacts = () => {
                       {t('emergencyContacts.viewModal.primaryPhone')}
                     </Text>
                     <Anchor
-                      href={`tel:${viewingContact.phone_number}`}
+                      href={phoneTelHref(viewingContact.phone_number)}
                       size="md"
                       c="blue"
                       fw={500}
                     >
-                      {formatPhoneNumber(viewingContact.phone_number)}
+                      {viewingContact.phone_number}
                     </Anchor>
                   </Stack>
                 </Grid.Col>
@@ -644,12 +644,12 @@ const EmergencyContacts = () => {
                     </Text>
                     {viewingContact.secondary_phone ? (
                       <Anchor
-                        href={`tel:${viewingContact.secondary_phone}`}
+                        href={phoneTelHref(viewingContact.secondary_phone)}
                         size="md"
                         c="blue"
                         fw={500}
                       >
-                        {formatPhoneNumber(viewingContact.secondary_phone)}
+                        {viewingContact.secondary_phone}
                       </Anchor>
                     ) : (
                       <Text size="md" c="dimmed">

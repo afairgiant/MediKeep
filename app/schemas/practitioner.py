@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from app.schemas.validators import validate_phone_number as _validate_phone
+
 
 # Shared validation helper functions to avoid code duplication
 def _validate_practice_value(v: Optional[str]) -> Optional[str]:
@@ -123,47 +125,11 @@ class PractitionerBase(BaseModel):
         """Validate practice field using shared helper."""
         return _validate_practice_value(v)
 
-    @field_validator("phone_number")
+    @field_validator("phone_number", mode="before")
     @classmethod
     def validate_phone_number(cls, v):
-        """
-        Validate and clean phone number field.
-
-        Accepts various formats like:
-        - (919) 555-1234
-        - 919-555-1234
-        - 919.555.1234
-        - 9195551234
-        - +1 919 555 1234
-
-        Stores as digits only for consistency.
-
-        Args:
-            v: The phone number value to validate
-
-        Returns:
-            Cleaned phone number (digits only) or None
-
-        Raises:
-            ValueError: If phone number format is invalid
-        """
-        if v is None or v.strip() == "":
-            return None
-
-        # Remove all non-digit characters for validation and storage
-        digits_only = re.sub(r"[^\d]", "", v)
-
-        # Handle international numbers with country code
-        if digits_only.startswith("1") and len(digits_only) == 11:
-            # US/Canada number with country code - remove the leading 1
-            digits_only = digits_only[1:]
-
-        # Check if it's a reasonable phone number length (10-15 digits)
-        if len(digits_only) < 10 or len(digits_only) > 15:
-            raise ValueError("Phone number must be between 10-15 digits")
-
-        # Return digits only for consistent storage
-        return digits_only
+        """Validate phone number using shared validator."""
+        return _validate_phone(v, field_name="Phone number")
 
     @field_validator("email")
     @classmethod
@@ -305,21 +271,11 @@ class PractitionerUpdate(BaseModel):
         """Validate practice if provided using shared helper."""
         return _validate_practice_value(v)
 
-    @field_validator("phone_number")
+    @field_validator("phone_number", mode="before")
     @classmethod
     def validate_phone_number_update(cls, v):
-        """Validate phone number if provided."""
-        if v is None or v.strip() == "":
-            return None
-
-        # Remove all non-digit characters for validation
-        digits_only = re.sub(r"[^\d]", "", v)
-
-        # Check if it's a reasonable phone number length (10-15 digits)
-        if len(digits_only) < 10 or len(digits_only) > 15:
-            raise ValueError("Phone number must be between 10-15 digits")
-
-        return v.strip()
+        """Validate phone number if provided using shared validator."""
+        return _validate_phone(v, field_name="Phone number")
 
     @field_validator("email")
     @classmethod

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Badge, Text, Group, Anchor } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
-import { formatPhoneNumber } from '../../../utils/phoneUtils';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
 
@@ -69,7 +68,7 @@ const PharmacyCard = ({
         value: pharmacy.phone_number,
         render: (value) => (
           <Text size="sm" fw={500}>
-            {value ? formatPhoneNumber(value) : t('labels.notSpecified')}
+            {value || t('labels.notSpecified')}
           </Text>
         )
       },

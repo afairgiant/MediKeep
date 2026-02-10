@@ -1181,7 +1181,7 @@
       },
       "phone": {
         "label": "Phone Number",
-        "placeholder": "(555) 123-4567",
+        "placeholder": "+1 555 123-4567",
         "description": "Primary contact number"
       },
       "email": {
@@ -1271,7 +1271,7 @@
       },
       "phone": {
         "label": "Phone Number",
-        "placeholder": "(555) 123-4567",
+        "placeholder": "+1 555 123-4567",
         "description": "Primary pharmacy phone number"
       },
       "website": {
@@ -1347,12 +1347,12 @@
       },
       "primaryPhone": {
         "label": "Primary Phone",
-        "placeholder": "e.g., (555) 123-4567",
+        "placeholder": "e.g., +1 555 123-4567",
         "description": "Primary phone number"
       },
       "secondaryPhone": {
         "label": "Secondary Phone",
-        "placeholder": "e.g., (555) 987-6543",
+        "placeholder": "e.g., +1 555 987-6543",
         "description": "Optional secondary phone number"
       },
       "email": {
@@ -1858,7 +1858,7 @@
     }
   },
   "form": {
-    "invalidPhoneDigits": "Phone number must contain only digits, spaces, dashes, or parentheses",
+    "invalidPhoneDigits": "Phone number can only contain digits, spaces, dashes, parentheses, periods, and +",
     "invalidWebsiteUrl": "Please enter a valid website URL"
   }
 }

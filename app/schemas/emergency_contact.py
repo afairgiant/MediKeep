@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.schemas.validators import validate_phone_number
+
 
 class EmergencyContactBase(BaseModel):
     name: str = Field(
@@ -12,7 +14,7 @@ class EmergencyContactBase(BaseModel):
         ..., min_length=2, max_length=50, description="Relationship to patient"
     )
     phone_number: str = Field(
-        ..., min_length=10, max_length=20, description="Primary phone number"
+        ..., min_length=1, max_length=20, description="Primary phone number"
     )
     secondary_phone: Optional[str] = Field(
         None, max_length=20, description="Optional secondary phone number"
@@ -69,17 +71,11 @@ class EmergencyContactBase(BaseModel):
             )
         return v.lower()
 
-    @field_validator("phone_number", "secondary_phone")
+    @field_validator("phone_number", "secondary_phone", mode="before")
     @classmethod
-    def validate_phone_number(cls, v):
-        if v is not None and v.strip():
-            # Remove all non-digits
-            digits_only = re.sub(r"[^\d]", "", v)
-            # Check if it's a valid length (10 digits for US, allow international)
-            if len(digits_only) < 10 or len(digits_only) > 15:
-                raise ValueError("Phone number must be between 10-15 digits")
-            return v.strip()
-        return v
+    def validate_phone_number_field(cls, v):
+        """Validate phone number using shared validator."""
+        return validate_phone_number(v, field_name="Phone number")
 
     @field_validator("email")
     @classmethod
@@ -99,7 +95,7 @@ class EmergencyContactCreate(EmergencyContactBase):
 class EmergencyContactUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=100)
     relationship: Optional[str] = Field(None, min_length=2, max_length=50)
-    phone_number: Optional[str] = Field(None, min_length=10, max_length=20)
+    phone_number: Optional[str] = Field(None, max_length=20)
     secondary_phone: Optional[str] = Field(None, max_length=20)
     email: Optional[str] = Field(None, max_length=100)
     is_primary: Optional[bool] = None
@@ -145,17 +141,11 @@ class EmergencyContactUpdate(BaseModel):
             return v.lower()
         return v
 
-    @field_validator("phone_number", "secondary_phone")
+    @field_validator("phone_number", "secondary_phone", mode="before")
     @classmethod
-    def validate_phone_number(cls, v):
-        if v is not None and v.strip():
-            # Remove all non-digits
-            digits_only = re.sub(r"[^\d]", "", v)
-            # Check if it's a valid length (10 digits for US, allow international)
-            if len(digits_only) < 10 or len(digits_only) > 15:
-                raise ValueError("Phone number must be between 10-15 digits")
-            return v.strip()
-        return v
+    def validate_phone_number_field(cls, v):
+        """Validate phone number using shared validator."""
+        return validate_phone_number(v, field_name="Phone number")
 
     @field_validator("email")
     @classmethod

@@ -30,7 +30,7 @@
     "patientNotSelected": "Por favor, seleccione un paciente.",
     "entityNotFound": "El objeto solicitado no se puede encontrar.",
     "conditionNotSelected": "Por favor, seleccione una condición",
-    "invalidPhoneDigits": "Por favor, introduzca un número de teléfono válido (10-15 dígitos)",
+    "invalidPhoneDigits": "Por favor, introduzca un número de teléfono válido",
     "invalidWebsiteUrl": "Por favor, introduzca una URL de sitio web válida",
     "medicationNotSelected": "Por favor, seleccione un medicamento",
     "mustBeValidNumber": "Debe ser un número válido"

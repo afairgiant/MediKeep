@@ -27,7 +27,7 @@
     "invalidDate": "Please enter a valid date.",
     "invalidEmail": "Please enter a valid email address.",
     "invalidPhone": "Please enter a valid phone number.",
-    "invalidPhoneDigits": "Please enter a valid phone number (10-15 digits)",
+    "invalidPhoneDigits": "Please enter a valid phone number",
     "invalidWebsiteUrl": "Please enter a valid website URL",
     "patientNotSelected": "Please select a patient.",
     "entityNotFound": "The requested item could not be found.",

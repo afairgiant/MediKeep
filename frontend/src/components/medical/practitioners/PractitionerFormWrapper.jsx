@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Text, Anchor } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from '../BaseMedicalForm';
 import { practitionerFormFields } from '../../../utils/medicalFormFields';
-import { formatPhoneInput, isValidPhoneNumber } from '../../../utils/phoneUtils';
+import { isValidPhoneNumber } from '../../../utils/phoneUtils';
 import { fetchMedicalSpecialties, clearSpecialtiesCache } from '../../../config/medicalSpecialties';
 import logger from '../../../services/logger';
 
@@ -17,6 +18,8 @@ const PractitionerFormWrapper = ({
   isLoading,
   statusMessage,
 }) => {
+  const { t } = useTranslation(['medical', 'common']);
+
   // State for dynamic specialties
   const [specialtyOptions, setSpecialtyOptions] = useState([]);
   const [isLoadingSpecialties, setIsLoadingSpecialties] = useState(true);
@@ -72,7 +75,7 @@ const PractitionerFormWrapper = ({
     }
   };
 
-  // Enhanced input change handler with phone formatting and validation
+  // Input change handler with phone validation
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
@@ -84,38 +87,20 @@ const PractitionerFormWrapper = ({
       }));
     }
     
-    // Handle phone number formatting and validation
-    if (name === 'phone_number') {
-      // Validate phone number if not empty
-      if (value.trim() !== '' && !isValidPhoneNumber(value)) {
-        setFieldErrors(prev => ({
-          ...prev,
-          [name]: 'Please enter a valid phone number (10-15 digits)'
-        }));
-      }
-      
-      // Format phone number as user types
-      const formattedValue = formatPhoneInput(value);
-      
-      // Create a new event with formatted value
-      const formattedEvent = {
-        ...e,
-        target: {
-          ...e.target,
-          value: formattedValue
-        }
-      };
-      
-      onInputChange(formattedEvent);
-      return;
+    // Handle phone number validation
+    if (name === 'phone_number' && value.trim() !== '' && !isValidPhoneNumber(value)) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: t('medical:form.invalidPhoneDigits', 'Please enter a valid phone number')
+      }));
     }
-    
+
     onInputChange(e);
   };
 
   const websiteError =
     formData.website && !isValidWebsite(formData.website)
-      ? 'Please enter a valid website URL'
+      ? t('medical:form.invalidWebsiteUrl', 'Please enter a valid website URL')
       : null;
 
   // Custom validation for submit - prevent submission if website is invalid
@@ -142,7 +127,7 @@ const PractitionerFormWrapper = ({
             rel="noopener noreferrer"
             style={{ fontSize: '12px', color: 'var(--mantine-color-blue-6)' }}
           >
-            Visit Website ↗
+            {t('common:labels.visitWebsite', 'Visit Website')} ↗
           </Anchor>
         </div>
       )}

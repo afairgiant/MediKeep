@@ -10,7 +10,6 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
-import { cleanPhoneNumber, formatPhoneNumber } from '../../utils/phoneUtils';
 import { 
   initializeFormData as initFormData, 
   restructureFormData, 

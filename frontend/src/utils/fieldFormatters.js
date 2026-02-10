@@ -5,7 +5,7 @@
 import logger from '../services/logger';
 
 
-import { formatPhoneNumber, cleanPhoneNumber, isPhoneField } from './phoneUtils';
+import { isPhoneField } from './phoneUtils';
 import { 
   CURRENCY_FIELDS, 
   PERCENTAGE_FIELDS, 
@@ -119,10 +119,6 @@ const defaultFormatRules = {
     excludeFields: PERCENTAGE_EXCLUDE_FIELDS,
     format: (value) => `${value}%`
   },
-  phone: {
-    fields: ['phone'], // This will be handled by isPhoneField utility
-    format: (value) => formatPhoneNumber(cleanPhoneNumber(value))
-  },
   date: {
     fields: DATE_FIELDS,
     format: (value) => {
@@ -153,21 +149,13 @@ export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
 
   const allFormatRules = { ...defaultFormatRules, ...customFormatRules };
 
-  // Special handling for phone fields using centralized detection
+  // Phone fields are displayed as-stored
   if (isPhoneField(fieldName)) {
-    try {
-      return formatPhoneNumber(cleanPhoneNumber(value));
-    } catch (error) {
-      logger.warn(`Error formatting phone field ${fieldName}:`, error);
-      return String(value);
-    }
+    return String(value);
   }
 
   // Apply format rules based on field name patterns
   for (const [ruleType, rule] of Object.entries(allFormatRules)) {
-    // Skip phone rule since it's handled above
-    if (ruleType === 'phone') continue;
-    
     const shouldApply = rule.fields.some(pattern => fieldName.includes(pattern));
     const shouldExclude = rule.excludeFields?.some(pattern => fieldName.includes(pattern));
     
@@ -183,27 +171,6 @@ export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
 
   // Default: return as string
   return String(value);
-};
-
-/**
- * Processes all phone fields in an object for consistent formatting
- * @param {Object} obj - Object containing phone fields
- * @returns {Object} Object with formatted phone fields
- */
-export const formatPhoneFields = (obj) => {
-  if (!obj || typeof obj !== 'object') return obj;
-
-  const formatted = {};
-  
-  Object.entries(obj).forEach(([key, value]) => {
-    if (isPhoneField(key) && value) {
-      formatted[key] = formatPhoneNumber(cleanPhoneNumber(value));
-    } else {
-      formatted[key] = value;
-    }
-  });
-
-  return formatted;
 };
 
 /**

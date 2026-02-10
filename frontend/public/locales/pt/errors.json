@@ -27,7 +27,7 @@
     "invalidDate": "Informe uma data válida.",
     "invalidEmail": "Informe um endereço de e-mail válido.",
     "invalidPhone": "Informe um número de telefone válido.",
-    "invalidPhoneDigits": "Informe um número de telefone válido (10–15 dígitos)",
+    "invalidPhoneDigits": "Informe um número de telefone válido",
     "invalidWebsiteUrl": "Informe uma URL de site válida",
     "patientNotSelected": "Selecione um paciente.",
     "entityNotFound": "O item solicitado não foi encontrado.",
