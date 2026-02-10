@@ -42,6 +42,25 @@ import {
   Paper,
 } from '@mantine/core';
 
+const INITIAL_FORM_DATA = {
+  procedure_name: '',
+  procedure_type: '',
+  procedure_code: '',
+  description: '',
+  procedure_date: '',
+  status: 'scheduled',
+  outcome: '',
+  notes: '',
+  facility: '',
+  procedure_setting: '',
+  procedure_complications: '',
+  procedure_duration: '',
+  practitioner_id: '',
+  anesthesia_type: '',
+  anesthesia_notes: '',
+  tags: [],
+};
+
 const Procedures = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
@@ -110,23 +129,7 @@ const Procedures = () => {
   // Form state
   const [showModal, setShowModal] = useState(false);
   const [editingProcedure, setEditingProcedure] = useState(null);
-  const [formData, setFormData] = useState({
-    procedure_name: '',
-    procedure_type: '',
-    procedure_code: '',
-    description: '',
-    procedure_date: '',
-    status: 'scheduled',
-    notes: '',
-    facility: '',
-    procedure_setting: '',
-    procedure_complications: '',
-    procedure_duration: '',
-    practitioner_id: '',
-    anesthesia_type: '',
-    anesthesia_notes: '',
-    tags: [],
-  });
+  const [formData, setFormData] = useState({ ...INITIAL_FORM_DATA });
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -153,24 +156,8 @@ const Procedures = () => {
       // Reset form and close modal on complete success
       setShowModal(false);
       setEditingProcedure(null);
-      setFormData({
-        procedure_name: '',
-        procedure_type: '',
-        procedure_code: '',
-        description: '',
-        procedure_date: '',
-        status: 'scheduled',
-        notes: '',
-        facility: '',
-        procedure_setting: '',
-        procedure_complications: '',
-        procedure_duration: '',
-        practitioner_id: '',
-        anesthesia_type: '',
-        anesthesia_notes: '',
-        tags: [],
-      });
-      
+      setFormData({ ...INITIAL_FORM_DATA });
+
       // Only refresh if we created a new procedure during form submission
       // Don't refresh after uploads complete to prevent resource exhaustion
       if (needsRefreshAfterSubmissionRef.current) {
@@ -191,23 +178,7 @@ const Procedures = () => {
   const handleAddProcedure = () => {
     resetSubmission();
     setEditingProcedure(null);
-    setFormData({
-      procedure_name: '',
-      procedure_type: '',
-      procedure_code: '',
-      description: '',
-      procedure_date: '',
-      status: 'scheduled',
-      notes: '',
-      facility: '',
-      procedure_setting: '',
-      procedure_complications: '',
-      procedure_duration: '',
-      practitioner_id: '',
-      anesthesia_type: '',
-      anesthesia_notes: '',
-      tags: [],
-    });
+    setFormData({ ...INITIAL_FORM_DATA });
     setShowModal(true);
   };
 
@@ -221,6 +192,7 @@ const Procedures = () => {
       description: procedure.description || '',
       procedure_date: procedure.date || '',
       status: procedure.status || 'scheduled',
+      outcome: procedure.outcome || '',
       notes: procedure.notes || '',
       facility: procedure.facility || '',
       procedure_setting: procedure.procedure_setting || '',
@@ -280,6 +252,7 @@ const Procedures = () => {
       description: formData.description,
       date: formData.procedure_date || null,
       status: formData.status,
+      outcome: formData.outcome || null,
       notes: formData.notes || null,
       facility: formData.facility || null,
       procedure_setting: formData.procedure_setting || null,

@@ -487,6 +487,18 @@
     },
     "status": {
       "description": "Estado actual del procedimiento"
+    },
+    "outcome": {
+      "label": "Resultado",
+      "placeholder": "Seleccione el resultado",
+      "description": "Resultado o desenlace del procedimiento",
+      "options": {
+        "successful": "Exitoso",
+        "abnormal": "Anormal",
+        "complications": "Complicaciones",
+        "inconclusive": "No concluyente",
+        "pending": "Pendiente"
+      }
     }
   },
   "practitioners": {

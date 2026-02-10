@@ -487,6 +487,18 @@
       "label": "Notes",
       "placeholder": "Additional notes about the procedure...",
       "description": "Any relevant observations, pre/post-op instructions, or details"
+    },
+    "outcome": {
+      "label": "Outcome",
+      "placeholder": "Select outcome",
+      "description": "Result or outcome of the procedure",
+      "options": {
+        "successful": "Successful",
+        "abnormal": "Abnormal",
+        "complications": "Complications",
+        "inconclusive": "Inconclusive",
+        "pending": "Pending"
+      }
     }
   },
   "visits": {

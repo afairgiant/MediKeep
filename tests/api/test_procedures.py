@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
+from app.models.enums import get_all_procedure_outcomes
 from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user, create_user_token_headers
 
@@ -732,6 +733,153 @@ class TestProceduresAPI:
         data = response.json()
         assert data["date"] == new_date
         assert data["status"] == "scheduled"  # Status unchanged
+
+    def test_create_procedure_with_outcome(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test creating a procedure with an outcome value."""
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Appendectomy",
+            "date": "2024-01-15",
+            "status": "completed",
+            "outcome": "successful"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["outcome"] == "successful"
+
+    def test_create_procedure_without_outcome(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test creating a procedure without an outcome (null is valid)."""
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Scheduled MRI",
+            "date": "2024-03-15",
+            "status": "scheduled"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["outcome"] is None
+
+    def test_create_procedure_invalid_outcome_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that an invalid outcome value is rejected."""
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Test Procedure",
+            "date": "2024-01-15",
+            "status": "completed",
+            "outcome": "invalid_outcome"
+        }
+
+        response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 422
+
+    def test_create_procedure_all_outcome_values(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that all valid outcome values are accepted."""
+        valid_outcomes = get_all_procedure_outcomes()
+
+        for outcome in valid_outcomes:
+            procedure_data = {
+                "patient_id": user_with_patient["patient"].id,
+                "procedure_name": f"Procedure with {outcome}",
+                "date": "2024-01-15",
+                "status": "completed",
+                "outcome": outcome
+            }
+
+            response = client.post(
+                "/api/v1/procedures/",
+                json=procedure_data,
+                headers=authenticated_headers
+            )
+
+            assert response.status_code == 200, f"Failed for outcome: {outcome}"
+            data = response.json()
+            assert data["outcome"] == outcome
+
+    def test_update_procedure_outcome(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test updating a procedure's outcome."""
+        # Create procedure without outcome
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Knee Arthroscopy",
+            "date": "2024-01-15",
+            "status": "scheduled",
+        }
+
+        create_response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        procedure_id = create_response.json()["id"]
+        assert create_response.json()["outcome"] is None
+
+        # Update to add outcome
+        update_data = {
+            "status": "completed",
+            "outcome": "successful",
+        }
+
+        response = client.put(
+            f"/api/v1/procedures/{procedure_id}",
+            json=update_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["outcome"] == "successful"
+        assert data["status"] == "completed"
+
+    def test_update_procedure_invalid_outcome_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that updating with an invalid outcome is rejected."""
+        # Create procedure
+        procedure_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "procedure_name": "Test Procedure",
+            "date": "2024-01-15",
+            "status": "completed",
+        }
+
+        create_response = client.post(
+            "/api/v1/procedures/",
+            json=procedure_data,
+            headers=authenticated_headers
+        )
+
+        procedure_id = create_response.json()["id"]
+
+        # Try to update with invalid outcome
+        update_data = {
+            "outcome": "not_a_valid_outcome",
+        }
+
+        response = client.put(
+            f"/api/v1/procedures/{procedure_id}",
+            json=update_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 422
 
     def test_scheduled_procedure_past_date_allowed(self, client: TestClient, user_with_patient, authenticated_headers):
         """Test that scheduled procedures can have past dates (e.g., rescheduled from past)."""

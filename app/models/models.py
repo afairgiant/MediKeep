@@ -809,6 +809,9 @@ class Procedure(Base):
     status = Column(
         String, nullable=True
     )  # Use ProcedureStatus enum: scheduled, in_progress, completed, cancelled
+    outcome = Column(
+        String, nullable=True
+    )  # Use ProcedureOutcome enum: successful, abnormal, complications, inconclusive, pending
     notes = Column(String, nullable=True)  # Additional notes about the procedure
     facility = Column(
         String, nullable=True

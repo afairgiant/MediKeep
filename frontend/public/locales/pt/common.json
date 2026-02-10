@@ -1082,6 +1082,7 @@
       "noComplications": "Nenhuma complicação relatada",
       "clinicalNotes": "Notas Clínicas",
       "noClinicalNotes": "Nenhuma nota clínica disponível",
+      "outcome": "Desfecho",
       "notSpecified": "Não especificado",
       "close": "Fechar",
       "edit": "Editar"
@@ -1144,6 +1145,14 @@
       "clinicalNotes": "Notas Clínicas",
       "clinicalNotesPlaceholder": "Digite notas clínicas, observações ou detalhes adicionais",
       "clinicalNotesDesc": "Informações adicionais sobre este procedimento",
+      "outcome": "Desfecho",
+      "outcomePlaceholder": "Selecione o desfecho",
+      "outcomeDesc": "Resultado ou desfecho do procedimento",
+      "outcomeSuccessful": "Bem-sucedido",
+      "outcomeAbnormal": "Anormal",
+      "outcomeComplications": "Com complicações",
+      "outcomeInconclusive": "Inconclusivo",
+      "outcomePending": "Pendente",
       "cancel": "Cancelar",
       "createProcedure": "Criar Procedimento",
       "updateProcedure": "Atualizar Procedimento"

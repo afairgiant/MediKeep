@@ -487,6 +487,18 @@
     },
     "status": {
       "description": "Aktueller Status des Eingriffs"
+    },
+    "outcome": {
+      "label": "Ergebnis",
+      "placeholder": "Ergebnis auswählen",
+      "description": "Resultat oder Ausgang des Eingriffs",
+      "options": {
+        "successful": "Erfolgreich",
+        "abnormal": "Auffällig",
+        "complications": "Komplikationen",
+        "inconclusive": "Nicht eindeutig",
+        "pending": "Ausstehend"
+      }
     }
   },
   "practitioners": {

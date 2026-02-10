@@ -487,6 +487,18 @@
     },
     "status": {
       "description": "Status atual do procedimento"
+    },
+    "outcome": {
+      "label": "Desfecho",
+      "placeholder": "Selecione o desfecho",
+      "description": "Resultado ou desfecho do procedimento",
+      "options": {
+        "successful": "Bem-sucedido",
+        "abnormal": "Anormal",
+        "complications": "Complicações",
+        "inconclusive": "Inconclusivo",
+        "pending": "Pendente"
+      }
     }
   },
   "visits": {

@@ -68,6 +68,15 @@ class ProcedureStatus(Enum):
     POSTPONED = "postponed"
 
 
+class ProcedureOutcome(Enum):
+    """Outcome values for procedures"""
+    SUCCESSFUL = "successful"
+    ABNORMAL = "abnormal"
+    COMPLICATIONS = "complications"
+    INCONCLUSIVE = "inconclusive"
+    PENDING = "pending"
+
+
 class TreatmentStatus(Enum):
     """Status values for treatments"""
     PLANNED = "planned"
@@ -225,6 +234,11 @@ def get_all_lab_result_statuses():
 def get_all_procedure_statuses():
     """Get all valid procedure status values"""
     return get_status_values(ProcedureStatus)
+
+
+def get_all_procedure_outcomes():
+    """Get all valid procedure outcome values"""
+    return get_status_values(ProcedureOutcome)
 
 
 def get_all_treatment_statuses():

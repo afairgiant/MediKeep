@@ -2,6 +2,7 @@ import React from 'react';
 import { Badge, Text, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
+import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
@@ -61,6 +62,11 @@ const ProcedureCard = ({
       {
         label: t('procedures.procedureCode.label'),
         value: procedure.procedure_code
+      },
+      {
+        label: t('procedures.outcome.label', 'Outcome'),
+        value: procedure.outcome,
+        render: (value) => value ? <StatusBadge status={value} size="sm" /> : t('common:labels.notSpecified')
       },
       {
         label: t('procedures.procedureSetting.label'),

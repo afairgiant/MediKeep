@@ -210,7 +210,7 @@ const ProcedureFormWrapper = ({
                       value={formData.status || null}
                       data={[
                         { value: 'scheduled', label: t('procedures.form.statusScheduled', 'Scheduled') },
-                        { value: 'in-progress', label: t('procedures.form.statusInProgress', 'In Progress') },
+                        { value: 'in_progress', label: t('procedures.form.statusInProgress', 'In Progress') },
                         { value: 'completed', label: t('procedures.form.statusCompleted', 'Completed') },
                         { value: 'postponed', label: t('procedures.form.statusPostponed', 'Postponed') },
                         { value: 'cancelled', label: t('procedures.form.statusCancelled', 'Cancelled') },
@@ -220,6 +220,26 @@ const ProcedureFormWrapper = ({
                       }}
                       placeholder={t('procedures.form.statusPlaceholder', 'Select status')}
                       description={t('procedures.form.statusDesc', 'Current procedure status')}
+                      clearable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <Select
+                      label={t('procedures.form.outcome', 'Outcome')}
+                      value={formData.outcome || null}
+                      data={[
+                        { value: 'successful', label: t('procedures.form.outcomeSuccessful', 'Successful') },
+                        { value: 'abnormal', label: t('procedures.form.outcomeAbnormal', 'Abnormal') },
+                        { value: 'complications', label: t('procedures.form.outcomeComplications', 'Complications') },
+                        { value: 'inconclusive', label: t('procedures.form.outcomeInconclusive', 'Inconclusive') },
+                        { value: 'pending', label: t('procedures.form.outcomePending', 'Pending') },
+                      ]}
+                      onChange={(value) => {
+                        onInputChange({ target: { name: 'outcome', value: value || '' } });
+                      }}
+                      placeholder={t('procedures.form.outcomePlaceholder', 'Select outcome')}
+                      description={t('procedures.form.outcomeDesc', 'Result or outcome of the procedure')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />

@@ -1082,6 +1082,7 @@
       "noComplications": "Nessuna complicazione segnalata",
       "clinicalNotes": "Note cliniche",
       "noClinicalNotes": "Nessuna nota clinica disponibile",
+      "outcome": "Esito",
       "notSpecified": "Non specificato",
       "close": "Chiudi",
       "edit": "Modifica"
@@ -1144,6 +1145,14 @@
       "clinicalNotes": "Note cliniche",
       "clinicalNotesPlaceholder": "Inserisci note cliniche, osservazioni o dettagli aggiuntivi",
       "clinicalNotesDesc": "Informazioni aggiuntive su questa procedura",
+      "outcome": "Esito",
+      "outcomePlaceholder": "Seleziona esito",
+      "outcomeDesc": "Risultato o esito della procedura",
+      "outcomeSuccessful": "Riuscito",
+      "outcomeAbnormal": "Anomalo",
+      "outcomeComplications": "Complicazioni",
+      "outcomeInconclusive": "Non conclusivo",
+      "outcomePending": "In sospeso",
       "cancel": "Annulla",
       "createProcedure": "Crea procedura",
       "updateProcedure": "Aggiorna procedura"
