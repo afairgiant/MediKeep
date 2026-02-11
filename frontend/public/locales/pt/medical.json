@@ -1277,6 +1277,26 @@
       "website": {
         "description": "Site da farmácia para pedidos online ou informações",
         "placeholder": "https://www.example.com"
+      },
+      "stateProvince": {
+        "label": "Estado / Província",
+        "placeholder": "ex., São Paulo, Ontario",
+        "description": "Estado, província ou região"
+      },
+      "postalCode": {
+        "label": "Código postal",
+        "placeholder": "ex., 01001-000, M5V 2T6",
+        "description": "CEP ou código postal"
+      },
+      "country": {
+        "label": "País",
+        "placeholder": "ex., Brasil, Canadá",
+        "description": "País da farmácia"
+      },
+      "specialtyServices": {
+        "label": "Especialidades",
+        "placeholder": "ex., Vacinações, Manipulação, Acompanhamento farmacoterapêutico",
+        "description": "Serviços especiais oferecidos por esta farmácia"
       }
     },
     "city": {

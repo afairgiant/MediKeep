@@ -1790,10 +1790,13 @@
     "card": {
       "address": "Dirección",
       "city": "Ciudad",
+      "stateProvince": "Estado / Provincia",
+      "postalCode": "Código postal",
+      "country": "País",
       "phone": "Teléfono",
       "storeNumber": "Número de tienda",
-      "visitWebsite": "Visitar sitio web",
-      "website": "Sitio web"
+      "website": "Sitio web",
+      "specialtyServices": "Especialidades"
     },
     "empty": {
       "filtered": "Intente ajustar su búsqueda o criterios de filtro.",
@@ -1812,6 +1815,9 @@
     "viewModal": {
       "address": "Dirección",
       "city": "Ciudad",
+      "stateProvince": "Estado / Provincia",
+      "postalCode": "Código postal",
+      "country": "País",
       "contact": "INFORMACIÓN DE CONTACTO",
       "editButton": "Editar farmacia",
       "location": "UBICACIÓN",
@@ -1819,8 +1825,8 @@
       "storeNumber": "Tienda #",
       "subtitle": "Farmacia",
       "title": "Detalles de la farmacia",
-      "visitWebsite": "Visitar sitio web",
-      "website": "Sitio web"
+      "website": "Sitio web",
+      "specialtyServices": "Especialidades"
     }
   },
   "practitioners": {

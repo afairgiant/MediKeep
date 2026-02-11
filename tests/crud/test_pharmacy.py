@@ -36,6 +36,41 @@ class TestPharmacyCRUD:
         assert pharmacy.zip_code == "27601"
         assert pharmacy.drive_through is True
 
+    def test_create_pharmacy_international_postal_code(self, db_session: Session):
+        """Test creating a pharmacy with international postal codes."""
+        # Canadian postal code
+        pharmacy_ca = PharmacyCreate(
+            name="Shoppers Drug Mart - Toronto",
+            brand="Independent",
+            city="Toronto",
+            state="Ontario",
+            zip_code="M5V 2T6",
+            country="Canada",
+        )
+        created_ca = pharmacy_crud.create(db_session, obj_in=pharmacy_ca)
+        assert created_ca.zip_code == "M5V 2T6"
+        assert created_ca.country == "Canada"
+
+        # UK postcode
+        pharmacy_uk = PharmacyCreate(
+            name="Boots Pharmacy - London",
+            city="London",
+            zip_code="SW1A 1AA",
+            country="United Kingdom",
+        )
+        created_uk = pharmacy_crud.create(db_session, obj_in=pharmacy_uk)
+        assert created_uk.zip_code == "SW1A 1AA"
+
+        # German postal code
+        pharmacy_de = PharmacyCreate(
+            name="Apotheke Berlin",
+            city="Berlin",
+            zip_code="10115",
+            country="Germany",
+        )
+        created_de = pharmacy_crud.create(db_session, obj_in=pharmacy_de)
+        assert created_de.zip_code == "10115"
+
     def test_get_by_name(self, db_session: Session):
         """Test getting a pharmacy by exact name.
 
@@ -168,6 +203,7 @@ class TestPharmacyCRUD:
             PharmacyCreate(name="NC Store 1", city="Raleigh", state="NC", zip_code="27601"),
             PharmacyCreate(name="NC Store 2", city="Raleigh", state="NC", zip_code="27602"),
             PharmacyCreate(name="SC Store", city="Charleston", state="SC", zip_code="29401"),
+            PharmacyCreate(name="CA Store", city="Toronto", state="Ontario", zip_code="m5v 2t6"),
         ]
 
         for phar_data in pharmacies_data:
@@ -181,9 +217,15 @@ class TestPharmacyCRUD:
         nc_stores = pharmacy_crud.search_by_location(db_session, state="NC")
         assert len(nc_stores) == 2
 
-        # Search by zip
+        # Search by zip (US)
         zip_results = pharmacy_crud.search_by_location(db_session, zip_code="27601")
         assert len(zip_results) == 1
+
+        # Search by postal code (international)
+        # Note: query method lowercases filter values for matching
+        postal_results = pharmacy_crud.search_by_location(db_session, zip_code="M5V 2T6")
+        assert len(postal_results) == 1
+        assert postal_results[0].name == "CA Store"
 
     def test_get_by_store_number(self, db_session: Session):
         """Test getting pharmacy by brand and store number.
@@ -206,19 +248,26 @@ class TestPharmacyCRUD:
         assert found.store_number == "12345"
 
     def test_get_by_zip_code(self, db_session: Session):
-        """Test getting pharmacies by ZIP code."""
+        """Test getting pharmacies by postal code."""
         pharmacies_data = [
             PharmacyCreate(name="Store 1", zip_code="27601"),
             PharmacyCreate(name="Store 2", zip_code="27601"),
             PharmacyCreate(name="Store 3", zip_code="27602"),
+            PharmacyCreate(name="Store CA", zip_code="m5v 2t6"),
         ]
 
         for phar_data in pharmacies_data:
             pharmacy_crud.create(db_session, obj_in=phar_data)
 
+        # US ZIP code
         results = pharmacy_crud.get_by_zip_code(db_session, zip_code="27601")
-
         assert len(results) == 2
+
+        # Canadian postal code
+        # Note: query method lowercases filter values for matching
+        ca_results = pharmacy_crud.get_by_zip_code(db_session, zip_code="M5V 2T6")
+        assert len(ca_results) == 1
+        assert ca_results[0].name == "Store CA"
 
     def test_get_24_hour_pharmacies(self, db_session: Session):
         """Test getting 24-hour pharmacies."""

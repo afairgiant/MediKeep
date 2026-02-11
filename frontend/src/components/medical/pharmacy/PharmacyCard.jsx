@@ -39,38 +39,30 @@ const PharmacyCard = ({
       {
         label: t('pharmacies.card.address'),
         value: pharmacy.street_address,
-        render: (value) => (
-          <Text size="sm" fw={500}>
-            {value || t('labels.notSpecified')}
-          </Text>
-        )
       },
       {
         label: t('pharmacies.card.city'),
         value: pharmacy.city,
-        render: (value) => (
-          <Text size="sm" fw={500}>
-            {value || t('labels.notSpecified')}
-          </Text>
-        )
+      },
+      pharmacy.state && {
+        label: t('pharmacies.card.stateProvince'),
+        value: pharmacy.state,
+      },
+      pharmacy.zip_code && {
+        label: t('pharmacies.card.postalCode'),
+        value: pharmacy.zip_code,
+      },
+      pharmacy.country && {
+        label: t('pharmacies.card.country'),
+        value: pharmacy.country,
       },
       {
         label: t('pharmacies.card.storeNumber'),
         value: pharmacy.store_number,
-        render: (value) => (
-          <Text size="sm" fw={500}>
-            {value || t('labels.notSpecified')}
-          </Text>
-        )
       },
       {
         label: t('pharmacies.card.phone'),
         value: pharmacy.phone_number,
-        render: (value) => (
-          <Text size="sm" fw={500}>
-            {value || t('labels.notSpecified')}
-          </Text>
-        )
       },
       {
         label: t('pharmacies.card.website'),
@@ -85,12 +77,16 @@ const PharmacyCard = ({
               size="sm"
               c="blue"
             >
-              {t('pharmacies.card.visitWebsite')}
+              {value}
             </Anchor>
           );
         }
-      }
-    ];
+      },
+      pharmacy.specialty_services && {
+        label: t('pharmacies.card.specialtyServices'),
+        value: pharmacy.specialty_services,
+      },
+    ].filter(Boolean);
 
     return (
       <BaseMedicalCard

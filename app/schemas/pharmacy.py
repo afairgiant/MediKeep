@@ -71,7 +71,7 @@ class PharmacyBase(BaseModel):
     @field_validator("zip_code", mode="before")
     @classmethod
     def validate_zip_code(cls, v):
-        """Validate ZIP code field."""
+        """Validate postal code field."""
         return validate_zip_code(v)
 
     @field_validator("country", mode="before")
@@ -209,7 +209,7 @@ class PharmacyUpdate(BaseModel):
     @field_validator("zip_code")
     @classmethod
     def validate_zip_code(cls, v):
-        """Validate ZIP code if provided."""
+        """Validate postal code if provided."""
         if v is None:
             return v
         return validate_zip_code(v)
@@ -355,7 +355,7 @@ class PharmacySearch(BaseModel):
     @field_validator("zip_code")
     @classmethod
     def validate_zip_code_search(cls, v):
-        """Validate search ZIP code parameter."""
+        """Validate search postal code parameter."""
         if v is None:
             return v
         return validate_zip_code(v)

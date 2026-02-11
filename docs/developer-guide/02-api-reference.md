@@ -2333,18 +2333,31 @@ Base path: `/api/v1/pharmacies`
 - **Request Body**:
 ```json
 {
-  "name": "CVS Pharmacy",
+  "name": "CVS Pharmacy - Main Street",
+  "brand": "CVS",
+  "street_address": "456 Oak St",
+  "city": "Anytown",
+  "state": "NC",
+  "zip_code": "27514",
+  "country": "United States",
+  "store_number": "12345",
   "phone_number": "+1234567890",
-  "address": "456 Oak St, City, State 12345",
+  "fax_number": "+1234567891",
+  "email": "pharmacy@example.com",
+  "website": "https://www.cvs.com",
   "hours": "Mon-Fri 9AM-9PM",
-  "notes": "24-hour location"
+  "drive_through": true,
+  "twenty_four_hour": false,
+  "specialty_services": "Vaccinations, Compounding, Medication Therapy Management"
 }
 ```
+- **Notes**: `zip_code` accepts international postal codes (US ZIP, Canadian, UK, etc.)
 
 #### List Pharmacies
 `GET /pharmacies/`
 - **Query Parameters**:
-  - `search` (string, optional): Search by name or address
+  - `skip` (integer, optional, default: 0): Number of records to skip (for pagination)
+  - `limit` (integer, optional, default: 100): Maximum number of records to return
 
 ### 7.5 Practitioners
 

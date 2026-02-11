@@ -1990,10 +1990,13 @@
     "card": {
       "address": "Adresse",
       "city": "Stadt",
+      "stateProvince": "Bundesland / Provinz",
+      "postalCode": "Postleitzahl",
+      "country": "Land",
       "storeNumber": "Filialnummer",
       "phone": "Telefon",
       "website": "Webseite",
-      "visitWebsite": "Webseite besuchen"
+      "specialtyServices": "Fachgebiete"
     },
     "viewModal": {
       "title": "Apothekendetails",
@@ -2001,11 +2004,14 @@
       "location": "STANDORT",
       "address": "Adresse",
       "city": "Stadt",
+      "stateProvince": "Bundesland / Provinz",
+      "postalCode": "Postleitzahl",
+      "country": "Land",
       "storeNumber": "Filiale Nr.",
       "contact": "KONTAKTINFORMATIONEN",
       "phone": "Telefon",
       "website": "Webseite",
-      "visitWebsite": "Webseite besuchen",
+      "specialtyServices": "Fachgebiete",
       "editButton": "Apotheke bearbeiten"
     },
     "form": {

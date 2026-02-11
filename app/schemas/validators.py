@@ -298,29 +298,35 @@ def validate_url(
 
 def validate_zip_code(
     value: Optional[str],
-    field_name: str = "ZIP code",
+    field_name: str = "Postal code",
 ) -> Optional[str]:
     """
-    Validate US ZIP code format (5 digits or ZIP+4).
+    Validate postal/ZIP code format (international).
+
+    Accepts US ZIP codes, Canadian postal codes, UK postcodes,
+    and other international formats (2-10 alphanumeric characters,
+    spaces, and hyphens).
 
     Args:
-        value: The ZIP code to validate
+        value: The postal code to validate
         field_name: Name of the field for error messages
 
     Returns:
-        Validated ZIP code or None
+        Validated postal code or None
 
     Raises:
-        ValueError: If ZIP code format is invalid
+        ValueError: If postal code format is invalid
     """
     if value is None or str(value).strip() == "":
         return None
 
-    zip_pattern = r"^\d{5}(-\d{4})?$"
+    postal_pattern = r"^(?=.*[A-Za-z0-9])[A-Za-z0-9 \-]{2,10}$"
     cleaned = value.strip()
 
-    if not re.match(zip_pattern, cleaned):
-        raise ValueError(f"{field_name} must be in format 12345 or 12345-6789")
+    if not re.match(postal_pattern, cleaned):
+        raise ValueError(
+            f"{field_name} must be 2-10 alphanumeric characters, spaces, or hyphens"
+        )
 
     return cleaned
 

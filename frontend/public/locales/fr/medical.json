@@ -1277,6 +1277,26 @@
       "website": {
         "description": "Site web de la pharmacie pour la commande en ligne ou les informations",
         "placeholder": "https://www.example.com"
+      },
+      "stateProvince": {
+        "label": "Province / État",
+        "placeholder": "ex : Île-de-France, Ontario",
+        "description": "État, province ou région"
+      },
+      "postalCode": {
+        "label": "Code postal",
+        "placeholder": "ex : 75001, M5V 2T6",
+        "description": "Code postal ou ZIP"
+      },
+      "country": {
+        "label": "Pays",
+        "placeholder": "ex : France, Canada",
+        "description": "Pays de la pharmacie"
+      },
+      "specialtyServices": {
+        "label": "Spécialités",
+        "placeholder": "ex : Vaccinations, Préparations magistrales, Suivi thérapeutique",
+        "description": "Services spéciaux offerts par cette pharmacie"
       }
     },
     "city": {
