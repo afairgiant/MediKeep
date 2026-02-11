@@ -1294,7 +1294,7 @@
         "description": "Country where the pharmacy is located"
       },
       "specialtyServices": {
-        "label": "Specialty Services",
+        "label": "Specialties",
         "placeholder": "e.g., Vaccinations, Compounding, Medication Therapy Management",
         "description": "Special services offered by this pharmacy"
       }

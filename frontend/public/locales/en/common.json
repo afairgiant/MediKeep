@@ -1746,8 +1746,7 @@
       "storeNumber": "Store Number",
       "phone": "Phone",
       "website": "Website",
-      "visitWebsite": "Visit Website",
-      "specialtyServices": "Specialty Services"
+      "specialtyServices": "Specialties"
     },
     "viewModal": {
       "title": "Pharmacy Details",
@@ -1762,8 +1761,7 @@
       "contact": "CONTACT INFORMATION",
       "phone": "Phone",
       "website": "Website",
-      "visitWebsite": "Visit Website",
-      "specialtyServices": "Specialty Services",
+      "specialtyServices": "Specialties",
       "editButton": "Edit Pharmacy"
     },
     "form": {

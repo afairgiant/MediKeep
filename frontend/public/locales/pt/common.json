@@ -1740,14 +1740,13 @@
     "card": {
       "address": "Endereço",
       "city": "Cidade",
-      "stateProvince": "Estado / Provincia",
-      "postalCode": "Codigo postal",
-      "country": "Pais",
+      "stateProvince": "Estado / Província",
+      "postalCode": "Código postal",
+      "country": "País",
       "storeNumber": "Número da Loja",
       "phone": "Telefone",
       "website": "Website",
-      "visitWebsite": "Visitar Website",
-      "specialtyServices": "Serviços especializados"
+      "specialtyServices": "Especialidades"
     },
     "viewModal": {
       "title": "Detalhes da Farmácia",
@@ -1755,15 +1754,14 @@
       "location": "LOCALIZAÇÃO",
       "address": "Endereço",
       "city": "Cidade",
-      "stateProvince": "Estado / Provincia",
-      "postalCode": "Codigo postal",
-      "country": "Pais",
+      "stateProvince": "Estado / Província",
+      "postalCode": "Código postal",
+      "country": "País",
       "storeNumber": "Número da Loja",
       "contact": "INFORMAÇÕES DE CONTATO",
       "phone": "Telefone",
       "website": "Website",
-      "visitWebsite": "Visitar Website",
-      "specialtyServices": "Serviços especializados",
+      "specialtyServices": "Especialidades",
       "editButton": "Editar Farmácia"
     },
     "form": {

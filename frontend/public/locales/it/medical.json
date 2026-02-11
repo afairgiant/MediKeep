@@ -1294,7 +1294,7 @@
         "description": "Paese della farmacia"
       },
       "specialtyServices": {
-        "label": "Servizi specialistici",
+        "label": "Specialit\u00e0",
         "placeholder": "es., Vaccinazioni, Preparazioni galeniche, Gestione terapia farmacologica",
         "description": "Servizi speciali offerti da questa farmacia"
       }

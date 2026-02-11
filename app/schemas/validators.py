@@ -320,7 +320,7 @@ def validate_zip_code(
     if value is None or str(value).strip() == "":
         return None
 
-    postal_pattern = r"^[A-Za-z0-9\s\-]{2,10}$"
+    postal_pattern = r"^(?=.*[A-Za-z0-9])[A-Za-z0-9 \-]{2,10}$"
     cleaned = value.strip()
 
     if not re.match(postal_pattern, cleaned):

@@ -2356,7 +2356,8 @@ Base path: `/api/v1/pharmacies`
 #### List Pharmacies
 `GET /pharmacies/`
 - **Query Parameters**:
-  - `search` (string, optional): Search by name, brand, city, state, postal code, country, or specialty services
+  - `skip` (integer, optional, default: 0): Number of records to skip (for pagination)
+  - `limit` (integer, optional, default: 100): Maximum number of records to return
 
 ### 7.5 Practitioners
 

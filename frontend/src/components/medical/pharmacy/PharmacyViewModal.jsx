@@ -105,7 +105,7 @@ const PharmacyViewModal = ({
                 </Text>
                 <Divider />
                 <Group>
-                  <Text size="sm" fw={500} w={80}>
+                  <Text size="sm" fw={500} w={120}>
                     {t('pharmacies.viewModal.address', 'Address')}:
                   </Text>
                   <Text
@@ -116,7 +116,7 @@ const PharmacyViewModal = ({
                   </Text>
                 </Group>
                 <Group>
-                  <Text size="sm" fw={500} w={80}>
+                  <Text size="sm" fw={500} w={120}>
                     {t('pharmacies.viewModal.city', 'City')}:
                   </Text>
                   <Text size="sm" c={pharmacy.city ? 'inherit' : 'dimmed'}>
@@ -124,7 +124,7 @@ const PharmacyViewModal = ({
                   </Text>
                 </Group>
                 <Group>
-                  <Text size="sm" fw={500} w={80}>
+                  <Text size="sm" fw={500} w={120}>
                     {t('pharmacies.viewModal.stateProvince', 'State / Province')}:
                   </Text>
                   <Text size="sm" c={pharmacy.state ? 'inherit' : 'dimmed'}>
@@ -132,7 +132,7 @@ const PharmacyViewModal = ({
                   </Text>
                 </Group>
                 <Group>
-                  <Text size="sm" fw={500} w={80}>
+                  <Text size="sm" fw={500} w={120}>
                     {t('pharmacies.viewModal.postalCode', 'Postal Code')}:
                   </Text>
                   <Text size="sm" c={pharmacy.zip_code ? 'inherit' : 'dimmed'}>
@@ -140,7 +140,7 @@ const PharmacyViewModal = ({
                   </Text>
                 </Group>
                 <Group>
-                  <Text size="sm" fw={500} w={80}>
+                  <Text size="sm" fw={500} w={120}>
                     {t('pharmacies.viewModal.country', 'Country')}:
                   </Text>
                   <Text size="sm" c={pharmacy.country ? 'inherit' : 'dimmed'}>
@@ -148,7 +148,7 @@ const PharmacyViewModal = ({
                   </Text>
                 </Group>
                 <Group>
-                  <Text size="sm" fw={500} w={80}>
+                  <Text size="sm" fw={500} w={120}>
                     {t('pharmacies.viewModal.storeNumber', 'Store #')}:
                   </Text>
                   <Text
@@ -170,7 +170,7 @@ const PharmacyViewModal = ({
                 </Text>
                 <Divider />
                 <Group>
-                  <Text size="sm" fw={500} w={80}>
+                  <Text size="sm" fw={500} w={120}>
                     {t('pharmacies.viewModal.phone', 'Phone')}:
                   </Text>
                   <Text
@@ -181,7 +181,7 @@ const PharmacyViewModal = ({
                   </Text>
                 </Group>
                 <Group>
-                  <Text size="sm" fw={500} w={80}>
+                  <Text size="sm" fw={500} w={120}>
                     {t('pharmacies.viewModal.website', 'Website')}:
                   </Text>
                   <Text size="sm" c={pharmacy.website ? 'inherit' : 'dimmed'}>
@@ -197,16 +197,16 @@ const PharmacyViewModal = ({
                         size="sm"
                         c="blue"
                       >
-                        {t('pharmacies.viewModal.visitWebsite', 'Visit Website')}
+                        {pharmacy.website}
                       </Anchor>
                     ) : (
                       t('common.labels.notSpecified', 'Not specified')
                     )}
                   </Text>
                 </Group>
-                <Group>
-                  <Text size="sm" fw={500} w={80}>
-                    {t('pharmacies.viewModal.specialtyServices', 'Specialty Services')}:
+                <Group wrap="nowrap" align="flex-start">
+                  <Text size="sm" fw={500} w={120} style={{ flexShrink: 0 }}>
+                    {t('pharmacies.viewModal.specialtyServices', 'Specialties')}:
                   </Text>
                   <Text size="sm" c={pharmacy.specialty_services ? 'inherit' : 'dimmed'}>
                     {pharmacy.specialty_services || t('common.labels.notSpecified', 'Not specified')}

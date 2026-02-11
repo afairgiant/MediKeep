@@ -930,21 +930,21 @@
       "stateProvince": {
         "label": "Estado / Provincia",
         "placeholder": "ej., California, Ontario",
-        "description": "Estado, provincia o region"
+        "description": "Estado, provincia o región"
       },
       "postalCode": {
-        "label": "Codigo postal",
+        "label": "Código postal",
         "placeholder": "ej., 28001, M5V 2T6",
-        "description": "Codigo postal o ZIP"
+        "description": "Código postal o ZIP"
       },
       "country": {
-        "label": "Pais",
-        "placeholder": "ej., España, Canada",
-        "description": "Pais donde se encuentra la farmacia"
+        "label": "País",
+        "placeholder": "ej., España, Canadá",
+        "description": "País donde se encuentra la farmacia"
       },
       "specialtyServices": {
-        "label": "Servicios especializados",
-        "placeholder": "ej., Vacunaciones, Formulacion magistral, Seguimiento farmacoterapeutico",
+        "label": "Especialidades",
+        "placeholder": "ej., Vacunaciones, Formulación magistral, Seguimiento farmacoterapéutico",
         "description": "Servicios especiales ofrecidos por esta farmacia"
       }
     }

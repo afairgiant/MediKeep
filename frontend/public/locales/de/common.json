@@ -1996,8 +1996,7 @@
       "storeNumber": "Filialnummer",
       "phone": "Telefon",
       "website": "Webseite",
-      "visitWebsite": "Webseite besuchen",
-      "specialtyServices": "Spezialleistungen"
+      "specialtyServices": "Fachgebiete"
     },
     "viewModal": {
       "title": "Apothekendetails",
@@ -2012,8 +2011,7 @@
       "contact": "KONTAKTINFORMATIONEN",
       "phone": "Telefon",
       "website": "Webseite",
-      "visitWebsite": "Webseite besuchen",
-      "specialtyServices": "Spezialleistungen",
+      "specialtyServices": "Fachgebiete",
       "editButton": "Apotheke bearbeiten"
     },
     "form": {

@@ -59,9 +59,13 @@ const Pharmacies = () => {
     brand: '',
     street_address: '',
     city: '',
+    state: '',
+    zip_code: '',
+    country: '',
     store_number: '',
     phone_number: '',
     website: '',
+    specialty_services: '',
   });
 
   // Handle global error
@@ -85,9 +89,13 @@ const Pharmacies = () => {
       brand: '',
       street_address: '',
       city: '',
+      state: '',
+      zip_code: '',
+      country: '',
       store_number: '',
       phone_number: '',
       website: '',
+      specialty_services: '',
     });
     setEditingPharmacy(null);
     setShowModal(false);
@@ -127,9 +135,13 @@ const Pharmacies = () => {
       brand: pharmacy.brand || '',
       street_address: pharmacy.street_address || '',
       city: pharmacy.city || '',
+      state: pharmacy.state || '',
+      zip_code: pharmacy.zip_code || '',
+      country: pharmacy.country || '',
       store_number: pharmacy.store_number || '',
       phone_number: pharmacy.phone_number || '',
       website: pharmacy.website || '',
+      specialty_services: pharmacy.specialty_services || '',
     });
     setEditingPharmacy(pharmacy);
     setShowModal(true);
@@ -145,9 +157,13 @@ const Pharmacies = () => {
         brand: formData.brand.trim(),
         street_address: formData.street_address.trim(),
         city: formData.city.trim(),
+        state: formData.state.trim() || null,
+        zip_code: formData.zip_code.trim() || null,
+        country: formData.country.trim() || null,
         store_number: formData.store_number.trim(),
         phone_number: formData.phone_number.trim() || null,
         website: formData.website.trim() || null,
+        specialty_services: formData.specialty_services.trim() || null,
       };
 
       if (editingPharmacy) {

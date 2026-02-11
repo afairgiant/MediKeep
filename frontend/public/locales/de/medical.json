@@ -917,7 +917,7 @@
         "description": "Land der Apotheke"
       },
       "specialtyServices": {
-        "label": "Spezialleistungen",
+        "label": "Fachgebiete",
         "placeholder": "z.B. Impfungen, Rezepturen, Medikationsmanagement",
         "description": "Besondere Leistungen dieser Apotheke"
       }

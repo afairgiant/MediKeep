@@ -1279,9 +1279,9 @@
         "placeholder": "https://www.example.com"
       },
       "stateProvince": {
-        "label": "Province / Etat",
-        "placeholder": "ex : Ile-de-France, Ontario",
-        "description": "Etat, province ou region"
+        "label": "Province / État",
+        "placeholder": "ex : Île-de-France, Ontario",
+        "description": "État, province ou région"
       },
       "postalCode": {
         "label": "Code postal",
@@ -1294,9 +1294,9 @@
         "description": "Pays de la pharmacie"
       },
       "specialtyServices": {
-        "label": "Services specialises",
-        "placeholder": "ex : Vaccinations, Preparations magistrales, Suivi therapeutique",
-        "description": "Services speciaux offerts par cette pharmacie"
+        "label": "Spécialités",
+        "placeholder": "ex : Vaccinations, Préparations magistrales, Suivi thérapeutique",
+        "description": "Services spéciaux offerts par cette pharmacie"
       }
     },
     "city": {

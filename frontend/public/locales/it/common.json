@@ -1746,8 +1746,7 @@
       "storeNumber": "Numero negozio",
       "phone": "Telefono",
       "website": "Sito web",
-      "visitWebsite": "Visita il sito web",
-      "specialtyServices": "Servizi specialistici"
+      "specialtyServices": "Specialit\u00e0"
     },
     "viewModal": {
       "title": "Dettagli farmacia",
@@ -1762,8 +1761,7 @@
       "contact": "INFORMAZIONI DI CONTATTO",
       "phone": "Telefono",
       "website": "Sito web",
-      "visitWebsite": "Visita il sito web",
-      "specialtyServices": "Servizi specialistici",
+      "specialtyServices": "Specialit\u00e0",
       "editButton": "Modifica farmacia"
     },
     "form": {
