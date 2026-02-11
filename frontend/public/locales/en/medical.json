@@ -1277,6 +1277,26 @@
       "website": {
         "placeholder": "https://www.example.com",
         "description": "Pharmacy website for online ordering or information"
+      },
+      "stateProvince": {
+        "label": "State / Province",
+        "placeholder": "e.g., California, Ontario",
+        "description": "State, province, or region"
+      },
+      "postalCode": {
+        "label": "Postal Code",
+        "placeholder": "e.g., 90210, M5V 2T6",
+        "description": "ZIP or postal code"
+      },
+      "country": {
+        "label": "Country",
+        "placeholder": "e.g., United States, Canada",
+        "description": "Country where the pharmacy is located"
+      },
+      "specialtyServices": {
+        "label": "Specialty Services",
+        "placeholder": "e.g., Vaccinations, Compounding, Medication Therapy Management",
+        "description": "Special services offered by this pharmacy"
       }
     },
     "pharmacyBrand": {

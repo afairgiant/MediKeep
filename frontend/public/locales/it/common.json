@@ -1740,10 +1740,14 @@
     "card": {
       "address": "Indirizzo",
       "city": "Città",
+      "stateProvince": "Stato / Provincia",
+      "postalCode": "Codice postale",
+      "country": "Paese",
       "storeNumber": "Numero negozio",
       "phone": "Telefono",
       "website": "Sito web",
-      "visitWebsite": "Visita il sito web"
+      "visitWebsite": "Visita il sito web",
+      "specialtyServices": "Servizi specialistici"
     },
     "viewModal": {
       "title": "Dettagli farmacia",
@@ -1751,11 +1755,15 @@
       "location": "LOCALITÀ",
       "address": "Indirizzo",
       "city": "Città",
+      "stateProvince": "Stato / Provincia",
+      "postalCode": "Codice postale",
+      "country": "Paese",
       "storeNumber": "Numero negozio",
       "contact": "INFORMAZIONI DI CONTATTO",
       "phone": "Telefono",
       "website": "Sito web",
       "visitWebsite": "Visita il sito web",
+      "specialtyServices": "Servizi specialistici",
       "editButton": "Modifica farmacia"
     },
     "form": {

@@ -1031,8 +1031,8 @@ JUNCTION TABLES (Many-to-Many)
 | brand | String | | Brand name (CVS, Walgreens) |
 | street_address | String | | Street address |
 | city | String | | City |
-| state | String | | State |
-| zip_code | String | | ZIP code |
+| state | String | | State / Province |
+| zip_code | String | | Postal / ZIP code (international) |
 | country | String | | Country |
 | store_number | String | | Chain store number |
 | phone_number | String | | Contact phone |

@@ -125,6 +125,30 @@ const PharmacyViewModal = ({
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
+                    {t('pharmacies.viewModal.stateProvince', 'State / Province')}:
+                  </Text>
+                  <Text size="sm" c={pharmacy.state ? 'inherit' : 'dimmed'}>
+                    {pharmacy.state || t('common.labels.notSpecified', 'Not specified')}
+                  </Text>
+                </Group>
+                <Group>
+                  <Text size="sm" fw={500} w={80}>
+                    {t('pharmacies.viewModal.postalCode', 'Postal Code')}:
+                  </Text>
+                  <Text size="sm" c={pharmacy.zip_code ? 'inherit' : 'dimmed'}>
+                    {pharmacy.zip_code || t('common.labels.notSpecified', 'Not specified')}
+                  </Text>
+                </Group>
+                <Group>
+                  <Text size="sm" fw={500} w={80}>
+                    {t('pharmacies.viewModal.country', 'Country')}:
+                  </Text>
+                  <Text size="sm" c={pharmacy.country ? 'inherit' : 'dimmed'}>
+                    {pharmacy.country || t('common.labels.notSpecified', 'Not specified')}
+                  </Text>
+                </Group>
+                <Group>
+                  <Text size="sm" fw={500} w={80}>
                     {t('pharmacies.viewModal.storeNumber', 'Store #')}:
                   </Text>
                   <Text
@@ -178,6 +202,14 @@ const PharmacyViewModal = ({
                     ) : (
                       t('common.labels.notSpecified', 'Not specified')
                     )}
+                  </Text>
+                </Group>
+                <Group>
+                  <Text size="sm" fw={500} w={80}>
+                    {t('pharmacies.viewModal.specialtyServices', 'Specialty Services')}:
+                  </Text>
+                  <Text size="sm" c={pharmacy.specialty_services ? 'inherit' : 'dimmed'}>
+                    {pharmacy.specialty_services || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
               </Stack>

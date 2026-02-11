@@ -1277,6 +1277,26 @@
       "website": {
         "description": "Sito web della farmacia per ordini online o informazioni",
         "placeholder": "https://www.example.com"
+      },
+      "stateProvince": {
+        "label": "Stato / Provincia",
+        "placeholder": "es., Lombardia, Ontario",
+        "description": "Stato, provincia o regione"
+      },
+      "postalCode": {
+        "label": "Codice postale",
+        "placeholder": "es., 20121, M5V 2T6",
+        "description": "Codice postale o ZIP"
+      },
+      "country": {
+        "label": "Paese",
+        "placeholder": "es., Italia, Canada",
+        "description": "Paese della farmacia"
+      },
+      "specialtyServices": {
+        "label": "Servizi specialistici",
+        "placeholder": "es., Vaccinazioni, Preparazioni galeniche, Gestione terapia farmacologica",
+        "description": "Servizi speciali offerti da questa farmacia"
       }
     },
     "city": {

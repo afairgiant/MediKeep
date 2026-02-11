@@ -176,7 +176,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
             db: SQLAlchemy database session
             city: City to search for (partial match)
             state: State to search for (partial match)
-            zip_code: ZIP code to search for (exact match)
+            zip_code: Postal code to search for (exact match)
             skip: Number of records to skip
             limit: Maximum number of records to return
 
@@ -254,19 +254,20 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         self, db: Session, *, zip_code: str, skip: int = 0, limit: int = 20
     ) -> List[PharmacyModel]:
         """
-        Retrieve pharmacies by ZIP code.
+        Retrieve pharmacies by postal code.
 
         Args:
             db: SQLAlchemy database session
-            zip_code: ZIP code to filter by
+            zip_code: Postal code to filter by
             skip: Number of records to skip
             limit: Maximum number of records to return
 
         Returns:
-            List of Pharmacy objects in the specified ZIP code
+            List of Pharmacy objects in the specified postal code area
 
         Example:
             pharmacies = pharmacy_crud.get_by_zip_code(db, zip_code="27601")
+            pharmacies = pharmacy_crud.get_by_zip_code(db, zip_code="M5V 2T6")
         """
         return self.query(
             db=db,
@@ -487,15 +488,15 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         limit: int = 20
     ) -> List[PharmacyModel]:
         """
-        Get pharmacies near a specific ZIP code.
+        Get pharmacies near a specific postal code.
 
         Note: This is a simplified implementation that just returns
-        pharmacies in the same ZIP code. For true geographic search,
+        pharmacies in the same postal code. For true geographic search,
         you would need to implement proper distance calculation.
 
         Args:
             db: SQLAlchemy database session
-            zip_code: ZIP code to search near
+            zip_code: Postal code to search near
             radius_miles: Search radius in miles (not implemented in this version)
             skip: Number of records to skip
             limit: Maximum number of records to return
@@ -505,6 +506,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
 
         Example:
             nearby = pharmacy_crud.get_nearby_pharmacies(db, zip_code="27601", radius_miles=5)
+            nearby = pharmacy_crud.get_nearby_pharmacies(db, zip_code="SW1A 1AA")
         """
         return self.get_by_zip_code(db, zip_code=zip_code, skip=skip, limit=limit)
 

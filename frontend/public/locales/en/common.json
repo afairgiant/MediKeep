@@ -1740,10 +1740,14 @@
     "card": {
       "address": "Address",
       "city": "City",
+      "stateProvince": "State / Province",
+      "postalCode": "Postal Code",
+      "country": "Country",
       "storeNumber": "Store Number",
       "phone": "Phone",
       "website": "Website",
-      "visitWebsite": "Visit Website"
+      "visitWebsite": "Visit Website",
+      "specialtyServices": "Specialty Services"
     },
     "viewModal": {
       "title": "Pharmacy Details",
@@ -1751,11 +1755,15 @@
       "location": "LOCATION",
       "address": "Address",
       "city": "City",
+      "stateProvince": "State / Province",
+      "postalCode": "Postal Code",
+      "country": "Country",
       "storeNumber": "Store #",
       "contact": "CONTACT INFORMATION",
       "phone": "Phone",
       "website": "Website",
       "visitWebsite": "Visit Website",
+      "specialtyServices": "Specialty Services",
       "editButton": "Edit Pharmacy"
     },
     "form": {

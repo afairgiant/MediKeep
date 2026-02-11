@@ -900,6 +900,26 @@
       "website": {
         "description": "Apotheken-Website für Online-Bestellungen oder Informationen",
         "placeholder": "https://www.example.com"
+      },
+      "stateProvince": {
+        "label": "Bundesland / Provinz",
+        "placeholder": "z.B. Bayern, Ontario",
+        "description": "Bundesland, Provinz oder Region"
+      },
+      "postalCode": {
+        "label": "Postleitzahl",
+        "placeholder": "z.B. 80331, M5V 2T6",
+        "description": "Postleitzahl oder ZIP-Code"
+      },
+      "country": {
+        "label": "Land",
+        "placeholder": "z.B. Deutschland, Kanada",
+        "description": "Land der Apotheke"
+      },
+      "specialtyServices": {
+        "label": "Spezialleistungen",
+        "placeholder": "z.B. Impfungen, Rezepturen, Medikationsmanagement",
+        "description": "Besondere Leistungen dieser Apotheke"
       }
     },
     "city": {

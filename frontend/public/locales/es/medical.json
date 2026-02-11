@@ -926,6 +926,26 @@
       "website": {
         "description": "Sitio web de la farmacia para pedidos en línea o información",
         "placeholder": "https://www.example.com"
+      },
+      "stateProvince": {
+        "label": "Estado / Provincia",
+        "placeholder": "ej., California, Ontario",
+        "description": "Estado, provincia o region"
+      },
+      "postalCode": {
+        "label": "Codigo postal",
+        "placeholder": "ej., 28001, M5V 2T6",
+        "description": "Codigo postal o ZIP"
+      },
+      "country": {
+        "label": "Pais",
+        "placeholder": "ej., España, Canada",
+        "description": "Pais donde se encuentra la farmacia"
+      },
+      "specialtyServices": {
+        "label": "Servicios especializados",
+        "placeholder": "ej., Vacunaciones, Formulacion magistral, Seguimiento farmacoterapeutico",
+        "description": "Servicios especiales ofrecidos por esta farmacia"
       }
     }
   },
