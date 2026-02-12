@@ -26,6 +26,7 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import logger from '../../services/logger';
 import { 
   ERROR_MESSAGES, 
@@ -49,7 +50,7 @@ import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
 const Visits = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
   const navigate = useNavigate();
   const responsive = useResponsive();
 
@@ -504,6 +505,7 @@ const Visits = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="visits"
                 data={filteredVisits}
                 columns={[
                   { header: t('visits.table.visitDate', 'Visit Date'), accessor: 'date', priority: 'high', width: 120 },

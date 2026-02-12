@@ -15,6 +15,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -41,7 +42,7 @@ import PractitionerFormWrapper from '../../components/medical/practitioners/Prac
 const Practitioners = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -313,6 +314,7 @@ const Practitioners = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="practitioners"
                 data={filteredPractitioners}
                 columns={[
                   { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },

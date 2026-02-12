@@ -30,6 +30,7 @@ import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { InjuryCard, InjuryViewModal, InjuryFormWrapper } from '../../components/medical/injuries';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import logger from '../../services/logger';
 
 const Injuries = () => {
@@ -37,7 +38,7 @@ const Injuries = () => {
   const { t } = useTranslation('medical');
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
 
   // Standardized data management
   const {
@@ -333,6 +334,7 @@ const Injuries = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="injuries"
                 data={processedInjuries}
                 columns={[
                   { header: t('injuries.injuryName.label', 'Injury Name'), accessor: 'injury_name', priority: 'high', width: 180 },

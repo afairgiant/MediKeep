@@ -27,6 +27,7 @@ import {
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -60,7 +61,7 @@ const Insurance = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
 
   // Modern data management with useMedicalData
   const {
@@ -506,6 +507,7 @@ const Insurance = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+              persistKey="insurance"
               data={processedInsurances}
               columns={[
                 { header: 'Type', accessor: 'insurance_type', priority: 'high', width: 100 },

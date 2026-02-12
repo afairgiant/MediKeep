@@ -592,6 +592,12 @@ export function AppDataProvider({ children }) {
         timestamp: new Date().toISOString()
       });
       dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
+
+      // Clean up persisted sort preferences and view mode from localStorage
+      Object.keys(localStorage)
+        .filter(key => key.startsWith('medikeep_sort_'))
+        .forEach(key => localStorage.removeItem(key));
+      localStorage.removeItem('medikeep_viewmode');
     }
   }, [
     isAuthenticated,

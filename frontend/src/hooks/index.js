@@ -41,3 +41,6 @@ export { useViewModalNavigation } from './useViewModalNavigation';
 
 // Treatment relationship management hooks
 export { useTreatmentRelationships } from './useTreatmentRelationships';
+
+// View mode persistence hooks
+export { usePersistedViewMode } from './usePersistedViewMode';

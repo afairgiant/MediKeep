@@ -102,17 +102,67 @@ export const ResponsiveTable = memo(({
   emptyText = 'No data available',
   errorText = 'Error loading data',
   
+  // Sort persistence
+  persistKey,
+
   // Accessibility
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
-  
+
   ...props
 }) => {
   const { breakpoint, deviceType, isMobile, isTablet, isDesktop } = useResponsive();
-  const [internalSortBy, setInternalSortBy] = useState(sortBy);
-  const [internalSortDirection, setInternalSortDirection] = useState(sortDirection);
+
+  // Restore persisted sort state from localStorage when persistKey is provided
+  const [internalSortBy, setInternalSortBy] = useState(() => {
+    if (persistKey) {
+      try {
+        const stored = localStorage.getItem(`medikeep_sort_${persistKey}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed.sortBy === 'string') {
+            return parsed.sortBy;
+          }
+        }
+      } catch {
+        // Corrupted data - fall through to default
+      }
+    }
+    return sortBy;
+  });
+  const [internalSortDirection, setInternalSortDirection] = useState(() => {
+    if (persistKey) {
+      try {
+        const stored = localStorage.getItem(`medikeep_sort_${persistKey}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && (parsed.sortDirection === 'asc' || parsed.sortDirection === 'desc')) {
+            return parsed.sortDirection;
+          }
+        }
+      } catch {
+        // Corrupted data - fall through to default
+      }
+    }
+    return sortDirection;
+  });
+
   const tableRef = useRef(null);
   const strategyRef = useRef(new TableLayoutStrategy());
+
+  // Persist sort state to localStorage when it changes
+  useEffect(() => {
+    if (persistKey && internalSortBy) {
+      try {
+        localStorage.setItem(
+          `medikeep_sort_${persistKey}`,
+          JSON.stringify({ sortBy: internalSortBy, sortDirection: internalSortDirection })
+        );
+      } catch {
+        // Storage full or unavailable - silently ignore
+      }
+    }
+  }, [persistKey, internalSortBy, internalSortDirection]);
 
   // Component logging context
   const componentContext = useMemo(() => ({
