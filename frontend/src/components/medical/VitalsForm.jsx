@@ -631,14 +631,16 @@ const VitalsForm = ({
         notes: formData.notes || null,
       };
 
-      // Remove empty/null values
+      // Edit: normalize empties to null so the backend clears DB columns.
+      // Create: strip empties so only provided fields are sent.
       Object.keys(processedData).forEach(key => {
-        if (
-          processedData[key] === '' ||
-          processedData[key] === null ||
-          processedData[key] === undefined
-        ) {
-          delete processedData[key];
+        const value = processedData[key];
+        if (value == null || value === '') {
+          if (isEdit) {
+            processedData[key] = null;
+          } else {
+            delete processedData[key];
+          }
         }
       });
 
