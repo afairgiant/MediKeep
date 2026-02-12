@@ -15,7 +15,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/sanitize-html": "^2.16.0",
-    "axios": "^1.9.0",
+    "axios": "^1.13.5",
     "chart.js": "^4.5.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "date-fns": "^4.1.0",
