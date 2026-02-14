@@ -13,6 +13,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import logger from '../../services/logger';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
@@ -41,7 +42,7 @@ const Treatments = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
 
   // Get practitioners data
   const { practitioners: practitionersObject } =
@@ -363,6 +364,7 @@ const Treatments = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+              persistKey="treatments"
               data={filteredTreatments}
               columns={[
                   { header: 'Treatment', accessor: 'treatment_name', priority: 'high', width: 200 },

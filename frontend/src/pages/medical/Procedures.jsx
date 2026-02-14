@@ -14,6 +14,7 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
 import {
@@ -66,7 +67,7 @@ const Procedures = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
 
   // Get practitioners data
   const { practitioners } = usePractitioners();
@@ -414,6 +415,7 @@ const Procedures = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="procedures"
                 data={filteredProcedures}
                 columns={[
                   { header: t('procedures.table.procedureName'), accessor: 'procedure_name', priority: 'high', width: 200 },

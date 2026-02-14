@@ -1,5 +1,3 @@
-import logger from '../../services/logger';
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +16,7 @@ import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -34,13 +33,14 @@ import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import logger from '../../services/logger';
 
 const Allergies = () => {
   const navigate = useNavigate();
   const { t } = useTranslation('medical');
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
 
   // Standardized data management
   const {
@@ -282,6 +282,7 @@ const Allergies = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="allergies"
                 data={processedAllergies}
                 columns={[
                   { header: t('allergies.allergen.label'), accessor: 'allergen', priority: 'high', width: 150 },

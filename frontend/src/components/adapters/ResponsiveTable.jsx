@@ -102,17 +102,58 @@ export const ResponsiveTable = memo(({
   emptyText = 'No data available',
   errorText = 'Error loading data',
   
+  // Sort persistence
+  persistKey,
+
   // Accessibility
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
-  
+
   ...props
 }) => {
   const { breakpoint, deviceType, isMobile, isTablet, isDesktop } = useResponsive();
-  const [internalSortBy, setInternalSortBy] = useState(sortBy);
-  const [internalSortDirection, setInternalSortDirection] = useState(sortDirection);
+
+  // Restore persisted sort state from localStorage when persistKey is provided
+  const persistedSort = useMemo(() => {
+    if (!persistKey) return null;
+    try {
+      const stored = localStorage.getItem(`medikeep_sort_${persistKey}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed.sortBy === 'string' &&
+            (parsed.sortDirection === 'asc' || parsed.sortDirection === 'desc')) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Corrupted data - fall through to default
+    }
+    return null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only read on mount
+  const [internalSortBy, setInternalSortBy] = useState(persistedSort?.sortBy ?? sortBy);
+  const [internalSortDirection, setInternalSortDirection] = useState(persistedSort?.sortDirection ?? sortDirection);
+
   const tableRef = useRef(null);
   const strategyRef = useRef(new TableLayoutStrategy());
+
+  // Persist sort state to localStorage when it changes
+  useEffect(() => {
+    if (persistKey) {
+      try {
+        if (internalSortBy) {
+          localStorage.setItem(
+            `medikeep_sort_${persistKey}`,
+            JSON.stringify({ sortBy: internalSortBy, sortDirection: internalSortDirection })
+          );
+        } else {
+          localStorage.removeItem(`medikeep_sort_${persistKey}`);
+        }
+      } catch {
+        // Storage full or unavailable - silently ignore
+      }
+    }
+  }, [persistKey, internalSortBy, internalSortDirection]);
 
   // Component logging context
   const componentContext = useMemo(() => ({

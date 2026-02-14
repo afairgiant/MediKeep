@@ -722,4 +722,131 @@ describe('ResponsiveTable Component Tests', () => {
       );
     });
   });
+
+  describe('Sort Persistence (persistKey)', () => {
+    const persistProps = {
+      ...defaultProps,
+      sortable: true,
+      persistKey: 'test-table',
+    };
+
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    afterEach(() => {
+      localStorage.clear();
+    });
+
+    it('persists sort state to localStorage when persistKey is provided', async () => {
+      const user = userEvent.setup();
+
+      renderResponsive(
+        <ResponsiveTable {...persistProps} />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      const medicationHeader = screen.getByRole('columnheader', { name: /medication/i });
+      await user.click(medicationHeader);
+
+      await waitFor(() => {
+        const stored = localStorage.getItem('medikeep_sort_test-table');
+        expect(stored).not.toBeNull();
+        const parsed = JSON.parse(stored);
+        expect(parsed.sortBy).toBe('medication_name');
+        expect(parsed.sortDirection).toBe('asc');
+      });
+    });
+
+    it('restores sort state from localStorage on remount', async () => {
+      localStorage.setItem(
+        'medikeep_sort_test-table',
+        JSON.stringify({ sortBy: 'dosage', sortDirection: 'desc' })
+      );
+
+      renderResponsive(
+        <ResponsiveTable {...persistProps} />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      const dosageHeader = screen.getByRole('columnheader', { name: /dosage/i });
+      expect(dosageHeader).toHaveAttribute('aria-sort', 'descending');
+    });
+
+    it('does not interact with localStorage when persistKey is not provided', async () => {
+      const user = userEvent.setup();
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+      const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
+
+      renderResponsive(
+        <ResponsiveTable {...defaultProps} sortable={true} />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      const medicationHeader = screen.getByRole('columnheader', { name: /medication/i });
+      await user.click(medicationHeader);
+
+      await waitFor(() => {
+        const sortCalls = setItemSpy.mock.calls.filter(
+          ([key]) => key.startsWith('medikeep_sort_')
+        );
+        expect(sortCalls).toHaveLength(0);
+      });
+
+      setItemSpy.mockRestore();
+      getItemSpy.mockRestore();
+    });
+
+    it('gracefully handles corrupted localStorage data', () => {
+      localStorage.setItem('medikeep_sort_test-table', 'not-valid-json{{{');
+
+      renderResponsive(
+        <ResponsiveTable {...persistProps} />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      // Should render without crashing and use default sort
+      expect(screen.getByRole('table')).toBeInTheDocument();
+    });
+
+    it('gracefully handles partial localStorage data', () => {
+      localStorage.setItem(
+        'medikeep_sort_test-table',
+        JSON.stringify({ sortBy: 123, sortDirection: 'invalid' })
+      );
+
+      renderResponsive(
+        <ResponsiveTable {...persistProps} />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      // Should render without crashing
+      expect(screen.getByRole('table')).toBeInTheDocument();
+    });
+
+    it('updates localStorage when sort direction changes', async () => {
+      const user = userEvent.setup();
+
+      renderResponsive(
+        <ResponsiveTable {...persistProps} />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      const medicationHeader = screen.getByRole('columnheader', { name: /medication/i });
+
+      // First click: asc
+      await user.click(medicationHeader);
+      await waitFor(() => {
+        const parsed = JSON.parse(localStorage.getItem('medikeep_sort_test-table'));
+        expect(parsed.sortDirection).toBe('asc');
+      });
+
+      // Second click: desc
+      await user.click(medicationHeader);
+      await waitFor(() => {
+        const parsed = JSON.parse(localStorage.getItem('medikeep_sort_test-table'));
+        expect(parsed.sortDirection).toBe('desc');
+      });
+    });
+  });
 });

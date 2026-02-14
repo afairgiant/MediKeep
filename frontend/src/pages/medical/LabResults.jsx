@@ -14,6 +14,7 @@ import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import logger from '../../services/logger';
 import { 
   ERROR_MESSAGES, 
@@ -51,7 +52,7 @@ const LabResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
 
   // Modern data management with useMedicalData
   const {
@@ -586,6 +587,7 @@ const LabResults = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="lab-results"
                 data={filteredLabResults}
               columns={[
                   { header: t('labResults.table.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },

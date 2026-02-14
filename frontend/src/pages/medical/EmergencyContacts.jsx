@@ -30,6 +30,7 @@ import { createCardClickHandler } from '../../utils/helpers';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
@@ -42,7 +43,7 @@ import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
   const { t } = useTranslation('common');
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -472,6 +473,7 @@ const EmergencyContacts = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="emergency-contacts"
                 data={filteredContacts}
                 columns={[
                   { header: t('emergencyContacts.table.name'), accessor: 'name', priority: 'high', width: 200 },

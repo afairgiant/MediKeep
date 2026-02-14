@@ -4,6 +4,7 @@ import { useMedicalData } from '../../hooks/useMedicalData';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import logger from '../../services/logger';
@@ -109,7 +110,7 @@ const useSimpleDataManagement = (data, config) => {
 
 const MedicalEquipment = () => {
   const { t } = useTranslation('common');
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
 
   // Get practitioners data
   const { practitioners: practitionersObject } = usePatientWithStaticData();

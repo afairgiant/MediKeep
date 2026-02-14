@@ -48,6 +48,7 @@ import {
 } from '../../components/medical/medications';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import {
   MEDICATION_TYPES,
   MEDICATION_TYPE_LABELS,
@@ -59,7 +60,7 @@ const Medication = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
 
   // Form state - moved up to be available for refs logic
   const [showAddForm, setShowAddForm] = useState(false);
@@ -541,6 +542,7 @@ const Medication = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="medications"
                 data={processedMedications}
                 columns={[
                   {

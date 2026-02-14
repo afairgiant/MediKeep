@@ -177,7 +177,7 @@ export const testAtAllBreakpoints = async (component, testFn, options = {}) => {
         mockViewport(viewport.width, viewport.height);
       });
 
-      await testFn(breakpoint, viewport);
+      testFn(breakpoint, viewport);
     });
   }
 };

@@ -18,6 +18,7 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import StatusBadge from '../../components/medical/StatusBadge';
 import { InvitationManager } from '../../components/invitations';
 import FamilyHistorySharingModal from '../../components/medical/FamilyHistorySharingModal';
@@ -64,7 +65,7 @@ const FamilyHistory = () => {
   const location = useLocation();
   const responsive = useResponsive();
   const { colorScheme } = useMantineColorScheme();
-  const [viewMode, setViewMode] = useState('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
   const [activeTab, setActiveTab] = useState('my-family');
   const [expandedMembers, setExpandedMembers] = useState(new Set());
   const [sharedFamilyHistory, setSharedFamilyHistory] = useState([]);
@@ -1069,6 +1070,7 @@ const FamilyHistory = () => {
           ) : viewMode === 'table' ? (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="family-history-conditions"
                 data={flattenedConditions}
                 columns={[
                   { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
@@ -1199,6 +1201,7 @@ const FamilyHistory = () => {
           ) : viewMode === 'table' ? (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="family-history-shared"
                 data={flattenedSharedConditions}
                 columns={[
                   { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },

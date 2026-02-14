@@ -1,5 +1,3 @@
-import logger from '../../services/logger';
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -15,17 +13,16 @@ import {
   IconShieldCheck,
 } from '@tabler/icons-react';
 import { useMedicalData, useDataManagement, useEntityFileCounts, useViewModalNavigation } from '../../hooks';
-import EmptyState from '../../components/shared/EmptyState';
-import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { apiService } from '../../services/api';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { 
-  formatDateForAPI, 
-  getTodayString, 
-  isDateInFuture, 
-  isEndDateBeforeStartDate 
+import {
+  formatDateForAPI,
+  getTodayString,
+  isDateInFuture,
+  isEndDateBeforeStartDate
 } from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
@@ -33,10 +30,11 @@ import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import EmptyState from '../../components/shared/EmptyState';
+import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
-
-// Modular components
+import logger from '../../services/logger';
 import {
   ConditionCard,
   ConditionViewModal,
@@ -48,7 +46,7 @@ const Conditions = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
   
   // Load medications and practitioners for linking dropdowns
   const [medications, setMedications] = useState([]);
@@ -397,6 +395,7 @@ const Conditions = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="conditions"
                 data={filteredConditions}
                 columns={[
                   { header: t('conditions.table.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },

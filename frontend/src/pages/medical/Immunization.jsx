@@ -38,6 +38,7 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
+import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 
 // Modular components
 import {
@@ -49,7 +50,7 @@ import {
 const Immunization = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
-  const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
+  const [viewMode, setViewMode] = usePersistedViewMode('cards');
   const navigate = useNavigate();
   const responsive = useResponsive();
 
@@ -317,6 +318,7 @@ const Immunization = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
+                persistKey="immunizations"
                 data={processedImmunizations}
                 columns={[
                   { header: t('immunizations.table.vaccineName', 'Vaccine Name'), accessor: 'vaccine_name', priority: 'high', width: 200 },
