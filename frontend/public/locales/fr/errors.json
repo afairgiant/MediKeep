@@ -70,7 +70,7 @@
     "uploadMultipleSuccess": "Tous les fichiers ont été téléversés avec succès.",
     "formSaved": "Formulaire sauvegardé avec succès.",
     "fileDeleted": "Fichier supprimé avec succès.",
-    "paperlessSyncSuccess": "Syncronisation réussie avec le système de gestion de document Paperless.",
+    "paperlessSyncSuccess": "Synchronisation réussie avec le système de gestion de document Paperless.",
     "batchUploadSuccess": "Tous les fichiers ont été téléversés avec succès."
   },
   "warnings": {
