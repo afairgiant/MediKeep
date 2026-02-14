@@ -29,6 +29,7 @@ from app.api.v1.endpoints import (
     patient_management,
     patient_sharing,
     pharmacy,
+    practice,
     practitioner,
     procedure,
     search,
@@ -107,6 +108,7 @@ api_router.include_router(
     practitioner.router, prefix="/practitioners", tags=["practitioners"]
 )
 api_router.include_router(pharmacy.router, prefix="/pharmacies", tags=["pharmacies"])
+api_router.include_router(practice.router, prefix="/practices", tags=["practices"])
 api_router.include_router(
     medication.router, prefix="/medications", tags=["medications"]
 )

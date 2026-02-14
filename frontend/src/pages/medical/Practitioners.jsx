@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
+  Accordion,
   Container,
+  Group,
   Paper,
+  Switch,
   Text,
   Title,
   Stack,
 } from '@mantine/core';
 import {
+  IconBuilding,
   IconPlus,
   IconShieldCheck,
+  IconUser,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -69,10 +74,11 @@ const Practitioners = () => {
   // Get standardized formatters for practitioners
   const defaultFormatters = getEntityFormatters('default', [], navigate, null, formatDate);
   const [editingPractitioner, setEditingPractitioner] = useState(null);
+  const [groupByPractice, setGroupByPractice] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     specialty: '',
-    practice: '',
+    practice_id: '',
     phone_number: '',
     email: '',
     website: '',
@@ -93,7 +99,7 @@ const Practitioners = () => {
     setFormData({
       name: '',
       specialty: '',
-      practice: '',
+      practice_id: '',
       phone_number: '',
       email: '',
       website: '',
@@ -130,7 +136,7 @@ const Practitioners = () => {
     setFormData({
       name: practitioner.name || '',
       specialty: practitioner.specialty || '',
-      practice: practitioner.practice || '',
+      practice_id: practitioner.practice_id ? String(practitioner.practice_id) : '',
       phone_number: practitioner.phone_number || '',
       email: practitioner.email || '',
       website: practitioner.website || '',
@@ -170,9 +176,9 @@ const Practitioners = () => {
       // Clean the data before sending to API
       const dataToSubmit = {
         ...formData,
-        practice:
-          formData.practice && formData.practice.trim() !== ''
-            ? formData.practice.trim()
+        practice_id:
+          formData.practice_id && formData.practice_id !== ''
+            ? parseInt(formData.practice_id, 10)
             : null,
         phone_number: formData.phone_number?.trim() || null,
         email:
@@ -188,6 +194,8 @@ const Practitioners = () => {
             ? parseFloat(formData.rating)
             : null,
       };
+      // Remove legacy practice field if present
+      delete dataToSubmit.practice;
 
       if (editingPractitioner) {
         await apiService.updatePractitioner(
@@ -226,6 +234,34 @@ const Practitioners = () => {
   };
 
   const filteredPractitioners = dataManagement.data;
+
+  // Group practitioners by practice when toggle is on
+  const groupedPractitioners = useMemo(() => {
+    if (!groupByPractice) return null;
+
+    const groups = {};
+    const ungrouped = [];
+
+    filteredPractitioners.forEach(p => {
+      if (p.practice_id && p.practice_name) {
+        if (!groups[p.practice_id]) {
+          groups[p.practice_id] = {
+            id: p.practice_id,
+            name: p.practice_name,
+            practitioners: [],
+          };
+        }
+        groups[p.practice_id].practitioners.push(p);
+      } else {
+        ungrouped.push(p);
+      }
+    });
+
+    return {
+      practices: Object.values(groups).sort((a, b) => a.name.localeCompare(b.name)),
+      ungrouped,
+    };
+  }, [groupByPractice, filteredPractitioners]);
 
   // Handle URL parameters for direct linking to specific practitioners
   useEffect(() => {
@@ -280,6 +316,16 @@ const Practitioners = () => {
         {/* Mantine Filter Controls */}
         <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
+        {/* Group by Practice Toggle */}
+        <Group>
+          <Switch
+            label={t('practitioners.groupByPractice', 'Group by Practice')}
+            checked={groupByPractice}
+            onChange={(event) => setGroupByPractice(event.currentTarget.checked)}
+            size="sm"
+          />
+        </Group>
+
         {/* Content */}
           {filteredPractitioners.length === 0 ? (
             <EmptyState
@@ -289,6 +335,135 @@ const Practitioners = () => {
               filteredMessage={t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
             />
+          ) : groupByPractice && groupedPractitioners ? (
+            <Accordion variant="separated" multiple defaultValue={groupedPractitioners.practices.map(g => String(g.id))}>
+              {groupedPractitioners.practices.map(group => (
+                <Accordion.Item key={group.id} value={String(group.id)}>
+                  <Accordion.Control>
+                    <Group gap="xs">
+                      <IconBuilding size={18} />
+                      <Text fw={600}>{group.name}</Text>
+                      <Text size="sm" c="dimmed">({group.practitioners.length})</Text>
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    {viewMode === 'cards' ? (
+                      <AnimatedCardGrid
+                        items={group.practitioners}
+                        columns={{ base: 12, md: 6, lg: 4 }}
+                        renderCard={(practitioner) => (
+                          <PractitionerCard
+                            practitioner={practitioner}
+                            onEdit={handleEditPractitioner}
+                            onDelete={handleDeletePractitioner}
+                            onView={handleViewPractitioner}
+                            navigate={navigate}
+                            onError={(error) => {
+                              setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
+                              frontendLogger.logError('PractitionerCard error', {
+                                practitionerId: practitioner.id,
+                                error: error.message,
+                                page: 'Practitioners',
+                              });
+                            }}
+                          />
+                        )}
+                      />
+                    ) : (
+                      <Paper shadow="sm" radius="md" withBorder>
+                        <ResponsiveTable
+                          persistKey={`practitioners-group-${group.id}`}
+                          data={group.practitioners}
+                          columns={[
+                            { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                            { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                            { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                            { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                            { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                          ]}
+                          tableName={group.name}
+                          onView={handleViewPractitioner}
+                          onEdit={handleEditPractitioner}
+                          onDelete={handleDeletePractitioner}
+                          formatters={{
+                            name: defaultFormatters.primaryName,
+                            specialty: defaultFormatters.simple,
+                            phone_number: value => value || '-',
+                            email: value => value || '-',
+                            rating: value => value !== null && value !== undefined ? `${value}/5` : '-',
+                          }}
+                          dataType="medical"
+                          responsive={responsive}
+                        />
+                      </Paper>
+                    )}
+                  </Accordion.Panel>
+                </Accordion.Item>
+              ))}
+              {groupedPractitioners.ungrouped.length > 0 && (
+                <Accordion.Item value="ungrouped">
+                  <Accordion.Control>
+                    <Group gap="xs">
+                      <IconUser size={18} />
+                      <Text fw={600}>{t('practitioners.ungroupedTitle', 'Independent Practitioners')}</Text>
+                      <Text size="sm" c="dimmed">({groupedPractitioners.ungrouped.length})</Text>
+                    </Group>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    {viewMode === 'cards' ? (
+                      <AnimatedCardGrid
+                        items={groupedPractitioners.ungrouped}
+                        columns={{ base: 12, md: 6, lg: 4 }}
+                        renderCard={(practitioner) => (
+                          <PractitionerCard
+                            practitioner={practitioner}
+                            onEdit={handleEditPractitioner}
+                            onDelete={handleDeletePractitioner}
+                            onView={handleViewPractitioner}
+                            navigate={navigate}
+                            onError={(error) => {
+                              setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
+                              frontendLogger.logError('PractitionerCard error', {
+                                practitionerId: practitioner.id,
+                                error: error.message,
+                                page: 'Practitioners',
+                              });
+                            }}
+                          />
+                        )}
+                      />
+                    ) : (
+                      <Paper shadow="sm" radius="md" withBorder>
+                        <ResponsiveTable
+                          persistKey="practitioners-ungrouped"
+                          data={groupedPractitioners.ungrouped}
+                          columns={[
+                            { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                            { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                            { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                            { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                            { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                          ]}
+                          tableName={t('practitioners.ungroupedTitle', 'Independent Practitioners')}
+                          onView={handleViewPractitioner}
+                          onEdit={handleEditPractitioner}
+                          onDelete={handleDeletePractitioner}
+                          formatters={{
+                            name: defaultFormatters.primaryName,
+                            specialty: defaultFormatters.simple,
+                            phone_number: value => value || '-',
+                            email: value => value || '-',
+                            rating: value => value !== null && value !== undefined ? `${value}/5` : '-',
+                          }}
+                          dataType="medical"
+                          responsive={responsive}
+                        />
+                      </Paper>
+                    )}
+                  </Accordion.Panel>
+                </Accordion.Item>
+              )}
+            </Accordion>
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
               items={filteredPractitioners}
@@ -319,7 +494,7 @@ const Practitioners = () => {
                 columns={[
                   { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
                   { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                  { header: t('practitioners.table.practice', 'Practice'), accessor: 'practice', priority: 'low', width: 150 },
+                  { header: t('practitioners.table.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
                   { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
                   { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
                   { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
@@ -331,7 +506,7 @@ const Practitioners = () => {
                 formatters={{
                   name: defaultFormatters.primaryName,
                   specialty: defaultFormatters.simple,
-                  practice: defaultFormatters.simple,
+                  practice_name: defaultFormatters.simple,
                   phone_number: value => value || '-',
                   email: value => value || '-',
                   rating: value =>

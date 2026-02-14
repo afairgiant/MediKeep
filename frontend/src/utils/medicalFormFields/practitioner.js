@@ -24,13 +24,16 @@ export const practitionerFormFields = [
     dynamicOptions: 'specialties',
   },
   {
-    name: 'practice',
-    type: 'text',
+    name: 'practice_id',
+    type: 'combobox',
     labelKey: 'medical:practitioners.form.practice.label',
     placeholderKey: 'medical:practitioners.form.practice.placeholder',
     required: false,
     descriptionKey: 'medical:practitioners.form.practice.description',
     gridColumn: 6,
+    maxDropdownHeight: 200,
+    dynamicOptions: 'practices',
+    creatable: true,
   },
   {
     name: 'phone_number',

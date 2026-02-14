@@ -1176,9 +1176,9 @@
         "description": "Select from list or type a custom specialty"
       },
       "practice": {
-        "label": "Practice/Hospital",
-        "placeholder": "City General Hospital",
-        "description": "Workplace or medical facility (optional)"
+        "label": "Practice/Clinic",
+        "placeholder": "Search or create a practice...",
+        "description": "Select an existing practice or type to create new"
       },
       "phone": {
         "label": "Phone Number",
@@ -1211,13 +1211,52 @@
       "description": "Select from the list or enter an additional specialty"
     },
     "practice": {
-      "label": "Practice/Hospital",
-      "placeholder": "City General Hospital",
-      "description": "Workplace or medical complex"
+      "label": "Practice/Clinic",
+      "placeholder": "Search or create a practice...",
+      "description": "Select an existing practice or type to create new"
     },
     "rating": {
       "label": "Rating",
       "description": "Rate the quality of care from this doctor"
+    }
+  },
+  "practices": {
+    "title": "Practices",
+    "form": {
+      "name": {
+        "label": "Practice Name",
+        "placeholder": "City General Hospital",
+        "description": "Name of the practice or clinic"
+      },
+      "phone": {
+        "label": "Practice Phone",
+        "placeholder": "+1 555 123-4567",
+        "description": "Main phone number for the practice"
+      },
+      "fax": {
+        "label": "Fax Number",
+        "placeholder": "+1 555 123-4568",
+        "description": "Practice fax number"
+      },
+      "website": {
+        "label": "Practice Website",
+        "placeholder": "https://www.practice.com",
+        "description": "Official practice website"
+      },
+      "patientPortal": {
+        "label": "Patient Portal URL",
+        "placeholder": "https://portal.practice.com",
+        "description": "URL for the patient portal"
+      },
+      "notes": {
+        "label": "Notes",
+        "placeholder": "Additional notes about this practice...",
+        "description": "Any additional information about the practice"
+      },
+      "locations": {
+        "label": "Locations",
+        "description": "Office locations for this practice"
+      }
     }
   },
   "pharmacies": {

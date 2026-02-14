@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Text, Anchor } from '@mantine/core';
+import { Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from '../BaseMedicalForm';
 import { practitionerFormFields } from '../../../utils/medicalFormFields';
 import { isValidPhoneNumber } from '../../../utils/phoneUtils';
 import { fetchMedicalSpecialties, clearSpecialtiesCache } from '../../../config/medicalSpecialties';
+import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 
 const PractitionerFormWrapper = ({
@@ -23,8 +24,12 @@ const PractitionerFormWrapper = ({
   // State for dynamic specialties
   const [specialtyOptions, setSpecialtyOptions] = useState([]);
   const [isLoadingSpecialties, setIsLoadingSpecialties] = useState(true);
-  
-  // Load specialties on component mount
+
+  // State for dynamic practices
+  const [practiceOptions, setPracticeOptions] = useState([]);
+  const [isLoadingPractices, setIsLoadingPractices] = useState(true);
+
+  // Load specialties and practices on component mount
   useEffect(() => {
     const loadSpecialties = async () => {
       try {
@@ -42,21 +47,44 @@ const PractitionerFormWrapper = ({
         setIsLoadingSpecialties(false);
       }
     };
-    
+
+    const loadPractices = async () => {
+      try {
+        setIsLoadingPractices(true);
+        const practices = await apiService.getPractices();
+        const safePractices = Array.isArray(practices) ? practices : [];
+        setPracticeOptions(
+          safePractices.map(p => ({
+            value: String(p.id),
+            label: p.name,
+          }))
+        );
+      } catch (error) {
+        logger.error('load_practices_failed', 'Failed to load practices', {
+          component: 'PractitionerFormWrapper',
+          error: error.message,
+        });
+      } finally {
+        setIsLoadingPractices(false);
+      }
+    };
+
     if (isOpen) {
       // Clear cache to get fresh data including any newly added specialties
       clearSpecialtiesCache();
       loadSpecialties();
+      loadPractices();
     }
   }, [isOpen]);
 
   const dynamicOptions = {
     specialties: specialtyOptions,
+    practices: practiceOptions,
   };
 
   // Field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
-  
+
   // Clear field errors when modal is closed
   useEffect(() => {
     if (!isOpen) {
@@ -75,10 +103,10 @@ const PractitionerFormWrapper = ({
     }
   };
 
-  // Input change handler with phone validation
-  const handleInputChange = (e) => {
+  // Input change handler with phone validation and inline practice creation
+  const handleInputChange = async (e) => {
     const { name, value } = e.target;
-    
+
     // Clear any existing error for this field
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
@@ -86,13 +114,33 @@ const PractitionerFormWrapper = ({
         [name]: null
       }));
     }
-    
+
     // Handle phone number validation
     if (name === 'phone_number' && value.trim() !== '' && !isValidPhoneNumber(value)) {
       setFieldErrors(prev => ({
         ...prev,
         [name]: t('medical:form.invalidPhoneDigits', 'Please enter a valid phone number')
       }));
+    }
+
+    // Handle inline practice creation when user types a new practice name in the combobox
+    if (name === 'practice_id' && value && !practiceOptions.find(opt => opt.value === value)) {
+      // User typed a new practice name - create it inline
+      try {
+        const newPractice = await apiService.createPractice({ name: value });
+        if (newPractice && newPractice.id) {
+          const newOption = { value: String(newPractice.id), label: newPractice.name };
+          setPracticeOptions(prev => [...prev, newOption]);
+          // Set the practice_id to the new ID
+          onInputChange({ target: { name: 'practice_id', value: String(newPractice.id) } });
+          return;
+        }
+      } catch (error) {
+        logger.error('create_practice_inline_failed', 'Failed to create practice inline', {
+          component: 'PractitionerFormWrapper',
+          error: error.message,
+        });
+      }
     }
 
     onInputChange(e);
@@ -112,32 +160,12 @@ const PractitionerFormWrapper = ({
     onSubmit(e);
   };
 
-  // Custom content for website validation and link
-  const customContent = (
-    <>
-      {formData.website && isValidWebsite(formData.website) && (
-        <div style={{ marginTop: '-16px', marginBottom: '16px', textAlign: 'right' }}>
-          <Anchor
-            href={
-              formData.website.startsWith('http')
-                ? formData.website
-                : `https://${formData.website}`
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ fontSize: '12px', color: 'var(--mantine-color-blue-6)' }}
-          >
-            {t('common:labels.visitWebsite', 'Visit Website')} ↗
-          </Anchor>
-        </div>
-      )}
-      {websiteError && (
-        <Text size="sm" c="red" style={{ marginTop: '-16px', marginBottom: '16px' }}>
-          {websiteError}
-        </Text>
-      )}
-    </>
-  );
+  // Custom content for website validation error
+  const customContent = websiteError ? (
+    <Text size="sm" c="red" style={{ marginTop: '-16px', marginBottom: '16px' }}>
+      {websiteError}
+    </Text>
+  ) : null;
 
   if (!isOpen) return null;
 
@@ -153,7 +181,7 @@ const PractitionerFormWrapper = ({
       fields={practitionerFormFields}
       dynamicOptions={dynamicOptions}
       fieldErrors={fieldErrors}
-      isLoading={isLoading || isLoadingSpecialties}
+      isLoading={isLoading || isLoadingSpecialties || isLoadingPractices}
     >
       {customContent}
     </BaseMedicalForm>

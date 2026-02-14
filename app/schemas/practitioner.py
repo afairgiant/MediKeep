@@ -1,8 +1,10 @@
 import re
+from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
+from app.schemas.validators import empty_strings_to_none
 from app.schemas.validators import validate_phone_number as _validate_phone
 
 
@@ -71,7 +73,8 @@ class PractitionerBase(BaseModel):
 
     name: str
     specialty: str
-    practice: Optional[str] = None  # Optional - not all practitioners are linked to a practice
+    practice: Optional[str] = None  # Legacy field - kept for backward compatibility
+    practice_id: Optional[int] = None
     phone_number: Optional[str] = None
     email: Optional[str] = None
     website: Optional[str] = None
@@ -235,11 +238,20 @@ class PractitionerUpdate(BaseModel):
 
     name: Optional[str] = None
     specialty: Optional[str] = None
-    practice: Optional[str] = None
+    practice: Optional[str] = None  # Legacy field
+    practice_id: Optional[int] = None
     phone_number: Optional[str] = None
     email: Optional[str] = None
     website: Optional[str] = None
     rating: Optional[float] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_empty_strings(cls, values):
+        return empty_strings_to_none(
+            values,
+            ["practice", "phone_number", "email", "website"],
+        )
 
     @field_validator("name")
     @classmethod
@@ -339,11 +351,15 @@ class Practitioner(PractitionerBase):
         {
             "id": 1,
             "name": "Dr. John Smith",
-            "specialty": "Cardiology"
+            "specialty": "Cardiology",
+            "practice_name": "City General Hospital"
         }
     """
 
     id: int
+    practice_name: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 

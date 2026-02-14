@@ -1176,9 +1176,9 @@
         "description": "Sélectionnez dans la liste ou saisissez une spécialité"
       },
       "practice": {
-        "label": "Cabinet/Hôpital",
-        "placeholder": "Hôpital général de la cité",
-        "description": "Lieu de travail ou établissement médical (optionnel)"
+        "label": "Cabinet/Clinique",
+        "placeholder": "Rechercher ou creer un cabinet...",
+        "description": "Selectionnez un cabinet existant ou saisissez pour en creer un nouveau"
       },
       "phone": {
         "label": "Numéro de téléphone",
@@ -1211,13 +1211,52 @@
         "description": "Sélectionnez dans la liste ou saisissez une spécialité"
     },
     "practice": {
-        "label": "Cabinet/Hôpital",
-        "placeholder": "Hôpital général de la cité",
-        "description": "Lieu de travail ou établissement médical"
+        "label": "Cabinet/Clinique",
+        "placeholder": "Rechercher ou creer un cabinet...",
+        "description": "Selectionnez un cabinet existant ou saisissez pour en creer un nouveau"
     },
     "rating": {
       "label": "Avis",
       "description": "Donnez votre avis sur la qualité des soins de ce docteur"
+    }
+  },
+  "practices": {
+    "title": "Cabinets",
+    "form": {
+      "name": {
+        "label": "Nom du cabinet",
+        "placeholder": "Hopital General de la Cite",
+        "description": "Nom du cabinet ou de la clinique"
+      },
+      "phone": {
+        "label": "Telephone du cabinet",
+        "placeholder": "+33 1 12 34 56 78",
+        "description": "Numero de telephone principal du cabinet"
+      },
+      "fax": {
+        "label": "Numero de fax",
+        "placeholder": "+33 1 12 34 56 79",
+        "description": "Numero de fax du cabinet"
+      },
+      "website": {
+        "label": "Site web du cabinet",
+        "placeholder": "https://www.cabinet.com",
+        "description": "Site web officiel du cabinet"
+      },
+      "patientPortal": {
+        "label": "URL du portail patient",
+        "placeholder": "https://portail.cabinet.com",
+        "description": "URL du portail patient"
+      },
+      "notes": {
+        "label": "Notes",
+        "placeholder": "Notes supplementaires sur ce cabinet...",
+        "description": "Toute information supplementaire sur le cabinet"
+      },
+      "locations": {
+        "label": "Emplacements",
+        "description": "Emplacements des bureaux pour ce cabinet"
+      }
     }
   },
   "pharmacies": {

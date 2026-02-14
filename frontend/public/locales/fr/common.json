@@ -1721,7 +1721,9 @@
     "form": {
       "addTitle": "Ajouter un médecin",
       "editTitle": "Editer un médecin"
-    }
+    },
+    "groupByPractice": "Grouper par cabinet",
+    "ungroupedTitle": "Praticiens independants"
   },
   "pharmacies": {
     "title": "Pharmacies",

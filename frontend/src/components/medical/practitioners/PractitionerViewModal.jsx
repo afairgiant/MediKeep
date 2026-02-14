@@ -80,9 +80,9 @@ const PractitionerViewModal = ({
                     {practitioner.specialty}
                   </Badge>
                 )}
-                {practitioner.practice && (
+                {(practitioner.practice_name || practitioner.practice) && (
                   <Badge variant="light" color="gray" size="sm">
-                    {practitioner.practice}
+                    {practitioner.practice_name || practitioner.practice}
                   </Badge>
                 )}
               </Group>
@@ -109,9 +109,9 @@ const PractitionerViewModal = ({
                   </Text>
                   <Text
                     size="sm"
-                    c={practitioner.practice ? 'inherit' : 'dimmed'}
+                    c={(practitioner.practice_name || practitioner.practice) ? 'inherit' : 'dimmed'}
                   >
-                    {practitioner.practice || t('common.labels.notSpecified', 'Not specified')}
+                    {practitioner.practice_name || practitioner.practice || t('common.labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -184,7 +184,7 @@ const PractitionerViewModal = ({
                         size="sm"
                         c="blue"
                       >
-                        {t('practitioners.viewModal.visitWebsite', 'Visit Website')}
+                        {practitioner.website.replace(/^https?:\/\//, '')}
                       </Anchor>
                     ) : (
                       t('common.labels.notSpecified', 'Not specified')

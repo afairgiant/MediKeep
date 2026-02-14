@@ -4,7 +4,7 @@
 
 export const practitionersPageConfig = {
   filtering: {
-    searchFields: ['name', 'specialty', 'practice'],
+    searchFields: ['name', 'specialty', 'practice_name'],
     categoryField: 'specialty',
     categoryLabel: 'Specialties',
   },
@@ -14,12 +14,12 @@ export const practitionersPageConfig = {
     sortOptions: [
       { value: 'name', label: 'Name' },
       { value: 'specialty', label: 'Specialty' },
-      { value: 'practice', label: 'Practice' },
+      { value: 'practice_name', label: 'Practice' },
     ],
     sortTypes: {
       name: 'string',
       specialty: 'string',
-      practice: 'string',
+      practice_name: 'string',
     },
   },
   filterControls: {

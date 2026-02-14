@@ -24,6 +24,7 @@ const ENTITY_TO_API_PATH = {
   [ENTITY_TYPES.SYMPTOM]: 'symptoms',
   [ENTITY_TYPES.INJURY]: 'injuries',
   [ENTITY_TYPES.MEDICAL_EQUIPMENT]: 'medical-equipment',
+  [ENTITY_TYPES.PRACTICE]: 'practices',
 };
 
 // Streamlined API service with proper logging integration
@@ -1701,6 +1702,46 @@ class ApiService {
 
   deletePharmacy(pharmacyId, signal) {
     return this.deleteEntity(ENTITY_TYPES.PHARMACY, pharmacyId, signal);
+  }
+
+  // Practice methods
+  getPractices(signal) {
+    return this.getEntities(ENTITY_TYPES.PRACTICE, signal);
+  }
+
+  getPractice(practiceId, signal) {
+    return this.getEntity(ENTITY_TYPES.PRACTICE, practiceId, signal);
+  }
+
+  getPracticesSummary(signal) {
+    return this.request(`${this.baseURL}/practices/summary`, {
+      method: 'GET',
+      signal,
+    });
+  }
+
+  searchPractices(name, signal) {
+    return this.request(
+      `${this.baseURL}/practices/search/by-name?name=${encodeURIComponent(name)}`,
+      { method: 'GET', signal }
+    );
+  }
+
+  createPractice(practiceData, signal) {
+    return this.createEntity(ENTITY_TYPES.PRACTICE, practiceData, signal);
+  }
+
+  updatePractice(practiceId, practiceData, signal) {
+    return this.updateEntity(
+      ENTITY_TYPES.PRACTICE,
+      practiceId,
+      practiceData,
+      signal
+    );
+  }
+
+  deletePractice(practiceId, signal) {
+    return this.deleteEntity(ENTITY_TYPES.PRACTICE, practiceId, signal);
   }
 
   // Allergy methods

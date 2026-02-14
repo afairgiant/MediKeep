@@ -1721,7 +1721,9 @@
     "form": {
       "addTitle": "Add New Practitioner",
       "editTitle": "Edit Practitioner"
-    }
+    },
+    "groupByPractice": "Group by Practice",
+    "ungroupedTitle": "Independent Practitioners"
   },
   "pharmacies": {
     "title": "Pharmacies",

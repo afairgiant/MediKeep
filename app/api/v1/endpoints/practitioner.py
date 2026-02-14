@@ -52,17 +52,28 @@ def read_practitioners(
     skip: int = 0,
     limit: int = Query(default=100, le=100),
     specialty: Optional[str] = Query(None),
+    practice_id: Optional[int] = Query(None),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Retrieve practitioners with optional filtering by specialty."""
+    """Retrieve practitioners with optional filtering by specialty or practice."""
     with handle_database_errors(request=request):
-        if specialty:
-            practitioners = practitioner.get_by_specialty(
+        if practice_id:
+            practitioners_list = practitioner.get_by_practice(
+                db, practice_id=practice_id, skip=skip, limit=limit
+            )
+        elif specialty:
+            practitioners_list = practitioner.get_by_specialty(
                 db, specialty=specialty, skip=skip, limit=limit
             )
         else:
-            practitioners = practitioner.get_multi(db, skip=skip, limit=limit)
-        return practitioners
+            practitioners_list = practitioner.get_multi(db, skip=skip, limit=limit)
+
+        # Populate practice_name from relationship
+        for p in practitioners_list:
+            if p.practice_rel:
+                p.practice_name = p.practice_rel.name
+
+        return practitioners_list
 
 
 @router.get("/{practitioner_id}", response_model=Practitioner)
@@ -76,9 +87,14 @@ def read_practitioner(
     """Get practitioner by ID with related information."""
     with handle_database_errors(request=request):
         practitioner_obj = practitioner.get_with_relations(
-            db=db, record_id=practitioner_id, relations=["patients", "conditions", "treatments", "medications", "procedures", "encounters", "lab_results", "immunizations", "vitals"]
+            db=db, record_id=practitioner_id, relations=["patients", "conditions", "treatments", "medications", "procedures", "encounters", "lab_results", "immunizations", "vitals", "practice_rel"]
         )
         handle_not_found(practitioner_obj, "Practitioner", request)
+
+        # Populate practice_name from relationship
+        if practitioner_obj.practice_rel:
+            practitioner_obj.practice_name = practitioner_obj.practice_rel.name
+
         return practitioner_obj
 
 
