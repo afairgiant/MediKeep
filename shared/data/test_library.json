@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "lastUpdated": "2026-02-14",
   "tests": [
     {
@@ -1120,6 +1120,7 @@
         "Sp Gr",
         "SpGr",
         "Urine Specific Gravity",
+        "Urine Density",
         "SG"
       ],
       "is_common": false,
@@ -1392,6 +1393,21 @@
       ],
       "is_common": false,
       "display_order": 92
+    },
+    {
+      "test_name": "Urine pH",
+      "abbreviation": "UpH",
+      "test_code": "2756-5",
+      "default_unit": "pH",
+      "category": "chemistry",
+      "common_names": [
+        "Urine pH",
+        "pH Urine",
+        "pH, Urine",
+        "Urine Acidity"
+      ],
+      "is_common": false,
+      "display_order": 103
     },
     {
       "test_name": "Vitamin B12",
