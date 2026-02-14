@@ -136,6 +136,7 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
     const categoryNames: Record<string, string> = {
       chemistry: 'Chemistry',
       hematology: 'Hematology',
+      hepatology: 'Hepatology',
       immunology: 'Immunology',
       microbiology: 'Microbiology',
       endocrinology: 'Endocrinology',

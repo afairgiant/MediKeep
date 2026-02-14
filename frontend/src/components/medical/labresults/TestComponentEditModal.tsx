@@ -359,6 +359,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               data={[
                 { value: 'chemistry', label: t('testComponents.categories.chemistry', 'Blood Chemistry & Metabolic') },
                 { value: 'hematology', label: t('testComponents.categories.hematology', 'Blood Counts & Cells') },
+                { value: 'hepatology', label: t('testComponents.categories.hepatology', 'Liver Enzymes & Function') },
                 { value: 'lipids', label: t('testComponents.categories.lipids', 'Cholesterol & Lipids') },
                 { value: 'endocrinology', label: t('testComponents.categories.endocrinology', 'Hormones & Thyroid') },
                 { value: 'immunology', label: t('testComponents.categories.immunology', 'Immune System & Antibodies') },

@@ -14,7 +14,7 @@ export interface LabTestComponent {
   ref_range_max?: number | null;
   ref_range_text?: string | null;
   status?: 'normal' | 'high' | 'low' | 'critical' | 'abnormal' | 'borderline' | null;
-  category?: 'chemistry' | 'hematology' | 'immunology' | 'microbiology' | 'endocrinology' |
+  category?: 'chemistry' | 'hematology' | 'hepatology' | 'immunology' | 'microbiology' | 'endocrinology' |
              'toxicology' | 'genetics' | 'molecular' | 'pathology' | 'lipids' | 'other' | null;
   display_order?: number | null;
   canonical_test_name?: string | null;  // Links to standardized test name for trend matching
@@ -640,13 +640,15 @@ class LabTestComponentApi {
         name: "Liver Function Panel",
         description: "Liver enzyme and function tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Alanine Aminotransferase", abbreviation: "ALT", unit: "U/L", category: "chemistry", display_order: 1 },
-          { test_name: "Aspartate Aminotransferase", abbreviation: "AST", unit: "U/L", category: "chemistry", display_order: 2 },
-          { test_name: "Alkaline Phosphatase", abbreviation: "ALP", unit: "U/L", category: "chemistry", display_order: 3 },
-          { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "chemistry", display_order: 4 },
-          { test_name: "Direct Bilirubin", abbreviation: "DBIL", unit: "mg/dL", category: "chemistry", display_order: 5 },
-          { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "chemistry", display_order: 6 },
-          { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "chemistry", display_order: 7 }
+          { test_name: "Alanine Aminotransferase", abbreviation: "ALT", unit: "U/L", category: "hepatology", display_order: 1 },
+          { test_name: "Aspartate Aminotransferase", abbreviation: "AST", unit: "U/L", category: "hepatology", display_order: 2 },
+          { test_name: "Alkaline Phosphatase", abbreviation: "ALP", unit: "U/L", category: "hepatology", display_order: 3 },
+          { test_name: "Gamma-glutamyl Transferase", abbreviation: "GGT", unit: "U/L", category: "hepatology", display_order: 4 },
+          { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "chemistry", display_order: 5 },
+          { test_name: "Direct Bilirubin", abbreviation: "DBIL", unit: "mg/dL", category: "chemistry", display_order: 6 },
+          { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "chemistry", display_order: 7 },
+          { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "chemistry", display_order: 8 },
+          { test_name: "Somatomedin C", abbreviation: "IGF-1", unit: "ng/mL", category: "hepatology", display_order: 9 }
         ]
       },
       thyroid: {

@@ -785,7 +785,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           ref_range_max: comp.ref_range_max,
           ref_range_text: comp.ref_range_text || null,
           status: (comp.status as "normal" | "high" | "low" | "critical" | "abnormal" | "borderline" | null) || null,
-          category: (comp.category as "chemistry" | "hematology" | "immunology" | "microbiology" | "endocrinology" | "toxicology" | "genetics" | "molecular" | "pathology" | "lipids" | "other" | null) || null,
+          category: (comp.category as "chemistry" | "hematology" | "hepatology" | "immunology" | "microbiology" | "endocrinology" | "toxicology" | "genetics" | "molecular" | "pathology" | "lipids" | "other" | null) || null,
           display_order: index + 1,
           notes: comp.issues.length > 0 ? `Parsing notes: ${comp.issues.join(', ')}` : null
         }));

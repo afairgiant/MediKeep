@@ -34,6 +34,7 @@ export const STATUS_OPTIONS = {
 export const MEDICAL_CATEGORIES = {
   LAB_RESULTS: [
     'hematology',
+    'hepatology',
     'chemistry',
     'microbiology',
     'pathology',

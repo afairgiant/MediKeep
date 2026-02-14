@@ -1,13 +1,13 @@
 {
-  "version": "1.1.0",
-  "lastUpdated": "2026-01-31",
+  "version": "1.2.0",
+  "lastUpdated": "2026-02-14",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
       "abbreviation": "ALT",
       "test_code": "1742-6",
       "default_unit": "U/L",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": [
         "ALT",
         "SGPT",
@@ -47,7 +47,7 @@
       "abbreviation": "ALP",
       "test_code": "6768-6",
       "default_unit": "U/L",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": [
         "ALP",
         "Alk Phos",
@@ -76,7 +76,7 @@
       "abbreviation": "AST",
       "test_code": "1920-8",
       "default_unit": "U/L",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": [
         "AST",
         "SGOT",
@@ -468,7 +468,7 @@
       "abbreviation": "GGT",
       "test_code": "2324-2",
       "default_unit": "U/L",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": [
         "GGT",
         "Gamma GT",
@@ -563,6 +563,35 @@
       "display_order": 41
     },
     {
+      "test_name": "HOMA-Beta",
+      "abbreviation": "HOMA-B",
+      "default_unit": "index",
+      "category": "endocrinology",
+      "common_names": [
+        "HOMA-Beta",
+        "HOMA-B",
+        "HOMA Beta",
+        "Homeostasis Model Assessment Beta",
+        "HOMA Beta Cell Function"
+      ],
+      "is_common": false,
+      "display_order": 97
+    },
+    {
+      "test_name": "HOMA-IR",
+      "abbreviation": "HOMA-IR",
+      "default_unit": "index",
+      "category": "endocrinology",
+      "common_names": [
+        "HOMA-IR",
+        "HOMA IR",
+        "Homeostasis Model Assessment Insulin Resistance",
+        "HOMA Insulin Resistance"
+      ],
+      "is_common": false,
+      "display_order": 98
+    },
+    {
       "test_name": "Immature Granulocytes",
       "abbreviation": "IG",
       "default_unit": "%",
@@ -600,6 +629,22 @@
       ],
       "is_common": false,
       "display_order": 44
+    },
+    {
+      "test_name": "Insulin",
+      "abbreviation": "INS",
+      "test_code": "20448-7",
+      "default_unit": "uU/mL",
+      "category": "endocrinology",
+      "common_names": [
+        "Insulin",
+        "Fasting Insulin",
+        "Serum Insulin",
+        "Insulin, Serum",
+        "Insulin Level"
+      ],
+      "is_common": false,
+      "display_order": 99
     },
     {
       "test_name": "Iron",
@@ -762,6 +807,20 @@
       "display_order": 56
     },
     {
+      "test_name": "Mean Platelet Volume",
+      "abbreviation": "MPV",
+      "test_code": "32623-1",
+      "default_unit": "fL",
+      "category": "hematology",
+      "common_names": [
+        "MPV",
+        "Mean Platelet Volume",
+        "Mean Platelet Vol"
+      ],
+      "is_common": true,
+      "display_order": 100
+    },
+    {
       "test_name": "Monocytes",
       "abbreviation": "MONO",
       "default_unit": "%",
@@ -891,6 +950,23 @@
       "display_order": 65
     },
     {
+      "test_name": "Parathyroid Hormone",
+      "abbreviation": "PTH",
+      "test_code": "2731-8",
+      "default_unit": "pg/mL",
+      "category": "endocrinology",
+      "common_names": [
+        "PTH",
+        "Parathyroid Hormone",
+        "Parathyroid Hormone, Intact",
+        "Intact PTH",
+        "iPTH",
+        "PTH Intact"
+      ],
+      "is_common": false,
+      "display_order": 101
+    },
+    {
       "test_name": "pH Arterial",
       "abbreviation": "pH",
       "test_code": "2744-1",
@@ -1014,6 +1090,24 @@
       ],
       "is_common": true,
       "display_order": 74
+    },
+    {
+      "test_name": "Somatomedin C",
+      "abbreviation": "IGF-1",
+      "test_code": "2484-4",
+      "default_unit": "ng/mL",
+      "category": "hepatology",
+      "common_names": [
+        "IGF-1",
+        "Somatomedin C",
+        "Somatomedin-C",
+        "Insulin-like Growth Factor 1",
+        "Insulin-like Growth Factor-1",
+        "IGF1",
+        "IGF-I"
+      ],
+      "is_common": false,
+      "display_order": 102
     },
     {
       "test_name": "Specific Gravity Urine",

@@ -193,6 +193,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
     const categoryNames: Record<string, string> = {
       chemistry: 'Chemistry',
       hematology: 'Hematology',
+      hepatology: 'Hepatology',
       immunology: 'Immunology',
       microbiology: 'Microbiology',
       endocrinology: 'Endocrinology',
@@ -209,6 +210,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
     const categoryColors: Record<string, string> = {
       chemistry: 'blue',
       hematology: 'red',
+      hepatology: 'lime',
       immunology: 'green',
       microbiology: 'yellow',
       endocrinology: 'purple',
