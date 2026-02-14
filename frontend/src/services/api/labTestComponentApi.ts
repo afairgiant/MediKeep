@@ -620,10 +620,10 @@ class LabTestComponentApi {
           { test_name: "Calcium", abbreviation: "Ca", unit: "mg/dL", category: "chemistry", display_order: 8 },
           { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "chemistry", display_order: 9 },
           { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "chemistry", display_order: 10 },
-          { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "chemistry", display_order: 11 },
-          { test_name: "Alkaline Phosphatase", abbreviation: "ALP", unit: "U/L", category: "chemistry", display_order: 12 },
-          { test_name: "Alanine Aminotransferase", abbreviation: "ALT", unit: "U/L", category: "chemistry", display_order: 13 },
-          { test_name: "Aspartate Aminotransferase", abbreviation: "AST", unit: "U/L", category: "chemistry", display_order: 14 }
+          { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "hepatology", display_order: 11 },
+          { test_name: "Alkaline Phosphatase", abbreviation: "ALP", unit: "U/L", category: "hepatology", display_order: 12 },
+          { test_name: "Alanine Aminotransferase", abbreviation: "ALT", unit: "U/L", category: "hepatology", display_order: 13 },
+          { test_name: "Aspartate Aminotransferase", abbreviation: "AST", unit: "U/L", category: "hepatology", display_order: 14 }
         ]
       },
       lipid: {
@@ -644,10 +644,10 @@ class LabTestComponentApi {
           { test_name: "Aspartate Aminotransferase", abbreviation: "AST", unit: "U/L", category: "hepatology", display_order: 2 },
           { test_name: "Alkaline Phosphatase", abbreviation: "ALP", unit: "U/L", category: "hepatology", display_order: 3 },
           { test_name: "Gamma-glutamyl Transferase", abbreviation: "GGT", unit: "U/L", category: "hepatology", display_order: 4 },
-          { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "chemistry", display_order: 5 },
-          { test_name: "Direct Bilirubin", abbreviation: "DBIL", unit: "mg/dL", category: "chemistry", display_order: 6 },
-          { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "chemistry", display_order: 7 },
-          { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "chemistry", display_order: 8 },
+          { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "hepatology", display_order: 5 },
+          { test_name: "Direct Bilirubin", abbreviation: "DBIL", unit: "mg/dL", category: "hepatology", display_order: 6 },
+          { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "hepatology", display_order: 7 },
+          { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "hepatology", display_order: 8 },
           { test_name: "Somatomedin C", abbreviation: "IGF-1", unit: "ng/mL", category: "hepatology", display_order: 9 }
         ]
       },

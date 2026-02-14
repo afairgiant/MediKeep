@@ -295,7 +295,7 @@
       "abbreviation": "DBIL",
       "test_code": "1968-7",
       "default_unit": "mg/dL",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": [
         "Direct Bilirubin",
         "D Bili",
@@ -1210,7 +1210,7 @@
       "abbreviation": "TBIL",
       "test_code": "1975-2",
       "default_unit": "mg/dL",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": [
         "Total Bilirubin",
         "T Bili",
