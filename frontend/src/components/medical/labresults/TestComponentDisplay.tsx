@@ -334,6 +334,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     const categoryNames: Record<string, string> = {
       chemistry: 'Chemistry',
       hematology: 'Hematology',
+      hepatology: 'Hepatology',
       immunology: 'Immunology',
       microbiology: 'Microbiology',
       endocrinology: 'Endocrinology',
@@ -350,6 +351,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     const categoryColors: Record<string, string> = {
       chemistry: 'blue',
       hematology: 'red',
+      hepatology: 'lime',
       immunology: 'green',
       microbiology: 'yellow',
       endocrinology: 'purple',

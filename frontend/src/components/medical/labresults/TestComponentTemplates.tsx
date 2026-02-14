@@ -171,7 +171,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
     },
     {
       id: 'liver_function',
-      category: 'chemistry',
+      category: 'hepatology',
       tests: [
         { test_name: 'Alanine Aminotransferase', abbreviation: 'ALT', test_code: '1742-6', unit: 'U/L', default_display_order: 1 },
         { test_name: 'Aspartate Aminotransferase', abbreviation: 'AST', test_code: '1920-8', unit: 'U/L', default_display_order: 2 },
@@ -181,6 +181,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         { test_name: 'Direct Bilirubin', abbreviation: 'DBIL', test_code: '1968-7', unit: 'mg/dL', default_display_order: 6 },
         { test_name: 'Albumin', abbreviation: 'ALB', test_code: '1751-7', unit: 'g/dL', default_display_order: 7 },
         { test_name: 'Total Protein', abbreviation: 'TP', test_code: '2885-2', unit: 'g/dL', default_display_order: 8 },
+        { test_name: 'Somatomedin C', abbreviation: 'IGF-1', test_code: '2484-4', unit: 'ng/mL', default_display_order: 9 },
       ]
     },
     {
@@ -422,7 +423,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         ref_range_max: component.ref_range_max === '' ? null : component.ref_range_max as number,
         ref_range_text: sanitizeInput(component.ref_range_text),
         status: (component.status as "normal" | "high" | "low" | "critical" | "abnormal" | "borderline" | null) || null,
-        category: (component.category as "chemistry" | "hematology" | "endocrinology" | "immunology" | "microbiology" | "toxicology" | "genetics" | "molecular" | "pathology" | "lipids" | "other" | null) || null,
+        category: (component.category as "chemistry" | "hematology" | "hepatology" | "endocrinology" | "immunology" | "microbiology" | "toxicology" | "genetics" | "molecular" | "pathology" | "lipids" | "other" | null) || null,
         display_order: component.display_order || null,
         notes: sanitizeInput(component.notes)
       }));
@@ -464,6 +465,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
     const categoryNames: Record<string, string> = {
       chemistry: 'Chemistry',
       hematology: 'Hematology',
+      hepatology: 'Hepatology',
       immunology: 'Immunology',
       microbiology: 'Microbiology',
       endocrinology: 'Endocrinology',
@@ -480,6 +482,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
     const categoryColors: Record<string, string> = {
       chemistry: 'blue',
       hematology: 'red',
+      hepatology: 'lime',
       immunology: 'green',
       microbiology: 'yellow',
       endocrinology: 'purple',
@@ -538,6 +541,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
               { value: 'all', label: 'All Categories' },
               { value: 'chemistry', label: 'Chemistry' },
               { value: 'hematology', label: 'Hematology' },
+              { value: 'hepatology', label: 'Hepatology' },
               { value: 'endocrinology', label: 'Endocrinology' },
               { value: 'immunology', label: 'Immunology' },
               { value: 'microbiology', label: 'Microbiology' },
@@ -879,6 +883,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                               data={[
                                 { value: 'chemistry', label: 'Blood Chemistry & Metabolic' },
                                 { value: 'hematology', label: 'Blood Counts & Cells' },
+                                { value: 'hepatology', label: 'Liver Enzymes & Function' },
                                 { value: 'lipids', label: 'Cholesterol & Lipids' },
                                 { value: 'endocrinology', label: 'Hormones & Thyroid' },
                                 { value: 'immunology', label: 'Immune System & Antibodies' },

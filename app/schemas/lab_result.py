@@ -51,6 +51,7 @@ class LabResultBase(TaggedEntityMixin):
             "microbiology",
             "chemistry",
             "hematology",
+            "hepatology",
             "immunology",
             "genetics",
             "cardiology",

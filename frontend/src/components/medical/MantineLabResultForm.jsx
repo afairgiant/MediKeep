@@ -39,6 +39,7 @@ const MantineLabResultForm = ({
     { value: 'microbiology', label: t('labResults.category.microbiology') },
     { value: 'chemistry', label: t('labResults.category.chemistry') },
     { value: 'hematology', label: t('labResults.category.hematology') },
+    { value: 'hepatology', label: t('labResults.category.hepatology') },
     { value: 'immunology', label: t('labResults.category.immunology') },
     { value: 'genetics', label: t('labResults.category.genetics') },
     { value: 'cardiology', label: t('labResults.category.cardiology') },
