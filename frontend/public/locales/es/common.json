@@ -1867,12 +1867,11 @@
     },
     "title": "Profesionales de salud",
     "viewModal": {
-      "contactRating": "CONTACTO Y VALORACIÓN",
       "editButton": "Editar profesional",
       "email": "Correo electrónico",
       "phone": "Teléfono",
       "practice": "Consultorio",
-      "practiceInfo": "INFORMACIÓN DEL CONSULTORIO",
+      "practitionerContact": "CONTACTO DEL PROFESIONAL",
       "rating": "Valoración",
       "specialty": "Especialidad",
       "subtitle": "Profesional de salud",

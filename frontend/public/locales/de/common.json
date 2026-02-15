@@ -1958,11 +1958,10 @@
     "viewModal": {
       "title": "Details der medizinischen Fachkraft",
       "subtitle": "Medizinische Fachkraft",
-      "practiceInfo": "PRAXISINFORMATIONEN",
+      "practitionerContact": "ARZTKONTAKT",
       "practice": "Praxis",
       "specialty": "Fachgebiet",
       "phone": "Telefon",
-      "contactRating": "KONTAKT & BEWERTUNG",
       "website": "Webseite",
       "visitWebsite": "Webseite besuchen",
       "rating": "Bewertung",

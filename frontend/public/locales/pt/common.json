@@ -1707,11 +1707,10 @@
     "viewModal": {
       "title": "Detalhes do Profissional",
       "subtitle": "Profissional de Saúde",
-      "practiceInfo": "INFORMAÇÕES DA PRÁTICA",
+      "practitionerContact": "CONTATO DO PROFISSIONAL",
       "practice": "Prática",
       "specialty": "Especialidade",
       "phone": "Telefone",
-      "contactRating": "CONTATO & AVALIAÇÃO",
       "website": "Website",
       "visitWebsite": "Visitar Website",
       "rating": "Avaliação",

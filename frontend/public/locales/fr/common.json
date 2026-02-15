@@ -1707,12 +1707,11 @@
     "viewModal": {
       "title": "Détails du médecin",
       "subtitle": "Médecin",
-      "practiceInfo": "INFORMATIONS DU CABINET",
+      "practitionerContact": "CONTACT DU PRATICIEN",
       "practice": "Cabinet",
       "specialty": "Spécialité",
       "phone": "Téléphone",
       "email": "Email",
-      "contactRating": "CONTACT & AVIS",
       "website": "Site web",
       "visitWebsite": "Visiter le site web",
       "rating": "Avis",

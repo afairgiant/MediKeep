@@ -1707,12 +1707,11 @@
     "viewModal": {
       "title": "Practitioner Details",
       "subtitle": "Healthcare Practitioner",
-      "practiceInfo": "PRACTICE INFORMATION",
+      "practitionerContact": "PRACTITIONER CONTACT",
       "practice": "Practice",
       "specialty": "Specialty",
       "phone": "Phone",
       "email": "Email",
-      "contactRating": "CONTACT & RATING",
       "website": "Website",
       "visitWebsite": "Visit Website",
       "rating": "Rating",
