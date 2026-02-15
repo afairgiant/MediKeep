@@ -21,45 +21,13 @@ import { Paper, Stack, Text, Group, Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import { VitalTrendResponse, VitalDataPoint, AggregatedDataPoint, AggregationPeriod } from './types';
 import { convertToChartData } from '../../../utils/vitalDataAggregation';
+import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
 
 interface VitalTrendChartProps {
   trendData: VitalTrendResponse;
   aggregatedDataPoints?: AggregatedDataPoint[];
   aggregationPeriod?: AggregationPeriod | null;
 }
-
-// Calculate a "nice" tick interval based on the data range
-const calculateNiceInterval = (range: number, targetTickCount: number = 5): number => {
-  const roughInterval = range / targetTickCount;
-  const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));
-  const normalized = roughInterval / magnitude;
-
-  // Choose a nice interval: 1, 2, 2.5, 5, or 10
-  let niceInterval: number;
-  if (normalized <= 1) {
-    niceInterval = 1;
-  } else if (normalized <= 2) {
-    niceInterval = 2;
-  } else if (normalized <= 2.5) {
-    niceInterval = 2.5;
-  } else if (normalized <= 5) {
-    niceInterval = 5;
-  } else {
-    niceInterval = 10;
-  }
-
-  return niceInterval * magnitude;
-};
-
-// Round a number down to the nearest multiple of interval
-const floorToInterval = (value: number, interval: number): number => {
-  return Math.floor(value / interval) * interval;
-};
-
-// Round a number up to the nearest multiple of interval
-const ceilToInterval = (value: number, interval: number): number => {
-  return Math.ceil(value / interval) * interval;
-};
 
 const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
   trendData,
@@ -103,66 +71,22 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
 
   // Calculate Y-axis configuration with nice, rounded tick values
   const yAxisConfig = useMemo(() => {
-    if (chartData.length === 0) {
-      return { domain: [0, 100] as [number, number], ticks: [0, 25, 50, 75, 100] };
-    }
-
     const primaryValues = chartData.map((d: { value: number }) => d.value);
     const secondaryValues = chartData
       .map((d: { secondaryValue?: number | null }) => d.secondaryValue)
-      .filter((v): v is number => v !== null && v !== undefined);
+      .filter((v): v is number => v != null);
 
     // For aggregated data, also consider min/max values for proper axis range
-    let minMaxValues: number[] = [];
+    let aggregatedBounds: number[] = [];
     if (isAggregated) {
-      const minValues = chartData
-        .map((d: any) => d.min)
-        .filter((v): v is number => v !== undefined);
-      const maxValues = chartData
-        .map((d: any) => d.max)
-        .filter((v): v is number => v !== undefined);
-      const secondaryMinValues = chartData
-        .map((d: any) => d.secondaryMin)
-        .filter((v): v is number => v !== null && v !== undefined);
-      const secondaryMaxValues = chartData
-        .map((d: any) => d.secondaryMax)
-        .filter((v): v is number => v !== null && v !== undefined);
-      minMaxValues = [...minValues, ...maxValues, ...secondaryMinValues, ...secondaryMaxValues];
+      const numericFields = ['min', 'max', 'secondaryMin', 'secondaryMax'] as const;
+      aggregatedBounds = numericFields.flatMap(field =>
+        chartData.map((d: any) => d[field]).filter((v): v is number => v != null)
+      );
     }
 
-    const allValues = [...primaryValues, ...secondaryValues, ...minMaxValues];
-    const dataMin = Math.min(...allValues);
-    const dataMax = Math.max(...allValues);
-
-    // Handle edge case where all values are identical
-    if (dataMin === dataMax) {
-      const padding = Math.abs(dataMax) * 0.1 || 1;
-      const interval = calculateNiceInterval(padding * 2);
-      const niceMin = floorToInterval(dataMin - padding, interval);
-      const niceMax = ceilToInterval(dataMax + padding, interval);
-      const ticks: number[] = [];
-      for (let tick = niceMin; tick <= niceMax; tick += interval) {
-        ticks.push(Number(tick.toFixed(10))); // Avoid floating point issues
-      }
-      return { domain: [niceMin, niceMax] as [number, number], ticks };
-    }
-
-    // Calculate nice interval and bounds
-    const range = dataMax - dataMin;
-    const interval = calculateNiceInterval(range);
-
-    // Extend bounds slightly and round to nice values
-    const niceMin = floorToInterval(dataMin - range * 0.05, interval);
-    const niceMax = ceilToInterval(dataMax + range * 0.05, interval);
-
-    // Generate tick values
-    const ticks: number[] = [];
-    for (let tick = niceMin; tick <= niceMax + interval * 0.01; tick += interval) {
-      ticks.push(Number(tick.toFixed(10))); // Avoid floating point issues
-    }
-
-    return { domain: [niceMin, niceMax] as [number, number], ticks };
-  }, [chartData]);
+    return generateYAxisConfig([...primaryValues, ...secondaryValues, ...aggregatedBounds]);
+  }, [chartData, isAggregated]);
 
   // Custom dot renderer for primary data points (systolic for BP)
   const renderPrimaryDot = (props: any): React.ReactElement => {
