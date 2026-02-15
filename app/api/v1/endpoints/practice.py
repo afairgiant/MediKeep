@@ -140,15 +140,7 @@ def delete_practice(
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Delete a practice. Nullifies practitioner practice_id references."""
-    with handle_database_errors(request=request):
-        # First nullify all practitioner references
-        from app.crud.practitioner import practitioner as practitioner_crud
-        practitioners = practitioner_crud.get_by_practice(db, practice_id=practice_id)
-        for p in practitioners:
-            p.practice_id = None
-        db.flush()
-
+    """Delete a practice. FK ondelete=SET NULL auto-nullifies practitioner references."""
     return handle_delete_with_logging(
         db=db,
         crud_obj=practice,

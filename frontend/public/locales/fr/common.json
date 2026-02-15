@@ -1737,7 +1737,8 @@
     },
     "groupByPractice": "Grouper par cabinet",
     "ungroupedTitle": "Praticiens independants",
-    "editPracticeError": "Echec du chargement du cabinet pour modification"
+    "editPracticeError": "Echec du chargement du cabinet pour modification",
+    "createPracticeError": "Echec de la creation du cabinet. Veuillez reessayer."
   },
   "pharmacies": {
     "title": "Pharmacies",

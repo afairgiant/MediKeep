@@ -58,17 +58,21 @@ def read_practitioners(
     """Retrieve practitioners with optional filtering by specialty or practice."""
     with handle_database_errors(request=request):
         if practice_id:
-            practitioners_list = practitioner.get_by_practice(
-                db, practice_id=practice_id, skip=skip, limit=limit
+            practitioners_list = practitioner.query(
+                db, filters={"practice_id": practice_id},
+                skip=skip, limit=limit, load_relations=["practice_rel"],
             )
         elif specialty:
-            practitioners_list = practitioner.get_by_specialty(
-                db, specialty=specialty, skip=skip, limit=limit
+            practitioners_list = practitioner.query(
+                db, filters={"specialty": specialty},
+                skip=skip, limit=limit, load_relations=["practice_rel"],
             )
         else:
-            practitioners_list = practitioner.get_multi(db, skip=skip, limit=limit)
+            practitioners_list = practitioner.query(
+                db, skip=skip, limit=limit, load_relations=["practice_rel"],
+            )
 
-        # Populate practice_name from relationship
+        # Populate practice_name from eagerly-loaded relationship
         for p in practitioners_list:
             if p.practice_rel:
                 p.practice_name = p.practice_rel.name

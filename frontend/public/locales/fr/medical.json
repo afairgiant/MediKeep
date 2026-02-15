@@ -1177,8 +1177,8 @@
       },
       "practice": {
         "label": "Cabinet/Clinique",
-        "placeholder": "Rechercher ou creer un cabinet...",
-        "description": "Selectionnez un cabinet existant ou saisissez pour en creer un nouveau"
+        "placeholder": "Rechercher ou créer un cabinet...",
+        "description": "Sélectionnez un cabinet existant ou saisissez pour en créer un nouveau"
       },
       "phone": {
         "label": "Numéro de téléphone",
@@ -1212,8 +1212,8 @@
     },
     "practice": {
         "label": "Cabinet/Clinique",
-        "placeholder": "Rechercher ou creer un cabinet...",
-        "description": "Selectionnez un cabinet existant ou saisissez pour en creer un nouveau"
+        "placeholder": "Rechercher ou créer un cabinet...",
+        "description": "Sélectionnez un cabinet existant ou saisissez pour en créer un nouveau"
     },
     "rating": {
       "label": "Avis",

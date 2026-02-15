@@ -184,7 +184,7 @@ const Practitioners = () => {
         ...formData,
         practice_id:
           formData.practice_id && formData.practice_id !== ''
-            ? parseInt(formData.practice_id, 10)
+            ? (Number.isNaN(parseInt(formData.practice_id, 10)) ? null : parseInt(formData.practice_id, 10))
             : null,
         phone_number: formData.phone_number?.trim() || null,
         email:

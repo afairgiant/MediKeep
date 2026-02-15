@@ -296,7 +296,7 @@ class Practitioner(Base):
     name = Column(String, nullable=False)
     specialty = Column(String, nullable=False)
     practice = Column(String, nullable=True)  # Legacy field - kept for migration safety
-    practice_id = Column(Integer, ForeignKey("practices.id"), nullable=True)
+    practice_id = Column(Integer, ForeignKey("practices.id", ondelete="SET NULL"), nullable=True)
     phone_number = Column(String, nullable=True)
     email = Column(String, nullable=True)
     website = Column(String, nullable=True)

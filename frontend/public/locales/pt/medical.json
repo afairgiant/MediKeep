@@ -1881,5 +1881,44 @@
   "form": {
     "invalidPhoneDigits": "O número de telefone pode conter apenas dígitos, espaços, traços, parênteses, pontos e +",
     "invalidWebsiteUrl": "Por favor, insira uma URL válida"
+  },
+  "practices": {
+    "title": "Consultorios",
+    "form": {
+      "name": {
+        "label": "Nome do consultorio",
+        "placeholder": "Hospital Geral da Cidade",
+        "description": "Nome do consultorio ou clinica"
+      },
+      "phone": {
+        "label": "Telefone do consultorio",
+        "placeholder": "+55 555 123-4567",
+        "description": "Numero de telefone principal do consultorio"
+      },
+      "fax": {
+        "label": "Numero de fax",
+        "placeholder": "+55 555 123-4568",
+        "description": "Numero de fax do consultorio"
+      },
+      "website": {
+        "label": "Website do consultorio",
+        "placeholder": "https://www.consultorio.com.br",
+        "description": "Website oficial do consultorio"
+      },
+      "patientPortal": {
+        "label": "URL do portal do paciente",
+        "placeholder": "https://portal.consultorio.com.br",
+        "description": "URL do portal do paciente"
+      },
+      "notes": {
+        "label": "Notas",
+        "placeholder": "Notas adicionais sobre este consultorio...",
+        "description": "Informacoes adicionais sobre o consultorio"
+      },
+      "locations": {
+        "label": "Localizacoes",
+        "description": "Localizacoes dos escritorios do consultorio"
+      }
+    }
   }
 }

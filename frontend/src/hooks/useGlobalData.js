@@ -134,7 +134,7 @@ export function usePractices(autoFetch = true) {
         component: 'usePractices',
       });
       setError(err.message);
-      return practices;
+      return [];
     } finally {
       setLoading(false);
     }

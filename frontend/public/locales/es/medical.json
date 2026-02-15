@@ -1881,5 +1881,44 @@
   "form": {
     "invalidPhoneDigits": "El número de teléfono solo puede contener dígitos, espacios, guiones, paréntesis, puntos y +",
     "invalidWebsiteUrl": "Por favor ingrese una URL de sitio web válida"
+  },
+  "practices": {
+    "title": "Consultorios",
+    "form": {
+      "name": {
+        "label": "Nombre del consultorio",
+        "placeholder": "Hospital General de la Ciudad",
+        "description": "Nombre del consultorio o clinica"
+      },
+      "phone": {
+        "label": "Telefono del consultorio",
+        "placeholder": "+1 555 123-4567",
+        "description": "Numero de telefono principal del consultorio"
+      },
+      "fax": {
+        "label": "Numero de fax",
+        "placeholder": "+1 555 123-4568",
+        "description": "Numero de fax del consultorio"
+      },
+      "website": {
+        "label": "Sitio web del consultorio",
+        "placeholder": "https://www.consultorio.com",
+        "description": "Sitio web oficial del consultorio"
+      },
+      "patientPortal": {
+        "label": "URL del portal del paciente",
+        "placeholder": "https://portal.consultorio.com",
+        "description": "URL del portal del paciente"
+      },
+      "notes": {
+        "label": "Notas",
+        "placeholder": "Notas adicionales sobre este consultorio...",
+        "description": "Informacion adicional sobre el consultorio"
+      },
+      "locations": {
+        "label": "Ubicaciones",
+        "description": "Ubicaciones de las oficinas del consultorio"
+      }
+    }
   }
 }

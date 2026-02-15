@@ -1878,8 +1878,25 @@
       "subtitle": "Profesional de salud",
       "title": "Detalles del profesional",
       "visitWebsite": "Visitar sitio web",
-      "website": "Sitio web"
-    }
+      "website": "Sitio web",
+      "practiceDetails": "DETALLES DEL CONSULTORIO",
+      "practicePhone": "Telefono",
+      "practiceFax": "Fax",
+      "practiceWebsite": "Sitio web",
+      "practicePortal": "Portal del paciente",
+      "practiceNotes": "Notas",
+      "practiceLocations": "Ubicaciones",
+      "editPractice": "Editar consultorio",
+      "noPractice": "Sin consultorio vinculado",
+      "savePractice": "Guardar consultorio",
+      "practiceUpdateSuccess": "Consultorio actualizado correctamente",
+      "practiceUpdateError": "Error al actualizar el consultorio",
+      "practiceLoadError": "Error al cargar los detalles del consultorio"
+    },
+    "groupByPractice": "Agrupar por consultorio",
+    "ungroupedTitle": "Profesionales independientes",
+    "editPracticeError": "Error al cargar el consultorio para edicion",
+    "createPracticeError": "Error al crear el consultorio. Intentelo de nuevo."
   },
   "reportBuilder": {
     "buttons": {

@@ -18,13 +18,13 @@ class CRUDPractice(CRUDBase[PracticeModel, PracticeCreate, PracticeUpdate]):
     """
 
     def get_by_name(self, db: Session, *, name: str) -> Optional[PracticeModel]:
-        """Retrieve a practice by exact name match."""
-        practices = self.query(
-            db=db,
-            filters={"name": name},
-            limit=1,
+        """Retrieve a practice by case-insensitive name match."""
+        result = (
+            db.query(PracticeModel)
+            .filter(func.lower(PracticeModel.name) == name.strip().lower())
+            .first()
         )
-        return practices[0] if practices else None
+        return result
 
     def search_by_name(
         self, db: Session, *, name: str, skip: int = 0, limit: int = 20
@@ -40,17 +40,13 @@ class CRUDPractice(CRUDBase[PracticeModel, PracticeCreate, PracticeUpdate]):
     def is_name_taken(
         self, db: Session, *, name: str, exclude_id: Optional[int] = None
     ) -> bool:
-        """Check if a practice name is already taken."""
-        practices = self.query(
-            db=db,
-            filters={"name": name},
-            limit=1,
-        )
+        """Check if a practice name is already taken (case-insensitive)."""
+        existing = self.get_by_name(db, name=name)
 
-        if not practices:
+        if not existing:
             return False
 
-        if exclude_id and practices[0].id == exclude_id:
+        if exclude_id and existing.id == exclude_id:
             return False
 
         return True

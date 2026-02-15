@@ -1881,5 +1881,44 @@
   "form": {
     "invalidPhoneDigits": "Telefonnummer darf nur Ziffern, Leerzeichen, Bindestriche, Klammern, Punkte und + enthalten",
     "invalidWebsiteUrl": "Bitte geben Sie eine gültige Website-URL ein"
+  },
+  "practices": {
+    "title": "Praxen",
+    "form": {
+      "name": {
+        "label": "Praxisname",
+        "placeholder": "Stadtkrankenhaus",
+        "description": "Name der Praxis oder Klinik"
+      },
+      "phone": {
+        "label": "Praxis-Telefon",
+        "placeholder": "+49 555 123-4567",
+        "description": "Haupttelefonnummer der Praxis"
+      },
+      "fax": {
+        "label": "Faxnummer",
+        "placeholder": "+49 555 123-4568",
+        "description": "Faxnummer der Praxis"
+      },
+      "website": {
+        "label": "Praxis-Website",
+        "placeholder": "https://www.praxis.de",
+        "description": "Offizielle Website der Praxis"
+      },
+      "patientPortal": {
+        "label": "Patientenportal-URL",
+        "placeholder": "https://portal.praxis.de",
+        "description": "URL des Patientenportals"
+      },
+      "notes": {
+        "label": "Notizen",
+        "placeholder": "Zusaetzliche Notizen zu dieser Praxis...",
+        "description": "Weitere Informationen zur Praxis"
+      },
+      "locations": {
+        "label": "Standorte",
+        "description": "Praxisstandorte"
+      }
+    }
   }
 }

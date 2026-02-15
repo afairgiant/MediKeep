@@ -1295,7 +1295,7 @@
         "description": "Paese della farmacia"
       },
       "specialtyServices": {
-        "label": "Specialit\u00e0",
+        "label": "Specialità",
         "placeholder": "es., Vaccinazioni, Preparazioni galeniche, Gestione terapia farmacologica",
         "description": "Servizi speciali offerti da questa farmacia"
       }
@@ -1881,5 +1881,44 @@
   "form": {
     "invalidPhoneDigits": "Il numero di telefono può contenere solo cifre, spazi, trattini, parentesi, punti e +",
     "invalidWebsiteUrl": "Inserisca un URL del sito web valido"
+  },
+  "practices": {
+    "title": "Studi medici",
+    "form": {
+      "name": {
+        "label": "Nome dello studio",
+        "placeholder": "Ospedale Generale della Citta",
+        "description": "Nome dello studio o della clinica"
+      },
+      "phone": {
+        "label": "Telefono dello studio",
+        "placeholder": "+39 555 123-4567",
+        "description": "Numero di telefono principale dello studio"
+      },
+      "fax": {
+        "label": "Numero di fax",
+        "placeholder": "+39 555 123-4568",
+        "description": "Numero di fax dello studio"
+      },
+      "website": {
+        "label": "Sito web dello studio",
+        "placeholder": "https://www.studio.it",
+        "description": "Sito web ufficiale dello studio"
+      },
+      "patientPortal": {
+        "label": "URL portale pazienti",
+        "placeholder": "https://portale.studio.it",
+        "description": "URL del portale pazienti"
+      },
+      "notes": {
+        "label": "Note",
+        "placeholder": "Note aggiuntive su questo studio...",
+        "description": "Informazioni aggiuntive sullo studio"
+      },
+      "locations": {
+        "label": "Sedi",
+        "description": "Sedi dello studio"
+      }
+    }
   }
 }

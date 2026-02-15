@@ -179,6 +179,14 @@ const PractitionerFormWrapper = ({
           component: 'PractitionerFormWrapper',
           error: error.message,
         });
+        // Revert practice_id to empty so it doesn't store a raw text string
+        onInputChange({ target: { name: 'practice_id', value: '' } });
+        notifications.show({
+          title: t('common:labels.error'),
+          message: t('common:practitioners.createPracticeError', 'Failed to create practice. Please try again.'),
+          color: 'red',
+        });
+        return;
       }
     }
 

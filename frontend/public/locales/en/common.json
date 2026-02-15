@@ -1737,7 +1737,8 @@
     },
     "groupByPractice": "Group by Practice",
     "ungroupedTitle": "Independent Practitioners",
-    "editPracticeError": "Failed to load practice for editing"
+    "editPracticeError": "Failed to load practice for editing",
+    "createPracticeError": "Failed to create practice. Please try again."
   },
   "pharmacies": {
     "title": "Pharmacies",
