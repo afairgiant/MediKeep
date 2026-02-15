@@ -123,6 +123,37 @@ async def reload_test_library_endpoint(
 SYNC_BATCH_SIZE = 100
 
 
+def _sync_component(component, force_all: bool):
+    """
+    Match a single component against the test library and update its
+    canonical_test_name and category.
+
+    Returns a tuple of (canonical_updated, category_updated) counts
+    representing how many fields were actually changed on this component.
+    """
+    canonical_updated = 0
+    category_updated = 0
+
+    canonical_name = canonical_test_matching.find_canonical_match(component.test_name)
+
+    if canonical_name:
+        if component.canonical_test_name != canonical_name:
+            component.canonical_test_name = canonical_name
+            canonical_updated = 1
+
+        test_info = canonical_test_matching.get_test_info(canonical_name)
+        if test_info and test_info.get("category"):
+            if component.category != test_info["category"]:
+                component.category = test_info["category"]
+                category_updated = 1
+    elif not force_all:
+        # Non-force mode: mark as processed with empty string to prevent
+        # re-querying on the next batch iteration
+        component.canonical_test_name = ""
+
+    return canonical_updated, category_updated
+
+
 @router.post("/test-library/sync", response_model=TestLibrarySyncResponse)
 async def sync_test_library(
     sync_request: TestLibrarySyncRequest,
@@ -173,21 +204,9 @@ async def sync_test_library(
                     break
 
                 for component in batch:
-                    canonical_name = canonical_test_matching.find_canonical_match(
-                        component.test_name
-                    )
-
-                    if canonical_name:
-                        if component.canonical_test_name != canonical_name:
-                            component.canonical_test_name = canonical_name
-                            canonical_updated += 1
-
-                        test_info = canonical_test_matching.get_test_info(canonical_name)
-                        if test_info and test_info.get("category"):
-                            if component.category != test_info["category"]:
-                                component.category = test_info["category"]
-                                category_updated += 1
-
+                    c_upd, cat_upd = _sync_component(component, force_all=True)
+                    canonical_updated += c_upd
+                    category_updated += cat_upd
                     total_processed += 1
 
                 db.commit()
@@ -207,20 +226,9 @@ async def sync_test_library(
                     break
 
                 for component in batch:
-                    canonical_name = canonical_test_matching.find_canonical_match(
-                        component.test_name
-                    )
-
-                    if canonical_name:
-                        component.canonical_test_name = canonical_name
-                        canonical_updated += 1
-
-                        test_info = canonical_test_matching.get_test_info(canonical_name)
-                        if test_info and test_info.get("category"):
-                            if component.category != test_info["category"]:
-                                component.category = test_info["category"]
-                                category_updated += 1
-
+                    c_upd, cat_upd = _sync_component(component, force_all=False)
+                    canonical_updated += c_upd
+                    category_updated += cat_upd
                     total_processed += 1
 
                 db.commit()

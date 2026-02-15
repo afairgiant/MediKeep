@@ -15,7 +15,7 @@ export interface LabTestComponent {
   ref_range_text?: string | null;
   status?: 'normal' | 'high' | 'low' | 'critical' | 'abnormal' | 'borderline' | null;
   category?: 'chemistry' | 'hematology' | 'hepatology' | 'immunology' | 'microbiology' | 'endocrinology' |
-             'toxicology' | 'genetics' | 'molecular' | 'pathology' | 'lipids' | 'other' | null;
+             'cardiology' | 'toxicology' | 'genetics' | 'molecular' | 'pathology' | 'lipids' | 'other' | null;
   display_order?: number | null;
   canonical_test_name?: string | null;  // Links to standardized test name for trend matching
   notes?: string | null;
@@ -596,7 +596,7 @@ class LabTestComponentApi {
         name: "Basic Metabolic Panel (BMP)",
         description: "Common chemistry tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "chemistry", display_order: 1 },
+          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "endocrinology", display_order: 1 },
           { test_name: "Sodium", abbreviation: "Na", unit: "mmol/L", category: "chemistry", display_order: 2 },
           { test_name: "Potassium", abbreviation: "K", unit: "mmol/L", category: "chemistry", display_order: 3 },
           { test_name: "Chloride", abbreviation: "Cl", unit: "mmol/L", category: "chemistry", display_order: 4 },
@@ -610,7 +610,7 @@ class LabTestComponentApi {
         name: "Comprehensive Metabolic Panel (CMP)",
         description: "Extended chemistry tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "chemistry", display_order: 1 },
+          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "endocrinology", display_order: 1 },
           { test_name: "Sodium", abbreviation: "Na", unit: "mmol/L", category: "chemistry", display_order: 2 },
           { test_name: "Potassium", abbreviation: "K", unit: "mmol/L", category: "chemistry", display_order: 3 },
           { test_name: "Chloride", abbreviation: "Cl", unit: "mmol/L", category: "chemistry", display_order: 4 },
@@ -618,8 +618,8 @@ class LabTestComponentApi {
           { test_name: "Blood Urea Nitrogen", abbreviation: "BUN", unit: "mg/dL", category: "chemistry", display_order: 6 },
           { test_name: "Creatinine", abbreviation: "CREA", unit: "mg/dL", category: "chemistry", display_order: 7 },
           { test_name: "Calcium", abbreviation: "Ca", unit: "mg/dL", category: "chemistry", display_order: 8 },
-          { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "chemistry", display_order: 9 },
-          { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "chemistry", display_order: 10 },
+          { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "hepatology", display_order: 9 },
+          { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "hepatology", display_order: 10 },
           { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "hepatology", display_order: 11 },
           { test_name: "Alkaline Phosphatase", abbreviation: "ALP", unit: "U/L", category: "hepatology", display_order: 12 },
           { test_name: "Alanine Aminotransferase", abbreviation: "ALT", unit: "U/L", category: "hepatology", display_order: 13 },
@@ -648,7 +648,7 @@ class LabTestComponentApi {
           { test_name: "Direct Bilirubin", abbreviation: "DBIL", unit: "mg/dL", category: "hepatology", display_order: 6 },
           { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "hepatology", display_order: 7 },
           { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "hepatology", display_order: 8 },
-          { test_name: "Somatomedin C", abbreviation: "IGF-1", unit: "ng/mL", category: "hepatology", display_order: 9 }
+          { test_name: "Somatomedin C", abbreviation: "IGF-1", unit: "ng/mL", category: "endocrinology", display_order: 9 }
         ]
       },
       thyroid: {
@@ -678,9 +678,9 @@ class LabTestComponentApi {
         name: "Diabetes Panel",
         description: "Blood sugar and diabetes markers - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "chemistry", display_order: 1 },
-          { test_name: "Hemoglobin A1c", abbreviation: "HbA1c", unit: "%", category: "chemistry", display_order: 2 },
-          { test_name: "Estimated Average Glucose", abbreviation: "eAG", unit: "mg/dL", category: "chemistry", display_order: 3 }
+          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "endocrinology", display_order: 1 },
+          { test_name: "Hemoglobin A1c", abbreviation: "HbA1c", unit: "%", category: "endocrinology", display_order: 2 },
+          { test_name: "Estimated Average Glucose", abbreviation: "eAG", unit: "mg/dL", category: "endocrinology", display_order: 3 }
         ]
       }
     });

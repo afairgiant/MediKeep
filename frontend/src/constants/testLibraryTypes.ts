@@ -13,6 +13,7 @@ export type TestCategory =
   | 'hepatology'
   | 'lipids'
   | 'endocrinology'
+  | 'cardiology'
   | 'immunology'
   | 'microbiology'
   | 'toxicology'

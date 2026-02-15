@@ -48,6 +48,7 @@ import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import { apiService } from '../../../services/api';
 import { searchTests } from '../../../constants/testLibrary';
+import { ComponentCategory, ComponentStatus } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 
 /**
@@ -784,8 +785,8 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           ref_range_min: comp.ref_range_min,
           ref_range_max: comp.ref_range_max,
           ref_range_text: comp.ref_range_text || null,
-          status: (comp.status as "normal" | "high" | "low" | "critical" | "abnormal" | "borderline" | null) || null,
-          category: (comp.category as "chemistry" | "hematology" | "hepatology" | "immunology" | "microbiology" | "endocrinology" | "toxicology" | "genetics" | "molecular" | "pathology" | "lipids" | "other" | null) || null,
+          status: (comp.status as ComponentStatus | null) || null,
+          category: (comp.category as ComponentCategory | null) || null,
           display_order: index + 1,
           notes: comp.issues.length > 0 ? `Parsing notes: ${comp.issues.join(', ')}` : null
         }));
