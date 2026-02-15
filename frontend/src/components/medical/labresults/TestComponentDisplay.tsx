@@ -24,6 +24,7 @@ import {
 import { IconInfoCircle, IconEdit, IconTrash, IconChartLine } from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
+import { getCategoryDisplayName, getCategoryColor } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 
 interface TestComponentDisplayProps {
@@ -328,41 +329,6 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
 
     return { sortedCategories, sortedGroupedComponents };
   }, [components]);
-
-  // Memoize static mapping functions
-  const getCategoryDisplayName = React.useCallback((category: string): string => {
-    const categoryNames: Record<string, string> = {
-      chemistry: 'Chemistry',
-      hematology: 'Hematology',
-      hepatology: 'Hepatology',
-      immunology: 'Immunology',
-      microbiology: 'Microbiology',
-      endocrinology: 'Endocrinology',
-      toxicology: 'Toxicology',
-      genetics: 'Genetics',
-      molecular: 'Molecular',
-      pathology: 'Pathology',
-      other: 'Other Tests'
-    };
-    return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
-  }, []);
-
-  const getCategoryColor = React.useCallback((category: string): string => {
-    const categoryColors: Record<string, string> = {
-      chemistry: 'blue',
-      hematology: 'red',
-      hepatology: 'lime',
-      immunology: 'green',
-      microbiology: 'yellow',
-      endocrinology: 'purple',
-      toxicology: 'orange',
-      genetics: 'teal',
-      molecular: 'cyan',
-      pathology: 'pink',
-      other: 'gray'
-    };
-    return categoryColors[category] || 'gray';
-  }, []);
 
   try {
     if (loading) {

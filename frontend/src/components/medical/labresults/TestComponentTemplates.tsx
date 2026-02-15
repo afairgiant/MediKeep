@@ -43,6 +43,7 @@ import { notifications } from '@mantine/notifications';
 import sanitizeHtml from 'sanitize-html';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
+import { getCategoryDisplayName, getCategoryColor, CATEGORY_SELECT_OPTIONS, ComponentCategory, ComponentStatus } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 import { getAutocompleteOptions, extractTestName, getTestByName } from '../../../constants/testLibrary';
 
@@ -422,8 +423,8 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         ref_range_min: component.ref_range_min === '' ? null : component.ref_range_min as number,
         ref_range_max: component.ref_range_max === '' ? null : component.ref_range_max as number,
         ref_range_text: sanitizeInput(component.ref_range_text),
-        status: (component.status as "normal" | "high" | "low" | "critical" | "abnormal" | "borderline" | null) || null,
-        category: (component.category as "chemistry" | "hematology" | "hepatology" | "endocrinology" | "immunology" | "microbiology" | "toxicology" | "genetics" | "molecular" | "pathology" | "lipids" | "other" | null) || null,
+        status: (component.status as ComponentStatus | null) || null,
+        category: (component.category as ComponentCategory | null) || null,
         display_order: component.display_order || null,
         notes: sanitizeInput(component.notes)
       }));
@@ -460,40 +461,6 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       setIsSubmitting(false);
     }
   }, [formValues, labResultId, selectedTemplate, onComponentsAdded, handleError, validateForm]);
-
-  const getCategoryDisplayName = (category: string): string => {
-    const categoryNames: Record<string, string> = {
-      chemistry: 'Chemistry',
-      hematology: 'Hematology',
-      hepatology: 'Hepatology',
-      immunology: 'Immunology',
-      microbiology: 'Microbiology',
-      endocrinology: 'Endocrinology',
-      toxicology: 'Toxicology',
-      genetics: 'Genetics',
-      molecular: 'Molecular',
-      pathology: 'Pathology',
-      other: 'Other Tests'
-    };
-    return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
-  };
-
-  const getCategoryColor = (category: string): string => {
-    const categoryColors: Record<string, string> = {
-      chemistry: 'blue',
-      hematology: 'red',
-      hepatology: 'lime',
-      immunology: 'green',
-      microbiology: 'yellow',
-      endocrinology: 'purple',
-      toxicology: 'orange',
-      genetics: 'teal',
-      molecular: 'cyan',
-      pathology: 'pink',
-      other: 'gray'
-    };
-    return categoryColors[category] || 'gray';
-  };
 
   const getTemplateDisplayName = (templateId: string): string => {
     const templateNames: Record<string, string> = {
@@ -880,20 +847,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                               clearable
                               searchable
                               comboboxProps={{ zIndex: 3003 }}
-                              data={[
-                                { value: 'chemistry', label: 'Blood Chemistry & Metabolic' },
-                                { value: 'hematology', label: 'Blood Counts & Cells' },
-                                { value: 'hepatology', label: 'Liver Enzymes & Function' },
-                                { value: 'lipids', label: 'Cholesterol & Lipids' },
-                                { value: 'endocrinology', label: 'Hormones & Thyroid' },
-                                { value: 'immunology', label: 'Immune System & Antibodies' },
-                                { value: 'microbiology', label: 'Infections & Cultures' },
-                                { value: 'toxicology', label: 'Drug & Toxin Screening' },
-                                { value: 'genetics', label: 'Genetic Testing' },
-                                { value: 'molecular', label: 'Molecular & DNA Tests' },
-                                { value: 'pathology', label: 'Tissue & Biopsy Analysis' },
-                                { value: 'other', label: 'Other Tests' },
-                              ]}
+                              data={CATEGORY_SELECT_OPTIONS}
                               value={component.category || null}
                               onChange={(value) => updateComponent(index, 'category', value)}
                             />

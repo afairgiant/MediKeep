@@ -26,6 +26,7 @@ import {
   LabTestComponentFilters
 } from '../../../services/api/labTestComponentApi';
 import { useCurrentPatient } from '../../../hooks/useGlobalData';
+import { getCategoryDisplayName } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 
 interface TestComponentSummaryProps {
@@ -131,23 +132,6 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
   useEffect(() => {
     loadSummary();
   }, [loadSummary]);
-
-  const getCategoryDisplayName = (category: string): string => {
-    const categoryNames: Record<string, string> = {
-      chemistry: 'Chemistry',
-      hematology: 'Hematology',
-      hepatology: 'Hepatology',
-      immunology: 'Immunology',
-      microbiology: 'Microbiology',
-      endocrinology: 'Endocrinology',
-      toxicology: 'Toxicology',
-      genetics: 'Genetics',
-      molecular: 'Molecular',
-      pathology: 'Pathology',
-      other: 'Other'
-    };
-    return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
-  };
 
   const getHealthScore = (): number => {
     if (!stats || stats.total === 0) return 0;

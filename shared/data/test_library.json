@@ -17,7 +17,7 @@
       "abbreviation": "ALB",
       "test_code": "1751-7",
       "default_unit": "g/dL",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": ["Albumin", "Alb"],
       "is_common": true,
       "display_order": 2
@@ -26,7 +26,7 @@
       "test_name": "Albumin/Globulin Ratio",
       "abbreviation": "A/G",
       "default_unit": "ratio",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": ["A/G Ratio", "Albumin/Globulin Ratio", "A/G"],
       "is_common": false,
       "display_order": 3
@@ -46,7 +46,7 @@
       "abbreviation": "AMY",
       "test_code": "1798-8",
       "default_unit": "U/L",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": ["Amylase", "Amylase, Serum", "Serum Amylase", "Amy"],
       "is_common": true,
       "display_order": 5
@@ -99,7 +99,7 @@
       "abbreviation": "BNP",
       "test_code": "30934-4",
       "default_unit": "pg/mL",
-      "category": "chemistry",
+      "category": "cardiology",
       "common_names": [
         "BNP",
         "B-type Natriuretic Peptide",
@@ -198,7 +198,7 @@
       "abbreviation": "CK",
       "test_code": "2157-6",
       "default_unit": "U/L",
-      "category": "chemistry",
+      "category": "cardiology",
       "common_names": ["CK", "CPK", "Creatine Kinase"],
       "is_common": false,
       "display_order": 19
@@ -276,7 +276,7 @@
       "test_name": "Estimated Average Glucose",
       "abbreviation": "eAG",
       "default_unit": "mg/dL",
-      "category": "chemistry",
+      "category": "endocrinology",
       "common_names": ["eAG", "Average Glucose"],
       "is_common": false,
       "display_order": 26
@@ -309,7 +309,7 @@
       "abbreviation": "FERR",
       "test_code": "2276-4",
       "default_unit": "ng/mL",
-      "category": "chemistry",
+      "category": "hematology",
       "common_names": ["Ferritin"],
       "is_common": false,
       "display_order": 29
@@ -334,7 +334,7 @@
       "abbreviation": "FOLATE",
       "test_code": "2284-8",
       "default_unit": "ng/mL",
-      "category": "chemistry",
+      "category": "hematology",
       "common_names": [
         "Folate",
         "Folic Acid",
@@ -392,7 +392,7 @@
       "test_name": "Globulin Total",
       "abbreviation": "GLOB",
       "default_unit": "g/dL",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": ["Globulin", "Total Globulin", "Globulin, Total"],
       "is_common": false,
       "display_order": 36
@@ -402,7 +402,7 @@
       "abbreviation": "GLU",
       "test_code": "2345-7",
       "default_unit": "mg/dL",
-      "category": "chemistry",
+      "category": "endocrinology",
       "common_names": ["Blood Glucose", "Blood Sugar", "Glu"],
       "is_common": true,
       "display_order": 37
@@ -442,7 +442,7 @@
       "abbreviation": "HbA1c",
       "test_code": "4548-4",
       "default_unit": "%",
-      "category": "chemistry",
+      "category": "endocrinology",
       "common_names": ["HbA1c", "A1c", "Glycated Hemoglobin"],
       "is_common": true,
       "display_order": 41
@@ -530,7 +530,7 @@
       "abbreviation": "Fe",
       "test_code": "2498-4",
       "default_unit": "ug/dL",
-      "category": "chemistry",
+      "category": "hematology",
       "common_names": ["Iron", "Fe", "Serum Iron"],
       "is_common": false,
       "display_order": 45
@@ -540,7 +540,7 @@
       "abbreviation": "LDH",
       "test_code": "2532-0",
       "default_unit": "U/L",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": ["LDH", "Lactate Dehydrogenase"],
       "is_common": false,
       "display_order": 46
@@ -581,7 +581,7 @@
       "abbreviation": "LIP",
       "test_code": "3040-3",
       "default_unit": "U/L",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": ["Lipase", "Lipase, Serum", "Serum Lipase"],
       "is_common": true,
       "display_order": 49
@@ -724,7 +724,7 @@
       "abbreviation": "NT-proBNP",
       "test_code": "33762-6",
       "default_unit": "pg/mL",
-      "category": "chemistry",
+      "category": "cardiology",
       "common_names": [
         "NT-proBNP",
         "N-terminal proBNP",
@@ -897,7 +897,7 @@
       "abbreviation": "IGF-1",
       "test_code": "2484-4",
       "default_unit": "ng/mL",
-      "category": "hepatology",
+      "category": "endocrinology",
       "common_names": [
         "IGF-1",
         "Somatomedin C",
@@ -1033,7 +1033,7 @@
       "abbreviation": "TIBC",
       "test_code": "2500-7",
       "default_unit": "ug/dL",
-      "category": "chemistry",
+      "category": "hematology",
       "common_names": ["TIBC", "Iron Binding Capacity"],
       "is_common": false,
       "display_order": 82
@@ -1043,7 +1043,7 @@
       "abbreviation": "TP",
       "test_code": "2885-2",
       "default_unit": "g/dL",
-      "category": "chemistry",
+      "category": "hepatology",
       "common_names": ["Total Protein", "TP", "Protein, Total"],
       "is_common": true,
       "display_order": 83
@@ -1069,11 +1069,21 @@
       "display_order": 85
     },
     {
+      "test_name": "Transferrin",
+      "abbreviation": "TRF",
+      "test_code": "3034-6",
+      "default_unit": "mg/dL",
+      "category": "hepatology",
+      "common_names": ["Transferrin", "Transferrin Protein", "TRF", "Serum Transferrin"],
+      "is_common": false,
+      "display_order": 105
+    },
+    {
       "test_name": "Transferrin Saturation",
       "abbreviation": "TSAT",
       "test_code": "2502-3",
       "default_unit": "%",
-      "category": "chemistry",
+      "category": "hematology",
       "common_names": ["Transferrin Saturation", "TSAT"],
       "is_common": false,
       "display_order": 86
@@ -1093,7 +1103,7 @@
       "abbreviation": "TnI",
       "test_code": "10839-9",
       "default_unit": "ng/mL",
-      "category": "chemistry",
+      "category": "cardiology",
       "common_names": [
         "Troponin I",
         "TnI",
@@ -1110,7 +1120,7 @@
       "abbreviation": "TnT",
       "test_code": "6598-7",
       "default_unit": "ng/L",
-      "category": "chemistry",
+      "category": "cardiology",
       "common_names": [
         "Troponin T",
         "TnT",
@@ -1169,7 +1179,7 @@
       "abbreviation": "B12",
       "test_code": "2132-9",
       "default_unit": "pg/mL",
-      "category": "chemistry",
+      "category": "hematology",
       "common_names": ["Vitamin B12", "B12", "Cobalamin"],
       "is_common": false,
       "display_order": 93

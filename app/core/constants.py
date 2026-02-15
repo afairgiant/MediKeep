@@ -22,7 +22,7 @@ LAB_TEST_COMPONENT_STATUSES = [
 # Lab Test Component valid categories
 LAB_TEST_COMPONENT_CATEGORIES = [
     "chemistry", "hematology", "hepatology", "immunology", "microbiology",
-    "endocrinology", "toxicology", "genetics", "molecular",
+    "endocrinology", "cardiology", "toxicology", "genetics", "molecular",
     "pathology", "lipids", "other"
 ]
 

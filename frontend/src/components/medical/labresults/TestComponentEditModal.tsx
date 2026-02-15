@@ -357,17 +357,18 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               searchable
               comboboxProps={{ zIndex: 3001 }}
               data={[
-                { value: 'chemistry', label: t('testComponents.categories.chemistry', 'Blood Chemistry & Metabolic') },
-                { value: 'hematology', label: t('testComponents.categories.hematology', 'Blood Counts & Cells') },
-                { value: 'hepatology', label: t('testComponents.categories.hepatology', 'Liver Enzymes & Function') },
-                { value: 'lipids', label: t('testComponents.categories.lipids', 'Cholesterol & Lipids') },
-                { value: 'endocrinology', label: t('testComponents.categories.endocrinology', 'Hormones & Thyroid') },
-                { value: 'immunology', label: t('testComponents.categories.immunology', 'Immune System & Antibodies') },
-                { value: 'microbiology', label: t('testComponents.categories.microbiology', 'Infections & Cultures') },
-                { value: 'toxicology', label: t('testComponents.categories.toxicology', 'Drug & Toxin Screening') },
-                { value: 'genetics', label: t('testComponents.categories.genetics', 'Genetic Testing') },
-                { value: 'molecular', label: t('testComponents.categories.molecular', 'Molecular & DNA Tests') },
-                { value: 'pathology', label: t('testComponents.categories.pathology', 'Tissue & Biopsy Analysis') },
+                { value: 'chemistry', label: t('testComponents.categories.chemistry', 'Chemistry - Electrolytes & Minerals') },
+                { value: 'hematology', label: t('testComponents.categories.hematology', 'Hematology - Blood Counts & Iron') },
+                { value: 'hepatology', label: t('testComponents.categories.hepatology', 'Hepatology - Liver Enzymes & Function') },
+                { value: 'lipids', label: t('testComponents.categories.lipids', 'Lipids - Cholesterol & Triglycerides') },
+                { value: 'endocrinology', label: t('testComponents.categories.endocrinology', 'Endocrinology - Hormones & Diabetes') },
+                { value: 'cardiology', label: t('testComponents.categories.cardiology', 'Cardiology - Heart & Cardiac Markers') },
+                { value: 'immunology', label: t('testComponents.categories.immunology', 'Immunology - Immune System & Antibodies') },
+                { value: 'microbiology', label: t('testComponents.categories.microbiology', 'Microbiology - Infections & Cultures') },
+                { value: 'toxicology', label: t('testComponents.categories.toxicology', 'Toxicology - Drug & Toxin Screening') },
+                { value: 'genetics', label: t('testComponents.categories.genetics', 'Genetics - Genetic Testing') },
+                { value: 'molecular', label: t('testComponents.categories.molecular', 'Molecular - DNA Tests') },
+                { value: 'pathology', label: t('testComponents.categories.pathology', 'Pathology - Tissue & Biopsy Analysis') },
                 { value: 'other', label: t('testComponents.categories.other', 'Other Tests') },
               ]}
               value={formData.category ?? null}
