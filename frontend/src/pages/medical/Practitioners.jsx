@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
+  ActionIcon,
   Accordion,
   Container,
   Group,
@@ -9,8 +10,10 @@ import {
   Title,
   Stack,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import {
   IconBuilding,
+  IconEdit,
   IconPlus,
   IconShieldCheck,
   IconUser,
@@ -43,6 +46,7 @@ import { useTranslation } from 'react-i18next';
 import PractitionerCard from '../../components/medical/practitioners/PractitionerCard';
 import PractitionerViewModal from '../../components/medical/practitioners/PractitionerViewModal';
 import PractitionerFormWrapper from '../../components/medical/practitioners/PractitionerFormWrapper';
+import PracticeEditModal from '../../components/medical/practitioners/PracticeEditModal';
 
 const Practitioners = () => {
   const { t } = useTranslation('common');
@@ -75,6 +79,8 @@ const Practitioners = () => {
   const defaultFormatters = getEntityFormatters('default', [], navigate, null, formatDate);
   const [editingPractitioner, setEditingPractitioner] = useState(null);
   const [groupByPractice, setGroupByPractice] = useState(false);
+  const [practiceEditData, setPracticeEditData] = useState(null);
+  const [showPracticeEditModal, setShowPracticeEditModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     specialty: '',
@@ -233,6 +239,24 @@ const Practitioners = () => {
     }));
   };
 
+  const handleEditPractice = async (practiceId) => {
+    try {
+      const data = await apiService.getPractice(practiceId);
+      setPracticeEditData(data);
+      setShowPracticeEditModal(true);
+    } catch {
+      notifications.show({
+        title: t('labels.error'),
+        message: t('practitioners.editPracticeError', 'Failed to load practice for editing'),
+        color: 'red',
+      });
+    }
+  };
+
+  const handlePracticeSaved = () => {
+    refresh();
+  };
+
   const filteredPractitioners = dataManagement.data;
 
   // Group practitioners by practice when toggle is on
@@ -340,10 +364,20 @@ const Practitioners = () => {
               {groupedPractitioners.practices.map(group => (
                 <Accordion.Item key={group.id} value={String(group.id)}>
                   <Accordion.Control>
-                    <Group gap="xs">
-                      <IconBuilding size={18} />
-                      <Text fw={600}>{group.name}</Text>
-                      <Text size="sm" c="dimmed">({group.practitioners.length})</Text>
+                    <Group gap="xs" justify="space-between" wrap="nowrap" style={{ width: '100%' }}>
+                      <Group gap="xs">
+                        <IconBuilding size={18} />
+                        <Text fw={600}>{group.name}</Text>
+                        <Text size="sm" c="dimmed">({group.practitioners.length})</Text>
+                      </Group>
+                      <ActionIcon
+                        size="sm"
+                        variant="subtle"
+                        onClick={(e) => { e.stopPropagation(); handleEditPractice(group.id); }}
+                        title={t('practitioners.viewModal.editPractice')}
+                      >
+                        <IconEdit size={16} />
+                      </ActionIcon>
                     </Group>
                   </Accordion.Control>
                   <Accordion.Panel>
@@ -506,7 +540,22 @@ const Practitioners = () => {
                 formatters={{
                   name: defaultFormatters.primaryName,
                   specialty: defaultFormatters.simple,
-                  practice_name: defaultFormatters.simple,
+                  practice_name: (value, row) => {
+                    if (!value || !row.practice_id) return '-';
+                    return (
+                      <Group gap={4} wrap="nowrap">
+                        <Text size="sm">{value}</Text>
+                        <ActionIcon
+                          size="xs"
+                          variant="subtle"
+                          onClick={(e) => { e.stopPropagation(); handleEditPractice(row.practice_id); }}
+                          title={t('practitioners.viewModal.editPractice')}
+                        >
+                          <IconEdit size={14} />
+                        </ActionIcon>
+                      </Group>
+                    );
+                  },
                   phone_number: value => value || '-',
                   email: value => value || '-',
                   rating: value =>
@@ -540,6 +589,13 @@ const Practitioners = () => {
         practitioner={viewingPractitioner}
         onEdit={handleEditPractitioner}
         navigate={navigate}
+      />
+
+      <PracticeEditModal
+        isOpen={showPracticeEditModal}
+        onClose={() => { setShowPracticeEditModal(false); setPracticeEditData(null); }}
+        practiceData={practiceEditData}
+        onSaved={handlePracticeSaved}
       />
     </>
   );

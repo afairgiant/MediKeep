@@ -80,6 +80,9 @@ const BaseMedicalForm = ({
   // Modal customization
   modalSize = "lg",
   
+  // Extra content to render after specific fields (keyed by field name)
+  fieldExtras = {},
+
   // Form type for responsive optimization
   formType = 'standard',
   
@@ -448,7 +451,7 @@ const BaseMedicalForm = ({
                 } else {
                   const selectedOption = selectOptions.find(item => item.value === val);
                   const displayValue = selectedOption ? selectedOption.label || selectedOption.value : val;
-                  setValue(displayValue);
+                  setValue(val);
                   setSearch(displayValue);
                   onInputChange({ target: { name, value: val } });
                 }
@@ -469,7 +472,8 @@ const BaseMedicalForm = ({
                   onFocus={() => combobox.openDropdown()}
                   onBlur={() => {
                     combobox.closeDropdown();
-                    setSearch(value || '');
+                    const option = selectOptions.find(opt => opt.value === value);
+                    setSearch(option ? option.label : value || '');
                   }}
                   placeholder={isFieldLoading ? t('common:labels.loadingOption', { option: dynamicOptionsKey }) : placeholder}
                   rightSectionPointerEvents="none"
@@ -689,6 +693,7 @@ const BaseMedicalForm = ({
               {row.map((field) => (
                 <Grid.Col key={field.name} span={field.calculatedSpan || field.gridColumn || Math.floor(layoutConfig.columns / row.length)}>
                   {renderField(field)}
+                  {fieldExtras[field.name]}
                 </Grid.Col>
               ))}
             </Grid>

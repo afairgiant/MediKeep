@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Text } from '@mantine/core';
+import { ActionIcon, Group, Text } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { IconEdit } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from '../BaseMedicalForm';
+import PracticeEditModal from './PracticeEditModal';
 import { practitionerFormFields } from '../../../utils/medicalFormFields';
 import { isValidPhoneNumber } from '../../../utils/phoneUtils';
 import { fetchMedicalSpecialties, clearSpecialtiesCache } from '../../../config/medicalSpecialties';
@@ -76,6 +79,42 @@ const PractitionerFormWrapper = ({
       loadPractices();
     }
   }, [isOpen]);
+
+  // State for practice edit modal
+  const [practiceEditData, setPracticeEditData] = useState(null);
+  const [showPracticeEdit, setShowPracticeEdit] = useState(false);
+
+  const handleEditPractice = async () => {
+    const practiceId = formData.practice_id;
+    if (!practiceId) return;
+    try {
+      const data = await apiService.getPractice(practiceId);
+      setPracticeEditData(data);
+      setShowPracticeEdit(true);
+    } catch {
+      notifications.show({
+        title: t('common:labels.error'),
+        message: t('common:practitioners.editPracticeError', 'Failed to load practice for editing'),
+        color: 'red',
+      });
+    }
+  };
+
+  const handlePracticeEditSaved = async () => {
+    // Reload practices to reflect updated name
+    try {
+      const practices = await apiService.getPractices();
+      const safePractices = Array.isArray(practices) ? practices : [];
+      setPracticeOptions(
+        safePractices.map(p => ({
+          value: String(p.id),
+          label: p.name,
+        }))
+      );
+    } catch {
+      // Silently fail - the form still works with stale options
+    }
+  };
 
   const dynamicOptions = {
     specialties: specialtyOptions,
@@ -169,22 +208,48 @@ const PractitionerFormWrapper = ({
 
   if (!isOpen) return null;
 
+  const practiceFieldExtra = formData.practice_id ? (
+    <Group gap={4} mt={4}>
+      <ActionIcon
+        size="xs"
+        variant="subtle"
+        onClick={handleEditPractice}
+        title={t('common:practitioners.viewModal.editPractice', 'Edit Practice')}
+      >
+        <IconEdit size={14} />
+      </ActionIcon>
+      <Text size="xs" c="dimmed" style={{ cursor: 'pointer' }} onClick={handleEditPractice}>
+        {t('common:practitioners.viewModal.editPractice', 'Edit Practice')}
+      </Text>
+    </Group>
+  ) : null;
+
   return (
-    <BaseMedicalForm
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title}
-      formData={formData}
-      onInputChange={handleInputChange}
-      onSubmit={handleSubmit}
-      editingItem={editingItem}
-      fields={practitionerFormFields}
-      dynamicOptions={dynamicOptions}
-      fieldErrors={fieldErrors}
-      isLoading={isLoading || isLoadingSpecialties || isLoadingPractices}
-    >
-      {customContent}
-    </BaseMedicalForm>
+    <>
+      <BaseMedicalForm
+        isOpen={isOpen}
+        onClose={onClose}
+        title={title}
+        formData={formData}
+        onInputChange={handleInputChange}
+        onSubmit={handleSubmit}
+        editingItem={editingItem}
+        fields={practitionerFormFields}
+        dynamicOptions={dynamicOptions}
+        fieldErrors={fieldErrors}
+        fieldExtras={{ practice_id: practiceFieldExtra }}
+        isLoading={isLoading || isLoadingSpecialties || isLoadingPractices}
+      >
+        {customContent}
+      </BaseMedicalForm>
+
+      <PracticeEditModal
+        isOpen={showPracticeEdit}
+        onClose={() => { setShowPracticeEdit(false); setPracticeEditData(null); }}
+        practiceData={practiceEditData}
+        onSaved={handlePracticeEditSaved}
+      />
+    </>
   );
 };
 

@@ -212,7 +212,7 @@
       "urgent": "Urgente - Analyse rapide",
       "emergency": "Critique - Priorité maximale",
       "followUp": "Suivi - Analyse répétée",
-      "screening": "Préventive - Analyse à titre préventif"
+      "screening": "Préventive - Analyse à titre préventif",
       "label": "Type d'analyse",
       "placeholder": "Sélectionnez le niveau d'urgence",
       "description": "Priorité ou urgence de l'analyse"
@@ -1069,7 +1069,7 @@
           "uncle": "Oncle",
           "aunt": "Tante",
           "cousin": "Cousin",
-          "other": "Autre"
+          "other": "Autre",
           "son": "Fils",
           "daughter": "Fille",
           "grandfather_paternal": "Grand-père (paternel)",
