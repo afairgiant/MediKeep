@@ -18,8 +18,9 @@ import {
   ReferenceArea,
   Dot
 } from 'recharts';
-import { Paper, Stack, Text, Badge, Group, Box } from '@mantine/core';
+import { Paper, Stack, Text, Badge, Group } from '@mantine/core';
 import { TrendResponse } from '../../../services/api/labTestComponentApi';
+import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
 
 interface TestComponentTrendChartProps {
   trendData: TrendResponse;
@@ -55,28 +56,13 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
     };
   }, [trendData.data_points]);
 
-  // Calculate Y-axis domain with padding
-  const yAxisDomain = useMemo(() => {
-    if (chartData.length === 0) return [0, 100];
-
+  // Calculate Y-axis configuration with nice, rounded tick values
+  const yAxisConfig = useMemo(() => {
     const values = chartData.map(d => d.value);
-    const refMins = chartData.map(d => d.refMin).filter(v => v !== null && v !== undefined) as number[];
-    const refMaxs = chartData.map(d => d.refMax).filter(v => v !== null && v !== undefined) as number[];
+    const refMins = chartData.map(d => d.refMin).filter((v): v is number => v != null);
+    const refMaxs = chartData.map(d => d.refMax).filter((v): v is number => v != null);
 
-    const allValues = [...values, ...refMins, ...refMaxs];
-    const min = Math.min(...allValues);
-    const max = Math.max(...allValues);
-
-    // Calculate padding - handle edge case where all values are identical
-    // Use 10% of the range, or a minimal fallback if range is zero
-    const range = max - min;
-    const padding = range > 0 ? range * 0.1 : Math.abs(max) * 0.1 || 1;
-
-    // Ensure we don't clamp to zero unconditionally
-    const lowerBound = min - padding;
-    const upperBound = max + padding;
-
-    return [lowerBound, upperBound];
+    return generateYAxisConfig([...values, ...refMins, ...refMaxs]);
   }, [chartData]);
 
   // Custom dot to show status colors
@@ -188,11 +174,13 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
             />
 
             <YAxis
-              domain={yAxisDomain}
+              domain={yAxisConfig.domain}
+              ticks={yAxisConfig.ticks}
               tick={{ fontSize: 12 }}
               tickLine={{ stroke: '#adb5bd' }}
               stroke="#adb5bd"
               label={{ value: trendData.unit, angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+              allowDataOverflow={false}
             />
 
             <Tooltip content={<CustomTooltip />} />
