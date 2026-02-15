@@ -2368,22 +2368,134 @@ Base path: `/api/v1/practitioners`
 - **Request Body**:
 ```json
 {
-  "first_name": "Dr. Sarah",
-  "last_name": "Smith",
+  "name": "Dr. Sarah Smith",
   "specialty": "Cardiology",
+  "practice_id": 1,
   "phone_number": "+1234567890",
   "email": "dr.smith@clinic.com",
-  "address": "789 Medical Plaza",
-  "npi_number": "1234567890",
-  "notes": "Accepts new patients"
+  "website": "https://drsmith.com",
+  "rating": 4.5
 }
 ```
+- **Notes**: `practice_id` links the practitioner to a Practice entity (optional). The legacy `practice` string field is still accepted for backward compatibility.
 
 #### List Practitioners
 `GET /practitioners/`
 - **Query Parameters**:
+  - `skip` (integer, optional, default: 0): Number of records to skip
+  - `limit` (integer, optional, default: 100, max: 100): Maximum records to return
   - `specialty` (string, optional): Filter by specialty
-  - `search` (string, optional): Search by name
+  - `practice_id` (integer, optional): Filter by practice
+- **Response** includes `practice_name` (resolved from the linked Practice entity) and timestamps (`created_at`, `updated_at`).
+
+#### Get Practitioner
+`GET /practitioners/{practitioner_id}`
+- **Response**: Full practitioner details with `practice_name` from linked Practice.
+
+#### Update Practitioner
+`PUT /practitioners/{practitioner_id}`
+- **Request Body**: Same fields as create, all optional.
+
+#### Delete Practitioner
+`DELETE /practitioners/{practitioner_id}`
+
+#### Search Practitioners by Name
+`GET /practitioners/search/by-name`
+- **Query Parameters**:
+  - `name` (string, required, min: 2): Search term
+
+#### Get All Specialties
+`GET /practitioners/specialties`
+- **Response**: `{ "specialties": ["Cardiology", "Dermatology", ...] }`
+
+### 7.6 Practices
+
+Base path: `/api/v1/practices`
+
+**Purpose**: Manage medical practices or clinics that practitioners belong to.
+
+#### Create Practice
+`POST /practices/`
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "name": "City General Hospital",
+  "phone_number": "+1234567890",
+  "fax_number": "+1234567891",
+  "website": "https://www.citygeneral.com",
+  "patient_portal_url": "https://portal.citygeneral.com",
+  "notes": "Main campus location",
+  "locations": [
+    {
+      "label": "Main Office",
+      "address": "123 Medical Dr",
+      "city": "Chapel Hill",
+      "state": "NC",
+      "zip": "27514",
+      "phone": "+1234567890"
+    }
+  ]
+}
+```
+- **Success Response** (200): Created practice object with `id`, `created_at`, `updated_at`
+- **Notes**: Practice name must be unique (case-insensitive). Name must be 2-150 characters.
+
+#### List Practices
+`GET /practices/`
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `skip` (integer, optional, default: 0): Number of records to skip
+  - `limit` (integer, optional, default: 100, max: 100): Maximum records to return
+  - `search` (string, optional, min: 1): Search by practice name
+
+#### Get Practice Summaries
+`GET /practices/summary`
+- **Authentication**: Yes
+- **Purpose**: Lightweight list for dropdowns and selectors
+- **Success Response** (200):
+```json
+[
+  { "id": 1, "name": "City General Hospital" },
+  { "id": 2, "name": "Downtown Medical Group" }
+]
+```
+
+#### Search Practices by Name
+`GET /practices/search/by-name`
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `name` (string, required, min: 1): Search term
+
+#### Get Practice
+`GET /practices/{practice_id}`
+- **Authentication**: Yes
+- **Response**: Practice details with `practitioner_count` indicating how many practitioners are linked.
+```json
+{
+  "id": 1,
+  "name": "City General Hospital",
+  "phone_number": "+1234567890",
+  "fax_number": "+1234567891",
+  "website": "https://www.citygeneral.com",
+  "patient_portal_url": "https://portal.citygeneral.com",
+  "notes": "Main campus location",
+  "locations": [...],
+  "created_at": "2026-02-14T12:00:00Z",
+  "updated_at": "2026-02-14T12:00:00Z",
+  "practitioner_count": 5
+}
+```
+
+#### Update Practice
+`PUT /practices/{practice_id}`
+- **Authentication**: Yes
+- **Request Body**: Same fields as create, all optional.
+
+#### Delete Practice
+`DELETE /practices/{practice_id}`
+- **Authentication**: Yes
+- **Notes**: Deleting a practice sets `practice_id` to NULL on all linked practitioners (ON DELETE SET NULL).
 
 ---
 
@@ -2946,7 +3058,7 @@ Base path: `/api/v1/tags`
 - **Purpose**: Get most popular tags across multiple entity types
 - **Authentication**: Yes
 - **Query Parameters**:
-  - `entity_types` (array, default: all types): Entity types to search (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy)
+  - `entity_types` (array, default: all types): Entity types to search (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy, practice)
   - `limit` (integer, default: 20, max: 50): Maximum number of tags
 - **Success Response** (200):
 ```json

@@ -111,11 +111,18 @@ FAMILY HISTORY
 
 REFERENCE DATA
 ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
-│Practitioners │         │  Pharmacies  │         │  User Tags   │
-│              │         │              │         │              │
-│ - specialty  │         │ - brand      │         │ - user_id    │
-│ - practice   │         │ - address    │         │ - tag        │
+│  Practices   │────────>│Practitioners │         │  Pharmacies  │
+│              │   1:N   │              │         │              │
+│ - name       │         │ - specialty  │         │ - brand      │
+│ - locations  │         │ - practice_id│         │ - address    │
+│ - website    │         │ - rating     │         │              │
 └──────────────┘         └──────────────┘         └──────────────┘
+                                                  ┌──────────────┐
+                                                  │  User Tags   │
+                                                  │              │
+                                                  │ - user_id    │
+                                                  │ - tag        │
+                                                  └──────────────┘
 
 JUNCTION TABLES (Many-to-Many)
 ┌────────────────────────┐         ┌──────────────────────────┐
@@ -989,6 +996,32 @@ JUNCTION TABLES (Many-to-Many)
 
 ## Reference Tables
 
+### practices
+**Purpose**: Medical practice/clinic directory that practitioners belong to
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique practice ID |
+| name | String | NOT NULL, UNIQUE | Practice/clinic name |
+| phone_number | String | | Contact phone |
+| fax_number | String | | Fax number |
+| website | String | | Website URL |
+| patient_portal_url | String | | Patient portal URL |
+| notes | Text | | Additional notes |
+| locations | JSON | | Array of location objects (label, address, city, state, zip, phone) |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `practitioners`: One-to-many with Practitioner (via `practice_id` FK)
+
+**Business Rules**:
+- Practice name is required and must be unique (case-insensitive)
+- Name must be 2-150 characters
+- Locations are stored as a JSON array of objects with optional fields: label, address, city, state, zip, phone
+- Deleting a practice sets `practice_id` to NULL on linked practitioners (ON DELETE SET NULL)
+- Shared across all users (global reference data)
+
 ### practitioners
 **Purpose**: Healthcare provider directory
 
@@ -997,13 +1030,17 @@ JUNCTION TABLES (Many-to-Many)
 | id | Integer | PRIMARY KEY | Unique practitioner ID |
 | name | String | NOT NULL | Practitioner's name |
 | specialty | String | NOT NULL | Medical specialty |
-| practice | String | | Practice/clinic name (optional) |
+| practice | String | | Legacy practice name (kept for migration safety) |
+| practice_id | Integer | FK(practices.id), ON DELETE SET NULL | Linked practice |
 | phone_number | String | | Contact phone |
 | email | String | | Email address |
 | website | String | | Website URL |
 | rating | Float | | Rating 0.0-5.0 |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
 
 **Relationships**:
+- `practice_rel`: Many-to-one with Practice
 - `patients`: One-to-many with Patient (as PCP)
 - `medications`: One-to-many with Medication
 - `encounters`: One-to-many with Encounter
@@ -1014,12 +1051,17 @@ JUNCTION TABLES (Many-to-Many)
 - `conditions`: One-to-many with Condition
 - `vitals`: One-to-many with Vitals
 - `injuries`: One-to-many with Injury
+- `medical_equipment`: One-to-many with MedicalEquipment
+
+**Indexes**:
+- `idx_practitioners_practice_id` on practice_id
 
 **Business Rules**:
 - Name and specialty are required
-- Practice is optional (not all practitioners are linked to a practice)
+- `practice_id` links to the practices table (optional)
+- The `practice` string field is a legacy field kept for backward compatibility
 - Shared across all users (global reference data)
-- Rating optional for user feedback
+- Rating optional for user feedback (0.0-5.0)
 
 ### pharmacies
 **Purpose**: Pharmacy directory for medication dispensing
@@ -1561,7 +1603,7 @@ JUNCTION TABLES (Many-to-Many)
 - backup_created, maintenance_started, maintenance_completed
 
 **Entity Types**:
-- user, patient, practitioner
+- user, patient, practitioner, practice
 - medication, lab_result, lab_result_file, lab_test_component
 - condition, treatment, immunization, allergy, procedure, encounter
 - emergency_contact, pharmacy, family_member, insurance, family_condition
