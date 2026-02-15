@@ -108,7 +108,7 @@ class TestPracticeCreate:
         assert practice.name == "Heart Health Center"
         assert practice.phone_number == "919-555-1000"
         assert practice.fax_number == "919-555-1001"
-        assert "hearthealthcenter.com" in practice.website
+        assert practice.website == "https://hearthealthcenter.com"
         assert practice.locations is not None
         assert len(practice.locations) == 1
         assert practice.locations[0].label == "Main Office"
