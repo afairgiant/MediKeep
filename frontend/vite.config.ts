@@ -37,7 +37,7 @@ export default defineConfig({
       ignored: ['**/node_modules/**', '**/build/**', '**/dist/**', '**/.git/**'],
     },
 
-    // Proxy configuration (matches setupProxy.js)
+    // Proxy configuration for API requests
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
