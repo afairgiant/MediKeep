@@ -88,15 +88,6 @@ const PractitionerViewModal = ({
 
   const notSpecified = t('common.labels.notSpecified', 'Not specified');
 
-  const hasPracticeContactInfo = practiceDetails && (
-    practiceDetails.phone_number ||
-    practiceDetails.fax_number ||
-    practiceDetails.website ||
-    practiceDetails.patient_portal_url ||
-    practiceDetails.notes ||
-    (practiceDetails.locations && practiceDetails.locations.length > 0)
-  );
-
   return (
     <Modal
       opened={isOpen}
@@ -143,14 +134,14 @@ const PractitionerViewModal = ({
           </Group>
         </Paper>
 
-        <Grid>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <Card withBorder p="md" h="100%">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  {t('practitioners.viewModal.practiceInfo', 'PRACTICE INFORMATION')}
-                </Text>
-                <Divider />
+        <Card withBorder p="md">
+          <Stack gap="sm">
+            <Text fw={600} size="sm" c="dimmed">
+              {t('practitioners.viewModal.practitionerContact', 'PRACTITIONER CONTACT')}
+            </Text>
+            <Divider />
+            <Grid>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
                     {t('practitioners.viewModal.practice', 'Practice')}:
@@ -162,6 +153,8 @@ const PractitionerViewModal = ({
                     {practitioner.practice_name || practitioner.practice || notSpecified}
                   </Text>
                 </Group>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
                     {t('practitioners.viewModal.specialty', 'Specialty')}:
@@ -173,6 +166,8 @@ const PractitionerViewModal = ({
                     {practitioner.specialty || notSpecified}
                   </Text>
                 </Group>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
                     {t('practitioners.viewModal.phone', 'Phone')}:
@@ -184,6 +179,8 @@ const PractitionerViewModal = ({
                     {practitioner.phone_number || notSpecified}
                   </Text>
                 </Group>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
                     {t('practitioners.viewModal.email', 'Email')}:
@@ -205,17 +202,8 @@ const PractitionerViewModal = ({
                     )}
                   </Text>
                 </Group>
-              </Stack>
-            </Card>
-          </Grid.Col>
-
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <Card withBorder p="md" h="100%">
-              <Stack gap="sm">
-                <Text fw={600} size="sm" c="dimmed">
-                  {t('practitioners.viewModal.contactRating', 'CONTACT & RATING')}
-                </Text>
-                <Divider />
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
                     {t('practitioners.viewModal.website', 'Website')}:
@@ -239,6 +227,8 @@ const PractitionerViewModal = ({
                     )}
                   </Text>
                 </Group>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
                     {t('practitioners.viewModal.rating', 'Rating')}:
@@ -269,10 +259,10 @@ const PractitionerViewModal = ({
                     )}
                   </Text>
                 </Group>
-              </Stack>
-            </Card>
-          </Grid.Col>
-        </Grid>
+              </Grid.Col>
+            </Grid>
+          </Stack>
+        </Card>
 
         {/* Practice Details Section */}
         {practitioner.practice_id && (
@@ -375,16 +365,14 @@ const PractitionerViewModal = ({
                   </Grid>
 
                   {/* Notes */}
-                  {practiceDetails.notes && (
-                    <div>
-                      <Text size="sm" fw={500} mb={4}>
-                        {t('practitioners.viewModal.practiceNotes', 'Notes')}:
-                      </Text>
-                      <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-wrap' }}>
-                        {practiceDetails.notes}
-                      </Text>
-                    </div>
-                  )}
+                  <Group>
+                    <Text size="sm" fw={500} w={100}>
+                      {t('practitioners.viewModal.practiceNotes', 'Notes')}:
+                    </Text>
+                    <Text size="sm" c={practiceDetails.notes ? 'inherit' : 'dimmed'} style={{ whiteSpace: 'pre-wrap' }}>
+                      {practiceDetails.notes || notSpecified}
+                    </Text>
+                  </Group>
 
                   {/* Locations */}
                   {practiceDetails.locations && practiceDetails.locations.length > 0 && (
@@ -404,11 +392,6 @@ const PractitionerViewModal = ({
                     </div>
                   )}
 
-                  {!hasPracticeContactInfo && (
-                    <Text size="sm" c="dimmed" fs="italic">
-                      {notSpecified}
-                    </Text>
-                  )}
                 </Stack>
               ) : (
                 <Text size="sm" c="dimmed" fs="italic">
