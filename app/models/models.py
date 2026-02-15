@@ -262,19 +262,54 @@ class Patient(Base):
     __table_args__ = (Index("idx_patients_owner_user_id", "owner_user_id"),)
 
 
+class Practice(Base):
+    """
+    Represents a medical practice or clinic that practitioners belong to.
+    Stores practice-level contact info, patient portal, and location details.
+    """
+
+    __tablename__ = "practices"
+    id = Column(Integer, primary_key=True)
+
+    name = Column(String, nullable=False, unique=True)
+    phone_number = Column(String, nullable=True)
+    fax_number = Column(String, nullable=True)
+    website = Column(String, nullable=True)
+    patient_portal_url = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
+    locations = Column(JSON, nullable=True)  # Array of location objects
+
+    # Timestamps
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    practitioners = orm_relationship("Practitioner", back_populates="practice_rel")
+
+
 class Practitioner(Base):
     __tablename__ = "practitioners"
     id = Column(Integer, primary_key=True)
 
     name = Column(String, nullable=False)
     specialty = Column(String, nullable=False)
-    practice = Column(String, nullable=True)  # Optional - not all practitioners are linked to a practice
+    practice = Column(String, nullable=True)  # Legacy field - kept for migration safety
+    practice_id = Column(Integer, ForeignKey("practices.id", ondelete="SET NULL"), nullable=True)
     phone_number = Column(String, nullable=True)
     email = Column(String, nullable=True)
     website = Column(String, nullable=True)
     rating = Column(Float, nullable=True)  # Rating from 0.0 to 5.0
 
+    # Timestamps
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
     # Table Relationships
+    practice_rel = orm_relationship("Practice", back_populates="practitioners")
     patients = orm_relationship("Patient", back_populates="practitioner")
     medications = orm_relationship("Medication", back_populates="practitioner")
     encounters = orm_relationship("Encounter", back_populates="practitioner")
@@ -286,6 +321,9 @@ class Practitioner(Base):
     vitals = orm_relationship("Vitals", back_populates="practitioner")
     injuries = orm_relationship("Injury", back_populates="practitioner")
     medical_equipment = orm_relationship("MedicalEquipment", back_populates="practitioner")
+
+    # Indexes for performance
+    __table_args__ = (Index("idx_practitioners_practice_id", "practice_id"),)
 
 
 class Medication(Base):

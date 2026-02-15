@@ -74,7 +74,7 @@ const PractitionerCard = ({
     const fields = [
       {
         label: t('practitioners.card.practice', 'Practice'),
-        value: practitioner.practice,
+        value: practitioner.practice_name || practitioner.practice,
         render: (value) => value || t('common.labels.notSpecified', 'Not specified')
       },
       {
@@ -106,7 +106,7 @@ const PractitionerCard = ({
             size="sm"
             c="blue"
           >
-            {t('practitioners.card.visitWebsite', 'Visit Website')}
+            {value.replace(/^https?:\/\//, '')}
           </Anchor>
         ) : t('common.labels.notSpecified', 'Not specified')
       },

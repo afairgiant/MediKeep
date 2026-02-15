@@ -25,6 +25,7 @@ export const ENTITY_TYPES = {
   SYMPTOM: 'symptoms',
   INJURY: 'injury',
   MEDICAL_EQUIPMENT: 'medical_equipment',
+  PRACTICE: 'practice',
 };
 
 // Relationship types

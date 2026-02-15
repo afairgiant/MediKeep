@@ -1716,12 +1716,29 @@
       "website": "Website",
       "visitWebsite": "Visit Website",
       "rating": "Rating",
-      "editButton": "Edit Practitioner"
+      "editButton": "Edit Practitioner",
+      "practiceDetails": "PRACTICE DETAILS",
+      "practicePhone": "Phone",
+      "practiceFax": "Fax",
+      "practiceWebsite": "Website",
+      "practicePortal": "Patient Portal",
+      "practiceNotes": "Notes",
+      "practiceLocations": "Locations",
+      "editPractice": "Edit Practice",
+      "noPractice": "No practice linked",
+      "savePractice": "Save Practice",
+      "practiceUpdateSuccess": "Practice updated successfully",
+      "practiceUpdateError": "Failed to update practice",
+      "practiceLoadError": "Failed to load practice details"
     },
     "form": {
       "addTitle": "Add New Practitioner",
       "editTitle": "Edit Practitioner"
-    }
+    },
+    "groupByPractice": "Group by Practice",
+    "ungroupedTitle": "Independent Practitioners",
+    "editPracticeError": "Failed to load practice for editing",
+    "createPracticeError": "Failed to create practice. Please try again."
   },
   "pharmacies": {
     "title": "Pharmacies",

@@ -1716,12 +1716,29 @@
       "visitWebsite": "Visitar Website",
       "rating": "Avaliação",
       "editButton": "Editar Profissional",
-      "email": "Email"
+      "email": "Email",
+      "practiceDetails": "DETALHES DO CONSULTORIO",
+      "practicePhone": "Telefone",
+      "practiceFax": "Fax",
+      "practiceWebsite": "Website",
+      "practicePortal": "Portal do paciente",
+      "practiceNotes": "Notas",
+      "practiceLocations": "Localizacoes",
+      "editPractice": "Editar consultorio",
+      "noPractice": "Nenhum consultorio vinculado",
+      "savePractice": "Salvar consultorio",
+      "practiceUpdateSuccess": "Consultorio atualizado com sucesso",
+      "practiceUpdateError": "Erro ao atualizar o consultorio",
+      "practiceLoadError": "Erro ao carregar detalhes do consultorio"
     },
     "form": {
       "addTitle": "Adicionar Novo Profissional",
       "editTitle": "Editar Profissional"
-    }
+    },
+    "groupByPractice": "Agrupar por consultorio",
+    "ungroupedTitle": "Profissionais independentes",
+    "editPracticeError": "Erro ao carregar o consultorio para edicao",
+    "createPracticeError": "Erro ao criar o consultorio. Tente novamente."
   },
   "pharmacies": {
     "title": "Farmácias",

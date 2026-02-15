@@ -200,6 +200,28 @@ class CRUDPractitioner(
         # Create new practitioner
         return self.create(db, obj_in=practitioner_data)
 
+    def get_by_practice(
+        self, db: Session, *, practice_id: int, skip: int = 0, limit: int = 100
+    ) -> List[PractitionerModel]:
+        """
+        Retrieve practitioners belonging to a specific practice.
+
+        Args:
+            db: SQLAlchemy database session
+            practice_id: ID of the practice to filter by
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List of Practitioner objects belonging to the practice
+        """
+        return self.query(
+            db=db,
+            filters={"practice_id": practice_id},
+            skip=skip,
+            limit=limit,
+        )
+
     def count_by_specialty(self, db: Session) -> dict:
         """
         Count practitioners by specialty.

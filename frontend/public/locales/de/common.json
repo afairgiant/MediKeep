@@ -1967,12 +1967,29 @@
       "visitWebsite": "Webseite besuchen",
       "rating": "Bewertung",
       "editButton": "Medizinische Fachkraft bearbeiten",
-      "email": "Email"
+      "email": "Email",
+      "practiceDetails": "PRAXISDETAILS",
+      "practicePhone": "Telefon",
+      "practiceFax": "Fax",
+      "practiceWebsite": "Website",
+      "practicePortal": "Patientenportal",
+      "practiceNotes": "Notizen",
+      "practiceLocations": "Standorte",
+      "editPractice": "Praxis bearbeiten",
+      "noPractice": "Keine Praxis verknuepft",
+      "savePractice": "Praxis speichern",
+      "practiceUpdateSuccess": "Praxis erfolgreich aktualisiert",
+      "practiceUpdateError": "Fehler beim Aktualisieren der Praxis",
+      "practiceLoadError": "Fehler beim Laden der Praxisdetails"
     },
     "form": {
       "addTitle": "Neue medizinische Fachkraft hinzufügen",
       "editTitle": "Medizinische Fachkraft bearbeiten"
-    }
+    },
+    "groupByPractice": "Nach Praxis gruppieren",
+    "ungroupedTitle": "Unabhaengige Aerzte",
+    "editPracticeError": "Fehler beim Laden der Praxis zur Bearbeitung",
+    "createPracticeError": "Fehler beim Erstellen der Praxis. Bitte versuchen Sie es erneut."
   },
   "pharmacies": {
     "title": "Apotheken",

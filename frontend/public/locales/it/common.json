@@ -1716,12 +1716,29 @@
       "visitWebsite": "Visita il sito web",
       "rating": "Valutazione",
       "editButton": "Modifica professionista",
-      "email": "Email"
+      "email": "Email",
+      "practiceDetails": "DETTAGLI DELLO STUDIO",
+      "practicePhone": "Telefono",
+      "practiceFax": "Fax",
+      "practiceWebsite": "Sito web",
+      "practicePortal": "Portale pazienti",
+      "practiceNotes": "Note",
+      "practiceLocations": "Sedi",
+      "editPractice": "Modifica studio",
+      "noPractice": "Nessuno studio collegato",
+      "savePractice": "Salva studio",
+      "practiceUpdateSuccess": "Studio aggiornato con successo",
+      "practiceUpdateError": "Errore durante aggiornamento dello studio",
+      "practiceLoadError": "Errore durante il caricamento dei dettagli dello studio"
     },
     "form": {
       "addTitle": "Aggiungi nuovo professionista",
       "editTitle": "Modifica professionista"
-    }
+    },
+    "groupByPractice": "Raggruppa per studio",
+    "ungroupedTitle": "Professionisti indipendenti",
+    "editPracticeError": "Errore durante il caricamento dello studio per la modifica",
+    "createPracticeError": "Errore durante la creazione dello studio. Riprovare."
   },
   "pharmacies": {
     "title": "Farmacie",
@@ -1746,7 +1763,7 @@
       "storeNumber": "Numero negozio",
       "phone": "Telefono",
       "website": "Sito web",
-      "specialtyServices": "Specialit\u00e0"
+      "specialtyServices": "Specialità"
     },
     "viewModal": {
       "title": "Dettagli farmacia",
@@ -1761,7 +1778,7 @@
       "contact": "INFORMAZIONI DI CONTATTO",
       "phone": "Telefono",
       "website": "Sito web",
-      "specialtyServices": "Specialit\u00e0",
+      "specialtyServices": "Specialità",
       "editButton": "Modifica farmacia"
     },
     "form": {

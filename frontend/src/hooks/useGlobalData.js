@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAppData } from '../contexts/AppDataContext';
 import { useAuth } from '../contexts/AuthContext';
+import { apiService } from '../services/api';
 import logger from '../services/logger';
 
 /**
@@ -103,6 +104,62 @@ export function usePractitioners(autoFetch = true) {
     error: practitionersError,
     refresh: refreshPractitioners,
     hasData: Array.isArray(practitioners) && practitioners.length > 0,
+  };
+}
+
+/**
+ * Hook for accessing practices list with on-demand fetching.
+ * Practices are not in the global AppDataContext since they're only needed
+ * on the practitioners page and related forms.
+ * @param {boolean} autoFetch - Whether to automatically fetch data on mount
+ * @returns {object} Practices data, loading state, error, and refresh function
+ */
+export function usePractices(autoFetch = true) {
+  const [practices, setPractices] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
+
+  const fetchPractices = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await apiService.getPractices();
+      const safePractices = Array.isArray(data) ? data : [];
+      setPractices(safePractices);
+      return safePractices;
+    } catch (err) {
+      logger.debug('practices_fetch_error', 'Error fetching practices', {
+        error: err.message,
+        component: 'usePractices',
+      });
+      setError(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (autoFetch && !initialFetchDone) {
+      fetchPractices().then(() => {
+        setInitialFetchDone(true);
+      }).catch(() => {
+        setInitialFetchDone(true);
+      });
+    }
+  }, [autoFetch, fetchPractices, initialFetchDone]);
+
+  const refresh = useCallback(() => {
+    return fetchPractices();
+  }, [fetchPractices]);
+
+  return {
+    practices: Array.isArray(practices) ? practices : [],
+    loading,
+    error,
+    refresh,
+    hasData: Array.isArray(practices) && practices.length > 0,
   };
 }
 
