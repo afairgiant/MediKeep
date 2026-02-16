@@ -80,6 +80,10 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
       if (value < refMin) return 'orange';
       if (value > refMax) return 'orange';
       return 'green';
+    } else if (refMax !== null && refMax !== undefined) {
+      return value > refMax ? 'orange' : 'green';
+    } else if (refMin !== null && refMin !== undefined) {
+      return value < refMin ? 'orange' : 'green';
     }
 
     return 'gray';

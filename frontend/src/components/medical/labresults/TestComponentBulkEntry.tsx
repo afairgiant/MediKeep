@@ -96,7 +96,7 @@ const REGEX_PATTERNS = {
   FULL_PATTERN: new RegExp(
     String.raw`^${TEST_NAME}:${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}(${UNIT_PATTERN})?${ZERO_OR_MORE_SPACES}` +
     String.raw`(?:\((?:.*?range.*?:${ZERO_OR_MORE_SPACES})?${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}${RANGE_SEPARATOR}${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}.*?\)|` +
-    String.raw`\(${COMPARISON_OP}${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}\)|` +
+    String.raw`\((${COMPARISON_OP}${ZERO_OR_MORE_SPACES}[0-9.,]+)\)|` +
     String.raw`\(Not\s+Estab\.?\)|` +
     String.raw`(\([^)]*\)))?`,
     'i'
@@ -105,7 +105,7 @@ const REGEX_PATTERNS = {
   // Pattern 2: "Glucose    123.4    mg/dL    70-100    Normal"
   TABULAR_PATTERN: new RegExp(
     String.raw`^${TEST_NAME}${ONE_OR_MORE_SPACES}${NUMERIC_VALUE}${ONE_OR_MORE_SPACES}(${UNIT_PATTERN})${ONE_OR_MORE_SPACES}` +
-    String.raw`((?:${NUMERIC_VALUE})${RANGE_SEPARATOR}(?:${NUMERIC_VALUE})|${COMPARISON_OP}?${NUMERIC_VALUE})${ZERO_OR_MORE_SPACES}` +
+    String.raw`(?:${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}${RANGE_SEPARATOR}${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}|(${COMPARISON_OP}${ZERO_OR_MORE_SPACES}[0-9.,]+))${ZERO_OR_MORE_SPACES}` +
     STATUS_VALUES,
     'i'
   ),
@@ -503,8 +503,23 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
               confidence += 0.2;
             }
           } else if (match[6]) {
-            // Handle special ranges like ">39", "<5"
-            parsed.ref_range_text = match[6].trim();
+            // Handle special ranges like "< 0.41", "> 39"
+            const compText = match[6].trim();
+            parsed.ref_range_text = compText;
+
+            // Extract numeric bound from comparison operator
+            const compMatch = compText.match(/^([<>\u2264\u2265])\s*([0-9.,]+)$/);
+            if (compMatch) {
+              const op = compMatch[1];
+              const num = parseFloat(compMatch[2].replace(/,/g, ''));
+              if (!isNaN(num)) {
+                if (op === '<' || op === '\u2264') {
+                  parsed.ref_range_max = num;
+                } else if (op === '>' || op === '\u2265') {
+                  parsed.ref_range_min = num;
+                }
+              }
+            }
             confidence += 0.1;
           } else if (match[7]) {
             // Fallback for other content in parentheses
@@ -543,16 +558,19 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
             confidence += 0.05;
           }
 
-          // Auto-calculate status if not already set and we have a numeric range
-          if (!parsed.status && parsed.value !== null &&
-              typeof parsed.ref_range_min === 'number' &&
-              typeof parsed.ref_range_max === 'number') {
-            if (parsed.value > parsed.ref_range_max) {
-              parsed.status = 'high';
-            } else if (parsed.value < parsed.ref_range_min) {
-              parsed.status = 'low';
-            } else {
-              parsed.status = 'normal';
+          // Auto-calculate status if not already set and we have reference range data
+          if (!parsed.status && parsed.value !== null) {
+            if (typeof parsed.ref_range_min === 'number' && typeof parsed.ref_range_max === 'number') {
+              // Full range
+              if (parsed.value > parsed.ref_range_max) parsed.status = 'high';
+              else if (parsed.value < parsed.ref_range_min) parsed.status = 'low';
+              else parsed.status = 'normal';
+            } else if (typeof parsed.ref_range_max === 'number') {
+              // Upper bound only (e.g., "< 0.41")
+              parsed.status = parsed.value > parsed.ref_range_max ? 'high' : 'normal';
+            } else if (typeof parsed.ref_range_min === 'number') {
+              // Lower bound only (e.g., "> 39")
+              parsed.status = parsed.value < parsed.ref_range_min ? 'low' : 'normal';
             }
           }
 
