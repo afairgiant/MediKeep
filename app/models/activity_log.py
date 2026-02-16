@@ -1,16 +1,9 @@
-from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship as orm_relationship
 
-from app.models.models import Base
-
-
-# Timezone-aware datetime function to replace deprecated datetime.utcnow()
-def get_utc_now():
-    """Get the current UTC datetime with timezone awareness."""
-    return datetime.now(timezone.utc)
+from app.models.base import Base, get_utc_now
 
 
 class ActivityLog(Base):
@@ -49,7 +42,7 @@ class ActivityLog(Base):
     ip_address = Column(String, nullable=True)
     user_agent = Column(String, nullable=True)
 
-    # Database indexes for efficient querying
+    # Indexes for performance
     __table_args__ = (
         Index("idx_activity_user_timestamp", "user_id", "timestamp"),
         Index("idx_activity_patient_timestamp", "patient_id", "timestamp"),
@@ -59,8 +52,8 @@ class ActivityLog(Base):
     )
 
     # Relationships
-    user = relationship("User", foreign_keys=[user_id])
-    patient = relationship("Patient", foreign_keys=[patient_id])
+    user = orm_relationship("User", foreign_keys=[user_id])
+    patient = orm_relationship("Patient", foreign_keys=[patient_id])
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert activity log to dictionary for API responses"""
