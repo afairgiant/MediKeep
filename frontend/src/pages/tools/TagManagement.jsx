@@ -18,6 +18,7 @@ import {
   NumberInput,
   Tooltip,
   Progress,
+  Center,
 } from '@mantine/core';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
