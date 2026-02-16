@@ -9,34 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-
-// Reproduce the regex patterns from TestComponentBulkEntry.tsx
-const UNIT_PATTERN = String.raw`[a-zA-Z0-9/%μ]+(?:/[a-zA-Z0-9]+)?|x10E\d+/[a-zA-Z]+`;
-const TEST_NAME = String.raw`(.+?)`;
-const NUMERIC_VALUE = String.raw`([0-9.,]+)`;
-const ONE_OR_MORE_SPACES = String.raw`\s+`;
-const ZERO_OR_MORE_SPACES = String.raw`\s*`;
-const RANGE_SEPARATOR = String.raw`[-–]`;
-const COMPARISON_OP = String.raw`[<>≤≥]`;
-const STATUS_VALUES = String.raw`(normal|high|low|critical|abnormal|borderline)?`;
-
-const REGEX_PATTERNS = {
-  FULL_PATTERN: new RegExp(
-    String.raw`^${TEST_NAME}:${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}(${UNIT_PATTERN})?${ZERO_OR_MORE_SPACES}` +
-    String.raw`(?:\((?:.*?range.*?:${ZERO_OR_MORE_SPACES})?${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}${RANGE_SEPARATOR}${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}.*?\)|` +
-    String.raw`\((${COMPARISON_OP}${ZERO_OR_MORE_SPACES}[0-9.,]+)\)|` +
-    String.raw`\(Not\s+Estab\.?\)|` +
-    String.raw`(\([^)]*\)))?`,
-    'i'
-  ),
-
-  TABULAR_PATTERN: new RegExp(
-    String.raw`^${TEST_NAME}${ONE_OR_MORE_SPACES}${NUMERIC_VALUE}${ONE_OR_MORE_SPACES}(${UNIT_PATTERN})${ONE_OR_MORE_SPACES}` +
-    String.raw`(?:${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}${RANGE_SEPARATOR}${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}|(${COMPARISON_OP}${ZERO_OR_MORE_SPACES}[0-9.,]+))${ZERO_OR_MORE_SPACES}` +
-    STATUS_VALUES,
-    'i'
-  ),
-};
+import { REGEX_PATTERNS } from '../TestComponentBulkEntry';
 
 /**
  * Helper to parse a line using the same logic as TestComponentBulkEntry.

@@ -9,7 +9,6 @@ Tests cover:
 5. Explicit status is not overridden
 """
 
-import pytest
 from app.schemas.lab_test_component import LabTestComponentBase
 
 

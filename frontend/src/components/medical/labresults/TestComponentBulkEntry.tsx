@@ -91,7 +91,7 @@ const RANGE_SEPARATOR = String.raw`[-–]`;
 const COMPARISON_OP = String.raw`[<>≤≥]`;
 const STATUS_VALUES = String.raw`(normal|high|low|critical|abnormal|borderline)?`;
 
-const REGEX_PATTERNS = {
+export const REGEX_PATTERNS = {
   // Pattern 1: "Test Name: 123.4 mg/dL (Normal range: 70-100)" or "Test Name: 123.4 mg/dL (70-100)"
   FULL_PATTERN: new RegExp(
     String.raw`^${TEST_NAME}:${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}(${UNIT_PATTERN})?${ZERO_OR_MORE_SPACES}` +
