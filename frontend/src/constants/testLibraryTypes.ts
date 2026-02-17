@@ -20,6 +20,7 @@ export type TestCategory =
   | 'genetics'
   | 'molecular'
   | 'pathology'
+  | 'hearing'
   | 'other';
 
 export interface TestLibraryItem {

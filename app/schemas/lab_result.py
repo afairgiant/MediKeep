@@ -56,6 +56,7 @@ class LabResultBase(TaggedEntityMixin):
             "genetics",
             "cardiology",
             "pulmonology",
+            "hearing",
             "other",
         ]
         if v and v.lower() not in valid_categories:

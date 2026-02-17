@@ -205,6 +205,7 @@
       "genetics": "Genética",
       "cardiology": "Cardiología",
       "pulmonology": "Neumología",
+      "hearing": "Audición",
       "other": "Otro"
     },
     "testType": {

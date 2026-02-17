@@ -90,6 +90,11 @@ export const labresultsPageConfig = {
         description: 'Lung function tests',
       },
       {
+        value: 'hearing',
+        label: 'Hearing',
+        description: 'Audiometry and vestibular tests',
+      },
+      {
         value: 'other',
         label: 'Other',
         description: 'Miscellaneous tests',
