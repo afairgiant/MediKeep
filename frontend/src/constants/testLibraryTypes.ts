@@ -21,6 +21,7 @@ export type TestCategory =
   | 'molecular'
   | 'pathology'
   | 'hearing'
+  | 'stomatology'
   | 'other';
 
 export interface TestLibraryItem {

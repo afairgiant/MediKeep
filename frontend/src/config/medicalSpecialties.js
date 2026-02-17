@@ -50,6 +50,10 @@ export const DEFAULT_MEDICAL_SPECIALTIES = [
     value: 'Oral and Maxillofacial Surgery',
     label: 'Oral & Maxillofacial Surgery - Surgical dental procedures',
   },
+  {
+    value: 'Stomatology',
+    label: 'Stomatology (Oral Medicine) - Oral mucosal diseases & diagnostics',
+  },
   { value: 'Orthodontics', label: 'Orthodontics - Teeth alignment & braces' },
   { value: 'Periodontics', label: 'Periodontics - Gum disease treatment' },
   { value: 'Endodontics', label: 'Endodontics - Root canal therapy' },

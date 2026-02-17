@@ -44,6 +44,7 @@ export const MEDICAL_CATEGORIES = {
     'immunology',
     'toxicology',
     'hearing',
+    'stomatology',
     'other',
   ],
   MEDICATION_ROUTES: [

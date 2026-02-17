@@ -45,6 +45,7 @@ const MantineLabResultForm = ({
     { value: 'cardiology', label: t('labResults.category.cardiology') },
     { value: 'pulmonology', label: t('labResults.category.pulmonology') },
     { value: 'hearing', label: t('labResults.category.hearing') },
+    { value: 'stomatology', label: t('labResults.category.stomatology') },
     { value: 'other', label: t('labResults.category.other') },
   ];
 
