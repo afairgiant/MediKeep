@@ -268,7 +268,9 @@ def update_family_condition(
             entity_name="Family Condition",
             request=request,
             current_user=current_user,
-            current_user_patient_id=current_user_patient_id,
+            # current_user_patient_id is intentionally omitted here because ownership 
+            # is verified via the parent FamilyMember object above.
+            # FamilyCondition objects do not have a direct patient_id link.
         )
 
 
@@ -311,5 +313,6 @@ def delete_family_condition(
             entity_name="Family Condition",
             request=request,
             current_user=current_user,
-            current_user_patient_id=current_user_patient_id,
+            # current_user_patient_id is intentionally omitted here because ownership 
+            # is verified via the parent FamilyMember object above.
         )

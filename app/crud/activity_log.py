@@ -399,7 +399,7 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
             "user_id": user_id,
             "patient_id": patient_id,
             "entity_id": entity_id,
-            "metadata": metadata,
+            "event_metadata": metadata,
             "ip_address": ip_address,
             "user_agent": user_agent,
         }
