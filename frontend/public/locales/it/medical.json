@@ -206,6 +206,7 @@
       "cardiology": "Cardiologia",
       "pulmonology": "Pneumologia",
       "hearing": "Udito",
+      "stomatology": "Stomatologia",
       "other": "Altro"
     },
     "testType": {

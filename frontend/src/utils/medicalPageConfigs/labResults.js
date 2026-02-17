@@ -95,6 +95,11 @@ export const labresultsPageConfig = {
         description: 'Audiometry and vestibular tests',
       },
       {
+        value: 'stomatology',
+        label: 'Stomatology',
+        description: 'Salivary and oral diagnostics',
+      },
+      {
         value: 'other',
         label: 'Other',
         description: 'Miscellaneous tests',

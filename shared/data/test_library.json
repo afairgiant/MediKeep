@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.5.0",
   "lastUpdated": "2026-02-17",
   "tests": [
     {
@@ -1278,6 +1278,23 @@
       "common_names": ["ABR", "Brainstem Audiometry", "BERA", "Auditory Brainstem Response"],
       "is_common": false,
       "display_order": 111
+    },
+    {
+      "test_name": "Salivary Flow Rate",
+      "abbreviation": "SFR",
+      "default_unit": "mL/min",
+      "category": "stomatology",
+      "common_names": ["SFR", "Sialometry", "Salivary Flow", "Unstimulated Salivary Flow"],
+      "is_common": true,
+      "display_order": 112
+    },
+    {
+      "test_name": "Salivary pH",
+      "default_unit": "pH",
+      "category": "stomatology",
+      "common_names": ["Salivary pH", "Oral pH", "Saliva pH"],
+      "is_common": true,
+      "display_order": 113
     }
   ]
 }
