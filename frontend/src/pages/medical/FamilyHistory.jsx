@@ -284,6 +284,8 @@ const FamilyHistory = () => {
     condition_type: '',
     severity: '',
     diagnosis_age: '',
+    status: '',
+    icd10_code: '',
     notes: '',
   });
 
@@ -323,6 +325,8 @@ const FamilyHistory = () => {
       condition_type: '',
       severity: '',
       diagnosis_age: '',
+      status: '',
+      icd10_code: '',
       notes: '',
     });
     setEditingCondition(null);
@@ -449,6 +453,8 @@ const FamilyHistory = () => {
       condition_type: condition.condition_type || '',
       severity: condition.severity || '',
       diagnosis_age: condition.diagnosis_age || '',
+      status: condition.status || '',
+      icd10_code: condition.icd10_code || condition.icd10Code || '',
       notes: condition.notes || '',
     });
     setShowConditionModal(true);
@@ -527,6 +533,8 @@ const FamilyHistory = () => {
       condition_type: conditionFormData.condition_type || null,
       severity: conditionFormData.severity || null,
       diagnosis_age: conditionFormData.diagnosis_age || null,
+      status: conditionFormData.status || null,
+      icd10_code: conditionFormData.icd10_code || null,
       notes: conditionFormData.notes || null,
     };
 
@@ -592,6 +600,8 @@ const FamilyHistory = () => {
       condition_type: '',
       severity: '',
       diagnosis_age: '',
+      status: '',
+      icd10_code: '',
       notes: '',
     });
     setEditingCondition(null);
@@ -644,6 +654,8 @@ const FamilyHistory = () => {
         condition_type: condition.condition_type || '',
         severity: condition.severity || '',
         diagnosis_age: condition.diagnosis_age || '',
+        status: condition.status || '',
+        icd10_code: condition.icd10_code || condition.icd10Code || '',
         notes: condition.notes || '',
       });
       // Temporarily close view modal to prevent overlap
@@ -664,6 +676,8 @@ const FamilyHistory = () => {
       condition_type: '',
       severity: '',
       diagnosis_age: '',
+      status: '',
+      icd10_code: '',
       notes: '',
     });
     setEditingCondition(null);

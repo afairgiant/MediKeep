@@ -79,6 +79,7 @@ class FamilyConditionBase(BaseModel):
     status: Optional[str]
     condition_type: Optional[str]
     notes: Optional[str]
+    icd10_code: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

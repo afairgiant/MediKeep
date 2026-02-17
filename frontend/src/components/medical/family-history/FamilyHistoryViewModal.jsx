@@ -330,6 +330,9 @@ const FamilyHistoryViewModal = ({
                         <Text fw={500} size="md">
                           {condition.condition_name}
                         </Text>
+                        {condition.status && (
+                          <StatusBadge status={condition.status} size="sm" />
+                        )}
                         {condition.severity && (
                           <Badge color={getSeverityColor(condition.severity)}>
                             {condition.severity}
@@ -399,6 +402,12 @@ const FamilyHistoryViewModal = ({
                     {condition.diagnosis_age && (
                       <Text size="sm" c="dimmed" mb="xs">
                         {t('familyHistory.card.diagnosedAtAge', 'Diagnosed at age {{age}}', { age: condition.diagnosis_age })}
+                      </Text>
+                    )}
+
+                    {condition.icd10_code && (
+                      <Text size="sm" c="dimmed" mb="xs">
+                        <strong>ICD-10:</strong> {condition.icd10_code}
                       </Text>
                     )}
 
