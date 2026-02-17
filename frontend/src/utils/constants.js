@@ -43,6 +43,7 @@ export const MEDICAL_CATEGORIES = {
     'endocrinology',
     'immunology',
     'toxicology',
+    'hearing',
     'other',
   ],
   MEDICATION_ROUTES: [

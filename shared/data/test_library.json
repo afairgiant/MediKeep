@@ -1,6 +1,6 @@
 {
-  "version": "1.3.0",
-  "lastUpdated": "2026-02-14",
+  "version": "1.4.0",
+  "lastUpdated": "2026-02-17",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -1218,6 +1218,66 @@
       "common_names": ["WBC", "White Blood Cells", "Leukocytes"],
       "is_common": true,
       "display_order": 96
+    },
+    {
+      "test_name": "Pure Tone Audiometry",
+      "abbreviation": "PTA",
+      "test_code": "89024-4",
+      "default_unit": "dB HL",
+      "category": "hearing",
+      "common_names": ["PTA", "Audiogram", "Hearing Test", "Pure Tone Average"],
+      "is_common": true,
+      "display_order": 97
+    },
+    {
+      "test_name": "Tympanometry",
+      "abbreviation": "TYMP",
+      "test_code": "89016-0",
+      "default_unit": "mL",
+      "category": "hearing",
+      "common_names": ["Tympanometry", "Tympanogram", "Middle Ear Test"],
+      "is_common": true,
+      "display_order": 98
+    },
+    {
+      "test_name": "Speech Reception Threshold",
+      "abbreviation": "SRT",
+      "test_code": "89023-6",
+      "default_unit": "dB HL",
+      "category": "hearing",
+      "common_names": ["SRT", "Speech Threshold", "Speech Reception"],
+      "is_common": true,
+      "display_order": 99
+    },
+    {
+      "test_name": "Word Recognition Score",
+      "abbreviation": "WRS",
+      "test_code": "89022-8",
+      "default_unit": "%",
+      "category": "hearing",
+      "common_names": ["WRS", "Word Recognition", "Speech Discrimination", "Word Discrimination"],
+      "is_common": true,
+      "display_order": 100
+    },
+    {
+      "test_name": "Otoacoustic Emissions",
+      "abbreviation": "OAE",
+      "test_code": "89015-2",
+      "default_unit": "dB SPL",
+      "category": "hearing",
+      "common_names": ["OAE", "Otoacoustic Emissions", "DPOAE", "TEOAE"],
+      "is_common": false,
+      "display_order": 101
+    },
+    {
+      "test_name": "Auditory Brainstem Response",
+      "abbreviation": "ABR",
+      "test_code": "89014-5",
+      "default_unit": "ms",
+      "category": "hearing",
+      "common_names": ["ABR", "Brainstem Audiometry", "BERA", "Auditory Brainstem Response"],
+      "is_common": false,
+      "display_order": 102
     }
   ]
 }

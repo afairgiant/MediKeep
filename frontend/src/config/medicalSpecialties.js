@@ -29,6 +29,10 @@ export const DEFAULT_MEDICAL_SPECIALTIES = [
   { value: 'Obstetrics and Gynecology', label: "OB/GYN - Women's health" },
   { value: 'Oncology', label: 'Oncology - Cancer treatment' },
   { value: 'Ophthalmology', label: 'Ophthalmology - Eye care' },
+  {
+    value: 'Otorhinolaryngology',
+    label: 'Otorhinolaryngology (ENT) - Ear, nose & throat',
+  },
   { value: 'Orthopedics', label: 'Orthopedics - Bone & joint care' },
   { value: 'Pathology', label: 'Pathology - Disease diagnosis' },
   { value: 'Pediatrics', label: "Pediatrics - Children's health" },
