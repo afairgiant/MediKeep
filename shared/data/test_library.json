@@ -1227,7 +1227,7 @@
       "category": "hearing",
       "common_names": ["PTA", "Audiogram", "Hearing Test", "Pure Tone Average"],
       "is_common": true,
-      "display_order": 97
+      "display_order": 106
     },
     {
       "test_name": "Tympanometry",
@@ -1237,7 +1237,7 @@
       "category": "hearing",
       "common_names": ["Tympanometry", "Tympanogram", "Middle Ear Test"],
       "is_common": true,
-      "display_order": 98
+      "display_order": 107
     },
     {
       "test_name": "Speech Reception Threshold",
@@ -1247,7 +1247,7 @@
       "category": "hearing",
       "common_names": ["SRT", "Speech Threshold", "Speech Reception"],
       "is_common": true,
-      "display_order": 99
+      "display_order": 108
     },
     {
       "test_name": "Word Recognition Score",
@@ -1257,7 +1257,7 @@
       "category": "hearing",
       "common_names": ["WRS", "Word Recognition", "Speech Discrimination", "Word Discrimination"],
       "is_common": true,
-      "display_order": 100
+      "display_order": 109
     },
     {
       "test_name": "Otoacoustic Emissions",
@@ -1267,7 +1267,7 @@
       "category": "hearing",
       "common_names": ["OAE", "Otoacoustic Emissions", "DPOAE", "TEOAE"],
       "is_common": false,
-      "display_order": 101
+      "display_order": 110
     },
     {
       "test_name": "Auditory Brainstem Response",
@@ -1277,7 +1277,7 @@
       "category": "hearing",
       "common_names": ["ABR", "Brainstem Audiometry", "BERA", "Auditory Brainstem Response"],
       "is_common": false,
-      "display_order": 102
+      "display_order": 111
     }
   ]
 }
