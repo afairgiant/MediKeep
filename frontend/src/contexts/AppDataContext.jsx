@@ -598,6 +598,7 @@ export function AppDataProvider({ children }) {
         .filter(key => key.startsWith('medikeep_sort_'))
         .forEach(key => localStorage.removeItem(key));
       localStorage.removeItem('medikeep_viewmode');
+      localStorage.removeItem('medikeep_practitioners_groupby');
     }
   }, [
     isAuthenticated,
