@@ -24,6 +24,7 @@ import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePersistedToggle } from '../../hooks/usePersistedToggle';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -78,7 +79,7 @@ const Practitioners = () => {
   // Get standardized formatters for practitioners
   const defaultFormatters = getEntityFormatters('default', [], navigate, null, formatDate);
   const [editingPractitioner, setEditingPractitioner] = useState(null);
-  const [groupByPractice, setGroupByPractice] = useState(false);
+  const [groupByPractice, setGroupByPractice] = usePersistedToggle('medikeep_practitioners_groupby', false);
   const [practiceEditData, setPracticeEditData] = useState(null);
   const [showPracticeEditModal, setShowPracticeEditModal] = useState(false);
   const [formData, setFormData] = useState({
