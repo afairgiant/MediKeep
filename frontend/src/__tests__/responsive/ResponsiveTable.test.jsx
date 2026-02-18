@@ -723,6 +723,168 @@ describe('ResponsiveTable Component Tests', () => {
     });
   });
 
+  describe('Action Buttons', () => {
+    const actionProps = {
+      ...defaultProps,
+      onView: vi.fn(),
+      onEdit: vi.fn(),
+      onDelete: vi.fn(),
+    };
+
+    it('renders Actions column header when callbacks are provided', () => {
+      renderResponsive(<ResponsiveTable {...actionProps} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
+
+      expect(screen.getByText('Actions')).toBeInTheDocument();
+    });
+
+    it('does not render Actions column header when no callbacks are provided', () => {
+      renderResponsive(<ResponsiveTable {...defaultProps} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
+
+      expect(screen.queryByText('Actions')).not.toBeInTheDocument();
+    });
+
+    it('renders View, Edit, Delete buttons for each row', () => {
+      renderResponsive(<ResponsiveTable {...actionProps} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
+
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      const editButtons = screen.getAllByRole('button', { name: /edit/i });
+      const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+
+      expect(viewButtons).toHaveLength(sampleMedicationData.length);
+      expect(editButtons).toHaveLength(sampleMedicationData.length);
+      expect(deleteButtons).toHaveLength(sampleMedicationData.length);
+    });
+
+    it('calls onView with the row when View is clicked', async () => {
+      const user = userEvent.setup();
+      renderResponsive(<ResponsiveTable {...actionProps} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
+
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      await user.click(viewButtons[0]);
+
+      await waitFor(() => {
+        expect(actionProps.onView).toHaveBeenCalledWith(sampleMedicationData[0]);
+      });
+    });
+
+    it('calls onEdit with the row when Edit is clicked', async () => {
+      const user = userEvent.setup();
+      renderResponsive(<ResponsiveTable {...actionProps} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
+
+      const editButtons = screen.getAllByRole('button', { name: /edit/i });
+      await user.click(editButtons[1]);
+
+      await waitFor(() => {
+        expect(actionProps.onEdit).toHaveBeenCalledWith(sampleMedicationData[1]);
+      });
+    });
+
+    it('calls onDelete with row.id when Delete is clicked', async () => {
+      const user = userEvent.setup();
+      renderResponsive(<ResponsiveTable {...actionProps} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
+
+      const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+      await user.click(deleteButtons[2]);
+
+      await waitFor(() => {
+        expect(actionProps.onDelete).toHaveBeenCalledWith(sampleMedicationData[2].id);
+      });
+    });
+
+    it('action button click does not trigger row click', async () => {
+      const user = userEvent.setup();
+      const mockRowClick = vi.fn();
+
+      renderResponsive(
+        <ResponsiveTable {...actionProps} onRowClick={mockRowClick} />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      await user.click(viewButtons[0]);
+
+      await waitFor(() => {
+        expect(actionProps.onView).toHaveBeenCalled();
+        expect(mockRowClick).not.toHaveBeenCalled();
+      });
+    });
+
+    it('renders only provided action callbacks', () => {
+      renderResponsive(
+        <ResponsiveTable {...defaultProps} onView={vi.fn()} />,
+        { viewport: TEST_VIEWPORTS.desktop }
+      );
+
+      expect(screen.getAllByRole('button', { name: /view/i })).toHaveLength(sampleMedicationData.length);
+      expect(screen.queryAllByRole('button', { name: /edit/i })).toHaveLength(0);
+      expect(screen.queryAllByRole('button', { name: /delete/i })).toHaveLength(0);
+    });
+
+    it('renders action buttons in mobile card view', () => {
+      useResponsive.mockReturnValue({
+        breakpoint: 'xs',
+        deviceType: 'mobile',
+        isMobile: true,
+        isTablet: false,
+        isDesktop: false,
+        width: 375,
+        height: 667,
+      });
+
+      renderResponsive(<ResponsiveTable {...actionProps} />, {
+        viewport: TEST_VIEWPORTS.mobile,
+      });
+
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      const editButtons = screen.getAllByRole('button', { name: /edit/i });
+      const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+
+      expect(viewButtons).toHaveLength(sampleMedicationData.length);
+      expect(editButtons).toHaveLength(sampleMedicationData.length);
+      expect(deleteButtons).toHaveLength(sampleMedicationData.length);
+    });
+
+    it('mobile action button click does not trigger row click', async () => {
+      const user = userEvent.setup();
+      const mockRowClick = vi.fn();
+
+      useResponsive.mockReturnValue({
+        breakpoint: 'xs',
+        deviceType: 'mobile',
+        isMobile: true,
+        isTablet: false,
+        isDesktop: false,
+        width: 375,
+        height: 667,
+      });
+
+      renderResponsive(
+        <ResponsiveTable {...actionProps} onRowClick={mockRowClick} />,
+        { viewport: TEST_VIEWPORTS.mobile }
+      );
+
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      await user.click(viewButtons[0]);
+
+      await waitFor(() => {
+        expect(actionProps.onView).toHaveBeenCalled();
+        expect(mockRowClick).not.toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('Sort Persistence (persistKey)', () => {
     const persistProps = {
       ...defaultProps,

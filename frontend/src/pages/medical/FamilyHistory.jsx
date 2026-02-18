@@ -1108,28 +1108,16 @@ const FamilyHistory = () => {
                     });
                     return;
                   }
-                  if (row.conditionId) {
-                    // Edit condition
-                    const familyMember = familyMembers.find(
-                      m => m.id === row.familyMemberId
-                    );
-                    const condition = familyMember?.family_conditions?.find(
-                      c => c.id === row.conditionId
-                    );
-                    if (familyMember && condition) {
-                      handleEditCondition(familyMember, condition);
-                    }
-                  } else {
-                    // Edit family member (no condition)
-                    const familyMember = familyMembers.find(
-                      m => m.id === row.familyMemberId
-                    );
-                    if (familyMember) {
-                      handleEditMember(familyMember);
-                    }
+                  const familyMember = familyMembers.find(
+                    m => m.id === row.familyMemberId
+                  );
+                  if (familyMember) {
+                    handleEditMember(familyMember);
                   }
                 }}
-                onDelete={row => {
+                onDelete={rowId => {
+                  const row = flattenedConditions.find(r => r.id === rowId);
+                  if (!row) return;
                   if (row.is_shared) {
                     notifications.show({
                       title: t('familyHistory.notifications.cannotDelete', 'Cannot Delete'),
@@ -1230,7 +1218,7 @@ const FamilyHistory = () => {
                 patientData={currentPatient}
                 tableName={t('familyHistory.sharedTableName', 'Shared Family History')}
                 onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
-                onEdit={row => {
+                onEdit={_row => {
                   notifications.show({
                     title: t('familyHistory.notifications.cannotEdit', 'Cannot Edit'),
                     message: t('familyHistory.notifications.cannotEditShared', 'You cannot edit shared family history records'),
@@ -1238,7 +1226,7 @@ const FamilyHistory = () => {
                     icon: <IconX size="1rem" />,
                   });
                 }}
-                onDelete={row => {
+                onDelete={() => {
                   notifications.show({
                     title: t('familyHistory.notifications.cannotDelete', 'Cannot Delete'),
                     message: t('familyHistory.notifications.cannotDeleteShared', 'You cannot delete shared family history records'),
