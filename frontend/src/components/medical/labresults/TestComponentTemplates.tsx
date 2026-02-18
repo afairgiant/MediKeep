@@ -183,6 +183,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         { test_name: 'Albumin', abbreviation: 'ALB', test_code: '1751-7', unit: 'g/dL', default_display_order: 7 },
         { test_name: 'Total Protein', abbreviation: 'TP', test_code: '2885-2', unit: 'g/dL', default_display_order: 8 },
         { test_name: 'Somatomedin C', abbreviation: 'IGF-1', test_code: '2484-4', unit: 'ng/mL', default_display_order: 9 },
+        { test_name: 'Transferrin', abbreviation: 'TRF', test_code: '3034-6', unit: 'mg/dL', default_display_order: 10 },
       ]
     },
     {
