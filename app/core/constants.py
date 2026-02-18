@@ -23,7 +23,7 @@ LAB_TEST_COMPONENT_STATUSES = [
 LAB_TEST_COMPONENT_CATEGORIES = [
     "chemistry", "hematology", "hepatology", "immunology", "microbiology",
     "endocrinology", "cardiology", "toxicology", "genetics", "molecular",
-    "pathology", "lipids", "other"
+    "pathology", "lipids", "hearing", "stomatology", "other"
 ]
 
 # User roles

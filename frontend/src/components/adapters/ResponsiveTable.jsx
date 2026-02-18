@@ -14,7 +14,8 @@ import {
   Skeleton,
   Center
 } from '@mantine/core';
-import { IconSearch, IconArrowsSort, IconSortAscending, IconSortDescending } from '@tabler/icons-react';
+import { IconSearch, IconArrowsSort, IconSortAscending, IconSortDescending, IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../../hooks/useResponsive';
 import { TableLayoutStrategy } from '../../strategies/TableLayoutStrategy';
 import logger from '../../services/logger';
@@ -72,6 +73,9 @@ export const ResponsiveTable = memo(({
   // Row actions
   onRowClick,
   onRowDoubleClick,
+  onView,
+  onEdit,
+  onDelete,
   
   // Styling and behavior
   className = '',
@@ -112,6 +116,8 @@ export const ResponsiveTable = memo(({
   ...props
 }) => {
   const { breakpoint, deviceType, isMobile, isTablet, isDesktop } = useResponsive();
+  const { t } = useTranslation('common');
+  const hasActions = Boolean(onView || onEdit || onDelete);
 
   // Restore persisted sort state from localStorage when persistKey is provided
   const persistedSort = useMemo(() => {
@@ -304,6 +310,56 @@ export const ResponsiveTable = memo(({
     }
   }, [onPageChange, page, pageSize, componentContext]);
 
+  // Render action buttons for a row
+  const renderActionButtons = useCallback((row, compact = false) => {
+    if (!hasActions) return null;
+    const iconSize = isMobile ? 14 : 16;
+    const buttonSize = compact ? 'sm' : 'md';
+
+    return (
+      <Group
+        gap={compact ? 4 : 6}
+        wrap="nowrap"
+        justify="center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {onView && (
+          <ActionIcon
+            variant="subtle"
+            color="blue"
+            size={buttonSize}
+            onClick={() => onView(row)}
+            aria-label={t('buttons.view')}
+          >
+            <IconEye size={iconSize} />
+          </ActionIcon>
+        )}
+        {onEdit && (
+          <ActionIcon
+            variant="subtle"
+            color="yellow"
+            size={buttonSize}
+            onClick={() => onEdit(row)}
+            aria-label={t('buttons.edit')}
+          >
+            <IconEdit size={iconSize} />
+          </ActionIcon>
+        )}
+        {onDelete && row.id != null && (
+          <ActionIcon
+            variant="subtle"
+            color="red"
+            size={buttonSize}
+            onClick={() => onDelete(row.id)}
+            aria-label={t('buttons.delete')}
+          >
+            <IconTrash size={iconSize} />
+          </ActionIcon>
+        )}
+      </Group>
+    );
+  }, [hasActions, isMobile, onView, onEdit, onDelete, t]);
+
   // Render table headers
   const renderTableHeader = useCallback(() => {
     const visibleColumns = tableConfig.visibleColumns;
@@ -350,10 +406,17 @@ export const ResponsiveTable = memo(({
               </MantineTable.Th>
             );
           })}
+          {hasActions && (
+            <MantineTable.Th className="no-print" style={{ width: 120, textAlign: 'center' }}>
+              <Text fw={500} size={size}>
+                {t('labels.actions', 'Actions')}
+              </Text>
+            </MantineTable.Th>
+          )}
         </MantineTable.Tr>
       </MantineTable.Thead>
     );
-  }, [tableConfig.visibleColumns, internalSortBy, internalSortDirection, sortable, handleSort, size]);
+  }, [tableConfig.visibleColumns, internalSortBy, internalSortDirection, sortable, handleSort, size, hasActions, t]);
 
   // Render table rows
   const renderTableRows = useCallback(() => {
@@ -406,12 +469,17 @@ export const ResponsiveTable = memo(({
                   </MantineTable.Td>
                 );
               })}
+              {hasActions && (
+                <MantineTable.Td className="no-print">
+                  {renderActionButtons(row)}
+                </MantineTable.Td>
+              )}
             </MantineTable.Tr>
           );
         })}
       </MantineTable.Tbody>
     );
-  }, [processedData, tableConfig.visibleColumns, selectedRows, handleRowClick, onRowDoubleClick]);
+  }, [processedData, tableConfig.visibleColumns, selectedRows, handleRowClick, onRowDoubleClick, hasActions, renderActionButtons]);
 
   // Render card layout for mobile
   const renderCards = useCallback(() => {
@@ -476,14 +544,19 @@ export const ResponsiveTable = memo(({
                     +{columns.length - displayFields.length} more field{columns.length - displayFields.length !== 1 ? 's' : ''}
                   </Text>
                 )}
+                {hasActions && (
+                  <Group justify="flex-end" mt={4}>
+                    {renderActionButtons(row, true)}
+                  </Group>
+                )}
               </Stack>
             </Card>
           );
         })}
       </Stack>
     );
-  }, [processedData, breakpoint, strategyContext, tableConfig.spacing, selectedRows, handleRowClick, 
-      withBorder, onRowClick, selectable, showSecondaryInfo, columns.length]);
+  }, [processedData, breakpoint, strategyContext, tableConfig.spacing, selectedRows, handleRowClick,
+      withBorder, onRowClick, selectable, showSecondaryInfo, columns.length, hasActions, renderActionButtons]);
 
   // Render loading state
   const renderLoading = useCallback(() => {
@@ -512,6 +585,11 @@ export const ResponsiveTable = memo(({
                 <Skeleton height={20} width="80%" />
               </MantineTable.Th>
             ))}
+            {hasActions && (
+              <MantineTable.Th>
+                <Skeleton height={20} width="60%" />
+              </MantineTable.Th>
+            )}
           </MantineTable.Tr>
         </MantineTable.Thead>
         <MantineTable.Tbody>
@@ -522,12 +600,17 @@ export const ResponsiveTable = memo(({
                   <Skeleton height={16} />
                 </MantineTable.Td>
               ))}
+              {hasActions && (
+                <MantineTable.Td>
+                  <Skeleton height={16} width="60%" />
+                </MantineTable.Td>
+              )}
             </MantineTable.Tr>
           ))}
         </MantineTable.Tbody>
       </MantineTable>
     );
-  }, [tableConfig.displayStrategy, tableConfig.spacing, tableConfig.visibleColumns]);
+  }, [tableConfig.displayStrategy, tableConfig.spacing, tableConfig.visibleColumns, hasActions]);
 
   // Render empty state
   const renderEmpty = useCallback(() => {
@@ -580,10 +663,10 @@ export const ResponsiveTable = memo(({
     'aria-label': ariaLabel || tableConfig.accessibility.tableLabel || `${medicalContext} data table`,
     'aria-labelledby': ariaLabelledBy,
     'aria-rowcount': processedData.length,
-    'aria-colcount': tableConfig.visibleColumns.length,
+    'aria-colcount': tableConfig.visibleColumns.length + (hasActions ? 1 : 0),
     role: 'table'
-  }), [ariaLabel, tableConfig.accessibility.tableLabel, medicalContext, ariaLabelledBy, 
-      processedData.length, tableConfig.visibleColumns.length]);
+  }), [ariaLabel, tableConfig.accessibility.tableLabel, medicalContext, ariaLabelledBy,
+      processedData.length, tableConfig.visibleColumns.length, hasActions]);
 
   // Error handling for malformed data
   if (error) {

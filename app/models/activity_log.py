@@ -65,7 +65,7 @@ class ActivityLog(Base):
             "entity_type": self.entity_type,
             "entity_id": self.entity_id,
             "description": self.description,
-            "metadata": self.metadata,
+            "metadata": self.event_metadata,
             "timestamp": (
                 self.timestamp.isoformat() if self.timestamp is not None else None
             ),

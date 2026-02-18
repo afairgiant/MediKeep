@@ -37,6 +37,8 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   molecular: 'Molecular - DNA Tests',
   pathology: 'Pathology - Tissue & Biopsy Analysis',
   lipids: 'Lipids - Cholesterol & Triglycerides',
+  hearing: 'Hearing - Audiometry & Vestibular Tests',
+  stomatology: 'Stomatology - Salivary & Oral Diagnostics',
   other: 'Other Tests',
 };
 
@@ -54,6 +56,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   molecular: 'cyan',
   pathology: 'pink',
   lipids: 'indigo',
+  hearing: 'violet',
+  stomatology: 'dark',
   other: 'gray',
 };
 
@@ -91,5 +95,7 @@ export const CATEGORY_SELECT_OPTIONS: Array<{ value: string; label: string }> = 
   { value: 'genetics', label: 'Genetic Testing' },
   { value: 'molecular', label: 'Molecular & DNA Tests' },
   { value: 'pathology', label: 'Tissue & Biopsy Analysis' },
+  { value: 'hearing', label: 'Hearing & Vestibular Tests' },
+  { value: 'stomatology', label: 'Salivary & Oral Diagnostics' },
   { value: 'other', label: 'Other Tests' },
 ];

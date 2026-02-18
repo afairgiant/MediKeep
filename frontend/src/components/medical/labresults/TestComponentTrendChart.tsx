@@ -140,16 +140,16 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
   return (
     <Stack gap="md">
       {/* Reference Range Legend */}
-      {referenceRange && (referenceRange.min !== null || referenceRange.max !== null) && (
+      {referenceRange && (referenceRange.min !== null || referenceRange.max !== null || referenceRange.text) && (
         <Paper withBorder p="xs" radius="md" bg="gray.0">
           <Group gap="xs">
             <Text size="xs" fw={600}>Reference Range:</Text>
             <Text size="xs">
-              {referenceRange.min ?? '?'} - {referenceRange.max ?? '?'} {trendData.unit}
+              {referenceRange.text
+                ? `${referenceRange.text} ${trendData.unit}`
+                : `${referenceRange.min ?? '?'} - ${referenceRange.max ?? '?'} ${trendData.unit}`
+              }
             </Text>
-            {referenceRange.text && (
-              <Text size="xs" c="dimmed">({referenceRange.text})</Text>
-            )}
           </Group>
         </Paper>
       )}

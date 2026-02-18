@@ -44,3 +44,6 @@ export { useTreatmentRelationships } from './useTreatmentRelationships';
 
 // View mode persistence hooks
 export { usePersistedViewMode } from './usePersistedViewMode';
+
+// Toggle persistence hooks
+export { usePersistedToggle } from './usePersistedToggle';

@@ -15,7 +15,7 @@ export interface LabTestComponent {
   ref_range_text?: string | null;
   status?: 'normal' | 'high' | 'low' | 'critical' | 'abnormal' | 'borderline' | null;
   category?: 'chemistry' | 'hematology' | 'hepatology' | 'immunology' | 'microbiology' | 'endocrinology' |
-             'cardiology' | 'toxicology' | 'genetics' | 'molecular' | 'pathology' | 'lipids' | 'other' | null;
+             'cardiology' | 'toxicology' | 'genetics' | 'molecular' | 'pathology' | 'lipids' | 'hearing' | 'stomatology' | 'other' | null;
   display_order?: number | null;
   canonical_test_name?: string | null;  // Links to standardized test name for trend matching
   notes?: string | null;

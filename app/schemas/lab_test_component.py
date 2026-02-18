@@ -185,13 +185,21 @@ class LabTestComponentBase(BaseModel):
     @model_validator(mode="after")
     def auto_calculate_status(self):
         """Auto-calculate status based on value and reference ranges"""
-        if self.status is None and self.ref_range_min is not None and self.ref_range_max is not None:
+        if self.status is not None:
+            return self
+        if self.ref_range_min is not None and self.ref_range_max is not None:
             if self.value < self.ref_range_min:
                 self.status = "low"
             elif self.value > self.ref_range_max:
                 self.status = "high"
             else:
                 self.status = "normal"
+        elif self.ref_range_max is not None:
+            # Upper bound only (e.g., "< 0.41")
+            self.status = "high" if self.value > self.ref_range_max else "normal"
+        elif self.ref_range_min is not None:
+            # Lower bound only (e.g., "> 39")
+            self.status = "low" if self.value < self.ref_range_min else "normal"
         return self
 
 

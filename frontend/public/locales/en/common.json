@@ -2324,6 +2324,8 @@
       "genetics": "Genetics - Genetic Testing",
       "molecular": "Molecular - DNA Tests",
       "pathology": "Pathology - Tissue & Biopsy Analysis",
+      "hearing": "Hearing - Audiometry & Vestibular Tests",
+      "stomatology": "Stomatology - Salivary & Oral Diagnostics",
       "other": "Other Tests"
     }
   },

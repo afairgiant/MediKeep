@@ -29,6 +29,10 @@ export const DEFAULT_MEDICAL_SPECIALTIES = [
   { value: 'Obstetrics and Gynecology', label: "OB/GYN - Women's health" },
   { value: 'Oncology', label: 'Oncology - Cancer treatment' },
   { value: 'Ophthalmology', label: 'Ophthalmology - Eye care' },
+  {
+    value: 'Otorhinolaryngology',
+    label: 'Otorhinolaryngology (ENT) - Ear, nose & throat',
+  },
   { value: 'Orthopedics', label: 'Orthopedics - Bone & joint care' },
   { value: 'Pathology', label: 'Pathology - Disease diagnosis' },
   { value: 'Pediatrics', label: "Pediatrics - Children's health" },
@@ -45,6 +49,10 @@ export const DEFAULT_MEDICAL_SPECIALTIES = [
   {
     value: 'Oral and Maxillofacial Surgery',
     label: 'Oral & Maxillofacial Surgery - Surgical dental procedures',
+  },
+  {
+    value: 'Stomatology',
+    label: 'Stomatology (Oral Medicine) - Oral mucosal diseases & diagnostics',
   },
   { value: 'Orthodontics', label: 'Orthodontics - Teeth alignment & braces' },
   { value: 'Periodontics', label: 'Periodontics - Gum disease treatment' },
