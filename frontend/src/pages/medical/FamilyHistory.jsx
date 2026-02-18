@@ -1218,7 +1218,7 @@ const FamilyHistory = () => {
                 patientData={currentPatient}
                 tableName={t('familyHistory.sharedTableName', 'Shared Family History')}
                 onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
-                onEdit={row => {
+                onEdit={_row => {
                   notifications.show({
                     title: t('familyHistory.notifications.cannotEdit', 'Cannot Edit'),
                     message: t('familyHistory.notifications.cannotEditShared', 'You cannot edit shared family history records'),

@@ -345,7 +345,7 @@ export const ResponsiveTable = memo(({
             <IconEdit size={iconSize} />
           </ActionIcon>
         )}
-        {onDelete && (
+        {onDelete && row.id != null && (
           <ActionIcon
             variant="subtle"
             color="red"

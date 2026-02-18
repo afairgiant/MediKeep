@@ -831,6 +831,58 @@ describe('ResponsiveTable Component Tests', () => {
       expect(screen.queryAllByRole('button', { name: /edit/i })).toHaveLength(0);
       expect(screen.queryAllByRole('button', { name: /delete/i })).toHaveLength(0);
     });
+
+    it('renders action buttons in mobile card view', () => {
+      useResponsive.mockReturnValue({
+        breakpoint: 'xs',
+        deviceType: 'mobile',
+        isMobile: true,
+        isTablet: false,
+        isDesktop: false,
+        width: 375,
+        height: 667,
+      });
+
+      renderResponsive(<ResponsiveTable {...actionProps} />, {
+        viewport: TEST_VIEWPORTS.mobile,
+      });
+
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      const editButtons = screen.getAllByRole('button', { name: /edit/i });
+      const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
+
+      expect(viewButtons).toHaveLength(sampleMedicationData.length);
+      expect(editButtons).toHaveLength(sampleMedicationData.length);
+      expect(deleteButtons).toHaveLength(sampleMedicationData.length);
+    });
+
+    it('mobile action button click does not trigger row click', async () => {
+      const user = userEvent.setup();
+      const mockRowClick = vi.fn();
+
+      useResponsive.mockReturnValue({
+        breakpoint: 'xs',
+        deviceType: 'mobile',
+        isMobile: true,
+        isTablet: false,
+        isDesktop: false,
+        width: 375,
+        height: 667,
+      });
+
+      renderResponsive(
+        <ResponsiveTable {...actionProps} onRowClick={mockRowClick} />,
+        { viewport: TEST_VIEWPORTS.mobile }
+      );
+
+      const viewButtons = screen.getAllByRole('button', { name: /view/i });
+      await user.click(viewButtons[0]);
+
+      await waitFor(() => {
+        expect(actionProps.onView).toHaveBeenCalled();
+        expect(mockRowClick).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('Sort Persistence (persistKey)', () => {
