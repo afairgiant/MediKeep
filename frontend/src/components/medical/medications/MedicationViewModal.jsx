@@ -24,6 +24,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import MedicationTreatmentsList from './MedicationTreatmentsList';
+import ConditionRelationshipsForMedication from '../ConditionRelationshipsForMedication';
 import logger from '../../../services/logger';
 
 const MedicationViewModal = ({
@@ -35,6 +36,7 @@ const MedicationViewModal = ({
   onError,
   onFileUploadComplete,
   practitioners = [],
+  conditions = [],
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
@@ -230,6 +232,17 @@ const MedicationViewModal = ({
                     </Group>
                   </div>
                 )}
+
+                {/* Related Conditions */}
+                <div>
+                  <Title order={4} mb="sm">Related Conditions</Title>
+                  <ConditionRelationshipsForMedication
+                    medicationId={medication.id}
+                    conditions={conditions}
+                    navigate={navigate}
+                    viewOnly={true}
+                  />
+                </div>
 
                 {/* Used in Treatments */}
                 <div>

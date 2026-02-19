@@ -251,7 +251,7 @@ const ConditionViewModal = ({
                   medications={medications}
                   fetchConditionMedications={fetchConditionMedications}
                   navigate={navigate}
-                  isViewMode={false}
+                  isViewMode={true}
                 />
               </div>
 
