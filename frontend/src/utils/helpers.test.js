@@ -1,4 +1,38 @@
 import { vi } from 'vitest';
+
+// Mock timezone service BEFORE importing helpers
+vi.mock('../services/timezoneService', () => ({
+  timezoneService: {
+    formatDateTime: vi.fn((date, options = {}) => {
+      if (!date || date === null || date === undefined) {
+        return 'Invalid Date';
+      }
+      try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) {
+          return 'Invalid Date';
+        }
+        if (options.dateOnly) {
+          return d.toLocaleDateString();
+        }
+        return options.includeTimezone
+          ? `${d.toLocaleString()} EST`
+          : d.toLocaleString();
+      } catch (error) {
+        return 'Invalid Date';
+      }
+    }),
+    getCurrentFacilityTime: vi.fn(() => '2023-12-01T10:30'),
+  },
+}));
+
+// Mock apiClient to prevent module resolution errors
+vi.mock('../services/api/index', () => ({
+  apiService: {},
+  default: {},
+}));
+
+// Import helpers AFTER mocks are set up
 import {
   formatDate,
   formatDateTime,
@@ -18,34 +52,8 @@ import {
   deepClone,
 } from './helpers';
 
-// Mock timezone service
-vi.mock('../services/timezoneService', () => ({
-  timezoneService: {
-    formatDateTime: vi.fn((date, options = {}) => {
-      if (!date || date === null || date === undefined) {
-        return 'Invalid Date';
-      }
-      try {
-        const d = new Date(date);
-        if (isNaN(d.getTime())) {
-          return 'Invalid Date';
-        }
-        if (options.dateOnly) {
-          return d.toLocaleDateString();
-        }
-        return options.includeTimezone 
-          ? `${d.toLocaleString()} EST`
-          : d.toLocaleString();
-      } catch (error) {
-        return 'Invalid Date';
-      }
-    }),
-    getCurrentFacilityTime: vi.fn(() => '2023-12-01T10:30'),
-  },
-}));
-
 // Get mock instance after import
-const { timezoneService } = require('../services/timezoneService');
+const { timezoneService } = await import('../services/timezoneService');
 
 describe('Date and Time Utilities', () => {
   beforeEach(() => {

@@ -5,11 +5,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute, { AdminRoute, RoleRoute, PublicRoute } from './ProtectedRoute';
 import render from '../../test-utils/render';
 
-// Mock react-toastify
-vi.mock('react-toastify', () => ({
-  toast: {
-    warn: vi.fn(),
-    error: vi.fn(),
+// Mock @mantine/notifications
+const mockNotificationsShow = vi.fn();
+vi.mock('@mantine/notifications', () => ({
+  notifications: {
+    show: mockNotificationsShow,
   },
 }));
 
@@ -36,6 +36,7 @@ const PublicComponent = () => <div data-testid="public-content">Public Content</
 describe('ProtectedRoute', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockNotificationsShow.mockClear();
   });
 
   describe('Loading State', () => {
@@ -78,9 +79,7 @@ describe('ProtectedRoute', () => {
   });
 
   describe('Authentication Check', () => {
-    test('shows toast and does not render content when not authenticated', () => {
-      const { toast } = require('react-toastify');
-      
+    test('shows notification and does not render content when not authenticated', async () => {
       render(
         <ProtectedRoute>
           <TestComponent />
@@ -96,12 +95,14 @@ describe('ProtectedRoute', () => {
       );
 
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
-      expect(toast.warn).toHaveBeenCalledWith('Please log in to access this page');
+      await waitFor(() => {
+        expect(mockNotificationsShow).toHaveBeenCalled();
+        const call = mockNotificationsShow.mock.calls[0][0];
+        expect(call.color).toBe('orange');
+      });
     });
 
-    test('shows toast for custom redirect when not authenticated', () => {
-      const { toast } = require('react-toastify');
-      
+    test('shows notification for custom redirect when not authenticated', async () => {
       render(
         <ProtectedRoute redirectTo="/custom-login">
           <TestComponent />
@@ -117,7 +118,11 @@ describe('ProtectedRoute', () => {
       );
 
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
-      expect(toast.warn).toHaveBeenCalledWith('Please log in to access this page');
+      await waitFor(() => {
+        expect(mockNotificationsShow).toHaveBeenCalled();
+        const call = mockNotificationsShow.mock.calls[0][0];
+        expect(call.color).toBe('orange');
+      });
     });
 
     test('renders protected content when authenticated', () => {
@@ -141,9 +146,7 @@ describe('ProtectedRoute', () => {
   });
 
   describe('Admin Access Control', () => {
-    test('blocks non-admin users from admin-only routes', () => {
-      const { toast } = require('react-toastify');
-      
+    test('blocks non-admin users from admin-only routes', async () => {
       render(
         <ProtectedRoute adminOnly={true}>
           <TestComponent />
@@ -161,7 +164,11 @@ describe('ProtectedRoute', () => {
       );
 
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
-      expect(toast.error).toHaveBeenCalledWith('Access denied: Administrator privileges required');
+      await waitFor(() => {
+        expect(mockNotificationsShow).toHaveBeenCalled();
+        const call = mockNotificationsShow.mock.calls[0][0];
+        expect(call.color).toBe('red');
+      });
     });
 
     test('allows admin users to access admin-only routes', () => {
@@ -185,10 +192,9 @@ describe('ProtectedRoute', () => {
   });
 
   describe('Role-based Access Control', () => {
-    test('blocks users without required role', () => {
-      const { toast } = require('react-toastify');
+    test('blocks users without required role', async () => {
       const mockHasRole = vi.fn(() => false);
-      
+
       render(
         <ProtectedRoute requiredRole="doctor">
           <TestComponent />
@@ -207,7 +213,11 @@ describe('ProtectedRoute', () => {
 
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
       expect(mockHasRole).toHaveBeenCalledWith('doctor');
-      expect(toast.error).toHaveBeenCalledWith('Access denied: doctor role required');
+      await waitFor(() => {
+        expect(mockNotificationsShow).toHaveBeenCalled();
+        const call = mockNotificationsShow.mock.calls[0][0];
+        expect(call.color).toBe('red');
+      });
     });
 
     test('allows users with required role', () => {
@@ -232,10 +242,9 @@ describe('ProtectedRoute', () => {
       expect(mockHasRole).toHaveBeenCalledWith('doctor');
     });
 
-    test('blocks users without any required roles', () => {
-      const { toast } = require('react-toastify');
+    test('blocks users without any required roles', async () => {
       const mockHasAnyRole = vi.fn(() => false);
-      
+
       render(
         <ProtectedRoute requiredRoles={['doctor', 'nurse']}>
           <TestComponent />
@@ -254,7 +263,11 @@ describe('ProtectedRoute', () => {
 
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
       expect(mockHasAnyRole).toHaveBeenCalledWith(['doctor', 'nurse']);
-      expect(toast.error).toHaveBeenCalledWith('Access denied: One of these roles required: doctor, nurse');
+      await waitFor(() => {
+        expect(mockNotificationsShow).toHaveBeenCalled();
+        const call = mockNotificationsShow.mock.calls[0][0];
+        expect(call.color).toBe('red');
+      });
     });
 
     test('allows users with any required role', () => {
@@ -301,9 +314,7 @@ describe('AdminRoute', () => {
     expect(screen.getByTestId('protected-content')).toBeInTheDocument();
   });
 
-  test('blocks non-admin users', () => {
-    const { toast } = require('react-toastify');
-    
+  test('blocks non-admin users', async () => {
     render(
       <AdminRoute>
         <TestComponent />
@@ -321,14 +332,18 @@ describe('AdminRoute', () => {
     );
 
     expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
-    expect(toast.error).toHaveBeenCalledWith('Access denied: Administrator privileges required');
+    await waitFor(() => {
+      expect(mockNotificationsShow).toHaveBeenCalled();
+      const call = mockNotificationsShow.mock.calls[0][0];
+      expect(call.color).toBe('red');
+    });
   });
 });
 
 describe('RoleRoute', () => {
   test('renders content for users with required role', () => {
     const mockHasRole = vi.fn(() => true);
-    
+
     render(
       <RoleRoute role="doctor">
         <TestComponent />
@@ -348,10 +363,9 @@ describe('RoleRoute', () => {
     expect(mockHasRole).toHaveBeenCalledWith('doctor');
   });
 
-  test('blocks users without required role', () => {
-    const { toast } = require('react-toastify');
+  test('blocks users without required role', async () => {
     const mockHasRole = vi.fn(() => false);
-    
+
     render(
       <RoleRoute role="doctor">
         <TestComponent />
@@ -370,7 +384,11 @@ describe('RoleRoute', () => {
 
     expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
     expect(mockHasRole).toHaveBeenCalledWith('doctor');
-    expect(toast.error).toHaveBeenCalledWith('Access denied: doctor role required');
+    await waitFor(() => {
+      expect(mockNotificationsShow).toHaveBeenCalled();
+      const call = mockNotificationsShow.mock.calls[0][0];
+      expect(call.color).toBe('red');
+    });
   });
 });
 

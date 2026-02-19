@@ -1,282 +1,257 @@
-/**
- * Tests for ConditionRelationships component
- * Covers medication linking functionality and translations
- */
+import { vi } from 'vitest';
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+/**
+ * @jest-environment jsdom
+ */
+import React from 'react';
+import render, { screen, fireEvent, waitFor } from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
-import { MantineProvider } from '@mantine/core';
-import { I18nextProvider } from 'react-i18next';
-import i18n from '../../../i18n/config';
+import '@testing-library/jest-dom';
 import ConditionRelationships from '../ConditionRelationships';
 
-// Mock API
-const mockMedications = [
-  { id: 1, medication_name: 'Lisinopril', dosage: '10mg' },
-  { id: 2, medication_name: 'Metformin', dosage: '500mg' },
-  { id: 3, medication_name: 'Atorvastatin', dosage: '20mg' },
-];
-
-const mockLinkedMedications = [
-  {
-    id: 1,
-    medication_id: 1,
-    medication: { id: 1, medication_name: 'Lisinopril', dosage: '10mg' },
-    relevance_note: 'Controls blood pressure',
+// Mock apiService
+vi.mock('../../../services/api', () => ({
+  apiService: {
+    createLabResultCondition: vi.fn(() => Promise.resolve({ id: 10, condition_id: 2, relevance_note: '' })),
+    updateLabResultCondition: vi.fn(() => Promise.resolve()),
+    deleteLabResultCondition: vi.fn(() => Promise.resolve()),
   },
-];
+}));
 
-const renderWithProviders = (component, locale = 'en') => {
-  i18n.changeLanguage(locale);
+// Mock @tabler/icons-react
+vi.mock('@tabler/icons-react', () => ({
+  IconPlus: (props) => <span data-testid="icon-plus" {...props} />,
+  IconTrash: (props) => <span data-testid="icon-trash" {...props} />,
+  IconEdit: (props) => <span data-testid="icon-edit" {...props} />,
+  IconCheck: (props) => <span data-testid="icon-check" {...props} />,
+  IconX: (props) => <span data-testid="icon-x" {...props} />,
+  IconStethoscope: (props) => <span data-testid="icon-stethoscope" {...props} />,
+  IconInfoCircle: (props) => <span data-testid="icon-info" {...props} />,
+}));
 
-  return render(
-    <I18nextProvider i18n={i18n}>
-      <MantineProvider>
-        {component}
-      </MantineProvider>
-    </I18nextProvider>
-  );
-};
+// Mock scrollIntoView for Mantine Select/MultiSelect
+Element.prototype.scrollIntoView = vi.fn();
 
 describe('ConditionRelationships Component', () => {
-  const mockProps = {
-    conditionId: 123,
-    patientId: 456,
-    linkedMedications: mockLinkedMedications,
-    availableMedications: mockMedications,
-    onAddMedication: vi.fn(),
-    onRemoveMedication: vi.fn(),
-    isLoading: false,
+  const mockConditions = [
+    { id: 1, diagnosis: 'Hypertension', status: 'active', severity: 'moderate' },
+    { id: 2, diagnosis: 'Diabetes', status: 'chronic', severity: 'moderate' },
+    { id: 3, diagnosis: 'Asthma', status: 'resolved', severity: 'mild' },
+  ];
+
+  const mockRelationships = [
+    {
+      id: 101,
+      condition_id: 1,
+      condition: { id: 1, diagnosis: 'Hypertension', status: 'active' },
+      relevance_note: 'Elevated blood pressure readings',
+    },
+  ];
+
+  const mockFetchLabResultConditions = vi.fn(() => Promise.resolve());
+  const mockNavigate = vi.fn();
+
+  const defaultProps = {
+    labResultId: 42,
+    labResultConditions: { 42: mockRelationships },
+    conditions: mockConditions,
+    fetchLabResultConditions: mockFetchLabResultConditions,
+    navigate: mockNavigate,
+    isViewMode: false,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset window.confirm mock
+    window.confirm = vi.fn(() => true);
   });
 
   describe('Rendering', () => {
-    it('should render linked medications section', () => {
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
+    it('should render linked conditions', () => {
+      render(<ConditionRelationships {...defaultProps} />);
 
-      expect(screen.getByText(/linked medications/i)).toBeInTheDocument();
+      // Should display condition diagnosis
+      expect(screen.getByText('Hypertension')).toBeInTheDocument();
     });
 
-    it('should display linked medication with relevance note', () => {
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
+    it('should display linked condition with relevance note', () => {
+      render(<ConditionRelationships {...defaultProps} />);
 
-      expect(screen.getByText('Lisinopril')).toBeInTheDocument();
-      expect(screen.getByText('10mg')).toBeInTheDocument();
-      expect(screen.getByText('Controls blood pressure')).toBeInTheDocument();
+      expect(screen.getByText('Hypertension')).toBeInTheDocument();
+      expect(screen.getByText('Elevated blood pressure readings')).toBeInTheDocument();
     });
 
-    it('should show message when no medications linked', () => {
-      const propsNoMeds = { ...mockProps, linkedMedications: [] };
-      renderWithProviders(<ConditionRelationships {...propsNoMeds} />);
+    it('should show condition status badge', () => {
+      render(<ConditionRelationships {...defaultProps} />);
 
-      expect(screen.getByText(/no medications linked/i)).toBeInTheDocument();
+      expect(screen.getByText('active')).toBeInTheDocument();
     });
 
-    it('should show link medication button', () => {
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
+    it('should show message when no conditions linked', () => {
+      const propsNoRelationships = {
+        ...defaultProps,
+        labResultConditions: { 42: [] },
+      };
+      render(<ConditionRelationships {...propsNoRelationships} />);
 
-      const linkButton = screen.getByRole('button', { name: /link medication/i });
-      expect(linkButton).toBeInTheDocument();
+      expect(screen.getByText('labels.noConditionsLinked')).toBeInTheDocument();
+    });
+
+    it('should show link condition button', () => {
+      render(<ConditionRelationships {...defaultProps} />);
+
+      expect(screen.getByText('buttons.linkCondition')).toBeInTheDocument();
+    });
+
+    it('should not show link button when no available conditions', () => {
+      // All conditions are already linked
+      const propsAllLinked = {
+        ...defaultProps,
+        labResultConditions: {
+          42: mockConditions.map((c, i) => ({
+            id: 100 + i,
+            condition_id: c.id,
+            condition: c,
+            relevance_note: '',
+          })),
+        },
+      };
+      render(<ConditionRelationships {...propsAllLinked} />);
+
+      expect(screen.queryByText('buttons.linkCondition')).not.toBeInTheDocument();
     });
   });
 
   describe('Modal Functionality', () => {
-    it('should open modal when link medication button clicked', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
+    it('should open modal when link condition button clicked', async () => {
+      render(<ConditionRelationships {...defaultProps} />);
 
-      const linkButton = screen.getByRole('button', { name: /link medication/i });
-      await user.click(linkButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/link medication to condition/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should display available medications in modal', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
-
-      const linkButton = screen.getByRole('button', { name: /link medication/i });
-      await user.click(linkButton);
+      const linkButton = screen.getByText('buttons.linkCondition');
+      await userEvent.click(linkButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Metformin')).toBeInTheDocument();
-        expect(screen.getByText('Atorvastatin')).toBeInTheDocument();
+        expect(screen.getByText('modals.linkConditionToLabResult')).toBeInTheDocument();
       });
     });
 
-    it('should not show already linked medications in modal', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
+    it('should display cancel button in modal', async () => {
+      render(<ConditionRelationships {...defaultProps} />);
 
-      const linkButton = screen.getByRole('button', { name: /link medication/i });
-      await user.click(linkButton);
+      const linkButton = screen.getByText('buttons.linkCondition');
+      await userEvent.click(linkButton);
 
       await waitFor(() => {
-        const modal = screen.getByRole('dialog');
-        // Lisinopril is already linked, should not appear in available list
-        const lisinoprilInModal = within(modal).queryByText('Lisinopril');
-        expect(lisinoprilInModal).not.toBeInTheDocument();
+        expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
       });
     });
 
-    it('should call onAddMedication when medication selected', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
+    it('should show relevance note textarea in modal', async () => {
+      render(<ConditionRelationships {...defaultProps} />);
 
-      const linkButton = screen.getByRole('button', { name: /link medication/i });
-      await user.click(linkButton);
+      const linkButton = screen.getByText('buttons.linkCondition');
+      await userEvent.click(linkButton);
 
       await waitFor(() => {
-        const metforminCard = screen.getByText('Metformin').closest('button');
-        return user.click(metforminCard);
+        expect(screen.getByLabelText(/modals\.relevanceNote/)).toBeInTheDocument();
       });
-
-      expect(mockProps.onAddMedication).toHaveBeenCalledWith(
-        expect.objectContaining({
-          medication_id: 2,
-        })
-      );
     });
 
-    it('should allow adding relevance note', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
+    it('should show condition select label in modal', async () => {
+      render(<ConditionRelationships {...defaultProps} />);
 
-      const linkButton = screen.getByRole('button', { name: /link medication/i });
-      await user.click(linkButton);
-
-      await waitFor(async () => {
-        const noteInput = screen.getByPlaceholderText(/relevance note/i);
-        await user.type(noteInput, 'Used for diabetes management');
-
-        const metforminCard = screen.getByText('Metformin').closest('button');
-        await user.click(metforminCard);
-      });
-
-      expect(mockProps.onAddMedication).toHaveBeenCalledWith(
-        expect.objectContaining({
-          relevance_note: 'Used for diabetes management',
-        })
-      );
-    });
-  });
-
-  describe('Remove Medication', () => {
-    it('should show confirmation when removing medication', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
-
-      const removeButton = screen.getByLabelText(/remove/i);
-      await user.click(removeButton);
+      const linkButton = screen.getByText('buttons.linkCondition');
+      await userEvent.click(linkButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/remove this medication relationship/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should call onRemoveMedication when confirmed', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
-
-      const removeButton = screen.getByLabelText(/remove/i);
-      await user.click(removeButton);
-
-      await waitFor(async () => {
-        const confirmButton = screen.getByRole('button', { name: /confirm/i });
-        await user.click(confirmButton);
-      });
-
-      expect(mockProps.onRemoveMedication).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe('Localization', () => {
-    it('should display German translations', async () => {
-      renderWithProviders(<ConditionRelationships {...mockProps} />, 'de');
-
-      await waitFor(() => {
-        expect(screen.getByText(/verknüpfte medikamente/i)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /medikament verknüpfen/i })).toBeInTheDocument();
-      });
-    });
-
-    it('should display French translations', async () => {
-      renderWithProviders(<ConditionRelationships {...mockProps} />, 'fr');
-
-      await waitFor(() => {
-        expect(screen.getByText(/médicaments liés/i)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /lier un médicament/i })).toBeInTheDocument();
-      });
-    });
-
-    it('should show modal title in selected language', async () => {
-      const user = userEvent.setup();
-      renderWithProviders(<ConditionRelationships {...mockProps} />, 'de');
-
-      const linkButton = screen.getByRole('button', { name: /medikament verknüpfen/i });
-      await user.click(linkButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/medikament mit erkrankung verknüpfen/i)).toBeInTheDocument();
+        expect(screen.getByText('modals.selectCondition')).toBeInTheDocument();
       });
     });
   });
 
-  describe('Loading States', () => {
-    it('should show loading skeleton when isLoading is true', () => {
-      const loadingProps = { ...mockProps, isLoading: true };
-      renderWithProviders(<ConditionRelationships {...loadingProps} />);
+  describe('View Mode', () => {
+    it('should show condition as clickable text in view mode', () => {
+      render(<ConditionRelationships {...defaultProps} isViewMode={true} />);
 
-      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+      expect(screen.getByText('Hypertension')).toBeInTheDocument();
     });
 
-    it('should disable buttons when loading', () => {
-      const loadingProps = { ...mockProps, isLoading: true };
-      renderWithProviders(<ConditionRelationships {...loadingProps} />);
+    it('should not show edit/delete buttons in view mode', () => {
+      render(<ConditionRelationships {...defaultProps} isViewMode={true} />);
 
-      const linkButton = screen.getByRole('button', { name: /link medication/i });
-      expect(linkButton).toBeDisabled();
+      expect(screen.queryByTestId('icon-edit')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('icon-trash')).not.toBeInTheDocument();
+    });
+
+    it('should not show link button in view mode', () => {
+      render(<ConditionRelationships {...defaultProps} isViewMode={true} />);
+
+      // In view mode, the "Link Condition" button should not appear
+      // because !isViewMode is a condition in the JSX
+      const buttons = screen.queryAllByText('buttons.linkCondition');
+      expect(buttons.length).toBe(0);
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle empty available medications', () => {
-      const propsNoAvailable = { ...mockProps, availableMedications: [] };
-      renderWithProviders(<ConditionRelationships {...propsNoAvailable} />);
+  describe('Edit Actions', () => {
+    it('should show edit and delete action buttons', () => {
+      render(<ConditionRelationships {...defaultProps} />);
 
-      const linkButton = screen.getByRole('button', { name: /link medication/i });
-      expect(linkButton).toBeDisabled();
+      expect(screen.getByTestId('icon-edit')).toBeInTheDocument();
+      expect(screen.getByTestId('icon-trash')).toBeInTheDocument();
     });
 
-    it('should show count of available medications', () => {
-      renderWithProviders(<ConditionRelationships {...mockProps} />);
-
-      // 3 total medications - 1 already linked = 2 available
-      expect(screen.getByText(/2.*medications available/i)).toBeInTheDocument();
-    });
-
-    it('should handle medication without relevance note', () => {
+    it('should show no relevance note message when note is empty', () => {
       const propsNoNote = {
-        ...mockProps,
-        linkedMedications: [
-          {
-            id: 1,
-            medication_id: 1,
-            medication: { id: 1, medication_name: 'Lisinopril', dosage: '10mg' },
-            relevance_note: null,
-          },
-        ],
+        ...defaultProps,
+        labResultConditions: {
+          42: [
+            {
+              id: 101,
+              condition_id: 1,
+              condition: { id: 1, diagnosis: 'Hypertension', status: 'active' },
+              relevance_note: null,
+            },
+          ],
+        },
+      };
+      render(<ConditionRelationships {...propsNoNote} />);
+
+      expect(screen.getByText('modals.noRelevanceNoteProvided')).toBeInTheDocument();
+    });
+  });
+
+  describe('Data Loading', () => {
+    it('should call fetchLabResultConditions on mount', () => {
+      render(<ConditionRelationships {...defaultProps} />);
+
+      expect(mockFetchLabResultConditions).toHaveBeenCalledWith(42);
+    });
+
+    it('should handle missing labResultConditions gracefully', () => {
+      const propsEmpty = {
+        ...defaultProps,
+        labResultConditions: {},
       };
 
-      renderWithProviders(<ConditionRelationships {...propsNoNote} />);
+      expect(() => {
+        render(<ConditionRelationships {...propsEmpty} />);
+      }).not.toThrow();
 
-      expect(screen.getByText(/no relevance note provided/i)).toBeInTheDocument();
+      expect(screen.getByText('labels.noConditionsLinked')).toBeInTheDocument();
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should render without errors', () => {
+      expect(() => {
+        render(<ConditionRelationships {...defaultProps} />);
+      }).not.toThrow();
+    });
+
+    it('should handle null conditions gracefully', () => {
+      expect(() => {
+        render(<ConditionRelationships {...defaultProps} conditions={[]} />);
+      }).not.toThrow();
     });
   });
 });
