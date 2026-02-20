@@ -35,6 +35,20 @@ vi.mock('react-i18next', () => ({
   },
 }));
 
+// Mock user preferences API globally for all tests
+vi.mock('./services/api/userPreferencesApi', () => ({
+  getUserPreferences: vi.fn(() =>
+    Promise.resolve({
+      unit_system: 'imperial',
+      session_timeout_minutes: 30,
+      date_format: 'mdy',
+      paperless_enabled: false,
+      language: 'en',
+    })
+  ),
+  updateUserPreferences: vi.fn(prefs => Promise.resolve(prefs)),
+}));
+
 // Configure testing library
 configure({
   testIdAttribute: 'data-testid',

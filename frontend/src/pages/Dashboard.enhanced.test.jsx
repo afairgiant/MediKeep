@@ -4,13 +4,70 @@ import { vi } from 'vitest';
  * @jest-environment jsdom
  */
 import React from 'react';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import { MantineProvider } from '@mantine/core';
 import { rest } from 'msw';
 import { server } from '../test-utils/mocks/server';
-import { renderWithPatient } from '../test-utils/render';
 import Dashboard from './Dashboard';
 import * as activityNavigation from '../utils/activityNavigation';
+import AuthContext from '../contexts/AuthContext';
+import { UserPreferencesProvider } from '../contexts/UserPreferencesContext';
+import { AppDataContext } from '../contexts/AppDataContext';
+
+// Mock global data hooks
+vi.mock('../hooks/useGlobalData', () => ({
+  useCurrentPatient: vi.fn(() => ({
+    patient: {
+      id: 1,
+      first_name: 'John',
+      last_name: 'Doe',
+      birth_date: '1990-01-01',
+      gender: 'M',
+    },
+    loading: false,
+  })),
+  useCacheManager: vi.fn(() => ({
+    invalidatePatient: vi.fn(),
+    refreshPatient: vi.fn(),
+    invalidateAll: vi.fn(),
+    setCurrentPatient: vi.fn(),
+  })),
+}));
+
+// Mock components
+vi.mock('../components/medical', () => ({
+  PatientSelector: () => <div data-testid="patient-selector" />,
+}));
+
+vi.mock('../components/common', () => ({
+  GlobalSearch: () => <input data-testid="global-search" />,
+}));
+
+vi.mock('../components/dashboard', () => ({
+  InvitationNotifications: () => <div data-testid="invitation-notifications" />,
+}));
+
+vi.mock('../components', () => ({
+  PageHeader: ({ title }) => <div data-testid="page-header">{title}</div>,
+}));
+
+// Mock services
+vi.mock('../services/logger', () => ({
+  default: {
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+  },
+}));
+
+vi.mock('../services/frontendLogger', () => ({
+  default: {
+    logInfo: vi.fn(),
+    logError: vi.fn(),
+  },
+}));
 
 // Mock the activity navigation functions
 vi.mock('../utils/activityNavigation', () => ({
@@ -22,6 +79,56 @@ vi.mock('../utils/activityNavigation', () => ({
   isActivityClickable: vi.fn(),
   getActivityTooltip: vi.fn(),
 }));
+
+// Helper to render with all providers
+const renderWithProviders = (ui) => {
+  const authUser = {
+    id: 1,
+    username: 'testuser',
+    email: 'test@example.com',
+    full_name: 'Test User',
+    role: 'user',
+  };
+
+  const patient = {
+    id: 1,
+    first_name: 'John',
+    last_name: 'Doe',
+    birth_date: '1990-01-01',
+    gender: 'M',
+  };
+
+  return render(
+    <MemoryRouter>
+      <MantineProvider>
+        <AuthContext.Provider
+          value={{
+            user: authUser,
+            isAuthenticated: true,
+            isLoading: false,
+            shouldShowProfilePrompts: vi.fn(() => false),
+            checkIsFirstLogin: vi.fn(() => false),
+          }}
+        >
+          <UserPreferencesProvider>
+            <AppDataContext.Provider
+              value={{
+                currentPatient: patient,
+                practitioners: [],
+                refreshPatient: vi.fn(),
+                refreshPractitioners: vi.fn(),
+                isLoading: false,
+                error: null,
+              }}
+            >
+              {ui}
+            </AppDataContext.Provider>
+          </UserPreferencesProvider>
+        </AuthContext.Provider>
+      </MantineProvider>
+    </MemoryRouter>
+  );
+};
 
 describe('Enhanced Dashboard with Clickable Activity', () => {
   const mockRecentActivity = [
@@ -80,7 +187,7 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
 
   describe('Activity Item Enhancements', () => {
     test('renders activity items with enhanced UI', async () => {
-      renderWithPatient(<Dashboard />);
+      renderWithProviders(<Dashboard />);
 
       // Wait for activities to load
       await waitFor(() => {
@@ -115,7 +222,7 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
       activityNavigation.isActivityClickable.mockReturnValue(true);
       activityNavigation.getActivityNavigationUrl.mockReturnValue('/medications');
 
-      renderWithPatient(<Dashboard />);
+      renderWithProviders(<Dashboard />);
 
       // Wait for activities to load
       await waitFor(() => {
@@ -141,7 +248,7 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
         .mockReturnValueOnce(true)  // Second activity clickable  
         .mockReturnValueOnce(false); // Third activity (deleted) not clickable
 
-      renderWithPatient(<Dashboard />);
+      renderWithProviders(<Dashboard />);
 
       await waitFor(() => {
         expect(screen.getByText('Removed procedure: Routine Checkup')).toBeInTheDocument();
@@ -159,7 +266,7 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
         .mockReturnValueOnce('blue')    // updated
         .mockReturnValueOnce('red');    // deleted
 
-      renderWithPatient(<Dashboard />);
+      renderWithProviders(<Dashboard />);
 
       await waitFor(() => {
         expect(screen.getByText('Recent Activity')).toBeInTheDocument();
@@ -171,7 +278,7 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
       expect(activityNavigation.getActionBadgeColor).toHaveBeenCalledWith('deleted');
     });
 
-    test('shows activity count when more than 4 activities', async () => {
+    test('shows only first 4 activities when more than 4 available', async () => {
       const manyActivities = Array.from({ length: 8 }, (_, i) => ({
         id: i + 1,
         model_name: 'medication',
@@ -186,10 +293,14 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
         })
       );
 
-      renderWithPatient(<Dashboard />);
+      activityNavigation.formatActivityDescription.mockImplementation((activity) => activity.description);
+
+      renderWithProviders(<Dashboard />);
 
       await waitFor(() => {
-        expect(screen.getByText('Showing 4 of 8')).toBeInTheDocument();
+        expect(screen.getByText('Activity 1')).toBeInTheDocument();
+        expect(screen.getByText('Activity 4')).toBeInTheDocument();
+        expect(screen.queryByText('Activity 5')).not.toBeInTheDocument();
       });
     });
 
@@ -200,7 +311,7 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
         })
       );
 
-      renderWithPatient(<Dashboard />);
+      renderWithProviders(<Dashboard />);
 
       await waitFor(() => {
         expect(screen.getByText('No recent activity')).toBeInTheDocument();
@@ -218,7 +329,7 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
         throw new Error('Navigation error');
       });
 
-      renderWithPatient(<Dashboard />);
+      renderWithProviders(<Dashboard />);
 
       await waitFor(() => {
         expect(screen.getByText('Added new medication: Aspirin 81mg')).toBeInTheDocument();

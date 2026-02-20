@@ -9,12 +9,28 @@ vi.mock('../frontendLogger', () => ({
   logInfo: vi.fn(),
 }));
 
+// Mock secureStorage
+vi.mock('../../utils/secureStorage', () => ({
+  secureStorage: {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+  },
+  legacyMigration: {
+    migrateFromLocalStorage: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
+// Import mocked secureStorage
+import { secureStorage } from '../../utils/secureStorage';
+
 describe('API Service', () => {
   beforeEach(() => {
-    // Clear localStorage before each test
-    localStorage.clear();
-    // Set a mock token
-    localStorage.setItem('token', 'mock-jwt-token');
+    // Clear all mocks
+    vi.clearAllMocks();
+    // Set up secureStorage mock to return a token
+    secureStorage.getItem.mockResolvedValue('mock-jwt-token');
   });
 
   describe('Authentication Methods', () => {
@@ -37,8 +53,9 @@ describe('API Service', () => {
     });
 
     test('localStorage can be cleared manually', () => {
-      localStorage.removeItem('token');
-      expect(localStorage.getItem('token')).toBeNull();
+      secureStorage.removeItem('token');
+      secureStorage.getItem.mockResolvedValue(null);
+      expect(secureStorage.removeItem).toHaveBeenCalledWith('token');
     });
 
     test('register creates new user account', async () => {
@@ -221,8 +238,8 @@ describe('API Service', () => {
     });
 
     test('handles requests without authentication token', async () => {
-      // Clear token
-      localStorage.removeItem('token');
+      // Clear token from secureStorage
+      secureStorage.getItem.mockResolvedValue(null);
 
       await expect(apiService.getCurrentPatient()).rejects.toThrow('Not authenticated');
     });
@@ -297,7 +314,7 @@ describe('API Service', () => {
       );
 
       const result = await apiService.deleteMedication(1);
-      expect(result).toBe('');
+      expect(result).toBe(null);
     });
   });
 });

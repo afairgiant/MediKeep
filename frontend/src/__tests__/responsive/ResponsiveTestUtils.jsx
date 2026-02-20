@@ -3,7 +3,7 @@ import { render, fireEvent, waitFor, screen, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import { MantineProvider } from '@mantine/core';
-import { ResponsiveProvider } from '../../contexts/ResponsiveContext';
+import ResponsiveContext from '../../contexts/ResponsiveContext';
 import logger from '../../services/logger';
 
 /**
@@ -61,9 +61,12 @@ export const mockViewport = (width, height) => {
 
   // Mock window.matchMedia
   window.matchMedia = vi.fn((query) => {
-    const match = query.includes('max-width') 
-      ? width <= parseInt(query.match(/\d+/)[0])
-      : width >= parseInt(query.match(/\d+/)[0]);
+    const digits = query.match(/\d+/);
+    const match = digits
+      ? (query.includes('max-width')
+        ? width <= parseInt(digits[0])
+        : width >= parseInt(digits[0]))
+      : false;
 
     return {
       matches: match,
@@ -126,11 +129,31 @@ export const renderResponsive = (ui, options = {}) => {
   // Set viewport dimensions
   mockViewport(viewport.width, viewport.height);
 
-  const ResponsiveWrapper = ({ children, ...props }) => (
+  const bp = breakpoint || getBreakpointForWidth(viewport.width);
+  const deviceType = getDeviceTypeForBreakpoint(bp);
+  const responsiveValue = {
+    width: viewport.width,
+    height: viewport.height,
+    breakpoint: bp,
+    deviceType,
+    isMobile: deviceType === 'mobile',
+    isTablet: deviceType === 'tablet',
+    isDesktop: deviceType === 'desktop',
+    isAbove: () => false,
+    isBelow: () => false,
+    matches: () => false,
+    isLandscape: viewport.width > viewport.height,
+    isPortrait: viewport.height >= viewport.width,
+    isTouch: deviceType === 'mobile',
+    lastUpdate: Date.now(),
+    updateCount: 0,
+  };
+
+  const ResponsiveWrapper = ({ children }) => (
     <MantineProvider>
-      <ResponsiveProvider {...props}>
+      <ResponsiveContext.Provider value={responsiveValue}>
         {children}
-      </ResponsiveProvider>
+      </ResponsiveContext.Provider>
     </MantineProvider>
   );
 

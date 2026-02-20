@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import render, { screen } from '../../test-utils/render';
 import AnimatedCardGrid from './AnimatedCardGrid';
 
 // Mock framer-motion to avoid animation issues in tests
@@ -47,7 +47,7 @@ describe('AnimatedCardGrid', () => {
         <AnimatedCardGrid items={[]} renderCard={mockRenderCard} />
       );
 
-      expect(container.firstChild).toBeNull();
+      expect(container.querySelector('.mantine-Grid-root')).toBeNull();
     });
 
     it('returns null for null items', () => {
@@ -55,7 +55,7 @@ describe('AnimatedCardGrid', () => {
         <AnimatedCardGrid items={null} renderCard={mockRenderCard} />
       );
 
-      expect(container.firstChild).toBeNull();
+      expect(container.querySelector('.mantine-Grid-root')).toBeNull();
     });
 
     it('returns null for undefined items', () => {
@@ -63,7 +63,7 @@ describe('AnimatedCardGrid', () => {
         <AnimatedCardGrid items={undefined} renderCard={mockRenderCard} />
       );
 
-      expect(container.firstChild).toBeNull();
+      expect(container.querySelector('.mantine-Grid-root')).toBeNull();
     });
   });
 

@@ -402,6 +402,11 @@ describe('useUploadProgress Hook', () => {
         result.current.completeUpload(true, 'Custom success message');
       });
 
+      // Advance timers to flush setTimeout(fn, 0) in completeUpload
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+
       expect(result.current.uploadState.isCompleted).toBe(true);
       expect(result.current.uploadState.canClose).toBe(true);
       expect(result.current.uploadState.endTime).toBeGreaterThan(0);
@@ -435,6 +440,11 @@ describe('useUploadProgress Hook', () => {
         result.current.completeUpload(false);
       });
 
+      // Advance timers to flush setTimeout(fn, 0) in completeUpload
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+
       expect(notifications.show).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Upload Completed with Errors',
@@ -457,6 +467,11 @@ describe('useUploadProgress Hook', () => {
 
       act(() => {
         result.current.completeUpload(false);
+      });
+
+      // Advance timers to flush setTimeout(fn, 0) in completeUpload
+      act(() => {
+        vi.advanceTimersByTime(1);
       });
 
       expect(notifications.show).toHaveBeenCalledWith(

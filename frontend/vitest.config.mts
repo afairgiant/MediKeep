@@ -15,6 +15,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.js',
     css: true,
+    env: {
+      VITE_API_URL: 'http://localhost:8000/api/v1',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

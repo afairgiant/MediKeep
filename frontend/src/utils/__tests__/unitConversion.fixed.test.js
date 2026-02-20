@@ -20,7 +20,7 @@ describe('Weight Conversion - Fixed', () => {
   test('kgToLbs converts with 2 decimal precision', () => {
     expect(convertWeight.kgToLbs(100)).toBe(220.46); // Exactly what the formula gives
     expect(convertWeight.kgToLbs(50)).toBe(110.23);
-    expect(convertWeight.kgToLbs(83)).toBe(183.00);
+    expect(convertWeight.kgToLbs(83)).toBe(182.98);
   });
 
   test('handles very small numbers correctly', () => {
@@ -155,7 +155,7 @@ describe('Specific Value Tests', () => {
   test('weight conversion specific values', () => {
     // Test specific conversions
     expect(convertWeight.lbsToKg(182.98)).toBe(83.0);
-    expect(convertWeight.kgToLbs(83)).toBe(183.00);
+    expect(convertWeight.kgToLbs(83)).toBe(182.98);
   });
 
   test('round trip conversions are close', () => {

@@ -302,6 +302,21 @@ export const handlers = [
     );
   }),
 
+  // Registration status endpoint
+  rest.get(`${API_BASE}/auth/registration-status`, (req, res, ctx) => {
+    return res(ctx.json({ registration_open: true }));
+  }),
+
+  // SSO config endpoint
+  rest.get(`${API_BASE}/auth/sso/config`, (req, res, ctx) => {
+    return res(ctx.json({ enabled: false }));
+  }),
+
+  // Tags suggestions endpoint
+  rest.get(`${API_BASE}/tags/suggestions`, (req, res, ctx) => {
+    return res(ctx.json([]));
+  }),
+
   // Error simulation handlers
   rest.get(`${API_BASE}/test/error`, (req, res, ctx) => {
     return res(

@@ -246,7 +246,8 @@ describe('EquipmentCard', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getByText('Replaced')).toBeInTheDocument();
+      // StatusBadge has no explicit config for "replaced" - falls back to raw status string
+      expect(screen.getByText('replaced')).toBeInTheDocument();
     });
   });
 
@@ -313,7 +314,8 @@ describe('EquipmentCard', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getByText('3')).toBeInTheDocument();
+      // FileCountBadge renders "3 attached" for badge variant
+      expect(screen.getByText('3 attached')).toBeInTheDocument();
     });
 
     test('does not display file count when zero', () => {

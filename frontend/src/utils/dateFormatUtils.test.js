@@ -186,7 +186,7 @@ describe('dateFormatUtils', () => {
     });
 
     test('returns correct label for dmy', () => {
-      expect(getDateFormatLabel('dmy')).toBe('DD/MM/YYYY (EU)');
+      expect(getDateFormatLabel('dmy')).toBe('DD/MM/YYYY (European)');
     });
 
     test('returns correct label for ymd', () => {

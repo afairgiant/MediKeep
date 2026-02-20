@@ -248,11 +248,15 @@ describe('Upload Progress Performance Tests', () => {
       for (let i = 0; i < 20; i++) {
         act(() => {
           result.current.startUpload([{ id: `file-${i}`, name: 'test.pdf', size: 1000 }]);
+        });
+        // resetUpload calls clearInterval
+        act(() => {
           result.current.resetUpload();
         });
       }
 
-      expect(clearIntervalSpy).toHaveBeenCalled();
+      // clearInterval is called during resetUpload
+      expect(clearIntervalSpy).toHaveBeenCalledTimes(20);
       clearIntervalSpy.mockRestore();
     });
 
