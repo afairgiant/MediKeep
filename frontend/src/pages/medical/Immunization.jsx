@@ -50,7 +50,7 @@ import {
 const Immunization = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('immunizations');
   const navigate = useNavigate();
   const responsive = useResponsive();
 
