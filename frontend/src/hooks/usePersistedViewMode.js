@@ -1,15 +1,12 @@
 import { useState, useEffect } from 'react';
 
 const LEGACY_KEY = 'medikeep_viewmode';
-
-function getStorageKey(pageKey) {
-  return `medikeep_viewmode_${pageKey}`;
-}
+const VALID_MODES = new Set(['cards', 'table']);
 
 function readValidMode(key) {
   try {
     const stored = localStorage.getItem(key);
-    if (stored === 'cards' || stored === 'table') {
+    if (VALID_MODES.has(stored)) {
       return stored;
     }
   } catch {
@@ -19,25 +16,12 @@ function readValidMode(key) {
 }
 
 export function usePersistedViewMode(pageKey, defaultMode = 'cards') {
-  const storageKey = getStorageKey(pageKey);
+  const storageKey = `medikeep_viewmode_${pageKey}`;
 
   const [viewMode, setViewMode] = useState(() => {
-    // Try page-specific key first
-    const pageValue = readValidMode(storageKey);
-    if (pageValue) return pageValue;
-
-    // Migrate from legacy global key
-    const legacyValue = readValidMode(LEGACY_KEY);
-    if (legacyValue) {
-      try {
-        localStorage.setItem(storageKey, legacyValue);
-      } catch {
-        // Storage full or unavailable
-      }
-      return legacyValue;
-    }
-
-    return defaultMode;
+    return readValidMode(storageKey)
+      ?? readValidMode(LEGACY_KEY)
+      ?? defaultMode;
   });
 
   useEffect(() => {
