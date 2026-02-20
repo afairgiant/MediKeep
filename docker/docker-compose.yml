@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: ${DB_NAME:-medical_records}
       POSTGRES_USER: ${DB_USER:-medapp}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      # For Docker secrets, use POSTGRES_PASSWORD_FILE instead (built-in to postgres image):
+      #POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - postgres_data-prod:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -60,6 +62,21 @@ services:
 
       #PUID: ${PUID} # Enable if using bind mounts
       #PGID: ${PGID} # Enable if using bind mounts
+
+      # --- Docker Secrets (_FILE pattern) ---
+      # Instead of passing secrets as plain env vars, point to mounted files:
+      #DB_PASSWORD_FILE: /run/secrets/db_password
+      #SECRET_KEY_FILE: /run/secrets/secret_key
+      #SSO_CLIENT_ID_FILE: /run/secrets/sso_client_id
+      #SSO_CLIENT_SECRET_FILE: /run/secrets/sso_client_secret
+      #ADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/admin_password
+      # When using _FILE vars, remove the corresponding plain env var above.
+    # secrets:
+    #   - db_password
+    #   - secret_key
+    #   - sso_client_id
+    #   - sso_client_secret
+    #   - admin_password
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
@@ -90,6 +107,19 @@ volumes:
     driver: local
   app_backups:
     driver: local
+
+# --- Docker Secrets (uncomment to use with Docker Swarm or compose secrets) ---
+# secrets:
+#   db_password:
+#     file: ./secrets/db_password.txt
+#   secret_key:
+#     file: ./secrets/secret_key.txt
+#   sso_client_id:
+#     file: ./secrets/sso_client_id.txt
+#   sso_client_secret:
+#     file: ./secrets/sso_client_secret.txt
+#   admin_password:
+#     file: ./secrets/admin_password.txt
 
 # Network for service communication
 networks:

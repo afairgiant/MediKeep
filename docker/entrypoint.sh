@@ -1,6 +1,41 @@
 #!/usr/bin/sh
 set -e
 
+# --- Docker Secrets _FILE support ---
+# For each sensitive variable, if VAR_FILE is set, read the file into VAR.
+# Direct VAR always takes precedence over VAR_FILE.
+file_env() {
+    local var="$1"
+    local file_var="${var}_FILE"
+    eval local val="\${$var:-}"
+    eval local file_val="\${$file_var:-}"
+
+    if [ -n "$val" ] && [ -n "$file_val" ]; then
+        echo "WARNING: Both $var and $file_var are set; using $var (direct value takes precedence)"
+    elif [ -z "$val" ] && [ -n "$file_val" ]; then
+        if [ -f "$file_val" ]; then
+            val="$(cat "$file_val")"
+            export "$var"="$val"
+        else
+            echo "ERROR: $file_var points to $file_val but the file does not exist"
+        fi
+    fi
+
+    # Unset the _FILE var so secret file paths are not leaked to child processes
+    unset "$file_var" 2>/dev/null || true
+}
+
+# Process all sensitive variables
+file_env DB_USER
+file_env DB_PASSWORD
+file_env DATABASE_URL
+file_env SECRET_KEY
+file_env ADMIN_DEFAULT_PASSWORD
+file_env SSO_CLIENT_ID
+file_env SSO_CLIENT_SECRET
+file_env PAPERLESS_SALT
+file_env NOTIFICATION_ENCRYPTION_SALT
+
 echo "Starting MediKeep..."
 
 # Fix bind mount permissions for upload directories

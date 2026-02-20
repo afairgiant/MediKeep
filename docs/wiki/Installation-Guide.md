@@ -31,7 +31,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}"]
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}',
+        ]
       interval: 60s
       timeout: 10s
       retries: 3
@@ -115,20 +119,20 @@ Default credentials: `admin` / `admin123`
 
 ### Minimum
 
-| Resource | Requirement |
-|----------|-------------|
-| CPU | 2 cores |
-| RAM | 2 GB |
-| Disk | 20 GB |
-| Docker | 24.0+ with Compose v2 |
+| Resource | Requirement           |
+| -------- | --------------------- |
+| CPU      | 2 cores               |
+| RAM      | 2 GB                  |
+| Disk     | 20 GB                 |
+| Docker   | 24.0+ with Compose v2 |
 
 ### Recommended
 
 | Resource | Requirement |
-|----------|-------------|
-| CPU | 4 cores |
-| RAM | 4 GB |
-| Disk | 50 GB SSD |
+| -------- | ----------- |
+| CPU      | 4 cores     |
+| RAM      | 4 GB        |
+| Disk     | 50 GB SSD   |
 
 ---
 
@@ -136,20 +140,26 @@ Default credentials: `admin` / `admin123`
 
 ### Essential Settings
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DB_PASSWORD` | Database password | Yes |
-| `SECRET_KEY` | JWT signing key (use random string) | Yes |
+| Variable      | Description                         | Required |
+| ------------- | ----------------------------------- | -------- |
+| `DB_PASSWORD` | Database password                   | Yes      |
+| `SECRET_KEY`  | JWT signing key (use random string) | Yes      |
 
 ### Optional Settings
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `APP_PORT` | Port to access MediKeep | 8005 |
-| `DB_NAME` | Database name | medical_records |
-| `DB_USER` | Database user | medapp |
-| `LOG_LEVEL` | Logging level | INFO |
-| `TZ` | Timezone | UTC |
+| Variable    | Description             | Default         |
+| ----------- | ----------------------- | --------------- |
+| `APP_PORT`  | Port to access MediKeep | 8005            |
+| `DB_NAME`   | Database name           | medical_records |
+| `DB_USER`   | Database user           | medapp          |
+| `LOG_LEVEL` | Logging level           | INFO            |
+| `TZ`        | Timezone                | UTC             |
+
+### Docker Secrets (Optional)
+
+For Docker, Docker Swarm or Kubernetes, you can pass sensitive values via mounted files instead of plain environment variables. Set `VAR_FILE=/run/secrets/filename` for any of: `DB_USER`, `DB_PASSWORD`, `DATABASE_URL`, `SECRET_KEY`, `ADMIN_DEFAULT_PASSWORD`, `SSO_CLIENT_ID`, `SSO_CLIENT_SECRET`, `PAPERLESS_SALT`, `NOTIFICATION_ENCRYPTION_SALT`.
+
+See [Deployment Guide](Deployment-Guide#docker-secrets-_file-pattern) for full details and examples.
 
 ### SSO Configuration (Optional)
 
@@ -172,6 +182,7 @@ See [SSO Quick Start](SSO-Quick-Start) for detailed setup.
 ### 1. Change Default Password
 
 Immediately after first login:
+
 1. Click your username in the top right
 2. Go to **Profile** → **Security**
 3. Change your password
@@ -210,6 +221,7 @@ docker compose up -d
 ### Container won't start
 
 Check logs:
+
 ```bash
 docker compose logs medikeep-app
 docker compose logs postgres
@@ -226,6 +238,7 @@ docker compose logs postgres
 ### Port already in use
 
 Change `APP_PORT` in your `.env`:
+
 ```bash
 APP_PORT=8006
 ```

@@ -606,6 +606,74 @@ PGID=1000
 TZ=Europe/London
 ```
 
+### Docker Secrets (`_FILE` Pattern)
+
+MediKeep supports the Docker `_FILE` convention used by the official PostgreSQL, MySQL, and Redis images. Instead of passing secrets as plain environment variables, you can point to a file containing the secret value. This is the recommended approach for Docker Swarm and Kubernetes deployments.
+
+**How it works:** For any supported variable (e.g., `DB_PASSWORD`), set `DB_PASSWORD_FILE=/run/secrets/db_password` and MediKeep will read the secret from that file at startup.
+
+**Precedence:** If both `VAR` and `VAR_FILE` are set, the direct `VAR` value wins and a warning is logged.
+
+| `_FILE` Variable | Corresponding Variable |
+|---|---|
+| `DB_USER_FILE` | `DB_USER` |
+| `DB_PASSWORD_FILE` | `DB_PASSWORD` |
+| `DATABASE_URL_FILE` | `DATABASE_URL` |
+| `SECRET_KEY_FILE` | `SECRET_KEY` |
+| `ADMIN_DEFAULT_PASSWORD_FILE` | `ADMIN_DEFAULT_PASSWORD` |
+| `SSO_CLIENT_ID_FILE` | `SSO_CLIENT_ID` |
+| `SSO_CLIENT_SECRET_FILE` | `SSO_CLIENT_SECRET` |
+| `PAPERLESS_SALT_FILE` | `PAPERLESS_SALT` |
+| `NOTIFICATION_ENCRYPTION_SALT_FILE` | `NOTIFICATION_ENCRYPTION_SALT` |
+
+#### Example: Docker Compose with File-Based Secrets
+
+1. **Create secret files:**
+
+```bash
+mkdir -p secrets
+echo -n "my-database-password" > secrets/db_password.txt
+echo -n "my-jwt-secret-key-min-32-chars-long" > secrets/secret_key.txt
+chmod 600 secrets/*.txt
+```
+
+2. **Update `docker-compose.yml`:**
+
+```yaml
+services:
+  postgres:
+    image: postgres:15.8-alpine
+    environment:
+      POSTGRES_DB: medical_records
+      POSTGRES_USER: medapp
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+
+  medikeep-app:
+    image: ghcr.io/afairgiant/medikeep:latest
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: medical_records
+      DB_USER: medapp
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      SECRET_KEY_FILE: /run/secrets/secret_key
+    secrets:
+      - db_password
+      - secret_key
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  secret_key:
+    file: ./secrets/secret_key.txt
+```
+
+The secrets are processed in two layers:
+- **Shell entrypoint** resolves `_FILE` vars before Python starts (critical for `DATABASE_URL` which is needed at import time)
+- **Python helper** (`app/core/secrets.py`) handles any remaining `_FILE` lookups within the application
+
 ## SSL/HTTPS Setup
 
 ### Using Self-Signed Certificates (Development/Testing)
