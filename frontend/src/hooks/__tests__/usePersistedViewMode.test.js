@@ -134,6 +134,20 @@ describe('usePersistedViewMode', () => {
     expect(localStorage.setItem).toHaveBeenCalledWith(storageKey('medications'), 'table');
   });
 
+  test('throws if pageKey is missing or empty', () => {
+    expect(() => {
+      renderHook(() => usePersistedViewMode());
+    }).toThrow('usePersistedViewMode: "pageKey" must be a non-empty string');
+
+    expect(() => {
+      renderHook(() => usePersistedViewMode(''));
+    }).toThrow('usePersistedViewMode: "pageKey" must be a non-empty string');
+
+    expect(() => {
+      renderHook(() => usePersistedViewMode('  '));
+    }).toThrow('usePersistedViewMode: "pageKey" must be a non-empty string');
+  });
+
   test('prefers page-specific key over legacy global key', () => {
     localStorage.getItem.mockImplementation((key) => {
       if (key === storageKey('medications')) return 'cards';
