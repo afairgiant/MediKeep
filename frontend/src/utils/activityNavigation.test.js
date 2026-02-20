@@ -35,12 +35,12 @@ describe('Activity Navigation Utils', () => {
   describe('getActivityNavigationUrl', () => {
     it('should return correct URL with hash for medication', () => {
       const activity = { id: 1, model_name: 'medication', action: 'created' };
-      expect(getActivityNavigationUrl(activity)).toBe('/medications#record-1');
+      expect(getActivityNavigationUrl(activity)).toBe('/medications?view=1');
     });
 
     it('should return correct URL with hash for lab_result', () => {
       const activity = { id: 2, model_name: 'lab_result', action: 'updated' };
-      expect(getActivityNavigationUrl(activity)).toBe('/lab-results#record-2');
+      expect(getActivityNavigationUrl(activity)).toBe('/lab-results?view=2');
     });
 
     it('should return URL without hash when includeHash is false', () => {
@@ -203,7 +203,7 @@ describe('Activity Navigation Utils', () => {
     it('should return clickable tooltip for valid activities', () => {
       const activity = { id: 1, model_name: 'medication', action: 'created' };
       const tooltip = getActivityTooltip(activity);
-      expect(tooltip).toContain('Click to view');
+      expect(tooltip).toContain('Click to go to');
       expect(tooltip).toContain('medication');
     });
 

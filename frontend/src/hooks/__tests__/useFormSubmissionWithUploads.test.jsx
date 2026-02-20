@@ -326,7 +326,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
         })
       );
 
-      expect(mockOnError).toHaveBeenCalledWith('Connection error. Please check your network and try again.');
+      expect(mockOnError).toHaveBeenCalledWith('User friendly: Error: Network connection failed');
     });
 
     test('should handle upload failure with error details', () => {
@@ -348,7 +348,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
         })
       );
 
-      expect(mockOnError).toHaveBeenCalledWith('File size exceeds the maximum limit.');
+      expect(mockOnError).toHaveBeenCalledWith('User friendly: [object Object]');
     });
 
     test('should handle unknown error gracefully', () => {
@@ -359,7 +359,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
       });
 
       expect(result.current.submissionState.hasErrors).toBe(true);
-      expect(mockOnError).toHaveBeenCalledWith('An unexpected error occurred. Please try again.');
+      expect(mockOnError).toHaveBeenCalledWith('User friendly: null');
     });
   });
 

@@ -48,6 +48,20 @@ describe('Responsive Modal and Layout Tests', () => {
   const mockOnClose = vi.fn();
   const mockOnOpen = vi.fn();
 
+  // Define defaultSelectProps at the top level so it's available to all tests
+  const selectOptions = [
+    'Option 1',
+    'Option 2',
+    'Option 3'
+  ];
+
+  const defaultSelectProps = {
+    options: selectOptions,
+    placeholder: 'Select an option',
+    onChange: vi.fn(),
+    value: ''
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -310,19 +324,6 @@ describe('Responsive Modal and Layout Tests', () => {
   });
 
   describe('ResponsiveSelect Component', () => {
-    const selectOptions = [
-      'Option 1',
-      'Option 2', 
-      'Option 3'
-    ];
-
-    const defaultSelectProps = {
-      options: selectOptions,
-      placeholder: 'Select an option',
-      onChange: vi.fn(),
-      value: ''
-    };
-
     testAtAllBreakpoints(
       <ResponsiveSelect {...defaultSelectProps} />,
       (breakpoint, viewport) => {

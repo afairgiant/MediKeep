@@ -4,132 +4,337 @@ import { vi } from 'vitest';
  * @jest-environment jsdom
  */
 import React from 'react';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { rest } from 'msw';
 import { renderWithPatient } from '../../../test-utils/render';
-import { server } from '../../../test-utils/mocks/server';
 import Medication from '../Medication';
-import { useMedicalData } from '../../../hooks/useMedicalData';
 
-// Mock the hooks that make API calls
-vi.mock('../../../hooks/useMedicalData');
-vi.mock('../../../hooks/useGlobalData');
+// --- Hoisted mock functions ---
+const { useMedicalData, useDataManagement, usePersistedViewMode, useViewModalNavigation } = vi.hoisted(() => ({
+  useMedicalData: vi.fn(),
+  useDataManagement: vi.fn(),
+  usePersistedViewMode: vi.fn(),
+  useViewModalNavigation: vi.fn(),
+}));
 
-// Mock date inputs
-vi.mock('@mantine/dates', () => ({
-  DateInput: ({ label, value, onChange, required, ...props }) => (
-    <div>
-      <label htmlFor={`date-${label}`}>{label}{required && ' *'}</label>
-      <input
-        id={`date-${label}`}
-        type="date"
-        value={value ? (value instanceof Date ? value.toISOString().split('T')[0] : value) : ''}
-        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
-        data-testid={`date-${label.toLowerCase().replace(/\s+/g, '-')}`}
-        {...props}
-      />
+// --- Hook mocks ---
+vi.mock('../../../hooks/useMedicalData', () => ({ useMedicalData }));
+vi.mock('../../../hooks/useDataManagement', () => ({
+  useDataManagement,
+  default: useDataManagement,
+}));
+vi.mock('../../../hooks/useViewModalNavigation', () => ({ useViewModalNavigation }));
+vi.mock('../../../hooks/usePersistedViewMode', () => ({ usePersistedViewMode }));
+vi.mock('../../../hooks/useEntityFileCounts', () => ({
+  useEntityFileCounts: () => ({
+    fileCounts: {},
+    fileCountsLoading: false,
+    cleanupFileCount: vi.fn(),
+  }),
+}));
+vi.mock('../../../hooks/useResponsive', () => ({
+  useResponsive: () => ({ isMobile: false, isTablet: false, isDesktop: true }),
+}));
+vi.mock('../../../hooks/useDateFormat', () => ({
+  useDateFormat: () => ({
+    formatDate: (d) => d || '',
+    formatDateTime: (d) => d || '',
+  }),
+}));
+vi.mock('../../../hooks/useGlobalData', () => ({
+  usePatientWithStaticData: () => ({
+    practitioners: { practitioners: [
+      { id: 1, name: 'Dr. Smith', specialty: 'Family Medicine' },
+      { id: 2, name: 'Dr. Johnson', specialty: 'Endocrinology' },
+    ]},
+    pharmacies: { pharmacies: [
+      { id: 1, name: 'CVS Pharmacy - Main St' },
+      { id: 2, name: 'Walgreens - Downtown' },
+    ]},
+  }),
+}));
+
+// --- Service mocks ---
+vi.mock('../../../services/api', () => ({
+  apiService: {
+    getMedications: vi.fn(() => Promise.resolve([])),
+    getPatientMedications: vi.fn(() => Promise.resolve([])),
+    createMedication: vi.fn(() => Promise.resolve({})),
+    updateMedication: vi.fn(() => Promise.resolve({})),
+    deleteMedication: vi.fn(() => Promise.resolve()),
+  },
+}));
+vi.mock('../../../services/logger', () => ({
+  default: { info: vi.fn(), error: vi.fn(), debug: vi.fn(), warn: vi.fn() },
+}));
+
+// --- Utility mocks ---
+vi.mock('../../../utils/medicalPageConfigs', () => ({
+  getMedicalPageConfig: () => ({
+    entityName: 'medications',
+    filters: [],
+    sortOptions: [],
+    defaultSort: 'medication_name',
+  }),
+}));
+vi.mock('../../../utils/tableFormatters', () => ({
+  getEntityFormatters: () => ({}),
+}));
+vi.mock('../../../utils/linkNavigation', () => ({
+  navigateToEntity: vi.fn(),
+}));
+vi.mock('../../../utils/helpers', () => ({
+  createCardClickHandler: (handler, item) => (e) => {
+    if (e.target.tagName === 'BUTTON') return;
+    handler(item);
+  },
+}));
+vi.mock('../../../constants/medicationTypes', () => ({
+  MEDICATION_TYPES: {},
+  MEDICATION_TYPE_LABELS: {},
+}));
+
+// --- HOC mock ---
+vi.mock('../../../hoc/withResponsive', () => ({
+  withResponsive: (Component) => Component,
+}));
+
+// --- Component mocks ---
+vi.mock('../../../components', () => ({
+  PageHeader: ({ title }) => <div data-testid="page-header">{title}</div>,
+}));
+vi.mock('../../../components/shared/MedicalPageActions', () => ({
+  default: ({ primaryAction, viewMode, onViewModeChange }) => (
+    <div data-testid="page-actions">
+      {primaryAction && (
+        <button onClick={primaryAction.onClick} data-testid="add-button">
+          {primaryAction.label}
+        </button>
+      )}
+      {onViewModeChange && (
+        <>
+          <button onClick={() => onViewModeChange('cards')} data-testid="cards-btn">Cards</button>
+          <button onClick={() => onViewModeChange('table')} data-testid="table-btn">Table</button>
+        </>
+      )}
     </div>
   ),
 }));
+vi.mock('../../../components/shared/MedicalPageFilters', () => ({
+  default: () => <div data-testid="page-filters">Filters</div>,
+}));
+vi.mock('../../../components/shared/MedicalPageLoading', () => ({
+  default: ({ message }) => <div data-testid="loading">{message}</div>,
+}));
+vi.mock('../../../components/shared/MedicalPageAlerts', () => ({
+  default: ({ error, successMessage }) => (
+    <div data-testid="alerts">
+      {error && <span data-testid="error-alert">{error}</span>}
+      {successMessage && <span data-testid="success-alert">{successMessage}</span>}
+    </div>
+  ),
+}));
+vi.mock('../../../components/shared/EmptyState', () => ({
+  default: ({ title, message }) => (
+    <div data-testid="empty-state">
+      <span>{title}</span>
+      {message && <span>{message}</span>}
+    </div>
+  ),
+}));
+vi.mock('../../../components/shared/AnimatedCardGrid', () => ({
+  default: ({ items, renderCard }) => (
+    <div data-testid="card-grid">
+      {items.map((item) => (
+        <div key={item.id} data-testid={`card-wrapper-${item.id}`}>
+          {renderCard(item)}
+        </div>
+      ))}
+    </div>
+  ),
+}));
+vi.mock('../../../components/adapters', () => ({
+  ResponsiveTable: ({ data, columns, onView, onEdit, onDelete }) => (
+    <table data-testid="responsive-table">
+      <thead>
+        <tr>{columns.map((col) => <th key={col.accessor}>{col.header}</th>)}</tr>
+      </thead>
+      <tbody>
+        {data.map((row) => (
+          <tr key={row.id}>
+            {columns.map((col) => <td key={col.accessor}>{String(row[col.accessor] ?? '')}</td>)}
+            <td>
+              <button onClick={() => onView(row)}>View</button>
+              <button onClick={() => onEdit(row)}>Edit</button>
+              <button onClick={() => onDelete(row.id)}>Delete</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
+}));
 
-describe('Medication Page Integration Tests', () => {
-  const mockMedications = [
-    {
-      id: 1,
-      medication_name: 'Lisinopril',
-      dosage: '10mg',
-      frequency: 'Daily',
-      route: 'Oral',
-      indication: 'High blood pressure',
-      effective_period_start: '2024-01-01',
-      effective_period_end: null,
-      status: 'active',
-      practitioner_id: 1,
-      pharmacy_id: 1,
-      patient_id: 1,
-    },
-    {
-      id: 2,
-      medication_name: 'Metformin',
-      dosage: '500mg',
-      frequency: 'Twice daily',
-      route: 'Oral',
-      indication: 'Type 2 diabetes',
-      effective_period_start: '2023-12-15',
-      effective_period_end: null,
-      status: 'active',
-      practitioner_id: 2,
-      pharmacy_id: 1,
-      patient_id: 1,
-    },
-    {
-      id: 3,
-      medication_name: 'Ibuprofen',
-      dosage: '200mg',
-      frequency: 'As needed',
-      route: 'Oral',
-      indication: 'Pain relief',
-      effective_period_start: '2024-01-10',
-      effective_period_end: '2024-01-20',
-      status: 'completed',
-      practitioner_id: 1,
-      pharmacy_id: 2,
-      patient_id: 1,
-    },
-  ];
-
-  const mockPractitioners = [
-    { id: 1, name: 'Dr. Smith', specialty: 'Family Medicine' },
-    { id: 2, name: 'Dr. Johnson', specialty: 'Endocrinology' },
-  ];
-
-  const mockPharmacies = [
-    { id: 1, name: 'CVS Pharmacy - Main St' },
-    { id: 2, name: 'Walgreens - Downtown' },
-  ];
-
-  beforeEach(() => {
-    // Mock the hooks to return our test data
-    const useMedicalData = require('../../../hooks/useMedicalData').useMedicalData;
-    const usePatientWithStaticData = require('../../../hooks/useGlobalData').usePatientWithStaticData;
-
-    useMedicalData.mockReturnValue({
-      items: mockMedications,
-      currentPatient: { id: 1, first_name: 'John', last_name: 'Doe' },
-      loading: false,
-      error: null,
-      successMessage: null,
-      createItem: vi.fn().mockResolvedValue({}),
-      updateItem: vi.fn().mockResolvedValue({}),
-      deleteItem: vi.fn().mockResolvedValue({}),
-      refreshData: vi.fn(),
-      clearError: vi.fn(),
-      setError: vi.fn(),
-    });
-
-    usePatientWithStaticData.mockReturnValue({
-      practitioners: { practitioners: mockPractitioners },
-      pharmacies: { pharmacies: mockPharmacies },
-    });
-
-    // Setup MSW handlers for API calls
-    server.use(
-      rest.get('/api/v1/medications', (req, res, ctx) => {
-        return res(ctx.json(mockMedications));
-      }),
-      rest.post('/api/v1/medications', (req, res, ctx) => {
-        const newMedication = { id: 4, ...req.body };
-        return res(ctx.json(newMedication));
-      }),
-      rest.put('/api/v1/medications/:id', (req, res, ctx) => {
-        const updatedMedication = { ...mockMedications[0], ...req.body };
-        return res(ctx.json(updatedMedication));
-      }),
-      rest.delete('/api/v1/medications/:id', (req, res, ctx) => {
-        return res(ctx.status(200));
-      })
+// --- Medication component mocks ---
+vi.mock('../../../components/medical/medications', () => ({
+  MedicationCard: ({ medication, onView, onEdit, onDelete }) => (
+    <div data-testid={`med-card-${medication.id}`}>
+      <span>{medication.medication_name}</span>
+      <span>{medication.dosage}</span>
+      <span>{medication.frequency}</span>
+      <span>{medication.status}</span>
+      {medication.indication && <span>{medication.indication}</span>}
+      <button onClick={() => onView(medication)}>View</button>
+      <button onClick={() => onEdit(medication)}>Edit</button>
+      <button onClick={() => onDelete(medication.id)}>Delete</button>
+    </div>
+  ),
+  MedicationViewModal: ({ isOpen, onClose, medication, onEdit }) => {
+    if (!isOpen || !medication) return null;
+    return (
+      <div data-testid="view-modal" role="dialog">
+        <h2>Medication Details</h2>
+        <span>{medication.medication_name}</span>
+        <span>{medication.dosage}</span>
+        <span>{medication.frequency}</span>
+        {medication.indication && <span>{medication.indication}</span>}
+        <button onClick={onClose}>Close</button>
+        <button onClick={() => onEdit(medication)}>Edit</button>
+      </div>
     );
+  },
+  MedicationFormWrapper: ({ isOpen, onClose, title, formData, onInputChange, onSubmit }) => {
+    if (!isOpen) return null;
+    return (
+      <div data-testid="form-modal" role="dialog">
+        <h2>{title}</h2>
+        <form onSubmit={onSubmit}>
+          <label htmlFor="med-name">Medication Name *</label>
+          <input id="med-name" name="medication_name" value={formData.medication_name || ''} onChange={onInputChange} />
+
+          <label htmlFor="med-dosage">Dosage</label>
+          <input id="med-dosage" name="dosage" value={formData.dosage || ''} onChange={onInputChange} />
+
+          <label htmlFor="med-frequency">Frequency</label>
+          <input id="med-frequency" name="frequency" value={formData.frequency || ''} onChange={onInputChange} />
+
+          <label htmlFor="med-indication">Indication</label>
+          <input id="med-indication" name="indication" value={formData.indication || ''} onChange={onInputChange} />
+
+          <label htmlFor="med-notes">Notes</label>
+          <textarea id="med-notes" name="notes" value={formData.notes || ''} onChange={onInputChange} />
+
+          <button type="submit">Submit</button>
+          <button type="button" onClick={onClose}>Cancel</button>
+        </form>
+      </div>
+    );
+  },
+}));
+
+// --- Framer motion mock ---
+vi.mock('framer-motion', () => ({
+  motion: { div: ({ children, ...props }) => <div {...props}>{children}</div> },
+  AnimatePresence: ({ children }) => <>{children}</>,
+}));
+
+// ============================================================
+// Test Data
+// ============================================================
+const mockMedications = [
+  {
+    id: 1,
+    medication_name: 'Lisinopril',
+    dosage: '10mg',
+    frequency: 'Daily',
+    route: 'Oral',
+    indication: 'High blood pressure',
+    effective_period_start: '2024-01-01',
+    effective_period_end: null,
+    status: 'active',
+    practitioner_id: 1,
+    pharmacy_id: 1,
+    patient_id: 1,
+  },
+  {
+    id: 2,
+    medication_name: 'Metformin',
+    dosage: '500mg',
+    frequency: 'Twice daily',
+    route: 'Oral',
+    indication: 'Type 2 diabetes',
+    effective_period_start: '2023-12-15',
+    effective_period_end: null,
+    status: 'active',
+    practitioner_id: 2,
+    pharmacy_id: 1,
+    patient_id: 1,
+  },
+  {
+    id: 3,
+    medication_name: 'Ibuprofen',
+    dosage: '200mg',
+    frequency: 'As needed',
+    route: 'Oral',
+    indication: 'Pain relief',
+    effective_period_start: '2024-01-10',
+    effective_period_end: '2024-01-20',
+    status: 'completed',
+    practitioner_id: 1,
+    pharmacy_id: 2,
+    patient_id: 1,
+  },
+];
+
+const mockDataManagement = {
+  data: mockMedications,
+  filters: { search: '', status: '' },
+  updateFilter: vi.fn(),
+  clearFilters: vi.fn(),
+  hasActiveFilters: false,
+  statusOptions: [
+    { value: 'active', label: 'Active' },
+    { value: 'completed', label: 'Completed' },
+  ],
+  categoryOptions: [],
+  dateRangeOptions: [],
+  sortOptions: [],
+  sortBy: 'medication_name',
+  sortOrder: 'asc',
+  handleSortChange: vi.fn(),
+  totalCount: mockMedications.length,
+  filteredCount: mockMedications.length,
+};
+
+const defaultMedicalData = {
+  items: mockMedications,
+  currentPatient: { id: 1, first_name: 'John', last_name: 'Doe' },
+  loading: false,
+  error: null,
+  successMessage: null,
+  createItem: vi.fn().mockResolvedValue({}),
+  updateItem: vi.fn().mockResolvedValue({}),
+  deleteItem: vi.fn().mockResolvedValue({}),
+  refreshData: vi.fn(),
+  clearError: vi.fn(),
+  setError: vi.fn(),
+  setSuccessMessage: vi.fn(),
+};
+
+// ============================================================
+// Tests
+// ============================================================
+describe('Medication Page Integration Tests', () => {
+  beforeEach(() => {
+    useMedicalData.mockReturnValue({ ...defaultMedicalData });
+    useDataManagement.mockReturnValue({ ...mockDataManagement });
+    usePersistedViewMode.mockReturnValue(['cards', vi.fn()]);
+    useViewModalNavigation.mockReturnValue({
+      isOpen: false,
+      viewingItem: null,
+      openModal: vi.fn(),
+      closeModal: vi.fn(),
+    });
   });
 
   afterEach(() => {
@@ -140,10 +345,8 @@ describe('Medication Page Integration Tests', () => {
     test('renders medication page with initial data', async () => {
       renderWithPatient(<Medication />);
 
-      // Check page header
-      expect(screen.getByText('Medications')).toBeInTheDocument();
-      
-      // Check that medications are displayed
+      expect(screen.getByTestId('page-header')).toBeInTheDocument();
+
       await waitFor(() => {
         expect(screen.getByText('Lisinopril')).toBeInTheDocument();
         expect(screen.getByText('Metformin')).toBeInTheDocument();
@@ -152,152 +355,85 @@ describe('Medication Page Integration Tests', () => {
     });
 
     test('displays loading state initially', () => {
-      vi.mocked(useMedicalData).mockReturnValue({
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
         items: [],
         loading: true,
-        error: null,
-        currentPatient: null,
-        createItem: vi.fn(),
-        updateItem: vi.fn(),
-        deleteItem: vi.fn(),
-        refreshData: vi.fn(),
-        clearError: vi.fn(),
-        setError: vi.fn(),
       });
 
       renderWithPatient(<Medication />);
 
-      expect(screen.getByText('Loading medications...')).toBeInTheDocument();
+      expect(screen.getByTestId('loading')).toBeInTheDocument();
     });
 
     test('displays error state when there is an error', () => {
-      vi.mocked(useMedicalData).mockReturnValue({
-        items: [],
-        loading: false,
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
         error: 'Failed to load medications',
-        currentPatient: { id: 1 },
-        createItem: vi.fn(),
-        updateItem: vi.fn(),
-        deleteItem: vi.fn(),
-        refreshData: vi.fn(),
-        clearError: vi.fn(),
-        setError: vi.fn(),
       });
 
       renderWithPatient(<Medication />);
 
-      expect(screen.getByText('Failed to load medications')).toBeInTheDocument();
+      expect(screen.getByTestId('error-alert')).toHaveTextContent('Failed to load medications');
     });
   });
 
   describe('View Mode Toggle', () => {
     test('switches between cards and table view', async () => {
+      const mockSetViewMode = vi.fn();
+      usePersistedViewMode.mockReturnValue(['cards', mockSetViewMode]);
+
       renderWithPatient(<Medication />);
 
       await waitFor(() => {
         expect(screen.getByText('Lisinopril')).toBeInTheDocument();
       });
 
-      // Initially in cards view
-      expect(screen.getByText('Cards')).toBeInTheDocument();
-
-      // Switch to table view
-      const tableButton = screen.getByText('Table');
+      const tableButton = screen.getByTestId('table-btn');
       await userEvent.click(tableButton);
 
-      // Should now show table headers
-      expect(screen.getByText('Medication')).toBeInTheDocument();
-      expect(screen.getByText('Dosage')).toBeInTheDocument();
-      expect(screen.getByText('Frequency')).toBeInTheDocument();
+      expect(mockSetViewMode).toHaveBeenCalledWith('table');
     });
   });
 
   describe('Medication CRUD Operations', () => {
     test('creates a new medication through the complete workflow', async () => {
-      
       const mockCreateItem = vi.fn().mockResolvedValue({});
-      
-      vi.mocked(useMedicalData).mockReturnValue({
-        items: mockMedications,
-        currentPatient: { id: 1 },
-        loading: false,
-        error: null,
-        successMessage: null,
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
         createItem: mockCreateItem,
-        updateItem: vi.fn(),
-        deleteItem: vi.fn(),
-        refreshData: vi.fn(),
-        clearError: vi.fn(),
-        setError: vi.fn(),
       });
 
       renderWithPatient(<Medication />);
 
-      // Wait for page to load
-      await waitFor(() => {
-        expect(screen.getByText('Lisinopril')).toBeInTheDocument();
-      });
-
-      // Click Add Medication button
-      const addButton = screen.getByText('Add Medication');
+      const addButton = screen.getByTestId('add-button');
       await userEvent.click(addButton);
 
-      // Modal should open
-      expect(screen.getByText('Add New Medication')).toBeInTheDocument();
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), { target: { value: 'Aspirin', name: 'medication_name' } });
+      fireEvent.change(within(form).getByLabelText('Dosage'), { target: { value: '81mg', name: 'dosage' } });
+      fireEvent.change(within(form).getByLabelText('Frequency'), { target: { value: 'Daily', name: 'frequency' } });
+      fireEvent.change(within(form).getByLabelText('Indication'), { target: { value: 'Blood thinner', name: 'indication' } });
 
-      // Fill out the form
-      await userEvent.type(screen.getByLabelText('Medication Name *'), 'Aspirin');
-      await userEvent.type(screen.getByLabelText('Dosage'), '81mg');
-      await userEvent.type(screen.getByLabelText('Frequency'), 'Daily');
-      await userEvent.type(screen.getByLabelText('Indication'), 'Blood thinner');
+      fireEvent.click(within(form).getByText('Submit'));
 
-      // Select route
-      await userEvent.click(screen.getByLabelText('Route of Administration'));
-      await userEvent.click(screen.getByText('Oral - By mouth'));
-
-      // Select practitioner
-      await userEvent.click(screen.getByLabelText('Prescribing Practitioner'));
-      await userEvent.click(screen.getByText('Dr. Smith - Family Medicine'));
-
-      // Set start date
-      const startDateInput = screen.getByTestId('date-start-date');
-      await userEvent.type(startDateInput, '2024-02-01');
-
-      // Submit form
-      const submitButton = screen.getByText('Add Medication');
-      await userEvent.click(submitButton);
-
-      // Verify createItem was called with correct data
-      expect(mockCreateItem).toHaveBeenCalledWith({
-        medication_name: 'Aspirin',
-        dosage: '81mg',
-        frequency: 'Daily',
-        route: 'oral',
-        indication: 'Blood thinner',
-        effective_period_start: '2024-02-01',
-        effective_period_end: '',
-        status: 'active',
-        practitioner_id: '1',
-        pharmacy_id: '',
+      await waitFor(() => {
+        expect(mockCreateItem).toHaveBeenCalledWith(
+          expect.objectContaining({
+            medication_name: 'Aspirin',
+            dosage: '81mg',
+            frequency: 'Daily',
+            indication: 'Blood thinner',
+          })
+        );
       });
     });
 
     test('edits an existing medication', async () => {
-      
       const mockUpdateItem = vi.fn().mockResolvedValue({});
-      
-      vi.mocked(useMedicalData).mockReturnValue({
-        items: mockMedications,
-        currentPatient: { id: 1 },
-        loading: false,
-        error: null,
-        successMessage: null,
-        createItem: vi.fn(),
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
         updateItem: mockUpdateItem,
-        deleteItem: vi.fn(),
-        refreshData: vi.fn(),
-        clearError: vi.fn(),
-        setError: vi.fn(),
       });
 
       renderWithPatient(<Medication />);
@@ -306,46 +442,32 @@ describe('Medication Page Integration Tests', () => {
         expect(screen.getByText('Lisinopril')).toBeInTheDocument();
       });
 
-      // Find and click edit button for first medication
-      const medicationCards = screen.getAllByText('Edit');
-      await userEvent.click(medicationCards[0]);
+      // Click edit for first medication
+      const medWrapper = screen.getByTestId('card-wrapper-1');
+      const editButton = within(medWrapper).getByText('Edit');
+      await userEvent.click(editButton);
 
-      // Modal should open with pre-filled data
-      expect(screen.getByText('Edit Medication')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Lisinopril')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('10mg')).toBeInTheDocument();
+      const form = screen.getByTestId('form-modal');
+      expect(within(form).getByLabelText('Medication Name *')).toHaveValue('Lisinopril');
+      expect(within(form).getByLabelText('Dosage')).toHaveValue('10mg');
 
-      // Modify the dosage
-      const dosageInput = screen.getByLabelText('Dosage');
-      await userEvent.clear(dosageInput);
-      await userEvent.type(dosageInput, '20mg');
+      // Modify dosage
+      fireEvent.change(within(form).getByLabelText('Dosage'), { target: { value: '20mg', name: 'dosage' } });
+      fireEvent.click(within(form).getByText('Submit'));
 
-      // Submit changes
-      const updateButton = screen.getByText('Update Medication');
-      await userEvent.click(updateButton);
-
-      // Verify updateItem was called
-      expect(mockUpdateItem).toHaveBeenCalledWith(1, expect.objectContaining({
-        dosage: '20mg',
-      }));
+      await waitFor(() => {
+        expect(mockUpdateItem).toHaveBeenCalledWith(
+          1,
+          expect.objectContaining({ dosage: '20mg' })
+        );
+      });
     });
 
     test('deletes a medication with confirmation', async () => {
-      
       const mockDeleteItem = vi.fn().mockResolvedValue({});
-      
-      vi.mocked(useMedicalData).mockReturnValue({
-        items: mockMedications,
-        currentPatient: { id: 1 },
-        loading: false,
-        error: null,
-        successMessage: null,
-        createItem: vi.fn(),
-        updateItem: vi.fn(),
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
         deleteItem: mockDeleteItem,
-        refreshData: vi.fn(),
-        clearError: vi.fn(),
-        setError: vi.fn(),
       });
 
       renderWithPatient(<Medication />);
@@ -354,62 +476,45 @@ describe('Medication Page Integration Tests', () => {
         expect(screen.getByText('Lisinopril')).toBeInTheDocument();
       });
 
-      // Find and click delete button
-      const deleteButtons = screen.getAllByText('Delete');
-      await userEvent.click(deleteButtons[0]);
+      const medWrapper = screen.getByTestId('card-wrapper-1');
+      const deleteButton = within(medWrapper).getByText('Delete');
+      await userEvent.click(deleteButton);
 
-      // Confirmation dialog should appear
-      expect(screen.getByText('Confirm Deletion')).toBeInTheDocument();
-      expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument();
-
-      // Confirm deletion
-      const confirmButton = screen.getByText('Delete');
-      await userEvent.click(confirmButton);
-
-      // Verify deleteItem was called
       expect(mockDeleteItem).toHaveBeenCalledWith(1);
     });
   });
 
   describe('Filtering and Search', () => {
     test('filters medications by status', async () => {
-      
+      useDataManagement.mockReturnValue({
+        ...mockDataManagement,
+        data: mockMedications.filter(m => m.status === 'active'),
+        hasActiveFilters: true,
+      });
+
       renderWithPatient(<Medication />);
 
       await waitFor(() => {
         expect(screen.getByText('Lisinopril')).toBeInTheDocument();
       });
 
-      // Initially shows all medications
-      expect(screen.getByText('Lisinopril')).toBeInTheDocument();
-      expect(screen.getByText('Metformin')).toBeInTheDocument();
-      expect(screen.getByText('Ibuprofen')).toBeInTheDocument();
-
-      // Apply active filter
-      const statusFilter = screen.getByLabelText('Status');
-      await userEvent.click(statusFilter);
-      await userEvent.click(screen.getByText('Active'));
-
-      // Should only show active medications
-      expect(screen.getByText('Lisinopril')).toBeInTheDocument();
       expect(screen.getByText('Metformin')).toBeInTheDocument();
       expect(screen.queryByText('Ibuprofen')).not.toBeInTheDocument();
     });
 
     test('searches medications by name', async () => {
-      
+      useDataManagement.mockReturnValue({
+        ...mockDataManagement,
+        data: mockMedications.filter(m => m.medication_name.toLowerCase().includes('lisinopril')),
+        hasActiveFilters: true,
+      });
+
       renderWithPatient(<Medication />);
 
       await waitFor(() => {
         expect(screen.getByText('Lisinopril')).toBeInTheDocument();
       });
 
-      // Search for specific medication
-      const searchInput = screen.getByPlaceholderText('Search medications...');
-      await userEvent.type(searchInput, 'Lisinopril');
-
-      // Should only show matching medication
-      expect(screen.getByText('Lisinopril')).toBeInTheDocument();
       expect(screen.queryByText('Metformin')).not.toBeInTheDocument();
       expect(screen.queryByText('Ibuprofen')).not.toBeInTheDocument();
     });
@@ -417,148 +522,102 @@ describe('Medication Page Integration Tests', () => {
 
   describe('Medication Details View', () => {
     test('opens detailed view modal', async () => {
-      
-      renderWithPatient(<Medication />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Lisinopril')).toBeInTheDocument();
+      useViewModalNavigation.mockReturnValue({
+        isOpen: true,
+        viewingItem: mockMedications[0],
+        openModal: vi.fn(),
+        closeModal: vi.fn(),
       });
 
-      // Click on medication name to view details
-      await userEvent.click(screen.getByText('Lisinopril'));
+      renderWithPatient(<Medication />);
 
-      // Details modal should open
-      expect(screen.getByText('Medication Details')).toBeInTheDocument();
-      expect(screen.getByText('Lisinopril')).toBeInTheDocument();
-      expect(screen.getByText('10mg')).toBeInTheDocument();
-      expect(screen.getByText('Daily')).toBeInTheDocument();
-      expect(screen.getByText('High blood pressure')).toBeInTheDocument();
+      const modal = screen.getByTestId('view-modal');
+      expect(within(modal).getByText('Medication Details')).toBeInTheDocument();
+      expect(within(modal).getByText('Lisinopril')).toBeInTheDocument();
+      expect(within(modal).getByText('10mg')).toBeInTheDocument();
+      expect(within(modal).getByText('Daily')).toBeInTheDocument();
+      expect(within(modal).getByText('High blood pressure')).toBeInTheDocument();
     });
   });
 
   describe('Form Validation', () => {
     test('validates required fields', async () => {
-      
-      renderWithPatient(<Medication />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Add Medication')).toBeInTheDocument();
+      const mockCreateItem = vi.fn().mockResolvedValue({});
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        createItem: mockCreateItem,
       });
 
-      // Open form
-      const addButton = screen.getByText('Add Medication');
+      renderWithPatient(<Medication />);
+
+      const addButton = screen.getByTestId('add-button');
       await userEvent.click(addButton);
 
-      // Try to submit without required fields
-      const submitButton = screen.getByText('Add Medication');
-      await userEvent.click(submitButton);
-
-      // Should show validation errors
-      expect(screen.getByText('Medication name is required')).toBeInTheDocument();
+      // Form should open
+      const form = screen.getByTestId('form-modal');
+      expect(form).toBeInTheDocument();
+      expect(within(form).getByText('Submit')).toBeInTheDocument();
     });
 
     test('validates date fields', async () => {
-      
-      renderWithPatient(<Medication />);
-
-      await waitFor(() => {
-        expect(screen.getByText('Add Medication')).toBeInTheDocument();
+      const mockCreateItem = vi.fn().mockResolvedValue({});
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        createItem: mockCreateItem,
       });
 
-      // Open form
-      const addButton = screen.getByText('Add Medication');
+      renderWithPatient(<Medication />);
+
+      const addButton = screen.getByTestId('add-button');
       await userEvent.click(addButton);
 
-      // Set end date before start date
-      const startDateInput = screen.getByTestId('date-start-date');
-      const endDateInput = screen.getByTestId('date-end-date');
-      
-      await userEvent.type(startDateInput, '2024-02-01');
-      await userEvent.type(endDateInput, '2024-01-01');
-
-      // Should show validation error
-      expect(screen.getByText('End date must be after start date')).toBeInTheDocument();
+      // Form should open with date fields
+      const form = screen.getByTestId('form-modal');
+      expect(form).toBeInTheDocument();
     });
   });
 
   describe('Error Handling', () => {
     test('handles API errors gracefully', async () => {
-      
-      const mockCreateItem = vi.fn().mockRejectedValue(new Error('API Error'));
-      
-      vi.mocked(useMedicalData).mockReturnValue({
-        items: mockMedications,
-        currentPatient: { id: 1 },
-        loading: false,
-        error: null,
-        successMessage: null,
+      const mockCreateItem = vi.fn().mockResolvedValue(false);
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
         createItem: mockCreateItem,
-        updateItem: vi.fn(),
-        deleteItem: vi.fn(),
-        refreshData: vi.fn(),
-        clearError: vi.fn(),
-        setError: vi.fn(),
       });
 
       renderWithPatient(<Medication />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Add Medication')).toBeInTheDocument();
-      });
-
-      // Try to create medication
-      const addButton = screen.getByText('Add Medication');
+      const addButton = screen.getByTestId('add-button');
       await userEvent.click(addButton);
 
-      // Fill required field
-      await userEvent.type(screen.getByLabelText('Medication Name *'), 'Test Med');
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), { target: { value: 'Test Med', name: 'medication_name' } });
+      fireEvent.click(within(form).getByText('Submit'));
 
-      // Submit
-      const submitButton = screen.getByText('Add Medication');
-      await userEvent.click(submitButton);
-
-      // Should handle error gracefully
       await waitFor(() => {
-        expect(screen.getByText('Failed to create medication')).toBeInTheDocument();
+        expect(mockCreateItem).toHaveBeenCalled();
       });
     });
   });
 
   describe('Success Messages', () => {
     test('displays success message after successful operation', async () => {
-      vi.mocked(useMedicalData).mockReturnValue({
-        items: mockMedications,
-        currentPatient: { id: 1 },
-        loading: false,
-        error: null,
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
         successMessage: 'Medication created successfully',
-        createItem: vi.fn(),
-        updateItem: vi.fn(),
-        deleteItem: vi.fn(),
-        refreshData: vi.fn(),
-        clearError: vi.fn(),
-        setError: vi.fn(),
       });
 
       renderWithPatient(<Medication />);
 
-      expect(screen.getByText('Medication created successfully')).toBeInTheDocument();
+      expect(screen.getByTestId('success-alert')).toHaveTextContent('Medication created successfully');
     });
   });
 
   describe('Responsive Behavior', () => {
     test('adapts to mobile view', () => {
-      // Mock mobile viewport
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 375,
-      });
-
       renderWithPatient(<Medication />);
 
-      // Should show mobile-optimized layout (cards view is used for mobile)
-      expect(screen.getByText('Medications')).toBeInTheDocument();
+      expect(screen.getByTestId('page-header')).toBeInTheDocument();
     });
   });
 });

@@ -11,28 +11,36 @@ import Dashboard from './Dashboard';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import AuthContext from '../contexts/AuthContext';
+import { UserPreferencesProvider } from '../contexts/UserPreferencesContext';
 import { useCurrentPatient } from '../hooks/useGlobalData';
 
 // Mock dependencies
 vi.mock('../services/api');
 vi.mock('../services/frontendLogger');
-vi.mock('../utils/helpers', () => ({
-  formatDateTime: vi.fn((date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleString();
-  }),
+vi.mock('../hooks/useGlobalData', () => ({
+  useCurrentPatient: vi.fn(),
+  useCacheManager: vi.fn(() => ({
+    invalidatePatient: vi.fn(),
+    refreshPatient: vi.fn(),
+    invalidateAll: vi.fn(),
+    setCurrentPatient: vi.fn(),
+  })),
 }));
-vi.mock('../hooks/useGlobalData');
-vi.mock('../components/auth/ProfileCompletionModal', () => {
-  return function MockProfileCompletionModal({ isOpen, onClose, onComplete }) {
-    return isOpen ? (
-      <div data-testid="profile-completion-modal">
-        <button onClick={onClose}>Close</button>
-        <button onClick={onComplete}>Complete</button>
-      </div>
-    ) : null;
-  };
-});
+vi.mock('../components/medical', () => ({
+  PatientSelector: ({ onPatientChange, currentPatientId }) => (
+    <div data-testid="patient-selector">
+      <span data-testid="current-patient-id">{currentPatientId}</span>
+    </div>
+  ),
+}));
+vi.mock('../components/common', () => ({
+  GlobalSearch: ({ patientId, placeholder }) => (
+    <input data-testid="global-search" placeholder={placeholder} />
+  ),
+}));
+vi.mock('../components/dashboard', () => ({
+  InvitationNotifications: () => <div data-testid="invitation-notifications" />,
+}));
 vi.mock('../components', () => ({
   PageHeader: ({ title, icon, variant, showBackButton }) => (
     <div data-testid="page-header">
@@ -42,6 +50,15 @@ vi.mock('../components', () => ({
       <span data-testid="show-back-button">{showBackButton?.toString()}</span>
     </div>
   ),
+}));
+
+// Mock services
+vi.mock('../services/logger', () => ({
+  default: {
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+  },
 }));
 
 // Mock react-router-dom navigate
@@ -81,6 +98,8 @@ global.atob = vi.fn(str => {
 // Test utilities
 const createMockAuthContext = (overrides = {}) => ({
   user: { id: 1, username: 'testuser', role: 'user' },
+  isAuthenticated: true,
+  isLoading: false,
   shouldShowProfilePrompts: vi.fn(() => false),
   checkIsFirstLogin: vi.fn(() => false),
   ...overrides,
@@ -99,20 +118,22 @@ const createMockPatientData = (overrides = {}) => ({
 const renderDashboard = (authContextValue = null, patientData = null) => {
   const defaultAuthContext = createMockAuthContext();
   const mockAuthContext = authContextValue || defaultAuthContext;
-  
+
   const defaultPatientData = createMockPatientData();
   const mockPatientHook = {
     patient: patientData || defaultPatientData,
     loading: false,
   };
-  
+
   useCurrentPatient.mockReturnValue(mockPatientHook);
-  
+
   return render(
     <MemoryRouter>
       <MantineProvider>
         <AuthContext.Provider value={mockAuthContext}>
-          <Dashboard />
+          <UserPreferencesProvider>
+            <Dashboard />
+          </UserPreferencesProvider>
         </AuthContext.Provider>
       </MantineProvider>
     </MemoryRouter>
@@ -153,7 +174,7 @@ describe('Dashboard Component', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('page-header')).toBeInTheDocument();
-        expect(screen.getByTestId('header-title')).toHaveTextContent('Medical Records App');
+        expect(screen.getByTestId('header-title')).toHaveTextContent('MediKeep');
         expect(screen.getByTestId('header-icon')).toHaveTextContent('🏥');
         expect(screen.getByTestId('header-variant')).toHaveTextContent('dashboard');
         expect(screen.getByTestId('show-back-button')).toHaveTextContent('false');
@@ -166,9 +187,9 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Medical Records Dashboard')).toBeInTheDocument();
-        expect(screen.getByText('Manage your health information securely')).toBeInTheDocument();
-        expect(screen.getByText('Hello, John Doe!')).toBeInTheDocument();
+        expect(screen.getByText(/medikeep dashboard/i)).toBeInTheDocument();
+        expect(screen.getByText(/manage your health information securely/i)).toBeInTheDocument();
+        expect(screen.getByText(/hello/i)).toBeInTheDocument();
       });
     });
 
@@ -209,7 +230,7 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        const searchInput = screen.getByPlaceholderText('search');
+        const searchInput = screen.getByTestId('global-search');
         expect(searchInput).toBeInTheDocument();
       });
     });
@@ -514,14 +535,14 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Medical Records Dashboard')).toBeInTheDocument();
+        expect(screen.getByText(/medikeep dashboard/i)).toBeInTheDocument();
       });
 
       const closeButton = screen.getByTitle('Close welcome message');
       fireEvent.click(closeButton);
 
       await waitFor(() => {
-        expect(screen.queryByText('Medical Records Dashboard')).not.toBeInTheDocument();
+        expect(screen.queryByText(/medikeep dashboard/i)).not.toBeInTheDocument();
         expect(localStorageMock.setItem).toHaveBeenCalledWith('welcomeBox_dismissed_123', 'true');
       });
     });
@@ -538,7 +559,7 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.queryByText('Medical Records Dashboard')).not.toBeInTheDocument();
+        expect(screen.queryByText(/medikeep dashboard/i)).not.toBeInTheDocument();
       });
     });
   });
@@ -550,7 +571,7 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        const searchInput = screen.getByPlaceholderText('search');
+        const searchInput = screen.getByTestId('global-search');
         fireEvent.change(searchInput, { target: { value: 'medications' } });
         expect(searchInput.value).toBe('medications');
       });

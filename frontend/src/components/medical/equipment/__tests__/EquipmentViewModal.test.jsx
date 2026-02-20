@@ -6,10 +6,15 @@ import { MantineProvider } from '@mantine/core';
 import '@testing-library/jest-dom';
 import EquipmentViewModal from '../EquipmentViewModal';
 
-// Mock useDateFormat hook
+// Mock useDateFormat hook - return dates in consistent format
 vi.mock('../../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDate: (date) => date ? new Date(date).toLocaleDateString('en-US') : null,
+    formatDate: (date) => {
+      if (!date) return null;
+      // Parse as UTC to avoid timezone issues
+      const d = new Date(date + 'T00:00:00');
+      return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+    },
   }),
 }));
 
@@ -122,9 +127,8 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      // Status may be displayed as is or capitalized by StatusBadge
-      const statusText = screen.queryByText('active') || screen.queryByText('Active');
-      expect(statusText).toBeInTheDocument();
+      // StatusBadge renders "Active" for active status (appears in header + details)
+      expect(screen.getAllByText('Active').length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -246,7 +250,8 @@ describe('EquipmentViewModal', () => {
       );
 
       expect(screen.getByText('Prescribed Date')).toBeInTheDocument();
-      expect(screen.getByText('1/15/2024')).toBeInTheDocument();
+      // Date appears in both header badge and details section
+      expect(screen.getAllByText('1/15/2024').length).toBeGreaterThanOrEqual(1);
     });
 
     test('displays last service date', () => {
@@ -506,8 +511,8 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      const statusText = screen.queryByText('active') || screen.queryByText('Active');
-      expect(statusText).toBeInTheDocument();
+      // StatusBadge renders "Active" (appears in header + details = 2 instances)
+      expect(screen.getAllByText('Active').length).toBeGreaterThanOrEqual(1);
     });
 
     test('displays inactive status', () => {
@@ -522,8 +527,8 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      const statusText = screen.queryByText('inactive') || screen.queryByText('Inactive');
-      expect(statusText).toBeInTheDocument();
+      // StatusBadge maps "inactive" to "Inactive"
+      expect(screen.getAllByText('Inactive').length).toBeGreaterThanOrEqual(1);
     });
 
     test('displays replaced status', () => {
@@ -538,8 +543,8 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      const statusText = screen.queryByText('replaced') || screen.queryByText('Replaced');
-      expect(statusText).toBeInTheDocument();
+      // StatusBadge has no "replaced" config - falls to default, label = raw status string
+      expect(screen.getAllByText('replaced').length).toBeGreaterThanOrEqual(1);
     });
 
     test('displays needs_repair status', () => {
@@ -554,8 +559,8 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      const statusText = screen.queryByText('needs_repair') || screen.queryByText('Needs Repair');
-      expect(statusText).toBeInTheDocument();
+      // StatusBadge has no "needs_repair" config - falls to default, label = raw status string
+      expect(screen.getAllByText('needs_repair').length).toBeGreaterThanOrEqual(1);
     });
   });
 
