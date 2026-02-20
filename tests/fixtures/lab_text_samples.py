@@ -141,6 +141,132 @@ LDL CHOLESTEROL 105 Reference Range: <100 mg/dL OPTIMAL
 TRIGLYCERIDES 100 Reference Range: <150 mg/dL
 """
 
+# ============================================================
+# Epic MyChart samples
+# ============================================================
+
+# Clean Epic MyChart renal panel (3 tests, sequential extraction)
+EPIC_MYCHART_RENAL_PANEL = """
+MyChart - licensed from Epic Systems Corporation
+Collected on Apr 10, 2025
+Authorizing provider: Dr. Smith
+Result status: Final
+Resulting lab: Main Hospital Lab
+
+Creatinine Level
+Normal range: 0.50 - 0.90 mg/dL
+0.50    0.90
+0.72
+
+Blood Urea Nitrogen (BUN)
+Normal range: 7 - 25 mg/dL
+7    25
+15
+
+Calcium Level
+Normal range: 8.5 - 10.5 mg/dL
+8.5    10.5
+9.4
+"""
+
+# Full 12-test panel including EGFR with "above >=90" and "Value" label
+EPIC_MYCHART_FULL_PANEL = """
+MyChart - licensed from Epic Systems Corporation
+Collected on Apr 10, 2025
+Authorizing provider: Dr. Smith
+Result status: Final
+Resulting lab: Main Hospital Lab
+
+Glucose Level
+Normal range: 74 - 106 mg/dL
+74    106
+92
+
+Blood Urea Nitrogen (BUN)
+Normal range: 7 - 25 mg/dL
+7    25
+15
+
+Creatinine Level
+Normal range: 0.50 - 0.90 mg/dL
+0.50    0.90
+0.72
+
+EGFR
+Normal range: above >=90 mL/min/1.73m2
+Value
+126
+
+Sodium Level
+Normal range: 136 - 145 mmol/L
+136    145
+140
+
+Potassium Level
+Normal range: 3.5 - 5.1 mmol/L
+3.5    5.1
+4.2
+
+Chloride Level
+Normal range: 98 - 106 mmol/L
+98    106
+102
+
+Carbon Dioxide Level
+Normal range: 20 - 29 mmol/L
+20    29
+24
+
+Calcium Level
+Normal range: 8.5 - 10.5 mg/dL
+8.5    10.5
+9.4
+
+Protein Total
+Normal range: 6.0 - 8.5 g/dL
+6.0    8.5
+7.1
+
+Albumin Level
+Normal range: 3.5 - 5.5 g/dL
+3.5    5.5
+4.3
+
+Anion Gap
+Normal range: 5 - 15 mmol/L
+5    15
+10
+"""
+
+# Epic MyChart with abnormal flags (values outside normal range)
+EPIC_MYCHART_WITH_FLAGS = """
+MyChart - licensed from Epic Systems Corporation
+Collected on Jun 15, 2025
+Authorizing provider: Dr. Johnson
+Result status: Final
+Resulting lab: Regional Medical Center
+
+Glucose Level
+Normal range: 74 - 106 mg/dL
+74    106
+118
+
+Creatinine Level
+Normal range: 0.50 - 0.90 mg/dL
+0.50    0.90
+0.42
+
+EGFR
+Normal range: above >=90 mL/min/1.73m2
+Value
+72
+
+Sodium Level
+Normal range: 136 - 145 mmol/L
+136    145
+140
+"""
+
 # Edge case: Empty PDF
 EMPTY_PDF_TEXT = ""
 
