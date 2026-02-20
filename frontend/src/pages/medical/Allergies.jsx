@@ -40,7 +40,7 @@ const Allergies = () => {
   const { t } = useTranslation('medical');
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('allergies');
 
   // Standardized data management
   const {

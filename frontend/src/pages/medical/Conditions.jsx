@@ -46,7 +46,7 @@ const Conditions = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('conditions');
   
   // Load medications and practitioners for linking dropdowns
   const [medications, setMedications] = useState([]);

@@ -65,7 +65,7 @@ const FamilyHistory = () => {
   const location = useLocation();
   const responsive = useResponsive();
   const { colorScheme } = useMantineColorScheme();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('family-history');
   const [activeTab, setActiveTab] = useState('my-family');
   const [expandedMembers, setExpandedMembers] = useState(new Set());
   const [sharedFamilyHistory, setSharedFamilyHistory] = useState([]);

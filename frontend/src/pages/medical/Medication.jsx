@@ -60,7 +60,7 @@ const Medication = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('medications');
 
   // Form state - moved up to be available for refs logic
   const [showAddForm, setShowAddForm] = useState(false);

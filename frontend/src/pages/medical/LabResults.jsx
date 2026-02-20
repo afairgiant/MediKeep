@@ -52,7 +52,7 @@ const LabResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('lab-results');
 
   // Modern data management with useMedicalData
   const {

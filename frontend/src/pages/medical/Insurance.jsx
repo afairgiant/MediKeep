@@ -61,7 +61,7 @@ const Insurance = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('insurance');
 
   // Modern data management with useMedicalData
   const {
