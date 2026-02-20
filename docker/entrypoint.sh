@@ -14,7 +14,7 @@ file_env() {
         echo "WARNING: Both $var and $file_var are set; using $var (direct value takes precedence)"
     elif [ -z "$val" ] && [ -n "$file_val" ]; then
         if [ -f "$file_val" ]; then
-            val="$(cat "$file_val")"
+            val="$(tr -d '\n\r' < "$file_val")"
             export "$var"="$val"
         else
             echo "ERROR: $file_var points to $file_val but the file does not exist"
