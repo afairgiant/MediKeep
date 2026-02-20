@@ -12,6 +12,8 @@ const MedicationFormWrapper = memo(({
   practitioners,
   pharmacies,
   editingMedication,
+  conditions,
+  navigate,
 }) => {
   return (
     <MantineMedicationForm
@@ -24,6 +26,8 @@ const MedicationFormWrapper = memo(({
       practitioners={practitioners}
       pharmacies={pharmacies}
       editingMedication={editingMedication}
+      conditions={conditions}
+      navigate={navigate}
     />
   );
 }, (prevProps, nextProps) => {

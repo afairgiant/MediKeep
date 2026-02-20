@@ -90,6 +90,16 @@ const Medication = () => {
     return data;
   }, [pharmaciesObject?.pharmacies]);
 
+  // Fetch conditions for the condition-linking dropdown in MedicationViewModal
+  const [conditions, setConditions] = useState([]);
+  useEffect(() => {
+    apiService.getConditionsDropdown(false).then(data => {
+      setConditions(data || []);
+    }).catch(err => {
+      logger.warn('Failed to fetch conditions dropdown:', err);
+    });
+  }, []);
+
   // Modern data management with useMedicalData
   const {
     items: medications,
@@ -507,6 +517,8 @@ const Medication = () => {
           practitioners={practitioners}
           pharmacies={pharmacies}
           editingMedication={editingMedication}
+          conditions={conditions}
+          navigate={navigate}
         />
 
         {/* Content */}
@@ -635,6 +647,7 @@ const Medication = () => {
           navigate={navigate}
           onError={setError}
           practitioners={practitioners}
+          conditions={conditions}
         />
       </Stack>
     </Container>
