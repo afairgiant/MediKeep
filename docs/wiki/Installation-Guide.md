@@ -157,17 +157,17 @@ Default credentials: `admin` / `admin123`
 
 ### Docker Secrets (Optional)
 
-For Docker, Docker Swarm or Kubernetes, you can pass sensitive values via mounted files instead of plain environment variables. Set `VAR_FILE=/run/secrets/filename` for any of: `DB_USER`, `DB_PASSWORD`, `DATABASE_URL`, `SECRET_KEY`, `ADMIN_DEFAULT_PASSWORD`, `SSO_CLIENT_ID`, `SSO_CLIENT_SECRET`, `PAPERLESS_SALT`, `NOTIFICATION_ENCRYPTION_SALT`.
+You can pass sensitive values via mounted files instead of plain environment variables. Set `VAR_FILE=/run/secrets/filename` for any of: `DB_USER`, `DB_PASSWORD`, `DATABASE_URL`, `SECRET_KEY`, `ADMIN_DEFAULT_PASSWORD`, `SSO_CLIENT_ID`, `SSO_CLIENT_SECRET`, `PAPERLESS_SALT`, `NOTIFICATION_ENCRYPTION_SALT`.
 
 See [Deployment Guide](Deployment-Guide#docker-secrets-_file-pattern) for full details and examples.
 
 ### SSO Configuration (Optional)
 
-To enable Google/GitHub login, add these to your `.env`:
+To enable SSO login, add these to your `.env`:
 
 ```bash
 SSO_ENABLED=true
-SSO_PROVIDER_TYPE=github  # or google, oidc
+SSO_PROVIDER_TYPE=github  # google, github, oidc, authentik, authelia, keycloak
 SSO_CLIENT_ID=your-client-id
 SSO_CLIENT_SECRET=your-client-secret
 SSO_REDIRECT_URI=http://localhost:8005/api/v1/sso/callback
@@ -183,9 +183,9 @@ See [SSO Quick Start](SSO-Quick-Start) for detailed setup.
 
 Immediately after first login:
 
-1. Click your username in the top right
-2. Go to **Profile** → **Security**
-3. Change your password
+1. Go to **Settings**
+2. Find the **Security** section
+3. Click **Change Password**
 
 ### 2. Create Patient Profiles
 

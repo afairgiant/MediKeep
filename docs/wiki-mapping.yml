@@ -16,6 +16,10 @@ pages:
     wiki_page: User-Guide
     title: User Guide
 
+  - source: docs/wiki/Admin-Guide.md
+    wiki_page: Admin-Guide
+    title: Admin Guide
+
   - source: docs/wiki/FAQ.md
     wiki_page: FAQ
     title: Frequently Asked Questions
@@ -66,13 +70,13 @@ pages:
     wiki_page: SSO-Setup-Guide
     title: SSO Setup Guide
 
-  - source: docs/api/PATIENT_SHARING_INVITATIONS_API.md
-    wiki_page: Patient-Sharing-API
-    title: Patient Sharing API
+  - source: docs/wiki/Paperless-Integration.md
+    wiki_page: Paperless-Integration
+    title: Paperless-ngx Integration
 
-  - source: docs/workflows/PATIENT_SHARE_INVITATION_WORKFLOW.md
-    wiki_page: Patient-Sharing-Workflow
-    title: Patient Sharing Workflow
+  - source: docs/wiki/Lab-Result-Parsing.md
+    wiki_page: Lab-Result-Parsing
+    title: Lab Result PDF Parsing
 
 # Link transformations
 # Maps internal doc links to wiki page links
@@ -95,9 +99,11 @@ link_mappings:
 
   # Wiki pages
   "User-Guide": "User-Guide"
+  "Admin-Guide": "Admin-Guide"
   "FAQ": "FAQ"
   "Installation-Guide": "Installation-Guide"
-  "Developer-Guide": "Developer-Guide"
+  "Paperless-Integration": "Paperless-Integration"
+  "Lab-Result-Parsing": "Lab-Result-Parsing"
 
 # Sidebar configuration
 # Defines the wiki sidebar structure
@@ -111,6 +117,10 @@ sidebar:
       - User-Guide
       - Installation-Guide
       - FAQ
+
+  - section: Administrators
+    pages:
+      - Admin-Guide
 
   - section: Developers
     pages:
@@ -129,5 +139,5 @@ sidebar:
 
   - section: Features
     pages:
-      - Patient-Sharing-API
-      - Patient-Sharing-Workflow
+      - Paperless-Integration
+      - Lab-Result-Parsing
