@@ -47,10 +47,11 @@ The easiest way is with Docker:
 git clone https://github.com/afairgiant/MediKeep.git
 cd MediKeep
 
-# Copy environment file
+# Copy and edit environment file (change passwords and SECRET_KEY)
 cp docker/.env.example .env
 
 # Start the application
+cd docker
 docker compose up -d
 ```
 
@@ -59,12 +60,9 @@ See the [Installation Guide](Installation-Guide) for detailed instructions.
 ### How do I update MediKeep?
 
 ```bash
-# Pull latest changes
-git pull
-
-# Rebuild and restart
-docker compose down
-docker compose up -d --build
+cd docker
+docker compose pull
+docker compose up -d
 ```
 
 ---
@@ -88,7 +86,7 @@ Yes! You can:
 
 ### Does MediKeep support multiple languages?
 
-The application is currently in English. The internationalization framework is in place for future language support.
+Yes. MediKeep supports 6 languages: English, French, German, Spanish, Italian, and Portuguese.
 
 ---
 
@@ -96,19 +94,22 @@ The application is currently in English. The internationalization framework is i
 
 ### How do I share records with someone?
 
-1. Go to **Settings** → **Sharing**
-2. Send an invitation to their email
-3. They'll receive a link to create an account and accept the invitation
+The recipient must already have an account on your MediKeep instance. To share:
 
-### Can I give someone view-only access?
+1. Go to the patient's page → **Sharing**
+2. Enter the recipient's username or email to look them up
+3. Choose a permission level and send the invitation
+4. The recipient will see the invitation in their account and can accept or decline
 
-Yes, when sharing you can choose between:
+### What permission levels are available?
+
 - **View** - Can see records but not modify
 - **Edit** - Can view and modify records
+- **Full** - Full access to the patient's records
 
 ### How do I revoke someone's access?
 
-Go to **Settings** → **Sharing** → Find the person → Click **Revoke Access**
+Go to the patient's sharing settings and remove their access.
 
 ---
 
@@ -116,7 +117,7 @@ Go to **Settings** → **Sharing** → Find the person → Click **Revoke Access
 
 ### I forgot my password
 
-Click "Forgot Password" on the login page to reset it via email (requires email to be configured).
+There is no self-service password reset. An administrator can reset your password through the admin panel.
 
 ### The application is slow
 
@@ -134,7 +135,7 @@ Check:
 
 ### I'm getting CORS errors
 
-Make sure your frontend URL matches the `CORS_ORIGINS` setting in your environment configuration.
+CORS is configured to allow all origins. If you're seeing CORS errors in development, make sure the backend is actually running on port 8000.
 
 ---
 
