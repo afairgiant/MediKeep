@@ -89,7 +89,7 @@
     "medicationsAvailableToLink": "{{count}} médicaments pouvant être connectés",
     "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
     "linkedMedications": "Médicaments connectés",
-    "visitWebsite": "Visiter le site web ↗",
+    "visitWebsite": "Visiter le site web ↗"
     "severity": "Sévérité",
     "onsetDate": "Date de survenue",
     "facility": "Etablissement",
@@ -206,7 +206,7 @@
     "title": "Filtres et recherche",
     "itemCount": "{{filtered}} sur {{total}} objets",
     "moreFilters": "{{count}} autres filtres",
-    "active": "Actif",
+    "active": "Actif"
     "clear": "Effacer"
   },
   "vitals": {
@@ -225,9 +225,9 @@
         "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",
         "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
         "a1cMin": "A1C doit valoir au moins 0 %",
-        "a1cMax": "A1C ne peut dépasser 20 %",
+        "a1cMax": "A1C ne peut dépasser 20 %"
         "dateInFuture": "La date ne peut se situer dans le futur",
-        "timeInFuture": "L'heure sélectionnée ne peut se situer dans le futur",
+        "timeInFuture": "L'heure sélectionnée ne peut se situer dans le futur"
         "dateRequired": "La date et l'heure de la mesure sont requises",
         "systolicMin": "La PAS doit valoir au moins 50 mmHg",
         "systolicMax": "La PAS ne peut pas dépasser 300 mmHg",
@@ -333,7 +333,7 @@
     },
     "categories": {
       "prediabetes": "Pré-diabète",
-      "diabetes": "Diabète",
+      "diabetes": "Diabète"
       "low": "Bas",
       "high": "Elevé",
       "normal": "Normal"
@@ -479,7 +479,7 @@
     "relevanceNoteOptional": "Note de pertinence (optionnel)",
     "noRelevanceNoteProvided": "Aucune note de pertinence fournie",
     "relevanceNote": "Note de pertinence",
-    "describeConditionRelevance": "Décrivez quel rapport cette condition a avec les résultats d'analyse (optionnel)",
+    "describeConditionRelevance": "Décrivez quel rapport cette condition a avec les résultats d'analyse (optionnel)"
     "describeMedicationRelevance": "Décrivez quel rapport ces médicaments ont avec la condition (optionnel)"
   },
   "time": {
@@ -863,7 +863,7 @@
         "tags": "Etiquettes",
         "icd10Code": "Code CIM-10",
         "snomedCode": "Code SNOMED",
-        "codeDescription": "Description du code",
+        "codeDescription": "Description du code"
         "clinicalNotes": "Notes cliniques"
       },
       "placeholders": {
@@ -1189,7 +1189,7 @@
       "route": "Voie",
       "lotNumber": "Numéro de lot",
       "expirationDate": "Date d'expiration",
-      "notes": "Notes",
+      "notes": "Notes"
       "tradeName": "Nom commercial",
       "practitioner": "Médecin"
     },
@@ -1204,7 +1204,7 @@
       "expirationDate": "Date d'expiration",
       "practitioner": "Médecin",
       "viewPractitioner": "Voir les détails du médecin",
-      "practitionerId": "ID : {{id}}",
+      "practitionerId": "ID : {{id}}"
       "notSpecified": "Non spécifié(e)"
     },
     "viewModal": {
@@ -1298,7 +1298,7 @@
       "clinicalNotesPlaceholder": "Saisissez les notes cliniques, réactions, ou détails supplémentaires",
       "clinicalNotesDesc": "Informations supplémentaires sur cette immunisation",
       "createImmunization": "Créer une immunisation",
-      "updateImmunization": "Mettre à jour une immunisation",
+      "updateImmunization": "Mettre à jour une immunisation"
       "siteOther": "Autre",
       "cancel": "Annuler"
     }
@@ -1707,37 +1707,37 @@
     "viewModal": {
       "title": "Détails du médecin",
       "subtitle": "Médecin",
-      "practitionerContact": "CONTACT DU PRATICIEN",
-      "practice": "Cabinet",
+      "practitionerContact": "INFORMATIONS DE CONTACT",
+      "practice": "Etablissement",
       "specialty": "Spécialité",
       "phone": "Téléphone",
       "email": "Email",
       "website": "Site web",
       "visitWebsite": "Visiter le site web",
       "rating": "Avis",
-      "editButton": "Editer le médecin",
-      "practiceDetails": "DETAILS DU CABINET",
-      "practicePhone": "Telephone",
+      "editButton": "Editer le médecin"
+      "practiceDetails": "DETAILS DE L'ETABLISSEMENT",
+      "practicePhone": "Numéro de téléphone",
       "practiceFax": "Fax",
       "practiceWebsite": "Site web",
-      "practicePortal": "Portail patient",
+      "practicePortal": "Portail de patient",
       "practiceNotes": "Notes",
       "practiceLocations": "Emplacements",
-      "editPractice": "Editer le cabinet",
-      "noPractice": "Aucun cabinet associe",
-      "savePractice": "Enregistrer le cabinet",
-      "practiceUpdateSuccess": "Cabinet mis a jour avec succes",
-      "practiceUpdateError": "Echec de la mise a jour du cabinet",
-      "practiceLoadError": "Echec du chargement des details du cabinet"
+      "editPractice": "Editer l'établissement",
+      "noPractice": "Aucun établissement connecté",
+      "savePractice": "Sauvegarder l'établissement",
+      "practiceUpdateSuccess": "Etablissement mis à jour avec succès",
+      "practiceUpdateError": "Echec de la mise à jour de l'établissement",
+      "practiceLoadError": "Echec du chargement des détails de l'établissement"
     },
     "form": {
       "addTitle": "Ajouter un médecin",
       "editTitle": "Editer un médecin"
     },
-    "groupByPractice": "Grouper par cabinet",
-    "ungroupedTitle": "Praticiens independants",
-    "editPracticeError": "Echec du chargement du cabinet pour modification",
-    "createPracticeError": "Echec de la creation du cabinet. Veuillez reessayer."
+    "groupByPractice": "Regrouper par établissement",
+    "ungroupedTitle": "Médecins indépendants",
+    "editPracticeError": "Echec du chargement de l'établissement pour l'éditer",
+    "createPracticeError": "Echec de la création de l'établissement. Veuillez réessayer."
   },
   "pharmacies": {
     "title": "Pharmacies",
@@ -2313,19 +2313,19 @@
     },
     "categories": {
       "chemistry": "Chimie - Electrolytes et minéraux",
-      "hematology": "Hématologie - Numération sanguine et fer",
-      "hepatology": "Hépatologie - Enzymes hépatiques et fonction",
+      "hematology": "Hématologie - Décomptes sanguins et fer",
+	  "hepatology": "Hépatologie - Enzymes et fonctions du foie",
       "lipids": "Lipides - Cholestérol et triglycérides",
       "endocrinology": "Endocrinologie - Hormones et diabète",
-      "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
+	  "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
       "immunology": "Immunologie - Système immunitaire et anticorps",
       "microbiology": "Microbiologie - Infections et cultures",
       "toxicology": "Toxicologie - Dépistage de drogues et toxines",
       "genetics": "Génétique - Analyses génétiques",
       "molecular": "Moléculaire - Analyses d'ADN",
-      "pathology": "Pathologie - Analyses de tissus et biopsies",
-      "hearing": "Audition - Audiométrie et tests vestibulaires",
-      "stomatology": "Stomatologie - Diagnostic salivaire et oral",
+      "pathology": "Pathologie - Analyses de tissus et de biopsies",
+	  "hearing": "Ouïe : Audiométrie et analyses vestibulaires",
+	  "stomatology": "Stomatologie - Diagnostics oraux et salivaires",
       "other": "Autres analyses"
     }
   },
@@ -2370,7 +2370,7 @@
       "unitSystem": {
         "title": "Système de mesure",
         "description": "Choisissez si les mesures doivent être affichées en unités impériales (livres, pieds, degrés Farenheit) ou métriques (kilogrammes, centimètres, degrés Celsius)",
-		"imperial": "Impérial (livres, pieds, °F)",
+		"imperial": "Impérial (livres, pieds, °F)"
         "metric": "Métrique (kg, cm, °C)"
       },
       "dateFormat": {
