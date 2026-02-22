@@ -2350,14 +2350,18 @@
     "subtitle": "Gérez vos préférences et paramètres pour l'application",
     "tabs": {
       "general": "Général",
-      "notifications": "Notifications"
+      "documents": "Documents",
+      "notifications": "Notifications",
+      "about": "À propos"
     },
     "sections": {
       "security": "Sécurité",
       "accountManagement": "Gestion des comptes",
       "systemInfo": "Informations système",
       "preferences": "Préférences d'application",
-      "documentStorage": "Stockage des documents"
+      "documentStorage": "Stockage des documents",
+      "gettingHelp": "Obtenir de l'aide",
+      "supportMediKeep": "Soutenir MediKeep"
     },
     "security": {
       "password": {
@@ -2381,6 +2385,20 @@
         "unknownApp": "Application inconnue",
         "unknownVersion": "Version inconnue"
       }
+    },
+    "help": {
+      "documentation": {
+        "title": "Documentation",
+        "description": "Consultez le wiki pour des guides, des instructions d'installation et la documentation des fonctionnalités."
+      },
+      "issues": {
+        "title": "Signaler un problème",
+        "description": "Vous avez trouvé un bug ou avez une suggestion ? Ouvrez un ticket sur GitHub."
+      }
+    },
+    "sponsor": {
+      "description": "MediKeep est gratuit et open source. Si vous le trouvez utile, envisagez de parrainer le projet pour aider à financer le développement.",
+      "button": "Parrainer sur GitHub"
     },
     "preferences": {
       "unitSystem": {

@@ -670,7 +670,9 @@
       "accountManagement": "Kontoverwaltung",
       "systemInfo": "Systeminformationen",
       "preferences": "Anwendungseinstellungen",
-      "documentStorage": "Dokumentenspeicherung"
+      "documentStorage": "Dokumentenspeicherung",
+      "gettingHelp": "Hilfe erhalten",
+      "supportMediKeep": "MediKeep unterstützen"
     },
     "security": {
       "password": {
@@ -694,6 +696,20 @@
         "unknownVersion": "Unbekannte Version",
         "unavailable": "Versionsinformationen nicht verfügbar"
       }
+    },
+    "help": {
+      "documentation": {
+        "title": "Dokumentation",
+        "description": "Durchsuchen Sie das Wiki nach Anleitungen, Installationshinweisen und Funktionsdokumentation."
+      },
+      "issues": {
+        "title": "Problem melden",
+        "description": "Einen Fehler gefunden oder einen Funktionswunsch? Erstellen Sie ein Issue auf GitHub."
+      }
+    },
+    "sponsor": {
+      "description": "MediKeep ist kostenlos und Open Source. Wenn Sie es nützlich finden, erwägen Sie, das Projekt zu sponsern, um die Entwicklung zu unterstützen.",
+      "button": "Auf GitHub sponsern"
     },
     "preferences": {
       "unitSystem": {
@@ -732,7 +748,9 @@
     },
     "tabs": {
       "general": "Allgemein",
-      "notifications": "Benachrichtigungen"
+      "documents": "Dokumente",
+      "notifications": "Benachrichtigungen",
+      "about": "Info"
     }
   },
   "patientInfo": {
