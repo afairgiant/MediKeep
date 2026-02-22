@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { Header } from '../components/adapters';
 import Container from '../components/layout/Container';
@@ -18,6 +19,82 @@ import { DEFAULT_DATE_FORMAT } from '../utils/constants';
 import { notifySuccess, notifyError, notifyInfo } from '../utils/notifyTranslated';
 import '../styles/pages/Settings.css';
 
+const SETTINGS_TABS = ['general', 'documents', 'notifications', 'about'];
+
+/**
+ * Builds a preferences object with guaranteed default values for fields
+ * that may be missing from the server response.
+ */
+function buildDefaultPreferences(prefs) {
+  return {
+    ...prefs,
+    paperless_username: prefs.paperless_username || '',
+    paperless_password: prefs.paperless_password || '',
+    session_timeout_minutes: parseInt(prefs.session_timeout_minutes) || 30,
+    date_format: prefs.date_format || DEFAULT_DATE_FORMAT,
+  };
+}
+
+/**
+ * Returns the keys from localPreferences that differ from serverPreferences,
+ * optionally filtered by a predicate on the key name.
+ */
+function getChangedKeys(localPreferences, serverPreferences, keyFilter) {
+  if (!serverPreferences || Object.keys(localPreferences).length === 0) {
+    return [];
+  }
+
+  return Object.keys(localPreferences).filter(key => {
+    if (keyFilter && !keyFilter(key)) return false;
+    return localPreferences[key] !== serverPreferences[key];
+  });
+}
+
+/**
+ * Save/Reset action bar displayed when a tab has unsaved changes.
+ */
+function SaveResetBar({ visible, saving, onSave, onReset, t }) {
+  if (!visible) return null;
+
+  return (
+    <Card>
+      <div className="settings-actions">
+        <div className="settings-actions-info">
+          <div className="settings-changes-indicator">
+            {t('settings.actions.unsavedChanges', 'You have unsaved changes')}
+          </div>
+        </div>
+
+        <div className="settings-actions-buttons">
+          <Button
+            variant="secondary"
+            onClick={onReset}
+            disabled={saving}
+          >
+            {t('settings.actions.reset', 'Reset Changes')}
+          </Button>
+
+          <Button
+            onClick={onSave}
+            disabled={saving}
+            loading={saving}
+          >
+            {saving ? t('settings.actions.saving', 'Saving...') : t('settings.actions.save', 'Save All Changes')}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+SaveResetBar.propTypes = {
+  visible: PropTypes.bool.isRequired,
+  saving: PropTypes.bool.isRequired,
+  onSave: PropTypes.func.isRequired,
+  onReset: PropTypes.func.isRequired,
+  t: PropTypes.func.isRequired,
+};
+
 const Settings = () => {
   const { t } = useTranslation(['common', 'notifications']);
   const { user, updateSessionTimeout } = useAuth();
@@ -28,58 +105,27 @@ const Settings = () => {
   } = useUserPreferences();
   const [activeTab, setActiveTab] = useState('general');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
-    useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
   const [versionInfo, setVersionInfo] = useState(null);
   const [loadingVersion, setLoadingVersion] = useState(true);
   const [localPreferences, setLocalPreferences] = useState({});
-  const [hasChanges, setHasChanges] = useState(false);
   const [savingPreferences, setSavingPreferences] = useState(false);
-  const [justSaved, setJustSaved] = useState(false);
   const [cleaningFiles, setCleaningFiles] = useState(false);
-
-  const handleOpenPasswordModal = () => {
-    setIsPasswordModalOpen(true);
-  };
-
-  const handleClosePasswordModal = () => {
-    setIsPasswordModalOpen(false);
-  };
-
-  const handleOpenDeleteAccountModal = () => {
-    setIsDeleteAccountModalOpen(true);
-  };
-
-  const handleCloseDeleteAccountModal = () => {
-    setIsDeleteAccountModalOpen(false);
-  };
 
   // Initialize local preferences when context loads
   useEffect(() => {
     if (userPreferences && Object.keys(userPreferences).length > 0) {
-      setLocalPreferences({
-        ...userPreferences,
-        // Ensure new fields have default values if they're missing
-        paperless_username: userPreferences.paperless_username || '',
-        paperless_password: userPreferences.paperless_password || '',
-        session_timeout_minutes: parseInt(userPreferences.session_timeout_minutes) || 30,
-        date_format: userPreferences.date_format || DEFAULT_DATE_FORMAT
-      });
+      setLocalPreferences(buildDefaultPreferences(userPreferences));
     }
   }, [userPreferences]);
 
-  // Check for changes
-  useEffect(() => {
-    if (!userPreferences || Object.keys(localPreferences).length === 0) {
-      setHasChanges(false);
-      return;
-    }
+  const hasGeneralChanges = getChangedKeys(
+    localPreferences, userPreferences, key => !isPaperlessSetting(key)
+  ).length > 0;
 
-    const hasChanged = Object.keys(localPreferences).some(key => {
-      return localPreferences[key] !== userPreferences[key];
-    });
-    setHasChanges(hasChanged);
-  }, [localPreferences, userPreferences]);
+  const hasDocumentChanges = getChangedKeys(
+    localPreferences, userPreferences, isPaperlessSetting
+  ).length > 0;
 
   const handleUnitSystemChange = newUnitSystem => {
     setLocalPreferences(prev => ({
@@ -114,13 +160,13 @@ const Settings = () => {
       Object.keys(localPreferences).forEach(key => {
         let localValue = localPreferences[key];
         let serverValue = userPreferences?.[key];
-        
+
         // Special handling for session_timeout_minutes to ensure proper type comparison
         if (key === 'session_timeout_minutes') {
           localValue = parseInt(localValue) || 30;
           serverValue = parseInt(serverValue) || 30;
         }
-        
+
         if (localValue !== serverValue) {
           fieldsToUpdate[key] = key === 'session_timeout_minutes' ? localValue : localPreferences[key];
         }
@@ -145,7 +191,7 @@ const Settings = () => {
       // Split fields into paperless and general settings
       const paperlessFields = {};
       const generalFields = {};
-      
+
       Object.keys(fieldsToUpdate).forEach(key => {
         if (PAPERLESS_SETTING_KEYS.includes(key)) {
           paperlessFields[key] = fieldsToUpdate[key];
@@ -153,9 +199,9 @@ const Settings = () => {
           generalFields[key] = fieldsToUpdate[key];
         }
       });
-      
+
       let updatedPreferences = {};
-      
+
       // Update general preferences first
       if (Object.keys(generalFields).length > 0) {
         const generalResponse = await updateUserPreferences(generalFields);
@@ -176,18 +222,12 @@ const Settings = () => {
           const newTokenExpiry = Date.now() + (generalResponse.session_timeout_minutes * 60 * 1000);
           await secureStorage.setItem('tokenExpiry', newTokenExpiry.toString());
 
-          // Update AuthContext with new token and expiry
-          // This is imported at the top: const { user, updateSessionTimeout } = useAuth();
-          // We need to also update the token in AuthContext state
-          // The updateSessionTimeout function will reset lastActivity automatically
-
           frontendLogger.logInfo('Token updated with new expiration', {
             component: 'Settings',
             expiryDate: new Date(newTokenExpiry).toISOString(),
             timeoutMinutes: generalResponse.session_timeout_minutes
           });
 
-          // Show user-friendly message
           notifySuccess('notifications:toasts.settings.sessionTimeoutUpdated', { interpolation: { minutes: generalResponse.session_timeout_minutes } });
         }
 
@@ -202,7 +242,7 @@ const Settings = () => {
           });
         }
       }
-      
+
       // Update paperless settings separately
       if (Object.keys(paperlessFields).length > 0) {
         const { updatePaperlessSettings } = await import('../services/api/paperlessApi.jsx');
@@ -213,11 +253,10 @@ const Settings = () => {
       // Update the context but preserve local form values for credentials
       const updatedPreferencesWithLocalCredentials = {
         ...updatedPreferences,
-        // Preserve local credential values that weren't returned by API for security
         paperless_username: localPreferences.paperless_username || '',
         paperless_password: localPreferences.paperless_password || ''
       };
-      
+
       // Debug what we're setting in local preferences
       if (fieldsToUpdate.session_timeout_minutes) {
         frontendLogger.debug('settings_local_preferences_update', 'Setting local preferences with timeout', {
@@ -227,7 +266,7 @@ const Settings = () => {
           component: 'Settings'
         });
       }
-      
+
       updateLocalPreferences(updatedPreferencesWithLocalCredentials);
 
       // Update session timeout in AuthContext if it was changed
@@ -255,14 +294,7 @@ const Settings = () => {
   };
 
   const handleResetPreferences = () => {
-    setLocalPreferences({
-      ...userPreferences,
-      // Ensure new fields have default values if they're missing
-      paperless_username: userPreferences.paperless_username || '',
-      paperless_password: userPreferences.paperless_password || '',
-      session_timeout_minutes: parseInt(userPreferences.session_timeout_minutes) || 30,
-      date_format: userPreferences.date_format || DEFAULT_DATE_FORMAT
-    });
+    setLocalPreferences(buildDefaultPreferences(userPreferences));
     frontendLogger.logInfo('User preferences reset to original values', {
       component: 'Settings',
     });
@@ -271,38 +303,72 @@ const Settings = () => {
   const handleCleanupFiles = async () => {
     try {
       setCleaningFiles(true);
-      
+
       frontendLogger.logInfo('Starting cleanup of out-of-sync files', {
         component: 'Settings'
       });
-      
+
       const results = await cleanupOutOfSyncFiles();
-      
+
       frontendLogger.logInfo('File cleanup completed', {
         results,
         component: 'Settings'
       });
-      
+
       const totalCleaned = results.files_cleaned || 0;
       const totalDeleted = results.files_deleted || 0;
-      
+
       if (totalCleaned > 0 || totalDeleted > 0) {
         notifySuccess('notifications:toasts.settings.cleanupComplete', { interpolation: { cleaned: totalCleaned, deleted: totalDeleted }, autoClose: 5000 });
       } else {
         notifyInfo('notifications:toasts.settings.noOutOfSync', { autoClose: 3000 });
       }
-      
+
     } catch (error) {
       frontendLogger.logError('Failed to cleanup out-of-sync files', {
         error: error.message,
         component: 'Settings'
       });
-      
+
       notifyError('notifications:toasts.settings.cleanupFailed', { autoClose: 5000 });
     } finally {
       setCleaningFiles(false);
     }
   };
+
+  const handleSessionTimeoutBlur = (e) => {
+    const parsed = parseInt(e.target.value);
+    const clamped = isNaN(parsed) ? 5 : Math.max(5, Math.min(1440, parsed));
+
+    setLocalPreferences(prev => ({
+      ...prev,
+      session_timeout_minutes: clamped,
+    }));
+
+    frontendLogger.logInfo('Session timeout preference changed (not saved yet)', {
+      newTimeout: clamped,
+      component: 'Settings',
+    });
+  };
+
+  function renderVersionInfo() {
+    if (loadingVersion) {
+      return t('settings.system.version.loading', 'Loading version information...');
+    }
+
+    if (!versionInfo) {
+      return t('settings.system.version.unavailable', 'Version information unavailable');
+    }
+
+    const appName = versionInfo.app_name || t('settings.system.version.unknownApp', 'Unknown App');
+    const version = versionInfo.version || t('settings.system.version.unknownVersion', 'Unknown Version');
+
+    return (
+      <span>
+        <strong>{appName}</strong> v{version}
+      </span>
+    );
+  }
 
   useEffect(() => {
     const fetchVersionInfo = async () => {
@@ -315,7 +381,6 @@ const Settings = () => {
           error: error.message,
           component: 'Settings',
         });
-        // Don't show error to user, just fail silently
       } finally {
         setLoadingVersion(false);
       }
@@ -340,20 +405,16 @@ const Settings = () => {
         showBackButton={true}
       />
 
-      {/* Settings Tabs */}
       <div className="settings-tabs">
-        <button
-          className={`settings-tab ${activeTab === 'general' ? 'active' : ''}`}
-          onClick={() => setActiveTab('general')}
-        >
-          {t('settings.tabs.general', 'General')}
-        </button>
-        <button
-          className={`settings-tab ${activeTab === 'notifications' ? 'active' : ''}`}
-          onClick={() => setActiveTab('notifications')}
-        >
-          {t('settings.tabs.notifications', 'Notifications')}
-        </button>
+        {SETTINGS_TABS.map(tab => (
+          <button
+            key={tab}
+            className={`settings-tab ${activeTab === tab ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {t(`settings.tabs.${tab}`, tab.charAt(0).toUpperCase() + tab.slice(1))}
+          </button>
+        ))}
       </div>
 
       {/* General Tab Content */}
@@ -372,7 +433,7 @@ const Settings = () => {
                 </div>
               </div>
               <div className="settings-option-control">
-                <Button variant="secondary" onClick={handleOpenPasswordModal}>
+                <Button variant="secondary" onClick={() => setIsPasswordModalOpen(true)}>
                   {t('settings.security.password.button', 'Change Password')}
                 </Button>
               </div>
@@ -393,41 +454,9 @@ const Settings = () => {
                 </div>
               </div>
               <div className="settings-option-control">
-                <Button variant="danger" onClick={handleOpenDeleteAccountModal}>
+                <Button variant="danger" onClick={() => setIsDeleteAccountModalOpen(true)}>
                   {t('settings.account.deleteAccount.button', 'Delete Account')}
                 </Button>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* System Information Section */}
-        <Card>
-          <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.systemInfo', 'System Information')}</h3>
-
-            <div className="settings-option">
-              <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.system.version.title', 'Application Version')}</div>
-                <div className="settings-option-description">
-                  {loadingVersion ? (
-                    t('settings.system.version.loading', 'Loading version information...')
-                  ) : versionInfo &&
-                    versionInfo.app_name &&
-                    versionInfo.version ? (
-                    <span>
-                      <strong>{versionInfo.app_name}</strong> v
-                      {versionInfo.version}
-                    </span>
-                  ) : versionInfo ? (
-                    <span>
-                      <strong>{versionInfo.app_name || t('settings.system.version.unknownApp', 'Unknown App')}</strong> v
-                      {versionInfo.version || t('settings.system.version.unknownVersion', 'Unknown Version')}
-                    </span>
-                  ) : (
-                    t('settings.system.version.unavailable', 'Version information unavailable')
-                  )}
-                </div>
               </div>
             </div>
           </div>
@@ -561,37 +590,12 @@ const Settings = () => {
                       type="text"
                       value={localPreferences?.session_timeout_minutes || 30}
                       onChange={(e) => {
-                        const value = e.target.value;
-                        // Allow typing any value, validation happens on blur/save
                         setLocalPreferences(prev => ({
                           ...prev,
-                          session_timeout_minutes: value
+                          session_timeout_minutes: e.target.value,
                         }));
                       }}
-                      onBlur={(e) => {
-                        // Validate and correct on blur
-                        const value = parseInt(e.target.value);
-                        if (isNaN(value) || value < 5) {
-                          setLocalPreferences(prev => ({
-                            ...prev,
-                            session_timeout_minutes: 5
-                          }));
-                        } else if (value > 1440) {
-                          setLocalPreferences(prev => ({
-                            ...prev,
-                            session_timeout_minutes: 1440
-                          }));
-                        } else {
-                          setLocalPreferences(prev => ({
-                            ...prev,
-                            session_timeout_minutes: value
-                          }));
-                        }
-                        frontendLogger.logInfo('Session timeout preference changed (not saved yet)', {
-                          newTimeout: parseInt(e.target.value) || 30,
-                          component: 'Settings',
-                        });
-                      }}
+                      onBlur={handleSessionTimeoutBlur}
                       placeholder="30"
                       disabled={savingPreferences}
                       className="settings-timeout-input"
@@ -614,7 +618,19 @@ const Settings = () => {
           </div>
         </Card>
 
-        {/* Document Storage Section */}
+        <SaveResetBar
+          visible={hasGeneralChanges}
+          saving={savingPreferences}
+          onSave={handleSavePreferences}
+          onReset={handleResetPreferences}
+          t={t}
+        />
+      </div>
+      )}
+
+      {/* Documents Tab Content */}
+      {activeTab === 'documents' && (
+      <div className="settings-content">
         <Card>
           <div className="settings-section">
             <h3 className="settings-section-title">{t('settings.sections.documentStorage', 'Document Storage')}</h3>
@@ -649,36 +665,13 @@ const Settings = () => {
           </div>
         </Card>
 
-        {/* Unified Save/Reset Actions */}
-        {hasChanges && (
-          <Card>
-            <div className="settings-actions">
-              <div className="settings-actions-info">
-                <div className="settings-changes-indicator">
-                  {t('settings.actions.unsavedChanges', 'You have unsaved changes')}
-                </div>
-              </div>
-
-              <div className="settings-actions-buttons">
-                <Button
-                  variant="secondary"
-                  onClick={handleResetPreferences}
-                  disabled={savingPreferences}
-                >
-                  {t('settings.actions.reset', 'Reset Changes')}
-                </Button>
-
-                <Button
-                  onClick={handleSavePreferences}
-                  disabled={savingPreferences}
-                  loading={savingPreferences}
-                >
-                  {savingPreferences ? t('settings.actions.saving', 'Saving...') : t('settings.actions.save', 'Save All Changes')}
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
+        <SaveResetBar
+          visible={hasDocumentChanges}
+          saving={savingPreferences}
+          onSave={handleSavePreferences}
+          onReset={handleResetPreferences}
+          t={t}
+        />
       </div>
       )}
 
@@ -689,16 +682,34 @@ const Settings = () => {
         </div>
       )}
 
-      {/* Change Password Modal */}
+      {/* About Tab Content */}
+      {activeTab === 'about' && (
+      <div className="settings-content">
+        <Card>
+          <div className="settings-section">
+            <h3 className="settings-section-title">{t('settings.sections.systemInfo', 'System Information')}</h3>
+
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-title">{t('settings.system.version.title', 'Application Version')}</div>
+                <div className="settings-option-description">
+                  {renderVersionInfo()}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+      )}
+
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
-        onClose={handleClosePasswordModal}
+        onClose={() => setIsPasswordModalOpen(false)}
       />
 
-      {/* Delete Account Modal */}
       <DeleteAccountModal
         isOpen={isDeleteAccountModalOpen}
-        onClose={handleCloseDeleteAccountModal}
+        onClose={() => setIsDeleteAccountModalOpen(false)}
       />
     </Container>
   );

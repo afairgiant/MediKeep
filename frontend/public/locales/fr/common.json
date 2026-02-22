@@ -2350,7 +2350,9 @@
     "subtitle": "Gérez vos préférences et paramètres pour l'application",
     "tabs": {
       "general": "Général",
-      "notifications": "Notifications"
+      "documents": "Documents",
+      "notifications": "Notifications",
+      "about": "A propos"
     },
     "sections": {
       "security": "Sécurité",

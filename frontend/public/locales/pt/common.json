@@ -2450,7 +2450,9 @@
     },
     "tabs": {
       "general": "Geral",
-      "notifications": "Notificações"
+      "documents": "Documentos",
+      "notifications": "Notificações",
+      "about": "Sobre"
     },
     "title": "Configurações"
   },

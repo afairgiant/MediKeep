@@ -2350,7 +2350,9 @@
     "subtitle": "Manage your application preferences and settings",
     "tabs": {
       "general": "General",
-      "notifications": "Notifications"
+      "documents": "Documents",
+      "notifications": "Notifications",
+      "about": "About"
     },
     "sections": {
       "security": "Security",

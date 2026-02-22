@@ -732,7 +732,9 @@
     },
     "tabs": {
       "general": "Allgemein",
-      "notifications": "Benachrichtigungen"
+      "documents": "Dokumente",
+      "notifications": "Benachrichtigungen",
+      "about": "Info"
     }
   },
   "patientInfo": {
