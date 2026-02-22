@@ -195,19 +195,19 @@
       "cancelled": "Annulée - Analyse annulée"
     },
     "category": {
-      "bloodWork": "Test sanguin",
+      "bloodWork": "Analyse sanguine",
       "imaging": "Imagerie (Radio, IRM, Scanner)",
       "pathology": "Pathologie",
       "microbiology": "Microbiologie",
       "chemistry": "Chimie",
       "hematology": "Hématologie",
       "hepatology": "Hépatologie",
-      "immunology": "Immunologie",
+	  "immunology": "Immunologie",
       "genetics": "Génétique",
       "cardiology": "Cardiologie",
       "pulmonology": "Pulmonologie",
-      "hearing": "Audition",
-      "stomatology": "Stomatologie",
+	  "hearing": "Ouïe",
+	  "stomatology": "Stomatologie",
       "other": "Autre"
     },
     "testType": {
@@ -1022,7 +1022,7 @@
       "resolvedTime": {
         "label": "Heure de résolution",
         "placeholder": "Heure à laquelle la crise s'est résolue",
-        "description": "L'heure à laquella cette crise s'est résolue"
+        "description": "L'heure à laquelle la cette crise s'est résolue"
       },
       "resolutionNotes": {
         "label": "Notes sur la résolution",
@@ -1196,9 +1196,9 @@
         "description": "Sélectionnez dans la liste ou saisissez une spécialité"
       },
       "practice": {
-        "label": "Cabinet/Clinique",
-        "placeholder": "Rechercher ou créer un cabinet...",
-        "description": "Sélectionnez un cabinet existant ou saisissez pour en créer un nouveau"
+        "label": "Etablissement/Clinique",
+        "placeholder": "Cherchez ou créez un établissement...",
+        "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
       },
       "phone": {
         "label": "Numéro de téléphone",
@@ -1241,41 +1241,41 @@
     }
   },
   "practices": {
-    "title": "Cabinets",
+    "title": "Etablissements",
     "form": {
       "name": {
-        "label": "Nom du cabinet",
-        "placeholder": "Hopital General de la Cite",
-        "description": "Nom du cabinet ou de la clinique"
+        "label": "Nom de l'établissement",
+        "placeholder": "Hôpital général de la cité",
+        "description": "Nom de l'établissement ou de la clinique"
       },
       "phone": {
-        "label": "Telephone du cabinet",
+        "label": "Numéro de téléphone de l'établissement",
         "placeholder": "+33 1 12 34 56 78",
-        "description": "Numero de telephone principal du cabinet"
+        "description": "Numéro de téléphone principal de l'établissement"
       },
       "fax": {
-        "label": "Numero de fax",
-        "placeholder": "+33 1 12 34 56 79",
-        "description": "Numero de fax du cabinet"
+        "label": "Numéro de fax",
+        "placeholder": "+33 1 12 34 56 78",
+        "description": "Numéro de fax de l'établissement"
       },
       "website": {
-        "label": "Site web du cabinet",
-        "placeholder": "https://www.cabinet.com",
-        "description": "Site web officiel du cabinet"
+        "label": "Site web de l'établissement",
+        "placeholder": "https://www.etablissement.com",
+        "description": "Site web officiel de l'établissement"
       },
       "patientPortal": {
-        "label": "URL du portail patient",
-        "placeholder": "https://portail.cabinet.com",
-        "description": "URL du portail patient"
+        "label": "URL du portail de patient",
+        "placeholder": "https://portail.etablissement.com",
+        "description": "URL pour le portail de patient"
       },
       "notes": {
         "label": "Notes",
-        "placeholder": "Notes supplementaires sur ce cabinet...",
-        "description": "Toute information supplementaire sur le cabinet"
+        "placeholder": "Toute note supplémentaire sur cet établissement...",
+        "description": "Toute information supplémentaire sur l'établissement"
       },
       "locations": {
         "label": "Emplacements",
-        "description": "Emplacements des bureaux pour ce cabinet"
+        "description": "Emplacements des bureaux pour cet établissement"
       }
     }
   },
