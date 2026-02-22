@@ -247,14 +247,11 @@
       "placeholder": "Sélectionnez une catégorie",
       "description": "Type d'analyse"
     },
-<<<<<<< HEAD
     "testTypeField": {
       "label": "Type d'analyse",
       "placeholder": "Sélectionnez le niveau d'urgence",
       "description": "Priorité ou urgence de l'analyse"
     },
-=======
->>>>>>> 8f92b30 (Add i18n support)
     "testingFacility": {
       "label": "Etablissement d'analyse",
       "placeholder": "ex : Laboratoire principal de l'hôpital",
