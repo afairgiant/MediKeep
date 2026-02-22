@@ -47,7 +47,7 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
     >
       <div className="profile-completion-content">
         <div className="completion-header">
-          <div className="completion-icon">🏥</div>
+          <div className="completion-icon"><img src="/medikeep-icon.svg" alt="" width={48} height={48} /></div>
           <p className="completion-message">
             Welcome to MediKeep! {message}
           </p>

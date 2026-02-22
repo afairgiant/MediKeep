@@ -723,7 +723,7 @@ const Dashboard = () => {
       <Container size="xl" py="md">
         <PageHeader
           title="MediKeep"
-          icon="🏥"
+          icon={<img src="/medikeep-icon.svg" alt="" width={28} height={28} style={{ verticalAlign: 'middle' }} />}
           variant="dashboard"
           showBackButton={false}
         />
