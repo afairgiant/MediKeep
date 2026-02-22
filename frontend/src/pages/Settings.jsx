@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { Header } from '../components/adapters';
 import Container from '../components/layout/Container';
@@ -20,6 +19,15 @@ import { notifySuccess, notifyError, notifyInfo } from '../utils/notifyTranslate
 import '../styles/pages/Settings.css';
 
 const SETTINGS_TABS = ['general', 'documents', 'notifications', 'about'];
+const DEFAULT_SESSION_TIMEOUT = 30;
+
+/**
+ * Safely parses a session timeout value to an integer with a default fallback.
+ */
+function safeParseTimeout(value) {
+  const parsed = parseInt(value, 10);
+  return Number.isNaN(parsed) ? DEFAULT_SESSION_TIMEOUT : parsed;
+}
 
 /**
  * Builds a preferences object with guaranteed default values for fields
@@ -30,7 +38,7 @@ function buildDefaultPreferences(prefs) {
     ...prefs,
     paperless_username: prefs.paperless_username || '',
     paperless_password: prefs.paperless_password || '',
-    session_timeout_minutes: parseInt(prefs.session_timeout_minutes) || 30,
+    session_timeout_minutes: safeParseTimeout(prefs.session_timeout_minutes),
     date_format: prefs.date_format || DEFAULT_DATE_FORMAT,
   };
 }
@@ -86,14 +94,6 @@ function SaveResetBar({ visible, saving, onSave, onReset, t }) {
     </Card>
   );
 }
-
-SaveResetBar.propTypes = {
-  visible: PropTypes.bool.isRequired,
-  saving: PropTypes.bool.isRequired,
-  onSave: PropTypes.func.isRequired,
-  onReset: PropTypes.func.isRequired,
-  t: PropTypes.func.isRequired,
-};
 
 const Settings = () => {
   const { t } = useTranslation(['common', 'notifications']);
@@ -163,8 +163,8 @@ const Settings = () => {
 
         // Special handling for session_timeout_minutes to ensure proper type comparison
         if (key === 'session_timeout_minutes') {
-          localValue = parseInt(localValue) || 30;
-          serverValue = parseInt(serverValue) || 30;
+          localValue = safeParseTimeout(localValue);
+          serverValue = safeParseTimeout(serverValue);
         }
 
         if (localValue !== serverValue) {
@@ -337,8 +337,8 @@ const Settings = () => {
   };
 
   const handleSessionTimeoutBlur = (e) => {
-    const parsed = parseInt(e.target.value);
-    const clamped = isNaN(parsed) ? 5 : Math.max(5, Math.min(1440, parsed));
+    const parsed = parseInt(e.target.value, 10);
+    const clamped = Number.isNaN(parsed) ? 5 : Math.max(5, Math.min(1440, parsed));
 
     setLocalPreferences(prev => ({
       ...prev,
@@ -695,6 +695,69 @@ const Settings = () => {
                 <div className="settings-option-description">
                   {renderVersionInfo()}
                 </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Getting Help Section */}
+        <Card>
+          <div className="settings-section">
+            <h3 className="settings-section-title">{t('settings.sections.gettingHelp', 'Getting Help')}</h3>
+
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-title">{t('settings.help.documentation.title', 'Documentation')}</div>
+                <div className="settings-option-description">
+                  {t('settings.help.documentation.description', 'Browse the wiki for guides, setup instructions, and feature documentation.')}
+                </div>
+              </div>
+              <div className="settings-option-control">
+                <Button
+                  variant="secondary"
+                  onClick={() => window.open('https://github.com/afairgiant/MediKeep/wiki', '_blank', 'noopener,noreferrer')}
+                >
+                  {t('settings.help.documentation.title', 'Documentation')}
+                </Button>
+              </div>
+            </div>
+
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-title">{t('settings.help.issues.title', 'Report an Issue')}</div>
+                <div className="settings-option-description">
+                  {t('settings.help.issues.description', 'Found a bug or have a feature request? Open an issue on GitHub.')}
+                </div>
+              </div>
+              <div className="settings-option-control">
+                <Button
+                  variant="secondary"
+                  onClick={() => window.open('https://github.com/afairgiant/MediKeep/issues', '_blank', 'noopener,noreferrer')}
+                >
+                  {t('settings.help.issues.title', 'Report an Issue')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Support MediKeep Section */}
+        <Card>
+          <div className="settings-section">
+            <h3 className="settings-section-title">{t('settings.sections.supportMediKeep', 'Support MediKeep')}</h3>
+
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-description">
+                  {t('settings.sponsor.description', 'MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going.')}
+                </div>
+              </div>
+              <div className="settings-option-control">
+                <Button
+                  onClick={() => window.open('https://github.com/sponsors/afairgiant', '_blank', 'noopener,noreferrer')}
+                >
+                  {t('settings.sponsor.button', 'Sponsor on GitHub')}
+                </Button>
               </div>
             </div>
           </div>
