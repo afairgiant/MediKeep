@@ -74,6 +74,23 @@ const MedicationFormWrapper = memo(({
     }
   }
   
+  // Check conditions array
+  if (prevProps.conditions !== nextProps.conditions) {
+    if (prevProps.conditions?.length !== nextProps.conditions?.length) {
+      logger.debug('MedicationFormWrapper re-rendering due to conditions length change', {
+        component: 'MedicationFormWrapper',
+        prevLength: prevProps.conditions?.length || 0,
+        nextLength: nextProps.conditions?.length || 0,
+      });
+      return false;
+    }
+  }
+
+  // Check navigate function reference
+  if (prevProps.navigate !== nextProps.navigate) {
+    return false;
+  }
+
   // Function props - these should be stable from parent
   if (prevProps.onClose !== nextProps.onClose ||
       prevProps.onInputChange !== nextProps.onInputChange ||
@@ -86,7 +103,7 @@ const MedicationFormWrapper = memo(({
     });
     return false;
   }
-  
+
   return true; // Props are equal, skip re-render
 });
 

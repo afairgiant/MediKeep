@@ -90,16 +90,6 @@ const Medication = () => {
     return data;
   }, [pharmaciesObject?.pharmacies]);
 
-  // Fetch conditions for the condition-linking dropdown in MedicationViewModal
-  const [conditions, setConditions] = useState([]);
-  useEffect(() => {
-    apiService.getConditionsDropdown(false).then(data => {
-      setConditions(data || []);
-    }).catch(err => {
-      logger.warn('Failed to fetch conditions dropdown:', err);
-    });
-  }, []);
-
   // Modern data management with useMedicalData
   const {
     items: medications,
@@ -126,6 +116,19 @@ const Medication = () => {
     },
     requiresPatient: true,
   });
+
+  // Fetch conditions for the condition-linking dropdown in the form and view modal.
+  // Depends on currentPatient so it refreshes when the active patient changes.
+  // Fetches all conditions (including inactive) so they can be linked to medications.
+  const [conditions, setConditions] = useState([]);
+  useEffect(() => {
+    if (!currentPatient?.id) return;
+    apiService.getConditionsDropdown(false).then(data => {
+      setConditions(data || []);
+    }).catch(err => {
+      logger.warn('Failed to fetch conditions dropdown:', err);
+    });
+  }, [currentPatient?.id]);
 
   // Get standardized configuration
   const config = getMedicalPageConfig('medications');

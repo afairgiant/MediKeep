@@ -1,6 +1,5 @@
-import logger from '../../services/logger';
-
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
@@ -22,6 +21,7 @@ import {
   IconPlus,
   IconTrash,
 } from '@tabler/icons-react';
+import logger from '../../services/logger';
 
 const ConditionRelationshipsForMedication = ({
   medicationId,
@@ -45,7 +45,10 @@ const ConditionRelationshipsForMedication = ({
   }, [medicationId]);
 
   const fetchMedicationConditions = async () => {
-    logger.info('Fetching medication conditions for medicationId:', medicationId);
+    logger.info('Fetching medication conditions', {
+      component: 'ConditionRelationshipsForMedication',
+      medicationId,
+    });
     setLoading(true);
     setError(null);
 
@@ -57,8 +60,11 @@ const ConditionRelationshipsForMedication = ({
       const missingConditions = rels.filter(rel => !rel.condition && rel.condition_id);
       if (missingConditions.length > 0) {
         const conditionPromises = missingConditions.map(rel =>
-          apiService.getCondition(rel.condition_id).catch(err => {
-            logger.warn(`Condition ${rel.condition_id} not found - may be deleted or orphaned relationship`);
+          apiService.getCondition(rel.condition_id).catch(() => {
+            logger.warn('Condition not found - may be deleted or orphaned relationship', {
+              component: 'ConditionRelationshipsForMedication',
+              conditionId: rel.condition_id,
+            });
             return null;
           })
         );
@@ -75,10 +81,13 @@ const ConditionRelationshipsForMedication = ({
 
         setConditionsCache(newConditionsCache);
       }
-    } catch (error) {
-      logger.error('Failed to fetch medication conditions:', error);
-      logger.error('Error details:', error.response?.data || error.message);
-      setError(`Failed to load related conditions: ${error.response?.data?.detail || error.message}`);
+    } catch (err) {
+      logger.error('Failed to fetch medication conditions', {
+        component: 'ConditionRelationshipsForMedication',
+        medicationId,
+        error: err.message,
+      });
+      setError(`Failed to load related conditions: ${err.response?.data?.detail || err.message}`);
       setRelationships([]);
     } finally {
       setLoading(false);
@@ -101,7 +110,12 @@ const ConditionRelationshipsForMedication = ({
       setSelectedConditionId(null);
       await fetchMedicationConditions();
     } catch (err) {
-      logger.error('Error adding condition relationship:', err);
+      logger.error('Failed to add condition relationship', {
+        component: 'ConditionRelationshipsForMedication',
+        medicationId,
+        conditionId: selectedConditionId,
+        error: err.message,
+      });
       setError(err.response?.data?.detail || err.message || t('medications.conditions.failedToAdd', 'Failed to add condition relationship'));
     } finally {
       setLoading(false);
@@ -118,7 +132,12 @@ const ConditionRelationshipsForMedication = ({
       await apiService.deleteConditionMedication(relationship.condition_id, relationship.id);
       await fetchMedicationConditions();
     } catch (err) {
-      logger.error('Error deleting condition relationship:', err);
+      logger.error('Failed to delete condition relationship', {
+        component: 'ConditionRelationshipsForMedication',
+        medicationId,
+        relationshipId: relationship.id,
+        error: err.message,
+      });
       setError(err.response?.data?.detail || err.message || t('medications.conditions.failedToRemove', 'Failed to remove condition relationship'));
     } finally {
       setLoading(false);
@@ -253,48 +272,63 @@ const ConditionRelationshipsForMedication = ({
           </Group>
 
           <Modal
-        opened={showAddModal}
-        onClose={() => { setShowAddModal(false); setSelectedConditionId(null); setError(null); }}
-        title={t('medications.conditions.linkToMedication', 'Link Condition to Medication')}
-        size="md"
-        centered
-        zIndex={3000}
-      >
-        <Stack gap="md">
-          <Select
-            label={t('medications.conditions.selectCondition', 'Select Condition')}
-            placeholder={t('medications.conditions.selectConditionPlaceholder', 'Choose a condition to link')}
-            data={conditionOptions}
-            value={selectedConditionId}
-            onChange={setSelectedConditionId}
-            searchable
-            clearable
-            required
-            comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-          />
-          {error && (
-            <Alert icon={<IconInfoCircle size={16} />} color="red" variant="light">
-              {error}
-            </Alert>
-          )}
-          <Group justify="flex-end" gap="sm">
-            <Button variant="light" onClick={() => { setShowAddModal(false); setSelectedConditionId(null); setError(null); }}>
-              {t('buttons.cancel', 'Cancel')}
-            </Button>
-            <Button
-              onClick={handleAddRelationship}
-              loading={loading}
-              disabled={!selectedConditionId}
-            >
-              {t('buttons.linkCondition', 'Link Condition')}
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+            opened={showAddModal}
+            onClose={() => { setShowAddModal(false); setSelectedConditionId(null); setError(null); }}
+            title={t('medications.conditions.linkToMedication', 'Link Condition to Medication')}
+            size="md"
+            centered
+            zIndex={3000}
+          >
+            <Stack gap="md">
+              <Select
+                label={t('medications.conditions.selectCondition', 'Select Condition')}
+                placeholder={t('medications.conditions.selectConditionPlaceholder', 'Choose a condition to link')}
+                data={conditionOptions}
+                value={selectedConditionId}
+                onChange={setSelectedConditionId}
+                searchable
+                clearable
+                required
+                comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+              />
+              {error && (
+                <Alert icon={<IconInfoCircle size={16} />} color="red" variant="light">
+                  {error}
+                </Alert>
+              )}
+              <Group justify="flex-end" gap="sm">
+                <Button variant="light" onClick={() => { setShowAddModal(false); setSelectedConditionId(null); setError(null); }}>
+                  {t('buttons.cancel', 'Cancel')}
+                </Button>
+                <Button
+                  onClick={handleAddRelationship}
+                  loading={loading}
+                  disabled={!selectedConditionId}
+                >
+                  {t('buttons.linkCondition', 'Link Condition')}
+                </Button>
+              </Group>
+            </Stack>
+          </Modal>
         </>
       )}
     </Stack>
   );
+};
+
+ConditionRelationshipsForMedication.propTypes = {
+  medicationId: PropTypes.number,
+  conditions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      diagnosis: PropTypes.string,
+      condition_name: PropTypes.string,
+      status: PropTypes.string,
+      severity: PropTypes.string,
+    })
+  ),
+  navigate: PropTypes.func,
+  viewOnly: PropTypes.bool,
 };
 
 export default ConditionRelationshipsForMedication;

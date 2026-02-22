@@ -1,4 +1,4 @@
-from typing import Optional, NamedTuple
+from typing import Generator, Optional, NamedTuple
 
 from fastapi import Depends, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database.database import get_db, SessionLocal
+from app.core.database.database import SessionLocal
 from app.core.logging.config import get_logger, log_security_event
 from app.core.http.error_handling import (
     MedicalRecordsAPIException,
@@ -37,6 +37,19 @@ class TokenValidationResult(NamedTuple):
     payload: dict
     username: str
 
+
+def get_db() -> Generator:
+    """
+    Get database session.
+
+    Creates a database session for each request and closes it when done.
+    This is the standard FastAPI database dependency pattern.
+    """
+    try:
+        db = SessionLocal()
+        yield db
+    finally:
+        db.close()
 
 
 def _validate_and_decode_token(
