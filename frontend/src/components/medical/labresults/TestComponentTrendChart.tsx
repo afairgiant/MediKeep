@@ -94,6 +94,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData })
               allowDuplicatedCategory={false}
             />
             <YAxis
+              dataKey="value"
               type="number"
               domain={[-0.5, 1.5]}
               ticks={[0, 1]}
