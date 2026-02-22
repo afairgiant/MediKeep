@@ -81,6 +81,10 @@
   },
   "relationships": {
     "addConditionFailed": "Fehler beim Hinzufügen der Erkrankungsverknüpfung",
-    "addMedicationFailed": "Fehler beim Hinzufügen der Medikamentenverknüpfung"
+    "addMedicationFailed": "Fehler beim Hinzufügen der Medikamentenverknüpfung",
+    "addFailed": "Fehler beim Hinzufügen der Verknüpfung",
+    "updateFailed": "Fehler beim Aktualisieren der Verknüpfung",
+    "deleteFailed": "Fehler beim Löschen der Verknüpfung",
+    "fetchFailed": "Fehler beim Laden der Verknüpfungen"
   }
 }

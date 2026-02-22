@@ -81,6 +81,10 @@
   },
   "relationships": {
     "addConditionFailed": "Error al añadir la relación con la condición",
-    "addMedicationFailed": "Error al añadir la relación con el medicamento"
+    "addMedicationFailed": "Error al añadir la relación con el medicamento",
+    "addFailed": "Error al añadir la relación",
+    "updateFailed": "Error al actualizar la relación",
+    "deleteFailed": "Error al eliminar la relación",
+    "fetchFailed": "Error al cargar las relaciones"
   }
 }

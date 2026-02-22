@@ -35,6 +35,7 @@
     "linkMedication": "Link Medication",
     "linkMedications": "Link Medications",
     "linkCondition": "Link Condition",
+    "linkConditions": "Link Conditions",
     "saveChanges": "Save Changes"
   },
   "labels": {
@@ -86,6 +87,8 @@
     "noRating": "No rating",
     "noMedicationsLinked": "No medications linked to this condition",
     "noConditionsLinked": "No conditions linked to this lab result",
+    "noConditionsLinkedToMedication": "No conditions linked to this medication",
+    "loadingRelatedConditions": "Loading related conditions...",
     "medicationsAvailableToLink": "{{count}} medications available to link",
     "conditionsAvailableToLink": "{{count}} conditions available to link",
     "linkedMedications": "Linked Medications",
@@ -486,16 +489,20 @@
   "modals": {
     "linkMedicationToCondition": "Link Medication to Condition",
     "linkMedicationsToCondition": "Link Medications to Condition",
+    "linkConditionsToMedication": "Link Conditions to Medication",
     "linkConditionToLabResult": "Link Condition to Lab Result",
     "selectMedication": "Select Medication",
     "selectMedications": "Select Medications",
+    "selectConditions": "Select Conditions",
     "selectCondition": "Select Condition",
     "chooseMedicationToLink": "Choose medications to link",
+    "chooseConditionsToLink": "Choose conditions to link",
     "chooseConditionToLink": "Choose a condition to link",
     "relevanceNoteOptional": "Relevance note (optional)",
     "noRelevanceNoteProvided": "No relevance note provided",
     "relevanceNote": "Relevance Note",
     "describeConditionRelevance": "Describe how this condition relates to the lab result (optional)",
+    "describeConditionRelevanceMedication": "Describe how these conditions relate to this medication (optional)",
     "describeMedicationRelevance": "Describe how these medications relate to the condition (optional)"
   },
   "time": {

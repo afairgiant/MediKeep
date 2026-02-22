@@ -33,6 +33,7 @@
     "skip": "Omitir",
     "done": "Hecho",
     "linkCondition": "Vincular condición",
+    "linkConditions": "Vincular condiciones",
     "linkMedication": "Vincular medicamento",
     "linkMedications": "Vincular medicamentos",
     "saveChanges": "Guardar cambios"
@@ -97,6 +98,8 @@
     "loadingOption": "Cargando {{option}}...",
     "medicationsAvailableToLink": "{{count}} medicamentos disponibles para vincular",
     "noConditionsLinked": "No hay condiciones vinculadas a este resultado de laboratorio",
+    "noConditionsLinkedToMedication": "No hay condiciones vinculadas a este medicamento",
+    "loadingRelatedConditions": "Cargando condiciones relacionadas...",
     "noMedicationsLinked": "No hay medicamentos vinculados a esta condición",
     "noRating": "Sin valoración",
     "ratingStars": "{{count}}/5 estrellas",
@@ -1593,10 +1596,13 @@
     }
   },
   "modals": {
+    "chooseConditionsToLink": "Elija condiciones para vincular",
     "chooseConditionToLink": "Elija una condición para vincular",
     "chooseMedicationToLink": "Elija medicamentos para vincular",
     "describeConditionRelevance": "Describa cómo esta condición se relaciona con el resultado de laboratorio (opcional)",
+    "describeConditionRelevanceMedication": "Describa cómo estas condiciones se relacionan con este medicamento (opcional)",
     "describeMedicationRelevance": "Describa cómo estos medicamentos se relacionan con la condición (opcional)",
+    "linkConditionsToMedication": "Vincular condiciones al medicamento",
     "linkConditionToLabResult": "Vincular condición al resultado de laboratorio",
     "linkMedicationToCondition": "Vincular medicamento a condición",
     "linkMedicationsToCondition": "Vincular medicamentos a condición",
@@ -1604,6 +1610,7 @@
     "relevanceNote": "Nota de relevancia",
     "relevanceNoteOptional": "Nota de relevancia (opcional)",
     "selectCondition": "Seleccione una condición",
+    "selectConditions": "Seleccione condiciones",
     "selectMedication": "Seleccione un medicamento",
     "selectMedications": "Seleccione medicamentos"
   },

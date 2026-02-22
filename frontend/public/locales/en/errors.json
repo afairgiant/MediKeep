@@ -81,6 +81,10 @@
   },
   "relationships": {
     "addConditionFailed": "Failed to add condition relationship",
-    "addMedicationFailed": "Failed to add medication relationship"
+    "addMedicationFailed": "Failed to add medication relationship",
+    "addFailed": "Failed to add relationship",
+    "updateFailed": "Failed to update relationship",
+    "deleteFailed": "Failed to delete relationship",
+    "fetchFailed": "Failed to load relationships"
   }
 }

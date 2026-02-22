@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import {
   Badge,
@@ -26,56 +27,190 @@ import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import logger from '../../services/logger';
 
-const INITIAL_RELATIONSHIP_STATE = {
-  medication_ids: [],
-  relevance_note: '',
+// Direction-specific configuration to avoid scattered ternaries throughout the component
+const DIRECTION_CONFIG = {
+  medication: {
+    idsField: 'condition_ids',
+    initialState: { condition_ids: [], relevance_note: '' },
+    emptyState: 'labels.noConditionsLinkedToMedication',
+    availableCount: 'labels.conditionsAvailableToLink',
+    addButton: 'buttons.linkCondition',
+    addButtonPlural: 'buttons.linkConditions',
+    modalTitle: 'modals.linkConditionsToMedication',
+    selectLabel: 'modals.selectConditions',
+    selectPlaceholder: 'modals.chooseConditionsToLink',
+    relevancePlaceholder: 'modals.describeConditionRelevanceMedication',
+    confirmRemove: 'messages.confirmRemoveConditionRelationship',
+    validationError: 'errors:form.conditionNotSelected',
+  },
+  condition: {
+    idsField: 'medication_ids',
+    initialState: { medication_ids: [], relevance_note: '' },
+    emptyState: 'labels.noMedicationsLinked',
+    availableCount: 'labels.medicationsAvailableToLink',
+    addButton: 'buttons.linkMedication',
+    addButtonPlural: 'buttons.linkMedications',
+    modalTitle: 'modals.linkMedicationsToCondition',
+    selectLabel: 'modals.selectMedications',
+    selectPlaceholder: 'modals.chooseMedicationToLink',
+    relevancePlaceholder: 'modals.describeMedicationRelevance',
+    confirmRemove: 'messages.confirmRemoveMedicationRelationship',
+    validationError: 'errors:form.medicationNotSelected',
+  },
 };
 
+function getSeverityColor(severity) {
+  switch (severity) {
+    case 'critical':
+      return 'red';
+    case 'severe':
+      return 'orange';
+    case 'moderate':
+      return 'yellow';
+    case 'mild':
+      return 'blue';
+    default:
+      return 'gray';
+  }
+}
+
+function getStatusColor(status) {
+  switch (status) {
+    case 'active':
+      return 'green';
+    case 'inactive':
+      return 'gray';
+    case 'resolved':
+      return 'blue';
+    case 'chronic':
+      return 'orange';
+    default:
+      return 'gray';
+  }
+}
+
 const MedicationRelationships = ({
+  // Common props
+  direction = 'condition',
+  navigate,
+  isViewMode = false,
+  // Condition-direction props (viewing a condition, linking medications)
   conditionId,
   conditionMedications = {},
   medications = [],
   fetchConditionMedications,
-  navigate,
-  isViewMode = false,
+  // Medication-direction props (viewing a medication, linking conditions)
+  medicationId,
+  conditions = [],
 }) => {
   const { t } = useTranslation(['common', 'errors']);
+  const isMedicationDirection = direction === 'medication';
+  const config = DIRECTION_CONFIG[direction];
+
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingRelationship, setEditingRelationship] = useState(null);
-  const [newRelationship, setNewRelationship] = useState(INITIAL_RELATIONSHIP_STATE);
+  const [newRelationship, setNewRelationship] = useState(config.initialState);
   const [error, setError] = useState(null);
+  const [conditionsCache, setConditionsCache] = useState({});
 
   const resetAndCloseModal = () => {
     setShowAddModal(false);
-    setNewRelationship(INITIAL_RELATIONSHIP_STATE);
+    setNewRelationship(config.initialState);
     setError(null);
   };
 
-  // Get relationships for this condition
-  useEffect(() => {
-    const conditionRelationships = conditionMedications[conditionId] || [];
-    setRelationships(conditionRelationships);
-  }, [conditionId, conditionMedications]);
+  // Refresh relationships after a mutation, using the appropriate fetch strategy per direction
+  const refreshRelationships = async () => {
+    if (isMedicationDirection) {
+      await fetchMedicationConditions();
+    } else if (fetchConditionMedications) {
+      await fetchConditionMedications(conditionId);
+    }
+  };
 
-  // Load relationships when component mounts
+  // Resolve the condition ID used for API calls depending on direction
+  const getRelConditionId = (relationship) =>
+    isMedicationDirection ? relationship.condition_id : conditionId;
+
+  // === Condition direction: sync relationships from parent cache ===
   useEffect(() => {
-    if (conditionId && fetchConditionMedications) {
-      // Only fetch if we don't already have the data for this condition
+    if (!isMedicationDirection) {
+      setRelationships(conditionMedications[conditionId] || []);
+    }
+  }, [isMedicationDirection, conditionId, conditionMedications]);
+
+  // === Condition direction: fetch if cache is empty ===
+  useEffect(() => {
+    if (!isMedicationDirection && conditionId && fetchConditionMedications) {
       const hasExistingData = conditionMedications && conditionMedications[conditionId];
       if (!hasExistingData) {
-        fetchConditionMedications(conditionId).catch(error => {
-          logger.error('Failed to fetch condition medications:', error);
-          setError(error.message || 'Failed to load medication relationships');
+        fetchConditionMedications(conditionId).catch(err => {
+          logger.error('Failed to fetch condition medications:', err);
+          setError(err.message || t('errors:relationships.fetchFailed'));
         });
       }
     }
-  }, [conditionId]); // Remove fetchConditionMedications from dependencies to prevent infinite loop
+  }, [conditionId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // === Medication direction: self-fetch relationships ===
+  const fetchMedicationConditions = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const rels = (await apiService.getMedicationConditions(medicationId)) || [];
+      setRelationships(rels);
+
+      // Fetch condition details for relationships missing condition data
+      const missingConditions = rels.filter(rel => !rel.condition && rel.condition_id);
+      if (missingConditions.length > 0) {
+        const conditionResults = await Promise.all(
+          missingConditions.map(rel =>
+            apiService.getCondition(rel.condition_id).catch(() => {
+              logger.warn('Condition not found - may be deleted or orphaned relationship', {
+                component: 'MedicationRelationships',
+                conditionId: rel.condition_id,
+              });
+              return null;
+            })
+          )
+        );
+
+        const newCache = {};
+        conditionResults.forEach((condition, index) => {
+          if (condition) {
+            newCache[missingConditions[index].condition_id] = condition;
+          }
+        });
+        setConditionsCache(newCache);
+      }
+    } catch (err) {
+      logger.error('Failed to fetch medication conditions', {
+        component: 'MedicationRelationships',
+        medicationId,
+        error: err.message,
+      });
+      setError(err.response?.data?.detail || err.message || t('errors:relationships.fetchFailed'));
+      setRelationships([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isMedicationDirection && medicationId) {
+      fetchMedicationConditions();
+    }
+  }, [medicationId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // === CRUD handlers ===
 
   const handleAddRelationship = async () => {
-    if (!newRelationship.medication_ids || newRelationship.medication_ids.length === 0) {
-      setError(t('errors:form.medicationNotSelected'));
+    const selectedIds = newRelationship[config.idsField] || [];
+    if (selectedIds.length === 0) {
+      setError(t(config.validationError, 'Please select at least one item'));
       return;
     }
 
@@ -83,58 +218,58 @@ const MedicationRelationships = ({
     setError(null);
 
     try {
-      // Use bulk create endpoint if multiple medications selected
-      if (newRelationship.medication_ids.length > 1) {
-        await apiService.createConditionMedicationsBulk(conditionId, {
-          medication_ids: newRelationship.medication_ids.map(id => parseInt(id)),
-          relevance_note: newRelationship.relevance_note || null,
-        });
+      if (isMedicationDirection) {
+        const parsedIds = selectedIds.map(id => parseInt(id));
+        for (const selectedConditionId of parsedIds) {
+          await apiService.createConditionMedication(selectedConditionId, {
+            condition_id: selectedConditionId,
+            medication_id: medicationId,
+            relevance_note: newRelationship.relevance_note || null,
+          });
+        }
       } else {
-        // Single medication - use regular endpoint
-        await apiService.createConditionMedication(conditionId, {
-          condition_id: conditionId,
-          medication_id: parseInt(newRelationship.medication_ids[0]),
-          relevance_note: newRelationship.relevance_note || null,
-        });
+        if (selectedIds.length > 1) {
+          await apiService.createConditionMedicationsBulk(conditionId, {
+            medication_ids: selectedIds.map(id => parseInt(id)),
+            relevance_note: newRelationship.relevance_note || null,
+          });
+        } else {
+          await apiService.createConditionMedication(conditionId, {
+            condition_id: conditionId,
+            medication_id: parseInt(selectedIds[0]),
+            relevance_note: newRelationship.relevance_note || null,
+          });
+        }
       }
 
-      // Refresh relationships
-      if (fetchConditionMedications) {
-        await fetchConditionMedications(conditionId);
-      }
-
+      await refreshRelationships();
       resetAndCloseModal();
     } catch (err) {
-      logger.error('Error adding medication relationship:', err);
-      setError(err.response?.data?.detail || err.message || t('errors:relationships.addMedicationFailed'));
+      logger.error('Error adding relationship:', err);
+      setError(err.response?.data?.detail || err.message || t('errors:relationships.addFailed', 'Failed to add relationship'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditRelationship = async (relationshipId, updates) => {
+  const handleEditRelationship = async (relationship, updates) => {
     setLoading(true);
     setError(null);
 
     try {
-      await apiService.updateConditionMedication(conditionId, relationshipId, updates);
-
-      // Refresh relationships
-      if (fetchConditionMedications) {
-        await fetchConditionMedications(conditionId);
-      }
-
+      await apiService.updateConditionMedication(getRelConditionId(relationship), relationship.id, updates);
+      await refreshRelationships();
       setEditingRelationship(null);
     } catch (err) {
-      logger.error('Error updating medication relationship:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to update medication relationship');
+      logger.error('Error updating relationship:', err);
+      setError(err.response?.data?.detail || err.message || t('errors:relationships.updateFailed', 'Failed to update relationship'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteRelationship = async (relationshipId) => {
-    if (!window.confirm(t('messages.confirmRemoveMedicationRelationship'))) {
+  const handleDeleteRelationship = async (relationship) => {
+    if (!window.confirm(t(config.confirmRemove))) {
       return;
     }
 
@@ -142,25 +277,18 @@ const MedicationRelationships = ({
     setError(null);
 
     try {
-      await apiService.deleteConditionMedication(conditionId, relationshipId);
-
-      // Refresh relationships
-      if (fetchConditionMedications) {
-        await fetchConditionMedications(conditionId);
-      }
+      await apiService.deleteConditionMedication(getRelConditionId(relationship), relationship.id);
+      await refreshRelationships();
     } catch (err) {
-      logger.error('Error deleting medication relationship:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to delete medication relationship');
+      logger.error('Error deleting relationship:', err);
+      setError(err.response?.data?.detail || err.message || t('errors:relationships.deleteFailed', 'Failed to delete relationship'));
     } finally {
       setLoading(false);
     }
   };
 
-  const getMedicationById = (medicationId) => {
-    return medications.find(medication => medication.id === medicationId);
-  };
+  // === Render helpers ===
 
-  // Render the relevance note section based on mode and state
   const renderRelevanceNote = (relationship, isEditing) => {
     if (!isViewMode && isEditing) {
       return (
@@ -197,17 +325,117 @@ const MedicationRelationships = ({
     return null;
   };
 
-  // Prepare medication options for MultiSelect
-  const medicationOptions = medications.map(medication => ({
-    value: medication.id.toString(),
-    label: `${medication.medication_name}${medication.dosage ? ` (${medication.dosage})` : ''}${medication.status ? ` - ${medication.status}` : ''}`,
-  }));
+  const renderConditionDirectionItem = (relationship) => {
+    const medication = relationship.medication
+      || medications.find(m => m.id === relationship.medication_id);
 
-  // Filter out already linked medications
-  const linkedMedicationIds = relationships.map(rel => rel.medication_id.toString());
-  const availableMedicationOptions = medicationOptions.filter(
-    option => !linkedMedicationIds.includes(option.value)
-  );
+    return (
+      <Group gap="sm">
+        {isViewMode ? (
+          <Text
+            size="sm"
+            fw={500}
+            c="blue"
+            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+            onClick={() => navigateToEntity('medication', medication?.id, navigate)}
+          >
+            {medication?.medication_name || `Medication ID: ${relationship.medication_id}`}
+          </Text>
+        ) : (
+          <Badge
+            variant="light"
+            color="teal"
+            leftSection={<IconPill size={12} />}
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigateToEntity('medication', medication?.id, navigate)}
+          >
+            {medication?.medication_name || `Medication ID: ${relationship.medication_id}`}
+          </Badge>
+        )}
+        {medication?.dosage && (
+          <Badge variant="outline" size="sm">
+            {medication.dosage}
+          </Badge>
+        )}
+        {medication?.frequency && (
+          <Badge variant="outline" size="sm" color="cyan">
+            {medication.frequency}
+          </Badge>
+        )}
+        {medication?.status && (
+          <Badge variant="outline" size="sm" color="green">
+            {medication.status}
+          </Badge>
+        )}
+      </Group>
+    );
+  };
+
+  const renderMedicationDirectionItem = (relationship) => {
+    const condition = relationship.condition || conditionsCache[relationship.condition_id];
+    const conditionName = condition?.diagnosis || condition?.condition_name || `Deleted Condition (ID: ${relationship.condition_id})`;
+    const isOrphaned = !condition;
+
+    return (
+      <Group gap="sm" style={{ flex: 1 }}>
+        <Text
+          size="sm"
+          fw={500}
+          c={isOrphaned ? 'red' : 'blue'}
+          style={isOrphaned ? { fontStyle: 'italic' } : { cursor: 'pointer', textDecoration: 'underline' }}
+          onClick={isOrphaned ? undefined : () => {
+            const condId = condition?.id || relationship.condition_id;
+            if (condId && navigate) {
+              navigateToEntity('condition', condId, navigate);
+            }
+          }}
+        >
+          {conditionName}
+        </Text>
+        {condition?.status && (
+          <Badge variant="outline" size="sm" color={getStatusColor(condition.status)}>
+            {condition.status}
+          </Badge>
+        )}
+        {condition?.severity && (
+          <Badge variant="outline" size="sm" color={getSeverityColor(condition.severity)}>
+            {condition.severity}
+          </Badge>
+        )}
+      </Group>
+    );
+  };
+
+  // === Dropdown options ===
+
+  let availableOptions = [];
+  let selectedIds = [];
+
+  if (isMedicationDirection) {
+    const linkedConditionIds = relationships.map(rel => String(rel.condition_id));
+    availableOptions = conditions
+      .filter(c => !linkedConditionIds.includes(String(c.id)))
+      .map(c => ({
+        value: String(c.id),
+        label: c.diagnosis || c.condition_name || `Condition #${c.id}`,
+      }));
+    selectedIds = newRelationship.condition_ids || [];
+  } else {
+    const medicationOptions = medications.map(medication => ({
+      value: medication.id.toString(),
+      label: `${medication.medication_name}${medication.dosage ? ` (${medication.dosage})` : ''}${medication.status ? ` - ${medication.status}` : ''}`,
+    }));
+    const linkedMedicationIds = relationships.map(rel => rel.medication_id.toString());
+    availableOptions = medicationOptions.filter(
+      option => !linkedMedicationIds.includes(option.value)
+    );
+    selectedIds = newRelationship.medication_ids || [];
+  }
+
+  // === Loading state for medication direction ===
+  if (isMedicationDirection && loading && relationships.length === 0) {
+    return <Text size="sm" c="dimmed">{t('labels.loadingRelatedConditions')}</Text>;
+  }
 
   return (
     <Stack gap="md">
@@ -221,52 +449,16 @@ const MedicationRelationships = ({
       {relationships.length > 0 ? (
         <Stack gap="sm">
           {relationships.map(relationship => {
-            const medication = relationship.medication || getMedicationById(relationship.medication_id);
             const isEditing = editingRelationship?.id === relationship.id;
 
             return (
               <Paper key={relationship.id} withBorder p="md">
                 <Group justify="space-between" align="flex-start">
                   <Stack gap="xs" style={{ flex: 1 }}>
-                    <Group gap="sm">
-                      {isViewMode ? (
-                        <Text
-                          size="sm"
-                          fw={500}
-                          c="blue"
-                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                          onClick={() => navigateToEntity('medication', medication?.id, navigate)}
-                        >
-                          {medication?.medication_name || `Medication ID: ${relationship.medication_id}`}
-                        </Text>
-                      ) : (
-                        <Badge
-                          variant="light"
-                          color="teal"
-                          leftSection={<IconPill size={12} />}
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => navigateToEntity('medication', medication?.id, navigate)}
-                        >
-                          {medication?.medication_name || `Medication ID: ${relationship.medication_id}`}
-                        </Badge>
-                      )}
-                      {medication?.dosage && (
-                        <Badge variant="outline" size="sm">
-                          {medication.dosage}
-                        </Badge>
-                      )}
-                      {medication?.frequency && (
-                        <Badge variant="outline" size="sm" color="cyan">
-                          {medication.frequency}
-                        </Badge>
-                      )}
-                      {medication?.status && (
-                        <Badge variant="outline" size="sm" color="green">
-                          {medication.status}
-                        </Badge>
-                      )}
-                    </Group>
-
+                    {isMedicationDirection
+                      ? renderMedicationDirectionItem(relationship)
+                      : renderConditionDirectionItem(relationship)
+                    }
                     {renderRelevanceNote(relationship, isEditing)}
                   </Stack>
 
@@ -278,7 +470,7 @@ const MedicationRelationships = ({
                             variant="light"
                             color="green"
                             size="sm"
-                            onClick={() => handleEditRelationship(relationship.id, {
+                            onClick={() => handleEditRelationship(relationship, {
                               relevance_note: editingRelationship?.relevance_note || relationship.relevance_note
                             })}
                             loading={loading}
@@ -311,7 +503,7 @@ const MedicationRelationships = ({
                             variant="light"
                             color="red"
                             size="sm"
-                            onClick={() => handleDeleteRelationship(relationship.id)}
+                            onClick={() => handleDeleteRelationship(relationship)}
                             loading={loading}
                           >
                             <IconTrash size={14} />
@@ -327,7 +519,7 @@ const MedicationRelationships = ({
         </Stack>
       ) : (
         <Paper withBorder p="md" ta="center">
-          <Text c="dimmed">{t('labels.noMedicationsLinked')}</Text>
+          <Text c="dimmed">{t(config.emptyState)}</Text>
         </Paper>
       )}
 
@@ -335,15 +527,15 @@ const MedicationRelationships = ({
       {!isViewMode && (
         <Group justify="space-between" align="center">
           <Text size="sm" c="dimmed">
-            {t('labels.medicationsAvailableToLink', { count: availableMedicationOptions.length })}
+            {t(config.availableCount, { count: availableOptions.length })}
           </Text>
           <Button
             variant="light"
             leftSection={<IconPlus size={16} />}
             onClick={() => setShowAddModal(true)}
-            disabled={loading || availableMedicationOptions.length === 0}
+            disabled={loading || availableOptions.length === 0}
           >
-            {t('buttons.linkMedication')}
+            {t(config.addButton)}
           </Button>
         </Group>
       )}
@@ -352,21 +544,20 @@ const MedicationRelationships = ({
       <Modal
         opened={showAddModal}
         onClose={resetAndCloseModal}
-        title={t('modals.linkMedicationsToCondition')}
+        title={t(config.modalTitle)}
         size="md"
         centered
         zIndex={3000}
       >
         <Stack gap="md">
           <MultiSelect
-            label={t('modals.selectMedications')}
-            placeholder={t('modals.chooseMedicationToLink')}
-            data={availableMedicationOptions}
-            value={newRelationship.medication_ids}
-            onChange={(values) => setNewRelationship(prev => ({
-              ...prev,
-              medication_ids: values
-            }))}
+            label={t(config.selectLabel)}
+            placeholder={t(config.selectPlaceholder)}
+            data={availableOptions}
+            value={selectedIds}
+            onChange={(values) => {
+              setNewRelationship(prev => ({ ...prev, [config.idsField]: values }));
+            }}
             searchable
             clearable
             required
@@ -375,7 +566,7 @@ const MedicationRelationships = ({
 
           <Textarea
             label={t('modals.relevanceNote')}
-            placeholder={t('modals.describeMedicationRelevance')}
+            placeholder={t(config.relevancePlaceholder)}
             value={newRelationship.relevance_note}
             onChange={(e) => setNewRelationship(prev => ({
               ...prev,
@@ -392,17 +583,45 @@ const MedicationRelationships = ({
             <Button
               onClick={handleAddRelationship}
               loading={loading}
-              disabled={!newRelationship.medication_ids || newRelationship.medication_ids.length === 0}
+              disabled={selectedIds.length === 0}
             >
-              {newRelationship.medication_ids.length > 1
-                ? t('buttons.linkMedications')
-                : t('buttons.linkMedication')}
+              {selectedIds.length > 1
+                ? t(config.addButtonPlural)
+                : t(config.addButton)}
             </Button>
           </Group>
         </Stack>
       </Modal>
     </Stack>
   );
+};
+
+MedicationRelationships.propTypes = {
+  direction: PropTypes.oneOf(['condition', 'medication']),
+  navigate: PropTypes.func,
+  isViewMode: PropTypes.bool,
+  conditionId: PropTypes.number,
+  conditionMedications: PropTypes.object,
+  medications: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      medication_name: PropTypes.string,
+      dosage: PropTypes.string,
+      frequency: PropTypes.string,
+      status: PropTypes.string,
+    })
+  ),
+  fetchConditionMedications: PropTypes.func,
+  medicationId: PropTypes.number,
+  conditions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      diagnosis: PropTypes.string,
+      condition_name: PropTypes.string,
+      status: PropTypes.string,
+      severity: PropTypes.string,
+    })
+  ),
 };
 
 export default MedicationRelationships;

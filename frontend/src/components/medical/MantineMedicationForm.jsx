@@ -27,7 +27,7 @@ import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
-import ConditionRelationshipsForMedication from './ConditionRelationshipsForMedication';
+import MedicationRelationships from './MedicationRelationships';
 import logger from '../../services/logger';
 
 const MantineMedicationForm = ({
@@ -302,10 +302,12 @@ const MantineMedicationForm = ({
             {editingMedication && (
               <Tabs.Panel value="conditions">
                 <Box mt="md">
-                  <ConditionRelationshipsForMedication
+                  <MedicationRelationships
+                    direction="medication"
                     medicationId={editingMedication.id}
                     conditions={conditions}
                     navigate={navigate}
+                    isViewMode={false}
                   />
                 </Box>
               </Tabs.Panel>

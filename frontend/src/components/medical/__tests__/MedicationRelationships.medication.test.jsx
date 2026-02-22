@@ -1,24 +1,21 @@
 import { vi } from 'vitest';
-
-/**
- * @jest-environment jsdom
- */
-import React from 'react';
-import render, { screen, fireEvent, waitFor } from '../../../test-utils/render';
+import render, { screen, waitFor } from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import ConditionRelationshipsForMedication from '../ConditionRelationshipsForMedication';
+import MedicationRelationships from '../MedicationRelationships';
 
 // --- Mocked API functions (hoisted so vi.mock factories can reference them) ---
 const {
   mockGetMedicationConditions,
   mockCreateConditionMedication,
   mockDeleteConditionMedication,
+  mockUpdateConditionMedication,
   mockGetCondition,
 } = vi.hoisted(() => ({
   mockGetMedicationConditions: vi.fn(),
   mockCreateConditionMedication: vi.fn(),
   mockDeleteConditionMedication: vi.fn(),
+  mockUpdateConditionMedication: vi.fn(),
   mockGetCondition: vi.fn(),
 }));
 
@@ -27,6 +24,7 @@ vi.mock('../../../services/api', () => ({
     getMedicationConditions: mockGetMedicationConditions,
     createConditionMedication: mockCreateConditionMedication,
     deleteConditionMedication: mockDeleteConditionMedication,
+    updateConditionMedication: mockUpdateConditionMedication,
     getCondition: mockGetCondition,
   },
 }));
@@ -39,15 +37,18 @@ vi.mock('../../../utils/linkNavigation', () => ({
   navigateToEntity: vi.fn(),
 }));
 
-// Mock Tabler icons
 vi.mock('@tabler/icons-react', () => ({
   IconStethoscope: (props) => <span data-testid="icon-stethoscope" {...props} />,
   IconInfoCircle: (props) => <span data-testid="icon-info" {...props} />,
   IconPlus: (props) => <span data-testid="icon-plus" {...props} />,
   IconTrash: (props) => <span data-testid="icon-trash" {...props} />,
+  IconEdit: (props) => <span data-testid="icon-edit" {...props} />,
+  IconCheck: (props) => <span data-testid="icon-check" {...props} />,
+  IconX: (props) => <span data-testid="icon-x" {...props} />,
+  IconPill: (props) => <span data-testid="icon-pill" {...props} />,
 }));
 
-// Needed for Mantine Select
+// Needed for Mantine Select/MultiSelect
 Element.prototype.scrollIntoView = vi.fn();
 
 // ============================================================
@@ -70,28 +71,46 @@ const mockRelationships = [
 ];
 
 const defaultProps = {
+  direction: 'medication',
   medicationId: 10,
   conditions: mockConditions,
   navigate: vi.fn(),
-  viewOnly: false,
+  isViewMode: false,
 };
 
 // In the test environment, i18n returns translation keys (e.g. 'buttons.linkCondition')
 // rather than the English fallback. Use these constants for assertions.
 const I18N = {
-  noLinked: 'medications.conditions.noLinked',
+  noLinked: 'labels.noConditionsLinkedToMedication',
   linkCondition: 'buttons.linkCondition',
-  availableToLink: 'medications.conditions.availableToLink',
-  linkToMedication: 'medications.conditions.linkToMedication',
-  selectCondition: 'medications.conditions.selectCondition',
+  linkConditions: 'buttons.linkConditions',
+  availableToLink: 'labels.conditionsAvailableToLink',
+  modalTitle: 'modals.linkConditionsToMedication',
+  selectConditions: 'modals.selectConditions',
   cancel: 'buttons.cancel',
+  confirmRemove: 'messages.confirmRemoveConditionRelationship',
 };
+
+// Wait for relationships to load, then click the Link Condition button to open the modal
+async function openAddModal() {
+  await waitFor(() => {
+    expect(screen.getByText(I18N.linkCondition)).toBeInTheDocument();
+  });
+
+  const linkButtons = screen.getAllByText(I18N.linkCondition);
+  const enabledBtn = linkButtons.find((btn) => !btn.disabled && btn.tagName === 'BUTTON');
+  await userEvent.click(enabledBtn || linkButtons[0]);
+
+  await waitFor(() => {
+    expect(screen.getByText(I18N.modalTitle)).toBeInTheDocument();
+  });
+}
 
 // ============================================================
 // Tests
 // ============================================================
 
-describe('ConditionRelationshipsForMedication', () => {
+describe('MedicationRelationships (direction="medication")', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.confirm = vi.fn(() => true);
@@ -103,28 +122,28 @@ describe('ConditionRelationshipsForMedication', () => {
   // ----------------------------------------------------------
   describe('Rendering', () => {
     it('renders without crashing', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText('Hypertension')).toBeInTheDocument();
       });
     });
 
     it('shows related condition name', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText('Hypertension')).toBeInTheDocument();
       });
     });
 
     it('shows condition status badge', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText('active')).toBeInTheDocument();
       });
     });
 
     it('shows condition severity badge', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText('moderate')).toBeInTheDocument();
       });
@@ -132,23 +151,22 @@ describe('ConditionRelationshipsForMedication', () => {
 
     it('shows empty message when no conditions are linked', async () => {
       mockGetMedicationConditions.mockResolvedValue([]);
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText(I18N.noLinked)).toBeInTheDocument();
       });
     });
 
-    it('shows Link Condition button when not viewOnly and conditions are available', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+    it('shows Link Condition button when not isViewMode and conditions are available', async () => {
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText(I18N.linkCondition)).toBeInTheDocument();
       });
     });
 
     it('shows available count text element', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
-        // The available count text uses i18n key
         expect(screen.getByText(I18N.availableToLink)).toBeInTheDocument();
       });
     });
@@ -159,20 +177,20 @@ describe('ConditionRelationshipsForMedication', () => {
   // ----------------------------------------------------------
   describe('Data loading', () => {
     it('fetches medication conditions on mount', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(mockGetMedicationConditions).toHaveBeenCalledWith(10);
       });
     });
 
     it('does not fetch when medicationId is not provided', () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} medicationId={null} />);
+      render(<MedicationRelationships {...defaultProps} medicationId={null} />);
       expect(mockGetMedicationConditions).not.toHaveBeenCalled();
     });
 
     it('fetches individual condition details for relationships missing condition data', async () => {
       const relWithoutCondition = [
-        { id: 102, condition_id: 2, medication_id: 10 }, // no `condition` property
+        { id: 102, condition_id: 2, medication_id: 10 },
       ];
       mockGetMedicationConditions.mockResolvedValue(relWithoutCondition);
       mockGetCondition.mockResolvedValue({
@@ -182,7 +200,7 @@ describe('ConditionRelationshipsForMedication', () => {
         severity: 'moderate',
       });
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(mockGetCondition).toHaveBeenCalledWith(2);
         expect(screen.getByText('Diabetes')).toBeInTheDocument();
@@ -196,7 +214,7 @@ describe('ConditionRelationshipsForMedication', () => {
       mockGetMedicationConditions.mockResolvedValue(relWithoutCondition);
       mockGetCondition.mockRejectedValue(new Error('Not found'));
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText(/Deleted Condition/)).toBeInTheDocument();
       });
@@ -204,37 +222,43 @@ describe('ConditionRelationshipsForMedication', () => {
 
     it('shows error message when fetch fails', async () => {
       mockGetMedicationConditions.mockRejectedValue(new Error('Network error'));
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
-        expect(
-          screen.getByText(/failed to load related conditions/i)
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Network error/)).toBeInTheDocument();
       });
     });
   });
 
   // ----------------------------------------------------------
-  // viewOnly mode
+  // isViewMode
   // ----------------------------------------------------------
-  describe('viewOnly mode', () => {
-    it('does not show Link Condition button in viewOnly mode', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} viewOnly={true} />);
+  describe('isViewMode', () => {
+    it('does not show Link Condition button in isViewMode', async () => {
+      render(<MedicationRelationships {...defaultProps} isViewMode={true} />);
       await waitFor(() => {
         expect(screen.getByText('Hypertension')).toBeInTheDocument();
       });
       expect(screen.queryByText(I18N.linkCondition)).not.toBeInTheDocument();
     });
 
-    it('does not show delete (trash) icon in viewOnly mode', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} viewOnly={true} />);
+    it('does not show delete (trash) icon in isViewMode', async () => {
+      render(<MedicationRelationships {...defaultProps} isViewMode={true} />);
       await waitFor(() => {
         expect(screen.getByText('Hypertension')).toBeInTheDocument();
       });
       expect(screen.queryByTestId('icon-trash')).not.toBeInTheDocument();
     });
 
-    it('shows condition name in viewOnly mode', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} viewOnly={true} />);
+    it('does not show edit icon in isViewMode', async () => {
+      render(<MedicationRelationships {...defaultProps} isViewMode={true} />);
+      await waitFor(() => {
+        expect(screen.getByText('Hypertension')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('icon-edit')).not.toBeInTheDocument();
+    });
+
+    it('shows condition name in isViewMode', async () => {
+      render(<MedicationRelationships {...defaultProps} isViewMode={true} />);
       await waitFor(() => {
         expect(screen.getByText('Hypertension')).toBeInTheDocument();
       });
@@ -242,25 +266,31 @@ describe('ConditionRelationshipsForMedication', () => {
   });
 
   // ----------------------------------------------------------
-  // Edit mode (viewOnly=false)
+  // Edit mode (isViewMode=false)
   // ----------------------------------------------------------
   describe('Edit mode', () => {
     it('shows delete icon for each linked condition', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByTestId('icon-trash')).toBeInTheDocument();
       });
     });
 
+    it('shows edit icon for each linked condition', async () => {
+      render(<MedicationRelationships {...defaultProps} />);
+      await waitFor(() => {
+        expect(screen.getByTestId('icon-edit')).toBeInTheDocument();
+      });
+    });
+
     it('shows Link Condition button', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText(I18N.linkCondition)).toBeInTheDocument();
       });
     });
 
     it('disables Link Condition button when all conditions are already linked', async () => {
-      // All 3 conditions are linked
       mockGetMedicationConditions.mockResolvedValue(
         mockConditions.map((c, i) => ({
           id: 200 + i,
@@ -270,7 +300,7 @@ describe('ConditionRelationshipsForMedication', () => {
         }))
       );
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByRole('button', { name: I18N.linkCondition })).toBeDisabled();
       });
@@ -282,69 +312,34 @@ describe('ConditionRelationshipsForMedication', () => {
   // ----------------------------------------------------------
   describe('Add relationship modal', () => {
     it('opens modal when Link Condition button is clicked', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
-      await waitFor(() => {
-        expect(screen.getByText(I18N.linkCondition)).toBeInTheDocument();
-      });
+      render(<MedicationRelationships {...defaultProps} />);
+      await openAddModal();
 
-      // Click the Link Condition button (not disabled)
-      const linkButtons = screen.getAllByText(I18N.linkCondition);
-      const enabledBtn = linkButtons.find((btn) => !btn.disabled && btn.tagName === 'BUTTON');
-      await userEvent.click(enabledBtn || linkButtons[0]);
-
-      await waitFor(() => {
-        expect(screen.getByText(I18N.linkToMedication)).toBeInTheDocument();
-      });
+      expect(screen.getByText(I18N.modalTitle)).toBeInTheDocument();
     });
 
-    it('shows Select Condition label in modal', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
-      await waitFor(() => {
-        expect(screen.getByText(I18N.linkCondition)).toBeInTheDocument();
-      });
+    it('shows Select Conditions label in modal', async () => {
+      render(<MedicationRelationships {...defaultProps} />);
+      await openAddModal();
 
-      const linkButtons = screen.getAllByText(I18N.linkCondition);
-      const enabledBtn = linkButtons.find((btn) => !btn.disabled && btn.tagName === 'BUTTON');
-      await userEvent.click(enabledBtn || linkButtons[0]);
-
-      await waitFor(() => {
-        expect(screen.getByText(I18N.selectCondition)).toBeInTheDocument();
-      });
+      expect(screen.getByText(I18N.selectConditions)).toBeInTheDocument();
     });
 
     it('shows Cancel button in modal', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
-      await waitFor(() => {
-        expect(screen.getByText(I18N.linkCondition)).toBeInTheDocument();
-      });
+      render(<MedicationRelationships {...defaultProps} />);
+      await openAddModal();
 
-      const linkButtons = screen.getAllByText(I18N.linkCondition);
-      const enabledBtn = linkButtons.find((btn) => !btn.disabled && btn.tagName === 'BUTTON');
-      await userEvent.click(enabledBtn || linkButtons[0]);
-
-      await waitFor(() => {
-        expect(screen.getByText(I18N.cancel)).toBeInTheDocument();
-      });
+      expect(screen.getByText(I18N.cancel)).toBeInTheDocument();
     });
 
     it('closes modal when Cancel is clicked', async () => {
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
-      await waitFor(() => {
-        expect(screen.getByText(I18N.linkCondition)).toBeInTheDocument();
-      });
-
-      const linkButtons = screen.getAllByText(I18N.linkCondition);
-      const enabledBtn = linkButtons.find((btn) => !btn.disabled && btn.tagName === 'BUTTON');
-      await userEvent.click(enabledBtn || linkButtons[0]);
-
-      await waitFor(() => {
-        expect(screen.getByText(I18N.cancel)).toBeInTheDocument();
-      });
+      render(<MedicationRelationships {...defaultProps} />);
+      await openAddModal();
 
       await userEvent.click(screen.getByText(I18N.cancel));
 
       await waitFor(() => {
-        expect(screen.queryByText(I18N.linkToMedication)).not.toBeInTheDocument();
+        expect(screen.queryByText(I18N.modalTitle)).not.toBeInTheDocument();
       });
     });
   });
@@ -355,23 +350,9 @@ describe('ConditionRelationshipsForMedication', () => {
   describe('handleAddRelationship', () => {
     it('does not call createConditionMedication without a selection', async () => {
       mockCreateConditionMedication.mockResolvedValue({});
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
+      await openAddModal();
 
-      // Wait for initial load
-      await waitFor(() => {
-        expect(screen.getByText('Hypertension')).toBeInTheDocument();
-      });
-
-      // Open modal
-      const linkButtons = screen.getAllByText(I18N.linkCondition);
-      const enabledBtn = linkButtons.find((btn) => !btn.disabled && btn.tagName === 'BUTTON');
-      await userEvent.click(enabledBtn || linkButtons[0]);
-
-      await waitFor(() => {
-        expect(screen.getByText(I18N.linkToMedication)).toBeInTheDocument();
-      });
-
-      // createConditionMedication should not be called yet (no condition selected)
       expect(mockCreateConditionMedication).not.toHaveBeenCalled();
     });
   });
@@ -386,7 +367,7 @@ describe('ConditionRelationshipsForMedication', () => {
         .mockResolvedValueOnce(mockRelationships)
         .mockResolvedValueOnce([]);
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('icon-trash')).toBeInTheDocument();
@@ -397,7 +378,7 @@ describe('ConditionRelationshipsForMedication', () => {
 
       await waitFor(() => {
         expect(mockDeleteConditionMedication).toHaveBeenCalledWith(
-          1,   // condition_id
+          1,   // condition_id from the relationship
           101  // relationship id
         );
       });
@@ -406,7 +387,7 @@ describe('ConditionRelationshipsForMedication', () => {
     it('does not call deleteConditionMedication when user cancels confirm', async () => {
       window.confirm = vi.fn(() => false);
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('icon-trash')).toBeInTheDocument();
@@ -425,7 +406,7 @@ describe('ConditionRelationshipsForMedication', () => {
         })
       );
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('icon-trash')).toBeInTheDocument();
@@ -445,7 +426,7 @@ describe('ConditionRelationshipsForMedication', () => {
         .mockResolvedValueOnce(mockRelationships)
         .mockResolvedValueOnce([]);
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('icon-trash')).toBeInTheDocument();
@@ -467,13 +448,11 @@ describe('ConditionRelationshipsForMedication', () => {
   describe('Condition option filtering', () => {
     it('excludes already-linked conditions from available count', async () => {
       // condition id=1 is already linked, so 2 remain available (Diabetes, Asthma)
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText('Hypertension')).toBeInTheDocument();
       });
-      // Available count text element should be present
       expect(screen.getByText(I18N.availableToLink)).toBeInTheDocument();
-      // Button should be enabled because there are still conditions to link
       expect(screen.getByText(I18N.linkCondition)).not.toBeDisabled();
     });
 
@@ -487,7 +466,7 @@ describe('ConditionRelationshipsForMedication', () => {
         }))
       );
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText('Hypertension')).toBeInTheDocument();
       });
@@ -497,7 +476,7 @@ describe('ConditionRelationshipsForMedication', () => {
     it('enables Link Condition button when no conditions are yet linked', async () => {
       mockGetMedicationConditions.mockResolvedValue([]);
 
-      render(<ConditionRelationshipsForMedication {...defaultProps} />);
+      render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
         expect(screen.getByText(I18N.noLinked)).toBeInTheDocument();
       });
@@ -514,7 +493,7 @@ describe('ConditionRelationshipsForMedication', () => {
       const mockNavigate = vi.fn();
 
       render(
-        <ConditionRelationshipsForMedication
+        <MedicationRelationships
           {...defaultProps}
           navigate={mockNavigate}
         />

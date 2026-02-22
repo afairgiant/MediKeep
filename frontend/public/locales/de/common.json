@@ -35,6 +35,7 @@
     "saveChanges": "Änderungen speichern",
     "linkMedication": "Medikament verknüpfen",
     "linkCondition": "Erkrankung verknüpfen",
+    "linkConditions": "Erkrankungen verknüpfen",
     "linkMedications": "Medikamente verknüpfen"
   },
   "labels": {
@@ -86,6 +87,8 @@
     "noRating": "Keine Bewertung",
     "noMedicationsLinked": "Keine Medikamente mit dieser Erkrankung verknüpft",
     "noConditionsLinked": "Keine Erkrankungen mit diesem Laborergebnis verknüpft",
+    "noConditionsLinkedToMedication": "Keine Erkrankungen mit diesem Medikament verknüpft",
+    "loadingRelatedConditions": "Verknüpfte Erkrankungen werden geladen...",
     "medicationsAvailableToLink": "{{count}} Medikamente zum Verknüpfen verfügbar",
     "conditionsAvailableToLink": "{{count}} Erkrankungen zum Verknüpfen verfügbar",
     "linkedMedications": "Verknüpfte Medikamente",
@@ -452,15 +455,19 @@
   },
   "modals": {
     "linkMedicationToCondition": "Medikament mit Erkrankung verknüpfen",
+    "linkConditionsToMedication": "Erkrankungen mit Medikament verknüpfen",
     "linkConditionToLabResult": "Erkrankung mit Laborergebnis verknüpfen",
     "selectMedication": "Medikament auswählen",
     "selectCondition": "Erkrankung auswählen",
+    "selectConditions": "Erkrankungen auswählen",
     "chooseMedicationToLink": "Wählen Sie ein Medikament zum Verknüpfen",
+    "chooseConditionsToLink": "Wählen Sie Erkrankungen zum Verknüpfen",
     "chooseConditionToLink": "Wählen Sie eine Erkrankung zum Verknüpfen",
     "relevanceNoteOptional": "Relevanznotiz (optional)",
     "noRelevanceNoteProvided": "Keine Relevanznotiz angegeben",
     "relevanceNote": "Relevanznotiz",
     "describeConditionRelevance": "Beschreiben Sie, wie diese Erkrankung mit dem Laborergebnis zusammenhängt (optional)",
+    "describeConditionRelevanceMedication": "Beschreiben Sie, wie diese Erkrankungen mit dem Medikament zusammenhängen (optional)",
     "describeMedicationRelevance": "Beschreiben Sie, wie diese Medikamente mit der Erkrankung zusammenhängen (optional)",
     "linkMedicationsToCondition": "Medikamente mit Erkrankung verknüpfen",
     "selectMedications": "Medikamente auswählen"
