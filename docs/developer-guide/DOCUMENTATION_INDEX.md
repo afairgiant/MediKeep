@@ -58,9 +58,7 @@
 | **SSO Quick Start** | Google/GitHub SSO setup | [../SSO_QUICK_START.md](../SSO_QUICK_START.md) |
 | **SSO Setup Guide** | Detailed SSO configuration | [../SSO_SETUP_GUIDE.md](../SSO_SETUP_GUIDE.md) |
 | **SSO Technical Overview** | SSO architecture | [../SSO_TECHNICAL_OVERVIEW.md](../SSO_TECHNICAL_OVERVIEW.md) |
-| **Patient Sharing API** | Patient sharing endpoints | [../api/PATIENT_SHARING_INVITATIONS_API.md](../api/PATIENT_SHARING_INVITATIONS_API.md) |
 | **Patient Sharing Examples** | Usage examples | [../examples/PATIENT_SHARING_EXAMPLES.md](../examples/PATIENT_SHARING_EXAMPLES.md) |
-| **Patient Share Workflow** | Sharing workflow diagram | [../workflows/PATIENT_SHARE_INVITATION_WORKFLOW.md](../workflows/PATIENT_SHARE_INVITATION_WORKFLOW.md) |
 | **Bind Mount Permissions** | Docker volume permissions | [../BIND_MOUNT_PERMISSIONS.md](../BIND_MOUNT_PERMISSIONS.md) |
 
 ---
@@ -165,10 +163,9 @@
 
 ### Deployment
 
-- Docker setup: [Deployment Guide](04-deployment.md#docker-deployment-primary-method)
-- Cloud deployment: [Deployment Guide](04-deployment.md#cloud-deployment)
+- Docker setup: [Deployment Guide](04-deployment.md#docker-deployment-recommended)
 - SSL/HTTPS: [Deployment Guide](04-deployment.md#sslhttps-setup)
-- Backup/restore: [Deployment Guide](04-deployment.md#backup-disaster-recovery)
+- Backup/restore: [Deployment Guide](04-deployment.md#backup--disaster-recovery)
 
 ### Development
 
@@ -179,10 +176,8 @@
 
 ### Features
 
-- Patient sharing: [Patient Sharing API](../api/PATIENT_SHARING_INVITATIONS_API.md)
+- Patient sharing: [API Reference - Sharing](02-api-reference.md#10-sharing--collaboration)
 - SSO: [SSO Setup Guide](../SSO_SETUP_GUIDE.md)
-- File uploads: [Architecture](01-architecture.md#file-storage)
-- Reports: [Architecture](01-architecture.md#reporting-system)
 
 ---
 
@@ -356,7 +351,6 @@
 - Community wiki
 - Multilingual support
 - Advanced troubleshooting
-- Performance tuning guide
 
 ---
 

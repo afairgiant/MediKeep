@@ -7,8 +7,12 @@ from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 
+from app.core.secrets import get_secret
+
 # Load environment variables from .env file
-load_dotenv()
+# Use explicit path so this works regardless of working directory
+_env_path = Path(__file__).parents[2] / ".env"
+load_dotenv(dotenv_path=_env_path)
 
 
 def _get_windows_path_helper(path_type: str):
@@ -41,9 +45,9 @@ def _get_windows_path_helper(path_type: str):
         return None
 
 
-# Raw database credentials from environment
-_DB_USER_RAW = os.getenv("DB_USER", "")
-_DB_PASS_RAW = os.getenv("DB_PASSWORD", "")
+# Database credentials (get_secret supports Docker _FILE pattern)
+_DB_USER_RAW = get_secret("DB_USER", "")
+_DB_PASS_RAW = get_secret("DB_PASSWORD", "")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "")
@@ -62,11 +66,11 @@ class Settings:  # App Info
         os.getenv("DEBUG", "True").lower() == "true"
     )  # Enable debug by default in development
     # Database Configuration
-    DATABASE_URL: str = os.getenv(
+    DATABASE_URL: str = get_secret(
         "DATABASE_URL",
         (
             f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-            if all([DB_USER, DB_PASS, DB_NAME])
+            if all((DB_USER, DB_PASS, DB_NAME))
             else ""
         ),
     )
@@ -93,7 +97,7 @@ class Settings:  # App Info
 
     # Security Configuration
     ALGORITHM: str = "HS256"
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your_default_secret_key")
+    SECRET_KEY: str = get_secret("SECRET_KEY", "your_default_secret_key")
 
     # Token Settings
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
@@ -141,13 +145,13 @@ class Settings:  # App Info
     )  # Default: enabled to avoid lockout scenarios
 
     # Default Admin Password Configuration
-    ADMIN_DEFAULT_PASSWORD: str = os.getenv("ADMIN_DEFAULT_PASSWORD", "admin123")
+    ADMIN_DEFAULT_PASSWORD: str = get_secret("ADMIN_DEFAULT_PASSWORD", "admin123")
 
     # SSO Configuration (Simple and Right-Sized)
     SSO_ENABLED: bool = os.getenv("SSO_ENABLED", "False").lower() == "true"
     SSO_PROVIDER_TYPE: str = os.getenv("SSO_PROVIDER_TYPE", "oidc")
-    SSO_CLIENT_ID: str = os.getenv("SSO_CLIENT_ID", "")
-    SSO_CLIENT_SECRET: str = os.getenv("SSO_CLIENT_SECRET", "")
+    SSO_CLIENT_ID: str = get_secret("SSO_CLIENT_ID", "")
+    SSO_CLIENT_SECRET: str = get_secret("SSO_CLIENT_SECRET", "")
     SSO_ISSUER_URL: str = os.getenv("SSO_ISSUER_URL", "")
     SSO_REDIRECT_URI: str = os.getenv("SSO_REDIRECT_URI", "")
     SSO_ALLOWED_DOMAINS: list = json.loads(os.getenv("SSO_ALLOWED_DOMAINS", "[]"))
@@ -181,7 +185,7 @@ class Settings:  # App Info
         os.getenv("PAPERLESS_MAX_UPLOAD_SIZE", str(50 * 1024 * 1024))
     )  # 50MB
     PAPERLESS_RETRY_ATTEMPTS: int = int(os.getenv("PAPERLESS_RETRY_ATTEMPTS", "3"))
-    PAPERLESS_SALT: str = os.getenv("PAPERLESS_SALT", "paperless_integration_salt_v1")
+    PAPERLESS_SALT: str = get_secret("PAPERLESS_SALT", "paperless_integration_salt_v1")
 
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
@@ -261,7 +265,7 @@ class Settings:  # App Info
         channel configs regardless of this salt value. Setting an explicit salt
         only prevents additional breakage if the default derivation changes.
         """
-        explicit_salt = os.getenv("NOTIFICATION_ENCRYPTION_SALT")
+        explicit_salt = get_secret("NOTIFICATION_ENCRYPTION_SALT")
         if explicit_salt:
             return explicit_salt
 
@@ -322,31 +326,34 @@ class Settings:  # App Info
         if not directory.exists():
             try:
                 directory.mkdir(parents=True, exist_ok=True)
-                logging.info(f"Created {directory_type} directory: {directory}")
+                logging.info("Created %s directory: %s", directory_type, directory)
             except PermissionError as e:
-                error_msg = (
-                    f"Permission denied creating {directory_type} directory: {directory}. "
+                logging.error(
+                    "Permission denied creating %s directory: %s. "
                     "This is likely a Docker bind mount permission issue. "
                     "Please ensure the container has write permissions to the host directory. "
                     "For bind mounts, you may need to: "
                     "1. Set proper ownership: 'sudo chown -R 1000:1000 /host/path' "
                     "2. Or use Docker volumes instead of bind mounts. "
-                    f"Error: {str(e)}"
+                    "Error: %s",
+                    directory_type,
+                    directory,
+                    e,
                 )
-                logging.error(error_msg)
-                # Don't raise here to allow the app to start, but log the issue
-                # The actual endpoints will handle the error when they try to create files
+                # Don't raise - allow the app to start; endpoints will handle errors at use time
             except OSError as e:
-                error_msg = (
-                    f"Failed to create {directory_type} directory {directory}: {str(e)}"
+                logging.error(
+                    "Failed to create %s directory %s: %s",
+                    directory_type,
+                    directory,
+                    e,
                 )
-                logging.error(error_msg)
-                # Don't raise here to allow the app to start
+                # Don't raise - allow the app to start
 
 
 # Create global settings instance
 try:
     settings = Settings()
 except Exception as e:
-    logging.error(f"Failed to initialize settings: {str(e)}")
+    logging.error("Failed to initialize settings: %s", e)
     raise

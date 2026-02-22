@@ -60,7 +60,7 @@ const Medication = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('medications');
 
   // Form state - moved up to be available for refs logic
   const [showAddForm, setShowAddForm] = useState(false);
@@ -116,6 +116,19 @@ const Medication = () => {
     },
     requiresPatient: true,
   });
+
+  // Fetch conditions for the condition-linking dropdown in the form and view modal.
+  // Depends on currentPatient so it refreshes when the active patient changes.
+  // Fetches all conditions (including inactive) so they can be linked to medications.
+  const [conditions, setConditions] = useState([]);
+  useEffect(() => {
+    if (!currentPatient?.id) return;
+    apiService.getConditionsDropdown(false).then(data => {
+      setConditions(data || []);
+    }).catch(err => {
+      logger.warn('Failed to fetch conditions dropdown:', err);
+    });
+  }, [currentPatient?.id]);
 
   // Get standardized configuration
   const config = getMedicalPageConfig('medications');
@@ -507,6 +520,8 @@ const Medication = () => {
           practitioners={practitioners}
           pharmacies={pharmacies}
           editingMedication={editingMedication}
+          conditions={conditions}
+          navigate={navigate}
         />
 
         {/* Content */}
@@ -635,6 +650,7 @@ const Medication = () => {
           navigate={navigate}
           onError={setError}
           practitioners={practitioners}
+          conditions={conditions}
         />
       </Stack>
     </Container>

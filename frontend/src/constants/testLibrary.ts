@@ -21,7 +21,7 @@ export const TEST_LIBRARY_VERSION = typedLibraryData.version;
 export const TEST_LIBRARY_LAST_UPDATED = typedLibraryData.lastUpdated;
 
 // Re-export types for convenience
-export type { TestLibraryItem, TestCategory } from './testLibraryTypes';
+export type { TestLibraryItem, TestCategory, ResultType, QualitativeValue } from './testLibraryTypes';
 
 /**
  * Helper Functions
@@ -137,4 +137,12 @@ export function getAutocompleteOptions(query: string = '', limit: number = 200):
 export function extractTestName(selection: string): string {
   const match = selection.match(/^(.+?)\s*(?:\([^)]+\))?$/);
   return match ? match[1].trim() : selection;
+}
+
+/**
+ * Check if a test is qualitative (positive/negative) based on test library data
+ */
+export function isQualitativeTest(testName: string): boolean {
+  const test = getTestByName(testName);
+  return test?.result_type === 'qualitative';
 }

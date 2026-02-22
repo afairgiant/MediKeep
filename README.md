@@ -21,6 +21,10 @@ Your personal health record keeper - built with React frontend and FastAPI backe
 
 ## This is actively being worked on!
 
+## Documentation
+
+Full documentation is available on the [MediKeep Wiki](https://github.com/afairgiant/MediKeep/wiki), including the [User Guide](https://github.com/afairgiant/MediKeep/wiki/User-Guide), [Admin Guide](https://github.com/afairgiant/MediKeep/wiki/Admin-Guide), and [Developer Guide](https://github.com/afairgiant/MediKeep/wiki/Developer-Guide).
+
 ## Screenshots
 
 ### Dashboard

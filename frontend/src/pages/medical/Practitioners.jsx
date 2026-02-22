@@ -52,7 +52,7 @@ import PracticeEditModal from '../../components/medical/practitioners/PracticeEd
 const Practitioners = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('practitioners');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();

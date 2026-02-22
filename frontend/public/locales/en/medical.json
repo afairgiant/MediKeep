@@ -123,7 +123,8 @@
       "basicInfo": "Basic Info",
       "details": "Details",
       "documents": "Documents",
-      "notes": "Notes"
+      "notes": "Notes",
+      "conditions": "Conditions"
     },
     "form": {
       "saving": "Saving medication...",
@@ -290,6 +291,28 @@
       "label": "Additional Notes",
       "placeholder": "Any additional information about the test, special instructions, or observations...",
       "description": "Clinical notes or special instructions"
+    },
+    "qualitative": {
+      "resultType": "Result Type",
+      "quantitative": "Quantitative",
+      "qualitativeLabel": "Qualitative",
+      "values": {
+        "positive": "Positive",
+        "negative": "Negative",
+        "detected": "Detected",
+        "undetected": "Undetected"
+      },
+      "expectedResult": "Expected Result",
+      "selectResult": "Select result",
+      "templates": {
+        "infectiousDisease": "Infectious Disease Panel",
+        "autoimmune": "Autoimmune Panel",
+        "viralSerology": "Viral Serology Panel"
+      },
+      "trends": {
+        "worsening": "Worsening",
+        "improving": "Improving"
+      }
     }
   },
   "immunizations": {

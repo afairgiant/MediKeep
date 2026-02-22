@@ -35,6 +35,7 @@
     "saveChanges": "Änderungen speichern",
     "linkMedication": "Medikament verknüpfen",
     "linkCondition": "Erkrankung verknüpfen",
+    "linkConditions": "Erkrankungen verknüpfen",
     "linkMedications": "Medikamente verknüpfen"
   },
   "labels": {
@@ -86,6 +87,8 @@
     "noRating": "Keine Bewertung",
     "noMedicationsLinked": "Keine Medikamente mit dieser Erkrankung verknüpft",
     "noConditionsLinked": "Keine Erkrankungen mit diesem Laborergebnis verknüpft",
+    "noConditionsLinkedToMedication": "Keine Erkrankungen mit diesem Medikament verknüpft",
+    "loadingRelatedConditions": "Verknüpfte Erkrankungen werden geladen...",
     "medicationsAvailableToLink": "{{count}} Medikamente zum Verknüpfen verfügbar",
     "conditionsAvailableToLink": "{{count}} Erkrankungen zum Verknüpfen verfügbar",
     "linkedMedications": "Verknüpfte Medikamente",
@@ -381,7 +384,8 @@
         "dosageInfo": "Dosierungsinformationen",
         "additionalNotes": "Zusätzliche Notizen",
         "sideEffects": "Nebenwirkungen",
-        "attachedDocuments": "Angehängte Dokumente"
+        "attachedDocuments": "Angehängte Dokumente",
+        "relatedConditions": "Verwandte Erkrankungen"
       },
       "labels": {
         "medicationName": "Medikamentenname",
@@ -398,6 +402,21 @@
     },
     "treatments": {
       "treatmentPlan": "Behandlungsplan"
+    },
+    "conditions": {
+      "loading": "Verwandte Erkrankungen werden geladen...",
+      "noLinked": "Keine Erkrankungen mit diesem Medikament verknüpft",
+      "orphanedTitle": "Diese Erkrankung wurde gelöscht, aber die Verknüpfung besteht noch",
+      "viewDetails": "Klicken zum Anzeigen der Erkrankungsdetails",
+      "removeLink": "Erkrankungsverknüpfung entfernen",
+      "confirmRemove": "Diese Erkrankungsverknüpfung entfernen?",
+      "failedToAdd": "Fehler beim Hinzufügen der Erkrankungsverknüpfung",
+      "failedToRemove": "Fehler beim Entfernen der Erkrankungsverknüpfung",
+      "availableToLink": "{{count}} Erkrankung zum Verknüpfen verfügbar",
+      "availableToLink_plural": "{{count}} Erkrankungen zum Verknüpfen verfügbar",
+      "linkToMedication": "Erkrankung mit Medikament verknüpfen",
+      "selectCondition": "Erkrankung auswählen",
+      "selectConditionPlaceholder": "Erkrankung zum Verknüpfen auswählen"
     }
   },
   "searchPlaceholders": {
@@ -436,15 +455,19 @@
   },
   "modals": {
     "linkMedicationToCondition": "Medikament mit Erkrankung verknüpfen",
+    "linkConditionsToMedication": "Erkrankungen mit Medikament verknüpfen",
     "linkConditionToLabResult": "Erkrankung mit Laborergebnis verknüpfen",
     "selectMedication": "Medikament auswählen",
     "selectCondition": "Erkrankung auswählen",
+    "selectConditions": "Erkrankungen auswählen",
     "chooseMedicationToLink": "Wählen Sie ein Medikament zum Verknüpfen",
+    "chooseConditionsToLink": "Wählen Sie Erkrankungen zum Verknüpfen",
     "chooseConditionToLink": "Wählen Sie eine Erkrankung zum Verknüpfen",
     "relevanceNoteOptional": "Relevanznotiz (optional)",
     "noRelevanceNoteProvided": "Keine Relevanznotiz angegeben",
     "relevanceNote": "Relevanznotiz",
     "describeConditionRelevance": "Beschreiben Sie, wie diese Erkrankung mit dem Laborergebnis zusammenhängt (optional)",
+    "describeConditionRelevanceMedication": "Beschreiben Sie, wie diese Erkrankungen mit dem Medikament zusammenhängen (optional)",
     "describeMedicationRelevance": "Beschreiben Sie, wie diese Medikamente mit der Erkrankung zusammenhängen (optional)",
     "linkMedicationsToCondition": "Medikamente mit Erkrankung verknüpfen",
     "selectMedications": "Medikamente auswählen"
@@ -654,7 +677,9 @@
       "accountManagement": "Kontoverwaltung",
       "systemInfo": "Systeminformationen",
       "preferences": "Anwendungseinstellungen",
-      "documentStorage": "Dokumentenspeicherung"
+      "documentStorage": "Dokumentenspeicherung",
+      "gettingHelp": "Hilfe erhalten",
+      "supportMediKeep": "MediKeep unterstützen"
     },
     "security": {
       "password": {
@@ -678,6 +703,20 @@
         "unknownVersion": "Unbekannte Version",
         "unavailable": "Versionsinformationen nicht verfügbar"
       }
+    },
+    "help": {
+      "documentation": {
+        "title": "Dokumentation",
+        "description": "Durchsuchen Sie das Wiki nach Anleitungen, Installationshinweisen und Funktionsdokumentation."
+      },
+      "issues": {
+        "title": "Problem melden",
+        "description": "Einen Fehler gefunden oder einen Funktionswunsch? Erstellen Sie ein Issue auf GitHub."
+      }
+    },
+    "sponsor": {
+      "description": "MediKeep ist kostenlos und Open Source. Wenn Sie es nützlich finden, erwägen Sie, das Projekt zu sponsern, um die Entwicklung zu unterstützen.",
+      "button": "Auf GitHub sponsern"
     },
     "preferences": {
       "unitSystem": {
@@ -716,7 +755,9 @@
     },
     "tabs": {
       "general": "Allgemein",
-      "notifications": "Benachrichtigungen"
+      "documents": "Dokumente",
+      "notifications": "Benachrichtigungen",
+      "about": "Info"
     }
   },
   "patientInfo": {

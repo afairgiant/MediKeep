@@ -117,9 +117,15 @@ class LabTestComponent(Base):
     abbreviation = Column(String, nullable=True)  # e.g., "WBC"
     test_code = Column(String, nullable=True)  # LOINC code
 
-    # Test values
-    value = Column(Float, nullable=False)  # Numeric result
-    unit = Column(String, nullable=False)  # e.g., "K/uL", "mg/dL"
+    # Result type discriminator
+    result_type = Column(String, nullable=True, default="quantitative")  # "quantitative" or "qualitative"
+
+    # Test values (nullable for qualitative tests)
+    value = Column(Float, nullable=True)  # Numeric result (required for quantitative)
+    unit = Column(String, nullable=True)  # e.g., "K/uL", "mg/dL" (required for quantitative)
+
+    # Qualitative result value (for immunology/microbiology tests)
+    qualitative_value = Column(String, nullable=True)  # "positive", "negative", "detected", "undetected"
 
     # Reference ranges
     ref_range_min = Column(Float, nullable=True)
@@ -150,6 +156,7 @@ class LabTestComponent(Base):
         Index("idx_lab_test_components_status", "status"),
         Index("idx_lab_test_components_category", "category"),
         Index("ix_lab_test_components_canonical_test_name", "canonical_test_name"),
+        Index("idx_lab_test_components_result_type", "result_type"),
         # Compound indexes for common query patterns
         Index("idx_lab_test_components_lab_result_status", "lab_result_id", "status"),
         Index("idx_lab_test_components_lab_result_category", "lab_result_id", "category"),

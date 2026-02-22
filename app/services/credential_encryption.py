@@ -5,9 +5,10 @@ This service provides secure encryption and decryption of API tokens using
 Fernet encryption with PBKDF2 key derivation for enhanced security.
 """
 
-import os
 import base64
+import re
 from typing import Optional
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -28,8 +29,7 @@ class CredentialEncryption:
     
     def __init__(self):
         """Initialize the encryption service with derived key."""
-        # Use environment variable for salt, with fallback
-        self.salt = os.environ.get('PAPERLESS_SALT', 'paperless_integration_salt_v1').encode()
+        self.salt = settings.PAPERLESS_SALT.encode()
         
         # Derive encryption key from SECRET_KEY + salt
         self.key = self._derive_key(settings.SECRET_KEY.encode(), self.salt)
@@ -146,7 +146,6 @@ class CredentialEncryption:
             return False
             
         # Paperless tokens are typically 40 characters of hex
-        import re
         return bool(re.match(r'^[a-f0-9]{40}$', token))
 
 

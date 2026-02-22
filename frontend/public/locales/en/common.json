@@ -35,6 +35,7 @@
     "linkMedication": "Link Medication",
     "linkMedications": "Link Medications",
     "linkCondition": "Link Condition",
+    "linkConditions": "Link Conditions",
     "saveChanges": "Save Changes"
   },
   "labels": {
@@ -86,6 +87,8 @@
     "noRating": "No rating",
     "noMedicationsLinked": "No medications linked to this condition",
     "noConditionsLinked": "No conditions linked to this lab result",
+    "noConditionsLinkedToMedication": "No conditions linked to this medication",
+    "loadingRelatedConditions": "Loading related conditions...",
     "medicationsAvailableToLink": "{{count}} medications available to link",
     "conditionsAvailableToLink": "{{count}} conditions available to link",
     "linkedMedications": "Linked Medications",
@@ -417,7 +420,8 @@
         "dosageInfo": "Dosage Information",
         "additionalNotes": "Additional Notes",
         "sideEffects": "Side Effects",
-        "attachedDocuments": "Attached Documents"
+        "attachedDocuments": "Attached Documents",
+        "relatedConditions": "Related Conditions"
       },
       "labels": {
         "medicationName": "Medication Name",
@@ -431,6 +435,21 @@
       "noNotes": "No notes available",
       "noSideEffects": "No side effects reported",
       "editMedication": "Edit Medication"
+    },
+    "conditions": {
+      "loading": "Loading related conditions...",
+      "noLinked": "No conditions linked to this medication",
+      "orphanedTitle": "This condition has been deleted but the relationship still exists",
+      "viewDetails": "Click to view condition details",
+      "removeLink": "Remove condition link",
+      "confirmRemove": "Remove this condition link?",
+      "failedToAdd": "Failed to add condition relationship",
+      "failedToRemove": "Failed to remove condition relationship",
+      "availableToLink": "{{count}} condition available to link",
+      "availableToLink_plural": "{{count}} conditions available to link",
+      "linkToMedication": "Link Condition to Medication",
+      "selectCondition": "Select Condition",
+      "selectConditionPlaceholder": "Choose a condition to link"
     }
   },
   "searchPlaceholders": {
@@ -470,16 +489,20 @@
   "modals": {
     "linkMedicationToCondition": "Link Medication to Condition",
     "linkMedicationsToCondition": "Link Medications to Condition",
+    "linkConditionsToMedication": "Link Conditions to Medication",
     "linkConditionToLabResult": "Link Condition to Lab Result",
     "selectMedication": "Select Medication",
     "selectMedications": "Select Medications",
+    "selectConditions": "Select Conditions",
     "selectCondition": "Select Condition",
     "chooseMedicationToLink": "Choose medications to link",
+    "chooseConditionsToLink": "Choose conditions to link",
     "chooseConditionToLink": "Choose a condition to link",
     "relevanceNoteOptional": "Relevance note (optional)",
     "noRelevanceNoteProvided": "No relevance note provided",
     "relevanceNote": "Relevance Note",
     "describeConditionRelevance": "Describe how this condition relates to the lab result (optional)",
+    "describeConditionRelevanceMedication": "Describe how these conditions relate to this medication (optional)",
     "describeMedicationRelevance": "Describe how these medications relate to the condition (optional)"
   },
   "time": {
@@ -2334,14 +2357,18 @@
     "subtitle": "Manage your application preferences and settings",
     "tabs": {
       "general": "General",
-      "notifications": "Notifications"
+      "documents": "Documents",
+      "notifications": "Notifications",
+      "about": "About"
     },
     "sections": {
       "security": "Security",
       "accountManagement": "Account Management",
       "systemInfo": "System Information",
       "preferences": "Application Preferences",
-      "documentStorage": "Document Storage"
+      "documentStorage": "Document Storage",
+      "gettingHelp": "Getting Help",
+      "supportMediKeep": "Support MediKeep"
     },
     "security": {
       "password": {
@@ -2365,6 +2392,20 @@
         "unknownApp": "Unknown App",
         "unknownVersion": "Unknown Version"
       }
+    },
+    "help": {
+      "documentation": {
+        "title": "Documentation",
+        "description": "Browse the wiki for guides, setup instructions, and feature documentation."
+      },
+      "issues": {
+        "title": "Report an Issue",
+        "description": "Found a bug or have a feature request? Open an issue on GitHub."
+      }
+    },
+    "sponsor": {
+      "description": "MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going.",
+      "button": "Sponsor on GitHub"
     },
     "preferences": {
       "unitSystem": {

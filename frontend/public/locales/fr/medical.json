@@ -123,7 +123,8 @@
       "basicInfo": "Informations basiques",
       "details": "Détails",
       "documents": "Documents",
-      "notes": "Notes"
+      "notes": "Notes",
+      "conditions": "Conditions"
     },
     "form": {
       "saving": "Sauvegarde du médicament...",
@@ -210,11 +211,6 @@
       "other": "Autre"
     },
     "testType": {
-      "routine": "Routine - Analyse standard",
-      "urgent": "Urgente - Analyse rapide",
-      "emergency": "Critique - Priorité maximale",
-      "followUp": "Suivi - Analyse répétée",
-      "screening": "Préventive - Analyse à titre préventif",
       "label": "Type d'analyse",
       "placeholder": "Sélectionnez le niveau d'urgence",
       "description": "Priorité ou urgence de l'analyse"
@@ -290,6 +286,28 @@
       "label": "Notes supplémentaires",
       "placeholder": "Toute information supplémentaire sur l'analyse, instructions spéciales, ou observations...",
       "description": "Notes cliniques ou instructions spéciales"
+    },
+    "qualitative": {
+      "resultType": "Type de résultat",
+      "quantitative": "Quantitatif",
+      "qualitativeLabel": "Qualitatif",
+      "values": {
+        "positive": "Positif",
+        "negative": "Négatif",
+        "detected": "Détecté",
+        "undetected": "Non détecté"
+      },
+      "expectedResult": "Résultat attendu",
+      "selectResult": "Sélectionner le résultat",
+      "templates": {
+        "infectiousDisease": "Bilan maladies infectieuses",
+        "autoimmune": "Bilan auto-immun",
+        "viralSerology": "Bilan sérologie virale"
+      },
+      "trends": {
+        "worsening": "En aggravation",
+        "improving": "En amélioration"
+      }
     }
   },
   "immunizations": {
@@ -1203,19 +1221,19 @@
       }
     },
     "name": {
-        "label": "Nom complet",
-        "placeholder": "Dr. Jeanne Dupont",
-        "description": "Nom complet du docteur, dont son titre"
+      "label": "Nom complet",
+      "placeholder": "Dr. Jeanne Dupont",
+      "description": "Nom complet du docteur, dont son titre"
     },
     "specialty": {
-        "label": "Spécialité médicale",
-        "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
-        "description": "Sélectionnez dans la liste ou saisissez une spécialité"
+      "label": "Spécialité médicale",
+      "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
+      "description": "Sélectionnez dans la liste ou saisissez une spécialité"
     },
     "practice": {
-        "label": "Etablissement/Clinique",
-        "placeholder": "Cherchez ou créez un établissement...",
-        "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
+      "label": "Cabinet/Clinique",
+      "placeholder": "Rechercher ou créer un cabinet...",
+      "description": "Sélectionnez un cabinet existant ou saisissez pour en créer un nouveau"
     },
     "rating": {
       "label": "Avis",
@@ -1352,9 +1370,9 @@
       "description": "Nom spécifique ou identification de l'emplacement"
     },
     "streetAddress": {
-        "label": "Adresse physique",
-        "placeholder": "123 Grand-rue",
-        "description": "Adresse physique"
+      "label": "Adresse physique",
+      "placeholder": "123 Grand-rue",
+      "description": "Adresse physique"
     },
     "city": {
       "label": "Cité",

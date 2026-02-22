@@ -18,6 +18,7 @@ import {
   IconPill,
   IconFileText,
   IconNotes,
+  IconStethoscope,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { medicationFormFields } from '../../utils/medicalFormFields';
@@ -26,6 +27,7 @@ import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
+import MedicationRelationships from './MedicationRelationships';
 import logger from '../../services/logger';
 
 const MantineMedicationForm = ({
@@ -39,6 +41,8 @@ const MantineMedicationForm = ({
   pharmacies = [],
   editingMedication = null,
   isLoading = false,
+  conditions = [],
+  navigate = null,
   children,
 }) => {
   // Translation
@@ -238,6 +242,11 @@ const MantineMedicationForm = ({
                   {t('medications.tabs.documents')}
                 </Tabs.Tab>
               )}
+              {editingMedication && (
+                <Tabs.Tab value="conditions" leftSection={<IconStethoscope size={16} />}>
+                  {t('medications.tabs.conditions')}
+                </Tabs.Tab>
+              )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('medications.tabs.notes')}
               </Tabs.Tab>
@@ -285,6 +294,21 @@ const MantineMedicationForm = ({
                       showProgressModal={true}
                     />
                   </Stack>
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Conditions Tab */}
+            {editingMedication && (
+              <Tabs.Panel value="conditions">
+                <Box mt="md">
+                  <MedicationRelationships
+                    direction="medication"
+                    medicationId={editingMedication.id}
+                    conditions={conditions}
+                    navigate={navigate}
+                    isViewMode={false}
+                  />
                 </Box>
               </Tabs.Panel>
             )}

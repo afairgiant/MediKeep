@@ -34,6 +34,7 @@
     "done": "Fatto",
     "linkMedication": "Collega farmaco",
     "linkCondition": "Collega condizione",
+    "linkConditions": "Collega condizioni",
     "linkMedications": "Collega farmaci",
     "saveChanges": "Salva modifiche"
   },
@@ -86,6 +87,8 @@
     "noRating": "Nessuna valutazione",
     "noMedicationsLinked": "Nessun farmaco collegato a questa condizione",
     "noConditionsLinked": "Nessuna condizione collegata a questo risultato di laboratorio",
+    "noConditionsLinkedToMedication": "Nessuna condizione collegata a questo farmaco",
+    "loadingRelatedConditions": "Caricamento condizioni correlate...",
     "medicationsAvailableToLink": "{{count}} farmaci disponibili da collegare",
     "conditionsAvailableToLink": "{{count}} condizioni disponibili da collegare",
     "linkedMedications": "Farmaci collegati",
@@ -420,7 +423,8 @@
         "prescriberPharmacy": "Prescrittore e farmacia",
         "sideEffects": "Effetti collaterali",
         "tags": "Tag",
-        "timeline": "Cronologia"
+        "timeline": "Cronologia",
+        "relatedConditions": "Condizioni correlate"
       },
       "tabs": {
         "documents": "Documenti",
@@ -431,7 +435,22 @@
     },
     "noMedications": "Nessun farmaco o integratore trovato",
     "success": "Successo",
-    "tryAdjustingFilters": "Prova a modificare i criteri di ricerca o filtro."
+    "tryAdjustingFilters": "Prova a modificare i criteri di ricerca o filtro.",
+    "conditions": {
+      "loading": "Caricamento delle condizioni correlate...",
+      "noLinked": "Nessuna condizione collegata a questo farmaco",
+      "orphanedTitle": "Questa condizione è stata eliminata ma la relazione esiste ancora",
+      "viewDetails": "Fare clic per visualizzare i dettagli della condizione",
+      "removeLink": "Rimuovi collegamento alla condizione",
+      "confirmRemove": "Rimuovere questo collegamento alla condizione?",
+      "failedToAdd": "Impossibile aggiungere la relazione con la condizione",
+      "failedToRemove": "Impossibile rimuovere la relazione con la condizione",
+      "availableToLink": "{{count}} condizione disponibile da collegare",
+      "availableToLink_plural": "{{count}} condizioni disponibili da collegare",
+      "linkToMedication": "Collega condizione al farmaco",
+      "selectCondition": "Seleziona condizione",
+      "selectConditionPlaceholder": "Scegli una condizione da collegare"
+    }
   },
   "searchPlaceholders": {
     "conditions": "Cerca condizioni, note, tag...",
@@ -469,15 +488,19 @@
   },
   "modals": {
     "linkMedicationToCondition": "Collega farmaco alla condizione",
+    "linkConditionsToMedication": "Collega condizioni al farmaco",
     "linkConditionToLabResult": "Collega condizione al risultato di laboratorio",
     "selectMedication": "Seleziona farmaco",
     "selectCondition": "Seleziona condizione",
+    "selectConditions": "Seleziona condizioni",
     "chooseMedicationToLink": "Scegli un farmaco da collegare",
+    "chooseConditionsToLink": "Scegli condizioni da collegare",
     "chooseConditionToLink": "Scegli una condizione da collegare",
     "relevanceNoteOptional": "Nota di rilevanza (opzionale)",
     "noRelevanceNoteProvided": "Nessuna nota di rilevanza fornita",
     "relevanceNote": "Nota di rilevanza",
     "describeConditionRelevance": "Descrivi come questa condizione è correlata al risultato di laboratorio (opzionale)",
+    "describeConditionRelevanceMedication": "Descrivi come queste condizioni sono correlate a questo farmaco (opzionale)",
     "describeMedicationRelevance": "Descrivi come questi farmaci sono correlati alla condizione (opzionale)",
     "linkMedicationsToCondition": "Collega farmaci alla condizione",
     "selectMedications": "Seleziona farmaci"
@@ -2413,7 +2436,9 @@
       "documentStorage": "Archiviazione documenti",
       "preferences": "Preferenze dell'applicazione",
       "security": "Sicurezza",
-      "systemInfo": "Informazioni di sistema"
+      "systemInfo": "Informazioni di sistema",
+      "gettingHelp": "Ottenere aiuto",
+      "supportMediKeep": "Supporta MediKeep"
     },
     "security": {
       "password": {
@@ -2432,9 +2457,25 @@
         "unknownVersion": "Versione sconosciuta"
       }
     },
+    "help": {
+      "documentation": {
+        "title": "Documentazione",
+        "description": "Consulta la wiki per guide, istruzioni di configurazione e documentazione delle funzionalità."
+      },
+      "issues": {
+        "title": "Segnala un problema",
+        "description": "Hai trovato un bug o hai un suggerimento? Apri un issue su GitHub."
+      }
+    },
+    "sponsor": {
+      "description": "MediKeep è gratuito e open source. Se lo trovi utile, considera di sponsorizzare il progetto per sostenere lo sviluppo.",
+      "button": "Sponsorizza su GitHub"
+    },
     "tabs": {
       "general": "Generale",
-      "notifications": "Notifiche"
+      "documents": "Documenti",
+      "notifications": "Notifiche",
+      "about": "Informazioni"
     },
     "title": "Impostazioni"
   },

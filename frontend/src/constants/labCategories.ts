@@ -77,11 +77,40 @@ export function getCategoryColor(category: string): string {
   return CATEGORY_COLORS[category] ?? 'gray';
 }
 
-/**
- * Options list for Mantine Select dropdowns.
- * Each entry uses user-friendly labels that differ from the longer display names
- * to keep dropdown menus compact.
- */
+/** Display names for qualitative result values. */
+const QUALITATIVE_DISPLAY_NAMES: Record<string, string> = {
+  positive: 'Positive',
+  negative: 'Negative',
+  detected: 'Detected',
+  undetected: 'Undetected',
+};
+
+/** Mantine color token for each qualitative value. */
+const QUALITATIVE_COLORS: Record<string, string> = {
+  positive: 'red',
+  negative: 'green',
+  detected: 'orange',
+  undetected: 'green',
+};
+
+/** Get display name for a qualitative value. */
+export function getQualitativeDisplayName(value: string): string {
+  return QUALITATIVE_DISPLAY_NAMES[value] ?? value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/** Get Mantine color for a qualitative value. */
+export function getQualitativeColor(value: string): string {
+  return QUALITATIVE_COLORS[value] ?? 'gray';
+}
+
+/** Options for qualitative value Select dropdowns. */
+export const QUALITATIVE_SELECT_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'positive', label: 'Positive' },
+  { value: 'negative', label: 'Negative' },
+  { value: 'detected', label: 'Detected' },
+  { value: 'undetected', label: 'Undetected' },
+];
+
 export const CATEGORY_SELECT_OPTIONS: Array<{ value: string; label: string }> = [
   { value: 'chemistry', label: 'Blood Chemistry & Metabolic' },
   { value: 'hematology', label: 'Blood Counts & Cells' },
