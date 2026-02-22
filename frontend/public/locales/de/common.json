@@ -381,7 +381,8 @@
         "dosageInfo": "Dosierungsinformationen",
         "additionalNotes": "Zusätzliche Notizen",
         "sideEffects": "Nebenwirkungen",
-        "attachedDocuments": "Angehängte Dokumente"
+        "attachedDocuments": "Angehängte Dokumente",
+        "relatedConditions": "Verwandte Erkrankungen"
       },
       "labels": {
         "medicationName": "Medikamentenname",
@@ -398,6 +399,21 @@
     },
     "treatments": {
       "treatmentPlan": "Behandlungsplan"
+    },
+    "conditions": {
+      "loading": "Verwandte Erkrankungen werden geladen...",
+      "noLinked": "Keine Erkrankungen mit diesem Medikament verknüpft",
+      "orphanedTitle": "Diese Erkrankung wurde gelöscht, aber die Verknüpfung besteht noch",
+      "viewDetails": "Klicken zum Anzeigen der Erkrankungsdetails",
+      "removeLink": "Erkrankungsverknüpfung entfernen",
+      "confirmRemove": "Diese Erkrankungsverknüpfung entfernen?",
+      "failedToAdd": "Fehler beim Hinzufügen der Erkrankungsverknüpfung",
+      "failedToRemove": "Fehler beim Entfernen der Erkrankungsverknüpfung",
+      "availableToLink": "{{count}} Erkrankung zum Verknüpfen verfügbar",
+      "availableToLink_plural": "{{count}} Erkrankungen zum Verknüpfen verfügbar",
+      "linkToMedication": "Erkrankung mit Medikament verknüpfen",
+      "selectCondition": "Erkrankung auswählen",
+      "selectConditionPlaceholder": "Erkrankung zum Verknüpfen auswählen"
     }
   },
   "searchPlaceholders": {

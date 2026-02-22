@@ -62,6 +62,7 @@ vi.mock('../../../services/api', () => ({
     createMedication: vi.fn(() => Promise.resolve({})),
     updateMedication: vi.fn(() => Promise.resolve({})),
     deleteMedication: vi.fn(() => Promise.resolve()),
+    getConditionsDropdown: vi.fn(() => Promise.resolve([])),
   },
 }));
 vi.mock('../../../services/logger', () => ({
@@ -189,7 +190,7 @@ vi.mock('../../../components/medical/medications', () => ({
       <button onClick={() => onDelete(medication.id)}>Delete</button>
     </div>
   ),
-  MedicationViewModal: ({ isOpen, onClose, medication, onEdit }) => {
+  MedicationViewModal: ({ isOpen, onClose, medication, onEdit, conditions }) => {
     if (!isOpen || !medication) return null;
     return (
       <div data-testid="view-modal" role="dialog">
@@ -198,16 +199,22 @@ vi.mock('../../../components/medical/medications', () => ({
         <span>{medication.dosage}</span>
         <span>{medication.frequency}</span>
         {medication.indication && <span>{medication.indication}</span>}
+        {conditions !== undefined && (
+          <span data-testid="view-modal-conditions-count">{conditions.length}</span>
+        )}
         <button onClick={onClose}>Close</button>
         <button onClick={() => onEdit(medication)}>Edit</button>
       </div>
     );
   },
-  MedicationFormWrapper: ({ isOpen, onClose, title, formData, onInputChange, onSubmit }) => {
+  MedicationFormWrapper: ({ isOpen, onClose, title, formData, onInputChange, onSubmit, conditions, navigate }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="form-modal" role="dialog">
         <h2>{title}</h2>
+        {conditions !== undefined && (
+          <span data-testid="form-modal-conditions-count">{conditions.length}</span>
+        )}
         <form onSubmit={onSubmit}>
           <label htmlFor="med-name">Medication Name *</label>
           <input id="med-name" name="medication_name" value={formData.medication_name || ''} onChange={onInputChange} />
@@ -618,6 +625,116 @@ describe('Medication Page Integration Tests', () => {
       renderWithPatient(<Medication />);
 
       expect(screen.getByTestId('page-header')).toBeInTheDocument();
+    });
+  });
+
+  // ============================================================
+  // Conditions Integration (commit 3e0dcd3)
+  // ============================================================
+  describe('Conditions Integration', () => {
+    test('calls getConditionsDropdown on mount', async () => {
+      const { apiService } = await import('../../../services/api');
+
+      renderWithPatient(<Medication />);
+
+      await waitFor(() => {
+        expect(apiService.getConditionsDropdown).toHaveBeenCalledWith(false);
+      });
+    });
+
+    test('passes fetched conditions to MedicationFormWrapper when form opens', async () => {
+      const mockConditions = [
+        { id: 1, diagnosis: 'Hypertension' },
+        { id: 2, diagnosis: 'Diabetes' },
+      ];
+      const { apiService } = await import('../../../services/api');
+      apiService.getConditionsDropdown.mockResolvedValue(mockConditions);
+
+      renderWithPatient(<Medication />);
+
+      // Open the add form
+      const addButton = screen.getByTestId('add-button');
+      await userEvent.click(addButton);
+
+      await waitFor(() => {
+        const conditionsCount = screen.getByTestId('form-modal-conditions-count');
+        expect(conditionsCount).toHaveTextContent('2');
+      });
+    });
+
+    test('passes fetched conditions to MedicationViewModal when viewing', async () => {
+      const mockConditions = [
+        { id: 1, diagnosis: 'Hypertension' },
+        { id: 2, diagnosis: 'Diabetes' },
+        { id: 3, diagnosis: 'Asthma' },
+      ];
+      const { apiService } = await import('../../../services/api');
+      apiService.getConditionsDropdown.mockResolvedValue(mockConditions);
+
+      useViewModalNavigation.mockReturnValue({
+        isOpen: true,
+        viewingItem: mockMedications[0],
+        openModal: vi.fn(),
+        closeModal: vi.fn(),
+      });
+
+      renderWithPatient(<Medication />);
+
+      await waitFor(() => {
+        const conditionsCount = screen.getByTestId('view-modal-conditions-count');
+        expect(conditionsCount).toHaveTextContent('3');
+      });
+    });
+
+    test('passes empty conditions array when getConditionsDropdown fails', async () => {
+      const { apiService } = await import('../../../services/api');
+      apiService.getConditionsDropdown.mockRejectedValue(new Error('Network error'));
+
+      useViewModalNavigation.mockReturnValue({
+        isOpen: true,
+        viewingItem: mockMedications[0],
+        openModal: vi.fn(),
+        closeModal: vi.fn(),
+      });
+
+      renderWithPatient(<Medication />);
+
+      await waitFor(() => {
+        // Modal should still render with empty conditions list
+        const conditionsCount = screen.getByTestId('view-modal-conditions-count');
+        expect(conditionsCount).toHaveTextContent('0');
+      });
+    });
+
+    test('conditions array starts empty and is populated after fetch', async () => {
+      let resolveConditions;
+      const conditionsPromise = new Promise((resolve) => {
+        resolveConditions = resolve;
+      });
+
+      const { apiService } = await import('../../../services/api');
+      apiService.getConditionsDropdown.mockReturnValue(conditionsPromise);
+
+      useViewModalNavigation.mockReturnValue({
+        isOpen: true,
+        viewingItem: mockMedications[0],
+        openModal: vi.fn(),
+        closeModal: vi.fn(),
+      });
+
+      renderWithPatient(<Medication />);
+
+      // Initially conditions should be empty
+      await waitFor(() => {
+        expect(screen.getByTestId('view-modal-conditions-count')).toHaveTextContent('0');
+      });
+
+      // Resolve with conditions
+      resolveConditions([{ id: 1, diagnosis: 'Hypertension' }]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('view-modal-conditions-count')).toHaveTextContent('1');
+      });
     });
   });
 });
