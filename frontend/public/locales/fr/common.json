@@ -35,6 +35,7 @@
     "linkMedication": "Connecter médicament",
     "linkMedications": "Connecter médicaments",
     "linkCondition": "Connecter condition",
+    "linkConditions": "Connecter conditions",
     "saveChanges": "Sauvegarder changements"
   },
   "labels": {
@@ -86,6 +87,8 @@
     "noRating": "Aucun avis",
     "noMedicationsLinked": "Aucun médicament connecté à cette condition",
     "noConditionsLinked": "Aucune condition connectée à ces résultats d'analyse",
+    "noConditionsLinkedToMedication": "Aucune condition connectée à ce médicament",
+    "loadingRelatedConditions": "Chargement des conditions associées...",
     "medicationsAvailableToLink": "{{count}} médicaments pouvant être connectés",
     "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
     "linkedMedications": "Médicaments connectés",
@@ -486,16 +489,20 @@
   "modals": {
     "linkMedicationToCondition": "Connecter médicament à condition",
     "linkMedicationsToCondition": "Connecter médicaments à condition",
+    "linkConditionsToMedication": "Connecter conditions au médicament",
     "linkConditionToLabResult": "Connecter condition à résultats d'analyse",
     "selectMedication": "Sélectionnez un médicament",
     "selectMedications": "Sélectionner des médicaments",
     "selectCondition": "Sélectionnez une condition",
+    "selectConditions": "Sélectionnez des conditions",
     "chooseMedicationToLink": "Choisissez des médicaments à connecter",
+    "chooseConditionsToLink": "Choisissez des conditions à connecter",
     "chooseConditionToLink": "Choisissez une condition à connecter",
     "relevanceNoteOptional": "Note de pertinence (optionnel)",
     "noRelevanceNoteProvided": "Aucune note de pertinence fournie",
     "relevanceNote": "Note de pertinence",
     "describeConditionRelevance": "Décrivez quel rapport cette condition a avec les résultats d'analyse (optionnel)",
+    "describeConditionRelevanceMedication": "Décrivez quel rapport ces conditions ont avec ce médicament (optionnel)",
     "describeMedicationRelevance": "Décrivez quel rapport ces médicaments ont avec la condition (optionnel)"
   },
   "time": {

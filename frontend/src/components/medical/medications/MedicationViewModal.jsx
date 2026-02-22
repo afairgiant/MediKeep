@@ -24,7 +24,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import MedicationTreatmentsList from './MedicationTreatmentsList';
-import ConditionRelationshipsForMedication from '../ConditionRelationshipsForMedication';
+import MedicationRelationships from '../MedicationRelationships';
 import logger from '../../../services/logger';
 
 const MedicationViewModal = ({
@@ -236,11 +236,12 @@ const MedicationViewModal = ({
                 {/* Related Conditions */}
                 <div>
                   <Title order={4} mb="sm">{t('medications.modal.sections.relatedConditions', 'Related Conditions')}</Title>
-                  <ConditionRelationshipsForMedication
+                  <MedicationRelationships
+                    direction="medication"
                     medicationId={medication.id}
                     conditions={conditions}
                     navigate={navigate}
-                    viewOnly={true}
+                    isViewMode={true}
                   />
                 </div>
 
