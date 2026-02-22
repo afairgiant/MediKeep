@@ -2350,14 +2350,18 @@
     "subtitle": "Manage your application preferences and settings",
     "tabs": {
       "general": "General",
-      "notifications": "Notifications"
+      "documents": "Documents",
+      "notifications": "Notifications",
+      "about": "About"
     },
     "sections": {
       "security": "Security",
       "accountManagement": "Account Management",
       "systemInfo": "System Information",
       "preferences": "Application Preferences",
-      "documentStorage": "Document Storage"
+      "documentStorage": "Document Storage",
+      "gettingHelp": "Getting Help",
+      "supportMediKeep": "Support MediKeep"
     },
     "security": {
       "password": {
@@ -2381,6 +2385,20 @@
         "unknownApp": "Unknown App",
         "unknownVersion": "Unknown Version"
       }
+    },
+    "help": {
+      "documentation": {
+        "title": "Documentation",
+        "description": "Browse the wiki for guides, setup instructions, and feature documentation."
+      },
+      "issues": {
+        "title": "Report an Issue",
+        "description": "Found a bug or have a feature request? Open an issue on GitHub."
+      }
+    },
+    "sponsor": {
+      "description": "MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going.",
+      "button": "Sponsor on GitHub"
     },
     "preferences": {
       "unitSystem": {

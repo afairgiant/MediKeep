@@ -2046,7 +2046,9 @@
       "documentStorage": "Almacenamiento de documentos",
       "preferences": "Preferencias de la aplicación",
       "security": "Seguridad",
-      "systemInfo": "Información del sistema"
+      "systemInfo": "Información del sistema",
+      "gettingHelp": "Obtener ayuda",
+      "supportMediKeep": "Apoyar MediKeep"
     },
     "security": {
       "password": {
@@ -2065,9 +2067,25 @@
         "unknownVersion": "Versión desconocida"
       }
     },
+    "help": {
+      "documentation": {
+        "title": "Documentación",
+        "description": "Consulte la wiki para guías, instrucciones de configuración y documentación de funciones."
+      },
+      "issues": {
+        "title": "Reportar un problema",
+        "description": "¿Encontraste un error o tienes una sugerencia? Abre un issue en GitHub."
+      }
+    },
+    "sponsor": {
+      "description": "MediKeep es gratuito y de código abierto. Si te resulta útil, considera patrocinar el proyecto para ayudar a financiar el desarrollo.",
+      "button": "Patrocinar en GitHub"
+    },
     "tabs": {
       "general": "General",
-      "notifications": "Notificaciones"
+      "documents": "Documentos",
+      "notifications": "Notificaciones",
+      "about": "Acerca de"
     },
     "title": "Configuración"
   },
