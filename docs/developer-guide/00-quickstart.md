@@ -9,6 +9,7 @@ Get MediKeep up and running on your local machine in under 10 minutes for active
 ## 🎯 What You'll Build
 
 By the end of this guide, you'll have:
+
 - ✅ Complete MediKeep development environment
 - ✅ Frontend and backend running locally with hot reload
 - ✅ PostgreSQL database with test data
@@ -22,12 +23,14 @@ By the end of this guide, you'll have:
 ### Prerequisites
 
 Ensure you have installed:
+
 - **Python 3.12+** - [Download](https://www.python.org/downloads/)
 - **Node.js 18+** - [Download](https://nodejs.org/)
 - **PostgreSQL 15+** OR **Docker** - [PostgreSQL Download](https://www.postgresql.org/download/) | [Docker Download](https://docs.docker.com/get-docker/)
 - **Git** - [Download](https://git-scm.com/downloads)
 
 **Verify installations:**
+
 ```bash
 python --version  # Should be 3.12+
 node --version    # Should be 18+
@@ -35,6 +38,7 @@ git --version     # Any recent version
 ```
 
 **Choose Your Setup:**
+
 - **Option 1 (Recommended):** Development Setup - Run code locally with hot reload
 - **Option 2 (Optional):** Docker Testing - Test production build locally
 
@@ -99,6 +103,7 @@ EOF
 #### 2.4 Set Up Database
 
 **Option A: Docker (Easiest)**
+
 ```bash
 docker run -d \
   --name medikeep-postgres \
@@ -110,6 +115,7 @@ docker run -d \
 ```
 
 **Option B: Local PostgreSQL**
+
 ```bash
 # Create database and user
 psql -U postgres << EOF
@@ -121,6 +127,8 @@ EOF
 ```
 
 #### 2.5 Run Migrations
+
+Migrations run automatically in Docker, but for local development you need to run them once on initial setup (and again after pulling new migration files):
 
 ```bash
 alembic upgrade head
@@ -170,6 +178,7 @@ npm start
 **Frontend is now running at:** http://localhost:3000
 
 **You're ready to develop!** 🎉
+
 - Make changes to backend code → Server auto-reloads
 - Make changes to frontend code → Browser auto-refreshes
 - Check API docs at http://localhost:8000/docs
@@ -219,10 +228,12 @@ docker compose up -d
 - **Database:** localhost:5432
 
 **Default Login:**
+
 - Username: `admin`
 - Password: `admin123`
 
 **Note:** To see code changes in this setup, you must rebuild the Docker image:
+
 ```bash
 cd docker
 docker compose down
@@ -277,20 +288,30 @@ psql -h localhost -U medikeep -d medikeep_dev
 
 ```
 MediKeep/
-├── app/                  # Backend (Python/FastAPI)
-│   ├── api/             # API endpoints
-│   ├── models/          # Database models
-│   ├── schemas/         # Pydantic schemas
-│   └── services/        # Business logic
+├── app/                    # Backend (Python/FastAPI)
+│   ├── api/v1/endpoints/  # API endpoint modules
+│   ├── auth/sso/          # SSO providers (Google, GitHub, Microsoft)
+│   ├── core/              # Config, database, logging, middleware, events
+│   ├── crud/              # CRUD operations (one per model)
+│   ├── events/            # Domain events (backup, collaboration, security)
+│   ├── models/            # SQLAlchemy database models
+│   ├── schemas/           # Pydantic request/response schemas
+│   ├── scripts/           # CLI tools (backup, restore)
+│   ├── services/          # Business logic and integrations
+│   └── utils/             # Helper functions
 │
-├── frontend/            # Frontend (React)
-│   └── src/
-│       ├── components/  # React components
-│       ├── pages/       # Page components
-│       ├── services/    # API services
-│       └── hooks/       # Custom hooks
+├── frontend/src/           # Frontend (React/Mantine)
+│   ├── components/        # React components (medical, navigation, shared, etc.)
+│   ├── contexts/          # React contexts (Auth, App, Theme, Preferences)
+│   ├── hooks/             # Custom hooks (~30)
+│   ├── i18n/              # Localization (6 languages)
+│   ├── pages/             # Route page components
+│   ├── services/          # API services, logger, auth
+│   ├── types/             # TypeScript type definitions
+│   └── utils/             # Helper functions
 │
-└── docs/               # Documentation
+├── docs/                   # Documentation
+└── docker/                 # Docker configs and entrypoint
 ```
 
 ### 2. Read the Documentation
@@ -303,6 +324,7 @@ MediKeep/
 ### 3. Run Tests
 
 **Backend:**
+
 ```bash
 # All tests
 pytest
@@ -315,6 +337,7 @@ pytest tests/api/test_medications.py -v
 ```
 
 **Frontend (Vitest):**
+
 ```bash
 cd frontend
 
@@ -333,31 +356,7 @@ npm run test:coverage
 
 ### 4. Make Your First Change
 
-**Try this simple task:**
-
-1. Add a new field to medication display
-2. Update the backend schema
-3. Update the frontend component
-4. Run tests
-5. Create a pull request
-
-**Example:**
-```python
-# app/schemas/medication.py
-class MedicationResponse(BaseModel):
-    id: int
-    name: str
-    dosage: Optional[str]
-    # Add this field
-    notes: Optional[str]
-```
-
-```javascript
-// frontend/src/components/medications/MedicationCard.js
-<Text size="sm" color="dimmed">
-  {medication.notes}
-</Text>
-```
+See the [Development Guide](05-contributing.md) for code standards, common tasks (adding endpoints, models, components), and the workflow for submitting changes.
 
 ---
 
@@ -366,6 +365,7 @@ class MedicationResponse(BaseModel):
 ### Backend Won't Start
 
 **Error: ModuleNotFoundError**
+
 ```bash
 # Solution: Activate virtual environment
 # Windows
@@ -379,6 +379,7 @@ pip install -r requirements.txt
 ```
 
 **Error: Database connection failed**
+
 ```bash
 # Check if PostgreSQL is running
 # Docker
@@ -392,6 +393,7 @@ cat .env | grep DB_
 ```
 
 **Error: Address already in use (port 8000)**
+
 ```bash
 # Find process using port 8000
 # Windows
@@ -407,6 +409,7 @@ uvicorn app.main:app --reload --port 8001
 ### Frontend Won't Start
 
 **Error: EADDRINUSE (port 3000)**
+
 ```bash
 # Kill process on port 3000
 # Windows
@@ -421,6 +424,7 @@ PORT=3001 npm start
 ```
 
 **Error: Module not found**
+
 ```bash
 # Clear cache and reinstall
 rm -rf node_modules package-lock.json
@@ -428,6 +432,7 @@ npm install
 ```
 
 **Error: API calls failing (CORS)**
+
 ```bash
 # Ensure backend is running on port 8000
 # Check .env.local has correct API URL
@@ -439,6 +444,7 @@ cat .env.local
 ### Database Issues
 
 **Can't connect to database**
+
 ```bash
 # Test connection
 psql -h localhost -U medikeep -d medikeep_dev
@@ -455,6 +461,7 @@ psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE medikeep_dev TO medikeep;"
 ```
 
 **Migration errors**
+
 ```bash
 # Reset migrations (CAUTION: Deletes data!)
 alembic downgrade base
@@ -475,22 +482,17 @@ alembic upgrade head
 ```bash
 # Backend
 python run.py                            # Start backend with auto-reload
-alembic revision --autogenerate -m ""   # Create migration
+alembic revision --autogenerate -m ""    # Create migration
 alembic upgrade head                     # Apply migrations
 pytest -v                                # Run tests (verbose)
-black .                                  # Format code
-pylint app/                              # Lint code
 
 # Frontend (Vite + Vitest)
 npm start                                # Start dev server (Vite)
-npm run dev                              # Alias for npm start
-npm test                                 # Run tests in watch mode (Vitest)
+npm run lint                             # ESLint
+npm run build                            # Production build
 npm run test:run                         # Run tests once
-npm run test:ui                          # Run tests with UI
-npm run test:coverage                    # Run tests with coverage
-npm run lint                             # Lint code
-npm run build                            # Build for production
-npm run preview                          # Preview production build
+npm run test:coverage                    # Tests with coverage
+npm run i18n:check                       # Translation key validation
 ```
 
 ### Database
@@ -575,11 +577,13 @@ docker compose logs -f
 ### Ask Questions
 
 **Before asking:**
+
 1. Check this guide
 2. Search existing issues
 3. Read the docs
 
 **When asking:**
+
 - Include error messages
 - Share your environment (OS, versions)
 - Describe what you've tried
@@ -587,29 +591,17 @@ docker compose logs -f
 
 ---
 
-## 📝 Development Checklist
+## 📝 Pre-Commit Checklist
 
-### Daily Workflow
+- [ ] No `console.log`, `print`, commented-out code, or debug code
+- [ ] All user-facing strings use `t()` translations
+- [ ] Error handling, loading states, and empty states implemented
+- [ ] Input validation on both frontend and backend
+- [ ] Tests included (happy path, error cases, edge cases)
+- [ ] `npm run lint` and `npm run build` pass
+- [ ] `pytest` passes
 
-- [ ] Pull latest changes: `git pull origin main`
-- [ ] Activate virtual environment
-- [ ] Start backend: `python run.py`
-- [ ] Start frontend: `cd frontend && npm start`
-- [ ] Check API docs: http://localhost:8000/docs
-- [ ] Make changes
-- [ ] Run tests: `pytest` and `npm test`
-- [ ] Commit with clear message
-- [ ] Push to your branch
-
-### Before Pull Request
-
-- [ ] All tests pass
-- [ ] Code follows style guide
-- [ ] Documentation updated
-- [ ] No console.log statements
-- [ ] No debug code
-- [ ] Migrations created (if needed)
-- [ ] Self-review completed
+See the [Development Guide](05-contributing.md) for full code standards.
 
 ---
 
@@ -631,6 +623,7 @@ Happy coding! 🚀
 ---
 
 **Quick Reference:**
+
 - Backend: http://localhost:8000
 - Frontend: http://localhost:3000
 - API Docs: http://localhost:8000/docs

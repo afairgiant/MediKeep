@@ -50,7 +50,7 @@ import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
 const Visits = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('visits');
   const navigate = useNavigate();
   const responsive = useResponsive();
 

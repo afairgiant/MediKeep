@@ -42,7 +42,7 @@ const Treatments = () => {
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('treatments');
 
   // Get practitioners data
   const { practitioners: practitionersObject } =

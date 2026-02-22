@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 import AuthContext from '../contexts/AuthContext';
 import { AppDataContext } from '../contexts/AppDataContext';
+import { UserPreferencesProvider } from '../contexts/UserPreferencesContext';
 import { MantineIntegratedThemeProvider } from '../contexts/ThemeContext';
 
 // Mock auth context values
@@ -54,9 +55,11 @@ function render(
       <MantineProvider theme={mantineTheme}>
         <MantineIntegratedThemeProvider>
           <AuthContext.Provider value={mergedAuthContext}>
-            <AppDataContext.Provider value={mergedAppDataContext}>
-              {children}
-            </AppDataContext.Provider>
+            <UserPreferencesProvider>
+              <AppDataContext.Provider value={mergedAppDataContext}>
+                {children}
+              </AppDataContext.Provider>
+            </UserPreferencesProvider>
           </AuthContext.Provider>
         </MantineIntegratedThemeProvider>
       </MantineProvider>

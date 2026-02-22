@@ -38,7 +38,7 @@ const Injuries = () => {
   const { t } = useTranslation('medical');
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('injuries');
 
   // Standardized data management
   const {

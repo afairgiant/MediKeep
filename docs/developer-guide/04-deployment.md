@@ -12,12 +12,10 @@ Complete guide for deploying MediKeep in production environments.
 6. [Reverse Proxy Configuration](#reverse-proxy-configuration)
 7. [Database Setup](#database-setup)
 8. [Production Deployment Checklist](#production-deployment-checklist)
-9. [Cloud Deployment](#cloud-deployment)
-10. [Scaling & Performance](#scaling--performance)
-11. [Monitoring & Logging](#monitoring--logging)
-12. [Backup & Disaster Recovery](#backup--disaster-recovery)
-13. [Maintenance](#maintenance)
-14. [Troubleshooting](#troubleshooting)
+9. [Monitoring & Logging](#monitoring--logging)
+10. [Backup & Disaster Recovery](#backup--disaster-recovery)
+11. [Maintenance](#maintenance)
+12. [Troubleshooting](#troubleshooting)
 
 ## Deployment Overview
 
@@ -49,9 +47,7 @@ MediKeep uses a multi-stage Docker build that combines:
 ### Deployment Options
 
 1. **Docker Compose** (Recommended) - Easiest, most consistent
-2. **Docker with External Database** - More scalable
-3. **Cloud Platforms** - AWS, GCP, Azure, DigitalOcean
-4. **Manual Installation** - Not recommended, requires extensive setup
+2. **Docker with External Database** - Use your own PostgreSQL server
 
 ### Security Considerations
 
@@ -606,6 +602,74 @@ PGID=1000
 TZ=Europe/London
 ```
 
+### Docker Secrets (`_FILE` Pattern)
+
+MediKeep supports the Docker `_FILE` convention used by the official PostgreSQL image. Instead of passing secrets as plain environment variables, you can point to a file containing the secret value.
+
+**How it works:** For any supported variable (e.g., `DB_PASSWORD`), set `DB_PASSWORD_FILE=/run/secrets/db_password` and MediKeep will read the secret from that file at startup.
+
+**Precedence:** If both `VAR` and `VAR_FILE` are set, the direct `VAR` value wins and a warning is logged.
+
+| `_FILE` Variable | Corresponding Variable |
+|---|---|
+| `DB_USER_FILE` | `DB_USER` |
+| `DB_PASSWORD_FILE` | `DB_PASSWORD` |
+| `DATABASE_URL_FILE` | `DATABASE_URL` |
+| `SECRET_KEY_FILE` | `SECRET_KEY` |
+| `ADMIN_DEFAULT_PASSWORD_FILE` | `ADMIN_DEFAULT_PASSWORD` |
+| `SSO_CLIENT_ID_FILE` | `SSO_CLIENT_ID` |
+| `SSO_CLIENT_SECRET_FILE` | `SSO_CLIENT_SECRET` |
+| `PAPERLESS_SALT_FILE` | `PAPERLESS_SALT` |
+| `NOTIFICATION_ENCRYPTION_SALT_FILE` | `NOTIFICATION_ENCRYPTION_SALT` |
+
+#### Example: Docker Compose with File-Based Secrets
+
+1. **Create secret files:**
+
+```bash
+mkdir -p secrets
+echo -n "my-database-password" > secrets/db_password.txt
+echo -n "my-jwt-secret-key-min-32-chars-long" > secrets/secret_key.txt
+chmod 600 secrets/*.txt
+```
+
+2. **Update `docker-compose.yml`:**
+
+```yaml
+services:
+  postgres:
+    image: postgres:15.8-alpine
+    environment:
+      POSTGRES_DB: medical_records
+      POSTGRES_USER: medapp
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+
+  medikeep-app:
+    image: ghcr.io/afairgiant/medikeep:latest
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: medical_records
+      DB_USER: medapp
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      SECRET_KEY_FILE: /run/secrets/secret_key
+    secrets:
+      - db_password
+      - secret_key
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  secret_key:
+    file: ./secrets/secret_key.txt
+```
+
+The secrets are processed in two layers:
+- **Shell entrypoint** resolves `_FILE` vars before Python starts (critical for `DATABASE_URL` which is needed at import time)
+- **Python helper** (`app/core/secrets.py`) handles any remaining `_FILE` lookups within the application
+
 ## SSL/HTTPS Setup
 
 ### Using Self-Signed Certificates (Development/Testing)
@@ -724,7 +788,7 @@ curl -k https://localhost:8000/health
 
 ## Reverse Proxy Configuration
 
-Using a reverse proxy is recommended for production to handle SSL termination, load balancing, and additional security.
+Using a reverse proxy is recommended for production to handle SSL termination and additional security.
 
 ### Nginx Configuration
 
@@ -1055,11 +1119,10 @@ Use this checklist before going live:
 
 ### Monitoring
 
-- [ ] Log monitoring configured
-- [ ] Health check endpoint monitored
-- [ ] Disk space monitoring
-- [ ] Database connection monitoring
-- [ ] Alerting configured for critical issues
+- [ ] Application and security logs reviewed regularly
+- [ ] Health check endpoint monitored (`/health`)
+- [ ] Disk space monitored (uploads, backups, logs)
+- [ ] Database connection verified
 - [ ] Log retention policy defined
 
 ### Documentation
@@ -1089,337 +1152,6 @@ Use this checklist before going live:
 - [ ] Access logging enabled
 - [ ] Encryption at rest configured (if required)
 - [ ] Audit trail reviewed
-
-## Cloud Deployment
-
-### AWS Deployment
-
-#### Using ECS Fargate
-
-1. **Push image to ECR**:
-
-```bash
-# Authenticate
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin YOUR_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com
-
-# Tag and push
-docker tag ghcr.io/afairgiant/medikeep:latest YOUR_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/medikeep:latest
-docker push YOUR_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/medikeep:latest
-```
-
-2. **Create RDS PostgreSQL instance**:
-
-   - Engine: PostgreSQL 15.x
-   - Instance class: db.t3.small or larger
-   - Storage: 50GB GP3 SSD
-   - Enable automated backups
-
-3. **Create ECS Task Definition**:
-
-```json
-{
-  "family": "medikeep",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "1024",
-  "memory": "2048",
-  "containerDefinitions": [
-    {
-      "name": "medikeep-app",
-      "image": "YOUR_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/medikeep:latest",
-      "portMappings": [
-        {
-          "containerPort": 8000,
-          "protocol": "tcp"
-        }
-      ],
-      "environment": [
-        {
-          "name": "DB_HOST",
-          "value": "your-rds-endpoint.region.rds.amazonaws.com"
-        },
-        { "name": "DB_NAME", "value": "medical_records" },
-        { "name": "DB_USER", "value": "medapp" }
-      ],
-      "secrets": [
-        {
-          "name": "DB_PASSWORD",
-          "valueFrom": "arn:aws:secretsmanager:region:account:secret:db-password"
-        },
-        {
-          "name": "SECRET_KEY",
-          "valueFrom": "arn:aws:secretsmanager:region:account:secret:secret-key"
-        }
-      ],
-      "mountPoints": [
-        {
-          "sourceVolume": "efs-uploads",
-          "containerPath": "/app/uploads"
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/medikeep",
-          "awslogs-region": "us-east-1",
-          "awslogs-stream-prefix": "medikeep"
-        }
-      }
-    }
-  ],
-  "volumes": [
-    {
-      "name": "efs-uploads",
-      "efsVolumeConfiguration": {
-        "fileSystemId": "fs-xxxxx",
-        "transitEncryption": "ENABLED"
-      }
-    }
-  ]
-}
-```
-
-4. **Create Application Load Balancer** with HTTPS listener
-
-5. **Create ECS Service** with the task definition
-
-#### Using EC2
-
-```bash
-# Install Docker
-sudo yum update -y
-sudo yum install docker -y
-sudo service docker start
-sudo usermod -a -G docker ec2-user
-
-# Install Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
-# Clone or copy docker-compose.yml
-mkdir medikeep
-cd medikeep
-# Copy docker-compose.yml and .env
-
-# Start services
-docker-compose up -d
-```
-
-### Google Cloud Platform
-
-#### Using Cloud Run
-
-1. **Build and push image**:
-
-```bash
-gcloud builds submit --tag gcr.io/PROJECT_ID/medikeep
-```
-
-2. **Create Cloud SQL PostgreSQL instance**:
-
-```bash
-gcloud sql instances create medikeep-db \
-  --database-version=POSTGRES_15 \
-  --tier=db-f1-micro \
-  --region=us-central1
-```
-
-3. **Deploy to Cloud Run**:
-
-```bash
-gcloud run deploy medikeep \
-  --image gcr.io/PROJECT_ID/medikeep \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars "DB_HOST=/cloudsql/PROJECT_ID:us-central1:medikeep-db" \
-  --set-secrets "DB_PASSWORD=db-password:latest,SECRET_KEY=secret-key:latest" \
-  --add-cloudsql-instances PROJECT_ID:us-central1:medikeep-db \
-  --memory 2Gi \
-  --cpu 1
-```
-
-### Azure
-
-#### Using Container Instances
-
-```bash
-# Create resource group
-az group create --name medikeep-rg --location eastus
-
-# Create PostgreSQL
-az postgres server create \
-  --resource-group medikeep-rg \
-  --name medikeep-db \
-  --location eastus \
-  --admin-user medapp \
-  --admin-password SecurePassword123! \
-  --sku-name B_Gen5_1
-
-# Create database
-az postgres db create \
-  --resource-group medikeep-rg \
-  --server-name medikeep-db \
-  --name medical_records
-
-# Deploy container
-az container create \
-  --resource-group medikeep-rg \
-  --name medikeep-app \
-  --image ghcr.io/afairgiant/medikeep:latest \
-  --dns-name-label medikeep \
-  --ports 8000 \
-  --environment-variables \
-    DB_HOST=medikeep-db.postgres.database.azure.com \
-    DB_NAME=medical_records \
-    DB_USER=medapp@medikeep-db \
-  --secure-environment-variables \
-    DB_PASSWORD=SecurePassword123! \
-    SECRET_KEY=your-secret-key
-```
-
-### DigitalOcean
-
-#### Using App Platform
-
-1. Create `app.yaml`:
-
-```yaml
-name: medikeep
-services:
-  - name: web
-    image:
-      registry_type: GHCR
-      registry: ghcr.io
-      repository: afairgiant/medikeep
-      tag: latest
-    envs:
-      - key: DB_HOST
-        value: ${medikeep-db.HOSTNAME}
-      - key: DB_PORT
-        value: ${medikeep-db.PORT}
-      - key: DB_NAME
-        value: ${medikeep-db.DATABASE}
-      - key: DB_USER
-        value: ${medikeep-db.USERNAME}
-      - key: DB_PASSWORD
-        value: ${medikeep-db.PASSWORD}
-        type: SECRET
-      - key: SECRET_KEY
-        value: your-secret-key
-        type: SECRET
-    http_port: 8000
-    instance_count: 1
-    instance_size_slug: basic-xs
-
-databases:
-  - name: medikeep-db
-    engine: PG
-    version: '15'
-    size: db-s-1vcpu-1gb
-```
-
-2. Deploy:
-
-```bash
-doctl apps create --spec app.yaml
-```
-
-## Scaling & Performance
-
-### Horizontal Scaling
-
-To scale MediKeep horizontally, you need:
-
-1. **Shared file storage** (not local volumes)
-2. **Load balancer**
-3. **Database connection pooling**
-
-#### Example with NFS/EFS
-
-```yaml
-services:
-  medikeep-app:
-    image: ghcr.io/afairgiant/medikeep:latest
-    deploy:
-      replicas: 3
-    volumes:
-      - type: volume
-        source: shared-uploads
-        target: /app/uploads
-        volume:
-          nocopy: true
-    environment:
-      # Use external PostgreSQL
-      DB_HOST: postgres.example.com
-
-volumes:
-  shared-uploads:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: addr=nfs-server.example.com,rw
-      device: ':/path/to/uploads'
-```
-
-### Database Connection Pooling
-
-Use PgBouncer for connection pooling:
-
-```yaml
-services:
-  pgbouncer:
-    image: pgbouncer/pgbouncer
-    environment:
-      DATABASES_HOST: postgres
-      DATABASES_PORT: 5432
-      DATABASES_DBNAME: medical_records
-      DATABASES_USER: medapp
-      DATABASES_PASSWORD: ${DB_PASSWORD}
-      POOL_MODE: transaction
-      MAX_CLIENT_CONN: 1000
-      DEFAULT_POOL_SIZE: 20
-    ports:
-      - '6432:6432'
-
-  medikeep-app:
-    environment:
-      DB_HOST: pgbouncer
-      DB_PORT: 6432
-```
-
-### CDN for Static Files
-
-Serve static files through a CDN:
-
-```nginx
-# Nginx configuration
-location /static/ {
-    proxy_pass http://localhost:8000;
-    proxy_cache static_cache;
-    proxy_cache_valid 200 1y;
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-}
-
-proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=static_cache:10m max_size=1g;
-```
-
-### Caching Strategy
-
-Implement Redis for session caching (requires code modifications):
-
-```yaml
-services:
-  redis:
-    image: redis:7-alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-
-volumes:
-  redis_data:
-```
 
 ## Monitoring & Logging
 
@@ -1518,65 +1250,7 @@ docker ps
 docker inspect medikeep-app | jq '.[0].State.Health'
 ```
 
-### Centralized Logging (Production)
-
-#### Using ELK Stack
-
-```yaml
-services:
-  elasticsearch:
-    image: elasticsearch:8.10.0
-    environment:
-      - discovery.type=single-node
-      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-
-  logstash:
-    image: logstash:8.10.0
-    volumes:
-      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - app_logs:/logs:ro
-
-  kibana:
-    image: kibana:8.10.0
-    ports:
-      - '5601:5601'
-    environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-
-volumes:
-  es_data:
-```
-
-#### Using Loki + Grafana
-
-```yaml
-services:
-  loki:
-    image: grafana/loki:latest
-    ports:
-      - '3100:3100'
-    command: -config.file=/etc/loki/local-config.yaml
-
-  promtail:
-    image: grafana/promtail:latest
-    volumes:
-      - app_logs:/var/log:ro
-      - ./promtail-config.yml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
-
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - '3000:3000'
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-```
-
-### Metrics and Alerting
-
-#### Basic Monitoring Script
+### Basic Health Monitoring Script
 
 ```bash
 #!/bin/bash
@@ -1605,18 +1279,6 @@ Add to crontab:
 
 ```bash
 */5 * * * * /path/to/monitor.sh
-```
-
-#### Using Prometheus
-
-Create `prometheus.yml`:
-
-```yaml
-scrape_configs:
-  - job_name: 'medikeep'
-    static_configs:
-      - targets: ['localhost:8000']
-    metrics_path: '/metrics' # Requires adding metrics endpoint
 ```
 
 ## Backup & Disaster Recovery
@@ -1873,18 +1535,6 @@ For major version changes:
    - Patient record access
    - File uploads
    - Backup creation
-
-### Rolling Updates (Zero-Downtime)
-
-For production with multiple instances:
-
-```bash
-# Update one instance at a time
-docker service update --image ghcr.io/afairgiant/medikeep:latest medikeep-app
-
-# Or with Docker Compose (automatic rolling update)
-docker compose up -d --no-deps --scale medikeep-app=3
-```
 
 ### Database Maintenance
 
@@ -2275,5 +1925,5 @@ If issues persist:
 
 ---
 
-**Last Updated**: 2026-02-02
-**MediKeep Version**: 0.49.1
+**Last Updated**: 2026-02-20
+**MediKeep Version**: 0.53.0

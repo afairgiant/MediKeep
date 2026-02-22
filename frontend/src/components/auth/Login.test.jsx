@@ -43,10 +43,10 @@ describe('Login Component', () => {
       expect(screen.getByText(/create new.*account/i)).toBeInTheDocument();
     });
 
-    test('renders with Medical Records System title', () => {
+    test('renders with MediKeep title', () => {
       render(<Login />);
 
-      expect(screen.getByText(/medical records system/i)).toBeInTheDocument();
+      expect(screen.getByText(/medikeep/i)).toBeInTheDocument();
     });
 
     test('renders form inputs correctly', () => {
@@ -71,7 +71,7 @@ describe('Login Component', () => {
         },
       });
 
-      expect(screen.getByText(/medical records system/i)).toBeInTheDocument();
+      expect(screen.getByText(/medikeep/i)).toBeInTheDocument();
     });
 
     test('renders with app data context', () => {

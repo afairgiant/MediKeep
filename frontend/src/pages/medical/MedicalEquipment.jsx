@@ -110,7 +110,7 @@ const useSimpleDataManagement = (data, config) => {
 
 const MedicalEquipment = () => {
   const { t } = useTranslation('common');
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('medical-equipment');
 
   // Get practitioners data
   const { practitioners: practitionersObject } = usePatientWithStaticData();

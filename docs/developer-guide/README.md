@@ -57,8 +57,7 @@ This comprehensive documentation will help you understand, develop, and contribu
 **→ Deploy to production**
 
 - Follow: [Deployment Guide](04-deployment.md)
-- Docker: [Docker Deployment](04-deployment.md#docker-deployment-primary-method)
-- Cloud: [Cloud Deployment](04-deployment.md#cloud-deployment)
+- Docker: [Docker Deployment](04-deployment.md#docker-deployment-recommended)
 
 **→ Contribute code**
 

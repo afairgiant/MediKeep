@@ -43,7 +43,7 @@ import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
   const { t } = useTranslation('common');
-  const [viewMode, setViewMode] = usePersistedViewMode('cards');
+  const [viewMode, setViewMode] = usePersistedViewMode('emergency-contacts');
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();

@@ -10,6 +10,7 @@ Welcome to the MediKeep documentation wiki - your comprehensive resource for usi
 |--------------|---------|
 | **Use MediKeep** | [User Guide](User-Guide) |
 | **Set up MediKeep** | [Installation Guide](Installation-Guide) |
+| **Administer MediKeep** | [Admin Guide](Admin-Guide) |
 | **Develop/Contribute** | [Developer Guide](Developer-Guide) |
 | **Deploy to production** | [Deployment Guide](Deployment-Guide) |
 | **Get help** | [FAQ](FAQ) |
@@ -23,11 +24,14 @@ MediKeep is a comprehensive medical records management system designed for indiv
 ### Key Features
 
 - **Patient Profiles** - Manage records for yourself and family members
-- **Medical Records** - Track medications, allergies, conditions, vitals, lab results, and more
+- **Medical Records** - Track 14 categories: medications, allergies, conditions, vitals, lab results, treatments, immunizations, procedures, injuries, symptoms, encounters, medical equipment, insurance, and emergency contacts
 - **Document Storage** - Upload and organize medical documents and images
+- **Paperless-ngx Integration** - Use [Paperless-ngx](Paperless-Integration) as a document storage backend
+- **Lab Result Parsing** - [Automatically extract results](Lab-Result-Parsing) from PDF lab reports
 - **PDF Reports** - Generate comprehensive health summaries
-- **Data Sharing** - Securely share records with family members or caregivers
-- **SSO Support** - Sign in with Google, GitHub, or your own identity provider
+- **Data Sharing** - Securely share patient records and family history with other users
+- **SSO Support** - Sign in with Google, GitHub, or Microsoft
+- **Notifications** - Get alerts via Discord, Email, Gotify, or Webhooks
 
 ### Technology Stack
 
@@ -43,11 +47,13 @@ MediKeep is a comprehensive medical records management system designed for indiv
 ### For Users
 
 - [User Guide](User-Guide) - How to use MediKeep
+- [Paperless-ngx Integration](Paperless-Integration) - Document storage with Paperless-ngx
+- [Lab Result PDF Parsing](Lab-Result-Parsing) - Automatic lab result extraction
 - [FAQ](FAQ) - Frequently asked questions
-- [Troubleshooting](Troubleshooting) - Common issues and solutions
 
 ### For Administrators
 
+- [Admin Guide](Admin-Guide) - User management, backups, system health
 - [Installation Guide](Installation-Guide) - Set up your own instance
 - [Deployment Guide](Deployment-Guide) - Production deployment
 - [SSO Setup](SSO-Quick-Start) - Configure single sign-on
