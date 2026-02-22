@@ -10,7 +10,9 @@ from dotenv import load_dotenv
 from app.core.secrets import get_secret
 
 # Load environment variables from .env file
-load_dotenv()
+# Use explicit path so this works regardless of working directory
+_env_path = Path(__file__).parents[2] / ".env"
+load_dotenv(dotenv_path=_env_path)
 
 
 def _get_windows_path_helper(path_type: str):
