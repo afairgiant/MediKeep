@@ -32,6 +32,12 @@ if (project_root / 'app').exists():
     datas.append(('app', 'app'))
     print("[OK] Including app package")
 
+# Add system tray icon for the packaged EXE
+tray_icon = project_root / 'frontend' / 'public' / 'icon-64.png'
+if tray_icon.exists():
+    datas.append(('frontend/public/icon-64.png', 'frontend/build'))
+    print("[OK] Including tray icon (icon-64.png)")
+
 # Add frontend build if it exists (Create React App builds to 'build' directory)
 if (project_root / 'frontend' / 'build').exists():
     datas.append(('frontend/build', 'frontend/build'))
@@ -165,7 +171,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # TODO: Add icon file path when available
+    icon='medikeep.ico',
     version_file=None,  # TODO: Add version info when available
 )
 

@@ -1,6 +1,6 @@
 // Safe Medical Records PWA Service Worker
 // IMPORTANT: No structured logging to prevent infinite loops
-const CACHE_NAME = 'medical-records-v1';
+const CACHE_NAME = 'medical-records-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',

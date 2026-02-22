@@ -108,7 +108,7 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        <h1>🏥 MediKeep</h1>
+        <h1><img src="/medikeep-icon.svg" alt="" width={40} height={40} style={{ verticalAlign: 'middle', marginRight: '8px' }} />MediKeep</h1>
         <h2>Login</h2>
 
         {error && <div className="error-message">{error}</div>}

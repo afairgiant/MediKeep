@@ -1,4 +1,6 @@
-# MediKeep
+<p align="center">
+  <img src="frontend/public/medikeep.svg" alt="MediKeep" width="300" />
+</p>
 
 > **⚠️ IMPORTANT: Repository and Image Name Change**
 >

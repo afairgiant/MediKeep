@@ -40,14 +40,55 @@ class MediKeepTrayApp:
         self.server_thread: Optional[threading.Thread] = None
         self.server_running = False
 
+    def _find_icon_file(self) -> Optional[str]:
+        """
+        Locate the icon-64.png file on disk.
+
+        Checks development and packaged EXE paths.
+
+        Returns:
+            Path to the icon file if found, None otherwise
+        """
+        candidates = [
+            os.path.join(os.path.dirname(__file__), '..', '..', '..', 'frontend', 'public', 'icon-64.png'),
+            os.path.join(os.path.dirname(__file__), '..', '..', '..', 'frontend', 'build', 'icon-64.png'),
+        ]
+
+        if getattr(sys, 'frozen', False):
+            base = os.path.dirname(sys.executable)
+            candidates.extend([
+                os.path.join(base, '_internal', 'frontend', 'build', 'icon-64.png'),
+                os.path.join(base, 'frontend', 'build', 'icon-64.png'),
+            ])
+
+        for path in candidates:
+            normalized = os.path.normpath(path)
+            if os.path.isfile(normalized):
+                return normalized
+        return None
+
     def create_icon_image(self) -> Image.Image:
         """
-        Create a simple icon for the system tray.
+        Create the system tray icon.
+
+        Loads icon-64.png from disk. Falls back to a programmatically
+        drawn icon if the file is not found.
 
         Returns:
             PIL Image for the tray icon
         """
-        # Create a simple 64x64 icon with a medical cross
+        icon_path = self._find_icon_file()
+        if icon_path:
+            try:
+                image = Image.open(icon_path)
+                image = image.resize((64, 64), Image.LANCZOS)
+                if image.mode != 'RGBA':
+                    image = image.convert('RGBA')
+                return image
+            except Exception as e:
+                logger.warning(f"Failed to load tray icon from {icon_path}: {e}")
+
+        # Fallback: draw a simple medical cross icon
         width = 64
         height = 64
         color1 = (52, 152, 219)  # Blue background
@@ -55,11 +96,7 @@ class MediKeepTrayApp:
 
         image = Image.new('RGB', (width, height), color1)
         draw = ImageDraw.Draw(image)
-
-        # Draw a medical cross
-        # Vertical bar
         draw.rectangle([(24, 8), (40, 56)], fill=color2)
-        # Horizontal bar
         draw.rectangle([(8, 24), (56, 40)], fill=color2)
 
         return image
