@@ -468,8 +468,16 @@ def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendSt
 
     count = len(components)
 
-    # Determine result type from components
-    result_type = components[0].result_type or 'quantitative'
+    # Determine result type from components - check if mixed
+    result_types = {getattr(c, 'result_type', None) or 'quantitative' for c in components}
+    if len(result_types) > 1:
+        # Mixed result types: default to quantitative stats, filtering to quantitative only
+        quant_components = [c for c in components if (getattr(c, 'result_type', None) or 'quantitative') == 'quantitative']
+        if quant_components:
+            return _calculate_quantitative_statistics(quant_components, count)
+        return _calculate_qualitative_statistics(components, count)
+
+    result_type = result_types.pop()
 
     if result_type == "qualitative":
         return _calculate_qualitative_statistics(components, count)

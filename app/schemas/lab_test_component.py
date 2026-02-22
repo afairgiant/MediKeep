@@ -211,6 +211,8 @@ class LabTestComponentBase(BaseModel):
                 raise ValueError("Numeric value must be empty for qualitative tests")
             if self.ref_range_min is not None or self.ref_range_max is not None:
                 raise ValueError("Reference ranges are not applicable for qualitative tests")
+            # Note: ref_range_text is intentionally allowed for qualitative tests
+            # to store expected result context (e.g., "Expected: Negative")
         return self
 
     @model_validator(mode="after")

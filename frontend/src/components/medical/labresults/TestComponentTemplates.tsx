@@ -201,7 +201,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         { test_name: 'Hepatitis B Surface Antibody', abbreviation: 'Anti-HBs', unit: '', default_display_order: 3, result_type: 'qualitative' },
         { test_name: 'Hepatitis C Antibody', abbreviation: 'Anti-HCV', unit: '', default_display_order: 4, result_type: 'qualitative' },
         { test_name: 'VDRL', abbreviation: 'VDRL', unit: '', default_display_order: 5, result_type: 'qualitative' },
-        { test_name: 'SARS-CoV-2 Antigen', abbreviation: 'SARS-CoV-2', unit: '', default_display_order: 6, result_type: 'qualitative' },
+        { test_name: 'SARS-CoV-2', abbreviation: 'SARS-CoV-2', unit: '', default_display_order: 6, result_type: 'qualitative' },
         { test_name: 'Mycoplasma hominis', unit: '', default_display_order: 7, result_type: 'qualitative' },
         { test_name: 'Ureaplasma spp', unit: '', default_display_order: 8, result_type: 'qualitative' },
       ]
@@ -210,14 +210,14 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       id: 'autoimmune_panel',
       category: 'immunology',
       tests: [
-        { test_name: 'Antinuclear Antibody', abbreviation: 'ANA', unit: '', default_display_order: 1, result_type: 'qualitative' },
-        { test_name: 'Anti-dsDNA Antibody', abbreviation: 'Anti-dsDNA', unit: '', default_display_order: 2, result_type: 'qualitative' },
-        { test_name: 'Anti-Sm Antibody', abbreviation: 'Anti-Sm', unit: '', default_display_order: 3, result_type: 'qualitative' },
-        { test_name: 'Anti-RNP Antibody', abbreviation: 'Anti-RNP', unit: '', default_display_order: 4, result_type: 'qualitative' },
-        { test_name: 'Anti-SSA Antibody', abbreviation: 'Anti-SSA', unit: '', default_display_order: 5, result_type: 'qualitative' },
-        { test_name: 'Anti-SSB Antibody', abbreviation: 'Anti-SSB', unit: '', default_display_order: 6, result_type: 'qualitative' },
-        { test_name: 'Anti-Jo-1 Antibody', abbreviation: 'Anti-Jo-1', unit: '', default_display_order: 7, result_type: 'qualitative' },
-        { test_name: 'Anti-SLA/LP Antibody', abbreviation: 'Anti-SLA/LP', unit: '', default_display_order: 8, result_type: 'qualitative' },
+        { test_name: 'ANA', abbreviation: 'ANA', unit: '', default_display_order: 1, result_type: 'qualitative' },
+        { test_name: 'Anti-dsDNA', abbreviation: 'Anti-dsDNA', unit: '', default_display_order: 2, result_type: 'qualitative' },
+        { test_name: 'Anti-Sm', abbreviation: 'Anti-Sm', unit: '', default_display_order: 3, result_type: 'qualitative' },
+        { test_name: 'Anti-RNP', abbreviation: 'Anti-RNP', unit: '', default_display_order: 4, result_type: 'qualitative' },
+        { test_name: 'Anti-SSA', abbreviation: 'Anti-SSA', unit: '', default_display_order: 5, result_type: 'qualitative' },
+        { test_name: 'Anti-SSB', abbreviation: 'Anti-SSB', unit: '', default_display_order: 6, result_type: 'qualitative' },
+        { test_name: 'Anti-Jo-1', abbreviation: 'Anti-Jo-1', unit: '', default_display_order: 7, result_type: 'qualitative' },
+        { test_name: 'Anti-SLA/LP', abbreviation: 'Anti-SLA/LP', unit: '', default_display_order: 8, result_type: 'qualitative' },
       ]
     },
     {

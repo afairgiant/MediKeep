@@ -97,7 +97,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData })
               type="number"
               domain={[-0.5, 1.5]}
               ticks={[0, 1]}
-              tickFormatter={(val: number) => val === 1 ? 'Positive' : 'Negative'}
+              tickFormatter={(val: number) => val === 1 ? 'Positive / Detected' : 'Negative / Undetected'}
               tick={{ fontSize: 12 }}
               stroke="#adb5bd"
               width={80}
