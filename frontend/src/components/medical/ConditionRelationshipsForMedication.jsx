@@ -1,6 +1,7 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
 import { navigateToEntity } from '../../utils/linkNavigation';
 import {
@@ -28,6 +29,7 @@ const ConditionRelationshipsForMedication = ({
   navigate,
   viewOnly = false,
 }) => {
+  const { t } = useTranslation('common');
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -100,14 +102,14 @@ const ConditionRelationshipsForMedication = ({
       await fetchMedicationConditions();
     } catch (err) {
       logger.error('Error adding condition relationship:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to add condition relationship');
+      setError(err.response?.data?.detail || err.message || t('medications.conditions.failedToAdd', 'Failed to add condition relationship'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteRelationship = async (relationship) => {
-    if (!window.confirm('Remove this condition link?')) return;
+    if (!window.confirm(t('medications.conditions.confirmRemove', 'Remove this condition link?'))) return;
 
     setLoading(true);
     setError(null);
@@ -117,7 +119,7 @@ const ConditionRelationshipsForMedication = ({
       await fetchMedicationConditions();
     } catch (err) {
       logger.error('Error deleting condition relationship:', err);
-      setError(err.response?.data?.detail || err.message || 'Failed to remove condition relationship');
+      setError(err.response?.data?.detail || err.message || t('medications.conditions.failedToRemove', 'Failed to remove condition relationship'));
     } finally {
       setLoading(false);
     }
@@ -163,7 +165,7 @@ const ConditionRelationshipsForMedication = ({
     }));
 
   if (loading && relationships.length === 0) {
-    return <Text size="sm" c="dimmed">Loading related conditions...</Text>;
+    return <Text size="sm" c="dimmed">{t('medications.conditions.loading', 'Loading related conditions...')}</Text>;
   }
 
   return (
@@ -196,7 +198,7 @@ const ConditionRelationshipsForMedication = ({
                           navigateToEntity('condition', conditionId, navigate);
                         }
                       }}
-                      title={isOrphaned ? 'This condition has been deleted but the relationship still exists' : 'Click to view condition details'}
+                      title={isOrphaned ? t('medications.conditions.orphanedTitle', 'This condition has been deleted but the relationship still exists') : t('medications.conditions.viewDetails', 'Click to view condition details')}
                     >
                       {conditionName}
                     </Text>
@@ -218,7 +220,7 @@ const ConditionRelationshipsForMedication = ({
                       size="sm"
                       onClick={() => handleDeleteRelationship(relationship)}
                       loading={loading}
-                      title="Remove condition link"
+                      title={t('medications.conditions.removeLink', 'Remove condition link')}
                     >
                       <IconTrash size={14} />
                     </ActionIcon>
@@ -230,7 +232,7 @@ const ConditionRelationshipsForMedication = ({
         </Stack>
       ) : (
         <Paper withBorder p="md" ta="center">
-          <Text c="dimmed">No conditions linked to this medication</Text>
+          <Text c="dimmed">{t('medications.conditions.noLinked', 'No conditions linked to this medication')}</Text>
         </Paper>
       )}
 
@@ -238,7 +240,7 @@ const ConditionRelationshipsForMedication = ({
         <>
           <Group justify="space-between" align="center">
             <Text size="sm" c="dimmed">
-              {conditionOptions.length} condition{conditionOptions.length !== 1 ? 's' : ''} available to link
+              {t('medications.conditions.availableToLink', '{{count}} condition available to link', { count: conditionOptions.length })}
             </Text>
             <Button
               variant="light"
@@ -246,22 +248,22 @@ const ConditionRelationshipsForMedication = ({
               onClick={() => setShowAddModal(true)}
               disabled={loading || conditionOptions.length === 0}
             >
-              Link Condition
+              {t('buttons.linkCondition', 'Link Condition')}
             </Button>
           </Group>
 
           <Modal
         opened={showAddModal}
         onClose={() => { setShowAddModal(false); setSelectedConditionId(null); setError(null); }}
-        title="Link Condition to Medication"
+        title={t('medications.conditions.linkToMedication', 'Link Condition to Medication')}
         size="md"
         centered
         zIndex={3000}
       >
         <Stack gap="md">
           <Select
-            label="Select Condition"
-            placeholder="Choose a condition to link"
+            label={t('medications.conditions.selectCondition', 'Select Condition')}
+            placeholder={t('medications.conditions.selectConditionPlaceholder', 'Choose a condition to link')}
             data={conditionOptions}
             value={selectedConditionId}
             onChange={setSelectedConditionId}
@@ -277,14 +279,14 @@ const ConditionRelationshipsForMedication = ({
           )}
           <Group justify="flex-end" gap="sm">
             <Button variant="light" onClick={() => { setShowAddModal(false); setSelectedConditionId(null); setError(null); }}>
-              Cancel
+              {t('buttons.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleAddRelationship}
               loading={loading}
               disabled={!selectedConditionId}
             >
-              Link Condition
+              {t('buttons.linkCondition', 'Link Condition')}
             </Button>
           </Group>
         </Stack>

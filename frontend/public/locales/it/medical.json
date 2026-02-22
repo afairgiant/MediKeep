@@ -123,7 +123,8 @@
       "basicInfo": "Informazioni di base",
       "details": "Dettagli",
       "documents": "Documenti",
-      "notes": "Note"
+      "notes": "Note",
+      "conditions": "Condizioni"
     },
     "form": {
       "saving": "Salvataggio farmaco...",

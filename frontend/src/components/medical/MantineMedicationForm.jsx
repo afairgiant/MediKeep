@@ -244,7 +244,7 @@ const MantineMedicationForm = ({
               )}
               {editingMedication && (
                 <Tabs.Tab value="conditions" leftSection={<IconStethoscope size={16} />}>
-                  Conditions
+                  {t('medications.tabs.conditions')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>

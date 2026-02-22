@@ -123,7 +123,8 @@
       "basicInfo": "Grundinformationen",
       "details": "Details",
       "documents": "Dokumente",
-      "notes": "Notizen"
+      "notes": "Notizen",
+      "conditions": "Erkrankungen"
     },
     "form": {
       "saving": "Medikament wird gespeichert...",

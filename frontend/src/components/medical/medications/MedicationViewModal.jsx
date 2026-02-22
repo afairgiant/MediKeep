@@ -235,7 +235,7 @@ const MedicationViewModal = ({
 
                 {/* Related Conditions */}
                 <div>
-                  <Title order={4} mb="sm">Related Conditions</Title>
+                  <Title order={4} mb="sm">{t('medications.modal.sections.relatedConditions', 'Related Conditions')}</Title>
                   <ConditionRelationshipsForMedication
                     medicationId={medication.id}
                     conditions={conditions}
