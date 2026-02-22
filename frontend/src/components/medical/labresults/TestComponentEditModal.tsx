@@ -11,6 +11,7 @@ import {
   TextInput,
   NumberInput,
   Select,
+  SegmentedControl,
   Textarea,
   Button,
   Text,
@@ -22,6 +23,7 @@ import { IconEdit, IconAlertCircle, IconLink } from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
 import { TEST_LIBRARY } from '../../../constants/testLibrary';
+import { QUALITATIVE_SELECT_OPTIONS } from '../../../constants/labCategories';
 
 interface TestComponentEditModalProps {
   component: LabTestComponent | null;
@@ -47,28 +49,18 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
     refMax: number | undefined
   ): LabTestComponent['status'] => {
     if (value === undefined || value === null) return undefined;
-
-    // If no reference range is provided, can't determine status
     if (refMin === undefined && refMax === undefined) return undefined;
 
-    // If value is a number and we have ranges, calculate status
-    if (typeof value === 'number' && !isNaN(value)) {
-      // Both min and max defined
-      if (refMin !== undefined && refMax !== undefined) {
-        if (value < refMin) return 'low';
-        if (value > refMax) return 'high';
-        return 'normal';
-      }
-      // Only min defined
-      if (refMin !== undefined && refMax === undefined) {
-        if (value < refMin) return 'low';
-        return 'normal';
-      }
-      // Only max defined
-      if (refMax !== undefined && refMin === undefined) {
-        if (value > refMax) return 'high';
-        return 'normal';
-      }
+    if (refMin !== undefined && refMax !== undefined) {
+      if (value < refMin) return 'low';
+      if (value > refMax) return 'high';
+      return 'normal';
+    }
+    if (refMin !== undefined) {
+      return value < refMin ? 'low' : 'normal';
+    }
+    if (refMax !== undefined) {
+      return value > refMax ? 'high' : 'normal';
     }
 
     return undefined;
@@ -171,7 +163,9 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
         status: calculatedStatus,
         category: categoryToUse,
         canonical_test_name: component.canonical_test_name || '',
-        notes: component.notes || ''
+        notes: component.notes || '',
+        result_type: component.result_type || 'quantitative',
+        qualitative_value: component.qualitative_value || ''
       });
     }
   }, [component]);
@@ -228,6 +222,27 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
     }
   };
 
+  const getStatusInputColor = (status: string | undefined | null): string => {
+    if (!status) return '#868e96';
+    switch (status) {
+      case 'high':
+      case 'critical':
+        return '#fa5252';
+      case 'low':
+        return '#fd7e14';
+      case 'normal':
+        return '#51cf66';
+      default:
+        return '#868e96';
+    }
+  };
+
+  const isSubmitDisabled = (() => {
+    if (isSubmitting || !formData.test_name) return true;
+    if (formData.result_type === 'qualitative') return !formData.qualitative_value;
+    return !formData.unit || formData.value === undefined;
+  })();
+
   if (!component) return null;
 
   return (
@@ -280,51 +295,91 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
             />
           </Group>
 
-          {/* Value and Unit */}
-          <Group grow>
-            <NumberInput
-              label={t('testComponents.editModal.fields.value', 'Value')}
-              placeholder={t('testComponents.editModal.placeholders.value', 'Enter test value')}
-              required
-              value={formData.value}
-              onChange={(value) => setFormData(prev => ({ ...prev, value: value as number }))}
-              decimalScale={2}
-            />
-            <TextInput
-              label={t('testComponents.editModal.fields.unit', 'Unit')}
-              placeholder={t('testComponents.editModal.placeholders.unit', 'e.g., g/dL')}
-              required
-              value={formData.unit || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
-            />
-          </Group>
+          {/* Result Type */}
+          <SegmentedControl
+            value={formData.result_type || 'quantitative'}
+            onChange={(value) => {
+              setFormData(prev => ({
+                ...prev,
+                result_type: value as 'quantitative' | 'qualitative',
+                // Clear incompatible fields when switching
+                ...(value === 'qualitative' ? { value: undefined, unit: '', ref_range_min: undefined, ref_range_max: undefined } : { qualitative_value: '' })
+              }));
+            }}
+            data={[
+              { label: 'Quantitative (Numeric)', value: 'quantitative' },
+              { label: 'Qualitative (Pos/Neg)', value: 'qualitative' },
+            ]}
+            fullWidth
+          />
 
-          {/* Reference Range */}
-          <Stack gap="xs">
-            <Text size="sm" fw={500}>{t('testComponents.editModal.fields.referenceRange', 'Reference Range')}</Text>
-            <Group grow>
-              <NumberInput
-                label={t('testComponents.editModal.fields.minimum', 'Minimum')}
-                placeholder={t('testComponents.editModal.placeholders.minValue', 'Min value')}
-                value={formData.ref_range_min ?? undefined}
-                onChange={(value) => setFormData(prev => ({ ...prev, ref_range_min: value === '' ? undefined : value as number }))}
-                decimalScale={2}
-              />
-              <NumberInput
-                label={t('testComponents.editModal.fields.maximum', 'Maximum')}
-                placeholder={t('testComponents.editModal.placeholders.maxValue', 'Max value')}
-                value={formData.ref_range_max ?? undefined}
-                onChange={(value) => setFormData(prev => ({ ...prev, ref_range_max: value === '' ? undefined : value as number }))}
-                decimalScale={2}
-              />
-            </Group>
-            <TextInput
-              label={t('testComponents.editModal.fields.rangeText', 'Range Text (alternative)')}
-              placeholder={t('testComponents.editModal.placeholders.rangeText', "e.g., 'Negative' or 'Male: 13.5-17.5, Female: 12.0-15.5'")}
-              value={formData.ref_range_text || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, ref_range_text: e.target.value }))}
+          {formData.result_type !== 'qualitative' && (
+            <>
+              {/* Value and Unit */}
+              <Group grow>
+                <NumberInput
+                  label={t('testComponents.editModal.fields.value', 'Value')}
+                  placeholder={t('testComponents.editModal.placeholders.value', 'Enter test value')}
+                  required
+                  value={formData.value}
+                  onChange={(value) => setFormData(prev => ({ ...prev, value: value as number }))}
+                  decimalScale={2}
+                />
+                <TextInput
+                  label={t('testComponents.editModal.fields.unit', 'Unit')}
+                  placeholder={t('testComponents.editModal.placeholders.unit', 'e.g., g/dL')}
+                  required
+                  value={formData.unit || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, unit: e.target.value }))}
+                />
+              </Group>
+
+              {/* Reference Range */}
+              <Stack gap="xs">
+                <Text size="sm" fw={500}>{t('testComponents.editModal.fields.referenceRange', 'Reference Range')}</Text>
+                <Group grow>
+                  <NumberInput
+                    label={t('testComponents.editModal.fields.minimum', 'Minimum')}
+                    placeholder={t('testComponents.editModal.placeholders.minValue', 'Min value')}
+                    value={formData.ref_range_min ?? undefined}
+                    onChange={(value) => setFormData(prev => ({ ...prev, ref_range_min: value === '' ? undefined : value as number }))}
+                    decimalScale={2}
+                  />
+                  <NumberInput
+                    label={t('testComponents.editModal.fields.maximum', 'Maximum')}
+                    placeholder={t('testComponents.editModal.placeholders.maxValue', 'Max value')}
+                    value={formData.ref_range_max ?? undefined}
+                    onChange={(value) => setFormData(prev => ({ ...prev, ref_range_max: value === '' ? undefined : value as number }))}
+                    decimalScale={2}
+                  />
+                </Group>
+                <TextInput
+                  label={t('testComponents.editModal.fields.rangeText', 'Range Text (alternative)')}
+                  placeholder={t('testComponents.editModal.placeholders.rangeText', "e.g., 'Negative' or 'Male: 13.5-17.5, Female: 12.0-15.5'")}
+                  value={formData.ref_range_text || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, ref_range_text: e.target.value }))}
+                />
+              </Stack>
+            </>
+          )}
+
+          {formData.result_type === 'qualitative' && (
+            <Select
+              label="Result"
+              placeholder="Select result"
+              required
+              data={QUALITATIVE_SELECT_OPTIONS}
+              value={formData.qualitative_value || null}
+              onChange={(value) => {
+                const qv = value || '';
+                let autoStatus: string | undefined;
+                if (qv === 'positive' || qv === 'detected') autoStatus = 'abnormal';
+                else if (qv === 'negative' || qv === 'undetected') autoStatus = 'normal';
+                setFormData(prev => ({ ...prev, qualitative_value: qv, status: autoStatus }));
+              }}
+              comboboxProps={{ zIndex: 3001 }}
             />
-          </Stack>
+          )}
 
           {/* Status (Auto-calculated) and Category */}
           <Group grow>
@@ -339,13 +394,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               styles={{
                 input: {
                   backgroundColor: '#f8f9fa',
-                  color: formData.status === 'high' || formData.status === 'critical'
-                    ? '#fa5252'
-                    : formData.status === 'low'
-                    ? '#fd7e14'
-                    : formData.status === 'normal'
-                    ? '#51cf66'
-                    : '#868e96',
+                  color: getStatusInputColor(formData.status),
                   fontWeight: 500
                 }
               }}
@@ -430,7 +479,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={isSubmitting || !formData.test_name || !formData.unit || formData.value === undefined}
+              disabled={isSubmitDisabled}
               loading={isSubmitting}
             >
               {t('buttons.saveChanges', 'Save Changes')}

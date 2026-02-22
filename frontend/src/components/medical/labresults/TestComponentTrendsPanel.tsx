@@ -11,19 +11,16 @@ import {
   Group,
   Text,
   Title,
-  Button,
   Tabs,
   Alert,
   Paper,
   Badge,
   LoadingOverlay,
-  CloseButton,
   Divider,
   Box,
   Skeleton,
   ActionIcon,
   Tooltip,
-  TextInput,
   Select
 } from '@mantine/core';
 import {
@@ -32,12 +29,10 @@ import {
   IconMinus,
   IconChartLine,
   IconTable,
-  IconChartBar,
   IconAlertCircle,
   IconDownload,
   IconCalendar,
   IconRefresh,
-  IconX,
   IconFilter
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
@@ -45,6 +40,7 @@ import {
   labTestComponentApi,
   TrendResponse
 } from '../../../services/api/labTestComponentApi';
+import { getQualitativeDisplayName } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 import TestComponentTrendChart from './TestComponentTrendChart';
 import TestComponentTrendTable from './TestComponentTrendTable';
@@ -174,8 +170,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
     switch (trendData.statistics.trend_direction) {
       case 'increasing':
+      case 'worsening':
         return <IconTrendingUp size={18} />;
       case 'decreasing':
+      case 'improving':
         return <IconTrendingDown size={18} />;
       default:
         return <IconMinus size={18} />;
@@ -190,6 +188,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         return 'blue';
       case 'decreasing':
         return 'orange';
+      case 'worsening':
+        return 'red';
+      case 'improving':
+        return 'green';
       default:
         return 'gray';
     }
@@ -203,6 +205,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         return 'Increasing';
       case 'decreasing':
         return 'Decreasing';
+      case 'worsening':
+        return 'Worsening';
+      case 'improving':
+        return 'Improving';
       default:
         return 'Stable';
     }
@@ -232,9 +238,22 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
     try {
       // Create CSV content
-      const headers = ['Date', 'Value', 'Unit', 'Status', 'Reference Range', 'Lab Result'];
+      const isQualitative = trendData.result_type === 'qualitative';
+      const headers = isQualitative
+        ? ['Date', 'Result', 'Status', 'Lab Result']
+        : ['Date', 'Value', 'Unit', 'Status', 'Reference Range', 'Lab Result'];
       const rows = trendData.data_points.map(point => {
         const date = point.recorded_date || point.created_at.split('T')[0];
+
+        if (isQualitative) {
+          return [
+            date,
+            point.qualitative_value || '',
+            point.status || '',
+            point.lab_result.test_name
+          ];
+        }
+
         const refRange = point.ref_range_text ||
           (point.ref_range_min !== null && point.ref_range_max !== null
             ? `${point.ref_range_min} - ${point.ref_range_max}`
@@ -242,8 +261,8 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
         return [
           date,
-          point.value.toString(),
-          point.unit,
+          String(point.value ?? ''),
+          point.unit || '',
           point.status || '',
           refRange,
           point.lab_result.test_name
@@ -259,11 +278,15 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         // Statistics
         ['Summary Statistics'],
         ['Count', trendData.statistics.count.toString()],
-        ['Latest', trendData.statistics.latest?.toFixed(2) || 'N/A'],
-        ['Average', trendData.statistics.average?.toFixed(2) || 'N/A'],
-        ['Min', trendData.statistics.min?.toFixed(2) || 'N/A'],
-        ['Max', trendData.statistics.max?.toFixed(2) || 'N/A'],
-        ['Std Dev', trendData.statistics.std_dev?.toFixed(2) || 'N/A'],
+        ...(isQualitative && trendData.statistics.qualitative_summary
+          ? Object.entries(trendData.statistics.qualitative_summary).map(([val, cnt]) => [val, String(cnt)])
+          : [
+              ['Latest', trendData.statistics.latest?.toFixed(2) || 'N/A'],
+              ['Average', trendData.statistics.average?.toFixed(2) || 'N/A'],
+              ['Min', trendData.statistics.min?.toFixed(2) || 'N/A'],
+              ['Max', trendData.statistics.max?.toFixed(2) || 'N/A'],
+              ['Std Dev', trendData.statistics.std_dev?.toFixed(2) || 'N/A'],
+            ]),
         ['Trend Direction', trendData.statistics.trend_direction],
         ['Normal Count', trendData.statistics.normal_count.toString()],
         ['Abnormal Count', trendData.statistics.abnormal_count.toString()],
@@ -419,37 +442,52 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
               <Divider />
 
-              <Group gap="xl">
-                <Box>
-                  <Text size="xs" c="dimmed">Latest</Text>
-                  <Group gap="xs" align="baseline">
-                    <Text fw={700} size="xl">
-                      {trendData.statistics.latest?.toFixed(2) ?? 'N/A'}
-                    </Text>
-                    <Text size="sm" c="dimmed">{trendData.unit}</Text>
-                  </Group>
-                </Box>
+              {trendData.result_type === 'qualitative' && trendData.statistics.qualitative_summary ? (
+                <Group gap="xl">
+                  {Object.entries(trendData.statistics.qualitative_summary).map(([value, count]) => (
+                    <Box key={value}>
+                      <Text size="xs" c="dimmed">{getQualitativeDisplayName(value)}</Text>
+                      <Text fw={700} size="xl">{count as number}</Text>
+                    </Box>
+                  ))}
+                  <Box>
+                    <Text size="xs" c="dimmed">Total</Text>
+                    <Text fw={700} size="xl">{trendData.statistics.count}</Text>
+                  </Box>
+                </Group>
+              ) : (
+                <Group gap="xl">
+                  <Box>
+                    <Text size="xs" c="dimmed">Latest</Text>
+                    <Group gap="xs" align="baseline">
+                      <Text fw={700} size="xl">
+                        {trendData.statistics.latest?.toFixed(2) ?? 'N/A'}
+                      </Text>
+                      <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                    </Group>
+                  </Box>
 
-                <Box>
-                  <Text size="xs" c="dimmed">Average</Text>
-                  <Group gap="xs" align="baseline">
-                    <Text fw={600} size="lg">
-                      {trendData.statistics.average?.toFixed(2) ?? 'N/A'}
-                    </Text>
-                    <Text size="sm" c="dimmed">{trendData.unit}</Text>
-                  </Group>
-                </Box>
+                  <Box>
+                    <Text size="xs" c="dimmed">Average</Text>
+                    <Group gap="xs" align="baseline">
+                      <Text fw={600} size="lg">
+                        {trendData.statistics.average?.toFixed(2) ?? 'N/A'}
+                      </Text>
+                      <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                    </Group>
+                  </Box>
 
-                <Box>
-                  <Text size="xs" c="dimmed">Range</Text>
-                  <Group gap="xs" align="baseline">
-                    <Text fw={600} size="sm">
-                      {trendData.statistics.min?.toFixed(2)} - {trendData.statistics.max?.toFixed(2)}
-                    </Text>
-                    <Text size="xs" c="dimmed">{trendData.unit}</Text>
-                  </Group>
-                </Box>
-              </Group>
+                  <Box>
+                    <Text size="xs" c="dimmed">Range</Text>
+                    <Group gap="xs" align="baseline">
+                      <Text fw={600} size="sm">
+                        {trendData.statistics.min?.toFixed(2)} - {trendData.statistics.max?.toFixed(2)}
+                      </Text>
+                      <Text size="xs" c="dimmed">{trendData.unit}</Text>
+                    </Group>
+                  </Box>
+                </Group>
+              )}
 
               <Group gap="md">
                 <Badge
@@ -480,7 +518,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                 <Text size="xs" c="dimmed">
                   Abnormal: <Text span fw={600}>{trendData.statistics.abnormal_count}</Text>
                 </Text>
-                {trendData.statistics.std_dev !== null && trendData.statistics.std_dev !== undefined && (
+                {trendData.result_type !== 'qualitative' && trendData.statistics.std_dev !== null && trendData.statistics.std_dev !== undefined && (
                   <>
                     <Text size="xs" c="dimmed">•</Text>
                     <Text size="xs" c="dimmed">
