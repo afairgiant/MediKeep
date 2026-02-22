@@ -420,7 +420,8 @@
         "prescriberPharmacy": "Prescritor e Farmácia",
         "sideEffects": "Efeitos Colaterais",
         "tags": "Tags",
-        "timeline": "Linha do Tempo"
+        "timeline": "Linha do Tempo",
+        "relatedConditions": "Condições relacionadas"
       },
       "tabs": {
         "documents": "Documentos",
@@ -431,7 +432,22 @@
     },
     "noMedications": "Nenhum medicamento ou suplemento encontrado",
     "success": "Sucesso",
-    "tryAdjustingFilters": "Tente ajustar seus critérios de busca ou filtro."
+    "tryAdjustingFilters": "Tente ajustar seus critérios de busca ou filtro.",
+    "conditions": {
+      "loading": "A carregar condições relacionadas...",
+      "noLinked": "Nenhuma condição vinculada a este medicamento",
+      "orphanedTitle": "Esta condição foi eliminada, mas a relação ainda existe",
+      "viewDetails": "Clique para ver os detalhes da condição",
+      "removeLink": "Remover vínculo de condição",
+      "confirmRemove": "Remover este vínculo de condição?",
+      "failedToAdd": "Falha ao adicionar relação de condição",
+      "failedToRemove": "Falha ao remover relação de condição",
+      "availableToLink": "{{count}} condição disponível para vincular",
+      "availableToLink_plural": "{{count}} condições disponíveis para vincular",
+      "linkToMedication": "Vincular condição ao medicamento",
+      "selectCondition": "Selecionar condição",
+      "selectConditionPlaceholder": "Escolha uma condição para vincular"
+    }
   },
   "searchPlaceholders": {
     "conditions": "Pesquisar condições, notas, tags...",

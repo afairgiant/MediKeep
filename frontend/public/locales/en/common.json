@@ -417,7 +417,8 @@
         "dosageInfo": "Dosage Information",
         "additionalNotes": "Additional Notes",
         "sideEffects": "Side Effects",
-        "attachedDocuments": "Attached Documents"
+        "attachedDocuments": "Attached Documents",
+        "relatedConditions": "Related Conditions"
       },
       "labels": {
         "medicationName": "Medication Name",
@@ -431,6 +432,21 @@
       "noNotes": "No notes available",
       "noSideEffects": "No side effects reported",
       "editMedication": "Edit Medication"
+    },
+    "conditions": {
+      "loading": "Loading related conditions...",
+      "noLinked": "No conditions linked to this medication",
+      "orphanedTitle": "This condition has been deleted but the relationship still exists",
+      "viewDetails": "Click to view condition details",
+      "removeLink": "Remove condition link",
+      "confirmRemove": "Remove this condition link?",
+      "failedToAdd": "Failed to add condition relationship",
+      "failedToRemove": "Failed to remove condition relationship",
+      "availableToLink": "{{count}} condition available to link",
+      "availableToLink_plural": "{{count}} conditions available to link",
+      "linkToMedication": "Link Condition to Medication",
+      "selectCondition": "Select Condition",
+      "selectConditionPlaceholder": "Choose a condition to link"
     }
   },
   "searchPlaceholders": {
