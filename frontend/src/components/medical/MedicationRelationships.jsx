@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import {
   Badge,
@@ -593,6 +594,34 @@ const MedicationRelationships = ({
       </Modal>
     </Stack>
   );
+};
+
+MedicationRelationships.propTypes = {
+  direction: PropTypes.oneOf(['condition', 'medication']),
+  navigate: PropTypes.func,
+  isViewMode: PropTypes.bool,
+  conditionId: PropTypes.number,
+  conditionMedications: PropTypes.object,
+  medications: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      medication_name: PropTypes.string,
+      dosage: PropTypes.string,
+      frequency: PropTypes.string,
+      status: PropTypes.string,
+    })
+  ),
+  fetchConditionMedications: PropTypes.func,
+  medicationId: PropTypes.number,
+  conditions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      diagnosis: PropTypes.string,
+      condition_name: PropTypes.string,
+      status: PropTypes.string,
+      severity: PropTypes.string,
+    })
+  ),
 };
 
 export default MedicationRelationships;

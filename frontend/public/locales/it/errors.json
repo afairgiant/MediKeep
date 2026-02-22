@@ -81,6 +81,10 @@
   },
   "relationships": {
     "addConditionFailed": "Impossibile aggiungere la relazione della condizione",
-    "addMedicationFailed": "Impossibile aggiungere la relazione del farmaco"
+    "addMedicationFailed": "Impossibile aggiungere la relazione del farmaco",
+    "addFailed": "Impossibile aggiungere la relazione",
+    "updateFailed": "Impossibile aggiornare la relazione",
+    "deleteFailed": "Impossibile eliminare la relazione",
+    "fetchFailed": "Impossibile caricare le relazioni"
   }
 }
