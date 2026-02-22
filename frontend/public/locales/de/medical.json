@@ -290,6 +290,28 @@
       "description": "Priorität oder Dringlichkeit des Tests",
       "label": "Testtyp",
       "placeholder": "Dringlichkeitsstufe auswählen"
+    },
+    "qualitative": {
+      "resultType": "Ergebnistyp",
+      "quantitative": "Quantitativ",
+      "qualitativeLabel": "Qualitativ",
+      "values": {
+        "positive": "Positiv",
+        "negative": "Negativ",
+        "detected": "Nachgewiesen",
+        "undetected": "Nicht nachgewiesen"
+      },
+      "expectedResult": "Erwartetes Ergebnis",
+      "selectResult": "Ergebnis auswählen",
+      "templates": {
+        "infectiousDisease": "Infektionskrankheiten-Panel",
+        "autoimmune": "Autoimmun-Panel",
+        "viralSerology": "Virusserologie-Panel"
+      },
+      "trends": {
+        "worsening": "Verschlechternd",
+        "improving": "Verbessernd"
+      }
     }
   },
   "immunizations": {

@@ -1295,6 +1295,228 @@
       "common_names": ["Salivary pH", "Oral pH", "Saliva pH"],
       "is_common": true,
       "display_order": 113
+    },
+    {
+      "test_name": "Hepatitis B Surface Antibody",
+      "abbreviation": "Anti-HBs",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Anti-HBs", "HBsAb", "Hepatitis B Antibody"],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 114
+    },
+    {
+      "test_name": "Hepatitis C Antibody",
+      "abbreviation": "Anti-HCV",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Anti-HCV", "HCV Ab", "Hep C Antibody"],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 115
+    },
+    {
+      "test_name": "HIV 1 Antibody",
+      "abbreviation": "Anti-HIV 1",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["HIV-1 Ab", "HIV 1/2 Antibody", "Anti-HIV"],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 116
+    },
+    {
+      "test_name": "HIV 2 Antibody",
+      "abbreviation": "Anti-HIV 2",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["HIV-2 Ab"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 117
+    },
+    {
+      "test_name": "EBV VCA IgM",
+      "abbreviation": "EBV IgM",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Epstein-Barr Virus IgM", "EBV VCA IgM Antibody"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 118
+    },
+    {
+      "test_name": "EBV VCA IgG",
+      "abbreviation": "EBV IgG",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Epstein-Barr Virus IgG", "EBV VCA IgG Antibody"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 119
+    },
+    {
+      "test_name": "CMV IgM",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Cytomegalovirus IgM", "CMV IgM Antibody"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 120
+    },
+    {
+      "test_name": "CMV IgG",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Cytomegalovirus IgG", "CMV IgG Antibody"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 121
+    },
+    {
+      "test_name": "HSV-1 IgM",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Herpes Simplex Virus 1 IgM", "HSV Type 1 IgM"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 122
+    },
+    {
+      "test_name": "HSV-1 IgG",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Herpes Simplex Virus 1 IgG", "HSV Type 1 IgG"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 123
+    },
+    {
+      "test_name": "HSV-2 IgM",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Herpes Simplex Virus 2 IgM", "HSV Type 2 IgM"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 124
+    },
+    {
+      "test_name": "HSV-2 IgG",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Herpes Simplex Virus 2 IgG", "HSV Type 2 IgG"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 125
+    },
+    {
+      "test_name": "VDRL",
+      "default_unit": "",
+      "category": "microbiology",
+      "common_names": ["Venereal Disease Research Laboratory", "Syphilis Screen", "RPR"],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 126
+    },
+    {
+      "test_name": "SARS-CoV-2",
+      "default_unit": "",
+      "category": "microbiology",
+      "common_names": ["COVID-19 Test", "SARS-CoV-2 PCR", "COVID PCR", "Coronavirus Test"],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 127
+    },
+    {
+      "test_name": "Mycoplasma hominis",
+      "default_unit": "",
+      "category": "microbiology",
+      "common_names": ["M. hominis", "Mycoplasma Culture"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 128
+    },
+    {
+      "test_name": "Ureaplasma spp",
+      "default_unit": "",
+      "category": "microbiology",
+      "common_names": ["Ureaplasma urealyticum", "Ureaplasma Culture"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 129
+    },
+    {
+      "test_name": "ANA",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Antinuclear Antibody", "ANA Screen", "ANA Test"],
+      "is_common": true,
+      "result_type": "qualitative",
+      "display_order": 130
+    },
+    {
+      "test_name": "Anti-dsDNA",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Anti-Double Stranded DNA", "dsDNA Antibody"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 131
+    },
+    {
+      "test_name": "Anti-Sm",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Anti-Smith Antibody", "Smith Antibody"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 132
+    },
+    {
+      "test_name": "Anti-RNP",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Anti-Ribonucleoprotein", "RNP Antibody", "Anti-U1 RNP"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 133
+    },
+    {
+      "test_name": "Anti-SSA",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Anti-Ro", "SSA Antibody", "Ro Antibody"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 134
+    },
+    {
+      "test_name": "Anti-SSB",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Anti-La", "SSB Antibody", "La Antibody"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 135
+    },
+    {
+      "test_name": "Anti-Jo-1",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Jo-1 Antibody", "Anti-Histidyl tRNA Synthetase"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 136
+    },
+    {
+      "test_name": "Anti-SLA/LP",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Anti-Soluble Liver Antigen", "Anti-Liver Pancreas"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 137
     }
   ]
 }

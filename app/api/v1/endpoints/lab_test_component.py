@@ -1,5 +1,4 @@
 from typing import Any, Dict, List, Optional
-from datetime import datetime
 from datetime import date as date_type
 
 from fastapi import (
@@ -133,6 +132,8 @@ def get_lab_test_component(
         "category": db_component.category,
         "display_order": db_component.display_order,
         "notes": db_component.notes,
+        "result_type": db_component.result_type,
+        "qualitative_value": db_component.qualitative_value,
         "created_at": db_component.created_at,
         "updated_at": db_component.updated_at,
         "lab_result": {
@@ -456,7 +457,7 @@ def get_abbreviation_suggestions(
 
 # Helper function for trend statistics
 def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendStatistics:
-    """Calculate statistics for trend data."""
+    """Calculate statistics for trend data. Handles both quantitative and qualitative results."""
     if not components:
         return LabTestComponentTrendStatistics(
             count=0,
@@ -465,48 +466,112 @@ def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendSt
             trend_direction="stable"
         )
 
-    values = [c.value for c in components]
+    count = len(components)
 
-    # Basic stats
-    count = len(values)
-    latest = values[0] if values else None
-    average = sum(values) / count if count > 0 else None
-    minimum = min(values) if values else None
-    maximum = max(values) if values else None
+    # Determine result type from components - check if mixed
+    result_types = {getattr(c, 'result_type', None) or 'quantitative' for c in components}
+    if len(result_types) > 1:
+        # Mixed result types: default to quantitative stats, filtering to quantitative only
+        quant_components = [c for c in components if (getattr(c, 'result_type', None) or 'quantitative') == 'quantitative']
+        if quant_components:
+            return _calculate_quantitative_statistics(quant_components, count)
+        return _calculate_qualitative_statistics(components, count)
 
-    # Trend direction (compare first half vs second half)
+    result_type = result_types.pop()
+
+    if result_type == "qualitative":
+        return _calculate_qualitative_statistics(components, count)
+
+    return _calculate_quantitative_statistics(components, count)
+
+
+def _calculate_qualitative_statistics(components: List[Any], count: int) -> LabTestComponentTrendStatistics:
+    """Calculate statistics for qualitative trend data."""
+    # Count occurrences of each qualitative value
+    qualitative_summary: dict = {}
+    for c in components:
+        qv = getattr(c, 'qualitative_value', None) or 'unknown'
+        qualitative_summary[qv] = qualitative_summary.get(qv, 0) + 1
+
+    normal_count = sum(1 for c in components if c.status == "normal")
+    abnormal_count = count - normal_count
+
+    # Trend direction for qualitative: based on recent positive/negative pattern
     trend = "stable"
     if count >= 4:
         mid = count // 2
-        first_half_avg = sum(values[:mid]) / mid
-        second_half_avg = sum(values[mid:]) / (count - mid)
+        # Recent half (first items are most recent)
+        recent_abnormal = sum(1 for c in components[:mid] if c.status != "normal")
+        older_abnormal = sum(1 for c in components[mid:] if c.status != "normal")
+        recent_rate = recent_abnormal / mid
+        older_rate = older_abnormal / (count - mid)
 
-        # Only calculate percentage if first_half_avg is meaningful
-        # Use absolute threshold to avoid division by zero and unstable percentages
+        if recent_rate > older_rate + 0.15:
+            trend = "worsening"
+        elif recent_rate < older_rate - 0.15:
+            trend = "improving"
+
+    return LabTestComponentTrendStatistics(
+        count=count,
+        latest=None,
+        average=None,
+        min=None,
+        max=None,
+        std_dev=None,
+        trend_direction=trend,
+        time_in_range_percent=round((normal_count / count * 100), 1) if count > 0 else None,
+        normal_count=normal_count,
+        abnormal_count=abnormal_count,
+        result_type="qualitative",
+        qualitative_summary=qualitative_summary
+    )
+
+
+def _calculate_quantitative_statistics(components: List[Any], count: int) -> LabTestComponentTrendStatistics:
+    """Calculate statistics for quantitative trend data."""
+    values = [c.value for c in components if c.value is not None]
+
+    if not values:
+        return LabTestComponentTrendStatistics(
+            count=count,
+            normal_count=0,
+            abnormal_count=count,
+            trend_direction="stable",
+            result_type="quantitative"
+        )
+
+    # Basic stats (values is guaranteed non-empty after the early return above)
+    latest = values[0]
+    average = sum(values) / len(values)
+    minimum = min(values)
+    maximum = max(values)
+
+    # Trend direction (compare first half vs second half)
+    trend = "stable"
+    if len(values) >= 4:
+        mid = len(values) // 2
+        first_half_avg = sum(values[:mid]) / mid
+        second_half_avg = sum(values[mid:]) / (len(values) - mid)
+
         if abs(first_half_avg) > 0.01:
             change_percent = ((second_half_avg - first_half_avg) / abs(first_half_avg)) * 100
-
             if change_percent > 5:
                 trend = "increasing"
             elif change_percent < -5:
                 trend = "decreasing"
         elif abs(second_half_avg - first_half_avg) > 0.01:
-            # For near-zero values, use absolute difference instead of percentage
             if second_half_avg > first_half_avg:
                 trend = "increasing"
             elif second_half_avg < first_half_avg:
                 trend = "decreasing"
 
-    # Time in range (count normal vs abnormal)
+    # Time in range
     normal_count = sum(1 for c in components if c.status == "normal")
     time_in_range_percent = (normal_count / count * 100) if count > 0 else None
 
-    # Standard deviation
-    # Note: Using population variance (divide by N) rather than sample variance (divide by N-1)
-    # This is appropriate for analyzing the complete set of measurements we have for a patient,
-    # rather than estimating variance for a theoretical larger population
-    if count > 1 and average is not None:
-        variance = sum((x - average) ** 2 for x in values) / count
+    # Standard deviation (population variance)
+    if len(values) > 1 and average is not None:
+        variance = sum((x - average) ** 2 for x in values) / len(values)
         std_dev = variance ** 0.5
     else:
         std_dev = None
@@ -521,7 +586,8 @@ def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendSt
         trend_direction=trend,
         time_in_range_percent=round(time_in_range_percent, 1) if time_in_range_percent is not None else None,
         normal_count=normal_count,
-        abnormal_count=count - normal_count
+        abnormal_count=count - normal_count,
+        result_type="quantitative"
     )
 
 
@@ -565,7 +631,7 @@ def get_lab_test_component_trends(
             limit=limit
         )
 
-        # Detect unit mismatches
+        # Detect unit mismatches (only for quantitative tests)
         if components:
             primary_unit = components[0].unit
             units_found = set(c.unit for c in components if c.unit)
@@ -625,6 +691,8 @@ def get_lab_test_component_trends(
                 ref_range_text=component.ref_range_text,
                 recorded_date=recorded_date,
                 created_at=component.created_at,
+                result_type=component.result_type or 'quantitative',
+                qualitative_value=component.qualitative_value,
                 lab_result=LabResultBasicForTrend(
                     id=component.lab_result.id,
                     test_name=component.lab_result.test_name,
@@ -633,9 +701,10 @@ def get_lab_test_component_trends(
             )
             data_points.append(data_point)
 
-        # Get unit and category from most recent component
+        # Get unit, category, and result_type from most recent component
         unit = components[0].unit
         category = components[0].category
+        result_type = components[0].result_type or 'quantitative'
 
         # Build response
         response = LabTestComponentTrendResponse(
@@ -645,7 +714,8 @@ def get_lab_test_component_trends(
             data_points=data_points,
             statistics=statistics,
             is_aggregated=False,
-            aggregation_period=None
+            aggregation_period=None,
+            result_type=result_type
         )
 
         return response

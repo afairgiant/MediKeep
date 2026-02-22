@@ -18,6 +18,7 @@ import {
 } from '@mantine/core';
 import { IconArrowUp, IconArrowDown, IconArrowsSort } from '@tabler/icons-react';
 import { TrendResponse, TrendDataPoint } from '../../../services/api/labTestComponentApi';
+import { getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
 
 interface TestComponentTrendTableProps {
   trendData: TrendResponse;
@@ -99,7 +100,14 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
           break;
         }
         case 'value':
-          comparison = a.value - b.value;
+          // Handle qualitative: sort alphabetically by qualitative_value
+          if (a.result_type === 'qualitative' || b.result_type === 'qualitative') {
+            const valA = a.qualitative_value || '';
+            const valB = b.qualitative_value || '';
+            comparison = valA.localeCompare(valB);
+          } else {
+            comparison = (a.value ?? 0) - (b.value ?? 0);
+          }
           break;
         case 'status': {
           const statusA = a.status || '';
@@ -200,10 +208,20 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
                     <Text size="sm">{formatDate(point)}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" fw={600}>{point.value}</Text>
+                    {point.result_type === 'qualitative' && point.qualitative_value ? (
+                      <Badge
+                        size="sm"
+                        variant="filled"
+                        color={getQualitativeColor(point.qualitative_value)}
+                      >
+                        {getQualitativeDisplayName(point.qualitative_value)}
+                      </Badge>
+                    ) : (
+                      <Text size="sm" fw={600}>{point.value}</Text>
+                    )}
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" c="dimmed">{point.unit}</Text>
+                    <Text size="sm" c="dimmed">{point.result_type === 'qualitative' ? '-' : point.unit}</Text>
                   </Table.Td>
                   <Table.Td>
                     {point.status ? (
@@ -220,7 +238,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
                   </Table.Td>
                   <Table.Td>
                     <Text size="xs" c="dimmed">
-                      {formatReferenceRange(point)}
+                      {point.result_type === 'qualitative' ? '-' : formatReferenceRange(point)}
                     </Text>
                   </Table.Td>
                   <Table.Td>

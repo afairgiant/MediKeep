@@ -13,25 +13,20 @@ import {
   Button,
   SimpleGrid,
   Title,
-  Divider,
   Paper,
   TextInput,
   NumberInput,
   Select,
-  Textarea,
-  Accordion,
   Alert,
   ActionIcon,
   Modal,
   ScrollArea,
-  Tooltip,
   Center,
   Box,
   Autocomplete
 } from '@mantine/core';
 import {
   IconPlus,
-  IconEdit,
   IconTrash,
   IconSearch,
   IconFilter,
@@ -43,7 +38,7 @@ import { notifications } from '@mantine/notifications';
 import sanitizeHtml from 'sanitize-html';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
-import { getCategoryDisplayName, getCategoryColor, CATEGORY_SELECT_OPTIONS, ComponentCategory, ComponentStatus } from '../../../constants/labCategories';
+import { getCategoryDisplayName, getCategoryColor, CATEGORY_SELECT_OPTIONS, QUALITATIVE_SELECT_OPTIONS, ComponentCategory, ComponentStatus } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 import { getAutocompleteOptions, extractTestName, getTestByName } from '../../../constants/testLibrary';
 
@@ -57,6 +52,7 @@ interface TestTemplate {
     unit: string;
     default_display_order?: number;
     notes?: string;
+    result_type?: 'quantitative' | 'qualitative';
   }>;
 }
 
@@ -195,7 +191,49 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         { test_name: 'Creatinine', abbreviation: 'CREAT', test_code: '2160-0', unit: 'mg/dL', default_display_order: 3 },
         { test_name: 'Estimated GFR', abbreviation: 'eGFR', unit: 'mL/min/1.73m²', default_display_order: 4 },
       ]
-    }
+    },
+    {
+      id: 'infectious_disease_panel',
+      category: 'immunology',
+      tests: [
+        { test_name: 'HIV 1 Antibody', abbreviation: 'Anti-HIV 1', unit: '', default_display_order: 1, result_type: 'qualitative' },
+        { test_name: 'HIV 2 Antibody', abbreviation: 'Anti-HIV 2', unit: '', default_display_order: 2, result_type: 'qualitative' },
+        { test_name: 'Hepatitis B Surface Antibody', abbreviation: 'Anti-HBs', unit: '', default_display_order: 3, result_type: 'qualitative' },
+        { test_name: 'Hepatitis C Antibody', abbreviation: 'Anti-HCV', unit: '', default_display_order: 4, result_type: 'qualitative' },
+        { test_name: 'VDRL', abbreviation: 'VDRL', unit: '', default_display_order: 5, result_type: 'qualitative' },
+        { test_name: 'SARS-CoV-2', abbreviation: 'SARS-CoV-2', unit: '', default_display_order: 6, result_type: 'qualitative' },
+        { test_name: 'Mycoplasma hominis', unit: '', default_display_order: 7, result_type: 'qualitative' },
+        { test_name: 'Ureaplasma spp', unit: '', default_display_order: 8, result_type: 'qualitative' },
+      ]
+    },
+    {
+      id: 'autoimmune_panel',
+      category: 'immunology',
+      tests: [
+        { test_name: 'ANA', abbreviation: 'ANA', unit: '', default_display_order: 1, result_type: 'qualitative' },
+        { test_name: 'Anti-dsDNA', abbreviation: 'Anti-dsDNA', unit: '', default_display_order: 2, result_type: 'qualitative' },
+        { test_name: 'Anti-Sm', abbreviation: 'Anti-Sm', unit: '', default_display_order: 3, result_type: 'qualitative' },
+        { test_name: 'Anti-RNP', abbreviation: 'Anti-RNP', unit: '', default_display_order: 4, result_type: 'qualitative' },
+        { test_name: 'Anti-SSA', abbreviation: 'Anti-SSA', unit: '', default_display_order: 5, result_type: 'qualitative' },
+        { test_name: 'Anti-SSB', abbreviation: 'Anti-SSB', unit: '', default_display_order: 6, result_type: 'qualitative' },
+        { test_name: 'Anti-Jo-1', abbreviation: 'Anti-Jo-1', unit: '', default_display_order: 7, result_type: 'qualitative' },
+        { test_name: 'Anti-SLA/LP', abbreviation: 'Anti-SLA/LP', unit: '', default_display_order: 8, result_type: 'qualitative' },
+      ]
+    },
+    {
+      id: 'viral_serology_panel',
+      category: 'immunology',
+      tests: [
+        { test_name: 'EBV VCA IgM', abbreviation: 'EBV IgM', unit: '', default_display_order: 1, result_type: 'qualitative' },
+        { test_name: 'EBV VCA IgG', abbreviation: 'EBV IgG', unit: '', default_display_order: 2, result_type: 'qualitative' },
+        { test_name: 'CMV IgM', abbreviation: 'CMV IgM', unit: '', default_display_order: 3, result_type: 'qualitative' },
+        { test_name: 'CMV IgG', abbreviation: 'CMV IgG', unit: '', default_display_order: 4, result_type: 'qualitative' },
+        { test_name: 'HSV-1 IgM', unit: '', default_display_order: 5, result_type: 'qualitative' },
+        { test_name: 'HSV-1 IgG', unit: '', default_display_order: 6, result_type: 'qualitative' },
+        { test_name: 'HSV-2 IgM', unit: '', default_display_order: 7, result_type: 'qualitative' },
+        { test_name: 'HSV-2 IgG', unit: '', default_display_order: 8, result_type: 'qualitative' },
+      ]
+    },
   ];
 
   // Form state for entering test values and reference ranges
@@ -213,6 +251,8 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       category?: string;
       display_order?: number;
       notes?: string;
+      result_type?: 'quantitative' | 'qualitative';
+      qualitative_value?: string;
     }>;
   }>({
     components: []
@@ -255,8 +295,10 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
   }, []);
 
   const validateForm = useCallback(() => {
-    // Check if at least one component has a value filled in
     const filledComponents = formValues.components.filter(component => {
+      if (component.result_type === 'qualitative') {
+        return !!component.qualitative_value;
+      }
       return component.value !== '' && component.value !== null && component.value !== undefined &&
              typeof component.value === 'number' && !isNaN(component.value);
     });
@@ -302,7 +344,9 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
           ref_range_text: '',
           status: '',
           display_order: prev.components.length + 1,
-          notes: ''
+          notes: '',
+          result_type: 'quantitative' as 'quantitative' | 'qualitative',
+          qualitative_value: ''
         }
       ]
     }));
@@ -313,6 +357,21 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       components: prev.components.filter((_, i) => i !== index)
     }));
   }, []);
+
+  const getStatusInputColor = (status: string | undefined): string => {
+    if (!status) return '#868e96';
+    switch (status) {
+      case 'high':
+      case 'critical':
+        return '#fa5252';
+      case 'low':
+        return '#fd7e14';
+      case 'normal':
+        return '#51cf66';
+      default:
+        return '#868e96';
+    }
+  };
 
   const filteredTemplates = testTemplates.filter(template => {
     const matchesSearch = searchQuery === '' ||
@@ -341,9 +400,11 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       ref_range_max: '' as number | '',
       ref_range_text: '',
       status: '',
-      category: template.category, // Set category from template
+      category: template.category,
       display_order: test.default_display_order,
-      notes: test.notes || ''
+      notes: test.notes || '',
+      result_type: test.result_type || 'quantitative',
+      qualitative_value: ''
     }));
 
     setFormValues({ components });
@@ -384,10 +445,13 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
 
       // Filter to only include components with values (allow partial template entry)
       const filledComponents = components.filter(component => {
+        if (component.result_type === 'qualitative') {
+          return !!component.qualitative_value && component.test_name.trim() !== '';
+        }
+
         const hasValue = component.value !== '' && component.value !== null && component.value !== undefined &&
                         typeof component.value === 'number' && !isNaN(component.value);
 
-        // For custom entry, also require test_name and unit
         if (selectedTemplate?.id === 'custom_entry') {
           const hasRequiredFields = component.test_name.trim() !== '' && component.unit.trim() !== '';
           return hasValue && hasRequiredFields;
@@ -419,15 +483,17 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         test_name: sanitizeInput(component.test_name) || '',
         abbreviation: sanitizeInput(component.abbreviation),
         test_code: sanitizeInput(component.test_code),
-        value: component.value as number,
-        unit: sanitizeInput(component.unit) || '',
+        value: component.result_type === 'qualitative' ? null : component.value as number,
+        unit: component.result_type === 'qualitative' ? null : (sanitizeInput(component.unit) || ''),
         ref_range_min: component.ref_range_min === '' ? null : component.ref_range_min as number,
         ref_range_max: component.ref_range_max === '' ? null : component.ref_range_max as number,
         ref_range_text: sanitizeInput(component.ref_range_text),
         status: (component.status as ComponentStatus | null) || null,
         category: (component.category as ComponentCategory | null) || null,
         display_order: component.display_order || null,
-        notes: sanitizeInput(component.notes)
+        notes: sanitizeInput(component.notes),
+        result_type: component.result_type || 'quantitative',
+        qualitative_value: component.qualitative_value || null
       }));
 
       // Call the API to create components in bulk
@@ -472,7 +538,10 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       lipid_panel: 'Lipid Panel',
       thyroid_function: 'Thyroid Function Tests',
       liver_function: 'Liver Function Panel',
-      kidney_function: 'Kidney Function Panel'
+      kidney_function: 'Kidney Function Panel',
+      infectious_disease_panel: 'Infectious Disease Panel',
+      autoimmune_panel: 'Autoimmune Panel',
+      viral_serology_panel: 'Viral Serology Panel'
     };
     return templateNames[templateId] || templateId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
@@ -562,7 +631,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                   <Stack gap={2}>
                     {template.tests.slice(0, 3).map((test, index) => (
                       <Text key={index} size="xs" c="dimmed">
-                        • {test.test_name} ({test.unit})
+                        • {test.test_name} {test.result_type === 'qualitative' ? '(Qualitative)' : test.unit ? `(${test.unit})` : ''}
                       </Text>
                     ))}
                     {template.tests.length > 3 && (
@@ -718,11 +787,13 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                                 const libraryTest = getTestByName(cleanTestName);
 
                                 if (libraryTest) {
-                                  // Always overwrite when selecting from dropdown (not just when empty)
                                   updateComponent(index, 'unit', libraryTest.default_unit);
                                   updateComponent(index, 'category', libraryTest.category);
                                   if (libraryTest.abbreviation) {
                                     updateComponent(index, 'abbreviation', libraryTest.abbreviation);
+                                  }
+                                  if (libraryTest.result_type) {
+                                    updateComponent(index, 'result_type', libraryTest.result_type);
                                   }
                                 }
                               }}
@@ -779,33 +850,56 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                           )}
                         </Box>
                         <Box style={{ width: '100px', minWidth: '100px' }}>
-                          <NumberInput
-                            placeholder="Value"
-                            required
-                            size="xs"
-                            value={component.value}
-                            onChange={(value) => updateComponent(index, 'value', value)}
-                            hideControls
-                          />
+                          {component.result_type === 'qualitative' ? (
+                            <Select
+                              placeholder="Result"
+                              size="xs"
+                              data={QUALITATIVE_SELECT_OPTIONS}
+                              value={component.qualitative_value || null}
+                              onChange={(value) => {
+                                updateComponent(index, 'qualitative_value', value || '');
+                                // Auto-calculate status
+                                if (value === 'positive' || value === 'detected') {
+                                  updateComponent(index, 'status', 'abnormal');
+                                } else if (value === 'negative' || value === 'undetected') {
+                                  updateComponent(index, 'status', 'normal');
+                                }
+                              }}
+                              comboboxProps={{ zIndex: 3003 }}
+                            />
+                          ) : (
+                            <NumberInput
+                              placeholder="Value"
+                              required
+                              size="xs"
+                              value={component.value}
+                              onChange={(value) => updateComponent(index, 'value', value)}
+                              hideControls
+                            />
+                          )}
                         </Box>
-                        <Box style={{ width: '100px', minWidth: '100px' }}>
-                          <NumberInput
-                            placeholder="Min"
-                            size="xs"
-                            value={component.ref_range_min}
-                            onChange={(value) => updateComponent(index, 'ref_range_min', value)}
-                            hideControls
-                          />
-                        </Box>
-                        <Box style={{ width: '100px', minWidth: '100px' }}>
-                          <NumberInput
-                            placeholder="Max"
-                            size="xs"
-                            value={component.ref_range_max}
-                            onChange={(value) => updateComponent(index, 'ref_range_max', value)}
-                            hideControls
-                          />
-                        </Box>
+                        {component.result_type !== 'qualitative' && (
+                          <>
+                            <Box style={{ width: '100px', minWidth: '100px' }}>
+                              <NumberInput
+                                placeholder="Min"
+                                size="xs"
+                                value={component.ref_range_min}
+                                onChange={(value) => updateComponent(index, 'ref_range_min', value)}
+                                hideControls
+                              />
+                            </Box>
+                            <Box style={{ width: '100px', minWidth: '100px' }}>
+                              <NumberInput
+                                placeholder="Max"
+                                size="xs"
+                                value={component.ref_range_max}
+                                onChange={(value) => updateComponent(index, 'ref_range_max', value)}
+                                hideControls
+                              />
+                            </Box>
+                          </>
+                        )}
                         <Box style={{ width: '120px', minWidth: '120px' }}>
                           <TextInput
                             placeholder="Auto-calculated"
@@ -819,13 +913,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                             styles={{
                               input: {
                                 backgroundColor: '#f8f9fa',
-                                color: component.status === 'high' || component.status === 'critical'
-                                  ? '#fa5252'
-                                  : component.status === 'low'
-                                  ? '#fd7e14'
-                                  : component.status === 'normal'
-                                  ? '#51cf66'
-                                  : '#868e96',
+                                color: getStatusInputColor(component.status),
                                 fontWeight: 500,
                                 cursor: 'default'
                               }
@@ -902,8 +990,10 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                 >
                   {(() => {
                     const filledCount = formValues.components.filter(c =>
-                      c.value !== '' && c.value !== null && c.value !== undefined &&
-                      typeof c.value === 'number' && !isNaN(c.value)
+                      c.result_type === 'qualitative'
+                        ? !!c.qualitative_value
+                        : (c.value !== '' && c.value !== null && c.value !== undefined &&
+                           typeof c.value === 'number' && !isNaN(c.value))
                     ).length;
                     const totalCount = formValues.components.length;
 

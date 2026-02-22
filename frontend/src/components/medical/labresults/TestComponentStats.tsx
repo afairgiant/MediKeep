@@ -3,7 +3,7 @@
  * Provides summary statistics, status distribution, and trend analysis
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   Card,
   Stack,
@@ -68,7 +68,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
   loading = false,
   onError
 }) => {
-  const handleError = (error: Error, context: string) => {
+  const handleError = useCallback((error: Error, context: string) => {
     logger.error('test_component_stats_error', {
       message: `Error in TestComponentStats: ${context}`,
       error: error.message,
@@ -78,7 +78,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
     if (onError) {
       onError(error);
     }
-  };
+  }, [onError]);
 
   const stats = useMemo<StatsData>(() => {
     try {
@@ -101,12 +101,11 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         byCategory[category] = (byCategory[category] || 0) + 1;
 
         // Count components with reference ranges
-        if (component.ref_range_min !== null || component.ref_range_max !== null || component.ref_range_text) {
+        if (component.ref_range_min != null || component.ref_range_max != null || component.ref_range_text) {
           withRanges++;
 
           // Check if out of range
-          if (component.ref_range_min !== null && component.ref_range_min !== undefined &&
-              component.ref_range_max !== null && component.ref_range_max !== undefined) {
+          if (component.ref_range_min != null && component.ref_range_max != null && component.value != null) {
             if (component.value < component.ref_range_min || component.value > component.ref_range_max) {
               outOfRange++;
             }
@@ -209,10 +208,13 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
   };
 
   const overallHealthScore = useMemo(() => {
-    if (stats.total === 0) return 0;
-    const healthyComponents = stats.normalCount;
-    return Math.round((healthyComponents / stats.total) * 100);
-  }, [stats]);
+    // Only count quantitative components for the health score
+    const quantitativeComponents = components.filter(c => c.result_type !== 'qualitative');
+    const quantTotal = quantitativeComponents.length;
+    if (quantTotal === 0) return 0;
+    const quantNormal = quantitativeComponents.filter(c => c.status?.toLowerCase() === 'normal').length;
+    return Math.round((quantNormal / quantTotal) * 100);
+  }, [components]);
 
   const getHealthScoreColor = (score: number): string => {
     if (score >= 80) return 'green';
@@ -337,6 +339,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
 
             <Text size="sm" c="dimmed" ta="center">
               Based on {stats.normalCount} normal results out of {stats.total} total tests
+              {components.some(c => c.result_type === 'qualitative') && ' (quantitative only)'}
             </Text>
 
             {stats.criticalCount > 0 && (

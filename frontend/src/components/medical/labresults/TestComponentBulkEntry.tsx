@@ -31,7 +31,6 @@ import { Dropzone } from '@mantine/dropzone';
 import { useDebouncedValue } from '@mantine/hooks';
 import {
   IconUpload,
-  IconEdit,
   IconTrash,
   IconCheck,
   IconX,
@@ -48,7 +47,7 @@ import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import { apiService } from '../../../services/api';
 import { searchTests } from '../../../constants/testLibrary';
-import { ComponentCategory, ComponentStatus } from '../../../constants/labCategories';
+import { ComponentCategory, ComponentStatus, getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 
 /**
@@ -124,6 +123,25 @@ export const REGEX_PATTERNS = {
   )
 };
 
+// Pattern for qualitative results: "Test Name: Positive", "HIV 1/2: Negative", "ANA: Detected"
+export const QUALITATIVE_PATTERN = /^(.+?)[:]\s*(positive|negative|detected|undetected|reactive|non-reactive|not detected)\s*$/i;
+
+/** Normalize qualitative value strings to standard values. */
+function normalizeQualitativeValue(raw: string): string {
+  const lower = raw.toLowerCase().trim();
+  switch (lower) {
+    case 'reactive':
+      return 'positive';
+    case 'non-reactive':
+    case 'nonreactive':
+      return 'negative';
+    case 'not detected':
+      return 'undetected';
+    default:
+      return lower;
+  }
+}
+
 interface ParsedTestComponent {
   test_name: string;
   abbreviation?: string;
@@ -136,6 +154,8 @@ interface ParsedTestComponent {
   status?: string;
   category?: string;
   loinc_code?: string;
+  result_type?: 'quantitative' | 'qualitative';
+  qualitative_value?: string;
   original_line: string;
   confidence: number; // 0-1 score for parsing confidence
   issues: string[];
@@ -236,21 +256,35 @@ const TableRow = React.memo<{
             </Stack>
           </Table.Td>
           <Table.Td style={{ width: '100px' }}>
-            <NumberInput
-              value={component.value || ''}
-              onChange={(value) => onEdit(index, 'value', value)}
-              size="xs"
-              styles={{ input: { width: 80 } }}
-            />
+            {component.result_type === 'qualitative' ? (
+              <Badge
+                size="sm"
+                variant="filled"
+                color={getQualitativeColor(component.qualitative_value || '')}
+              >
+                {getQualitativeDisplayName(component.qualitative_value || '')}
+              </Badge>
+            ) : (
+              <NumberInput
+                value={component.value || ''}
+                onChange={(value) => onEdit(index, 'value', value)}
+                size="xs"
+                styles={{ input: { width: 80 } }}
+              />
+            )}
           </Table.Td>
           <Table.Td style={{ width: '80px' }}>
-            <TextInput
-              value={localUnit}
-              onChange={handleUnitChange}
-              onBlur={handleUnitBlur}
-              size="xs"
-              styles={{ input: { width: 60 } }}
-            />
+            {component.result_type === 'qualitative' ? (
+              <Text size="xs" c="dimmed">-</Text>
+            ) : (
+              <TextInput
+                value={localUnit}
+                onChange={handleUnitChange}
+                onBlur={handleUnitBlur}
+                size="xs"
+                styles={{ input: { width: 60 } }}
+              />
+            )}
           </Table.Td>
           <Table.Td style={{ width: '140px' }}>
             <Stack gap={2}>
@@ -460,7 +494,36 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       let confidence = 0;
       const issues: string[] = [];
 
-      // Try patterns in order of specificity
+      // Try qualitative pattern first (before numeric patterns)
+      const qualMatch = trimmedLine.match(QUALITATIVE_PATTERN);
+      if (qualMatch) {
+        const testName = qualMatch[1].trim().replace(/[,;:]+$/, '');
+        const rawValue = qualMatch[2];
+        const normalizedValue = normalizeQualitativeValue(rawValue);
+
+        if (testName) {
+          parsed = {
+            test_name: testName,
+            value: null,
+            unit: '',
+            original_line: trimmedLine,
+            confidence: 0.8,
+            issues: [],
+            result_type: 'qualitative',
+            qualitative_value: normalizedValue
+          };
+
+          // Auto-calculate status
+          if (normalizedValue === 'positive' || normalizedValue === 'detected') {
+            parsed.status = 'abnormal';
+          } else {
+            parsed.status = 'normal';
+          }
+        }
+      }
+
+      // Try numeric patterns in order of specificity (only if not already parsed as qualitative)
+      if (!parsed)
       for (const [patternName, pattern] of Object.entries(patterns)) {
         const match = trimmedLine.match(pattern);
         if (match) {
@@ -664,6 +727,11 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           component.category = standardizedTest.category;
         }
 
+        // Set result_type from standardized test if not already set
+        if (standardizedTest.result_type && !component.result_type) {
+          component.result_type = standardizedTest.result_type as 'quantitative' | 'qualitative';
+        }
+
         // Store LOINC code for reference
         if (standardizedTest.test_code) {
           component.loinc_code = standardizedTest.test_code;
@@ -791,22 +859,24 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       }
 
       const componentsToCreate: LabTestComponentCreate[] = parsedComponents
-        .filter(comp => comp.value !== null && comp.test_name.trim())
+        .filter(comp => (comp.result_type === 'qualitative' ? !!comp.qualitative_value : comp.value !== null) && comp.test_name.trim())
         .map((comp, index) => ({
           lab_result_id: labResultId,
           test_name: comp.test_name,
           abbreviation: comp.abbreviation || null,
           canonical_test_name: comp.canonical_test_name || null,
           test_code: null,
-          value: comp.value as number,
-          unit: (comp.unit || '').trim() || 'ratio',
+          value: comp.result_type === 'qualitative' ? null : comp.value as number,
+          unit: comp.result_type === 'qualitative' ? null : ((comp.unit || '').trim() || 'ratio'),
           ref_range_min: comp.ref_range_min,
           ref_range_max: comp.ref_range_max,
           ref_range_text: comp.ref_range_text || null,
           status: (comp.status as ComponentStatus | null) || null,
           category: (comp.category as ComponentCategory | null) || null,
           display_order: index + 1,
-          notes: comp.issues.length > 0 ? `Parsing notes: ${comp.issues.join(', ')}` : null
+          notes: comp.issues.length > 0 ? `Parsing notes: ${comp.issues.join(', ')}` : null,
+          result_type: comp.result_type || 'quantitative',
+          qualitative_value: comp.qualitative_value || null
         }));
 
       // Call the API to create components in bulk
@@ -946,7 +1016,9 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   }, [extractedText, parseText, enrichWithStandardizedTests]);
 
   const validComponents = useMemo(() => {
-    return parsedComponents.filter(comp => comp.value !== null && comp.test_name.trim());
+    return parsedComponents.filter(comp =>
+      (comp.result_type === 'qualitative' ? !!comp.qualitative_value : comp.value !== null) && comp.test_name.trim()
+    );
   }, [parsedComponents]);
 
   const averageConfidence = useMemo(() => {
@@ -976,7 +1048,13 @@ Platelet Count     275      K/uL     150-450     Normal`,
     format3: `Glucose,125,mg/dL,70-100,Normal
 BUN,18,mg/dL,7-20,Normal
 Creatinine,1.0,mg/dL,0.6-1.2,Normal
-Sodium,140,mEq/L,136-145,Normal`
+Sodium,140,mEq/L,136-145,Normal`,
+
+    format4: `HIV 1/2: Negative
+Hepatitis B Surface Antibody: Positive
+ANA: Detected
+VDRL: Non-Reactive
+SARS-CoV-2: Not Detected`
   };
 
   return (
@@ -1263,7 +1341,8 @@ Sodium,140,mEq/L,136-145,Normal`
                           <Text size="sm" fw={500}>
                             {key === 'format1' ? 'Colon-separated with ranges' :
                              key === 'format2' ? 'Tabular format' :
-                             'CSV format'}
+                             key === 'format3' ? 'CSV format' :
+                             'Qualitative results (positive/negative)'}
                           </Text>
                           <Button
                             size="xs"
