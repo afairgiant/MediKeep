@@ -24,6 +24,9 @@ export type TestCategory =
   | 'stomatology'
   | 'other';
 
+export type ResultType = 'quantitative' | 'qualitative';
+export type QualitativeValue = 'positive' | 'negative' | 'detected' | 'undetected';
+
 export interface TestLibraryItem {
   test_name: string;
   abbreviation?: string;
@@ -33,6 +36,7 @@ export interface TestLibraryItem {
   common_names?: string[];
   is_common: boolean;
   display_order?: number;
+  result_type?: ResultType;
 }
 
 export interface TestLibraryData {

@@ -19,6 +19,14 @@ LAB_TEST_COMPONENT_STATUSES = [
     "normal", "abnormal", "critical", "high", "low", "borderline"
 ]
 
+# Lab Test Component result types (quantitative = numeric, qualitative = positive/negative)
+LAB_TEST_COMPONENT_RESULT_TYPES = ["quantitative", "qualitative"]
+
+# Valid qualitative result values
+LAB_TEST_COMPONENT_QUALITATIVE_VALUES = [
+    "positive", "negative", "detected", "undetected"
+]
+
 # Lab Test Component valid categories
 LAB_TEST_COMPONENT_CATEGORIES = [
     "chemistry", "hematology", "hepatology", "immunology", "microbiology",

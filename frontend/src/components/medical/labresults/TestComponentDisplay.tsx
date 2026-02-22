@@ -24,7 +24,7 @@ import {
 import { IconInfoCircle, IconEdit, IconTrash, IconChartLine } from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
-import { getCategoryDisplayName, getCategoryColor } from '../../../constants/labCategories';
+import { getCategoryDisplayName, getCategoryColor, getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 
 interface TestComponentDisplayProps {
@@ -62,7 +62,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     }
   };
 
-  const getStatusColor = (status: string | null | undefined, value: number, refMin?: number | null, refMax?: number | null): string => {
+  const getStatusColor = (status: string | null | undefined, value: number | null | undefined, refMin?: number | null, refMax?: number | null): string => {
     if (status) {
       switch (status.toLowerCase()) {
         case 'normal': return 'green';
@@ -76,13 +76,13 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     }
 
     // Auto-calculate status if not provided but ranges are available
-    if (refMin !== null && refMin !== undefined && refMax !== null && refMax !== undefined) {
-      if (value < refMin) return 'orange';
-      if (value > refMax) return 'orange';
+    if (value == null) return 'gray';
+    if (refMin != null && refMax != null) {
+      if (value < refMin || value > refMax) return 'orange';
       return 'green';
-    } else if (refMax !== null && refMax !== undefined) {
+    } else if (refMax != null) {
       return value > refMax ? 'orange' : 'green';
-    } else if (refMin !== null && refMin !== undefined) {
+    } else if (refMin != null) {
       return value < refMin ? 'orange' : 'green';
     }
 
@@ -92,23 +92,10 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
   const formatReferenceRange = (component: LabTestComponent): string => {
     const { ref_range_min, ref_range_max, ref_range_text } = component;
 
-    if (ref_range_text) {
-      return ref_range_text;
-    }
-
-    if (ref_range_min !== null && ref_range_min !== undefined &&
-        ref_range_max !== null && ref_range_max !== undefined) {
-      return `${ref_range_min} - ${ref_range_max}`;
-    }
-
-    if (ref_range_min !== null && ref_range_min !== undefined) {
-      return `≥ ${ref_range_min}`;
-    }
-
-    if (ref_range_max !== null && ref_range_max !== undefined) {
-      return `≤ ${ref_range_max}`;
-    }
-
+    if (ref_range_text) return ref_range_text;
+    if (ref_range_min != null && ref_range_max != null) return `${ref_range_min} - ${ref_range_max}`;
+    if (ref_range_min != null) return `≥ ${ref_range_min}`;
+    if (ref_range_max != null) return `≤ ${ref_range_max}`;
     return 'Not specified';
   };
 
@@ -227,14 +214,24 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
           {/* Value and Status */}
           <Group justify="space-between" align="center">
             <div>
-              <Group gap="xs" align="baseline">
-                <Text fw={700} size="lg" c={statusColor}>
-                  {component.value}
-                </Text>
-                <Text size="sm" c="dimmed">
-                  {component.unit}
-                </Text>
-              </Group>
+              {component.result_type === 'qualitative' && component.qualitative_value ? (
+                <Badge
+                  size="lg"
+                  variant="filled"
+                  color={getQualitativeColor(component.qualitative_value)}
+                >
+                  {getQualitativeDisplayName(component.qualitative_value)}
+                </Badge>
+              ) : (
+                <Group gap="xs" align="baseline">
+                  <Text fw={700} size="lg" c={statusColor}>
+                    {component.value}
+                  </Text>
+                  <Text size="sm" c="dimmed">
+                    {component.unit}
+                  </Text>
+                </Group>
+              )}
             </div>
 
             {component.status && (
@@ -243,13 +240,15 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
           </Group>
 
           {/* Reference Range */}
-          <Group gap="xs" align="center">
-            <Text size="xs" c="dimmed" fw={500}>Reference:</Text>
-            <Text size="xs">{referenceRange}</Text>
-            {component.unit && referenceRange !== 'Not specified' && (
-              <Text size="xs" c="dimmed">{component.unit}</Text>
-            )}
-          </Group>
+          {component.result_type !== 'qualitative' && (
+            <Group gap="xs" align="center">
+              <Text size="xs" c="dimmed" fw={500}>Reference:</Text>
+              <Text size="xs">{referenceRange}</Text>
+              {component.unit && referenceRange !== 'Not specified' && (
+                <Text size="xs" c="dimmed">{component.unit}</Text>
+              )}
+            </Group>
+          )}
 
           {/* Notes */}
           {component.notes && (
@@ -320,12 +319,11 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     const sortedGroupedComponents = sortedCategories.reduce((acc, category) => {
       acc[category] = [...groupedComponents[category]].sort((a, b) => {
         // Sort by display_order first, then by test_name
-        if (a.display_order !== null && a.display_order !== undefined &&
-            b.display_order !== null && b.display_order !== undefined) {
+        if (a.display_order != null && b.display_order != null) {
           return a.display_order - b.display_order;
         }
-        if (a.display_order !== null) return -1;
-        if (b.display_order !== null) return 1;
+        if (a.display_order != null) return -1;
+        if (b.display_order != null) return 1;
         return a.test_name.localeCompare(b.test_name);
       });
       return acc;

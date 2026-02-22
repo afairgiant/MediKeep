@@ -2,14 +2,17 @@ import { apiService } from './index';
 import logger from '../logger';
 
 // Types for Lab Test Components
+export type ResultType = 'quantitative' | 'qualitative';
+export type QualitativeValue = 'positive' | 'negative' | 'detected' | 'undetected';
+
 export interface LabTestComponent {
   id?: number;
   lab_result_id: number;
   test_name: string;
   abbreviation?: string | null;
   test_code?: string | null;
-  value: number;
-  unit: string;
+  value?: number | null;
+  unit?: string | null;
   ref_range_min?: number | null;
   ref_range_max?: number | null;
   ref_range_text?: string | null;
@@ -21,6 +24,8 @@ export interface LabTestComponent {
   notes?: string | null;
   created_at?: string;
   updated_at?: string;
+  result_type?: ResultType | null;
+  qualitative_value?: QualitativeValue | null;
 }
 
 export interface LabTestComponentCreate extends Omit<LabTestComponent, 'id' | 'created_at' | 'updated_at' | 'lab_result_id'> {
@@ -57,8 +62,8 @@ export interface LabTestComponentStatistics {
 // Trend tracking types
 export interface TrendDataPoint {
   id: number;
-  value: number;
-  unit: string;
+  value?: number | null;
+  unit?: string | null;
   status?: string | null;
   ref_range_min?: number | null;
   ref_range_max?: number | null;
@@ -70,6 +75,8 @@ export interface TrendDataPoint {
     test_name: string;
     completed_date?: string | null;
   };
+  result_type?: ResultType | null;
+  qualitative_value?: QualitativeValue | null;
 }
 
 export interface TrendStatistics {
@@ -79,20 +86,23 @@ export interface TrendStatistics {
   min?: number | null;
   max?: number | null;
   std_dev?: number | null;
-  trend_direction: 'increasing' | 'decreasing' | 'stable';
+  trend_direction: 'increasing' | 'decreasing' | 'stable' | 'worsening' | 'improving';
   time_in_range_percent?: number | null;
   normal_count: number;
   abnormal_count: number;
+  result_type?: ResultType | null;
+  qualitative_summary?: Record<string, number> | null;
 }
 
 export interface TrendResponse {
   test_name: string;
-  unit: string;
+  unit?: string | null;
   category?: string | null;
   data_points: TrendDataPoint[];
   statistics: TrendStatistics;
   is_aggregated: boolean;
   aggregation_period?: string | null;
+  result_type?: ResultType | null;
 }
 
 export interface TestTemplate {
@@ -107,6 +117,7 @@ export interface TestTemplateItem {
   unit: string;
   category: string;
   display_order?: number;
+  result_type?: ResultType;
   // No hardcoded reference ranges - user will enter these based on their lab report
 }
 
@@ -117,6 +128,7 @@ export interface TestTemplateEntry extends TestTemplateItem {
   ref_range_max?: number | null;
   ref_range_text?: string | null;
   notes?: string | null;
+  qualitative_value?: QualitativeValue | null;
 }
 
 class LabTestComponentApi {

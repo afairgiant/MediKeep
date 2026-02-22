@@ -1,13 +1,15 @@
 import math
 from datetime import date, datetime
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, field_validator, model_validator
 
 from app.core.constants import (
     LAB_TEST_COMPONENT_LIMITS,
     LAB_TEST_COMPONENT_STATUSES,
-    LAB_TEST_COMPONENT_CATEGORIES
+    LAB_TEST_COMPONENT_CATEGORIES,
+    LAB_TEST_COMPONENT_RESULT_TYPES,
+    LAB_TEST_COMPONENT_QUALITATIVE_VALUES
 )
 
 
@@ -17,8 +19,8 @@ class LabTestComponentBase(BaseModel):
     test_name: str
     abbreviation: Optional[str] = None
     test_code: Optional[str] = None
-    value: float
-    unit: str
+    value: Optional[float] = None
+    unit: Optional[str] = None
     ref_range_min: Optional[float] = None
     ref_range_max: Optional[float] = None
     ref_range_text: Optional[str] = None
@@ -28,6 +30,8 @@ class LabTestComponentBase(BaseModel):
     canonical_test_name: Optional[str] = None  # Links to standardized test name for trend matching
     notes: Optional[str] = None
     lab_result_id: int
+    result_type: Optional[str] = "quantitative"
+    qualitative_value: Optional[str] = None
 
     @field_validator("test_name")
     @classmethod
@@ -58,28 +62,23 @@ class LabTestComponentBase(BaseModel):
     @field_validator("value")
     @classmethod
     def validate_value(cls, v):
-        """Validate test value"""
+        """Validate test value - allow None for qualitative tests"""
         if v is None:
-            raise ValueError("Test value is required")
-        if not isinstance(v, (int, float)):
-            raise ValueError("Test value must be a number")
-
-        # Check for invalid numbers (NaN, Infinity)
+            return None
         if math.isnan(v) or math.isinf(v):
             raise ValueError("Test value must be a finite number")
-
-        # Reasonable boundary check (prevents display/calculation issues)
         if abs(v) > 1e15:
             raise ValueError("Test value is out of reasonable range")
-
         return float(v)
 
     @field_validator("unit")
     @classmethod
     def validate_unit(cls, v):
-        """Validate test unit"""
-        if not v or len(v.strip()) < 1:
-            raise ValueError("Unit is required")
+        """Validate test unit - allow None for qualitative tests"""
+        if v is None:
+            return None
+        if len(v.strip()) < 1:
+            return None
         if len(v) > LAB_TEST_COMPONENT_LIMITS["MAX_UNIT_LENGTH"]:
             raise ValueError(f"Unit must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_UNIT_LENGTH']} characters")
         return v.strip()
@@ -89,14 +88,10 @@ class LabTestComponentBase(BaseModel):
     def validate_ref_range_min(cls, v):
         """Validate reference range minimum"""
         if v is not None:
-            if not isinstance(v, (int, float)):
-                raise ValueError("Reference range minimum must be a number")
-
             if math.isnan(v) or math.isinf(v):
                 raise ValueError("Reference range minimum must be a finite number")
             if abs(v) > 1e15:
                 raise ValueError("Reference range minimum is out of reasonable range")
-
         return float(v) if v is not None else None
 
     @field_validator("ref_range_max")
@@ -104,9 +99,6 @@ class LabTestComponentBase(BaseModel):
     def validate_ref_range_max(cls, v):
         """Validate reference range maximum"""
         if v is not None:
-            if not isinstance(v, (int, float)):
-                raise ValueError("Reference range maximum must be a number")
-
             if math.isnan(v) or math.isinf(v):
                 raise ValueError("Reference range maximum must be a finite number")
             if abs(v) > 1e15:
@@ -174,6 +166,26 @@ class LabTestComponentBase(BaseModel):
             raise ValueError("Lab result ID must be a positive integer")
         return v
 
+    @field_validator("result_type")
+    @classmethod
+    def validate_result_type(cls, v):
+        """Validate result type"""
+        if v is None:
+            return "quantitative"
+        if v.lower() not in LAB_TEST_COMPONENT_RESULT_TYPES:
+            raise ValueError(f"Result type must be one of: {', '.join(LAB_TEST_COMPONENT_RESULT_TYPES)}")
+        return v.lower()
+
+    @field_validator("qualitative_value")
+    @classmethod
+    def validate_qualitative_value(cls, v):
+        """Validate qualitative value"""
+        if v is None:
+            return None
+        if v.lower() not in LAB_TEST_COMPONENT_QUALITATIVE_VALUES:
+            raise ValueError(f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}")
+        return v.lower()
+
     @model_validator(mode="after")
     def validate_ref_range(self):
         """Validate that ref_range_max is greater than ref_range_min"""
@@ -183,10 +195,44 @@ class LabTestComponentBase(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def validate_result_type_fields(self):
+        """Cross-field validation for quantitative vs qualitative tests"""
+        rt = self.result_type or "quantitative"
+
+        if rt == "quantitative":
+            if self.value is None:
+                raise ValueError("Value is required for quantitative tests")
+            if not self.unit:
+                raise ValueError("Unit is required for quantitative tests")
+        elif rt == "qualitative":
+            if not self.qualitative_value:
+                raise ValueError("Qualitative value is required for qualitative tests")
+            if self.value is not None:
+                raise ValueError("Numeric value must be empty for qualitative tests")
+            if self.ref_range_min is not None or self.ref_range_max is not None:
+                raise ValueError("Reference ranges are not applicable for qualitative tests")
+        return self
+
+    @model_validator(mode="after")
     def auto_calculate_status(self):
-        """Auto-calculate status based on value and reference ranges"""
+        """Auto-calculate status based on value and reference ranges or qualitative value"""
         if self.status is not None:
             return self
+
+        rt = self.result_type or "quantitative"
+
+        if rt == "qualitative" and self.qualitative_value:
+            # Qualitative: positive/detected -> abnormal, negative/undetected -> normal
+            if self.qualitative_value in ("positive", "detected"):
+                self.status = "abnormal"
+            elif self.qualitative_value in ("negative", "undetected"):
+                self.status = "normal"
+            return self
+
+        # Quantitative: existing numeric logic
+        if self.value is None:
+            return self
+
         if self.ref_range_min is not None and self.ref_range_max is not None:
             if self.value < self.ref_range_min:
                 self.status = "low"
@@ -205,16 +251,7 @@ class LabTestComponentBase(BaseModel):
 
 class LabTestComponentCreate(LabTestComponentBase):
     """Schema for creating a new lab test component"""
-
-    lab_result_id: int
-
-    @field_validator("lab_result_id")
-    @classmethod
-    def validate_lab_result_id(cls, v):
-        """Validate lab result ID"""
-        if v <= 0:
-            raise ValueError("Lab result ID must be a positive integer")
-        return v
+    pass
 
 
 class LabTestComponentUpdate(BaseModel):
@@ -233,6 +270,8 @@ class LabTestComponentUpdate(BaseModel):
     display_order: Optional[int] = None
     canonical_test_name: Optional[str] = None  # Links to standardized test name for trend matching
     notes: Optional[str] = None
+    result_type: Optional[str] = None
+    qualitative_value: Optional[str] = None
 
     @field_validator("test_name")
     @classmethod
@@ -249,8 +288,6 @@ class LabTestComponentUpdate(BaseModel):
     @classmethod
     def validate_value(cls, v):
         if v is not None:
-            if not isinstance(v, (int, float)):
-                raise ValueError("Test value must be a number")
             return float(v)
         return v
 
@@ -258,8 +295,8 @@ class LabTestComponentUpdate(BaseModel):
     @classmethod
     def validate_unit(cls, v):
         if v is not None:
-            if not v or len(v.strip()) < 1:
-                raise ValueError("Unit is required")
+            if len(v.strip()) < 1:
+                return None
             if len(v) > LAB_TEST_COMPONENT_LIMITS["MAX_UNIT_LENGTH"]:
                 raise ValueError(f"Unit must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_UNIT_LENGTH']} characters")
             return v.strip()
@@ -280,6 +317,24 @@ class LabTestComponentUpdate(BaseModel):
         if v is not None:
             if v.lower() not in LAB_TEST_COMPONENT_CATEGORIES:
                 raise ValueError(f"Category must be one of: {', '.join(LAB_TEST_COMPONENT_CATEGORIES)}")
+            return v.lower()
+        return v
+
+    @field_validator("result_type")
+    @classmethod
+    def validate_result_type(cls, v):
+        if v is not None:
+            if v.lower() not in LAB_TEST_COMPONENT_RESULT_TYPES:
+                raise ValueError(f"Result type must be one of: {', '.join(LAB_TEST_COMPONENT_RESULT_TYPES)}")
+            return v.lower()
+        return v
+
+    @field_validator("qualitative_value")
+    @classmethod
+    def validate_qualitative_value(cls, v):
+        if v is not None:
+            if v.lower() not in LAB_TEST_COMPONENT_QUALITATIVE_VALUES:
+                raise ValueError(f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}")
             return v.lower()
         return v
 
@@ -364,8 +419,8 @@ class LabTestComponentTrendDataPoint(BaseModel):
     """Single data point in trend data"""
 
     id: int
-    value: float
-    unit: str
+    value: Optional[float] = None
+    unit: Optional[str] = None
     status: Optional[str] = None
     ref_range_min: Optional[float] = None
     ref_range_max: Optional[float] = None
@@ -373,6 +428,8 @@ class LabTestComponentTrendDataPoint(BaseModel):
     recorded_date: Optional[date] = None
     created_at: datetime
     lab_result: LabResultBasicForTrend
+    result_type: Optional[str] = "quantitative"
+    qualitative_value: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -386,19 +443,22 @@ class LabTestComponentTrendStatistics(BaseModel):
     min: Optional[float] = None
     max: Optional[float] = None
     std_dev: Optional[float] = None
-    trend_direction: str  # "increasing", "decreasing", "stable"
+    trend_direction: str  # "increasing", "decreasing", "stable", "worsening", "improving"
     time_in_range_percent: Optional[float] = None
     normal_count: int
     abnormal_count: int
+    result_type: Optional[str] = "quantitative"
+    qualitative_summary: Optional[Dict[str, int]] = None  # e.g., {"positive": 3, "negative": 5}
 
 
 class LabTestComponentTrendResponse(BaseModel):
     """Response for trend data request"""
 
     test_name: str
-    unit: str
+    unit: Optional[str] = None
     category: Optional[str] = None
     data_points: List[LabTestComponentTrendDataPoint]
     statistics: LabTestComponentTrendStatistics
     is_aggregated: bool = False
     aggregation_period: Optional[str] = None  # "month", "week", etc.
+    result_type: Optional[str] = "quantitative"

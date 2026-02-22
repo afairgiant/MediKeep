@@ -290,6 +290,28 @@
       "label": "Notas Adicionais",
       "placeholder": "Qualquer informação adicional sobre o teste, instruções especiais ou observações...",
       "description": "Notas clínicas ou instruções especiais"
+    },
+    "qualitative": {
+      "resultType": "Tipo de resultado",
+      "quantitative": "Quantitativo",
+      "qualitativeLabel": "Qualitativo",
+      "values": {
+        "positive": "Positivo",
+        "negative": "Negativo",
+        "detected": "Detetado",
+        "undetected": "Não detetado"
+      },
+      "expectedResult": "Resultado esperado",
+      "selectResult": "Selecionar resultado",
+      "templates": {
+        "infectiousDisease": "Painel de doenças infecciosas",
+        "autoimmune": "Painel autoimune",
+        "viralSerology": "Painel de serologia viral"
+      },
+      "trends": {
+        "worsening": "A piorar",
+        "improving": "A melhorar"
+      }
     }
   },
   "immunizations": {
