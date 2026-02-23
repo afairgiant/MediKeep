@@ -50,13 +50,12 @@ export const medicationsPageConfig = {
       active: (a, b, sortOrder) => {
         const aIsActive = a.status === 'active';
         const bIsActive = b.status === 'active';
-        // Active medications first
+        // Active medications first (desc) or last (asc)
         if (aIsActive !== bIsActive) {
           return sortOrder === 'asc' ? (aIsActive ? 1 : -1) : (aIsActive ? -1 : 1);
         }
-        // Then by medication name
-        const nameDiff = a.medication_name.localeCompare(b.medication_name);
-        return sortOrder === 'asc' ? nameDiff : -nameDiff;
+        // Always sub-sort alphabetically A-Z within each status group
+        return a.medication_name.localeCompare(b.medication_name);
       },
     },
   },
