@@ -655,7 +655,7 @@ class RestoreService:
                 "no-new-privileges",  # Security: prevent privilege escalation
                 "--read-only",  # Security: read-only container
                 "--tmpfs",
-                "/tmp:noexec,nosuid,size=100m",  # Secure temp space
+                "/tmp:noexec,nosuid,size=100m",  # nosec B108
                 "-v",
                 f"{temp_dir}:/backup:ro",  # Read-only mount
                 "-e",

@@ -1,0 +1,10 @@
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "node_modules", "frontend", "dist", "build", "alembic"]
+skips = [
+    "B101",  # assert usage - acceptable in application code
+    "B110",  # try/except/pass - common Python pattern
+    "B112",  # try/except/continue - common Python pattern
+    "B404",  # subprocess import - flagging imports alone is not actionable
+]
+# Note: Scan targets (app/) must be passed via CLI, not config
+# Note: Blocking CI uses -ll -ii (MEDIUM+ severity/confidence); SARIF captures all remaining findings
