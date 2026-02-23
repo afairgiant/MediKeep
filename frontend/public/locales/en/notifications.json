@@ -274,6 +274,7 @@
       "accessDeniedRoles": "Access denied: One of these roles required: {{roles}}",
       "loginRequired": "Please log in to access this page",
       "userCreatedSuccess": "User account created successfully!",
+      "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!",
       "accountCreatedSuccess": "Account created successfully! Logging you in..."
     },
     "patient": {

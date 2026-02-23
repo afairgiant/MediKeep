@@ -307,6 +307,17 @@ class AdminApiService extends BaseApiService {
     });
   }
 
+  // Admin User Management endpoints
+  async searchAllPatients(query, limit = 200) {
+    const params = { limit };
+    if (query) params.q = query;
+    return this.get('/user-management/patients/search', params);
+  }
+
+  async createUserWithPatientLink(userData) {
+    return this.post('/user-management/users/create', userData);
+  }
+
   // Test Library Maintenance endpoints
   async getTestLibraryInfo() {
     return this.get('/maintenance/test-library/info');

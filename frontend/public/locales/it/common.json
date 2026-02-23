@@ -2484,5 +2484,50 @@
     "messages": {
       "loading": "Caricamento allergie..."
     }
+  },
+  "admin": {
+    "createUser": {
+      "username": "Nome utente",
+      "usernamePlaceholder": "Inserisci il nome utente",
+      "password": "Password",
+      "passwordPlaceholder": "Inserisci la password (min 6 caratteri, includi lettera e numero)",
+      "email": "Email",
+      "emailPlaceholder": "Inserisci l'indirizzo email",
+      "role": "Ruolo",
+      "roleUser": "Utente",
+      "roleAdmin": "Amministratore",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "Inserisci il nome",
+      "lastName": "Cognome",
+      "lastNamePlaceholder": "Inserisci il cognome",
+      "submitButton": "Crea account",
+      "noteLabel": "Nota:",
+      "noteText": "Per questo utente verrà creato automaticamente un record paziente con il ruolo predefinito \"utente\".",
+      "validation": {
+        "firstNameRequired": "Inserisci il nome",
+        "lastNameRequired": "Inserisci il cognome",
+        "usernameMinLength": "Il nome utente deve contenere almeno 3 caratteri",
+        "passwordMinLength": "La password deve contenere almeno 6 caratteri",
+        "passwordRequirements": "La password deve contenere almeno una lettera e un numero"
+      },
+      "passwordReqs": {
+        "minLength": "Almeno 6 caratteri",
+        "hasLetter": "Contiene almeno una lettera",
+        "hasNumber": "Contiene almeno un numero"
+      },
+      "linkPatient": {
+        "checkbox": "Collega a un record paziente esistente",
+        "hint": "Invece di creare un nuovo record paziente, collega il nuovo utente a un paziente esistente (ad es. un bambino che ora ha bisogno di un proprio accesso).",
+        "selectPlaceholder": "Seleziona un paziente...",
+        "loading": "Caricamento pazienti...",
+        "selfRecordBadge": "Record personale",
+        "patientId": "ID",
+        "dob": "Data di nascita",
+        "owner": "Proprietario",
+        "currentOwner": "Proprietario attuale",
+        "selfRecordWarningTitle": "Nota:",
+        "selfRecordWarning": "Questo è il record personale dell'attuale proprietario. Verrà creato un nuovo record personale per il proprietario originale con i suoi dati anagrafici copiati. Il proprietario originale riceverà accesso in modifica a questo paziente."
+      }
+    }
   }
 }
