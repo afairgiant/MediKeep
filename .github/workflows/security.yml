@@ -1,0 +1,97 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  bandit:
+    name: Bandit SAST
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install bandit
+        run: pip install "bandit[toml,sarif]"
+      - name: Run bandit (SARIF for Security tab)
+        run: bandit -c pyproject.toml -r app/ -f sarif -o bandit-results.sarif --exit-zero
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: bandit-results.sarif
+          category: bandit
+      - name: Run bandit (blocking - MEDIUM+ severity/confidence)
+        run: bandit -c pyproject.toml -r app/ -ll -ii -f txt
+        # -ll: MEDIUM+ severity, -ii: MEDIUM+ confidence
+        # Lower-severity findings are still captured in SARIF above
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-results.sarif
+          retention-days: 30
+
+  pip-audit:
+    name: pip-audit Dependency Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install pip-audit
+        run: pip install pip-audit
+      - name: Run pip-audit (JSON report)
+        run: pip-audit -r requirements.txt -f json -o pip-audit-report.json --progress-spinner off || true
+      - name: Run pip-audit (blocking)
+        run: >-
+          pip-audit -r requirements.txt --progress-spinner off
+          --ignore-vuln CVE-2025-53643
+          --ignore-vuln CVE-2025-69223
+          --ignore-vuln CVE-2025-69224
+          --ignore-vuln CVE-2025-69225
+          --ignore-vuln CVE-2025-69226
+          --ignore-vuln CVE-2025-69227
+          --ignore-vuln CVE-2025-69228
+          --ignore-vuln CVE-2025-69229
+          --ignore-vuln CVE-2025-69230
+          --ignore-vuln CVE-2026-26007
+          --ignore-vuln CVE-2024-23342
+          --ignore-vuln CVE-2025-54121
+          --ignore-vuln CVE-2025-62727
+          --ignore-vuln CVE-2026-25990
+          --ignore-vuln CVE-2024-47081
+          --ignore-vuln CVE-2026-21441
+          --ignore-vuln CVE-2025-64512
+          --ignore-vuln CVE-2025-70559
+        # Pre-existing CVEs in pinned dependencies. Remove ignores as packages are upgraded:
+        #   aiohttp 3.12.12 -> 3.12.14+ (9 CVEs)
+        #   cryptography 45.0.3 -> 46.0.5+ (1 CVE)
+        #   ecdsa 0.19.1 - no fix available (1 CVE)
+        #   starlette 0.46.2 -> 0.47.2+ (2 CVEs, tied to FastAPI version)
+        #   pillow 11.3.0 -> 12.1.1+ (1 CVE)
+        #   requests 2.32.3 -> 2.32.4+ (1 CVE)
+        #   urllib3 2.6.0 -> 2.6.3+ (1 CVE)
+        #   pdfminer-six 20221105 -> 20251107+ (2 CVEs)
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+          retention-days: 30
