@@ -57,7 +57,7 @@ jobs:
           npm test -- --coverage --watchAll=false --testTimeout=30000 --maxWorkers=2
 
       - name: Upload frontend coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./frontend/coverage/lcov.info
           flags: frontend
@@ -105,7 +105,7 @@ jobs:
           pytest tests/ -v --cov=app --cov-report=xml --cov-report=html || true
 
       - name: Upload backend coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./coverage.xml
           flags: backend
