@@ -2484,5 +2484,50 @@
     "messages": {
       "loading": "Loading allergies..."
     }
+  },
+  "admin": {
+    "createUser": {
+      "username": "Username",
+      "usernamePlaceholder": "Enter username",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password (min 6 chars, include letter & number)",
+      "email": "Email",
+      "emailPlaceholder": "Enter email address",
+      "role": "Role",
+      "roleUser": "User",
+      "roleAdmin": "Admin",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter first name",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter last name",
+      "submitButton": "Create Account",
+      "noteLabel": "Note:",
+      "noteText": "A patient record will be automatically created for this user with default role \"user\".",
+      "validation": {
+        "firstNameRequired": "Please enter the first name",
+        "lastNameRequired": "Please enter the last name",
+        "usernameMinLength": "Username must be at least 3 characters long",
+        "passwordMinLength": "Password must be at least 6 characters long",
+        "passwordRequirements": "Password must contain at least one letter and one number"
+      },
+      "passwordReqs": {
+        "minLength": "At least 6 characters",
+        "hasLetter": "Contains at least one letter",
+        "hasNumber": "Contains at least one number"
+      },
+      "linkPatient": {
+        "checkbox": "Link to existing patient record",
+        "hint": "Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).",
+        "selectPlaceholder": "Select a patient...",
+        "loading": "Loading patients...",
+        "selfRecordBadge": "Self-Record",
+        "patientId": "ID",
+        "dob": "DOB",
+        "owner": "Owner",
+        "currentOwner": "Current Owner",
+        "selfRecordWarningTitle": "Note:",
+        "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient."
+      }
+    }
   }
 }

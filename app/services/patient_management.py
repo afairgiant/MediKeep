@@ -7,10 +7,12 @@ from datetime import datetime, date
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from app.models.models import User, Patient
-from app.core.logging.config import get_logger
+from app.models.models import User, Patient, PatientShare
+from app.core.logging.config import get_logger, log_security_event
 from app.services.patient_access import PatientAccessService
 from app.core.utils.activity_tracker import activity_tracking_disabled_var
+
+security_logger = get_logger(__name__, "security")
 
 logger = get_logger(__name__, "app")
 
@@ -366,12 +368,161 @@ class PatientManagementService:
         
         try:
             return self.get_patient(user, user.active_patient_id)
-        except (ValueError, ValueError):
+        except ValueError:
             # Clear invalid active patient
             user.active_patient_id = None
             self.db.commit()
             return None
     
+    def transfer_patient_ownership(
+        self,
+        patient_id: int,
+        new_owner: User,
+        admin_user: User,
+    ) -> dict:
+        """
+        Transfer ownership of a patient record to a new user.
+
+        If the patient is the original owner's self-record, a replacement
+        self-record is created for the original owner with copied demographics.
+        The original owner receives edit access via PatientShare.
+
+        Args:
+            patient_id: ID of the patient to transfer
+            new_owner: The user receiving ownership
+            admin_user: The admin performing the transfer
+
+        Returns:
+            Dict with transfer details
+
+        Raises:
+            ValueError: If patient not found or transfer not possible
+        """
+        logger.info(
+            f"Admin {admin_user.id} transferring patient {patient_id} "
+            f"to user {new_owner.id}"
+        )
+
+        patient = self.db.query(Patient).filter(Patient.id == patient_id).first()
+        if not patient:
+            raise ValueError("Patient not found")
+
+        original_owner_id = patient.owner_user_id
+        original_owner = self.db.query(User).filter(
+            User.id == original_owner_id
+        ).first()
+
+        if not original_owner:
+            raise ValueError("Original patient owner not found")
+
+        was_self_record = patient.is_self_record or False
+        replacement_patient_id = None
+
+        try:
+            # If the patient is the original owner's self-record, create a replacement
+            if patient.is_self_record:
+                demographic_fields = (
+                    "first_name", "last_name", "birth_date", "gender",
+                    "blood_type", "height", "weight", "address", "physician_id",
+                )
+                replacement_data = {
+                    field: getattr(patient, field)
+                    for field in demographic_fields
+                    if getattr(patient, field) is not None
+                }
+
+                replacement = Patient(
+                    owner_user_id=original_owner.id,
+                    user_id=original_owner.id,
+                    is_self_record=True,
+                    **replacement_data,
+                )
+                self.db.add(replacement)
+                self.db.flush()
+                replacement_patient_id = replacement.id
+
+                logger.info(
+                    f"Created replacement self-record {replacement.id} "
+                    f"for original owner {original_owner.id}"
+                )
+
+            # Transfer ownership to new user
+            patient.owner_user_id = new_owner.id
+            patient.user_id = new_owner.id
+            patient.is_self_record = True
+
+            # Set as new owner's active patient
+            new_owner.active_patient_id = patient.id
+
+            # Update original owner's active_patient_id if it pointed to transferred patient
+            if original_owner.active_patient_id == patient_id:
+                if replacement_patient_id:
+                    original_owner.active_patient_id = replacement_patient_id
+                else:
+                    # Find another owned patient to set as active
+                    other_patient = self.db.query(Patient).filter(
+                        Patient.owner_user_id == original_owner.id,
+                        Patient.id != patient_id,
+                    ).first()
+                    original_owner.active_patient_id = (
+                        other_patient.id if other_patient else None
+                    )
+
+            # Create PatientShare giving original owner edit access
+            # Handle the unique constraint: check for existing share first
+            existing_share = self.db.query(PatientShare).filter(
+                PatientShare.patient_id == patient_id,
+                PatientShare.shared_with_user_id == original_owner.id,
+            ).first()
+
+            if existing_share:
+                # Reactivate and update existing share
+                existing_share.is_active = True
+                existing_share.permission_level = "edit"
+                existing_share.shared_by_user_id = new_owner.id
+            else:
+                new_share = PatientShare(
+                    patient_id=patient_id,
+                    shared_by_user_id=new_owner.id,
+                    shared_with_user_id=original_owner.id,
+                    permission_level="edit",
+                    is_active=True,
+                )
+                self.db.add(new_share)
+
+            self.db.commit()
+
+            log_security_event(
+                security_logger,
+                event="patient_ownership_transferred",
+                user_id=admin_user.id,
+                message=(
+                    f"Admin {admin_user.id} transferred patient {patient_id} "
+                    f"from user {original_owner.id} to user {new_owner.id}"
+                ),
+            )
+
+            return {
+                "patient_id": patient_id,
+                "new_owner_id": new_owner.id,
+                "original_owner_id": original_owner.id,
+                "was_self_record": was_self_record,
+                "replacement_patient_id": replacement_patient_id,
+                "original_owner_has_edit_access": True,
+            }
+
+        except IntegrityError as e:
+            self.db.rollback()
+            error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
+            logger.error(f"Database integrity error during transfer: {error_msg}")
+            raise ValueError("Failed to transfer patient due to database constraint")
+        except Exception as e:
+            self.db.rollback()
+            if isinstance(e, ValueError):
+                raise
+            logger.error(f"Unexpected error during patient transfer: {str(e)}")
+            raise ValueError(f"Failed to transfer patient: {str(e)}")
+
     def get_patient_statistics(self, user: User) -> dict:
         """
         Get statistics about the user's patients

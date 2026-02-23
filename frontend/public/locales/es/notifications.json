@@ -246,7 +246,8 @@
       "sessionExpired": "Sesión expirada por inactividad",
       "sessionExpiredLogin": "Sesión expirada. Por favor, inicie sesión de nuevo.",
       "ssoFailed": "Error al iniciar sesión SSO",
-      "userCreatedSuccess": "Cuenta de usuario creada con éxito"
+      "userCreatedSuccess": "Cuenta de usuario creada con éxito",
+      "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!"
     },
     "documents": {
       "deleteFailed": "Error al eliminar",
