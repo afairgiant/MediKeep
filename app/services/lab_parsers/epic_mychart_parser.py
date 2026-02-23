@@ -114,12 +114,13 @@ class EpicMyChartParser(BaseLabParser):
 
         test_date = self.extract_date_from_text(text)
         if test_date:
-            logger.info(
-                "epic_mychart_date_extracted",
-                extra={"date": test_date},
-            )
+            logger.info(f"Extracted test date: {test_date}")
+        else:
+            logger.warning("No test date found in PDF")
 
-        logger.info("epic_mychart_parser_start")
+        logger.info("=" * 80)
+        logger.info("EPIC MYCHART PARSER - PROCESSING LINES")
+        logger.info("=" * 80)
 
         for i, line in enumerate(lines):
             stripped = line.strip()
@@ -155,24 +156,15 @@ class EpicMyChartParser(BaseLabParser):
             )
             results.append(result)
 
-            logger.info(
-                "epic_mychart_test_parsed",
-                extra={
-                    "test_name": test_name,
-                    "value": value,
-                    "unit": unit,
-                    "ref_range": ref_range,
-                    "flag": flag,
-                },
-            )
+            flag_str = f" [{flag}]" if flag else ""
+            logger.info(f"PARSED: {test_name} = {value} {unit}{flag_str} (Ref: {ref_range})")
 
         # Deduplicate by test name (card layout can cause double parsing)
         results = self._deduplicate(results)
 
-        logger.info(
-            "epic_mychart_parser_complete",
-            extra={"total_parsed": len(results)},
-        )
+        logger.info("=" * 80)
+        logger.info(f"TOTAL PARSED: {len(results)} components")
+        logger.info("=" * 80)
 
         return results
 
@@ -370,7 +362,7 @@ class EpicMyChartParser(BaseLabParser):
         so we compute them from the value and reference range.
         """
         # Handle >=N ranges (e.g., ">=90")
-        gte_match = re.match(r">=?\s*(\d+\.?\d*)", ref_range)
+        gte_match = re.match(r">=\s*(\d+\.?\d*)", ref_range)
         if gte_match:
             threshold = float(gte_match.group(1))
             return "Low" if value < threshold else ""
