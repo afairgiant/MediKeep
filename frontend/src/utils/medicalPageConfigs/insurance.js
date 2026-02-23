@@ -2,6 +2,8 @@
  * Insurance page configuration
  */
 
+const STATUS_PRIORITY_ORDER = ['active', 'pending', 'expired', 'inactive'];
+
 export const insurancesPageConfig = {
   filtering: {
     searchFields: ['company_name', 'member_name', 'plan_name', 'notes'],
@@ -103,6 +105,7 @@ export const insurancesPageConfig = {
       expiration_date: 'date',
       status: 'status',
     },
+    statusOrder: { active: 1, pending: 2, expired: 3, inactive: 4 },
     customSortFunctions: {
       priority: (a, b, sortOrder) => {
         // Primary medical insurance first
@@ -113,17 +116,15 @@ export const insurancesPageConfig = {
         }
 
         // Then by status priority: active > pending > expired > inactive
-        const statusOrder = ['active', 'pending', 'expired', 'inactive'];
-        const aStatusIndex = statusOrder.indexOf(a.status);
-        const bStatusIndex = statusOrder.indexOf(b.status);
+        const aStatusIndex = STATUS_PRIORITY_ORDER.indexOf(a.status);
+        const bStatusIndex = STATUS_PRIORITY_ORDER.indexOf(b.status);
         const statusDiff = (aStatusIndex === -1 ? 999 : aStatusIndex) - (bStatusIndex === -1 ? 999 : bStatusIndex);
         if (statusDiff !== 0) {
           return sortOrder === 'asc' ? statusDiff : -statusDiff;
         }
 
-        // Finally by insurance type alphabetically
-        const typeDiff = a.insurance_type.localeCompare(b.insurance_type);
-        return sortOrder === 'asc' ? typeDiff : -typeDiff;
+        // Always sub-sort alphabetically A-Z within each group
+        return a.insurance_type.localeCompare(b.insurance_type);
       },
     },
   },
