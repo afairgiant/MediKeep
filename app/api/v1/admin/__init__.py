@@ -15,6 +15,7 @@ from app.api.v1.admin import (
     models,
     restore,
     trash_management,
+    user_management,
 )
 
 router = APIRouter()
@@ -33,5 +34,7 @@ router.include_router(restore.router, prefix="/restore", tags=["admin-restore"])
 router.include_router(trash_management.router, prefix="", tags=["admin-trash"])
 
 router.include_router(maintenance.router, prefix="/maintenance", tags=["admin-maintenance"])
+
+router.include_router(user_management.router, prefix="/user-management", tags=["admin-user-management"])
 
 __all__ = ["router"]

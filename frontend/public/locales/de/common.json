@@ -2484,5 +2484,50 @@
     "messages": {
       "loading": "Lade Allergien..."
     }
+  },
+  "admin": {
+    "createUser": {
+      "username": "Benutzername",
+      "usernamePlaceholder": "Benutzernamen eingeben",
+      "password": "Passwort",
+      "passwordPlaceholder": "Passwort eingeben (mind. 6 Zeichen, mit Buchstaben und Zahl)",
+      "email": "E-Mail",
+      "emailPlaceholder": "E-Mail-Adresse eingeben",
+      "role": "Rolle",
+      "roleUser": "Benutzer",
+      "roleAdmin": "Admin",
+      "firstName": "Vorname",
+      "firstNamePlaceholder": "Vornamen eingeben",
+      "lastName": "Nachname",
+      "lastNamePlaceholder": "Nachnamen eingeben",
+      "submitButton": "Konto erstellen",
+      "noteLabel": "Hinweis:",
+      "noteText": "Für diesen Benutzer wird automatisch ein Patientenprofil mit der Standardrolle \"Benutzer\" erstellt.",
+      "validation": {
+        "firstNameRequired": "Bitte geben Sie den Vornamen ein",
+        "lastNameRequired": "Bitte geben Sie den Nachnamen ein",
+        "usernameMinLength": "Der Benutzername muss mindestens 3 Zeichen lang sein",
+        "passwordMinLength": "Das Passwort muss mindestens 6 Zeichen lang sein",
+        "passwordRequirements": "Das Passwort muss mindestens einen Buchstaben und eine Zahl enthalten"
+      },
+      "passwordReqs": {
+        "minLength": "Mindestens 6 Zeichen",
+        "hasLetter": "Enthält mindestens einen Buchstaben",
+        "hasNumber": "Enthält mindestens eine Zahl"
+      },
+      "linkPatient": {
+        "checkbox": "Mit vorhandenem Patientenprofil verknüpfen",
+        "hint": "Anstatt ein neues Patientenprofil zu erstellen, verknüpfen Sie den neuen Benutzer mit einem bestehenden Patienten (z. B. ein Kind, das nun einen eigenen Login benötigt).",
+        "selectPlaceholder": "Patienten auswählen...",
+        "loading": "Lade Patienten...",
+        "selfRecordBadge": "Eigenakte",
+        "patientId": "ID",
+        "dob": "Geburtsdatum",
+        "owner": "Inhaber",
+        "currentOwner": "Aktueller Inhaber",
+        "selfRecordWarningTitle": "Hinweis:",
+        "selfRecordWarning": "Dies ist die Eigenakte des aktuellen Inhabers. Für den ursprünglichen Inhaber wird eine neue Eigenakte erstellt, in die seine demografischen Daten übernommen werden. Der ursprüngliche Inhaber erhält Bearbeitungsrechte für diesen Patienten."
+      }
+    }
   }
 }

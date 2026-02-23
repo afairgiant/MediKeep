@@ -203,19 +203,12 @@ button[type="submit"]:disabled {
   line-height: 1.4;
 }
 
-/* Password requirements styling */
-.password-requirements {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: #6c757d;
-  font-style: italic;
-}
-
 /* Password Requirements Indicators */
 .password-requirements {
+  display: block;
   margin-top: 0.5rem;
   font-size: 0.85rem;
+  color: #6c757d;
 }
 
 .requirement {
@@ -308,6 +301,61 @@ button[type="submit"]:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Patient Linking Section (Admin User Create) */
+.patient-link-section {
+  border-top: 1px solid #e1e5e9;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.patient-link-section .field-hint {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0.75rem 0;
+  line-height: 1.4;
+}
+
+.patient-select-container {
+  margin-top: 0.75rem;
+}
+
+.self-record-badge {
+  display: inline-block;
+  background: #fff3cd;
+  color: #856404;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-left: 0.5rem;
+}
+
+.selected-patient-card {
+  border: 2px solid #667eea;
+  border-radius: 5px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+  background: #f8f9ff;
+}
+
+.selected-patient-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.self-record-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 /* Registration Disabled Message */
