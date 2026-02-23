@@ -29,7 +29,7 @@ jobs:
       - name: Run bandit (SARIF for Security tab)
         run: bandit -c pyproject.toml -r app/ -f sarif -o bandit-results.sarif --exit-zero
       - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: bandit-results.sarif
