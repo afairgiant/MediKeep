@@ -2,6 +2,8 @@
  * Insurance page configuration
  */
 
+const STATUS_PRIORITY_ORDER = ['active', 'pending', 'expired', 'inactive'];
+
 export const insurancesPageConfig = {
   filtering: {
     searchFields: ['company_name', 'member_name', 'plan_name', 'notes'],
@@ -113,9 +115,8 @@ export const insurancesPageConfig = {
         }
 
         // Then by status priority: active > pending > expired > inactive
-        const statusOrder = ['active', 'pending', 'expired', 'inactive'];
-        const aStatusIndex = statusOrder.indexOf(a.status);
-        const bStatusIndex = statusOrder.indexOf(b.status);
+        const aStatusIndex = STATUS_PRIORITY_ORDER.indexOf(a.status);
+        const bStatusIndex = STATUS_PRIORITY_ORDER.indexOf(b.status);
         const statusDiff = (aStatusIndex === -1 ? 999 : aStatusIndex) - (bStatusIndex === -1 ? 999 : bStatusIndex);
         if (statusDiff !== 0) {
           return sortOrder === 'asc' ? statusDiff : -statusDiff;
