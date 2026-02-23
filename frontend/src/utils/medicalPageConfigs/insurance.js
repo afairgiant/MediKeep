@@ -121,9 +121,8 @@ export const insurancesPageConfig = {
           return sortOrder === 'asc' ? statusDiff : -statusDiff;
         }
 
-        // Finally by insurance type alphabetically
-        const typeDiff = a.insurance_type.localeCompare(b.insurance_type);
-        return sortOrder === 'asc' ? typeDiff : -typeDiff;
+        // Always sub-sort alphabetically A-Z within each group
+        return a.insurance_type.localeCompare(b.insurance_type);
       },
     },
   },

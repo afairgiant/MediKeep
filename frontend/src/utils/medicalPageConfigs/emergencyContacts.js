@@ -74,9 +74,8 @@ export const emergencyContactsPageConfig = {
         if (a.is_active !== b.is_active) {
           return sortOrder === 'asc' ? (a.is_active ? 1 : -1) : (a.is_active ? -1 : 1);
         }
-        // Finally by name
-        const nameDiff = a.name.localeCompare(b.name);
-        return sortOrder === 'asc' ? nameDiff : -nameDiff;
+        // Always sub-sort alphabetically A-Z within each group
+        return a.name.localeCompare(b.name);
       },
     },
   },
