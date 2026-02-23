@@ -105,6 +105,7 @@ export const insurancesPageConfig = {
       expiration_date: 'date',
       status: 'status',
     },
+    statusOrder: { active: 1, pending: 2, expired: 3, inactive: 4 },
     customSortFunctions: {
       priority: (a, b, sortOrder) => {
         // Primary medical insurance first
