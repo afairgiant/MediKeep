@@ -9,6 +9,7 @@ from typing import List, Optional
 from .base_parser import BaseLabParser, LabTestResult
 from .labcorp_parser_v2 import LabCorpParserV2
 from .quest_parser import QuestParser
+from .epic_mychart_parser import EpicMyChartParser
 
 
 class LabParserRegistry:
@@ -19,9 +20,7 @@ class LabParserRegistry:
         self.parsers: List[BaseLabParser] = [
             LabCorpParserV2(),  # Using improved V2 parser
             QuestParser(),
-            # Add more parsers here as they're implemented:
-            # SonoraQuestParser(),
-            # etc.
+            EpicMyChartParser(),
         ]
 
     def get_parser(self, text: str) -> Optional[BaseLabParser]:
@@ -68,6 +67,7 @@ __all__ = [
     'LabTestResult',
     'LabCorpParserV2',
     'QuestParser',
+    'EpicMyChartParser',
     'LabParserRegistry',
     'lab_parser_registry'
 ]
