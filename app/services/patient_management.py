@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.models.models import User, Patient, PatientShare
 from app.core.logging.config import get_logger, log_security_event
+from app.core.logging.constants import LogFields
 from app.services.patient_access import PatientAccessService
 from app.core.utils.activity_tracker import activity_tracking_disabled_var
 
@@ -399,8 +400,14 @@ class PatientManagementService:
             ValueError: If patient not found or transfer not possible
         """
         logger.info(
-            f"Admin {admin_user.id} transferring patient {patient_id} "
-            f"to user {new_owner.id}"
+            "Patient ownership transfer initiated",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "patient_ownership_transfer_initiated",
+                LogFields.USER_ID: admin_user.id,
+                LogFields.PATIENT_ID: patient_id,
+                "new_owner_id": new_owner.id,
+            },
         )
 
         patient = self.db.query(Patient).filter(Patient.id == patient_id).first()

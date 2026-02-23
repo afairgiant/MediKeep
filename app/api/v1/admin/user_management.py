@@ -203,9 +203,10 @@ def create_user_with_optional_link(
                 e, user_id=admin_id,
             )
             # User was created but linking failed - report the issue
+            # Log full error server-side but return generic message to client
             return {
                 "status": "partial_success",
-                "message": f"User created but patient linking failed: {str(e)}",
+                "message": "User created but patient linking failed. Check server logs for details.",
                 "data": {
                     "user_id": new_user.id,
                     "username": new_user.username,
@@ -233,6 +234,7 @@ def create_user_with_optional_link(
         else:
             last_name = "Your Name"
 
+        patient_create_failed = False
         try:
             patient_service = PatientManagementService(db)
             patient_data = {
@@ -254,6 +256,7 @@ def create_user_with_optional_link(
             db.refresh(new_user)
 
         except Exception as e:
+            patient_create_failed = True
             logger.warning(
                 f"Failed to auto-create patient for new user {new_user.id}: {str(e)}"
             )
@@ -263,6 +266,17 @@ def create_user_with_optional_link(
             f"Admin {admin_id} created user {new_user.id} (standard flow)",
             user_id=admin_id,
         )
+
+        if patient_create_failed:
+            return {
+                "status": "partial_success",
+                "message": "User created but auto-creating patient failed. Check server logs for details.",
+                "data": {
+                    "user_id": new_user.id,
+                    "username": new_user.username,
+                    "linked_patient_id": None,
+                },
+            }
 
         return {
             "status": "success",

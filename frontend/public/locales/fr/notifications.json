@@ -268,7 +268,7 @@
       "accessDeniedRoles": "Accès refusé : un des rôles suivants est requis : {{roles}}",
       "loginRequired": "Veuillez vous connecter pour accéder à cette page",
       "userCreatedSuccess": "Compte utilisateur créé avec succès !",
-      "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!",
+      "userCreatedWithLinkSuccess": "Compte utilisateur créé et lié avec succès à un patient existant !",
       "accountCreatedSuccess": "Compte créé avec succès ! Connexion en cours..."
     },
     "patient": {

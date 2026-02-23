@@ -17,7 +17,7 @@ def _validate_optional_name(v: Optional[str], field_label: str) -> Optional[str]
     stripped = v.strip()
     if len(stripped) < 1:
         raise ValueError(f"{field_label} cannot be empty")
-    if len(v) > 50:
+    if len(stripped) > 50:
         raise ValueError(f"{field_label} must be less than 50 characters")
     return stripped.title()
 

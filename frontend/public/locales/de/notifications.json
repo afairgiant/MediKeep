@@ -247,7 +247,7 @@
       "sessionExpiredLogin": "Sitzung abgelaufen. Bitte melden Sie sich erneut an.",
       "ssoFailed": "SSO-Anmeldung konnte nicht gestartet werden",
       "userCreatedSuccess": "Benutzerkonto erfolgreich erstellt!",
-      "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!"
+      "userCreatedWithLinkSuccess": "Benutzerkonto erfolgreich erstellt und mit bestehendem Patienten verknüpft!"
     },
     "documents": {
       "deleteFailed": "Löschen fehlgeschlagen",

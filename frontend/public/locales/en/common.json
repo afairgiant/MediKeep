@@ -2527,6 +2527,20 @@
         "currentOwner": "Current Owner",
         "selfRecordWarningTitle": "Note:",
         "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient."
+      },
+      "successRedirect": "User created successfully! Redirecting...",
+      "autoFeaturesTitle": "Auto-Generated Features",
+      "autoFeatures": {
+        "patientRecord": "A patient record will be automatically created (or link to an existing one)",
+        "linkExisting": "Use 'Link to existing patient' to transfer a patient record to the new user",
+        "editAccess": "Original owner keeps edit access after transfer",
+        "timestamps": "Created/updated timestamps tracked automatically",
+        "immediateLogin": "New user can log in immediately after creation"
+      },
+      "errors": {
+        "createFailed": "Failed to create user",
+        "accountCreateFailed": "Failed to create account",
+        "createRetry": "Failed to create user. Please try again."
       }
     }
   }

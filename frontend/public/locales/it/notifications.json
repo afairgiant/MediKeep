@@ -247,7 +247,7 @@
       "sessionExpiredLogin": "Sessione scaduta. Effettui nuovamente l'accesso.",
       "ssoFailed": "Impossibile avviare l'accesso SSO",
       "userCreatedSuccess": "Account utente creato con successo!",
-      "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!"
+      "userCreatedWithLinkSuccess": "Account utente creato e collegato con successo al paziente esistente!"
     },
     "documents": {
       "deleteFailed": "Eliminazione non riuscita",

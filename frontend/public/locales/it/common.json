@@ -2487,46 +2487,46 @@
   },
   "admin": {
     "createUser": {
-      "username": "Username",
-      "usernamePlaceholder": "Enter username",
+      "username": "Nome utente",
+      "usernamePlaceholder": "Inserisci il nome utente",
       "password": "Password",
-      "passwordPlaceholder": "Enter password (min 6 chars, include letter & number)",
+      "passwordPlaceholder": "Inserisci la password (min 6 caratteri, includi lettera e numero)",
       "email": "Email",
-      "emailPlaceholder": "Enter email address",
-      "role": "Role",
-      "roleUser": "User",
-      "roleAdmin": "Admin",
-      "firstName": "First Name",
-      "firstNamePlaceholder": "Enter first name",
-      "lastName": "Last Name",
-      "lastNamePlaceholder": "Enter last name",
-      "submitButton": "Create Account",
-      "noteLabel": "Note:",
-      "noteText": "A patient record will be automatically created for this user with default role \"user\".",
+      "emailPlaceholder": "Inserisci l'indirizzo email",
+      "role": "Ruolo",
+      "roleUser": "Utente",
+      "roleAdmin": "Amministratore",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "Inserisci il nome",
+      "lastName": "Cognome",
+      "lastNamePlaceholder": "Inserisci il cognome",
+      "submitButton": "Crea account",
+      "noteLabel": "Nota:",
+      "noteText": "Per questo utente verrà creato automaticamente un record paziente con il ruolo predefinito \"utente\".",
       "validation": {
-        "firstNameRequired": "Please enter the first name",
-        "lastNameRequired": "Please enter the last name",
-        "usernameMinLength": "Username must be at least 3 characters long",
-        "passwordMinLength": "Password must be at least 6 characters long",
-        "passwordRequirements": "Password must contain at least one letter and one number"
+        "firstNameRequired": "Inserisci il nome",
+        "lastNameRequired": "Inserisci il cognome",
+        "usernameMinLength": "Il nome utente deve contenere almeno 3 caratteri",
+        "passwordMinLength": "La password deve contenere almeno 6 caratteri",
+        "passwordRequirements": "La password deve contenere almeno una lettera e un numero"
       },
       "passwordReqs": {
-        "minLength": "At least 6 characters",
-        "hasLetter": "Contains at least one letter",
-        "hasNumber": "Contains at least one number"
+        "minLength": "Almeno 6 caratteri",
+        "hasLetter": "Contiene almeno una lettera",
+        "hasNumber": "Contiene almeno un numero"
       },
       "linkPatient": {
-        "checkbox": "Link to existing patient record",
-        "hint": "Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).",
-        "selectPlaceholder": "Select a patient...",
-        "loading": "Loading patients...",
-        "selfRecordBadge": "Self-Record",
+        "checkbox": "Collega a un record paziente esistente",
+        "hint": "Invece di creare un nuovo record paziente, collega il nuovo utente a un paziente esistente (ad es. un bambino che ora ha bisogno di un proprio accesso).",
+        "selectPlaceholder": "Seleziona un paziente...",
+        "loading": "Caricamento pazienti...",
+        "selfRecordBadge": "Record personale",
         "patientId": "ID",
-        "dob": "DOB",
-        "owner": "Owner",
-        "currentOwner": "Current Owner",
-        "selfRecordWarningTitle": "Note:",
-        "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient."
+        "dob": "Data di nascita",
+        "owner": "Proprietario",
+        "currentOwner": "Proprietario attuale",
+        "selfRecordWarningTitle": "Nota:",
+        "selfRecordWarning": "Questo è il record personale dell'attuale proprietario. Verrà creato un nuovo record personale per il proprietario originale con i suoi dati anagrafici copiati. Il proprietario originale riceverà accesso in modifica a questo paziente."
       }
     }
   }
