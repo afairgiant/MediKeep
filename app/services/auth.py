@@ -26,7 +26,8 @@ class AuthService:
 
     @staticmethod
     def create_user(
-        db: Session, username: str, password: str, is_superuser: bool = False
+        db: Session, username: str, password: str, is_superuser: bool = False,
+        must_change_password: bool = False,
     ) -> User:
         """Create a new user with an associated patient record"""
         # Create the user first
@@ -37,7 +38,7 @@ class AuthService:
             role="admin" if is_superuser else "user",
             password=password,
         )
-        new_user = user.create(db, obj_in=user_create)
+        new_user = user.create(db, obj_in=user_create, must_change_password=must_change_password)
 
         # Create a patient record for the user
         try:

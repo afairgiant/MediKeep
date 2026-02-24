@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import ForceChangePassword from '../../pages/auth/ForceChangePassword';
+import ForceChangePassword from './ForceChangePassword';
 import render from '../../test-utils/render';
 import logger from '../../services/logger';
 import { apiService } from '../../services/api';

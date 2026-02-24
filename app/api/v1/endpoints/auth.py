@@ -336,7 +336,7 @@ def login(
         "access_token": access_token,
         "token_type": "bearer",
         "session_timeout_minutes": session_timeout_minutes,
-        "must_change_password": bool(getattr(db_user, "must_change_password", False)),
+        "must_change_password": bool(db_user.must_change_password),
     }
 
 
@@ -387,6 +387,14 @@ async def change_password(
     if len(password_data.newPassword) < 6:
         raise BusinessLogicException(
             message="New password must be at least 6 characters long",
+            request=request
+        )
+
+    has_letter = any(c.isalpha() for c in password_data.newPassword)
+    has_number = any(c.isdigit() for c in password_data.newPassword)
+    if not (has_letter and has_number):
+        raise BusinessLogicException(
+            message="New password must contain at least one letter and one number",
             request=request
         )
 

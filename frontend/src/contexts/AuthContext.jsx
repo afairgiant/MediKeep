@@ -165,12 +165,10 @@ export function AuthProvider({ children }) {
         const storedUser = await secureStorage.getItem('user');
         const storedExpiry = await secureStorage.getItem('tokenExpiry');
         const storedSessionTimeout = await secureStorage.getItem('sessionTimeoutMinutes');
-        const storedMustChangePassword = await secureStorage.getItem('mustChangePassword');
 
         if (storedToken && storedUser && storedExpiry) {
           const tokenExpiry = parseInt(storedExpiry);
           const sessionTimeoutMinutes = storedSessionTimeout ? parseInt(storedSessionTimeout) : 30;
-          const mustChangePassword = storedMustChangePassword === 'true';
 
           if (!isTokenExpired(tokenExpiry)) {
             // Token is still valid, verify with server
@@ -184,7 +182,19 @@ export function AuthProvider({ children }) {
                 timestamp: new Date().toISOString()
               });
 
+              // getCurrentUser() calls the backend so must_change_password is always
+              // authoritative — never read from client-side storage which can be cleared.
               const user = await authService.getCurrentUser();
+
+              // A null return means the backend rejected the token (e.g. expired or
+              // deleted user). Treat it the same as a failed verification.
+              if (!user) {
+                clearAuthData();
+                dispatch({ type: AUTH_ACTIONS.LOGOUT });
+                return;
+              }
+
+              const mustChangePassword = user.must_change_password === true;
               dispatch({
                 type: AUTH_ACTIONS.LOGIN_SUCCESS,
                 payload: {

@@ -116,13 +116,12 @@ def create_emergency_admin(
         # Create the emergency admin user
         print(f"🔧 Creating emergency admin user '{username}'...")
 
-        new_user = AuthService.create_user(
-            db, username=username, password=password, is_superuser=True
+        # must_change_password=True is set atomically in the same commit as the
+        # user row inside create_user — no second commit needed.
+        AuthService.create_user(
+            db, username=username, password=password, is_superuser=True,
+            must_change_password=True,
         )
-
-        # Emergency admin accounts must change their password on first login
-        new_user.must_change_password = True
-        db.commit()
 
         print("✅ Emergency admin user created successfully!")
         print("")

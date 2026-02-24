@@ -238,6 +238,7 @@ class User(UserBase):
     """
 
     id: int
+    must_change_password: bool = False
 
     # SSO fields
     auth_method: Optional[str] = None

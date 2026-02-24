@@ -2459,6 +2459,7 @@
             "passwordsMustMatch": "As novas senhas não correspondem.",
             "passwordTooShort": "A nova senha deve ter pelo menos 6 caracteres.",
             "passwordMustDiffer": "A nova senha deve ser diferente da sua senha atual.",
+            "passwordComplexity": "A nova senha deve conter pelo menos uma letra e um número.",
             "changeFailed": "Falha ao alterar a senha. Por favor, tente novamente."
           }
         }

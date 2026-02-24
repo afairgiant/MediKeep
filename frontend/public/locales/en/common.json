@@ -2389,6 +2389,7 @@
             "passwordsMustMatch": "New passwords do not match.",
             "passwordTooShort": "New password must be at least 6 characters.",
             "passwordMustDiffer": "New password must be different from your current password.",
+            "passwordComplexity": "New password must contain at least one letter and one number.",
             "changeFailed": "Failed to change password. Please try again."
           }
         }

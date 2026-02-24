@@ -2,31 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
+import type { AuthContextType } from '../../contexts/AuthContext';
 import { apiService } from '../../services/api';
 import { Button, Alert } from '../../components/ui';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import logger from '../../services/logger';
 import '../../styles/pages/Login.css';
 import '../../components/auth/ChangePasswordModal.css';
-
-// These UI components are plain JS without TypeScript declarations; cast to prevent
-// prop-mismatch errors while preserving full runtime behaviour.
-const AlertUI = Alert as React.ComponentType<{
-  type?: string;
-  id?: string;
-  children?: React.ReactNode;
-}>;
-const ButtonUI = Button as React.ComponentType<{
-  type?: 'submit' | 'button' | 'reset';
-  variant?: string;
-  onClick?: () => void | Promise<void>;
-  disabled?: boolean;
-  children?: React.ReactNode;
-}>;
-const FormLoadingOverlayUI = FormLoadingOverlay as React.ComponentType<{
-  visible: boolean;
-  message?: string;
-}>;
 
 /**
  * Forced password change page.
@@ -45,9 +27,7 @@ const ForceChangePassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  // AuthContext is JS with createContext(null); TypeScript infers the context as
-  // never after the non-null guard. Cast to any to access the known members.
-  const { logout, clearMustChangePassword } = useAuth() as any; // eslint-disable-line
+  const { logout, clearMustChangePassword } = useAuth() as AuthContextType;
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +52,13 @@ const ForceChangePassword = () => {
 
     if (passwordData.newPassword.length < 6) {
       setError(t('settings.security.password.forceChange.errors.passwordTooShort'));
+      return;
+    }
+
+    const hasLetter = /[a-zA-Z]/.test(passwordData.newPassword);
+    const hasNumber = /[0-9]/.test(passwordData.newPassword);
+    if (!hasLetter || !hasNumber) {
+      setError(t('settings.security.password.forceChange.errors.passwordComplexity'));
       return;
     }
 
@@ -115,7 +102,7 @@ const ForceChangePassword = () => {
   return (
     <div className="login-container">
       <div className="login-form login-form--wide">
-        <FormLoadingOverlayUI
+        <FormLoadingOverlay
           visible={isSubmitting}
           message={t('settings.security.password.forceChange.submitting')}
         />
@@ -135,7 +122,7 @@ const ForceChangePassword = () => {
         </p>
 
         <div className="change-password-content">
-          {error && <AlertUI type="error" id="fcp-error">{error}</AlertUI>}
+          {error && <Alert type="error" id="fcp-error">{error}</Alert>}
 
           <form onSubmit={handleSubmit} className="password-form">
             <div className="form-group">
@@ -195,21 +182,21 @@ const ForceChangePassword = () => {
             </div>
 
             <div className="form-actions">
-              <ButtonUI
+              <Button
                 type="button"
                 variant="secondary"
                 onClick={handleLogout}
                 disabled={isSubmitting}
               >
                 {t('navigation:menu.logout')}
-              </ButtonUI>
-              <ButtonUI
+              </Button>
+              <Button
                 type="submit"
                 variant="primary"
                 disabled={isSubmitting}
               >
                 {t('settings.security.password.forceChange.submit')}
-              </ButtonUI>
+              </Button>
             </div>
           </form>
         </div>

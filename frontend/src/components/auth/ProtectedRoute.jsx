@@ -122,17 +122,19 @@ export function RoleRoute({ role, roles, children, ...props }) {
 
 /**
  * Public Route Component
- * Redirects authenticated users away from auth pages
+ * Redirects authenticated users away from auth pages.
+ * If the user must change their password, they are sent to /change-password
+ * rather than the default dashboard so the forced-change flow is not skipped.
  */
 export function PublicRoute({ children, redirectTo = '/dashboard' }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, mustChangePassword } = useAuth();
 
   if (isLoading) {
     return <LoadingSpinner message="Loading..." />;
   }
 
   if (isAuthenticated) {
-    return <Navigate to={redirectTo} replace />;
+    return <Navigate to={mustChangePassword ? '/change-password' : redirectTo} replace />;
   }
 
   return children;

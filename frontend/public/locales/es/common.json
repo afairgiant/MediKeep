@@ -2076,6 +2076,7 @@
             "passwordsMustMatch": "Las nuevas contraseñas no coinciden.",
             "passwordTooShort": "La nueva contraseña debe tener al menos 6 caracteres.",
             "passwordMustDiffer": "La nueva contraseña debe ser diferente de tu contraseña actual.",
+            "passwordComplexity": "La nueva contraseña debe contener al menos una letra y un número.",
             "changeFailed": "Error al cambiar la contraseña. Por favor, inténtalo de nuevo."
           }
         }

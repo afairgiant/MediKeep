@@ -700,6 +700,7 @@
             "passwordsMustMatch": "Die neuen Passwörter stimmen nicht überein.",
             "passwordTooShort": "Das neue Passwort muss mindestens 6 Zeichen lang sein.",
             "passwordMustDiffer": "Das neue Passwort muss sich von Ihrem aktuellen Passwort unterscheiden.",
+            "passwordComplexity": "Das neue Passwort muss mindestens einen Buchstaben und eine Zahl enthalten.",
             "changeFailed": "Passwortänderung fehlgeschlagen. Bitte versuchen Sie es erneut."
           }
         }
