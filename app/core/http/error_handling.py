@@ -31,7 +31,7 @@ from starlette.status import (
     HTTP_503_SERVICE_UNAVAILABLE
 )
 
-from api_exception import APIException, register_exception_handlers
+from api_exception import APIException, register_exception_handlers, ResponseFormat
 from app.core.http.response_models import ExceptionCode, ExceptionStatus, ResponseModel
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -493,7 +493,7 @@ def setup_error_handling(app: FastAPI):
     # Register APIException handlers with our custom configuration
     register_exception_handlers(
         app,
-        use_response_model=True,
+        response_format=ResponseFormat.RESPONSE_MODEL,
         use_fallback_middleware=False  # We'll use our custom handlers
     )
     
