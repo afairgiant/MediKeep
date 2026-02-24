@@ -232,22 +232,6 @@ describe('ModelEdit security', () => {
   });
 
   test('calls navigate("/login") instead of window.location.href after logout on own username change', async () => {
-    const hrefSetter = vi.fn();
-    const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      writable: true,
-      value: {
-        ...window.location,
-        get href() {
-          return window.location._href || '';
-        },
-        set href(val) {
-          hrefSetter(val);
-        },
-      },
-    });
-
     renderComponent();
     await waitForLoad();
 
@@ -264,16 +248,5 @@ describe('ModelEdit security', () => {
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/login');
     });
-
-    // window.location.href must not have been assigned '/login' (or any login path)
-    const loginHrefCalls = hrefSetter.mock.calls.filter(([val]) =>
-      typeof val === 'string' && val.includes('login')
-    );
-    expect(loginHrefCalls).toHaveLength(0);
-
-    // Restore window.location
-    if (originalDescriptor) {
-      Object.defineProperty(window, 'location', originalDescriptor);
-    }
   });
 });

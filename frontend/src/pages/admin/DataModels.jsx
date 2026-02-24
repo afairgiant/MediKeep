@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Card,
@@ -228,8 +228,12 @@ const DataModels = () => {
   const navigate = useNavigate();
   const { colorScheme } = useMantineColorScheme();
   const [searchParams] = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
-  const [filterQuery, setFilterQuery] = useState(initialQuery);
+  const urlQuery = searchParams.get('q') || '';
+  const [filterQuery, setFilterQuery] = useState(urlQuery);
+
+  useEffect(() => {
+    setFilterQuery(urlQuery);
+  }, [urlQuery]);
 
   const filterLower = filterQuery.trim().toLowerCase();
   const filteredModels = filterLower
