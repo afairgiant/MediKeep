@@ -685,7 +685,24 @@
       "password": {
         "title": "Passwort",
         "description": "Ändern Sie Ihr Kontopasswort, um Ihr Konto zu schützen",
-        "button": "Passwort ändern"
+        "button": "Passwort ändern",
+        "currentPassword": "Aktuelles Passwort",
+        "newPassword": "Neues Passwort",
+        "confirmPassword": "Neues Passwort bestätigen",
+        "passwordHelp": "Mindestens 6 Zeichen, muss einen Buchstaben und eine Zahl enthalten.",
+        "forceChange": {
+          "title": "Passwortänderung erforderlich",
+          "subtitle": "Ihr Konto erfordert eine Passwortänderung, bevor Sie fortfahren können. Bitte legen Sie unten ein neues Passwort fest.",
+          "submit": "Neues Passwort festlegen",
+          "submitting": "Passwort wird geändert...",
+          "errors": {
+            "allFieldsRequired": "Alle Felder sind erforderlich.",
+            "passwordsMustMatch": "Die neuen Passwörter stimmen nicht überein.",
+            "passwordTooShort": "Das neue Passwort muss mindestens 6 Zeichen lang sein.",
+            "passwordMustDiffer": "Das neue Passwort muss sich von Ihrem aktuellen Passwort unterscheiden.",
+            "changeFailed": "Passwortänderung fehlgeschlagen. Bitte versuchen Sie es erneut."
+          }
+        }
       }
     },
     "account": {

@@ -16,7 +16,7 @@ function ProtectedRoute({
   redirectTo = '/login',
   fallback = null,
 }) {
-  const { isAuthenticated, isLoading, user, hasRole, hasAnyRole } = useAuth();
+  const { isAuthenticated, isLoading, user, hasRole, hasAnyRole, mustChangePassword } = useAuth();
   const location = useLocation();
   const toastShownRef = useRef(false);
 
@@ -25,11 +25,16 @@ function ProtectedRoute({
     if (isLoading) {
       return null;
     }
-    
+
     if (!isAuthenticated) {
       return { to: redirectTo, reason: 'unauthenticated' };
     }
-    
+
+    // Authenticated but must change password — block access to all other routes
+    if (mustChangePassword && location.pathname !== '/change-password') {
+      return { to: '/change-password', reason: 'must-change-password' };
+    }
+
     if (adminOnly && !user?.isAdmin) {
       return { to: '/dashboard', reason: 'admin-required' };
     }

@@ -2061,7 +2061,24 @@
       "password": {
         "button": "Cambiar contraseña",
         "description": "Cambie la contraseña de su cuenta para mantenerla segura",
-        "title": "Contraseña"
+        "title": "Contraseña",
+        "currentPassword": "Contraseña actual",
+        "newPassword": "Nueva contraseña",
+        "confirmPassword": "Confirmar nueva contraseña",
+        "passwordHelp": "Al menos 6 caracteres, debe incluir una letra y un número.",
+        "forceChange": {
+          "title": "Cambio de contraseña requerido",
+          "subtitle": "Tu cuenta requiere un cambio de contraseña antes de continuar. Por favor, establece una nueva contraseña abajo.",
+          "submit": "Establecer nueva contraseña",
+          "submitting": "Cambiando contraseña...",
+          "errors": {
+            "allFieldsRequired": "Todos los campos son obligatorios.",
+            "passwordsMustMatch": "Las nuevas contraseñas no coinciden.",
+            "passwordTooShort": "La nueva contraseña debe tener al menos 6 caracteres.",
+            "passwordMustDiffer": "La nueva contraseña debe ser diferente de tu contraseña actual.",
+            "changeFailed": "Error al cambiar la contraseña. Por favor, inténtalo de nuevo."
+          }
+        }
       }
     },
     "subtitle": "Gestione las preferencias y configuración de su aplicación",

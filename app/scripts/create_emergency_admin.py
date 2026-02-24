@@ -120,6 +120,10 @@ def create_emergency_admin(
             db, username=username, password=password, is_superuser=True
         )
 
+        # Emergency admin accounts must change their password on first login
+        new_user.must_change_password = True
+        db.commit()
+
         print("✅ Emergency admin user created successfully!")
         print("")
         print("🔐 Login Credentials:")

@@ -2444,7 +2444,24 @@
       "password": {
         "button": "Cambia password",
         "description": "Cambia la password del tuo account per mantenerlo sicuro",
-        "title": "Password"
+        "title": "Password",
+        "currentPassword": "Password attuale",
+        "newPassword": "Nuova password",
+        "confirmPassword": "Conferma nuova password",
+        "passwordHelp": "Almeno 6 caratteri, deve includere una lettera e un numero.",
+        "forceChange": {
+          "title": "Cambio password richiesto",
+          "subtitle": "Il tuo account richiede una modifica della password prima di continuare. Per favore imposta una nuova password qui sotto.",
+          "submit": "Imposta nuova password",
+          "submitting": "Modifica in corso...",
+          "errors": {
+            "allFieldsRequired": "Tutti i campi sono obbligatori.",
+            "passwordsMustMatch": "Le nuove password non corrispondono.",
+            "passwordTooShort": "La nuova password deve contenere almeno 6 caratteri.",
+            "passwordMustDiffer": "La nuova password deve essere diversa dalla password attuale.",
+            "changeFailed": "Modifica della password non riuscita. Riprova."
+          }
+        }
       }
     },
     "subtitle": "Gestisci le preferenze e le impostazioni dell'applicazione",

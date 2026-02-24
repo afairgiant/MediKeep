@@ -333,9 +333,10 @@ def login(
     )
 
     return {
-        "access_token": access_token, 
+        "access_token": access_token,
         "token_type": "bearer",
-        "session_timeout_minutes": session_timeout_minutes
+        "session_timeout_minutes": session_timeout_minutes,
+        "must_change_password": bool(getattr(db_user, "must_change_password", False)),
     }
 
 
@@ -389,7 +390,7 @@ async def change_password(
             request=request
         )
 
-    # Update password
+    # Update password (also clears must_change_password flag)
     user.update_password_by_user(
         db, user_obj=current_user, new_password=password_data.newPassword
     )

@@ -290,3 +290,83 @@ class TestAuthEndpoints:
         assert patient_data["first_name"] == "First Name"
         assert patient_data["last_name"] == "Last Name"
         assert patient_data["address"] == "Please update your address"
+
+    # ------------------------------------------------------------------
+    # must_change_password flag tests
+    # ------------------------------------------------------------------
+
+    def test_login_response_includes_must_change_password_false(
+        self, client: TestClient, db_session: Session
+    ):
+        """Login for a normal user should return must_change_password: false."""
+        user_data = create_random_user(db_session)
+
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "must_change_password" in data
+        assert data["must_change_password"] is False
+
+    def test_login_response_must_change_password_true_for_flagged_user(
+        self, client: TestClient, db_session: Session
+    ):
+        """Login should return must_change_password: true when the flag is set on the user."""
+        user_data = create_random_user(db_session)
+        db_user = user_data["user"]
+
+        # Set the forced-change flag directly (simulates emergency admin creation)
+        db_user.must_change_password = True
+        db_session.commit()
+
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["must_change_password"] is True
+
+    def test_change_password_clears_must_change_password_flag(
+        self, client: TestClient, db_session: Session
+    ):
+        """Changing password via /change-password should clear the must_change_password flag."""
+        user_data = create_random_user(db_session)
+        db_user = user_data["user"]
+        original_password = user_data["password"]
+        new_password = original_password + "_new"
+
+        # Set the forced-change flag
+        db_user.must_change_password = True
+        db_session.commit()
+
+        # Confirm the flag is set in the login response
+        login_response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": original_password},
+        )
+        assert login_response.status_code == 200
+        assert login_response.json()["must_change_password"] is True
+
+        token = login_response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # Change the password
+        change_response = client.post(
+            "/api/v1/auth/change-password",
+            json={"currentPassword": original_password, "newPassword": new_password},
+            headers=headers,
+        )
+        assert change_response.status_code == 200
+
+        # Login again with the new password and confirm flag is cleared
+        re_login_response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": new_password},
+        )
+        assert re_login_response.status_code == 200
+        assert re_login_response.json()["must_change_password"] is False

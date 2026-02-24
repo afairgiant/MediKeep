@@ -318,6 +318,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     session_timeout_minutes: Optional[int] = 30
+    must_change_password: bool = False
 
 
 class TokenData(BaseModel):

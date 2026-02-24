@@ -163,8 +163,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             return None  # Hash the new password
         hashed_password = get_password_hash(new_password)
 
-        # Update the password hash using setattr
+        # Update the password hash and clear the forced-change flag
         setattr(user, "password_hash", hashed_password)
+        setattr(user, "must_change_password", False)
 
         # Commit the changes
         db.add(user)
@@ -193,8 +194,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         # Hash the new password
         hashed_password = get_password_hash(new_password)
 
-        # Update the password hash
+        # Update the password hash and clear the forced-change flag
         setattr(user_obj, "password_hash", hashed_password)
+        setattr(user_obj, "must_change_password", False)
 
         # Commit the changes
         db.add(user_obj)

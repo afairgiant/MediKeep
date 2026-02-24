@@ -64,9 +64,13 @@ const Login = () => {
       if (result.success) {
         // Add a small delay to ensure auth state is fully saved before navigation
         await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const from = location.state?.from?.pathname || '/dashboard';
-        navigate(from, { replace: true });
+
+        if (result.mustChangePassword) {
+          navigate('/change-password', { replace: true });
+        } else {
+          const from = location.state?.from?.pathname || '/dashboard';
+          navigate(from, { replace: true });
+        }
       } else {
         notifyError('notifications:toasts.auth.loginFailed');
       }

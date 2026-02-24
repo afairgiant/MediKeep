@@ -5,8 +5,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute, { AdminRoute, RoleRoute, PublicRoute } from './ProtectedRoute';
 import render from '../../test-utils/render';
 
+// vi.hoisted ensures this fn is available when vi.mock() factories run (they are hoisted)
+const mockNotificationsShow = vi.hoisted(() => vi.fn());
+
 // Mock @mantine/notifications
-const mockNotificationsShow = vi.fn();
 vi.mock('@mantine/notifications', () => ({
   notifications: {
     show: mockNotificationsShow,
@@ -20,10 +22,13 @@ vi.mock('../ui/LoadingSpinner', () => ({
   },
 }));
 
+// Mutable so individual tests can simulate different routes
+let mockPathname = '/test';
+
 // Mock react-router-dom hooks and Navigate
 vi.mock('react-router-dom', async () => ({
   ...(await vi.importActual('react-router-dom')),
-  useLocation: () => ({ pathname: '/test', state: null, search: '', hash: '' }),
+  useLocation: () => ({ pathname: mockPathname, state: null, search: '', hash: '' }),
   Navigate: ({ to, state, replace }) => (
     <div data-testid="navigate" data-to={to} data-replace={replace} />
   ),
@@ -37,6 +42,7 @@ describe('ProtectedRoute', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockNotificationsShow.mockClear();
+    mockPathname = '/test'; // reset before each test
   });
 
   describe('Loading State', () => {
@@ -462,5 +468,98 @@ describe('PublicRoute', () => {
 
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
     expect(screen.getByText('Loading...')).toBeInTheDocument();
+  });
+});
+
+describe('ProtectedRoute — mustChangePassword guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockNotificationsShow.mockClear();
+    mockPathname = '/test';
+  });
+
+  test('redirects to /change-password when mustChangePassword is true and not on /change-password', () => {
+    render(
+      <ProtectedRoute>
+        <TestComponent />
+      </ProtectedRoute>,
+      {
+        authContextValue: {
+          isLoading: false,
+          isAuthenticated: true,
+          user: { id: 1, username: 'admin' },
+          mustChangePassword: true,
+          hasRole: vi.fn(() => true),
+          hasAnyRole: vi.fn(() => true),
+        },
+        skipRouter: true,
+      }
+    );
+
+    expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
+    const nav = screen.getByTestId('navigate');
+    expect(nav).toHaveAttribute('data-to', '/change-password');
+  });
+
+  test('renders children when mustChangePassword is true but already on /change-password', () => {
+    mockPathname = '/change-password';
+
+    render(
+      <ProtectedRoute>
+        <TestComponent />
+      </ProtectedRoute>,
+      {
+        authContextValue: {
+          isLoading: false,
+          isAuthenticated: true,
+          user: { id: 1, username: 'admin' },
+          mustChangePassword: true,
+          hasRole: vi.fn(() => true),
+          hasAnyRole: vi.fn(() => true),
+        },
+      }
+    );
+
+    expect(screen.getByTestId('protected-content')).toBeInTheDocument();
+  });
+
+  test('renders children normally when mustChangePassword is false', () => {
+    render(
+      <ProtectedRoute>
+        <TestComponent />
+      </ProtectedRoute>,
+      {
+        authContextValue: {
+          isLoading: false,
+          isAuthenticated: true,
+          user: { id: 1, username: 'testuser' },
+          mustChangePassword: false,
+          hasRole: vi.fn(() => true),
+          hasAnyRole: vi.fn(() => true),
+        },
+      }
+    );
+
+    expect(screen.getByTestId('protected-content')).toBeInTheDocument();
+  });
+
+  test('renders children when mustChangePassword is undefined (backwards compat)', () => {
+    render(
+      <ProtectedRoute>
+        <TestComponent />
+      </ProtectedRoute>,
+      {
+        authContextValue: {
+          isLoading: false,
+          isAuthenticated: true,
+          user: { id: 1, username: 'testuser' },
+          hasRole: vi.fn(() => true),
+          hasAnyRole: vi.fn(() => true),
+          // mustChangePassword intentionally omitted
+        },
+      }
+    );
+
+    expect(screen.getByTestId('protected-content')).toBeInTheDocument();
   });
 });
