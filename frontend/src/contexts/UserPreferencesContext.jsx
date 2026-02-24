@@ -46,7 +46,11 @@ export const UserPreferencesProvider = ({ children }) => {
         // Apply the backend-stored language to i18next if it differs from the current language.
         // Without this, the saved language preference is ignored on every page load because
         // i18next only reads from localStorage/browser detection on startup.
-        if (userPrefs.language && userPrefs.language !== i18n.language) {
+        if (
+          userPrefs.language &&
+          SUPPORTED_LANGUAGES.includes(userPrefs.language) &&
+          userPrefs.language !== i18n.language
+        ) {
           try {
             await i18n.changeLanguage(userPrefs.language);
           } catch (langErr) {

@@ -105,6 +105,19 @@ describe('UserPreferencesContext — language sync on load', () => {
     );
   });
 
+  test('does not call i18n.changeLanguage when backend language is unsupported', async () => {
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: 'xx' })
+    );
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(userPrefsApi.getUserPreferences).toHaveBeenCalled();
+    });
+    expect(i18n.changeLanguage).not.toHaveBeenCalled();
+  });
+
   test('does not call i18n.changeLanguage when backend language is absent', async () => {
     vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
       makePrefs({ language: undefined })
