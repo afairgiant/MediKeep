@@ -1,12 +1,12 @@
 from typing import Optional, NamedTuple
 
-from fastapi import Depends, Query, Request, status
+from fastapi import Depends, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database.database import get_db, SessionLocal
+from app.core.database.database import get_db
 from app.core.logging.config import get_logger, log_security_event
 from app.core.http.error_handling import (
     MedicalRecordsAPIException,
@@ -19,6 +19,7 @@ from app.core.http.error_handling import (
     BusinessLogicException,
     ServiceUnavailableException,
 )
+from app.core.http.response_models import ExceptionCode
 from app.api.v1.endpoints.system import get_client_ip
 from app.core.logging.constants import sanitize_log_input
 from app.crud.user import user
@@ -382,52 +383,37 @@ def get_current_user_flexible_auth(
     return db_user
 
 
+def _extract_user_id(current_user: User) -> int:
+    """Extract and validate the integer user ID from a SQLAlchemy User model instance."""
+    user_id = getattr(current_user, "id", None)
+    if user_id is None:
+        raise MedicalRecordsAPIException(
+            error_code=ExceptionCode.INTERNAL_SERVER_ERROR,
+            http_status_code=500,
+            message="User ID not found",
+            request=None,
+        )
+    return user_id
+
+
 def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     """
     Get the current user's ID as an integer.
 
-    This helper function ensures we get the actual integer value
-    instead of the SQLAlchemy Column descriptor for type safety.
-
-    Args:
-        current_user: The current authenticated user
-
-    Returns:
-        User ID as integer
+    Ensures we get the actual integer value instead of the SQLAlchemy
+    Column descriptor for type safety.
     """
-    # Use getattr to safely access the id value from the SQLAlchemy model
-    user_id = getattr(current_user, "id", None)
-    if user_id is None:
-        raise MedicalRecordsAPIException(
-            status_code=500,
-            message="User ID not found",
-            request=None
-        )
-    return user_id
+    return _extract_user_id(current_user)
 
 
 def get_current_user_id_flexible_auth(current_user: User = Depends(get_current_user_flexible_auth)) -> int:
     """
     Get the current user's ID as an integer using flexible authentication.
-    
-    This helper function works with the flexible authentication dependency
-    that supports both header and query parameter authentication.
-    
-    Args:
-        current_user: The current authenticated user from flexible auth
-        
-    Returns:
-        User ID as integer
+
+    Works with the flexible authentication dependency that supports both
+    header and query parameter authentication.
     """
-    # Use getattr to safely access the id value from the SQLAlchemy model
-    user_id = getattr(current_user, "id", None)
-    if user_id is None:
-        raise MedicalRecordsAPIException(
-            status_code=500,
-            message="User ID not found",
-            request=None
-        )
-    return user_id
+    return _extract_user_id(current_user)
 
 
 def get_current_admin_user(current_user: User = Depends(get_current_user)) -> User:
