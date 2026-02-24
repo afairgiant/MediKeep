@@ -3,17 +3,17 @@
  * Provides consistent formatting across all medical pages
  */
 import logger from '../services/logger';
+import { timezoneService } from '../services/timezoneService';
 
-
-import { isPhoneField } from './phoneUtils';
-import { 
-  CURRENCY_FIELDS, 
-  PERCENTAGE_FIELDS, 
-  PERCENTAGE_EXCLUDE_FIELDS, 
-  DATE_FIELDS, 
+import { formatDateWithPreference } from './dateFormatUtils';
+import {
+  CURRENCY_FIELDS,
+  PERCENTAGE_FIELDS,
+  PERCENTAGE_EXCLUDE_FIELDS,
+  DATE_FIELDS,
   BOOLEAN_FIELDS,
-  isFieldType 
 } from './fieldTypeConfig';
+import { isPhoneField } from './phoneUtils';
 
 /**
  * Default label mappings for common medical record fields
@@ -123,7 +123,7 @@ const defaultFormatRules = {
     fields: DATE_FIELDS,
     format: (value) => {
       try {
-        return new Date(value).toLocaleDateString();
+        return formatDateWithPreference(value, timezoneService.dateFormatCode);
       } catch {
         return value;
       }
