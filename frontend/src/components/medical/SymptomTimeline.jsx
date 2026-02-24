@@ -22,6 +22,7 @@ import {
   SYMPTOM_SEVERITY_ORDER,
 } from '../../constants/symptomEnums';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { capitalizeFirst } from '../../utils/dateFormatUtils';
 
 /**
  * SymptomTimeline Component
@@ -31,6 +32,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 const SymptomTimeline = ({ patientId, hidden }) => {
   const { t } = useTranslation('common');
   const { locale } = useDateFormat();
+
   const [timelineData, setTimelineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
@@ -39,6 +41,9 @@ const SymptomTimeline = ({ patientId, hidden }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewingSymptom, setViewingSymptom] = useState(null);
+
+  const formatLocalDate = (dateStr, options) =>
+    capitalizeFirst(new Date(dateStr).toLocaleDateString(locale, options));
 
   const fetchTimelineData = useCallback(async () => {
     try {
@@ -216,7 +221,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
               title={
                 <Group gap="xs">
                   <Text fw={500}>
-                    {new Date(entry.date).toLocaleDateString(locale, {
+                    {formatLocalDate(entry.date, {
                       weekday: 'short',
                       year: 'numeric',
                       month: 'short',
@@ -262,7 +267,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
         onClose={() => setModalOpen(false)}
         title={t('symptoms.calendar.episodesOn', 'Symptom Episodes on {{date}}', {
           date: selectedDate
-            ? new Date(selectedDate).toLocaleDateString(locale, {
+            ? formatLocalDate(selectedDate, {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',

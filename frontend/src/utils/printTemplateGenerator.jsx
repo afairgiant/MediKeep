@@ -3,7 +3,9 @@
  * Provides consistent printing functionality across all medical pages
  */
 import logger from '../services/logger';
+import { timezoneService } from '../services/timezoneService';
 
+import { formatDateWithPreference } from './dateFormatUtils';
 import { formatFieldLabel, formatFieldValue, insurancePrintLabelMappings, contactInfoLabelMappings } from './fieldFormatters';
 
 /**
@@ -184,7 +186,7 @@ export const generatePrintFooter = () => {
   const now = new Date();
   return `
     <div class="footer">
-      Printed on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}
+      Printed on ${formatDateWithPreference(now, timezoneService.dateFormatCode)} at ${now.toLocaleTimeString()}
     </div>
   `;
 };
@@ -246,11 +248,11 @@ export const generateMedicalRecordPrint = (data, config) => {
   `;
 };
 
-// Default date formatter for backwards compatibility
+// Default date formatter using user's date preference
 const defaultFormatDate = (value) => {
   if (!value) return '-';
   try {
-    return new Date(value).toLocaleDateString();
+    return formatDateWithPreference(value, timezoneService.dateFormatCode);
   } catch {
     return value;
   }

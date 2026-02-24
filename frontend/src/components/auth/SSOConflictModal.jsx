@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Modal, Group, Text, Stack, Card, Badge, Alert } from '@mantine/core';
 import { IconInfoCircle, IconLink, IconUserPlus, IconX } from '@tabler/icons-react';
+import { formatDateWithPreference } from '../../utils/dateFormatUtils';
+import { timezoneService } from '../../services/timezoneService';
 
 const SSOConflictModal = ({ 
   conflictData, 
@@ -77,7 +79,7 @@ const SSOConflictModal = ({
             {existing_user_info?.created_at && (
               <Group>
                 <Text size="sm" color="dimmed">Created:</Text>
-                <Text size="sm">{new Date(existing_user_info.created_at).toLocaleDateString()}</Text>
+                <Text size="sm">{formatDateWithPreference(existing_user_info.created_at, timezoneService.dateFormatCode)}</Text>
               </Group>
             )}
           </Stack>

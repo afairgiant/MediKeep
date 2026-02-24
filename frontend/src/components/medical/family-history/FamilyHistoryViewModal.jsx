@@ -6,7 +6,6 @@ import {
   Text,
   Badge,
   Button,
-  Divider,
   Card,
   Box,
   ActionIcon,
@@ -16,12 +15,12 @@ import {
 import {
   IconEdit,
   IconStethoscope,
-  IconX
 } from '@tabler/icons-react';
 import { useMantineColorScheme } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 // Style constants matching the main component
 const CARD_STYLES = {
@@ -52,6 +51,7 @@ const FamilyHistoryViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
+  const { formatDate } = useDateFormat();
 
   const handleError = (error, action) => {
     logger.error('family_history_view_modal_error', {
@@ -259,7 +259,7 @@ const FamilyHistoryViewModal = ({
               )}
               {member.is_shared && member.shared_at && (
                 <Text size="sm">
-                  <strong>{t('familyHistory.viewModal.sharedAt', 'Shared At')}:</strong> {new Date(member.shared_at).toLocaleDateString()}
+                  <strong>{t('familyHistory.viewModal.sharedAt', 'Shared At')}:</strong> {formatDate(member.shared_at)}
                 </Text>
               )}
               {member.is_shared && member.sharing_note && (

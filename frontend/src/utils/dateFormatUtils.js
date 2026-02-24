@@ -6,6 +6,18 @@
 import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from './constants';
 
 /**
+ * Capitalize the first character of a string.
+ * Useful for locale-formatted dates where some locales (e.g., sv-SE)
+ * produce lowercase month/day names.
+ * @param {string} str - String to capitalize
+ * @returns {string} String with first character uppercased
+ */
+export const capitalizeFirst = str => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+/**
  * Get the locale string for a date format code
  * @param {string} formatCode - 'mdy', 'dmy', or 'ymd'
  * @returns {string} Locale string for toLocaleDateString
@@ -106,11 +118,14 @@ export const formatDateLong = (
 
     if (isNaN(date.getTime())) return 'Invalid Date';
 
-    return date.toLocaleDateString(locale, {
+    const result = date.toLocaleDateString(locale, {
       year: 'numeric',
       month: longMonth ? 'long' : 'short',
       day: 'numeric',
     });
+
+    // Some locales (e.g. sv-SE) produce lowercase month names
+    return capitalizeFirst(result);
   } catch {
     return 'Invalid Date';
   }

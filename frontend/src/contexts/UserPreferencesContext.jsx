@@ -6,6 +6,8 @@ import {
 import { useAuth } from './AuthContext';
 import frontendLogger from '../services/frontendLogger';
 import { PAPERLESS_SETTING_DEFAULTS } from '../constants/paperlessSettings';
+import { timezoneService } from '../services/timezoneService';
+import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
 import i18n from '../i18n';
 
 // Supported languages - must match backend validation
@@ -168,6 +170,13 @@ export const UserPreferencesProvider = ({ children }) => {
 
     syncAutoDetectedLanguage();
   }, [isAuthenticated, user, preferences, loading, updatePreferences]);
+
+  // Sync date format locale to timezoneService when preferences change
+  useEffect(() => {
+    const formatCode = preferences?.date_format || DEFAULT_DATE_FORMAT;
+    const config = DATE_FORMAT_OPTIONS[formatCode] || DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT];
+    timezoneService.setDateLocale(config.locale, formatCode);
+  }, [preferences?.date_format]);
 
   // Function to update local preferences only (for internal use)
   const updateLocalPreferences = newPreferences => {

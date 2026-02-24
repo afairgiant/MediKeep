@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
+import { formatDateWithPreference } from '../../../utils/dateFormatUtils';
+import { timezoneService } from '../../../services/timezoneService';
 import {
   ActionIcon,
   Alert,
@@ -286,20 +288,11 @@ RelationshipRow.propTypes = {
 };
 
 /**
- * Formats a date string for display with readable format (e.g., "Jan 15, 2025").
+ * Formats a date string for display respecting user's date format preference.
  */
 export function formatDateDisplay(dateString) {
   if (!dateString) return '';
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  } catch {
-    return dateString;
-  }
+  return formatDateWithPreference(dateString, timezoneService.dateFormatCode);
 }
 
 /**

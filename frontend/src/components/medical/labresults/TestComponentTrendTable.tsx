@@ -12,13 +12,12 @@ import {
   Badge,
   Group,
   ScrollArea,
-  ActionIcon,
   Tooltip,
-  Box
 } from '@mantine/core';
 import { IconArrowUp, IconArrowDown, IconArrowsSort } from '@tabler/icons-react';
 import { TrendResponse, TrendDataPoint } from '../../../services/api/labTestComponentApi';
 import { getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface TestComponentTrendTableProps {
   trendData: TrendResponse;
@@ -30,6 +29,7 @@ type SortOrder = 'asc' | 'desc';
 const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trendData }) => {
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc'); // Most recent first by default
+  const { formatDate: formatPreferredDate } = useDateFormat();
 
   const getStatusColor = (status: string | null | undefined): string => {
     if (!status) return 'gray';
@@ -52,16 +52,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
 
   const formatDate = (point: TrendDataPoint): string => {
     const dateStr = point.recorded_date || point.created_at.split('T')[0];
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch {
-      return dateStr;
-    }
+    return formatPreferredDate(dateStr);
   };
 
   const formatReferenceRange = (point: TrendDataPoint): string => {

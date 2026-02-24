@@ -2,6 +2,8 @@
  * Shared date utility functions for consistent date handling across the application
  */
 
+import { timezoneService } from '../services/timezoneService';
+
 /**
  * Parse a date input value to a JavaScript Date object
  * Handles string dates in YYYY-MM-DD format to avoid timezone issues
@@ -151,8 +153,12 @@ export const formatDateForDisplay = (dateValue) => {
   const date = parseDateInput(dateValue);
   if (!date) return '';
 
-  // Use browser's locale for user-friendly display
-  return date.toLocaleDateString();
+  // Use timezoneService locale to respect user's date format preference
+  return date.toLocaleDateString(timezoneService.dateLocale, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
 };
 
 /**

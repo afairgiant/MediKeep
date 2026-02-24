@@ -4,7 +4,14 @@ import logger from './logger';
 class TimezoneService {
   constructor() {
     this.facilityTimezone = 'UTC';
+    this.dateLocale = 'en-US';
+    this.dateFormatCode = 'mdy';
     this.initialized = false;
+  }
+
+  setDateLocale(locale, formatCode) {
+    this.dateLocale = locale || 'en-US';
+    this.dateFormatCode = formatCode || 'mdy';
   }
 
   async init() {
@@ -37,10 +44,10 @@ class TimezoneService {
       const date = new Date(utcString);
 
       if (dateOnly) {
-        return date.toLocaleDateString('en-US', {
+        return date.toLocaleDateString(this.dateLocale, {
           timeZone: this.facilityTimezone,
           year: 'numeric',
-          month: 'short',
+          month: '2-digit',
           day: '2-digit',
         });
       }
@@ -48,7 +55,7 @@ class TimezoneService {
       const dateTimeOptions = {
         timeZone: this.facilityTimezone,
         year: 'numeric',
-        month: 'short',
+        month: '2-digit',
         day: '2-digit',
         hour: 'numeric',
         minute: '2-digit',
@@ -58,7 +65,7 @@ class TimezoneService {
         dateTimeOptions.timeZoneName = 'short';
       }
 
-      return date.toLocaleString('en-US', dateTimeOptions);
+      return date.toLocaleString(this.dateLocale, dateTimeOptions);
     } catch (error) {
       logger.debug('timezone_service_format_error', 'Date formatting failed', {
         utcString,
