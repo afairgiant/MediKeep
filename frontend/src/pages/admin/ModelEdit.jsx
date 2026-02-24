@@ -1,23 +1,25 @@
-import logger from '../../services/logger';
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+
 import AdminLayout from '../../components/admin/AdminLayout';
-import { adminApiService } from '../../services/api/adminApi';
 import { AdminResetPasswordModal } from '../../components/auth';
 import { Loading } from '../../components';
 import { Button } from '../../components/ui';
-import { MEDICAL_MODELS } from '../../constants/modelConstants';
+import FieldRenderer from '../../components/admin/FieldRenderer';
 import { EDIT_EXCLUDED_FIELDS } from '../../constants/validationConstants';
+import { useAuth } from '../../contexts/AuthContext';
 import { useFieldHandlers } from '../../hooks/useFieldHandlers';
+import { adminApiService } from '../../services/api/adminApi';
+import logger from '../../services/logger';
 import { validateForm } from '../../utils/fieldValidation';
 import { formatFieldLabel } from '../../utils/formatters';
-import FieldRenderer from '../../components/admin/FieldRenderer';
+import { secureStorage } from '../../utils/secureStorage';
 import './ModelEdit.css';
 
 const ModelEdit = () => {
   const { modelName, recordId } = useParams();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const [record, setRecord] = useState(null);
   const [metadata, setMetadata] = useState(null);
@@ -30,7 +32,6 @@ const ModelEdit = () => {
   const [resetUserId, setResetUserId] = useState(null);
   const [resetUsername, setResetUsername] = useState('');
 
-  // Use the shared field handlers hook
   const { handleFieldChange } = useFieldHandlers(setFormData, setValidationErrors);
 
   useEffect(() => {
@@ -39,7 +40,6 @@ const ModelEdit = () => {
         setLoading(true);
         setError(null);
 
-        // Load metadata and record in parallel
         const [metadataResult, recordResult] = await Promise.all([
           adminApiService.getModelMetadata(modelName),
           adminApiService.getModelRecord(modelName, recordId),
@@ -79,7 +79,6 @@ const ModelEdit = () => {
       setSaving(true);
       setError(null);
 
-      // Create update data excluding primary key fields, password fields, and timestamp fields
       const updateData = {};
       metadata.fields.forEach(field => {
         if (
@@ -97,35 +96,29 @@ const ModelEdit = () => {
         }
       });
 
-      // Safety checks for user model updates
       if (modelName === 'user') {
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const currentUser = await secureStorage.getJSON('user') || {};
         const currentUsername = currentUser.username;
-        
-        // Check for username changes
+
         if (updateData.username && record.username !== updateData.username) {
-          // If admin is changing their own username, show warning
           if (record.username === currentUsername) {
             const confirmChange = window.confirm(
               `WARNING: You are about to change your own username from "${record.username}" to "${updateData.username}".\n\n` +
               `This will log you out immediately and you'll need to log back in with the new username.\n\n` +
               `Are you sure you want to continue?`
             );
-            
+
             if (!confirmChange) {
               setSaving(false);
               return;
             }
           }
         }
-        
-        // Check for role changes that could lock out admin access
+
         if (updateData.role && record.role !== updateData.role) {
-          const currentUserRole = (currentUser.role || '').toLowerCase();
           const recordRole = (record.role || '').toLowerCase();
           const newRole = (updateData.role || '').toLowerCase();
           
-          // If changing admin to non-admin, warn about potential lockout
           if (['admin', 'administrator'].includes(recordRole) && !['admin', 'administrator'].includes(newRole)) {
             const confirmRoleChange = window.confirm(
               `WARNING: You are about to remove admin privileges from this user.\n\n` +
@@ -143,22 +136,19 @@ const ModelEdit = () => {
 
       await adminApiService.updateModelRecord(modelName, recordId, updateData);
       
-      // If user changed their own username, they need to log out
       if (modelName === 'user' && updateData.username && record.username !== updateData.username) {
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        const currentUsername = currentUser.username;
-        
-        if (record.username === currentUsername) {
+        const currentUserAfterSave = await secureStorage.getJSON('user') || {};
+        const currentUsernameAfterSave = currentUserAfterSave.username;
+
+        if (record.username === currentUsernameAfterSave) {
           alert(
             `Username updated successfully!\n\n` +
             `You have been logged out because your username changed.\n` +
             `Please log back in with your new username: "${updateData.username}"`
           );
-          
-          // Clear authentication and redirect to login
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+
+          await logout();
+          navigate('/login');
           return;
         }
       }
@@ -173,7 +163,6 @@ const ModelEdit = () => {
   };
 
   const handleChangePassword = userId => {
-    // Get the username from the form data
     const username = formData.username || `User ${userId}`;
     setResetUserId(userId);
     setResetUsername(username);
