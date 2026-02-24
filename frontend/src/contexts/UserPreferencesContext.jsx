@@ -45,6 +45,25 @@ export const UserPreferencesProvider = ({ children }) => {
         const userPrefs = await getUserPreferences();
         setPreferences(userPrefs);
 
+        // Apply the backend-stored language to i18next if it differs from the current language.
+        // Without this, the saved language preference is ignored on every page load because
+        // i18next only reads from localStorage/browser detection on startup.
+        if (
+          userPrefs.language &&
+          SUPPORTED_LANGUAGES.includes(userPrefs.language) &&
+          userPrefs.language !== i18n.language
+        ) {
+          try {
+            await i18n.changeLanguage(userPrefs.language);
+          } catch (langErr) {
+            frontendLogger.logError('Failed to apply saved language preference', {
+              language: userPrefs.language,
+              error: langErr.message,
+              component: 'UserPreferencesContext',
+            });
+          }
+        }
+
         frontendLogger.logInfo('User preferences loaded', {
           unitSystem: userPrefs.unit_system,
           paperlessEnabled: userPrefs.paperless_enabled,
