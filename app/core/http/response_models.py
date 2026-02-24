@@ -2,7 +2,7 @@
 Response models for standardized API responses in the Medical Records Management System.
 
 This module provides Pydantic models for consistent API responses across the application,
-integrating with the APIException library for standardized error handling.
+with exception code definitions for standardized error handling.
 """
 
 from enum import Enum
@@ -19,40 +19,6 @@ class ExceptionStatus(str, Enum):
     FAIL = "FAIL"
 
 
-class BaseExceptionCode(str, Enum):
-    """
-    Base enumeration for exception codes with standard HTTP error types.
-    """
-    # 400 Bad Request
-    BAD_REQUEST = "BAD-400"
-    VALIDATION_ERROR = "VAL-422"
-    
-    # 401 Unauthorized
-    UNAUTHORIZED = "AUTH-401"
-    TOKEN_EXPIRED = "AUTH-401-EXPIRED"
-    TOKEN_INVALID = "AUTH-401-INVALID"
-    
-    # 403 Forbidden
-    FORBIDDEN = "PERM-403"
-    INSUFFICIENT_PERMISSIONS = "PERM-403-INSUF"
-    
-    # 404 Not Found
-    NOT_FOUND = "NOT-404"
-    RESOURCE_NOT_FOUND = "RES-404"
-    
-    # 409 Conflict
-    CONFLICT = "CONF-409"
-    DUPLICATE_ENTRY = "CONF-409-DUP"
-    
-    # 500 Internal Server Error
-    INTERNAL_SERVER_ERROR = "ISE-500"
-    DATABASE_ERROR = "DB-500"
-    
-    # Custom application errors
-    BUSINESS_LOGIC_ERROR = "BIZ-400"
-    SERVICE_UNAVAILABLE = "SVC-503"
-
-
 class ExceptionCodeDefinition:
     """
     Helper class to define exception code details.
@@ -63,9 +29,12 @@ class ExceptionCodeDefinition:
         self.description = description
 
 
-class ExceptionCode(ExceptionCodeDefinition):
+class ExceptionCode:
     """
-    Exception code definitions for various error scenarios.
+    Namespace of ExceptionCodeDefinition instances for standard error scenarios.
+
+    Each attribute is an ExceptionCodeDefinition with an error_code, message,
+    and description that can be passed directly to APIException.
     """
     
     # 400 Bad Request

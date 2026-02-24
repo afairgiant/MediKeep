@@ -7,18 +7,17 @@ and integration with our structured logging system.
 """
 
 import traceback
-from typing import Dict, Any, Optional, List
 from contextlib import contextmanager
+from typing import Any, Optional
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import (
     IntegrityError,
-    DatabaseError,
     DisconnectionError,
     OperationalError,
-    SQLAlchemyError
+    SQLAlchemyError,
 )
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -28,10 +27,15 @@ from starlette.status import (
     HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
-    HTTP_503_SERVICE_UNAVAILABLE
+    HTTP_503_SERVICE_UNAVAILABLE,
 )
 
-from app.core.http.response_models import ExceptionCode, ExceptionStatus, ResponseModel
+from app.core.http.response_models import (
+    ExceptionCode,
+    ExceptionCodeDefinition,
+    ExceptionStatus,
+    ResponseModel,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_endpoint_error, log_security_event
@@ -41,22 +45,29 @@ logger = get_logger(__name__, "app")
 
 
 class APIException(Exception):
-    """Base API exception class (replaces third-party apiexception library)."""
+    """Base exception for all API errors with standardized response formatting."""
 
     def __init__(
         self,
         error_code,
         http_status_code: int = 400,
         status: ExceptionStatus = ExceptionStatus.FAIL,
-        message: str = None,
-        description: str = None,
+        message: Optional[str] = None,
+        description: Optional[str] = None,
     ):
-        self.error_code = error_code.error_code if hasattr(error_code, 'error_code') else str(error_code)
+        # Extract defaults from ExceptionCodeDefinition when provided
+        if isinstance(error_code, ExceptionCodeDefinition):
+            self.error_code = error_code.error_code
+            self.message = message or error_code.message
+            self.description = description or error_code.description
+        else:
+            self.error_code = str(error_code)
+            self.message = message or "An error occurred"
+            self.description = description or ""
+
         self.http_status_code = http_status_code
         self.status = status
-        self.message = message or (error_code.message if hasattr(error_code, 'message') else "An error occurred")
-        self.description = description or (error_code.description if hasattr(error_code, 'description') else "")
-        self.headers = {}
+        self.headers: dict[str, str] = {}
         super().__init__(self.message)
 
     def to_response_model(self, data=None):
@@ -71,112 +82,89 @@ class APIException(Exception):
 
 
 class MedicalRecordsAPIException(APIException):
-    """
-    Custom APIException subclass for Medical Records system with enhanced logging.
-    
-    This class extends the base APIException to integrate with our structured logging
-    system and provide better context for medical records specific errors.
-    """
-    
-    def __init__(self, 
-                 error_code,
-                 http_status_code: int = 400,
-                 status: ExceptionStatus = ExceptionStatus.FAIL,
-                 message: str = None,
-                 description: str = None,
-                 request: Optional[Request] = None,
-                 context: Optional[Dict[str, Any]] = None,
-                 headers: Optional[Dict[str, str]] = None):
-        """
-        Initialize with enhanced logging and context.
-        
-        Args:
-            error_code: Exception code definition
-            http_status_code: HTTP status code
-            status: Exception status (fail, error, warning)
-            message: Custom error message
-            description: Detailed error description
-            request: FastAPI request object for logging context
-            context: Additional context data for logging
-            headers: Optional HTTP headers to include in the response
-        """
+    """APIException subclass with structured logging integration for the Medical Records system."""
+
+    def __init__(
+        self,
+        error_code,
+        http_status_code: int = 400,
+        status: ExceptionStatus = ExceptionStatus.FAIL,
+        message: Optional[str] = None,
+        description: Optional[str] = None,
+        request: Optional[Request] = None,
+        context: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, str]] = None,
+    ):
         super().__init__(error_code, http_status_code, status, message, description)
-        
-        # Store headers for FastAPI to use
-        self.headers = headers
-        
-        # Enhanced logging with medical records context
-        self._log_enhanced_exception(request, context)
-    
-    def _log_enhanced_exception(self, request: Optional[Request] = None, context: Optional[Dict[str, Any]] = None):
-        """
-        Enhanced logging with request context and structured data using LogFields constants.
-        """
-        # Build extra context with LogFields constants (without EVENT - helpers set this)
+        if headers:
+            self.headers = headers
+        self._log_exception(request, context)
+
+    def _log_exception(
+        self,
+        request: Optional[Request] = None,
+        context: Optional[dict[str, Any]] = None,
+    ):
+        """Log the exception with structured data, routing to the appropriate helper and level."""
         extra_data = {
             "error_code": self.error_code,
             "http_status": self.http_status_code,
-            "status": self.status.value if hasattr(self.status, 'value') else str(self.status)
+            LogFields.STATUS: self.status.value if hasattr(self.status, "value") else str(self.status),
         }
-
         if context:
             extra_data.update(context)
 
-        # Use appropriate logging based on HTTP status and severity
-        if self.http_status_code >= 500:
-            # Server errors - use endpoint_error helper if request available
+        code = self.http_status_code
+
+        if code >= 500:
             if request:
-                log_endpoint_error(logger, request, f"Server Error: {self.message}",
-                                 error=self.error_code, **extra_data)
+                log_endpoint_error(
+                    logger, request, f"Server Error: {self.message}",
+                    error=self.error_code, **extra_data,
+                )
             else:
                 logger.error(f"Server Error: {self.message}", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "api_exception",
-                    **extra_data
+                    LogFields.CATEGORY: "app", LogFields.EVENT: "api_exception", **extra_data,
                 })
-        elif self.http_status_code in (401, 403):
-            # Authentication/authorization errors - use security_event helper
+
+        elif code in (401, 403):
             if request:
-                log_security_event(logger, "authentication_error", request, f"Auth Error: {self.message}", **extra_data)
+                log_security_event(
+                    logger, "authentication_error", request,
+                    f"Auth Error: {self.message}", **extra_data,
+                )
             else:
                 logger.warning(f"Auth Error: {self.message}", extra={
-                    LogFields.CATEGORY: "security",
-                    LogFields.EVENT: "authentication_error",
-                    **extra_data
+                    LogFields.CATEGORY: "security", LogFields.EVENT: "authentication_error",
+                    **extra_data,
                 })
-        elif self.http_status_code >= 400:
-            # Client errors - use endpoint_error helper if request available
+
+        elif code >= 400:
             if request:
-                log_endpoint_error(logger, request, f"Client Error: {self.message}",
-                                 error=self.error_code, **extra_data)
+                log_endpoint_error(
+                    logger, request, f"Client Error: {self.message}",
+                    error=self.error_code, **extra_data,
+                )
             else:
                 logger.warning(f"Client Error: {self.message}", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "api_exception",
-                    **extra_data
+                    LogFields.CATEGORY: "app", LogFields.EVENT: "api_exception", **extra_data,
                 })
+
         else:
-            # Informational - use structured logging
-            if request:
-                logger.info(f"Exception: {self.message}", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "api_exception",
-                    LogFields.IP: request.client.host if request.client else "unknown",
-                    **extra_data
-                })
-            else:
-                logger.info(f"Exception: {self.message}", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "api_exception",
-                    **extra_data
-                })
+            log_extra = {
+                LogFields.CATEGORY: "app", LogFields.EVENT: "api_exception", **extra_data,
+            }
+            if request and request.client:
+                log_extra[LogFields.IP] = request.client.host
+            logger.info(f"Exception: {self.message}", extra=log_extra)
 
 
 # Custom exception classes for different error categories
 
 class ValidationException(MedicalRecordsAPIException):
     """Exception for validation errors (422)."""
-    def __init__(self, message: str = None, description: str = None, validation_errors: List[str] = None, **kwargs):
+    def __init__(self, message: Optional[str] = None, description: Optional[str] = None,
+                 validation_errors: Optional[list[str]] = None, **kwargs):
         super().__init__(
             error_code=ExceptionCode.VALIDATION_ERROR,
             http_status_code=HTTP_422_UNPROCESSABLE_ENTITY,
@@ -187,23 +175,21 @@ class ValidationException(MedicalRecordsAPIException):
         )
         self.validation_errors = validation_errors or []
 
-    def to_response_model(self):
-        """Override to include validation_errors in detail field."""
-        from app.core.http.response_models import ResponseModel
-
-        # Create response model with validation errors in detail field
+    def to_response_model(self, data=None):
+        """Override to include validation_errors in the detail field."""
         return ResponseModel(
+            data=data,
             status=self.status,
             message=self.message,
             error_code=self.error_code,
             description=self.description,
-            detail=self.validation_errors if self.validation_errors else None
+            detail=self.validation_errors or None,
         )
 
 
 class UnauthorizedException(MedicalRecordsAPIException):
     """Exception for unauthorized access (401)."""
-    def __init__(self, message: str = None, description: str = None, **kwargs):
+    def __init__(self, message: Optional[str] = None, description: Optional[str] = None, **kwargs):
         super().__init__(
             error_code=ExceptionCode.UNAUTHORIZED,
             http_status_code=HTTP_401_UNAUTHORIZED,
@@ -216,7 +202,7 @@ class UnauthorizedException(MedicalRecordsAPIException):
 
 class ForbiddenException(MedicalRecordsAPIException):
     """Exception for forbidden access (403)."""
-    def __init__(self, message: str = None, description: str = None, **kwargs):
+    def __init__(self, message: Optional[str] = None, description: Optional[str] = None, **kwargs):
         super().__init__(
             error_code=ExceptionCode.FORBIDDEN,
             http_status_code=HTTP_403_FORBIDDEN,
@@ -229,7 +215,8 @@ class ForbiddenException(MedicalRecordsAPIException):
 
 class NotFoundException(MedicalRecordsAPIException):
     """Exception for resource not found (404)."""
-    def __init__(self, resource: str = None, message: str = None, description: str = None, **kwargs):
+    def __init__(self, resource: Optional[str] = None, message: Optional[str] = None,
+                 description: Optional[str] = None, **kwargs):
         default_message = f"{resource} not found" if resource else "Resource not found"
         default_description = f"The requested {resource.lower()} does not exist" if resource else "The requested resource does not exist"
         
@@ -245,7 +232,7 @@ class NotFoundException(MedicalRecordsAPIException):
 
 class ConflictException(MedicalRecordsAPIException):
     """Exception for resource conflicts (409)."""
-    def __init__(self, message: str = None, description: str = None, **kwargs):
+    def __init__(self, message: Optional[str] = None, description: Optional[str] = None, **kwargs):
         super().__init__(
             error_code=ExceptionCode.CONFLICT,
             http_status_code=HTTP_409_CONFLICT,
@@ -258,7 +245,8 @@ class ConflictException(MedicalRecordsAPIException):
 
 class DatabaseException(MedicalRecordsAPIException):
     """Exception for database errors (500)."""
-    def __init__(self, message: str = None, description: str = None, original_error: Exception = None, **kwargs):
+    def __init__(self, message: Optional[str] = None, description: Optional[str] = None,
+                 original_error: Optional[Exception] = None, **kwargs):
         super().__init__(
             error_code=ExceptionCode.DATABASE_ERROR,
             http_status_code=HTTP_500_INTERNAL_SERVER_ERROR,
@@ -272,7 +260,7 @@ class DatabaseException(MedicalRecordsAPIException):
 
 class BusinessLogicException(MedicalRecordsAPIException):
     """Exception for business logic violations (400)."""
-    def __init__(self, message: str = None, description: str = None, **kwargs):
+    def __init__(self, message: Optional[str] = None, description: Optional[str] = None, **kwargs):
         super().__init__(
             error_code=ExceptionCode.BUSINESS_LOGIC_ERROR,
             http_status_code=HTTP_400_BAD_REQUEST,
@@ -285,7 +273,7 @@ class BusinessLogicException(MedicalRecordsAPIException):
 
 class ServiceUnavailableException(MedicalRecordsAPIException):
     """Exception for service unavailable (503)."""
-    def __init__(self, message: str = None, description: str = None, **kwargs):
+    def __init__(self, message: Optional[str] = None, description: Optional[str] = None, **kwargs):
         super().__init__(
             error_code=ExceptionCode.SERVICE_UNAVAILABLE,
             http_status_code=HTTP_503_SERVICE_UNAVAILABLE,
@@ -297,7 +285,7 @@ class ServiceUnavailableException(MedicalRecordsAPIException):
 
 
 @contextmanager
-def handle_database_errors(request: Optional[Request] = None, context: Optional[Dict[str, Any]] = None):
+def handle_database_errors(request: Optional[Request] = None, context: Optional[dict[str, Any]] = None):
     """
     Context manager for handling database errors with proper logging and exception conversion.
     
@@ -382,13 +370,13 @@ def create_enhanced_validation_error_handler():
         logger.warning(
             f"Validation error on {request.method} {request.url.path}",
             extra={
-                "category": "app",
-                "event": "validation_error",
-                "ip": user_ip,
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "validation_error",
+                LogFields.IP: user_ip,
                 "validation_errors": exc.errors(),
                 "url_path": str(request.url.path),
                 "method": request.method,
-                "error_count": len(exc.errors())
+                "error_count": len(exc.errors()),
             }
         )
 
@@ -474,15 +462,15 @@ def create_fallback_exception_handler():
         logger.error(
             f"Unhandled exception on {request.method} {request.url.path}",
             extra={
-                "category": "app", 
-                "event": "unhandled_exception",
-                "ip": user_ip,
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "unhandled_exception",
+                LogFields.IP: user_ip,
                 "url_path": str(request.url.path),
                 "method": request.method,
                 "exception_type": type(exc).__name__,
                 "exception_message": str(exc),
                 "traceback": tb,
-                "user_agent": request.headers.get("user-agent", "unknown")
+                "user_agent": request.headers.get("user-agent", "unknown"),
             }
         )
         
@@ -508,6 +496,16 @@ def create_fallback_exception_handler():
     return fallback_exception_handler
 
 
+# Map standard HTTP status codes to ExceptionCode definitions for HTTPException conversion
+_HTTP_STATUS_TO_CODE = {
+    400: ExceptionCode.BAD_REQUEST,
+    401: ExceptionCode.UNAUTHORIZED,
+    403: ExceptionCode.FORBIDDEN,
+    404: ExceptionCode.NOT_FOUND,
+    409: ExceptionCode.CONFLICT,
+}
+
+
 def setup_error_handling(app: FastAPI):
     """
     Setup comprehensive error handling for the FastAPI application.
@@ -519,14 +517,12 @@ def setup_error_handling(app: FastAPI):
         app: FastAPI application instance
     """
     
-    # Register handler for APIException (and all subclasses)
     @app.exception_handler(APIException)
     async def api_exception_handler(request: Request, exc: APIException):
-        headers = exc.headers if hasattr(exc, 'headers') and exc.headers else None
         return JSONResponse(
             status_code=exc.http_status_code,
             content=exc.to_response_model().model_dump(exclude_none=False),
-            headers=headers,
+            headers=exc.headers or None,
         )
     
     # Replace default validation error handler with our enhanced version
@@ -534,39 +530,22 @@ def setup_error_handling(app: FastAPI):
     
     # Add fallback handler for any unhandled exceptions
     app.add_exception_handler(Exception, create_fallback_exception_handler())
-    
-    # Add specific handler for standard HTTPException to maintain compatibility
+
     @app.exception_handler(HTTPException)
     async def http_exception_handler(request: Request, exc: HTTPException):
-        """
-        Handler for standard FastAPI HTTPExceptions.
-        Converts them to our standardized response format.
-        """
-        # Determine appropriate error code based on status code
-        if exc.status_code == 400:
-            error_code = ExceptionCode.BAD_REQUEST
-        elif exc.status_code == 401:
-            error_code = ExceptionCode.UNAUTHORIZED
-        elif exc.status_code == 403:
-            error_code = ExceptionCode.FORBIDDEN
-        elif exc.status_code == 404:
-            error_code = ExceptionCode.NOT_FOUND
-        elif exc.status_code == 409:
-            error_code = ExceptionCode.CONFLICT
-        else:
-            error_code = ExceptionCode.INTERNAL_SERVER_ERROR
-        
-        # Log the HTTP exception
+        """Convert standard FastAPI HTTPExceptions to our standardized response format."""
+        error_code = _HTTP_STATUS_TO_CODE.get(exc.status_code, ExceptionCode.INTERNAL_SERVER_ERROR)
+
         logger.warning(
             f"HTTP Exception {exc.status_code} on {request.method} {request.url.path}",
             extra={
-                "category": "app",
-                "event": "http_exception", 
-                "ip": request.client.host if request.client else "unknown",
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "http_exception",
+                LogFields.IP: request.client.host if request.client else "unknown",
                 "url_path": str(request.url.path),
                 "method": request.method,
                 "status_code": exc.status_code,
-                "detail": exc.detail
+                "detail": exc.detail,
             }
         )
         
@@ -588,21 +567,21 @@ def setup_error_handling(app: FastAPI):
     logger.info(
         "Comprehensive error handling system initialized",
         extra={
-            "category": "app",
-            "event": "error_handling_setup",
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "error_handling_setup",
             "handlers": [
-                "APIException", 
+                "APIException",
                 "RequestValidationError",
-                "HTTPException", 
-                "Exception (fallback)"
-            ]
+                "HTTPException",
+                "Exception (fallback)",
+            ],
         }
     )
 
 
 # Convenience functions for common error scenarios
 
-def raise_not_found(resource: str, identifier: str = None, request: Request = None):
+def raise_not_found(resource: str, identifier: Optional[str] = None, request: Optional[Request] = None):
     """
     Convenience function to raise a not found exception with consistent messaging.
     
@@ -626,7 +605,7 @@ def raise_not_found(resource: str, identifier: str = None, request: Request = No
     )
 
 
-def raise_validation_error(field: str, message: str, request: Request = None):
+def raise_validation_error(field: str, message: str, request: Optional[Request] = None):
     """
     Convenience function to raise validation errors for specific fields.
     
@@ -644,7 +623,8 @@ def raise_validation_error(field: str, message: str, request: Request = None):
     )
 
 
-def raise_permission_denied(action: str = None, resource: str = None, request: Request = None):
+def raise_permission_denied(action: Optional[str] = None, resource: Optional[str] = None,
+                            request: Optional[Request] = None):
     """
     Convenience function to raise permission denied exceptions.
     
