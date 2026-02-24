@@ -19,6 +19,7 @@ from app.core.http.error_handling import (
     BusinessLogicException,
     ServiceUnavailableException,
 )
+from app.core.http.response_models import ExceptionCode
 from app.api.v1.endpoints.system import get_client_ip
 from app.core.logging.constants import sanitize_log_input
 from app.crud.user import user
@@ -399,7 +400,8 @@ def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     user_id = getattr(current_user, "id", None)
     if user_id is None:
         raise MedicalRecordsAPIException(
-            status_code=500,
+            error_code=ExceptionCode.INTERNAL_SERVER_ERROR,
+            http_status_code=500,
             message="User ID not found",
             request=None
         )
@@ -423,7 +425,8 @@ def get_current_user_id_flexible_auth(current_user: User = Depends(get_current_u
     user_id = getattr(current_user, "id", None)
     if user_id is None:
         raise MedicalRecordsAPIException(
-            status_code=500,
+            error_code=ExceptionCode.INTERNAL_SERVER_ERROR,
+            http_status_code=500,
             message="User ID not found",
             request=None
         )

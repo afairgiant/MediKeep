@@ -1,8 +1,8 @@
 """
 Comprehensive global error handling system for the Medical Records Management System.
 
-This module provides a centralized error handling system using the APIException library,
-with custom exception classes for different error types, database error handling,
+This module provides a centralized error handling system with a local APIException base class,
+custom exception classes for different error types, database error handling,
 and integration with our structured logging system.
 """
 
@@ -31,7 +31,6 @@ from starlette.status import (
     HTTP_503_SERVICE_UNAVAILABLE
 )
 
-from api_exception import APIException, register_exception_handlers, ResponseFormat
 from app.core.http.response_models import ExceptionCode, ExceptionStatus, ResponseModel
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -39,6 +38,36 @@ from app.core.logging.helpers import log_endpoint_error, log_security_event
 
 # Initialize logger for error handling
 logger = get_logger(__name__, "app")
+
+
+class APIException(Exception):
+    """Base API exception class (replaces third-party apiexception library)."""
+
+    def __init__(
+        self,
+        error_code,
+        http_status_code: int = 400,
+        status: ExceptionStatus = ExceptionStatus.FAIL,
+        message: str = None,
+        description: str = None,
+    ):
+        self.error_code = error_code.error_code if hasattr(error_code, 'error_code') else str(error_code)
+        self.http_status_code = http_status_code
+        self.status = status
+        self.message = message or (error_code.message if hasattr(error_code, 'message') else "An error occurred")
+        self.description = description or (error_code.description if hasattr(error_code, 'description') else "")
+        self.headers = {}
+        super().__init__(self.message)
+
+    def to_response_model(self, data=None):
+        """Convert exception to a ResponseModel for JSON serialization."""
+        return ResponseModel(
+            data=data,
+            status=self.status,
+            message=self.message,
+            error_code=self.error_code,
+            description=self.description,
+        )
 
 
 class MedicalRecordsAPIException(APIException):
@@ -490,12 +519,15 @@ def setup_error_handling(app: FastAPI):
         app: FastAPI application instance
     """
     
-    # Register APIException handlers with our custom configuration
-    register_exception_handlers(
-        app,
-        response_format=ResponseFormat.RESPONSE_MODEL,
-        use_fallback_middleware=False  # We'll use our custom handlers
-    )
+    # Register handler for APIException (and all subclasses)
+    @app.exception_handler(APIException)
+    async def api_exception_handler(request: Request, exc: APIException):
+        headers = exc.headers if hasattr(exc, 'headers') and exc.headers else None
+        return JSONResponse(
+            status_code=exc.http_status_code,
+            content=exc.to_response_model().model_dump(exclude_none=False),
+            headers=headers,
+        )
     
     # Replace default validation error handler with our enhanced version
     app.add_exception_handler(RequestValidationError, create_enhanced_validation_error_handler())
@@ -645,6 +677,7 @@ def raise_permission_denied(action: str = None, resource: str = None, request: R
 # Export commonly used items
 __all__ = [
     "setup_error_handling",
+    "APIException",
     "MedicalRecordsAPIException",
     "ValidationException",
     "UnauthorizedException", 
