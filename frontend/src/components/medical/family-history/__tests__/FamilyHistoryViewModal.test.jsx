@@ -1,7 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
-import { MantineProvider } from '@mantine/core';
+import render from '../../../../test-utils/render';
 import FamilyHistoryViewModal from '../FamilyHistoryViewModal';
 
 vi.mock('react-i18next', () => ({
@@ -30,18 +30,16 @@ const mockMember = {
 
 const renderModal = (props = {}) => {
   return render(
-    <MantineProvider>
-      <FamilyHistoryViewModal
-        isOpen={true}
-        onClose={vi.fn()}
-        member={mockMember}
-        onEdit={vi.fn()}
-        onAddCondition={vi.fn()}
-        onEditCondition={vi.fn()}
-        onDeleteCondition={vi.fn()}
-        {...props}
-      />
-    </MantineProvider>
+    <FamilyHistoryViewModal
+      isOpen={true}
+      onClose={vi.fn()}
+      member={mockMember}
+      onEdit={vi.fn()}
+      onAddCondition={vi.fn()}
+      onEditCondition={vi.fn()}
+      onDeleteCondition={vi.fn()}
+      {...props}
+    />
   );
 };
 

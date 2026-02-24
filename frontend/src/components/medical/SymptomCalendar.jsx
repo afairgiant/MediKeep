@@ -23,6 +23,7 @@ import { symptomApi } from '../../services/api/symptomApi';
 import { OccurrenceDetailCard, SymptomViewModal } from './symptoms';
 import logger from '../../services/logger';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { capitalizeFirst } from '../../utils/dateFormatUtils';
 
 /**
  * Pure helper function - outside component to prevent recreation
@@ -217,14 +218,13 @@ const SymptomCalendar = ({ patientId, hidden }) => {
     const occurrencesOnDate = occurrencesByDate[dateKey] || [];
 
     if (occurrencesOnDate.length > 0) {
-      setSelectedDate(
-        clickedDate.toLocaleDateString(locale, {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })
-      );
+      const dateStr = capitalizeFirst(clickedDate.toLocaleDateString(locale, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }));
+      setSelectedDate(dateStr);
       setSelectedOccurrences(occurrencesOnDate);
       setModalOpen(true);
     }
@@ -251,10 +251,10 @@ const SymptomCalendar = ({ patientId, hidden }) => {
     setModalOpen(true); // Reopen occurrences modal
   };
 
-  const monthName = currentDate.toLocaleDateString(locale, {
+  const monthName = capitalizeFirst(currentDate.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric',
-  });
+  }));
   const days = getDaysInMonth(currentDate);
   const weekDays = [
     t('symptoms.calendar.weekDays.sun', 'Sun'),

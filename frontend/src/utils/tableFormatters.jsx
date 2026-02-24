@@ -1,6 +1,8 @@
 import React from 'react';
 import { createEntityLinkProps } from './linkNavigation';
 import { MEDICATION_TYPE_LABELS } from '../constants/medicationTypes';
+import { formatDateWithPreference } from './dateFormatUtils';
+import { timezoneService } from '../services/timezoneService';
 
 /**
  * Standardized table formatters for medical pages
@@ -137,12 +139,12 @@ export const createStandardFormatters = (formatDate) => {
   };
 };
 
-// Default formatters using ISO locale (for backwards compatibility)
+// Default formatters using user's date preference (via timezoneService singleton)
 // Components should use createStandardFormatters(formatDate) from useDateFormat hook
 const defaultFormatDate = (value) => {
   if (!value) return '-';
   try {
-    return new Date(value).toLocaleDateString();
+    return formatDateWithPreference(value, timezoneService.dateFormatCode);
   } catch {
     return value;
   }

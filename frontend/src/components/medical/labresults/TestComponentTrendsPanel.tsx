@@ -42,6 +42,7 @@ import {
 } from '../../../services/api/labTestComponentApi';
 import { getQualitativeDisplayName } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import TestComponentTrendChart from './TestComponentTrendChart';
 import TestComponentTrendTable from './TestComponentTrendTable';
 
@@ -63,6 +64,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('chart');
   const [timeRange, setTimeRange] = useState<string>('all');
+  const { formatDate: formatPreferredDate } = useDateFormat();
 
   const getDateRangeFromSelection = (range: string): { dateFrom?: string; dateTo?: string } => {
     const today = new Date();
@@ -273,7 +275,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
       const csvContent = [
         // Title row
         [`Test Component Trend Data: ${trendData.test_name}`],
-        [`Export Date: ${new Date().toLocaleDateString()}`],
+        [`Export Date: ${formatPreferredDate(new Date())}`],
         [''],
         // Statistics
         ['Summary Statistics'],

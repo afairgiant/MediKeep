@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Card, Button } from '../ui';
 import { notificationApi } from '../../services/api/notificationApi';
 import frontendLogger from '../../services/frontendLogger';
+import { formatDateWithPreference } from '../../utils/dateFormatUtils';
+import { timezoneService } from '../../services/timezoneService';
 import '../../styles/components/NotificationHistory.css';
 
 /**
@@ -40,7 +42,7 @@ function formatRelativeTime(dateString) {
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
 
-  return date.toLocaleDateString();
+  return formatDateWithPreference(date, timezoneService.dateFormatCode);
 }
 
 /**
