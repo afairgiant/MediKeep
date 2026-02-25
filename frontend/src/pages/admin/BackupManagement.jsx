@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { useAdminData } from '../../hooks/useAdminData';
 import { useBackupNotifications } from '../../hooks/useBackupNotifications';
@@ -84,6 +84,7 @@ const BackupManagement = () => {
   const [creating, setCreating] = useState({});
   const [restoring, setRestoring] = useState({});
   const [uploading, setUploading] = useState(false);
+  const uploadResetRef = useRef(null);
 
   // Tab management
   const [activeTab, setActiveTab] = useState('backups');
@@ -186,6 +187,9 @@ const BackupManagement = () => {
   };
 
   const handleConfirmTabSwitch = () => {
+    if (hasUnsavedChanges && originalSettings) {
+      setRetentionSettings(originalSettings);
+    }
     if (pendingTab) {
       setActiveTab(pendingTab);
       setPendingTab(null);
@@ -235,10 +239,17 @@ const BackupManagement = () => {
       return;
     }
 
-    if (typeof value === 'number' && value >= 1) {
+    const numericValue =
+      typeof value === 'number'
+        ? value
+        : typeof value === 'string'
+          ? Number(value)
+          : NaN;
+
+    if (!Number.isNaN(numericValue) && numericValue >= 1) {
       setRetentionSettings(prev => ({
         ...prev,
-        [field]: value,
+        [field]: numericValue,
       }));
     }
   };
@@ -360,6 +371,7 @@ const BackupManagement = () => {
       logger.error('Upload backup failed:', err);
     } finally {
       setUploading(false);
+      uploadResetRef.current?.();
     }
   };
 
@@ -662,6 +674,7 @@ const BackupManagement = () => {
                       Upload an external backup file (.sql or .zip)
                     </Text>
                     <FileButton
+                      resetRef={uploadResetRef}
                       onChange={handleUploadBackup}
                       accept=".sql,.zip"
                     >
