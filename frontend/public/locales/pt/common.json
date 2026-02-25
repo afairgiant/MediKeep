@@ -2444,7 +2444,25 @@
       "password": {
         "button": "Alterar Senha",
         "description": "Altere a senha da sua conta para mantê-la segura",
-        "title": "Senha"
+        "title": "Senha",
+        "currentPassword": "Senha atual",
+        "newPassword": "Nova senha",
+        "confirmPassword": "Confirmar nova senha",
+        "passwordHelp": "Pelo menos 6 caracteres, deve incluir uma letra e um número.",
+        "forceChange": {
+          "title": "Alteração de senha necessária",
+          "subtitle": "Sua conta requer uma alteração de senha antes de continuar. Por favor, defina uma nova senha abaixo.",
+          "submit": "Definir nova senha",
+          "submitting": "Alterando senha...",
+          "errors": {
+            "allFieldsRequired": "Todos os campos são obrigatórios.",
+            "passwordsMustMatch": "As novas senhas não correspondem.",
+            "passwordTooShort": "A nova senha deve ter pelo menos 6 caracteres.",
+            "passwordMustDiffer": "A nova senha deve ser diferente da sua senha atual.",
+            "passwordComplexity": "A nova senha deve conter pelo menos uma letra e um número.",
+            "changeFailed": "Falha ao alterar a senha. Por favor, tente novamente."
+          }
+        }
       }
     },
     "subtitle": "Gerencie as preferências e configurações do aplicativo",

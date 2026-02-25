@@ -238,6 +238,7 @@ class User(UserBase):
     """
 
     id: int
+    must_change_password: bool = False
 
     # SSO fields
     auth_method: Optional[str] = None
@@ -318,6 +319,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     session_timeout_minutes: Optional[int] = 30
+    must_change_password: bool = False
 
 
 class TokenData(BaseModel):

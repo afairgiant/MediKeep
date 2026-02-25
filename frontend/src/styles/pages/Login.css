@@ -18,6 +18,12 @@
   width: 340px;
   max-width: 90%;
   margin: 0 auto;
+  position: relative;
+}
+
+/* Wider variant used by pages that need more horizontal space (e.g. ForceChangePassword) */
+.login-form--wide {
+  width: 480px;
 }
 
 .login-form h1 {
@@ -185,6 +191,21 @@ button[type="submit"]:disabled {
   width: 200px !important;
   min-width: 200px !important;
   max-width: 200px !important;
+}
+
+/* Override for the full-page force-change-password form: centre the row and let
+   buttons grow to fill the available space equally instead of being fixed 200 px. */
+.login-container .change-password-content .form-actions {
+  justify-content: center;
+}
+
+.login-container .change-password-content .form-actions .btn,
+.login-container .change-password-content .form-actions button,
+.login-container .change-password-content .form-actions .mantine-Button-root {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
 }
 
 /* Create User Info */

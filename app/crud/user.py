@@ -58,7 +58,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         )
         return users[0] if users else None
 
-    def create(self, db: Session, *, obj_in: UserCreate) -> User:
+    def create(self, db: Session, *, obj_in: UserCreate, must_change_password: bool = False) -> User:
         """
         Create a new user with password hashing.
 
@@ -68,6 +68,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         Args:
             db: SQLAlchemy database session
             obj_in: UserCreate schema with user data including plain text password
+            must_change_password: If True, flag the user to change password on first login
 
         Returns:
             The newly created User object (without password)
@@ -93,6 +94,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             password_hash=hashed_password,  # Store hashed password, not plain text
             full_name=obj_in.full_name,
             role=obj_in.role.lower(),  # Store role in lowercase for consistency
+            must_change_password=must_change_password,
         )
 
         # Add to database session
@@ -163,8 +165,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             return None  # Hash the new password
         hashed_password = get_password_hash(new_password)
 
-        # Update the password hash using setattr
+        # Update the password hash and clear the forced-change flag
         setattr(user, "password_hash", hashed_password)
+        setattr(user, "must_change_password", False)
 
         # Commit the changes
         db.add(user)
@@ -193,8 +196,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         # Hash the new password
         hashed_password = get_password_hash(new_password)
 
-        # Update the password hash
+        # Update the password hash and clear the forced-change flag
         setattr(user_obj, "password_hash", hashed_password)
+        setattr(user_obj, "must_change_password", False)
 
         # Commit the changes
         db.add(user_obj)

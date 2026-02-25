@@ -16,7 +16,7 @@ function ProtectedRoute({
   redirectTo = '/login',
   fallback = null,
 }) {
-  const { isAuthenticated, isLoading, user, hasRole, hasAnyRole } = useAuth();
+  const { isAuthenticated, isLoading, user, hasRole, hasAnyRole, mustChangePassword } = useAuth();
   const location = useLocation();
   const toastShownRef = useRef(false);
 
@@ -25,11 +25,16 @@ function ProtectedRoute({
     if (isLoading) {
       return null;
     }
-    
+
     if (!isAuthenticated) {
       return { to: redirectTo, reason: 'unauthenticated' };
     }
-    
+
+    // Authenticated but must change password — block access to all other routes
+    if (mustChangePassword && location.pathname !== '/change-password') {
+      return { to: '/change-password', reason: 'must-change-password' };
+    }
+
     if (adminOnly && !user?.isAdmin) {
       return { to: '/dashboard', reason: 'admin-required' };
     }
@@ -117,17 +122,19 @@ export function RoleRoute({ role, roles, children, ...props }) {
 
 /**
  * Public Route Component
- * Redirects authenticated users away from auth pages
+ * Redirects authenticated users away from auth pages.
+ * If the user must change their password, they are sent to /change-password
+ * rather than the default dashboard so the forced-change flow is not skipped.
  */
 export function PublicRoute({ children, redirectTo = '/dashboard' }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, mustChangePassword } = useAuth();
 
   if (isLoading) {
     return <LoadingSpinner message="Loading..." />;
   }
 
   if (isAuthenticated) {
-    return <Navigate to={redirectTo} replace />;
+    return <Navigate to={mustChangePassword ? '/change-password' : redirectTo} replace />;
   }
 
   return children;

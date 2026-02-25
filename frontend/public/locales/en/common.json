@@ -2374,7 +2374,25 @@
       "password": {
         "title": "Password",
         "description": "Change your account password to keep your account secure",
-        "button": "Change Password"
+        "button": "Change Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "passwordHelp": "At least 6 characters, must include a letter and a number.",
+        "forceChange": {
+          "title": "Password Change Required",
+          "subtitle": "Your account requires a password change before you can continue. Please set a new password below.",
+          "submit": "Set New Password",
+          "submitting": "Changing Password...",
+          "errors": {
+            "allFieldsRequired": "All fields are required.",
+            "passwordsMustMatch": "New passwords do not match.",
+            "passwordTooShort": "New password must be at least 6 characters.",
+            "passwordMustDiffer": "New password must be different from your current password.",
+            "passwordComplexity": "New password must contain at least one letter and one number.",
+            "changeFailed": "Failed to change password. Please try again."
+          }
+        }
       }
     },
     "account": {

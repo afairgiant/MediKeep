@@ -333,9 +333,10 @@ def login(
     )
 
     return {
-        "access_token": access_token, 
+        "access_token": access_token,
         "token_type": "bearer",
-        "session_timeout_minutes": session_timeout_minutes
+        "session_timeout_minutes": session_timeout_minutes,
+        "must_change_password": bool(db_user.must_change_password),
     }
 
 
@@ -389,7 +390,15 @@ async def change_password(
             request=request
         )
 
-    # Update password
+    has_letter = any(c.isalpha() for c in password_data.newPassword)
+    has_number = any(c.isdigit() for c in password_data.newPassword)
+    if not (has_letter and has_number):
+        raise BusinessLogicException(
+            message="New password must contain at least one letter and one number",
+            request=request
+        )
+
+    # Update password (also clears must_change_password flag)
     user.update_password_by_user(
         db, user_obj=current_user, new_password=password_data.newPassword
     )

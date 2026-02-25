@@ -252,6 +252,21 @@ def get_current_user(
         username=result.username,
     )
 
+    # Block all endpoints for users who have a pending forced password change,
+    # except the change-password, logout, and /users/me (needed for frontend
+    # auth-state re-validation on reload) endpoints.
+    if db_user.must_change_password:
+        allowed_paths = {
+            "/api/v1/auth/change-password",
+            "/api/v1/auth/logout",
+            "/api/v1/users/me",
+        }
+        if request.url.path not in allowed_paths:
+            raise ForbiddenException(
+                message="Password change required before accessing this resource",
+                request=request,
+            )
+
     return db_user
 
 
@@ -379,6 +394,19 @@ def get_current_user_flexible_auth(
         message=f"Token successfully validated for user: {result.username} (auth method: {auth_method})",
         username=result.username,
     )
+
+    # Apply the same forced-password-change enforcement as get_current_user.
+    if db_user.must_change_password:
+        allowed_paths = {
+            "/api/v1/auth/change-password",
+            "/api/v1/auth/logout",
+            "/api/v1/users/me",
+        }
+        if request.url.path not in allowed_paths:
+            raise ForbiddenException(
+                message="Password change required before accessing this resource",
+                request=request,
+            )
 
     return db_user
 
