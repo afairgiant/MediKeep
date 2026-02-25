@@ -42,6 +42,7 @@ import ProtectedRoute, {
 import Login from './pages/auth/Login';
 import UserCreation from './pages/auth/UserCreation';
 import SSOCallback from './components/auth/SSOCallback';
+import ForceChangePassword from './pages/auth/ForceChangePassword';
 import Dashboard from './pages/Dashboard';
 import ExportPage from './pages/ExportPage';
 import PatientInfo from './pages/medical/Patient-Info';
@@ -397,6 +398,15 @@ function App() {
                             <PublicRoute>
                               <SSOCallback />
                             </PublicRoute>
+                          }
+                        />
+                        {/* Forced password change — requires authentication but not full access */}
+                        <Route
+                          path="/change-password"
+                          element={
+                            <ProtectedRoute>
+                              <ForceChangePassword />
+                            </ProtectedRoute>
                           }
                         />
                         {/* Protected Routes */}

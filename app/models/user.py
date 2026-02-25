@@ -43,6 +43,9 @@ class User(Base):
         String(20), nullable=True
     )  # 'auto_link', 'create_separate', 'always_ask'
 
+    # Force password change on next login (e.g. for default/emergency accounts)
+    must_change_password = Column(Boolean, default=False, nullable=False)
+
     # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(

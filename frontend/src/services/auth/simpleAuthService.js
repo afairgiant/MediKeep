@@ -218,6 +218,7 @@ class SimpleAuthService {
         token: data.access_token,
         tokenExpiry: payload.exp * 1000, // Convert to milliseconds
         sessionTimeoutMinutes: data.session_timeout_minutes || 30, // Get user's timeout preference
+        mustChangePassword: data.must_change_password || false,
       };
     } catch (error) {
       logger.error('Login error occurred', {
@@ -300,22 +301,47 @@ class SimpleAuthService {
     }
   }
 
-  // Get current user (from localStorage since /users/me has issues)
+  // Get current user from the backend so must_change_password is always fresh.
+  // Falls back to the cached value if the network call fails.
   async getCurrentUser() {
     try {
-      const storedUser = await secureStorage.getItem(this.userKey);
-      if (storedUser && await this.isTokenValid()) {
-        return JSON.parse(storedUser);
+      const token = await this.getToken();
+      if (!token || !(await this.isTokenValid(token))) {
+        return null;
       }
+
+      const response = await this.makeRequest('/users/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const user = await response.json();
+        // Keep the cached copy up-to-date
+        secureStorage.setJSON(this.userKey, user);
+        return user;
+      }
+
+      // Non-2xx means the token is invalid or the user was deleted
       return null;
     } catch (error) {
-      logger.error('Error retrieving current user from storage', {
+      logger.error('Error fetching current user from backend, falling back to cache', {
         error: error.message,
         errorType: error.constructor.name,
-        hasToken: !!(await this.getToken()),
-        isTokenValid: await this.isTokenValid(),
         category: 'auth_user_fetch_error'
       });
+      // Network error — use the cached value so offline/flaky scenarios still work
+      try {
+        const storedUser = await secureStorage.getItem(this.userKey);
+        if (storedUser && await this.isTokenValid()) {
+          return JSON.parse(storedUser);
+        }
+      } catch (_) {
+        // ignore secondary errors
+      }
       return null;
     }
   }

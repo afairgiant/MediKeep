@@ -24,6 +24,7 @@ const initialState = {
   tokenExpiry: null,
   lastActivity: Date.now(),
   sessionTimeoutMinutes: 30, // Default timeout
+  mustChangePassword: false,
 };
 
 // Auth Actions
@@ -37,6 +38,7 @@ const AUTH_ACTIONS = {
   SET_ERROR: 'SET_ERROR',
   CLEAR_ERROR: 'CLEAR_ERROR',
   UPDATE_SESSION_TIMEOUT: 'UPDATE_SESSION_TIMEOUT',
+  CLEAR_MUST_CHANGE_PASSWORD: 'CLEAR_MUST_CHANGE_PASSWORD',
 };
 
 // Auth Reducer
@@ -59,6 +61,13 @@ function authReducer(state, action) {
         tokenExpiry: action.payload.tokenExpiry,
         lastActivity: Date.now(),
         sessionTimeoutMinutes: action.payload.sessionTimeoutMinutes || 30,
+        mustChangePassword: action.payload.mustChangePassword || false,
+      };
+
+    case AUTH_ACTIONS.CLEAR_MUST_CHANGE_PASSWORD:
+      return {
+        ...state,
+        mustChangePassword: false,
       };
 
     case AUTH_ACTIONS.LOGIN_FAILURE:
@@ -173,7 +182,19 @@ export function AuthProvider({ children }) {
                 timestamp: new Date().toISOString()
               });
 
+              // getCurrentUser() calls the backend so must_change_password is always
+              // authoritative — never read from client-side storage which can be cleared.
               const user = await authService.getCurrentUser();
+
+              // A null return means the backend rejected the token (e.g. expired or
+              // deleted user). Treat it the same as a failed verification.
+              if (!user) {
+                clearAuthData();
+                dispatch({ type: AUTH_ACTIONS.LOGOUT });
+                return;
+              }
+
+              const mustChangePassword = user.must_change_password === true;
               dispatch({
                 type: AUTH_ACTIONS.LOGIN_SUCCESS,
                 payload: {
@@ -181,6 +202,7 @@ export function AuthProvider({ children }) {
                   token: storedToken,
                   tokenExpiry,
                   sessionTimeoutMinutes,
+                  mustChangePassword,
                 },
               });
 
@@ -455,6 +477,7 @@ export function AuthProvider({ children }) {
     secureStorage.removeItem('user');
     secureStorage.removeItem('tokenExpiry');
     secureStorage.removeItem('sessionTimeoutMinutes');
+    secureStorage.removeItem('mustChangePassword');
 
     // Clear any cached app data to ensure fresh data on next login
     const cacheKeys = Object.keys(localStorage).filter(key => 
@@ -616,11 +639,13 @@ export function AuthProvider({ children }) {
 
       // Get session timeout from result or use default
       const sessionTimeoutMinutes = (isSSO ? 30 : result?.sessionTimeoutMinutes) || 30;
+      const mustChangePassword = isSSO ? false : (result?.mustChangePassword || false);
 
       // Store in localStorage - MUST await to prevent race conditions
       await updateStoredToken(token, tokenExpiry);
       await updateStoredUser(user);
       await secureStorage.setItem('sessionTimeoutMinutes', sessionTimeoutMinutes.toString());
+      await secureStorage.setItem('mustChangePassword', mustChangePassword ? 'true' : 'false');
 
       logger.info('Session timeout stored', {
         category: 'auth_session_timeout',
@@ -636,6 +661,7 @@ export function AuthProvider({ children }) {
           token,
           tokenExpiry,
           sessionTimeoutMinutes,
+          mustChangePassword,
         },
       });
 
@@ -666,6 +692,7 @@ export function AuthProvider({ children }) {
       return {
         success: true,
         isFirstLogin: isFirstLogin(user.username),
+        mustChangePassword,
       };
     } catch (error) {
       const errorMessage = error.message || 'Login failed';
@@ -745,6 +772,11 @@ export function AuthProvider({ children }) {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
   };
 
+  const clearMustChangePassword = () => {
+    secureStorage.removeItem('mustChangePassword');
+    dispatch({ type: AUTH_ACTIONS.CLEAR_MUST_CHANGE_PASSWORD });
+  };
+
   // Check if user has specific role
   const hasRole = role => {
     return state.user?.role === role || state.user?.roles?.includes(role);
@@ -780,12 +812,14 @@ export function AuthProvider({ children }) {
     isLoading: state.isLoading,
     error: state.error,
     sessionTimeoutMinutes: state.sessionTimeoutMinutes,
+    mustChangePassword: state.mustChangePassword,
 
     // Actions
     login,
     logout,
     updateActivity,
     clearError,
+    clearMustChangePassword,
     updateUser,
     updateSessionTimeout,
 
