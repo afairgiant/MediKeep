@@ -47,7 +47,7 @@ const NAV_SECTIONS = [
   {
     label: 'Monitoring',
     items: [
-      { label: 'Audit Log', icon: IconFileText, path: '/admin/audit-log', disabled: true },
+      { label: 'Audit Log', icon: IconFileText, path: '/admin/audit-log' },
       { label: 'System Health', icon: IconHeartRateMonitor, path: '/admin/system-health' },
     ],
   },

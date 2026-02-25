@@ -149,17 +149,37 @@ class AdminApiService extends BaseApiService {
   }
 
   async getActivityLog(params = {}) {
-    const {
-      page = 1,
-      per_page = 50,
-      model_name = null,
-      action = null,
-    } = params;
+    const { page = 1, per_page = 50, ...filters } = params;
     const queryParams = { page, per_page };
-    if (model_name) queryParams.model_name = model_name;
-    if (action) queryParams.action = action;
+    for (const [key, value] of Object.entries(filters)) {
+      if (value) queryParams[key] = value;
+    }
+    return this.get('/activity-log', { params: queryParams });
+  }
 
-    return this.get('/activity-log', queryParams);
+  async getActivityLogFilters() {
+    return this.get('/activity-log/filters');
+  }
+
+  async exportActivityLog(params = {}) {
+    const { search, action, entity_type, user_id, start_date, end_date } = params;
+    const searchParams = new URLSearchParams();
+    if (search) searchParams.set('search', search);
+    if (action) searchParams.set('action', action);
+    if (entity_type) searchParams.set('entity_type', entity_type);
+    if (user_id) searchParams.set('user_id', user_id);
+    if (start_date) searchParams.set('start_date', start_date);
+    if (end_date) searchParams.set('end_date', end_date);
+
+    const queryString = searchParams.toString();
+    const url = `${this.baseURL}${this.basePath}/activity-log/export${queryString ? `?${queryString}` : ''}`;
+
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      throw new Error(`Export failed with status ${response.status}`);
+    }
+    return response.blob();
   }
 
   // Test admin access

@@ -8,6 +8,7 @@ allowing administrators to manage all models through a unified interface.
 from fastapi import APIRouter
 
 from app.api.v1.admin import (
+    activity_log,
     backup,
     bulk_operations,
     dashboard,
@@ -36,5 +37,7 @@ router.include_router(trash_management.router, prefix="", tags=["admin-trash"])
 router.include_router(maintenance.router, prefix="/maintenance", tags=["admin-maintenance"])
 
 router.include_router(user_management.router, prefix="/user-management", tags=["admin-user-management"])
+
+router.include_router(activity_log.router, prefix="/activity-log", tags=["admin-activity-log"])
 
 __all__ = ["router"]
