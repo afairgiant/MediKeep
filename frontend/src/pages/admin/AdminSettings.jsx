@@ -1,8 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import {
+  Card,
+  Group,
+  Stack,
+  Text,
+  Badge,
+  Button,
+  Switch,
+  NumberInput,
+  Alert,
+  ThemeIcon,
+  Center,
+  Loader,
+  List,
+  Code,
+} from '@mantine/core';
+import {
+  IconSettings,
+  IconTrash,
+  IconUsers,
+  IconLock,
+  IconDeviceFloppy,
+  IconRestore,
+  IconCheck,
+  IconX,
+  IconAlertCircle,
+  IconInfoCircle,
+  IconPlugConnected,
+} from '@tabler/icons-react';
 import { adminApiService } from '../../services/api/adminApi';
 import { authService } from '../../services/auth/simpleAuthService';
 import AdminLayout from '../../components/admin/AdminLayout';
 import frontendLogger from '../../services/frontendLogger';
+import { capitalizeFirst } from '../../utils/dateFormatUtils';
 import './AdminSettings.css';
 
 const AdminSettings = () => {
@@ -17,7 +47,6 @@ const AdminSettings = () => {
   const [ssoTestLoading, setSSOTestLoading] = useState(false);
   const [ssoTestResult, setSSOTestResult] = useState(null);
 
-  // Load settings on component mount
   useEffect(() => {
     loadSettings();
     loadSSOConfig();
@@ -43,27 +72,18 @@ const AdminSettings = () => {
   };
 
   const handleInputChange = (field, value) => {
-    // Allow empty string for temporary editing
-    if (value === '') {
-      setSettings(prev => ({
-        ...prev,
-        [field]: '',
-      }));
+    if (value === '' || value === undefined) {
+      setSettings(prev => ({ ...prev, [field]: '' }));
       return;
     }
-
-    const numValue = parseInt(value, 10);
-    if (isNaN(numValue) || numValue < 1) {
-      return; // Don't update if invalid
+    const numValue = Number(value);
+    if (!Number.isFinite(numValue) || numValue < 1) {
+      return;
     }
-    setSettings(prev => ({
-      ...prev,
-      [field]: numValue,
-    }));
+    setSettings(prev => ({ ...prev, [field]: numValue }));
   };
 
   const handleBlur = (field, min = 1) => {
-    // On blur, ensure we have a valid number
     if (settings[field] === '' || settings[field] < min) {
       setSettings(prev => ({
         ...prev,
@@ -77,12 +97,10 @@ const AdminSettings = () => {
       setSaving(true);
       setMessage({ type: '', text: '' });
 
-      // Ensure all numeric fields have valid values before saving
       const validSettings = {
         trash_retention_days: settings.trash_retention_days || 30,
       };
 
-      // Update local state with valid values
       setSettings(prev => ({
         ...prev,
         ...validSettings,
@@ -101,12 +119,10 @@ const AdminSettings = () => {
         text: response.message || 'Settings updated successfully',
       });
 
-      // Update local state with confirmed values
       if (response.current_settings) {
         setSettings(response.current_settings);
       }
 
-      // Clear message after 5 seconds
       setTimeout(() => {
         setMessage({ type: '', text: '' });
       }, 5000);
@@ -154,7 +170,7 @@ const AdminSettings = () => {
   };
 
   const handleReset = () => {
-    loadSettings(); // Reload from server
+    loadSettings();
     loadSSOConfig();
     setSSOTestResult(null);
     setMessage({ type: '', text: '' });
@@ -163,263 +179,247 @@ const AdminSettings = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="settings-content">
-          <div className="settings-loading">
-            <div className="loading-spinner"></div>
-            <p>Loading settings...</p>
-          </div>
-        </div>
+        <Center h={400}>
+          <Stack align="center">
+            <Loader size="lg" />
+            <Text c="dimmed">Loading settings...</Text>
+          </Stack>
+        </Center>
       </AdminLayout>
     );
   }
 
   return (
     <AdminLayout>
-      <div className="settings-content">
-        <div className="settings-page-header">
-          <h1>Admin Settings</h1>
-          <p>Configure system-wide settings and retention policies</p>
-        </div>
+      <div className="admin-settings">
+        {/* Page Header */}
+        <Card shadow="sm" p="xl" mb="xl" withBorder>
+          <Group align="center" mb="xs">
+            <ThemeIcon size="xl" variant="light" color="blue">
+              <IconSettings size={24} />
+            </ThemeIcon>
+            <Text size="xl" fw={700}>
+              Admin Settings
+            </Text>
+          </Group>
+          <Text c="dimmed" size="md">
+            Configure system-wide settings and retention policies
+          </Text>
+        </Card>
 
+        {/* Success/Error Message */}
         {message.text && (
-          <div className={`settings-message ${message.type}`}>
+          <Alert
+            color={message.type === 'success' ? 'green' : 'red'}
+            icon={
+              message.type === 'success' ? (
+                <IconCheck size={16} />
+              ) : (
+                <IconAlertCircle size={16} />
+              )
+            }
+            withCloseButton
+            onClose={() => setMessage({ type: '', text: '' })}
+            mb="lg"
+          >
             {message.text}
-          </div>
+          </Alert>
         )}
 
-        <div className="settings-sections">
-          {/* Data Retention Settings */}
-          <div className="settings-section-card">
-            <div className="settings-section-header">
-              <h2>Data Retention</h2>
-              <p>
-                Configure how long deleted files are kept in trash before
-                permanent deletion
-              </p>
-            </div>
+        {/* Data Retention */}
+        <Card shadow="sm" p="lg" mb="lg" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="orange">
+              <IconTrash size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              Data Retention
+            </Text>
+          </Group>
+          <Group justify="space-between" align="flex-start">
+            <Stack gap={4} style={{ flex: 1 }}>
+              <Text fw={500}>Trash Retention</Text>
+              <Text size="sm" c="dimmed">
+                Number of days to keep deleted files in trash before permanent
+                deletion
+              </Text>
+            </Stack>
+            <NumberInput
+              w={160}
+              min={1}
+              max={365}
+              value={settings.trash_retention_days}
+              onChange={value => handleInputChange('trash_retention_days', value)}
+              onBlur={() => handleBlur('trash_retention_days', 1)}
+              suffix=" days"
+            />
+          </Group>
+        </Card>
 
-            <div className="settings-section-content">
-              <div className="setting-item">
-                <div className="setting-info">
-                  <div className="setting-title">Trash Retention</div>
-                  <div className="setting-description">
-                    Number of days to keep deleted files in trash before
-                    permanent deletion
-                  </div>
-                </div>
-                <div className="setting-control">
-                  <div className="input-group">
-                    <input
-                      type="number"
-                      min="1"
-                      max="365"
-                      value={settings.trash_retention_days}
-                      onChange={e =>
-                        handleInputChange(
-                          'trash_retention_days',
-                          e.target.value
-                        )
-                      }
-                      onBlur={() => handleBlur('trash_retention_days', 1)}
-                      className="settings-input"
-                    />
-                    <span className="input-suffix">days</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* User Management */}
+        <Card shadow="sm" p="lg" mb="lg" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="teal">
+              <IconUsers size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              User Management
+            </Text>
+          </Group>
+          <Group justify="space-between" align="flex-start">
+            <Stack gap={4} style={{ flex: 1 }}>
+              <Text fw={500}>Allow New User Registration</Text>
+              <Text size="sm" c="dimmed">
+                Enable or disable the ability for new users to create accounts
+                from the login page
+              </Text>
+            </Stack>
+            <Group gap="sm">
+              <Switch
+                size="lg"
+                checked={settings.allow_user_registration}
+                onChange={e =>
+                  setSettings(prev => ({
+                    ...prev,
+                    allow_user_registration: e.currentTarget.checked,
+                  }))
+                }
+              />
+              <Badge
+                variant="light"
+                color={settings.allow_user_registration ? 'green' : 'red'}
+              >
+                {settings.allow_user_registration ? 'Enabled' : 'Disabled'}
+              </Badge>
+            </Group>
+          </Group>
+        </Card>
 
-          {/* User Management Settings */}
-          <div className="settings-section-card">
-            <div className="settings-section-header">
-              <h2>User Management</h2>
-              <p>Control user registration and access settings</p>
-            </div>
+        {/* SSO Settings */}
+        <Card shadow="sm" p="lg" mb="lg" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="orange">
+              <IconLock size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              Single Sign-On (SSO)
+            </Text>
+            <Badge
+              variant="light"
+              color={ssoConfig.enabled ? 'green' : 'gray'}
+            >
+              {ssoConfig.enabled ? 'Enabled' : 'Disabled'}
+            </Badge>
+          </Group>
 
-            <div className="settings-section-content">
-              <div className="setting-item">
-                <div className="setting-info">
-                  <div className="setting-title">
-                    Allow New User Registration
-                  </div>
-                  <div className="setting-description">
-                    Enable or disable the ability for new users to create
-                    accounts from the login page
-                  </div>
-                </div>
-                <div className="setting-control">
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={settings.allow_user_registration}
-                      onChange={e =>
-                        setSettings(prev => ({
-                          ...prev,
-                          allow_user_registration: e.target.checked,
-                        }))
-                      }
-                    />
-                    <span className="toggle-slider"></span>
-                  </label>
-                  <span className="toggle-label">
-                    {settings.allow_user_registration ? 'Enabled' : 'Disabled'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Stack>
+            {ssoConfig.enabled ? (
+              <>
+                <Group justify="space-between">
+                  <Text fw={500}>Provider</Text>
+                  <Text c="dimmed">
+                    {capitalizeFirst(ssoConfig.provider_type) || 'Unknown'}
+                  </Text>
+                </Group>
 
-          {/* SSO Settings */}
-          <div className="settings-section-card">
-            <div className="settings-section-header">
-              <h2>Single Sign-On (SSO)</h2>
-              <p>Configure SSO authentication settings</p>
-            </div>
-
-            <div className="settings-section-content">
-              <div className="setting-item">
-                <div className="setting-info">
-                  <div className="setting-title">SSO Status</div>
-                  <div className="setting-description">
-                    Current SSO configuration status
-                  </div>
-                </div>
-                <div className="setting-control">
-                  <div
-                    className={`status-indicator ${ssoConfig.enabled ? 'enabled' : 'disabled'}`}
+                <Group justify="space-between">
+                  <Text fw={500}>SSO Registration</Text>
+                  <Badge
+                    variant="light"
+                    color={ssoConfig.registration_enabled ? 'green' : 'yellow'}
                   >
-                    {ssoConfig.enabled ? 'Enabled' : 'Disabled'}
-                  </div>
-                  {ssoConfig.enabled && ssoConfig.provider_type && (
-                    <div className="sso-provider-info">
-                      Provider:{' '}
-                      {ssoConfig.provider_type.charAt(0).toUpperCase() +
-                        ssoConfig.provider_type.slice(1)}
-                    </div>
-                  )}
-                </div>
-              </div>
+                    {ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
+                  </Badge>
+                </Group>
 
-              {ssoConfig.enabled && (
-                <>
-                  <div className="setting-item">
-                    <div className="setting-info">
-                      <div className="setting-title">SSO Registration</div>
-                      <div className="setting-description">
-                        Whether new users can be created via SSO
-                      </div>
-                    </div>
-                    <div className="setting-control">
-                      <div
-                        className={`status-indicator ${ssoConfig.registration_enabled ? 'enabled' : 'disabled'}`}
-                      >
-                        {ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
-                      </div>
-                    </div>
-                  </div>
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap={4}>
+                    <Text fw={500}>Test Connection</Text>
+                    <Text size="sm" c="dimmed">
+                      Test the SSO provider connection and configuration
+                    </Text>
+                  </Stack>
+                  <Button
+                    variant="light"
+                    leftSection={<IconPlugConnected size={16} />}
+                    onClick={testSSOConnection}
+                    loading={ssoTestLoading}
+                  >
+                    Test SSO Connection
+                  </Button>
+                </Group>
 
-                  <div className="setting-item">
-                    <div className="setting-info">
-                      <div className="setting-title">Test Connection</div>
-                      <div className="setting-description">
-                        Test the SSO provider connection and configuration
-                      </div>
-                    </div>
-                    <div className="setting-control">
-                      <button
-                        onClick={testSSOConnection}
-                        disabled={ssoTestLoading}
-                        className="settings-btn secondary"
-                      >
-                        {ssoTestLoading ? 'Testing...' : 'Test SSO Connection'}
-                      </button>
-                    </div>
-                  </div>
+                {ssoTestResult && (
+                  <Alert
+                    color={ssoTestResult.success ? 'green' : 'red'}
+                    variant="light"
+                    icon={
+                      ssoTestResult.success ? (
+                        <IconCheck size={16} />
+                      ) : (
+                        <IconX size={16} />
+                      )
+                    }
+                  >
+                    {ssoTestResult.message}
+                  </Alert>
+                )}
+              </>
+            ) : (
+              <Alert
+                variant="light"
+                color="blue"
+                icon={<IconInfoCircle size={16} />}
+              >
+                <Text size="sm" mb="xs">
+                  SSO is currently disabled. To enable SSO, configure the
+                  following environment variables and restart the application:
+                </Text>
+                <List size="sm" spacing={4}>
+                  <List.Item>
+                    <Code>SSO_ENABLED=true</Code>
+                  </List.Item>
+                  <List.Item>
+                    <Code>SSO_PROVIDER_TYPE</Code> (google, github, or oidc)
+                  </List.Item>
+                  <List.Item>
+                    <Code>SSO_CLIENT_ID</Code>
+                  </List.Item>
+                  <List.Item>
+                    <Code>SSO_CLIENT_SECRET</Code>
+                  </List.Item>
+                  <List.Item>
+                    <Code>SSO_ISSUER_URL</Code> (for OIDC provider)
+                  </List.Item>
+                  <List.Item>
+                    <Code>SSO_REDIRECT_URI</Code>
+                  </List.Item>
+                </List>
+              </Alert>
+            )}
+          </Stack>
+        </Card>
 
-                  {ssoTestResult && (
-                    <div className="setting-item">
-                      <div className="setting-info">
-                        <div className="setting-title">Test Result</div>
-                      </div>
-                      <div className="setting-control">
-                        <div
-                          className={`sso-test-result ${ssoTestResult.success ? 'success' : 'error'}`}
-                        >
-                          {ssoTestResult.success ? '✓ ' : '✗ '}
-                          {ssoTestResult.message}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {!ssoConfig.enabled && (
-                <div className="sso-disabled-info">
-                  <p>
-                    SSO is currently disabled. To enable SSO, configure the
-                    following environment variables and restart the application:
-                  </p>
-                  <ul>
-                    <li>
-                      <code>SSO_ENABLED=true</code>
-                    </li>
-                    <li>
-                      <code>SSO_PROVIDER_TYPE</code> (google, github, or oidc)
-                    </li>
-                    <li>
-                      <code>SSO_CLIENT_ID</code>
-                    </li>
-                    <li>
-                      <code>SSO_CLIENT_SECRET</code>
-                    </li>
-                    <li>
-                      <code>SSO_ISSUER_URL</code> (for OIDC provider)
-                    </li>
-                    <li>
-                      <code>SSO_REDIRECT_URI</code>
-                    </li>
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Future Settings Sections */}
-          <div className="settings-section-card">
-            <div className="settings-section-header">
-              <h2>Future Settings</h2>
-              <p>
-                Additional configuration options will be added here in future
-                updates
-              </p>
-            </div>
-            <div className="settings-section-content">
-              <div className="settings-placeholder">
-                <p>More settings coming soon...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Global Save Actions - Apply to all settings */}
-        <div className="settings-global-actions">
-          <button
-            onClick={handleReset}
-            className="settings-btn secondary"
-            disabled={saving}
-          >
-            Reset All
-          </button>
-          <button
-            onClick={handleSave}
-            className="settings-btn primary"
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : 'Save All Changes'}
-          </button>
-        </div>
+        {/* Save/Reset Actions */}
+        <Card shadow="sm" p="lg" withBorder>
+          <Group justify="flex-end">
+            <Button
+              variant="default"
+              leftSection={<IconRestore size={16} />}
+              onClick={handleReset}
+              disabled={saving}
+            >
+              Reset All
+            </Button>
+            <Button
+              leftSection={<IconDeviceFloppy size={16} />}
+              onClick={handleSave}
+              loading={saving}
+            >
+              Save All Changes
+            </Button>
+          </Group>
+        </Card>
       </div>
     </AdminLayout>
   );
