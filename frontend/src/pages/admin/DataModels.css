@@ -44,8 +44,6 @@
   transform: translateY(0);
 }
 
-/* Dark theme specific adjustments - removed as handled by Mantine component */
-
 [data-theme='dark'] .model-card {
   background: var(--color-bg-secondary);
   border-color: var(--color-border);
@@ -56,16 +54,3 @@
   border-color: var(--color-border-light);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
-
-/* Responsive Design - Sidebar-aware breakpoints */
-/* Large desktop screens - sidebar + content fits comfortably */
-
-/* Medium desktop - account for sidebar width (1024px - 280px = 744px content) */
-
-/* Small desktop/large tablet - sidebar significantly reduces available width */
-
-/* Small tablets and large mobile screens */
-
-/* Mobile phone screens */
-
-/* Very small mobile screens */

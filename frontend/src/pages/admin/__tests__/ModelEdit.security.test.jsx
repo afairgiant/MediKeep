@@ -86,18 +86,6 @@ vi.mock('../../../components/auth', () => ({
   AdminResetPasswordModal: () => null,
 }));
 
-vi.mock('../../../components', () => ({
-  Loading: ({ message }) => <div data-testid="loading">{message}</div>,
-}));
-
-vi.mock('../../../components/ui', () => ({
-  Button: ({ children, onClick, disabled, loading: _loading, ...props }) => (
-    <button onClick={onClick} disabled={disabled} {...props}>
-      {children}
-    </button>
-  ),
-}));
-
 vi.mock('../../../constants/validationConstants', () => ({
   EDIT_EXCLUDED_FIELDS: ['password', 'hashed_password'],
 }));
@@ -131,6 +119,12 @@ vi.mock('../../../components/admin/FieldRenderer', () => ({
 
 vi.mock('../ModelEdit.css', () => ({}));
 
+// ─── Notifications mock ─────────────────────────────────────────────────────
+
+vi.mock('@mantine/notifications', () => ({
+  notifications: { show: vi.fn() },
+}));
+
 // ─── Component import (after all mocks) ──────────────────────────────────────
 
 import ModelEdit from '../ModelEdit';
@@ -149,23 +143,16 @@ const renderComponent = () =>
 // ─── Shared wait helper ───────────────────────────────────────────────────────
 
 const waitForLoad = () =>
-  waitFor(() => expect(screen.queryByTestId('loading')).not.toBeInTheDocument());
+  waitFor(() => expect(screen.getByTestId('field-username')).toBeInTheDocument());
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('ModelEdit security', () => {
-  let originalConfirm;
-  let originalAlert;
   let localStorageGetItemSpy;
   let localStorageRemoveItemSpy;
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    originalConfirm = window.confirm;
-    originalAlert = window.alert;
-    window.confirm = vi.fn().mockReturnValue(true);
-    window.alert = vi.fn();
 
     localStorageGetItemSpy = vi.spyOn(Storage.prototype, 'getItem');
     localStorageRemoveItemSpy = vi.spyOn(Storage.prototype, 'removeItem');
@@ -175,8 +162,6 @@ describe('ModelEdit security', () => {
   });
 
   afterEach(() => {
-    window.confirm = originalConfirm;
-    window.alert = originalAlert;
     localStorageGetItemSpy.mockRestore();
     localStorageRemoveItemSpy.mockRestore();
   });
@@ -195,11 +180,20 @@ describe('ModelEdit security', () => {
       fireEvent.click(saveButton);
     });
 
+    // A warning modal appears for own-username change; confirm it
+    await waitFor(() => {
+      expect(screen.getByText(/Username Change Warning/i)).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByRole('button', { name: /change username/i });
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
+
     await waitFor(() => {
       expect(mockGetJSON).toHaveBeenCalledWith('user');
     });
 
-    // localStorage.getItem must never be called with 'user' directly by the component
     const userDirectCalls = localStorageGetItemSpy.mock.calls.filter(
       ([key]) => key === 'user'
     );
@@ -220,11 +214,20 @@ describe('ModelEdit security', () => {
       fireEvent.click(saveButton);
     });
 
+    // Confirm the warning modal
+    await waitFor(() => {
+      expect(screen.getByText(/Username Change Warning/i)).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByRole('button', { name: /change username/i });
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
+
     await waitFor(() => {
       expect(mockLogout).toHaveBeenCalledTimes(1);
     });
 
-    // localStorage.removeItem must not have been called with 'user' (or any auth key)
     const authRemoveCalls = localStorageRemoveItemSpy.mock.calls.filter(([key]) =>
       ['user', 'token', 'tokenExpiry'].includes(key)
     );
@@ -243,6 +246,16 @@ describe('ModelEdit security', () => {
     const saveButton = screen.getByRole('button', { name: /save changes/i });
     await act(async () => {
       fireEvent.click(saveButton);
+    });
+
+    // Confirm the warning modal
+    await waitFor(() => {
+      expect(screen.getByText(/Username Change Warning/i)).toBeInTheDocument();
+    });
+
+    const confirmButton = screen.getByRole('button', { name: /change username/i });
+    await act(async () => {
+      fireEvent.click(confirmButton);
     });
 
     await waitFor(() => {
