@@ -120,7 +120,7 @@ async def startup_event():
     # Create default user if not exists
     create_default_user()
     await check_sequences_on_startup()
-    
+
     # Run data migrations (after users/database setup is complete)
     run_startup_data_migrations()
 
@@ -142,5 +142,15 @@ async def startup_event():
     # NOTE: Automatic activity tracking disabled to prevent double logging
     # Manual activity logging is used instead via app.api.activity_logging
     logger.info("Activity tracking initialization skipped (using manual logging)")
+
+    # Initialize auto-backup scheduler
+    try:
+        from app.services.backup_scheduler_service import BackupSchedulerService
+
+        scheduler = BackupSchedulerService.get_instance()
+        await scheduler.start()
+    except Exception as e:
+        logger.warning(f"Could not initialize auto-backup scheduler: {e}")
+        # Non-fatal - app can still function without auto-backups
 
     logger.info("Application startup completed")

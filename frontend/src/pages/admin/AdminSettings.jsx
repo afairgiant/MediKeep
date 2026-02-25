@@ -8,6 +8,7 @@ import {
   Button,
   Switch,
   NumberInput,
+  Select,
   Alert,
   ThemeIcon,
   Center,
@@ -46,7 +47,6 @@ const AdminSettings = () => {
   const [ssoConfig, setSSOConfig] = useState({ enabled: false });
   const [ssoTestLoading, setSSOTestLoading] = useState(false);
   const [ssoTestResult, setSSOTestResult] = useState(null);
-
   useEffect(() => {
     loadSettings();
     loadSSOConfig();

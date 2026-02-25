@@ -57,6 +57,20 @@ static_dir, html_dir = setup_static_files(app)
 app.add_event_handler("startup", startup_event)
 
 
+async def shutdown_event():
+    """Clean up resources on shutdown."""
+    try:
+        from app.services.backup_scheduler_service import BackupSchedulerService
+
+        scheduler = BackupSchedulerService.get_instance()
+        await scheduler.shutdown()
+    except Exception as e:
+        logger.warning(f"Error shutting down backup scheduler: {e}")
+
+
+app.add_event_handler("shutdown", shutdown_event)
+
+
 @app.get("/health")
 def health():
     """Health check endpoint"""

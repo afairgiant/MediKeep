@@ -253,6 +253,15 @@ class AdminApiService extends BaseApiService {
     return this.post('/backups/settings/retention', settings);
   }
 
+  // Auto-backup schedule endpoints
+  async getAutoBackupSchedule() {
+    return this.get('/backups/settings/schedule');
+  }
+
+  async updateAutoBackupSchedule(scheduleData) {
+    return this.post('/backups/settings/schedule', scheduleData);
+  }
+
   // Restore management endpoints
   async previewRestore(backupId) {
     return this.post(`/restore/preview/${backupId}`);

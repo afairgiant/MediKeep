@@ -30,6 +30,7 @@ import {
   IconCheck,
   IconX,
   IconInfoCircle,
+  IconCalendarEvent,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import HealthItem, { getHealthColor } from '../../components/admin/HealthItem';
@@ -134,6 +135,21 @@ const SystemHealth = () => {
     },
   });
 
+  // Backup Schedule
+  const [scheduleSettings, setScheduleSettings] = useState(null);
+  const loadScheduleSettings = useCallback(async () => {
+    try {
+      const data = await adminApiService.getAutoBackupSchedule();
+      setScheduleSettings(data);
+    } catch {
+      // Non-critical — leave as null
+    }
+  }, []);
+
+  useEffect(() => {
+    loadScheduleSettings();
+  }, [loadScheduleSettings]);
+
   // Test Library State
   const [testLibraryInfo, setTestLibraryInfo] = useState(null);
   const [testLibraryLoading, setTestLibraryLoading] = useState(false);
@@ -205,6 +221,7 @@ const SystemHealth = () => {
       refreshStorage(true),
       refreshLogs(true),
       refreshSSO(true),
+      loadScheduleSettings(),
     ]);
   };
 
@@ -316,11 +333,49 @@ const SystemHealth = () => {
                   Last Backup
                 </Text>
               </Group>
-              <Text size="xl" fw={700}>
-                {healthData?.last_backup
-                  ? formatDate(healthData.last_backup)
-                  : 'No backups configured'}
-              </Text>
+              {healthData?.last_backup ? (
+                <Text size="xl" fw={700}>
+                  {formatDate(healthData.last_backup)}
+                </Text>
+              ) : scheduleSettings?.last_run_status === 'failed' ? (
+                <Text size="xl" fw={700} c="red">
+                  Last run failed
+                </Text>
+              ) : (
+                <Text size="xl" fw={700}>
+                  None yet
+                </Text>
+              )}
+              {scheduleSettings?.last_run_status === 'failed' && scheduleSettings.last_run_at && (
+                <Text size="xs" c="red" mt={2}>
+                  {formatDateTime(scheduleSettings.last_run_at)}
+                  {scheduleSettings.last_run_error ? ` — ${scheduleSettings.last_run_error}` : ''}
+                </Text>
+              )}
+              {scheduleSettings?.enabled && (
+                <Group gap={4} mt={4}>
+                  <IconCalendarEvent size={14} color="var(--mantine-color-green-6)" />
+                  <Text size="xs" c="green">
+                    Scheduled: {
+                      scheduleSettings.preset === 'every_6_hours' ? 'Every 6 hours' :
+                      scheduleSettings.preset === 'every_12_hours' ? 'Every 12 hours' :
+                      scheduleSettings.preset === 'daily' ? 'Daily' :
+                      scheduleSettings.preset === 'weekly' ? 'Weekly' :
+                      scheduleSettings.preset
+                    }
+                  </Text>
+                </Group>
+              )}
+              {scheduleSettings && !scheduleSettings.enabled && !healthData?.last_backup && (
+                <Text size="xs" c="dimmed" mt={4}>
+                  No schedule configured
+                </Text>
+              )}
+              {scheduleSettings?.next_run_at && scheduleSettings.enabled && (
+                <Text size="xs" c="dimmed" mt={2}>
+                  Next: {formatDateTime(scheduleSettings.next_run_at)}
+                </Text>
+              )}
             </Paper>
           </SimpleGrid>
         </Card>

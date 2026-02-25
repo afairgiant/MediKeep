@@ -9,7 +9,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
@@ -18,10 +18,15 @@ from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
-    log_security_event
+    log_security_event,
 )
 from app.models.models import User
 from app.services.backup_service import BackupService
+from app.services.backup_scheduler_service import (
+    TIME_FORMAT_RE,
+    VALID_DAYS_OF_WEEK,
+    VALID_PRESETS,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -58,6 +63,50 @@ class RetentionSettingsUpdate(BaseModel):
     allow_user_registration: Optional[bool] = None
 
 
+class AutoBackupScheduleResponse(BaseModel):
+    preset: str
+    time_of_day: str
+    day_of_week: Optional[str] = None
+    enabled: bool
+    last_run_at: Optional[str] = None
+    last_run_status: Optional[str] = None
+    last_run_error: Optional[str] = None
+    next_run_at: Optional[str] = None
+
+
+class AutoBackupScheduleUpdate(BaseModel):
+    preset: str
+    time_of_day: Optional[str] = None
+    day_of_week: Optional[str] = None
+
+    @field_validator("preset")
+    @classmethod
+    def validate_preset(cls, v):
+        if v not in VALID_PRESETS:
+            raise ValueError(f"Must be one of: {', '.join(sorted(VALID_PRESETS))}")
+        return v
+
+    @field_validator("time_of_day")
+    @classmethod
+    def validate_time_of_day(cls, v):
+        if v is None:
+            return v
+        if not TIME_FORMAT_RE.match(v):
+            raise ValueError("Must be in HH:MM format (24-hour)")
+        return v
+
+    @field_validator("day_of_week")
+    @classmethod
+    def validate_day_of_week(cls, v):
+        if v is None:
+            return v
+        if v not in VALID_DAYS_OF_WEEK:
+            raise ValueError(
+                f"Must be one of: {', '.join(sorted(VALID_DAYS_OF_WEEK))}"
+            )
+        return v
+
+
 @router.post("/create-database", response_model=BackupResponse)
 async def create_database_backup(
     backup_request: BackupCreateRequest,
@@ -84,7 +133,7 @@ async def create_database_backup(
             user_id=current_user.id,
             backup_id=backup_result["id"],
             backup_filename=backup_result["filename"],
-            size_bytes=backup_result["size_bytes"]
+            size_bytes=backup_result["size_bytes"],
         )
 
         return BackupResponse(
@@ -103,7 +152,7 @@ async def create_database_backup(
             request,
             "Failed to create database backup",
             e,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -137,7 +186,7 @@ async def create_files_backup(
             user_id=current_user.id,
             backup_id=backup_result["id"],
             backup_filename=backup_result["filename"],
-            size_bytes=backup_result["size_bytes"]
+            size_bytes=backup_result["size_bytes"],
         )
 
         return BackupResponse(
@@ -152,11 +201,7 @@ async def create_files_backup(
 
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Failed to create files backup",
-            e,
-            user_id=current_user.id
+            logger, request, "Failed to create files backup", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -190,7 +235,7 @@ async def create_full_backup(
             user_id=current_user.id,
             backup_id=backup_result["id"],
             backup_filename=backup_result["filename"],
-            size_bytes=backup_result["size_bytes"]
+            size_bytes=backup_result["size_bytes"],
         )
 
         return BackupResponse(
@@ -205,11 +250,7 @@ async def create_full_backup(
 
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Failed to create full backup",
-            e,
-            user_id=current_user.id
+            logger, request, "Failed to create full backup", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -236,11 +277,7 @@ async def list_backups(
 
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Failed to list backups",
-            e,
-            user_id=current_user.id
+            logger, request, "Failed to list backups", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -289,7 +326,7 @@ async def download_backup(
             f"Backup downloaded: {backup['filename']}",
             user_id=current_user.id,
             backup_id=backup_id,
-            backup_filename=backup["filename"]
+            backup_filename=backup["filename"],
         )
 
         return FileResponse(
@@ -307,7 +344,7 @@ async def download_backup(
             f"Failed to download backup {backup_id}",
             e,
             user_id=current_user.id,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -337,7 +374,7 @@ async def verify_backup(
             request,
             f"Backup verification requested",
             user_id=current_user.id,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
 
         return verification_result
@@ -349,7 +386,7 @@ async def verify_backup(
             f"Failed to verify backup {backup_id}",
             e,
             user_id=current_user.id,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -379,7 +416,7 @@ async def delete_backup(
             request,
             f"Backup deleted",
             user_id=current_user.id,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
 
         return deletion_result
@@ -393,7 +430,7 @@ async def delete_backup(
             f"Failed to delete backup {backup_id}",
             e,
             user_id=current_user.id,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -421,18 +458,14 @@ async def cleanup_old_backups(
             "backup_cleanup_triggered",
             request,
             "Backup cleanup triggered",
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
         return cleanup_result
 
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Failed to cleanup backups",
-            e,
-            user_id=current_user.id
+            logger, request, "Failed to cleanup backups", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -460,7 +493,7 @@ async def cleanup_orphaned_files(
             "orphaned_cleanup_triggered",
             request,
             "Orphaned file cleanup triggered",
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
         return cleanup_result
@@ -471,7 +504,7 @@ async def cleanup_orphaned_files(
             request,
             "Failed to cleanup orphaned files",
             e,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -499,18 +532,14 @@ async def cleanup_all_old_data(
             "complete_cleanup_triggered",
             request,
             "Complete cleanup triggered",
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
         return cleanup_result
 
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Failed to cleanup old data",
-            e,
-            user_id=current_user.id
+            logger, request, "Failed to cleanup old data", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -602,7 +631,9 @@ async def update_retention_settings(
 
         if settings_update.allow_user_registration is not None:
             settings.ALLOW_USER_REGISTRATION = settings_update.allow_user_registration
-            updated_settings["allow_user_registration"] = settings_update.allow_user_registration
+            updated_settings["allow_user_registration"] = (
+                settings_update.allow_user_registration
+            )
             log_security_event(
                 logger,
                 "user_registration_toggled",
@@ -610,7 +641,7 @@ async def update_retention_settings(
                 f"User registration {'enabled' if settings_update.allow_user_registration else 'disabled'}",
                 user_id=current_user.id,
                 username=current_user.username,
-                registration_enabled=settings_update.allow_user_registration
+                registration_enabled=settings_update.allow_user_registration,
             )
 
         log_security_event(
@@ -620,7 +651,7 @@ async def update_retention_settings(
             "Admin settings updated",
             user_id=current_user.id,
             username=current_user.username,
-            updated_settings=str(updated_settings)
+            updated_settings=str(updated_settings),
         )
 
         return {
@@ -639,11 +670,7 @@ async def update_retention_settings(
         raise
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Failed to update settings",
-            e,
-            user_id=current_user.id
+            logger, request, "Failed to update settings", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=500, detail=f"Failed to update settings: {str(e)}"
@@ -668,12 +695,68 @@ async def get_retention_stats(
 
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Failed to get retention stats",
-            e,
-            user_id=current_user.id
+            logger, request, "Failed to get retention stats", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=500, detail=f"Failed to get retention stats: {str(e)}"
+        )
+
+
+@router.get("/settings/schedule", response_model=AutoBackupScheduleResponse)
+async def get_auto_backup_schedule(
+    current_user: User = Depends(get_current_admin_user),
+) -> AutoBackupScheduleResponse:
+    """Get current auto-backup schedule configuration."""
+    from app.services.backup_scheduler_service import BackupSchedulerService
+
+    scheduler_service = BackupSchedulerService.get_instance()
+    config = scheduler_service.get_schedule()
+    return AutoBackupScheduleResponse(**config)
+
+
+@router.post("/settings/schedule")
+async def update_auto_backup_schedule(
+    schedule_update: AutoBackupScheduleUpdate,
+    request: Request,
+    current_user: User = Depends(get_current_admin_user),
+):
+    """Update auto-backup schedule configuration."""
+    from app.services.backup_scheduler_service import BackupSchedulerService
+
+    try:
+        scheduler_service = BackupSchedulerService.get_instance()
+        config = scheduler_service.update_schedule(
+            preset=schedule_update.preset,
+            time_of_day=schedule_update.time_of_day,
+            day_of_week=schedule_update.day_of_week,
+        )
+
+        log_security_event(
+            logger,
+            "auto_backup_schedule_updated",
+            request,
+            f"Auto-backup schedule set to: {schedule_update.preset}",
+            user_id=current_user.id,
+            username=current_user.username,
+            preset=schedule_update.preset,
+        )
+
+        return {
+            "message": "Auto-backup schedule updated successfully",
+            "schedule": config,
+        }
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to update auto-backup schedule",
+            e,
+            user_id=current_user.id,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update schedule: {str(e)}",
         )
