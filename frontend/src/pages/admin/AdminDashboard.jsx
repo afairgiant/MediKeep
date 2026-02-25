@@ -52,6 +52,8 @@ import {
   IconClock,
   IconShieldCheck,
   IconAlertCircle,
+  IconArrowRight,
+  IconTrash,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import ChartErrorBoundary from '../../components/shared/ChartErrorBoundary';
@@ -59,6 +61,7 @@ import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import useThemeColors from '../../hooks/useThemeColors';
+import logger from '../../services/logger';
 import './AdminDashboard.css';
 
 // Register Chart.js components
@@ -82,12 +85,6 @@ const DASHBOARD_CONFIG = {
   ACTIVITY_MAX_HEIGHT: 300,
   DEFAULT_WEEK_LABELS: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   DEFAULT_WEEK_DATA: [0, 0, 0, 0, 0, 0, 0],
-  // Staggered refresh delays to prevent thundering herd
-  REFRESH_STAGGER: {
-    STATS: 0,
-    ACTIVITY: 2000,
-    HEALTH: 4000,
-  },
 };
 
 const AdminDashboard = () => {
@@ -160,14 +157,18 @@ const AdminDashboard = () => {
   const handleRefreshAll = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      // Stagger the refresh calls slightly to avoid network congestion
-      refreshStats(true);
-      setTimeout(() => refreshActivity(true), 500);
-      setTimeout(() => refreshHealth(true), 1000);
-      setTimeout(() => refreshAnalytics(true), 1500);
-
-      // Wait for staggered requests to complete
-      await new Promise(resolve => setTimeout(resolve, 2500));
+      await Promise.all([
+        refreshStats(true),
+        refreshActivity(true),
+        refreshHealth(true),
+        refreshAnalytics(true),
+      ]);
+    } catch (error) {
+      logger.error('Failed to refresh dashboard data', {
+        component: 'AdminDashboard',
+        event: 'refresh_all_failed',
+        error: error.message,
+      });
     } finally {
       setIsRefreshing(false);
     }
@@ -332,18 +333,21 @@ const AdminDashboard = () => {
             label="Total Users"
             change={`+${stats?.recent_registrations || 0} this week`}
             color="blue"
+            href="/admin/models/user"
           />
           <StatCard
             icon={IconStethoscope}
             value={stats?.total_patients || 0}
             label="Active Patients"
             color="green"
+            href="/admin/models/patient"
           />
           <StatCard
             icon={IconFlask}
             value={stats?.total_lab_results || 0}
             label="Lab Results"
             color="orange"
+            href="/admin/models/lab_result"
           />
           <StatCard
             icon={IconPill}
@@ -351,12 +355,14 @@ const AdminDashboard = () => {
             label="Medications"
             change={`${stats?.active_medications || 0} active prescriptions`}
             color="cyan"
+            href="/admin/models/medication"
           />
           <StatCard
             icon={IconHeart}
             value={stats?.total_vitals || 0}
             label="Vital Signs"
             color="red"
+            href="/admin/models/vitals"
           />
         </SimpleGrid>
 
@@ -476,30 +482,54 @@ const AdminDashboard = () => {
 };
 
 // Reusable StatCard Component
-const StatCard = ({ icon: IconComponent, value, label, change, color }) => (
-  <Card shadow="sm" p="lg" withBorder>
-    <Group justify="space-between" mb="xs">
-      <ThemeIcon size="lg" variant="light" color={color}>
-        <IconComponent size={20} />
-      </ThemeIcon>
-      <Badge variant="light" color={color} size="sm">
-        <IconTrendingUp size={12} />
-      </Badge>
-    </Group>
+const StatCard = ({ icon: IconComponent, value, label, change, color, href }) => {
+  const navigate = useNavigate();
 
-    <Text size="xl" fw={700} mb="xs">
-      {value}
-    </Text>
+  const handleNavigation = href ? () => navigate(href) : undefined;
 
-    <Text size="sm" fw={500} mb="xs">
-      {label}
-    </Text>
+  const handleKeyDown = href
+    ? (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleNavigation();
+        }
+      }
+    : undefined;
 
-    <Text size="xs" c="dimmed">
-      {change}
-    </Text>
-  </Card>
-);
+  return (
+    <Card
+      shadow="sm"
+      p="lg"
+      withBorder
+      onClick={handleNavigation}
+      onKeyDown={handleKeyDown}
+      role={href ? 'button' : undefined}
+      tabIndex={href ? 0 : undefined}
+      className={href ? 'action-button-hover' : undefined}
+    >
+      <Group justify="space-between" mb="xs">
+        <ThemeIcon size="lg" variant="light" color={color}>
+          <IconComponent size={20} />
+        </ThemeIcon>
+        <Badge variant="light" color={color} size="sm">
+          <IconTrendingUp size={12} />
+        </Badge>
+      </Group>
+
+      <Text size="xl" fw={700} mb="xs">
+        {value}
+      </Text>
+
+      <Text size="sm" fw={500} mb="xs">
+        {label}
+      </Text>
+
+      <Text size="xs" c="dimmed">
+        {change}
+      </Text>
+    </Card>
+  );
+};
 
 StatCard.propTypes = {
   icon: PropTypes.elementType.isRequired,
@@ -507,6 +537,7 @@ StatCard.propTypes = {
   label: PropTypes.string.isRequired,
   change: PropTypes.string,
   color: PropTypes.string.isRequired,
+  href: PropTypes.string,
 };
 
 // Reusable SystemHealthCard Component
@@ -669,28 +700,42 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false }) => {
       )}
 
       {!loading && !error && (
-        <Stack gap="sm" mah={DASHBOARD_CONFIG.ACTIVITY_MAX_HEIGHT} style={{ overflowY: 'auto' }}>
-          {activities.length > 0 ? (
-            activities.map((activity, index) => (
-              <ActivityItem
-                key={index}
-                activity={activity}
-                iconData={getActivityIcon(activity.model_name, activity.action)}
-              />
-            ))
-          ) : (
-            <Center py="xl">
-              <Stack align="center">
-                <ThemeIcon size="xl" variant="light" color="gray">
-                  <IconActivity size={24} />
-                </ThemeIcon>
-                <Text c="dimmed" size="sm">
-                  No recent activity to display
-                </Text>
-              </Stack>
-            </Center>
+        <>
+          <Stack gap="sm" mah={DASHBOARD_CONFIG.ACTIVITY_MAX_HEIGHT} style={{ overflowY: 'auto' }}>
+            {activities.length > 0 ? (
+              activities.map((activity, index) => (
+                <ActivityItem
+                  key={index}
+                  activity={activity}
+                  iconData={getActivityIcon(activity.model_name, activity.action)}
+                />
+              ))
+            ) : (
+              <Center py="xl">
+                <Stack align="center">
+                  <ThemeIcon size="xl" variant="light" color="gray">
+                    <IconActivity size={24} />
+                  </ThemeIcon>
+                  <Text c="dimmed" size="sm">
+                    No recent activity to display
+                  </Text>
+                </Stack>
+              </Center>
+            )}
+          </Stack>
+          {activities.length > 0 && (
+            <Button
+              variant="subtle"
+              fullWidth
+              mt="md"
+              rightSection={<IconArrowRight size={16} />}
+              disabled
+              title="Available when Audit Log page is added"
+            >
+              View All Activity
+            </Button>
           )}
-        </Stack>
+        </>
       )}
     </Card>
   );
@@ -727,7 +772,7 @@ const QuickActionsCard = () => (
       </div>
     </Group>
 
-    <SimpleGrid cols={{ base: 2, sm: 3, md: 6 }} spacing="md">
+    <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
       <ActionButton
         href="/admin/data-models"
         icon={IconDatabase}
@@ -762,6 +807,29 @@ const QuickActionsCard = () => (
         title="Settings"
         desc="System configuration"
         color="gray"
+      />
+      <ActionButton
+        href="/admin/models/user"
+        icon={IconUsers}
+        title="Manage Users"
+        desc="View and manage user accounts"
+        color="teal"
+      />
+      <ActionButton
+        href="/admin/audit-log"
+        icon={IconActivity}
+        title="Audit Log"
+        desc="View system activity log"
+        color="red"
+        disabled
+      />
+      <ActionButton
+        href="/admin/trash"
+        icon={IconTrash}
+        title="Trash"
+        desc="Recover deleted records"
+        color="yellow"
+        disabled
       />
     </SimpleGrid>
   </Card>
@@ -837,20 +905,31 @@ ActivityItem.propTypes = {
   }).isRequired,
 };
 
-const ActionButton = ({ href, icon: IconComponent, title, desc, color }) => {
+const ActionButton = ({ href, icon: IconComponent, title, desc, color, disabled }) => {
   const navigate = useNavigate();
 
-  const handleClick = () => {
-    navigate(href);
-  };
+  const handleClick = disabled ? undefined : () => navigate(href);
+
+  const handleKeyDown = disabled
+    ? undefined
+    : (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          navigate(href);
+        }
+      };
 
   return (
     <Paper
       p="md"
       withBorder
-      style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
       onClick={handleClick}
-      className="action-button-hover"
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      className={disabled ? undefined : 'action-button-hover'}
+      style={disabled ? { opacity: 0.5 } : undefined}
+      aria-disabled={disabled || undefined}
     >
       <Stack align="center" gap="xs">
         <ThemeIcon size="lg" variant="light" color={color}>
@@ -875,6 +954,7 @@ ActionButton.propTypes = {
   title: PropTypes.string.isRequired,
   desc: PropTypes.string.isRequired,
   color: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default AdminDashboard;
