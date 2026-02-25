@@ -1,7 +1,9 @@
 import logger from '../../services/logger';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Center, Loader, Text, Alert, Button, Stack } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { useAuth } from '../../contexts/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
@@ -14,140 +16,118 @@ const AdminLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [adminVerified, setAdminVerified] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
 
-
-  const checkAdminAccess = useCallback(async () => {
-    const ENCRYPTION_INIT_RETRY_DELAY = 100; // ms to wait for encryption initialization
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Migrate legacy data first
-      await legacyMigration.migrateFromLocalStorage();
-      
-      // Try to get token with retry logic for decryption failures
-      let token = await secureStorage.getItem('token');
-      
-      // If token retrieval failed, wait a moment and retry once
-      // This handles cases where encryption key might not be ready yet
-      if (!token) {
-        await new Promise(resolve => setTimeout(resolve, ENCRYPTION_INIT_RETRY_DELAY));
-        token = await secureStorage.getItem('token');
-      }
-      
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      // Decode token to check role and expiration with error handling
-      let payload;
-      try {
-        payload = JSON.parse(atob(token.split('.')[1]));
-      } catch (decodeError) {
-        logger.error('Failed to decode token:', decodeError);
-        // Token is corrupted, clear and redirect to login
-        await secureStorage.removeItem('token');
-        navigate('/login');
-        return;
-      }
-      
-      const currentTime = Date.now() / 1000;
-
-      if (payload.exp < currentTime) {
-        await secureStorage.removeItem('token');
-        navigate('/login');
-        return;
-      }
-
-      // Check if user has admin role
-      const userRole = payload.role || '';
-      if (
-        userRole.toLowerCase() !== 'admin' &&
-        userRole.toLowerCase() !== 'administrator'
-      ) {
-        navigate('/dashboard');
-        return;
-      }
-
-      // Set user data immediately after role check
-      const userData = {
-        username: payload.sub,
-        role: userRole,
-        fullName: payload.full_name || payload.sub,
-      };
-
-      setUser(userData);
-      setAdminVerified(true); // Mark as verified
-
-      // Optional: Test admin access with backend (less aggressive)
-      try {
-        await adminApiService.testAdminAccess();
-      } catch (apiError) {
-        // Don't fail the whole auth check if backend test fails
-        // User already passed token validation and role check
-      }
-    } catch (error) {
-      setError('Authentication failed. Please try logging in again.');
-      setTimeout(() => navigate('/login'), 3000);
-    } finally {
-      setLoading(false);
-    }
-  }, [navigate, user?.username, adminVerified, location.pathname]);
   useEffect(() => {
-    // Only check admin access once when component first mounts
-    // Don't re-check on every navigation within admin area
-    if (!user && !adminVerified) {
-      checkAdminAccess();
+    const ENCRYPTION_INIT_RETRY_DELAY = 100;
+
+    async function checkAdminAccess() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        await legacyMigration.migrateFromLocalStorage();
+
+        let token = await secureStorage.getItem('token');
+
+        // Retry once if encryption key might not be ready yet
+        if (!token) {
+          await new Promise(resolve => setTimeout(resolve, ENCRYPTION_INIT_RETRY_DELAY));
+          token = await secureStorage.getItem('token');
+        }
+
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        let payload;
+        try {
+          payload = JSON.parse(atob(token.split('.')[1]));
+        } catch (decodeError) {
+          logger.error('Failed to decode token:', decodeError);
+          await secureStorage.removeItem('token');
+          navigate('/login');
+          return;
+        }
+
+        if (payload.exp < Date.now() / 1000) {
+          await secureStorage.removeItem('token');
+          navigate('/login');
+          return;
+        }
+
+        const userRole = payload.role || '';
+        if (
+          userRole.toLowerCase() !== 'admin' &&
+          userRole.toLowerCase() !== 'administrator'
+        ) {
+          navigate('/dashboard');
+          return;
+        }
+
+        setUser({
+          username: payload.sub,
+          role: userRole,
+          fullName: payload.full_name || payload.sub,
+        });
+
+        try {
+          await adminApiService.testAdminAccess();
+        } catch (apiError) {
+          // Backend test is optional -- user already passed token validation
+        }
+      } catch (error) {
+        setError('Authentication failed. Please try logging in again.');
+        setTimeout(() => navigate('/login'), 3000);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [checkAdminAccess, user, adminVerified]);
+
+    checkAdminAccess();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogout = async () => {
     try {
-      // Use AuthContext logout to properly clear state and redirect
       await logout();
-      // Navigation will be handled by AuthContext/ProtectedRoute
     } catch (error) {
-      // Fallback navigation if logout fails
       navigate('/login');
     }
   };
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
-  // Show loading state
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
+
   if (loading) {
     return (
-      <div className="admin-layout loading-state">
-        <div className="loading-container">
-          <div className="spinner"></div>
-          <p>Verifying admin access...</p>
-        </div>
-      </div>
+      <Center h="100vh">
+        <Stack align="center" gap="md">
+          <Loader size="lg" />
+          <Text c="dimmed">Verifying admin access...</Text>
+        </Stack>
+      </Center>
     );
   }
 
-  // Show error state
   if (error) {
     return (
-      <div className="admin-layout error-state">
-        <div className="error-container">
-          <h2>Access Error</h2>
-          <p>{error}</p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="btn btn-primary"
+      <Center h="100vh">
+        <Stack align="center" gap="md" maw={500}>
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            title="Access Error"
+            color="red"
+            variant="light"
           >
+            {error}
+          </Alert>
+          <Button variant="light" onClick={() => navigate('/dashboard')}>
             Return to Dashboard
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Stack>
+      </Center>
     );
   }
 
