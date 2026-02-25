@@ -36,7 +36,7 @@
   max-width: 100%;
   box-sizing: border-box;
   min-width: 0;
-  margin-top: 0; /* Header is within flex layout, no overlap */
+  margin-top: 0;
 }
 
 /* Mobile responsive design */
@@ -57,19 +57,8 @@
   }
 }
 
-/* Portrait monitor optimization - dynamic width calculation */
+/* Portrait monitor optimization */
 @media (max-width: 1200px) {
-  .admin-main.sidebar-open {
-    width: calc(100vw - 280px);
-    margin-left: 280px;
-  }
-
-  .admin-main.sidebar-closed {
-    width: calc(100vw - 60px);
-    margin-left: 60px;
-  }
-
-  /* Ensure content adapts to very narrow widths */
   .admin-content {
     padding: 12px 8px;
   }
@@ -282,10 +271,6 @@
   box-sizing: border-box;
 }
 
-.admin-content {
-  overflow-x: hidden;
-}
-
 /* Specific table overflow fixes */
 .backup-table,
 .admin-table {
@@ -437,114 +422,3 @@
   }
 }
 
-/* Dark theme support */
-[data-theme='dark'] .admin-layout {
-  background-color: var(--color-bg-primary);
-}
-
-/* Loading state dark theme */
-[data-theme='dark'] .admin-layout.loading-state {
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-}
-
-[data-theme='dark'] .loading-container {
-  color: var(--color-text-primary);
-}
-
-[data-theme='dark'] .loading-container p {
-  color: var(--color-text-secondary);
-}
-
-/* Error state dark theme */
-[data-theme='dark'] .admin-layout.error-state {
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-}
-
-[data-theme='dark'] .error-container {
-  color: var(--color-text-primary);
-}
-
-[data-theme='dark'] .error-container h2 {
-  color: var(--color-danger);
-}
-
-[data-theme='dark'] .error-container p {
-  color: var(--color-text-secondary);
-}
-
-/* Loading state */
-.admin-layout.loading-state {
-  justify-content: center;
-  align-items: center;
-  background-color: var(--color-bg-primary, #f8f9fa);
-  color: var(--color-text-primary, #333);
-}
-
-.loading-container {
-  text-align: center;
-  max-width: 400px;
-  padding: 2rem;
-}
-
-.loading-container .spinner {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 1rem;
-  border: 4px solid #e3e3e3;
-  border-top: 4px solid var(--color-primary, #007bff);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-container p {
-  font-size: 1.1rem;
-  color: var(--color-text-secondary, #666);
-  margin: 0;
-}
-
-/* Error state */
-.admin-layout.error-state {
-  justify-content: center;
-  align-items: center;
-  background-color: var(--color-bg-primary, #f8f9fa);
-  color: var(--color-text-primary, #333);
-}
-
-.error-container {
-  text-align: center;
-  max-width: 500px;
-  padding: 2rem;
-}
-
-.error-container h2 {
-  color: var(--color-danger, #dc3545);
-  margin-bottom: 1rem;
-}
-
-.error-container p {
-  color: var(--color-text-secondary, #666);
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-.error-container button {
-  background-color: var(--color-primary, #007bff);
-  color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.error-container button:hover {
-  background-color: var(--color-primary-dark, #0056b3);
-}
