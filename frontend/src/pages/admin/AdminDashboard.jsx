@@ -164,8 +164,9 @@ const AdminDashboard = () => {
         refreshAnalytics(true),
       ]);
     } catch (error) {
-      logger.error('refresh_all_failed', 'Failed to refresh dashboard data', {
+      logger.error('Failed to refresh dashboard data', {
         component: 'AdminDashboard',
+        event: 'refresh_all_failed',
         error: error.message,
       });
     } finally {
@@ -484,12 +485,26 @@ const AdminDashboard = () => {
 const StatCard = ({ icon: IconComponent, value, label, change, color, href }) => {
   const navigate = useNavigate();
 
+  const handleNavigation = href ? () => navigate(href) : undefined;
+
+  const handleKeyDown = href
+    ? (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleNavigation();
+        }
+      }
+    : undefined;
+
   return (
     <Card
       shadow="sm"
       p="lg"
       withBorder
-      onClick={href ? () => navigate(href) : undefined}
+      onClick={handleNavigation}
+      onKeyDown={handleKeyDown}
+      role={href ? 'button' : undefined}
+      tabIndex={href ? 0 : undefined}
       className={href ? 'action-button-hover' : undefined}
     >
       <Group justify="space-between" mb="xs">
@@ -806,6 +821,7 @@ const QuickActionsCard = () => (
         title="Audit Log"
         desc="View system activity log"
         color="red"
+        disabled
       />
       <ActionButton
         href="/admin/trash"
@@ -813,6 +829,7 @@ const QuickActionsCard = () => (
         title="Trash"
         desc="Recover deleted records"
         color="yellow"
+        disabled
       />
     </SimpleGrid>
   </Card>
@@ -888,15 +905,31 @@ ActivityItem.propTypes = {
   }).isRequired,
 };
 
-const ActionButton = ({ href, icon: IconComponent, title, desc, color }) => {
+const ActionButton = ({ href, icon: IconComponent, title, desc, color, disabled }) => {
   const navigate = useNavigate();
+
+  const handleClick = disabled ? undefined : () => navigate(href);
+
+  const handleKeyDown = disabled
+    ? undefined
+    : (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          navigate(href);
+        }
+      };
 
   return (
     <Paper
       p="md"
       withBorder
-      onClick={() => navigate(href)}
-      className="action-button-hover"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      className={disabled ? undefined : 'action-button-hover'}
+      style={disabled ? { opacity: 0.5 } : undefined}
+      aria-disabled={disabled || undefined}
     >
       <Stack align="center" gap="xs">
         <ThemeIcon size="lg" variant="light" color={color}>
@@ -921,6 +954,7 @@ ActionButton.propTypes = {
   title: PropTypes.string.isRequired,
   desc: PropTypes.string.isRequired,
   color: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
 };
 
 export default AdminDashboard;
