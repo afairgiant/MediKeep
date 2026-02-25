@@ -72,8 +72,15 @@ const AdminSettings = () => {
   };
 
   const handleInputChange = (field, value) => {
-    const normalized = value === undefined ? '' : value;
-    setSettings(prev => ({ ...prev, [field]: normalized }));
+    if (value === '' || value === undefined) {
+      setSettings(prev => ({ ...prev, [field]: '' }));
+      return;
+    }
+    const numValue = Number(value);
+    if (!Number.isFinite(numValue) || numValue < 1) {
+      return;
+    }
+    setSettings(prev => ({ ...prev, [field]: numValue }));
   };
 
   const handleBlur = (field, min = 1) => {
