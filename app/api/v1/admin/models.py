@@ -37,8 +37,12 @@ from app.crud import (
     vitals,
 )
 from app.crud.emergency_contact import emergency_contact
+from app.crud.injury import injury
+from app.crud.injury_type import injury_type
+from app.crud.medical_equipment import medical_equipment
+from app.crud.symptom import symptom_parent, symptom_occurrence
 from app.crud.base import CRUDBase
-from app.models.activity_log import ActionType, ActivityLog, EntityType, get_utc_now
+from app.models.activity_log import ActionType, ActivityLog
 from app.models.models import (
     Allergy,
     Condition,
@@ -49,22 +53,25 @@ from app.models.models import (
     FamilyHistoryShare,
     FamilyMember,
     Immunization,
+    Injury,
+    InjuryType,
     Insurance,
     Invitation,
     LabResult,
     LabResultFile,
+    MedicalEquipment,
     Medication,
     Patient,
     PatientShare,
     Pharmacy,
     Practitioner,
     Procedure,
+    Symptom,
+    SymptomOccurrence,
     Treatment,
     User,
-    UserPreferences,
     Vitals,
 )
-from app.models.activity_log import ActivityLog
 from app.schemas.allergy import AllergyCreate
 from app.schemas.condition import ConditionCreate
 from app.schemas.emergency_contact import EmergencyContactCreate
@@ -73,14 +80,18 @@ from app.schemas.entity_file import EntityFileCreate
 from app.schemas.family_condition import FamilyConditionCreate
 from app.schemas.family_member import FamilyMemberCreate
 from app.schemas.immunization import ImmunizationCreate
+from app.schemas.injury import InjuryCreate
+from app.schemas.injury_type import InjuryTypeCreate
 from app.schemas.insurance import InsuranceCreate
 from app.schemas.lab_result import LabResultCreate
 from app.schemas.lab_result_file import LabResultFileCreate
+from app.schemas.medical_equipment import MedicalEquipmentCreate
 from app.schemas.medication import MedicationCreate
 from app.schemas.patient import PatientCreate
 from app.schemas.pharmacy import PharmacyCreate
 from app.schemas.practitioner import PractitionerCreate
 from app.schemas.procedure import ProcedureCreate
+from app.schemas.symptom import SymptomCreate, SymptomOccurrenceCreate
 from app.schemas.treatment import TreatmentCreate
 from app.schemas.user import UserCreate
 from app.schemas.vitals import VitalsCreate
@@ -112,6 +123,11 @@ DATETIME_FIELD_MAP = {
     "family_member": ["created_at", "updated_at"],
     "family_condition": ["created_at", "updated_at"],
     "entity_file": ["uploaded_at", "created_at", "updated_at"],
+    "injury": ["created_at", "updated_at"],
+    "injury_type": ["created_at", "updated_at"],
+    "symptom": ["created_at", "updated_at"],
+    "symptom_occurrence": ["created_at", "updated_at"],
+    "medical_equipment": ["created_at", "updated_at"],
 }
 
 DATE_FIELD_MAP = {
@@ -126,6 +142,10 @@ DATE_FIELD_MAP = {
     "family_condition": ["onset_date", "end_date"],
     "insurance": ["policy_start_date", "policy_end_date"],
     "entity_file": ["last_sync_at"],
+    "injury": ["date_of_injury"],
+    "symptom": ["first_occurrence_date", "last_occurrence_date", "resolved_date"],
+    "symptom_occurrence": ["occurrence_date", "resolved_date"],
+    "medical_equipment": ["prescribed_date", "last_service_date", "next_service_date"],
 }
 
 # Field display configuration - controls which fields are shown and their order
@@ -751,7 +771,145 @@ FIELD_DISPLAY_CONFIG = {
         ],
         "search_fields": ["file_name", "entity_type", "file_type", "category"],
     },
-    # Add more models as needed
+    "injury": {
+        "list_fields": [
+            "id",
+            "patient_id",
+            "injury_name",
+            "body_part",
+            "severity",
+            "status",
+            "date_of_injury",
+        ],
+        "detail_fields": [
+            "id",
+            "patient_id",
+            "injury_name",
+            "injury_type_id",
+            "body_part",
+            "laterality",
+            "date_of_injury",
+            "mechanism",
+            "severity",
+            "status",
+            "treatment_received",
+            "recovery_notes",
+            "practitioner_id",
+            "notes",
+            "tags",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["injury_name", "body_part", "mechanism", "severity", "status"],
+    },
+    "injury_type": {
+        "list_fields": [
+            "id",
+            "name",
+            "description",
+            "is_system",
+            "created_at",
+        ],
+        "detail_fields": [
+            "id",
+            "name",
+            "description",
+            "is_system",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["name", "description"],
+    },
+    "symptom": {
+        "list_fields": [
+            "id",
+            "patient_id",
+            "symptom_name",
+            "category",
+            "status",
+            "is_chronic",
+            "first_occurrence_date",
+        ],
+        "detail_fields": [
+            "id",
+            "patient_id",
+            "symptom_name",
+            "category",
+            "status",
+            "is_chronic",
+            "first_occurrence_date",
+            "last_occurrence_date",
+            "resolved_date",
+            "typical_triggers",
+            "general_notes",
+            "tags",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["symptom_name", "category", "status"],
+    },
+    "symptom_occurrence": {
+        "list_fields": [
+            "id",
+            "symptom_id",
+            "occurrence_date",
+            "severity",
+            "pain_scale",
+            "duration",
+            "impact_level",
+        ],
+        "detail_fields": [
+            "id",
+            "symptom_id",
+            "occurrence_date",
+            "severity",
+            "pain_scale",
+            "duration",
+            "time_of_day",
+            "location",
+            "triggers",
+            "relief_methods",
+            "associated_symptoms",
+            "impact_level",
+            "resolved_date",
+            "resolution_notes",
+            "notes",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["severity", "location", "duration", "impact_level"],
+    },
+    "medical_equipment": {
+        "list_fields": [
+            "id",
+            "patient_id",
+            "equipment_name",
+            "equipment_type",
+            "status",
+            "prescribed_date",
+        ],
+        "detail_fields": [
+            "id",
+            "patient_id",
+            "practitioner_id",
+            "equipment_name",
+            "equipment_type",
+            "manufacturer",
+            "model_number",
+            "serial_number",
+            "prescribed_date",
+            "last_service_date",
+            "next_service_date",
+            "usage_instructions",
+            "status",
+            "supplier",
+            "notes",
+            "tags",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["equipment_name", "equipment_type", "manufacturer", "supplier"],
+    },
 }
 
 # Create basic schemas for sharing models (minimal for admin interface)
@@ -877,6 +1035,31 @@ MODEL_REGISTRY = {
         "model": EntityFile,
         "crud": CRUDBase[EntityFile, EntityFileCreate, dict](EntityFile),
         "create_schema": EntityFileCreate,
+    },
+    "injury": {
+        "model": Injury,
+        "crud": injury,
+        "create_schema": InjuryCreate,
+    },
+    "injury_type": {
+        "model": InjuryType,
+        "crud": injury_type,
+        "create_schema": InjuryTypeCreate,
+    },
+    "symptom": {
+        "model": Symptom,
+        "crud": symptom_parent,
+        "create_schema": SymptomCreate,
+    },
+    "symptom_occurrence": {
+        "model": SymptomOccurrence,
+        "crud": symptom_occurrence,
+        "create_schema": SymptomOccurrenceCreate,
+    },
+    "medical_equipment": {
+        "model": MedicalEquipment,
+        "crud": medical_equipment,
+        "create_schema": MedicalEquipmentCreate,
     },
 }
 
@@ -1073,6 +1256,31 @@ def process_field_mappings(data: Dict[str, Any], model_name: str) -> Dict[str, A
     return data
 
 
+def record_to_dict(
+    record: Any, model_class: Type[Any], fields: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    """Convert a SQLAlchemy model instance to a dictionary with ISO-formatted datetimes.
+
+    If *fields* is provided, only those field names are included (in order).
+    Otherwise all columns on the model are included.
+    """
+    result = {}
+    if fields:
+        for field_name in fields:
+            if hasattr(record, field_name):
+                value = getattr(record, field_name, None)
+                if isinstance(value, datetime):
+                    value = value.isoformat()
+                result[field_name] = value
+    else:
+        for column in model_class.__table__.columns:
+            value = getattr(record, column.name, None)
+            if isinstance(value, datetime):
+                value = value.isoformat()
+            result[column.name] = value
+    return result
+
+
 @router.get("/{model_name}/", response_model=ModelListResponse)
 def list_model_records(
     model_name: str,
@@ -1178,66 +1386,50 @@ def list_model_records(
                 )
                 total = db.query(model_info["model"]).count()
 
+        # Determine which fields to show
+        fields_to_show = None
+        if model_name in FIELD_DISPLAY_CONFIG:
+            fields_to_show = FIELD_DISPLAY_CONFIG[model_name].get("list_fields")
+        else:
+            # Smart default: show common important fields if they exist
+            all_columns = [
+                col.name for col in model_info["model"].__table__.columns
+            ]
+            smart_defaults = []
+
+            # Always include ID if it exists
+            if "id" in all_columns:
+                smart_defaults.append("id")
+
+            # Include name-like fields
+            for field in [
+                "name",
+                "username",
+                "title",
+                "medication_name",
+                "test_name",
+            ]:
+                if field in all_columns:
+                    smart_defaults.append(field)
+                    break
+
+            # Include status if it exists
+            if "status" in all_columns:
+                smart_defaults.append("status")
+
+            # Include created_at if it exists
+            if "created_at" in all_columns:
+                smart_defaults.append("created_at")
+
+            # If we found smart defaults, use them, otherwise show all
+            if smart_defaults:
+                fields_to_show = smart_defaults
+
         # Convert to dictionaries for JSON response
-        items = []
-        for record in records:
-            item = {}
-
-            # Get fields to display (use config if available, otherwise smart defaults)
-            fields_to_show = None
-            if model_name in FIELD_DISPLAY_CONFIG:
-                fields_to_show = FIELD_DISPLAY_CONFIG[model_name].get("list_fields")
-            else:
-                # Smart default: show common important fields if they exist
-                all_columns = [
-                    col.name for col in model_info["model"].__table__.columns
-                ]
-                smart_defaults = []
-
-                # Always include ID if it exists
-                if "id" in all_columns:
-                    smart_defaults.append("id")
-
-                # Include name-like fields
-                for field in [
-                    "name",
-                    "username",
-                    "title",
-                    "medication_name",
-                    "test_name",
-                ]:
-                    if field in all_columns:
-                        smart_defaults.append(field)
-                        break
-
-                # Include status if it exists
-                if "status" in all_columns:
-                    smart_defaults.append("status")
-
-                # Include created_at if it exists
-                if "created_at" in all_columns:
-                    smart_defaults.append("created_at")
-
-                # If we found smart defaults, use them, otherwise show all
-                if smart_defaults:
-                    fields_to_show = smart_defaults
-
-            if fields_to_show:
-                # Show only configured fields in specified order
-                for field_name in fields_to_show:
-                    if hasattr(record, field_name):
-                        value = getattr(record, field_name, None)
-                        if isinstance(value, datetime):
-                            value = value.isoformat()
-                        item[field_name] = value
-            else:
-                # Show all fields (default behavior)
-                for column in model_info["model"].__table__.columns:
-                    value = getattr(record, column.name, None)
-                    if isinstance(value, datetime):
-                        value = value.isoformat()
-                    item[column.name] = value
-            items.append(item)
+        items = [
+            record_to_dict(record, model_info["model"], fields_to_show)
+            for record in records
+        ]
 
         total_pages = (total + per_page - 1) // per_page
 
@@ -1282,31 +1474,12 @@ def get_model_record(
                 detail=f"{model_name} record with id {record_id} not found",
             )
 
-        # Convert to dictionary
-        result = {}
-
         # Get fields to display (use config if available, otherwise all fields)
         fields_to_show = None
         if model_name in FIELD_DISPLAY_CONFIG:
             fields_to_show = FIELD_DISPLAY_CONFIG[model_name].get("detail_fields")
 
-        if fields_to_show:
-            # Show only configured fields in specified order
-            for field_name in fields_to_show:
-                if hasattr(record, field_name):
-                    value = getattr(record, field_name, None)
-                    if isinstance(value, datetime):
-                        value = value.isoformat()
-                    result[field_name] = value
-        else:
-            # Show all fields (default behavior)
-            for column in model_info["model"].__table__.columns:
-                value = getattr(record, column.name, None)
-                if isinstance(value, datetime):
-                    value = value.isoformat()
-                result[column.name] = value
-
-        return result
+        return record_to_dict(record, model_info["model"], fields_to_show)
 
     except HTTPException:
         raise
@@ -1384,7 +1557,6 @@ def delete_model_record(
             # Note: SQLAlchemy cascade="all, delete-orphan" relationships automatically
             # handle deletion of all medical data when patient is deleted
             from app.crud.patient import patient as patient_crud
-            from app.models.activity_log import ActivityLog
 
             user_patient = patient_crud.get_by_user_id(db, user_id=record.id)
             if user_patient:
@@ -1485,15 +1657,7 @@ def update_model_record(
                 user_id=current_user_id,
             )
 
-        # Convert to dictionary for JSON response
-        result = {}
-        for column in model_info["model"].__table__.columns:
-            value = getattr(updated_record, column.name, None)
-            if isinstance(value, datetime):
-                value = value.isoformat()
-            result[column.name] = value
-
-        return result
+        return record_to_dict(updated_record, model_info["model"])
 
     except HTTPException:
         raise
@@ -1543,15 +1707,7 @@ def create_model_record(
                 user_id=current_user_id,
             )
 
-        # Convert to dictionary for JSON response
-        result = {}
-        for column in model_info["model"].__table__.columns:
-            value = getattr(created_record, column.name, None)
-            if isinstance(value, datetime):
-                value = value.isoformat()
-            result[column.name] = value
-
-        return result
+        return record_to_dict(created_record, model_info["model"])
 
     except HTTPException:
         raise

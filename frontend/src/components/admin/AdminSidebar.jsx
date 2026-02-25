@@ -15,8 +15,11 @@ import {
 import {
   IconTool,
   IconChartBar,
+  IconTrendingUp,
   IconDatabase,
   IconUsers,
+  IconTrash,
+  IconFileText,
   IconDeviceFloppy,
   IconHeartRateMonitor,
   IconSettings,
@@ -30,20 +33,28 @@ const NAV_SECTIONS = [
     label: 'Dashboard',
     items: [
       { label: 'Overview', icon: IconChartBar, path: '/admin', exact: true },
+      { label: 'Analytics', icon: IconTrendingUp, path: '/admin/analytics', disabled: true },
     ],
   },
   {
     label: 'Data Management',
     items: [
       { label: 'Data Models', icon: IconDatabase, path: '/admin/data-models' },
-      { label: 'Manage Users', icon: IconUsers, path: '/admin/models/user' },
+      { label: 'User Management', icon: IconUsers, path: '/admin/models/user' },
+      { label: 'Trash', icon: IconTrash, path: '/admin/trash', disabled: true },
+    ],
+  },
+  {
+    label: 'Monitoring',
+    items: [
+      { label: 'Audit Log', icon: IconFileText, path: '/admin/audit-log', disabled: true },
+      { label: 'System Health', icon: IconHeartRateMonitor, path: '/admin/system-health' },
     ],
   },
   {
     label: 'Tools',
     items: [
       { label: 'Backup Management', icon: IconDeviceFloppy, path: '/admin/backup' },
-      { label: 'System Health', icon: IconHeartRateMonitor, path: '/admin/system-health' },
       { label: 'Settings', icon: IconSettings, path: '/admin/settings' },
     ],
   },
@@ -128,26 +139,27 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
                 )}
                 <Stack gap={2}>
                   {section.items.map((item) => {
-                    const active = isActive(currentPath, item);
+                    const active = !item.disabled && isActive(currentPath, item);
                     const Icon = item.icon;
 
                     if (!isOpen) {
                       return (
                         <Tooltip
                           key={item.path}
-                          label={item.label}
+                          label={item.disabled ? `${item.label} (Coming Soon)` : item.label}
                           position="right"
                           withArrow
                         >
                           <ActionIcon
-                            component={Link}
-                            to={item.path}
-                            onClick={closeSidebar}
+                            component={item.disabled ? 'button' : Link}
+                            to={item.disabled ? undefined : item.path}
+                            onClick={item.disabled ? undefined : closeSidebar}
                             variant={active ? 'light' : 'subtle'}
                             color={active ? 'blue' : 'gray'}
                             size="lg"
                             aria-current={active ? 'page' : undefined}
-                            style={{ margin: '2px auto' }}
+                            disabled={item.disabled}
+                            style={{ margin: '2px auto', opacity: item.disabled ? 0.5 : 1 }}
                           >
                             <Icon size={18} />
                           </ActionIcon>
@@ -158,14 +170,16 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
                     return (
                       <NavLink
                         key={item.path}
-                        component={Link}
-                        to={item.path}
+                        component={item.disabled ? 'button' : Link}
+                        to={item.disabled ? undefined : item.path}
                         label={item.label}
                         leftSection={<Icon size={18} />}
                         active={active}
-                        onClick={closeSidebar}
+                        disabled={item.disabled}
+                        onClick={item.disabled ? undefined : closeSidebar}
                         aria-current={active ? 'page' : undefined}
                         variant="light"
+                        style={item.disabled ? { opacity: 0.5 } : undefined}
                       />
                     );
                   })}

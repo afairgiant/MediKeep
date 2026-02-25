@@ -1,9 +1,17 @@
-import logger from '../../services/logger';
-
 import React, { useState } from 'react';
-import { Modal } from '../ui';
-import { Button, Alert } from '../ui';
+import {
+  Modal,
+  Button,
+  Alert,
+  PasswordInput,
+  Stack,
+  Group,
+  Text,
+  Paper,
+} from '@mantine/core';
+import { IconAlertTriangle } from '@tabler/icons-react';
 import { adminApiService } from '../../services/api/adminApi';
+import logger from '../../services/logger';
 
 const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
   const [passwordData, setPasswordData] = useState({
@@ -14,19 +22,8 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const handleInputChange = e => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const resetForm = () => {
-    setPasswordData({
-      newPassword: '',
-      confirmPassword: '',
-    });
+    setPasswordData({ newPassword: '', confirmPassword: '' });
     setError('');
     setSuccessMessage('');
   };
@@ -39,11 +36,9 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
   const handlePasswordReset = async e => {
     e.preventDefault();
 
-    // Reset messages
     setError('');
     setSuccessMessage('');
 
-    // Validation
     if (!passwordData.newPassword || !passwordData.confirmPassword) {
       setError('Both password fields are required');
       return;
@@ -59,7 +54,6 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
       return;
     }
 
-    // Check if password contains at least one letter and one number
     const hasLetter = /[a-zA-Z]/.test(passwordData.newPassword);
     const hasNumber = /\d/.test(passwordData.newPassword);
     if (!hasLetter || !hasNumber) {
@@ -69,21 +63,21 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
 
     try {
       setIsResetting(true);
-      await adminApiService.adminResetPassword(
-        userId,
-        passwordData.newPassword
-      );
+      await adminApiService.adminResetPassword(userId, passwordData.newPassword);
 
       setSuccessMessage(`Password reset successfully for ${username}!`);
       resetForm();
 
-      // Close modal after 2 seconds
       setTimeout(() => {
         handleClose();
       }, 2000);
-    } catch (error) {
-      logger.error('Error resetting password:', error);
-      setError(error.message || 'Failed to reset password. Please try again.');
+    } catch (err) {
+      logger.error('password_reset_error', 'Error resetting password', {
+        component: 'AdminResetPasswordModal',
+        userId,
+        error: err.message,
+      });
+      setError(err.message || 'Failed to reset password. Please try again.');
     } finally {
       setIsResetting(false);
     }
@@ -91,174 +85,86 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
 
   return (
     <Modal
-      isOpen={isOpen}
+      opened={isOpen}
       onClose={handleClose}
       title={`Reset Password for ${username}`}
-      size="small"
-      className="admin-reset-password-modal"
+      size="sm"
+      centered
     >
-      <div className="reset-password-content">
-        {error && <Alert type="error">{error}</Alert>}
-        {successMessage && <Alert type="success">{successMessage}</Alert>}
+      <Stack gap="md">
+        {error && (
+          <Alert color="red" variant="light">
+            {error}
+          </Alert>
+        )}
+        {successMessage && (
+          <Alert color="green" variant="light">
+            {successMessage}
+          </Alert>
+        )}
 
-        <div className="user-info">
-          <p>
+        <Paper
+          p="sm"
+          radius="sm"
+          withBorder
+          style={{ borderLeft: '4px solid var(--mantine-color-blue-5)' }}
+        >
+          <Text size="sm">
             <strong>User:</strong> {username} (ID: {userId})
-          </p>
-          <p className="warning-text">
-            ⚠️ This will immediately reset the user's password. They will need
-            to use the new password to log in.
-          </p>
-        </div>
+          </Text>
+          <Alert
+            color="yellow"
+            variant="light"
+            icon={<IconAlertTriangle size={16} />}
+            mt="xs"
+            p="xs"
+          >
+            <Text size="xs">
+              This will immediately reset the user&apos;s password. They will need to use the new password to log in.
+            </Text>
+          </Alert>
+        </Paper>
 
-        <form onSubmit={handlePasswordReset} className="password-form">
-          <div className="form-group">
-            <label htmlFor="newPassword">New Password</label>
-            <input
-              type="password"
-              id="newPassword"
-              name="newPassword"
-              value={passwordData.newPassword}
-              onChange={handleInputChange}
-              required
-              className="form-input"
-              minLength="6"
-              disabled={isResetting}
+        <form onSubmit={handlePasswordReset}>
+          <Stack gap="md">
+            <PasswordInput
+              label="New Password"
               placeholder="Enter new password"
-            />
-            <small className="form-help">
-              Password must be at least 6 characters with at least one letter
-              and one number
-            </small>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm New Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={passwordData.confirmPassword}
-              onChange={handleInputChange}
+              value={passwordData.newPassword}
+              onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.currentTarget.value }))}
               required
-              className="form-input"
+              minLength={6}
               disabled={isResetting}
-              placeholder="Confirm new password"
+              description="At least 6 characters with one letter and one number"
             />
-          </div>
 
-          <div className="form-actions">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleClose}
+            <PasswordInput
+              label="Confirm New Password"
+              placeholder="Confirm new password"
+              value={passwordData.confirmPassword}
+              onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.currentTarget.value }))}
+              required
               disabled={isResetting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              loading={isResetting}
-              disabled={isResetting}
-            >
-              {isResetting ? 'Resetting Password...' : 'Reset Password'}
-            </Button>
-          </div>
+            />
+
+            <Group justify="flex-end" gap="sm" mt="xs">
+              <Button
+                variant="default"
+                onClick={handleClose}
+                disabled={isResetting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                loading={isResetting}
+              >
+                Reset Password
+              </Button>
+            </Group>
+          </Stack>
         </form>
-      </div>
-
-      <style>{`
-        .reset-password-content {
-          padding: 0;
-        }
-
-        .user-info {
-          background-color: #f8f9fa;
-          padding: 1rem;
-          border-radius: 0.375rem;
-          margin-bottom: 1.5rem;
-          border-left: 4px solid #667eea;
-        }
-
-        .user-info p {
-          margin: 0.5rem 0;
-          font-size: 0.9rem;
-        }
-
-        .warning-text {
-          color: #d97706;
-          font-weight: 500;
-          font-size: 0.85rem !important;
-        }
-
-        .password-form {
-          width: 100%;
-        }
-
-        .form-group {
-          margin-bottom: 1.25rem;
-        }
-
-        .form-group label {
-          display: block;
-          font-weight: 500;
-          color: #333;
-          margin-bottom: 0.5rem;
-          font-size: 0.9rem;
-        }
-
-        .form-input {
-          width: 100%;
-          padding: 0.75rem;
-          border: 1px solid #e9ecef;
-          border-radius: 0.375rem;
-          font-size: 0.95rem;
-          transition:
-            border-color 0.2s ease,
-            box-shadow 0.2s ease;
-          box-sizing: border-box;
-        }
-
-        .form-input:focus {
-          outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-input:disabled {
-          background-color: #f8f9fa;
-          cursor: not-allowed;
-          opacity: 0.7;
-        }
-
-        .form-help {
-          display: block;
-          font-size: 0.8rem;
-          color: #666;
-          margin-top: 0.25rem;
-        }
-
-        .form-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 0.75rem;
-          margin-top: 1.5rem;
-          padding-top: 1rem;
-          border-top: 1px solid #f1f3f5;
-        }
-
-        @media (max-width: 480px) {
-          .form-actions {
-            flex-direction: column;
-            gap: 0.5rem;
-          }
-
-          .form-actions button {
-            width: 100%;
-          }
-        }
-      `}</style>
+      </Stack>
     </Modal>
   );
 };
