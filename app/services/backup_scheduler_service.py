@@ -64,7 +64,8 @@ class BackupSchedulerService:
     async def start(self) -> None:
         """Start the scheduler and restore schedule from DB."""
         config = self._load_config()
-        self._scheduler.start()
+        if not self._scheduler.running:
+            self._scheduler.start()
         if config.get("enabled") and config.get("preset") != "disabled":
             self._apply_schedule(config)
         logger.info(
@@ -255,10 +256,11 @@ class BackupSchedulerService:
             db.close()
 
     def _update_last_run(self, db, status: str, error: Optional[str]) -> None:
-        """Update last_run fields in the persisted config."""
+        """Update last_run fields in the persisted config using the provided session."""
         from app.crud.system_setting import system_setting
 
-        config = self._load_config()
+        raw = system_setting.get_setting(db, SETTING_KEY)
+        config = {**DEFAULT_CONFIG, **json.loads(raw)} if raw else dict(DEFAULT_CONFIG)
         config["last_run_at"] = datetime.now(timezone.utc).isoformat()
         config["last_run_status"] = status
         config["last_run_error"] = error
