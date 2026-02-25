@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import {
+  Alert,
+  Button,
+  Center,
+  Group,
+  Loader,
+  Modal,
+  Stack,
+  Text,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
+import { IconAlertTriangle, IconAlertCircle, IconArrowLeft } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { AdminResetPasswordModal } from '../../components/auth';
-import { Loading } from '../../components';
-import { Button } from '../../components/ui';
 import FieldRenderer from '../../components/admin/FieldRenderer';
 import { EDIT_EXCLUDED_FIELDS } from '../../constants/validationConstants';
 import { useAuth } from '../../contexts/AuthContext';
@@ -32,6 +42,11 @@ const ModelEdit = () => {
   const [resetUserId, setResetUserId] = useState(null);
   const [resetUsername, setResetUsername] = useState('');
 
+  // Warning modal states
+  const [usernameWarningOpened, { open: openUsernameWarning, close: closeUsernameWarning }] = useDisclosure(false);
+  const [roleWarningOpened, { open: openRoleWarning, close: closeRoleWarning }] = useDisclosure(false);
+  const [pendingUpdateData, setPendingUpdateData] = useState(null);
+
   const { handleFieldChange } = useFieldHandlers(setFormData, setValidationErrors);
 
   useEffect(() => {
@@ -49,7 +64,12 @@ const ModelEdit = () => {
         setRecord(recordResult);
         setFormData(recordResult);
       } catch (err) {
-        logger.error('Error loading record:', err);
+        logger.error('record_edit_load_error', 'Error loading record for edit', {
+          component: 'ModelEdit',
+          modelName,
+          recordId,
+          error: err.message,
+        });
         setError(err.message || 'Failed to load record');
       } finally {
         setLoading(false);
@@ -70,95 +90,118 @@ const ModelEdit = () => {
     return !hasErrors;
   };
 
-  const handleSave = async () => {
-    if (!handleValidateForm()) {
-      return;
-    }
+  const buildUpdateData = useCallback(() => {
+    const updateData = {};
+    metadata.fields.forEach(field => {
+      if (
+        !field.primary_key &&
+        field.name !== 'created_at' &&
+        field.name !== 'updated_at' &&
+        !EDIT_EXCLUDED_FIELDS.some(excluded => field.name.includes(excluded))
+      ) {
+        if (field.name === 'medication_type' && modelName === 'medication') {
+          updateData[field.name] = formData[field.name] || 'prescription';
+        } else {
+          updateData[field.name] = formData[field.name];
+        }
+      }
+    });
+    return updateData;
+  }, [metadata, formData, modelName]);
 
+  const executeSave = useCallback(async (updateData) => {
     try {
       setSaving(true);
       setError(null);
 
-      const updateData = {};
-      metadata.fields.forEach(field => {
-        if (
-          !field.primary_key &&
-          field.name !== 'created_at' &&
-          field.name !== 'updated_at' &&
-          !EDIT_EXCLUDED_FIELDS.some(excluded => field.name.includes(excluded))
-        ) {
-          // Special handling for medication_type - always include with default
-          if (field.name === 'medication_type' && modelName === 'medication') {
-            updateData[field.name] = formData[field.name] || 'prescription';
-          } else {
-            updateData[field.name] = formData[field.name];
-          }
-        }
-      });
-
-      if (modelName === 'user') {
-        const currentUser = await secureStorage.getJSON('user') || {};
-        const currentUsername = currentUser.username;
-
-        if (updateData.username && record.username !== updateData.username) {
-          if (record.username === currentUsername) {
-            const confirmChange = window.confirm(
-              `WARNING: You are about to change your own username from "${record.username}" to "${updateData.username}".\n\n` +
-              `This will log you out immediately and you'll need to log back in with the new username.\n\n` +
-              `Are you sure you want to continue?`
-            );
-
-            if (!confirmChange) {
-              setSaving(false);
-              return;
-            }
-          }
-        }
-
-        if (updateData.role && record.role !== updateData.role) {
-          const recordRole = (record.role || '').toLowerCase();
-          const newRole = (updateData.role || '').toLowerCase();
-          
-          if (['admin', 'administrator'].includes(recordRole) && !['admin', 'administrator'].includes(newRole)) {
-            const confirmRoleChange = window.confirm(
-              `WARNING: You are about to remove admin privileges from this user.\n\n` +
-              `If this is the last admin user in the system, you may lose admin access.\n\n` +
-              `Are you sure you want to continue?`
-            );
-            
-            if (!confirmRoleChange) {
-              setSaving(false);
-              return;
-            }
-          }
-        }
-      }
-
       await adminApiService.updateModelRecord(modelName, recordId, updateData);
-      
+
+      // Handle username change logout
       if (modelName === 'user' && updateData.username && record.username !== updateData.username) {
         const currentUserAfterSave = await secureStorage.getJSON('user') || {};
         const currentUsernameAfterSave = currentUserAfterSave.username;
 
         if (record.username === currentUsernameAfterSave) {
-          alert(
-            `Username updated successfully!\n\n` +
-            `You have been logged out because your username changed.\n` +
-            `Please log back in with your new username: "${updateData.username}"`
-          );
-
+          notifications.show({
+            title: 'Username updated',
+            message: `Your username has been changed. Please log in with your new username: "${updateData.username}"`,
+            color: 'blue',
+            autoClose: 5000,
+          });
           await logout();
           navigate('/login');
           return;
         }
       }
-      
+
+      notifications.show({
+        title: 'Changes saved',
+        message: 'Record updated successfully',
+        color: 'green',
+      });
       navigate(`/admin/models/${modelName}/${recordId}`);
     } catch (err) {
-      logger.error('Error saving record:', err);
+      logger.error('record_save_error', 'Error saving record', {
+        component: 'ModelEdit',
+        modelName,
+        recordId,
+        error: err.message,
+      });
       setError(err.message || 'Failed to save record');
+      notifications.show({
+        title: 'Save failed',
+        message: err.message || 'Failed to save record',
+        color: 'red',
+      });
     } finally {
       setSaving(false);
+    }
+  }, [modelName, recordId, record, navigate, logout]);
+
+  const handleSave = async () => {
+    if (!handleValidateForm()) return;
+
+    const updateData = buildUpdateData();
+
+    if (modelName === 'user') {
+      const currentUser = await secureStorage.getJSON('user') || {};
+      const currentUsername = currentUser.username;
+
+      // Check username change for self
+      if (updateData.username && record.username !== updateData.username) {
+        if (record.username === currentUsername) {
+          setPendingUpdateData(updateData);
+          openUsernameWarning();
+          return;
+        }
+      }
+
+      // Check role demotion
+      if (updateData.role && record.role !== updateData.role) {
+        const recordRole = (record.role || '').toLowerCase();
+        const newRole = (updateData.role || '').toLowerCase();
+        if (['admin', 'administrator'].includes(recordRole) && !['admin', 'administrator'].includes(newRole)) {
+          setPendingUpdateData(updateData);
+          openRoleWarning();
+          return;
+        }
+      }
+    }
+
+    await executeSave(updateData);
+  };
+
+  const dismissWarning = (closeModal) => {
+    closeModal();
+    setPendingUpdateData(null);
+    setSaving(false);
+  };
+
+  const confirmPendingUpdate = async (closeModal) => {
+    closeModal();
+    if (pendingUpdateData) {
+      await executeSave(pendingUpdateData);
+      setPendingUpdateData(null);
     }
   };
 
@@ -182,23 +225,26 @@ const ModelEdit = () => {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="admin-page-loading">
-          <Loading message="Loading model for editing..." />
-        </div>
+        <Center style={{ minHeight: 'calc(100vh - 140px)' }}>
+          <Loader size="lg" />
+        </Center>
       </AdminLayout>
     );
   }
 
-  if (error) {
+  if (error && !metadata) {
     return (
       <AdminLayout>
-        <div className="model-edit-error">
-          <h2>Error</h2>
-          <p>{error}</p>
-          <Button variant="secondary" onClick={handleCancel}>
-            ← Back
-          </Button>
-        </div>
+        <Center style={{ minHeight: 'calc(100vh - 140px)' }}>
+          <Stack align="center" gap="md">
+            <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title="Error">
+              {error}
+            </Alert>
+            <Button variant="default" leftSection={<IconArrowLeft size={16} />} onClick={handleCancel}>
+              Back
+            </Button>
+          </Stack>
+        </Center>
       </AdminLayout>
     );
   }
@@ -214,22 +260,26 @@ const ModelEdit = () => {
 
           <div className="edit-actions">
             <Button
-              variant="secondary"
+              variant="default"
               onClick={handleCancel}
               disabled={saving}
             >
               Cancel
             </Button>
             <Button
-              variant="primary"
               onClick={handleSave}
-              disabled={saving}
               loading={saving}
             >
               Save Changes
             </Button>
           </div>
         </div>
+
+        {error && (
+          <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" mb="md">
+            {error}
+          </Alert>
+        )}
 
         <form
           className="edit-form"
@@ -264,9 +314,9 @@ const ModelEdit = () => {
 
                 {validationErrors[field.name] && (
                   <div className="field-errors">
-                    {validationErrors[field.name].map((error, index) => (
+                    {validationErrors[field.name].map((validationError, index) => (
                       <div key={index} className="error-message">
-                        {error}
+                        {validationError}
                       </div>
                     ))}
                   </div>
@@ -283,6 +333,70 @@ const ModelEdit = () => {
           </div>
         </form>
       </div>
+
+      {/* Username Change Warning Modal */}
+      <Modal
+        opened={usernameWarningOpened}
+        onClose={() => dismissWarning(closeUsernameWarning)}
+        title={
+          <Group gap="xs">
+            <IconAlertTriangle size={20} color="var(--mantine-color-yellow-6)" />
+            <Text fw={600}>Username Change Warning</Text>
+          </Group>
+        }
+        centered
+      >
+        <Stack gap="md">
+          <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={16} />}>
+            <Text size="sm">
+              You are about to change your own username from <strong>&quot;{record?.username}&quot;</strong> to <strong>&quot;{pendingUpdateData?.username}&quot;</strong>.
+            </Text>
+            <Text size="sm" mt="xs">
+              This will log you out immediately and you will need to log back in with the new username.
+            </Text>
+          </Alert>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={() => dismissWarning(closeUsernameWarning)}>
+              Cancel
+            </Button>
+            <Button color="yellow" onClick={() => confirmPendingUpdate(closeUsernameWarning)}>
+              Change Username
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Role Change Warning Modal */}
+      <Modal
+        opened={roleWarningOpened}
+        onClose={() => dismissWarning(closeRoleWarning)}
+        title={
+          <Group gap="xs">
+            <IconAlertTriangle size={20} color="var(--mantine-color-yellow-6)" />
+            <Text fw={600}>Role Change Warning</Text>
+          </Group>
+        }
+        centered
+      >
+        <Stack gap="md">
+          <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={16} />}>
+            <Text size="sm">
+              You are about to remove admin privileges from this user.
+            </Text>
+            <Text size="sm" mt="xs">
+              If this is the last admin user in the system, you may lose admin access.
+            </Text>
+          </Alert>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" onClick={() => dismissWarning(closeRoleWarning)}>
+              Cancel
+            </Button>
+            <Button color="yellow" onClick={() => confirmPendingUpdate(closeRoleWarning)}>
+              Change Role
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
 
       <AdminResetPasswordModal
         isOpen={showPasswordModal}
