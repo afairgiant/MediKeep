@@ -1,11 +1,54 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Card,
+  Group,
+  Stack,
+  Text,
+  Badge,
+  Button,
+  SimpleGrid,
+  Paper,
+  Progress,
+  Alert,
+  ThemeIcon,
+  Center,
+  Loader,
+} from '@mantine/core';
+import {
+  IconHeartRateMonitor,
+  IconShieldCheck,
+  IconChartBar,
+  IconClock,
+  IconDeviceFloppy,
+  IconDatabase,
+  IconServer,
+  IconSettings,
+  IconLock,
+  IconBolt,
+  IconTestPipe,
+  IconRefresh,
+  IconCheck,
+  IconX,
+  IconInfoCircle,
+} from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import AdminCard from '../../components/admin/AdminCard';
+import HealthItem, { getHealthColor } from '../../components/admin/HealthItem';
+import DirectoryCard from '../../components/admin/DirectoryCard';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
-import { Loading } from '../../components';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import './SystemHealth.css';
+
+const SSO_PROVIDER_LABELS = {
+  google: 'Google OAuth 2.0',
+  github: 'GitHub OAuth',
+  oidc: 'OpenID Connect',
+};
+
+const USAGE_STATUS = {
+  low: 'healthy',
+  normal: 'warning',
+};
 
 const SystemHealth = () => {
   const { formatDate, formatDateTime } = useDateFormat();
@@ -45,7 +88,6 @@ const SystemHealth = () => {
   const {
     data: detailedStats,
     loading: statsLoading,
-    error: statsError,
     refreshData: refreshStats,
   } = useAdminData({
     entityName: 'Dashboard Statistics',
@@ -71,7 +113,6 @@ const SystemHealth = () => {
   const {
     data: frontendLogHealth,
     loading: logLoading,
-    error: logError,
     refreshData: refreshLogs,
   } = useAdminData({
     entityName: 'Frontend Logs',
@@ -154,8 +195,6 @@ const SystemHealth = () => {
     storageLoading ||
     logLoading ||
     ssoLoading;
-  const hasError =
-    healthError || metricsError || statsError || storageError || logError || ssoError;
 
   const handleRefreshAll = async () => {
     setLastRefresh(new Date());
@@ -169,49 +208,21 @@ const SystemHealth = () => {
     ]);
   };
 
-  const formatUptime = uptimeString => {
-    if (!uptimeString) return 'Unknown';
-    return uptimeString;
-  };
-
-  const formatBytes = bytes => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const getHealthStatusColor = status => {
-    switch (status?.toLowerCase()) {
-      case 'healthy':
-      case 'ok':
-      case 'operational':
-        return 'healthy';
-      case 'warning':
-      case 'slow':
-        return 'warning';
-      case 'error':
-      case 'unhealthy':
-      case 'failed':
-        return 'error';
-      default:
-        return 'info';
-    }
-  };
-
   const getStorageUsageColor = percentage => {
-    if (percentage < 70) return 'healthy';
-    if (percentage < 85) return 'warning';
-    return 'error';
+    if (percentage < 70) return 'green';
+    if (percentage < 85) return 'yellow';
+    return 'red';
   };
 
   if (loading && !healthData) {
     return (
       <AdminLayout>
-        <div className="admin-page-loading">
-          <Loading message="Loading system health..." />
-        </div>
+        <Center h={400}>
+          <Stack align="center">
+            <Loader size="lg" />
+            <Text c="dimmed">Loading system health...</Text>
+          </Stack>
+        </Center>
       </AdminLayout>
     );
   }
@@ -220,470 +231,500 @@ const SystemHealth = () => {
     <AdminLayout>
       <div className="system-health">
         {/* Header */}
-        <div className="health-header">
-          <div className="health-title">
-            <h1>🔍 System Health Monitor</h1>
-            <p>Real-time system status and performance metrics</p>
-          </div>
-
-          <div className="health-actions">
-            {lastRefresh && (
-              <div className="last-refresh">
-                <span>
+        <Card shadow="sm" p="xl" mb="xl" withBorder>
+          <Group justify="space-between" align="flex-start">
+            <div>
+              <Group align="center" mb="xs">
+                <ThemeIcon size="xl" variant="light" color="blue">
+                  <IconHeartRateMonitor size={24} />
+                </ThemeIcon>
+                <Text size="xl" fw={700}>
+                  System Health Monitor
+                </Text>
+              </Group>
+              <Text c="dimmed" size="md">
+                Real-time system status and performance metrics
+              </Text>
+            </div>
+            <Group>
+              {lastRefresh && (
+                <Text size="sm" c="dimmed">
                   Last updated: {formatDateTime(lastRefresh.toISOString())}
-                </span>
-              </div>
-            )}
-            <button
-              onClick={handleRefreshAll}
-              className="refresh-btn"
-              disabled={loading}
+                </Text>
+              )}
+              <Button
+                leftSection={<IconRefresh size={16} />}
+                onClick={handleRefreshAll}
+                loading={loading}
+                variant="light"
+              >
+                Refresh All
+              </Button>
+            </Group>
+          </Group>
+        </Card>
+
+        {/* Overall System Status */}
+        <Card shadow="sm" p="lg" mb="lg" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="green">
+              <IconShieldCheck size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              Overall System Status
+            </Text>
+            <Badge
+              variant="light"
+              color={getHealthColor(healthData?.database_status)}
             >
-              {loading ? '🔄 Refreshing...' : '🔄 Refresh All'}
-            </button>
-          </div>
-        </div>
-
-        {/* Overall System Status Overview */}
-        <AdminCard
-          title="Overall System Status"
-          icon="💚"
-          status={getHealthStatusColor(healthData?.database_status)}
-          className="health-overview-card"
-        >
-          <div className="health-overview-grid">
-            <div className="status-item">
-              <div className="status-icon">📊</div>
-              <div className="status-content">
-                <h3>Total Records</h3>
-                <p className="status-value">
-                  {healthData?.total_records?.toLocaleString() || 0}
-                </p>
-              </div>
-            </div>
-
-            <div className="status-item">
-              <div className="status-icon">⏱️</div>
-              <div className="status-content">
-                <h3>Application Uptime</h3>
-                <p className="status-value">
-                  {formatUptime(healthData?.system_uptime)}
-                </p>
-              </div>
-            </div>
-
-            <div className="status-item">
-              <div className="status-icon">💾</div>
-              <div className="status-content">
-                <h3>Last Backup</h3>
-                <p className="status-value">
-                  {healthData?.last_backup
-                    ? formatDate(healthData.last_backup)
-                    : 'No backups configured'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </AdminCard>
+              {healthData?.database_status || 'Unknown'}
+            </Badge>
+          </Group>
+          <SimpleGrid cols={{ base: 1, sm: 3 }}>
+            <Paper p="md" withBorder>
+              <Group gap="sm" mb="xs">
+                <ThemeIcon size="md" variant="light" color="blue">
+                  <IconChartBar size={16} />
+                </ThemeIcon>
+                <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
+                  Total Records
+                </Text>
+              </Group>
+              <Text size="xl" fw={700}>
+                {healthData?.total_records?.toLocaleString() || 0}
+              </Text>
+            </Paper>
+            <Paper p="md" withBorder>
+              <Group gap="sm" mb="xs">
+                <ThemeIcon size="md" variant="light" color="orange">
+                  <IconClock size={16} />
+                </ThemeIcon>
+                <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
+                  Application Uptime
+                </Text>
+              </Group>
+              <Text size="xl" fw={700}>
+                {healthData?.system_uptime || 'Unknown'}
+              </Text>
+            </Paper>
+            <Paper p="md" withBorder>
+              <Group gap="sm" mb="xs">
+                <ThemeIcon size="md" variant="light" color="violet">
+                  <IconDeviceFloppy size={16} />
+                </ThemeIcon>
+                <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
+                  Last Backup
+                </Text>
+              </Group>
+              <Text size="xl" fw={700}>
+                {healthData?.last_backup
+                  ? formatDate(healthData.last_backup)
+                  : 'No backups configured'}
+              </Text>
+            </Paper>
+          </SimpleGrid>
+        </Card>
 
         {/* Database Health */}
-        <AdminCard
-          title="Database Health"
-          icon="🗄️"
-          status={getHealthStatusColor(healthData?.database_status)}
-          loading={healthLoading}
-          error={healthError}
-        >
-          <div className="health-items">
-            <HealthItem
-              label="Connection Status"
-              value={healthData?.database_status || 'Unknown'}
-              status={getHealthStatusColor(healthData?.database_status)}
-            />
-            <HealthItem
-              label="Connection Test"
-              value={healthData?.database_connection_test ? 'Passed' : 'Failed'}
-              status={
-                healthData?.database_connection_test ? 'healthy' : 'error'
-              }
-            />
-            <HealthItem
-              label="Total Records"
-              value={healthData?.total_records?.toLocaleString() || 0}
-            />
-            {healthData?.disk_usage && (
-              <HealthItem label="Database Size" value={healthData.disk_usage} />
-            )}
-            {detailedStats && (
-              <>
-                <HealthItem
-                  label="Active Users"
-                  value={detailedStats.total_users}
-                />
-                <HealthItem
-                  label="Patient Records"
-                  value={detailedStats.total_patients}
-                />
-                <HealthItem
-                  label="Medical Records"
-                  value={
-                    (detailedStats.total_medications || 0) +
-                    (detailedStats.total_lab_results || 0) +
-                    (detailedStats.total_conditions || 0)
-                  }
-                />
-              </>
-            )}
-          </div>
-        </AdminCard>
+        <Card shadow="sm" p="lg" mb="lg" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="blue">
+              <IconDatabase size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              Database Health
+            </Text>
+            <Badge
+              variant="light"
+              color={getHealthColor(healthData?.database_status)}
+            >
+              {healthData?.database_status || 'Unknown'}
+            </Badge>
+          </Group>
+          {healthError ? (
+            <Alert color="red" variant="light">
+              {healthError}
+            </Alert>
+          ) : (
+            <Stack gap={0}>
+              <HealthItem
+                label="Connection Status"
+                value={healthData?.database_status || 'Unknown'}
+                status={healthData?.database_status}
+              />
+              <HealthItem
+                label="Connection Test"
+                value={healthData?.database_connection_test ? 'Passed' : 'Failed'}
+                status={healthData?.database_connection_test ? 'healthy' : 'error'}
+              />
+              <HealthItem
+                label="Total Records"
+                value={healthData?.total_records?.toLocaleString() || 0}
+              />
+              {healthData?.disk_usage && (
+                <HealthItem label="Database Size" value={healthData.disk_usage} />
+              )}
+              {detailedStats && (
+                <>
+                  <HealthItem
+                    label="Active Users"
+                    value={detailedStats.total_users}
+                  />
+                  <HealthItem
+                    label="Patient Records"
+                    value={detailedStats.total_patients}
+                  />
+                  <HealthItem
+                    label="Medical Records"
+                    value={
+                      (detailedStats.total_medications || 0) +
+                      (detailedStats.total_lab_results || 0) +
+                      (detailedStats.total_conditions || 0)
+                    }
+                  />
+                </>
+              )}
+            </Stack>
+          )}
+        </Card>
 
         {/* Storage Health */}
         {storageHealth && (
-          <AdminCard
-            title="Storage Health"
-            icon="💽"
-            status={getHealthStatusColor(storageHealth.status)}
-            loading={storageLoading}
-            error={storageError}
-          >
-            <div className="storage-overview">
-              <HealthItem
-                label="Status"
-                value={storageHealth.status}
-                status={getHealthStatusColor(storageHealth.status)}
-              />
-
-              {storageHealth.disk_space && (
-                <div className="disk-usage-container">
-                  <span className="health-label">Disk Usage:</span>
-                  <div className="disk-usage-info">
-                    <div className="disk-usage-bar">
-                      <div
-                        className={`disk-usage-fill ${getStorageUsageColor(
-                          storageHealth.disk_space.usage_percent
-                        )}`}
-                        style={{
-                          width: `${storageHealth.disk_space.usage_percent}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="disk-usage-text">
-                      {storageHealth.disk_space.usage_percent}% (
-                      {storageHealth.disk_space.free_gb}GB free)
-                    </span>
+          <Card shadow="sm" p="lg" mb="lg" withBorder>
+            <Group mb="md">
+              <ThemeIcon size="lg" variant="light" color="cyan">
+                <IconServer size={20} />
+              </ThemeIcon>
+              <Text fw={600} size="lg">
+                Storage Health
+              </Text>
+              <Badge
+                variant="light"
+                color={getHealthColor(storageHealth.status)}
+              >
+                {storageHealth.status}
+              </Badge>
+            </Group>
+            {storageError ? (
+              <Alert color="red" variant="light">
+                {storageError}
+              </Alert>
+            ) : (
+              <Stack>
+                {storageHealth.disk_space && (
+                  <div>
+                    <Group justify="space-between" mb="xs">
+                      <Text fw={500}>Disk Usage</Text>
+                      <Text size="sm" c="dimmed">
+                        {storageHealth.disk_space.usage_percent}% (
+                        {storageHealth.disk_space.free_gb}GB free)
+                      </Text>
+                    </Group>
+                    <Progress
+                      value={storageHealth.disk_space.usage_percent}
+                      color={getStorageUsageColor(
+                        storageHealth.disk_space.usage_percent
+                      )}
+                      size="lg"
+                      radius="md"
+                    />
                   </div>
-                </div>
-              )}
+                )}
 
-              {storageHealth.directories && (
-                <div className="storage-directories">
-                  {Object.entries(storageHealth.directories).map(
-                    ([dirName, dirInfo]) => (
-                      <DirectoryCard
-                        key={dirName}
-                        name={dirName}
-                        info={dirInfo}
-                      />
-                    )
-                  )}
-                </div>
-              )}
-            </div>
-          </AdminCard>
+                {storageHealth.directories && (
+                  <SimpleGrid cols={{ base: 2, sm: 3 }} mt="sm">
+                    {Object.entries(storageHealth.directories).map(
+                      ([dirName, dirInfo]) => (
+                        <DirectoryCard
+                          key={dirName}
+                          name={dirName}
+                          info={dirInfo}
+                        />
+                      )
+                    )}
+                  </SimpleGrid>
+                )}
+              </Stack>
+            )}
+          </Card>
         )}
 
         {/* Application Services */}
-        <AdminCard
-          title="Application Services"
-          icon="🔧"
-          loading={metricsLoading}
-          error={metricsError}
-        >
-          <div className="health-items">
-            <HealthItem
-              label="API Status"
-              value={`${systemMetrics?.services?.api?.status || 'Unknown'}${
-                systemMetrics?.services?.api?.response_time_ms
-                  ? ` (${systemMetrics.services.api.response_time_ms}ms)`
-                  : ''
-              }`}
-              status={getHealthStatusColor(
-                systemMetrics?.services?.api?.status
-              )}
-            />
-            <HealthItem
-              label="Authentication Service"
-              value={
-                systemMetrics?.services?.authentication?.status || 'Unknown'
-              }
-              status={getHealthStatusColor(
-                systemMetrics?.services?.authentication?.status
-              )}
-            />
-            <HealthItem
-              label="Frontend Logging"
-              value={
-                systemMetrics?.services?.frontend_logging?.status ||
-                frontendLogHealth?.status ||
-                'Unknown'
-              }
-              status={getHealthStatusColor(
-                systemMetrics?.services?.frontend_logging?.status ||
+        <Card shadow="sm" p="lg" mb="lg" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="violet">
+              <IconSettings size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              Application Services
+            </Text>
+          </Group>
+          {metricsError ? (
+            <Alert color="red" variant="light">
+              {metricsError}
+            </Alert>
+          ) : (
+            <Stack gap={0}>
+              <HealthItem
+                label="API Status"
+                value={`${systemMetrics?.services?.api?.status || 'Unknown'}${
+                  systemMetrics?.services?.api?.response_time_ms
+                    ? ` (${systemMetrics.services.api.response_time_ms}ms)`
+                    : ''
+                }`}
+                status={systemMetrics?.services?.api?.status}
+              />
+              <HealthItem
+                label="Authentication Service"
+                value={
+                  systemMetrics?.services?.authentication?.status || 'Unknown'
+                }
+                status={systemMetrics?.services?.authentication?.status}
+              />
+              <HealthItem
+                label="Frontend Logging"
+                value={
+                  systemMetrics?.services?.frontend_logging?.status ||
+                  frontendLogHealth?.status ||
+                  'Unknown'
+                }
+                status={
+                  systemMetrics?.services?.frontend_logging?.status ||
                   frontendLogHealth?.status
-              )}
-            />
-            <HealthItem
-              label="Admin Interface"
-              value={
-                systemMetrics?.services?.admin_interface?.status || 'Unknown'
-              }
-              status={getHealthStatusColor(
-                systemMetrics?.services?.admin_interface?.status
-              )}
-            />
-          </div>
-        </AdminCard>
+                }
+              />
+              <HealthItem
+                label="Admin Interface"
+                value={
+                  systemMetrics?.services?.admin_interface?.status || 'Unknown'
+                }
+                status={systemMetrics?.services?.admin_interface?.status}
+              />
+            </Stack>
+          )}
+        </Card>
 
         {/* SSO Configuration */}
-        <AdminCard
-          title="Single Sign-On (SSO)"
-          icon="🔐"
-          status={ssoConfig?.enabled ? 'healthy' : 'info'}
-          loading={ssoLoading}
-          error={ssoError}
-        >
-          <div className="health-items">
-            <HealthItem
-              label="SSO Status"
-              value={ssoConfig?.enabled ? 'Enabled' : 'Disabled'}
-              status={ssoConfig?.enabled ? 'healthy' : 'info'}
-            />
-            {ssoConfig?.enabled && (
-              <>
+        <Card shadow="sm" p="lg" mb="lg" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="orange">
+              <IconLock size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              Single Sign-On (SSO)
+            </Text>
+            <Badge
+              variant="light"
+              color={ssoConfig?.enabled ? 'green' : 'blue'}
+            >
+              {ssoConfig?.enabled ? 'Enabled' : 'Disabled'}
+            </Badge>
+          </Group>
+          {ssoError ? (
+            <Alert color="red" variant="light">
+              {ssoError}
+            </Alert>
+          ) : (
+            <Stack gap={0}>
+              <HealthItem
+                label="SSO Status"
+                value={ssoConfig?.enabled ? 'Enabled' : 'Disabled'}
+                status={ssoConfig?.enabled ? 'healthy' : 'info'}
+              />
+              {ssoConfig?.enabled && (
+                <>
+                  <HealthItem
+                    label="Provider Type"
+                    value={ssoConfig.provider_type?.toUpperCase() || 'Unknown'}
+                    status="info"
+                  />
+                  {SSO_PROVIDER_LABELS[ssoConfig.provider_type] && (
+                    <HealthItem
+                      label="Provider"
+                      value={SSO_PROVIDER_LABELS[ssoConfig.provider_type]}
+                      status="healthy"
+                    />
+                  )}
+                  <HealthItem
+                    label="Registration via SSO"
+                    value={ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
+                    status={ssoConfig.registration_enabled ? 'healthy' : 'warning'}
+                  />
+                </>
+              )}
+              {!ssoConfig?.enabled && (
                 <HealthItem
-                  label="Provider Type"
-                  value={ssoConfig.provider_type?.toUpperCase() || 'Unknown'}
+                  label="Info"
+                  value="Users can only log in with username/password"
                   status="info"
                 />
-                {ssoConfig.provider_type === 'google' && (
-                  <HealthItem
-                    label="Provider"
-                    value="Google OAuth 2.0"
-                    status="healthy"
-                  />
-                )}
-                {ssoConfig.provider_type === 'github' && (
-                  <HealthItem
-                    label="Provider"
-                    value="GitHub OAuth"
-                    status="healthy"
-                  />
-                )}
-                {ssoConfig.provider_type === 'oidc' && (
-                  <HealthItem
-                    label="Provider"
-                    value="OpenID Connect"
-                    status="healthy"
-                  />
-                )}
-                <HealthItem
-                  label="Registration via SSO"
-                  value={ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
-                  status={ssoConfig.registration_enabled ? 'healthy' : 'warning'}
-                />
-              </>
-            )}
-            {!ssoConfig?.enabled && (
-              <HealthItem
-                label="Info"
-                value="Users can only log in with username/password"
-                status="info"
-              />
-            )}
-          </div>
-        </AdminCard>
+              )}
+            </Stack>
+          )}
+        </Card>
 
         {/* Application Performance */}
         {systemMetrics?.application && (
-          <AdminCard
-            title="Application Performance"
-            icon="⚡"
-            loading={metricsLoading}
-            error={metricsError}
-          >
-            <div className="health-items">
+          <Card shadow="sm" p="lg" mb="lg" withBorder>
+            <Group mb="md">
+              <ThemeIcon size="lg" variant="light" color="yellow">
+                <IconBolt size={20} />
+              </ThemeIcon>
+              <Text fw={600} size="lg">
+                Application Performance
+              </Text>
+            </Group>
+            <Stack gap={0}>
               <HealthItem
                 label="Memory Usage"
                 value={systemMetrics.application.memory_usage}
-                status={
-                  systemMetrics.application.memory_usage === 'low'
-                    ? 'healthy'
-                    : systemMetrics.application.memory_usage === 'normal'
-                      ? 'warning'
-                      : 'error'
-                }
+                status={USAGE_STATUS[systemMetrics.application.memory_usage] || 'error'}
               />
               <HealthItem
                 label="CPU Usage"
                 value={systemMetrics.application.cpu_usage}
-                status={
-                  systemMetrics.application.cpu_usage === 'low'
-                    ? 'healthy'
-                    : systemMetrics.application.cpu_usage === 'normal'
-                      ? 'warning'
-                      : 'error'
-                }
+                status={USAGE_STATUS[systemMetrics.application.cpu_usage] || 'error'}
               />
-            </div>
-          </AdminCard>
+            </Stack>
+          </Card>
         )}
 
         {/* Test Library Maintenance */}
-        <AdminCard
-          title="Test Library Maintenance"
-          icon="🧪"
-          status={testLibraryError ? 'error' : 'healthy'}
-          loading={testLibraryLoading}
-          error={testLibraryError}
-        >
-          <div className="test-library-section">
-            {testLibraryInfo && (
-              <div className="health-items">
-                <HealthItem
-                  label="Library Version"
-                  value={testLibraryInfo.version}
-                  status="info"
-                />
-                <HealthItem
-                  label="Total Tests"
-                  value={testLibraryInfo.test_count}
-                  status="info"
-                />
-                <div className="health-item">
-                  <span className="health-label">Categories:</span>
-                  <span className="health-value">
-                    {testLibraryInfo.categories &&
-                      Object.entries(testLibraryInfo.categories)
-                        .map(([cat, count]) => `${cat}: ${count}`)
-                        .join(', ')}
-                  </span>
-                </div>
-              </div>
-            )}
+        <Card shadow="sm" p="lg" mb="lg" withBorder>
+          <Group mb="md">
+            <ThemeIcon size="lg" variant="light" color="grape">
+              <IconTestPipe size={20} />
+            </ThemeIcon>
+            <Text fw={600} size="lg">
+              Test Library Maintenance
+            </Text>
+            <Badge
+              variant="light"
+              color={testLibraryError ? 'red' : 'green'}
+            >
+              {testLibraryError ? 'Error' : 'Operational'}
+            </Badge>
+          </Group>
 
-            {syncResult && (
-              <div
-                className={`sync-result ${syncResult.success ? 'success' : 'error'}`}
-              >
-                <div className="sync-result-header">
-                  {syncResult.success ? '✓' : '✗'}{' '}
-                  {syncResult.type === 'reload'
-                    ? 'Library Reloaded'
-                    : 'Sync Complete'}
-                </div>
-                {syncResult.type === 'sync' && (
-                  <div className="sync-result-details">
-                    <span>Processed: {syncResult.components_processed}</span>
-                    <span>Names Updated: {syncResult.canonical_names_updated}</span>
-                    <span>Categories Updated: {syncResult.categories_updated}</span>
-                  </div>
-                )}
-                {syncResult.message && (
-                  <div className="sync-result-message">{syncResult.message}</div>
-                )}
-              </div>
-            )}
+          {testLibraryError && (
+            <Alert color="red" variant="light" mb="md">
+              {testLibraryError}
+            </Alert>
+          )}
 
-            <div className="test-library-actions">
-              <button
-                onClick={handleReloadTestLibrary}
-                className="action-btn secondary"
-                disabled={testLibrarySyncing}
-              >
-                {testLibrarySyncing ? 'Working...' : 'Reload Library'}
-              </button>
-              <button
-                onClick={() => handleSyncTestLibrary(false)}
-                className="action-btn primary"
-                disabled={testLibrarySyncing}
-              >
-                {testLibrarySyncing ? 'Syncing...' : 'Sync Unmatched'}
-              </button>
-              <button
-                onClick={() => handleSyncTestLibrary(true)}
-                className="action-btn warning"
-                disabled={testLibrarySyncing}
-              >
-                {testLibrarySyncing ? 'Syncing...' : 'Force Sync All'}
-              </button>
-            </div>
+          {testLibraryLoading ? (
+            <Center py="lg">
+              <Loader size="sm" />
+            </Center>
+          ) : (
+            <>
+              {testLibraryInfo && (
+                <Stack gap={0} mb="md">
+                  <HealthItem
+                    label="Library Version"
+                    value={testLibraryInfo.version}
+                    status="info"
+                  />
+                  <HealthItem
+                    label="Total Tests"
+                    value={testLibraryInfo.test_count}
+                    status="info"
+                  />
+                  <HealthItem
+                    label="Categories"
+                    value={
+                      testLibraryInfo.categories
+                        ? Object.entries(testLibraryInfo.categories)
+                            .map(([cat, count]) => `${cat}: ${count}`)
+                            .join(', ')
+                        : ''
+                    }
+                  />
+                </Stack>
+              )}
 
-            <div className="test-library-help">
-              <p>
-                <strong>Reload Library:</strong> Refreshes the test library from
-                disk (use after updating test_library.json)
-              </p>
-              <p>
-                <strong>Sync Unmatched:</strong> Updates components that don't have
-                a canonical name yet
-              </p>
-              <p>
-                <strong>Force Sync All:</strong> Re-matches all components
-                (categories and canonical names)
-              </p>
-            </div>
-          </div>
-        </AdminCard>
+              {syncResult && (
+                <Alert
+                  color={syncResult.success ? 'green' : 'red'}
+                  variant="light"
+                  icon={syncResult.success ? <IconCheck size={16} /> : <IconX size={16} />}
+                  mb="md"
+                  withCloseButton
+                  onClose={() => setSyncResult(null)}
+                  title={
+                    syncResult.type === 'reload'
+                      ? 'Library Reloaded'
+                      : 'Sync Complete'
+                  }
+                >
+                  {syncResult.type === 'sync' && (
+                    <Group gap="lg" mb="xs">
+                      <Text size="sm">
+                        Processed: {syncResult.components_processed}
+                      </Text>
+                      <Text size="sm">
+                        Names Updated: {syncResult.canonical_names_updated}
+                      </Text>
+                      <Text size="sm">
+                        Categories Updated: {syncResult.categories_updated}
+                      </Text>
+                    </Group>
+                  )}
+                  {syncResult.message && (
+                    <Text size="sm">{syncResult.message}</Text>
+                  )}
+                </Alert>
+              )}
+
+              <Group mt="md">
+                <Button
+                  variant="default"
+                  onClick={handleReloadTestLibrary}
+                  loading={testLibrarySyncing}
+                >
+                  Reload Library
+                </Button>
+                <Button
+                  variant="light"
+                  onClick={() => handleSyncTestLibrary(false)}
+                  loading={testLibrarySyncing}
+                >
+                  Sync Unmatched
+                </Button>
+                <Button
+                  variant="light"
+                  color="yellow"
+                  onClick={() => handleSyncTestLibrary(true)}
+                  loading={testLibrarySyncing}
+                >
+                  Force Sync All
+                </Button>
+              </Group>
+
+              <Alert
+                variant="light"
+                color="gray"
+                mt="md"
+                icon={<IconInfoCircle size={16} />}
+              >
+                <Text size="sm" mb={4}>
+                  <Text span fw={600}>Reload Library:</Text> Refreshes the test
+                  library from disk (use after updating test_library.json)
+                </Text>
+                <Text size="sm" mb={4}>
+                  <Text span fw={600}>Sync Unmatched:</Text> Updates components
+                  that don&apos;t have a canonical name yet
+                </Text>
+                <Text size="sm">
+                  <Text span fw={600}>Force Sync All:</Text> Re-matches all
+                  components (categories and canonical names)
+                </Text>
+              </Alert>
+            </>
+          )}
+        </Card>
       </div>
     </AdminLayout>
-  );
-};
-
-// Reusable HealthItem Component
-const HealthItem = ({ label, value, status }) => (
-  <div className="health-item">
-    <span className="health-label">{label}:</span>
-    <span className={`health-value ${status ? `status-${status}` : ''}`}>
-      {value}
-    </span>
-  </div>
-);
-
-// Reusable DirectoryCard Component
-const DirectoryCard = ({ name, info }) => {
-  const dirIcons = {
-    uploads: '📁',
-    backups: '💾',
-    logs: '📝',
-  };
-
-  return (
-    <div className="directory-card">
-      <div className="directory-header">
-        <span className="directory-icon">{dirIcons[name] || '📂'}</span>
-        <span className="directory-name">
-          {name.charAt(0).toUpperCase() + name.slice(1)}
-        </span>
-        <span
-          className={`directory-status ${
-            info.write_permission && info.exists ? 'healthy' : 'error'
-          }`}
-        >
-          {info.write_permission && info.exists ? '✓' : '✗'}
-        </span>
-      </div>
-      <div className="directory-stats">
-        <div className="stat">
-          <span className="stat-value">{info.size_mb}</span>
-          <span className="stat-label">MB</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value">{info.file_count}</span>
-          <span className="stat-label">files</span>
-        </div>
-      </div>
-      {info.error && <div className="directory-error">{info.error}</div>}
-    </div>
   );
 };
 
