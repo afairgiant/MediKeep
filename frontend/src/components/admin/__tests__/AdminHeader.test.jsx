@@ -2,6 +2,7 @@ import React from 'react';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { MantineProvider } from '@mantine/core';
 
 vi.mock('../AdminHeader.css', () => ({}));
 
@@ -23,9 +24,11 @@ import AdminHeader from '../AdminHeader';
 
 const renderAdminHeader = (props = {}) => {
   return render(
-    <MemoryRouter>
-      <AdminHeader {...props} />
-    </MemoryRouter>
+    <MantineProvider>
+      <MemoryRouter>
+        <AdminHeader {...props} />
+      </MemoryRouter>
+    </MantineProvider>
   );
 };
 
@@ -134,7 +137,7 @@ describe('AdminHeader', () => {
     const onToggleSidebar = vi.fn();
     renderAdminHeader({ onToggleSidebar });
 
-    const sidebarToggleBtn = screen.getByRole('button', { name: /☰/i });
+    const sidebarToggleBtn = screen.getByRole('button', { name: /toggle sidebar/i });
     fireEvent.click(sidebarToggleBtn);
 
     expect(onToggleSidebar).toHaveBeenCalledTimes(1);
@@ -143,7 +146,7 @@ describe('AdminHeader', () => {
   test('sidebar toggle button does not throw when onToggleSidebar is not provided', () => {
     renderAdminHeader();
 
-    const sidebarToggleBtn = screen.getByRole('button', { name: /☰/i });
+    const sidebarToggleBtn = screen.getByRole('button', { name: /toggle sidebar/i });
     expect(() => fireEvent.click(sidebarToggleBtn)).not.toThrow();
   });
 

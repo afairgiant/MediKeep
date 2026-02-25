@@ -1,6 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import {
+  Group,
+  TextInput,
+  ActionIcon,
+  Button,
+  Badge,
+  Avatar,
+  Tooltip,
+  Box,
+  Text,
+} from '@mantine/core';
+import {
+  IconMenu2,
+  IconSearch,
+  IconArrowLeft,
+  IconHome,
+  IconUser,
+  IconMoon,
+  IconSun,
+  IconLogout,
+} from '@tabler/icons-react';
 import './AdminHeader.css';
 
 const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
@@ -23,68 +44,126 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
 
   const handleLogout = () => onLogout?.();
   const handleToggleSidebar = () => onToggleSidebar?.();
+
   return (
-    <header className="admin-header">
-      <div className="header-left">
-        <button className="sidebar-toggle-btn" onClick={handleToggleSidebar}>
-          ☰
-        </button>
-        <h1>Medical Records Admin</h1>
-      </div>
-      
-      <div className="header-center">
-        <div className="search-bar">
-          <input
-            type="text"
+    <Box
+      component="header"
+      className="admin-header"
+      px="md"
+      style={{
+        height: 70,
+        borderBottom: '1px solid var(--mantine-color-default-border)',
+      }}
+    >
+      <Group h="100%" justify="space-between" wrap="nowrap" gap="md">
+        <Group gap="md" wrap="nowrap" style={{ flexShrink: 0 }}>
+          <ActionIcon
+            className="sidebar-toggle-btn"
+            variant="filled"
+            size="lg"
+            onClick={handleToggleSidebar}
+            aria-label="Toggle sidebar"
+          >
+            <IconMenu2 size={20} />
+          </ActionIcon>
+          <Text fw={600} size="xl" style={{ whiteSpace: 'nowrap' }}>
+            Medical Records Admin
+          </Text>
+        </Group>
+
+        <Box style={{ flex: 1, maxWidth: 500 }} mx="md" visibleFrom="sm">
+          <TextInput
             placeholder="Search records, users, or data..."
-            className="global-search"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.currentTarget.value)}
             onKeyDown={handleSearchKeyDown}
             aria-label="Search data models"
+            leftSection={<IconSearch size={16} />}
+            rightSection={
+              <ActionIcon
+                variant="subtle"
+                size="sm"
+                onClick={handleSearch}
+                aria-label="Search"
+              >
+                <IconSearch size={14} />
+              </ActionIcon>
+            }
           />
-          <button className="search-btn" onClick={handleSearch} aria-label="Search">🔍</button>
-        </div>
-      </div>
-      
-      <div className="header-right">
-        <button
-          className="back-to-dashboard-btn"
-          onClick={() => navigate('/admin')}
-          title="Return to Admin Dashboard"
-        >
-          ← Dashboard
-        </button>
+        </Box>
 
-        <button
-          className="back-to-home-btn"
-          onClick={() => navigate('/dashboard')}
-          title="Return to Normal Dashboard"
-        >
-          🏠
-        </button>
+        <Group gap="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
+          <Tooltip label="Return to Admin Dashboard">
+            <Button
+              variant="default"
+              size="compact-sm"
+              leftSection={<IconArrowLeft size={14} />}
+              onClick={() => navigate('/admin')}
+              title="Return to Admin Dashboard"
+              visibleFrom="md"
+            >
+              Dashboard
+            </Button>
+          </Tooltip>
 
-        <div className="admin-user-info">
-          <span className="user-role">Admin</span>
-          <span className="user-name">{user?.username || 'Administrator'}</span>
-          <div className="user-avatar">👤</div>
-        </div>
+          <Tooltip label="Return to Normal Dashboard">
+            <ActionIcon
+              variant="light"
+              color="blue"
+              size="lg"
+              onClick={() => navigate('/dashboard')}
+              title="Return to Normal Dashboard"
+            >
+              <IconHome size={18} />
+            </ActionIcon>
+          </Tooltip>
 
-        <div className="header-actions">
-          <button
-            className="theme-toggle-btn"
-            onClick={toggleTheme}
-            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          <Group
+            gap="xs"
+            px="sm"
+            py={4}
+            wrap="nowrap"
+            visibleFrom="lg"
+            style={{
+              borderRadius: 'var(--mantine-radius-md)',
+              border: '1px solid var(--mantine-color-default-border)',
+            }}
           >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
+            <Badge size="sm" variant="light" color="green">
+              Admin
+            </Badge>
+            <Text size="sm" fw={500}>
+              {user?.username || 'Administrator'}
+            </Text>
+            <Avatar size="sm" radius="xl" color="blue">
+              <IconUser size={14} />
+            </Avatar>
+          </Group>
 
-          <button className="logout-btn" onClick={handleLogout} title="Logout">
+          <Tooltip label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
+            <ActionIcon
+              variant="default"
+              size="lg"
+              radius="xl"
+              onClick={toggleTheme}
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
+            </ActionIcon>
+          </Tooltip>
+
+          <Button
+            variant="default"
+            size="compact-sm"
+            leftSection={<IconLogout size={14} />}
+            onClick={handleLogout}
+            title="Logout"
+          >
             Logout
-          </button>
-        </div>
-      </div>
-    </header>
+          </Button>
+        </Group>
+      </Group>
+    </Box>
   );
 };
 

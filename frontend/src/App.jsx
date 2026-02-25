@@ -551,14 +551,6 @@ function App() {
                           }
                         />
                         <Route
-                          path="/admin/bulk-operations"
-                          element={
-                            <AdminRoute>
-                              <PlaceholderPage />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
                           path="/admin/system-health"
                           element={
                             <AdminRoute>

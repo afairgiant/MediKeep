@@ -1,120 +1,180 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Box,
+  NavLink,
+  Stack,
+  Text,
+  ActionIcon,
+  Tooltip,
+  ScrollArea,
+  Group,
+  Overlay,
+  ThemeIcon,
+} from '@mantine/core';
+import {
+  IconTool,
+  IconChartBar,
+  IconDatabase,
+  IconUsers,
+  IconDeviceFloppy,
+  IconHeartRateMonitor,
+  IconSettings,
+  IconChevronLeft,
+  IconChevronRight,
+} from '@tabler/icons-react';
 import './AdminSidebar.css';
 
+const NAV_SECTIONS = [
+  {
+    label: 'Dashboard',
+    items: [
+      { label: 'Overview', icon: IconChartBar, path: '/admin', exact: true },
+    ],
+  },
+  {
+    label: 'Data Management',
+    items: [
+      { label: 'Data Models', icon: IconDatabase, path: '/admin/data-models' },
+      { label: 'Manage Users', icon: IconUsers, path: '/admin/models/user' },
+    ],
+  },
+  {
+    label: 'Tools',
+    items: [
+      { label: 'Backup Management', icon: IconDeviceFloppy, path: '/admin/backup' },
+      { label: 'System Health', icon: IconHeartRateMonitor, path: '/admin/system-health' },
+      { label: 'Settings', icon: IconSettings, path: '/admin/settings' },
+    ],
+  },
+];
+
+const isActive = (currentPath, item) => {
+  if (item.exact) return currentPath === item.path;
+  return currentPath.includes(item.path);
+};
+
 const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
-
-  const handleToggle = () => {
-    if (onToggle) {
-      onToggle();
-    }
+  const closeSidebar = () => {
+    if (isOpen) onToggle?.();
   };
 
-  const handleLinkClick = path => {
-    // Close sidebar when a link is clicked
-    if (isOpen && onToggle) {
-      onToggle();
-    }
-  };
-
-  const handleBackdropClick = () => {
-    if (isOpen && onToggle) {
-      onToggle();
-    }
-  };
-
-  // Close sidebar on escape key press
   useEffect(() => {
     const handleEscapeKey = (event) => {
-      if (event.key === 'Escape' && isOpen && onToggle) {
-        onToggle();
-      }
+      if (event.key === 'Escape' && isOpen) onToggle?.();
     };
 
     document.addEventListener('keydown', handleEscapeKey);
-    return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
+    return () => document.removeEventListener('keydown', handleEscapeKey);
   }, [isOpen, onToggle]);
 
   return (
     <>
-      {/* Backdrop */}
-      <div 
-        className={`mobile-sidebar-backdrop ${isOpen ? 'visible' : ''}`}
-        onClick={handleBackdropClick}
-      />
-      
-      <div className={`admin-sidebar ${isOpen ? 'open' : 'closed'}`}>
-        <div className="sidebar-header">
-          <h2>🔧 Admin</h2>
-          <button className="sidebar-toggle" onClick={handleToggle}>
-            {isOpen ? '‹' : '›'}
-          </button>
-        </div>
+      {isOpen && (
+        <Overlay
+          className="mobile-sidebar-backdrop"
+          onClick={closeSidebar}
+          backgroundOpacity={0.5}
+          zIndex={999}
+        />
+      )}
 
-      <nav className="sidebar-nav">
-        <div className="nav-section">
-          <h3>Dashboard</h3>
-          <Link
-            to="/admin"
-            className={`nav-item ${currentPath === '/admin' ? 'active' : ''}`}
-            onClick={() => handleLinkClick('/admin')}
+      <Box
+        component="nav"
+        aria-label="Admin navigation"
+        className={`admin-sidebar ${isOpen ? 'open' : 'closed'}`}
+      >
+        <Group
+          justify="space-between"
+          px="md"
+          py="sm"
+          style={{ minHeight: 70, borderBottom: '1px solid var(--mantine-color-default-border)' }}
+          wrap="nowrap"
+        >
+          {isOpen && (
+            <Group gap="xs" wrap="nowrap">
+              <ThemeIcon variant="light" size="md" color="blue">
+                <IconTool size={16} />
+              </ThemeIcon>
+              <Text fw={600} size="lg">Admin</Text>
+            </Group>
+          )}
+          <ActionIcon
+            variant="subtle"
+            onClick={() => onToggle?.()}
+            aria-label="Toggle sidebar"
+            size="lg"
           >
-            <span className="nav-icon">📊</span>
-            <span className="nav-text">Overview</span>
-          </Link>
-        </div>
+            {isOpen ? <IconChevronLeft size={18} /> : <IconChevronRight size={18} />}
+          </ActionIcon>
+        </Group>
 
-        <div className="nav-section">
-          <h3>Data Management</h3>
-          <Link
-            to="/admin/data-models"
-            className={`nav-item ${currentPath.includes('/admin/data-models') ? 'active' : ''}`}
-            onClick={() => handleLinkClick('/admin/data-models')}
-          >
-            <span className="nav-icon">🗄️</span>
-            <span className="nav-text">Data Models</span>
-          </Link>
-          <Link
-            to="/admin/models/user"
-            className={`nav-item ${currentPath.includes('/admin/models/user') ? 'active' : ''}`}
-            onClick={() => handleLinkClick('/admin/models/user')}
-          >
-            <span className="nav-icon">👥</span>
-            <span className="nav-text">Manage Users</span>
-          </Link>
-        </div>
+        <ScrollArea h="calc(100vh - 70px)" px={isOpen ? 'xs' : 0} py="md">
+          <Stack gap="lg">
+            {NAV_SECTIONS.map((section) => (
+              <Box key={section.label}>
+                {isOpen && (
+                  <Text
+                    size="xs"
+                    tt="uppercase"
+                    fw={500}
+                    c="dimmed"
+                    px="sm"
+                    mb="xs"
+                    style={{ letterSpacing: '1px' }}
+                  >
+                    {section.label}
+                  </Text>
+                )}
+                <Stack gap={2}>
+                  {section.items.map((item) => {
+                    const active = isActive(currentPath, item);
+                    const Icon = item.icon;
 
-        <div className="nav-section">
-          <h3>Tools</h3>
-          <Link
-            to="/admin/backup"
-            className={`nav-item ${currentPath.includes('/admin/backup') ? 'active' : ''}`}
-            onClick={() => handleLinkClick('/admin/backup')}
-          >
-            <span className="nav-icon">💾</span>
-            <span className="nav-text">Backup Management</span>
-          </Link>
-          <Link
-            to="/admin/system-health"
-            className={`nav-item ${currentPath.includes('/admin/system-health') ? 'active' : ''}`}
-            onClick={() => handleLinkClick('/admin/system-health')}
-          >
-            <span className="nav-icon">🔍</span>
-            <span className="nav-text">System Health</span>
-          </Link>
-          <Link
-            to="/admin/settings"
-            className={`nav-item ${currentPath.includes('/admin/settings') ? 'active' : ''}`}
-            onClick={() => handleLinkClick('/admin/settings')}
-          >
-            <span className="nav-icon">⚙️</span>
-            <span className="nav-text">Settings</span>
-          </Link>
-        </div>
-      </nav>
-    </div>
+                    if (!isOpen) {
+                      return (
+                        <Tooltip
+                          key={item.path}
+                          label={item.label}
+                          position="right"
+                          withArrow
+                        >
+                          <ActionIcon
+                            component={Link}
+                            to={item.path}
+                            onClick={closeSidebar}
+                            variant={active ? 'light' : 'subtle'}
+                            color={active ? 'blue' : 'gray'}
+                            size="lg"
+                            aria-current={active ? 'page' : undefined}
+                            style={{ margin: '2px auto' }}
+                          >
+                            <Icon size={18} />
+                          </ActionIcon>
+                        </Tooltip>
+                      );
+                    }
+
+                    return (
+                      <NavLink
+                        key={item.path}
+                        component={Link}
+                        to={item.path}
+                        label={item.label}
+                        leftSection={<Icon size={18} />}
+                        active={active}
+                        onClick={closeSidebar}
+                        aria-current={active ? 'page' : undefined}
+                        variant="light"
+                      />
+                    );
+                  })}
+                </Stack>
+              </Box>
+            ))}
+          </Stack>
+        </ScrollArea>
+      </Box>
     </>
   );
 };
