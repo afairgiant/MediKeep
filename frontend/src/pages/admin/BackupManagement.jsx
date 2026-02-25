@@ -24,6 +24,7 @@ import {
   Modal,
   Alert,
   NumberInput,
+  Select,
   List,
   ThemeIcon,
   SimpleGrid,
@@ -34,6 +35,7 @@ import {
   FileButton,
   Divider,
 } from '@mantine/core';
+import { TimeInput } from '@mantine/dates';
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconDeviceFloppy,
@@ -56,6 +58,9 @@ import {
   IconInbox,
   IconBolt,
   IconClipboardList,
+  IconCalendarEvent,
+  IconClock,
+  IconCheck,
 } from '@tabler/icons-react';
 import './BackupManagement.css';
 
@@ -114,6 +119,19 @@ const BackupManagement = () => {
   const [originalSettings, setOriginalSettings] = useState(null);
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(false);
+
+  // Auto-backup schedule state
+  const [scheduleSettings, setScheduleSettings] = useState({
+    preset: 'disabled',
+    time_of_day: '02:00',
+    day_of_week: 'sun',
+    enabled: false,
+    last_run_at: null,
+    last_run_status: null,
+    last_run_error: null,
+    next_run_at: null,
+  });
+  const [scheduleSaving, setScheduleSaving] = useState(false);
 
   // Enhanced notification system
   const { showSuccess, showError, showLoading, hideLoading, showWarning } = useBackupNotifications();
@@ -197,9 +215,10 @@ const BackupManagement = () => {
     closeUnsaved();
   };
 
-  // Load retention settings on mount
+  // Load retention settings and schedule on mount
   React.useEffect(() => {
     loadRetentionSettings();
+    loadScheduleSettings();
   }, []);
 
   const loadRetentionSettings = async () => {
@@ -227,6 +246,49 @@ const BackupManagement = () => {
       showError('loadRetentionSettings', err);
     } finally {
       setSettingsLoading(false);
+    }
+  };
+
+  const loadScheduleSettings = async () => {
+    try {
+      const data = await adminApiService.getAutoBackupSchedule();
+      setScheduleSettings(data);
+    } catch (err) {
+      logger.error('Failed to load auto-backup schedule', {
+        component: 'BackupManagement',
+        error: err.message,
+      });
+    }
+  };
+
+  const handleSaveSchedule = async () => {
+    try {
+      setScheduleSaving(true);
+
+      const payload = {
+        preset: scheduleSettings.preset,
+        time_of_day: scheduleSettings.time_of_day,
+      };
+      if (scheduleSettings.preset === 'weekly') {
+        payload.day_of_week = scheduleSettings.day_of_week;
+      }
+
+      const loadingId = showLoading('updateSchedule');
+      const response = await adminApiService.updateAutoBackupSchedule(payload);
+      hideLoading(loadingId);
+      showSuccess('updateSchedule', response);
+
+      if (response.schedule) {
+        setScheduleSettings(prev => ({ ...prev, ...response.schedule }));
+      }
+    } catch (err) {
+      logger.error('Failed to save auto-backup schedule', {
+        component: 'BackupManagement',
+        error: err.message,
+      });
+      showError('updateSchedule', err);
+    } finally {
+      setScheduleSaving(false);
     }
   };
 
@@ -890,15 +952,163 @@ const BackupManagement = () => {
 
           {/* Settings Panel */}
           <Tabs.Panel value="settings">
-            <RetentionSettings
-              settings={retentionSettings}
-              loading={settingsLoading}
-              saving={settingsSaving}
-              backupCount={backups.length}
-              onInputChange={handleSettingsInputChange}
-              onBlur={handleSettingsBlur}
-              onSave={handleSaveSettings}
-            />
+            <Stack gap="lg">
+              {/* Auto-Backup Schedule */}
+              <Card shadow="sm" p="lg" withBorder>
+                <Group mb="md">
+                  <ThemeIcon size="lg" variant="light" color="violet">
+                    <IconCalendarEvent size={20} />
+                  </ThemeIcon>
+                  <Text fw={600} size="lg">
+                    Auto-Backup Schedule
+                  </Text>
+                  <Badge
+                    variant="light"
+                    color={scheduleSettings.enabled ? 'green' : 'gray'}
+                  >
+                    {scheduleSettings.enabled ? 'Active' : 'Disabled'}
+                  </Badge>
+                </Group>
+
+                <Stack>
+                  <Group justify="space-between" align="flex-start">
+                    <Stack gap={4} style={{ flex: 1 }}>
+                      <Text fw={500}>Backup Frequency</Text>
+                      <Text size="sm" c="dimmed">
+                        Schedule automatic full backups (database + files)
+                      </Text>
+                    </Stack>
+                    <Select
+                      w={200}
+                      value={scheduleSettings.preset}
+                      onChange={value =>
+                        setScheduleSettings(prev => ({
+                          ...prev,
+                          preset: value,
+                          enabled: value !== 'disabled',
+                        }))
+                      }
+                      data={[
+                        { value: 'disabled', label: 'Disabled' },
+                        { value: 'every_6_hours', label: 'Every 6 hours' },
+                        { value: 'every_12_hours', label: 'Every 12 hours' },
+                        { value: 'daily', label: 'Daily' },
+                        { value: 'weekly', label: 'Weekly' },
+                      ]}
+                    />
+                  </Group>
+
+                  {(scheduleSettings.preset === 'daily' ||
+                    scheduleSettings.preset === 'weekly') && (
+                    <Group justify="space-between" align="flex-start">
+                      <Stack gap={4} style={{ flex: 1 }}>
+                        <Text fw={500}>Time of Day</Text>
+                        <Text size="sm" c="dimmed">
+                          When should the backup run? (24-hour format)
+                        </Text>
+                      </Stack>
+                      <TimeInput
+                        w={160}
+                        value={scheduleSettings.time_of_day}
+                        onChange={event =>
+                          setScheduleSettings(prev => ({
+                            ...prev,
+                            time_of_day: event.target.value,
+                          }))
+                        }
+                        leftSection={<IconClock size={16} />}
+                      />
+                    </Group>
+                  )}
+
+                  {scheduleSettings.preset === 'weekly' && (
+                    <Group justify="space-between" align="flex-start">
+                      <Stack gap={4} style={{ flex: 1 }}>
+                        <Text fw={500}>Day of Week</Text>
+                        <Text size="sm" c="dimmed">
+                          Which day should the weekly backup run?
+                        </Text>
+                      </Stack>
+                      <Select
+                        w={160}
+                        value={scheduleSettings.day_of_week}
+                        onChange={value =>
+                          setScheduleSettings(prev => ({
+                            ...prev,
+                            day_of_week: value,
+                          }))
+                        }
+                        data={[
+                          { value: 'mon', label: 'Monday' },
+                          { value: 'tue', label: 'Tuesday' },
+                          { value: 'wed', label: 'Wednesday' },
+                          { value: 'thu', label: 'Thursday' },
+                          { value: 'fri', label: 'Friday' },
+                          { value: 'sat', label: 'Saturday' },
+                          { value: 'sun', label: 'Sunday' },
+                        ]}
+                        leftSection={<IconCalendarEvent size={16} />}
+                      />
+                    </Group>
+                  )}
+
+                  {scheduleSettings.next_run_at && scheduleSettings.enabled && (
+                    <Group justify="space-between">
+                      <Text fw={500}>Next Scheduled Run</Text>
+                      <Text size="sm" c="dimmed">
+                        {new Date(scheduleSettings.next_run_at).toLocaleString()}
+                      </Text>
+                    </Group>
+                  )}
+
+                  {scheduleSettings.last_run_at && (
+                    <Alert
+                      variant="light"
+                      color={
+                        scheduleSettings.last_run_status === 'success' ? 'green' : 'red'
+                      }
+                      icon={
+                        scheduleSettings.last_run_status === 'success' ? (
+                          <IconCheck size={16} />
+                        ) : (
+                          <IconAlertCircle size={16} />
+                        )
+                      }
+                    >
+                      <Text size="sm">
+                        Last backup:{' '}
+                        {new Date(scheduleSettings.last_run_at).toLocaleString()}
+                        {' \u2014 '}
+                        {scheduleSettings.last_run_status === 'success'
+                          ? 'Completed successfully'
+                          : `Failed: ${scheduleSettings.last_run_error || 'Unknown error'}`}
+                      </Text>
+                    </Alert>
+                  )}
+
+                  <Group justify="flex-end">
+                    <Button
+                      variant="light"
+                      leftSection={<IconDeviceFloppy size={16} />}
+                      onClick={handleSaveSchedule}
+                      loading={scheduleSaving}
+                    >
+                      Save Schedule
+                    </Button>
+                  </Group>
+                </Stack>
+              </Card>
+
+              <RetentionSettings
+                settings={retentionSettings}
+                loading={settingsLoading}
+                saving={settingsSaving}
+                backupCount={backups.length}
+                onInputChange={handleSettingsInputChange}
+                onBlur={handleSettingsBlur}
+                onSave={handleSaveSettings}
+              />
+            </Stack>
           </Tabs.Panel>
         </Tabs>
 
