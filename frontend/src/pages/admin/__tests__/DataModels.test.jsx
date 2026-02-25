@@ -61,7 +61,7 @@ const renderComponent = async (searchParams = '') => {
   // Wait for async fallback to complete (API rejects, fallback models load)
   // The yellow alert only appears after loading finishes with an error + fallback
   await waitFor(() => {
-    expect(screen.getByText(/Could not load models/)).toBeInTheDocument();
+    expect(screen.getByText(/Could not load models from server/)).toBeInTheDocument();
   });
   return result;
 };

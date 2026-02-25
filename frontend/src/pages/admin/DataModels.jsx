@@ -300,7 +300,7 @@ const DataModels = () => {
                 variant="light"
                 mb="lg"
               >
-                Could not load models from server. Showing cached model list.
+                Could not load models from server. Showing built-in model list.
               </Alert>
             )}
             <div className="models-content">

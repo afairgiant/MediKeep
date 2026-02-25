@@ -65,8 +65,9 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
       setIsResetting(true);
       await adminApiService.adminResetPassword(userId, passwordData.newPassword);
 
+      setPasswordData({ newPassword: '', confirmPassword: '' });
+      setError('');
       setSuccessMessage(`Password reset successfully for ${username}!`);
-      resetForm();
 
       setTimeout(() => {
         handleClose();

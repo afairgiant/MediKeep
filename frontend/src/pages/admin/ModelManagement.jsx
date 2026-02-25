@@ -92,11 +92,19 @@ const ModelManagement = () => {
 
   // Load column visibility from localStorage when model changes
   useEffect(() => {
-    const saved = localStorage.getItem(`admin_columns_${modelName}`);
+    const storageKey = `admin_columns_${modelName}`;
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       try {
-        setVisibleColumns(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
+          setVisibleColumns(parsed);
+        } else {
+          localStorage.removeItem(storageKey);
+          setVisibleColumns(null);
+        }
       } catch {
+        localStorage.removeItem(storageKey);
         setVisibleColumns(null);
       }
     } else {
@@ -104,7 +112,7 @@ const ModelManagement = () => {
     }
   }, [modelName]);
 
-  const loadModelData = useCallback(async (search = '') => {
+  const loadModelData = useCallback(async (search = '', page = currentPage) => {
     try {
       setLoading(true);
       setError(null);
@@ -112,7 +120,7 @@ const ModelManagement = () => {
       const [metadataResult, recordsResult] = await Promise.all([
         adminApiService.getModelMetadata(modelName),
         adminApiService.getModelRecords(modelName, {
-          page: currentPage,
+          page,
           per_page: Number(perPage),
           search: search || null,
         }),
@@ -147,7 +155,7 @@ const ModelManagement = () => {
     searchTimerRef.current = setTimeout(() => {
       setCurrentPage(1);
       setSelectedRecords(new Set());
-      loadModelData(value);
+      loadModelData(value, 1);
     }, 300);
   }, [loadModelData]);
 
