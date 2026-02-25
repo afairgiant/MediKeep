@@ -1,26 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import './AdminHeader.css';
 
 const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
 
+  const handleSearch = () => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) return;
+    navigate(`/admin/data-models?q=${encodeURIComponent(trimmed)}`);
+    setSearchQuery('');
+  };
 
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
     }
   };
 
-  const handleToggleSidebar = () => {
-    if (onToggleSidebar) {
-      onToggleSidebar();
-    }
-  };
-
-  const handleThemeToggle = () => {
-    toggleTheme();
-  };
+  const handleLogout = () => onLogout?.();
+  const handleToggleSidebar = () => onToggleSidebar?.();
   return (
     <header className="admin-header">
       <div className="header-left">
@@ -36,15 +38,19 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
             type="text"
             placeholder="Search records, users, or data..."
             className="global-search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            aria-label="Search data models"
           />
-          <button className="search-btn">🔍</button>
+          <button className="search-btn" onClick={handleSearch} aria-label="Search">🔍</button>
         </div>
       </div>
       
       <div className="header-right">
         <button
           className="back-to-dashboard-btn"
-          onClick={() => (window.location.href = '/admin')}
+          onClick={() => navigate('/admin')}
           title="Return to Admin Dashboard"
         >
           ← Dashboard
@@ -52,7 +58,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
 
         <button
           className="back-to-home-btn"
-          onClick={() => (window.location.href = '/dashboard')}
+          onClick={() => navigate('/dashboard')}
           title="Return to Normal Dashboard"
         >
           🏠
@@ -67,7 +73,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
         <div className="header-actions">
           <button
             className="theme-toggle-btn"
-            onClick={handleThemeToggle}
+            onClick={toggleTheme}
             title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
             {theme === 'light' ? '🌙' : '☀️'}
