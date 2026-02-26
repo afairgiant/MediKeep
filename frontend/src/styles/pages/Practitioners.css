@@ -192,7 +192,7 @@
 
 /* Website link styling */
 .website-link {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
@@ -427,12 +427,12 @@
 }
 
 .btn-secondary {
-  background: var(--color-gray-500);
+  background: var(--color-gray-700);
   color: var(--color-text-light);
 }
 
 .btn-secondary:hover {
-  background: var(--color-gray-600);
+  background: var(--color-gray-800);
 }
 
 /* Status Badge Customizations for Practitioners */

@@ -77,29 +77,32 @@ export const theme = createTheme({
   },
 
   /** Comprehensive CSS Variables for Mantine v8 */
-  vars: (theme) => ({
-    // Base text colors
-    '--mantine-color-text': '#000000',
-    '--mantine-color-dimmed': '#4a5568',
-    '--mantine-color-placeholder': 'var(--mantine-color-dimmed)',
-    
-    // Input specific - referencing base variables
-    '--input-color': 'var(--mantine-color-text)',
-    '--input-placeholder-color': 'var(--mantine-color-placeholder)',
-    '--input-section-color': 'var(--mantine-color-text)',
-    
-    // Border colors
-    '--input-bd': '#e2e8f0',
-    '--input-bd-focus': theme.colors.primary[5],
-    
-    // Background colors
-    '--mantine-color-body': '#ffffff',
-    '--mantine-color-default': '#ffffff',
-    
-    // Component specific
-    '--card-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-    '--button-font-weight': '500',
-  }),
+  vars: (theme, colorScheme) => {
+    const isDark = colorScheme === 'dark';
+    return {
+      // Base text colors
+      '--mantine-color-text': isDark ? '#f7fafc' : '#000000',
+      '--mantine-color-dimmed': isDark ? '#a0aec0' : '#3f4a59',
+      '--mantine-color-placeholder': 'var(--mantine-color-dimmed)',
+
+      // Input specific - referencing base variables
+      '--input-color': 'var(--mantine-color-text)',
+      '--input-placeholder-color': 'var(--mantine-color-placeholder)',
+      '--input-section-color': 'var(--mantine-color-text)',
+
+      // Border colors
+      '--input-bd': isDark ? '#4a5568' : '#6b7280',
+      '--input-bd-focus': theme.colors.primary[5],
+
+      // Background colors
+      '--mantine-color-body': isDark ? '#1a202c' : '#ffffff',
+      '--mantine-color-default': isDark ? '#2d3748' : '#ffffff',
+
+      // Component specific
+      '--card-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
+      '--button-font-weight': '500',
+    };
+  },
 
   /** Component-specific theme overrides using CSS variables */
   components: {
@@ -119,126 +122,91 @@ export const theme = createTheme({
     },
     TextInput: {
       styles: {
+        label: { color: 'var(--color-text-primary)', fontWeight: 600 },
         input: {
           borderColor: 'var(--input-bd)',
           color: 'var(--input-color)',
-          '&:focus': {
-            borderColor: 'var(--input-bd-focus)',
-          },
-          '&::placeholder': {
-            color: 'var(--input-placeholder-color)',
-          },
+          '&:focus': { borderColor: 'var(--input-bd-focus)' },
+          '&::placeholder': { color: 'var(--input-placeholder-color)' },
         },
-        section: {
-          color: 'var(--input-section-color)',
-        },
+        section: { color: 'var(--input-section-color)' },
       },
     },
     Select: {
       styles: {
+        label: { color: 'var(--color-text-primary)', fontWeight: 600 },
         input: {
           borderColor: 'var(--input-bd)',
           color: 'var(--input-color)',
-          '&:focus': {
-            borderColor: 'var(--input-bd-focus)',
-          },
-          '&::placeholder': {
-            color: 'var(--input-placeholder-color)',
-          },
+          '&:focus': { borderColor: 'var(--input-bd-focus)' },
+          '&::placeholder': { color: 'var(--input-placeholder-color)' },
         },
-        option: {
-          color: 'var(--mantine-color-text)',
+        option: { color: 'var(--mantine-color-text)' },
+        rightSection: { color: 'var(--input-section-color)' },
+        section: { color: 'var(--input-section-color)' },
+      },
+    },
+    Textarea: {
+      styles: {
+        label: { color: 'var(--color-text-primary)', fontWeight: 600 },
+        input: {
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
+          '&:focus': { borderColor: 'var(--input-bd-focus)' },
+          '&::placeholder': { color: 'var(--input-placeholder-color)' },
         },
-        rightSection: {
-          color: 'var(--input-section-color)',
+      },
+    },
+    NumberInput: {
+      styles: {
+        label: { color: 'var(--color-text-primary)', fontWeight: 600 },
+        input: {
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
+          '&:focus': { borderColor: 'var(--input-bd-focus)' },
+          '&::placeholder': { color: 'var(--input-placeholder-color)' },
         },
-        section: {
-          color: 'var(--input-section-color)',
+        section: { color: 'var(--input-section-color)' },
+      },
+    },
+    DateInput: {
+      styles: {
+        label: { color: 'var(--color-text-primary)', fontWeight: 600 },
+        input: {
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
+          '&:focus': { borderColor: 'var(--input-bd-focus)' },
+          '&::placeholder': { color: 'var(--input-placeholder-color)' },
         },
+        section: { color: 'var(--input-section-color)' },
+      },
+    },
+    Autocomplete: {
+      styles: {
+        label: { color: 'var(--color-text-primary)', fontWeight: 600 },
+      },
+    },
+    MultiSelect: {
+      styles: {
+        label: { color: 'var(--color-text-primary)', fontWeight: 600 },
+        input: {
+          borderColor: 'var(--input-bd)',
+          color: 'var(--input-color)',
+          '&:focus': { borderColor: 'var(--input-bd-focus)' },
+          '&::placeholder': { color: 'var(--input-placeholder-color)' },
+        },
+        option: { color: 'var(--mantine-color-text)' },
+        section: { color: 'var(--input-section-color)' },
       },
     },
     Combobox: {
       styles: {
         input: {
           color: 'var(--input-color)',
-          '&::placeholder': {
-            color: 'var(--input-placeholder-color)',
-          },
+          '&::placeholder': { color: 'var(--input-placeholder-color)' },
         },
-        option: {
-          color: 'var(--mantine-color-text)',
-        },
-        section: {
-          color: 'var(--input-section-color)',
-        },
-      },
-    },
-    MultiSelect: {
-      styles: {
-        input: {
-          borderColor: 'var(--input-bd)',
-          color: 'var(--input-color)',
-          '&:focus': {
-            borderColor: 'var(--input-bd-focus)',
-          },
-          '&::placeholder': {
-            color: 'var(--input-placeholder-color)',
-          },
-        },
-        option: {
-          color: 'var(--mantine-color-text)',
-        },
-        section: {
-          color: 'var(--input-section-color)',
-        },
-      },
-    },
-    DateInput: {
-      styles: {
-        input: {
-          borderColor: 'var(--input-bd)',
-          color: 'var(--input-color)',
-          '&:focus': {
-            borderColor: 'var(--input-bd-focus)',
-          },
-          '&::placeholder': {
-            color: 'var(--input-placeholder-color)',
-          },
-        },
-        section: {
-          color: 'var(--input-section-color)',
-        },
-      },
-    },
-    Textarea: {
-      styles: {
-        input: {
-          borderColor: 'var(--input-bd)',
-          color: 'var(--input-color)',
-          '&:focus': {
-            borderColor: 'var(--input-bd-focus)',
-          },
-          '&::placeholder': {
-            color: 'var(--input-placeholder-color)',
-          },
-        },
-      },
-    },
-    NumberInput: {
-      styles: {
-        input: {
-          borderColor: 'var(--input-bd)',
-          color: 'var(--input-color)',
-          '&:focus': {
-            borderColor: 'var(--input-bd-focus)',
-          },
-          '&::placeholder': {
-            color: 'var(--input-placeholder-color)',
-          },
-        },
-        section: {
-          color: 'var(--input-section-color)',
-        },
+        option: { color: 'var(--mantine-color-text)' },
+        section: { color: 'var(--input-section-color)' },
       },
     },
   },

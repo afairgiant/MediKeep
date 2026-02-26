@@ -7,10 +7,11 @@
   --color-primary: #667eea;
   --color-primary-dark: #5a67d8;
   --color-primary-light: #a78bfa;
+  --color-primary-text: #4f46e5;
   --color-secondary: #f8f9fa;
   --color-secondary-dark: #e9ecef;
 
-  --color-success: #28a745;
+  --color-success: #1a7a30;
   --color-success-light: #d4edda;
   --color-success-dark: #155724;
 
@@ -22,9 +23,9 @@
   --color-warning-light: #fff3cd;
   --color-warning-dark: #856404;
 
-  --color-info: #17a2b8;
+  --color-info: #0369a1;
   --color-info-light: #d1ecf1;
-  --color-info-dark: #0c5460;
+  --color-info-dark: #0c4a6e;
 
   --color-light: #f8f9fa;
   --color-dark: #343a40;
@@ -35,7 +36,7 @@
   --color-gray-300: #dee2e6;
   --color-gray-400: #ced4da;
   --color-gray-500: #adb5bd;
-  --color-gray-600: #6c757d;
+  --color-gray-600: #646c74;
   --color-gray-700: #495057;
   --color-gray-800: #343a40;
   --color-gray-900: #212529;
@@ -43,7 +44,7 @@
   /* Text Colors */
   --color-text-primary: #000000;
   --color-text-secondary: #000000;
-  --color-text-muted: #4a5568;
+  --color-text-muted: #3f4a59;
   --color-text-light: #fff;
 
   /* Background Colors */
@@ -53,9 +54,9 @@
   --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
   /* Border Colors */
-  --color-border-light: #e9ecef;
-  --color-border-medium: #dee2e6;
-  --color-border-dark: #adb5bd;
+  --color-border-light: #94a3b8;
+  --color-border-medium: #6b7280;
+  --color-border-dark: #374151;
 
   /* Typography */
   --font-family-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -141,7 +142,7 @@
   --form-input-border: 1px solid var(--color-border-medium);
   --form-input-border-radius: var(--border-radius-md);
   --form-input-focus-border: var(--color-primary);
-  --form-input-focus-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  --form-input-focus-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
 
   /* Card styles */
   --card-padding: var(--spacing-xl);
@@ -181,8 +182,10 @@
   --color-gray-900: #ffffff;
 
   /* Status colors (slightly adjusted for dark theme) */
+  --color-success: #4ade80;
   --color-success-light: #2d5a3d;
   --color-success-dark: #68d391;
+  --color-primary-text: #818cf8;
 
   --color-danger-light: #553c4e;
   --color-danger-dark: #fc8181;

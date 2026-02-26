@@ -214,7 +214,7 @@
 
 /* File indicator styling for lab results */
 .file-indicator {
-  color: var(--color-success, #28a745);
+  color: var(--color-success, #1a7a30);
   font-weight: 500;
 }
 
@@ -326,7 +326,7 @@
 }
 
 .active-filters-indicator {
-  color: var(--color-primary, #3498db);
+  color: var(--color-primary-text, #3498db);
   font-weight: 600;
   font-style: normal;
 }

@@ -10,7 +10,7 @@
 .paperless-settings-loading {
   padding: 2rem;
   text-align: center;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   font-size: 0.875rem;
 }
 
@@ -72,7 +72,7 @@
 
 .connection-status-disconnected {
   background-color: #f8f9fa;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   border: 1px solid #dee2e6;
 }
 
@@ -119,7 +119,7 @@
 
 .paperless-form-input:disabled {
   background-color: #f8f9fa;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   cursor: not-allowed;
 }
 
@@ -132,7 +132,7 @@
 
 .paperless-form-help {
   margin-top: 0.5rem;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   font-size: 0.75rem;
   line-height: 1.4;
 }
@@ -315,7 +315,7 @@
 
 .paperless-storage-badge {
   background-color: #f8f9fa;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.75rem;
@@ -323,7 +323,7 @@
 }
 
 .paperless-storage-description {
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   font-size: 0.875rem;
   line-height: 1.4;
 }
@@ -365,7 +365,7 @@
 
 .paperless-checkbox-description {
   margin-top: 0.25rem;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   font-size: 0.75rem;
   line-height: 1.4;
 }
@@ -401,7 +401,7 @@
 }
 
 .storage-stat-value {
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   font-size: 0.8125rem;
 }
 
@@ -409,7 +409,7 @@
 .paperless-storage-stats-empty {
   padding: 1rem;
   text-align: center;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   font-size: 0.875rem;
   background-color: #f8f9fa;
   border-radius: 0.5rem;
