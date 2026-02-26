@@ -1,5 +1,40 @@
 import { createTheme } from '@mantine/core';
 
+/**
+ * Mantine v8 CSS Variables Resolver.
+ * Must be passed to MantineProvider via cssVariablesResolver prop.
+ * Returns { variables, light, dark } per ConvertCSSVariablesInput type.
+ */
+export const cssVariablesResolver = (theme) => ({
+  variables: {
+    '--input-bd-focus': theme.colors.primary[5],
+    '--card-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
+    '--button-font-weight': '500',
+  },
+  light: {
+    '--mantine-color-text': '#000000',
+    '--mantine-color-dimmed': '#3f4a59',
+    '--mantine-color-placeholder': '#3f4a59',
+    '--input-color': '#000000',
+    '--input-placeholder-color': '#3f4a59',
+    '--input-section-color': '#000000',
+    '--input-bd': '#6b7280',
+    '--mantine-color-body': '#ffffff',
+    '--mantine-color-default': '#ffffff',
+  },
+  dark: {
+    '--mantine-color-text': '#f7fafc',
+    '--mantine-color-dimmed': '#a0aec0',
+    '--mantine-color-placeholder': '#a0aec0',
+    '--input-color': '#f7fafc',
+    '--input-placeholder-color': '#a0aec0',
+    '--input-section-color': '#f7fafc',
+    '--input-bd': '#4a5568',
+    '--mantine-color-body': '#1a202c',
+    '--mantine-color-default': '#2d3748',
+  },
+});
+
 export const theme = createTheme({
   /** Color scheme detection and settings */
   forceColorScheme: undefined, // Let Mantine handle auto-detection
@@ -74,34 +109,6 @@ export const theme = createTheme({
     fontFamily:
       'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
     fontWeight: '600',
-  },
-
-  /** Comprehensive CSS Variables for Mantine v8 */
-  vars: (theme, colorScheme) => {
-    const isDark = colorScheme === 'dark';
-    return {
-      // Base text colors
-      '--mantine-color-text': isDark ? '#f7fafc' : '#000000',
-      '--mantine-color-dimmed': isDark ? '#a0aec0' : '#3f4a59',
-      '--mantine-color-placeholder': 'var(--mantine-color-dimmed)',
-
-      // Input specific - referencing base variables
-      '--input-color': 'var(--mantine-color-text)',
-      '--input-placeholder-color': 'var(--mantine-color-placeholder)',
-      '--input-section-color': 'var(--mantine-color-text)',
-
-      // Border colors
-      '--input-bd': isDark ? '#4a5568' : '#6b7280',
-      '--input-bd-focus': theme.colors.primary[5],
-
-      // Background colors
-      '--mantine-color-body': isDark ? '#1a202c' : '#ffffff',
-      '--mantine-color-default': isDark ? '#2d3748' : '#ffffff',
-
-      // Component specific
-      '--card-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',
-      '--button-font-weight': '500',
-    };
   },
 
   /** Component-specific theme overrides using CSS variables */

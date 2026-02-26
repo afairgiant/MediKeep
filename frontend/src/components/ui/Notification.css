@@ -29,18 +29,18 @@
 }
 
 .notification.error {
-  border-left: 4px solid var(--error-color, #dc3545);
-  background-color: var(--error-light, #f8d7da);
+  border-left: 4px solid var(--color-danger, #dc3545);
+  background-color: var(--color-danger-light, #f8d7da);
 }
 
 .notification.warning {
-  border-left: 4px solid var(--warning-color, #ffc107);
-  background-color: var(--warning-light, #fff3cd);
+  border-left: 4px solid var(--color-warning, #ffc107);
+  background-color: var(--color-warning-light, #fff3cd);
 }
 
 .notification.info {
-  border-left: 4px solid var(--info-color, #17a2b8);
-  background-color: var(--info-light, #d1ecf1);
+  border-left: 4px solid var(--color-info, #0369a1);
+  background-color: var(--color-info-light, #d1ecf1);
 }
 
 .notification-icon {

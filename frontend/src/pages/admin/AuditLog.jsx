@@ -224,7 +224,7 @@ const AuditLog = () => {
           <Group justify="space-between" align="flex-start">
             <div>
               <Group align="center" mb="xs">
-                <ThemeIcon size="xl" variant="light" color="blue">
+                <ThemeIcon size="xl" variant="light" color="blue" aria-hidden="true">
                   <IconFileText size={24} />
                 </ThemeIcon>
                 <Title order={2}>Audit Log</Title>
@@ -366,7 +366,7 @@ const AuditLog = () => {
               </Center>
             )}
             <ScrollArea>
-              <Table striped highlightOnHover>
+              <Table striped highlightOnHover aria-label="Activity log entries">
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>Timestamp</Table.Th>
@@ -386,6 +386,13 @@ const AuditLog = () => {
                           key={entry.id}
                           style={link ? { cursor: 'pointer' } : undefined}
                           onClick={link ? () => navigate(link) : undefined}
+                          onKeyDown={link ? (e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              navigate(link);
+                            }
+                          } : undefined}
+                          tabIndex={link ? 0 : undefined}
                         >
                           <Table.Td style={{ whiteSpace: 'nowrap' }}>
                             <Text size="sm">

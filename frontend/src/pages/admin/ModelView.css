@@ -12,7 +12,7 @@
   align-items: flex-start;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--color-border-light);
 }
 
 .view-title {
@@ -23,21 +23,21 @@
 
 .view-title h1 {
   margin: 0;
-  color: #1f2937;
+  color: var(--color-text-primary);
   font-size: 1.875rem;
   font-weight: 600;
 }
 
 .view-title p {
   margin: 0;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 0.875rem;
 }
 
 .back-btn {
   background: none;
   border: none;
-  color: #3b82f6;
+  color: var(--color-primary);
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -47,8 +47,8 @@
 }
 
 .back-btn:hover {
-  background-color: #eff6ff;
-  color: #1d4ed8;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-primary-dark);
 }
 
 .view-actions {
@@ -69,27 +69,27 @@
 }
 
 .view-actions .btn-primary {
-  background-color: #3b82f6;
-  color: white;
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
 }
 
 .view-actions .btn-primary:hover {
-  background-color: #2563eb;
+  background-color: var(--color-primary-dark);
 }
 
 .view-actions .btn-danger {
-  background-color: #ef4444;
-  color: white;
+  background-color: var(--color-danger);
+  color: var(--color-text-light);
 }
 
 .view-actions .btn-danger:hover {
-  background-color: #dc2626;
+  background-color: var(--color-danger-dark);
 }
 
 .record-details {
-  background: white;
+  background: var(--color-bg-primary);
   border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-light);
   overflow: hidden;
 }
 
@@ -101,7 +101,7 @@
 
 .field-group {
   padding: 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .field-group:last-child {
@@ -113,7 +113,7 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-primary);
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
 }
@@ -128,31 +128,31 @@
 }
 
 .pk-badge {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
 }
 
 .fk-badge {
-  background-color: #ddd6fe;
-  color: #6b21a8;
+  background-color: var(--color-purple-light);
+  color: var(--color-purple-dark);
 }
 
 .required {
-  color: #ef4444;
+  color: var(--color-danger);
   font-weight: bold;
 }
 
 .field-value {
   padding: 0.75rem;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
   border-radius: 0.375rem;
   font-family:
     ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo,
     monospace;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: #374151;
+  color: var(--color-text-primary);
   min-height: 2.5rem;
   display: flex;
   align-items: center;
@@ -161,30 +161,30 @@
 
 .field-value.datetime,
 .field-value.date {
-  color: #059669;
+  color: var(--color-success);
 }
 
 .field-value.boolean {
-  color: #7c3aed;
+  color: var(--color-purple);
   font-weight: 500;
 }
 
 .field-value.number {
-  color: #dc2626;
+  color: var(--color-danger);
 }
 
 .field-meta {
   margin-top: 0.5rem;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-style: italic;
 }
 
 .raw-data-section {
   margin-top: 2rem;
   padding: 1rem;
-  background-color: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .raw-data-section details {
@@ -193,14 +193,14 @@
 
 .raw-data-section summary {
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-primary);
   margin-bottom: 1rem;
   user-select: none;
 }
 
 .raw-json {
-  background-color: #1f2937;
-  color: #f9fafb;
+  background-color: var(--color-gray-900);
+  color: var(--color-gray-100);
   padding: 1rem;
   border-radius: 0.375rem;
   font-size: 0.75rem;
@@ -215,12 +215,12 @@
 }
 
 .model-view-error h2 {
-  color: #ef4444;
+  color: var(--color-danger);
   margin-bottom: 1rem;
 }
 
 .model-view-error p {
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin-bottom: 2rem;
 }
 
@@ -233,32 +233,19 @@
 }
 
 .model-view-error .btn-secondary {
-  background-color: #6b7280;
-  color: white;
+  background-color: var(--color-text-muted);
+  color: var(--color-text-light);
 }
 
 .model-view-error .btn-secondary:hover {
-  background-color: #4b5563;
+  background-color: var(--color-gray-700);
 }
 
-/* Admin Page Loading - Centered within admin content area */
-.admin-page-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 140px); /* Account for header and padding */
-  width: 100%;
+/* Focus-visible indicators for keyboard navigation */
+.back-btn:focus-visible,
+.view-actions .btn-primary:focus-visible,
+.view-actions .btn-danger:focus-visible,
+.model-view-error .btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
-
-/* Responsive Design - Sidebar-aware breakpoints */
-/* Large desktop screens - sidebar + content fits comfortably */
-
-/* Medium desktop - account for sidebar width (1024px - 280px = 744px content) */
-
-/* Small desktop/large tablet - sidebar significantly reduces available width */
-
-/* Small tablets and large mobile screens */
-
-/* Mobile phone screens */
-
-/* Very small mobile screens */

@@ -302,7 +302,7 @@ const AdminDashboard = () => {
           <Group justify="space-between" align="flex-start">
             <div>
               <Group align="center" mb="xs">
-                <ThemeIcon size="xl" variant="light" color="blue">
+                <ThemeIcon size="xl" variant="light" color="blue" aria-hidden="true">
                   <IconStethoscope size={24} />
                 </ThemeIcon>
                 <Text size="xl" fw={700}>
@@ -413,7 +413,11 @@ const AdminDashboard = () => {
                     </Group>
                   )}
 
-                  <div className="chart-container">
+                  <div
+                    className="chart-container"
+                    role="img"
+                    aria-label={`Weekly activity trend chart: ${analyticsData?.weekly_activity?.total || 0} total activities`}
+                  >
                     <ChartErrorBoundary onReset={refreshAnalytics}>
                       <Line
                         data={chartData.activity}
@@ -437,7 +441,11 @@ const AdminDashboard = () => {
                     </div>
                   </Group>
 
-                  <div className="chart-container doughnut">
+                  <div
+                    className="chart-container doughnut"
+                    role="img"
+                    aria-label={`Records distribution chart across 6 categories: patients, lab results, medications, procedures, allergies, and vitals`}
+                  >
                     <ChartErrorBoundary onReset={refreshStats}>
                       <Doughnut
                         data={chartData.distribution}
@@ -557,7 +565,7 @@ const SystemHealthCard = ({
     <LoadingOverlay visible={isRefreshing} />
     <Group justify="space-between" mb="md">
       <Group>
-        <ThemeIcon size="lg" variant="light" color="blue">
+        <ThemeIcon size="lg" variant="light" color="blue" aria-hidden="true">
           <IconShieldCheck size={20} />
         </ThemeIcon>
         <div>
@@ -672,7 +680,7 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
       <LoadingOverlay visible={isRefreshing} />
       <Group justify="space-between" mb="md">
         <Group>
-          <ThemeIcon size="lg" variant="light" color="green">
+          <ThemeIcon size="lg" variant="light" color="green" aria-hidden="true">
             <IconActivity size={20} />
           </ThemeIcon>
           <div>
@@ -761,7 +769,7 @@ ActivityCard.propTypes = {
 const QuickActionsCard = () => (
   <Card shadow="sm" p="lg" withBorder>
     <Group mb="md">
-      <ThemeIcon size="lg" variant="light" color="violet">
+      <ThemeIcon size="lg" variant="light" color="violet" aria-hidden="true">
         <IconSettings size={20} />
       </ThemeIcon>
       <div>

@@ -17,15 +17,6 @@
   --admin-radius-lg: var(--border-radius-xl);
 }
 
-/* Dark theme overrides for admin dashboard */
-[data-theme='dark'] {
-  /* Admin colors adjusted for dark theme */
-  --admin-light: var(--color-bg-secondary);
-  --admin-dark: var(--color-text-primary);
-  --admin-border: var(--color-border-light);
-  --admin-secondary: var(--color-text-secondary);
-}
-
 /* Main Dashboard Container */
 .admin-dashboard-modern {
   padding: 20px;
@@ -150,7 +141,7 @@
 }
 
 .tab-btn:not(.active):hover {
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--color-bg-secondary);
 }
 
 /* Quick Stats Grid */
@@ -512,18 +503,18 @@
 }
 
 .status-badge.danger {
-  background-color: #fee2e2;
-  color: #dc2626;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
 }
 
 .status-badge.info {
-  background-color: #dbeafe;
-  color: #2563eb;
+  background-color: var(--color-info-light);
+  color: var(--color-info);
 }
 
 .status-badge.secondary {
-  background-color: #f3f4f6;
-  color: #6b7280;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-muted);
 }
 
 .no-activity-modern {
@@ -596,7 +587,7 @@
   --btn-color: var(--admin-secondary);
 }
 .action-btn-modern.tertiary {
-  --btn-color: #8b5cf6;
+  --btn-color: var(--color-purple);
 }
 
 .action-icon {
@@ -646,7 +637,7 @@
 .admin-error {
   background: var(--color-bg-primary);
   border-radius: var(--admin-radius-lg);
-  padding: 40px;
+  padding: 60px 20px;
   text-align: center;
   box-shadow: var(--admin-shadow);
   border: 1px solid var(--admin-border);
@@ -661,13 +652,13 @@
 }
 
 .admin-error h2 {
-  color: var(--admin-danger);
-  margin-bottom: 12px;
+  margin: 0 0 10px 0;
+  color: var(--color-danger);
 }
 
 .admin-error p {
-  color: var(--admin-secondary);
-  margin-bottom: 24px;
+  margin: 0 0 20px 0;
+  color: var(--color-text-secondary);
   line-height: 1.5;
 }
 
@@ -678,12 +669,14 @@
 }
 
 .retry-btn {
-  padding: 12px 24px;
+  background: var(--color-primary);
+  color: white;
   border: none;
-  border-radius: var(--admin-radius);
+  padding: 10px 20px;
+  border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .retry-btn.primary {
@@ -698,31 +691,8 @@
 }
 
 .retry-btn:hover {
-  transform: translateY(-1px);
-  opacity: 0.9;
+  background: var(--color-primary-dark);
 }
-
-/* Admin Page Loading - Centered within admin content area */
-.admin-page-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 140px); /* Account for header and padding */
-  width: 100%;
-}
-
-/* Responsive Design - Sidebar-aware breakpoints */
-/* Large desktop screens - sidebar + content fits comfortably */
-
-/* Medium desktop - account for sidebar width */
-
-/* Small desktop/large tablet - sidebar significantly reduces available width */
-
-/* Small tablets and large mobile screens */
-
-/* Mobile phone screens */
-
-/* Very small mobile screens */
 
 /* Fix for webkit background clip */
 .header-title h1 {
@@ -738,40 +708,6 @@
 .action-icon {
   font-size: 1.1rem;
 }
-
-/* Error State */
-.admin-error {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.admin-error h2 {
-  margin: 0 0 10px 0;
-  color: var(--color-danger);
-}
-
-.admin-error p {
-  margin: 0 0 20px 0;
-  color: var(--color-text-secondary);
-}
-
-.retry-btn {
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.retry-btn:hover {
-  background: var(--color-primary-dark);
-}
-
-/* Responsive Design */
-
 
 /* Activity action type styling */
 .activity-action {
@@ -830,12 +766,6 @@
   background-color: var(--color-danger-light);
 }
 
-/* Dark theme deleted activity items */
-[data-theme='dark'] .activity-item-modern.deleted {
-  border-left: 3px solid var(--color-danger);
-  background-color: var(--color-danger-light);
-}
-
 /* Mantine component hover effects */
 .action-button-hover {
   cursor: pointer;
@@ -845,4 +775,14 @@
 .action-button-hover:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus-visible indicators for keyboard navigation */
+.action-button-hover:focus-visible,
+.refresh-btn:focus-visible,
+.tab-btn:focus-visible,
+.action-btn-modern:focus-visible,
+.retry-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
