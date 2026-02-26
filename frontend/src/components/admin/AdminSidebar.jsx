@@ -41,7 +41,7 @@ const NAV_SECTIONS = [
     items: [
       { label: 'Data Models', icon: IconDatabase, path: '/admin/data-models' },
       { label: 'User Management', icon: IconUsers, path: '/admin/models/user' },
-      { label: 'Trash', icon: IconTrash, path: '/admin/trash', disabled: true },
+      { label: 'Trash', icon: IconTrash, path: '/admin/trash' },
     ],
   },
   {

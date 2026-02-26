@@ -828,9 +828,8 @@ const QuickActionsCard = () => (
         href="/admin/trash"
         icon={IconTrash}
         title="Trash"
-        desc="Recover deleted records"
+        desc="Recover deleted files"
         color="yellow"
-        disabled
       />
     </SimpleGrid>
   </Card>
