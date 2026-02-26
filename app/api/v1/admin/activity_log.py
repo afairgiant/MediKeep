@@ -12,8 +12,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, field_validator
-from sqlalchemy import func
+from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
@@ -142,16 +141,6 @@ def _build_activity_query(
     return query
 
 
-def _parse_datetime(value: Optional[str]) -> Optional[datetime]:
-    """Parse an ISO datetime string, returning None on failure."""
-    if not value:
-        return None
-    try:
-        return datetime.fromisoformat(value)
-    except (ValueError, TypeError):
-        return None
-
-
 def _log_to_entry(log: ActivityLog) -> ActivityLogEntry:
     """Convert an ActivityLog model instance to an API response entry."""
     entity_type = log.entity_type or ""
@@ -184,8 +173,8 @@ def get_activity_log(
     action: Optional[str] = Query(default=None),
     entity_type: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
-    start_date: Optional[str] = Query(default=None),
-    end_date: Optional[str] = Query(default=None),
+    start_date: Optional[datetime] = Query(default=None),
+    end_date: Optional[datetime] = Query(default=None),
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
@@ -193,17 +182,14 @@ def get_activity_log(
     log_endpoint_access(logger, request, current_user.id, "activity_log_list_accessed")
 
     try:
-        parsed_start = _parse_datetime(start_date)
-        parsed_end = _parse_datetime(end_date)
-
         query = _build_activity_query(
             db,
             search=search,
             action=action,
             entity_type=entity_type,
             user_id=user_id,
-            start_date=parsed_start,
-            end_date=parsed_end,
+            start_date=start_date,
+            end_date=end_date,
         )
 
         total = query.count()
@@ -238,8 +224,8 @@ def export_activity_log(
     action: Optional[str] = Query(default=None),
     entity_type: Optional[str] = Query(default=None),
     user_id: Optional[int] = Query(default=None),
-    start_date: Optional[str] = Query(default=None),
-    end_date: Optional[str] = Query(default=None),
+    start_date: Optional[datetime] = Query(default=None),
+    end_date: Optional[datetime] = Query(default=None),
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
@@ -247,45 +233,50 @@ def export_activity_log(
     log_endpoint_access(logger, request, current_user.id, "activity_log_export")
 
     try:
-        parsed_start = _parse_datetime(start_date)
-        parsed_end = _parse_datetime(end_date)
-
         query = _build_activity_query(
             db,
             search=search,
             action=action,
             entity_type=entity_type,
             user_id=user_id,
-            start_date=parsed_start,
-            end_date=parsed_end,
+            start_date=start_date,
+            end_date=end_date,
         )
 
         logs = query.order_by(ActivityLog.timestamp.desc()).all()
 
-        output = io.StringIO()
-        writer = csv.writer(output)
-        writer.writerow(
-            ["Timestamp", "User", "Action", "Entity Type", "Entity ID", "Description", "IP Address"]
-        )
+        def iter_csv():
+            output = io.StringIO()
+            writer = csv.writer(output)
 
-        for log in logs:
-            username = log.user.username if log.user else "System"
             writer.writerow(
-                [
-                    log.timestamp.isoformat() if log.timestamp else "",
-                    username,
-                    log.action,
-                    ENTITY_TYPE_DISPLAY.get(log.entity_type or "", log.entity_type or ""),
-                    log.entity_id or "",
-                    log.description,
-                    log.ip_address or "",
-                ]
+                ["Timestamp", "User", "Action", "Entity Type", "Entity ID", "Description", "IP Address"]
             )
+            yield output.getvalue()
+            output.seek(0)
+            output.truncate(0)
 
-        output.seek(0)
+            for log in logs:
+                username = log.user.username if log.user else "System"
+                writer.writerow(
+                    [
+                        log.timestamp.isoformat() if log.timestamp else "",
+                        username,
+                        log.action,
+                        ENTITY_TYPE_DISPLAY.get(
+                            log.entity_type or "", (log.entity_type or "").replace("_", " ").title()
+                        ),
+                        log.entity_id or "",
+                        log.description,
+                        log.ip_address or "",
+                    ]
+                )
+                yield output.getvalue()
+                output.seek(0)
+                output.truncate(0)
 
         return StreamingResponse(
-            iter([output.getvalue()]),
+            iter_csv(),
             media_type="text/csv",
             headers={"Content-Disposition": "attachment; filename=audit_log_export.csv"},
         )

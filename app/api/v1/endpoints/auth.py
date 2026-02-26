@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.deps import BusinessLogicException, ConflictException, UnauthorizedException
-from app.api.activity_logging import log_create, log_update, safe_log_activity
+from app.api.activity_logging import log_create, safe_log_activity
 from app.core.config import settings
 from app.core.events import get_event_bus
 from app.core.http.error_handling import handle_database_errors
