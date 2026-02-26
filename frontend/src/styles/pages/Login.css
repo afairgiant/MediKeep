@@ -113,7 +113,7 @@ button[type="submit"]:disabled {
 
 .create-user-btn {
   background: transparent;
-  color: #667eea;
+  color: var(--color-primary-text, #4f46e5);
   border: 2px solid #667eea;
   padding: 0.6rem 1.2rem;
   border-radius: 5px;
@@ -211,7 +211,7 @@ button[type="submit"]:disabled {
 /* Create User Info */
 .create-user-info {
   padding: 0 2rem 1.5rem 2rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--color-border-light, #94a3b8);
   margin-top: 1rem;
   background: #f8f9fa;
   border-radius: 0 0 10px 10px;
@@ -229,7 +229,7 @@ button[type="submit"]:disabled {
   display: block;
   margin-top: 0.5rem;
   font-size: 0.85rem;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
 }
 
 .requirement {
@@ -241,7 +241,7 @@ button[type="submit"]:disabled {
 }
 
 .requirement.valid {
-  color: #28a745;
+  color: var(--color-success, #1a7a30);
 }
 
 .requirement:before {
@@ -332,7 +332,7 @@ button[type="submit"]:disabled {
 }
 
 .patient-link-section .field-hint {
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   font-size: 0.85rem;
   margin: 0.25rem 0 0.75rem 0;
   line-height: 1.4;

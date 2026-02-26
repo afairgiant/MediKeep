@@ -418,7 +418,7 @@
 }
 
 .clear-filters-btn {
-  background: var(--color-gray-500, #6c757d);
+  background: var(--color-gray-700, #495057);
   color: var(--color-text-light, white);
   border: none;
   padding: 0.5rem 1rem;
@@ -431,7 +431,7 @@
 }
 
 .clear-filters-btn:hover {
-  background: var(--color-gray-600, #5a6268);
+  background: var(--color-gray-800, #343a40);
   transform: translateY(-1px);
 }
 
@@ -444,7 +444,7 @@
 }
 
 .filter-indicator {
-  color: var(--color-primary, #667eea);
+  color: var(--color-primary-text, #667eea);
   font-weight: 600;
 }
 
@@ -575,7 +575,7 @@
 .save-button {
   background: linear-gradient(
     135deg,
-    var(--color-success, #28a745) 0%,
+    var(--color-success, #1a7a30) 0%,
     var(--color-info, #20c997) 100%
   );
   color: var(--color-text-light, white);
@@ -952,7 +952,7 @@
 .view-button {
   background: linear-gradient(
     135deg,
-    var(--color-success, #28a745) 0%,
+    var(--color-success, #1a7a30) 0%,
     var(--color-info, #20c997) 100%
   );
   color: var(--color-text-light, white);
@@ -982,11 +982,11 @@
 }
 
 .priority-badge.priority-routine {
-  color: var(--color-success, #28a745);
+  color: var(--color-success, #1a7a30);
 }
 
 .priority-badge.priority-urgent {
-  color: var(--color-warning, #ffc107);
+  color: var(--color-warning-dark, #856404);
 }
 
 .priority-badge.priority-emergency {

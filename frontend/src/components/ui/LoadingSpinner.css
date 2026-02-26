@@ -58,27 +58,27 @@
 
 /* Color variants */
 .loading-spinner--primary {
-  color: #007bff;
+  color: var(--color-primary);
 }
 
 .loading-spinner--secondary {
-  color: #6c757d;
+  color: var(--color-gray-600);
 }
 
 .loading-spinner--success {
-  color: #28a745;
+  color: var(--color-success);
 }
 
 .loading-spinner--warning {
-  color: #ffc107;
+  color: var(--color-warning-dark);
 }
 
 .loading-spinner--danger {
-  color: #dc3545;
+  color: var(--color-danger);
 }
 
 .loading-spinner--info {
-  color: #17a2b8;
+  color: var(--color-info);
 }
 
 /* Message styling */

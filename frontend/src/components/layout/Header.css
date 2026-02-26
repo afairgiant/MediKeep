@@ -19,7 +19,7 @@
 .back-button {
   background: none;
   border: none;
-  color: var(--color-primary, #667eea);
+  color: var(--color-primary-text, #667eea);
   font-size: 0.9rem;
   cursor: pointer;
   padding: 0.25rem 0;

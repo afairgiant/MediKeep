@@ -28,7 +28,7 @@
 }
 
 .settings-tab.active {
-  color: var(--color-primary, #4f46e5);
+  color: var(--color-primary-text, #4f46e5);
 }
 
 .settings-tab.active::after {
@@ -177,7 +177,7 @@
 }
 
 .settings-update-indicator {
-  color: var(--color-primary, #007bff);
+  color: var(--color-primary-text, #007bff);
   font-size: 0.85rem;
   font-style: italic;
   margin-top: 0.5rem;
