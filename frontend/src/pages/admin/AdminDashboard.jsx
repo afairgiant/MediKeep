@@ -88,6 +88,7 @@ const DASHBOARD_CONFIG = {
 };
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const { formatDate, formatDateTime } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -467,6 +468,7 @@ const AdminDashboard = () => {
                   loading={activityLoading}
                   error={activityError}
                   isRefreshing={isRefreshing}
+                  onViewAll={() => navigate('/admin/audit-log')}
                 />
               </Grid.Col>
 
@@ -637,7 +639,7 @@ SystemHealthCard.propTypes = {
 };
 
 // Reusable ActivityCard Component
-const ActivityCard = ({ activities, loading, error, isRefreshing = false }) => {
+const ActivityCard = ({ activities, loading, error, isRefreshing = false, onViewAll }) => {
   const getActivityIcon = (modelName, action) => {
     const iconMap = {
       User: IconUsers,
@@ -729,8 +731,7 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false }) => {
               fullWidth
               mt="md"
               rightSection={<IconArrowRight size={16} />}
-              disabled
-              title="Available when Audit Log page is added"
+              onClick={onViewAll}
             >
               View All Activity
             </Button>
@@ -753,6 +754,7 @@ ActivityCard.propTypes = {
   loading: PropTypes.bool.isRequired,
   error: PropTypes.object,
   isRefreshing: PropTypes.bool,
+  onViewAll: PropTypes.func,
 };
 
 // Reusable QuickActionsCard Component
@@ -821,7 +823,6 @@ const QuickActionsCard = () => (
         title="Audit Log"
         desc="View system activity log"
         color="red"
-        disabled
       />
       <ActionButton
         href="/admin/trash"

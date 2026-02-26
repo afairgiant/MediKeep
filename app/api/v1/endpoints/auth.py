@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.deps import BusinessLogicException, ConflictException, UnauthorizedException
+from app.api.activity_logging import log_create, safe_log_activity
 from app.core.config import settings
 from app.core.events import get_event_bus
 from app.core.http.error_handling import handle_database_errors
@@ -20,6 +21,7 @@ from app.core.utils.security import create_access_token, verify_password
 from app.crud.patient import patient
 from app.crud.user import user
 from app.events.security_events import PasswordChangedEvent
+from app.models.activity_log import ActionType, EntityType
 from app.models.models import Patient, User as DBUser
 from app.schemas.patient import PatientCreate
 from app.schemas.user import Token, User, UserCreate
@@ -100,6 +102,15 @@ def register(
     # Create new user with database error handling
     with handle_database_errors(request=request):
         new_user = user.create(db, obj_in=user_in)
+
+    # Log user registration in activity log
+    log_create(
+        db=db,
+        entity_type=EntityType.USER,
+        entity_obj=new_user,
+        user_id=new_user.id,
+        request=request,
+    )
 
     # Create a basic patient record for the new user using Phase 1 approach
     # Extract first/last names from available user data
@@ -319,6 +330,17 @@ def login(
         expires_delta=access_token_expires,
     )
 
+    # Log login in activity log
+    safe_log_activity(
+        db=db,
+        action=ActionType.LOGIN,
+        entity_type=EntityType.USER,
+        entity_obj=db_user,
+        user_id=db_user.id,
+        description=f"User logged in: {db_user.username}",
+        request=request,
+    )
+
     # Log successful login with token expiration details
     log_successful_login(getattr(db_user, "id", 0), form_data.username, request)
     log_endpoint_access(
@@ -401,6 +423,17 @@ async def change_password(
     # Update password (also clears must_change_password flag)
     user.update_password_by_user(
         db, user_obj=current_user, new_password=password_data.newPassword
+    )
+
+    # Log password change in activity log
+    safe_log_activity(
+        db=db,
+        action=ActionType.UPDATED,
+        entity_type=EntityType.USER,
+        entity_obj=current_user,
+        user_id=current_user.id,
+        description=f"Password changed for user: {current_user.username}",
+        request=request,
     )
 
     log_security_event(

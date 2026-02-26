@@ -74,6 +74,7 @@ import AdminUserCreate from './pages/admin/AdminUserCreate';
 import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
+import AuditLog from './pages/admin/AuditLog';
 import DataModels from './pages/admin/DataModels';
 import ReportBuilder from './pages/reports/ReportBuilder';
 import TagManagement from './pages/tools/TagManagement';
@@ -573,6 +574,14 @@ function App() {
                           element={
                             <AdminRoute>
                               <AdminSettings />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/audit-log"
+                          element={
+                            <AdminRoute>
+                              <AuditLog />
                             </AdminRoute>
                           }
                         />
