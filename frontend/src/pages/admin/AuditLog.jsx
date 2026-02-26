@@ -34,6 +34,7 @@ import {
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { downloadBlob } from '../../utils/downloadUtils';
 import logger from '../../services/logger';
 
 const DEBOUNCE_MS = 300;
@@ -178,14 +179,7 @@ const AuditLog = () => {
     setExporting(true);
     try {
       const blob = await adminApiService.exportActivityLog(buildFilterParams());
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'audit_log_export.csv';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
+      downloadBlob(blob, 'audit_log_export.csv');
     } catch (err) {
       logger.error('audit_log_export_error', 'Failed to export activity log', {
         component: 'AuditLog',

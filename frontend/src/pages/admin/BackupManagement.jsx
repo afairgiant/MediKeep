@@ -5,6 +5,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import { useAdminData } from '../../hooks/useAdminData';
 import { useBackupNotifications } from '../../hooks/useBackupNotifications';
 import { adminApiService } from '../../services/api/adminApi';
+import { downloadBlob, exportTimestamp } from '../../utils/downloadUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   Card,
@@ -89,6 +90,7 @@ const BackupManagement = () => {
   const [creating, setCreating] = useState({});
   const [restoring, setRestoring] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const uploadResetRef = useRef(null);
 
   // Tab management
@@ -182,6 +184,21 @@ const BackupManagement = () => {
   };
 
   const backups = backupData?.backups || [];
+
+  const handleExportBackups = async () => {
+    setExporting(true);
+    try {
+      const blob = await adminApiService.exportBackups();
+      downloadBlob(blob, `backup_history_export_${exportTimestamp()}.csv`);
+    } catch (err) {
+      logger.error('backup_export_error', 'Failed to export backup history', {
+        component: 'BackupManagement', error: err.message,
+      });
+      showError('exportBackups', err);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   // Detect unsaved changes
   const hasUnsavedChanges = React.useMemo(() => {
@@ -823,7 +840,19 @@ const BackupManagement = () => {
                   </ThemeIcon>
                   <Text fw={600} size="lg">Existing Backups</Text>
                 </Group>
-                <Text size="sm" c="dimmed">{backups.length} backup{backups.length !== 1 ? 's' : ''}</Text>
+                <Group gap="sm">
+                  <Button
+                    variant="light"
+                    size="xs"
+                    leftSection={<IconDownload size={14} />}
+                    onClick={handleExportBackups}
+                    loading={exporting}
+                    disabled={backups.length === 0}
+                  >
+                    Export CSV
+                  </Button>
+                  <Text size="sm" c="dimmed">{backups.length} backup{backups.length !== 1 ? 's' : ''}</Text>
+                </Group>
               </Group>
 
               {backups.length === 0 ? (
