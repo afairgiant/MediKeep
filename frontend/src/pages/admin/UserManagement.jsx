@@ -82,7 +82,7 @@ const PER_PAGE = 20;
 
 const UserManagement = () => {
   const { user: currentUser } = useAuth();
-  const { formatDateTime, formatDate } = useDateFormat();
+  const { formatDate } = useDateFormat();
 
   // Data state
   const [users, setUsers] = useState([]);
@@ -328,10 +328,32 @@ const UserManagement = () => {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const getAuthIcon = (method) => {
-    if (method === 'sso') return <IconBrandGoogle size={14} />;
-    if (method === 'hybrid') return <IconLink size={14} />;
-    return <IconKey size={14} />;
+  const AUTH_ICONS = {
+    sso: <IconBrandGoogle size={14} />,
+    hybrid: <IconLink size={14} />,
+  };
+
+  const getAuthIcon = (method) => AUTH_ICONS[method] || <IconKey size={14} />;
+
+  const formatLocalDateTime = (dateStr) => {
+    if (!dateStr) return '-';
+    try {
+      // Backend returns UTC timestamps; ensure JS parses them as UTC
+      const utcStr = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
+      const date = new Date(utcStr);
+      if (isNaN(date.getTime())) return dateStr;
+      return date.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short',
+      });
+    } catch {
+      return dateStr;
+    }
   };
 
   const formatRelativeTime = (dateStr) => {
@@ -672,7 +694,7 @@ const UserManagement = () => {
                 <Table.Tbody>
                   {loginHistory.map((entry) => (
                     <Table.Tr key={entry.id}>
-                      <Table.Td>{formatDateTime(entry.timestamp) || '-'}</Table.Td>
+                      <Table.Td>{formatLocalDateTime(entry.timestamp)}</Table.Td>
                       <Table.Td><Code>{entry.ip_address || 'N/A'}</Code></Table.Td>
                       <Table.Td>{entry.description || '-'}</Table.Td>
                     </Table.Tr>

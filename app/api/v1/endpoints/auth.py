@@ -272,7 +272,7 @@ def login(
         )
 
     # Check if user account is active
-    if not getattr(db_user, 'is_active', True):
+    if not db_user.is_active:
         log_security_event(
             logger,
             "login_rejected_inactive",
