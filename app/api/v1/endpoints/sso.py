@@ -5,12 +5,14 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.api import deps
+from app.api.deps import UnauthorizedException
 from app.auth.sso.exceptions import *
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
 from app.core.utils.security import create_access_token
 from app.crud.user_preferences import user_preferences
+from app.models.base import get_utc_now
 from app.services.sso_service import SSOService
 
 logger = get_logger(__name__, "sso")
@@ -93,11 +95,34 @@ async def sso_callback(
         if result.get("conflict"):
             # Return conflict data directly for frontend to handle
             return result
-        
+
         # Check if this is a GitHub manual linking response
         if result.get("github_manual_link"):
             # Return GitHub manual linking data for frontend to handle
             return result
+
+        # Check if user account is active
+        sso_user = result["user"]
+        if not getattr(sso_user, 'is_active', True):
+            log_security_event(
+                logger, "sso_login_rejected_inactive", req,
+                f"SSO login rejected for inactive user: {sso_user.username}",
+                username=sso_user.username,
+            )
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "message": "This account has been deactivated. Please contact an administrator.",
+                    "error_code": "ACCOUNT_DEACTIVATED",
+                }
+            )
+
+        # Update last login timestamp
+        try:
+            sso_user.last_login_at = get_utc_now()
+            db.commit()
+        except Exception:
+            db.rollback()
 
         # Get user's timeout preference BEFORE creating the token
         preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
@@ -189,6 +214,29 @@ async def resolve_account_conflict(
     try:
         result = sso_service.resolve_account_conflict(request.temp_token, request.action, request.preference, db)
 
+        # Check if user account is active
+        conflict_user = result["user"]
+        if not getattr(conflict_user, 'is_active', True):
+            log_security_event(
+                logger, "sso_conflict_login_rejected_inactive", req,
+                f"SSO conflict resolution rejected for inactive user: {conflict_user.username}",
+                username=conflict_user.username,
+            )
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "message": "This account has been deactivated. Please contact an administrator.",
+                    "error_code": "ACCOUNT_DEACTIVATED",
+                }
+            )
+
+        # Update last login timestamp
+        try:
+            conflict_user.last_login_at = get_utc_now()
+            db.commit()
+        except Exception:
+            db.rollback()
+
         # Get user's timeout preference BEFORE creating the token
         preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
         session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
@@ -264,6 +312,29 @@ async def resolve_github_manual_link(
     """Resolve GitHub manual linking by verifying user credentials"""
     try:
         result = sso_service.resolve_github_manual_link(request.temp_token, request.username, request.password, db)
+
+        # Check if user account is active
+        gh_user = result["user"]
+        if not getattr(gh_user, 'is_active', True):
+            log_security_event(
+                logger, "github_link_login_rejected_inactive", req,
+                f"GitHub linking rejected for inactive user: {gh_user.username}",
+                username=gh_user.username,
+            )
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "message": "This account has been deactivated. Please contact an administrator.",
+                    "error_code": "ACCOUNT_DEACTIVATED",
+                }
+            )
+
+        # Update last login timestamp
+        try:
+            gh_user.last_login_at = get_utc_now()
+            db.commit()
+        except Exception:
+            db.rollback()
 
         # Get user's timeout preference BEFORE creating the token
         preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)

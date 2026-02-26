@@ -22,6 +22,7 @@ from app.crud.patient import patient
 from app.crud.user import user
 from app.events.security_events import PasswordChangedEvent
 from app.models.activity_log import ActionType, EntityType
+from app.models.base import get_utc_now
 from app.models.models import Patient, User as DBUser
 from app.schemas.patient import PatientCreate
 from app.schemas.user import Token, User, UserCreate
@@ -270,6 +271,20 @@ def login(
             request=request
         )
 
+    # Check if user account is active
+    if not getattr(db_user, 'is_active', True):
+        log_security_event(
+            logger,
+            "login_rejected_inactive",
+            request,
+            f"Login rejected for inactive user: {form_data.username}",
+            username=form_data.username,
+        )
+        raise UnauthorizedException(
+            message="This account has been deactivated. Please contact an administrator.",
+            request=request,
+        )
+
     # Check if user has an active patient, if not try to set one
     if not db_user.active_patient_id:
         # Single query with priority ordering: self-records first, then by ID
@@ -340,6 +355,13 @@ def login(
         description=f"User logged in: {db_user.username}",
         request=request,
     )
+
+    # Update last login timestamp
+    try:
+        db_user.last_login_at = get_utc_now()
+        db.commit()
+    except Exception:
+        db.rollback()
 
     # Log successful login with token expiration details
     log_successful_login(getattr(db_user, "id", 0), form_data.username, request)
