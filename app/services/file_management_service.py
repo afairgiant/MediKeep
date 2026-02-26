@@ -20,7 +20,6 @@ class FileManagementService:
     def __init__(self):
         self.uploads_dir = settings.UPLOAD_DIR
         self.trash_dir = settings.TRASH_DIR
-        self.trash_retention_days = settings.TRASH_RETENTION_DAYS
 
     def move_to_trash(
         self, file_path: str, reason: Optional[str] = None
@@ -193,7 +192,7 @@ class FileManagementService:
             if not self.trash_dir.exists():
                 return {"deleted_files": 0, "deleted_dirs": 0}
 
-            cutoff_date = datetime.now() - timedelta(days=self.trash_retention_days)
+            cutoff_date = datetime.now() - timedelta(days=settings.TRASH_RETENTION_DAYS)
             deleted_files = 0
             deleted_dirs = 0
 
