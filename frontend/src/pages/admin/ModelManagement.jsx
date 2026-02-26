@@ -448,7 +448,7 @@ const ModelManagement = () => {
         {/* Table */}
         <Paper withBorder mb="md">
           <ScrollArea>
-            <Table striped highlightOnHover>
+            <Table striped highlightOnHover aria-label={`${metadata?.verbose_name_plural || modelName} records`}>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th w={40}>
@@ -559,7 +559,7 @@ const ModelManagement = () => {
           onClose={() => { closeDeleteModal(); setRecordToDelete(null); }}
           title={
             <Group gap="xs">
-              <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" />
+              <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" aria-hidden="true" />
               <Text fw={600}>Confirm Deletion</Text>
             </Group>
           }
@@ -599,7 +599,7 @@ const ModelManagement = () => {
           onClose={() => { closeBulkDeleteModal(); setBulkDeleteConfirmText(''); }}
           title={
             <Group gap="xs">
-              <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" />
+              <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" aria-hidden="true" />
               <Text fw={600}>Confirm Bulk Deletion</Text>
             </Group>
           }

@@ -27,6 +27,10 @@
   --color-info-light: #d1ecf1;
   --color-info-dark: #0c4a6e;
 
+  --color-purple: #7c3aed;
+  --color-purple-light: #ddd6fe;
+  --color-purple-dark: #6b21a8;
+
   --color-light: #f8f9fa;
   --color-dark: #343a40;
 
@@ -192,6 +196,11 @@
 
   --color-warning-light: #5d4e37;
   --color-warning-dark: #f6e05e;
+  --color-info: #38bdf8;
   --color-info-light: #2c5282;
   --color-info-dark: #63b3ed;
+
+  --color-purple: #a78bfa;
+  --color-purple-light: #4c3575;
+  --color-purple-dark: #c4b5fd;
 }

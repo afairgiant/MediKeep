@@ -10,7 +10,7 @@
 .paperless-settings-loading {
   padding: 2rem;
   text-align: center;
-  color: var(--color-gray-600, #646c74);
+  color: var(--color-text-muted);
   font-size: 0.875rem;
 }
 
@@ -21,7 +21,7 @@
   align-items: flex-start;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color, #e1e5e9);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .paperless-section-title {
@@ -34,7 +34,7 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary, #2c3e50);
+  color: var(--color-text-primary);
 }
 
 .paperless-section-icon {
@@ -53,27 +53,27 @@
 }
 
 .connection-status-connected {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+  border: 1px solid var(--color-success);
 }
 
 .connection-status-failed {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
+  border: 1px solid var(--color-danger);
 }
 
 .connection-status-testing {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-dark);
+  border: 1px solid var(--color-warning);
 }
 
 .connection-status-disconnected {
-  background-color: #f8f9fa;
-  color: var(--color-gray-600, #646c74);
-  border: 1px solid #dee2e6;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border-light);
 }
 
 .connection-status-icon {
@@ -93,14 +93,14 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
-  color: var(--text-primary, #2c3e50);
+  color: var(--color-text-primary);
   font-size: 0.875rem;
 }
 
 .paperless-form-input {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid var(--border-color, #dee2e6);
+  border: 1px solid var(--color-border-light);
   border-radius: 0.5rem;
   font-size: 0.875rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -108,31 +108,31 @@
 
 .paperless-form-input:focus {
   outline: none;
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .paperless-form-input.error {
-  border-color: #dc3545;
+  border-color: var(--color-danger);
   box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
 }
 
 .paperless-form-input:disabled {
-  background-color: #f8f9fa;
-  color: var(--color-gray-600, #646c74);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-muted);
   cursor: not-allowed;
 }
 
 .paperless-form-error {
   margin-top: 0.5rem;
-  color: #dc3545;
+  color: var(--color-danger);
   font-size: 0.75rem;
   font-weight: 500;
 }
 
 .paperless-form-help {
   margin-top: 0.5rem;
-  color: var(--color-gray-600, #646c74);
+  color: var(--color-text-muted);
   font-size: 0.75rem;
   line-height: 1.4;
 }
@@ -170,7 +170,7 @@
 .paperless-radio-option span {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-primary, #2c3e50);
+  color: var(--color-text-primary);
 }
 
 .paperless-radio-option input[type="radio"]:disabled {
@@ -227,10 +227,10 @@
 
 .paperless-server-info {
   padding: 1rem;
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
+  background-color: var(--color-success-light);
+  border: 1px solid var(--color-success);
   border-radius: 0.5rem;
-  color: #155724;
+  color: var(--color-success-dark);
 }
 
 .server-info-item {
@@ -244,10 +244,10 @@
 
 .paperless-connection-error {
   padding: 1rem;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
+  background-color: var(--color-danger-light);
+  border: 1px solid var(--color-danger);
   border-radius: 0.5rem;
-  color: #721c24;
+  color: var(--color-danger-dark);
 }
 
 .connection-error-message {
@@ -263,13 +263,13 @@
 }
 
 .paperless-storage-option {
-  border: 1px solid var(--border-color, #dee2e6);
+  border: 1px solid var(--color-border-light);
   border-radius: 0.5rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .paperless-storage-option:hover {
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--color-primary);
 }
 
 .paperless-storage-option.disabled {
@@ -278,7 +278,7 @@
 }
 
 .paperless-storage-option.disabled:hover {
-  border-color: var(--border-color, #dee2e6);
+  border-color: var(--color-border-light);
 }
 
 .paperless-storage-option-label {
@@ -310,12 +310,12 @@
 
 .paperless-storage-title {
   font-weight: 600;
-  color: var(--text-primary, #2c3e50);
+  color: var(--color-text-primary);
 }
 
 .paperless-storage-badge {
-  background-color: #f8f9fa;
-  color: var(--color-gray-600, #646c74);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-muted);
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.75rem;
@@ -323,7 +323,7 @@
 }
 
 .paperless-storage-description {
-  color: var(--color-gray-600, #646c74);
+  color: var(--color-text-muted);
   font-size: 0.875rem;
   line-height: 1.4;
 }
@@ -360,12 +360,12 @@
   flex: 1;
   font-size: 0.875rem;
   line-height: 1.4;
-  color: var(--text-primary, #2c3e50);
+  color: var(--color-text-primary);
 }
 
 .paperless-checkbox-description {
   margin-top: 0.25rem;
-  color: var(--color-gray-600, #646c74);
+  color: var(--color-text-muted);
   font-size: 0.75rem;
   line-height: 1.4;
 }
@@ -382,7 +382,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background-color: #f8f9fa;
+  background-color: var(--color-bg-secondary);
   border-radius: 0.5rem;
 }
 
@@ -396,12 +396,12 @@
 
 .storage-stat-label {
   font-weight: 500;
-  color: var(--text-primary, #2c3e50);
+  color: var(--color-text-primary);
   font-size: 0.875rem;
 }
 
 .storage-stat-value {
-  color: var(--color-gray-600, #646c74);
+  color: var(--color-text-muted);
   font-size: 0.8125rem;
 }
 
@@ -409,9 +409,9 @@
 .paperless-storage-stats-empty {
   padding: 1rem;
   text-align: center;
-  color: var(--color-gray-600, #646c74);
+  color: var(--color-text-muted);
   font-size: 0.875rem;
-  background-color: #f8f9fa;
+  background-color: var(--color-bg-secondary);
   border-radius: 0.5rem;
 }
 
@@ -428,7 +428,7 @@
 }
 
 .paperless-settings-changes-indicator {
-  color: #856404;
+  color: var(--color-warning-dark);
   font-size: 0.875rem;
   font-weight: 500;
 }
