@@ -150,21 +150,21 @@ const LabResultViewModal = ({
                     <Title order={4} mb="sm">{t('labResults.modal.sections.testInfo', 'Test Information')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.testCode', 'Test Code')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.testCode', 'Test Code')}</Text>
                         <Text>{labResult.test_code || t('labels.notSpecified', 'Not specified')}</Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.category', 'Category')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.category', 'Category')}</Text>
                         <Text>{labResult.test_category || t('labels.notSpecified', 'Not specified')}</Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.testType', 'Test Type')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.testType', 'Test Type')}</Text>
                         <Text c={labResult.test_type ? 'inherit' : 'dimmed'}>
                           {labResult.test_type || t('labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.facility', 'Facility')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.facility', 'Facility')}</Text>
                         <Text c={labResult.facility ? 'inherit' : 'dimmed'}>
                           {labResult.facility || t('labels.notSpecified', 'Not specified')}
                         </Text>
@@ -177,11 +177,11 @@ const LabResultViewModal = ({
                     <Title order={4} mb="sm">{t('labResults.modal.sections.testResults', 'Test Results')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labels.status', 'Status')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labels.status', 'Status')}</Text>
                         <StatusBadge status={labResult.status} />
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.labResult', 'Lab Result')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.labResult', 'Lab Result')}</Text>
                         {labResult.labs_result ? (
                           <StatusBadge status={labResult.labs_result} />
                         ) : (
@@ -189,11 +189,11 @@ const LabResultViewModal = ({
                         )}
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.orderedDate', 'Ordered Date')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.orderedDate', 'Ordered Date')}</Text>
                         <Text>{formatDate(labResult.ordered_date)}</Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.completedDate', 'Completed Date')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.completedDate', 'Completed Date')}</Text>
                         <Text c={labResult.completed_date ? 'inherit' : 'dimmed'}>
                           {labResult.completed_date
                             ? formatDate(labResult.completed_date)
@@ -208,7 +208,7 @@ const LabResultViewModal = ({
                     <Title order={4} mb="sm">{t('labResults.modal.sections.orderingPractitioner', 'Ordering Practitioner')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.doctor', 'Doctor')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.doctor', 'Doctor')}</Text>
                         <Text c={labResult.practitioner_id ? 'inherit' : 'dimmed'}>
                           {labResult.practitioner_id
                             ? practitioner?.name || `Practitioner ID: ${labResult.practitioner_id}`
@@ -217,7 +217,7 @@ const LabResultViewModal = ({
                       </Stack>
                       {practitioner?.specialty && (
                         <Stack gap="xs">
-                          <Text fw={500} size="sm" c="dimmed">{t('labResults.modal.labels.specialty', 'Specialty')}</Text>
+                          <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.specialty', 'Specialty')}</Text>
                           <Text>{practitioner.specialty}</Text>
                         </Stack>
                       )}

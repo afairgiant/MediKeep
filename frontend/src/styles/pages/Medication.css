@@ -118,7 +118,7 @@
 .controls-left .add-button {
   background: linear-gradient(
     135deg,
-    var(--color-success, #28a745) 0%,
+    var(--color-success, #1a7a30) 0%,
     var(--color-success-light, #20c997) 100%
   );
   color: var(--color-text-light, white);
@@ -202,7 +202,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border-light, #94a3b8);
   background: #f8f9fa;
   border-radius: 10px 10px 0 0;
 }
@@ -218,7 +218,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
   padding: 0;
   width: 30px;
   height: 30px;
@@ -260,7 +260,7 @@
 .form-group select,
 .form-group textarea {
   padding: 0.75rem;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--color-border-medium, #6b7280);
   border-radius: 5px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
@@ -270,8 +270,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--color-primary, #667eea);
+  box-shadow: var(--form-input-focus-shadow, 0 0 0 3px rgba(102, 126, 234, 0.25));
 }
 
 .form-actions {
@@ -279,7 +279,7 @@
   gap: 1rem;
   justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--color-border-light, #94a3b8);
 }
 
 .cancel-button {
@@ -321,7 +321,7 @@
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  color: #6c757d;
+  color: var(--color-gray-600, #646c74);
 }
 
 .empty-icon {
@@ -345,7 +345,7 @@
   border-radius: 10px;
   padding: 1.5rem;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--color-border-light, #94a3b8);
   transition: all 0.3s ease;
 }
 
@@ -400,7 +400,7 @@
 .medication-actions {
   display: flex;
   gap: 0.75rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--color-border-light, #94a3b8);
   padding-top: 1rem;
 }
 
