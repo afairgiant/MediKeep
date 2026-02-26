@@ -75,6 +75,7 @@ import SystemHealth from './pages/admin/SystemHealth';
 import BackupManagement from './pages/admin/BackupManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import AuditLog from './pages/admin/AuditLog';
+import TrashManagement from './pages/admin/TrashManagement';
 import DataModels from './pages/admin/DataModels';
 import ReportBuilder from './pages/reports/ReportBuilder';
 import TagManagement from './pages/tools/TagManagement';
@@ -582,6 +583,14 @@ function App() {
                           element={
                             <AdminRoute>
                               <AuditLog />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/trash"
+                          element={
+                            <AdminRoute>
+                              <TrashManagement />
                             </AdminRoute>
                           }
                         />
