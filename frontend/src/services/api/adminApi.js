@@ -348,6 +348,30 @@ class AdminApiService extends BaseApiService {
     return this.post('/user-management/users/create', userData);
   }
 
+  // User Management endpoints
+  async getUserLoginHistory(userId, page = 1, perPage = 20) {
+    return this.get(`/user-management/users/${userId}/login-history`, {
+      page,
+      per_page: perPage,
+    });
+  }
+
+  async toggleUserActive(userId, isActive) {
+    return this.put(`/models/user/${userId}`, { is_active: isActive });
+  }
+
+  async changeUserRole(userId, role) {
+    return this.put(`/models/user/${userId}`, { role });
+  }
+
+  async deleteUser(userId) {
+    return this.delete(`/models/user/${userId}`);
+  }
+
+  async getUsers(params = {}) {
+    return this.get('/models/user/', params);
+  }
+
   // Test Library Maintenance endpoints
   async getTestLibraryInfo() {
     return this.get('/maintenance/test-library/info');

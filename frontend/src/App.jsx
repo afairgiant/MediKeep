@@ -77,6 +77,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AuditLog from './pages/admin/AuditLog';
 import TrashManagement from './pages/admin/TrashManagement';
 import DataModels from './pages/admin/DataModels';
+import UserManagement from './pages/admin/UserManagement';
 import ReportBuilder from './pages/reports/ReportBuilder';
 import TagManagement from './pages/tools/TagManagement';
 import SearchResults from './pages/SearchResults';
@@ -527,6 +528,14 @@ function App() {
                           element={
                             <AdminRoute>
                               <BackupManagement />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/users"
+                          element={
+                            <AdminRoute>
+                              <UserManagement />
                             </AdminRoute>
                           }
                         />

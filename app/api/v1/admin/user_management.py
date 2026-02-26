@@ -26,7 +26,7 @@ from app.api.deps import (
     ConflictException,
 )
 from app.crud.user import user as user_crud
-from app.models.activity_log import EntityType
+from app.models.activity_log import ActionType, EntityType, ActivityLog
 from app.models.models import User, Patient
 from app.schemas.user import UserCreate
 from app.schemas.admin import (
@@ -298,3 +298,47 @@ def create_user_with_optional_link(
                 "linked_patient_id": None,
             },
         }
+
+
+@router.get("/users/{user_id}/login-history")
+def get_user_login_history(
+    request: Request,
+    user_id: int,
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(20, ge=1, le=100, description="Items per page"),
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user),
+):
+    """Get login history for a specific user from the activity log."""
+    log_endpoint_access(logger, request, admin_user.id, "user_login_history_viewed")
+
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        raise NotFoundException(message="User not found", request=request)
+
+    query = db.query(ActivityLog).filter(
+        ActivityLog.user_id == user_id,
+        ActivityLog.action == ActionType.LOGIN,
+    ).order_by(ActivityLog.timestamp.desc())
+
+    total = query.count()
+    items = query.offset((page - 1) * per_page).limit(per_page).all()
+
+    return {
+        "status": "success",
+        "data": {
+            "items": [
+                {
+                    "id": item.id,
+                    "timestamp": item.timestamp.isoformat() if item.timestamp else None,
+                    "ip_address": item.ip_address,
+                    "user_agent": item.user_agent,
+                    "description": item.description,
+                }
+                for item in items
+            ],
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+        },
+    }

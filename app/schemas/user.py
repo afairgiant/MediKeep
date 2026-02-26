@@ -175,6 +175,7 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
     role: Optional[str] = None
+    is_active: Optional[bool] = None
 
     @field_validator("username")
     @classmethod
@@ -239,6 +240,10 @@ class User(UserBase):
 
     id: int
     must_change_password: bool = False
+
+    # Account status
+    is_active: bool = True
+    last_login_at: Optional[datetime] = None
 
     # SSO fields
     auth_method: Optional[str] = None
