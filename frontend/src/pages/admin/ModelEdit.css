@@ -97,7 +97,7 @@
   color: var(--color-text-primary);
 }
 
-.field-input:focus {
+.field-input:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
   border-color: var(--color-primary);
@@ -109,7 +109,7 @@
   background-color: var(--color-danger-light);
 }
 
-.field-input.error:focus {
+.field-input.error:focus-visible {
   border-color: var(--color-danger);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
@@ -237,12 +237,6 @@ select.field-input {
 .model-edit-error p {
   color: var(--color-text-muted);
   margin-bottom: 2rem;
-}
-
-/* Focus-visible indicators for keyboard navigation */
-.field-input:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -2px;
 }
 
 /* Admin Page Loading - Centered within admin content area */
