@@ -48,9 +48,8 @@ interface TrashItem {
 }
 
 interface CleanupResult {
-  deleted_count?: number;
-  count?: number;
-  freed_bytes?: number;
+  deleted_files?: number;
+  deleted_dirs?: number;
 }
 
 interface ConfirmationModalProps {
@@ -85,6 +84,12 @@ function getErrorMessage(err: unknown, fallback: string): string {
 
 function pluralFiles(count: number): string {
   return count === 1 ? 'file' : 'files';
+}
+
+function getFileExtension(filename: string): string | null {
+  const dotIndex = filename.lastIndexOf('.');
+  if (dotIndex <= 0 || dotIndex === filename.length - 1) return null;
+  return filename.slice(dotIndex + 1).toLowerCase();
 }
 
 function ConfirmationModal({
@@ -232,12 +237,12 @@ function TrashManagement(): React.ReactElement {
     setPurging(true);
     try {
       const result: CleanupResult = await adminApiService.cleanupTrash();
-      const deleted = result?.deleted_count ?? result?.count ?? 0;
-      const freed =
-        result?.freed_bytes != null ? ` (${formatFileSize(result.freed_bytes)} freed)` : '';
+      const deletedFiles = result?.deleted_files ?? 0;
+      const deletedDirs = result?.deleted_dirs ?? 0;
+      const dirsSuffix = deletedDirs > 0 ? ` across ${deletedDirs} ${deletedDirs === 1 ? 'directory' : 'directories'}` : '';
       notifications.show({
         title: 'Trash purged',
-        message: `${deleted} expired ${pluralFiles(deleted)} permanently deleted${freed}`,
+        message: `${deletedFiles} expired ${pluralFiles(deletedFiles)} permanently deleted${dirsSuffix}`,
         color: 'green',
       });
       setPurgeModalOpen(false);
@@ -264,10 +269,17 @@ function TrashManagement(): React.ReactElement {
       ) {
         return false;
       }
-      if (dateRange[0] && new Date(item.deleted_at || 0) < dateRange[0]) return false;
-      if (dateRange[1] && new Date(item.deleted_at || 0) > dateRange[1]) return false;
+      if (dateRange[0] || dateRange[1]) {
+        const parsed = item.deleted_at && item.deleted_at !== 'Unknown'
+          ? new Date(item.deleted_at)
+          : null;
+        if (parsed && !Number.isNaN(parsed.getTime())) {
+          if (dateRange[0] && parsed < dateRange[0]) return false;
+          if (dateRange[1] && parsed > dateRange[1]) return false;
+        }
+      }
       if (typeFilter) {
-        const ext = item.filename.split('.').pop()?.toLowerCase();
+        const ext = getFileExtension(item.filename);
         if (ext !== typeFilter) return false;
       }
       return true;
@@ -277,7 +289,7 @@ function TrashManagement(): React.ReactElement {
   const fileTypeOptions = useMemo(() => {
     const extensions = new Set<string>();
     trashItems.forEach((item) => {
-      const ext = item.filename.split('.').pop()?.toLowerCase();
+      const ext = getFileExtension(item.filename);
       if (ext) extensions.add(ext);
     });
     return Array.from(extensions)
