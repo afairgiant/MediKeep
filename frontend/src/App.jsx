@@ -20,7 +20,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 
-import { theme } from './theme';
+import { theme, cssVariablesResolver } from './theme';
 
 // Responsive System
 import { ResponsiveProvider } from './providers/ResponsiveProvider';
@@ -367,7 +367,7 @@ function App() {
         <AuthProvider>
           <UserPreferencesProvider>
             <AppDataProvider>
-              <MantineProvider theme={theme}>
+              <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver}>
                 <Notifications />
                 <ResponsiveProvider>
                   <DatesProvider settings={{}}>

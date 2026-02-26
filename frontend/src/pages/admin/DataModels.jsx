@@ -184,6 +184,13 @@ const DataModels = () => {
     navigate(`/admin/models/${modelName}`);
   };
 
+  const handleModelKeyDown = (event, modelName) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      navigate(`/admin/models/${modelName}`);
+    }
+  };
+
   const renderModelsByCategory = category => {
     const categoryModels = filteredModels.filter(model => model.category === category);
     if (categoryModels.length === 0) return null;
@@ -208,6 +215,10 @@ const DataModels = () => {
                   withBorder
                   className="model-card"
                   onClick={() => handleModelClick(model.name)}
+                  onKeyDown={(e) => handleModelKeyDown(e, model.name)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${model.display} - ${model.description}`}
                   style={{ cursor: 'pointer', height: '100%' }}
                 >
                   <Group justify="space-between" mb="xs">
@@ -243,28 +254,24 @@ const DataModels = () => {
   return (
     <AdminLayout>
       <div className="data-models-page">
-        <div
-          className="page-header"
-          style={{
-            backgroundColor: 'var(--mantine-color-body)',
-            border: '1px solid var(--mantine-color-default-border)',
-          }}
-        >
-          <Group justify="space-between" align="flex-start" mb="xl">
+        <Card shadow="sm" p="xl" mb="xl" withBorder>
+          <Group justify="space-between" align="flex-start">
             <div>
-              <Text size="xl" fw={700} mb="xs">
+              <Group align="center" mb="xs">
                 <IconDatabase
                   size={32}
-                  style={{ verticalAlign: 'middle', marginRight: '8px' }}
+                  aria-hidden="true"
                 />
-                Data Models
-              </Text>
+                <Text size="xl" fw={700}>
+                  Data Models
+                </Text>
+              </Group>
               <Text c="dimmed" size="md">
                 Manage and view all database tables and records
               </Text>
             </div>
           </Group>
-        </div>
+        </Card>
 
         <TextInput
           placeholder="Filter models..."

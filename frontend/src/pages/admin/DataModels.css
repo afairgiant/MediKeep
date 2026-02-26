@@ -4,20 +4,6 @@
   padding: 20px;
 }
 
-.page-header {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  border-radius: 8px;
-  background-color: white;
-  border: 1px solid #dee2e6;
-}
-
-/* Dark theme override */
-[data-theme='dark'] .page-header {
-  background-color: #1a1b1e !important;
-  border-color: #373A40 !important;
-}
-
 .models-content {
   display: flex;
   flex-direction: column;
@@ -53,4 +39,10 @@
   background: var(--color-bg-tertiary);
   border-color: var(--color-border-light);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Focus-visible indicator for keyboard navigation */
+.model-card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

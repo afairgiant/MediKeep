@@ -13,12 +13,12 @@
 
 .channel-form .form-group label {
   font-weight: 500;
-  color: var(--text-primary, #333);
+  color: var(--color-text-primary);
   font-size: 0.875rem;
 }
 
 .channel-form .form-group .required {
-  color: #d32f2f;
+  color: var(--color-danger);
   margin-left: 0.25rem;
 }
 
@@ -28,7 +28,7 @@
 .channel-form .form-group input[type="password"],
 .channel-form .form-group select {
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--color-border-light);
   border-radius: 6px;
   font-size: 0.875rem;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -37,13 +37,13 @@
 .channel-form .form-group input:focus,
 .channel-form .form-group select:focus {
   outline: none;
-  border-color: var(--primary-color, #4f46e5);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
 }
 
 .channel-form .form-group.has-error input,
 .channel-form .form-group.has-error select {
-  border-color: #d32f2f;
+  border-color: var(--color-danger);
 }
 
 .channel-form .form-group-checkbox {
@@ -67,24 +67,24 @@
 
 .channel-form .field-help {
   font-size: 0.75rem;
-  color: var(--text-secondary, #666);
+  color: var(--color-text-muted);
 }
 
 .channel-form .field-error {
   font-size: 0.75rem;
-  color: #d32f2f;
+  color: var(--color-danger);
 }
 
 .channel-form .config-section {
   margin-top: 0.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color, #e0e0e0);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .channel-form .config-section h4 {
   margin: 0 0 1rem 0;
   font-size: 0.875rem;
-  color: var(--text-secondary, #666);
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
@@ -94,5 +94,5 @@
   gap: 0.75rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color, #e0e0e0);
+  border-top: 1px solid var(--color-border-light);
 }

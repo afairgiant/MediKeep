@@ -9,7 +9,7 @@
 .notification-settings-error {
   padding: 2rem;
   text-align: center;
-  color: var(--text-secondary, #666);
+  color: var(--color-text-muted);
 }
 
 .notification-settings-error p {

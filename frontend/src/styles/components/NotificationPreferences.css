@@ -14,19 +14,19 @@
 .notification-preferences-header h3 {
   margin: 0 0 0.5rem 0;
   font-size: 1.125rem;
-  color: var(--text-primary, #333);
+  color: var(--color-text-primary);
 }
 
 .notification-preferences-description {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--text-secondary, #666);
+  color: var(--color-text-muted);
 }
 
 .notification-preferences-loading {
   padding: 2rem;
   text-align: center;
-  color: var(--text-secondary, #666);
+  color: var(--color-text-muted);
 }
 
 .preferences-matrix-container {
@@ -45,13 +45,13 @@
 .preferences-matrix td {
   padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .preferences-matrix th {
   font-weight: 500;
-  color: var(--text-secondary, #666);
-  background: var(--bg-secondary, #f8f9fa);
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -69,14 +69,14 @@
 .preferences-matrix .channel-header .channel-name {
   display: block;
   font-weight: 500;
-  color: var(--text-primary, #333);
+  color: var(--color-text-primary);
 }
 
 .preferences-matrix .channel-header .channel-type {
   display: block;
   font-size: 0.75rem;
   font-weight: normal;
-  color: var(--text-tertiary, #999);
+  color: var(--color-text-muted);
   text-transform: capitalize;
 }
 
@@ -87,21 +87,21 @@
 }
 
 .preferences-matrix .category-row:hover .category-cell {
-  background: var(--bg-hover, #ebedf0);
+  background: var(--color-bg-tertiary);
 }
 
 .preferences-matrix .category-row .category-cell {
-  background: var(--bg-tertiary, #f0f1f3);
+  background: var(--color-bg-tertiary);
   font-weight: 600;
   font-size: 0.8125rem;
-  color: var(--text-secondary, #555);
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: background-color 0.15s ease;
 }
 
 .preferences-matrix .category-row.collapsed .category-cell {
-  border-bottom: 2px solid var(--border-color, #e0e0e0);
+  border-bottom: 2px solid var(--color-border-light);
 }
 
 .category-expand-icon {
@@ -110,20 +110,20 @@
   margin-right: 0.5rem;
   font-weight: normal;
   font-size: 1rem;
-  color: var(--text-tertiary, #999);
+  color: var(--color-text-muted);
 }
 
 .category-count {
   font-weight: normal;
   font-size: 0.75rem;
-  color: var(--text-tertiary, #999);
+  color: var(--color-text-muted);
   margin-left: 0.5rem;
   text-transform: none;
   letter-spacing: normal;
 }
 
 .preferences-matrix .event-row:hover {
-  background: var(--bg-hover, #fafbfc);
+  background: var(--color-bg-secondary);
 }
 
 .preferences-matrix .event-cell {
@@ -132,13 +132,13 @@
 
 .preferences-matrix .event-name {
   font-weight: 500;
-  color: var(--text-primary, #333);
+  color: var(--color-text-primary);
   margin-bottom: 0.25rem;
 }
 
 .preferences-matrix .event-description {
   font-size: 0.75rem;
-  color: var(--text-secondary, #666);
+  color: var(--color-text-muted);
   line-height: 1.4;
 }
 
@@ -165,7 +165,7 @@
 .preference-toggle .toggle-slider {
   width: 36px;
   height: 20px;
-  background: #ccc;
+  background: var(--color-gray-400);
   border-radius: 20px;
   position: relative;
   transition: background 0.2s;
@@ -177,7 +177,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: white;
+  background: var(--color-bg-primary);
   top: 2px;
   left: 2px;
   transition: transform 0.2s;
@@ -185,7 +185,7 @@
 }
 
 .preference-toggle input:checked + .toggle-slider {
-  background: var(--primary-color, #4f46e5);
+  background: var(--color-primary);
 }
 
 .preference-toggle input:checked + .toggle-slider::before {
@@ -207,7 +207,7 @@
 }
 
 .preferences-matrix .event-row.not-implemented .event-name {
-  color: var(--text-secondary, #666);
+  color: var(--color-text-muted);
 }
 
 .coming-soon-badge {
@@ -218,9 +218,9 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--text-tertiary, #888);
-  background: var(--bg-secondary, #f0f0f0);
-  border: 1px solid var(--border-color, #ddd);
+  color: var(--color-text-muted);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
   border-radius: 3px;
   vertical-align: middle;
 }
