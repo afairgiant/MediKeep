@@ -32,5 +32,5 @@ def stream_csv(headers: List[str], rows: List[Dict[str, str]], filename: str) ->
     return StreamingResponse(
         iter_csv(),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={filename}"},
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

@@ -1442,8 +1442,14 @@ def export_model_records(
         model_class = model_info["model"]
         records, _total = _get_model_records(db, model_name, search=search)
 
-        # Export all columns, not just list_fields
-        column_names = [col.name for col in model_class.__table__.columns]
+        # Use detail_fields (safe, curated) when configured; fall back to all columns.
+        # This prevents leaking sensitive columns (e.g. password_hash, encrypted tokens).
+        config = FIELD_DISPLAY_CONFIG.get(model_name, {})
+        column_names = (
+            config.get("detail_fields")
+            or config.get("list_fields")
+            or [col.name for col in model_class.__table__.columns]
+        )
         col_to_header = {col: col.replace("_", " ").title() for col in column_names}
         display_headers = list(col_to_header.values())
 

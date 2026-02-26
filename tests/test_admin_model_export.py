@@ -3,7 +3,7 @@ Tests for Admin Model Export endpoint.
 
 Tests cover:
 - GET /api/v1/admin/models/{model_name}/export (CSV export)
-- CSV headers match FIELD_DISPLAY_CONFIG list_fields
+- CSV headers include configured detail_fields (not raw model columns)
 - Search filtering in export
 - Invalid model returns 404
 - Non-admin returns 403
@@ -50,22 +50,18 @@ class TestModelExport:
         assert "attachment" in response.headers.get("content-disposition", "")
         assert "pharmacy_export.csv" in response.headers["content-disposition"]
 
-    def test_csv_headers_include_all_columns(self, admin_client, sample_pharmacies):
+    def test_csv_headers_match_detail_fields(self, admin_client, sample_pharmacies):
         response = admin_client.get(f"{self.BASE_URL}/pharmacy/export")
         content = response.text
         reader = csv.reader(io.StringIO(content))
         headers = next(reader)
-        # Export should include all model columns, not just list_fields
-        assert "Id" in headers
-        assert "Name" in headers
-        assert "Brand" in headers
-        assert "City" in headers
-        assert "State" in headers
-        assert "Phone Number" in headers
-        # Should also include columns NOT in list_fields
-        assert "Street Address" in headers
-        assert "Zip Code" in headers
-        assert "Website" in headers
+        # Export uses detail_fields config (more than list_fields, but curated for safety)
+        expected = [
+            "Id", "Name", "Brand", "Street Address", "City", "State",
+            "Zip Code", "Phone Number", "Website", "Hours",
+            "Drive Through", "Twenty Four Hour", "Created At", "Updated At",
+        ]
+        assert headers == expected
 
     def test_csv_has_data_rows(self, admin_client, sample_pharmacies):
         response = admin_client.get(f"{self.BASE_URL}/pharmacy/export")
