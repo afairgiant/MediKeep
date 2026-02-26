@@ -65,21 +65,20 @@ export function generateAdminBreadcrumbs(pathname) {
     });
 
     if (recordId && recordId !== 'create') {
-      crumbs.push({
-        label: action === 'edit' ? 'Edit' : `Record ${recordId}`,
-        path: action ? `/admin/models/${modelName}/${recordId}` : null,
-      });
-
       if (action === 'edit') {
+        crumbs.push({
+          label: `Record ${recordId}`,
+          path: `/admin/models/${modelName}/${recordId}`,
+        });
         crumbs.push({ label: 'Edit', path: null });
+      } else {
+        crumbs.push({
+          label: `Record ${recordId}`,
+          path: null,
+        });
       }
     } else if (recordId === 'create') {
       crumbs.push({ label: 'Create', path: null });
-    }
-
-    // Ensure last crumb has path=null
-    if (crumbs[crumbs.length - 1].path !== null) {
-      crumbs[crumbs.length - 1].path = null;
     }
 
     return crumbs;

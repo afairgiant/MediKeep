@@ -416,7 +416,7 @@ const SystemHealth = () => {
                       <Text size="sm" c="dimmed">
                         {storageHealth.app_storage.total_mb >= 1024
                           ? `${(storageHealth.app_storage.total_mb / 1024).toFixed(2)} GB`
-                          : `${storageHealth.app_storage.total_mb} MB`}
+                          : `${storageHealth.app_storage.total_mb.toFixed(2)} MB`}
                         {' '}across {storageHealth.app_storage.total_files} files
                       </Text>
                     </Group>

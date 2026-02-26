@@ -541,8 +541,7 @@ def get_system_metrics(
             # System load average (for Unix-like systems)
             try:
                 load_avg = os.getloadavg()[0]  # 1-minute load average
-                cpu_count = psutil.cpu_count()
-                if cpu_count and cpu_count > 0:
+                if cpu_count > 0:
                     load_percent = (load_avg / cpu_count) * 100
                     system_load = (
                         "high"

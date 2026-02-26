@@ -253,6 +253,7 @@ const Analytics = () => {
                   size="xs"
                   variant={analyticsDays === d && !analyticsDateRange[0] ? 'filled' : 'light'}
                   onClick={() => handlePresetDays(d)}
+                  aria-label={`Filter by last ${d} days`}
                 >
                   {d}d
                 </Button>
