@@ -35,6 +35,7 @@ import {
   IconX,
   IconAlertTriangle,
   IconAlertCircle,
+  IconDownload,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
@@ -44,6 +45,7 @@ import {
   getCascadeTypes,
 } from '../../utils/adminDeletionConfig';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { downloadBlob, exportTimestamp } from '../../utils/downloadUtils';
 import logger from '../../services/logger';
 import { IMPORTANT_FIELDS } from '../../constants/modelConstants';
 import './ModelManagement.css';
@@ -86,6 +88,7 @@ const ModelManagement = () => {
   const [recordToDelete, setRecordToDelete] = useState(null);
   const [bulkDeleteConfirmText, setBulkDeleteConfirmText] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(null);
@@ -297,6 +300,23 @@ const ModelManagement = () => {
     }
   }, [modelName, navigate]);
 
+  const handleExport = useCallback(async () => {
+    setExporting(true);
+    try {
+      const blob = await adminApiService.exportModelData(modelName, {
+        search: searchQuery || null,
+      });
+      downloadBlob(blob, `${modelName}_export_${exportTimestamp()}.csv`);
+    } catch (err) {
+      logger.error('model_export_error', 'Failed to export model data', {
+        component: 'ModelManagement', modelName, error: err.message,
+      });
+      notifications.show({ title: 'Export failed', message: 'Failed to export data', color: 'red' });
+    } finally {
+      setExporting(false);
+    }
+  }, [modelName, searchQuery]);
+
   if (loading && !metadata) {
     return (
       <AdminLayout>
@@ -369,6 +389,18 @@ const ModelManagement = () => {
               aria-label="Search records"
             />
             <Group gap="sm">
+              <Tooltip label="Export to CSV">
+                <Button
+                  variant="light"
+                  leftSection={<IconDownload size={16} />}
+                  onClick={handleExport}
+                  loading={exporting}
+                  disabled={totalRecords === 0}
+                  size="sm"
+                >
+                  Export CSV
+                </Button>
+              </Tooltip>
               <Menu shadow="md" width={220} closeOnItemClick={false}>
                 <Menu.Target>
                   <Tooltip label="Column visibility">

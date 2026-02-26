@@ -15,7 +15,9 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import safe_log_activity
+from app.api.v1.admin.csv_utils import stream_csv
 from app.core.utils.datetime_utils import convert_date_fields, convert_datetime_fields
+from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.core.logging.config import get_logger
 from app.crud import (
     allergy,
@@ -1264,6 +1266,88 @@ def process_field_mappings(data: Dict[str, Any], model_name: str) -> Dict[str, A
     return data
 
 
+def _resolve_search_field(model_name: str, model_class) -> Optional[str]:
+    """Find the best column to search on for a model."""
+    config = FIELD_DISPLAY_CONFIG.get(model_name, {})
+    search_fields = config.get("search_fields", [])
+    if search_fields:
+        return search_fields[0]
+
+    all_columns = [col.name for col in model_class.__table__.columns]
+    for field in ["name", "username", "title", "medication_name", "test_name", "allergen", "diagnosis"]:
+        if field in all_columns:
+            return field
+    return None
+
+
+def _fetch_records(db: Session, model_info: dict, crud_instance, skip: int = None, limit: int = None):
+    """Fetch records using get_multi or a raw query, with optional pagination."""
+    if hasattr(crud_instance, "get_multi"):
+        effective_skip = skip if skip is not None else 0
+        effective_limit = limit if limit is not None else 999999
+        return crud_instance.get_multi(db, skip=effective_skip, limit=effective_limit)
+
+    q = db.query(model_info["model"])
+    if skip is not None:
+        q = q.offset(skip)
+    if limit is not None:
+        q = q.limit(limit)
+    return q.all()
+
+
+def _get_model_records(db: Session, model_name: str, search: str = None, skip: int = None, limit: int = None):
+    """Fetch model records with optional search and pagination.
+
+    Returns:
+        Tuple of (records, total_count).
+    """
+    model_info = MODEL_REGISTRY[model_name]
+    crud_instance = model_info["crud"]
+
+    # Try search via CRUD query if a search term and searchable field exist
+    if search and search.strip() and hasattr(crud_instance, "query"):
+        search_field = _resolve_search_field(model_name, model_info["model"])
+        if search_field:
+            search_param = {"field": search_field, "term": search.strip()}
+            records = crud_instance.query(db=db, search=search_param, skip=skip, limit=limit)
+            all_matched = crud_instance.query(db=db, search=search_param)
+            return records, len(all_matched)
+
+    # Fallback: fetch all records (ignoring unsearchable search terms)
+    records = _fetch_records(db, model_info, crud_instance, skip=skip, limit=limit)
+    total = db.query(model_info["model"]).count()
+    return records, total
+
+
+def _get_fields_for_model(model_name: str):
+    """Determine which fields to show for a model.
+
+    Returns a list of field names or None (meaning all columns).
+    """
+    if model_name in FIELD_DISPLAY_CONFIG:
+        return FIELD_DISPLAY_CONFIG[model_name].get("list_fields")
+
+    model_info = MODEL_REGISTRY[model_name]
+    all_columns = [col.name for col in model_info["model"].__table__.columns]
+    smart_defaults = []
+
+    if "id" in all_columns:
+        smart_defaults.append("id")
+
+    for field in ["name", "username", "title", "medication_name", "test_name"]:
+        if field in all_columns:
+            smart_defaults.append(field)
+            break
+
+    if "status" in all_columns:
+        smart_defaults.append("status")
+
+    if "created_at" in all_columns:
+        smart_defaults.append("created_at")
+
+    return smart_defaults if smart_defaults else None
+
+
 def record_to_dict(
     record: Any, model_class: Type[Any], fields: Optional[List[str]] = None
 ) -> Dict[str, Any]:
@@ -1310,130 +1394,10 @@ def list_model_records(
     crud_instance = model_info["crud"]
 
     try:
-        # Calculate pagination
         skip = (page - 1) * per_page
+        records, total = _get_model_records(db, model_name, search=search, skip=skip, limit=per_page)
+        fields_to_show = _get_fields_for_model(model_name)
 
-        # Get records using CRUD instance with search filtering
-        if search and search.strip():
-            # Use the new query method for search functionality
-            if hasattr(crud_instance, "query"):
-                # Determine which field to search in based on model configuration or smart defaults
-                search_field = None
-
-                # Use configured search fields if available
-                if model_name in FIELD_DISPLAY_CONFIG:
-                    search_fields = FIELD_DISPLAY_CONFIG[model_name].get(
-                        "search_fields", []
-                    )
-                    if search_fields:
-                        search_field = search_fields[0]  # Use first search field
-
-                # Fallback to smart defaults if no config
-                if not search_field:
-                    all_columns = [
-                        col.name for col in model_info["model"].__table__.columns
-                    ]
-                    for field in [
-                        "name",
-                        "username",
-                        "title",
-                        "medication_name",
-                        "test_name",
-                        "allergen",
-                        "diagnosis",
-                    ]:
-                        if field in all_columns:
-                            search_field = field
-                            break
-
-                if search_field:
-                    # Use the query method with search
-                    records = crud_instance.query(
-                        db=db,
-                        search={"field": search_field, "term": search.strip()},
-                        skip=skip,
-                        limit=per_page,
-                    )
-
-                    # Get total count for search results
-                    total_records = crud_instance.query(
-                        db=db, search={"field": search_field, "term": search.strip()}
-                    )
-                    total = len(total_records)
-                else:
-                    # No searchable field found, return all records
-                    records = (
-                        crud_instance.get_multi(db, skip=skip, limit=per_page)
-                        if hasattr(crud_instance, "get_multi")
-                        else db.query(model_info["model"])
-                        .offset(skip)
-                        .limit(per_page)
-                        .all()
-                    )
-                    total = db.query(model_info["model"]).count()
-            else:
-                # Fallback if query method not available
-                records = (
-                    crud_instance.get_multi(db, skip=skip, limit=per_page)
-                    if hasattr(crud_instance, "get_multi")
-                    else db.query(model_info["model"])
-                    .offset(skip)
-                    .limit(per_page)
-                    .all()
-                )
-                total = db.query(model_info["model"]).count()
-        else:
-            # No search, get all records
-            if hasattr(crud_instance, "get_multi"):
-                records = crud_instance.get_multi(db, skip=skip, limit=per_page)
-                total = db.query(model_info["model"]).count()
-            else:
-                # Fallback for CRUD instances without get_multi
-                records = (
-                    db.query(model_info["model"]).offset(skip).limit(per_page).all()
-                )
-                total = db.query(model_info["model"]).count()
-
-        # Determine which fields to show
-        fields_to_show = None
-        if model_name in FIELD_DISPLAY_CONFIG:
-            fields_to_show = FIELD_DISPLAY_CONFIG[model_name].get("list_fields")
-        else:
-            # Smart default: show common important fields if they exist
-            all_columns = [
-                col.name for col in model_info["model"].__table__.columns
-            ]
-            smart_defaults = []
-
-            # Always include ID if it exists
-            if "id" in all_columns:
-                smart_defaults.append("id")
-
-            # Include name-like fields
-            for field in [
-                "name",
-                "username",
-                "title",
-                "medication_name",
-                "test_name",
-            ]:
-                if field in all_columns:
-                    smart_defaults.append(field)
-                    break
-
-            # Include status if it exists
-            if "status" in all_columns:
-                smart_defaults.append("status")
-
-            # Include created_at if it exists
-            if "created_at" in all_columns:
-                smart_defaults.append("created_at")
-
-            # If we found smart defaults, use them, otherwise show all
-            if smart_defaults:
-                fields_to_show = smart_defaults
-
-        # Convert to dictionaries for JSON response
         items = [
             record_to_dict(record, model_info["model"], fields_to_show)
             for record in records
@@ -1453,6 +1417,53 @@ def list_model_records(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error fetching {model_name} records: {str(e)}",
+        )
+
+
+@router.get("/{model_name}/export")
+def export_model_records(
+    model_name: str,
+    search: Optional[str] = Query(None),
+    request: Request = None,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_admin_user),
+):
+    """Export model records as CSV."""
+    if model_name not in MODEL_REGISTRY:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Model '{model_name}' not found",
+        )
+
+    log_endpoint_access(logger, request, current_user.id, "model_data_export")
+
+    try:
+        model_info = MODEL_REGISTRY[model_name]
+        model_class = model_info["model"]
+        records, _total = _get_model_records(db, model_name, search=search)
+
+        # Export all columns, not just list_fields
+        column_names = [col.name for col in model_class.__table__.columns]
+        col_to_header = {col: col.replace("_", " ").title() for col in column_names}
+        display_headers = list(col_to_header.values())
+
+        rows = []
+        for record in records:
+            data = record_to_dict(record, model_class, column_names)
+            rows.append({col_to_header[col]: data.get(col, "") for col in column_names})
+
+        return stream_csv(display_headers, rows, f"{model_name}_export.csv")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_endpoint_error(
+            logger, request, f"Failed to export {model_name}", e,
+            user_id=current_user.id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error exporting {model_name} records",
         )
 
 
