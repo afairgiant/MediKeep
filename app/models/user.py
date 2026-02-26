@@ -46,6 +46,10 @@ class User(Base):
     # Force password change on next login (e.g. for default/emergency accounts)
     must_change_password = Column(Boolean, default=False, nullable=False)
 
+    # Account status
+    is_active = Column(Boolean, default=True, nullable=False)
+    last_login_at = Column(DateTime, nullable=True)
+
     # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(

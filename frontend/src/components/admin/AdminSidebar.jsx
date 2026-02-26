@@ -40,7 +40,7 @@ const NAV_SECTIONS = [
     label: 'Data Management',
     items: [
       { label: 'Data Models', icon: IconDatabase, path: '/admin/data-models' },
-      { label: 'User Management', icon: IconUsers, path: '/admin/models/user' },
+      { label: 'User Management', icon: IconUsers, path: '/admin/users' },
       { label: 'Trash', icon: IconTrash, path: '/admin/trash' },
     ],
   },

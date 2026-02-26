@@ -5,12 +5,16 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.api import deps
+from app.api.deps import UnauthorizedException
+from app.api.activity_logging import safe_log_activity
 from app.auth.sso.exceptions import *
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
 from app.core.utils.security import create_access_token
 from app.crud.user_preferences import user_preferences
+from app.models.activity_log import ActionType, EntityType
+from app.models.base import get_utc_now
 from app.services.sso_service import SSOService
 
 logger = get_logger(__name__, "sso")
@@ -30,6 +34,90 @@ class GitHubLinkRequest(BaseModel):
     temp_token: str
     username: str
     password: str
+
+
+def _check_user_active(sso_user, event_name: str, req: Request) -> None:
+    """Raise UnauthorizedException if the user account is inactive."""
+    if not sso_user.is_active:
+        log_security_event(
+            logger, event_name, req,
+            f"SSO login rejected for inactive user: {sso_user.username}",
+            username=sso_user.username,
+        )
+        raise UnauthorizedException(
+            message="This account has been deactivated. Please contact an administrator.",
+            request=req,
+        )
+
+
+def _complete_sso_login(
+    result: dict,
+    req: Request,
+    db: Session,
+    log_event_name: str,
+    activity_description: str,
+) -> dict:
+    """Shared post-authentication logic for all SSO login paths.
+
+    Logs the login activity, updates last_login_at, creates a JWT token,
+    and returns the standard SSO login response dict.
+    """
+    sso_user = result["user"]
+
+    safe_log_activity(
+        db=db,
+        action=ActionType.LOGIN,
+        entity_type=EntityType.USER,
+        entity_obj=sso_user,
+        user_id=sso_user.id,
+        description=activity_description,
+        request=req,
+    )
+
+    try:
+        sso_user.last_login_at = get_utc_now()
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    preferences = user_preferences.get_or_create_by_user_id(db, user_id=sso_user.id)
+    session_timeout_minutes = (
+        preferences.session_timeout_minutes
+        if preferences
+        else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+
+    access_token = create_access_token(
+        data={
+            "sub": sso_user.username,
+            "role": sso_user.role if sso_user.role in ["admin", "user", "guest"] else "user",
+            "user_id": sso_user.id,
+        },
+        expires_delta=timedelta(minutes=session_timeout_minutes),
+    )
+
+    log_endpoint_access(
+        logger, req, sso_user.id, log_event_name,
+        message=f"SSO JWT token created with {session_timeout_minutes} minute expiration",
+        username=sso_user.username,
+        session_timeout_minutes=session_timeout_minutes,
+        used_user_preference=bool(preferences and preferences.session_timeout_minutes),
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",  # nosec B105 - OAuth2 token type, not a password
+        "user": {
+            "id": sso_user.id,
+            "username": sso_user.username,
+            "email": sso_user.email,
+            "full_name": sso_user.full_name,
+            "role": sso_user.role,
+            "auth_method": sso_user.auth_method,
+        },
+        "is_new_user": result["is_new_user"],
+        "session_timeout_minutes": session_timeout_minutes,
+    }
 
 @router.get("/config")
 async def get_sso_config(request: Request):
@@ -93,56 +181,19 @@ async def sso_callback(
         if result.get("conflict"):
             # Return conflict data directly for frontend to handle
             return result
-        
+
         # Check if this is a GitHub manual linking response
         if result.get("github_manual_link"):
             # Return GitHub manual linking data for frontend to handle
             return result
 
-        # Get user's timeout preference BEFORE creating the token
-        preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
-        session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        _check_user_active(result["user"], "sso_login_rejected_inactive", req)
 
-        # Create JWT token for the user (matching regular auth format)
-        # Use user's session timeout preference for token expiration
-        access_token_expires = timedelta(minutes=session_timeout_minutes)
-        access_token = create_access_token(
-            data={
-                "sub": result["user"].username,
-                "role": (
-                    result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
-                ),
-                "user_id": result["user"].id,
-            },
-            expires_delta=access_token_expires,
+        return _complete_sso_login(
+            result, req, db,
+            log_event_name="sso_token_created",
+            activity_description=f"User logged in via SSO: {result['user'].username}",
         )
-
-        # Log token creation for SSO
-        log_endpoint_access(
-            logger,
-            req,
-            result["user"].id,
-            "sso_token_created",
-            message=f"SSO JWT token created with {session_timeout_minutes} minute expiration",
-            username=result["user"].username,
-            session_timeout_minutes=session_timeout_minutes,
-            used_user_preference=bool(preferences and preferences.session_timeout_minutes),
-        )
-
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": {
-                "id": result["user"].id,
-                "username": result["user"].username,
-                "email": result["user"].email,
-                "full_name": result["user"].full_name,
-                "role": result["user"].role,
-                "auth_method": result["user"].auth_method,
-            },
-            "is_new_user": result["is_new_user"],
-            "session_timeout_minutes": session_timeout_minutes
-        }
         
     except SSORegistrationBlockedError as e:
         log_security_event(
@@ -189,49 +240,13 @@ async def resolve_account_conflict(
     try:
         result = sso_service.resolve_account_conflict(request.temp_token, request.action, request.preference, db)
 
-        # Get user's timeout preference BEFORE creating the token
-        preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
-        session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        _check_user_active(result["user"], "sso_conflict_login_rejected_inactive", req)
 
-        # Create JWT token for the user
-        # Use user's session timeout preference for token expiration
-        access_token_expires = timedelta(minutes=session_timeout_minutes)
-        access_token = create_access_token(
-            data={
-                "sub": result["user"].username,
-                "role": (
-                    result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
-                ),
-                "user_id": result["user"].id,
-            },
-            expires_delta=access_token_expires,
+        return _complete_sso_login(
+            result, req, db,
+            log_event_name="sso_conflict_resolved_token_created",
+            activity_description=f"User logged in via SSO conflict resolution: {result['user'].username}",
         )
-
-        # Log token creation
-        log_endpoint_access(
-            logger,
-            req,
-            result["user"].id,
-            "sso_conflict_resolved_token_created",
-            message=f"SSO conflict resolved, JWT token created with {session_timeout_minutes} minute expiration",
-            username=result["user"].username,
-            session_timeout_minutes=session_timeout_minutes,
-        )
-
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": {
-                "id": result["user"].id,
-                "username": result["user"].username,
-                "email": result["user"].email,
-                "full_name": result["user"].full_name,
-                "role": result["user"].role,
-                "auth_method": result["user"].auth_method,
-            },
-            "is_new_user": result["is_new_user"],
-            "session_timeout_minutes": session_timeout_minutes
-        }
         
     except SSOAuthenticationError as e:
         log_security_event(
@@ -265,49 +280,13 @@ async def resolve_github_manual_link(
     try:
         result = sso_service.resolve_github_manual_link(request.temp_token, request.username, request.password, db)
 
-        # Get user's timeout preference BEFORE creating the token
-        preferences = user_preferences.get_or_create_by_user_id(db, user_id=result["user"].id)
-        session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        _check_user_active(result["user"], "github_link_login_rejected_inactive", req)
 
-        # Create JWT token for the user
-        # Use user's session timeout preference for token expiration
-        access_token_expires = timedelta(minutes=session_timeout_minutes)
-        access_token = create_access_token(
-            data={
-                "sub": result["user"].username,
-                "role": (
-                    result["user"].role if result["user"].role in ["admin", "user", "guest"] else "user"
-                ),
-                "user_id": result["user"].id,
-            },
-            expires_delta=access_token_expires,
+        return _complete_sso_login(
+            result, req, db,
+            log_event_name="github_manual_link_token_created",
+            activity_description=f"User logged in via GitHub linking: {result['user'].username}",
         )
-
-        # Log token creation
-        log_endpoint_access(
-            logger,
-            req,
-            result["user"].id,
-            "github_manual_link_token_created",
-            message=f"GitHub manual link resolved, JWT token created with {session_timeout_minutes} minute expiration",
-            username=result["user"].username,
-            session_timeout_minutes=session_timeout_minutes,
-        )
-        
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": {
-                "id": result["user"].id,
-                "username": result["user"].username,
-                "email": result["user"].email,
-                "full_name": result["user"].full_name,
-                "role": result["user"].role,
-                "auth_method": result["user"].auth_method,
-            },
-            "is_new_user": result["is_new_user"],
-            "session_timeout_minutes": session_timeout_minutes
-        }
         
     except SSOAuthenticationError as e:
         log_security_event(
@@ -338,10 +317,7 @@ async def test_sso_connection(request: Request):
     """Test SSO provider connection (for admin use)"""
     try:
         result = sso_service.test_connection()
-        if result["success"]:
-            return {"success": True, "message": result["message"]}
-        else:
-            return {"success": False, "message": result["message"]}
+        return {"success": result["success"], "message": result["message"]}
     except Exception as e:
         log_endpoint_error(
             logger, request, "SSO connection test failed", e
