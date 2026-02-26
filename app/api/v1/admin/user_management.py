@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 
+from app.api.activity_logging import log_create
 from app.core.database.database import get_db
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
@@ -25,6 +26,7 @@ from app.api.deps import (
     ConflictException,
 )
 from app.crud.user import user as user_crud
+from app.models.activity_log import EntityType
 from app.models.models import User, Patient
 from app.schemas.user import UserCreate
 from app.schemas.admin import (
@@ -167,6 +169,15 @@ def create_user_with_optional_link(
 
     with handle_database_errors(request=request):
         new_user = user_crud.create(db, obj_in=user_create)
+
+    # Log user creation in activity log (attributed to admin)
+    log_create(
+        db=db,
+        entity_type=EntityType.USER,
+        entity_obj=new_user,
+        user_id=admin_id,
+        request=request,
+    )
 
     if user_data.link_patient_id:
         # Transfer existing patient to new user

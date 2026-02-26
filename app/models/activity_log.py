@@ -163,6 +163,7 @@ class EntityType:
             cls.MEDICATION,
             cls.LAB_RESULT,
             cls.LAB_RESULT_FILE,
+            cls.LAB_TEST_COMPONENT,
             cls.ENTITY_FILE,
             cls.CONDITION,
             cls.TREATMENT,

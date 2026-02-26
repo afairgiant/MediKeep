@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.activity_logging import log_delete
+from app.api.activity_logging import log_delete, log_update
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
@@ -34,12 +34,20 @@ def get_current_user(current_user: UserModel = Depends(deps.get_current_user)) -
 @router.put("/me", response_model=User)
 def update_current_user(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     user_in: UserUpdate,
     current_user: UserModel = Depends(deps.get_current_user),
 ) -> Any:
     """Update current user profile."""
     updated_user = user.update(db, db_obj=current_user, obj_in=user_in)
+    log_update(
+        db=db,
+        entity_type=EntityType.USER,
+        entity_obj=updated_user,
+        user_id=current_user.id,
+        request=request,
+    )
     return updated_user
 
 

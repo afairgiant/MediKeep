@@ -27,6 +27,7 @@ from app.crud import (
     insurance,
     lab_result,
     lab_result_file,
+    lab_test_component,
     medication,
     patient,
     pharmacy,
@@ -42,7 +43,8 @@ from app.crud.injury_type import injury_type
 from app.crud.medical_equipment import medical_equipment
 from app.crud.symptom import symptom_parent, symptom_occurrence
 from app.crud.base import CRUDBase
-from app.models.activity_log import ActionType, ActivityLog
+from app.models.activity_log import ActionType, ActivityLog, EntityType
+from app.models.labs import LabTestComponent
 from app.models.models import (
     Allergy,
     Condition,
@@ -85,6 +87,7 @@ from app.schemas.injury_type import InjuryTypeCreate
 from app.schemas.insurance import InsuranceCreate
 from app.schemas.lab_result import LabResultCreate
 from app.schemas.lab_result_file import LabResultFileCreate
+from app.schemas.lab_test_component import LabTestComponentCreate
 from app.schemas.medical_equipment import MedicalEquipmentCreate
 from app.schemas.medication import MedicationCreate
 from app.schemas.patient import PatientCreate
@@ -965,6 +968,11 @@ MODEL_REGISTRY = {
         "crud": lab_result_file,
         "create_schema": LabResultFileCreate,
     },
+    "lab_test_component": {
+        "model": LabTestComponent,
+        "crud": lab_test_component,
+        "create_schema": LabTestComponentCreate,
+    },
     "vitals": {
         "model": Vitals,
         "crud": vitals,
@@ -1775,6 +1783,17 @@ def admin_reset_password(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
+
+        # Log admin password reset in activity log
+        safe_log_activity(
+            db=db,
+            action=ActionType.UPDATED,
+            entity_type=EntityType.USER,
+            entity_obj=target_user,
+            user_id=current_user.id,
+            description=f"Admin reset password for user: {target_user.username}",
+            request=request,
+        )
 
         logger.info(
             f"Admin {current_user.username} reset password for user {target_user.username}",
