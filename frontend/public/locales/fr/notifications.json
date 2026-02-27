@@ -3,6 +3,7 @@
   "description": "Configurez comment vous recevez des notifications pour les événements importants",
   "loading": "Chargement des paramètres de notification...",
   "error": "Echec du chargement des paramètres de notification",
+
   "channels": {
     "title": "Canaux de notification",
     "description": "Ajoutez et gérez vos canaux de notification",
@@ -143,6 +144,7 @@
       }
     }
   },
+
   "preferences": {
     "title": "Notifications d'événements",
     "description": "Choisissez quels événements déclenchent des notifications dans chaque canal",
@@ -161,6 +163,7 @@
       "other": "Autres événements"
     }
   },
+
   "events": {
     "test_notification": {
       "name": "Notification de test",
@@ -211,9 +214,10 @@
       "description": "Quand votre mot de passe est modifié"
     }
   },
+
   "history": {
     "title": "Historique des notifications",
-    "description": "Notifications récemment envoyées via vos canaux",
+    "description": "Notifications récentes envoyées dans vos canaux",
     "loading": "Chargement de l'historique...",
     "noHistory": "Aucune notification envoyée pour l'instant",
     "noHistoryHint": "Les notifications apparaîtront ici une fois envoyées",
@@ -223,7 +227,7 @@
     "status": {
       "sent": "Envoyée",
       "failed": "Echec",
-      "pending": "En attente"
+      "pending": "En cours"
     },
     "fields": {
       "event": "Evénement",
@@ -233,6 +237,7 @@
       "error": "Erreur"
     }
   },
+
   "validation": {
     "nameRequired": "Le nom du canal est requis",
     "nameTooLong": "Le nom ne peut dépasser 100 caractères",
@@ -255,6 +260,7 @@
     "urlInvalid": "Format d'URL invalide",
     "headersInvalid": "Les en-têtes doivent constituer du code JSON valide"
   },
+
   "toasts": {
     "auth": {
       "sessionExpired": "La session a expiré pour cause d'inactivité.",
@@ -268,7 +274,7 @@
       "accessDeniedRoles": "Accès refusé : un des rôles suivants est requis : {{roles}}",
       "loginRequired": "Veuillez vous connecter pour accéder à cette page",
       "userCreatedSuccess": "Compte utilisateur créé avec succès !",
-      "userCreatedWithLinkSuccess": "Compte utilisateur créé et lié avec succès à un patient existant !",
+      "userCreatedWithLinkSuccess": "Utilisateur créé et connecté à un patient existant avec succès !",
       "accountCreatedSuccess": "Compte créé avec succès ! Connexion en cours..."
     },
     "patient": {
@@ -278,7 +284,7 @@
       "deletedSwitched": "Suppression réussie : {{name}}. Changement vers {{fallbackName}}.",
       "deletedNoOthers": "Suppression réussie : {{name}}. Aucun autre patient disponible.",
       "deletedSuccess": "Suppression réussie : {{name}}.",
-      "deleteFailed": "Echec de la suppression : {{message}}",
+      "deleteFailed": "Echec de la supperssion : {{message}}",
       "removeOwnOnly": "Vous ne pouvez pas retirer l'accès aux patients que vous possédez.",
       "removedAccess": "Accès à {{name}} retiré",
       "removeAccessFailed": "Echec du retrait de l'accès : {{message}}",
@@ -304,7 +310,7 @@
       "deleteFailed": "Echec de la suppression des signes vitaux"
     },
     "settings": {
-      "sessionTimeoutUpdated": "Expiration de session mis à jour pour durer désormais {{minutes}} minutes. Votre session a été rafraîchie.",
+      "sessionTimeoutUpdated": "Expiration de session mise à jour pour durer désormais {{minutes}} minutes. Votre session a été rafraîchie.",
       "cleanupComplete": "Nettoyage complété : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
       "noOutOfSync": "Aucun fichier désynchronisé à nettoyer",
       "cleanupFailed": "Echec du nettoyage des fichiers. Veuillez réessayer ultérieurement."
@@ -343,7 +349,7 @@
       "templateNameRequired": "Un nom est requis pour le modèle",
       "templateSaved": "Modèle sauvegardé avec succès",
       "templateSaveFailed": "Echec de la sauvegarde du modèle",
-      "templateDeleted": "Modèle supprimé avec succès",
+      "templateDeleted": "Moddèle supprimé avec succès",
       "templateDeleteFailed": "Echec de la suppression du modèle",
       "templateLoaded": "Le modèle \"{{name}}\" a été chargé"
     },
