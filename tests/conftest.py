@@ -5,6 +5,7 @@ import asyncio
 import os
 import tempfile
 from datetime import date
+from pathlib import Path
 from typing import AsyncGenerator, Generator
 
 # CRITICAL: Set test environment variables BEFORE importing app modules
@@ -327,17 +328,22 @@ def setup_test_environment():
 
 
 # File handling fixtures
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def temp_upload_dir():
-    """Create a temporary directory for file uploads during testing."""
+    """Redirect all file uploads to a temporary directory during testing.
+
+    This is session-scoped and autouse to prevent ANY test from writing
+    files to the real uploads/ directory. Without this, tests that upload
+    files (e.g., lab result file tests) leave orphan placeholder files
+    that end up in production backups.
+    """
     with tempfile.TemporaryDirectory() as temp_dir:
-        original_upload_dir = getattr(settings, 'UPLOAD_DIR', None)
-        settings.UPLOAD_DIR = temp_dir
-        
+        original_upload_dir = settings.UPLOAD_DIR
+        settings.UPLOAD_DIR = Path(temp_dir)
+
         yield temp_dir
-        
-        if original_upload_dir:
-            settings.UPLOAD_DIR = original_upload_dir
+
+        settings.UPLOAD_DIR = original_upload_dir
 
 
 @pytest.fixture
