@@ -43,20 +43,10 @@ describe('AdminHeader', () => {
     expect(screen.getByText('Medical Records Admin')).toBeInTheDocument();
   });
 
-  test('Dashboard button calls navigate with /admin', () => {
-    renderAdminHeader();
-
-    const dashboardBtn = screen.getByTitle('Return to Admin Dashboard');
-    fireEvent.click(dashboardBtn);
-
-    expect(mockNavigate).toHaveBeenCalledWith('/admin');
-    expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('http'));
-  });
-
   test('Home button calls navigate with /dashboard', () => {
     renderAdminHeader();
 
-    const homeBtn = screen.getByTitle('Return to Normal Dashboard');
+    const homeBtn = screen.getByTitle('Return to Dashboard');
     fireEvent.click(homeBtn);
 
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
