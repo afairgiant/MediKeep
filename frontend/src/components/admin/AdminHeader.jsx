@@ -16,7 +16,6 @@ import {
   IconMenu2,
   IconSearch,
   IconArrowLeft,
-  IconHome,
   IconUser,
   IconMoon,
   IconSun,
@@ -93,29 +92,17 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
         </Box>
 
         <Group gap="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
-          <Tooltip label="Return to Admin Dashboard">
+          <Tooltip label="Return to Dashboard">
             <Button
               variant="default"
               size="compact-sm"
               leftSection={<IconArrowLeft size={14} />}
-              onClick={() => navigate('/admin')}
-              title="Return to Admin Dashboard"
+              onClick={() => navigate('/dashboard')}
+              title="Return to Dashboard"
               visibleFrom="md"
             >
               Dashboard
             </Button>
-          </Tooltip>
-
-          <Tooltip label="Return to Normal Dashboard">
-            <ActionIcon
-              variant="light"
-              color="blue"
-              size="lg"
-              onClick={() => navigate('/dashboard')}
-              title="Return to Normal Dashboard"
-            >
-              <IconHome size={18} />
-            </ActionIcon>
           </Tooltip>
 
           <Group
