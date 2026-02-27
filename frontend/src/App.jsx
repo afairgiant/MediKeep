@@ -78,6 +78,8 @@ import AuditLog from './pages/admin/AuditLog';
 import TrashManagement from './pages/admin/TrashManagement';
 import DataModels from './pages/admin/DataModels';
 import UserManagement from './pages/admin/UserManagement';
+import ToolsMaintenance from './pages/admin/ToolsMaintenance';
+import Analytics from './pages/admin/Analytics';
 import ReportBuilder from './pages/reports/ReportBuilder';
 import TagManagement from './pages/tools/TagManagement';
 import SearchResults from './pages/SearchResults';
@@ -508,6 +510,14 @@ function App() {
                           }
                         />
                         <Route
+                          path="/admin/analytics"
+                          element={
+                            <AdminRoute>
+                              <Analytics />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
                           path="/admin/data-models"
                           element={
                             <AdminRoute>
@@ -600,6 +610,14 @@ function App() {
                           element={
                             <AdminRoute>
                               <TrashManagement />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/tools"
+                          element={
+                            <AdminRoute>
+                              <ToolsMaintenance />
                             </AdminRoute>
                           }
                         />

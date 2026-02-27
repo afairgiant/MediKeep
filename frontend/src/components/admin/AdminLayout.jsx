@@ -1,14 +1,14 @@
-import logger from '../../services/logger';
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Center, Loader, Text, Alert, Button, Stack } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useAuth } from '../../contexts/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
+import AdminBreadcrumbs from './AdminBreadcrumbs';
 import { adminApiService } from '../../services/api/adminApi';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
+import logger from '../../services/logger';
 import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
@@ -147,6 +147,8 @@ const AdminLayout = ({ children }) => {
           onLogout={handleLogout}
           onToggleSidebar={toggleSidebar}
         />
+
+        <AdminBreadcrumbs />
 
         <main className="admin-content">{children}</main>
       </div>

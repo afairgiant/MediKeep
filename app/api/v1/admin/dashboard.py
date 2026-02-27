@@ -512,7 +512,7 @@ def get_system_metrics(
 
         # Real system performance metrics
         try:
-            # Memory usage
+            # System-wide memory (kept for status label)
             memory = psutil.virtual_memory()
             memory_percent = memory.percent
             memory_status = (
@@ -521,17 +521,27 @@ def get_system_metrics(
                 else "normal" if memory_percent > 70 else "low"
             )
 
-            # CPU usage
+            # Application process metrics (what this app actually uses)
+            process = psutil.Process(os.getpid())
+            proc_mem = process.memory_info()
+            memory_used_mb = round(proc_mem.rss / (1024 * 1024))
+            memory_total_mb = round(memory.total / (1024 * 1024))
+
+            # App process CPU (percent of one core; call once to prime, then read)
+            process.cpu_percent(interval=None)  # prime the measurement
+            app_cpu_percent = round(process.cpu_percent(interval=0.1), 1)
+
+            # System-wide CPU
             cpu_percent = psutil.cpu_percent(interval=0.1)
             cpu_status = (
                 "high" if cpu_percent > 80 else "normal" if cpu_percent > 50 else "low"
             )
+            cpu_count = psutil.cpu_count() or 1
 
             # System load average (for Unix-like systems)
             try:
                 load_avg = os.getloadavg()[0]  # 1-minute load average
-                cpu_count = psutil.cpu_count()
-                if cpu_count and cpu_count > 0:
+                if cpu_count > 0:
                     load_percent = (load_avg / cpu_count) * 100
                     system_load = (
                         "high"
@@ -547,7 +557,13 @@ def get_system_metrics(
         except ImportError:
             # Fallback if psutil is not available
             memory_status = "normal"
+            memory_percent = None
+            memory_used_mb = None
+            memory_total_mb = None
             cpu_status = "low"
+            cpu_percent = None
+            app_cpu_percent = None
+            cpu_count = None
             system_load = "normal"
 
         # Database performance metrics
@@ -574,7 +590,13 @@ def get_system_metrics(
             },
             "application": {
                 "memory_usage": memory_status,
+                "memory_percent": memory_percent,
+                "memory_used_mb": memory_used_mb,
+                "memory_total_mb": memory_total_mb,
                 "cpu_usage": cpu_status,
+                "cpu_percent": cpu_percent,
+                "app_cpu_percent": app_cpu_percent,
+                "cpu_count": cpu_count,
                 "response_time": "< 100ms",
                 "system_load": system_load,
             },
@@ -749,9 +771,21 @@ def get_storage_health(
                 }
                 overall_healthy = False
 
+        # Calculate total app storage across all tracked directories
+        app_total_mb = sum(
+            d.get("size_mb", 0) for d in directory_status.values()
+        )
+        app_total_files = sum(
+            d.get("file_count", 0) for d in directory_status.values()
+        )
+
         return {
             "status": "healthy" if overall_healthy else "unhealthy",
             "directories": directory_status,
+            "app_storage": {
+                "total_mb": round(app_total_mb, 2),
+                "total_files": app_total_files,
+            },
             "disk_space": {
                 "total_gb": round(total / (1024**3), 2),
                 "used_gb": round(used / (1024**3), 2),
@@ -773,60 +807,74 @@ def get_storage_health(
 def get_analytics_data(
     request: Request,
     days: int = 7,
+    start_date: str = None,
+    end_date: str = None,
+    compare: bool = False,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
-    """Get analytics data for dashboard charts"""
+    """Get analytics data for dashboard charts.
+
+    Accepts either explicit start_date/end_date (ISO YYYY-MM-DD) or a
+    ``days`` shortcut (default 7).  When ``compare=True`` the response
+    includes a ``comparison`` object with the previous period totals.
+    """
+    from datetime import date as date_type
     from datetime import datetime, timedelta
 
     from sqlalchemy import Date, cast
 
     try:
-        # Get current date and calculate date range
-        end_date = datetime.utcnow().date()
-        start_date = end_date - timedelta(days=days - 1)
+        # Determine date range
+        if start_date and end_date:
+            try:
+                parsed_start = date_type.fromisoformat(start_date)
+                parsed_end = date_type.fromisoformat(end_date)
+            except ValueError:
+                parsed_start = datetime.utcnow().date() - timedelta(days=days - 1)
+                parsed_end = datetime.utcnow().date()
+        else:
+            parsed_end = datetime.utcnow().date()
+            parsed_start = parsed_end - timedelta(days=days - 1)
+
+        range_days = (parsed_end - parsed_start).days + 1
 
         # Generate list of dates for the range
-        date_range = []
-        current_date = start_date
-        while current_date <= end_date:
-            date_range.append(current_date)
+        date_range_list = []
+        current_date = parsed_start
+        while current_date <= parsed_end:
+            date_range_list.append(current_date)
             current_date += timedelta(days=1)
 
         # Query activity logs grouped by date
         daily_activity = {}
         try:
-            # Get activity counts by date
             activity_counts = (
                 db.query(
                     cast(ActivityLog.timestamp, Date).label("date"),
                     func.count(ActivityLog.id).label("count"),
                 )
-                .filter(ActivityLog.timestamp >= start_date)
-                .filter(ActivityLog.timestamp <= end_date + timedelta(days=1))
+                .filter(ActivityLog.timestamp >= parsed_start)
+                .filter(ActivityLog.timestamp <= parsed_end + timedelta(days=1))
                 .group_by(cast(ActivityLog.timestamp, Date))
                 .all()
             )
 
-            # Convert to dictionary
-            for date, count in activity_counts:
-                daily_activity[date] = count
+            for dt, count in activity_counts:
+                daily_activity[dt] = count
 
         except Exception as e:
             logger.error(f"Error querying activity logs: {str(e)}")
 
-        # Create week labels and data arrays
+        # Use "%b %d" labels for ranges > 7 days, "%a" for weekly
+        date_fmt = "%b %d" if range_days > 7 else "%a"
+
         week_labels = []
         activity_data = []
 
-        for date in date_range:
-            # Format day labels (Mon, Tue, etc.)
-            day_name = date.strftime("%a")
-            week_labels.append(day_name)
-
-            # Get activity count for this date (default to 0 if no activity)
-            count = daily_activity.get(date, 0)
-            activity_data.append(count)
+        for dt in date_range_list:
+            week_labels.append(dt.strftime(date_fmt))
+            activity_data.append(daily_activity.get(dt, 0))
 
         # Get activity breakdown by model type
         model_activity = {}
@@ -835,7 +883,8 @@ def get_analytics_data(
                 db.query(
                     ActivityLog.entity_type, func.count(ActivityLog.id).label("count")
                 )
-                .filter(ActivityLog.timestamp >= start_date)
+                .filter(ActivityLog.timestamp >= parsed_start)
+                .filter(ActivityLog.timestamp <= parsed_end + timedelta(days=1))
                 .group_by(ActivityLog.entity_type)
                 .all()
             )
@@ -860,7 +909,6 @@ def get_analytics_data(
                 .all()
             )
 
-            # Create 24-hour array
             hourly_data = [0] * 24
             for hour, count in hourly_counts:
                 if hour is not None:
@@ -872,11 +920,13 @@ def get_analytics_data(
             logger.error(f"Error querying hourly activity: {str(e)}")
             hourly_activity = [0] * 24
 
-        return {
+        current_total = sum(activity_data)
+
+        result = {
             "weekly_activity": {
                 "labels": week_labels,
                 "data": activity_data,
-                "total": sum(activity_data),
+                "total": current_total,
             },
             "model_activity": model_activity,
             "hourly_activity": {
@@ -884,15 +934,50 @@ def get_analytics_data(
                 "data": hourly_activity,
             },
             "date_range": {
-                "start": start_date.isoformat(),
-                "end": end_date.isoformat(),
-                "days": days,
+                "start": parsed_start.isoformat(),
+                "end": parsed_end.isoformat(),
+                "days": range_days,
             },
         }
 
+        # Comparison with previous period
+        if compare:
+            prev_end = parsed_start - timedelta(days=1)
+            prev_start = prev_end - timedelta(days=range_days - 1)
+
+            previous_total = 0
+            try:
+                prev_count = (
+                    db.query(func.count(ActivityLog.id))
+                    .filter(ActivityLog.timestamp >= prev_start)
+                    .filter(ActivityLog.timestamp <= prev_end + timedelta(days=1))
+                    .scalar()
+                ) or 0
+                previous_total = prev_count
+            except Exception as e:
+                logger.error(f"Error querying comparison period: {str(e)}")
+
+            if previous_total > 0:
+                change_percent = round(
+                    ((current_total - previous_total) / previous_total) * 100, 1
+                )
+            else:
+                change_percent = 100.0 if current_total > 0 else 0.0
+
+            result["comparison"] = {
+                "previous_total": previous_total,
+                "current_total": current_total,
+                "change_percent": change_percent,
+                "previous_period": {
+                    "start": prev_start.isoformat(),
+                    "end": prev_end.isoformat(),
+                },
+            }
+
+        return result
+
     except Exception as e:
         logger.error(f"Error generating analytics data: {str(e)}")
-        # Return fallback data if there's an error
         return {
             "weekly_activity": {
                 "labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],

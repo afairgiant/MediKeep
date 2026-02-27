@@ -25,11 +25,7 @@ import {
   IconSettings,
   IconLock,
   IconBolt,
-  IconTestPipe,
   IconRefresh,
-  IconCheck,
-  IconX,
-  IconInfoCircle,
   IconCalendarEvent,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -149,60 +145,6 @@ const SystemHealth = () => {
   useEffect(() => {
     loadScheduleSettings();
   }, [loadScheduleSettings]);
-
-  // Test Library State
-  const [testLibraryInfo, setTestLibraryInfo] = useState(null);
-  const [testLibraryLoading, setTestLibraryLoading] = useState(false);
-  const [testLibrarySyncing, setTestLibrarySyncing] = useState(false);
-  const [testLibraryError, setTestLibraryError] = useState(null);
-  const [syncResult, setSyncResult] = useState(null);
-
-  const loadTestLibraryInfo = useCallback(async () => {
-    setTestLibraryLoading(true);
-    setTestLibraryError(null);
-    try {
-      const info = await adminApiService.getTestLibraryInfo();
-      setTestLibraryInfo(info);
-    } catch (err) {
-      setTestLibraryError(err.message || 'Failed to load test library info');
-    } finally {
-      setTestLibraryLoading(false);
-    }
-  }, []);
-
-  const handleReloadTestLibrary = async () => {
-    setTestLibrarySyncing(true);
-    setTestLibraryError(null);
-    setSyncResult(null);
-    try {
-      const result = await adminApiService.reloadTestLibrary();
-      setSyncResult({ type: 'reload', ...result });
-      await loadTestLibraryInfo();
-    } catch (err) {
-      setTestLibraryError(err.message || 'Failed to reload test library');
-    } finally {
-      setTestLibrarySyncing(false);
-    }
-  };
-
-  const handleSyncTestLibrary = async (forceAll = false) => {
-    setTestLibrarySyncing(true);
-    setTestLibraryError(null);
-    setSyncResult(null);
-    try {
-      const result = await adminApiService.syncTestLibrary(forceAll);
-      setSyncResult({ type: 'sync', ...result });
-      await loadTestLibraryInfo();
-    } catch (err) {
-      setTestLibraryError(err.message || 'Failed to sync test library');
-    } finally {
-      setTestLibrarySyncing(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTestLibraryInfo();
-  }, [loadTestLibraryInfo]);
 
   const loading =
     healthLoading ||
@@ -466,13 +408,29 @@ const SystemHealth = () => {
               </Alert>
             ) : (
               <Stack>
+                {/* App Storage Summary */}
+                {storageHealth.app_storage && (
+                  <div>
+                    <Group justify="space-between" mb="xs">
+                      <Text fw={500}>App Storage</Text>
+                      <Text size="sm" c="dimmed">
+                        {storageHealth.app_storage.total_mb >= 1024
+                          ? `${(storageHealth.app_storage.total_mb / 1024).toFixed(2)} GB`
+                          : `${storageHealth.app_storage.total_mb.toFixed(2)} MB`}
+                        {' '}across {storageHealth.app_storage.total_files} files
+                      </Text>
+                    </Group>
+                  </div>
+                )}
+
+                {/* Disk Usage */}
                 {storageHealth.disk_space && (
                   <div>
                     <Group justify="space-between" mb="xs">
                       <Text fw={500}>Disk Usage</Text>
                       <Text size="sm" c="dimmed">
                         {storageHealth.disk_space.usage_percent}% (
-                        {storageHealth.disk_space.free_gb}GB free)
+                        {storageHealth.disk_space.free_gb} GB free of {storageHealth.disk_space.total_gb} GB)
                       </Text>
                     </Group>
                     <Progress
@@ -629,155 +587,84 @@ const SystemHealth = () => {
                 Application Performance
               </Text>
             </Group>
-            <Stack gap={0}>
+            <Stack gap="md">
+              {/* App Memory Usage (process RSS) */}
+              {systemMetrics.application.memory_used_mb != null ? (
+                <div>
+                  <Group justify="space-between" mb="xs">
+                    <Text fw={500}>App Memory (RSS)</Text>
+                    <Text size="sm" c="dimmed">
+                      {systemMetrics.application.memory_used_mb} MB used (system: {systemMetrics.application.memory_percent}% of {systemMetrics.application.memory_total_mb} MB)
+                    </Text>
+                  </Group>
+                  <Progress
+                    value={systemMetrics.application.memory_percent}
+                    color={
+                      systemMetrics.application.memory_percent > 85
+                        ? 'red'
+                        : systemMetrics.application.memory_percent > 70
+                          ? 'yellow'
+                          : 'green'
+                    }
+                    size="lg"
+                    radius="md"
+                  />
+                </div>
+              ) : (
+                <HealthItem
+                  label="Memory Usage"
+                  value={systemMetrics.application.memory_usage}
+                  status={USAGE_STATUS[systemMetrics.application.memory_usage] || 'error'}
+                />
+              )}
+
+              {/* CPU Usage */}
+              {systemMetrics.application.cpu_percent != null ? (
+                <div>
+                  <Group justify="space-between" mb="xs">
+                    <Text fw={500}>CPU Usage</Text>
+                    <Text size="sm" c="dimmed">
+                      App: {systemMetrics.application.app_cpu_percent ?? '—'}%
+                      {systemMetrics.application.cpu_count ? ` of ${systemMetrics.application.cpu_count} cores` : ''}
+                      {' '}(system: {systemMetrics.application.cpu_percent}%)
+                    </Text>
+                  </Group>
+                  <Progress
+                    value={systemMetrics.application.cpu_percent}
+                    color={
+                      systemMetrics.application.cpu_percent > 80
+                        ? 'red'
+                        : systemMetrics.application.cpu_percent > 50
+                          ? 'yellow'
+                          : 'green'
+                    }
+                    size="lg"
+                    radius="md"
+                  />
+                </div>
+              ) : (
+                <HealthItem
+                  label="CPU Usage"
+                  value={systemMetrics.application.cpu_usage}
+                  status={USAGE_STATUS[systemMetrics.application.cpu_usage] || 'error'}
+                />
+              )}
+
+              {/* Response Time & System Load */}
               <HealthItem
-                label="Memory Usage"
-                value={systemMetrics.application.memory_usage}
-                status={USAGE_STATUS[systemMetrics.application.memory_usage] || 'error'}
+                label="Response Time"
+                value={systemMetrics.application.response_time}
+                status="healthy"
               />
               <HealthItem
-                label="CPU Usage"
-                value={systemMetrics.application.cpu_usage}
-                status={USAGE_STATUS[systemMetrics.application.cpu_usage] || 'error'}
+                label="System Load"
+                value={systemMetrics.application.system_load}
+                status={USAGE_STATUS[systemMetrics.application.system_load] || 'error'}
               />
             </Stack>
           </Card>
         )}
 
-        {/* Test Library Maintenance */}
-        <Card shadow="sm" p="lg" mb="lg" withBorder>
-          <Group mb="md">
-            <ThemeIcon size="lg" variant="light" color="grape">
-              <IconTestPipe size={20} />
-            </ThemeIcon>
-            <Text fw={600} size="lg">
-              Test Library Maintenance
-            </Text>
-            <Badge
-              variant="light"
-              color={testLibraryError ? 'red' : 'green'}
-            >
-              {testLibraryError ? 'Error' : 'Operational'}
-            </Badge>
-          </Group>
-
-          {testLibraryError && (
-            <Alert color="red" variant="light" mb="md">
-              {testLibraryError}
-            </Alert>
-          )}
-
-          {testLibraryLoading ? (
-            <Center py="lg">
-              <Loader size="sm" />
-            </Center>
-          ) : (
-            <>
-              {testLibraryInfo && (
-                <Stack gap={0} mb="md">
-                  <HealthItem
-                    label="Library Version"
-                    value={testLibraryInfo.version}
-                    status="info"
-                  />
-                  <HealthItem
-                    label="Total Tests"
-                    value={testLibraryInfo.test_count}
-                    status="info"
-                  />
-                  <HealthItem
-                    label="Categories"
-                    value={
-                      testLibraryInfo.categories
-                        ? Object.entries(testLibraryInfo.categories)
-                            .map(([cat, count]) => `${cat}: ${count}`)
-                            .join(', ')
-                        : ''
-                    }
-                  />
-                </Stack>
-              )}
-
-              {syncResult && (
-                <Alert
-                  color={syncResult.success ? 'green' : 'red'}
-                  variant="light"
-                  icon={syncResult.success ? <IconCheck size={16} /> : <IconX size={16} />}
-                  mb="md"
-                  withCloseButton
-                  onClose={() => setSyncResult(null)}
-                  title={
-                    syncResult.type === 'reload'
-                      ? 'Library Reloaded'
-                      : 'Sync Complete'
-                  }
-                >
-                  {syncResult.type === 'sync' && (
-                    <Group gap="lg" mb="xs">
-                      <Text size="sm">
-                        Processed: {syncResult.components_processed}
-                      </Text>
-                      <Text size="sm">
-                        Names Updated: {syncResult.canonical_names_updated}
-                      </Text>
-                      <Text size="sm">
-                        Categories Updated: {syncResult.categories_updated}
-                      </Text>
-                    </Group>
-                  )}
-                  {syncResult.message && (
-                    <Text size="sm">{syncResult.message}</Text>
-                  )}
-                </Alert>
-              )}
-
-              <Group mt="md">
-                <Button
-                  variant="default"
-                  onClick={handleReloadTestLibrary}
-                  loading={testLibrarySyncing}
-                >
-                  Reload Library
-                </Button>
-                <Button
-                  variant="light"
-                  onClick={() => handleSyncTestLibrary(false)}
-                  loading={testLibrarySyncing}
-                >
-                  Sync Unmatched
-                </Button>
-                <Button
-                  variant="light"
-                  color="yellow"
-                  onClick={() => handleSyncTestLibrary(true)}
-                  loading={testLibrarySyncing}
-                >
-                  Force Sync All
-                </Button>
-              </Group>
-
-              <Alert
-                variant="light"
-                color="gray"
-                mt="md"
-                icon={<IconInfoCircle size={16} />}
-              >
-                <Text size="sm" mb={4}>
-                  <Text span fw={600}>Reload Library:</Text> Refreshes the test
-                  library from disk (use after updating test_library.json)
-                </Text>
-                <Text size="sm" mb={4}>
-                  <Text span fw={600}>Sync Unmatched:</Text> Updates components
-                  that don&apos;t have a canonical name yet
-                </Text>
-                <Text size="sm">
-                  <Text span fw={600}>Force Sync All:</Text> Re-matches all
-                  components (categories and canonical names)
-                </Text>
-              </Alert>
-            </>
-          )}
-        </Card>
       </div>
     </AdminLayout>
   );
