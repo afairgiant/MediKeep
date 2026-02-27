@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Button,
   Group,
@@ -37,6 +38,7 @@ import logger from '../../services/logger';
 const ModelView = () => {
   const { modelName, recordId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
   const { formatDateTime } = useDateFormat();
 
   const [record, setRecord] = useState(null);
@@ -100,15 +102,15 @@ const ModelView = () => {
       setDeleting(true);
       await adminApiService.deleteModelRecord(modelName, recordId);
       notifications.show({
-        title: 'Record deleted',
-        message: `Successfully deleted ${modelName} record #${recordId}`,
+        title: t('models.recordDeleted', 'Record deleted'),
+        message: t('models.recordDeletedMessage', { modelName, id: recordId, defaultValue: `Successfully deleted ${modelName} record #${recordId}` }),
         color: 'green',
       });
       navigate(`/admin/models/${modelName}`);
     } catch (err) {
       notifications.show({
-        title: 'Delete failed',
-        message: err.message || 'Failed to delete record',
+        title: t('models.deleteFailed', 'Delete failed'),
+        message: err.message || t('models.failedToDelete', 'Failed to delete record'),
         color: 'red',
       });
     } finally {
@@ -140,7 +142,7 @@ const ModelView = () => {
               {error}
             </Alert>
             <Button variant="default" leftSection={<IconArrowLeft size={16} />} onClick={handleBack}>
-              Back to {modelName}
+              {t('models.backToModel', { modelName, defaultValue: `Back to ${modelName}` })}
             </Button>
           </Stack>
         </Center>
@@ -160,12 +162,12 @@ const ModelView = () => {
             style={{ alignSelf: 'flex-start' }}
             size="sm"
           >
-            Back
+            {t('common:buttons.back', 'Back')}
           </Button>
           <Group justify="space-between" align="flex-end">
             <div>
-              <Title order={2}>View {metadata?.display_name || modelName}</Title>
-              <Text c="dimmed" size="sm">Record ID: {recordId}</Text>
+              <Title order={2}>{t('models.viewRecord', { modelName: metadata?.display_name || modelName, defaultValue: `View ${metadata?.display_name || modelName}` })}</Title>
+              <Text c="dimmed" size="sm">{t('models.recordId', { id: recordId, defaultValue: `Record ID: ${recordId}` })}</Text>
             </div>
             <Group gap="sm">
               <Button
@@ -173,7 +175,7 @@ const ModelView = () => {
                 leftSection={<IconEdit size={16} />}
                 onClick={handleEdit}
               >
-                Edit
+                {t('common:buttons.edit', 'Edit')}
               </Button>
               <Button
                 color="red"
@@ -181,7 +183,7 @@ const ModelView = () => {
                 leftSection={<IconTrash size={16} />}
                 onClick={openDeleteModal}
               >
-                Delete
+                {t('common:buttons.delete', 'Delete')}
               </Button>
             </Group>
           </Group>
@@ -217,9 +219,9 @@ const ModelView = () => {
                   {formatFieldValue(record[field.name], field.type)}
                 </Paper>
                 <Text size="xs" c="dimmed" mt={4} fs="italic">
-                  Type: {field.type}
-                  {field.max_length && ` | Max Length: ${field.max_length}`}
-                  {field.foreign_key && ` | References: ${field.foreign_key}`}
+                  {t('models.fieldType', { type: field.type, defaultValue: `Type: ${field.type}` })}
+                  {field.max_length && ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
+                  {field.foreign_key && ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
                 </Text>
               </div>
             ))}
@@ -230,7 +232,7 @@ const ModelView = () => {
         <Paper withBorder p="md" radius="md">
           <details>
             <summary style={{ cursor: 'pointer', fontWeight: 500, marginBottom: 8 }}>
-              Raw Data (JSON)
+              {t('models.rawDataJson', 'Raw Data (JSON)')}
             </summary>
             <Code block>{JSON.stringify(record, null, 2)}</Code>
           </details>
@@ -243,7 +245,7 @@ const ModelView = () => {
           title={
             <Group gap="xs">
               <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" />
-              <Text fw={600}>Confirm Deletion</Text>
+              <Text fw={600}>{t('models.confirmDeletion', 'Confirm Deletion')}</Text>
             </Group>
           }
           centered
@@ -252,7 +254,7 @@ const ModelView = () => {
             {requiresEnhancedDeletionWarning(modelName) ? (
               <Alert color="red" variant="light" icon={<IconAlertTriangle size={16} />}>
                 <Text size="sm" fw={500} mb="xs">
-                  This will permanently delete this {modelName} record and all associated data:
+                  {t('models.deleteWarning', { modelName, defaultValue: `This will permanently delete this ${modelName} record and all associated data:` })}
                 </Text>
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
                   {getCascadeTypes(modelName).map(type => (
@@ -266,9 +268,9 @@ const ModelView = () => {
               </Text>
             )}
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={closeDeleteModal}>Cancel</Button>
+              <Button variant="default" onClick={closeDeleteModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
               <Button color="red" onClick={handleConfirmDelete} loading={deleting}>
-                Delete
+                {t('common:buttons.delete', 'Delete')}
               </Button>
             </Group>
           </Stack>

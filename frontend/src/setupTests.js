@@ -6,10 +6,33 @@ import '@testing-library/jest-dom';
 import { expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
 import { configure } from '@testing-library/react';
 
+// i18next mock t() — returns the fallback/default value when provided, otherwise the key.
+// Handles: t('key'), t('key', 'Default'), t('key', { defaultValue: 'Default' }),
+// t('key', 'Default {{var}}', { var: 'value' })
+const mockT = (key, defaultValueOrOptions, options) => {
+  let text;
+  let vars = {};
+
+  if (typeof defaultValueOrOptions === 'string') {
+    text = defaultValueOrOptions;
+    if (typeof options === 'object') vars = options;
+  } else if (typeof defaultValueOrOptions === 'object' && defaultValueOrOptions !== null) {
+    text = defaultValueOrOptions.defaultValue || key;
+    vars = defaultValueOrOptions;
+  } else {
+    text = key;
+  }
+
+  // Perform basic {{variable}} interpolation
+  return text.replace(/\{\{(\w+)\}\}/g, (match, name) =>
+    vars[name] !== undefined ? String(vars[name]) : match
+  );
+};
+
 // Mock i18next to prevent HTTP requests in tests
 vi.mock('./i18n/config', () => ({
   default: {
-    t: (key) => key,
+    t: mockT,
     use: () => ({ init: () => Promise.resolve() }),
     init: () => Promise.resolve(),
     changeLanguage: () => Promise.resolve(),
@@ -21,7 +44,7 @@ vi.mock('./i18n/config', () => ({
 // Mock react-i18next hooks
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key) => key,
+    t: mockT,
     i18n: {
       language: 'en',
       changeLanguage: () => Promise.resolve(),

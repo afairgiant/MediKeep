@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   Group,
@@ -48,6 +49,7 @@ const USAGE_STATUS = {
 };
 
 const SystemHealth = () => {
+  const { t } = useTranslation('admin');
   const { formatDate, formatDateTime } = useDateFormat();
   const [lastRefresh, setLastRefresh] = useState(null);
 
@@ -179,7 +181,7 @@ const SystemHealth = () => {
         <Center h={400}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text c="dimmed">Loading system health...</Text>
+            <Text c="dimmed">{t('health.loading', 'Loading system health...')}</Text>
           </Stack>
         </Center>
       </AdminLayout>
@@ -198,17 +200,17 @@ const SystemHealth = () => {
                   <IconHeartRateMonitor size={24} />
                 </ThemeIcon>
                 <Text size="xl" fw={700}>
-                  System Health Monitor
+                  {t('health.title', 'System Health Monitor')}
                 </Text>
               </Group>
               <Text c="dimmed" size="md">
-                Real-time system status and performance metrics
+                {t('health.subtitle', 'Real-time system status and performance metrics')}
               </Text>
             </div>
             <Group>
               {lastRefresh && (
                 <Text size="sm" c="dimmed">
-                  Last updated: {formatDateTime(lastRefresh.toISOString())}
+                  {t('health.lastUpdated', 'Last updated: {{time}}', { time: formatDateTime(lastRefresh.toISOString()) })}
                 </Text>
               )}
               <Button
@@ -217,7 +219,7 @@ const SystemHealth = () => {
                 loading={loading}
                 variant="light"
               >
-                Refresh All
+                {t('dashboard.refreshAll', 'Refresh All')}
               </Button>
             </Group>
           </Group>
@@ -230,7 +232,7 @@ const SystemHealth = () => {
               <IconShieldCheck size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              Overall System Status
+              {t('health.overallStatus', 'Overall System Status')}
             </Text>
             <Badge
               variant="light"
@@ -246,7 +248,7 @@ const SystemHealth = () => {
                   <IconChartBar size={16} />
                 </ThemeIcon>
                 <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
-                  Total Records
+                  {t('health.totalRecords', 'Total Records')}
                 </Text>
               </Group>
               <Text size="xl" fw={700}>
@@ -259,7 +261,7 @@ const SystemHealth = () => {
                   <IconClock size={16} />
                 </ThemeIcon>
                 <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
-                  Application Uptime
+                  {t('health.applicationUptime', 'Application Uptime')}
                 </Text>
               </Group>
               <Text size="xl" fw={700}>
@@ -272,7 +274,7 @@ const SystemHealth = () => {
                   <IconDeviceFloppy size={16} />
                 </ThemeIcon>
                 <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
-                  Last Backup
+                  {t('health.lastBackup', 'Last Backup')}
                 </Text>
               </Group>
               {healthData?.last_backup ? (
@@ -281,11 +283,11 @@ const SystemHealth = () => {
                 </Text>
               ) : scheduleSettings?.last_run_status === 'failed' ? (
                 <Text size="xl" fw={700} c="red">
-                  Last run failed
+                  {t('health.lastRunFailed', 'Last run failed')}
                 </Text>
               ) : (
                 <Text size="xl" fw={700}>
-                  None yet
+                  {t('health.noneYet', 'None yet')}
                 </Text>
               )}
               {scheduleSettings?.last_run_status === 'failed' && scheduleSettings.last_run_at && (
@@ -298,24 +300,25 @@ const SystemHealth = () => {
                 <Group gap={4} mt={4}>
                   <IconCalendarEvent size={14} color="var(--mantine-color-green-6)" />
                   <Text size="xs" c="green">
-                    Scheduled: {
-                      scheduleSettings.preset === 'every_6_hours' ? 'Every 6 hours' :
-                      scheduleSettings.preset === 'every_12_hours' ? 'Every 12 hours' :
-                      scheduleSettings.preset === 'daily' ? 'Daily' :
-                      scheduleSettings.preset === 'weekly' ? 'Weekly' :
-                      scheduleSettings.preset
-                    }
+                    {t('health.scheduled', 'Scheduled: {{schedule}}', {
+                      schedule:
+                        scheduleSettings.preset === 'every_6_hours' ? t('health.schedulePresets.every_6_hours', 'Every 6 hours') :
+                        scheduleSettings.preset === 'every_12_hours' ? t('health.schedulePresets.every_12_hours', 'Every 12 hours') :
+                        scheduleSettings.preset === 'daily' ? t('health.schedulePresets.daily', 'Daily') :
+                        scheduleSettings.preset === 'weekly' ? t('health.schedulePresets.weekly', 'Weekly') :
+                        scheduleSettings.preset
+                    })}
                   </Text>
                 </Group>
               )}
               {scheduleSettings && !scheduleSettings.enabled && !healthData?.last_backup && (
                 <Text size="xs" c="dimmed" mt={4}>
-                  No schedule configured
+                  {t('health.noScheduleConfigured', 'No schedule configured')}
                 </Text>
               )}
               {scheduleSettings?.next_run_at && scheduleSettings.enabled && (
                 <Text size="xs" c="dimmed" mt={2}>
-                  Next: {formatDateTime(scheduleSettings.next_run_at)}
+                  {t('health.next', 'Next: {{time}}', { time: formatDateTime(scheduleSettings.next_run_at) })}
                 </Text>
               )}
             </Paper>
@@ -329,7 +332,7 @@ const SystemHealth = () => {
               <IconDatabase size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              Database Health
+              {t('health.database.title', 'Database Health')}
             </Text>
             <Badge
               variant="light"
@@ -345,34 +348,34 @@ const SystemHealth = () => {
           ) : (
             <Stack gap={0}>
               <HealthItem
-                label="Connection Status"
-                value={healthData?.database_status || 'Unknown'}
+                label={t('health.database.connectionStatus', 'Connection Status')}
+                value={healthData?.database_status || t('shared.unknown', 'Unknown')}
                 status={healthData?.database_status}
               />
               <HealthItem
-                label="Connection Test"
-                value={healthData?.database_connection_test ? 'Passed' : 'Failed'}
+                label={t('health.database.connectionTest', 'Connection Test')}
+                value={healthData?.database_connection_test ? t('health.database.passed', 'Passed') : t('health.database.failed', 'Failed')}
                 status={healthData?.database_connection_test ? 'healthy' : 'error'}
               />
               <HealthItem
-                label="Total Records"
+                label={t('health.totalRecords', 'Total Records')}
                 value={healthData?.total_records?.toLocaleString() || 0}
               />
               {healthData?.disk_usage && (
-                <HealthItem label="Database Size" value={healthData.disk_usage} />
+                <HealthItem label={t('health.database.databaseSize', 'Database Size')} value={healthData.disk_usage} />
               )}
               {detailedStats && (
                 <>
                   <HealthItem
-                    label="Active Users"
+                    label={t('health.database.activeUsers', 'Active Users')}
                     value={detailedStats.total_users}
                   />
                   <HealthItem
-                    label="Patient Records"
+                    label={t('health.database.patientRecords', 'Patient Records')}
                     value={detailedStats.total_patients}
                   />
                   <HealthItem
-                    label="Medical Records"
+                    label={t('health.database.medicalRecords', 'Medical Records')}
                     value={
                       (detailedStats.total_medications || 0) +
                       (detailedStats.total_lab_results || 0) +
@@ -393,7 +396,7 @@ const SystemHealth = () => {
                 <IconServer size={20} />
               </ThemeIcon>
               <Text fw={600} size="lg">
-                Storage Health
+                {t('health.storage.title', 'Storage Health')}
               </Text>
               <Badge
                 variant="light"
@@ -412,12 +415,12 @@ const SystemHealth = () => {
                 {storageHealth.app_storage && (
                   <div>
                     <Group justify="space-between" mb="xs">
-                      <Text fw={500}>App Storage</Text>
+                      <Text fw={500}>{t('health.storage.appStorage', 'App Storage')}</Text>
                       <Text size="sm" c="dimmed">
                         {storageHealth.app_storage.total_mb >= 1024
                           ? `${(storageHealth.app_storage.total_mb / 1024).toFixed(2)} GB`
                           : `${storageHealth.app_storage.total_mb.toFixed(2)} MB`}
-                        {' '}across {storageHealth.app_storage.total_files} files
+                        {' '}{t('health.storage.filesAcross', 'across {{count}} files', { count: storageHealth.app_storage.total_files })}
                       </Text>
                     </Group>
                   </div>
@@ -427,10 +430,10 @@ const SystemHealth = () => {
                 {storageHealth.disk_space && (
                   <div>
                     <Group justify="space-between" mb="xs">
-                      <Text fw={500}>Disk Usage</Text>
+                      <Text fw={500}>{t('health.storage.diskUsage', 'Disk Usage')}</Text>
                       <Text size="sm" c="dimmed">
                         {storageHealth.disk_space.usage_percent}% (
-                        {storageHealth.disk_space.free_gb} GB free of {storageHealth.disk_space.total_gb} GB)
+                        {t('health.storage.freeOf', '{{free}} GB free of {{total}} GB', { free: storageHealth.disk_space.free_gb, total: storageHealth.disk_space.total_gb })})
                       </Text>
                     </Group>
                     <Progress
@@ -469,7 +472,7 @@ const SystemHealth = () => {
               <IconSettings size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              Application Services
+              {t('health.services.title', 'Application Services')}
             </Text>
           </Group>
           {metricsError ? (
@@ -479,8 +482,8 @@ const SystemHealth = () => {
           ) : (
             <Stack gap={0}>
               <HealthItem
-                label="API Status"
-                value={`${systemMetrics?.services?.api?.status || 'Unknown'}${
+                label={t('health.services.apiStatus', 'API Status')}
+                value={`${systemMetrics?.services?.api?.status || t('shared.unknown', 'Unknown')}${
                   systemMetrics?.services?.api?.response_time_ms
                     ? ` (${systemMetrics.services.api.response_time_ms}ms)`
                     : ''
@@ -488,18 +491,18 @@ const SystemHealth = () => {
                 status={systemMetrics?.services?.api?.status}
               />
               <HealthItem
-                label="Authentication Service"
+                label={t('health.services.authService', 'Authentication Service')}
                 value={
-                  systemMetrics?.services?.authentication?.status || 'Unknown'
+                  systemMetrics?.services?.authentication?.status || t('shared.unknown', 'Unknown')
                 }
                 status={systemMetrics?.services?.authentication?.status}
               />
               <HealthItem
-                label="Frontend Logging"
+                label={t('health.services.frontendLogging', 'Frontend Logging')}
                 value={
                   systemMetrics?.services?.frontend_logging?.status ||
                   frontendLogHealth?.status ||
-                  'Unknown'
+                  t('shared.unknown', 'Unknown')
                 }
                 status={
                   systemMetrics?.services?.frontend_logging?.status ||
@@ -507,9 +510,9 @@ const SystemHealth = () => {
                 }
               />
               <HealthItem
-                label="Admin Interface"
+                label={t('health.services.adminInterface', 'Admin Interface')}
                 value={
-                  systemMetrics?.services?.admin_interface?.status || 'Unknown'
+                  systemMetrics?.services?.admin_interface?.status || t('shared.unknown', 'Unknown')
                 }
                 status={systemMetrics?.services?.admin_interface?.status}
               />
@@ -524,13 +527,13 @@ const SystemHealth = () => {
               <IconLock size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              Single Sign-On (SSO)
+              {t('health.sso.title', 'Single Sign-On (SSO)')}
             </Text>
             <Badge
               variant="light"
               color={ssoConfig?.enabled ? 'green' : 'blue'}
             >
-              {ssoConfig?.enabled ? 'Enabled' : 'Disabled'}
+              {ssoConfig?.enabled ? t('shared.enabled', 'Enabled') : t('shared.disabled', 'Disabled')}
             </Badge>
           </Group>
           {ssoError ? (
@@ -540,35 +543,35 @@ const SystemHealth = () => {
           ) : (
             <Stack gap={0}>
               <HealthItem
-                label="SSO Status"
-                value={ssoConfig?.enabled ? 'Enabled' : 'Disabled'}
+                label={t('health.sso.ssoStatus', 'SSO Status')}
+                value={ssoConfig?.enabled ? t('shared.enabled', 'Enabled') : t('shared.disabled', 'Disabled')}
                 status={ssoConfig?.enabled ? 'healthy' : 'info'}
               />
               {ssoConfig?.enabled && (
                 <>
                   <HealthItem
-                    label="Provider Type"
-                    value={ssoConfig.provider_type?.toUpperCase() || 'Unknown'}
+                    label={t('health.sso.providerType', 'Provider Type')}
+                    value={ssoConfig.provider_type?.toUpperCase() || t('shared.unknown', 'Unknown')}
                     status="info"
                   />
                   {SSO_PROVIDER_LABELS[ssoConfig.provider_type] && (
                     <HealthItem
-                      label="Provider"
+                      label={t('health.sso.provider', 'Provider')}
                       value={SSO_PROVIDER_LABELS[ssoConfig.provider_type]}
                       status="healthy"
                     />
                   )}
                   <HealthItem
-                    label="Registration via SSO"
-                    value={ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
+                    label={t('health.sso.registrationViaSso', 'Registration via SSO')}
+                    value={ssoConfig.registration_enabled ? t('health.sso.allowed', 'Allowed') : t('health.sso.blocked', 'Blocked')}
                     status={ssoConfig.registration_enabled ? 'healthy' : 'warning'}
                   />
                 </>
               )}
               {!ssoConfig?.enabled && (
                 <HealthItem
-                  label="Info"
-                  value="Users can only log in with username/password"
+                  label={t('shared.info', 'Info')}
+                  value={t('health.sso.passwordOnlyInfo', 'Users can only log in with username/password')}
                   status="info"
                 />
               )}
@@ -584,7 +587,7 @@ const SystemHealth = () => {
                 <IconBolt size={20} />
               </ThemeIcon>
               <Text fw={600} size="lg">
-                Application Performance
+                {t('health.performance.title', 'Application Performance')}
               </Text>
             </Group>
             <Stack gap="md">
@@ -592,9 +595,9 @@ const SystemHealth = () => {
               {systemMetrics.application.memory_used_mb != null ? (
                 <div>
                   <Group justify="space-between" mb="xs">
-                    <Text fw={500}>App Memory (RSS)</Text>
+                    <Text fw={500}>{t('health.performance.appMemory', 'App Memory (RSS)')}</Text>
                     <Text size="sm" c="dimmed">
-                      {systemMetrics.application.memory_used_mb} MB used (system: {systemMetrics.application.memory_percent}% of {systemMetrics.application.memory_total_mb} MB)
+                      {t('health.performance.memoryUsed', '{{used}} MB used (system: {{percent}}% of {{total}} MB)', { used: systemMetrics.application.memory_used_mb, percent: systemMetrics.application.memory_percent, total: systemMetrics.application.memory_total_mb })}
                     </Text>
                   </Group>
                   <Progress
@@ -612,7 +615,7 @@ const SystemHealth = () => {
                 </div>
               ) : (
                 <HealthItem
-                  label="Memory Usage"
+                  label={t('health.performance.memoryUsage', 'Memory Usage')}
                   value={systemMetrics.application.memory_usage}
                   status={USAGE_STATUS[systemMetrics.application.memory_usage] || 'error'}
                 />
@@ -622,11 +625,13 @@ const SystemHealth = () => {
               {systemMetrics.application.cpu_percent != null ? (
                 <div>
                   <Group justify="space-between" mb="xs">
-                    <Text fw={500}>CPU Usage</Text>
+                    <Text fw={500}>{t('health.performance.cpuUsage', 'CPU Usage')}</Text>
                     <Text size="sm" c="dimmed">
-                      App: {systemMetrics.application.app_cpu_percent ?? '—'}%
-                      {systemMetrics.application.cpu_count ? ` of ${systemMetrics.application.cpu_count} cores` : ''}
-                      {' '}(system: {systemMetrics.application.cpu_percent}%)
+                      {t('health.performance.cpuDetails', 'App: {{appPercent}}% of {{cores}} cores (system: {{systemPercent}}%)', {
+                        appPercent: systemMetrics.application.app_cpu_percent ?? '\u2014',
+                        cores: systemMetrics.application.cpu_count || '\u2014',
+                        systemPercent: systemMetrics.application.cpu_percent
+                      })}
                     </Text>
                   </Group>
                   <Progress
@@ -644,7 +649,7 @@ const SystemHealth = () => {
                 </div>
               ) : (
                 <HealthItem
-                  label="CPU Usage"
+                  label={t('health.performance.cpuUsage', 'CPU Usage')}
                   value={systemMetrics.application.cpu_usage}
                   status={USAGE_STATUS[systemMetrics.application.cpu_usage] || 'error'}
                 />
@@ -652,12 +657,12 @@ const SystemHealth = () => {
 
               {/* Response Time & System Load */}
               <HealthItem
-                label="Response Time"
+                label={t('health.performance.responseTime', 'Response Time')}
                 value={systemMetrics.application.response_time}
                 status="healthy"
               />
               <HealthItem
-                label="System Load"
+                label={t('health.performance.systemLoad', 'System Load')}
                 value={systemMetrics.application.system_load}
                 status={USAGE_STATUS[systemMetrics.application.system_load] || 'error'}
               />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Table,
   TextInput,
@@ -55,6 +56,7 @@ const PER_PAGE_OPTIONS = ['10', '25', '50', '100'];
 const ModelManagement = () => {
   const { modelName } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
   const { formatDate } = useDateFormat();
 
   const formatFieldValue = (value, fieldType) => {
@@ -212,8 +214,8 @@ const ModelManagement = () => {
       setDeleting(true);
       await adminApiService.deleteModelRecord(modelName, recordToDelete.id);
       notifications.show({
-        title: 'Record deleted',
-        message: `Successfully deleted ${modelName} record #${recordToDelete.id}`,
+        title: t('models.recordDeleted', 'Record deleted'),
+        message: t('models.recordDeletedMessage', { modelName, id: recordToDelete.id, defaultValue: `Successfully deleted ${modelName} record #${recordToDelete.id}` }),
         color: 'green',
       });
       closeDeleteModal();
@@ -221,14 +223,14 @@ const ModelManagement = () => {
       loadModelData(searchQuery);
     } catch (err) {
       notifications.show({
-        title: 'Delete failed',
-        message: err.message || 'Failed to delete record',
+        title: t('models.deleteFailed', 'Delete failed'),
+        message: err.message || t('models.failedToDelete', 'Failed to delete record'),
         color: 'red',
       });
     } finally {
       setDeleting(false);
     }
-  }, [modelName, recordToDelete, loadModelData, closeDeleteModal, searchQuery]);
+  }, [modelName, recordToDelete, loadModelData, closeDeleteModal, searchQuery, t]);
 
   // Bulk delete
   const handleBulkDeleteClick = useCallback(() => {
@@ -241,8 +243,8 @@ const ModelManagement = () => {
       setDeleting(true);
       await adminApiService.bulkDeleteRecords(modelName, Array.from(selectedRecords));
       notifications.show({
-        title: 'Records deleted',
-        message: `Successfully deleted ${selectedRecords.size} records`,
+        title: t('models.recordsDeleted', 'Records deleted'),
+        message: t('models.recordsDeletedMessage', { count: selectedRecords.size, defaultValue: `Successfully deleted ${selectedRecords.size} records` }),
         color: 'green',
       });
       closeBulkDeleteModal();
@@ -251,14 +253,14 @@ const ModelManagement = () => {
       loadModelData(searchQuery);
     } catch (err) {
       notifications.show({
-        title: 'Bulk delete failed',
-        message: err.message || 'Failed to delete records',
+        title: t('models.bulkDeleteFailed', 'Bulk delete failed'),
+        message: err.message || t('models.failedToBulkDelete', 'Failed to delete records'),
         color: 'red',
       });
     } finally {
       setDeleting(false);
     }
-  }, [modelName, selectedRecords, loadModelData, closeBulkDeleteModal, searchQuery]);
+  }, [modelName, selectedRecords, loadModelData, closeBulkDeleteModal, searchQuery, t]);
 
   // Column visibility
   const allFields = useMemo(() => {
@@ -311,11 +313,11 @@ const ModelManagement = () => {
       logger.error('model_export_error', 'Failed to export model data', {
         component: 'ModelManagement', modelName, error: err.message,
       });
-      notifications.show({ title: 'Export failed', message: 'Failed to export data', color: 'red' });
+      notifications.show({ title: t('models.exportFailed', 'Export failed'), message: t('models.failedToExport', 'Failed to export data'), color: 'red' });
     } finally {
       setExporting(false);
     }
-  }, [modelName, searchQuery]);
+  }, [modelName, searchQuery, t]);
 
   if (loading && !metadata) {
     return (
@@ -335,7 +337,7 @@ const ModelManagement = () => {
             <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title="Error">
               {error}
             </Alert>
-            <Button onClick={() => loadModelData(searchQuery)}>Retry</Button>
+            <Button onClick={() => loadModelData(searchQuery)}>{t('common:buttons.retry', 'Retry')}</Button>
           </Stack>
         </Center>
       </AdminLayout>
@@ -354,18 +356,18 @@ const ModelManagement = () => {
             style={{ alignSelf: 'flex-start' }}
             size="sm"
           >
-            Back to Data Models
+            {t('models.backToDataModels', 'Back to Data Models')}
           </Button>
           <Group justify="space-between" align="flex-end">
             <div>
               <Title order={2}>{metadata?.verbose_name_plural || modelName}</Title>
-              <Text c="dimmed" size="sm">{totalRecords} total records</Text>
+              <Text c="dimmed" size="sm">{t('models.totalRecords', { count: totalRecords, defaultValue: '{{count}} total records' })}</Text>
             </div>
             <Button
               leftSection={<IconPlus size={16} />}
               onClick={handleNavigateToCreate}
             >
-              Add New
+              {t('common:buttons.addNew', 'Add New')}
             </Button>
           </Group>
         </Stack>
@@ -374,11 +376,11 @@ const ModelManagement = () => {
         <Paper withBorder p="md" mb="md">
           <Group justify="space-between" wrap="wrap" gap="sm">
             <TextInput
-              placeholder={`Search ${metadata?.verbose_name_plural || modelName}...`}
+              placeholder={t('models.searchPlaceholder', { modelName: metadata?.verbose_name_plural || modelName, defaultValue: `Search ${metadata?.verbose_name_plural || modelName}...` })}
               leftSection={<IconSearch size={16} />}
               rightSection={
                 searchQuery ? (
-                  <ActionIcon variant="subtle" size="sm" onClick={() => handleSearchChange('')} aria-label="Clear search">
+                  <ActionIcon variant="subtle" size="sm" onClick={() => handleSearchChange('')} aria-label={t('models.clearSearch', 'Clear search')}>
                     <IconX size={14} />
                   </ActionIcon>
                 ) : null
@@ -386,10 +388,10 @@ const ModelManagement = () => {
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.currentTarget.value)}
               style={{ flex: 1, minWidth: 200, maxWidth: 400 }}
-              aria-label="Search records"
+              aria-label={t('models.searchRecords', 'Search records')}
             />
             <Group gap="sm">
-              <Tooltip label="Export to CSV">
+              <Tooltip label={t('models.exportToCSV', 'Export to CSV')}>
                 <Button
                   variant="light"
                   leftSection={<IconDownload size={16} />}
@@ -398,19 +400,19 @@ const ModelManagement = () => {
                   disabled={totalRecords === 0}
                   size="sm"
                 >
-                  Export CSV
+                  {t('models.exportCsv', 'Export CSV')}
                 </Button>
               </Tooltip>
               <Menu shadow="md" width={220} closeOnItemClick={false}>
                 <Menu.Target>
-                  <Tooltip label="Column visibility">
-                    <ActionIcon variant="light" size="lg" aria-label="Toggle column visibility">
+                  <Tooltip label={t('models.columnVisibility', 'Column visibility')}>
+                    <ActionIcon variant="light" size="lg" aria-label={t('models.toggleColumnVisibility', 'Toggle column visibility')}>
                       <IconColumns size={18} />
                     </ActionIcon>
                   </Tooltip>
                 </Menu.Target>
                 <Menu.Dropdown>
-                  <Menu.Label>Visible columns</Menu.Label>
+                  <Menu.Label>{t('models.visibleColumns', 'Visible columns')}</Menu.Label>
                   <ScrollArea.Autosize mah={300}>
                     {allFields.map((fieldName) => (
                       <Menu.Item
@@ -439,23 +441,23 @@ const ModelManagement = () => {
                       localStorage.removeItem(`admin_columns_${modelName}`);
                     }}
                   >
-                    <Text size="xs" c="dimmed">Reset to default</Text>
+                    <Text size="xs" c="dimmed">{t('models.resetToDefault', 'Reset to default')}</Text>
                   </Menu.Item>
                 </Menu.Dropdown>
               </Menu>
               <Select
-                data={PER_PAGE_OPTIONS.map(v => ({ value: v, label: `${v} per page` }))}
+                data={PER_PAGE_OPTIONS.map(v => ({ value: v, label: t('models.perPage', { count: v, defaultValue: `${v} per page` }) }))}
                 value={perPage}
                 onChange={handlePerPageChange}
                 w={140}
-                aria-label="Records per page"
+                aria-label={t('models.searchRecords', 'Records per page')}
                 allowDeselect={false}
               />
             </Group>
           </Group>
           {searchQuery && (
             <Text size="sm" c="dimmed" mt="xs">
-              {totalRecords} result{totalRecords !== 1 ? 's' : ''} for &quot;{searchQuery}&quot;
+              {t('models.searchResult', { count: totalRecords, query: searchQuery, defaultValue: `${totalRecords} result${totalRecords !== 1 ? 's' : ''} for "${searchQuery}"` })}
             </Text>
           )}
         </Paper>
@@ -464,14 +466,14 @@ const ModelManagement = () => {
         {selectedRecords.size > 0 && (
           <Alert color="yellow" variant="light" mb="md">
             <Group justify="space-between">
-              <Text fw={500}>{selectedRecords.size} selected</Text>
+              <Text fw={500}>{t('models.selected', { count: selectedRecords.size, defaultValue: `${selectedRecords.size} selected` })}</Text>
               <Button
                 color="red"
                 size="xs"
                 leftSection={<IconTrash size={14} />}
                 onClick={handleBulkDeleteClick}
               >
-                Delete Selected
+                {t('models.deleteSelected', 'Delete Selected')}
               </Button>
             </Group>
           </Alert>
@@ -514,7 +516,7 @@ const ModelManagement = () => {
                 ) : records.length === 0 ? (
                   <Table.Tr>
                     <Table.Td colSpan={displayFields.length + 2}>
-                      <Text ta="center" c="dimmed" py="md">No records found</Text>
+                      <Text ta="center" c="dimmed" py="md">{t('models.noRecordsFound', 'No records found')}</Text>
                     </Table.Td>
                   </Table.Tr>
                 ) : (
@@ -592,7 +594,7 @@ const ModelManagement = () => {
           title={
             <Group gap="xs">
               <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" aria-hidden="true" />
-              <Text fw={600}>Confirm Deletion</Text>
+              <Text fw={600}>{t('models.confirmDeletion', 'Confirm Deletion')}</Text>
             </Group>
           }
           centered
@@ -601,7 +603,7 @@ const ModelManagement = () => {
             {recordToDelete && requiresEnhancedDeletionWarning(modelName) ? (
               <Alert color="red" variant="light" icon={<IconAlertTriangle size={16} />}>
                 <Text size="sm" fw={500} mb="xs">
-                  This will permanently delete this {modelName} record and all associated data:
+                  {t('models.deleteWarning', { modelName, defaultValue: `This will permanently delete this ${modelName} record and all associated data:` })}
                 </Text>
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
                   {getCascadeTypes(modelName).map(type => (
@@ -616,10 +618,10 @@ const ModelManagement = () => {
             )}
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeDeleteModal(); setRecordToDelete(null); }}>
-                Cancel
+                {t('common:buttons.cancel', 'Cancel')}
               </Button>
               <Button color="red" onClick={handleConfirmDelete} loading={deleting}>
-                Delete
+                {t('common:buttons.delete', 'Delete')}
               </Button>
             </Group>
           </Stack>
@@ -632,7 +634,7 @@ const ModelManagement = () => {
           title={
             <Group gap="xs">
               <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" aria-hidden="true" />
-              <Text fw={600}>Confirm Bulk Deletion</Text>
+              <Text fw={600}>{t('models.confirmBulkDeletion', 'Confirm Bulk Deletion')}</Text>
             </Group>
           }
           centered
@@ -640,23 +642,23 @@ const ModelManagement = () => {
           <Stack gap="md">
             <Alert color="red" variant="light" icon={<IconAlertTriangle size={16} />}>
               <Text size="sm" fw={500}>
-                You are about to permanently delete {selectedRecords.size} {modelName} record{selectedRecords.size !== 1 ? 's' : ''}.
+                {t('models.bulkDeleteWarning', { count: selectedRecords.size, modelName, defaultValue: `You are about to permanently delete ${selectedRecords.size} ${modelName} record${selectedRecords.size !== 1 ? 's' : ''}.` })}
               </Text>
               {requiresEnhancedDeletionWarning(modelName) && (
                 <Text size="sm" mt="xs">
-                  All associated data (including {getCascadeTypes(modelName).join(', ')}) will also be deleted.
+                  {t('models.bulkDeleteAssociated', { types: getCascadeTypes(modelName).join(', '), defaultValue: `All associated data (including ${getCascadeTypes(modelName).join(', ')}) will also be deleted.` })}
                 </Text>
               )}
             </Alert>
             <TextInput
-              label={<Text size="sm">Type <strong>DELETE</strong> to confirm</Text>}
+              label={<Text size="sm" dangerouslySetInnerHTML={{ __html: t('models.typeDeleteToConfirm', 'Type <strong>DELETE</strong> to confirm') }} />}
               placeholder="DELETE"
               value={bulkDeleteConfirmText}
               onChange={(e) => setBulkDeleteConfirmText(e.currentTarget.value)}
             />
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeBulkDeleteModal(); setBulkDeleteConfirmText(''); }}>
-                Cancel
+                {t('common:buttons.cancel', 'Cancel')}
               </Button>
               <Button
                 color="red"
@@ -664,7 +666,7 @@ const ModelManagement = () => {
                 loading={deleting}
                 disabled={bulkDeleteConfirmText !== 'DELETE'}
               >
-                Delete {selectedRecords.size} Records
+                {t('models.deleteRecords', { count: selectedRecords.size, defaultValue: `Delete ${selectedRecords.size} Records` })}
               </Button>
             </Group>
           </Stack>
