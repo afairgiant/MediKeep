@@ -211,6 +211,11 @@
       "other": "Autre"
     },
     "testType": {
+      "routine": "Routine - Analyse standard",
+      "urgent": "Urgente - Analyse rapide",
+      "emergency": "Critique - Priorité maximale",
+      "followUp": "Suivi - Analyse répétée",
+      "screening": "Préventive - Analyse à titre préventif",
       "label": "Type d'analyse",
       "placeholder": "Sélectionnez le niveau d'urgence",
       "description": "Priorité ou urgence de l'analyse"
@@ -294,19 +299,19 @@
       "values": {
         "positive": "Positif",
         "negative": "Négatif",
-        "detected": "Détecté",
-        "undetected": "Non détecté"
+        "detected": "Détecté(e)",
+        "undetected": "Non détecté(e)"
       },
       "expectedResult": "Résultat attendu",
-      "selectResult": "Sélectionner le résultat",
+      "selectResult": "Sélectionnez le résultat",
       "templates": {
-        "infectiousDisease": "Bilan maladies infectieuses",
-        "autoimmune": "Bilan auto-immun",
-        "viralSerology": "Bilan sérologie virale"
+        "infectiousDisease": "Panel de maladies infectieuses",
+        "autoimmune": "Panel de maladies auto-immunes",
+        "viralSerology": "Panel de sérologie virale"
       },
       "trends": {
-        "worsening": "En aggravation",
-        "improving": "En amélioration"
+        "worsening": "S'aggrave",
+        "improving": "S'améliore"
       }
     }
   },
@@ -1221,19 +1226,19 @@
       }
     },
     "name": {
-      "label": "Nom complet",
-      "placeholder": "Dr. Jeanne Dupont",
-      "description": "Nom complet du docteur, dont son titre"
+        "label": "Nom complet",
+        "placeholder": "Dr. Jeanne Dupont",
+        "description": "Nom complet du docteur, dont son titre"
     },
     "specialty": {
-      "label": "Spécialité médicale",
-      "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
-      "description": "Sélectionnez dans la liste ou saisissez une spécialité"
+        "label": "Spécialité médicale",
+        "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
+        "description": "Sélectionnez dans la liste ou saisissez une spécialité"
     },
     "practice": {
-      "label": "Cabinet/Clinique",
-      "placeholder": "Rechercher ou créer un cabinet...",
-      "description": "Sélectionnez un cabinet existant ou saisissez pour en créer un nouveau"
+        "label": "Etablissement/Clinique",
+        "placeholder": "Cherchez ou créez un établissement...",
+        "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
     },
     "rating": {
       "label": "Avis",
@@ -1370,9 +1375,9 @@
       "description": "Nom spécifique ou identification de l'emplacement"
     },
     "streetAddress": {
-      "label": "Adresse physique",
-      "placeholder": "123 Grand-rue",
-      "description": "Adresse physique"
+        "label": "Adresse physique",
+        "placeholder": "123 Grand-rue",
+        "description": "Adresse physique"
     },
     "city": {
       "label": "Cité",
