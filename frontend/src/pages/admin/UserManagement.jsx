@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Title,
   Text,
@@ -54,35 +55,36 @@ const ROLE_COLORS = {
   staff: 'orange',
 };
 
-const ROLE_OPTIONS = [
-  { value: '', label: 'All Roles' },
-  { value: 'admin', label: 'Admin' },
-  { value: 'user', label: 'User' },
-];
-
-const AUTH_METHOD_OPTIONS = [
-  { value: '', label: 'All Auth Methods' },
-  { value: 'local', label: 'Local' },
-  { value: 'sso', label: 'SSO' },
-  { value: 'hybrid', label: 'Hybrid' },
-];
-
-const STATUS_OPTIONS = [
-  { value: '', label: 'All Statuses' },
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-];
-
-const ASSIGNABLE_ROLES = [
-  { value: 'admin', label: 'Admin' },
-  { value: 'user', label: 'User' },
-];
-
 const PER_PAGE = 20;
 
 const UserManagement = () => {
+  const { t } = useTranslation(['admin', 'common']);
   const { user: currentUser } = useAuth();
   const { formatDate } = useDateFormat();
+
+  const ROLE_OPTIONS = useMemo(() => [
+    { value: '', label: t('users.roleFilter.all', 'All Roles') },
+    { value: 'admin', label: t('users.roleFilter.admin', 'Admin') },
+    { value: 'user', label: t('users.roleFilter.user', 'User') },
+  ], [t]);
+
+  const AUTH_METHOD_OPTIONS = useMemo(() => [
+    { value: '', label: t('users.authFilter.all', 'All Auth Methods') },
+    { value: 'local', label: t('users.authFilter.local', 'Local') },
+    { value: 'sso', label: t('users.authFilter.sso', 'SSO') },
+    { value: 'hybrid', label: t('users.authFilter.hybrid', 'Hybrid') },
+  ], [t]);
+
+  const STATUS_OPTIONS = useMemo(() => [
+    { value: '', label: t('users.statusFilter.all', 'All Statuses') },
+    { value: 'active', label: t('users.statusFilter.active', 'Active') },
+    { value: 'inactive', label: t('users.statusFilter.inactive', 'Inactive') },
+  ], [t]);
+
+  const ASSIGNABLE_ROLES = useMemo(() => [
+    { value: 'admin', label: t('users.roleFilter.admin', 'Admin') },
+    { value: 'user', label: t('users.roleFilter.user', 'User') },
+  ], [t]);
 
   // Data state
   const [users, setUsers] = useState([]);
@@ -357,18 +359,18 @@ const UserManagement = () => {
   };
 
   const formatRelativeTime = (dateStr) => {
-    if (!dateStr) return 'Never';
+    if (!dateStr) return t('users.never', 'Never');
     try {
       const date = new Date(dateStr);
       const now = new Date();
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return 'Just now';
-      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffMins < 1) return t('users.justNow', 'Just now');
+      if (diffMins < 60) return t('users.minutesAgo', '{{count}}m ago', { count: diffMins });
       const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffHours < 24) return t('users.hoursAgo', '{{count}}h ago', { count: diffHours });
       const diffDays = Math.floor(diffHours / 24);
-      if (diffDays < 30) return `${diffDays}d ago`;
+      if (diffDays < 30) return t('users.daysAgo', '{{count}}d ago', { count: diffDays });
       return formatDate(dateStr);
     } catch {
       return formatDate(dateStr) || '-';
@@ -381,15 +383,15 @@ const UserManagement = () => {
     <AdminLayout>
       <Stack gap="lg">
         <Group justify="space-between" align="center">
-          <Title order={2}>User Management</Title>
-          <Text c="dimmed" size="sm">{filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}</Text>
+          <Title order={2}>{t('users.title', 'User Management')}</Title>
+          <Text c="dimmed" size="sm">{t('users.userCount', { count: filteredUsers.length, defaultValue: '{{count}} users' })}</Text>
         </Group>
 
         {/* Filters */}
         <Paper p="md" withBorder>
           <Group gap="sm" align="flex-end" wrap="wrap">
             <TextInput
-              placeholder="Search users..."
+              placeholder={t('users.searchPlaceholder', 'Search users...')}
               leftSection={<IconSearch size={16} />}
               value={search}
               onChange={(e) => setSearch(e.currentTarget.value)}
@@ -399,7 +401,7 @@ const UserManagement = () => {
               data={ROLE_OPTIONS}
               value={roleFilter}
               onChange={(v) => setRoleFilter(v || '')}
-              placeholder="Role"
+              placeholder={t('users.tableHeaders.role', 'Role')}
               clearable={false}
               style={{ minWidth: 130 }}
             />
@@ -407,7 +409,7 @@ const UserManagement = () => {
               data={AUTH_METHOD_OPTIONS}
               value={authMethodFilter}
               onChange={(v) => setAuthMethodFilter(v || '')}
-              placeholder="Auth"
+              placeholder={t('users.tableHeaders.auth', 'Auth')}
               clearable={false}
               style={{ minWidth: 130 }}
             />
@@ -415,7 +417,7 @@ const UserManagement = () => {
               data={STATUS_OPTIONS}
               value={statusFilter}
               onChange={(v) => setStatusFilter(v || '')}
-              placeholder="Status"
+              placeholder={t('users.tableHeaders.status', 'Status')}
               clearable={false}
               style={{ minWidth: 130 }}
             />
@@ -426,7 +428,7 @@ const UserManagement = () => {
                 onClick={clearFilters}
                 size="sm"
               >
-                Clear
+                {t('users.clear', 'Clear')}
               </Button>
             )}
           </Group>
@@ -436,8 +438,8 @@ const UserManagement = () => {
         {loading ? (
           <Center py="xl"><Loader size="lg" /></Center>
         ) : filteredUsers.length === 0 ? (
-          <Alert variant="light" color="gray" title="No users found">
-            {hasFilters ? 'No users match your filters. Try adjusting or clearing filters.' : 'No users in the system.'}
+          <Alert variant="light" color="gray" title={t('users.noUsersFound', 'No users found')}>
+            {hasFilters ? t('users.noUsersMatchFilters', 'No users match your filters. Try adjusting or clearing filters.') : t('users.noUsersInSystem', 'No users in the system.')}
           </Alert>
         ) : (
           <>
@@ -445,14 +447,14 @@ const UserManagement = () => {
               <Table striped highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>User</Table.Th>
-                    <Table.Th>Full Name</Table.Th>
-                    <Table.Th>Role</Table.Th>
-                    <Table.Th>Auth</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                    <Table.Th>Last Login</Table.Th>
-                    <Table.Th>Created</Table.Th>
-                    <Table.Th style={{ width: 60 }}>Actions</Table.Th>
+                    <Table.Th>{t('users.tableHeaders.user', 'User')}</Table.Th>
+                    <Table.Th>{t('users.tableHeaders.fullName', 'Full Name')}</Table.Th>
+                    <Table.Th>{t('users.tableHeaders.role', 'Role')}</Table.Th>
+                    <Table.Th>{t('users.tableHeaders.auth', 'Auth')}</Table.Th>
+                    <Table.Th>{t('users.tableHeaders.status', 'Status')}</Table.Th>
+                    <Table.Th>{t('users.tableHeaders.lastLogin', 'Last Login')}</Table.Th>
+                    <Table.Th>{t('users.tableHeaders.created', 'Created')}</Table.Th>
+                    <Table.Th style={{ width: 60 }}>{t('users.tableHeaders.actions', 'Actions')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -487,7 +489,7 @@ const UserManagement = () => {
                           variant="light"
                           size="sm"
                         >
-                          {u.is_active === false ? 'Inactive' : 'Active'}
+                          {u.is_active === false ? t('users.statusFilter.inactive', 'Inactive') : t('users.statusFilter.active', 'Active')}
                         </Badge>
                       </Table.Td>
                       <Table.Td>
@@ -499,7 +501,7 @@ const UserManagement = () => {
                       <Table.Td>
                         <Menu shadow="md" width={200} position="bottom-end">
                           <Menu.Target>
-                            <ActionIcon variant="subtle" aria-label={`Actions for ${u.username}`}>
+                            <ActionIcon variant="subtle" aria-label={t('users.actionsFor', 'Actions for {{username}}', { username: u.username })}>
                               <IconDotsVertical size={16} />
                             </ActionIcon>
                           </Menu.Target>
@@ -508,26 +510,26 @@ const UserManagement = () => {
                               leftSection={<IconUserCog size={14} />}
                               onClick={() => handleOpenRoleModal(u)}
                             >
-                              Change Role
+                              {t('users.changeRole', 'Change Role')}
                             </Menu.Item>
                             <Menu.Item
                               leftSection={<IconKey size={14} />}
                               onClick={() => handleOpenPasswordModal(u)}
                             >
-                              Reset Password
+                              {t('users.resetPassword', 'Reset Password')}
                             </Menu.Item>
                             <Menu.Item
                               leftSection={u.is_active === false ? <IconUserCheck size={14} /> : <IconUserOff size={14} />}
                               onClick={() => handleOpenToggleActiveModal(u)}
                               disabled={isSelf(u)}
                             >
-                              {u.is_active === false ? 'Activate' : 'Deactivate'}
+                              {u.is_active === false ? t('users.activate', 'Activate') : t('users.deactivate', 'Deactivate')}
                             </Menu.Item>
                             <Menu.Item
                               leftSection={<IconHistory size={14} />}
                               onClick={() => handleOpenLoginHistory(u)}
                             >
-                              Login History
+                              {t('users.loginHistory', 'Login History')}
                             </Menu.Item>
                             <Menu.Divider />
                             <Menu.Item
@@ -536,7 +538,7 @@ const UserManagement = () => {
                               onClick={() => handleOpenDeleteModal(u)}
                               disabled={isSelf(u)}
                             >
-                              Delete User
+                              {t('users.deleteUser', 'Delete User')}
                             </Menu.Item>
                           </Menu.Dropdown>
                         </Menu>
@@ -556,12 +558,12 @@ const UserManagement = () => {
       </Stack>
 
       {/* Change Role Modal */}
-      <Modal opened={roleModalOpened} onClose={closeRoleModal} title="Change User Role">
+      <Modal opened={roleModalOpened} onClose={closeRoleModal} title={t('users.roleModal.title', 'Change User Role')}>
         {selectedUser && (
           <Stack>
-            <Text>Changing role for <strong>{selectedUser.username}</strong></Text>
+            <Text>{t('users.roleModal.changingRole', 'Changing role for <strong>{{username}}</strong>', { username: selectedUser.username })}</Text>
             <Select
-              label="Role"
+              label={t('users.roleModal.roleLabel', 'Role')}
               data={ASSIGNABLE_ROLES}
               value={newRole}
               onChange={(v) => setNewRole(v || '')}
@@ -569,23 +571,23 @@ const UserManagement = () => {
             {(selectedUser.role === 'admin' || newRole === 'admin') && (
               <Alert color="yellow" icon={<IconAlertTriangle size={16} />}>
                 {newRole === 'admin'
-                  ? 'This will grant full administrator privileges.'
-                  : 'This will revoke administrator privileges.'}
+                  ? t('users.roleModal.grantAdmin', 'This will grant full administrator privileges.')
+                  : t('users.roleModal.revokeAdmin', 'This will revoke administrator privileges.')}
               </Alert>
             )}
             {selectedUser.role === 'admin' && newRole !== 'admin' && isLastAdmin(selectedUser) && (
               <Alert color="red" icon={<IconAlertTriangle size={16} />}>
-                Cannot remove the last administrator role.
+                {t('users.roleModal.cannotRemoveLastAdmin', 'Cannot remove the last administrator role.')}
               </Alert>
             )}
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeRoleModal}>Cancel</Button>
+              <Button variant="default" onClick={closeRoleModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
               <Button
                 onClick={handleChangeRole}
                 loading={actionLoading}
                 disabled={newRole === selectedUser.role || (selectedUser.role === 'admin' && newRole !== 'admin' && isLastAdmin(selectedUser))}
               >
-                Save
+                {t('common:buttons.save', 'Save')}
               </Button>
             </Group>
           </Stack>
@@ -593,35 +595,34 @@ const UserManagement = () => {
       </Modal>
 
       {/* Reset Password Modal */}
-      <Modal opened={passwordModalOpened} onClose={closePasswordModal} title="Reset Password">
+      <Modal opened={passwordModalOpened} onClose={closePasswordModal} title={t('users.passwordModal.title', 'Reset Password')}>
         {selectedUser && (
           <Stack>
-            <Text>Reset password for <strong>{selectedUser.username}</strong></Text>
+            <Text>{t('users.passwordModal.resettingFor', 'Reset password for <strong>{{username}}</strong>', { username: selectedUser.username })}</Text>
             {selectedUser.auth_method === 'sso' && (
               <Alert color="blue" icon={<IconInfoCircle size={16} />}>
-                This user authenticates via SSO ({selectedUser.sso_provider}).
-                Setting a local password will allow hybrid authentication.
+                {t('users.passwordModal.ssoWarning', 'This user authenticates via SSO ({{provider}}). Setting a local password will allow hybrid authentication.', { provider: selectedUser.sso_provider })}
               </Alert>
             )}
             <PasswordInput
-              label="New Password"
+              label={t('users.passwordModal.newPassword', 'New Password')}
               value={newPassword}
               onChange={(e) => setNewPassword(e.currentTarget.value)}
-              description="Min 6 characters, at least 1 letter and 1 number"
+              description={t('users.passwordModal.passwordDescription', 'Min 6 characters, at least 1 letter and 1 number')}
             />
             <Checkbox
-              label="Force password change on next login"
+              label={t('users.passwordModal.forceChange', 'Force password change on next login')}
               checked={forceChange}
               onChange={(e) => setForceChange(e.currentTarget.checked)}
             />
             <Group justify="flex-end">
-              <Button variant="default" onClick={closePasswordModal}>Cancel</Button>
+              <Button variant="default" onClick={closePasswordModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
               <Button
                 onClick={handleResetPassword}
                 loading={actionLoading}
                 disabled={newPassword.length < 6}
               >
-                Reset Password
+                {t('users.resetPassword', 'Reset Password')}
               </Button>
             </Group>
           </Stack>
@@ -632,7 +633,7 @@ const UserManagement = () => {
       <Modal
         opened={toggleActiveModalOpened}
         onClose={closeToggleActiveModal}
-        title={selectedUser?.is_active === false ? 'Activate User' : 'Deactivate User'}
+        title={selectedUser?.is_active === false ? t('users.toggleActiveModal.activateTitle', 'Activate User') : t('users.toggleActiveModal.deactivateTitle', 'Deactivate User')}
       >
         {selectedUser && (
           <Stack>
@@ -641,28 +642,28 @@ const UserManagement = () => {
               icon={selectedUser.is_active === false ? <IconUserCheck size={16} /> : <IconAlertTriangle size={16} />}
             >
               {selectedUser.is_active === false
-                ? `Activate "${selectedUser.username}"? They will be able to log in again.`
-                : `Deactivate "${selectedUser.username}"? They will not be able to log in until reactivated.`}
+                ? t('users.toggleActiveModal.activateConfirm', 'Activate "{{username}}"? They will be able to log in again.', { username: selectedUser.username })
+                : t('users.toggleActiveModal.deactivateConfirm', 'Deactivate "{{username}}"? They will not be able to log in until reactivated.', { username: selectedUser.username })}
             </Alert>
             {selectedUser.is_active && isSelf(selectedUser) && (
               <Alert color="red" icon={<IconAlertTriangle size={16} />}>
-                You cannot deactivate your own account.
+                {t('users.toggleActiveModal.cannotDeactivateSelf', 'You cannot deactivate your own account.')}
               </Alert>
             )}
             {selectedUser.is_active && isLastAdmin(selectedUser) && (
               <Alert color="red" icon={<IconAlertTriangle size={16} />}>
-                Cannot deactivate the last administrator.
+                {t('users.toggleActiveModal.cannotDeactivateLastAdmin', 'Cannot deactivate the last administrator.')}
               </Alert>
             )}
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeToggleActiveModal}>Cancel</Button>
+              <Button variant="default" onClick={closeToggleActiveModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
               <Button
                 color={selectedUser.is_active === false ? 'green' : 'red'}
                 onClick={handleToggleActive}
                 loading={actionLoading}
                 disabled={(selectedUser.is_active && isSelf(selectedUser)) || (selectedUser.is_active && isLastAdmin(selectedUser))}
               >
-                {selectedUser.is_active === false ? 'Activate' : 'Deactivate'}
+                {selectedUser.is_active === false ? t('users.activate', 'Activate') : t('users.deactivate', 'Deactivate')}
               </Button>
             </Group>
           </Stack>
@@ -673,7 +674,7 @@ const UserManagement = () => {
       <Modal
         opened={loginHistoryOpened}
         onClose={closeLoginHistory}
-        title={`Login History: ${selectedUser?.username || ''}`}
+        title={t('users.loginHistoryModal.title', 'Login History: {{username}}', { username: selectedUser?.username || '' })}
         size="lg"
       >
         {selectedUser && (
@@ -681,21 +682,21 @@ const UserManagement = () => {
             {loginHistoryLoading ? (
               <Center py="xl"><Loader /></Center>
             ) : loginHistory.length === 0 ? (
-              <Text c="dimmed" ta="center" py="md">No login history found</Text>
+              <Text c="dimmed" ta="center" py="md">{t('users.loginHistoryModal.noHistory', 'No login history found')}</Text>
             ) : (
               <Table>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>Date & Time</Table.Th>
-                    <Table.Th>IP Address</Table.Th>
-                    <Table.Th>Details</Table.Th>
+                    <Table.Th>{t('users.loginHistoryModal.dateTime', 'Date & Time')}</Table.Th>
+                    <Table.Th>{t('users.loginHistoryModal.ipAddress', 'IP Address')}</Table.Th>
+                    <Table.Th>{t('users.loginHistoryModal.details', 'Details')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   {loginHistory.map((entry) => (
                     <Table.Tr key={entry.id}>
                       <Table.Td>{formatLocalDateTime(entry.timestamp)}</Table.Td>
-                      <Table.Td><Code>{entry.ip_address || 'N/A'}</Code></Table.Td>
+                      <Table.Td><Code>{entry.ip_address || t('users.loginHistoryModal.notAvailable', 'N/A')}</Code></Table.Td>
                       <Table.Td>{entry.description || '-'}</Table.Td>
                     </Table.Tr>
                   ))}
@@ -707,37 +708,37 @@ const UserManagement = () => {
       </Modal>
 
       {/* Delete User Modal */}
-      <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title="Delete User">
+      <Modal opened={deleteModalOpened} onClose={closeDeleteModal} title={t('users.deleteModal.title', 'Delete User')}>
         {selectedUser && (
           <Stack>
             <Alert color="red" icon={<IconAlertTriangle size={16} />}>
-              This action cannot be undone. All data associated with this user will be permanently deleted.
+              {t('users.deleteModal.warning', 'This action cannot be undone. All data associated with this user will be permanently deleted.')}
             </Alert>
             {isSelf(selectedUser) && (
               <Alert color="red" icon={<IconAlertTriangle size={16} />}>
-                You cannot delete your own account.
+                {t('users.deleteModal.cannotDeleteSelf', 'You cannot delete your own account.')}
               </Alert>
             )}
             {isLastAdmin(selectedUser) && (
               <Alert color="red" icon={<IconAlertTriangle size={16} />}>
-                Cannot delete the last administrator.
+                {t('users.deleteModal.cannotDeleteLastAdmin', 'Cannot delete the last administrator.')}
               </Alert>
             )}
             <TextInput
-              label={`Type "${selectedUser.username}" to confirm`}
+              label={t('users.deleteModal.typeUsername', 'Type "{{username}}" to confirm', { username: selectedUser.username })}
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.currentTarget.value)}
               disabled={isSelf(selectedUser) || isLastAdmin(selectedUser)}
             />
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeDeleteModal}>Cancel</Button>
+              <Button variant="default" onClick={closeDeleteModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
               <Button
                 color="red"
                 onClick={handleDeleteUser}
                 loading={actionLoading}
                 disabled={deleteConfirmText !== selectedUser.username || isSelf(selectedUser) || isLastAdmin(selectedUser)}
               >
-                Delete User
+                {t('users.deleteUser', 'Delete User')}
               </Button>
             </Group>
           </Stack>

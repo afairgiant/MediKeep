@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   NavLink,
@@ -28,35 +29,35 @@ import {
 } from '@tabler/icons-react';
 import './AdminSidebar.css';
 
-const NAV_SECTIONS = [
+const getNavSections = (t) => [
   {
-    label: 'Dashboard',
+    label: t('sidebar.sections.dashboard', 'Dashboard'),
     items: [
-      { label: 'Overview', icon: IconChartBar, path: '/admin', exact: true },
-      { label: 'Analytics', icon: IconTrendingUp, path: '/admin/analytics' },
+      { label: t('sidebar.items.overview', 'Overview'), icon: IconChartBar, path: '/admin', exact: true },
+      { label: t('sidebar.items.analytics', 'Analytics'), icon: IconTrendingUp, path: '/admin/analytics' },
     ],
   },
   {
-    label: 'Data Management',
+    label: t('sidebar.sections.dataManagement', 'Data Management'),
     items: [
-      { label: 'Data Models', icon: IconDatabase, path: '/admin/data-models' },
-      { label: 'User Management', icon: IconUsers, path: '/admin/users' },
-      { label: 'Trash', icon: IconTrash, path: '/admin/trash' },
+      { label: t('sidebar.items.dataModels', 'Data Models'), icon: IconDatabase, path: '/admin/data-models' },
+      { label: t('sidebar.items.userManagement', 'User Management'), icon: IconUsers, path: '/admin/users' },
+      { label: t('sidebar.items.trash', 'Trash'), icon: IconTrash, path: '/admin/trash' },
     ],
   },
   {
-    label: 'Monitoring',
+    label: t('sidebar.sections.monitoring', 'Monitoring'),
     items: [
-      { label: 'Audit Log', icon: IconFileText, path: '/admin/audit-log' },
-      { label: 'System Health', icon: IconHeartRateMonitor, path: '/admin/system-health' },
+      { label: t('sidebar.items.auditLog', 'Audit Log'), icon: IconFileText, path: '/admin/audit-log' },
+      { label: t('sidebar.items.systemHealth', 'System Health'), icon: IconHeartRateMonitor, path: '/admin/system-health' },
     ],
   },
   {
-    label: 'Tools',
+    label: t('sidebar.sections.tools', 'Tools'),
     items: [
-      { label: 'Backup Management', icon: IconDeviceFloppy, path: '/admin/backup' },
-      { label: 'Maintenance', icon: IconTool, path: '/admin/tools' },
-      { label: 'Settings', icon: IconSettings, path: '/admin/settings' },
+      { label: t('sidebar.items.backupManagement', 'Backup Management'), icon: IconDeviceFloppy, path: '/admin/backup' },
+      { label: t('sidebar.items.maintenance', 'Maintenance'), icon: IconTool, path: '/admin/tools' },
+      { label: t('sidebar.items.settings', 'Settings'), icon: IconSettings, path: '/admin/settings' },
     ],
   },
 ];
@@ -67,6 +68,9 @@ const isActive = (currentPath, item) => {
 };
 
 const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
+  const { t } = useTranslation('admin');
+  const sections = useMemo(() => getNavSections(t), [t]);
+
   const closeSidebar = () => {
     if (isOpen) onToggle?.();
   };
@@ -93,7 +97,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
 
       <Box
         component="nav"
-        aria-label="Admin navigation"
+        aria-label={t('sidebar.adminNavigation', 'Admin navigation')}
         className={`admin-sidebar ${isOpen ? 'open' : 'closed'}`}
       >
         <Group
@@ -108,13 +112,13 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
               <ThemeIcon variant="light" size="md" color="blue">
                 <IconTool size={16} />
               </ThemeIcon>
-              <Text fw={600} size="lg">Admin</Text>
+              <Text fw={600} size="lg">{t('sidebar.title', 'Admin')}</Text>
             </Group>
           )}
           <ActionIcon
             variant="subtle"
             onClick={() => onToggle?.()}
-            aria-label="Toggle sidebar"
+            aria-label={t('sidebar.toggleSidebar', 'Toggle sidebar')}
             size="lg"
           >
             {isOpen ? <IconChevronLeft size={18} /> : <IconChevronRight size={18} />}
@@ -123,7 +127,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
 
         <ScrollArea h="calc(100vh - 70px)" px={isOpen ? 'xs' : 0} py="md">
           <Stack gap="lg">
-            {NAV_SECTIONS.map((section) => (
+            {sections.map((section) => (
               <Box key={section.label}>
                 {isOpen && (
                   <Text
@@ -147,7 +151,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
                       return (
                         <Tooltip
                           key={item.path}
-                          label={item.disabled ? `${item.label} (Coming Soon)` : item.label}
+                          label={item.disabled ? t('sidebar.comingSoon', '{{label}} (Coming Soon)', { label: item.label }) : item.label}
                           position="right"
                           withArrow
                         >

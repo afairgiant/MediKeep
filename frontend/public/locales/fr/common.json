@@ -29,6 +29,7 @@
     "print": "Imprimer",
     "refresh": "Rafraîchir",
     "retry": "Réessayer",
+    "restore": "Restaurer",
     "continue": "Continuer",
     "skip": "Ignorer",
     "done": "Fait",
@@ -2541,51 +2542,6 @@
     "addNew": "Ajouter une nouvelle allergie",
     "messages": {
       "loading": "Chargement des allergies..."
-    }
-  },
-  "admin": {
-    "createUser": {
-      "username": "Nom d'utilisateur",
-      "usernamePlaceholder": "Saisir le nom d'utilisateur",
-      "password": "Mot de passe",
-      "passwordPlaceholder": "Saisir le mot de passe (au moins 6 caractères, inclure une lettre et un chiffre)",
-      "email": "E-mail",
-      "emailPlaceholder": "Saisir l'adresse e-mail",
-      "role": "Rôle",
-      "roleUser": "Utilisateur",
-      "roleAdmin": "Administrateur",
-      "firstName": "Prénom",
-      "firstNamePlaceholder": "Saisir le prénom",
-      "lastName": "Nom de famille",
-      "lastNamePlaceholder": "Saisir le nom de famille",
-      "submitButton": "Créer le compte",
-      "noteLabel": "Remarque :",
-      "noteText": "Un dossier patient sera automatiquement créé pour cet utilisateur avec le rôle par défaut \"utilisateur\".",
-      "validation": {
-        "firstNameRequired": "Veuillez saisir le prénom",
-        "lastNameRequired": "Veuillez saisir le nom de famille",
-        "usernameMinLength": "Le nom d'utilisateur doit contenir au moins 3 caractères",
-        "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
-        "passwordRequirements": "Le mot de passe doit contenir au moins une lettre et un chiffre"
-      },
-      "passwordReqs": {
-        "minLength": "Au moins 6 caractères",
-        "hasLetter": "Contient au moins une lettre",
-        "hasNumber": "Contient au moins un chiffre"
-      },
-      "linkPatient": {
-        "checkbox": "Lier à un dossier patient existant",
-        "hint": "Au lieu de créer un nouveau dossier patient, liez le nouvel utilisateur à un patient existant (par exemple, un enfant qui a désormais besoin de sa propre connexion).",
-        "selectPlaceholder": "Sélectionner un patient...",
-        "loading": "Chargement des patients...",
-        "selfRecordBadge": "Auto-dossier",
-        "patientId": "ID",
-        "dob": "Date de naissance",
-        "owner": "Propriétaire",
-        "currentOwner": "Propriétaire actuel",
-        "selfRecordWarningTitle": "Remarque :",
-        "selfRecordWarning": "Il s'agit de l'auto-dossier du propriétaire actuel. Un nouveau dossier personnel sera créé pour le propriétaire initial avec ses informations démographiques recopiées. Le propriétaire initial recevra un accès de modification à ce patient."
-      }
     }
   }
 }

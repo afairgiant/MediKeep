@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
   Group,
@@ -24,6 +25,7 @@ import {
 import './AdminHeader.css';
 
 const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
+  const { t } = useTranslation('admin');
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,22 +63,22 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
             variant="filled"
             size="lg"
             onClick={handleToggleSidebar}
-            aria-label="Toggle sidebar"
+            aria-label={t('sidebar.toggleSidebar', 'Toggle sidebar')}
           >
             <IconMenu2 size={20} />
           </ActionIcon>
           <Text fw={600} size="xl" style={{ whiteSpace: 'nowrap' }}>
-            Medical Records Admin
+            {t('header.title', 'Medical Records Admin')}
           </Text>
         </Group>
 
         <Box style={{ flex: 1, maxWidth: 500 }} mx="md" visibleFrom="sm">
           <TextInput
-            placeholder="Search records, users, or data..."
+            placeholder={t('header.searchPlaceholder', 'Search records, users, or data...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.currentTarget.value)}
             onKeyDown={handleSearchKeyDown}
-            aria-label="Search data models"
+            aria-label={t('header.searchAriaLabel', 'Search data models')}
             leftSection={<IconSearch size={16} />}
             rightSection={
               <ActionIcon
@@ -92,16 +94,16 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
         </Box>
 
         <Group gap="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
-          <Tooltip label="Return to Dashboard">
+          <Tooltip label={t('header.returnToDashboard', 'Return to Dashboard')}>
             <Button
               variant="default"
               size="compact-sm"
               leftSection={<IconArrowLeft size={14} />}
               onClick={() => navigate('/dashboard')}
-              title="Return to Dashboard"
+              title={t('header.returnToDashboard', 'Return to Dashboard')}
               visibleFrom="md"
             >
-              Dashboard
+              {t('header.dashboard', 'Dashboard')}
             </Button>
           </Tooltip>
 
@@ -117,23 +119,23 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
             }}
           >
             <Badge size="sm" variant="light" color="green">
-              Admin
+              {t('header.adminBadge', 'Admin')}
             </Badge>
             <Text size="sm" fw={500}>
-              {user?.username || 'Administrator'}
+              {user?.username || t('header.administrator', 'Administrator')}
             </Text>
             <Avatar size="sm" radius="xl" color="blue">
               <IconUser size={14} />
             </Avatar>
           </Group>
 
-          <Tooltip label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}>
+          <Tooltip label={t('header.switchToMode', 'Switch to {{mode}} mode', { mode: theme === 'light' ? t('shared.dark', 'dark') : t('shared.light', 'light') })}>
             <ActionIcon
               variant="default"
               size="lg"
               radius="xl"
               onClick={toggleTheme}
-              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              title={t('header.switchToMode', 'Switch to {{mode}} mode', { mode: theme === 'light' ? t('shared.dark', 'dark') : t('shared.light', 'light') })}
             >
               {theme === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
             </ActionIcon>
@@ -144,9 +146,9 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
             size="compact-sm"
             leftSection={<IconLogout size={14} />}
             onClick={handleLogout}
-            title="Logout"
+            title={t('header.logout', 'Logout')}
           >
-            Logout
+            {t('header.logout', 'Logout')}
           </Button>
         </Group>
       </Group>
