@@ -2434,7 +2434,8 @@
         "weightMin": "El peso debe ser al menos {{min}} {{unit}}"
       },
       "vitalSignsDesc": "Mediciones fisiológicas principales",
-      "weightDesc": "Peso en {{unit}}"
+      "weightDesc": "Peso en {{unit}}",
+      "lockedByImport": "Gestionado por importación del dispositivo"
     },
     "healthSummary": "Resumen de salud",
     "loading": "Cargando signos vitales...",
@@ -2495,6 +2496,45 @@
       "mgdl": "mg/dL",
       "mmHg": "mmHg",
       "perMin": "/min"
+    },
+    "import": {
+      "title": "Importar signos vitales",
+      "selectDevice": "Seleccionar dispositivo",
+      "selectDevicePlaceholder": "Elija su dispositivo...",
+      "uploadFile": "Subir archivo CSV",
+      "preview": "Vista previa",
+      "importButton": "Importar",
+      "back": "Volver",
+      "importing": "Importando signos vitales...",
+      "previewTitle": "Vista previa de importación",
+      "totalReadings": "Total de lecturas",
+      "duplicatesFound": "Duplicados encontrados",
+      "newReadings": "Nuevas lecturas",
+      "dateRange": "Rango de fechas",
+      "skipDuplicates": "Omitir lecturas duplicadas",
+      "duplicateWarning": "{{count}} lecturas ya existen en este rango de fechas. Marque la casilla de arriba para omitirlas.",
+      "success": "{{count}} lecturas importadas correctamente",
+      "successWithSkipped": "{{imported}} lecturas importadas ({{skipped}} duplicados omitidos)",
+      "noFile": "Por favor, seleccione un archivo CSV",
+      "noDevice": "Por favor, seleccione un dispositivo",
+      "fileTooLarge": "El archivo supera el límite de 10 MB",
+      "invalidFileType": "Solo se admiten archivos CSV",
+      "duplicate": "Duplicado",
+      "parsingFailed": "Error al analizar el archivo CSV"
+    },
+    "summary": {
+      "dailySummary": "Resumen diario",
+      "readings": "{{count}} lecturas",
+      "avgGlucose": "Prom",
+      "minGlucose": "Mín",
+      "maxGlucose": "Máx",
+      "expandDetails": "Mostrar lecturas",
+      "collapseDetails": "Ocultar lecturas",
+      "importedFrom": "Importado desde {{source}}",
+      "glucoseTrend": "Tendencia de glucosa",
+      "time": "Hora",
+      "confirmDeleteDay": "¿Eliminar las {{count}} lecturas importadas de este día?",
+      "deleteDay": "Eliminar día"
     }
   },
   "allergies": {

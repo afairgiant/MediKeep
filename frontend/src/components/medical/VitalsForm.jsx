@@ -61,7 +61,6 @@ import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
 
-
 const VitalsForm = ({
   vitals = null,
   patientId,
@@ -75,6 +74,8 @@ const VitalsForm = ({
   clearError,
 }) => {
   const { t } = useTranslation(['common', 'errors']);
+  // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
+  const lockedFields = vitals?._lockedFields || [];
   const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
@@ -257,7 +258,6 @@ const VitalsForm = ({
           max: { value: 100, message: t('vitals.form.validation.oxygenMax', 'Oxygen saturation cannot exceed 100%') },
         },
       },
-
       blood_glucose: {
         label: t('vitals.modal.bloodGlucose', 'Blood Glucose'),
         type: 'number',
@@ -777,12 +777,13 @@ const VitalsForm = ({
     }
 
     if (config.type === 'number') {
+      const isLocked = lockedFields.includes(fieldName);
       return (
         <NumberInput
           key={fieldName}
           label={config.label}
           placeholder={config.placeholder}
-          value={value === null || value === undefined ? '' : value}
+          value={value == null ? '' : value}
           onChange={val => handleInputChange(fieldName, val)}
           leftSection={<IconComponent size={16} />}
           rightSection={
@@ -798,6 +799,8 @@ const VitalsForm = ({
           precision={config.step < 1 ? 1 : 0}
           required={config.required}
           error={error}
+          disabled={isLocked}
+          description={isLocked ? t('vitals.form.lockedByImport', 'Managed by device import') : undefined}
         />
       );
     }

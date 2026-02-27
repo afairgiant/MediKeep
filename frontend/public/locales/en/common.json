@@ -289,7 +289,8 @@
         "pharmacy": "Pharmacy",
         "ambulatory": "Ambulatory Care",
         "other": "Other"
-      }
+      },
+      "lockedByImport": "Managed by device import"
     },
     "modal": {
       "bloodGlucose": "Blood Glucose",
@@ -370,6 +371,45 @@
       "errorLoading": "Error loading vital signs",
       "noRecords": "No vital signs records found",
       "noRecordsDesc": "Vital signs will appear here once they have been recorded"
+    },
+    "import": {
+      "title": "Import Vitals",
+      "selectDevice": "Select Device",
+      "selectDevicePlaceholder": "Choose your device...",
+      "uploadFile": "Upload CSV File",
+      "preview": "Preview",
+      "importButton": "Import",
+      "back": "Back",
+      "importing": "Importing vitals...",
+      "previewTitle": "Import Preview",
+      "totalReadings": "Total Readings",
+      "duplicatesFound": "Duplicates Found",
+      "newReadings": "New Readings",
+      "dateRange": "Date Range",
+      "skipDuplicates": "Skip duplicate readings",
+      "duplicateWarning": "{{count}} readings already exist in this date range. Check the box above to skip them.",
+      "success": "Successfully imported {{count}} readings",
+      "successWithSkipped": "Imported {{imported}} readings ({{skipped}} duplicates skipped)",
+      "noFile": "Please select a CSV file",
+      "noDevice": "Please select a device",
+      "fileTooLarge": "File exceeds 10 MB limit",
+      "invalidFileType": "Only CSV files are supported",
+      "duplicate": "Duplicate",
+      "parsingFailed": "Failed to parse CSV file"
+    },
+    "summary": {
+      "dailySummary": "Daily Summary",
+      "readings": "{{count}} readings",
+      "avgGlucose": "Avg",
+      "minGlucose": "Min",
+      "maxGlucose": "Max",
+      "expandDetails": "Show readings",
+      "collapseDetails": "Hide readings",
+      "importedFrom": "Imported from {{source}}",
+      "glucoseTrend": "Glucose Trend",
+      "time": "Time",
+      "confirmDeleteDay": "Delete all {{count}} imported readings for this day?",
+      "deleteDay": "Delete Day"
     }
   },
   "medications": {

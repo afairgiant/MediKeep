@@ -289,7 +289,8 @@
         "pharmacy": "Pharmacie",
         "ambulatory": "Soins ambulatoires",
         "other": "Autre"
-      }
+      },
+      "lockedByImport": "Géré par l'importation de l'appareil"
     },
     "modal": {
       "bloodGlucose": "Taux de glucose dans le sang",
@@ -370,6 +371,45 @@
       "errorLoading": "Erreur de chargement des signes vitaux",
       "noRecords": "Aucune entrée de signes vitaux trouvée",
       "noRecordsDesc": "Les signes vitaux apparaîtront ici une fois qu'ils auront été saisis"
+    },
+    "import": {
+      "title": "Importer des signes vitaux",
+      "selectDevice": "Sélectionner un appareil",
+      "selectDevicePlaceholder": "Choisissez votre appareil...",
+      "uploadFile": "Importer un fichier CSV",
+      "preview": "Aperçu",
+      "importButton": "Importer",
+      "back": "Retour",
+      "importing": "Importation des signes vitaux en cours...",
+      "previewTitle": "Aperçu de l'importation",
+      "totalReadings": "Total des mesures",
+      "duplicatesFound": "Doublons détectés",
+      "newReadings": "Nouvelles mesures",
+      "dateRange": "Plage de dates",
+      "skipDuplicates": "Ignorer les mesures en double",
+      "duplicateWarning": "{{count}} mesures existent déjà dans cette plage de dates. Cochez la case ci-dessus pour les ignorer.",
+      "success": "{{count}} mesures importées avec succès",
+      "successWithSkipped": "{{imported}} mesures importées ({{skipped}} doublons ignorés)",
+      "noFile": "Veuillez sélectionner un fichier CSV",
+      "noDevice": "Veuillez sélectionner un appareil",
+      "fileTooLarge": "Le fichier dépasse la limite de 10 Mo",
+      "invalidFileType": "Seuls les fichiers CSV sont pris en charge",
+      "duplicate": "Doublon",
+      "parsingFailed": "Échec de l'analyse du fichier CSV"
+    },
+    "summary": {
+      "dailySummary": "Résumé quotidien",
+      "readings": "{{count}} mesures",
+      "avgGlucose": "Moy",
+      "minGlucose": "Min",
+      "maxGlucose": "Max",
+      "expandDetails": "Afficher les mesures",
+      "collapseDetails": "Masquer les mesures",
+      "importedFrom": "Importé depuis {{source}}",
+      "glucoseTrend": "Tendance de la glycémie",
+      "time": "Heure",
+      "confirmDeleteDay": "Supprimer les {{count}} mesures importées pour cette journée ?",
+      "deleteDay": "Supprimer la journée"
     }
   },
   "medications": {

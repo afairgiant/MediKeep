@@ -336,7 +336,47 @@
       "pasteDateTime": "Datum/Uhrzeit einfügen oder eingeben",
       "pasteDateTimeDescription": "Datum/Uhrzeit eingeben oder einfügen, oder Kalender zum Auswählen klicken",
       "pasteDateTimePlaceholder": "z. B. 29.07.2015 23:58:21",
-      "selectTime": "Uhrzeit"
+      "selectTime": "Uhrzeit",
+      "lockedByImport": "Verwaltet durch Geräteimport"
+    },
+    "import": {
+      "title": "Vitalwerte importieren",
+      "selectDevice": "Gerät auswählen",
+      "selectDevicePlaceholder": "Wählen Sie Ihr Gerät...",
+      "uploadFile": "CSV-Datei hochladen",
+      "preview": "Vorschau",
+      "importButton": "Importieren",
+      "back": "Zurück",
+      "importing": "Vitalwerte werden importiert...",
+      "previewTitle": "Import-Vorschau",
+      "totalReadings": "Gesamtmessungen",
+      "duplicatesFound": "Duplikate gefunden",
+      "newReadings": "Neue Messungen",
+      "dateRange": "Datumsbereich",
+      "skipDuplicates": "Doppelte Messungen überspringen",
+      "duplicateWarning": "{{count}} Messungen existieren bereits in diesem Datumsbereich. Aktivieren Sie das Kontrollkästchen oben, um sie zu überspringen.",
+      "success": "{{count}} Messungen erfolgreich importiert",
+      "successWithSkipped": "{{imported}} Messungen importiert ({{skipped}} Duplikate übersprungen)",
+      "noFile": "Bitte wählen Sie eine CSV-Datei aus",
+      "noDevice": "Bitte wählen Sie ein Gerät aus",
+      "fileTooLarge": "Die Datei überschreitet das Limit von 10 MB",
+      "invalidFileType": "Nur CSV-Dateien werden unterstützt",
+      "duplicate": "Duplikat",
+      "parsingFailed": "CSV-Datei konnte nicht analysiert werden"
+    },
+    "summary": {
+      "dailySummary": "Tagesübersicht",
+      "readings": "{{count}} Messungen",
+      "avgGlucose": "Durchschn.",
+      "minGlucose": "Min",
+      "maxGlucose": "Max",
+      "expandDetails": "Messungen anzeigen",
+      "collapseDetails": "Messungen ausblenden",
+      "importedFrom": "Importiert von {{source}}",
+      "glucoseTrend": "Glukosetrend",
+      "time": "Uhrzeit",
+      "confirmDeleteDay": "Alle {{count}} importierten Messungen für diesen Tag löschen?",
+      "deleteDay": "Tag löschen"
     }
   },
   "medications": {

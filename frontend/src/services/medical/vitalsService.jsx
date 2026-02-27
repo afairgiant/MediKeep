@@ -12,14 +12,9 @@ class VitalsService {
    * @returns {Promise<Array>}
    */
   async getVitals(params = {}) {
-    try {
-      const queryParams = new URLSearchParams(params).toString();
-      const url = queryParams ? `/vitals/?${queryParams}` : '/vitals/';
-      return await apiClient.get(url);
-    } catch (error) {
-      // Error fetching vitals
-      throw error;
-    }
+    const queryParams = new URLSearchParams(params).toString();
+    const url = queryParams ? `/vitals/?${queryParams}` : '/vitals/';
+    return await apiClient.get(url);
   }
 
   /**
@@ -28,12 +23,7 @@ class VitalsService {
    * @returns {Promise<Object>}
    */
   async getVitalsById(vitalsId) {
-    try {
-      return await apiClient.get(`/vitals/${vitalsId}`);
-    } catch (error) {
-      // Error fetching vitals by ID
-      throw error;
-    }
+    return await apiClient.get(`/vitals/${vitalsId}`);
   }
 
   /**
@@ -42,12 +32,7 @@ class VitalsService {
    * @returns {Promise<Object>}
    */
   async createVitals(vitalsData) {
-    try {
-      return await apiClient.post('/vitals/', vitalsData);
-    } catch (error) {
-      // Error creating vitals
-      throw error;
-    }
+    return await apiClient.post('/vitals/', vitalsData);
   }
 
   /**
@@ -57,12 +42,7 @@ class VitalsService {
    * @returns {Promise<Object>}
    */
   async updateVitals(vitalsId, vitalsData) {
-    try {
-      return await apiClient.put(`/vitals/${vitalsId}`, vitalsData);
-    } catch (error) {
-      // Error updating vitals
-      throw error;
-    }
+    return await apiClient.put(`/vitals/${vitalsId}`, vitalsData);
   }
 
   /**
@@ -71,12 +51,7 @@ class VitalsService {
    * @returns {Promise<void>}
    */
   async deleteVitals(vitalsId) {
-    try {
-      return await apiClient.delete(`/vitals/${vitalsId}`);
-    } catch (error) {
-      // Error deleting vitals
-      throw error;
-    }
+    return await apiClient.delete(`/vitals/${vitalsId}`);
   }
 
   /**
@@ -86,16 +61,11 @@ class VitalsService {
    * @returns {Promise<Array>}
    */
   async getPatientVitals(patientId, params = {}) {
-    try {
-      const queryParams = new URLSearchParams(params).toString();
-      const url = queryParams
-        ? `/vitals/patient/${patientId}?${queryParams}`
-        : `/vitals/patient/${patientId}`;
-      return await apiClient.get(url);
-    } catch (error) {
-      // Error fetching patient vitals
-      throw error;
-    }
+    const queryParams = new URLSearchParams(params).toString();
+    const url = queryParams
+      ? `/vitals/patient/${patientId}?${queryParams}`
+      : `/vitals/patient/${patientId}`;
+    return await apiClient.get(url);
   }
 
   /**
@@ -105,18 +75,12 @@ class VitalsService {
    * @returns {Promise<{items: Array, total: number, skip: number, limit: number}>}
    */
   async getPatientVitalsPaginated(patientId, params = {}) {
-    try {
-      const queryParams = new URLSearchParams(params).toString();
-      const url = queryParams
-        ? `/vitals/patient/${patientId}/paginated?${queryParams}`
-        : `/vitals/patient/${patientId}/paginated`;
-      const response = await apiClient.get(url);
-      // Unwrap data from API client response wrapper
-      return response?.data ?? response;
-    } catch (error) {
-      // Error fetching paginated patient vitals
-      throw error;
-    }
+    const queryParams = new URLSearchParams(params).toString();
+    const url = queryParams
+      ? `/vitals/patient/${patientId}/paginated?${queryParams}`
+      : `/vitals/patient/${patientId}/paginated`;
+    const response = await apiClient.get(url);
+    return response?.data ?? response;
   }
 
   /**
@@ -126,16 +90,11 @@ class VitalsService {
    * @returns {Promise<Object>}
    */
   async getPatientVitalsStats(patientId, params = {}) {
-    try {
-      const queryParams = new URLSearchParams(params).toString();
-      const url = queryParams
-        ? `/vitals/patient/${patientId}/stats?${queryParams}`
-        : `/vitals/patient/${patientId}/stats`;
-      return await apiClient.get(url);
-    } catch (error) {
-      // Error fetching patient vitals stats
-      throw error;
-    }
+    const queryParams = new URLSearchParams(params).toString();
+    const url = queryParams
+      ? `/vitals/patient/${patientId}/stats?${queryParams}`
+      : `/vitals/patient/${patientId}/stats`;
+    return await apiClient.get(url);
   }
 
   /**
@@ -147,20 +106,77 @@ class VitalsService {
    * @returns {Promise<Array>}
    */
   async getPatientVitalsDateRange(patientId, startDate, endDate, params = {}) {
-    try {
-      const queryParams = new URLSearchParams({
-        start_date: startDate,
-        end_date: endDate,
-        ...params,
-      }).toString();
-      return await apiClient.get(
-        `/vitals/patient/${patientId}/date-range?${queryParams}`
-      );
-    } catch (error) {
-      // Error fetching patient vitals by date range
-      throw error;
-    }
+    const queryParams = new URLSearchParams({
+      start_date: startDate,
+      end_date: endDate,
+      ...params,
+    }).toString();
+    return await apiClient.get(
+      `/vitals/patient/${patientId}/date-range?${queryParams}`
+    );
   }
+
+  /**
+   * Get list of supported import devices
+   * @returns {Promise<{devices: Array<{key: string, name: string}>}>}
+   */
+  async getImportDevices() {
+    const response = await apiClient.get('/vitals/import/devices');
+    return response?.data ?? response;
+  }
+
+  /**
+   * Preview a vitals CSV import with duplicate detection
+   * @param {number} patientId
+   * @param {string} deviceKey - e.g., "dexcom_clarity"
+   * @param {File} file - CSV file
+   * @returns {Promise<Object>} Preview response with counts and sample rows
+   */
+  async previewImport(patientId, deviceKey, file) {
+    const formData = new FormData();
+    formData.append('device_key', deviceKey);
+    formData.append('file', file);
+    const response = await apiClient.postForm(
+      `/vitals/patient/${patientId}/import/preview`,
+      formData
+    );
+    return response?.data ?? response;
+  }
+
+  /**
+   * Execute a vitals CSV import
+   * @param {number} patientId
+   * @param {string} deviceKey
+   * @param {File} file - CSV file (re-uploaded)
+   * @param {boolean} skipDuplicates
+   * @returns {Promise<Object>} Import result with counts
+   */
+  async executeImport(patientId, deviceKey, file, skipDuplicates = true) {
+    const formData = new FormData();
+    formData.append('device_key', deviceKey);
+    formData.append('file', file);
+    formData.append('skip_duplicates', String(skipDuplicates));
+    const response = await apiClient.postForm(
+      `/vitals/patient/${patientId}/import/execute`,
+      formData
+    );
+    return response?.data ?? response;
+  }
+
+  /**
+   * Delete all imported vitals for a patient on a specific date
+   * @param {number} patientId
+   * @param {string} importSource - e.g., "dexcom_clarity"
+   * @param {string} date - YYYY-MM-DD
+   * @returns {Promise<{deleted_count: number}>}
+   */
+  async deleteImportedDay(patientId, importSource, date) {
+    const response = await apiClient.delete(
+      `/vitals/patient/${patientId}/import/${importSource}/date/${date}`
+    );
+    return response?.data ?? response;
+  }
+
   /**
    * Calculate BMI from height and weight
    * @param {number} weight - Weight in lbs
@@ -178,11 +194,12 @@ class VitalsService {
     // Convert height from inches to meters
     const heightInMeters = height * 0.0254;
 
-    // Calculate BMI: weight(kg) / height(m)²
+    // Calculate BMI: weight(kg) / height(m)^2
     const bmi = weightInKg / (heightInMeters * heightInMeters);
 
     return parseFloat(bmi.toFixed(1));
   }
+
   /**
    * Get BMI category
    * @param {number} bmi
@@ -231,7 +248,9 @@ class VitalsService {
    */
   validateVitalsData(vitalsData) {
     const errors = {};
-    const warnings = []; // Required fields
+    const warnings = [];
+
+    // Required fields
     if (!vitalsData.patient_id) errors.patient_id = 'Patient is required';
     if (!vitalsData.recorded_date)
       errors.recorded_date = 'Measurement date is required';
@@ -260,12 +279,16 @@ class VitalsService {
       if (vitalsData.temperature < 90 || vitalsData.temperature > 110) {
         errors.temperature = 'Temperature must be between 90-110°F';
       }
-    } // Weight validation
+    }
+
+    // Weight validation
     if (vitalsData.weight) {
       if (vitalsData.weight < 0.1 || vitalsData.weight > 2200) {
         errors.weight = 'Weight must be between 0.1-2200 lbs';
       }
-    } // Height validation (in inches)
+    }
+
+    // Height validation (in inches)
     if (vitalsData.height) {
       if (vitalsData.height < 12 || vitalsData.height > 120) {
         errors.height = 'Height must be between 12-120 inches';
@@ -313,16 +336,11 @@ class VitalsService {
    * @returns {Promise<Object>}
    */
   async getVitalsStats(params = {}) {
-    try {
-      const queryParams = new URLSearchParams(params).toString();
-      const url = queryParams
-        ? `/vitals/stats?${queryParams}`
-        : `/vitals/stats`;
-      return await apiClient.get(url);
-    } catch (error) {
-      // Error fetching current user vitals stats
-      throw error;
-    }
+    const queryParams = new URLSearchParams(params).toString();
+    const url = queryParams
+      ? `/vitals/stats?${queryParams}`
+      : `/vitals/stats`;
+    return await apiClient.get(url);
   }
 }
 
