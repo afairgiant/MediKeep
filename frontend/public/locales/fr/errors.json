@@ -82,9 +82,9 @@
   "relationships": {
     "addConditionFailed": "Echec de l'ajout d'une relation à une condition",
     "addMedicationFailed": "Echec de l'ajout d'une relation à un médicament",
-    "addFailed": "Echec de l'ajout de la relation",
-    "updateFailed": "Echec de la mise à jour de la relation",
-    "deleteFailed": "Echec de la suppression de la relation",
+    "addFailed": "Echec de l'ajout d'une relation",
+    "updateFailed": "Echec de la mise à jour d'une relation",
+    "deleteFailed": "Echec de la suppression d'une relation",
     "fetchFailed": "Echec du chargement des relations"
   }
 }
