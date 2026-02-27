@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   Paper,
@@ -104,6 +105,7 @@ function ConfirmationModal({
   warning,
   children,
 }: ConfirmationModalProps): React.ReactElement {
+  const { t: tCommon } = useTranslation('common');
   return (
     <Modal opened={opened} onClose={onClose} title={title} centered>
       <Stack gap="md">
@@ -115,7 +117,7 @@ function ConfirmationModal({
         {children}
         <Group justify="flex-end">
           <Button variant="subtle" color="gray" onClick={onClose} disabled={loading}>
-            Cancel
+            {tCommon('buttons.cancel', 'Cancel')}
           </Button>
           <Button
             color={confirmColor}
@@ -132,6 +134,7 @@ function ConfirmationModal({
 }
 
 function TrashManagement(): React.ReactElement {
+  const { t } = useTranslation(['admin', 'common']);
   const { formatDateTime } = useDateFormat();
 
   // Data
@@ -191,15 +194,15 @@ function TrashManagement(): React.ReactElement {
     try {
       await adminApiService.restoreFromTrash(restoreTarget.trash_path);
       notifications.show({
-        title: 'File restored',
-        message: `${restoreTarget.filename} restored to original location`,
+        title: t('trash.fileRestored', 'File restored'),
+        message: t('trash.fileRestoredMessage', '{{filename}} restored to original location', { filename: restoreTarget.filename }),
         color: 'green',
       });
       setRestoreTarget(null);
       await fetchTrashContents();
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'Failed to restore file');
-      notifications.show({ title: 'Restore failed', message, color: 'red' });
+      notifications.show({ title: t('trash.restoreFailed', 'Restore failed'), message, color: 'red' });
       logger.error('trash_restore_error', 'Failed to restore file from trash', {
         component: 'TrashManagement',
         error: message,
@@ -207,7 +210,7 @@ function TrashManagement(): React.ReactElement {
     } finally {
       setRestoring(null);
     }
-  }, [restoreTarget, fetchTrashContents]);
+  }, [restoreTarget, fetchTrashContents, t]);
 
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
@@ -215,15 +218,15 @@ function TrashManagement(): React.ReactElement {
     try {
       await adminApiService.permanentlyDeleteFromTrash(deleteTarget.trash_path);
       notifications.show({
-        title: 'File deleted',
-        message: `${deleteTarget.filename} permanently deleted`,
+        title: t('trash.fileDeleted', 'File deleted'),
+        message: t('trash.fileDeletedMessage', '{{filename}} permanently deleted', { filename: deleteTarget.filename }),
         color: 'green',
       });
       setDeleteTarget(null);
       await fetchTrashContents();
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'Failed to permanently delete file');
-      notifications.show({ title: 'Delete failed', message, color: 'red' });
+      notifications.show({ title: t('trash.deleteFailed', 'Delete failed'), message, color: 'red' });
       logger.error('trash_delete_error', 'Failed to permanently delete file from trash', {
         component: 'TrashManagement',
         error: message,
@@ -231,7 +234,7 @@ function TrashManagement(): React.ReactElement {
     } finally {
       setDeleting(null);
     }
-  }, [deleteTarget, fetchTrashContents]);
+  }, [deleteTarget, fetchTrashContents, t]);
 
   const confirmPurge = useCallback(async () => {
     setPurging(true);
@@ -239,17 +242,18 @@ function TrashManagement(): React.ReactElement {
       const result: CleanupResult = await adminApiService.cleanupTrash();
       const deletedFiles = result?.deleted_files ?? 0;
       const deletedDirs = result?.deleted_dirs ?? 0;
-      const dirsSuffix = deletedDirs > 0 ? ` across ${deletedDirs} ${deletedDirs === 1 ? 'directory' : 'directories'}` : '';
+      const purgedMsg = t('trash.purgedMessage', '{{count}} expired files permanently deleted', { count: deletedFiles });
+      const dirsSuffix = deletedDirs > 0 ? ` ${t('trash.purgedDirectories', 'across {{count}} directories', { count: deletedDirs })}` : '';
       notifications.show({
-        title: 'Trash purged',
-        message: `${deletedFiles} expired ${pluralFiles(deletedFiles)} permanently deleted${dirsSuffix}`,
+        title: t('trash.trashPurged', 'Trash purged'),
+        message: `${purgedMsg}${dirsSuffix}`,
         color: 'green',
       });
       setPurgeModalOpen(false);
       await fetchTrashContents();
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'Failed to purge expired files');
-      notifications.show({ title: 'Purge failed', message, color: 'red' });
+      notifications.show({ title: t('trash.purgeFailed', 'Purge failed'), message, color: 'red' });
       logger.error('trash_purge_error', 'Failed to purge expired trash files', {
         component: 'TrashManagement',
         error: message,
@@ -257,7 +261,7 @@ function TrashManagement(): React.ReactElement {
     } finally {
       setPurging(false);
     }
-  }, [fetchTrashContents]);
+  }, [fetchTrashContents, t]);
 
   // Client-side filtering
   const filteredItems = useMemo(() => {
@@ -318,18 +322,17 @@ function TrashManagement(): React.ReactElement {
                 <ThemeIcon size="xl" variant="light" color="yellow" aria-hidden="true">
                   <IconTrash size={24} />
                 </ThemeIcon>
-                <Title order={2}>Trash Management</Title>
+                <Title order={2}>{t('trash.title', 'Trash Management')}</Title>
               </Group>
               <Text c="dimmed" size="md">
-                Manage deleted uploaded files. Restore files to their original location or
-                permanently remove them to free up storage.
+                {t('trash.subtitle', 'Manage deleted uploaded files. Restore files to their original location or permanently remove them to free up storage.')}
               </Text>
               <Group mt="sm" gap="xs">
                 <Badge variant="light" color="yellow">
-                  {trashItems.length} {pluralFiles(trashItems.length)}
+                  {t('trash.fileCount', { count: trashItems.length, defaultValue: '{{count}} files' })}
                 </Badge>
                 <Badge variant="light" color="gray">
-                  {totalSize} total
+                  {t('trash.totalSize', '{{size}} total', { size: totalSize })}
                 </Badge>
               </Group>
             </div>
@@ -340,7 +343,7 @@ function TrashManagement(): React.ReactElement {
                 onClick={fetchTrashContents}
                 loading={loading}
               >
-                Refresh
+                {t('common:buttons.refresh', 'Refresh')}
               </Button>
               <Button
                 leftSection={<IconTrashX size={16} />}
@@ -348,7 +351,7 @@ function TrashManagement(): React.ReactElement {
                 variant="light"
                 onClick={() => setPurgeModalOpen(true)}
               >
-                Purge Expired
+                {t('trash.purgeExpired', 'Purge Expired')}
               </Button>
             </Group>
           </Group>
@@ -358,28 +361,28 @@ function TrashManagement(): React.ReactElement {
         <Paper shadow="xs" p="md" withBorder>
           <Group grow align="flex-end">
             <TextInput
-              placeholder="Search by filename or path..."
+              placeholder={t('trash.searchPlaceholder', 'Search by filename or path...')}
               leftSection={<IconSearch size={16} />}
               value={search}
               onChange={(e) => setSearch(e.currentTarget.value)}
-              aria-label="Search trash files"
+              aria-label={t('trash.searchAriaLabel', 'Search trash files')}
             />
             <DatePickerInput
               type="range"
-              placeholder="Deleted date range"
+              placeholder={t('trash.deletedDateRange', 'Deleted date range')}
               value={dateRange}
               onChange={setDateRange}
               clearable
-              aria-label="Filter by deleted date range"
+              aria-label={t('trash.filterByDeletedDate', 'Filter by deleted date range')}
             />
             <Select
-              placeholder="File type"
+              placeholder={t('trash.fileType', 'File type')}
               data={fileTypeOptions}
               value={typeFilter}
               onChange={setTypeFilter}
               clearable
               searchable
-              aria-label="Filter by file type"
+              aria-label={t('trash.filterByFileType', 'Filter by file type')}
             />
             {hasActiveFilters && (
               <Button
@@ -388,7 +391,7 @@ function TrashManagement(): React.ReactElement {
                 leftSection={<IconFilterOff size={16} />}
                 onClick={handleClearFilters}
               >
-                Clear Filters
+                {t('trash.clearFilters', 'Clear Filters')}
               </Button>
             )}
           </Group>
@@ -397,18 +400,17 @@ function TrashManagement(): React.ReactElement {
         {/* Results Info */}
         {!loading && (
           <Text size="sm" c="dimmed">
-            Showing {filteredItems.length} of {trashItems.length}{' '}
-            {pluralFiles(trashItems.length)}
-            {hasActiveFilters ? ' (filtered)' : ''}
+            {t('trash.showingFiltered', 'Showing {{shown}} of {{total}} {{files}}', { shown: filteredItems.length, total: trashItems.length, files: pluralFiles(trashItems.length) })}
+            {hasActiveFilters ? ` ${t('trash.filtered', '(filtered)')}` : ''}
           </Text>
         )}
 
         {/* Error State */}
         {error && (
-          <Alert icon={<IconAlertCircle size={16} />} title="Error loading trash" color="red">
+          <Alert icon={<IconAlertCircle size={16} />} title={t('trash.errorLoading', 'Error loading trash')} color="red">
             {error}
             <Button variant="subtle" size="xs" mt="xs" onClick={fetchTrashContents}>
-              Retry
+              {t('common:buttons.retry', 'Retry')}
             </Button>
           </Alert>
         )}
@@ -418,7 +420,7 @@ function TrashManagement(): React.ReactElement {
           <Center py="xl">
             <Stack align="center">
               <Loader size="lg" />
-              <Text c="dimmed">Loading trash contents...</Text>
+              <Text c="dimmed">{t('trash.loading', 'Loading trash contents...')}</Text>
             </Stack>
           </Center>
         )}
@@ -445,12 +447,12 @@ function TrashManagement(): React.ReactElement {
               <Table striped highlightOnHover aria-label="Deleted files">
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>Filename</Table.Th>
-                    <Table.Th>Original Location</Table.Th>
-                    <Table.Th>Deleted</Table.Th>
-                    <Table.Th>Reason</Table.Th>
-                    <Table.Th>Size</Table.Th>
-                    <Table.Th>Actions</Table.Th>
+                    <Table.Th>{t('trash.tableHeaders.filename', 'Filename')}</Table.Th>
+                    <Table.Th>{t('trash.tableHeaders.originalLocation', 'Original Location')}</Table.Th>
+                    <Table.Th>{t('trash.tableHeaders.deleted', 'Deleted')}</Table.Th>
+                    <Table.Th>{t('trash.tableHeaders.reason', 'Reason')}</Table.Th>
+                    <Table.Th>{t('trash.tableHeaders.size', 'Size')}</Table.Th>
+                    <Table.Th>{t('trash.tableHeaders.actions', 'Actions')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -491,33 +493,33 @@ function TrashManagement(): React.ReactElement {
                           </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="sm">{item.reason || 'Manual deletion'}</Text>
+                          <Text size="sm">{item.reason || t('trash.manualDeletion', 'Manual deletion')}</Text>
                         </Table.Td>
                         <Table.Td style={{ whiteSpace: 'nowrap' }}>
                           <Text size="sm">{formatFileSize(item.size_bytes)}</Text>
                         </Table.Td>
                         <Table.Td>
                           <Group gap="xs" wrap="nowrap">
-                            <Tooltip label="Restore to original location">
+                            <Tooltip label={t('trash.restoreToOriginal', 'Restore to original location')}>
                               <ActionIcon
                                 variant="light"
                                 color="green"
                                 size="sm"
                                 onClick={() => setRestoreTarget(item)}
                                 loading={restoring === item.trash_path}
-                                aria-label={`Restore ${item.filename}`}
+                                aria-label={`${t('common:buttons.restore', 'Restore')} ${item.filename}`}
                               >
                                 <IconRestore size={14} />
                               </ActionIcon>
                             </Tooltip>
-                            <Tooltip label="Permanently delete">
+                            <Tooltip label={t('trash.permanentlyDelete', 'Permanently delete')}>
                               <ActionIcon
                                 variant="light"
                                 color="red"
                                 size="sm"
                                 onClick={() => setDeleteTarget(item)}
                                 loading={deleting === item.trash_path}
-                                aria-label={`Permanently delete ${item.filename}`}
+                                aria-label={`${t('trash.permanentlyDelete', 'Permanently delete')} ${item.filename}`}
                               >
                                 <IconTrashX size={14} />
                               </ActionIcon>
@@ -536,8 +538,8 @@ function TrashManagement(): React.ReactElement {
                             </ThemeIcon>
                             <Text c="dimmed" size="sm">
                               {hasActiveFilters
-                                ? 'No files match your filters'
-                                : 'No files in trash'}
+                                ? t('trash.noFilesMatch', 'No files match your filters')
+                                : t('trash.noFilesInTrash', 'No files in trash')}
                             </Text>
                           </Stack>
                         </Center>
@@ -556,21 +558,18 @@ function TrashManagement(): React.ReactElement {
         opened={restoreTarget !== null}
         onClose={() => setRestoreTarget(null)}
         onConfirm={confirmRestore}
-        title="Restore File"
-        confirmLabel="Restore"
+        title={t('trash.restoreFile', 'Restore File')}
+        confirmLabel={t('common:buttons.restore', 'Restore')}
         confirmColor="green"
         confirmIcon={<IconRestore size={16} />}
         loading={restoring !== null}
       >
         <Text size="sm">
-          Are you sure you want to restore{' '}
-          <Text component="span" fw={600}>
-            {restoreTarget?.filename}
-          </Text>
+          {t('trash.restoreConfirm', 'Are you sure you want to restore <strong>{{filename}}</strong>', { filename: restoreTarget?.filename })}
           {restoreTarget?.original_path && (
             <>
               {' '}
-              to{' '}
+              {t('trash.restoreTo', 'to')}{' '}
               <Text component="span" c="dimmed" size="xs">
                 {restoreTarget.original_path}
               </Text>
@@ -585,19 +584,15 @@ function TrashManagement(): React.ReactElement {
         opened={deleteTarget !== null}
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
-        title="Permanently Delete File"
-        confirmLabel="Delete Permanently"
+        title={t('trash.permanentlyDeleteFile', 'Permanently Delete File')}
+        confirmLabel={t('trash.deletePermanently', 'Delete Permanently')}
         confirmColor="red"
         confirmIcon={<IconTrashX size={16} />}
         loading={deleting !== null}
-        warning="This action cannot be undone. The file will be permanently removed from the system."
+        warning={t('trash.deleteWarning', 'This action cannot be undone. The file will be permanently removed from the system.')}
       >
         <Text size="sm">
-          Are you sure you want to permanently delete{' '}
-          <Text component="span" fw={600}>
-            {deleteTarget?.filename}
-          </Text>
-          ?
+          {t('trash.deleteConfirm', 'Are you sure you want to permanently delete <strong>{{filename}}</strong>?', { filename: deleteTarget?.filename })}
         </Text>
       </ConfirmationModal>
 
@@ -606,24 +601,20 @@ function TrashManagement(): React.ReactElement {
         opened={purgeModalOpen}
         onClose={() => setPurgeModalOpen(false)}
         onConfirm={confirmPurge}
-        title="Purge Expired Files"
-        confirmLabel="Purge Expired"
+        title={t('trash.purgeExpiredFiles', 'Purge Expired Files')}
+        confirmLabel={t('trash.purgeExpiredButton', 'Purge Expired')}
         confirmColor="red"
         confirmIcon={<IconTrashX size={16} />}
         loading={purging}
-        warning="This will permanently delete all expired files from the trash. This action cannot be undone."
+        warning={t('trash.purgeWarning', 'This will permanently delete all expired files from the trash. This action cannot be undone.')}
       >
         <Text size="sm">
-          Files that have exceeded the retention period will be removed. Currently there{' '}
-          {trashItems.length === 1 ? 'is' : 'are'}{' '}
-          <Text component="span" fw={600}>
-            {trashItems.length} {pluralFiles(trashItems.length)}
-          </Text>{' '}
-          in the trash totalling{' '}
-          <Text component="span" fw={600}>
-            {totalSize}
-          </Text>
-          .
+          {t('trash.purgeDescription', 'Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.', {
+            verb: trashItems.length === 1 ? 'is' : 'are',
+            count: trashItems.length,
+            files: pluralFiles(trashItems.length),
+            size: totalSize,
+          })}
         </Text>
       </ConfirmationModal>
     </AdminLayout>

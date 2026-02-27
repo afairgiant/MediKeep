@@ -2,6 +2,7 @@ import logger from '../../services/logger';
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { apiService } from '../../services/api';
@@ -18,6 +19,7 @@ import './ModelEdit.css'; // Reuse the same styles as ModelEdit
 const ModelCreate = () => {
   const { modelName } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
 
   const [metadata, setMetadata] = useState(null);
   const [formData, setFormData] = useState({});
@@ -123,7 +125,7 @@ const ModelCreate = () => {
           }
         } catch (patientError) {
           setError(
-            'Failed to get patient information. Please ensure you have a patient record.'
+            t('models.failedToGetPatient', 'Failed to get patient information. Please ensure you have a patient record.')
           );
           setSaving(false);
           return;
@@ -151,7 +153,7 @@ const ModelCreate = () => {
     return (
       <AdminLayout>
         <div className="admin-page-loading">
-          <Loading message="Loading model creation form..." />
+          <Loading message={t('models.loadingForm', 'Loading model creation form...')} />
         </div>
       </AdminLayout>
     );
@@ -164,7 +166,7 @@ const ModelCreate = () => {
           <h2>Error</h2>
           <p>{error}</p>
           <Button variant="secondary" onClick={handleCancel}>
-            ← Back
+            {t('common:buttons.back', 'Back')}
           </Button>
         </div>
       </AdminLayout>
@@ -176,8 +178,8 @@ const ModelCreate = () => {
       <div className="model-edit">
         <div className="model-edit-header">
           <div className="edit-title">
-            <h1>Create New {metadata?.display_name || modelName}</h1>
-            <p>Fill in the form below to create a new record</p>
+            <h1>{t('models.createNew', { modelName: metadata?.display_name || modelName, defaultValue: `Create New ${metadata?.display_name || modelName}` })}</h1>
+            <p>{t('models.fillForm', 'Fill in the form below to create a new record')}</p>
           </div>
 
           <div className="edit-actions">
@@ -186,7 +188,7 @@ const ModelCreate = () => {
               onClick={handleCancel}
               disabled={saving}
             >
-              Cancel
+              {t('common:buttons.cancel', 'Cancel')}
             </Button>
             <Button
               variant="primary"
@@ -194,7 +196,7 @@ const ModelCreate = () => {
               disabled={saving}
               loading={saving}
             >
-              Create Record
+              {t('models.createRecord', 'Create Record')}
             </Button>
           </div>
         </div>
@@ -255,10 +257,10 @@ const ModelCreate = () => {
                     )}
 
                     <div className="field-meta">
-                      Type: {field.type}
-                      {field.max_length && ` | Max Length: ${field.max_length}`}
-                      {field.foreign_key && ` | References: ${field.foreign_key}`}
-                      {!field.nullable && ` | Required`}
+                      {t('models.fieldType', { type: field.type, defaultValue: `Type: ${field.type}` })}
+                      {field.max_length && ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
+                      {field.foreign_key && ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
+                      {!field.nullable && ` | ${t('models.fieldRequired', 'Required')}`}
                     </div>
                   </div>
                 );

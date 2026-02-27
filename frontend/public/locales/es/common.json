@@ -29,6 +29,7 @@
     "print": "Imprimir",
     "refresh": "Actualizar",
     "retry": "Reintentar",
+    "restore": "Restaurar",
     "continue": "Continuar",
     "skip": "Omitir",
     "done": "Hecho",
@@ -2541,51 +2542,6 @@
     "addNew": "Agregar Nueva Alergia",
     "messages": {
       "loading": "Cargando alergias..."
-    }
-  },
-  "admin": {
-    "createUser": {
-      "username": "Nombre de usuario",
-      "usernamePlaceholder": "Introduce el nombre de usuario",
-      "password": "Contraseña",
-      "passwordPlaceholder": "Introduce una contraseña (mín. 6 caracteres, incluye letra y número)",
-      "email": "Correo electrónico",
-      "emailPlaceholder": "Introduce la dirección de correo electrónico",
-      "role": "Rol",
-      "roleUser": "Usuario",
-      "roleAdmin": "Administrador",
-      "firstName": "Nombre",
-      "firstNamePlaceholder": "Introduce el nombre",
-      "lastName": "Apellido",
-      "lastNamePlaceholder": "Introduce el apellido",
-      "submitButton": "Crear cuenta",
-      "noteLabel": "Nota:",
-      "noteText": "Se creará automáticamente un registro de paciente para este usuario con el rol predeterminado \"usuario\".",
-      "validation": {
-        "firstNameRequired": "Introduce el nombre",
-        "lastNameRequired": "Introduce el apellido",
-        "usernameMinLength": "El nombre de usuario debe tener al menos 3 caracteres",
-        "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
-        "passwordRequirements": "La contraseña debe contener al menos una letra y un número"
-      },
-      "passwordReqs": {
-        "minLength": "Al menos 6 caracteres",
-        "hasLetter": "Contiene al menos una letra",
-        "hasNumber": "Contiene al menos un número"
-      },
-      "linkPatient": {
-        "checkbox": "Vincular a un registro de paciente existente",
-        "hint": "En lugar de crear un nuevo registro de paciente, vincula el nuevo usuario a un paciente existente (p. ej., un niño que ahora necesita su propio acceso).",
-        "selectPlaceholder": "Selecciona un paciente...",
-        "loading": "Cargando pacientes...",
-        "selfRecordBadge": "Registro propio",
-        "patientId": "ID",
-        "dob": "Fecha de nacimiento",
-        "owner": "Titular",
-        "currentOwner": "Titular actual",
-        "selfRecordWarningTitle": "Nota:",
-        "selfRecordWarning": "Este es el autoregistro del titular actual. Se creará un nuevo autoregistro para el titular original copiando sus datos demográficos. El titular original recibirá acceso de edición a este paciente."
-      }
     }
   }
 }

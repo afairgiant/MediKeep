@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Button,
@@ -29,6 +30,7 @@ import './ModelEdit.css';
 const ModelEdit = () => {
   const { modelName, recordId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
   const { logout } = useAuth();
 
   const [record, setRecord] = useState(null);
@@ -123,8 +125,8 @@ const ModelEdit = () => {
 
         if (record.username === currentUsernameAfterSave) {
           notifications.show({
-            title: 'Username updated',
-            message: `Your username has been changed. Please log in with your new username: "${updateData.username}"`,
+            title: t('models.usernameUpdated', 'Username updated'),
+            message: t('models.usernameUpdatedMessage', { username: updateData.username, defaultValue: `Your username has been changed. Please log in with your new username: "${updateData.username}"` }),
             color: 'blue',
             autoClose: 5000,
           });
@@ -135,8 +137,8 @@ const ModelEdit = () => {
       }
 
       notifications.show({
-        title: 'Changes saved',
-        message: 'Record updated successfully',
+        title: t('models.changesSaved', 'Changes saved'),
+        message: t('models.recordUpdated', 'Record updated successfully'),
         color: 'green',
       });
       navigate(`/admin/models/${modelName}/${recordId}`);
@@ -147,16 +149,16 @@ const ModelEdit = () => {
         recordId,
         error: err.message,
       });
-      setError(err.message || 'Failed to save record');
+      setError(err.message || t('models.failedToSave', 'Failed to save record'));
       notifications.show({
-        title: 'Save failed',
-        message: err.message || 'Failed to save record',
+        title: t('models.saveFailed', 'Save failed'),
+        message: err.message || t('models.failedToSave', 'Failed to save record'),
         color: 'red',
       });
     } finally {
       setSaving(false);
     }
-  }, [modelName, recordId, record, navigate, logout]);
+  }, [modelName, recordId, record, navigate, logout, t]);
 
   const handleSave = async () => {
     if (!handleValidateForm()) return;
@@ -254,8 +256,8 @@ const ModelEdit = () => {
       <div className="model-edit">
         <div className="model-edit-header">
           <div className="edit-title">
-            <h1>Edit {metadata?.display_name || modelName}</h1>
-            <p>Record ID: {recordId}</p>
+            <h1>{t('models.editRecord', { modelName: metadata?.display_name || modelName, defaultValue: `Edit ${metadata?.display_name || modelName}` })}</h1>
+            <p>{t('models.recordId', { id: recordId, defaultValue: `Record ID: ${recordId}` })}</p>
           </div>
 
           <div className="edit-actions">
@@ -264,13 +266,13 @@ const ModelEdit = () => {
               onClick={handleCancel}
               disabled={saving}
             >
-              Cancel
+              {t('common:buttons.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleSave}
               loading={saving}
             >
-              Save Changes
+              {t('common:buttons.save', 'Save Changes')}
             </Button>
           </div>
         </div>
@@ -323,10 +325,10 @@ const ModelEdit = () => {
                 )}
 
                 <div className="field-meta">
-                  Type: {field.type}
-                  {field.max_length && ` | Max Length: ${field.max_length}`}
-                  {field.foreign_key && ` | References: ${field.foreign_key}`}
-                  {!field.nullable && ` | Required`}
+                  {t('models.fieldType', { type: field.type, defaultValue: `Type: ${field.type}` })}
+                  {field.max_length && ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
+                  {field.foreign_key && ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
+                  {!field.nullable && ` | ${t('models.fieldRequired', 'Required')}`}
                 </div>
               </div>
             ))}
@@ -341,26 +343,24 @@ const ModelEdit = () => {
         title={
           <Group gap="xs">
             <IconAlertTriangle size={20} color="var(--mantine-color-yellow-6)" />
-            <Text fw={600}>Username Change Warning</Text>
+            <Text fw={600}>{t('models.usernameChangeWarning', 'Username Change Warning')}</Text>
           </Group>
         }
         centered
       >
         <Stack gap="md">
           <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={16} />}>
-            <Text size="sm">
-              You are about to change your own username from <strong>&quot;{record?.username}&quot;</strong> to <strong>&quot;{pendingUpdateData?.username}&quot;</strong>.
-            </Text>
+            <Text size="sm" dangerouslySetInnerHTML={{ __html: t('models.usernameChangeText', { oldUsername: record?.username, newUsername: pendingUpdateData?.username, defaultValue: `You are about to change your own username from <strong>"${record?.username}"</strong> to <strong>"${pendingUpdateData?.username}"</strong>.` }) }} />
             <Text size="sm" mt="xs">
-              This will log you out immediately and you will need to log back in with the new username.
+              {t('models.usernameChangeLogout', 'This will log you out immediately and you will need to log back in with the new username.')}
             </Text>
           </Alert>
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={() => dismissWarning(closeUsernameWarning)}>
-              Cancel
+              {t('common:buttons.cancel', 'Cancel')}
             </Button>
             <Button color="yellow" onClick={() => confirmPendingUpdate(closeUsernameWarning)}>
-              Change Username
+              {t('models.changeUsername', 'Change Username')}
             </Button>
           </Group>
         </Stack>
@@ -373,7 +373,7 @@ const ModelEdit = () => {
         title={
           <Group gap="xs">
             <IconAlertTriangle size={20} color="var(--mantine-color-yellow-6)" />
-            <Text fw={600}>Role Change Warning</Text>
+            <Text fw={600}>{t('models.roleChangeWarning', 'Role Change Warning')}</Text>
           </Group>
         }
         centered
@@ -381,18 +381,18 @@ const ModelEdit = () => {
         <Stack gap="md">
           <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={16} />}>
             <Text size="sm">
-              You are about to remove admin privileges from this user.
+              {t('models.roleChangeText', 'You are about to remove admin privileges from this user.')}
             </Text>
             <Text size="sm" mt="xs">
-              If this is the last admin user in the system, you may lose admin access.
+              {t('models.roleChangeLastAdmin', 'If this is the last admin user in the system, you may lose admin access.')}
             </Text>
           </Alert>
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={() => dismissWarning(closeRoleWarning)}>
-              Cancel
+              {t('common:buttons.cancel', 'Cancel')}
             </Button>
             <Button color="yellow" onClick={() => confirmPendingUpdate(closeRoleWarning)}>
-              Change Role
+              {t('models.changeRole', 'Change Role')}
             </Button>
           </Group>
         </Stack>

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   Grid,
@@ -50,6 +51,7 @@ const DASHBOARD_CONFIG = {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('admin');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Dashboard Stats (no auto-refresh - manual refresh only)
@@ -123,7 +125,7 @@ const AdminDashboard = () => {
         <Center h={400}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text c="dimmed">Loading comprehensive dashboard...</Text>
+            <Text c="dimmed">{t('dashboard.loading', 'Loading comprehensive dashboard...')}</Text>
           </Stack>
         </Center>
       </AdminLayout>
@@ -142,11 +144,11 @@ const AdminDashboard = () => {
                   <IconStethoscope size={24} />
                 </ThemeIcon>
                 <Text size="xl" fw={700}>
-                  Admin Dashboard
+                  {t('dashboard.title', 'Admin Dashboard')}
                 </Text>
               </Group>
               <Text c="dimmed" size="md">
-                Comprehensive system overview and management
+                {t('dashboard.subtitle', 'Comprehensive system overview and management')}
               </Text>
             </div>
             <Group>
@@ -156,7 +158,7 @@ const AdminDashboard = () => {
                 loading={loading}
                 variant="light"
               >
-                Refresh All
+                {t('dashboard.refreshAll', 'Refresh All')}
               </Button>
             </Group>
           </Group>
@@ -167,37 +169,37 @@ const AdminDashboard = () => {
           <StatCard
             icon={IconUsers}
             value={stats?.total_users || 0}
-            label="Total Users"
-            change={`+${stats?.recent_registrations || 0} this week`}
+            label={t('dashboard.stats.totalUsers', 'Total Users')}
+            change={t('dashboard.stats.recentRegistrations', '+{{count}} this week', { count: stats?.recent_registrations || 0 })}
             color="blue"
             href="/admin/models/user"
           />
           <StatCard
             icon={IconStethoscope}
             value={stats?.total_patients || 0}
-            label="Active Patients"
+            label={t('dashboard.stats.activePatients', 'Active Patients')}
             color="green"
             href="/admin/models/patient"
           />
           <StatCard
             icon={IconFlask}
             value={stats?.total_lab_results || 0}
-            label="Lab Results"
+            label={t('dashboard.stats.labResults', 'Lab Results')}
             color="orange"
             href="/admin/models/lab_result"
           />
           <StatCard
             icon={IconPill}
             value={stats?.total_medications || 0}
-            label="Medications"
-            change={`${stats?.active_medications || 0} active prescriptions`}
+            label={t('dashboard.stats.medications', 'Medications')}
+            change={t('dashboard.stats.activePrescriptions', '{{count}} active prescriptions', { count: stats?.active_medications || 0 })}
             color="cyan"
             href="/admin/models/medication"
           />
           <StatCard
             icon={IconHeart}
             value={stats?.total_vitals || 0}
-            label="Vital Signs"
+            label={t('dashboard.stats.vitalSigns', 'Vital Signs')}
             color="red"
             href="/admin/models/vitals"
           />
@@ -300,6 +302,7 @@ const SystemHealthCard = ({
   isRefreshing = false,
 }) => {
   const { formatDate } = useDateFormat();
+  const { t } = useTranslation('admin');
 
   return (
   <Card shadow="sm" p="lg" withBorder h="100%" style={{ position: 'relative' }}>
@@ -311,10 +314,10 @@ const SystemHealthCard = ({
         </ThemeIcon>
         <div>
           <Text size="lg" fw={600}>
-            System Health
+            {t('dashboard.systemHealth.title', 'System Health')}
           </Text>
           <Text size="sm" c="dimmed">
-            Current system status
+            {t('dashboard.systemHealth.subtitle', 'Current system status')}
           </Text>
         </div>
       </Group>
@@ -322,7 +325,7 @@ const SystemHealthCard = ({
         color={systemHealth?.database_status === 'healthy' ? 'green' : 'orange'}
         variant="light"
       >
-        {systemHealth?.database_status || 'Unknown'}
+        {systemHealth?.database_status || t('shared.unknown', 'Unknown')}
       </Badge>
     </Group>
 
@@ -334,7 +337,7 @@ const SystemHealthCard = ({
 
     {error && (
       <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
-        Error loading system health
+        {t('dashboard.systemHealth.errorLoading', 'Error loading system health')}
       </Alert>
     )}
 
@@ -342,29 +345,29 @@ const SystemHealthCard = ({
       <Stack gap="md">
         <HealthMetric
           icon={IconDatabase}
-          label="Database Status"
-          value={systemHealth?.database_status || 'Unknown'}
+          label={t('dashboard.systemHealth.databaseStatus', 'Database Status')}
+          value={systemHealth?.database_status || t('shared.unknown', 'Unknown')}
           color="blue"
         />
         <HealthMetric
           icon={IconReportAnalytics}
-          label="Total Records"
+          label={t('dashboard.systemHealth.totalRecords', 'Total Records')}
           value={systemHealth?.total_records || 0}
           color="green"
         />
         <HealthMetric
           icon={IconClock}
-          label="Uptime"
-          value={systemHealth?.system_uptime || 'Unknown'}
+          label={t('dashboard.systemHealth.uptime', 'Uptime')}
+          value={systemHealth?.system_uptime || t('shared.unknown', 'Unknown')}
           color="orange"
         />
         <HealthMetric
           icon={IconDatabase}
-          label="Last Backup"
+          label={t('dashboard.systemHealth.lastBackup', 'Last Backup')}
           value={
             systemHealth?.last_backup
               ? formatDate(systemHealth.last_backup)
-              : 'No backup'
+              : t('dashboard.systemHealth.noBackup', 'No backup')
           }
           color="purple"
         />
@@ -388,6 +391,8 @@ SystemHealthCard.propTypes = {
 
 // Reusable ActivityCard Component
 const ActivityCard = ({ activities, loading, error, isRefreshing = false, onViewAll }) => {
+  const { t } = useTranslation('admin');
+
   const getActivityIcon = (modelName, action) => {
     const iconMap = {
       User: IconUsers,
@@ -425,15 +430,15 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
           </ThemeIcon>
           <div>
             <Text size="lg" fw={600}>
-              Recent Activity
+              {t('dashboard.recentActivity.title', 'Recent Activity')}
             </Text>
             <Text size="sm" c="dimmed">
-              Latest system events
+              {t('dashboard.recentActivity.subtitle', 'Latest system events')}
             </Text>
           </div>
         </Group>
         <Badge variant="light" color="green">
-          {activities.length} activities
+          {t('dashboard.recentActivity.count', '{{count}} activities', { count: activities.length })}
         </Badge>
       </Group>
 
@@ -445,7 +450,7 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
 
       {error && (
         <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
-          Error loading activity
+          {t('dashboard.recentActivity.errorLoading', 'Error loading activity')}
         </Alert>
       )}
 
@@ -467,7 +472,7 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
                     <IconActivity size={24} />
                   </ThemeIcon>
                   <Text c="dimmed" size="sm">
-                    No recent activity to display
+                    {t('dashboard.recentActivity.noActivity', 'No recent activity to display')}
                   </Text>
                 </Stack>
               </Center>
@@ -481,7 +486,7 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
               rightSection={<IconArrowRight size={16} />}
               onClick={onViewAll}
             >
-              View All Activity
+              {t('dashboard.recentActivity.viewAll', 'View All Activity')}
             </Button>
           )}
         </>
@@ -506,82 +511,86 @@ ActivityCard.propTypes = {
 };
 
 // Reusable QuickActionsCard Component
-const QuickActionsCard = () => (
-  <Card shadow="sm" p="lg" withBorder>
-    <Group mb="md">
-      <ThemeIcon size="lg" variant="light" color="violet" aria-hidden="true">
-        <IconSettings size={20} />
-      </ThemeIcon>
-      <div>
-        <Text size="lg" fw={600}>
-          Quick Actions
-        </Text>
-        <Text size="sm" c="dimmed">
-          Common administrative tasks
-        </Text>
-      </div>
-    </Group>
+const QuickActionsCard = () => {
+  const { t } = useTranslation('admin');
 
-    <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
-      <ActionButton
-        href="/admin/data-models"
-        icon={IconDatabase}
-        title="Data Models"
-        desc="View and manage database tables"
-        color="blue"
-      />
-      <ActionButton
-        href="/admin/create-user"
-        icon={IconUserCog}
-        title="Create New User"
-        desc="Create user account with patient profile"
-        color="green"
-      />
-      <ActionButton
-        href="/admin/system-health"
-        icon={IconShieldCheck}
-        title="System Health"
-        desc="Monitor system status"
-        color="orange"
-      />
-      <ActionButton
-        href="/admin/backup"
-        icon={IconDatabase}
-        title="Backups"
-        desc="Backup management"
-        color="purple"
-      />
-      <ActionButton
-        href="/admin/settings"
-        icon={IconSettings}
-        title="Settings"
-        desc="System configuration"
-        color="gray"
-      />
-      <ActionButton
-        href="/admin/models/user"
-        icon={IconUsers}
-        title="Manage Users"
-        desc="View and manage user accounts"
-        color="teal"
-      />
-      <ActionButton
-        href="/admin/audit-log"
-        icon={IconActivity}
-        title="Audit Log"
-        desc="View system activity log"
-        color="red"
-      />
-      <ActionButton
-        href="/admin/trash"
-        icon={IconTrash}
-        title="Trash"
-        desc="Recover deleted files"
-        color="yellow"
-      />
-    </SimpleGrid>
-  </Card>
-);
+  return (
+    <Card shadow="sm" p="lg" withBorder>
+      <Group mb="md">
+        <ThemeIcon size="lg" variant="light" color="violet" aria-hidden="true">
+          <IconSettings size={20} />
+        </ThemeIcon>
+        <div>
+          <Text size="lg" fw={600}>
+            {t('dashboard.quickActions.title', 'Quick Actions')}
+          </Text>
+          <Text size="sm" c="dimmed">
+            {t('dashboard.quickActions.subtitle', 'Common administrative tasks')}
+          </Text>
+        </div>
+      </Group>
+
+      <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
+        <ActionButton
+          href="/admin/data-models"
+          icon={IconDatabase}
+          title={t('dashboard.quickActions.dataModels', 'Data Models')}
+          desc={t('dashboard.quickActions.dataModelsDesc', 'View and manage database tables')}
+          color="blue"
+        />
+        <ActionButton
+          href="/admin/create-user"
+          icon={IconUserCog}
+          title={t('dashboard.quickActions.createUser', 'Create New User')}
+          desc={t('dashboard.quickActions.createUserDesc', 'Create user account with patient profile')}
+          color="green"
+        />
+        <ActionButton
+          href="/admin/system-health"
+          icon={IconShieldCheck}
+          title={t('dashboard.quickActions.systemHealth', 'System Health')}
+          desc={t('dashboard.quickActions.systemHealthDesc', 'Monitor system status')}
+          color="orange"
+        />
+        <ActionButton
+          href="/admin/backup"
+          icon={IconDatabase}
+          title={t('dashboard.quickActions.backups', 'Backups')}
+          desc={t('dashboard.quickActions.backupsDesc', 'Backup management')}
+          color="purple"
+        />
+        <ActionButton
+          href="/admin/settings"
+          icon={IconSettings}
+          title={t('dashboard.quickActions.settings', 'Settings')}
+          desc={t('dashboard.quickActions.settingsDesc', 'System configuration')}
+          color="gray"
+        />
+        <ActionButton
+          href="/admin/models/user"
+          icon={IconUsers}
+          title={t('dashboard.quickActions.manageUsers', 'Manage Users')}
+          desc={t('dashboard.quickActions.manageUsersDesc', 'View and manage user accounts')}
+          color="teal"
+        />
+        <ActionButton
+          href="/admin/audit-log"
+          icon={IconActivity}
+          title={t('dashboard.quickActions.auditLog', 'Audit Log')}
+          desc={t('dashboard.quickActions.auditLogDesc', 'View system activity log')}
+          color="red"
+        />
+        <ActionButton
+          href="/admin/trash"
+          icon={IconTrash}
+          title={t('dashboard.quickActions.trash', 'Trash')}
+          desc={t('dashboard.quickActions.trashDesc', 'Recover deleted files')}
+          color="yellow"
+        />
+      </SimpleGrid>
+    </Card>
+  );
+};
 
 // Helper Components
 const HealthMetric = ({ icon: IconComponent, label, value, color }) => (

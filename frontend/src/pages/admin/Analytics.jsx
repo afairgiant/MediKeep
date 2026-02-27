@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -61,6 +62,7 @@ const ANALYTICS_CONFIG = {
 };
 
 const Analytics = () => {
+  const { t } = useTranslation('admin');
   const themeColors = useThemeColors();
 
   // Date range state
@@ -137,7 +139,7 @@ const Analytics = () => {
       labels: analyticsData?.weekly_activity?.labels || ANALYTICS_CONFIG.DEFAULT_LABELS,
       datasets: [
         {
-          label: 'User Activity',
+          label: t('analytics.chartLabels.userActivity', 'User Activity'),
           data: analyticsData?.weekly_activity?.data || ANALYTICS_CONFIG.DEFAULT_DATA,
           borderColor: themeColors.primary,
           backgroundColor: `${themeColors.primary}1a`,
@@ -147,12 +149,12 @@ const Analytics = () => {
     },
     distribution: {
       labels: [
-        'Patients',
-        'Lab Results',
-        'Medications',
-        'Procedures',
-        'Allergies',
-        'Vitals',
+        t('analytics.chartLabels.patients', 'Patients'),
+        t('analytics.chartLabels.labResults', 'Lab Results'),
+        t('analytics.chartLabels.medications', 'Medications'),
+        t('analytics.chartLabels.procedures', 'Procedures'),
+        t('analytics.chartLabels.allergies', 'Allergies'),
+        t('analytics.chartLabels.vitals', 'Vitals'),
       ],
       datasets: [
         {
@@ -176,7 +178,7 @@ const Analytics = () => {
         },
       ],
     },
-  }), [analyticsData, stats, themeColors]);
+  }), [analyticsData, stats, themeColors, t]);
 
   const lineChartOptions = useMemo(() => ({
     responsive: true,
@@ -190,17 +192,17 @@ const Analytics = () => {
     scales: {
       y: {
         beginAtZero: true,
-        title: { display: true, text: 'Activities', color: themeColors.textPrimary },
+        title: { display: true, text: t('analytics.axisLabels.activities', 'Activities'), color: themeColors.textPrimary },
         ticks: { color: themeColors.textPrimary },
         grid: { color: themeColors.borderLight },
       },
       x: {
-        title: { display: true, text: 'Date', color: themeColors.textPrimary },
+        title: { display: true, text: t('analytics.axisLabels.date', 'Date'), color: themeColors.textPrimary },
         ticks: { color: themeColors.textPrimary },
         grid: { color: themeColors.borderLight },
       },
     },
-  }), [themeColors]);
+  }), [themeColors, t]);
 
   const doughnutChartOptions = useMemo(() => ({
     responsive: true,
@@ -225,11 +227,11 @@ const Analytics = () => {
                   <IconChartBar size={24} />
                 </ThemeIcon>
                 <Text size="xl" fw={700}>
-                  Analytics
+                  {t('analytics.title', 'Analytics')}
                 </Text>
               </Group>
               <Text c="dimmed" size="md">
-                Activity trends, comparisons, and record distribution
+                {t('analytics.subtitle', 'Activity trends, comparisons, and record distribution')}
               </Text>
             </div>
             <Button
@@ -253,7 +255,7 @@ const Analytics = () => {
                   size="xs"
                   variant={analyticsDays === d && !analyticsDateRange[0] ? 'filled' : 'light'}
                   onClick={() => handlePresetDays(d)}
-                  aria-label={`Filter by last ${d} days`}
+                  aria-label={t('analytics.filterByDays', 'Filter by last {{days}} days', { days: d })}
                 >
                   {d}d
                 </Button>
@@ -261,13 +263,13 @@ const Analytics = () => {
             </Group>
             <DatePickerInput
               type="range"
-              placeholder="Custom date range"
+              placeholder={t('analytics.customDateRange', 'Custom date range')}
               value={analyticsDateRange}
               onChange={handleDateRangeChange}
               clearable
               size="xs"
               leftSection={<IconCalendar size={14} />}
-              aria-label="Analytics date range"
+              aria-label={t('analytics.analyticsDateRange', 'Analytics date range')}
             />
           </Group>
         </Card>
@@ -276,7 +278,7 @@ const Analytics = () => {
           <Center h={300}>
             <Stack align="center">
               <Loader size="lg" />
-              <Text c="dimmed">Loading analytics...</Text>
+              <Text c="dimmed">{t('analytics.loading', 'Loading analytics...')}</Text>
             </Stack>
           </Center>
         ) : (
@@ -285,12 +287,12 @@ const Analytics = () => {
             {comparisonData && (
               <SimpleGrid cols={{ base: 1, sm: 3 }}>
                 <KpiCard
-                  label="Total Activities"
+                  label={t('analytics.totalActivities', 'Total Activities')}
                   value={comparisonData.current_total}
                   changePercent={comparisonData.change_percent}
                 />
                 <KpiCard
-                  label="Daily Average"
+                  label={t('analytics.dailyAverage', 'Daily Average')}
                   value={
                     analyticsData?.date_range?.days
                       ? Math.round(comparisonData.current_total / analyticsData.date_range.days)
@@ -300,10 +302,10 @@ const Analytics = () => {
                 />
                 <Paper p="md" withBorder>
                   <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb="xs">
-                    Period
+                    {t('analytics.period', 'Period')}
                   </Text>
                   <Text size="lg" fw={700}>
-                    {analyticsData?.date_range?.days || 0} days
+                    {t('analytics.days', '{{count}} days', { count: analyticsData?.date_range?.days || 0 })}
                   </Text>
                   {comparisonData.previous_period && (
                     <Text size="xs" c="dimmed" mt={4}>
@@ -321,16 +323,16 @@ const Analytics = () => {
                   <Group justify="space-between" mb="md">
                     <div>
                       <Text size="lg" fw={600}>
-                        Activity Trend
+                        {t('analytics.activityTrend', 'Activity Trend')}
                       </Text>
                       <Text size="sm" c="dimmed">
                         {analyticsData?.date_range
                           ? `${analyticsData.date_range.start} to ${analyticsData.date_range.end}`
-                          : 'User interactions'}
+                          : t('analytics.userInteractions', 'User interactions')}
                       </Text>
                     </div>
                     <Badge variant="light" color="blue">
-                      {analyticsData?.weekly_activity?.total || 0} total
+                      {t('analytics.total', '{{count}} total', { count: analyticsData?.weekly_activity?.total || 0 })}
                     </Badge>
                   </Group>
 
@@ -354,10 +356,10 @@ const Analytics = () => {
                   <Group justify="space-between" mb="md">
                     <div>
                       <Text size="lg" fw={600}>
-                        Records Distribution
+                        {t('analytics.recordsDistribution', 'Records Distribution')}
                       </Text>
                       <Text size="sm" c="dimmed">
-                        Breakdown by type
+                        {t('analytics.breakdownByType', 'Breakdown by type')}
                       </Text>
                     </div>
                   </Group>
@@ -382,7 +384,7 @@ const Analytics = () => {
             {analyticsData?.model_activity && Object.keys(analyticsData.model_activity).length > 0 && (
               <Card shadow="sm" p="lg" withBorder>
                 <Text size="lg" fw={600} mb="md">
-                  Activity by Record Type
+                  {t('analytics.activityByRecordType', 'Activity by Record Type')}
                 </Text>
                 <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }}>
                   {Object.entries(analyticsData.model_activity)
@@ -409,6 +411,7 @@ const Analytics = () => {
 
 // KPI Card with comparison badge
 const KpiCard = ({ label, value, changePercent }) => {
+  const { t } = useTranslation('admin');
   const isPositive = changePercent >= 0;
   const color = isPositive ? 'green' : 'red';
   const ArrowIcon = isPositive ? IconTrendingUp : IconTrendingDown;
@@ -432,7 +435,7 @@ const KpiCard = ({ label, value, changePercent }) => {
         </Badge>
       </Group>
       <Text size="xs" c="dimmed" mt={4}>
-        vs. previous period
+        {t('analytics.vsPreviousPeriod', 'vs. previous period')}
       </Text>
     </Paper>
   );
