@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Set, Tuple
 
 from sqlalchemy import asc, desc, func
 from sqlalchemy.orm import Query, Session, joinedload
@@ -382,6 +382,133 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
 
         bmi = (weight_lbs / (height_inches**2)) * 703
         return round(bmi, 1)
+
+    def find_duplicates(
+        self,
+        db: Session,
+        *,
+        patient_id: int,
+        readings: list,
+    ) -> Set[int]:
+        """Find indices of readings that already exist for this patient.
+
+        Duplicates are matched on (recorded_date, blood_glucose) within the
+        date range of the provided readings. Returns a set of indices into
+        the readings list.
+        """
+        if not readings:
+            return set()
+
+        dates = [r.recorded_date for r in readings]
+        min_date = min(dates)
+        max_date = max(dates)
+
+        existing = (
+            db.query(Vitals.recorded_date, Vitals.blood_glucose)
+            .filter(
+                Vitals.patient_id == patient_id,
+                Vitals.recorded_date >= min_date,
+                Vitals.recorded_date <= max_date,
+            )
+            .all()
+        )
+
+        existing_set: Set[Tuple] = {
+            (row.recorded_date, row.blood_glucose) for row in existing
+        }
+
+        duplicates: Set[int] = set()
+        for idx, reading in enumerate(readings):
+            key = (reading.recorded_date, reading.blood_glucose)
+            if key in existing_set:
+                duplicates.add(idx)
+
+        return duplicates
+
+    def bulk_create(
+        self,
+        db: Session,
+        *,
+        readings: list,
+        patient_id: int,
+        skip_indices: Optional[Set[int]] = None,
+        batch_size: int = 100,
+    ) -> int:
+        """Bulk insert vitals readings for a patient.
+
+        Args:
+            readings: List of VitalsReading dataclass instances.
+            patient_id: The patient to create records for.
+            skip_indices: Set of reading indices to skip (e.g., duplicates).
+            batch_size: Number of records per commit batch.
+
+        Returns:
+            Number of records actually inserted.
+        """
+        skip = skip_indices or set()
+        objects = []
+
+        for idx, reading in enumerate(readings):
+            if idx in skip:
+                continue
+            obj = Vitals(
+                patient_id=patient_id,
+                recorded_date=reading.recorded_date,
+                blood_glucose=reading.blood_glucose,
+                heart_rate=reading.heart_rate,
+                systolic_bp=reading.systolic_bp,
+                diastolic_bp=reading.diastolic_bp,
+                oxygen_saturation=reading.oxygen_saturation,
+                temperature=reading.temperature,
+                device_used=reading.device_used,
+                import_source=reading.import_source,
+                notes=reading.notes,
+            )
+            objects.append(obj)
+
+        inserted = 0
+        for i in range(0, len(objects), batch_size):
+            batch = objects[i : i + batch_size]
+            db.bulk_save_objects(batch)
+            db.flush()
+            inserted += len(batch)
+
+        db.commit()
+        return inserted
+
+    def bulk_delete_by_import(
+        self,
+        db: Session,
+        *,
+        patient_id: int,
+        import_source: str,
+        date_str: str,
+    ) -> int:
+        """Delete all imported vitals for a patient on a specific date.
+
+        Args:
+            patient_id: Patient ID.
+            import_source: The import source key (e.g., "dexcom_clarity").
+            date_str: Date string in YYYY-MM-DD format.
+
+        Returns:
+            Number of records deleted.
+        """
+        date_start = datetime.strptime(date_str, "%Y-%m-%d")
+        date_end = date_start + timedelta(days=1)
+
+        count = (
+            db.query(Vitals)
+            .filter(
+                Vitals.patient_id == patient_id,
+                Vitals.import_source == import_source,
+                Vitals.recorded_date >= date_start,
+                Vitals.recorded_date < date_end,
+            )
+            .delete(synchronize_session="fetch")
+        )
+        db.commit()
+        return count
 
     def create_with_bmi(self, db: Session, *, obj_in: VitalsCreate) -> Vitals:
         """Create vitals record with automatic BMI calculation"""

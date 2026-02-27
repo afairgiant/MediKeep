@@ -37,6 +37,7 @@ import {
   IconAlertTriangle,
   IconDroplet,
   IconChartLine,
+  IconFileImport,
 } from '@tabler/icons-react';
 import { PageHeader } from '../../components';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
@@ -49,6 +50,7 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import VitalViewModal from '../../components/medical/vital/VitalViewModal';
 import VitalFormWrapper from '../../components/medical/vital/VitalFormWrapper';
 import { VitalTrendsPanel } from '../../components/medical/vitals';
+import VitalsImportModal from '../../components/medical/VitalsImportModal';
 
 import { apiService } from '../../services/api';
 import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
@@ -191,6 +193,7 @@ const Vitals = () => {
   const [statsError, setStatsError] = useState(null);
   const [showTrendsPanel, setShowTrendsPanel] = useState(false);
   const [selectedVitalType, setSelectedVitalType] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // Global data
   const { practitioners } = usePractitioners();
@@ -519,6 +522,13 @@ const Vitals = () => {
             onClick: handleAddNew,
             leftSection: <IconPlus size={16} />,
           }}
+          secondaryActions={[{
+            label: t('vitals.import.title', 'Import Vitals'),
+            onClick: () => setShowImportModal(true),
+            variant: 'light',
+            size: 'sm',
+            leftSection: <IconFileImport size={14} />,
+          }]}
           showViewToggle={false}
           align="flex-start"
         />
@@ -646,6 +656,18 @@ const Vitals = () => {
           onEdit={handleEdit}
           practitioners={practitioners}
           navigate={navigate}
+        />
+
+        {/* Vitals Import Modal */}
+        <VitalsImportModal
+          opened={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          patientId={currentPatient?.id}
+          onImportComplete={async () => {
+            setShowImportModal(false);
+            await refreshData();
+            await loadStats();
+          }}
         />
 
         {/* Vital Trends Panel */}

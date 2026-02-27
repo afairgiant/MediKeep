@@ -289,7 +289,8 @@
       "timezoneInfo": "Informazioni sul fuso orario",
       "updateVitals": "Aggiorna segni vitali",
       "vitalSignsDesc": "Misurazioni fisiologiche principali",
-      "weightDesc": "Peso in {{unit}}"
+      "weightDesc": "Peso in {{unit}}",
+      "lockedByImport": "Gestito dall'importazione del dispositivo"
     },
     "modal": {
       "bloodGlucose": "Glicemia",
@@ -370,7 +371,46 @@
       "noRecordsDesc": "I segni vitali appariranno qui una volta registrati",
       "oxygenSat": "O2 Sat"
     },
-    "title": "Segni vitali"
+    "title": "Segni vitali",
+    "import": {
+      "title": "Importa segni vitali",
+      "selectDevice": "Seleziona dispositivo",
+      "selectDevicePlaceholder": "Scegli il tuo dispositivo...",
+      "uploadFile": "Carica file CSV",
+      "preview": "Anteprima",
+      "importButton": "Importa",
+      "back": "Indietro",
+      "importing": "Importazione dei segni vitali in corso...",
+      "previewTitle": "Anteprima importazione",
+      "totalReadings": "Letture totali",
+      "duplicatesFound": "Duplicati trovati",
+      "newReadings": "Nuove letture",
+      "dateRange": "Intervallo di date",
+      "skipDuplicates": "Salta le letture duplicate",
+      "duplicateWarning": "{{count}} letture esistono già in questo intervallo di date. Seleziona la casella sopra per saltarle.",
+      "success": "{{count}} letture importate con successo",
+      "successWithSkipped": "{{imported}} letture importate ({{skipped}} duplicati saltati)",
+      "noFile": "Seleziona un file CSV",
+      "noDevice": "Seleziona un dispositivo",
+      "fileTooLarge": "Il file supera il limite di 10 MB",
+      "invalidFileType": "Sono supportati solo file CSV",
+      "duplicate": "Duplicato",
+      "parsingFailed": "Impossibile analizzare il file CSV"
+    },
+    "summary": {
+      "dailySummary": "Riepilogo giornaliero",
+      "readings": "{{count}} letture",
+      "avgGlucose": "Media",
+      "minGlucose": "Min",
+      "maxGlucose": "Max",
+      "expandDetails": "Mostra letture",
+      "collapseDetails": "Nascondi letture",
+      "importedFrom": "Importato da {{source}}",
+      "glucoseTrend": "Andamento della glicemia",
+      "time": "Ora",
+      "confirmDeleteDay": "Eliminare tutte le {{count}} letture importate per questo giorno?",
+      "deleteDay": "Elimina giorno"
+    }
   },
   "medications": {
     "title": "Farmaci",

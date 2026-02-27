@@ -170,6 +170,11 @@ class APIClient {
         ...processedConfig.headers,
       };
 
+      // For FormData bodies, remove Content-Type so browser sets multipart boundary
+      if (processedConfig.body instanceof FormData) {
+        delete headers['Content-Type'];
+      }
+
       // Make request
       const response = await fetch(url, {
         method: processedConfig.method || 'GET',
