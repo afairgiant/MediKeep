@@ -50,12 +50,14 @@ export function getAggregationPeriod(dataPoints: VitalDataPoint[]): AggregationP
   const newest = Math.max(...dates.map(d => d.getTime()));
   const spanDays = Math.max(1, (newest - oldest) / (1000 * 60 * 60 * 24));
 
-  // Density check: count readings per calendar day.
+  // Density check: count readings per calendar day (local timezone).
   // If ANY day has >10 readings (e.g., CGM data), aggregate to daily.
   // This works regardless of total time span or how many days have CGM data.
+  // Uses local date parts to avoid UTC midnight date-shift issues.
   const countsByDay = new Map<string, number>();
   for (const p of dataPoints) {
-    const day = new Date(p.recorded_date).toISOString().split('T')[0];
+    const d = new Date(p.recorded_date);
+    const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     countsByDay.set(day, (countsByDay.get(day) || 0) + 1);
   }
   const maxPerDay = Math.max(...countsByDay.values());

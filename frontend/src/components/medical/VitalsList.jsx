@@ -595,7 +595,8 @@ const VitalsList = ({
       if (!vital.import_source) {
         manualRecords.push({ type: 'individual', record: vital });
       } else {
-        const dateKey = new Date(vital.recorded_date).toISOString().split('T')[0];
+        const d = new Date(vital.recorded_date);
+        const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const groupKey = `${dateKey}|${vital.import_source}`;
         if (!importGroups[groupKey]) {
           importGroups[groupKey] = [];
@@ -895,7 +896,8 @@ const VitalsList = ({
 
   // Handle deleting all imported readings for a day
   const handleDeleteDay = async (item) => {
-    const dateStr = new Date(item.date).toISOString().split('T')[0];
+    const d = new Date(item.date);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     if (!window.confirm(
       t('vitals.summary.confirmDeleteDay', 'Delete all {{count}} imported readings for this day?', { count: item.count })
     )) {
@@ -936,7 +938,7 @@ const VitalsList = ({
     const totalSubPages = Math.max(1, Math.ceil(item.readings.length / EXPANDED_PAGE_SIZE));
     const subStart = (expandedPage - 1) * EXPANDED_PAGE_SIZE;
     const subEnd = Math.min(subStart + EXPANDED_PAGE_SIZE, item.readings.length);
-    const pageReadings = item.readings
+    const pageReadings = [...item.readings]
       .sort((a, b) => new Date(b.recorded_date) - new Date(a.recorded_date))
       .slice(subStart, subEnd);
 
