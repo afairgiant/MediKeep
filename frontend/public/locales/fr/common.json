@@ -35,8 +35,8 @@
     "linkMedication": "Connecter médicament",
     "linkMedications": "Connecter médicaments",
     "linkCondition": "Connecter condition",
-    "linkConditions": "Connecter conditions",
-    "saveChanges": "Sauvegarder changements"
+	"linkConditions": "Connecter conditions",
+	"saveChanges": "Sauvegarder changements"
   },
   "labels": {
     "loading": "Chargement...",
@@ -68,8 +68,8 @@
     "endDate": "Date de fin",
     "duration": "Durée",
     "notes": "Notes",
-    "tags": "Etiquettes",
-    "location": "Emplacement",
+	"tags": "Etiquettes",
+	"location": "Emplacement",
     "name": "Nom",
     "date": "Date",
     "time": "Heure",
@@ -87,8 +87,8 @@
     "noRating": "Aucun avis",
     "noMedicationsLinked": "Aucun médicament connecté à cette condition",
     "noConditionsLinked": "Aucune condition connectée à ces résultats d'analyse",
-    "noConditionsLinkedToMedication": "Aucune condition connectée à ce médicament",
-    "loadingRelatedConditions": "Chargement des conditions associées...",
+	"noConditionsLinkedToMedication": "Aucune condition connectée à ce médicament",
+	"loadingRelatedConditions": "Chargement des conditions connectées...",
     "medicationsAvailableToLink": "{{count}} médicaments pouvant être connectés",
     "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
     "linkedMedications": "Médicaments connectés",
@@ -104,102 +104,102 @@
     "address": "Adresse",
     "patientRecord": "Dossier du patient",
     "medicalHistory": "Antécédents médicaux",
-    "practitioner": "Médecin"
+	"practitioner": "Médecin"
   },
   "fields": {
     "notes": {
-      "label": "Notes",
-      "placeholder": "Informations supplémentaires...",
-      "description": "Tout détail ou note supplémentaire"
+        "label": "Notes",
+        "placeholder": "Informations supplémentaires...",
+        "description": "Tout détail ou note supplémentaire"
+      },
+      "tags": {
+        "label": "Etiquettes",
+        "placeholder": "Ajoutez des étiquettes pour organiser et trouver cette entrée",
+        "description": "Ajoutez des étiquettes pour vous aider à organiser et rechercher cette entrée ultérieurement."
+      },
+      "status": {
+        "label": "Statut",
+        "description": "Statut actuel",
+		"placeholder": "Sélectionnez le statut"
+      },
+      "severity": {
+        "label": "Sévérité",
+        "placeholder": "Sélectionnez le niveau de sévérité",
+        "description": "Niveau de sévérité"
+      },
+      "startDate": {
+        "label": "Date de début",
+        "placeholder": "Sélectionnez la date de début",
+        "description": "Quand cela a commencé"
+      },
+      "endDate": {
+        "label": "Date de fin",
+        "placeholder": "Sélectionnez la date de fin",
+        "description": "Quand cela s'est terminé (si applicable)"
+      },
+      "onsetDate": {
+        "label": "Date de survenue",
+        "placeholder": "Quand cela s'est produit pour la première fois",
+        "description": "Quand cela fut découvert pour la première fois"
+      },
+      "phoneNumber": {
+        "label": "Numéro de téléphone",
+        "placeholder": "06 12 34 56 78",
+        "description": "Numéro de contact primaire"
     },
-    "tags": {
-      "label": "Etiquettes",
-      "placeholder": "Ajoutez des étiquettes pour organiser et trouver cette entrée",
-      "description": "Ajoutez des étiquettes pour vous aider à organiser et rechercher cette entrée ultérieurement."
-    },
-    "status": {
-      "label": "Statut",
-      "description": "Statut actuel",
-      "placeholder": "Sélectionnez le statut"
-    },
-    "severity": {
-      "label": "Sévérité",
-      "placeholder": "Sélectionnez le niveau de sévérité",
-      "description": "Niveau de sévérité"
-    },
-    "startDate": {
-      "label": "Date de début",
-      "placeholder": "Sélectionnez la date de début",
-      "description": "Quand cela a commencé"
-    },
-    "endDate": {
-      "label": "Date de fin",
-      "placeholder": "Sélectionnez la date de fin",
-      "description": "Quand cela s'est terminé (si applicable)"
-    },
-    "onsetDate": {
-      "label": "Date de survenue",
-      "placeholder": "Quand cela s'est produit pour la première fois",
-      "description": "Quand cela fut découvert pour la première fois"
-    },
-    "phoneNumber": {
-      "label": "Numéro de téléphone",
-      "placeholder": "06 12 34 56 78",
-      "description": "Numéro de contact primaire"
-    },
-    "website": {
-      "label": "Site web",
-      "placeholder": "https://www.exemple.com",
-      "description": "URL du site web"
-    },
-    "fullName": {
-      "label": "Nom complet",
-      "placeholder": "Saisissez le nom complet",
-      "description": "Nom complet"
-    },
-    "email": {
-      "label": "Adresse email",
-      "placeholder": "nom@email.com",
-      "description": "Adresse email"
+      "website": {
+        "label": "Site web",
+        "placeholder": "https://www.exemple.com",
+        "description": "URL du site web"
+      },
+      "fullName": {
+        "label": "Nom complet",
+        "placeholder": "Saisissez le nom complet",
+        "description": "Nom complet"
+      },
+      "email": {
+        "label": "Adresse email",
+        "placeholder": "nom@email.com",
+        "description": "Adresse email"
     },
     "address": {
-      "label": "Adresse",
-      "placeholder": "Saisissez l'adresse",
-      "description": "Adresse physique"
+        "label": "Adresse",
+        "placeholder": "Saisissez l'adresse",
+        "description": "Adresse physique"
     }
   },
   "severity": {
-    "mild": "Bénigne - Gêne mineure",
-    "moderate": "Modérée - Symptômes notables",
-    "severe": "Sévère - Réaction significative",
-    "lifeThreatening": "Dangereux - Risque de choc anaphylactique",
-    "critical": "Critique - Danger de mort",
-    "mildImpact": "Bénigne - Impact mineur",
-    "moderateImpact": "Modérée - Impact notable",
-    "severeImpact": "Sévère - Impact significatif"
+      "mild": "Bénigne - Gêne mineure",
+      "moderate": "Modérée - Symptômes notables",
+      "severe": "Sévère - Réaction significative",
+      "lifeThreatening": "Dangereux - Risque de choc anaphylactique",
+      "critical": "Critique - Danger de mort",
+      "mildImpact": "Bénigne - Impact mineur",
+      "moderateImpact": "Modérée - Impact notable",
+      "severeImpact": "Sévère - Impact significatif"
   },
   "status": {
-    "active": "Actif",
-    "inactive": "Inactif",
-    "resolved": "Résolu",
-    "stopped": "Arrêté",
-    "onHold": "En suspens",
-    "completed": "Complété",
-    "planned": "Planifié",
-    "cancelled": "Annulé",
-    "pending": "En attente",
-    "expired": "Expiré"
+      "active": "Actif",
+      "inactive": "Inactif",
+      "resolved": "Résolu",
+      "stopped": "Arrêté",
+      "onHold": "En suspens",
+      "completed": "Complété",
+      "planned": "Planifié",
+      "cancelled": "Annulé",
+      "pending": "En attente",
+      "expired": "Expiré"
   },
   "statusDescriptions": {
-    "activeAllergic": "Actif - Actuellement allergique",
-    "inactiveAllergic": "Inactif - N'est plus allergique",
-    "resolvedAllergy": "Résolu - Allergie dépassée",
-    "activeCondition": "Actif - Condition en cours",
-    "resolvedCondition": "Résolu - N'est plus présente",
-    "chronicCondition": "Chronique - Condition à long terme",
-    "activeExperiencing": "Actif - En cours",
-    "resolvedExperiencing": "Résolu - Terminé",
-    "recurring": "Récurrent - Va et vient"
+      "activeAllergic": "Actif - Actuellement allergique",
+      "inactiveAllergic": "Inactif - N'est plus allergique",
+      "resolvedAllergy": "Résolu - Allergie dépassée",
+      "activeCondition": "Actif - Condition en cours",
+      "resolvedCondition": "Résolu - N'est plus présente",
+      "chronicCondition": "Chronique - Condition à long terme",
+      "activeExperiencing": "Actif - En cours",
+      "resolvedExperiencing": "Résolu - Terminé",
+      "recurring": "Récurrent - Va et vient"
   },
   "viewToggle": {
     "cards": "Cartes",
@@ -421,7 +421,7 @@
         "additionalNotes": "Notes supplémentaires",
         "sideEffects": "Effets secondaires",
         "attachedDocuments": "Pièces jointes",
-        "relatedConditions": "Conditions associées"
+		"relatedConditions": "Conditions concernées"
       },
       "labels": {
         "medicationName": "Nom du médicament",
@@ -437,19 +437,19 @@
       "editMedication": "Editer le médicament"
     },
     "conditions": {
-      "loading": "Chargement des conditions associées...",
-      "noLinked": "Aucune condition liée à ce médicament",
-      "orphanedTitle": "Cette condition a été supprimée mais la relation existe encore",
-      "viewDetails": "Cliquez pour afficher les détails de la condition",
+      "loading": "Chargement des conditions connectées...",
+      "noLinked": "Aucune condition connectée à ce médicament",
+      "orphanedTitle": "Cette condition a été supprimée, mais la connexion existe encore",
+      "viewDetails": "Cliquez pour voir les détails de la condition",
       "removeLink": "Supprimer le lien de condition",
-      "confirmRemove": "Supprimer ce lien de condition ?",
-      "failedToAdd": "Échec de l'ajout de la relation de condition",
-      "failedToRemove": "Échec de la suppression de la relation de condition",
-      "availableToLink": "{{count}} condition disponible à lier",
-      "availableToLink_plural": "{{count}} conditions disponibles à lier",
-      "linkToMedication": "Lier une condition au médicament",
-      "selectCondition": "Sélectionner une condition",
-      "selectConditionPlaceholder": "Choisir une condition à lier"
+      "confirmRemove": "Supprimer ce lien de condition ?",
+      "failedToAdd": "Echec d'ajout de relation de condition",
+      "failedToRemove": "Echec de suppression de relation de condition",
+      "availableToLink": "{{count}} condition pouvant être connectée",
+      "availableToLink_plural": "{{count}} conditions pouvant être connectées",
+      "linkToMedication": "Connecter une condition à un médicament",
+      "selectCondition": "Sélectionnez une condition",
+      "selectConditionPlaceholder": "Choisissez une condition à connecter"
     }
   },
   "searchPlaceholders": {
@@ -461,14 +461,14 @@
     "visits": "Rechercher parmi les visites, raisons, notes, étiquettes...",
     "immunizations": "Rechercher parmi les immunisations, vaccins, étiquettes...",
     "allergies": "Rechercher parmi les allergies, réactions, étiquettes...",
-    "symptoms": "Rechercher parmi les symtômes, descriptions, étiquettes...",
+    "symptoms": "Rechercher parmi les symptômes, descriptions, étiquettes...",
     "practitioners": "Rechercher parmi les médecins...",
     "pharmacies": "Rechercher parmi les pharmacies...",
     "labResults": "Rechercher parmi les résultats d'analyse, codes, établissements, médecins, étiquettes...",
     "vitals": "Rechercher parmi les signes vitaux, notes...",
     "emergencyContacts": "Rechercher parmi les contacts, liens de parenté, numéros de téléphone, adresses email...",
     "familyHistory": "Rechercher parmi les membres de la famille, conditions, notes...",
-    "injuries": "Rechercher parmi les blessures, parties du corps, notes, étiquettes...",
+	"injuries": "Rechercher parmi les blessures, parties du corps, notes, étiquettes...",
     "generic": "Rechercher..."
   },
   "messages": {
@@ -487,14 +487,14 @@
     "confirmRemoveConditionRelationship": "Voulez-vous vraiment supprimer cette relation à une condition ?"
   },
   "modals": {
-    "linkMedicationToCondition": "Connecter médicament à condition",
-    "linkMedicationsToCondition": "Connecter médicaments à condition",
-    "linkConditionsToMedication": "Connecter conditions au médicament",
-    "linkConditionToLabResult": "Connecter condition à résultats d'analyse",
+    "linkMedicationToCondition": "Connecter un médicament à une condition",
+    "linkMedicationsToCondition": "Connecter des médicaments à une condition",
+    "linkConditionsToMedication": "Connecter des conditions à un médicament",
+    "linkConditionToLabResult": "Connecter une condition à des résultats d'analyse",
     "selectMedication": "Sélectionnez un médicament",
-    "selectMedications": "Sélectionner des médicaments",
-    "selectCondition": "Sélectionnez une condition",
+    "selectMedications": "Sélectionnez des médicaments",
     "selectConditions": "Sélectionnez des conditions",
+    "selectCondition": "Sélectionnez une condition",
     "chooseMedicationToLink": "Choisissez des médicaments à connecter",
     "chooseConditionsToLink": "Choisissez des conditions à connecter",
     "chooseConditionToLink": "Choisissez une condition à connecter",
@@ -758,7 +758,7 @@
       "viewSymptom": "Voir le symptôme",
       "duration": "Durée",
       "location": "Emplacement",
-      "time": "Heure",
+	  "time": "Heure",
       "timeOfDay": "Moment de la journée",
       "resolved": "Résolu",
       "occurrenceId": "ID de l'occurrence",
@@ -1105,7 +1105,7 @@
       "noComplications": "Aucune complication signalée",
       "clinicalNotes": "Notes cliniques",
       "noClinicalNotes": "Aucune note cliniques disponible",
-      "outcome": "Résultat",
+	  "outcome": "Résultat",
       "notSpecified": "Non spécifié",
       "close": "Fermer",
       "edit": "Editer"
@@ -1168,7 +1168,7 @@
       "clinicalNotes": "Notes cliniques",
       "clinicalNotesPlaceholder": "Saisissez les notes cliniques, observations, ou détails supplémentaires",
       "clinicalNotesDesc": "Informations supplémentaires sur cette procédure",
-      "outcome": "Résultat",
+	  "outcome": "Résultat",
       "outcomePlaceholder": "Sélectionnez le résultat",
       "outcomeDesc": "Résultat de la procédure",
       "outcomeSuccessful": "Succès",
@@ -1696,7 +1696,7 @@
     }
   },
   "practitioners": {
-    "title": "Professionnels de santé",
+   "title": "Professionnels de santé",
     "loading": "Chargement des médecins...",
     "errors": {
       "loadFailed": "Echec du chargement des médecins. Veuillez réessayer.",
@@ -1779,9 +1779,9 @@
     "card": {
       "address": "Adresse",
       "city": "Cité",
-      "stateProvince": "Région / Etat / Province",
-      "postalCode": "Code postal",
-      "country": "Pays",
+	  "stateProvince": "Région / Etat / Province",
+	  "postalCode": "Code postal",
+	  "country": "Pays",
       "storeNumber": "Numéro de la pharmacie",
       "phone": "Téléphone",
       "website": "Site web",
@@ -1793,9 +1793,9 @@
       "location": "EMPLACEMENT",
       "address": "Adresse",
       "city": "Cité",
-      "stateProvince": "Région / Etat / Province",
-      "postalCode": "Code postal",
-      "country": "Pays",
+	  "stateProvince": "Région / Etat / Province",
+	  "postalCode": "Code postal",
+	  "country": "Pays",
       "storeNumber": "Numéro du magasin",
       "contact": "INFORMATIONS DE CONTACT",
       "phone": "Téléphone",
@@ -2337,18 +2337,18 @@
     "categories": {
       "chemistry": "Chimie - Electrolytes et minéraux",
       "hematology": "Hématologie - Décomptes sanguins et fer",
-      "hepatology": "Hépatologie - Enzymes et fonctions du foie",
+	  "hepatology": "Hépatologie - Enzymes et fonctions du foie",
       "lipids": "Lipides - Cholestérol et triglycérides",
       "endocrinology": "Endocrinologie - Hormones et diabète",
-      "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
+	  "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
       "immunology": "Immunologie - Système immunitaire et anticorps",
       "microbiology": "Microbiologie - Infections et cultures",
       "toxicology": "Toxicologie - Dépistage de drogues et toxines",
       "genetics": "Génétique - Analyses génétiques",
       "molecular": "Moléculaire - Analyses d'ADN",
       "pathology": "Pathologie - Analyses de tissus et de biopsies",
-      "hearing": "Ouïe : Audiométrie et analyses vestibulaires",
-      "stomatology": "Stomatologie - Diagnostics oraux et salivaires",
+	  "hearing": "Audition - Audiométrie et analyses vestibulaires",
+	  "stomatology": "Stomatologie - Diagnostics oraux et salivaires",
       "other": "Autres analyses"
     }
   },
@@ -2359,7 +2359,7 @@
       "general": "Général",
       "documents": "Documents",
       "notifications": "Notifications",
-      "about": "À propos"
+      "about": "A propos"
     },
     "sections": {
       "security": "Sécurité",
@@ -2378,19 +2378,19 @@
         "currentPassword": "Mot de passe actuel",
         "newPassword": "Nouveau mot de passe",
         "confirmPassword": "Confirmer le nouveau mot de passe",
-        "passwordHelp": "Au moins 6 caractères, doit inclure une lettre et un chiffre.",
+        "passwordHelp": "Le mot de passe doit contenir au moins 6 caractères et au moins une lettre et un chiffre.",
         "forceChange": {
           "title": "Changement de mot de passe requis",
-          "subtitle": "Votre compte nécessite un changement de mot de passe avant de continuer. Veuillez définir un nouveau mot de passe ci-dessous.",
+          "subtitle": "Votre compte requiert un changement de mot de passe avant de pouvoir continuer. Veuillez définir un nouveau mot de passe ci-dessous.",
           "submit": "Définir un nouveau mot de passe",
-          "submitting": "Modification en cours...",
+          "submitting": "Changement de mot de passe...",
           "errors": {
-            "allFieldsRequired": "Tous les champs sont obligatoires.",
+            "allFieldsRequired": "Tous les champs sont requis.",
             "passwordsMustMatch": "Les nouveaux mots de passe ne correspondent pas.",
-            "passwordTooShort": "Le nouveau mot de passe doit comporter au moins 6 caractères.",
+            "passwordTooShort": "Le nouveau mot de passe doit contenir au moins 6 caractères.",
             "passwordMustDiffer": "Le nouveau mot de passe doit être différent de votre mot de passe actuel.",
             "passwordComplexity": "Le nouveau mot de passe doit contenir au moins une lettre et un chiffre.",
-            "changeFailed": "Échec de la modification du mot de passe. Veuillez réessayer."
+            "changeFailed": "Echec du changement de mot de passe. Veuillez réessayer."
           }
         }
       }
@@ -2414,22 +2414,22 @@
     "help": {
       "documentation": {
         "title": "Documentation",
-        "description": "Consultez le wiki pour des guides, des instructions d'installation et la documentation des fonctionnalités."
+        "description": "Visitez le wiki pour avoir accès à des guides, des instructions d'installation, et de la documentation sur les fonctionnalités de l'application."
       },
       "issues": {
         "title": "Signaler un problème",
-        "description": "Vous avez trouvé un bug ou avez une suggestion ? Ouvrez un ticket sur GitHub."
+        "description": "Vous avez trouvé un bug ou souhaitez demander l'intégration d'une fonctionnalité ? Ouvrez un problème sur GitHub."
       }
     },
     "sponsor": {
-      "description": "MediKeep est gratuit et open source. Si vous le trouvez utile, envisagez de parrainer le projet pour aider à financer le développement.",
+      "description": "MediKeep est gratuit et open source. Si vous trouvez l'application utile, envisagez de parrainer le projet pour aider à financer son développement.",
       "button": "Parrainer sur GitHub"
     },
     "preferences": {
       "unitSystem": {
         "title": "Système de mesure",
         "description": "Choisissez si les mesures doivent être affichées en unités impériales (livres, pieds, degrés Farenheit) ou métriques (kilogrammes, centimètres, degrés Celsius)",
-        "imperial": "Impérial (livres, pieds, °F)",
+		"imperial": "Impérial (livres, pieds, °F)",
         "metric": "Métrique (kg, cm, °C)"
       },
       "dateFormat": {
@@ -2505,46 +2505,60 @@
   },
   "admin": {
     "createUser": {
-      "username": "Nom d'utilisateur",
-      "usernamePlaceholder": "Saisir le nom d'utilisateur",
+      "username": "Pseudonyme",
+      "usernamePlaceholder": "Saisissez le pseudonyme",
       "password": "Mot de passe",
-      "passwordPlaceholder": "Saisir le mot de passe (au moins 6 caractères, inclure une lettre et un chiffre)",
-      "email": "E-mail",
-      "emailPlaceholder": "Saisir l'adresse e-mail",
+      "passwordPlaceholder": "Saisissez le mot de passe (6 caractères minimum et doit contenir au moins une lettre et un chiffre)",
+      "email": "Email",
+      "emailPlaceholder": "Saisissez l'adresse email",
       "role": "Rôle",
       "roleUser": "Utilisateur",
       "roleAdmin": "Administrateur",
       "firstName": "Prénom",
-      "firstNamePlaceholder": "Saisir le prénom",
-      "lastName": "Nom de famille",
-      "lastNamePlaceholder": "Saisir le nom de famille",
+      "firstNamePlaceholder": "Saisissez le prénom",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Saisissez le nom",
       "submitButton": "Créer le compte",
-      "noteLabel": "Remarque :",
-      "noteText": "Un dossier patient sera automatiquement créé pour cet utilisateur avec le rôle par défaut \"utilisateur\".",
+      "noteLabel": "Note :",
+      "noteText": "Un dossier de patient sera automatiquement créé pour cet utilisateur avec le rôle par défaut \"Utilisateur\".",
       "validation": {
         "firstNameRequired": "Veuillez saisir le prénom",
-        "lastNameRequired": "Veuillez saisir le nom de famille",
-        "usernameMinLength": "Le nom d'utilisateur doit contenir au moins 3 caractères",
+        "lastNameRequired": "Veuillez saisir le nom",
+        "usernameMinLength": "Le pseudonyme doit contenir au moins 3 caractères",
         "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
         "passwordRequirements": "Le mot de passe doit contenir au moins une lettre et un chiffre"
       },
       "passwordReqs": {
         "minLength": "Au moins 6 caractères",
-        "hasLetter": "Contient au moins une lettre",
-        "hasNumber": "Contient au moins un chiffre"
+        "hasLetter": "Doit contenir au moins une lettre",
+        "hasNumber": "Doit contenir au moins un chiffre"
       },
       "linkPatient": {
-        "checkbox": "Lier à un dossier patient existant",
-        "hint": "Au lieu de créer un nouveau dossier patient, liez le nouvel utilisateur à un patient existant (par exemple, un enfant qui a désormais besoin de sa propre connexion).",
-        "selectPlaceholder": "Sélectionner un patient...",
+        "checkbox": "Connecter à un dossier de patient existant",
+        "hint": "Au lieu de créer un nouveau dossier de patient, connectez le nouvel utilisateur à un patient existant (ex : un enfant qui a besoin de son propre compte).",
+        "selectPlaceholder": "Sélectionnez un patient...",
         "loading": "Chargement des patients...",
-        "selfRecordBadge": "Auto-dossier",
+        "selfRecordBadge": "Dossier en nom propre",
         "patientId": "ID",
         "dob": "Date de naissance",
         "owner": "Propriétaire",
         "currentOwner": "Propriétaire actuel",
-        "selfRecordWarningTitle": "Remarque :",
-        "selfRecordWarning": "Il s'agit de l'auto-dossier du propriétaire actuel. Un nouveau dossier personnel sera créé pour le propriétaire initial avec ses informations démographiques recopiées. Le propriétaire initial recevra un accès de modification à ce patient."
+        "selfRecordWarningTitle": "Note :",
+        "selfRecordWarning": "Ceci est le dossier appartemment au propriétaire actuel. Un nouveau dossier en nom propre sera créé pour le propriétaire d'origine avec ses données démographiques copiées dedans. Le propriétaire d'origine recevra les droits d'édition pour ce patient."
+      },
+      "successRedirect": "Utilisateur créé avec succès ! Redirection...",
+      "autoFeaturesTitle": "Fonctionnalités auto-générées",
+      "autoFeatures": {
+        "patientRecord": "Un dossier de patient sera automatiquement créé (ou vous pouvez en connecter un préexistant)",
+        "linkExisting": "Utilisez 'Connecter à un patient existant' pour transférer un dossier de patient vers le nouvel utilisateur'",
+        "editAccess": "Le propriétaire d'origine garde les droits d'édition après le transfert",
+        "timestamps": "Création/Mise à jour des horodatages traqués automatiquement",
+        "immediateLogin": "Le nouvel utilisateur peut se connecter immédiatement après sa création"
+      },
+      "errors": {
+        "createFailed": "Echec de création de l'utilisateur",
+        "accountCreateFailed": "Echec de création du compte",
+        "createRetry": "Echec de création de l'utilisateur. Veuillez réessayer."
       }
     }
   }
