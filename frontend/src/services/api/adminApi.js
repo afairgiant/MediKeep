@@ -61,8 +61,13 @@ class AdminApiService extends BaseApiService {
     return this.get('/dashboard/storage-health');
   }
 
-  async getAnalyticsData(days = 7) {
-    return this.get('/dashboard/analytics-data', { days });
+  async getAnalyticsData(options = {}) {
+    const params = {};
+    if (options.days) params.days = options.days;
+    if (options.startDate) params.start_date = options.startDate;
+    if (options.endDate) params.end_date = options.endDate;
+    if (options.compare) params.compare = true;
+    return this.get('/dashboard/analytics-data', { params, signal: options.signal });
   }
 
   async getFrontendLogHealth() {

@@ -1,19 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from 'chart.js';
-import { Line, Doughnut } from 'react-chartjs-2';
 import {
   Card,
   Grid,
@@ -21,8 +8,6 @@ import {
   Group,
   Button,
   Badge,
-  ActionIcon,
-  Tabs,
   Stack,
   SimpleGrid,
   Paper,
@@ -30,14 +15,10 @@ import {
   Loader,
   Alert,
   ThemeIcon,
-  Progress,
-  Divider,
   LoadingOverlay,
 } from '@mantine/core';
 import {
   IconRefresh,
-  IconChartBar,
-  IconEye,
   IconUsers,
   IconStethoscope,
   IconFlask,
@@ -56,49 +37,25 @@ import {
   IconTrash,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import ChartErrorBoundary from '../../components/shared/ChartErrorBoundary';
 import { useAdminData } from '../../hooks/useAdminData';
 import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import useThemeColors from '../../hooks/useThemeColors';
 import logger from '../../services/logger';
 import './AdminDashboard.css';
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
-
-// Dashboard Configuration Constants
 const DASHBOARD_CONFIG = {
   RECENT_ACTIVITY_LIMIT: 15,
-  ANALYTICS_DAYS: 7,
-  REFRESH_INTERVAL: 30000,
   ACTIVITY_MAX_HEIGHT: 300,
-  DEFAULT_WEEK_LABELS: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  DEFAULT_WEEK_DATA: [0, 0, 0, 0, 0, 0, 0],
 };
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { formatDate, formatDateTime } = useDateFormat();
-  const [activeTab, setActiveTab] = useState('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const themeColors = useThemeColors();
 
   // Dashboard Stats (no auto-refresh - manual refresh only)
   const {
     data: stats,
     loading: statsLoading,
-    error: statsError,
     refreshData: refreshStats,
   } = useAdminData({
     entityName: 'Dashboard Statistics',
@@ -136,21 +93,7 @@ const AdminDashboard = () => {
     autoRefresh: false,
   });
 
-  // Analytics Data
-  const {
-    data: analyticsData,
-    loading: analyticsLoading,
-    error: analyticsError,
-    refreshData: refreshAnalytics,
-  } = useAdminData({
-    entityName: 'Analytics Data',
-    apiMethodsConfig: {
-      load: signal => adminApiService.getAnalyticsData(DASHBOARD_CONFIG.ANALYTICS_DAYS, signal),
-    },
-  });
-
-  const loading =
-    statsLoading || activityLoading || healthLoading || analyticsLoading;
+  const loading = statsLoading || activityLoading || healthLoading;
 
   // Note: Auto-refresh disabled to reduce log noise and unnecessary API calls
   // Users can manually refresh using the "Refresh All" button
@@ -162,7 +105,6 @@ const AdminDashboard = () => {
         refreshStats(true),
         refreshActivity(true),
         refreshHealth(true),
-        refreshAnalytics(true),
       ]);
     } catch (error) {
       logger.error('Failed to refresh dashboard data', {
@@ -173,113 +115,7 @@ const AdminDashboard = () => {
     } finally {
       setIsRefreshing(false);
     }
-  }, [refreshStats, refreshActivity, refreshHealth, refreshAnalytics]);
-
-  const getHealthStatusColor = status => {
-    switch (status?.toLowerCase()) {
-      case 'healthy':
-        return themeColors.success;
-      case 'warning':
-        return themeColors.warning;
-      case 'error':
-      case 'critical':
-        return themeColors.danger;
-      default:
-        return themeColors.textSecondary;
-    }
-  };
-
-  const chartData = useMemo(() => {
-    return {
-      activity: {
-        labels: analyticsData?.weekly_activity?.labels || DASHBOARD_CONFIG.DEFAULT_WEEK_LABELS,
-        datasets: [
-          {
-            label: 'User Activity',
-            data: analyticsData?.weekly_activity?.data || DASHBOARD_CONFIG.DEFAULT_WEEK_DATA,
-            borderColor: themeColors.primary,
-            backgroundColor: `${themeColors.primary}1a`,
-            tension: 0.4,
-          },
-        ],
-      },
-      distribution: {
-        labels: [
-          'Patients',
-          'Lab Results',
-          'Medications',
-          'Procedures',
-          'Allergies',
-          'Vitals',
-        ],
-        datasets: [
-          {
-            data: [
-              stats?.total_patients || 0,
-              stats?.total_lab_results || 0,
-              stats?.total_medications || 0,
-              stats?.total_procedures || 0,
-              stats?.total_allergies || 0,
-              stats?.total_vitals || 0,
-            ],
-            backgroundColor: [
-              themeColors.primary,
-              themeColors.success,
-              themeColors.warning,
-              themeColors.danger,
-              themeColors.purple,
-              themeColors.info,
-            ],
-            borderWidth: 0,
-          },
-        ],
-      },
-    };
-  }, [analyticsData, stats, themeColors]);
-
-  // Memoized chart configuration options
-  const lineChartOptions = useMemo(() => {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false,
-          labels: {
-            color: themeColors.textPrimary,
-          },
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Activities', color: themeColors.textPrimary },
-          ticks: { color: themeColors.textPrimary },
-          grid: { color: themeColors.borderLight },
-        },
-        x: {
-          title: { display: true, text: 'Day of Week', color: themeColors.textPrimary },
-          ticks: { color: themeColors.textPrimary },
-          grid: { color: themeColors.borderLight },
-        },
-      },
-    };
-  }, [themeColors]);
-
-  const doughnutChartOptions = useMemo(() => {
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: themeColors.textPrimary,
-          },
-        },
-      },
-    };
-  }, [themeColors]);
+  }, [refreshStats, refreshActivity, refreshHealth]);
 
   if (loading && !stats) {
     return (
@@ -367,125 +203,31 @@ const AdminDashboard = () => {
           />
         </SimpleGrid>
 
-        {/* Main Dashboard Content with Tabs */}
-        <Tabs value={activeTab} onChange={setActiveTab}>
-          <Tabs.List mb="xl">
-            <Tabs.Tab value="overview" leftSection={<IconEye size={16} />}>
-              Overview
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="analytics"
-              leftSection={<IconChartBar size={16} />}
-            >
-              Analytics
-            </Tabs.Tab>
-          </Tabs.List>
+        {/* Main Dashboard Content */}
+        <Grid>
+          <Grid.Col span={{ base: 12, lg: 6 }}>
+            <SystemHealthCard
+              systemHealth={systemHealth}
+              loading={healthLoading}
+              error={healthError}
+              isRefreshing={isRefreshing}
+            />
+          </Grid.Col>
 
-          <Tabs.Panel value="analytics">
-            <Grid>
-              <Grid.Col span={{ base: 12, md: 8 }}>
-                <Card shadow="sm" p="lg" withBorder>
-                  <Group justify="space-between" mb="md">
-                    <div>
-                      <Text size="lg" fw={600}>
-                        Weekly Activity Trend
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        User interactions over the past week
-                      </Text>
-                    </div>
-                    <Badge variant="light" color="blue">
-                      Analytics
-                    </Badge>
-                  </Group>
+          <Grid.Col span={{ base: 12, lg: 6 }}>
+            <ActivityCard
+              activities={recentActivity || []}
+              loading={activityLoading}
+              error={activityError}
+              isRefreshing={isRefreshing}
+              onViewAll={() => navigate('/admin/audit-log')}
+            />
+          </Grid.Col>
 
-                  {analyticsData?.weekly_activity && (
-                    <Group mb="md">
-                      <Text size="sm" c="dimmed">
-                        Total: {analyticsData.weekly_activity.total} activities
-                      </Text>
-                      {analyticsData.date_range && (
-                        <Text size="sm" c="dimmed">
-                          ({analyticsData.date_range.start} to{' '}
-                          {analyticsData.date_range.end})
-                        </Text>
-                      )}
-                    </Group>
-                  )}
-
-                  <div
-                    className="chart-container"
-                    role="img"
-                    aria-label={`Weekly activity trend chart: ${analyticsData?.weekly_activity?.total || 0} total activities`}
-                  >
-                    <ChartErrorBoundary onReset={refreshAnalytics}>
-                      <Line
-                        data={chartData.activity}
-                        options={lineChartOptions}
-                      />
-                    </ChartErrorBoundary>
-                  </div>
-                </Card>
-              </Grid.Col>
-
-              <Grid.Col span={{ base: 12, md: 4 }}>
-                <Card shadow="sm" p="lg" withBorder>
-                  <Group justify="space-between" mb="md">
-                    <div>
-                      <Text size="lg" fw={600}>
-                        Records Distribution
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        Breakdown by type
-                      </Text>
-                    </div>
-                  </Group>
-
-                  <div
-                    className="chart-container doughnut"
-                    role="img"
-                    aria-label={`Records distribution chart across 6 categories: patients, lab results, medications, procedures, allergies, and vitals`}
-                  >
-                    <ChartErrorBoundary onReset={refreshStats}>
-                      <Doughnut
-                        data={chartData.distribution}
-                        options={doughnutChartOptions}
-                      />
-                    </ChartErrorBoundary>
-                  </div>
-                </Card>
-              </Grid.Col>
-            </Grid>
-          </Tabs.Panel>
-
-          <Tabs.Panel value="overview">
-            <Grid>
-              <Grid.Col span={{ base: 12, lg: 6 }}>
-                <SystemHealthCard
-                  systemHealth={systemHealth}
-                  loading={healthLoading}
-                  error={healthError}
-                  getHealthStatusColor={getHealthStatusColor}
-                  isRefreshing={isRefreshing}
-                />
-              </Grid.Col>
-
-              <Grid.Col span={{ base: 12, lg: 6 }}>
-                <ActivityCard
-                  activities={recentActivity || []}
-                  loading={activityLoading}
-                  error={activityError}
-                  isRefreshing={isRefreshing}
-                  onViewAll={() => navigate('/admin/audit-log')}
-                />
-              </Grid.Col>
-
-              <Grid.Col span={12}>
-                <QuickActionsCard />
-              </Grid.Col>
-            </Grid>
-          </Tabs.Panel>
-        </Tabs>
+          <Grid.Col span={12}>
+            <QuickActionsCard />
+          </Grid.Col>
+        </Grid>
       </div>
     </AdminLayout>
   );
@@ -555,7 +297,6 @@ const SystemHealthCard = ({
   systemHealth,
   loading,
   error,
-  getHealthStatusColor,
   isRefreshing = false,
 }) => {
   const { formatDate } = useDateFormat();
@@ -642,7 +383,6 @@ SystemHealthCard.propTypes = {
   }),
   loading: PropTypes.bool.isRequired,
   error: PropTypes.object,
-  getHealthStatusColor: PropTypes.func.isRequired,
   isRefreshing: PropTypes.bool,
 };
 

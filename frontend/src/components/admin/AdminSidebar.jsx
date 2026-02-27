@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box,
@@ -33,7 +33,7 @@ const NAV_SECTIONS = [
     label: 'Dashboard',
     items: [
       { label: 'Overview', icon: IconChartBar, path: '/admin', exact: true },
-      { label: 'Analytics', icon: IconTrendingUp, path: '/admin/analytics', disabled: true },
+      { label: 'Analytics', icon: IconTrendingUp, path: '/admin/analytics' },
     ],
   },
   {
@@ -55,6 +55,7 @@ const NAV_SECTIONS = [
     label: 'Tools',
     items: [
       { label: 'Backup Management', icon: IconDeviceFloppy, path: '/admin/backup' },
+      { label: 'Maintenance', icon: IconTool, path: '/admin/tools' },
       { label: 'Settings', icon: IconSettings, path: '/admin/settings' },
     ],
   },
