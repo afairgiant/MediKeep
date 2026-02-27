@@ -2,7 +2,7 @@
  * VitalsList Component - Enhanced Version with Mantine UI
  * Displays a list of patient vital signs with options to edit/delete/view details
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import {
@@ -25,12 +25,14 @@ import {
   Card,
   Select,
   Pagination,
+  Badge,
 } from '@mantine/core';
 import {
   IconEdit,
   IconTrash,
   IconChevronUp,
   IconChevronDown,
+  IconChevronRight,
   IconSelector,
   IconAlertTriangle,
   IconRefresh,
@@ -49,6 +51,16 @@ import {
   IconTrendingUp,
   IconUser,
 } from '@tabler/icons-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from 'recharts';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -58,6 +70,21 @@ import {
   unitLabels,
 } from '../../utils/unitConversion';
 import logger from '../../services/logger';
+
+const PAGE_SIZE_OPTIONS = [
+  { value: '10', label: '10' },
+  { value: '20', label: '20' },
+  { value: '25', label: '25' },
+  { value: '50', label: '50' },
+];
+const VALID_PAGE_SIZES = [10, 20, 25, 50];
+
+function normalizePageSize(value) {
+  if (VALID_PAGE_SIZES.includes(value)) return value;
+  return VALID_PAGE_SIZES.reduce((prev, curr) =>
+    Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+  );
+}
 
 const VitalsList = ({
   patientId,
@@ -85,24 +112,6 @@ const VitalsList = ({
   });
   const [selectedVital, setSelectedVital] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-
-  // Page size options for the dropdown
-  const pageSizeOptions = [
-    { value: '10', label: '10' },
-    { value: '20', label: '20' },
-    { value: '25', label: '25' },
-    { value: '50', label: '50' },
-  ];
-  const validPageSizes = [10, 20, 25, 50];
-
-  // Normalize a value to the nearest valid page size option
-  const normalizePageSize = (value) => {
-    if (validPageSizes.includes(value)) return value;
-    // Find the closest valid option
-    return validPageSizes.reduce((prev, curr) =>
-      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
-    );
-  };
 
   const [pageSize, setPageSize] = useState(() => normalizePageSize(limit));
   const [currentPage, setCurrentPage] = useState(1);
@@ -189,8 +198,9 @@ const VitalsList = ({
   // For external data, use array length; for internal, use tracked total
   const actualTotalRecords = vitalsData !== undefined ? vitalsData.length : totalRecords;
 
-  const handleDelete = async vitalsId => {
+  const handleDelete = async (vitalsId, skipConfirm = false) => {
     if (
+      !skipConfirm &&
       !window.confirm('Are you sure you want to delete this vitals record?')
     ) {
       return;
@@ -557,14 +567,98 @@ const VitalsList = ({
     );
   };
 
+  // Track which daily summary group is expanded (accordion - one at a time)
+  const [expandedGroup, setExpandedGroup] = useState(null);
+  // Sub-pagination for expanded group readings
+  const [expandedPage, setExpandedPage] = useState(1);
+  const EXPANDED_PAGE_SIZE = 20;
+
+  const toggleGroup = (groupKey) => {
+    setExpandedGroup(prev => {
+      if (prev === groupKey) return null;
+      setExpandedPage(1); // Reset sub-pagination when switching groups
+      return groupKey;
+    });
+  };
+
   const sortedVitals = getSortedVitals();
+
+  // Group imported vitals by day for collapsible daily summaries
+  const groupedDisplayItems = useMemo(() => {
+    if (!sortedVitals || sortedVitals.length === 0) return [];
+
+    const manualRecords = [];
+    // Map of "YYYY-MM-DD|import_source" -> array of records
+    const importGroups = {};
+
+    for (const vital of sortedVitals) {
+      if (!vital.import_source) {
+        manualRecords.push({ type: 'individual', record: vital });
+      } else {
+        const dateKey = new Date(vital.recorded_date).toISOString().split('T')[0];
+        const groupKey = `${dateKey}|${vital.import_source}`;
+        if (!importGroups[groupKey]) {
+          importGroups[groupKey] = [];
+        }
+        importGroups[groupKey].push(vital);
+      }
+    }
+
+    // Build summary rows for import groups
+    const summaryRows = Object.entries(importGroups).map(([groupKey, readings]) => {
+      const glucoseValues = readings
+        .map(r => r.blood_glucose)
+        .filter(v => v != null);
+
+      const stats = glucoseValues.length > 0
+        ? {
+            avg: Math.round(glucoseValues.reduce((a, b) => a + b, 0) / glucoseValues.length),
+            min: Math.round(Math.min(...glucoseValues)),
+            max: Math.round(Math.max(...glucoseValues)),
+          }
+        : null;
+
+      return {
+        type: 'summary',
+        groupKey,
+        date: readings[0].recorded_date,
+        source: readings[0].import_source,
+        deviceUsed: readings[0].device_used,
+        readings,
+        count: readings.length,
+        stats,
+      };
+    });
+
+    // Merge and sort by date
+    const allItems = [...manualRecords, ...summaryRows];
+    const getItemDate = (item) =>
+      new Date(item.type === 'summary' ? item.date : item.record.recorded_date);
+
+    allItems.sort((a, b) => {
+      const diff = getItemDate(a) - getItemDate(b);
+      return sortConfig.direction === 'asc' ? diff : -diff;
+    });
+
+    return allItems;
+  }, [sortedVitals, sortConfig.direction]);
 
   // For server-side pagination: data is already paginated, just sort it
   // For client-side (when vitalsData is provided): slice after sorting
   const isServerSidePagination = vitalsData === undefined && patientId;
 
+  // Determine if we have imported data that needs grouping
+  const hasImportedData = vitalsData !== undefined &&
+    sortedVitals.some(v => v.import_source);
+
+  // When grouping is active, pagination counts grouped items (1 row per day),
+  // not the raw record count
+  const effectiveTotalRecords = hasImportedData
+    ? groupedDisplayItems.length
+    : actualTotalRecords;
+
   // Calculate pagination values
-  const totalPages = Math.max(1, Math.ceil(actualTotalRecords / pageSize));
+  const totalPages = Math.max(1, Math.ceil(effectiveTotalRecords / pageSize));
 
   // For server-side pagination, show all sorted items (already paginated by server)
   // For client-side pagination, slice the sorted data
@@ -580,7 +674,7 @@ const VitalsList = ({
   } else {
     // Client-side pagination for externally provided data
     startIndex = (currentPage - 1) * pageSize;
-    endIndex = Math.min(startIndex + pageSize, actualTotalRecords);
+    endIndex = Math.min(startIndex + pageSize, effectiveTotalRecords);
     paginatedVitals = sortedVitals.slice(startIndex, endIndex);
   }
 
@@ -645,11 +739,15 @@ const VitalsList = ({
     );
   }
 
-  const rows = paginatedVitals.map(vital => (
-    <Table.Tr key={vital.id}>
+  // Reusable N/A cell for summary rows where columns are not applicable
+  const naCell = <Table.Td><Text size="sm" c="dimmed">N/A</Text></Table.Td>;
+
+  // Render a single vital row (used for both individual records and expanded group readings)
+  const renderVitalRow = (vital, isNested = false) => (
+    <Table.Tr key={vital.id} style={isNested ? { backgroundColor: 'var(--mantine-color-gray-0)' } : undefined}>
       <Table.Td>
-        <Text size="sm" fw={500}>
-          {formatDate(vital.recorded_date)}
+        <Text size="sm" fw={500} pl={isNested ? 'md' : undefined}>
+          {isNested ? formatDateTime(vital.recorded_date) : formatDate(vital.recorded_date)}
         </Text>
       </Table.Td>
       <Table.Td>
@@ -750,48 +848,336 @@ const VitalsList = ({
       </Table.Td>
       {showActions && (
         <Table.Td>
-          <Group gap="xs">
-            <ActionIcon
-              variant="filled"
-              color="green"
-              size="sm"
-              onClick={e => {
-                e.stopPropagation();
-                handleViewDetails(vital);
-              }}
-              title="View details"
-            >
-              <IconEye size={14} />
-            </ActionIcon>
-            <ActionIcon
-              variant="filled"
-              color="blue"
-              size="sm"
-              onClick={e => {
-                e.stopPropagation();
-                onEdit(vital);
-              }}
-              title="Edit vitals"
-            >
-              <IconEdit size={14} />
-            </ActionIcon>
-            <ActionIcon
-              variant="filled"
-              color="red"
-              size="sm"
-              onClick={e => {
-                e.stopPropagation();
-                handleDelete(vital.id);
-              }}
-              title="Delete vitals"
-            >
-              <IconTrash size={14} />
-            </ActionIcon>
-          </Group>
+          {!isNested && (
+            <Group gap="xs">
+              <ActionIcon
+                variant="filled"
+                color="green"
+                size="sm"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleViewDetails(vital);
+                }}
+                title="View details"
+              >
+                <IconEye size={14} />
+              </ActionIcon>
+              <ActionIcon
+                variant="filled"
+                color="blue"
+                size="sm"
+                onClick={e => {
+                  e.stopPropagation();
+                  onEdit(vital);
+                }}
+                title="Edit vitals"
+              >
+                <IconEdit size={14} />
+              </ActionIcon>
+              <ActionIcon
+                variant="filled"
+                color="red"
+                size="sm"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleDelete(vital.id);
+                }}
+                title="Delete vitals"
+              >
+                <IconTrash size={14} />
+              </ActionIcon>
+            </Group>
+          )}
         </Table.Td>
       )}
     </Table.Tr>
-  ));
+  );
+
+  // Handle deleting all imported readings for a day
+  const handleDeleteDay = async (item) => {
+    const dateStr = new Date(item.date).toISOString().split('T')[0];
+    if (!window.confirm(
+      t('vitals.summary.confirmDeleteDay', 'Delete all {{count}} imported readings for this day?', { count: item.count })
+    )) {
+      return;
+    }
+
+    try {
+      await vitalsService.deleteImportedDay(patientId, item.source, dateStr);
+      notifySuccess('notifications:toasts.vitals.deleteSuccess');
+      setExpandedGroup(null);
+      // Refresh data
+      if (vitalsData === undefined) {
+        loadVitals();
+      } else if (onDelete) {
+        // Signal parent to refresh
+        onDelete();
+      }
+    } catch (err) {
+      logger.error('bulk_delete_imported_day_failed', err);
+      notifyError('notifications:toasts.vitals.deleteFailed');
+    }
+  };
+
+  // Build chart data from a day's readings for mini glucose chart
+  const buildDayChartData = (readings) => {
+    return readings
+      .filter(r => r.blood_glucose != null)
+      .sort((a, b) => new Date(a.recorded_date) - new Date(b.recorded_date))
+      .map(r => ({
+        time: new Date(r.recorded_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        glucose: r.blood_glucose,
+      }));
+  };
+
+  // Render the expanded daily view: mini chart + stats + sub-paginated table
+  const renderExpandedDayView = (item) => {
+    const chartData = buildDayChartData(item.readings);
+    const totalSubPages = Math.max(1, Math.ceil(item.readings.length / EXPANDED_PAGE_SIZE));
+    const subStart = (expandedPage - 1) * EXPANDED_PAGE_SIZE;
+    const subEnd = Math.min(subStart + EXPANDED_PAGE_SIZE, item.readings.length);
+    const pageReadings = item.readings
+      .sort((a, b) => new Date(b.recorded_date) - new Date(a.recorded_date))
+      .slice(subStart, subEnd);
+
+    // Glucose reference ranges
+    const normalMin = 70;
+    const normalMax = 180;
+
+    const colCount = showActions ? 10 : 9;
+
+    return (
+      <Table.Tr key={`${item.groupKey}-expanded`}>
+        <Table.Td colSpan={colCount} style={{ padding: 0 }}>
+          <Paper p="md" style={{ backgroundColor: 'var(--mantine-color-gray-0)', borderRadius: 0 }}>
+            <Stack gap="md">
+              {/* Mini glucose chart */}
+              {chartData.length > 1 && (
+                <Box>
+                  <Text size="xs" fw={500} c="dimmed" mb="xs">
+                    {t('vitals.summary.glucoseTrend', 'Glucose Trend')}
+                  </Text>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--mantine-color-gray-3)" />
+                      <XAxis
+                        dataKey="time"
+                        tick={{ fontSize: 10 }}
+                        interval="preserveStartEnd"
+                        stroke="var(--mantine-color-gray-5)"
+                      />
+                      <YAxis
+                        tick={{ fontSize: 10 }}
+                        domain={['dataMin - 10', 'dataMax + 10']}
+                        stroke="var(--mantine-color-gray-5)"
+                      />
+                      <Tooltip
+                        contentStyle={{ fontSize: 12 }}
+                        formatter={(value) => [`${value} mg/dL`, t('vitals.modal.bloodGlucose', 'Glucose')]}
+                      />
+                      <ReferenceLine y={normalMin} stroke="var(--mantine-color-green-4)" strokeDasharray="4 4" />
+                      <ReferenceLine y={normalMax} stroke="var(--mantine-color-orange-4)" strokeDasharray="4 4" />
+                      <Line
+                        type="monotone"
+                        dataKey="glucose"
+                        stroke="var(--mantine-color-orange-6)"
+                        strokeWidth={1.5}
+                        dot={false}
+                        activeDot={{ r: 3 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Box>
+              )}
+
+              {/* Stats bar */}
+              {item.stats && (
+                <Group grow>
+                  <Paper p="xs" withBorder ta="center">
+                    <Text size="xs" c="dimmed">{t('vitals.summary.avgGlucose', 'Avg')}</Text>
+                    <Text size="sm" fw={600}>{item.stats.avg} mg/dL</Text>
+                  </Paper>
+                  <Paper p="xs" withBorder ta="center">
+                    <Text size="xs" c="dimmed">{t('vitals.summary.minGlucose', 'Min')}</Text>
+                    <Text size="sm" fw={600}>{item.stats.min} mg/dL</Text>
+                  </Paper>
+                  <Paper p="xs" withBorder ta="center">
+                    <Text size="xs" c="dimmed">{t('vitals.summary.maxGlucose', 'Max')}</Text>
+                    <Text size="sm" fw={600}>{item.stats.max} mg/dL</Text>
+                  </Paper>
+                  <Paper p="xs" withBorder ta="center">
+                    <Text size="xs" c="dimmed">{t('vitals.summary.readings', 'Readings')}</Text>
+                    <Text size="sm" fw={600}>{item.count}</Text>
+                  </Paper>
+                </Group>
+              )}
+
+              {/* Sub-paginated readings table */}
+              <Box>
+                <Table striped highlightOnHover size="xs">
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>{t('vitals.summary.time', 'Time')}</Table.Th>
+                      <Table.Th>{t('vitals.modal.bloodGlucose', 'Glucose')} (mg/dL)</Table.Th>
+                      {showActions && <Table.Th />}
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {pageReadings.map(vital => (
+                      <Table.Tr key={vital.id}>
+                        <Table.Td>
+                          <Text size="xs">{formatDateTime(vital.recorded_date)}</Text>
+                        </Table.Td>
+                        <Table.Td>
+                          <Text size="xs" fw={500}>{vital.blood_glucose ?? 'N/A'}</Text>
+                        </Table.Td>
+                        {showActions && (
+                          <Table.Td>
+                            <ActionIcon
+                              variant="subtle"
+                              color="red"
+                              size="xs"
+                              onClick={() => handleDelete(vital.id, true)}
+                              title={t('buttons.delete', 'Delete')}
+                            >
+                              <IconTrash size={12} />
+                            </ActionIcon>
+                          </Table.Td>
+                        )}
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+
+                {/* Sub-pagination */}
+                {totalSubPages > 1 && (
+                  <Group justify="space-between" mt="xs">
+                    <Text size="xs" c="dimmed">
+                      {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
+                        start: subStart + 1,
+                        end: subEnd,
+                        total: item.readings.length,
+                      })}
+                    </Text>
+                    <Pagination
+                      total={totalSubPages}
+                      value={expandedPage}
+                      onChange={setExpandedPage}
+                      size="xs"
+                      siblings={1}
+                      boundaries={1}
+                    />
+                  </Group>
+                )}
+              </Box>
+
+            </Stack>
+          </Paper>
+        </Table.Td>
+      </Table.Tr>
+    );
+  };
+
+  // Render a summary row that looks like a normal vitals row.
+  // Shows date + count badge, avg glucose in the glucose column, and expands on click.
+  const renderSummaryRow = (item) => {
+    const isExpanded = expandedGroup === item.groupKey;
+
+    return (
+      <React.Fragment key={item.groupKey}>
+        <Table.Tr
+          style={{ cursor: 'pointer' }}
+          onClick={() => toggleGroup(item.groupKey)}
+        >
+          <Table.Td>
+            <Group gap="xs">
+              {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+              <Text size="sm" fw={500}>
+                {formatDate(item.date)}
+              </Text>
+              <Badge size="xs" variant="light" color="blue">
+                {item.count}
+              </Badge>
+            </Group>
+          </Table.Td>
+          {/* BP, Heart Rate, Temperature, Weight, BMI - not applicable for grouped rows */}
+          {naCell}{naCell}{naCell}{naCell}{naCell}
+          {/* Glucose - show avg (min-max) */}
+          <Table.Td>
+            {item.stats ? (
+              <Text size="sm" fw={500}>
+                {item.stats.avg}{' '}
+                <Text span size="xs" c="dimmed">
+                  ({item.stats.min}-{item.stats.max})
+                </Text>{' '}
+                mg/dL
+              </Text>
+            ) : (
+              <Text size="sm" c="dimmed">N/A</Text>
+            )}
+          </Table.Td>
+          {/* A1C, O2 Sat - not applicable for grouped rows */}
+          {naCell}{naCell}
+          {showActions && (
+            <Table.Td>
+              <Group gap="xs">
+                <ActionIcon
+                  variant="filled"
+                  color="green"
+                  size="sm"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleViewDetails(item.readings[0]);
+                  }}
+                  title="View details"
+                >
+                  <IconEye size={14} />
+                </ActionIcon>
+                <ActionIcon
+                  variant="filled"
+                  color="blue"
+                  size="sm"
+                  onClick={e => {
+                    e.stopPropagation();
+                    // Pass first reading with locked glucose flag when multiple readings exist
+                    const record = { ...item.readings[0] };
+                    if (item.count > 1) {
+                      record._lockedFields = ['blood_glucose'];
+                    }
+                    onEdit(record);
+                  }}
+                  title="Edit vitals"
+                >
+                  <IconEdit size={14} />
+                </ActionIcon>
+                <ActionIcon
+                  variant="filled"
+                  color="red"
+                  size="sm"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleDeleteDay(item);
+                  }}
+                  title={t('vitals.summary.deleteDay', 'Delete Day')}
+                >
+                  <IconTrash size={14} />
+                </ActionIcon>
+              </Group>
+            </Table.Td>
+          )}
+        </Table.Tr>
+        {isExpanded && renderExpandedDayView(item)}
+      </React.Fragment>
+    );
+  };
+
+  // When imported data is present, render grouped display items (summary + individual rows).
+  // Otherwise, render flat paginated vitals rows.
+  const rows = hasImportedData
+    ? groupedDisplayItems.slice(startIndex, endIndex).map(item =>
+        item.type === 'summary' ? renderSummaryRow(item) : renderVitalRow(item.record)
+      )
+    : paginatedVitals.map(vital => renderVitalRow(vital));
 
   return (
     <>
@@ -880,7 +1266,7 @@ const VitalsList = ({
         </Paper>
 
         {/* Pagination Controls */}
-        {actualTotalRecords > 0 && (
+        {effectiveTotalRecords > 0 && (
           <Group justify={totalPages > 1 ? 'space-between' : 'flex-end'} align="center" mt="md">
             {/* Left: Record count (only show when multiple pages) */}
             {totalPages > 1 && (
@@ -888,7 +1274,7 @@ const VitalsList = ({
                 {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
                   start: startIndex + 1,
                   end: endIndex,
-                  total: actualTotalRecords,
+                  total: effectiveTotalRecords,
                 })}
               </Text>
             )}
@@ -914,7 +1300,7 @@ const VitalsList = ({
               <Select
                 value={String(pageSize)}
                 onChange={handlePageSizeChange}
-                data={pageSizeOptions}
+                data={PAGE_SIZE_OPTIONS}
                 size="xs"
                 w={70}
                 allowDeselect={false}

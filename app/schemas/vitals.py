@@ -34,6 +34,7 @@ class VitalsBase(BaseModel):
     notes: Optional[str] = None
     location: Optional[str] = None
     device_used: Optional[str] = None
+    import_source: Optional[str] = None
     patient_id: int
     practitioner_id: Optional[int] = None
 

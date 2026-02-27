@@ -29,13 +29,18 @@ export interface AggregationResult {
 }
 
 /**
- * Determine aggregation period based on data time span
+ * Determine aggregation period based on data time span and density
  *
- * Thresholds:
+ * Thresholds (time-span based):
  * - < 6 months: No aggregation (raw data)
  * - 6 months - 2 years: Weekly aggregation
  * - 2 - 5 years: Bi-weekly aggregation
  * - 5+ years: Monthly aggregation
+ *
+ * Density override:
+ * - Any day with > 10 readings (e.g., CGM data): Daily aggregation
+ *   regardless of time span. Detected by peak day, not average,
+ *   so it works even when CGM data covers only part of the range.
  */
 export function getAggregationPeriod(dataPoints: VitalDataPoint[]): AggregationPeriod | null {
   if (dataPoints.length === 0) return null;
@@ -43,7 +48,20 @@ export function getAggregationPeriod(dataPoints: VitalDataPoint[]): AggregationP
   const dates = dataPoints.map(p => new Date(p.recorded_date));
   const oldest = Math.min(...dates.map(d => d.getTime()));
   const newest = Math.max(...dates.map(d => d.getTime()));
-  const spanDays = (newest - oldest) / (1000 * 60 * 60 * 24);
+  const spanDays = Math.max(1, (newest - oldest) / (1000 * 60 * 60 * 24));
+
+  // Density check: count readings per calendar day.
+  // If ANY day has >10 readings (e.g., CGM data), aggregate to daily.
+  // This works regardless of total time span or how many days have CGM data.
+  const countsByDay = new Map<string, number>();
+  for (const p of dataPoints) {
+    const day = new Date(p.recorded_date).toISOString().split('T')[0];
+    countsByDay.set(day, (countsByDay.get(day) || 0) + 1);
+  }
+  const maxPerDay = Math.max(...countsByDay.values());
+  if (maxPerDay > 10) {
+    return 'daily';
+  }
 
   // Less than 6 months: no aggregation needed
   if (spanDays <= 180) return null;
