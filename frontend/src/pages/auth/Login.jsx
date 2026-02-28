@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { notifyError } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
 import { Button } from '../../components/ui';
-import '../../styles/pages/Login.css';
+import { IconUser, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
+import styles from '../../styles/pages/Login.module.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [registrationEnabled, setRegistrationEnabled] = useState(true);
   const [registrationMessage, setRegistrationMessage] = useState('');
@@ -21,6 +24,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, error, clearError, isAuthenticated } = useAuth();
+  const { t } = useTranslation('common');
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -37,12 +41,12 @@ const Login = () => {
       setRegistrationEnabled(status.registration_enabled);
       setRegistrationMessage(status.message || '');
     };
-    
+
     const checkSSO = async () => {
       const config = await authService.getSSOConfig();
       setSSOConfig(config);
     };
-    
+
     checkRegistration();
     checkSSO();
   }, []);
@@ -95,7 +99,7 @@ const Login = () => {
       // Store current location for redirect after SSO
       const returnUrl = location.state?.from?.pathname || '/dashboard';
       sessionStorage.setItem('sso_return_url', returnUrl);
-      
+
       const result = await authService.initiateSSOLogin(returnUrl);
       // Redirect to SSO provider
       window.location.href = result.auth_url;
@@ -110,71 +114,111 @@ const Login = () => {
     }
   };
   return (
-    <div className="login-container">
-      <div className="login-form">
-        <h1><img src="/medikeep-icon.svg" alt="" width={40} height={40} style={{ verticalAlign: 'middle', marginRight: '8px' }} />MediKeep</h1>
-        <h2>Login</h2>
+    <div className={styles.loginContainer}>
+      <div className={styles.loginForm}>
+        <div className={styles.loginHeader}>
+          <h1>
+            <img
+              src="/medikeep-icon.svg"
+              alt=""
+              width={40}
+              height={40}
+              style={{ verticalAlign: 'middle', marginRight: '8px' }}
+            />
+            MediKeep
+          </h1>
+        </div>
 
-        {error && <div className="error-message">{error}</div>}
+        <div className={styles.loginDivider}>
+          <span>{t('auth.login.title')}</span>
+        </div>
+
+        {error && <div className={styles.errorMessage}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username">Username:</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-            />
+          <div className={styles.formGroup}>
+            <label htmlFor="username">{t('auth.login.username')}</label>
+            <div className={styles.inputWrapper}>
+              <span className={styles.inputIconPrefix}>
+                <IconUser size={18} />
+              </span>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder={t('auth.login.usernamePlaceholder')}
+                required
+                disabled={isLoading}
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password:</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={isLoading}
-            />
+          <div className={styles.formGroup}>
+            <label htmlFor="password">{t('auth.login.password')}</label>
+            <div className={styles.inputWrapper}>
+              <span className={styles.inputIconPrefix}>
+                <IconLock size={18} />
+              </span>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder={t('auth.login.passwordPlaceholder')}
+                required
+                disabled={isLoading}
+              />
+              <span
+                className={styles.inputIconSuffix}
+                onClick={() => setShowPassword(!showPassword)}
+                role="button"
+                tabIndex={0}
+                aria-label={showPassword ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
+              >
+                {showPassword ? (
+                  <IconEyeOff size={18} />
+                ) : (
+                  <IconEye size={18} />
+                )}
+              </span>
+            </div>
           </div>
 
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Login'}
+
+          <button type="submit" disabled={isLoading} className={styles.submitBtn}>
+            {isLoading ? t('auth.login.submitting') : t('auth.login.submit')}
           </button>
         </form>
 
         {/* SSO Login Option */}
         {ssoConfig.enabled && (
-          <div className="sso-section">
-            <div className="divider">
-              <span>or</span>
+          <div className={styles.ssoSection}>
+            <div className={styles.divider}>
+              <span>{t('auth.login.or')}</span>
             </div>
             <button
               type="button"
-              className="sso-btn"
+              className={styles.ssoBtn}
               onClick={handleSSOLogin}
               disabled={isLoading || ssoLoading}
             >
-              {ssoLoading ? 'Redirecting...' : `Continue with ${ssoConfig.provider_type === 'google' ? 'Google' : ssoConfig.provider_type === 'github' ? 'GitHub' : 'SSO'}`}
+              {ssoLoading ? t('labels.loading') : t('auth.login.continueWith', { provider: ssoConfig.provider_type === 'google' ? 'Google' : ssoConfig.provider_type === 'github' ? 'GitHub' : 'SSO' })}
             </button>
           </div>
         )}
 
-        <div className="login-actions">
+        <div className={styles.loginActions}>
           {registrationEnabled ? (
             <button
               type="button"
-              className="create-user-btn"
+              className={styles.createUserBtn}
               onClick={handleCreateUserNavigation}
               disabled={isLoading}
             >
-              Create New User Account
+              {t('auth.login.createAccount')}
             </button>
           ) : (
             <div className="registration-disabled-message">

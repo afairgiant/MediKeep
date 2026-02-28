@@ -16,30 +16,30 @@ const UserCreation = () => {
         username: formData.username,
         password: formData.password
       });
-      
+
       if (result.success) {
         // Add a small delay to ensure auth state is fully saved before navigation
         await new Promise(resolve => setTimeout(resolve, 500));
-        
-        navigate('/dashboard', { 
-          state: { 
-            message: `Welcome ${formData.firstName}! Your account has been created successfully.` 
-          } 
+
+        navigate('/dashboard', {
+          state: {
+            message: `Welcome ${formData.firstName}! Your account has been created successfully.`
+          }
         });
       } else {
         // If login result indicates failure, redirect to login page
-        navigate('/login', { 
-          state: { 
-            message: `Account created successfully! Please log in with your credentials.` 
-          } 
+        navigate('/login', {
+          state: {
+            message: `Account created successfully! Please log in with your credentials.`
+          }
         });
       }
     } catch (error) {
       // If auto-login fails, redirect to login page with success message
-      navigate('/login', { 
-        state: { 
-          message: `Account created successfully! Please log in with your credentials.` 
-        } 
+      navigate('/login', {
+        state: {
+          message: `Account created successfully! Please log in with your credentials.`
+        }
       });
     }
   };
@@ -63,7 +63,7 @@ const UserCreation = () => {
               Back to Login
             </Button>
           </Group>
-          
+
           <Group align="center" mb="xs">
             <ThemeIcon size="xl" variant="light" color="blue">
               <IconUserPlus size={24} />
@@ -112,9 +112,9 @@ const UserCreation = () => {
                   What happens next?
                 </Text>
                 <Text size="xs" c="dimmed">
-                  • Your patient record will be automatically created<br/>
-                  • You'll be logged in immediately after account creation<br/>
-                  • You can start managing your medical information right away<br/>
+                  • Your patient record will be automatically created<br />
+                  • You'll be logged in immediately after account creation<br />
+                  • You can start managing your medical information right away<br />
                   • All your data is secure and private
                 </Text>
               </div>

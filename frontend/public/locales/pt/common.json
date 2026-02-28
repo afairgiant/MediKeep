@@ -105,7 +105,11 @@
     "address": "Endereço",
     "patientRecord": "Prontuário do Paciente",
     "medicalHistory": "Histórico Médico",
-    "practitioner": "Profissional"
+    "practitioner": "Profissional",
+    "firstName": "Primeiro Nome",
+    "lastName": "Sobrenome",
+    "role": "Cargo",
+    "note": "Nota"
   },
   "fields": {
     "notes": {
@@ -242,7 +246,12 @@
         "temperatureMin": "A temperatura deve ser de pelo menos {{min}}{{unit}}",
         "timeInFuture": "A hora selecionada não pode ser no futuro",
         "weightMax": "O peso não pode exceder {{max}} {{unit}}",
-        "weightMin": "O peso deve ser de pelo menos {{min}} {{unit}}"
+        "weightMin": "O peso deve ser de pelo menos {{min}} {{unit}}",
+        "firstNameRequired": "Por favor, digite seu primeiro nome",
+        "lastNameRequired": "Por favor, digite seu sobrenome",
+        "usernameLength": "O nome de usuário deve ter pelo menos 3 caracteres",
+        "passwordLength": "A senha deve ter pelo menos 6 caracteres",
+        "passwordRequirements": "A senha deve conter pelo menos uma letra e um número"
       },
       "additionalMeasurementsDesc": "Indicadores de saúde complementares",
       "bloodPressureDesc": "Medida em mmHg",
@@ -2542,6 +2551,67 @@
     "addNew": "Adicionar Nova Alergia",
     "messages": {
       "loading": "Carregando alergias..."
+    }
+  },
+  "admin": {
+    "createUser": {
+      "username": "Nome de usuário",
+      "usernamePlaceholder": "Insira o nome de usuário",
+      "password": "Senha",
+      "passwordPlaceholder": "Insira a senha (mín. 6 caracteres, incluir letra e número)",
+      "email": "E-mail",
+      "emailPlaceholder": "Insira o endereço de e-mail",
+      "role": "Função",
+      "roleUser": "Usuário",
+      "roleAdmin": "Administrador",
+      "firstName": "Nome",
+      "firstNamePlaceholder": "Insira o nome",
+      "lastName": "Sobrenome",
+      "lastNamePlaceholder": "Insira o sobrenome",
+      "submitButton": "Criar conta",
+      "noteLabel": "Observação:",
+      "noteText": "Um registro de paciente será criado automaticamente para este usuário com a função padrão \"usuário\".",
+      "validation": {
+        "firstNameRequired": "Por favor, insira o nome",
+        "lastNameRequired": "Por favor, insira o sobrenome",
+        "usernameMinLength": "O nome de usuário deve ter pelo menos 3 caracteres",
+        "passwordMinLength": "A senha deve ter pelo menos 6 caracteres",
+        "passwordRequirements": "A senha deve conter pelo menos uma letra e um número"
+      },
+      "passwordReqs": {
+        "minLength": "Pelo menos 6 caracteres",
+        "hasLetter": "Contém pelo menos uma letra",
+        "hasNumber": "Contém pelo menos um número"
+      },
+      "linkPatient": {
+        "checkbox": "Vincular a um registro de paciente existente",
+        "hint": "Em vez de criar um novo registro de paciente, vincule o novo usuário a um paciente existente (por exemplo, uma criança que agora precisa do próprio login).",
+        "selectPlaceholder": "Selecione um paciente...",
+        "loading": "Carregando pacientes...",
+        "selfRecordBadge": "Auto-registro",
+        "patientId": "ID",
+        "dob": "Data de nascimento",
+        "owner": "Responsável",
+        "currentOwner": "Responsável atual",
+        "selfRecordWarningTitle": "Observação:",
+        "selfRecordWarning": "Este é o auto-registro do responsável atual. Um novo auto-registro será criado para o responsável original com seus dados demográficos copiados. O responsável original receberá acesso de edição a este paciente."
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "ACESSE SUA CONTA",
+      "username": "Usuário",
+      "password": "Senha",
+      "usernamePlaceholder": "Digite seu usuário",
+      "passwordPlaceholder": "Digite sua senha",
+      "showPassword": "Mostrar senha",
+      "hidePassword": "Esconder senha",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "createAccount": "Criar nova conta",
+      "or": "ou",
+      "continueWith": "Continuar com {{provider}}"
     }
   }
 }
