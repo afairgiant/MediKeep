@@ -60,7 +60,7 @@ DB_PASS = quote_plus(_DB_PASS_RAW) if _DB_PASS_RAW else ""
 
 class Settings:  # App Info
     APP_NAME: str = "MediKeep"
-    VERSION: str = "0.54.0"
+    VERSION: str = "0.55.0"
 
     DEBUG: bool = (
         os.getenv("DEBUG", "True").lower() == "true"
