@@ -182,9 +182,13 @@ class LabTestComponentBase(BaseModel):
         """Validate qualitative value"""
         if v is None:
             return None
-        if v.lower() not in LAB_TEST_COMPONENT_QUALITATIVE_VALUES:
+        stripped = v.strip()
+        if not stripped:
+            return None
+        normalized = stripped.lower()
+        if normalized not in LAB_TEST_COMPONENT_QUALITATIVE_VALUES:
             raise ValueError(f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}")
-        return v.lower()
+        return normalized
 
     @model_validator(mode="after")
     def validate_ref_range(self):
@@ -335,9 +339,13 @@ class LabTestComponentUpdate(BaseModel):
     @classmethod
     def validate_qualitative_value(cls, v):
         if v is not None:
-            if v.lower() not in LAB_TEST_COMPONENT_QUALITATIVE_VALUES:
+            stripped = v.strip()
+            if not stripped:
+                return None
+            normalized = stripped.lower()
+            if normalized not in LAB_TEST_COMPONENT_QUALITATIVE_VALUES:
                 raise ValueError(f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}")
-            return v.lower()
+            return normalized
         return v
 
     @model_validator(mode="after")
