@@ -354,6 +354,21 @@ class BaseApiService {
     });
   }
 
+  // Enhanced PATCH method with queuing
+  async patch(endpoint, data, errorMessage) {
+    return this.queueRequest(async () => {
+      const response = await fetch(
+        `${this.baseURL}${this.basePath}${endpoint}`,
+        {
+          method: 'PATCH',
+          headers: await this.getAuthHeaders(),
+          body: JSON.stringify(data),
+        }
+      );
+      return this.handleResponse(response, errorMessage);
+    });
+  }
+
   // Enhanced DELETE method with queuing
   async delete(endpoint, errorMessage) {
     return this.queueRequest(async () => {

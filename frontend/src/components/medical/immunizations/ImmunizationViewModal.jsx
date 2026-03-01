@@ -21,7 +21,9 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
 
@@ -36,6 +38,7 @@ const ImmunizationViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or immunization changes
@@ -182,15 +185,11 @@ const ImmunizationViewModal = ({
                   <Title order={4} mb="sm">{t('labels.tags', 'Tags')}</Title>
                   <Group gap="xs">
                     {immunization.tags.map((tag, index) => (
-                      <Badge
+                      <ClickableTagBadge
                         key={index}
-                        variant="light"
-                        color="blue"
-                        size="sm"
-                        radius="md"
-                      >
-                        {tag}
-                      </Badge>
+                        tag={tag}
+                        color={getTagColor(tag)}
+                      />
                     ))}
                   </Group>
                 </div>

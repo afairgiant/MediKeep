@@ -1,7 +1,9 @@
+import datetime
 from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, and_, func, Text
+from sqlalchemy import or_, func, text
 from app.api import deps
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_data_access
@@ -18,6 +20,83 @@ router = APIRouter()
 # Constants
 DEFAULT_SEARCH_SCORE = 0.9
 
+# Sort normalization: frontend values -> internal handling
+SORT_ALIASES = {
+    "relevance": "date_desc",
+    "date": "date_desc",
+}
+
+
+def _tag_text_filter(db: Session, table_name: str, query_lower: str):
+    """Build an EXISTS filter for precise tag text matching.
+
+    Uses json_array_elements_text on PostgreSQL and json_each on SQLite.
+    Returns a SQLAlchemy text clause that checks if any element in the
+    JSON tags array contains the search term (case-insensitive LIKE).
+    Uses parameterized binding to prevent SQL injection.
+    """
+    dialect = db.get_bind().dialect.name
+    if dialect == "sqlite":
+        return text(
+            f'EXISTS (SELECT 1 FROM json_each("{table_name}"."tags") '
+            "WHERE lower(json_each.value) LIKE '%' || :_tag_q || '%')"
+        ).bindparams(_tag_q=query_lower)
+    return text(
+        f'EXISTS (SELECT 1 FROM json_array_elements_text("{table_name}"."tags") AS t '
+        "WHERE lower(t) LIKE '%' || :_tag_q || '%')"
+    ).bindparams(_tag_q=query_lower)
+
+
+def _apply_date_filter(query_obj, date_col, date_from, date_to):
+    """Apply optional date range filters to a query."""
+    if date_from:
+        query_obj = query_obj.filter(date_col >= date_from)
+    if date_to:
+        # Include the entire end date (up to end of day)
+        query_obj = query_obj.filter(date_col <= date_to)
+    return query_obj
+
+
+def _apply_sort(query_obj, sort: str, date_col, title_col=None):
+    """Apply sorting to a query. Falls back to date desc for unknown sort values."""
+    if sort == "date_asc":
+        return query_obj.order_by(date_col.asc())
+    elif sort == "title" and title_col is not None:
+        return query_obj.order_by(title_col.asc())
+    elif sort == "title_desc" and title_col is not None:
+        return query_obj.order_by(title_col.desc())
+    else:
+        # date_desc is the default (including for "relevance")
+        return query_obj.order_by(date_col.desc())
+
+
+def _windowed_query(query_obj, model_id_col, skip: int, limit: int):
+    """Execute a query with window count to avoid separate COUNT query.
+
+    Returns (items, count) where items are the model instances and count
+    is the total matching rows.
+    """
+    windowed = query_obj.add_columns(
+        func.count(model_id_col).over().label("_total_count")
+    )
+    rows = windowed.offset(skip).limit(limit).all()
+    if not rows:
+        return [], 0
+    items = [row[0] for row in rows]
+    count = rows[0][1]
+    return items, count
+
+
+def _parse_date(date_str: Optional[str]) -> Optional[datetime.date]:
+    """Parse an ISO date string, returning None on invalid input."""
+    if not date_str:
+        return None
+    try:
+        return datetime.date.fromisoformat(date_str)
+    except (ValueError, TypeError):
+        return None
+
+
 # Response models
 class SearchItemBase(BaseModel):
     id: int
@@ -33,7 +112,7 @@ class MedicationSearchItem(SearchItemBase):
     start_date: Optional[str]
 
 class ConditionSearchItem(SearchItemBase):
-    condition_name: str
+    condition_name: Optional[str]
     diagnosis: Optional[str]
     status: Optional[str]
     diagnosed_date: Optional[str]
@@ -58,7 +137,7 @@ class ImmunizationSearchItem(SearchItemBase):
 
 class TreatmentSearchItem(SearchItemBase):
     treatment_name: str
-    treatment_type: str
+    treatment_type: Optional[str]
     description: Optional[str]
     status: Optional[str]
     start_date: Optional[str]
@@ -101,17 +180,20 @@ class SearchResponse(BaseModel):
 @router.get("/", response_model=SearchResponse)
 def search_patient_records(
     *,
-    q: str = Query(..., min_length=1, description="Search query"),
+    q: Optional[str] = Query(None, min_length=1, description="Search query (omit to list all records)"),
     types: Optional[List[str]] = Query(None, description="Filter by record types"),
     skip: int = Query(0, ge=0, description="Pagination offset"),
     limit: int = Query(default=20, le=100, description="Results per type"),
-    sort: str = Query("relevance", description="Sort by: relevance, date_desc, date_asc"),
+    sort: str = Query("relevance", description="Sort by: relevance, date_desc, date_asc, title"),
+    date_from: Optional[str] = Query(None, description="Filter records from this date (ISO format)"),
+    date_to: Optional[str] = Query(None, description="Filter records up to this date (ISO format)"),
     request: Request,
     db: Session = Depends(deps.get_db),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """
     Search across all medical record types for a specific patient.
+    When q is omitted, returns all records (list mode).
     Consolidates multiple API calls into a single efficient search.
     """
     log_endpoint_access(
@@ -124,7 +206,15 @@ def search_patient_records(
         limit=limit
     )
 
-    query_lower = q.lower()
+    query_lower = q.lower() if q else None
+
+    # Normalize sort aliases from frontend
+    sort = SORT_ALIASES.get(sort, sort)
+
+    # Parse date filters
+    parsed_date_from = _parse_date(date_from)
+    parsed_date_to = _parse_date(date_to)
+
     results = {}
     total_count = 0
 
@@ -139,25 +229,30 @@ def search_patient_records(
     # Search medications
     if "medications" in search_types:
         medications_query = db.query(Medication).filter(
-            and_(
-                Medication.patient_id == target_patient_id,
+            Medication.patient_id == target_patient_id
+        )
+        if query_lower:
+            medications_query = medications_query.filter(
                 or_(
                     func.lower(Medication.medication_name).contains(query_lower),
                     func.lower(Medication.dosage).contains(query_lower),
                     func.lower(Medication.indication).contains(query_lower),
-                    func.cast(Medication.tags, Text).ilike(f'%{query_lower}%')
+                    _tag_text_filter(db, "medications", query_lower)
                 )
             )
+
+        medications_query = _apply_date_filter(
+            medications_query, Medication.effective_period_start,
+            parsed_date_from, parsed_date_to
+        )
+        medications_query = _apply_sort(
+            medications_query, sort, Medication.effective_period_start,
+            title_col=Medication.medication_name
         )
 
-        # Apply sorting
-        if sort == "date_desc":
-            medications_query = medications_query.order_by(Medication.effective_period_start.desc())
-        elif sort == "date_asc":
-            medications_query = medications_query.order_by(Medication.effective_period_start.asc())
-
-        med_count = medications_query.count()
-        medications = medications_query.offset(skip).limit(limit).all()
+        medications, med_count = _windowed_query(
+            medications_query, Medication.id, skip, limit
+        )
 
         results["medications"] = SearchResultGroup(
             count=med_count,
@@ -181,24 +276,30 @@ def search_patient_records(
     # Search conditions
     if "conditions" in search_types:
         conditions_query = db.query(Condition).filter(
-            and_(
-                Condition.patient_id == target_patient_id,
+            Condition.patient_id == target_patient_id
+        )
+        if query_lower:
+            conditions_query = conditions_query.filter(
                 or_(
                     func.lower(Condition.condition_name).contains(query_lower),
                     func.lower(Condition.diagnosis).contains(query_lower),
                     func.lower(Condition.notes).contains(query_lower),
-                    func.cast(Condition.tags, Text).ilike(f'%{query_lower}%')
+                    _tag_text_filter(db, "conditions", query_lower)
                 )
             )
+
+        conditions_query = _apply_date_filter(
+            conditions_query, Condition.onset_date,
+            parsed_date_from, parsed_date_to
+        )
+        conditions_query = _apply_sort(
+            conditions_query, sort, Condition.onset_date,
+            title_col=Condition.condition_name
         )
 
-        if sort == "date_desc":
-            conditions_query = conditions_query.order_by(Condition.onset_date.desc())
-        elif sort == "date_asc":
-            conditions_query = conditions_query.order_by(Condition.onset_date.asc())
-
-        cond_count = conditions_query.count()
-        conditions = conditions_query.offset(skip).limit(limit).all()
+        conditions, cond_count = _windowed_query(
+            conditions_query, Condition.id, skip, limit
+        )
 
         results["conditions"] = SearchResultGroup(
             count=cond_count,
@@ -211,7 +312,7 @@ def search_patient_records(
                     status=cond.status,
                     diagnosed_date=cond.onset_date.isoformat() if cond.onset_date else None,
                     tags=cond.tags or [],
-                    highlight=cond.condition_name,
+                    highlight=cond.condition_name or cond.diagnosis or "Condition",
                     score=DEFAULT_SEARCH_SCORE
                 ).model_dump()
                 for cond in conditions
@@ -222,24 +323,30 @@ def search_patient_records(
     # Search lab results
     if "lab_results" in search_types:
         lab_results_query = db.query(LabResult).filter(
-            and_(
-                LabResult.patient_id == target_patient_id,
+            LabResult.patient_id == target_patient_id
+        )
+        if query_lower:
+            lab_results_query = lab_results_query.filter(
                 or_(
                     func.lower(LabResult.test_name).contains(query_lower),
                     func.lower(LabResult.labs_result).contains(query_lower),
                     func.lower(LabResult.notes).contains(query_lower),
-                    func.cast(LabResult.tags, Text).ilike(f'%{query_lower}%')
+                    _tag_text_filter(db, "lab_results", query_lower)
                 )
             )
+
+        lab_results_query = _apply_date_filter(
+            lab_results_query, LabResult.completed_date,
+            parsed_date_from, parsed_date_to
+        )
+        lab_results_query = _apply_sort(
+            lab_results_query, sort, LabResult.completed_date,
+            title_col=LabResult.test_name
         )
 
-        if sort == "date_desc":
-            lab_results_query = lab_results_query.order_by(LabResult.completed_date.desc())
-        elif sort == "date_asc":
-            lab_results_query = lab_results_query.order_by(LabResult.completed_date.asc())
-
-        lab_count = lab_results_query.count()
-        lab_results = lab_results_query.offset(skip).limit(limit).all()
+        lab_results, lab_count = _windowed_query(
+            lab_results_query, LabResult.id, skip, limit
+        )
 
         results["lab_results"] = SearchResultGroup(
             count=lab_count,
@@ -263,24 +370,30 @@ def search_patient_records(
     # Search procedures
     if "procedures" in search_types:
         procedures_query = db.query(Procedure).filter(
-            and_(
-                Procedure.patient_id == target_patient_id,
+            Procedure.patient_id == target_patient_id
+        )
+        if query_lower:
+            procedures_query = procedures_query.filter(
                 or_(
                     func.lower(Procedure.procedure_name).contains(query_lower),
                     func.lower(Procedure.description).contains(query_lower),
                     func.lower(Procedure.notes).contains(query_lower),
-                    func.cast(Procedure.tags, Text).ilike(f'%{query_lower}%')
+                    _tag_text_filter(db, "procedures", query_lower)
                 )
             )
+
+        procedures_query = _apply_date_filter(
+            procedures_query, Procedure.date,
+            parsed_date_from, parsed_date_to
+        )
+        procedures_query = _apply_sort(
+            procedures_query, sort, Procedure.date,
+            title_col=Procedure.procedure_name
         )
 
-        if sort == "date_desc":
-            procedures_query = procedures_query.order_by(Procedure.date.desc())
-        elif sort == "date_asc":
-            procedures_query = procedures_query.order_by(Procedure.date.asc())
-
-        proc_count = procedures_query.count()
-        procedures = procedures_query.offset(skip).limit(limit).all()
+        procedures, proc_count = _windowed_query(
+            procedures_query, Procedure.id, skip, limit
+        )
 
         results["procedures"] = SearchResultGroup(
             count=proc_count,
@@ -304,23 +417,29 @@ def search_patient_records(
     # Search immunizations
     if "immunizations" in search_types:
         immunizations_query = db.query(Immunization).filter(
-            and_(
-                Immunization.patient_id == target_patient_id,
+            Immunization.patient_id == target_patient_id
+        )
+        if query_lower:
+            immunizations_query = immunizations_query.filter(
                 or_(
                     func.lower(Immunization.vaccine_name).contains(query_lower),
                     func.lower(Immunization.notes).contains(query_lower),
-                    func.cast(Immunization.tags, Text).ilike(f'%{query_lower}%')
+                    _tag_text_filter(db, "immunizations", query_lower)
                 )
             )
+
+        immunizations_query = _apply_date_filter(
+            immunizations_query, Immunization.date_administered,
+            parsed_date_from, parsed_date_to
+        )
+        immunizations_query = _apply_sort(
+            immunizations_query, sort, Immunization.date_administered,
+            title_col=Immunization.vaccine_name
         )
 
-        if sort == "date_desc":
-            immunizations_query = immunizations_query.order_by(Immunization.date_administered.desc())
-        elif sort == "date_asc":
-            immunizations_query = immunizations_query.order_by(Immunization.date_administered.asc())
-
-        imm_count = immunizations_query.count()
-        immunizations = immunizations_query.offset(skip).limit(limit).all()
+        immunizations, imm_count = _windowed_query(
+            immunizations_query, Immunization.id, skip, limit
+        )
 
         results["immunizations"] = SearchResultGroup(
             count=imm_count,
@@ -330,7 +449,7 @@ def search_patient_records(
                     type="immunization",
                     vaccine_name=imm.vaccine_name,
                     dose_number=imm.dose_number,
-                    status=None,  # Immunization model has no status field
+                    status=None,
                     administered_date=imm.date_administered.isoformat() if imm.date_administered else None,
                     tags=imm.tags or [],
                     highlight=imm.vaccine_name,
@@ -344,25 +463,31 @@ def search_patient_records(
     # Search treatments
     if "treatments" in search_types:
         treatments_query = db.query(Treatment).filter(
-            and_(
-                Treatment.patient_id == target_patient_id,
+            Treatment.patient_id == target_patient_id
+        )
+        if query_lower:
+            treatments_query = treatments_query.filter(
                 or_(
                     func.lower(Treatment.treatment_name).contains(query_lower),
                     func.lower(Treatment.treatment_type).contains(query_lower),
                     func.lower(Treatment.description).contains(query_lower),
                     func.lower(Treatment.notes).contains(query_lower),
-                    func.cast(Treatment.tags, Text).ilike(f'%{query_lower}%')
+                    _tag_text_filter(db, "treatments", query_lower)
                 )
             )
+
+        treatments_query = _apply_date_filter(
+            treatments_query, Treatment.start_date,
+            parsed_date_from, parsed_date_to
+        )
+        treatments_query = _apply_sort(
+            treatments_query, sort, Treatment.start_date,
+            title_col=Treatment.treatment_name
         )
 
-        if sort == "date_desc":
-            treatments_query = treatments_query.order_by(Treatment.start_date.desc())
-        elif sort == "date_asc":
-            treatments_query = treatments_query.order_by(Treatment.start_date.asc())
-
-        treat_count = treatments_query.count()
-        treatments = treatments_query.offset(skip).limit(limit).all()
+        treatments, treat_count = _windowed_query(
+            treatments_query, Treatment.id, skip, limit
+        )
 
         results["treatments"] = SearchResultGroup(
             count=treat_count,
@@ -387,24 +512,30 @@ def search_patient_records(
     # Search encounters
     if "encounters" in search_types:
         encounters_query = db.query(Encounter).filter(
-            and_(
-                Encounter.patient_id == target_patient_id,
+            Encounter.patient_id == target_patient_id
+        )
+        if query_lower:
+            encounters_query = encounters_query.filter(
                 or_(
                     func.lower(Encounter.visit_type).contains(query_lower),
                     func.lower(Encounter.chief_complaint).contains(query_lower),
                     func.lower(Encounter.notes).contains(query_lower),
-                    func.cast(Encounter.tags, Text).ilike(f'%{query_lower}%')
+                    _tag_text_filter(db, "encounters", query_lower)
                 )
             )
+
+        encounters_query = _apply_date_filter(
+            encounters_query, Encounter.date,
+            parsed_date_from, parsed_date_to
+        )
+        encounters_query = _apply_sort(
+            encounters_query, sort, Encounter.date,
+            title_col=Encounter.visit_type
         )
 
-        if sort == "date_desc":
-            encounters_query = encounters_query.order_by(Encounter.date.desc())
-        elif sort == "date_asc":
-            encounters_query = encounters_query.order_by(Encounter.date.asc())
-
-        enc_count = encounters_query.count()
-        encounters = encounters_query.offset(skip).limit(limit).all()
+        encounters, enc_count = _windowed_query(
+            encounters_query, Encounter.id, skip, limit
+        )
 
         results["encounters"] = SearchResultGroup(
             count=enc_count,
@@ -428,24 +559,30 @@ def search_patient_records(
     # Search allergies
     if "allergies" in search_types:
         allergies_query = db.query(Allergy).filter(
-            and_(
-                Allergy.patient_id == target_patient_id,
+            Allergy.patient_id == target_patient_id
+        )
+        if query_lower:
+            allergies_query = allergies_query.filter(
                 or_(
                     func.lower(Allergy.allergen).contains(query_lower),
                     func.lower(Allergy.reaction).contains(query_lower),
                     func.lower(Allergy.notes).contains(query_lower),
-                    func.cast(Allergy.tags, Text).ilike(f'%{query_lower}%')
+                    _tag_text_filter(db, "allergies", query_lower)
                 )
             )
+
+        allergies_query = _apply_date_filter(
+            allergies_query, Allergy.onset_date,
+            parsed_date_from, parsed_date_to
+        )
+        allergies_query = _apply_sort(
+            allergies_query, sort, Allergy.onset_date,
+            title_col=Allergy.allergen
         )
 
-        if sort == "date_desc":
-            allergies_query = allergies_query.order_by(Allergy.onset_date.desc())
-        elif sort == "date_asc":
-            allergies_query = allergies_query.order_by(Allergy.onset_date.asc())
-
-        allergy_count = allergies_query.count()
-        allergies = allergies_query.offset(skip).limit(limit).all()
+        allergies, allergy_count = _windowed_query(
+            allergies_query, Allergy.id, skip, limit
+        )
 
         results["allergies"] = SearchResultGroup(
             count=allergy_count,
@@ -466,23 +603,25 @@ def search_patient_records(
         )
         total_count += allergy_count
 
-    # Search vitals
+    # Search vitals (no tags column, no title sort)
     if "vitals" in search_types:
-        # Vitals only has 'notes' field, not 'tags'
         vitals_query = db.query(Vitals).filter(
-            and_(
-                Vitals.patient_id == target_patient_id,
+            Vitals.patient_id == target_patient_id
+        )
+        if query_lower:
+            vitals_query = vitals_query.filter(
                 func.lower(Vitals.notes).contains(query_lower)
             )
+
+        vitals_query = _apply_date_filter(
+            vitals_query, Vitals.recorded_date,
+            parsed_date_from, parsed_date_to
         )
+        vitals_query = _apply_sort(vitals_query, sort, Vitals.recorded_date)
 
-        if sort == "date_desc":
-            vitals_query = vitals_query.order_by(Vitals.recorded_date.desc())
-        elif sort == "date_asc":
-            vitals_query = vitals_query.order_by(Vitals.recorded_date.asc())
-
-        vital_count = vitals_query.count()
-        vitals = vitals_query.offset(skip).limit(limit).all()
+        vitals, vital_count = _windowed_query(
+            vitals_query, Vitals.id, skip, limit
+        )
 
         results["vitals"] = SearchResultGroup(
             count=vital_count,
@@ -505,9 +644,9 @@ def search_patient_records(
         )
         total_count += vital_count
 
-    # Determine if there are more results for any search type
+    # Step 1A fix: has_more must account for skip offset
     has_more = any(
-        result.count > limit
+        result.count > skip + limit
         for result in results.values()
     )
 
@@ -521,7 +660,7 @@ def search_patient_records(
     )
 
     return SearchResponse(
-        query=q,
+        query=q or "",
         total_count=total_count,
         results=results,
         pagination=PaginationInfo(

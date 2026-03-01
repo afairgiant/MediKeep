@@ -22,6 +22,8 @@ import {
   IconFileText,
 } from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
+import { useTagColors } from '../../../hooks/useTagColors';
 import ConditionRelationships from '../ConditionRelationships';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import TestComponentsTab from './TestComponentsTab';
@@ -46,6 +48,7 @@ const LabResultViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
 
   // Reset activeTab when modal opens with new labResult
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -277,12 +280,10 @@ const LabResultViewModal = ({
                     <Title order={4}>{t('labResults.modal.sections.tags', 'Tags')}</Title>
                     <Group gap="xs">
                       {labResult.tags.map((tag, index) => (
-                        <StatusBadge
+                        <ClickableTagBadge
                           key={index}
-                          status={tag}
-                          variant="light"
-                          color="blue"
-                          size="sm"
+                          tag={tag}
+                          color={getTagColor(tag)}
                         />
                       ))}
                     </Group>

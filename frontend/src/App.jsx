@@ -477,6 +477,10 @@ function App() {
                           }
                         />
                         <Route
+                          path="/tag-search"
+                          element={<Navigate to="/search" replace />}
+                        />
+                        <Route
                           path="/search"
                           element={
                             <ProtectedRoute>

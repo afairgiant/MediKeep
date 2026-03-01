@@ -45,15 +45,6 @@ const LabResultCard = React.memo(({
       badges.push({ label: labResult.test_category, color: 'blue' });
     }
     
-    // Add tags as badges
-    if (labResult.tags && labResult.tags.length > 0) {
-      badges.push({
-        label: `🏷️ ${labResult.tags[0]}${labResult.tags.length > 1 ? ` +${labResult.tags.length - 1}` : ''}`,
-        color: 'gray',
-        variant: 'outline'
-      });
-    }
-
     // Generate dynamic fields
     const fields = [
       {
@@ -120,6 +111,7 @@ const LabResultCard = React.memo(({
         title={labResult.test_name}
         status={labResult.status}
         badges={badges}
+        tags={labResult.tags || []}
         fields={fields}
         notes={labResult.notes}
         fileCount={fileCount}

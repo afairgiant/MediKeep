@@ -19,6 +19,7 @@ import {
   Tooltip,
   Progress,
   Center,
+  ColorInput,
 } from '@mantine/core';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
@@ -33,6 +34,7 @@ import {
   IconReplace,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
+import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/api';
 import logger from '../../services/logger';
 import { PageHeader } from '../../components';
@@ -40,6 +42,7 @@ import { useTranslation } from 'react-i18next';
 
 const TagManagement = () => {
   const { t } = useTranslation('common');
+  const navigate = useNavigate();
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -53,8 +56,10 @@ const TagManagement = () => {
   
   // Form states
   const [newTagName, setNewTagName] = useState('');
+  const [newTagColor, setNewTagColor] = useState('');
   const [editingTag, setEditingTag] = useState(null);
   const [editTagName, setEditTagName] = useState('');
+  const [editTagColor, setEditTagColor] = useState('');
   const [deletingTag, setDeletingTag] = useState(null);
   const [replacingTag, setReplacingTag] = useState(null);
   const [replaceWithTag, setReplaceWithTag] = useState('');
@@ -93,11 +98,25 @@ const TagManagement = () => {
     if (!newTagName.trim()) return;
 
     try {
-      const response = await apiService.post('/tags/create', { tag: newTagName });
+      await apiService.post('/tags/create', { tag: newTagName });
+
+      // If a color was selected, fetch tags to get the new tag's ID, then update color
+      if (newTagColor) {
+        const refreshed = await apiService.get('/tags/popular?limit=50');
+        const tagList = refreshed.data || refreshed || [];
+        const created = tagList.find((t) => t.tag === newTagName.trim());
+        if (created) {
+          await apiService.patch(`/tags/${created.id}/color`, { color: newTagColor });
+        }
+        setTags(tagList);
+      } else {
+        fetchTags();
+      }
+
       setSuccessMessage(t('tagManagement.success.created', { tag: newTagName }));
       setNewTagName('');
+      setNewTagColor('');
       closeCreateModal();
-      fetchTags(); // Refresh the list
 
       logger.info('tag_created', {
         message: 'Tag created successfully',
@@ -113,28 +132,55 @@ const TagManagement = () => {
     }
   };
 
-  // Edit/rename tag (replace all instances)
+  // Edit tag (rename and/or change color)
   const handleEditTag = async () => {
     if (!editTagName.trim() || !editingTag) return;
 
-    try {
-      const response = await apiService.put(`/tags/rename?old_tag=${encodeURIComponent(editingTag.tag)}&new_tag=${encodeURIComponent(editTagName)}`);
-      setSuccessMessage(t('tagManagement.success.renamed', { oldTag: editingTag.tag, newTag: editTagName }));
-      closeEditModal();
-      fetchTags(); // Refresh the list
+    const nameChanged = editTagName.trim() !== editingTag.tag;
+    const colorChanged = (editTagColor || '') !== (editingTag.color || '');
 
-      logger.info('tag_renamed', {
-        message: 'Tag renamed successfully',
-        oldTag: editingTag.tag,
-        newTag: editTagName,
-        recordsUpdated: response.records_updated
+    if (!nameChanged && !colorChanged) {
+      closeEditModal();
+      return;
+    }
+
+    try {
+      const promises = [];
+
+      if (nameChanged) {
+        promises.push(
+          apiService.put(`/tags/rename?old_tag=${encodeURIComponent(editingTag.tag)}&new_tag=${encodeURIComponent(editTagName)}`)
+        );
+      }
+
+      if (colorChanged) {
+        promises.push(
+          apiService.patch(`/tags/${editingTag.id}/color`, { color: editTagColor || null })
+        );
+      }
+
+      await Promise.all(promises);
+
+      if (nameChanged) {
+        setSuccessMessage(t('tagManagement.success.renamed', { oldTag: editingTag.tag, newTag: editTagName }));
+      } else {
+        setSuccessMessage(t('tagManagement.success.updated', { tag: editingTag.tag }));
+      }
+
+      closeEditModal();
+      fetchTags();
+
+      logger.info('tag_edited', {
+        message: 'Tag edited successfully',
+        tag: editingTag.tag,
+        nameChanged,
+        colorChanged,
       });
     } catch (err) {
-      setError(t('tagManagement.errors.renameFailed'));
-      logger.error('tag_rename_error', {
-        message: 'Failed to rename tag',
-        oldTag: editingTag.tag,
-        newTag: editTagName,
+      setError(t('tagManagement.errors.editFailed'));
+      logger.error('tag_edit_error', {
+        message: 'Failed to edit tag',
+        tag: editingTag.tag,
         error: err
       });
     }
@@ -304,7 +350,13 @@ const TagManagement = () => {
                   {filteredTags.map((tag) => (
                     <Table.Tr key={tag.tag}>
                       <Table.Td>
-                        <Badge variant="outline" size="md">
+                        <Badge
+                          color={tag.color || 'blue'}
+                          variant="light"
+                          size="md"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => navigate(`/search?tags=${encodeURIComponent(tag.tag)}`)}
+                        >
                           {tag.tag}
                         </Badge>
                       </Table.Td>
@@ -339,10 +391,11 @@ const TagManagement = () => {
                               onClick={() => {
                                 setEditingTag(tag);
                                 setEditTagName(tag.tag);
+                                setEditTagColor(tag.color || '');
                                 openEditModal();
                               }}
                             >
-                              {t('tagManagement.menu.rename')}
+                              {t('tagManagement.menu.edit')}
                             </Menu.Item>
                             <Menu.Item
                               leftSection={<IconReplace size={14} />}
@@ -391,6 +444,12 @@ const TagManagement = () => {
             onChange={(e) => setNewTagName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreateTag()}
           />
+          <ColorInput
+            label={t('tagManagement.editModal.colorLabel')}
+            value={newTagColor}
+            onChange={setNewTagColor}
+            swatches={['#228be6', '#40c057', '#fab005', '#fa5252', '#7950f2', '#fd7e14', '#15aabf', '#e64980']}
+          />
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeCreateModal}>
               {t('buttons.cancel')}
@@ -415,6 +474,12 @@ const TagManagement = () => {
             value={editTagName}
             onChange={(e) => setEditTagName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleEditTag()}
+          />
+          <ColorInput
+            label={t('tagManagement.editModal.colorLabel')}
+            value={editTagColor}
+            onChange={setEditTagColor}
+            swatches={['#228be6', '#40c057', '#fab005', '#fa5252', '#7950f2', '#fd7e14', '#15aabf', '#e64980']}
           />
           <Text size="sm" c="dimmed">
             {t('tagManagement.editModal.description', { count: editingTag?.usage_count })}
