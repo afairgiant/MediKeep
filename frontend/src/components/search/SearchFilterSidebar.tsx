@@ -47,15 +47,15 @@ import { ClickableTagBadge } from '../common/ClickableTagBadge';
 // ---------------------------------------------------------------------------
 
 export const RECORD_TYPES = [
-  { value: 'medications', label: 'Medications', icon: IconPill, color: 'green' },
-  { value: 'conditions', label: 'Conditions', icon: IconStethoscope, color: 'blue' },
-  { value: 'lab_results', label: 'Lab Results', icon: IconFlask, color: 'indigo' },
-  { value: 'procedures', label: 'Procedures', icon: IconMedicalCross, color: 'violet' },
-  { value: 'immunizations', label: 'Immunizations', icon: IconVaccine, color: 'orange' },
-  { value: 'treatments', label: 'Treatments', icon: IconHeartbeat, color: 'pink' },
-  { value: 'encounters', label: 'Visits', icon: IconCalendarEvent, color: 'teal' },
-  { value: 'allergies', label: 'Allergies', icon: IconAlertTriangle, color: 'red' },
-  { value: 'vitals', label: 'Vitals', icon: IconHeartbeat, color: 'cyan' },
+  { value: 'medications', labelKey: 'search.types.medications', icon: IconPill, color: 'green' },
+  { value: 'conditions', labelKey: 'search.types.conditions', icon: IconStethoscope, color: 'blue' },
+  { value: 'lab_results', labelKey: 'search.types.labResults', icon: IconFlask, color: 'indigo' },
+  { value: 'procedures', labelKey: 'search.types.procedures', icon: IconMedicalCross, color: 'violet' },
+  { value: 'immunizations', labelKey: 'search.types.immunizations', icon: IconVaccine, color: 'orange' },
+  { value: 'treatments', labelKey: 'search.types.treatments', icon: IconHeartbeat, color: 'pink' },
+  { value: 'encounters', labelKey: 'search.types.encounters', icon: IconCalendarEvent, color: 'teal' },
+  { value: 'allergies', labelKey: 'search.types.allergies', icon: IconAlertTriangle, color: 'red' },
+  { value: 'vitals', labelKey: 'search.types.vitals', icon: IconHeartbeat, color: 'cyan' },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -172,7 +172,30 @@ export function SearchFilterSidebar({
       if (preset === 'allTime') {
         return dateRange[0] === null && dateRange[1] === null;
       }
-      return false;
+
+      if (dateRange[0] === null || dateRange[1] === null) {
+        return false;
+      }
+
+      let presetRange: [Date, Date];
+      if (preset === 'last7') {
+        presetRange = buildPresetRange(7);
+      } else if (preset === 'last30') {
+        presetRange = buildPresetRange(30);
+      } else if (preset === 'last6m') {
+        presetRange = buildMonthPresetRange(6);
+      } else if (preset === 'lastYear') {
+        presetRange = buildMonthPresetRange(12);
+      } else {
+        return false;
+      }
+
+      const normalizeToDate = (d: Date): string => d.toISOString().split('T')[0];
+
+      return (
+        normalizeToDate(dateRange[0]) === normalizeToDate(presetRange[0]) &&
+        normalizeToDate(dateRange[1]) === normalizeToDate(presetRange[1])
+      );
     },
     [dateRange]
   );
@@ -220,7 +243,7 @@ export function SearchFilterSidebar({
             size="xs"
             circle
             color="blue"
-            aria-label={`${activeFilterCount} active filters`}
+            aria-label={t('search.activeFilterCount', { count: activeFilterCount })}
           >
             {activeFilterCount}
           </Badge>
@@ -286,7 +309,7 @@ export function SearchFilterSidebar({
                   <ThemeIcon size="sm" color={recordType.color} variant="light">
                     <IconComponent size="0.8rem" />
                   </ThemeIcon>
-                  <Text size="sm">{recordType.label}</Text>
+                  <Text size="sm">{t(recordType.labelKey)}</Text>
                 </Group>
               }
               checked={selectedTypes.includes(recordType.value)}

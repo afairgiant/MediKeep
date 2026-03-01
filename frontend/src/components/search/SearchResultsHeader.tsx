@@ -92,11 +92,11 @@ export function SearchResultsHeader({
                     size="xs"
                     variant="transparent"
                     onClick={() => onTypeToggle(type)}
-                    aria-label={`Remove ${typeConfig?.label} filter`}
+                    aria-label={t('search.removeTypeFilter', { type: typeConfig ? t(typeConfig.labelKey) : type })}
                   />
                 }
               >
-                {typeConfig?.label}
+                {typeConfig ? t(typeConfig.labelKey) : type}
               </Badge>
             );
           })}

@@ -2622,6 +2622,44 @@
     "lastYear": "Last year",
     "allTime": "All time",
     "datePresets": "Quick presets",
-    "noRecentSearches": "No recent searches"
+    "noRecentSearches": "No recent searches",
+    "activeFilterCount": "{{count}} active filters",
+    "removeTypeFilter": "Remove {{type}} filter",
+    "types": {
+      "medications": "Medications",
+      "conditions": "Conditions",
+      "labResults": "Lab Results",
+      "procedures": "Procedures",
+      "immunizations": "Immunizations",
+      "treatments": "Treatments",
+      "encounters": "Visits",
+      "allergies": "Allergies",
+      "vitals": "Vitals"
+    },
+    "fallbacks": {
+      "labResult": "Lab Result",
+      "medication": "Medication",
+      "condition": "Condition",
+      "procedure": "Procedure",
+      "immunization": "Immunization",
+      "treatment": "Treatment",
+      "encounter": "Encounter",
+      "allergy": "Allergy",
+      "record": "Record"
+    },
+    "subtitles": {
+      "result": "Result: {{value}}",
+      "dose": "Dose {{number}}"
+    },
+    "dateLabels": {
+      "tested": "Tested",
+      "started": "Started",
+      "diagnosed": "Diagnosed",
+      "performed": "Performed",
+      "given": "Given",
+      "visited": "Visited",
+      "identified": "Identified",
+      "recorded": "Recorded"
+    }
   }
 }

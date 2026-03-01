@@ -25,10 +25,12 @@ const BaseMedicalCard = ({
   entityType,
   children,
   onError,
-  disableCardClick = false
+  disableCardClick = false,
+  getTagColor: getTagColorProp
 }) => {
   const { t } = useTranslation('common');
-  const { getTagColor } = useTagColors();
+  const { getTagColor: getTagColorHook } = useTagColors();
+  const getTagColor = getTagColorProp || getTagColorHook;
   const handleError = (error, action) => {
     logger.error('base_medical_card_error', {
       message: `Error in BaseMedicalCard during ${action}`,

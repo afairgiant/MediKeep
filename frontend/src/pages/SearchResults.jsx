@@ -38,7 +38,7 @@ import {
   SearchResultsHeader,
   ICON_MAP,
   FALLBACK_ICON,
-  TYPE_LABEL_MAP,
+  getTypeLabel,
   RECORD_TYPE_TO_TAG_ENTITY,
   getItemDateWithLabel,
   flattenTagResults,
@@ -244,14 +244,14 @@ const SearchResults = () => {
     const dateFrom = toISODateStr(range[0]);
     const dateTo = toISODateStr(range[1]);
     updateUrlParams({ dateFrom: dateFrom || '', dateTo: dateTo || '', page: 1 });
-    performSearch(query, 1, null, null, range);
+    performSearch(query, null, null, range);
   };
 
   // ---------------------------------------------------------------------------
   // Text search
   // ---------------------------------------------------------------------------
 
-  const performSearch = async (searchQuery = '', page = 1, types = null, sort = null, dateRangeOverride = null) => {
+  const performSearch = async (searchQuery = '', types = null, sort = null, dateRangeOverride = null) => {
     if (!currentPatient?.id) {
       setError(t('search.noPatientTitle'));
       return;
@@ -317,7 +317,7 @@ const SearchResults = () => {
     setCurrentPage(1);
     updateUrlParams({ q: query, page: 1 });
     addHistoryEntry(query, selectedTags, matchMode);
-    performSearch(query, 1);
+    performSearch(query);
   };
 
   const handleTypeToggle = (type) => {
@@ -328,7 +328,7 @@ const SearchResults = () => {
     setSelectedTypes(newTypes);
     setCurrentPage(1);
     updateUrlParams({ types: newTypes, page: 1 });
-    performSearch(query, 1, newTypes);
+    performSearch(query, newTypes);
 
     if (selectedTags.length > 0) {
       performTagSearch(selectedTags, newTypes);
@@ -339,13 +339,12 @@ const SearchResults = () => {
     setSortBy(newSort);
     setCurrentPage(1);
     updateUrlParams({ sort: newSort, page: 1 });
-    performSearch(query, 1, null, newSort);
+    performSearch(query, null, newSort);
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
     updateUrlParams({ page });
-    performSearch(query, page);
   };
 
   const handlePageSizeChange = (val) => {
@@ -377,7 +376,7 @@ const SearchResults = () => {
     setQuery('');
     setDateRange([null, null]);
     setSearchParams({});
-    performSearch('', 1, [], 'date_desc');
+    performSearch('', [], 'date_desc');
   };
 
   // ---------------------------------------------------------------------------
@@ -393,10 +392,10 @@ const SearchResults = () => {
       if (urlQuery) {
         setQuery(urlQuery);
       }
-      performSearch(urlQuery, currentPage);
+      performSearch(urlQuery);
     } else {
       // Patient changed after initial load: reset to page 1
-      performSearch(query, 1);
+      performSearch(query);
     }
   }, [currentPatient?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -433,7 +432,7 @@ const SearchResults = () => {
   const allFilteredResults = useMemo(() => {
     const textRows = results.map(result => {
       const IconComponent = ICON_MAP[result.icon] || FALLBACK_ICON;
-      const dateInfo = getItemDateWithLabel(result.type, result.data || result);
+      const dateInfo = getItemDateWithLabel(result.type, result.data || result, t);
       return {
         type: result.type,
         id: result.id,
@@ -443,7 +442,7 @@ const SearchResults = () => {
         dateLabel: dateInfo.label,
         icon: IconComponent,
         color: result.color || 'gray',
-        typeLabel: TYPE_LABEL_MAP[result.type] || result.type.replace('_', ' '),
+        typeLabel: getTypeLabel(t, result.type),
         tags: result.tags || [],
         route: searchService.getRecordRoute(result.type, result.id),
         _source: 'text'
@@ -451,21 +450,66 @@ const SearchResults = () => {
     });
 
     const hasTagFilter = selectedTags.length > 0;
-    const tagRows = flattenTagResults(tagResults);
+    const tagRows = flattenTagResults(tagResults, t);
 
     // No tag filter active: show text results only
-    if (!hasTagFilter) return textRows;
+    let merged;
+    if (!hasTagFilter) {
+      merged = textRows;
+    } else if (!query || !query.trim()) {
+      // Tag filter active but no text query: show tag results only
+      merged = tagRows;
+    } else {
+      // Both active: filter tag results by query text client-side
+      const q = query.trim().toLowerCase();
+      merged = tagRows.filter(r =>
+        r.title?.toLowerCase().includes(q) ||
+        r.subtitle?.toLowerCase().includes(q)
+      );
+    }
 
-    // Tag filter active but no text query: show tag results only
-    if (!query || !query.trim()) return tagRows;
+    // Apply client-side date range filter (tag search results lack server-side date filtering)
+    let dateFiltered = merged;
+    if (dateRange[0] !== null || dateRange[1] !== null) {
+      dateFiltered = merged.filter(r => {
+        if (!r.date) return false;
+        const itemDate = new Date(r.date);
+        if (dateRange[0] && itemDate < dateRange[0]) return false;
+        if (dateRange[1] && itemDate > dateRange[1]) return false;
+        return true;
+      });
+    }
 
-    // Both active: filter tag results by query text client-side
-    const q = query.trim().toLowerCase();
-    return tagRows.filter(r =>
-      r.title?.toLowerCase().includes(q) ||
-      r.subtitle?.toLowerCase().includes(q)
-    );
-  }, [results, tagResults, selectedTags, query]);
+    // Apply global sort based on sortBy
+    const sorted = [...dateFiltered];
+    sorted.sort((a, b) => {
+      if (sortBy === 'date_desc') {
+        if (!a.date && !b.date) return 0;
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return new Date(b.date) - new Date(a.date);
+      }
+      if (sortBy === 'date_asc') {
+        if (!a.date && !b.date) return 0;
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return new Date(a.date) - new Date(b.date);
+      }
+      if (sortBy === 'title') {
+        const aTitle = (a.title || '').toLowerCase();
+        const bTitle = (b.title || '').toLowerCase();
+        return aTitle.localeCompare(bTitle);
+      }
+      if (sortBy === 'title_desc') {
+        const aTitle = (a.title || '').toLowerCase();
+        const bTitle = (b.title || '').toLowerCase();
+        return bTitle.localeCompare(aTitle);
+      }
+      return 0;
+    });
+
+    return sorted;
+  }, [results, tagResults, selectedTags, query, sortBy, dateRange, t]);
 
   // Client-side page slice
   const mergedResults = useMemo(() => {

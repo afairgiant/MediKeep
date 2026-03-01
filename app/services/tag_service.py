@@ -11,13 +11,15 @@ logger = get_logger(__name__, "app")
 class TagService:
     """Universal tag management across all entities
 
-    This service uses standard JSON functions compatible with both PostgreSQL and SQLite:
+    This service requires PostgreSQL and uses PostgreSQL-specific functions:
     - json_array_elements_text() for expanding JSON arrays
     - json_agg() for JSON aggregation
-    - Standard SQL text operations for filtering
+    - array_agg() for array aggregation
+    - ILIKE for case-insensitive matching
+    - ON CONFLICT for upsert operations
 
-    Note: The @> containment operator was removed for SQLite compatibility.
-    Tag matching now uses json_array_elements_text() with WHERE clauses.
+    Tag matching uses json_array_elements_text() with WHERE clauses
+    instead of the @> containment operator for JSON (vs JSONB) compatibility.
     """
 
     ENTITY_TABLES = {
@@ -357,6 +359,58 @@ class TagService:
                     "error": str(e)
                 })
 
+        # Update user_tags registry: rename old_tag to new_tag
+        # If new_tag already exists in user_tags for this user, delete old_tag instead
+        # to avoid unique constraint violation
+        try:
+            check_new_tag_query = """
+                SELECT COUNT(*) FROM user_tags
+                WHERE user_id = :user_id AND tag = :new_tag
+            """
+            new_tag_exists = db.execute(
+                text(check_new_tag_query),
+                {"user_id": user_id, "new_tag": new_tag}
+            ).fetchone()[0] > 0
+
+            if new_tag_exists:
+                # New tag already exists, just delete the old one
+                delete_old_query = """
+                    DELETE FROM user_tags
+                    WHERE user_id = :user_id AND tag = :old_tag
+                """
+                db.execute(
+                    text(delete_old_query),
+                    {"user_id": user_id, "old_tag": old_tag}
+                )
+                logger.debug("Deleted old tag from user_tags (new tag already exists)", extra={
+                    "user_id": user_id,
+                    "old_tag": old_tag,
+                    "new_tag": new_tag
+                })
+            else:
+                # Rename old tag to new tag
+                rename_query = """
+                    UPDATE user_tags
+                    SET tag = :new_tag
+                    WHERE user_id = :user_id AND tag = :old_tag
+                """
+                db.execute(
+                    text(rename_query),
+                    {"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag}
+                )
+                logger.debug("Renamed tag in user_tags", extra={
+                    "user_id": user_id,
+                    "old_tag": old_tag,
+                    "new_tag": new_tag
+                })
+        except Exception as e:
+            logger.error("Failed to update user_tags during tag rename", extra={
+                "user_id": user_id,
+                "old_tag": old_tag,
+                "new_tag": new_tag,
+                "error": str(e)
+            })
+
         db.commit()
 
         logger.info("Completed tag rename across entities", extra={
@@ -416,6 +470,27 @@ class TagService:
                     "tag": tag,
                     "error": str(e)
                 })
+
+        # Remove the tag from user_tags registry
+        try:
+            delete_user_tag_query = """
+                DELETE FROM user_tags
+                WHERE user_id = :user_id AND tag = :tag
+            """
+            db.execute(
+                text(delete_user_tag_query),
+                {"user_id": user_id, "tag": tag}
+            )
+            logger.debug("Deleted tag from user_tags", extra={
+                "user_id": user_id,
+                "tag": tag
+            })
+        except Exception as e:
+            logger.error("Failed to delete tag from user_tags", extra={
+                "user_id": user_id,
+                "tag": tag,
+                "error": str(e)
+            })
 
         db.commit()
 
@@ -484,6 +559,30 @@ class TagService:
                     "new_tag": new_tag,
                     "error": str(e)
                 })
+
+        # Remove old tag from user_tags registry
+        # The new tag should already exist in user_tags (or will be created by sync)
+        try:
+            delete_old_tag_query = """
+                DELETE FROM user_tags
+                WHERE user_id = :user_id AND tag = :old_tag
+            """
+            db.execute(
+                text(delete_old_tag_query),
+                {"user_id": user_id, "old_tag": old_tag}
+            )
+            logger.debug("Deleted old tag from user_tags after replacement", extra={
+                "user_id": user_id,
+                "old_tag": old_tag,
+                "new_tag": new_tag
+            })
+        except Exception as e:
+            logger.error("Failed to delete old tag from user_tags during replacement", extra={
+                "user_id": user_id,
+                "old_tag": old_tag,
+                "new_tag": new_tag,
+                "error": str(e)
+            })
 
         db.commit()
 

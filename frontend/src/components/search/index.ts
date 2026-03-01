@@ -7,11 +7,12 @@ export {
   RECORD_TYPE_TO_TAG_ENTITY,
   ICON_MAP,
   FALLBACK_ICON,
-  TYPE_LABEL_MAP,
+  TYPE_LABEL_KEY_MAP,
+  getTypeLabel,
   getItemTitle,
   getItemSubtitle,
   getItemDateWithLabel,
   flattenTagResults,
   toISODateStr,
 } from './searchResultHelpers';
-export type { SearchResultRow } from './searchResultHelpers';
+export type { SearchResultRow, TFunc } from './searchResultHelpers';

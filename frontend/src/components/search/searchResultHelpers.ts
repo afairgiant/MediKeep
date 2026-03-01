@@ -21,6 +21,9 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
+/** Translation function type accepted by helper functions. */
+export type TFunc = (key: string, defaultValueOrOptions?: string | Record<string, unknown>) => string;
+
 export interface SearchResultRow {
   type: string;
   id: number;
@@ -39,7 +42,7 @@ export interface SearchResultRow {
 interface EntityConfig {
   icon: React.ComponentType<{ size?: string | number }>;
   color: string;
-  label: string;
+  labelKey: string;
   route: string;
 }
 
@@ -49,14 +52,14 @@ interface EntityConfig {
 
 /** Entity config for tag search results (keyed by singular backend response keys). */
 export const TAG_ENTITY_CONFIG: Record<string, EntityConfig> = {
-  lab_result: { icon: IconFlask, color: 'indigo', label: 'Lab Results', route: '/lab-results' },
-  medication: { icon: IconPill, color: 'green', label: 'Medications', route: '/medications' },
-  condition: { icon: IconStethoscope, color: 'blue', label: 'Conditions', route: '/conditions' },
-  procedure: { icon: IconMedicalCross, color: 'violet', label: 'Procedures', route: '/procedures' },
-  immunization: { icon: IconVaccine, color: 'orange', label: 'Immunizations', route: '/immunizations' },
-  treatment: { icon: IconHeartbeat, color: 'pink', label: 'Treatments', route: '/treatments' },
-  encounter: { icon: IconCalendarEvent, color: 'teal', label: 'Encounters', route: '/encounters' },
-  allergy: { icon: IconAlertTriangle, color: 'red', label: 'Allergies', route: '/allergies' },
+  lab_result: { icon: IconFlask, color: 'indigo', labelKey: 'search.types.labResults', route: '/lab-results' },
+  medication: { icon: IconPill, color: 'green', labelKey: 'search.types.medications', route: '/medications' },
+  condition: { icon: IconStethoscope, color: 'blue', labelKey: 'search.types.conditions', route: '/conditions' },
+  procedure: { icon: IconMedicalCross, color: 'violet', labelKey: 'search.types.procedures', route: '/procedures' },
+  immunization: { icon: IconVaccine, color: 'orange', labelKey: 'search.types.immunizations', route: '/immunizations' },
+  treatment: { icon: IconHeartbeat, color: 'pink', labelKey: 'search.types.treatments', route: '/treatments' },
+  encounter: { icon: IconCalendarEvent, color: 'teal', labelKey: 'search.types.encounters', route: '/encounters' },
+  allergy: { icon: IconAlertTriangle, color: 'red', labelKey: 'search.types.allergies', route: '/allergies' },
 };
 
 /** Map sidebar record type values (plural) to tag entity keys (singular). */
@@ -87,44 +90,51 @@ export const ICON_MAP: Record<string, React.ComponentType<{ size?: string | numb
 /** Fallback icon when the backend icon name is unknown. */
 export const FALLBACK_ICON = IconSearch;
 
-/** Proper type labels for display (singular type key -> display label). */
-export const TYPE_LABEL_MAP: Record<string, string> = {
-  medication: 'Medications',
-  condition: 'Conditions',
-  lab_result: 'Lab Results',
-  procedure: 'Procedures',
-  immunization: 'Immunizations',
-  treatment: 'Treatments',
-  encounter: 'Visits',
-  allergy: 'Allergies',
-  vital: 'Vitals',
+/** Mapping from singular type key to i18n translation key. */
+export const TYPE_LABEL_KEY_MAP: Record<string, string> = {
+  medication: 'search.types.medications',
+  condition: 'search.types.conditions',
+  lab_result: 'search.types.labResults',
+  procedure: 'search.types.procedures',
+  immunization: 'search.types.immunizations',
+  treatment: 'search.types.treatments',
+  encounter: 'search.types.encounters',
+  allergy: 'search.types.allergies',
+  vital: 'search.types.vitals',
 };
+
+/** Resolve a type key to a translated label. */
+export function getTypeLabel(t: TFunc, typeKey: string): string {
+  const translationKey = TYPE_LABEL_KEY_MAP[typeKey];
+  if (translationKey) return t(translationKey);
+  return typeKey.replace('_', ' ');
+}
 
 // ---------------------------------------------------------------------------
 // Helper functions
 // ---------------------------------------------------------------------------
 
-export function getItemTitle(entityType: string, item: Record<string, unknown>): string {
+export function getItemTitle(entityType: string, item: Record<string, unknown>, t: TFunc): string {
   switch (entityType) {
-    case 'lab_result': return (item.test_name as string) || 'Lab Result';
-    case 'medication': return (item.medication_name as string) || 'Medication';
-    case 'condition': return (item.condition_name as string) || (item.diagnosis as string) || 'Condition';
-    case 'procedure': return (item.name as string) || (item.procedure_name as string) || 'Procedure';
-    case 'immunization': return (item.vaccine_name as string) || 'Immunization';
-    case 'treatment': return (item.treatment_name as string) || 'Treatment';
-    case 'encounter': return (item.visit_type as string) || (item.encounter_type as string) || (item.reason as string) || 'Encounter';
-    case 'allergy': return (item.allergen as string) || 'Allergy';
-    default: return 'Record';
+    case 'lab_result': return (item.test_name as string) || t('search.fallbacks.labResult');
+    case 'medication': return (item.medication_name as string) || t('search.fallbacks.medication');
+    case 'condition': return (item.condition_name as string) || (item.diagnosis as string) || t('search.fallbacks.condition');
+    case 'procedure': return (item.name as string) || (item.procedure_name as string) || t('search.fallbacks.procedure');
+    case 'immunization': return (item.vaccine_name as string) || t('search.fallbacks.immunization');
+    case 'treatment': return (item.treatment_name as string) || t('search.fallbacks.treatment');
+    case 'encounter': return (item.visit_type as string) || (item.encounter_type as string) || (item.reason as string) || t('search.fallbacks.encounter');
+    case 'allergy': return (item.allergen as string) || t('search.fallbacks.allergy');
+    default: return t('search.fallbacks.record');
   }
 }
 
-export function getItemSubtitle(entityType: string, item: Record<string, unknown>): string {
+export function getItemSubtitle(entityType: string, item: Record<string, unknown>, t: TFunc): string {
   switch (entityType) {
-    case 'lab_result': return item.result ? `Result: ${item.result}` : (item.status as string) || '';
+    case 'lab_result': return item.result ? t('search.subtitles.result', { value: item.result }) : (item.status as string) || '';
     case 'medication': return [item.dosage, item.status].filter(Boolean).join(' - ');
     case 'condition': return [item.diagnosis, item.status].filter(Boolean).join(' - ');
     case 'procedure': return (item.description as string) || (item.status as string) || '';
-    case 'immunization': return item.dose_number ? `Dose ${item.dose_number}` : '';
+    case 'immunization': return item.dose_number ? t('search.subtitles.dose', { number: item.dose_number }) : '';
     case 'treatment': return [item.treatment_type, item.status].filter(Boolean).join(' - ');
     case 'encounter': return (item.reason as string) || (item.chief_complaint as string) || '';
     case 'allergy': return [item.severity, item.reaction].filter(Boolean).join(' - ');
@@ -135,18 +145,19 @@ export function getItemSubtitle(entityType: string, item: Record<string, unknown
 /** Returns { label, value } for the most relevant date per record type. */
 export function getItemDateWithLabel(
   entityType: string,
-  item: Record<string, unknown>
+  item: Record<string, unknown>,
+  t: TFunc
 ): { label: string; value: string | undefined } {
   switch (entityType) {
-    case 'lab_result': return { label: 'Tested', value: (item.test_date || item.created_at) as string | undefined };
-    case 'medication': return { label: 'Started', value: (item.start_date || item.created_at) as string | undefined };
-    case 'condition': return { label: 'Diagnosed', value: (item.diagnosed_date || item.created_at) as string | undefined };
-    case 'procedure': return { label: 'Performed', value: (item.procedure_date || item.created_at) as string | undefined };
-    case 'immunization': return { label: 'Given', value: (item.administered_date || item.created_at) as string | undefined };
-    case 'treatment': return { label: 'Started', value: (item.start_date || item.created_at) as string | undefined };
-    case 'encounter': return { label: 'Visited', value: (item.encounter_date || item.created_at) as string | undefined };
-    case 'allergy': return { label: 'Identified', value: (item.identified_date || item.created_at) as string | undefined };
-    case 'vital': return { label: 'Recorded', value: (item.recorded_date || item.created_at) as string | undefined };
+    case 'lab_result': return { label: t('search.dateLabels.tested'), value: (item.test_date || item.created_at) as string | undefined };
+    case 'medication': return { label: t('search.dateLabels.started'), value: (item.start_date || item.created_at) as string | undefined };
+    case 'condition': return { label: t('search.dateLabels.diagnosed'), value: (item.diagnosed_date || item.created_at) as string | undefined };
+    case 'procedure': return { label: t('search.dateLabels.performed'), value: (item.procedure_date || item.created_at) as string | undefined };
+    case 'immunization': return { label: t('search.dateLabels.given'), value: (item.administered_date || item.created_at) as string | undefined };
+    case 'treatment': return { label: t('search.dateLabels.started'), value: (item.start_date || item.created_at) as string | undefined };
+    case 'encounter': return { label: t('search.dateLabels.visited'), value: (item.encounter_date || item.created_at) as string | undefined };
+    case 'allergy': return { label: t('search.dateLabels.identified'), value: (item.identified_date || item.created_at) as string | undefined };
+    case 'vital': return { label: t('search.dateLabels.recorded'), value: (item.recorded_date || item.created_at) as string | undefined };
     default: return { label: '', value: item.created_at as string | undefined };
   }
 }
@@ -156,7 +167,8 @@ export function getItemDateWithLabel(
  * as text search results, for unified display.
  */
 export function flattenTagResults(
-  tagResults: Record<string, unknown[]> | null
+  tagResults: Record<string, unknown[]> | null,
+  t: TFunc
 ): SearchResultRow[] {
   if (!tagResults) return [];
   const flat: SearchResultRow[] = [];
@@ -164,17 +176,17 @@ export function flattenTagResults(
     const config = TAG_ENTITY_CONFIG[entityType];
     if (!config || !Array.isArray(items)) return;
     items.forEach((item: Record<string, unknown>) => {
-      const dateInfo = getItemDateWithLabel(entityType, item);
+      const dateInfo = getItemDateWithLabel(entityType, item, t);
       flat.push({
         type: entityType,
         id: item.id as number,
-        title: getItemTitle(entityType, item),
-        subtitle: getItemSubtitle(entityType, item),
+        title: getItemTitle(entityType, item, t),
+        subtitle: getItemSubtitle(entityType, item, t),
         date: dateInfo.value,
         dateLabel: dateInfo.label,
         icon: config.icon,
         color: config.color,
-        typeLabel: config.label,
+        typeLabel: t(config.labelKey),
         tags: (item.tags as string[]) || [],
         route: `${config.route}?view=${item.id}`,
         _source: 'tag',
