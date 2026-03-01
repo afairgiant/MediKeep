@@ -1,4 +1,28 @@
 {
+  "auth": {
+    "login": {
+      "title": "LOGIN TO YOUR ACCOUNT",
+      "username": "Username",
+      "password": "Password",
+      "usernamePlaceholder": "Enter your username",
+      "passwordPlaceholder": "Enter your password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "createAccount": "Create new account",
+      "or": "or",
+      "continueWith": "Continue with {{provider}}"
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "At least 6 characters",
+        "letter": "Contains at least one letter",
+        "number": "Contains at least one number"
+      },
+      "note": "A patient record will be automatically created for this user with default role \"user\"."
+    }
+  },
   "buttons": {
     "save": "Save",
     "cancel": "Cancel",
@@ -105,7 +129,11 @@
     "address": "Address",
     "patientRecord": "Patient Record",
     "medicalHistory": "Medical History",
-    "practitioner": "Practitioner"
+    "practitioner": "Practitioner",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "role": "Role",
+    "note": "Note"
   },
   "fields": {
     "notes": {
@@ -250,7 +278,12 @@
         "painScaleMin": "Pain scale must be at least 0",
         "painScaleMax": "Pain scale cannot exceed 10",
         "deviceMaxLength": "Device name cannot exceed 100 characters",
-        "notesMaxLength": "Notes cannot exceed 1000 characters"
+        "notesMaxLength": "Notes cannot exceed 1000 characters",
+        "firstNameRequired": "Please enter your first name",
+        "lastNameRequired": "Please enter your last name",
+        "usernameLength": "Username must be at least 3 characters long",
+        "passwordLength": "Password must be at least 6 characters long",
+        "passwordRequirements": "Password must contain at least one letter and one number"
       },
       "sections": {
         "basicInfo": "Basic Information",
