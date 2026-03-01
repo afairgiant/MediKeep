@@ -5,6 +5,7 @@ import { authService } from '../../services/auth/simpleAuthService';
 import { adminApiService } from '../../services/api/adminApi';
 import frontendLogger from '../../services/frontendLogger';
 import { Button, Checkbox, Select } from '../ui';
+import styles from './UserRegistrationForm.module.css';
 
 const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) => {
   const { t } = useTranslation(['admin', 'common']);
@@ -237,11 +238,11 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {error && <div className="error-message">{error}</div>}
+    <form onSubmit={handleSubmit} className={styles.form}>
+      {error && <div className={styles.errorMessage}>{error}</div>}
 
-      <div className="form-group">
-        <label htmlFor="username">{t('createUser.username', 'Username')} *</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="username">{t('admin.createUser.username', 'Username')} *</label>
         <input
           type="text"
           id="username"
@@ -254,8 +255,8 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
         />
       </div>
 
-      <div className="form-group">
-        <label htmlFor="password">{t('createUser.password', 'Password')} *</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="password">{t('admin.createUser.password', 'Password')} *</label>
         <input
           type="password"
           id="password"
@@ -267,21 +268,21 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           placeholder={t('createUser.passwordPlaceholder', 'Enter password (min 6 chars, include letter & number)')}
           minLength={6}
         />
-        <div className="password-requirements">
-          <div className={`requirement ${formData.password.length >= 6 ? 'valid' : ''}`}>
-            {t('createUser.passwordReqs.minLength', 'At least 6 characters')}
+        <div className={styles.passwordRequirements}>
+          <div className={`${styles.requirement} ${formData.password.length >= 6 ? styles.valid : ''}`}>
+            {t('admin.createUser.passwordReqs.minLength', 'At least 6 characters')}
           </div>
-          <div className={`requirement ${/[a-zA-Z]/.test(formData.password) ? 'valid' : ''}`}>
-            {t('createUser.passwordReqs.hasLetter', 'Contains at least one letter')}
+          <div className={`${styles.requirement} ${/[a-zA-Z]/.test(formData.password) ? styles.valid : ''}`}>
+            {t('admin.createUser.passwordReqs.hasLetter', 'Contains at least one letter')}
           </div>
-          <div className={`requirement ${/[0-9]/.test(formData.password) ? 'valid' : ''}`}>
-            {t('createUser.passwordReqs.hasNumber', 'Contains at least one number')}
+          <div className={`${styles.requirement} ${/[0-9]/.test(formData.password) ? styles.valid : ''}`}>
+            {t('admin.createUser.passwordReqs.hasNumber', 'Contains at least one number')}
           </div>
         </div>
       </div>
 
-      <div className="form-group">
-        <label htmlFor="email">{t('createUser.email', 'Email')} *</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="email">{t('admin.createUser.email', 'Email')} *</label>
         <input
           type="email"
           id="email"
@@ -295,8 +296,8 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       </div>
 
       {isAdminContext && (
-        <div className="form-group">
-          <label htmlFor="role">{t('createUser.role', 'Role')} *</label>
+        <div className={styles.formGroup}>
+          <label htmlFor="role">{t('admin.createUser.role', 'Role')} *</label>
           <select
             id="role"
             name="role"
@@ -311,8 +312,8 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
         </div>
       )}
 
-      <div className="form-group">
-        <label htmlFor="firstName">{t('createUser.firstName', 'First Name')} *</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="firstName">{t('admin.createUser.firstName', 'First Name')} *</label>
         <input
           type="text"
           id="firstName"
@@ -325,8 +326,8 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
         />
       </div>
 
-      <div className="form-group">
-        <label htmlFor="lastName">{t('createUser.lastName', 'Last Name')} *</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="lastName">{t('admin.createUser.lastName', 'Last Name')} *</label>
         <input
           type="text"
           id="lastName"
@@ -340,7 +341,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       </div>
 
       {isAdminContext && (
-        <div className="form-group patient-link-section">
+        <div className={`${styles.formGroup} ${styles.patientLinkSection}`}>
           <Checkbox
             checked={linkExistingPatient}
             onChange={handleLinkToggle}
@@ -348,12 +349,12 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
             disabled={isCreating}
             id="linkExistingPatient"
           />
-          <p className="field-hint">
-            {t('createUser.linkPatient.hint', 'Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).')}
+          <p className={styles.fieldHint}>
+            {t('admin.createUser.linkPatient.hint', 'Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).')}
           </p>
 
           {linkExistingPatient && (
-            <div className="patient-select-container">
+            <div className={styles.patientSelectContainer}>
               <Select
                 value={selectedPatientId}
                 onChange={handlePatientSelect}
@@ -369,13 +370,13 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
               />
 
               {selectedPatient && (
-                <div className="selected-patient-card">
-                  <div className="selected-patient-info">
+                <div className={styles.selectedPatientCard}>
+                  <div className={styles.selectedPatientInfo}>
                     <p>
                       <strong>{selectedPatient.first_name} {selectedPatient.last_name}</strong>
                       {selectedPatient.is_self_record && (
-                        <span className="self-record-badge">
-                          {t('createUser.linkPatient.selfRecordBadge', 'Self-Record')}
+                        <span className={styles.selfRecordBadge}>
+                          {t('admin.createUser.linkPatient.selfRecordBadge', 'Self-Record')}
                         </span>
                       )}
                     </p>
@@ -388,9 +389,9 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
                     )}
                   </div>
                   {selectedPatient.is_self_record && (
-                    <div className="self-record-warning">
-                      <strong>{t('createUser.linkPatient.selfRecordWarningTitle', 'Note:')}</strong>{' '}
-                      {t('createUser.linkPatient.selfRecordWarning', 'This is the current owner\'s self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.')}
+                    <div className={styles.selfRecordWarning}>
+                      <strong>{t('admin.createUser.linkPatient.selfRecordWarningTitle', 'Note:')}</strong>{' '}
+                      {t('admin.createUser.linkPatient.selfRecordWarning', 'This is the current owner\'s self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.')}
                     </div>
                   )}
                 </div>
@@ -400,7 +401,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
         </div>
       )}
 
-      <div className="form-actions">
+      <div className={styles.formActions}>
         {onCancel && (
           <Button
             variant="secondary"
@@ -421,7 +422,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       </div>
 
       {!isAdminContext && (
-        <div className="create-user-info">
+        <div className={styles.createUserInfo}>
           <p>
             <strong>{t('createUser.noteLabel', 'Note:')}</strong> {t('createUser.noteText', 'A patient record will be automatically created for this user with default role "user".')}
           </p>
