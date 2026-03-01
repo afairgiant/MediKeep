@@ -62,7 +62,7 @@ class SearchService {
       case 'conditions':
         return {
           ...baseItem,
-          title: item.condition_name,
+          title: item.condition_name || item.diagnosis,
           subtitle: item.status,
           description: item.diagnosis || item.notes || '',
           date: item.diagnosed_date || item.created_at,
