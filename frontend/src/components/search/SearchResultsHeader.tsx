@@ -16,7 +16,6 @@ import {
   CloseButton,
   Flex,
   Tooltip,
-  ActionIcon,
 } from '@mantine/core';
 import {
   IconSearch,
@@ -170,9 +169,9 @@ export function SearchResultsHeader({
                 value: 'table',
                 label: (
                   <Tooltip label={t('search.viewTable')} withArrow>
-                    <ActionIcon variant="transparent" size="xs" aria-label={t('search.viewTable')}>
+                    <Group gap={0} justify="center" aria-label={t('search.viewTable')}>
                       <IconTable size="0.9rem" />
-                    </ActionIcon>
+                    </Group>
                   </Tooltip>
                 ),
               },
@@ -180,9 +179,9 @@ export function SearchResultsHeader({
                 value: 'cards',
                 label: (
                   <Tooltip label={t('search.viewCards')} withArrow>
-                    <ActionIcon variant="transparent" size="xs" aria-label={t('search.viewCards')}>
+                    <Group gap={0} justify="center" aria-label={t('search.viewCards')}>
                       <IconLayoutGrid size="0.9rem" />
-                    </ActionIcon>
+                    </Group>
                   </Tooltip>
                 ),
               },

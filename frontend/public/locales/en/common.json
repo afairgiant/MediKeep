@@ -2001,6 +2001,8 @@
     },
     "menu": {
       "rename": "Rename Tag",
+      "edit": "Edit",
+      "search": "Search records",
       "replace": "Replace With...",
       "delete": "Delete Tag"
     },
@@ -2011,11 +2013,12 @@
       "submit": "Create Tag"
     },
     "editModal": {
-      "title": "Rename Tag",
-      "label": "New Tag Name",
+      "title": "Edit Tag",
+      "label": "Tag Name",
       "placeholder": "Enter new tag name...",
+      "colorLabel": "Tag Color",
       "description": "This will rename the tag across all {{count}} records.",
-      "submit": "Rename Tag"
+      "submit": "Save"
     },
     "deleteModal": {
       "title": "Delete Tag",
@@ -2033,6 +2036,7 @@
     "success": {
       "created": "Successfully created tag \"{{tag}}\"",
       "renamed": "Successfully renamed \"{{oldTag}}\" to \"{{newTag}}\"",
+      "updated": "Successfully updated tag \"{{tag}}\"",
       "deleted": "Successfully deleted tag \"{{tag}}\"",
       "replaced": "Successfully replaced \"{{oldTag}}\" with \"{{newTag}}\""
     },
@@ -2040,6 +2044,7 @@
       "loadFailed": "Failed to load tags",
       "createFailed": "Failed to create tag",
       "renameFailed": "Failed to rename tag",
+      "editFailed": "Failed to update tag",
       "deleteFailed": "Failed to delete tag",
       "replaceFailed": "Failed to replace tag"
     }

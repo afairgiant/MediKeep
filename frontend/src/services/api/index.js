@@ -277,6 +277,10 @@ class ApiService {
     return this.request('DELETE', endpoint, null, options);
   }
 
+  patch(endpoint, data, options = {}) {
+    return this.request('PATCH', endpoint, data, options);
+  }
+
   // Simplified API methods for backward compatibility  // Auth methods
   login(username, password, signal) {
     // FastAPI OAuth2PasswordRequestForm expects form-encoded data
