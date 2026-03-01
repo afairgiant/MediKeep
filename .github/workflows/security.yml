@@ -40,7 +40,7 @@ jobs:
         # Lower-severity findings are still captured in SARIF above
       - name: Upload report artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bandit-report
           path: bandit-results.sarif
@@ -90,7 +90,7 @@ jobs:
         #   pdfminer-six 20221105 -> 20251107+ (2 CVEs)
       - name: Upload report artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pip-audit-report
           path: pip-audit-report.json
