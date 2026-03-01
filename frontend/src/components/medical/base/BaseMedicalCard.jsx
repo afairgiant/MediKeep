@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Card, Stack, Group, Text, Badge, Button, Divider } from '@mantine/core';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
+import { useTagColors } from '../../../hooks/useTagColors';
 import logger from '../../../services/logger';
 import { createCardClickHandler } from '../../../utils/helpers';
 import '../../../styles/shared/MedicalPageShared.css';
@@ -12,6 +14,7 @@ const BaseMedicalCard = ({
   subtitle,
   status,
   badges = [],
+  tags = [],
   fields = [],
   notes,
   fileCount = 0,
@@ -25,6 +28,7 @@ const BaseMedicalCard = ({
   disableCardClick = false
 }) => {
   const { t } = useTranslation('common');
+  const { getTagColor } = useTagColors();
   const handleError = (error, action) => {
     logger.error('base_medical_card_error', {
       message: `Error in BaseMedicalCard during ${action}`,
@@ -93,6 +97,18 @@ const BaseMedicalCard = ({
                     {badge.label}
                   </Badge>
                 ))}
+                {tags.length > 0 && tags.slice(0, 2).map((tag) => (
+                  <ClickableTagBadge
+                    key={tag}
+                    tag={tag}
+                    color={getTagColor(tag)}
+                    size="sm"
+                    compact
+                  />
+                ))}
+                {tags.length > 2 && (
+                  <Text size="xs" c="dimmed">+{tags.length - 2}</Text>
+                )}
                 {entityType && (
                   <FileCountBadge
                     count={fileCount}

@@ -115,15 +115,6 @@ const ConditionCard = ({
       });
     }
 
-    // Add tags as badges
-    if (condition.tags && condition.tags.length > 0) {
-      badges.push({
-        label: `🏷️ ${condition.tags[0]}${condition.tags.length > 1 ? ` +${condition.tags.length - 1}` : ''}`,
-        color: 'gray',
-        variant: 'outline'
-      });
-    }
-
     // Generate dynamic fields
     const fields = [
       {
@@ -163,6 +154,7 @@ const ConditionCard = ({
         subtitle={getConditionIcon(condition.diagnosis)}
         status={condition.status}
         badges={badges}
+        tags={condition.tags || []}
         fields={fields}
         notes={condition.notes}
         entityType="condition"

@@ -21,7 +21,9 @@ import {
   IconEdit,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
 import StatusBadge from '../StatusBadge';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import MedicationRelationships from '../MedicationRelationships';
 
@@ -40,6 +42,7 @@ const ConditionViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or condition changes
@@ -261,15 +264,11 @@ const ConditionViewModal = ({
                   <Title order={4} mb="sm">{t('conditions.modal.sections.tags', 'Tags')}</Title>
                   <Group gap="xs">
                     {condition.tags.map((tag, index) => (
-                      <Badge
+                      <ClickableTagBadge
                         key={index}
-                        variant="light"
-                        color="blue"
-                        size="sm"
-                        radius="md"
-                      >
-                        {tag}
-                      </Badge>
+                        tag={tag}
+                        color={getTagColor(tag)}
+                      />
                     ))}
                   </Group>
                 </div>

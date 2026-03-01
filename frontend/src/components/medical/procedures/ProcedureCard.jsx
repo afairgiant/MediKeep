@@ -43,15 +43,6 @@ const ProcedureCard = ({
       badges.push({ label: procedure.procedure_type, color: 'blue' });
     }
 
-    // Add tags as badges
-    if (procedure.tags && procedure.tags.length > 0) {
-      badges.push({
-        label: `🏷️ ${procedure.tags[0]}${procedure.tags.length > 1 ? ` +${procedure.tags.length - 1}` : ''}`,
-        color: 'gray',
-        variant: 'outline'
-      });
-    }
-
     // Generate dynamic fields
     const fields = [
       {
@@ -129,6 +120,7 @@ const ProcedureCard = ({
         title={procedure.procedure_name}
         status={procedure.status}
         badges={badges}
+        tags={procedure.tags || []}
         fields={fields}
         notes={procedure.notes}
         fileCount={fileCount}

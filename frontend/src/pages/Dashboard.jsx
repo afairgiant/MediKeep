@@ -793,48 +793,60 @@ const Dashboard = () => {
           )}
 
           {/* Patient Selector and Search Bar - Responsive Layout */}
-          <Stack gap="md" mb="xl">
-            <Flex
-              justify="space-between"
-              align="flex-start"
-              gap="md"
-              direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
-              wrap="wrap"
-              style={{ width: '100%' }}
+          <Flex
+            justify="space-between"
+            align="flex-end"
+            gap="md"
+            direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
+            wrap="wrap"
+            mb="sm"
+            style={{ width: '100%' }}
+          >
+            {/* Patient Selector */}
+            <Box
+              style={{
+                flex: '1 1 auto',
+                maxWidth: '500px',
+                minWidth: '200px',
+              }}
             >
-              {/* Patient Selector */}
-              <Box
-                style={{
-                  flex: '1 1 auto',
-                  maxWidth: '500px',
-                  minWidth: '200px',
-                }}
-              >
-                <PatientSelector
-                  onPatientChange={handlePatientChange}
-                  currentPatientId={currentPatient?.id || user?.id}
-                  loading={patientSelectorLoading}
-                  compact={true}
-                />
-              </Box>
+              <PatientSelector
+                onPatientChange={handlePatientChange}
+                currentPatientId={currentPatient?.id || user?.id}
+                loading={patientSelectorLoading}
+                compact={true}
+              />
+            </Box>
 
-              {/* Search Bar */}
-              <Box
-                style={{
-                  flexShrink: 1,
-                  flex: '0 1 250px',
-                  maxWidth: '250px',
-                  minWidth: '150px',
-                }}
-              >
+            {/* Search Bar + Advanced Search link */}
+            <Group gap="xs" align="flex-end">
+              <Box style={{ width: 250, minWidth: 150 }}>
                 <GlobalSearch
                   patientId={currentPatient?.id}
                   placeholder={t('dashboard.search.placeholder', 'Search medical records...')}
                   width="100%"
                 />
               </Box>
-            </Flex>
-          </Stack>
+              <Text
+                size="xs"
+                c="dimmed"
+                td="underline"
+                mb={6}
+                style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+                onClick={() => navigate('/search')}
+                role="link"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate('/search');
+                  }
+                }}
+              >
+                {t('dashboard.search.advancedSearch', 'Advanced Search')}
+              </Text>
+            </Group>
+          </Flex>
 
           {/* Main Content Grid */}
           <Grid mb="xl">

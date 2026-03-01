@@ -14,6 +14,8 @@ import { createCardClickHandler } from '../../../utils/helpers';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
+import { useTagColors } from '../../../hooks/useTagColors';
 import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
 import '../../../styles/shared/MedicalPageShared.css';
 
@@ -29,6 +31,7 @@ const MedicationCard = ({
 }) => {
   const { t } = useTranslation(['medical', 'common']);
   const { formatLongDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
 
   const getMedicationPurpose = (medication) => {
     const indication = medication.indication?.trim();
@@ -91,15 +94,17 @@ const MedicationCard = ({
               )}
             </Group>
             <Group gap="xs">
-              {medication.tags && medication.tags.length > 0 && (
-                <Badge
-                  variant="outline"
-                  color="gray"
+              {medication.tags && medication.tags.length > 0 && medication.tags.slice(0, 2).map((tag) => (
+                <ClickableTagBadge
+                  key={tag}
+                  tag={tag}
+                  color={getTagColor(tag)}
                   size="sm"
-                  style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                >
-                  🏷️ {medication.tags[0]}{medication.tags.length > 1 ? ` +${medication.tags.length - 1}` : ''}
-                </Badge>
+                  compact
+                />
+              ))}
+              {medication.tags && medication.tags.length > 2 && (
+                <Text size="xs" c="dimmed">+{medication.tags.length - 2}</Text>
               )}
               <FileCountBadge
                 count={fileCount}

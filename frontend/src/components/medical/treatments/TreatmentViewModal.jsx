@@ -26,6 +26,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import TreatmentMedicationsViewTab from './TreatmentMedicationsViewTab';
 import TreatmentEncounterRelationships from './TreatmentEncounterRelationships';
@@ -48,6 +50,7 @@ const TreatmentViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or treatment changes
@@ -306,15 +309,11 @@ const TreatmentViewModal = ({
                   <Title order={4} mb="sm">{t('treatments.viewModal.tags', 'Tags')}</Title>
                   <Group gap="xs">
                     {treatment.tags.map((tag, index) => (
-                      <Badge
+                      <ClickableTagBadge
                         key={index}
-                        variant="light"
-                        color="blue"
-                        size="sm"
-                        radius="md"
-                      >
-                        {tag}
-                      </Badge>
+                        tag={tag}
+                        color={getTagColor(tag)}
+                      />
                     ))}
                   </Group>
                 </div>
