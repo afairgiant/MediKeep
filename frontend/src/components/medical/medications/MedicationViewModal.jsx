@@ -21,7 +21,9 @@ import {
 } from '@tabler/icons-react';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
 import StatusBadge from '../StatusBadge';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import MedicationTreatmentsList from './MedicationTreatmentsList';
 import MedicationRelationships from '../MedicationRelationships';
@@ -40,6 +42,7 @@ const MedicationViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('overview');
@@ -219,15 +222,11 @@ const MedicationViewModal = ({
                     <Title order={4} mb="sm">{t('medications.modal.sections.tags', 'Tags')}</Title>
                     <Group gap="xs">
                       {medication.tags.map((tag, index) => (
-                        <Badge
+                        <ClickableTagBadge
                           key={index}
-                          variant="light"
-                          color="blue"
-                          size="sm"
-                          radius="md"
-                        >
-                          {tag}
-                        </Badge>
+                          tag={tag}
+                          color={getTagColor(tag)}
+                        />
                       ))}
                     </Group>
                   </div>

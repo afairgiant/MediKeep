@@ -9,121 +9,6 @@ import logger from './logger';
 
 class SearchService {
   /**
-   * Search across all medical record types for a patient using unified API
-   * @param {string} query - Search query string
-   * @param {number} patientId - Patient ID to search records for
-   * @param {Object} options - Search options
-   * @param {Array<string>} options.types - Filter by record types
-   * @param {number} options.limit - Results limit (default: 20)
-   * @param {number} options.skip - Results offset (default: 0)
-   * @param {string} options.sort - Sort order (default: 'relevance')
-   * @returns {Promise<Array>} Array of formatted search results
-   */
-  async searchPatientRecords(query, patientId, options = {}) {
-    logger.debug('search_called', 'searchPatientRecords called', {
-      query,
-      patientId,
-      options,
-      component: 'SearchService'
-    });
-
-    if (!query || query.trim().length < 2) {
-      logger.debug('search_query_short', 'Query too short, returning empty results', {
-        component: 'SearchService'
-      });
-      return [];
-    }
-
-    if (!patientId) {
-      logger.debug('search_no_patient', 'No patient ID provided, returning empty results', {
-        patientId,
-        component: 'SearchService'
-      });
-      return [];
-    }
-
-    const {
-      types = null,
-      limit = 20,
-      skip = 0,
-      sort = 'relevance'
-    } = options;
-
-    try {
-      logger.debug('search_api_call', 'Making API call to search endpoint', {
-        component: 'SearchService'
-      });
-
-      logger.info('search_request', 'Searching patient records', {
-        component: 'SearchService',
-        query,
-        patientId,
-        options
-      });
-
-      // Use new unified search endpoint
-      const params = {
-        q: query,
-        limit,
-        skip,
-        sort
-      };
-
-      // Add patient_id as query parameter if provided
-      if (patientId) {
-        params.patient_id = patientId;
-      }
-
-      if (types && types.length > 0) {
-        params.types = types;
-      }
-
-      logger.debug('search_api_params', 'API request parameters', {
-        params,
-        component: 'SearchService'
-      });
-
-      const searchData = await apiService.get('/search/', { params });
-      logger.debug('search_api_response', 'API response received', {
-        hasData: !!searchData,
-        component: 'SearchService'
-      });
-
-      logger.info('search_response', 'Search completed successfully', {
-        component: 'SearchService',
-        totalResults: searchData?.total_count || 0,
-        typesFound: Object.keys(searchData?.results || {})
-      });
-
-      // Convert backend response to frontend format
-      const matchedResults = this.formatSearchResults(searchData?.results || {});
-
-      // Sort by date (newest first) for consistency with old behavior
-      if (sort === 'relevance') {
-        matchedResults.sort((a, b) => new Date(b.date) - new Date(a.date));
-      }
-
-      return matchedResults;
-
-    } catch (error) {
-      logger.error('search_api_error', 'API request failed', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-        component: 'SearchService'
-      });
-
-      logger.error('search_error', 'Search request failed', {
-        component: 'SearchService',
-        error: error.message,
-        query,
-        patientId
-      });
-      return [];
-    }
-  }
-
-  /**
    * Format backend search results to frontend format
    * @param {Object} results - Backend search results grouped by type
    * @returns {Array} Formatted results array
@@ -254,8 +139,8 @@ class SearchService {
       case 'vitals':
         return {
           ...baseItem,
-          title: 'Vital Signs',
-          subtitle: this.formatVitalSigns(item),
+          title: this.formatVitalSigns(item),
+          subtitle: item.notes || '',
           description: item.notes || '',
           date: item.recorded_date || item.created_at,
           icon: 'IconHeartbeat',
@@ -326,14 +211,6 @@ class SearchService {
    * @returns {Promise<Object>} Search results with pagination info
    */
   async searchWithPagination(query, patientId, paginationOptions = {}) {
-    if (!query || query.trim().length < 2) {
-      return {
-        results: [],
-        totalCount: 0,
-        pagination: { skip: 0, limit: 20, hasMore: false }
-      };
-    }
-
     if (!patientId) {
       return {
         results: [],
@@ -344,9 +221,12 @@ class SearchService {
 
     try {
       const params = {
-        q: query,
         ...paginationOptions
       };
+
+      if (query && query.trim().length > 0) {
+        params.q = query;
+      }
 
       // Add patient_id as query parameter if provided
       if (patientId) {

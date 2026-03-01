@@ -104,15 +104,6 @@ const VisitCard = ({
       });
     }
 
-    // Add tags as badges
-    if (visit.tags && visit.tags.length > 0) {
-      badges.push({
-        label: `🏷️ ${visit.tags[0]}${visit.tags.length > 1 ? ` +${visit.tags.length - 1}` : ''}`,
-        color: 'gray',
-        variant: 'outline'
-      });
-    }
-
     // Generate dynamic fields
     const fields = [
       {
@@ -245,6 +236,7 @@ const VisitCard = ({
         }
         status={visit.status}
         badges={badges}
+        tags={visit.tags || []}
         fields={fields}
         notes={visit.notes}
         fileCount={fileCount}

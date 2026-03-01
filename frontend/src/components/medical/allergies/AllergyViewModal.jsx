@@ -26,6 +26,8 @@ import {
 } from '@tabler/icons-react';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
 
@@ -40,6 +42,7 @@ const AllergyViewModal = ({
 }) => {
   const { t } = useTranslation(['medical', 'common']);
   const { formatDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or allergy changes
@@ -255,15 +258,11 @@ const AllergyViewModal = ({
                     <Title order={4} mb="sm">{t('common:fields.tags.label')}</Title>
                     <Group gap="xs">
                       {allergy.tags.map((tag, index) => (
-                        <Badge
+                        <ClickableTagBadge
                           key={index}
-                          variant="light"
-                          color="blue"
-                          size="sm"
-                          radius="md"
-                        >
-                          {tag}
-                        </Badge>
+                          tag={tag}
+                          color={getTagColor(tag)}
+                        />
                       ))}
                     </Group>
                   </div>

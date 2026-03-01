@@ -23,6 +23,8 @@ import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
@@ -38,6 +40,7 @@ const ProcedureViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Reset tab when modal opens or procedure changes
@@ -251,15 +254,11 @@ const ProcedureViewModal = ({
                     <Title order={4} mb="sm">{t('procedures.viewModal.tags', 'Tags')}</Title>
                     <Group gap="xs">
                       {procedure.tags.map((tag, index) => (
-                        <Badge
+                        <ClickableTagBadge
                           key={index}
-                          variant="light"
-                          color="blue"
-                          size="sm"
-                          radius="md"
-                        >
-                          {tag}
-                        </Badge>
+                          tag={tag}
+                          color={getTagColor(tag)}
+                        />
                       ))}
                     </Group>
                   </div>
