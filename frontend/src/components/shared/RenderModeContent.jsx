@@ -91,7 +91,7 @@ const RenderModeContent = memo(({
         paperlessConnected={
           paperlessSettings?.paperless_enabled &&
           paperlessSettings?.paperless_url &&
-          paperlessSettings?.paperless_has_credentials
+          (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)
         }
         disabled={loading}
         size="sm"

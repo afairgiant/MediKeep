@@ -250,11 +250,12 @@ const Settings = () => {
         updatedPreferences = { ...updatedPreferences, ...paperlessResponse };
       }
 
-      // Update the context but preserve local form values for credentials
+      // Update the context but preserve local form values for credentials and API token
       const updatedPreferencesWithLocalCredentials = {
         ...updatedPreferences,
         paperless_username: localPreferences.paperless_username || '',
-        paperless_password: localPreferences.paperless_password || ''
+        paperless_password: localPreferences.paperless_password || '',
+        paperless_api_token: localPreferences.paperless_api_token || ''
       };
 
       // Debug what we're setting in local preferences
@@ -274,10 +275,23 @@ const Settings = () => {
         updateSessionTimeout(fieldsToUpdate.session_timeout_minutes);
       }
 
+      // Redact sensitive Paperless fields before logging
+      const sensitiveKeys = ['paperless_password', 'paperless_username', 'paperless_api_token'];
+      const redactedFieldsToUpdate = Object.fromEntries(
+        Object.entries(fieldsToUpdate).map(([k, v]) =>
+          sensitiveKeys.includes(k) ? [k, '[REDACTED]'] : [k, v]
+        )
+      );
+      const redactedUpdatedPreferences = Object.fromEntries(
+        Object.entries(updatedPreferences).map(([k, v]) =>
+          sensitiveKeys.includes(k) ? [k, '[REDACTED]'] : [k, v]
+        )
+      );
+
       frontendLogger.logInfo('User preferences saved successfully', {
         updatedFields: Object.keys(fieldsToUpdate),
-        fieldsToUpdate: fieldsToUpdate,
-        updatedPreferences: updatedPreferences,
+        fieldsToUpdate: redactedFieldsToUpdate,
+        updatedPreferences: redactedUpdatedPreferences,
         component: 'Settings',
       });
 
