@@ -254,7 +254,8 @@ const Settings = () => {
       const updatedPreferencesWithLocalCredentials = {
         ...updatedPreferences,
         paperless_username: localPreferences.paperless_username || '',
-        paperless_password: localPreferences.paperless_password || ''
+        paperless_password: localPreferences.paperless_password || '',
+        paperless_api_token: localPreferences.paperless_api_token || ''
       };
 
       // Debug what we're setting in local preferences
