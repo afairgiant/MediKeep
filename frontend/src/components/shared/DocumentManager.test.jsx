@@ -1,7 +1,8 @@
-import { vi, describe, test, expect } from 'vitest';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 import React from 'react';
-import render, { screen } from '../../test-utils/render';
+import render, { screen, waitFor } from '../../test-utils/render';
 import DocumentManager from './DocumentManager';
+import { getPaperlessSettings } from '../../services/api/paperlessApi';
 
 // Mock the API service
 vi.mock('../../services/api', () => ({
@@ -71,6 +72,16 @@ vi.mock('./DocumentManagerCore', () => ({
 }));
 
 describe('DocumentManager', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getPaperlessSettings.mockResolvedValue({
+      paperless_enabled: false,
+      paperless_url: '',
+      paperless_has_credentials: false,
+      default_storage_backend: 'local'
+    });
+  });
+
   test('renders without crashing in view mode', () => {
     const { container } = render(
       <DocumentManager
@@ -95,5 +106,49 @@ describe('DocumentManager', () => {
 
     // Component should render without crashing
     expect(container).toBeTruthy();
+  });
+
+  test('shows Paperless Ready when using API token auth (no credentials)', async () => {
+    getPaperlessSettings.mockResolvedValue({
+      paperless_enabled: true,
+      paperless_url: 'https://paperless.example.com',
+      paperless_has_credentials: false,
+      paperless_has_token: true,
+      default_storage_backend: 'paperless',
+    });
+
+    render(
+      <DocumentManager
+        entityType="lab-result"
+        entityId="123"
+        mode="view"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Paperless Ready')).toBeInTheDocument();
+    });
+  });
+
+  test('shows Paperless Ready when using credential auth (no token)', async () => {
+    getPaperlessSettings.mockResolvedValue({
+      paperless_enabled: true,
+      paperless_url: 'https://paperless.example.com',
+      paperless_has_credentials: true,
+      paperless_has_token: false,
+      default_storage_backend: 'paperless',
+    });
+
+    render(
+      <DocumentManager
+        entityType="lab-result"
+        entityId="123"
+        mode="view"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Paperless Ready')).toBeInTheDocument();
+    });
   });
 });
