@@ -128,10 +128,21 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             """
             Serve React app for all other routes (client-side routing).
             This must be the last route to avoid conflicts with API routes.
+
+            Static files in the build root (SVGs, favicons, etc.) are served
+            directly with proper MIME types. All other paths get index.html
+            for React Router client-side routing.
             """
             # If path starts with /api, let it fall through to API routes
             if full_path.startswith("api/"):
                 return {"error": "API endpoint not found"}
+
+            # Check if the requested path maps to an actual file in static dir
+            # (handles SVGs, favicons, and other root-level static files)
+            if full_path and "/" not in full_path and ".." not in full_path:
+                file_path = os.path.join(html_dir, full_path)
+                if os.path.isfile(file_path):
+                    return FileResponse(file_path)
 
             # Serve index.html for all other paths (React Router handles routing)
             index_path = os.path.join(html_dir, "index.html")
