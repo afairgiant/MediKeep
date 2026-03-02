@@ -173,11 +173,11 @@ const Login = () => {
               />
               <span
                 className={styles.inputIconSuffix}
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPassword(prev => !prev)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setShowPassword(!showPassword);
+                    setShowPassword(prev => !prev);
                   }
                 }}
                 role="button"
