@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
@@ -138,13 +137,18 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             if full_path.startswith("api/"):
                 return {"error": "API endpoint not found"}
 
-            # Check if the requested path maps to an actual file in static dir
-            # (handles SVGs, favicons, and other root-level static files)
-            if full_path and "/" not in full_path:
-                resolved = Path(html_dir, full_path).resolve()
-                # Ensure resolved path stays within html_dir (prevents traversal)
-                if resolved.is_relative_to(Path(html_dir).resolve()) and resolved.is_file():
-                    return FileResponse(str(resolved))
+            # Serve root-level static files (SVGs, favicons, etc.) directly.
+            # Only single-segment names with no path separators are considered,
+            # and the name must match an actual file already in the build dir.
+            if (
+                full_path
+                and "/" not in full_path
+                and "\\" not in full_path
+                and ".." not in full_path
+                and not os.path.isabs(full_path)
+                and full_path in os.listdir(html_dir)
+            ):
+                return FileResponse(os.path.join(html_dir, full_path))
 
             # Serve index.html for all other paths (React Router handles routing)
             index_path = os.path.join(html_dir, "index.html")
