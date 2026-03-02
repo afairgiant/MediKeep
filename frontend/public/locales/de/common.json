@@ -2543,5 +2543,44 @@
     "messages": {
       "loading": "Lade Allergien..."
     }
+  },
+  "auth": {
+    "login": {
+      "title": "MELDEN SIE SICH AN",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "usernamePlaceholder": "Benutzernamen eingeben",
+      "passwordPlaceholder": "Passwort eingeben",
+      "showPassword": "Passwort anzeigen",
+      "hidePassword": "Passwort verbergen",
+      "submit": "Anmelden",
+      "submitting": "Anmeldung...",
+      "createAccount": "Neues Konto erstellen",
+      "or": "oder",
+      "continueWith": "Weiter mit {{provider}}",
+      "registrationDisabled": "Die Registrierung neuer Benutzer ist derzeit deaktiviert."
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "Mindestens 6 Zeichen",
+        "letter": "Mindestens ein Buchstabe",
+        "number": "Mindestens eine Zahl"
+      },
+      "note": "Ein Patientendatensatz wird automatisch für diesen Benutzer mit der Standardrolle \"Benutzer\" erstellt.",
+      "backToLogin": "Zurück zur Anmeldung",
+      "pageTitle": "Konto erstellen",
+      "pageSubtitle": "Treten Sie MediKeep bei und verwalten Sie Ihre Gesundheitsdaten sicher",
+      "cardTitle": "Kontodetails",
+      "cardSubtitle": "Füllen Sie das folgende Formular aus, um Ihr Konto zu erstellen",
+      "whatHappensNext": "Was passiert als Nächstes?",
+      "nextSteps": {
+        "autoRecord": "Ihr Patientendatensatz wird automatisch erstellt",
+        "loggedIn": "Sie werden sofort nach der Kontoerstellung angemeldet",
+        "startManaging": "Sie können sofort mit der Verwaltung Ihrer medizinischen Daten beginnen",
+        "dataSecure": "Alle Ihre Daten sind sicher und privat"
+      },
+      "welcomeMessage": "Willkommen {{name}}! Ihr Konto wurde erfolgreich erstellt.",
+      "accountCreated": "Konto erfolgreich erstellt! Bitte melden Sie sich mit Ihren Zugangsdaten an."
+    }
   }
 }
