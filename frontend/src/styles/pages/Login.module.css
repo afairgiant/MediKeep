@@ -226,6 +226,13 @@
   background: var(--color-bg-secondary);
 }
 
+.registrationDisabledMessage {
+  text-align: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .errorMessage {
   background-color: var(--color-danger-light);
   color: var(--color-danger);

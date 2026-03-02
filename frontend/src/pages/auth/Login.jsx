@@ -174,6 +174,12 @@ const Login = () => {
               <span
                 className={styles.inputIconSuffix}
                 onClick={() => setShowPassword(!showPassword)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setShowPassword(!showPassword);
+                  }
+                }}
                 role="button"
                 tabIndex={0}
                 aria-label={showPassword ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
@@ -221,8 +227,8 @@ const Login = () => {
               {t('auth.login.createAccount')}
             </button>
           ) : (
-            <div className="registration-disabled-message">
-              {registrationMessage || 'New user registration is currently disabled.'}
+            <div className={styles.registrationDisabledMessage}>
+              {registrationMessage || t('auth.login.registrationDisabled')}
             </div>
           )}
         </div>

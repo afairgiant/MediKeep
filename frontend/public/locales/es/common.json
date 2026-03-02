@@ -2543,5 +2543,44 @@
     "messages": {
       "loading": "Cargando alergias..."
     }
+  },
+  "auth": {
+    "login": {
+      "title": "INICIE SESIÓN EN SU CUENTA",
+      "username": "Usuario",
+      "password": "Contraseña",
+      "usernamePlaceholder": "Ingrese su usuario",
+      "passwordPlaceholder": "Ingrese su contraseña",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión...",
+      "createAccount": "Crear nueva cuenta",
+      "or": "o",
+      "continueWith": "Continuar con {{provider}}",
+      "registrationDisabled": "El registro de nuevos usuarios está actualmente deshabilitado."
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "Al menos 6 caracteres",
+        "letter": "Contiene al menos una letra",
+        "number": "Contiene al menos un número"
+      },
+      "note": "Se creará automáticamente un registro de paciente para este usuario con el rol predeterminado \"usuario\".",
+      "backToLogin": "Volver al inicio de sesión",
+      "pageTitle": "Crea tu cuenta",
+      "pageSubtitle": "Únete a MediKeep y gestiona tus registros médicos de forma segura",
+      "cardTitle": "Detalles de la cuenta",
+      "cardSubtitle": "Completa el formulario a continuación para crear tu cuenta",
+      "whatHappensNext": "¿Qué sucede después?",
+      "nextSteps": {
+        "autoRecord": "Tu registro de paciente se creará automáticamente",
+        "loggedIn": "Iniciarás sesión inmediatamente después de crear la cuenta",
+        "startManaging": "Podrás comenzar a gestionar tu información médica de inmediato",
+        "dataSecure": "Todos tus datos están seguros y son privados"
+      },
+      "welcomeMessage": "Bienvenido {{name}}! Tu cuenta ha sido creada exitosamente.",
+      "accountCreated": "Cuenta creada exitosamente! Por favor inicia sesión con tus credenciales."
+    }
   }
 }

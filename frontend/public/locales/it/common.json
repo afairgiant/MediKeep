@@ -2543,5 +2543,44 @@
     "messages": {
       "loading": "Caricamento allergie..."
     }
+  },
+  "auth": {
+    "login": {
+      "title": "ACCEDI AL TUO ACCOUNT",
+      "username": "Nome utente",
+      "password": "Password",
+      "usernamePlaceholder": "Inserisci il tuo nome utente",
+      "passwordPlaceholder": "Inserisci la tua password",
+      "showPassword": "Mostra password",
+      "hidePassword": "Nascondi password",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso...",
+      "createAccount": "Crea un nuovo account",
+      "or": "o",
+      "continueWith": "Continua con {{provider}}",
+      "registrationDisabled": "La registrazione di nuovi utenti è attualmente disabilitata."
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "Almeno 6 caratteri",
+        "letter": "Contiene almeno una lettera",
+        "number": "Contiene almeno un numero"
+      },
+      "note": "Verrà automaticamente creato un record paziente per questo utente con il ruolo predefinito \"utente\".",
+      "backToLogin": "Torna al login",
+      "pageTitle": "Crea il tuo account",
+      "pageSubtitle": "Unisciti a MediKeep e gestisci le tue cartelle cliniche in sicurezza",
+      "cardTitle": "Dettagli account",
+      "cardSubtitle": "Compila il modulo qui sotto per creare il tuo account",
+      "whatHappensNext": "Cosa succede dopo?",
+      "nextSteps": {
+        "autoRecord": "Il tuo record paziente verrà creato automaticamente",
+        "loggedIn": "Effettuerai l'accesso immediatamente dopo la creazione dell'account",
+        "startManaging": "Potrai iniziare a gestire le tue informazioni mediche subito",
+        "dataSecure": "Tutti i tuoi dati sono sicuri e privati"
+      },
+      "welcomeMessage": "Benvenuto {{name}}! Il tuo account è stato creato con successo.",
+      "accountCreated": "Account creato con successo! Accedi con le tue credenziali."
+    }
   }
 }
