@@ -12,7 +12,8 @@
       "submitting": "Signing in...",
       "createAccount": "Create new account",
       "or": "or",
-      "continueWith": "Continue with {{provider}}"
+      "continueWith": "Continue with {{provider}}",
+      "registrationDisabled": "New user registration is currently disabled."
     },
     "userCreation": {
       "requirements": {
@@ -20,7 +21,21 @@
         "letter": "Contains at least one letter",
         "number": "Contains at least one number"
       },
-      "note": "A patient record will be automatically created for this user with default role \"user\"."
+      "note": "A patient record will be automatically created for this user with default role \"user\".",
+      "backToLogin": "Back to Login",
+      "pageTitle": "Create Your Account",
+      "pageSubtitle": "Join MediKeep today and manage your health records securely",
+      "cardTitle": "Account Details",
+      "cardSubtitle": "Fill out the form below to create your new account",
+      "whatHappensNext": "What happens next?",
+      "nextSteps": {
+        "autoRecord": "Your patient record will be automatically created",
+        "loggedIn": "You'll be logged in immediately after account creation",
+        "startManaging": "You can start managing your medical information right away",
+        "dataSecure": "All your data is secure and private"
+      },
+      "welcomeMessage": "Welcome {{name}}! Your account has been created successfully.",
+      "accountCreated": "Account created successfully! Please log in with your credentials."
     }
   },
   "buttons": {
