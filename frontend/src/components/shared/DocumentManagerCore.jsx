@@ -231,9 +231,9 @@ const useDocumentManagerCore = ({
         setSelectedStorageBackend(settings.default_storage_backend);
       } else {
         // No default set - check if Paperless is fully configured
-        if (settings?.paperless_enabled && 
-            settings?.paperless_url && 
-            settings?.paperless_has_credentials) {
+        if (settings?.paperless_enabled &&
+            settings?.paperless_url &&
+            (settings?.paperless_has_credentials || settings?.paperless_has_token)) {
           // Paperless is fully configured - use it as default for better UX
           setSelectedStorageBackend('paperless');
           logger.info('Auto-selected Paperless storage (no default set but Paperless configured)', {
@@ -682,10 +682,10 @@ const useDocumentManagerCore = ({
         });
 
         // Warning if Paperless is configured but upload is going to local storage
-        if (selectedStorageBackend === 'local' && 
-            paperlessSettings?.paperless_enabled && 
-            paperlessSettings?.paperless_url && 
-            paperlessSettings?.paperless_has_credentials) {
+        if (selectedStorageBackend === 'local' &&
+            paperlessSettings?.paperless_enabled &&
+            paperlessSettings?.paperless_url &&
+            (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)) {
           logger.warn('LAB_RESULTS_PAPERLESS_MISCONFIGURATION', {
             message: 'Lab Results: Paperless is configured but upload going to local storage',
             entityType,
@@ -937,10 +937,10 @@ const useDocumentManagerCore = ({
           });
 
           // Warning if Paperless is configured but upload is going to local storage
-          if (currentStorageBackend === 'local' && 
-              currentPaperlessSettings?.paperless_enabled && 
-              currentPaperlessSettings?.paperless_url && 
-              currentPaperlessSettings?.paperless_has_credentials) {
+          if (currentStorageBackend === 'local' &&
+              currentPaperlessSettings?.paperless_enabled &&
+              currentPaperlessSettings?.paperless_url &&
+              (currentPaperlessSettings?.paperless_has_credentials || currentPaperlessSettings?.paperless_has_token)) {
             logger.warn('LAB_RESULTS_BATCH_PAPERLESS_MISCONFIGURATION', {
               message: 'Lab Results Batch: Paperless is configured but upload going to local storage',
               entityType,
