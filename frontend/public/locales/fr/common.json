@@ -2081,15 +2081,8 @@
         "description": "Recherchez et sélectionnez les analyses de laboratoire à représenter graphiquement",
         "searchPlaceholder": "Rechercher des analyses de laboratoire..."
       },
-      "timeRange": {
-        "label": "Période",
-        "all": "Toute la période",
-        "3months": "3 mois",
-        "6months": "6 mois",
-        "1year": "1 an",
-        "2years": "2 ans",
-        "5years": "5 ans"
-      },
+      "dateFrom": "Du",
+      "dateTo": "Au",
       "selectedCharts": "Graphiques sélectionnés ({{count}})",
       "recordCount": "{{count}} enregistrements",
       "removeChart": "Supprimer le graphique {{name}}"

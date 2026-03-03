@@ -3,22 +3,16 @@
  * Matches backend schemas in app/schemas/trend_charts.py.
  */
 
-export type TrendChartTimeRange =
-  | 'all'
-  | '3months'
-  | '6months'
-  | '1year'
-  | '2years'
-  | '5years';
-
 export interface VitalChartRequest {
   vital_type: string;
-  time_range: TrendChartTimeRange;
+  date_from: string | null;
+  date_to: string | null;
 }
 
 export interface LabTestChartRequest {
   test_name: string;
-  time_range: TrendChartTimeRange;
+  date_from: string | null;
+  date_to: string | null;
 }
 
 export interface TrendChartSelection {

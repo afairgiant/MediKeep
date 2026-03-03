@@ -63,10 +63,10 @@ const ReportBuilder = () => {
     clearError,
     addVitalChart,
     removeVitalChart,
-    updateVitalChartTimeRange,
+    updateVitalChartDates,
     addLabTestChart,
     removeLabTestChart,
-    updateLabTestChartTimeRange,
+    updateLabTestChartDates,
   } = useCustomReports();
 
   const {
@@ -372,10 +372,10 @@ const ReportBuilder = () => {
               trendCharts={trendCharts}
               addVitalChart={addVitalChart}
               removeVitalChart={removeVitalChart}
-              updateVitalChartTimeRange={updateVitalChartTimeRange}
+              updateVitalChartDates={updateVitalChartDates}
               addLabTestChart={addLabTestChart}
               removeLabTestChart={removeLabTestChart}
-              updateLabTestChartTimeRange={updateLabTestChartTimeRange}
+              updateLabTestChartDates={updateLabTestChartDates}
               trendChartCount={trendChartCount}
             />
           </Paper>

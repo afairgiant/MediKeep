@@ -2115,6 +2115,24 @@ class CustomReportPDFGenerator:
                     stats_table.setStyle(TableStyle(table_style))
                     block_elements.append(stats_table)
 
+            # Date range footnote
+            date_from = chart_data.get("date_from")
+            date_to = chart_data.get("date_to")
+            if date_from or date_to:
+                block_elements.append(Spacer(1, 0.04 * inch))
+                footnote_style = ParagraphStyle(
+                    'ChartFootnote',
+                    parent=self.styles['CustomBody'],
+                    fontSize=6,
+                    textColor=colors.HexColor('#9E9E9E'),
+                )
+                block_elements.append(
+                    Paragraph(
+                        "*Chart displays all available data within the requested date range.",
+                        footnote_style,
+                    )
+                )
+
             block_elements.append(Spacer(1, 0.3 * inch))
 
             # Keep chart and stats together on same page

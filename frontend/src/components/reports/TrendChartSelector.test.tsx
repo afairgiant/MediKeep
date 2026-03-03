@@ -18,6 +18,10 @@ vi.mock('../../services/api/index.js', () => ({
         { test_name: 'TSH', unit: 'mIU/L', count: 5 },
       ],
     }),
+    getTrendChartCounts: vi.fn().mockResolvedValue({
+      vital_counts: { heart_rate: 15, weight: 8 },
+      lab_test_counts: { Glucose: 12 },
+    }),
   },
 }));
 
@@ -31,25 +35,10 @@ vi.mock('../../services/logger', () => ({
   },
 }));
 
-// Mock useApi hook
-vi.mock('../../hooks/useApi.js', () => ({
-  useApi: () => ({
-    loading: false,
-    error: null,
-    execute: vi.fn(async (fn) => {
-      const result = await fn(new AbortController().signal);
-      return result;
-    }),
-    clearError: vi.fn(),
-    setError: vi.fn(),
-  }),
-}));
-
 // Mock i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => {
-      // Return the key with interpolated values for testing
       if (opts) {
         let result = key;
         Object.entries(opts).forEach(([k, v]) => {
@@ -67,10 +56,10 @@ const defaultProps = {
   trendCharts: { vital_charts: [], lab_test_charts: [] },
   addVitalChart: vi.fn(),
   removeVitalChart: vi.fn(),
-  updateVitalChartTimeRange: vi.fn(),
+  updateVitalChartDates: vi.fn(),
   addLabTestChart: vi.fn(),
   removeLabTestChart: vi.fn(),
-  updateLabTestChartTimeRange: vi.fn(),
+  updateLabTestChartDates: vi.fn(),
   trendChartCount: 0,
 };
 
@@ -83,8 +72,8 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...defaultProps} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByText(/Heart Rate/)).toBeInTheDocument();
-      expect(screen.getByText(/Weight/)).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: /Heart Rate/ })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: /Weight/ })).toBeInTheDocument();
     });
   });
 
@@ -92,7 +81,7 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...defaultProps} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByText(/Heart Rate/)).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: /Heart Rate/ })).toBeInTheDocument();
     });
 
     const checkbox = screen.getByRole('checkbox', { name: /Heart Rate/ });
@@ -105,7 +94,7 @@ describe('TrendChartSelector', () => {
     const props = {
       ...defaultProps,
       trendCharts: {
-        vital_charts: [{ vital_type: 'heart_rate', time_range: '1year' }],
+        vital_charts: [{ vital_type: 'heart_rate', date_from: '2025-03-03', date_to: '2026-03-03' }],
         lab_test_charts: [],
       },
       trendChartCount: 1,
@@ -114,7 +103,7 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...props} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByText(/Heart Rate/)).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: /Heart Rate/ })).toBeInTheDocument();
     });
 
     const checkbox = screen.getByRole('checkbox', { name: /Heart Rate/ });
@@ -123,12 +112,12 @@ describe('TrendChartSelector', () => {
     expect(defaultProps.removeVitalChart).toHaveBeenCalledWith('heart_rate');
   });
 
-  it('shows selected charts with time range and remove button', async () => {
+  it('shows selected charts with badges and remove buttons', async () => {
     const props = {
       ...defaultProps,
       trendCharts: {
-        vital_charts: [{ vital_type: 'heart_rate', time_range: '1year' }],
-        lab_test_charts: [{ test_name: 'Glucose', time_range: '6months' }],
+        vital_charts: [{ vital_type: 'heart_rate', date_from: '2025-03-03', date_to: '2026-03-03' }],
+        lab_test_charts: [{ test_name: 'Glucose', date_from: '2025-09-03', date_to: '2026-03-03' }],
       },
       trendChartCount: 2,
     };
@@ -136,12 +125,11 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...props} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByText('Heart Rate')).toBeInTheDocument();
-      expect(screen.getByText('Glucose')).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: /Heart Rate/ })).toBeInTheDocument();
     });
 
-    // Should have remove buttons
-    const removeButtons = screen.getAllByRole('button', { name: /Remove/ });
+    // Should have remove buttons (aria-label uses i18n key)
+    const removeButtons = screen.getAllByRole('button', { name: /removeChart/ });
     expect(removeButtons.length).toBe(2);
   });
 
@@ -162,7 +150,7 @@ describe('TrendChartSelector', () => {
     const props = {
       ...defaultProps,
       trendCharts: {
-        vital_charts: [{ vital_type: 'weight', time_range: '1year' }],
+        vital_charts: [{ vital_type: 'weight', date_from: '2025-03-03', date_to: '2026-03-03' }],
         lab_test_charts: [],
       },
       trendChartCount: 1,
@@ -171,10 +159,11 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...props} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByText('Weight')).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: /Weight/ })).toBeInTheDocument();
     });
 
-    const removeButton = screen.getByRole('button', { name: /Remove Weight/ });
+    // aria-label is the i18n key with the name interpolated
+    const removeButton = screen.getByRole('button', { name: /removeChart/ });
     fireEvent.click(removeButton);
 
     expect(defaultProps.removeVitalChart).toHaveBeenCalledWith('weight');

@@ -2122,15 +2122,8 @@
         "description": "Cerca e seleziona gli esami di laboratorio da rappresentare graficamente",
         "searchPlaceholder": "Cerca esami di laboratorio..."
       },
-      "timeRange": {
-        "label": "Intervallo temporale",
-        "all": "Tutto il periodo",
-        "3months": "3 mesi",
-        "6months": "6 mesi",
-        "1year": "1 anno",
-        "2years": "2 anni",
-        "5years": "5 anni"
-      },
+      "dateFrom": "Da",
+      "dateTo": "A",
       "selectedCharts": "Grafici selezionati ({{count}})",
       "recordCount": "{{count}} registrazioni",
       "removeChart": "Rimuovi grafico {{name}}"

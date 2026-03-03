@@ -2,13 +2,13 @@
 Trend Chart Schemas
 
 Pydantic models for trend chart requests used in custom report generation.
-Supports vital sign and lab test trend charts with configurable time ranges.
+Supports vital sign and lab test trend charts with configurable date ranges.
 """
 
-from enum import Enum
-from typing import List
+from datetime import date
+from typing import List, Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
 
 # Vital types that can be charted (must match Vitals model columns)
@@ -19,23 +19,11 @@ SUPPORTED_VITAL_TYPES = [
 ]
 
 
-class TrendChartTimeRange(str, Enum):
-    """Time range options for trend charts"""
-    ALL = "all"
-    THREE_MONTHS = "3months"
-    SIX_MONTHS = "6months"
-    ONE_YEAR = "1year"
-    TWO_YEARS = "2years"
-    FIVE_YEARS = "5years"
-
-
 class VitalChartRequest(BaseModel):
     """Request for a single vital sign trend chart"""
     vital_type: str = Field(..., description="Vital sign column name")
-    time_range: TrendChartTimeRange = Field(
-        default=TrendChartTimeRange.ONE_YEAR,
-        description="Time range for the chart"
-    )
+    date_from: Optional[date] = Field(default=None, description="Start date filter")
+    date_to: Optional[date] = Field(default=None, description="End date filter")
 
     @field_validator("vital_type")
     @classmethod
@@ -47,14 +35,28 @@ class VitalChartRequest(BaseModel):
             )
         return v
 
+    @field_validator("date_to")
+    @classmethod
+    def validate_date_to(cls, v, info: ValidationInfo):
+        date_from = info.data.get("date_from")
+        if date_from and v and v < date_from:
+            raise ValueError("date_to must be on or after date_from")
+        return v
+
 
 class LabTestChartRequest(BaseModel):
     """Request for a single lab test trend chart"""
     test_name: str = Field(..., min_length=1, max_length=500, description="Lab test name")
-    time_range: TrendChartTimeRange = Field(
-        default=TrendChartTimeRange.ONE_YEAR,
-        description="Time range for the chart"
-    )
+    date_from: Optional[date] = Field(default=None, description="Start date filter")
+    date_to: Optional[date] = Field(default=None, description="End date filter")
+
+    @field_validator("date_to")
+    @classmethod
+    def validate_date_to(cls, v, info: ValidationInfo):
+        date_from = info.data.get("date_from")
+        if date_from and v and v < date_from:
+            raise ValueError("date_to must be on or after date_from")
+        return v
 
 
 class TrendChartSelection(BaseModel):

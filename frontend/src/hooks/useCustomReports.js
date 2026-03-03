@@ -146,7 +146,15 @@ export const useCustomReports = () => {
 
   // --- Trend chart actions ---
 
-  const addVitalChart = useCallback((vitalType, timeRange = '1year') => {
+  const getDefaultDateFrom = () => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 1);
+    return d.toISOString().slice(0, 10);
+  };
+
+  const getDefaultDateTo = () => new Date().toISOString().slice(0, 10);
+
+  const addVitalChart = useCallback((vitalType) => {
     setTrendCharts(prev => {
       // Don't add duplicate
       if (prev.vital_charts.some(c => c.vital_type === vitalType)) {
@@ -158,7 +166,11 @@ export const useCustomReports = () => {
       }
       return {
         ...prev,
-        vital_charts: [...prev.vital_charts, { vital_type: vitalType, time_range: timeRange }],
+        vital_charts: [...prev.vital_charts, {
+          vital_type: vitalType,
+          date_from: getDefaultDateFrom(),
+          date_to: getDefaultDateTo(),
+        }],
       };
     });
   }, []);
@@ -170,16 +182,16 @@ export const useCustomReports = () => {
     }));
   }, []);
 
-  const updateVitalChartTimeRange = useCallback((vitalType, timeRange) => {
+  const updateVitalChartDates = useCallback((vitalType, dateFrom, dateTo) => {
     setTrendCharts(prev => ({
       ...prev,
       vital_charts: prev.vital_charts.map(c =>
-        c.vital_type === vitalType ? { ...c, time_range: timeRange } : c
+        c.vital_type === vitalType ? { ...c, date_from: dateFrom, date_to: dateTo } : c
       ),
     }));
   }, []);
 
-  const addLabTestChart = useCallback((testName, timeRange = '1year') => {
+  const addLabTestChart = useCallback((testName) => {
     setTrendCharts(prev => {
       // Don't add duplicate (case-insensitive)
       if (prev.lab_test_charts.some(c => c.test_name.toLowerCase() === testName.toLowerCase())) {
@@ -191,7 +203,11 @@ export const useCustomReports = () => {
       }
       return {
         ...prev,
-        lab_test_charts: [...prev.lab_test_charts, { test_name: testName, time_range: timeRange }],
+        lab_test_charts: [...prev.lab_test_charts, {
+          test_name: testName,
+          date_from: getDefaultDateFrom(),
+          date_to: getDefaultDateTo(),
+        }],
       };
     });
   }, []);
@@ -205,12 +221,12 @@ export const useCustomReports = () => {
     }));
   }, []);
 
-  const updateLabTestChartTimeRange = useCallback((testName, timeRange) => {
+  const updateLabTestChartDates = useCallback((testName, dateFrom, dateTo) => {
     setTrendCharts(prev => ({
       ...prev,
       lab_test_charts: prev.lab_test_charts.map(c =>
         c.test_name.toLowerCase() === testName.toLowerCase()
-          ? { ...c, time_range: timeRange }
+          ? { ...c, date_from: dateFrom, date_to: dateTo }
           : c
       ),
     }));
@@ -412,10 +428,10 @@ export const useCustomReports = () => {
     // Trend chart actions
     addVitalChart,
     removeVitalChart,
-    updateVitalChartTimeRange,
+    updateVitalChartDates,
     addLabTestChart,
     removeLabTestChart,
-    updateLabTestChartTimeRange,
+    updateLabTestChartDates,
     clearTrendCharts,
 
     // Utilities

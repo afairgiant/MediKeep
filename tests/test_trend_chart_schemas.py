@@ -1,5 +1,7 @@
 """Tests for trend chart schemas (app/schemas/trend_charts.py)"""
 
+from datetime import date
+
 import pytest
 from pydantic import ValidationError
 
@@ -7,29 +9,8 @@ from app.schemas.trend_charts import (
     SUPPORTED_VITAL_TYPES,
     LabTestChartRequest,
     TrendChartSelection,
-    TrendChartTimeRange,
     VitalChartRequest,
 )
-
-
-class TestTrendChartTimeRange:
-    """Tests for TrendChartTimeRange enum."""
-
-    def test_all_values_exist(self):
-        assert TrendChartTimeRange.ALL == "all"
-        assert TrendChartTimeRange.THREE_MONTHS == "3months"
-        assert TrendChartTimeRange.SIX_MONTHS == "6months"
-        assert TrendChartTimeRange.ONE_YEAR == "1year"
-        assert TrendChartTimeRange.TWO_YEARS == "2years"
-        assert TrendChartTimeRange.FIVE_YEARS == "5years"
-
-    def test_enum_string_coercion(self):
-        req = VitalChartRequest(vital_type="heart_rate", time_range="1year")
-        assert req.time_range == TrendChartTimeRange.ONE_YEAR
-
-    def test_invalid_time_range(self):
-        with pytest.raises(ValidationError):
-            VitalChartRequest(vital_type="heart_rate", time_range="10years")
 
 
 class TestVitalChartRequest:
@@ -38,7 +19,8 @@ class TestVitalChartRequest:
     def test_valid_vital_type(self):
         req = VitalChartRequest(vital_type="heart_rate")
         assert req.vital_type == "heart_rate"
-        assert req.time_range == TrendChartTimeRange.ONE_YEAR  # default
+        assert req.date_from is None
+        assert req.date_to is None
 
     def test_all_supported_vital_types(self):
         for vt in SUPPORTED_VITAL_TYPES:
@@ -49,9 +31,40 @@ class TestVitalChartRequest:
         with pytest.raises(ValidationError, match="Unsupported vital type"):
             VitalChartRequest(vital_type="invalid_type")
 
-    def test_custom_time_range(self):
-        req = VitalChartRequest(vital_type="weight", time_range="3months")
-        assert req.time_range == TrendChartTimeRange.THREE_MONTHS
+    def test_with_date_range(self):
+        req = VitalChartRequest(
+            vital_type="weight",
+            date_from=date(2025, 1, 1),
+            date_to=date(2026, 1, 1),
+        )
+        assert req.date_from == date(2025, 1, 1)
+        assert req.date_to == date(2026, 1, 1)
+
+    def test_date_to_before_date_from_rejected(self):
+        with pytest.raises(ValidationError, match="date_to must be on or after date_from"):
+            VitalChartRequest(
+                vital_type="heart_rate",
+                date_from=date(2026, 1, 1),
+                date_to=date(2025, 1, 1),
+            )
+
+    def test_same_date_allowed(self):
+        req = VitalChartRequest(
+            vital_type="heart_rate",
+            date_from=date(2026, 1, 1),
+            date_to=date(2026, 1, 1),
+        )
+        assert req.date_from == req.date_to
+
+    def test_date_from_only(self):
+        req = VitalChartRequest(vital_type="weight", date_from=date(2025, 6, 1))
+        assert req.date_from == date(2025, 6, 1)
+        assert req.date_to is None
+
+    def test_date_to_only(self):
+        req = VitalChartRequest(vital_type="weight", date_to=date(2026, 1, 1))
+        assert req.date_from is None
+        assert req.date_to == date(2026, 1, 1)
 
 
 class TestLabTestChartRequest:
@@ -60,7 +73,8 @@ class TestLabTestChartRequest:
     def test_valid_request(self):
         req = LabTestChartRequest(test_name="Glucose")
         assert req.test_name == "Glucose"
-        assert req.time_range == TrendChartTimeRange.ONE_YEAR
+        assert req.date_from is None
+        assert req.date_to is None
 
     def test_empty_test_name_rejected(self):
         with pytest.raises(ValidationError):
@@ -74,6 +88,23 @@ class TestLabTestChartRequest:
     def test_too_long_test_name_rejected(self):
         with pytest.raises(ValidationError):
             LabTestChartRequest(test_name="A" * 501)
+
+    def test_with_date_range(self):
+        req = LabTestChartRequest(
+            test_name="TSH",
+            date_from=date(2025, 1, 1),
+            date_to=date(2026, 1, 1),
+        )
+        assert req.date_from == date(2025, 1, 1)
+        assert req.date_to == date(2026, 1, 1)
+
+    def test_date_to_before_date_from_rejected(self):
+        with pytest.raises(ValidationError, match="date_to must be on or after date_from"):
+            LabTestChartRequest(
+                test_name="Glucose",
+                date_from=date(2026, 1, 1),
+                date_to=date(2025, 1, 1),
+            )
 
 
 class TestTrendChartSelection:
@@ -148,12 +179,20 @@ class TestTrendChartSelection:
                 ]
             )
 
-    def test_different_time_ranges_allowed(self):
+    def test_different_date_ranges_allowed(self):
         sel = TrendChartSelection(
             vital_charts=[
-                VitalChartRequest(vital_type="heart_rate", time_range="3months"),
-                VitalChartRequest(vital_type="weight", time_range="1year"),
+                VitalChartRequest(
+                    vital_type="heart_rate",
+                    date_from=date(2025, 12, 1),
+                    date_to=date(2026, 3, 1),
+                ),
+                VitalChartRequest(
+                    vital_type="weight",
+                    date_from=date(2024, 1, 1),
+                    date_to=date(2026, 1, 1),
+                ),
             ]
         )
-        assert sel.vital_charts[0].time_range == TrendChartTimeRange.THREE_MONTHS
-        assert sel.vital_charts[1].time_range == TrendChartTimeRange.ONE_YEAR
+        assert sel.vital_charts[0].date_from == date(2025, 12, 1)
+        assert sel.vital_charts[1].date_from == date(2024, 1, 1)

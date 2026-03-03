@@ -2175,15 +2175,8 @@
         "description": "Search and select lab tests to chart",
         "searchPlaceholder": "Search lab tests..."
       },
-      "timeRange": {
-        "label": "Time Range",
-        "all": "All Time",
-        "3months": "3 Months",
-        "6months": "6 Months",
-        "1year": "1 Year",
-        "2years": "2 Years",
-        "5years": "5 Years"
-      },
+      "dateFrom": "From",
+      "dateTo": "To",
       "selectedCharts": "Selected Charts ({{count}})",
       "recordCount": "{{count}} records",
       "removeChart": "Remove {{name}} chart"

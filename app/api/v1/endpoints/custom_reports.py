@@ -204,14 +204,14 @@ async def get_trend_chart_counts(
 
         vital_counts = {
             chart.vital_type: fetcher.count_vital_records(
-                patient_id, chart.vital_type, chart.time_range,
+                patient_id, chart.vital_type, chart.date_from, chart.date_to,
             )
             for chart in chart_selection.vital_charts
         }
 
         lab_test_counts = {
             chart.test_name: fetcher.count_lab_test_records(
-                patient_id, chart.test_name, chart.time_range,
+                patient_id, chart.test_name, chart.date_from, chart.date_to,
             )
             for chart in chart_selection.lab_test_charts
         }

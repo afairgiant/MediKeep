@@ -911,14 +911,14 @@ class CustomReportService:
         for vc in trend_charts.vital_charts:
             chart_tasks.append((
                 vc.vital_type,
-                lambda v=vc: fetcher.fetch_vital_trend(patient_id, v.vital_type, v.time_range),
+                lambda v=vc: fetcher.fetch_vital_trend(patient_id, v.vital_type, v.date_from, v.date_to),
                 lambda data, v=vc: generator.generate_vital_chart(data, v.vital_type),
                 "vital",
             ))
         for lc in trend_charts.lab_test_charts:
             chart_tasks.append((
                 lc.test_name,
-                lambda l=lc: fetcher.fetch_lab_test_trend(patient_id, l.test_name, l.time_range),
+                lambda l=lc: fetcher.fetch_lab_test_trend(patient_id, l.test_name, l.date_from, l.date_to),
                 lambda data, l=lc: generator.generate_lab_test_chart(data),
                 "lab_test",
             ))
@@ -934,6 +934,8 @@ class CustomReportService:
                         "statistics": data.get("statistics", {}),
                         "unit": data.get("unit", ""),
                         "chart_type": chart_type,
+                        "date_from": data.get("date_from"),
+                        "date_to": data.get("date_to"),
                     })
                 else:
                     logger.warning("No data for %s chart: %s", chart_type, label)

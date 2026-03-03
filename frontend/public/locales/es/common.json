@@ -2002,15 +2002,8 @@
         "description": "Busque y seleccione las pruebas de laboratorio a representar",
         "searchPlaceholder": "Buscar pruebas de laboratorio..."
       },
-      "timeRange": {
-        "label": "Período de tiempo",
-        "all": "Todo el período",
-        "3months": "3 meses",
-        "6months": "6 meses",
-        "1year": "1 año",
-        "2years": "2 años",
-        "5years": "5 años"
-      },
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
       "selectedCharts": "Gráficos seleccionados ({{count}})",
       "recordCount": "{{count}} registros",
       "removeChart": "Eliminar gráfico de {{name}}"

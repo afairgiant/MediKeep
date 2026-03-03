@@ -5,7 +5,7 @@ Thin adapter that wraps existing CRUD functions to fetch vital sign
 and lab test trend data for chart generation in custom reports.
 """
 
-from datetime import date, timedelta
+from datetime import date
 from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy import func
@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.logging.config import get_logger
 from app.crud.lab_test_component import lab_test_component as crud_lab_test_component
 from app.models.models import LabResult, LabTestComponent, Vitals
-from app.schemas.trend_charts import SUPPORTED_VITAL_TYPES, TrendChartTimeRange
+from app.schemas.trend_charts import SUPPORTED_VITAL_TYPES
 
 logger = get_logger(__name__, "app")
 
@@ -58,21 +58,6 @@ VITAL_REFERENCE_RANGES: Dict[str, Tuple[float, float]] = {
 }
 
 
-def _time_range_to_date(time_range: TrendChartTimeRange) -> Optional[date]:
-    """Convert a time range enum to a start date."""
-    if time_range == TrendChartTimeRange.ALL:
-        return None
-    days_map = {
-        TrendChartTimeRange.THREE_MONTHS: 90,
-        TrendChartTimeRange.SIX_MONTHS: 180,
-        TrendChartTimeRange.ONE_YEAR: 365,
-        TrendChartTimeRange.TWO_YEARS: 730,
-        TrendChartTimeRange.FIVE_YEARS: 1825,
-    }
-    days = days_map[time_range]
-    return date.today() - timedelta(days=days)
-
-
 class TrendDataFetcher:
     """Fetches trend data for vital signs and lab tests."""
 
@@ -83,7 +68,8 @@ class TrendDataFetcher:
         self,
         patient_id: int,
         vital_type: str,
-        time_range: TrendChartTimeRange,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None,
     ) -> Dict[str, Any]:
         """
         Fetch vital sign trend data for a specific vital type.
@@ -95,10 +81,9 @@ class TrendDataFetcher:
 
         # Blood pressure is a combined chart with systolic + diastolic
         if vital_type == "blood_pressure":
-            return self.fetch_blood_pressure_trend(patient_id, time_range)
+            return self.fetch_blood_pressure_trend(patient_id, date_from, date_to)
 
         column = getattr(Vitals, vital_type)
-        start_date = _time_range_to_date(time_range)
 
         query = (
             self.db.query(Vitals.recorded_date, column)
@@ -109,9 +94,13 @@ class TrendDataFetcher:
             .order_by(Vitals.recorded_date.asc())
         )
 
-        if start_date:
+        if date_from:
             query = query.filter(
-                func.date(Vitals.recorded_date) >= start_date
+                func.date(Vitals.recorded_date) >= date_from
+            )
+        if date_to:
+            query = query.filter(
+                func.date(Vitals.recorded_date) <= date_to
             )
 
         rows = query.all()
@@ -128,20 +117,21 @@ class TrendDataFetcher:
             "unit": VITAL_TYPE_UNITS.get(vital_type, ""),
             "reference_range": VITAL_REFERENCE_RANGES.get(vital_type),
             "statistics": statistics,
+            "date_from": date_from,
+            "date_to": date_to,
         }
 
     def fetch_blood_pressure_trend(
         self,
         patient_id: int,
-        time_range: TrendChartTimeRange,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None,
     ) -> Dict[str, Any]:
         """
         Fetch blood pressure data with both systolic and diastolic values.
 
         Returns dict with systolic_values, diastolic_values, dates, and statistics.
         """
-        start_date = _time_range_to_date(time_range)
-
         query = (
             self.db.query(
                 Vitals.recorded_date,
@@ -156,9 +146,13 @@ class TrendDataFetcher:
             .order_by(Vitals.recorded_date.asc())
         )
 
-        if start_date:
+        if date_from:
             query = query.filter(
-                func.date(Vitals.recorded_date) >= start_date
+                func.date(Vitals.recorded_date) >= date_from
+            )
+        if date_to:
+            query = query.filter(
+                func.date(Vitals.recorded_date) <= date_to
             )
 
         rows = query.all()
@@ -178,13 +172,16 @@ class TrendDataFetcher:
                 "systolic": _compute_vital_statistics(systolic) if systolic else {},
                 "diastolic": _compute_vital_statistics(diastolic) if diastolic else {},
             },
+            "date_from": date_from,
+            "date_to": date_to,
         }
 
     def fetch_lab_test_trend(
         self,
         patient_id: int,
         test_name: str,
-        time_range: TrendChartTimeRange,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None,
     ) -> Dict[str, Any]:
         """
         Fetch lab test trend data for a specific test name.
@@ -193,13 +190,12 @@ class TrendDataFetcher:
         Returns dict with keys: dates, values, statuses, display_name, unit,
                                 ref_range_min, ref_range_max, statistics
         """
-        start_date = _time_range_to_date(time_range)
-
         components = crud_lab_test_component.get_by_patient_and_test_name(
             self.db,
             patient_id=patient_id,
             test_name=test_name,
-            date_from=start_date,
+            date_from=date_from,
+            date_to=date_to,
         )
 
         if not components:
@@ -246,6 +242,8 @@ class TrendDataFetcher:
             "unit": unit,
             "ref_range_min": ref_min,
             "ref_range_max": ref_max,
+            "date_from": date_from,
+            "date_to": date_to,
             "statistics": {
                 "count": statistics.count,
                 "latest": statistics.latest,
@@ -324,27 +322,36 @@ class TrendDataFetcher:
         ]
 
     def count_vital_records(
-        self, patient_id: int, vital_type: str, time_range: TrendChartTimeRange,
+        self,
+        patient_id: int,
+        vital_type: str,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None,
     ) -> int:
-        """Count vital records for a type within a time range."""
+        """Count vital records for a type within a date range."""
         if vital_type not in SUPPORTED_VITAL_TYPES:
             return 0
-        start_date = _time_range_to_date(time_range)
         query = self._vital_count_query(patient_id, vital_type)
-        if start_date:
-            query = query.filter(func.date(Vitals.recorded_date) >= start_date)
+        if date_from:
+            query = query.filter(func.date(Vitals.recorded_date) >= date_from)
+        if date_to:
+            query = query.filter(func.date(Vitals.recorded_date) <= date_to)
         return query.scalar() or 0
 
     def count_lab_test_records(
-        self, patient_id: int, test_name: str, time_range: TrendChartTimeRange,
+        self,
+        patient_id: int,
+        test_name: str,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None,
     ) -> int:
-        """Count lab test component records for a test name within a time range."""
-        start_date = _time_range_to_date(time_range)
+        """Count lab test component records for a test name within a date range."""
         components = crud_lab_test_component.get_by_patient_and_test_name(
             self.db,
             patient_id=patient_id,
             test_name=test_name,
-            date_from=start_date,
+            date_from=date_from,
+            date_to=date_to,
         )
         return len(components)
 

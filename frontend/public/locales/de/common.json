@@ -2412,15 +2412,8 @@
         "description": "Suchen und wählen Sie Labortests zum Darstellen aus",
         "searchPlaceholder": "Labortests suchen..."
       },
-      "timeRange": {
-        "label": "Zeitraum",
-        "all": "Gesamter Zeitraum",
-        "3months": "3 Monate",
-        "6months": "6 Monate",
-        "1year": "1 Jahr",
-        "2years": "2 Jahre",
-        "5years": "5 Jahre"
-      },
+      "dateFrom": "Von",
+      "dateTo": "Bis",
       "selectedCharts": "Ausgewählte Diagramme ({{count}})",
       "recordCount": "{{count}} Datensätze",
       "removeChart": "{{name}}-Diagramm entfernen"

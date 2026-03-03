@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Stack,
   Group,
@@ -6,7 +6,6 @@ import {
   Title,
   Checkbox,
   SimpleGrid,
-  Select,
   MultiSelect,
   Badge,
   ActionIcon,
@@ -15,9 +14,9 @@ import {
   Loader,
   Center,
 } from '@mantine/core';
+import { DatePickerInput } from '@mantine/dates';
 import { IconChartLine, IconX, IconInfoCircle } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { useApi } from '../../hooks/useApi.js';
 import { apiService } from '../../services/api/index.js';
 import logger from '../../services/logger';
 
@@ -26,26 +25,17 @@ interface ChartCounts {
   lab_test_counts: Record<string, number>;
 }
 
-const TIME_RANGE_OPTIONS = [
-  { value: 'all', labelKey: 'reportBuilder.trendCharts.timeRange.all' },
-  { value: '3months', labelKey: 'reportBuilder.trendCharts.timeRange.3months' },
-  { value: '6months', labelKey: 'reportBuilder.trendCharts.timeRange.6months' },
-  { value: '1year', labelKey: 'reportBuilder.trendCharts.timeRange.1year' },
-  { value: '2years', labelKey: 'reportBuilder.trendCharts.timeRange.2years' },
-  { value: '5years', labelKey: 'reportBuilder.trendCharts.timeRange.5years' },
-];
-
 interface TrendChartSelectorProps {
   trendCharts: {
-    vital_charts: Array<{ vital_type: string; time_range: string }>;
-    lab_test_charts: Array<{ test_name: string; time_range: string }>;
+    vital_charts: Array<{ vital_type: string; date_from: string | null; date_to: string | null }>;
+    lab_test_charts: Array<{ test_name: string; date_from: string | null; date_to: string | null }>;
   };
-  addVitalChart: (vitalType: string, timeRange?: string) => void;
+  addVitalChart: (vitalType: string) => void;
   removeVitalChart: (vitalType: string) => void;
-  updateVitalChartTimeRange: (vitalType: string, timeRange: string) => void;
-  addLabTestChart: (testName: string, timeRange?: string) => void;
+  updateVitalChartDates: (vitalType: string, dateFrom: string | null, dateTo: string | null) => void;
+  addLabTestChart: (testName: string) => void;
   removeLabTestChart: (testName: string) => void;
-  updateLabTestChartTimeRange: (testName: string, timeRange: string) => void;
+  updateLabTestChartDates: (testName: string, dateFrom: string | null, dateTo: string | null) => void;
   trendChartCount: number;
 }
 
@@ -66,14 +56,15 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
   trendCharts,
   addVitalChart,
   removeVitalChart,
-  updateVitalChartTimeRange,
+  updateVitalChartDates,
   addLabTestChart,
   removeLabTestChart,
-  updateLabTestChartTimeRange,
+  updateLabTestChartDates,
   trendChartCount,
 }) => {
   const { t } = useTranslation('common');
-  const { loading, execute } = useApi();
+  const [loading, setLoading] = useState(true);
+  const today = new Date().toISOString().slice(0, 10);
 
   const [availableVitals, setAvailableVitals] = useState<AvailableVitalType[]>([]);
   const [availableLabTests, setAvailableLabTests] = useState<AvailableLabTest[]>([]);
@@ -83,31 +74,39 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
   const maxReached = trendChartCount >= 10;
 
   // Fetch available data on mount
-  const fetchAvailableData = useCallback(async () => {
-    const result = await execute(
-      (signal: AbortSignal) => apiService.getAvailableTrendData(signal),
-      { errorMessage: 'Failed to fetch available trend data' }
-    );
-
-    if (result) {
-      setAvailableVitals(result.vital_types || []);
-      setAvailableLabTests(result.lab_test_names || []);
-      logger.debug('trend_chart_available_data_loaded', 'Available trend data loaded', {
-        vitalTypeCount: result.vital_types?.length || 0,
-        labTestCount: result.lab_test_names?.length || 0,
-        component: 'TrendChartSelector',
-      });
-    }
-  }, [execute]);
-
   useEffect(() => {
-    fetchAvailableData();
-  }, [fetchAvailableData]);
+    const controller = new AbortController();
+    apiService.getAvailableTrendData(controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted && result) {
+          setAvailableVitals(result.vital_types || []);
+          setAvailableLabTests(result.lab_test_names || []);
+          logger.debug('trend_chart_available_data_loaded', 'Available trend data loaded', {
+            vitalTypeCount: result.vital_types?.length || 0,
+            labTestCount: result.lab_test_names?.length || 0,
+            component: 'TrendChartSelector',
+          });
+        }
+      })
+      .catch((err: Error) => {
+        if (err.name !== 'AbortError') {
+          logger.debug('trend_chart_available_data_error', 'Failed to fetch available trend data', {
+            error: err.message,
+            component: 'TrendChartSelector',
+          });
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      });
+    return () => controller.abort();
+  }, []);
 
-  // Fetch record counts when chart selections or time ranges change
+  // Fetch record counts when chart selections or date ranges change
   useEffect(() => {
     if (trendChartCount === 0) {
-      setChartCounts({ vital_counts: {}, lab_test_counts: {} });
       return;
     }
 
@@ -144,13 +143,10 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
     };
   }, [trendCharts, trendChartCount]);
 
+  const emptyCounts: ChartCounts = { vital_counts: {}, lab_test_counts: {} };
+  const effectiveCounts = trendChartCount === 0 ? emptyCounts : chartCounts;
   const selectedVitalTypes = new Set(trendCharts.vital_charts.map(c => c.vital_type));
   const selectedLabTestNames = trendCharts.lab_test_charts.map(c => c.test_name);
-
-  const timeRangeOptions = TIME_RANGE_OPTIONS.map(opt => ({
-    value: opt.value,
-    label: t(opt.labelKey),
-  }));
 
   // Deduplicate lab tests by test_name (API may return same name with different units)
   const seenLabTestNames = new Set<string>();
@@ -265,7 +261,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
         </Stack>
       )}
 
-      {/* Selected Charts with Time Range Controls */}
+      {/* Selected Charts with Date Range Controls */}
       {trendChartCount > 0 && (
         <Stack gap="sm">
           <Title order={5}>
@@ -275,19 +271,34 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
           {/* Vital chart rows */}
           {trendCharts.vital_charts.map(chart => {
             const vitalInfo = availableVitals.find(v => v.vital_type === chart.vital_type);
-            const count = chartCounts.vital_counts[chart.vital_type];
+            const count = effectiveCounts.vital_counts[chart.vital_type];
             return (
               <Group key={chart.vital_type} gap="sm" wrap="nowrap">
                 <Badge variant="light" color="blue" size="lg" style={{ flex: '0 0 auto' }}>
                   {vitalInfo?.display_name || chart.vital_type}
                 </Badge>
-                <Select
-                  data={timeRangeOptions}
-                  value={chart.time_range}
-                  onChange={(val) => val && updateVitalChartTimeRange(chart.vital_type, val)}
+                <DatePickerInput
+                  value={chart.date_from}
+                  onChange={(val) => updateVitalChartDates(chart.vital_type, val, chart.date_to)}
                   size="xs"
-                  style={{ width: 120 }}
-                  aria-label={t('reportBuilder.trendCharts.timeRange.label')}
+                  style={{ width: 130 }}
+                  placeholder={t('reportBuilder.trendCharts.dateFrom')}
+                  aria-label={t('reportBuilder.trendCharts.dateFrom')}
+                  clearable
+                  maxDate={chart.date_to || undefined}
+                  popoverProps={{ withinPortal: true }}
+                />
+                <DatePickerInput
+                  value={chart.date_to}
+                  onChange={(val) => updateVitalChartDates(chart.vital_type, chart.date_from, val)}
+                  size="xs"
+                  style={{ width: 130 }}
+                  placeholder={t('reportBuilder.trendCharts.dateTo')}
+                  aria-label={t('reportBuilder.trendCharts.dateTo')}
+                  clearable
+                  minDate={chart.date_from || undefined}
+                  maxDate={today}
+                  popoverProps={{ withinPortal: true }}
                 />
                 {count !== undefined && (
                   <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
@@ -309,19 +320,34 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
 
           {/* Lab test chart rows */}
           {trendCharts.lab_test_charts.map(chart => {
-            const count = chartCounts.lab_test_counts[chart.test_name];
+            const count = effectiveCounts.lab_test_counts[chart.test_name];
             return (
               <Group key={chart.test_name} gap="sm" wrap="nowrap">
                 <Badge variant="light" color="teal" size="lg" style={{ flex: '0 0 auto' }}>
                   {chart.test_name}
                 </Badge>
-                <Select
-                  data={timeRangeOptions}
-                  value={chart.time_range}
-                  onChange={(val) => val && updateLabTestChartTimeRange(chart.test_name, val)}
+                <DatePickerInput
+                  value={chart.date_from}
+                  onChange={(val) => updateLabTestChartDates(chart.test_name, val, chart.date_to)}
                   size="xs"
-                  style={{ width: 120 }}
-                  aria-label={t('reportBuilder.trendCharts.timeRange.label')}
+                  style={{ width: 130 }}
+                  placeholder={t('reportBuilder.trendCharts.dateFrom')}
+                  aria-label={t('reportBuilder.trendCharts.dateFrom')}
+                  clearable
+                  maxDate={chart.date_to || undefined}
+                  popoverProps={{ withinPortal: true }}
+                />
+                <DatePickerInput
+                  value={chart.date_to}
+                  onChange={(val) => updateLabTestChartDates(chart.test_name, chart.date_from, val)}
+                  size="xs"
+                  style={{ width: 130 }}
+                  placeholder={t('reportBuilder.trendCharts.dateTo')}
+                  aria-label={t('reportBuilder.trendCharts.dateTo')}
+                  clearable
+                  minDate={chart.date_from || undefined}
+                  maxDate={today}
+                  popoverProps={{ withinPortal: true }}
                 />
                 {count !== undefined && (
                   <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>

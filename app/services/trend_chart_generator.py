@@ -16,7 +16,7 @@ matplotlib.use("Agg")  # Non-interactive backend, must be set before importing F
 
 import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.dates import AutoDateLocator, ConciseDateFormatter, date2num
+from matplotlib.dates import date2num
 from matplotlib.figure import Figure
 
 from app.core.logging.config import get_logger
@@ -130,9 +130,9 @@ class TrendChartGenerator:
             # Labels
             ylabel = f"{display_name} ({unit})" if unit else display_name
             ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT)
-            ax.set_title(f"{display_name} Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold")
+            ax.set_title(f"{display_name} Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
 
-            _format_date_axis(ax)
+            _format_date_axis(ax, vital_data.get("date_from"), vital_data.get("date_to"))
             _add_statistics_text(ax, vital_data.get("statistics", {}), unit)
 
             fig.tight_layout()
@@ -178,11 +178,11 @@ class TrendChartGenerator:
             _add_trend_line(ax, dates, diastolic)
 
             ax.set_ylabel("Blood Pressure (mmHg)", fontsize=9, color=COLOR_TEXT)
-            ax.set_title("Blood Pressure Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold")
+            ax.set_title("Blood Pressure Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
             ax.legend(loc="lower left", fontsize=7, framealpha=0.9,
                         bbox_to_anchor=(0.0, 1.02), ncol=2, borderaxespad=0)
 
-            _format_date_axis(ax)
+            _format_date_axis(ax, bp_data.get("date_from"), bp_data.get("date_to"))
 
             # Stats text for both
             stats = bp_data.get("statistics", {})
@@ -270,9 +270,9 @@ class TrendChartGenerator:
 
             ylabel = f"{display_name} ({unit})" if unit else display_name
             ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT)
-            ax.set_title(f"{display_name} Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold")
+            ax.set_title(f"{display_name} Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
 
-            _format_date_axis(ax)
+            _format_date_axis(ax, lab_data.get("date_from"), lab_data.get("date_to"))
             _add_statistics_text(ax, lab_data.get("statistics", {}), unit)
 
             fig.tight_layout()
@@ -293,13 +293,114 @@ def _apply_print_style(ax):
         spine.set_linewidth(0.5)
 
 
-def _format_date_axis(ax):
-    """Format the x-axis with auto-scaled date labels."""
-    locator = AutoDateLocator()
-    formatter = ConciseDateFormatter(locator)
-    ax.xaxis.set_major_locator(locator)
-    ax.xaxis.set_major_formatter(formatter)
+def _format_date_axis(ax, date_from=None, date_to=None):
+    """Format the x-axis with date labels. Adds a subtitle showing the requested date range."""
+    from matplotlib.dates import num2date
+    from matplotlib.ticker import FixedLocator, FuncFormatter
+
+    # Add date range note under the title if the user specified dates
+    if date_from or date_to:
+        from_str = date_from.strftime("%b %d, %Y") if date_from else "earliest"
+        to_str = date_to.strftime("%b %d, %Y") if date_to else "latest"
+        ax.text(0.5, 1.02, f"Requested range: {from_str}  \u2013  {to_str}",
+                transform=ax.transAxes, fontsize=7, color="#757575",
+                ha="center", va="bottom")
+
+    x_min, x_max = ax.get_xlim()
+    if x_min >= x_max:
+        return
+
+    span = x_max - x_min
+    dt_min = num2date(x_min)
+    dt_max = num2date(x_max)
+
+    # Generate calendar-aligned interior ticks based on the time span
+    interior = _calendar_ticks(dt_min, dt_max, span)
+
+    # Always anchor with data start/end; drop interior ticks too close to them
+    from matplotlib.dates import date2num
+    margin = span * 0.06
+    ticks = [x_min]
+    for t in interior:
+        t_num = date2num(t)
+        if t_num - x_min > margin and x_max - t_num > margin:
+            ticks.append(t_num)
+    ticks.append(x_max)
+
+    ax.xaxis.set_major_locator(FixedLocator(ticks))
+
+    def _tick_fmt(val, _pos):
+        dt = num2date(val)
+        is_endpoint = abs(val - x_min) < 0.5 or abs(val - x_max) < 0.5
+        if is_endpoint or span > 365:
+            return dt.strftime("%b %d, %Y")
+        return dt.strftime("%b %d")
+
+    ax.xaxis.set_major_formatter(FuncFormatter(_tick_fmt))
     ax.figure.autofmt_xdate(rotation=30, ha="right")
+
+
+def _calendar_ticks(dt_min, dt_max, span_days):
+    """Generate calendar-aligned tick dates between dt_min and dt_max.
+
+    Picks natural boundaries based on the span:
+      < 90 days:   1st and 15th of each month
+      < 365 days:  1st of each month
+      < 730 days:  1st of every other month
+      < 1825 days: 1st of each quarter (Jan, Apr, Jul, Oct)
+      >= 1825 days: Jan 1 of each year
+    """
+    from dateutil.relativedelta import relativedelta
+
+    ticks = []
+    if span_days < 90:
+        # Semi-monthly: 1st and 15th
+        cur = dt_min.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        while cur <= dt_max:
+            if cur >= dt_min:
+                ticks.append(cur)
+            mid = cur.replace(day=15)
+            if dt_min <= mid <= dt_max:
+                ticks.append(mid)
+            cur = cur + relativedelta(months=1)
+    elif span_days < 365:
+        # Monthly: 1st of each month
+        cur = dt_min.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if cur < dt_min:
+            cur = cur + relativedelta(months=1)
+        while cur <= dt_max:
+            ticks.append(cur)
+            cur = cur + relativedelta(months=1)
+    elif span_days < 730:
+        # Bi-monthly: 1st of every other month
+        cur = dt_min.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if cur < dt_min:
+            cur = cur + relativedelta(months=1)
+        # Snap to even month
+        if cur.month % 2 != 0:
+            cur = cur + relativedelta(months=1)
+        while cur <= dt_max:
+            ticks.append(cur)
+            cur = cur + relativedelta(months=2)
+    elif span_days < 1825:
+        # Quarterly: Jan 1, Apr 1, Jul 1, Oct 1
+        quarter_months = [1, 4, 7, 10]
+        cur = dt_min.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        # Advance to next quarter start
+        while cur.month not in quarter_months or cur < dt_min:
+            cur = cur + relativedelta(months=1)
+        while cur <= dt_max:
+            ticks.append(cur)
+            cur = cur + relativedelta(months=3)
+    else:
+        # Yearly: Jan 1
+        year = dt_min.year + 1
+        while year <= dt_max.year:
+            ticks.append(dt_min.replace(year=year, month=1, day=1,
+                                        hour=0, minute=0, second=0, microsecond=0))
+            year += 1
+
+    return ticks
 
 
 def _add_statistics_text(ax, statistics: Dict[str, Any], unit: str):

@@ -2131,15 +2131,8 @@
         "description": "Pesquise e selecione os exames laboratoriais para representar",
         "searchPlaceholder": "Pesquisar exames laboratoriais..."
       },
-      "timeRange": {
-        "label": "Período",
-        "all": "Todo o Período",
-        "3months": "3 Meses",
-        "6months": "6 Meses",
-        "1year": "1 Ano",
-        "2years": "2 Anos",
-        "5years": "5 Anos"
-      },
+      "dateFrom": "De",
+      "dateTo": "Até",
       "selectedCharts": "Gráficos Selecionados ({{count}})",
       "recordCount": "{{count}} registros",
       "removeChart": "Remover gráfico {{name}}"
