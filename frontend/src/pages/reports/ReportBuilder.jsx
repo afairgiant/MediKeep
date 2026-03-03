@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
 import {
   Center,
+  Badge,
   Container,
   Paper,
   Group,
@@ -16,6 +17,7 @@ import {
   Modal,
   TextInput,
   Switch,
+  SegmentedControl,
 } from '@mantine/core';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import {
@@ -23,10 +25,13 @@ import {
   IconDownload,
   IconSettings,
   IconFileDescription,
+  IconChartLine,
+  IconNotes,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { PageHeader } from '../../components';
-import { CategoryTabs, TemplateManager } from '../../components/reports';
+import { CategoryTabs } from '../../components/reports';
+import TrendChartSelector from '../../components/reports/TrendChartSelector';
 import { useCustomReports } from '../../hooks/useCustomReports';
 import { useReportTemplates } from '../../hooks/useReportTemplates';
 import logger from '../../services/logger';
@@ -36,17 +41,19 @@ const ReportBuilder = () => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Hooks for report functionality
   const {
     dataSummary,
     selectedRecords,
     reportSettings,
+    trendCharts,
     loading,
     error,
     isGenerating,
     selectedCount,
     hasSelections,
+    trendChartCount,
     fetchDataSummary,
     toggleRecordSelection,
     toggleCategorySelection,
@@ -54,6 +61,12 @@ const ReportBuilder = () => {
     updateReportSettings,
     generateReport,
     clearError,
+    addVitalChart,
+    removeVitalChart,
+    updateVitalChartTimeRange,
+    addLabTestChart,
+    removeLabTestChart,
+    updateLabTestChartTimeRange,
   } = useCustomReports();
 
   const {
@@ -70,6 +83,7 @@ const ReportBuilder = () => {
 
   // UI state
   const [activeTab, setActiveTab] = useState('medications');
+  const [activeSegment, setActiveSegment] = useState('records');
   const [showSettingsModal, { open: openSettingsModal, close: closeSettingsModal }] = useDisclosure(false);
 
   // Initialize data on mount
@@ -82,7 +96,7 @@ const ReportBuilder = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const templateId = searchParams.get('template');
-    
+
     if (templateId && templates.length > 0) {
       const template = templates.find(t => t.id.toString() === templateId);
       if (template) {
@@ -93,7 +107,7 @@ const ReportBuilder = () => {
 
   // Get available categories from data summary
   const availableCategories = dataSummary?.categories ? Object.keys(dataSummary.categories) : [];
-  
+
   // Debug logging for development
   useEffect(() => {
     if (dataSummary) {
@@ -148,7 +162,7 @@ const ReportBuilder = () => {
     if (template) {
       // Clear current selections first
       clearSelections();
-      
+
       // Load template selections (this would need to be implemented in the hook)
       notifications.show({
         title: t('reportBuilder.notifications.templateLoaded'),
@@ -159,12 +173,20 @@ const ReportBuilder = () => {
     }
   };
 
-  // Handle generate report
-  const handleGenerateReport = async () => {
-    const success = await generateReport();
-    if (success) {
-      // Optionally redirect or show additional UI
+  // Build generate button label
+  const getGenerateButtonLabel = () => {
+    if (selectedCount > 0 && trendChartCount > 0) {
+      return t('reportBuilder.buttons.generateReportWithCharts', {
+        recordCount: selectedCount,
+        chartCount: trendChartCount,
+      });
     }
+    if (trendChartCount > 0) {
+      return t('reportBuilder.buttons.generateReportChartsOnly', {
+        chartCount: trendChartCount,
+      });
+    }
+    return t('reportBuilder.buttons.generateReport', { count: selectedCount });
   };
 
   if (loading || templatesLoading) {
@@ -202,18 +224,8 @@ const ReportBuilder = () => {
                 {t('reportBuilder.configuration.description')}
               </Text>
             </Stack>
-            
-            <Group>
-              {/* Template Manager - Hidden for now */}
-              {/* <TemplateManager
-                templates={templates}
-                hasSelections={hasSelections}
-                onSaveTemplate={handleSaveTemplate}
-                onLoadTemplate={handleLoadTemplate}
-                onDeleteTemplate={deleteTemplate}
-                isSaving={isSaving}
-              /> */}
 
+            <Group>
               <Button
                 leftSection={<IconSettings size={16} />}
                 variant="outline"
@@ -225,11 +237,11 @@ const ReportBuilder = () => {
               {hasSelections && (
                 <Button
                   leftSection={<IconDownload size={16} />}
-                  onClick={handleGenerateReport}
+                  onClick={generateReport}
                   loading={isGenerating}
                   disabled={!hasSelections}
                 >
-                  {t('reportBuilder.buttons.generateReport', { count: selectedCount })}
+                  {getGenerateButtonLabel()}
                 </Button>
               )}
             </Group>
@@ -240,35 +252,40 @@ const ReportBuilder = () => {
             <Box mb="md">
               <Group justify="space-between" mb={4}>
                 <Text size="sm" fw={500}>{t('reportBuilder.progress.recordsSelected')}</Text>
-                <Text size="sm" c="dimmed">{selectedCount} / {dataSummary?.total_records || 0}</Text>
+                <Text size="sm" c="dimmed">
+                  {selectedCount} {t('reportBuilder.segmentControl.records', 'records')}
+                  {trendChartCount > 0 && `, ${trendChartCount} ${t('reportBuilder.trendCharts.title', 'charts').toLowerCase()}`}
+                </Text>
               </Group>
-              <Progress 
-                value={(selectedCount / (dataSummary?.total_records || 1)) * 100} 
-                color="blue" 
-                size="sm" 
+              <Progress
+                value={(selectedCount / Math.max(dataSummary?.total_records || 1, 1)) * 100}
+                color="blue"
+                size="sm"
               />
             </Box>
           )}
 
           {/* Selection controls */}
           <Group justify="space-between" mb="md">
-            <Button
-              size="xs"
-              variant="subtle"
-              color="blue"
-              onClick={() => {
-                // Select all records from all categories
-                availableCategories.forEach(category => {
-                  const categoryData = dataSummary?.categories?.[category];
-                  if (categoryData?.records) {
-                    toggleCategorySelection(category, categoryData.records);
-                  }
-                });
-              }}
-              disabled={!dataSummary?.categories || Object.keys(dataSummary.categories).length === 0}
-            >
-              {t('reportBuilder.buttons.selectAll')}
-            </Button>
+            {activeSegment === 'records' && (
+              <Button
+                size="xs"
+                variant="subtle"
+                color="blue"
+                onClick={() => {
+                  // Select all records from all categories
+                  availableCategories.forEach(category => {
+                    const categoryData = dataSummary?.categories?.[category];
+                    if (categoryData?.records) {
+                      toggleCategorySelection(category, categoryData.records);
+                    }
+                  });
+                }}
+                disabled={!dataSummary?.categories || Object.keys(dataSummary.categories).length === 0}
+              >
+                {t('reportBuilder.buttons.selectAll')}
+              </Button>
+            )}
             {hasSelections && (
               <Button size="xs" variant="subtle" color="red" onClick={clearSelections}>
                 {t('reportBuilder.buttons.clearSelections')}
@@ -277,40 +294,93 @@ const ReportBuilder = () => {
           </Group>
         </Paper>
 
-        {/* Category tabs and record selection OR No data message */}
-        {availableCategories.length > 0 ? (
+        {/* Segment control for switching between Records and Trend Charts */}
+        <SegmentedControl
+          value={activeSegment}
+          onChange={setActiveSegment}
+          data={[
+            {
+              value: 'records',
+              label: (
+                <Group gap={6} wrap="nowrap">
+                  <IconNotes size={16} />
+                  <span>{t('reportBuilder.segmentControl.records')}</span>
+                  {selectedCount > 0 && (
+                    <Badge size="xs" variant="filled" color="blue">{selectedCount}</Badge>
+                  )}
+                </Group>
+              ),
+            },
+            {
+              value: 'trendCharts',
+              label: (
+                <Group gap={6} wrap="nowrap">
+                  <IconChartLine size={16} />
+                  <span>{t('reportBuilder.segmentControl.trendCharts')}</span>
+                  {trendChartCount > 0 && (
+                    <Badge size="xs" variant="filled" color="teal">{trendChartCount}</Badge>
+                  )}
+                </Group>
+              ),
+            },
+          ]}
+          fullWidth
+          size="md"
+        />
+
+        {/* Medical Records segment */}
+        {activeSegment === 'records' && (
+          <>
+            {availableCategories.length > 0 ? (
+              <Paper shadow="sm" radius="md" withBorder>
+                <CategoryTabs
+                  categories={availableCategories}
+                  dataSummary={dataSummary}
+                  selectedRecords={selectedRecords}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                  onToggleRecord={toggleRecordSelection}
+                  onToggleCategory={toggleCategorySelection}
+                  categoryDisplayNames={categoryDisplayNames}
+                />
+              </Paper>
+            ) : (
+              <Paper shadow="sm" p="xl" radius="md">
+                <Center py="xl">
+                  <Stack align="center" gap="md">
+                    <IconFileDescription size={64} stroke={1} color="var(--mantine-color-gray-5)" />
+                    <Stack align="center" gap="xs">
+                      <Title order={3}>{t('reportBuilder.noData.title')}</Title>
+                      <Text c="dimmed" ta="center">
+                        {t('reportBuilder.noData.description')}
+                      </Text>
+                    </Stack>
+                    <Button onClick={() => navigate('/medications')}>
+                      {t('reportBuilder.buttons.addRecords')}
+                    </Button>
+                  </Stack>
+                </Center>
+              </Paper>
+            )}
+          </>
+        )}
+
+        {/* Trend Charts segment */}
+        {activeSegment === 'trendCharts' && (
           <Paper shadow="sm" radius="md" withBorder>
-            <CategoryTabs
-              categories={availableCategories}
-              dataSummary={dataSummary}
-              selectedRecords={selectedRecords}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              onToggleRecord={toggleRecordSelection}
-              onToggleCategory={toggleCategorySelection}
-              categoryDisplayNames={categoryDisplayNames}
+            <TrendChartSelector
+              trendCharts={trendCharts}
+              addVitalChart={addVitalChart}
+              removeVitalChart={removeVitalChart}
+              updateVitalChartTimeRange={updateVitalChartTimeRange}
+              addLabTestChart={addLabTestChart}
+              removeLabTestChart={removeLabTestChart}
+              updateLabTestChartTimeRange={updateLabTestChartTimeRange}
+              trendChartCount={trendChartCount}
             />
-          </Paper>
-        ) : (
-          <Paper shadow="sm" p="xl" radius="md">
-            <Center py="xl">
-              <Stack align="center" gap="md">
-                <IconFileDescription size={64} stroke={1} color="var(--mantine-color-gray-5)" />
-                <Stack align="center" gap="xs">
-                  <Title order={3}>{t('reportBuilder.noData.title')}</Title>
-                  <Text c="dimmed" ta="center">
-                    {t('reportBuilder.noData.description')}
-                  </Text>
-                </Stack>
-                <Button onClick={() => navigate('/medications')}>
-                  {t('reportBuilder.buttons.addRecords')}
-                </Button>
-              </Stack>
-            </Center>
           </Paper>
         )}
       </Stack>
-
 
       {/* Report Settings Modal */}
       <Modal

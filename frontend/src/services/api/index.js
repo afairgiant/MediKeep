@@ -2384,6 +2384,62 @@ class ApiService {
   }
 
   /**
+   * Get available vital types and lab test names for trend chart selection.
+   */
+  getAvailableTrendData(signal) {
+    try {
+      logger.debug(
+        'api_available_trend_data',
+        'Fetching available trend data for chart selection',
+        {
+          component: 'ApiService',
+        }
+      );
+
+      return this.get('/custom-reports/available-trend-data', { signal });
+    } catch (error) {
+      logger.error(
+        'api_available_trend_data_error',
+        'Failed to get available trend data',
+        {
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Get record counts for selected trend charts filtered by their time ranges.
+   */
+  getTrendChartCounts(chartSelection, signal) {
+    try {
+      logger.debug(
+        'api_trend_chart_counts',
+        'Fetching trend chart record counts',
+        {
+          vitalCount: chartSelection.vital_charts?.length || 0,
+          labTestCount: chartSelection.lab_test_charts?.length || 0,
+          component: 'ApiService',
+        }
+      );
+
+      return this.post('/custom-reports/trend-chart-counts', chartSelection, { signal });
+    } catch (error) {
+      logger.error(
+        'api_trend_chart_counts_error',
+        'Failed to get trend chart counts',
+        {
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Generate a custom PDF report with selected records from various categories.
    */
   async generateCustomReport(reportRequest, signal) {

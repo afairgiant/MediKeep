@@ -1929,6 +1929,8 @@
       "addRecords": "Añadir registros médicos",
       "clearSelections": "Limpiar todas las selecciones",
       "generateReport": "Generar informe ({{count}} registros)",
+      "generateReportWithCharts": "Generar informe ({{recordCount}} registros, {{chartCount}} gráficos)",
+      "generateReportChartsOnly": "Generar informe ({{chartCount}} gráficos)",
       "selectAll": "Seleccionar todos los registros",
       "settings": "Configuración"
     },
@@ -1985,7 +1987,38 @@
       },
       "title": "Configuración del informe"
     },
-    "title": "Generador de informes personalizados"
+    "title": "Generador de informes personalizados",
+    "trendCharts": {
+      "title": "Gráficos de tendencia",
+      "description": "Seleccione los signos vitales y las pruebas de laboratorio para incluir como gráficos de tendencia en su informe",
+      "emptyState": "No hay datos de tendencia disponibles. Agregue signos vitales o resultados de laboratorio para habilitar los gráficos de tendencia.",
+      "maxReached": "Máximo de 10 gráficos alcanzado",
+      "vitalCharts": {
+        "title": "Gráficos de signos vitales",
+        "description": "Seleccione los signos vitales a representar"
+      },
+      "labTestCharts": {
+        "title": "Gráficos de pruebas de laboratorio",
+        "description": "Busque y seleccione las pruebas de laboratorio a representar",
+        "searchPlaceholder": "Buscar pruebas de laboratorio..."
+      },
+      "timeRange": {
+        "label": "Período de tiempo",
+        "all": "Todo el período",
+        "3months": "3 meses",
+        "6months": "6 meses",
+        "1year": "1 año",
+        "2years": "2 años",
+        "5years": "5 años"
+      },
+      "selectedCharts": "Gráficos seleccionados ({{count}})",
+      "recordCount": "{{count}} registros",
+      "removeChart": "Eliminar gráfico de {{name}}"
+    },
+    "segmentControl": {
+      "records": "Registros médicos",
+      "trendCharts": "Gráficos de tendencia"
+    }
   },
   "searchPlaceholders": {
     "allergies": "Buscar alergias, reacciones, etiquetas...",

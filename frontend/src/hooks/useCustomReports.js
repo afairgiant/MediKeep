@@ -7,6 +7,7 @@ import logger from '../services/logger';
 /**
  * Custom hook for managing custom report generation
  * Provides data fetching, report generation, and download functionality
+ * Supports both medical record selections and trend chart selections
  */
 export const useCustomReports = () => {
   const [dataSummary, setDataSummary] = useState(null);
@@ -18,6 +19,12 @@ export const useCustomReports = () => {
     include_summary: true,
     include_profile_picture: true,
     date_range: null,
+  });
+
+  // Trend chart state
+  const [trendCharts, setTrendCharts] = useState({
+    vital_charts: [],
+    lab_test_charts: [],
   });
 
   const { loading, error, execute, clearError, setError } = useApi();
@@ -32,14 +39,14 @@ export const useCustomReports = () => {
     const result = await execute(
       async signal => {
         const response = await apiService.getCustomReportSummary(signal);
-        
+
         // Log response summary
         logger.debug('custom_reports_summary_response', 'Data summary fetched', {
           categoriesCount: Object.keys(response?.categories || {}).length,
           totalRecords: response?.total_records || 0,
           component: 'useCustomReports',
         });
-        
+
         return response;
       },
       { errorMessage: 'Failed to fetch data summary' }
@@ -119,10 +126,11 @@ export const useCustomReports = () => {
     });
   }, []);
 
-  // Clear all selections
+  // Clear all selections (records + charts)
   const clearSelections = useCallback(() => {
     setSelectedRecords({});
-    logger.info('custom_reports_selections_cleared', 'All record selections cleared', {
+    setTrendCharts({ vital_charts: [], lab_test_charts: [] });
+    logger.info('custom_reports_selections_cleared', 'All selections cleared', {
       component: 'useCustomReports',
     });
   }, []);
@@ -136,12 +144,93 @@ export const useCustomReports = () => {
     });
   }, []);
 
+  // --- Trend chart actions ---
+
+  const addVitalChart = useCallback((vitalType, timeRange = '1year') => {
+    setTrendCharts(prev => {
+      // Don't add duplicate
+      if (prev.vital_charts.some(c => c.vital_type === vitalType)) {
+        return prev;
+      }
+      const totalCharts = prev.vital_charts.length + prev.lab_test_charts.length;
+      if (totalCharts >= 10) {
+        return prev;
+      }
+      return {
+        ...prev,
+        vital_charts: [...prev.vital_charts, { vital_type: vitalType, time_range: timeRange }],
+      };
+    });
+  }, []);
+
+  const removeVitalChart = useCallback((vitalType) => {
+    setTrendCharts(prev => ({
+      ...prev,
+      vital_charts: prev.vital_charts.filter(c => c.vital_type !== vitalType),
+    }));
+  }, []);
+
+  const updateVitalChartTimeRange = useCallback((vitalType, timeRange) => {
+    setTrendCharts(prev => ({
+      ...prev,
+      vital_charts: prev.vital_charts.map(c =>
+        c.vital_type === vitalType ? { ...c, time_range: timeRange } : c
+      ),
+    }));
+  }, []);
+
+  const addLabTestChart = useCallback((testName, timeRange = '1year') => {
+    setTrendCharts(prev => {
+      // Don't add duplicate (case-insensitive)
+      if (prev.lab_test_charts.some(c => c.test_name.toLowerCase() === testName.toLowerCase())) {
+        return prev;
+      }
+      const totalCharts = prev.vital_charts.length + prev.lab_test_charts.length;
+      if (totalCharts >= 10) {
+        return prev;
+      }
+      return {
+        ...prev,
+        lab_test_charts: [...prev.lab_test_charts, { test_name: testName, time_range: timeRange }],
+      };
+    });
+  }, []);
+
+  const removeLabTestChart = useCallback((testName) => {
+    setTrendCharts(prev => ({
+      ...prev,
+      lab_test_charts: prev.lab_test_charts.filter(
+        c => c.test_name.toLowerCase() !== testName.toLowerCase()
+      ),
+    }));
+  }, []);
+
+  const updateLabTestChartTimeRange = useCallback((testName, timeRange) => {
+    setTrendCharts(prev => ({
+      ...prev,
+      lab_test_charts: prev.lab_test_charts.map(c =>
+        c.test_name.toLowerCase() === testName.toLowerCase()
+          ? { ...c, time_range: timeRange }
+          : c
+      ),
+    }));
+  }, []);
+
+  const clearTrendCharts = useCallback(() => {
+    setTrendCharts({ vital_charts: [], lab_test_charts: [] });
+  }, []);
+
+  // --- Computed values ---
+
   // Get selected records count
   const getSelectedCount = useCallback(() => {
     return Object.values(selectedRecords).reduce((total, categoryRecords) => {
       return total + Object.keys(categoryRecords).length;
     }, 0);
   }, [selectedRecords]);
+
+  const trendChartCount = trendCharts.vital_charts.length + trendCharts.lab_test_charts.length;
+  const hasTrendCharts = trendChartCount > 0;
 
   // Get selected records in API format
   const getSelectedRecordsForAPI = useCallback(() => {
@@ -154,27 +243,31 @@ export const useCustomReports = () => {
   // Validate selections
   const validateSelections = useCallback(() => {
     const selectedRecordsArray = getSelectedRecordsForAPI();
-    
-    if (selectedRecordsArray.length === 0) {
-      return { valid: false, error: 'Please select at least one record to include in the report.' };
+    const hasRecords = selectedRecordsArray.length > 0;
+    const hasCharts = trendChartCount > 0;
+
+    if (!hasRecords && !hasCharts) {
+      return { valid: false, error: 'Please select at least one record or trend chart to include in the report.' };
     }
 
-    const totalRecords = selectedRecordsArray.reduce((total, category) => {
-      return total + category.record_ids.length;
-    }, 0);
+    if (hasRecords) {
+      const totalRecords = selectedRecordsArray.reduce((total, category) => {
+        return total + category.record_ids.length;
+      }, 0);
 
-    if (totalRecords > 5000) {
-      return { valid: false, error: 'Cannot select more than 5000 records total across all categories.' };
-    }
+      if (totalRecords > 5000) {
+        return { valid: false, error: 'Cannot select more than 5000 records total across all categories.' };
+      }
 
-    for (const category of selectedRecordsArray) {
-      if (category.record_ids.length > 1000) {
-        return { valid: false, error: `Cannot select more than 1000 records in the ${category.category} category.` };
+      for (const category of selectedRecordsArray) {
+        if (category.record_ids.length > 1000) {
+          return { valid: false, error: `Cannot select more than 1000 records in the ${category.category} category.` };
+        }
       }
     }
 
     return { valid: true };
-  }, [getSelectedRecordsForAPI]);
+  }, [getSelectedRecordsForAPI, trendChartCount]);
 
   // Generate and download report
   const generateReport = useCallback(async () => {
@@ -203,9 +296,15 @@ export const useCustomReports = () => {
         ...reportSettings,
       };
 
+      // Include trend charts if any are selected
+      if (trendChartCount > 0) {
+        requestData.trend_charts = trendCharts;
+      }
+
       logger.info('custom_reports_generate_start', 'Starting report generation', {
         categoriesCount: selectedRecordsArray.length,
         totalRecords: getSelectedCount(),
+        trendChartCount,
         reportTitle: reportSettings.report_title,
         component: 'useCustomReports',
       });
@@ -226,6 +325,7 @@ export const useCustomReports = () => {
         logger.info('custom_reports_generate_success', 'Report generated and downloaded successfully', {
           categoriesCount: selectedRecordsArray.length,
           totalRecords: getSelectedCount(),
+          trendChartCount,
           component: 'useCustomReports',
         });
 
@@ -256,7 +356,7 @@ export const useCustomReports = () => {
       });
 
       setError(`Failed to generate report: ${error.message}`);
-      
+
       notifications.show({
         title: 'Report Generation Failed',
         message: error.message || 'An error occurred while generating the report.',
@@ -269,7 +369,7 @@ export const useCustomReports = () => {
       setIsGenerating(false);
       abortControllerRef.current = null;
     }
-  }, [validateSelections, getSelectedRecordsForAPI, getSelectedCount, reportSettings, setError, clearError]);
+  }, [validateSelections, getSelectedRecordsForAPI, getSelectedCount, reportSettings, trendCharts, trendChartCount, setError, clearError]);
 
   // Cancel report generation
   const cancelGeneration = useCallback(() => {
@@ -286,6 +386,7 @@ export const useCustomReports = () => {
     dataSummary,
     selectedRecords,
     reportSettings,
+    trendCharts,
 
     // State
     loading,
@@ -294,7 +395,9 @@ export const useCustomReports = () => {
 
     // Computed
     selectedCount: getSelectedCount(),
-    hasSelections: getSelectedCount() > 0,
+    hasSelections: getSelectedCount() > 0 || hasTrendCharts,
+    trendChartCount,
+    hasTrendCharts,
 
     // Actions
     fetchDataSummary,
@@ -305,6 +408,15 @@ export const useCustomReports = () => {
     generateReport,
     cancelGeneration,
     clearError,
+
+    // Trend chart actions
+    addVitalChart,
+    removeVitalChart,
+    updateVitalChartTimeRange,
+    addLabTestChart,
+    removeLabTestChart,
+    updateLabTestChartTimeRange,
+    clearTrendCharts,
 
     // Utilities
     getSelectedRecordsForAPI,

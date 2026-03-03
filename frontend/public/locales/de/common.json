@@ -2345,6 +2345,8 @@
     "buttons": {
       "settings": "Einstellungen",
       "generateReport": "Bericht Generieren ({{count}} Datensätze)",
+      "generateReportWithCharts": "Bericht Generieren ({{recordCount}} Datensätze, {{chartCount}} Diagramme)",
+      "generateReportChartsOnly": "Bericht Generieren ({{chartCount}} Diagramme)",
       "selectAll": "Alle Datensätze Auswählen",
       "clearSelections": "Alle Auswahlen Löschen",
       "addRecords": "Medizinische Aufzeichnungen Hinzufügen"
@@ -2395,6 +2397,37 @@
     "notifications": {
       "templateLoaded": "Vorlage Geladen",
       "templateLoadedMessage": "Vorlage \"{{name}}\" wurde geladen."
+    },
+    "trendCharts": {
+      "title": "Trenddiagramme",
+      "description": "Wählen Sie Vitalzeichen und Laboruntersuchungen aus, die als Trenddiagramme in Ihren Bericht aufgenommen werden sollen",
+      "emptyState": "Keine Trenddaten verfügbar. Fügen Sie Vitalzeichen oder Laborergebnisse hinzu, um Trenddiagramme zu aktivieren.",
+      "maxReached": "Maximum von 10 Diagrammen erreicht",
+      "vitalCharts": {
+        "title": "Vitalzeichen-Diagramme",
+        "description": "Wählen Sie Vitalzeichen zum Darstellen aus"
+      },
+      "labTestCharts": {
+        "title": "Labortest-Diagramme",
+        "description": "Suchen und wählen Sie Labortests zum Darstellen aus",
+        "searchPlaceholder": "Labortests suchen..."
+      },
+      "timeRange": {
+        "label": "Zeitraum",
+        "all": "Gesamter Zeitraum",
+        "3months": "3 Monate",
+        "6months": "6 Monate",
+        "1year": "1 Jahr",
+        "2years": "2 Jahre",
+        "5years": "5 Jahre"
+      },
+      "selectedCharts": "Ausgewählte Diagramme ({{count}})",
+      "recordCount": "{{count}} Datensätze",
+      "removeChart": "{{name}}-Diagramm entfernen"
+    },
+    "segmentControl": {
+      "records": "Medizinische Aufzeichnungen",
+      "trendCharts": "Trenddiagramme"
     }
   },
   "exportPage": {

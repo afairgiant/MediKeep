@@ -357,13 +357,19 @@ class CustomReportPDFGenerator:
             for category, records in data.items():
                 if records:  # Only add sections with data
                     story.extend(self._create_category_section(category, records))
-        else:
+
+        # Add trend charts section
+        trend_charts = report_data.get('trend_charts')
+        if trend_charts:
+            story.extend(self._create_trend_charts_section(trend_charts))
+
+        if not data and not trend_charts:
             # No data message
             story.append(Paragraph(
                 "No medical records were included in this report.",
                 self.styles['CustomBody']
             ))
-        
+
         # Add failed categories notice if any
         failed = report_data.get('failed_categories', [])
         if failed:
@@ -2034,3 +2040,122 @@ class CustomReportPDFGenerator:
 
         story.append(Spacer(1, 0.08*inch))
         return story
+
+    def _create_trend_charts_section(self, chart_data_list: List[Dict[str, Any]]) -> List:
+        """
+        Create a PDF section containing trend charts with statistics.
+
+        Each chart entry has: title, png_bytes, statistics, unit, chart_type
+        """
+        story = []
+
+        # Section header
+        story.append(PageBreak())
+        story.append(Paragraph("Trend Charts", self.styles['SectionHeader']))
+        story.append(Spacer(1, 0.15 * inch))
+
+        for chart_data in chart_data_list:
+            title = chart_data.get("title", "Trend Chart")
+            png_bytes = chart_data.get("png_bytes")
+            statistics = chart_data.get("statistics", {})
+            unit = chart_data.get("unit", "")
+
+            if not png_bytes:
+                continue
+
+            block_elements = []
+
+            # Subsection title
+            block_elements.append(
+                Paragraph(title, self.styles['SubsectionHeader'])
+            )
+            block_elements.append(Spacer(1, 0.05 * inch))
+
+            # Chart image from PNG bytes
+            try:
+                img_buffer = io.BytesIO(png_bytes)
+                chart_image = Image(img_buffer, width=6.5 * inch, height=3.0 * inch)
+                chart_image.hAlign = 'CENTER'
+                block_elements.append(chart_image)
+                block_elements.append(Spacer(1, 0.1 * inch))
+            except Exception as e:
+                logger.error("Failed to embed chart image for %s: %s", title, e)
+                block_elements.append(
+                    Paragraph(
+                        f"Chart image could not be rendered for {title}.",
+                        self.styles['CustomBody']
+                    )
+                )
+
+            # Statistics table
+            if statistics:
+                stats_table_data = self._build_chart_stats_table(statistics, unit)
+                if stats_table_data:
+                    num_cols = len(stats_table_data[0])
+                    col_width = 6.0 * inch / num_cols
+                    stats_table = Table(
+                        stats_table_data,
+                        colWidths=[col_width] * num_cols,
+                    )
+                    table_style = [
+                        ('FONTSIZE', (0, 0), (-1, -1), 8),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#37474F')),
+                        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#FAFAFA')),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ('TOPPADDING', (0, 0), (-1, -1), 4),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                    ]
+                    # Bold row labels for multi-row tables (e.g., BP systolic/diastolic)
+                    if len(stats_table_data) > 2:
+                        table_style.append(('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'))
+                        table_style.append(('ALIGN', (0, 1), (0, -1), 'LEFT'))
+                    stats_table.setStyle(TableStyle(table_style))
+                    block_elements.append(stats_table)
+
+            block_elements.append(Spacer(1, 0.3 * inch))
+
+            # Keep chart and stats together on same page
+            story.append(KeepTogether(block_elements))
+
+        return story
+
+    def _build_chart_stats_table(
+        self, statistics: Dict[str, Any], unit: str
+    ) -> Optional[List[List[str]]]:
+        """Build a 2-row statistics table for a trend chart."""
+        # Handle blood pressure (nested stats) - one row per measurement
+        if "systolic" in statistics and "diastolic" in statistics:
+            sys_stats = statistics["systolic"]
+            dia_stats = statistics["diastolic"]
+            if not sys_stats and not dia_stats:
+                return None
+            headers = ["", "Latest", "Average", "Range"]
+            sys_row = [
+                "Systolic",
+                f"{sys_stats.get('latest', '-')} {unit}",
+                f"{sys_stats.get('average', '-')} {unit}",
+                f"{sys_stats.get('min', '-')} - {sys_stats.get('max', '-')} {unit}",
+            ]
+            dia_row = [
+                "Diastolic",
+                f"{dia_stats.get('latest', '-')} {unit}",
+                f"{dia_stats.get('average', '-')} {unit}",
+                f"{dia_stats.get('min', '-')} - {dia_stats.get('max', '-')} {unit}",
+            ]
+            return [headers, sys_row, dia_row]
+
+        # Standard stats
+        if not statistics.get("count"):
+            return None
+
+        unit_suffix = f" {unit}" if unit else ""
+        headers = ["Latest", "Average", "Range"]
+        row = [
+            f"{statistics.get('latest', '-')}{unit_suffix}",
+            f"{statistics.get('average', '-')}{unit_suffix}",
+            f"{statistics.get('min', '-')} - {statistics.get('max', '-')}{unit_suffix}",
+        ]
+        return [headers, row]

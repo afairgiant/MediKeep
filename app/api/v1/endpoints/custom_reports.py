@@ -5,7 +5,7 @@ This module provides endpoints for generating custom medical reports
 with selective record inclusion and template management.
 """
 
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
@@ -13,16 +13,26 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user_id, get_db
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event, log_validation_error
-from app.core.logging.constants import LogFields
+from app.models.models import User
 from app.schemas.custom_reports import (
     CustomReportRequest, DataSummaryResponse, ReportTemplate,
     ReportTemplateResponse, TemplateActionResponse
 )
+from app.schemas.trend_charts import TrendChartSelection
 from app.services.custom_report_service import CustomReportService
+from app.services.trend_data_fetcher import TrendDataFetcher
 
 logger = get_logger(__name__, "app")
 
 router = APIRouter()
+
+
+def _get_active_patient_id(db: Session, user_id: int) -> Optional[int]:
+    """Look up the active patient ID for a user. Returns None if not set."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user or not user.active_patient_id:
+        return None
+    return user.active_patient_id
 
 
 @router.get("/data-summary", response_model=DataSummaryResponse)
@@ -73,10 +83,11 @@ async def generate_custom_report(
     """
     try:
         service = CustomReportService(db)
-        
-        # Validate user owns all selected records
-        await service.validate_record_ownership(current_user_id, request.selected_records)
-        
+
+        # Validate user owns all selected records (skip if no records selected)
+        if request.selected_records:
+            await service.validate_record_ownership(current_user_id, request.selected_records)
+
         # Generate the report
         pdf_data = await service.generate_selective_report(current_user_id, request)
         
@@ -124,6 +135,102 @@ async def generate_custom_report(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Report generation failed"
+        )
+
+
+@router.get("/available-trend-data")
+async def get_available_trend_data(
+    request: Request,
+    current_user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Get available vital types and lab test names that have data for trend charts.
+    Returns lists the frontend can use to populate chart selection UI.
+    """
+    try:
+        patient_id = _get_active_patient_id(db, current_user_id)
+        if not patient_id:
+            return {"vital_types": [], "lab_test_names": []}
+
+        fetcher = TrendDataFetcher(db)
+        vital_types = fetcher.get_available_vital_types(patient_id)
+        lab_test_names = fetcher.get_available_lab_test_names(patient_id)
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "available_trend_data_retrieved",
+            vital_type_count=len(vital_types),
+            lab_test_count=len(lab_test_names)
+        )
+
+        return {
+            "vital_types": vital_types,
+            "lab_test_names": lab_test_names,
+        }
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to retrieve available trend data",
+            e,
+            user_id=current_user_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve available trend data"
+        )
+
+
+@router.post("/trend-chart-counts")
+async def get_trend_chart_counts(
+    chart_selection: TrendChartSelection,
+    request: Request,
+    current_user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    """
+    Get record counts for selected trend charts filtered by their time ranges.
+    Used by the UI to show how many data points each chart will include.
+    """
+    try:
+        patient_id = _get_active_patient_id(db, current_user_id)
+        if not patient_id:
+            return {"vital_counts": {}, "lab_test_counts": {}}
+
+        fetcher = TrendDataFetcher(db)
+
+        vital_counts = {
+            chart.vital_type: fetcher.count_vital_records(
+                patient_id, chart.vital_type, chart.time_range,
+            )
+            for chart in chart_selection.vital_charts
+        }
+
+        lab_test_counts = {
+            chart.test_name: fetcher.count_lab_test_records(
+                patient_id, chart.test_name, chart.time_range,
+            )
+            for chart in chart_selection.lab_test_charts
+        }
+
+        return {
+            "vital_counts": vital_counts,
+            "lab_test_counts": lab_test_counts,
+        }
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to retrieve trend chart counts",
+            e,
+            user_id=current_user_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve trend chart counts"
         )
 
 
