@@ -2595,6 +2595,20 @@
         "currentOwner": "Responsável atual",
         "selfRecordWarningTitle": "Observação:",
         "selfRecordWarning": "Este é o auto-registro do responsável atual. Um novo auto-registro será criado para o responsável original com seus dados demográficos copiados. O responsável original receberá acesso de edição a este paciente."
+      },
+      "successRedirect": "Utilizador criado com sucesso! A redirecionar...",
+      "autoFeaturesTitle": "Funcionalidades geradas automaticamente",
+      "autoFeatures": {
+        "patientRecord": "Um perfil de paciente será criado automaticamente (ou vinculado a um existente)",
+        "linkExisting": "Use 'Vincular a paciente existente' para transferir um perfil de paciente para o novo utilizador",
+        "editAccess": "O responsável original mantém o acesso de edição após a transferência",
+        "timestamps": "Os carimbos de data/hora de criação/atualização são rastreados automaticamente",
+        "immediateLogin": "O novo utilizador pode iniciar sessão imediatamente após a criação"
+      },
+      "errors": {
+        "createFailed": "Falha ao criar utilizador",
+        "accountCreateFailed": "Falha ao criar conta",
+        "createRetry": "Falha ao criar utilizador. Por favor, tente novamente."
       }
     }
   },

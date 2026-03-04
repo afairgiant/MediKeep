@@ -25,6 +25,7 @@ const defaultAppDataContext = {
   practitioners: [],
   refreshPatient: vi.fn(),
   refreshPractitioners: vi.fn(),
+  fetchCurrentPatient: vi.fn(() => Promise.resolve()),
   isLoading: false,
   error: null,
 };

@@ -2579,6 +2579,33 @@
         "startManaging": "Potrai iniziare a gestire le tue informazioni mediche subito",
         "dataSecure": "Tutti i tuoi dati sono sicuri e privati"
       },
+      "linkPatient": {
+        "checkbox": "Collega a un record paziente esistente",
+        "hint": "Invece di creare un nuovo record paziente, collega il nuovo utente a un paziente esistente (ad es. un bambino che ora ha bisogno di un proprio accesso).",
+        "selectPlaceholder": "Seleziona un paziente...",
+        "loading": "Caricamento pazienti...",
+        "selfRecordBadge": "Record personale",
+        "patientId": "ID",
+        "dob": "Data di nascita",
+        "owner": "Proprietario",
+        "currentOwner": "Proprietario attuale",
+        "selfRecordWarningTitle": "Nota:",
+        "selfRecordWarning": "Questo è il record personale dell'attuale proprietario. Verrà creato un nuovo record personale per il proprietario originale con i suoi dati anagrafici copiati. Il proprietario originale riceverà accesso in modifica a questo paziente."
+      },
+      "successRedirect": "Utente creato con successo! Reindirizzamento...",
+      "autoFeaturesTitle": "Funzionalità generate automaticamente",
+      "autoFeatures": {
+        "patientRecord": "Un profilo paziente verrà creato automaticamente (o collegato a uno esistente)",
+        "linkExisting": "Usa 'Collega a paziente esistente' per trasferire un profilo paziente al nuovo utente",
+        "editAccess": "Il proprietario originale mantiene l'accesso in modifica dopo il trasferimento",
+        "timestamps": "I timestamp di creazione/aggiornamento vengono tracciati automaticamente",
+        "immediateLogin": "Il nuovo utente può accedere immediatamente dopo la creazione"
+      },
+      "errors": {
+        "createFailed": "Impossibile creare l'utente",
+        "accountCreateFailed": "Impossibile creare l'account",
+        "createRetry": "Impossibile creare l'utente. Riprovare."
+      }
       "welcomeMessage": "Benvenuto {{name}}! Il tuo account è stato creato con successo.",
       "accountCreated": "Account creato con successo! Accedi con le tue credenziali."
     }

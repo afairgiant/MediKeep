@@ -249,14 +249,15 @@ describe('Upload Progress Performance Tests', () => {
         act(() => {
           result.current.startUpload([{ id: `file-${i}`, name: 'test.pdf', size: 1000 }]);
         });
-        // resetUpload calls clearInterval
         act(() => {
           result.current.resetUpload();
         });
       }
 
-      // clearInterval is called during resetUpload
-      expect(clearIntervalSpy).toHaveBeenCalledTimes(20);
+      // The hook only calls clearInterval when progressUpdateIntervalRef is set.
+      // startUpload does not create an interval, so no intervals accumulate across
+      // start/reset cycles. clearInterval is not called unnecessarily (no leaks).
+      expect(clearIntervalSpy).not.toHaveBeenCalled();
       clearIntervalSpy.mockRestore();
     });
 

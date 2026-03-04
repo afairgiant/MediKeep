@@ -119,6 +119,10 @@ export const ResponsiveTable = memo(({
   const { t } = useTranslation('common');
   const hasActions = Boolean(onView || onEdit || onDelete);
 
+  // Coerce null to [] — the default param only fires for undefined, not null,
+  // so an API returning null would otherwise crash at data.length below.
+  data = data ?? [];
+
   // Restore persisted sort state from localStorage when persistKey is provided
   const persistedSort = useMemo(() => {
     if (!persistKey) return null;
@@ -437,6 +441,13 @@ export const ResponsiveTable = memo(({
               key={rowKey}
               onClick={(event) => handleRowClick(row, index, event)}
               onDoubleClick={onRowDoubleClick ? (event) => onRowDoubleClick(row, index, event) : undefined}
+              onKeyDown={(event) => {
+                if ((event.key === 'Enter' || event.key === ' ') && (onRowClick || selectable)) {
+                  event.preventDefault();
+                  handleRowClick(row, index, event);
+                }
+              }}
+              tabIndex={onRowClick || selectable ? 0 : undefined}
               style={{
                 cursor: onRowClick || selectable ? 'pointer' : 'default',
                 backgroundColor: isSelected ? 'var(--mantine-color-blue-0)' : undefined,
@@ -479,7 +490,7 @@ export const ResponsiveTable = memo(({
         })}
       </MantineTable.Tbody>
     );
-  }, [processedData, tableConfig.visibleColumns, selectedRows, handleRowClick, onRowDoubleClick, hasActions, renderActionButtons]);
+  }, [processedData, tableConfig.visibleColumns, selectedRows, handleRowClick, onRowDoubleClick, onRowClick, selectable, hasActions, renderActionButtons]);
 
   // Render card layout for mobile
   const renderCards = useCallback(() => {

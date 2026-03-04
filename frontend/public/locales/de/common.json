@@ -2579,6 +2579,33 @@
         "startManaging": "Sie können sofort mit der Verwaltung Ihrer medizinischen Daten beginnen",
         "dataSecure": "Alle Ihre Daten sind sicher und privat"
       },
+      "linkPatient": {
+        "checkbox": "Mit vorhandenem Patientenprofil verknüpfen",
+        "hint": "Anstatt ein neues Patientenprofil zu erstellen, verknüpfen Sie den neuen Benutzer mit einem bestehenden Patienten (z. B. ein Kind, das nun einen eigenen Login benötigt).",
+        "selectPlaceholder": "Patienten auswählen...",
+        "loading": "Lade Patienten...",
+        "selfRecordBadge": "Eigenakte",
+        "patientId": "ID",
+        "dob": "Geburtsdatum",
+        "owner": "Inhaber",
+        "currentOwner": "Aktueller Inhaber",
+        "selfRecordWarningTitle": "Hinweis:",
+        "selfRecordWarning": "Dies ist die Eigenakte des aktuellen Inhabers. Für den ursprünglichen Inhaber wird eine neue Eigenakte erstellt, in die seine demografischen Daten übernommen werden. Der ursprüngliche Inhaber erhält Bearbeitungsrechte für diesen Patienten."
+      },
+      "successRedirect": "Benutzer erfolgreich erstellt! Weiterleitung...",
+      "autoFeaturesTitle": "Automatisch generierte Funktionen",
+      "autoFeatures": {
+        "patientRecord": "Ein Patientenprofil wird automatisch erstellt (oder mit einem bestehenden verknüpft)",
+        "linkExisting": "Verwenden Sie 'Mit vorhandenem Patienten verknüpfen', um ein Patientenprofil auf den neuen Benutzer zu übertragen",
+        "editAccess": "Der ursprüngliche Inhaber behält nach der Übertragung Bearbeitungsrechte",
+        "timestamps": "Erstellungs-/Aktualisierungszeitstempel werden automatisch verfolgt",
+        "immediateLogin": "Der neue Benutzer kann sich sofort nach der Erstellung anmelden"
+      },
+      "errors": {
+        "createFailed": "Benutzer konnte nicht erstellt werden",
+        "accountCreateFailed": "Konto konnte nicht erstellt werden",
+        "createRetry": "Benutzer konnte nicht erstellt werden. Bitte erneut versuchen."
+      }
       "welcomeMessage": "Willkommen {{name}}! Ihr Konto wurde erfolgreich erstellt.",
       "accountCreated": "Konto erfolgreich erstellt! Bitte melden Sie sich mit Ihren Zugangsdaten an."
     }

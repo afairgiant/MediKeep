@@ -199,7 +199,10 @@ describe('FamilyHistorySharingModal Component', () => {
       const option = await screen.findByText('3 Days');
       await userEvent.click(option);
 
-      expect(expirationInput).toHaveValue('3 Days');
+      // Mantine v8 Select updates asynchronously - wait for value to update
+      await waitFor(() => {
+        expect(expirationInput).toHaveValue('3 Days');
+      });
     });
 
     it('should handle never expires option', async () => {
@@ -212,7 +215,10 @@ describe('FamilyHistorySharingModal Component', () => {
       const option = await screen.findByText('Never Expires');
       await userEvent.click(option);
 
-      expect(expirationInput).toHaveValue('Never Expires');
+      // Mantine v8 Select updates asynchronously - wait for value to update
+      await waitFor(() => {
+        expect(expirationInput).toHaveValue('Never Expires');
+      });
     });
 
     it('should validate required fields before sending invitation', async () => {
