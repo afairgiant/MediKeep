@@ -2150,18 +2150,21 @@ class CustomReportPDFGenerator:
             dia_stats = statistics["diastolic"]
             if not sys_stats and not dia_stats:
                 return None
-            headers = ["", "Latest", "Average", "Range"]
+            count = sys_stats.get("count", dia_stats.get("count", "-"))
+            headers = ["", "Latest", "Average", "Range", "Count"]
             sys_row = [
                 "Systolic",
                 f"{sys_stats.get('latest', '-')} {unit}",
                 f"{sys_stats.get('average', '-')} {unit}",
                 f"{sys_stats.get('min', '-')} - {sys_stats.get('max', '-')} {unit}",
+                str(count),
             ]
             dia_row = [
                 "Diastolic",
                 f"{dia_stats.get('latest', '-')} {unit}",
                 f"{dia_stats.get('average', '-')} {unit}",
                 f"{dia_stats.get('min', '-')} - {dia_stats.get('max', '-')} {unit}",
+                "",
             ]
             return [headers, sys_row, dia_row]
 
@@ -2170,10 +2173,11 @@ class CustomReportPDFGenerator:
             return None
 
         unit_suffix = f" {unit}" if unit else ""
-        headers = ["Latest", "Average", "Range"]
+        headers = ["Latest", "Average", "Range", "Count"]
         row = [
             f"{statistics.get('latest', '-')}{unit_suffix}",
             f"{statistics.get('average', '-')}{unit_suffix}",
             f"{statistics.get('min', '-')} - {statistics.get('max', '-')}{unit_suffix}",
+            str(statistics.get("count", "-")),
         ]
         return [headers, row]

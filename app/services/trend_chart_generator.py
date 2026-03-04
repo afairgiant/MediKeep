@@ -37,23 +37,8 @@ COLOR_SYSTOLIC = "#C62828"
 COLOR_DIASTOLIC = "#1565C0"
 COLOR_REF_BAND = "#E8F5E9"
 COLOR_REF_EDGE = "#81C784"
-COLOR_NORMAL = "#4CAF50"
-COLOR_HIGH = "#FF9800"
-COLOR_LOW = "#FF9800"
-COLOR_CRITICAL = "#F44336"
 COLOR_TREND_LINE = "#9E9E9E"
-
-# Status color mapping for lab results
-STATUS_COLORS = {
-    "normal": COLOR_NORMAL,
-    "high": COLOR_HIGH,
-    "low": COLOR_LOW,
-    "critical_high": COLOR_CRITICAL,
-    "critical_low": COLOR_CRITICAL,
-    "critical": COLOR_CRITICAL,
-    "abnormal": COLOR_HIGH,
-    "unknown": COLOR_LINE,
-}
+COLOR_DOT = "#2E7D32"
 
 
 def _marker_style(n: int) -> dict:
@@ -133,7 +118,6 @@ class TrendChartGenerator:
             ax.set_title(f"{display_name} Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
 
             _format_date_axis(ax, vital_data.get("date_from"), vital_data.get("date_to"))
-            _add_statistics_text(ax, vital_data.get("statistics", {}), unit)
 
             fig.tight_layout()
             return _figure_to_png(fig, canvas)
@@ -183,19 +167,6 @@ class TrendChartGenerator:
                         bbox_to_anchor=(0.0, 1.02), ncol=2, borderaxespad=0)
 
             _format_date_axis(ax, bp_data.get("date_from"), bp_data.get("date_to"))
-
-            # Stats text for both
-            stats = bp_data.get("statistics", {})
-            sys_stats = stats.get("systolic", {})
-            dia_stats = stats.get("diastolic", {})
-            if sys_stats and dia_stats:
-                text = (
-                    f"Sys: {sys_stats.get('latest', '-')}/{dia_stats.get('latest', '-')} mmHg  "
-                    f"Avg: {sys_stats.get('average', '-')}/{dia_stats.get('average', '-')}  "
-                    f"n={sys_stats.get('count', 0)}"
-                )
-                ax.text(0.02, 0.02, text, transform=ax.transAxes, fontsize=7,
-                        color="#616161", verticalalignment="bottom")
 
             fig.tight_layout()
             return _figure_to_png(fig, canvas)
@@ -257,13 +228,12 @@ class TrendChartGenerator:
             lw = _line_width(n)
             ax.plot(dates, values, color=COLOR_LINE, linewidth=lw, zorder=4)
 
-            # Status-colored dots (skip when too dense)
+            # Data point dots (skip when too dense)
             if n <= 80:
                 dot_size = 5 if n <= 30 else 3
-                for d, v, s in zip(dates, values, statuses):
-                    dot_color = STATUS_COLORS.get(s, COLOR_LINE)
-                    ax.plot(d, v, marker="o", markersize=dot_size, color=dot_color,
-                            markeredgecolor=dot_color, zorder=6)
+                ax.plot(dates, values, linestyle="none", marker="o",
+                        markersize=dot_size, color=COLOR_DOT,
+                        markeredgecolor=COLOR_DOT, zorder=6)
 
             # Trend line
             _add_trend_line(ax, dates, values)
@@ -273,7 +243,6 @@ class TrendChartGenerator:
             ax.set_title(f"{display_name} Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
 
             _format_date_axis(ax, lab_data.get("date_from"), lab_data.get("date_to"))
-            _add_statistics_text(ax, lab_data.get("statistics", {}), unit)
 
             fig.tight_layout()
             return _figure_to_png(fig, canvas)
@@ -353,7 +322,14 @@ def _calendar_ticks(dt_min, dt_max, span_days):
     from dateutil.relativedelta import relativedelta
 
     ticks = []
-    if span_days < 90:
+    if span_days <= 30:
+        # Daily ticks
+        from datetime import timedelta
+        cur = (dt_min + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+        while cur <= dt_max:
+            ticks.append(cur)
+            cur = cur + timedelta(days=1)
+    elif span_days < 90:
         # Semi-monthly: 1st and 15th
         cur = dt_min.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         while cur <= dt_max:
@@ -402,24 +378,6 @@ def _calendar_ticks(dt_min, dt_max, span_days):
 
     return ticks
 
-
-def _add_statistics_text(ax, statistics: Dict[str, Any], unit: str):
-    """Add summary statistics text to the bottom of the chart."""
-    if not statistics:
-        return
-
-    parts = []
-    if "latest" in statistics and statistics["latest"] is not None:
-        parts.append(f"Latest: {statistics['latest']}{unit}")
-    if "average" in statistics and statistics["average"] is not None:
-        parts.append(f"Avg: {statistics['average']}{unit}")
-    if "count" in statistics:
-        parts.append(f"n={statistics['count']}")
-
-    if parts:
-        text = "  |  ".join(parts)
-        ax.text(0.02, 0.02, text, transform=ax.transAxes, fontsize=7,
-                color="#616161", verticalalignment="bottom")
 
 
 def _add_trend_line(ax, dates: List, values: List[float]) -> None:
