@@ -280,11 +280,10 @@ describe('AdminDashboard', () => {
   });
 
   describe('View All Activity link (Item 21)', () => {
-    test('renders disabled View All Activity button when activities exist', () => {
+    test('renders View All Activity button when activities exist', () => {
       renderComponent();
       const button = screen.getByText('View All Activity').closest('button');
       expect(button).toBeInTheDocument();
-      expect(button).toBeDisabled();
     });
   });
 
@@ -358,23 +357,26 @@ describe('AdminDashboard', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/admin/models/user');
     });
 
-    test('Audit Log quick action is disabled', () => {
+    test('Audit Log quick action navigates to audit log', () => {
       renderComponent();
       const button = screen.getByText('Audit Log').closest('[role="button"]');
-      expect(button).toHaveAttribute('aria-disabled', 'true');
+      expect(button).toBeInTheDocument();
+      fireEvent.click(button);
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/audit-log');
     });
 
-    test('Trash quick action is disabled', () => {
+    test('Trash quick action navigates to trash', () => {
       renderComponent();
       const button = screen.getByText('Trash').closest('[role="button"]');
-      expect(button).toHaveAttribute('aria-disabled', 'true');
+      expect(button).toBeInTheDocument();
+      fireEvent.click(button);
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/trash');
     });
 
-    test('disabled quick actions do not navigate on click', () => {
+    test('active quick actions navigate on click', () => {
       renderComponent();
       fireEvent.click(screen.getByText('Audit Log').closest('[role="button"]'));
-      fireEvent.click(screen.getByText('Trash').closest('[role="button"]'));
-      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/audit-log');
     });
 
     test('quick action buttons are keyboard accessible', () => {
@@ -384,11 +386,11 @@ describe('AdminDashboard', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/admin/data-models');
     });
 
-    test('disabled quick actions ignore keyboard events', () => {
+    test('quick action buttons respond to keyboard events', () => {
       renderComponent();
       const button = screen.getByText('Audit Log').closest('[role="button"]');
       fireEvent.keyDown(button, { key: 'Enter' });
-      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockNavigate).toHaveBeenCalledWith('/admin/audit-log');
     });
   });
 });

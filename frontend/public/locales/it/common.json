@@ -2545,6 +2545,20 @@
         "currentOwner": "Proprietario attuale",
         "selfRecordWarningTitle": "Nota:",
         "selfRecordWarning": "Questo è il record personale dell'attuale proprietario. Verrà creato un nuovo record personale per il proprietario originale con i suoi dati anagrafici copiati. Il proprietario originale riceverà accesso in modifica a questo paziente."
+      },
+      "successRedirect": "Utente creato con successo! Reindirizzamento...",
+      "autoFeaturesTitle": "Funzionalità generate automaticamente",
+      "autoFeatures": {
+        "patientRecord": "Un profilo paziente verrà creato automaticamente (o collegato a uno esistente)",
+        "linkExisting": "Usa 'Collega a paziente esistente' per trasferire un profilo paziente al nuovo utente",
+        "editAccess": "Il proprietario originale mantiene l'accesso in modifica dopo il trasferimento",
+        "timestamps": "I timestamp di creazione/aggiornamento vengono tracciati automaticamente",
+        "immediateLogin": "Il nuovo utente può accedere immediatamente dopo la creazione"
+      },
+      "errors": {
+        "createFailed": "Impossibile creare l'utente",
+        "accountCreateFailed": "Impossibile creare l'account",
+        "createRetry": "Impossibile creare l'utente. Riprovare."
       }
     }
   }

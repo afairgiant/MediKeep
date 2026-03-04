@@ -2545,6 +2545,20 @@
         "currentOwner": "Propriétaire actuel",
         "selfRecordWarningTitle": "Remarque :",
         "selfRecordWarning": "Il s'agit de l'auto-dossier du propriétaire actuel. Un nouveau dossier personnel sera créé pour le propriétaire initial avec ses informations démographiques recopiées. Le propriétaire initial recevra un accès de modification à ce patient."
+      },
+      "successRedirect": "Utilisateur créé avec succès ! Redirection...",
+      "autoFeaturesTitle": "Fonctionnalités générées automatiquement",
+      "autoFeatures": {
+        "patientRecord": "Un dossier patient sera créé automatiquement (ou lié à un existant)",
+        "linkExisting": "Utilisez 'Lier à un patient existant' pour transférer un dossier patient au nouvel utilisateur",
+        "editAccess": "Le propriétaire initial conserve l'accès de modification après le transfert",
+        "timestamps": "Les horodatages de création/mise à jour sont suivis automatiquement",
+        "immediateLogin": "Le nouvel utilisateur peut se connecter immédiatement après la création"
+      },
+      "errors": {
+        "createFailed": "Échec de la création de l'utilisateur",
+        "accountCreateFailed": "Échec de la création du compte",
+        "createRetry": "Échec de la création de l'utilisateur. Veuillez réessayer."
       }
     }
   }

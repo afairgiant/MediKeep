@@ -211,6 +211,11 @@
       "other": "Autre"
     },
     "testType": {
+      "routine": "Routine - Traitement standard",
+      "urgent": "Urgent - Traitement accéléré",
+      "emergency": "Urgence - Priorité critique",
+      "followUp": "Suivi - Test répété",
+      "screening": "Dépistage - Test préventif",
       "label": "Type d'analyse",
       "placeholder": "Sélectionnez le niveau d'urgence",
       "description": "Priorité ou urgence de l'analyse"

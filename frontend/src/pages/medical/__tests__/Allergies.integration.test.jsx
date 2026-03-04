@@ -837,9 +837,8 @@ describe('Allergies Page Integration Tests', () => {
       renderWithPatient(<Allergies />);
 
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
-      // i18n keys for empty state title and message
-      expect(screen.getByText('allergies.emptyState.title')).toBeInTheDocument();
-      expect(screen.getByText('allergies.emptyState.noData')).toBeInTheDocument();
+      expect(screen.getByText('No allergies found')).toBeInTheDocument();
+      expect(screen.getByText('Click "Add New Allergy" to get started.')).toBeInTheDocument();
     });
   });
 
