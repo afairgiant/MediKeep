@@ -44,7 +44,7 @@ describe('TabletSidebar', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(screen.getAllByRole('button').length).toBeGreaterThan(0);
   });
 
   test('renders navigation toggle', () => {

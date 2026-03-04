@@ -197,43 +197,55 @@ export const ResponsiveSelect = memo(({
 
   // Transform options with grouping and medical context enhancements
   const processedOptions = useMemo(() => {
-    let processedData = options.map(option => {
-      // Handle different option formats
-      if (typeof option === 'string') {
-        return { value: option, label: option };
-      }
-      
-      return {
-        value: option.value,
-        label: option.label,
-        disabled: option.disabled,
-        group: option.group || (groupBy && option[groupBy]),
-        // Medical context enhancements
-        ...(medicalContext === 'practitioners' && {
-          description: option.specialty || option.description
-        }),
-        ...(medicalContext === 'pharmacies' && {
-          description: option.address || option.description
-        }),
-        ...(medicalContext === 'medications' && {
-          description: option.dosage || option.strength || option.description
-        })
-      };
-    });
+    let processedData = options
+      .filter(option => option != null) // Remove null/undefined entries
+      .map(option => {
+        // Handle different option formats
+        if (typeof option === 'string') {
+          return { value: option, label: option };
+        }
 
-    // Apply grouping if specified
+        if (typeof option !== 'object') {
+          return null;
+        }
+
+        const groupValue = option.group || (groupBy && option[groupBy]) || undefined;
+
+        return {
+          value: option.value,
+          label: option.label ?? option.value ?? '',
+          // Only include these keys when truthy to avoid Mantine v8 misinterpreting undefined group
+          ...(option.disabled && { disabled: option.disabled }),
+          ...(groupValue && { group: groupValue }),
+          // Medical context enhancements
+          ...(medicalContext === 'practitioners' && {
+            description: option.specialty || option.description
+          }),
+          ...(medicalContext === 'pharmacies' && {
+            description: option.address || option.description
+          }),
+          ...(medicalContext === 'medications' && {
+            description: option.dosage || option.strength || option.description
+          })
+        };
+      })
+      .filter(item => item != null && item.value != null); // Remove null entries and entries with no usable value
+
+    // Apply grouping if specified - use Mantine v8 group format { group, items }
     if (groupBy && !isMobile) {
       const grouped = processedData.reduce((acc, option) => {
         const group = option.group || 'Other';
         if (!acc[group]) acc[group] = [];
-        acc[group].push(option);
+        // Remove group key from individual items since it's now the group header
+        const { group: _g, ...itemWithoutGroup } = option;
+        acc[group].push(itemWithoutGroup);
         return acc;
       }, {});
 
-      processedData = Object.entries(grouped).flatMap(([group, groupOptions]) => [
-        { group, disabled: true }, // Group header
-        ...groupOptions
-      ]);
+      processedData = Object.entries(grouped).map(([group, items]) => ({
+        group,
+        items
+      }));
     }
 
     return processedData;
@@ -281,76 +293,77 @@ export const ResponsiveSelect = memo(({
   }
 
   return (
-    <MantineSelect
-      // Core props
-      label={label}
-      name={name}
-      value={value}
-      onChange={handleChange}
-      data={processedOptions}
-      placeholder={loading ? loadingText : placeholder}
-      error={error}
-      required={required}
-      disabled={disabled || loading}
-      description={description}
-      className={className}
-      
-      // Responsive configuration
-      size={responsiveConfig.size}
-      searchable={responsiveConfig.searchable}
-      clearable={clearable && !required}
-      limit={optimizedLimit}
-      maxDropdownHeight={responsiveConfig.maxDropdownHeight}
-      withinPortal={responsiveConfig.withinPortal}
-      transitionProps={responsiveConfig.transitionProps}
-      dropdownPosition={responsiveConfig.dropdownPosition}
-      comboboxProps={responsiveConfig.comboboxProps}
-      
-      // Search functionality
-      onSearchChange={responsiveConfig.searchable ? handleSearch : undefined}
-      searchValue={responsiveConfig.searchable ? searchValue : undefined}
-      
-      // Dropdown events
-      onDropdownOpen={handleDropdownOpen}
-      onDropdownClose={handleDropdownClose}
-      
-      // Performance optimizations
-      withScrollArea={options.length > 20}
-      
-      // Accessibility
-      withAsterisk={required}
-      {...accessibilityProps}
-      
-      // Loading state
-      rightSection={loading ? (
-        <Loader size="xs" />
-      ) : (
-        <IconChevronDown size={rem(16)} />
-      )}
-      
-      // Mobile-specific enhancements
-      {...(isMobile && {
-        styles: (theme) => ({
-          input: {
-            minHeight: rem(48), // Larger touch target
-            fontSize: rem(16), // Prevent zoom on iOS
-          },
-          dropdown: {
-            maxHeight: '60vh',
-            overflowY: 'auto'
-          }
-        })
-      })}
-      
-      // Medical context specific props
-      {...(medicalContext === 'practitioners' && {
-        rightSectionPointerEvents: 'none'
-      })}
-      
-      // Additional props
-      {...props}
-    >
-      {/* Custom option rendering for medical contexts */}
+    <Box>
+      <MantineSelect
+        // Core props
+        label={label}
+        name={name}
+        value={value}
+        onChange={handleChange}
+        data={processedOptions}
+        placeholder={loading ? loadingText : placeholder}
+        error={error}
+        required={required}
+        disabled={disabled || loading}
+        description={description}
+        className={className}
+
+        // Responsive configuration
+        size={responsiveConfig.size}
+        searchable={responsiveConfig.searchable}
+        clearable={clearable && !required}
+        limit={optimizedLimit}
+        maxDropdownHeight={responsiveConfig.maxDropdownHeight}
+        withinPortal={responsiveConfig.withinPortal}
+        transitionProps={responsiveConfig.transitionProps}
+        dropdownPosition={responsiveConfig.dropdownPosition}
+        comboboxProps={responsiveConfig.comboboxProps}
+
+        // Search functionality
+        onSearchChange={responsiveConfig.searchable ? handleSearch : undefined}
+        searchValue={responsiveConfig.searchable ? searchValue : undefined}
+
+        // Dropdown events
+        onDropdownOpen={handleDropdownOpen}
+        onDropdownClose={handleDropdownClose}
+
+        // Performance optimizations
+        withScrollArea={options.length > 20}
+
+        // Accessibility
+        withAsterisk={required}
+        {...accessibilityProps}
+
+        // Loading state
+        rightSection={loading ? (
+          <Loader size="xs" />
+        ) : (
+          <IconChevronDown size={rem(16)} />
+        )}
+
+        // Mobile-specific enhancements
+        {...(isMobile && {
+          styles: (theme) => ({
+            input: {
+              minHeight: rem(48), // Larger touch target
+              fontSize: rem(16), // Prevent zoom on iOS
+            },
+            dropdown: {
+              maxHeight: '60vh',
+              overflowY: 'auto'
+            }
+          })
+        })}
+
+        // Medical context specific props
+        {...(medicalContext === 'practitioners' && {
+          rightSectionPointerEvents: 'none'
+        })}
+
+        // Additional props
+        {...props}
+      />
+      {/* Option count display rendered outside Select to avoid void element children error */}
       {processedOptions.length > 0 && showCount && (
         <Group justify="space-between" px="xs" py="xs" bg="gray.0">
           <Text size="xs" c="dimmed">
@@ -358,7 +371,7 @@ export const ResponsiveSelect = memo(({
           </Text>
         </Group>
       )}
-    </MantineSelect>
+    </Box>
   );
 });
 
