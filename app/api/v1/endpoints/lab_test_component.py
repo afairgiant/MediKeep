@@ -546,24 +546,9 @@ def _calculate_quantitative_statistics(components: List[Any], count: int) -> Lab
     minimum = min(values)
     maximum = max(values)
 
-    # Trend direction (compare first half vs second half)
-    trend = "stable"
-    if len(values) >= 4:
-        mid = len(values) // 2
-        first_half_avg = sum(values[:mid]) / mid
-        second_half_avg = sum(values[mid:]) / (len(values) - mid)
-
-        if abs(first_half_avg) > 0.01:
-            change_percent = ((second_half_avg - first_half_avg) / abs(first_half_avg)) * 100
-            if change_percent > 5:
-                trend = "increasing"
-            elif change_percent < -5:
-                trend = "decreasing"
-        elif abs(second_half_avg - first_half_avg) > 0.01:
-            if second_half_avg > first_half_avg:
-                trend = "increasing"
-            elif second_half_avg < first_half_avg:
-                trend = "decreasing"
+    # Trend direction using linear regression slope
+    from app.utils.trend_statistics import compute_trend_direction
+    trend = compute_trend_direction(values)
 
     # Time in range
     normal_count = sum(1 for c in components if c.status == "normal")

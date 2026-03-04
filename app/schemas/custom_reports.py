@@ -8,7 +8,9 @@ including request/response models for selective record exports and report templa
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_validator, model_validator, ValidationInfo
+
+from app.schemas.trend_charts import TrendChartSelection
 
 
 class DateRange(BaseModel):
@@ -43,8 +45,12 @@ class SelectiveRecordRequest(BaseModel):
 class CustomReportRequest(BaseModel):
     """Request model for generating custom medical reports"""
     selected_records: List[SelectiveRecordRequest] = Field(
-        ...,
+        default_factory=list,
         description="List of categories with selected record IDs"
+    )
+    trend_charts: Optional[TrendChartSelection] = Field(
+        default=None,
+        description="Trend charts to include in the report"
     )
     report_title: Optional[str] = Field(
         default="Custom Medical Report",
@@ -72,7 +78,7 @@ class CustomReportRequest(BaseModel):
     @classmethod
     def validate_selected_records(cls, v):
         if not v:
-            raise ValueError('At least one category with records must be selected')
+            return v
 
         # Check for duplicate categories
         categories = [req.category for req in v]
@@ -86,14 +92,26 @@ class CustomReportRequest(BaseModel):
 
         return v
 
+    @model_validator(mode='after')
+    def validate_has_content(self):
+        has_records = bool(self.selected_records)
+        has_charts = bool(self.trend_charts)
+        if not has_records and not has_charts:
+            raise ValueError('Report must include at least records or trend charts')
+        return self
+
 
 class ReportTemplate(BaseModel):
     """Model for saving and managing report templates"""
     name: str = Field(..., max_length=255, description="Template name")
     description: Optional[str] = Field(None, max_length=1000, description="Template description")
     selected_records: List[SelectiveRecordRequest] = Field(
-        ...,
+        default_factory=list,
         description="Saved record selections"
+    )
+    trend_charts: Optional[TrendChartSelection] = Field(
+        default=None,
+        description="Trend chart selections for the template"
     )
     is_public: bool = Field(default=False, description="Whether template is public")
     shared_with_family: bool = Field(

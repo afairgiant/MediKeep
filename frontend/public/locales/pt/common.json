@@ -2064,6 +2064,8 @@
     "buttons": {
       "settings": "Configurações",
       "generateReport": "Gerar Relatório ({{count}} registros)",
+      "generateReportWithCharts": "Gerar Relatório ({{recordCount}} registros, {{chartCount}} gráficos)",
+      "generateReportChartsOnly": "Gerar Relatório ({{chartCount}} gráficos)",
       "selectAll": "Selecionar Todos os Registros",
       "clearSelections": "Limpar Todas as Seleções",
       "addRecords": "Adicionar Registros Médicos"
@@ -2114,6 +2116,30 @@
     "notifications": {
       "templateLoaded": "Template Carregado",
       "templateLoadedMessage": "Template \"{{name}}\" foi carregado."
+    },
+    "trendCharts": {
+      "title": "Gráficos de Tendência",
+      "description": "Selecione os sinais vitais e exames laboratoriais para incluir como gráficos de tendência no seu relatório",
+      "emptyState": "Nenhum dado de tendência disponível. Adicione sinais vitais ou resultados de laboratório para ativar os gráficos de tendência.",
+      "maxReached": "Máximo de 10 gráficos atingido",
+      "vitalCharts": {
+        "title": "Gráficos de Sinais Vitais",
+        "description": "Selecione os sinais vitais para representar"
+      },
+      "labTestCharts": {
+        "title": "Gráficos de Exames Laboratoriais",
+        "description": "Pesquise e selecione os exames laboratoriais para representar",
+        "searchPlaceholder": "Pesquisar exames laboratoriais..."
+      },
+      "dateFrom": "De",
+      "dateTo": "Até",
+      "selectedCharts": "Gráficos Selecionados ({{count}})",
+      "recordCount": "{{count}} registros",
+      "removeChart": "Remover gráfico {{name}}"
+    },
+    "segmentControl": {
+      "records": "Registros Médicos",
+      "trendCharts": "Gráficos de Tendência"
     }
   },
   "exportPage": {
