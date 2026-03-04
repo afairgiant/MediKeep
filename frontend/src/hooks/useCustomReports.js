@@ -146,13 +146,20 @@ export const useCustomReports = () => {
 
   // --- Trend chart actions ---
 
+  const formatLocalDate = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
   const getDefaultDateFrom = () => {
     const d = new Date();
     d.setFullYear(d.getFullYear() - 1);
-    return d.toISOString().slice(0, 10);
+    return formatLocalDate(d);
   };
 
-  const getDefaultDateTo = () => new Date().toISOString().slice(0, 10);
+  const getDefaultDateTo = () => formatLocalDate(new Date());
 
   const addVitalChart = useCallback((vitalType) => {
     setTrendCharts(prev => {

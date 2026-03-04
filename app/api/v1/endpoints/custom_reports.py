@@ -216,6 +216,15 @@ async def get_trend_chart_counts(
             for chart in chart_selection.lab_test_charts
         }
 
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "trend_chart_counts_retrieved",
+            vital_chart_count=len(vital_counts),
+            lab_test_chart_count=len(lab_test_counts),
+        )
+
         return {
             "vital_counts": vital_counts,
             "lab_test_counts": lab_test_counts,

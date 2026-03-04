@@ -1,6 +1,5 @@
 """Tests for trend chart generator (app/services/trend_chart_generator.py)"""
 
-import struct
 from datetime import datetime, timedelta
 
 import pytest

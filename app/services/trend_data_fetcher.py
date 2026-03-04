@@ -8,13 +8,14 @@ and lab test trend data for chart generation in custom reports.
 from datetime import date
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import func
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.crud.lab_test_component import lab_test_component as crud_lab_test_component
 from app.models.models import LabResult, LabTestComponent, Vitals
 from app.schemas.trend_charts import SUPPORTED_VITAL_TYPES
+from app.utils.trend_statistics import compute_trend_direction
 
 logger = get_logger(__name__, "app")
 
@@ -346,14 +347,37 @@ class TrendDataFetcher:
         date_to: Optional[date] = None,
     ) -> int:
         """Count lab test component records for a test name within a date range."""
-        components = crud_lab_test_component.get_by_patient_and_test_name(
-            self.db,
-            patient_id=patient_id,
-            test_name=test_name,
-            date_from=date_from,
-            date_to=date_to,
+        query = (
+            self.db.query(func.count(LabTestComponent.id))
+            .join(LabTestComponent.lab_result)
+            .filter(
+                and_(
+                    LabTestComponent.lab_result.has(patient_id=patient_id),
+                    or_(
+                        and_(
+                            LabTestComponent.canonical_test_name.isnot(None),
+                            func.lower(LabTestComponent.canonical_test_name) == func.lower(test_name),
+                        ),
+                        and_(
+                            LabTestComponent.canonical_test_name.is_(None),
+                            func.lower(func.rtrim(LabTestComponent.test_name, ',;: ')) == func.lower(test_name),
+                        ),
+                    ),
+                )
+            )
         )
-        return len(components)
+
+        if date_from or date_to:
+            recorded_date_expr = func.coalesce(
+                LabResult.completed_date,
+                func.date(LabTestComponent.created_at),
+            )
+            if date_from:
+                query = query.filter(recorded_date_expr >= date_from)
+            if date_to:
+                query = query.filter(recorded_date_expr <= date_to)
+
+        return query.scalar() or 0
 
 
 def _compute_vital_statistics(values: List[float]) -> Dict[str, Any]:
@@ -379,49 +403,5 @@ def _compute_vital_statistics(values: List[float]) -> Dict[str, Any]:
     }
 
 
-def _compute_trend_direction(values: List[float]) -> str:
-    """
-    Determine trend direction using linear regression slope.
-
-    Fits a least-squares line y = mx + b to the values (using index as x)
-    and checks whether the total predicted change over the dataset is
-    meaningful relative to the data's range.
-    """
-    n = len(values)
-    if n < 3:
-        return "stable"
-
-    # Least-squares linear regression: y = mx + b
-    # x values are 0, 1, 2, ..., n-1
-    sum_x = n * (n - 1) / 2
-    sum_x2 = n * (n - 1) * (2 * n - 1) / 6
-    sum_y = sum(values)
-    sum_xy = sum(i * v for i, v in enumerate(values))
-
-    denominator = n * sum_x2 - sum_x * sum_x
-    if abs(denominator) < 1e-10:
-        return "stable"
-
-    slope = (n * sum_xy - sum_x * sum_y) / denominator
-
-    # Total predicted change over the dataset
-    total_change = slope * (n - 1)
-
-    # Compare against the data range to determine significance
-    data_range = max(values) - min(values)
-    avg = sum_y / n
-
-    # Use whichever is larger as the baseline for comparison
-    baseline = max(data_range, abs(avg) * 0.01)
-    if baseline < 1e-10:
-        return "stable"
-
-    # Trend is meaningful if the regression line's total rise/fall
-    # is at least 10% of the data range (or avg for flat data)
-    threshold = baseline * 0.10
-    if total_change > threshold:
-        return "increasing"
-    elif total_change < -threshold:
-        return "decreasing"
-
-    return "stable"
+# Kept as private alias for internal callers
+_compute_trend_direction = compute_trend_direction

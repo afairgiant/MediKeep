@@ -826,6 +826,8 @@ class CustomReportService:
 
             # Get the active patient information
             user = self.db.query(User).filter(User.id == user_id).first()
+            if not user:
+                raise CustomReportError("User not found")
             patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
 
             if not patient:
@@ -942,7 +944,7 @@ class CustomReportService:
             except Exception as e:
                 logger.error("Failed to generate %s chart %s: %s", chart_type, label, e)
 
-        logger.info("Generated %d trend charts for patient %d", len(chart_results), patient_id)
+        logger.info("Generated %d trend charts for report", len(chart_results))
         return chart_results
     
     async def _get_selected_records(

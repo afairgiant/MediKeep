@@ -547,8 +547,8 @@ def _calculate_quantitative_statistics(components: List[Any], count: int) -> Lab
     maximum = max(values)
 
     # Trend direction using linear regression slope
-    from app.services.trend_data_fetcher import _compute_trend_direction
-    trend = _compute_trend_direction(values)
+    from app.utils.trend_statistics import compute_trend_direction
+    trend = compute_trend_direction(values)
 
     # Time in range
     normal_count = sum(1 for c in components if c.status == "normal")
