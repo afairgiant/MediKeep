@@ -2055,6 +2055,8 @@
     "buttons": {
       "settings": "Impostazioni",
       "generateReport": "Genera report ({{count}} record)",
+      "generateReportWithCharts": "Genera report ({{recordCount}} record, {{chartCount}} grafici)",
+      "generateReportChartsOnly": "Genera report ({{chartCount}} grafici)",
       "selectAll": "Seleziona tutti i record",
       "clearSelections": "Cancella tutte le selezioni",
       "addRecords": "Aggiungi record medici"
@@ -2105,6 +2107,30 @@
     "notifications": {
       "templateLoaded": "Modello caricato",
       "templateLoadedMessage": "Il modello \"{{name}}\" è stato caricato."
+    },
+    "trendCharts": {
+      "title": "Grafici di tendenza",
+      "description": "Seleziona i segni vitali e gli esami di laboratorio da includere come grafici di tendenza nel tuo report",
+      "emptyState": "Nessun dato di tendenza disponibile. Aggiungi segni vitali o risultati di laboratorio per abilitare i grafici di tendenza.",
+      "maxReached": "Massimo di 10 grafici raggiunto",
+      "vitalCharts": {
+        "title": "Grafici dei segni vitali",
+        "description": "Seleziona i segni vitali da rappresentare graficamente"
+      },
+      "labTestCharts": {
+        "title": "Grafici degli esami di laboratorio",
+        "description": "Cerca e seleziona gli esami di laboratorio da rappresentare graficamente",
+        "searchPlaceholder": "Cerca esami di laboratorio..."
+      },
+      "dateFrom": "Da",
+      "dateTo": "A",
+      "selectedCharts": "Grafici selezionati ({{count}})",
+      "recordCount": "{{count}} registrazioni",
+      "removeChart": "Rimuovi grafico {{name}}"
+    },
+    "segmentControl": {
+      "records": "Cartelle cliniche",
+      "trendCharts": "Grafici di tendenza"
     }
   },
   "exportPage": {

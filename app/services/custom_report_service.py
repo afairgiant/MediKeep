@@ -809,28 +809,34 @@ class CustomReportService:
                 )
     
     async def generate_selective_report(
-        self, 
-        user_id: int, 
+        self,
+        user_id: int,
         request: CustomReportRequest
     ) -> bytes:
-        """Generate PDF with only selected records"""
+        """Generate PDF with only selected records and/or trend charts"""
         start_time = time.time()
-        
+
         try:
             # Log report generation start
             await self._log_report_generation_start(user_id, request)
-            
-            # Validate ownership
-            await self.validate_record_ownership(user_id, request.selected_records)
-            
-            # Get the active patient information (already validated in validate_record_ownership)
+
+            # Validate ownership (only if records are selected)
+            if request.selected_records:
+                await self.validate_record_ownership(user_id, request.selected_records)
+
+            # Get the active patient information
             user = self.db.query(User).filter(User.id == user_id).first()
+            if not user:
+                raise CustomReportError("User not found")
             patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
-            
+
+            if not patient:
+                raise CustomReportError("No active patient found")
+
             # Collect selected data
             report_data = {}
             failed_categories = []
-            
+
             for record_group in request.selected_records:
                 try:
                     category_data = await self._get_selected_records(
@@ -845,21 +851,33 @@ class CustomReportService:
                         f"Failed to export {record_group.category} for user {user_id}: {str(e)}"
                     )
                     failed_categories.append(record_group.category)
-            
-            if not report_data and failed_categories:
+
+            # Generate trend charts if requested
+            trend_chart_data = []
+            if request.trend_charts:
+                trend_chart_data = self._generate_trend_charts(
+                    patient.id, request.trend_charts
+                )
+
+            # Fail only if no records AND no charts were produced
+            if not report_data and not trend_chart_data and failed_categories:
                 raise CustomReportError(
                     "No categories could be processed successfully",
                     details={'failed_categories': failed_categories}
                 )
-            
+
+            if not report_data and not trend_chart_data:
+                raise CustomReportError("No data available for report generation")
+
             # Generate PDF using export service
             pdf_data = await self._generate_pdf_report(
                 patient,
                 report_data,
                 request,
-                failed_categories
+                failed_categories,
+                trend_chart_data
             )
-            
+
             # Log successful generation
             generation_time = int((time.time() - start_time) * 1000)
             await self._log_report_generation_complete(
@@ -869,13 +887,65 @@ class CustomReportService:
                 len(pdf_data),
                 failed_categories
             )
-            
+
             return pdf_data
-            
+
         except Exception as e:
             # Log failed generation
             await self._log_report_generation_failed(user_id, request, str(e))
             raise
+
+    def _generate_trend_charts(
+        self,
+        patient_id: int,
+        trend_charts: "TrendChartSelection"
+    ) -> List[Dict[str, Any]]:
+        """Generate trend chart images and collect their data for PDF inclusion."""
+        from app.services.trend_data_fetcher import TrendDataFetcher
+        from app.services.trend_chart_generator import TrendChartGenerator
+
+        fetcher = TrendDataFetcher(self.db)
+        generator = TrendChartGenerator()
+        chart_results = []
+
+        # Build a unified list of (label, fetch_fn, render_fn, chart_type) tasks
+        chart_tasks = []
+        for vc in trend_charts.vital_charts:
+            chart_tasks.append((
+                vc.vital_type,
+                lambda v=vc: fetcher.fetch_vital_trend(patient_id, v.vital_type, v.date_from, v.date_to),
+                lambda data, v=vc: generator.generate_vital_chart(data, v.vital_type),
+                "vital",
+            ))
+        for lc in trend_charts.lab_test_charts:
+            chart_tasks.append((
+                lc.test_name,
+                lambda l=lc: fetcher.fetch_lab_test_trend(patient_id, l.test_name, l.date_from, l.date_to),
+                lambda data, l=lc: generator.generate_lab_test_chart(data),
+                "lab_test",
+            ))
+
+        for label, fetch_fn, render_fn, chart_type in chart_tasks:
+            try:
+                data = fetch_fn()
+                png_bytes = render_fn(data)
+                if png_bytes:
+                    chart_results.append({
+                        "title": data.get("display_name", label),
+                        "png_bytes": png_bytes,
+                        "statistics": data.get("statistics", {}),
+                        "unit": data.get("unit", ""),
+                        "chart_type": chart_type,
+                        "date_from": data.get("date_from"),
+                        "date_to": data.get("date_to"),
+                    })
+                else:
+                    logger.warning("No data for %s chart: %s", chart_type, label)
+            except Exception as e:
+                logger.error("Failed to generate %s chart %s: %s", chart_type, label, e)
+
+        logger.info("Generated %d trend charts for report", len(chart_results))
+        return chart_results
     
     async def _get_selected_records(
         self,
@@ -1065,7 +1135,8 @@ class CustomReportService:
         patient: Patient,
         report_data: Dict[str, List[Dict]],
         request: CustomReportRequest,
-        failed_categories: List[str]
+        failed_categories: List[str],
+        trend_chart_data: Optional[List[Dict[str, Any]]] = None,
     ) -> bytes:
         """Generate PDF report using the new custom PDF generator"""
         # Prepare data for PDF generator
@@ -1078,9 +1149,10 @@ class CustomReportService:
             'failed_categories': failed_categories if failed_categories else None,
             'include_patient_info': request.include_patient_info,
             'include_summary': request.include_summary,
-            'include_profile_picture': request.include_profile_picture
+            'include_profile_picture': request.include_profile_picture,
+            'trend_charts': trend_chart_data if trend_chart_data else None,
         }
-        
+
         # Use new PDF generator
         pdf_bytes = await self.pdf_generator.generate_pdf(pdf_data)
         return pdf_bytes

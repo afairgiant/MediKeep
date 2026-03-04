@@ -2108,6 +2108,8 @@
     "buttons": {
       "settings": "Settings",
       "generateReport": "Generate Report ({{count}} records)",
+      "generateReportWithCharts": "Generate Report ({{recordCount}} records, {{chartCount}} charts)",
+      "generateReportChartsOnly": "Generate Report ({{chartCount}} charts)",
       "selectAll": "Select All Records",
       "clearSelections": "Clear All Selections",
       "addRecords": "Add Medical Records"
@@ -2158,6 +2160,30 @@
     "notifications": {
       "templateLoaded": "Template Loaded",
       "templateLoadedMessage": "Template \"{{name}}\" has been loaded."
+    },
+    "trendCharts": {
+      "title": "Trend Charts",
+      "description": "Select vital signs and lab tests to include as trend charts in your report",
+      "emptyState": "No trend data available. Add vital signs or lab results to enable trend charts.",
+      "maxReached": "Maximum of 10 charts reached",
+      "vitalCharts": {
+        "title": "Vital Sign Charts",
+        "description": "Select vital signs to chart"
+      },
+      "labTestCharts": {
+        "title": "Lab Test Charts",
+        "description": "Search and select lab tests to chart",
+        "searchPlaceholder": "Search lab tests..."
+      },
+      "dateFrom": "From",
+      "dateTo": "To",
+      "selectedCharts": "Selected Charts ({{count}})",
+      "recordCount": "{{count}} records",
+      "removeChart": "Remove {{name}} chart"
+    },
+    "segmentControl": {
+      "records": "Medical Records",
+      "trendCharts": "Trend Charts"
     }
   },
   "exportPage": {

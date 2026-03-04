@@ -2014,6 +2014,8 @@
     "buttons": {
       "settings": "Paramètres",
       "generateReport": "Générer le rapport ({{count}} entrées)",
+      "generateReportWithCharts": "Générer le rapport ({{recordCount}} entrées, {{chartCount}} graphiques)",
+      "generateReportChartsOnly": "Générer le rapport ({{chartCount}} graphiques)",
       "selectAll": "Sélectionner toutes les entrées",
       "clearSelections": "Tout désélectionner",
       "addRecords": "Ajouter des données médicales"
@@ -2064,6 +2066,30 @@
     "notifications": {
       "templateLoaded": "Modèle chargé",
       "templateLoadedMessage": "Modèle \"{{name}}\" chargé."
+    },
+    "trendCharts": {
+      "title": "Graphiques de tendance",
+      "description": "Sélectionnez les signes vitaux et les analyses de laboratoire à inclure sous forme de graphiques de tendance dans votre rapport",
+      "emptyState": "Aucune donnée de tendance disponible. Ajoutez des signes vitaux ou des résultats d'analyses pour activer les graphiques de tendance.",
+      "maxReached": "Maximum de 10 graphiques atteint",
+      "vitalCharts": {
+        "title": "Graphiques des signes vitaux",
+        "description": "Sélectionnez les signes vitaux à représenter graphiquement"
+      },
+      "labTestCharts": {
+        "title": "Graphiques des analyses de laboratoire",
+        "description": "Recherchez et sélectionnez les analyses de laboratoire à représenter graphiquement",
+        "searchPlaceholder": "Rechercher des analyses de laboratoire..."
+      },
+      "dateFrom": "Du",
+      "dateTo": "Au",
+      "selectedCharts": "Graphiques sélectionnés ({{count}})",
+      "recordCount": "{{count}} enregistrements",
+      "removeChart": "Supprimer le graphique {{name}}"
+    },
+    "segmentControl": {
+      "records": "Dossiers médicaux",
+      "trendCharts": "Graphiques de tendance"
     }
   },
   "exportPage": {
