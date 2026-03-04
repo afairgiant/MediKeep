@@ -7,7 +7,7 @@ import { apiService } from '../../services/api';
 import { Button, Alert } from '../../components/ui';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import logger from '../../services/logger';
-import '../../styles/pages/Login.css';
+import styles from '../../styles/pages/Login.module.css';
 import '../../components/auth/ChangePasswordModal.css';
 
 /**
@@ -100,8 +100,8 @@ const ForceChangePassword = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-form login-form--wide">
+    <div className={styles.loginContainer}>
+      <div className={`${styles.loginForm} ${styles.loginFormWide}`}>
         <FormLoadingOverlay
           visible={isSubmitting}
           message={t('settings.security.password.forceChange.submitting')}

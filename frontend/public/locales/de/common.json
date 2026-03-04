@@ -29,6 +29,7 @@
     "print": "Drucken",
     "refresh": "Aktualisieren",
     "retry": "Erneut versuchen",
+    "restore": "Wiederherstellen",
     "continue": "Fortfahren",
     "skip": "Überspringen",
     "done": "Fertig",
@@ -336,7 +337,47 @@
       "pasteDateTime": "Datum/Uhrzeit einfügen oder eingeben",
       "pasteDateTimeDescription": "Datum/Uhrzeit eingeben oder einfügen, oder Kalender zum Auswählen klicken",
       "pasteDateTimePlaceholder": "z. B. 29.07.2015 23:58:21",
-      "selectTime": "Uhrzeit"
+      "selectTime": "Uhrzeit",
+      "lockedByImport": "Verwaltet durch Geräteimport"
+    },
+    "import": {
+      "title": "Vitalwerte importieren",
+      "selectDevice": "Gerät auswählen",
+      "selectDevicePlaceholder": "Wählen Sie Ihr Gerät...",
+      "uploadFile": "CSV-Datei hochladen",
+      "preview": "Vorschau",
+      "importButton": "Importieren",
+      "back": "Zurück",
+      "importing": "Vitalwerte werden importiert...",
+      "previewTitle": "Import-Vorschau",
+      "totalReadings": "Gesamtmessungen",
+      "duplicatesFound": "Duplikate gefunden",
+      "newReadings": "Neue Messungen",
+      "dateRange": "Datumsbereich",
+      "skipDuplicates": "Doppelte Messungen überspringen",
+      "duplicateWarning": "{{count}} Messungen existieren bereits in diesem Datumsbereich. Aktivieren Sie das Kontrollkästchen oben, um sie zu überspringen.",
+      "success": "{{count}} Messungen erfolgreich importiert",
+      "successWithSkipped": "{{imported}} Messungen importiert ({{skipped}} Duplikate übersprungen)",
+      "noFile": "Bitte wählen Sie eine CSV-Datei aus",
+      "noDevice": "Bitte wählen Sie ein Gerät aus",
+      "fileTooLarge": "Die Datei überschreitet das Limit von 10 MB",
+      "invalidFileType": "Nur CSV-Dateien werden unterstützt",
+      "duplicate": "Duplikat",
+      "parsingFailed": "CSV-Datei konnte nicht analysiert werden"
+    },
+    "summary": {
+      "dailySummary": "Tagesübersicht",
+      "readings": "{{count}} Messungen",
+      "avgGlucose": "Durchschn.",
+      "minGlucose": "Min",
+      "maxGlucose": "Max",
+      "expandDetails": "Messungen anzeigen",
+      "collapseDetails": "Messungen ausblenden",
+      "importedFrom": "Importiert von {{source}}",
+      "glucoseTrend": "Glukosetrend",
+      "time": "Uhrzeit",
+      "confirmDeleteDay": "Alle {{count}} importierten Messungen für diesen Tag löschen?",
+      "deleteDay": "Tag löschen"
     }
   },
   "medications": {
@@ -2503,35 +2544,40 @@
       "loading": "Lade Allergien..."
     }
   },
-  "admin": {
-    "createUser": {
+  "auth": {
+    "login": {
+      "title": "MELDEN SIE SICH AN",
       "username": "Benutzername",
-      "usernamePlaceholder": "Benutzernamen eingeben",
       "password": "Passwort",
-      "passwordPlaceholder": "Passwort eingeben (mind. 6 Zeichen, mit Buchstaben und Zahl)",
-      "email": "E-Mail",
-      "emailPlaceholder": "E-Mail-Adresse eingeben",
-      "role": "Rolle",
-      "roleUser": "Benutzer",
-      "roleAdmin": "Admin",
-      "firstName": "Vorname",
-      "firstNamePlaceholder": "Vornamen eingeben",
-      "lastName": "Nachname",
-      "lastNamePlaceholder": "Nachnamen eingeben",
-      "submitButton": "Konto erstellen",
-      "noteLabel": "Hinweis:",
-      "noteText": "Für diesen Benutzer wird automatisch ein Patientenprofil mit der Standardrolle \"Benutzer\" erstellt.",
-      "validation": {
-        "firstNameRequired": "Bitte geben Sie den Vornamen ein",
-        "lastNameRequired": "Bitte geben Sie den Nachnamen ein",
-        "usernameMinLength": "Der Benutzername muss mindestens 3 Zeichen lang sein",
-        "passwordMinLength": "Das Passwort muss mindestens 6 Zeichen lang sein",
-        "passwordRequirements": "Das Passwort muss mindestens einen Buchstaben und eine Zahl enthalten"
+      "usernamePlaceholder": "Benutzernamen eingeben",
+      "passwordPlaceholder": "Passwort eingeben",
+      "showPassword": "Passwort anzeigen",
+      "hidePassword": "Passwort verbergen",
+      "submit": "Anmelden",
+      "submitting": "Anmeldung...",
+      "createAccount": "Neues Konto erstellen",
+      "or": "oder",
+      "continueWith": "Weiter mit {{provider}}",
+      "registrationDisabled": "Die Registrierung neuer Benutzer ist derzeit deaktiviert."
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "Mindestens 6 Zeichen",
+        "letter": "Mindestens ein Buchstabe",
+        "number": "Mindestens eine Zahl"
       },
-      "passwordReqs": {
-        "minLength": "Mindestens 6 Zeichen",
-        "hasLetter": "Enthält mindestens einen Buchstaben",
-        "hasNumber": "Enthält mindestens eine Zahl"
+      "note": "Ein Patientendatensatz wird automatisch für diesen Benutzer mit der Standardrolle \"Benutzer\" erstellt.",
+      "backToLogin": "Zurück zur Anmeldung",
+      "pageTitle": "Konto erstellen",
+      "pageSubtitle": "Treten Sie MediKeep bei und verwalten Sie Ihre Gesundheitsdaten sicher",
+      "cardTitle": "Kontodetails",
+      "cardSubtitle": "Füllen Sie das folgende Formular aus, um Ihr Konto zu erstellen",
+      "whatHappensNext": "Was passiert als Nächstes?",
+      "nextSteps": {
+        "autoRecord": "Ihr Patientendatensatz wird automatisch erstellt",
+        "loggedIn": "Sie werden sofort nach der Kontoerstellung angemeldet",
+        "startManaging": "Sie können sofort mit der Verwaltung Ihrer medizinischen Daten beginnen",
+        "dataSecure": "Alle Ihre Daten sind sicher und privat"
       },
       "linkPatient": {
         "checkbox": "Mit vorhandenem Patientenprofil verknüpfen",
@@ -2560,6 +2606,8 @@
         "accountCreateFailed": "Konto konnte nicht erstellt werden",
         "createRetry": "Benutzer konnte nicht erstellt werden. Bitte erneut versuchen."
       }
+      "welcomeMessage": "Willkommen {{name}}! Ihr Konto wurde erfolgreich erstellt.",
+      "accountCreated": "Konto erfolgreich erstellt! Bitte melden Sie sich mit Ihren Zugangsdaten an."
     }
   }
 }

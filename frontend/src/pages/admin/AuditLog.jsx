@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ActionIcon,
   Card,
@@ -34,6 +35,7 @@ import {
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { downloadBlob } from '../../utils/downloadUtils';
 import logger from '../../services/logger';
 
 const DEBOUNCE_MS = 300;
@@ -79,6 +81,7 @@ function getEntityLink(entry) {
 
 const AuditLog = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation(['admin', 'common']);
   const { formatDateTime } = useDateFormat();
 
   // Pagination
@@ -178,14 +181,7 @@ const AuditLog = () => {
     setExporting(true);
     try {
       const blob = await adminApiService.exportActivityLog(buildFilterParams());
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'audit_log_export.csv';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
+      downloadBlob(blob, 'audit_log_export.csv');
     } catch (err) {
       logger.error('audit_log_export_error', 'Failed to export activity log', {
         component: 'AuditLog',
@@ -224,13 +220,13 @@ const AuditLog = () => {
           <Group justify="space-between" align="flex-start">
             <div>
               <Group align="center" mb="xs">
-                <ThemeIcon size="xl" variant="light" color="blue">
+                <ThemeIcon size="xl" variant="light" color="blue" aria-hidden="true">
                   <IconFileText size={24} />
                 </ThemeIcon>
-                <Title order={2}>Audit Log</Title>
+                <Title order={2}>{t('auditLog.title', 'Audit Log')}</Title>
               </Group>
               <Text c="dimmed" size="md">
-                Complete activity trail for compliance and auditing
+                {t('auditLog.subtitle', 'Complete activity trail for compliance and auditing')}
               </Text>
             </div>
             <Group>
@@ -240,14 +236,14 @@ const AuditLog = () => {
                 onClick={fetchData}
                 loading={loading}
               >
-                Refresh
+                {t('common:buttons.refresh', 'Refresh')}
               </Button>
               <Button
                 leftSection={<IconDownload size={16} />}
                 onClick={handleExport}
                 loading={exporting}
               >
-                Export CSV
+                {t('auditLog.exportCsv', 'Export CSV')}
               </Button>
             </Group>
           </Group>
@@ -258,48 +254,48 @@ const AuditLog = () => {
           <Stack gap="sm">
             <Group grow align="flex-end">
               <TextInput
-                placeholder="Search descriptions..."
+                placeholder={t('auditLog.searchPlaceholder', 'Search descriptions...')}
                 leftSection={<IconSearch size={16} />}
                 value={search}
                 onChange={(e) => setSearch(e.currentTarget.value)}
-                aria-label="Search activity log"
+                aria-label={t('auditLog.searchAriaLabel', 'Search activity log')}
               />
               <DatePickerInput
                 type="range"
-                placeholder="Date range"
+                placeholder={t('auditLog.dateRange', 'Date range')}
                 value={dateRange}
                 onChange={setDateRange}
                 clearable
-                aria-label="Filter by date range"
+                aria-label={t('auditLog.filterByDateRange', 'Filter by date range')}
               />
             </Group>
             <Group grow align="flex-end">
               <Select
-                placeholder="Action"
+                placeholder={t('auditLog.actionFilter', 'Action')}
                 data={actionOptions}
                 value={actionFilter}
                 onChange={setActionFilter}
                 clearable
                 searchable
-                aria-label="Filter by action"
+                aria-label={t('auditLog.filterByAction', 'Filter by action')}
               />
               <Select
-                placeholder="Entity Type"
+                placeholder={t('auditLog.entityTypeFilter', 'Entity Type')}
                 data={entityTypeOptions}
                 value={entityTypeFilter}
                 onChange={setEntityTypeFilter}
                 clearable
                 searchable
-                aria-label="Filter by entity type"
+                aria-label={t('auditLog.filterByEntityType', 'Filter by entity type')}
               />
               <Select
-                placeholder="User"
+                placeholder={t('auditLog.userFilter', 'User')}
                 data={userOptions}
                 value={userFilter}
                 onChange={setUserFilter}
                 clearable
                 searchable
-                aria-label="Filter by user"
+                aria-label={t('auditLog.filterByUser', 'Filter by user')}
               />
               {hasActiveFilters && (
                 <Button
@@ -308,7 +304,7 @@ const AuditLog = () => {
                   leftSection={<IconFilterOff size={16} />}
                   onClick={handleClearFilters}
                 >
-                  Clear Filters
+                  {t('auditLog.clearFilters', 'Clear Filters')}
                 </Button>
               )}
             </Group>
@@ -318,8 +314,8 @@ const AuditLog = () => {
         {/* Results Info */}
         {data && !loading && (
           <Text size="sm" c="dimmed">
-            Showing {data.items?.length || 0} of {data.total || 0} results
-            {data.total_pages > 1 && ` (page ${data.page} of ${data.total_pages})`}
+            {t('auditLog.showingResults', 'Showing {{shown}} of {{total}} results', { shown: data.items?.length || 0, total: data.total || 0 })}
+            {data.total_pages > 1 && ` (${t('auditLog.pageInfo', 'page {{page}} of {{totalPages}}', { page: data.page, totalPages: data.total_pages })})`}
           </Text>
         )}
 
@@ -327,12 +323,12 @@ const AuditLog = () => {
         {error && (
           <Alert
             icon={<IconAlertCircle size={16} />}
-            title="Error loading audit log"
+            title={t('auditLog.errorLoading', 'Error loading audit log')}
             color="red"
           >
             {error}
             <Button variant="subtle" size="xs" mt="xs" onClick={fetchData}>
-              Retry
+              {t('common:buttons.retry', 'Retry')}
             </Button>
           </Alert>
         )}
@@ -342,7 +338,7 @@ const AuditLog = () => {
           <Center py="xl">
             <Stack align="center">
               <Loader size="lg" />
-              <Text c="dimmed">Loading audit log...</Text>
+              <Text c="dimmed">{t('auditLog.loading', 'Loading audit log...')}</Text>
             </Stack>
           </Center>
         )}
@@ -366,15 +362,15 @@ const AuditLog = () => {
               </Center>
             )}
             <ScrollArea>
-              <Table striped highlightOnHover>
+              <Table striped highlightOnHover aria-label="Activity log entries">
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>Timestamp</Table.Th>
-                    <Table.Th>User</Table.Th>
-                    <Table.Th>Action</Table.Th>
-                    <Table.Th>Entity Type</Table.Th>
-                    <Table.Th>Description</Table.Th>
-                    <Table.Th>Record ID</Table.Th>
+                    <Table.Th>{t('auditLog.tableHeaders.timestamp', 'Timestamp')}</Table.Th>
+                    <Table.Th>{t('auditLog.tableHeaders.user', 'User')}</Table.Th>
+                    <Table.Th>{t('auditLog.tableHeaders.action', 'Action')}</Table.Th>
+                    <Table.Th>{t('auditLog.tableHeaders.entityType', 'Entity Type')}</Table.Th>
+                    <Table.Th>{t('auditLog.tableHeaders.description', 'Description')}</Table.Th>
+                    <Table.Th>{t('auditLog.tableHeaders.recordId', 'Record ID')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -386,6 +382,13 @@ const AuditLog = () => {
                           key={entry.id}
                           style={link ? { cursor: 'pointer' } : undefined}
                           onClick={link ? () => navigate(link) : undefined}
+                          onKeyDown={link ? (e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              navigate(link);
+                            }
+                          } : undefined}
+                          tabIndex={link ? 0 : undefined}
                         >
                           <Table.Td style={{ whiteSpace: 'nowrap' }}>
                             <Text size="sm">
@@ -393,7 +396,7 @@ const AuditLog = () => {
                             </Text>
                           </Table.Td>
                           <Table.Td>
-                            <Text size="sm">{entry.username || 'System'}</Text>
+                            <Text size="sm">{entry.username || t('auditLog.system', 'System')}</Text>
                           </Table.Td>
                           <Table.Td>
                             <Badge
@@ -421,7 +424,7 @@ const AuditLog = () => {
                           </Table.Td>
                           <Table.Td>
                             {link ? (
-                              <Tooltip label={`View ${entry.entity_type_display} record`}>
+                              <Tooltip label={t('auditLog.viewRecord', 'View {{type}} record', { type: entry.entity_type_display })}>
                                 <ActionIcon
                                   variant="subtle"
                                   size="sm"
@@ -430,7 +433,7 @@ const AuditLog = () => {
                                     e.stopPropagation();
                                     navigate(link);
                                   }}
-                                  aria-label={`View ${entry.entity_type_display} #${entry.entity_id}`}
+                                  aria-label={t('auditLog.viewRecordAriaLabel', 'View {{type}} #{{id}}', { type: entry.entity_type_display, id: entry.entity_id })}
                                 >
                                   <IconExternalLink size={14} />
                                 </ActionIcon>
@@ -453,7 +456,7 @@ const AuditLog = () => {
                               <IconFileText size={24} />
                             </ThemeIcon>
                             <Text c="dimmed" size="sm">
-                              No activity logs found
+                              {t('auditLog.noLogs', 'No activity logs found')}
                             </Text>
                           </Stack>
                         </Center>

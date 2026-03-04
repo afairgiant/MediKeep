@@ -20,7 +20,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 
-import { theme } from './theme';
+import { theme, cssVariablesResolver } from './theme';
 
 // Responsive System
 import { ResponsiveProvider } from './providers/ResponsiveProvider';
@@ -77,6 +77,9 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AuditLog from './pages/admin/AuditLog';
 import TrashManagement from './pages/admin/TrashManagement';
 import DataModels from './pages/admin/DataModels';
+import UserManagement from './pages/admin/UserManagement';
+import ToolsMaintenance from './pages/admin/ToolsMaintenance';
+import Analytics from './pages/admin/Analytics';
 import ReportBuilder from './pages/reports/ReportBuilder';
 import TagManagement from './pages/tools/TagManagement';
 import SearchResults from './pages/SearchResults';
@@ -367,7 +370,7 @@ function App() {
         <AuthProvider>
           <UserPreferencesProvider>
             <AppDataProvider>
-              <MantineProvider theme={theme}>
+              <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver}>
                 <Notifications />
                 <ResponsiveProvider>
                   <DatesProvider settings={{}}>
@@ -474,6 +477,10 @@ function App() {
                           }
                         />
                         <Route
+                          path="/tag-search"
+                          element={<Navigate to="/search" replace />}
+                        />
+                        <Route
                           path="/search"
                           element={
                             <ProtectedRoute>
@@ -507,6 +514,14 @@ function App() {
                           }
                         />
                         <Route
+                          path="/admin/analytics"
+                          element={
+                            <AdminRoute>
+                              <Analytics />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
                           path="/admin/data-models"
                           element={
                             <AdminRoute>
@@ -527,6 +542,14 @@ function App() {
                           element={
                             <AdminRoute>
                               <BackupManagement />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/users"
+                          element={
+                            <AdminRoute>
+                              <UserManagement />
                             </AdminRoute>
                           }
                         />
@@ -591,6 +614,14 @@ function App() {
                           element={
                             <AdminRoute>
                               <TrashManagement />
+                            </AdminRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/tools"
+                          element={
+                            <AdminRoute>
+                              <ToolsMaintenance />
                             </AdminRoute>
                           }
                         />

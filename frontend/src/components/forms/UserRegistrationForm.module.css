@@ -1,0 +1,166 @@
+.form {
+  width: 100%;
+}
+
+.errorMessage {
+  background-color: #fee;
+  color: #c33;
+  padding: 0.75rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  border: 1px solid #fcc;
+  text-align: center;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.formGroup input,
+.formGroup select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  outline: none;
+  background: white;
+  color: #333;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  border-color: #667eea;
+}
+
+.passwordRequirements {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  display: block;
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  padding: 0.2rem 0;
+  color: #dc3545; /* Original Red */
+  transition: color 0.3s ease;
+}
+
+.requirement.valid {
+  color: #28a745 !important; /* Original Green */
+}
+
+/* Ensure CSS modules exports 'valid' as a class we can use in JSX */
+.valid {
+  opacity: 1;
+}
+
+.requirement:before {
+  content: '✗';
+  margin-right: 0.5rem;
+  font-weight: bold;
+}
+
+.requirement.valid:before {
+  content: '✓' !important;
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+
+.createUserInfo {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e9ecef;
+  margin-top: 1rem;
+  background: #f8f9fa;
+  border-radius: 0 0 10px 10px;
+}
+
+.createUserInfo p {
+  margin: 1rem 0 0 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Patient Linking Section (Admin User Create) */
+.patientLinkSection {
+  border-top: 1px solid #e1e5e9;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.fieldHint {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0.75rem 0;
+  line-height: 1.4;
+}
+
+.patientSelectContainer {
+  margin-top: 0.75rem;
+}
+
+.selfRecordBadge {
+  display: inline-block;
+  background: #fff3cd;
+  color: #856404;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  margin-left: 0.5rem;
+}
+
+.selectedPatientCard {
+  border: 2px solid #667eea;
+  border-radius: 5px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+  background: #f8f9ff;
+}
+
+.selectedPatientInfo p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.selfRecordWarning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+  .formActions {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  .createUserInfo {
+    padding: 1rem;
+  }
+}

@@ -13,6 +13,7 @@ from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
+from app.api.v1.admin.csv_utils import stream_csv
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
@@ -282,6 +283,51 @@ async def list_backups(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to list backups: {str(e)}",
+        )
+
+
+@router.get("/export")
+async def export_backup_history(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
+    """Export backup history as CSV."""
+    log_endpoint_access(logger, request, current_user.id, "backup_history_export")
+
+    try:
+        backup_service = BackupService(db)
+        backups = await backup_service.list_backups()
+
+        headers = [
+            "ID", "Backup Type", "Status", "Filename",
+            "Size (bytes)", "Created At", "Description", "File Exists",
+        ]
+        field_keys = [
+            "id", "backup_type", "status", "filename",
+            "size_bytes", "created_at", "description", "file_exists",
+        ]
+
+        rows = []
+        for backup in backups:
+            row = {}
+            for header, key in zip(headers, field_keys):
+                value = backup.get(key, "")
+                if key == "file_exists":
+                    value = "Yes" if value else "No"
+                row[header] = value if value is not None else ""
+            rows.append(row)
+
+        return stream_csv(headers, rows, "backup_history_export.csv")
+
+    except Exception as e:
+        log_endpoint_error(
+            logger, request, "Failed to export backup history", e,
+            user_id=current_user.id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to export backup history",
         )
 
 

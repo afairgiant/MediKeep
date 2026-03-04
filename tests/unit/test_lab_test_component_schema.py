@@ -1,5 +1,5 @@
 """
-Unit tests for LabTestComponentBase schema validation
+Unit tests for LabTestComponentBase and LabTestComponentUpdate schema validation
 
 Tests cover:
 1. Full range (min and max) auto-status calculation
@@ -10,12 +10,13 @@ Tests cover:
 6. Qualitative test creation and validation
 7. Qualitative auto-status calculation
 8. Cross-field validation (quantitative vs qualitative)
+9. Empty/whitespace qualitative value normalization (Base + Update schemas)
 """
 
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.lab_test_component import LabTestComponentBase
+from app.schemas.lab_test_component import LabTestComponentBase, LabTestComponentUpdate
 
 
 def make_component(**overrides):
@@ -245,3 +246,48 @@ class TestCrossFieldValidation:
     def test_none_result_type_defaults_to_quantitative(self):
         comp = make_component(result_type=None)
         assert comp.result_type == "quantitative"
+
+
+class TestQualitativeValueNormalization:
+    """Tests for empty/whitespace qualitative value handling (issue #598)."""
+
+    def test_empty_string_normalized_to_none_in_base(self):
+        """Empty string qualitative_value should become None (not trigger validation error)."""
+        comp = make_component(qualitative_value="")
+        assert comp.qualitative_value is None
+
+    def test_whitespace_only_normalized_to_none_in_base(self):
+        comp = make_component(qualitative_value="   ")
+        assert comp.qualitative_value is None
+
+    def test_whitespace_tabs_normalized_to_none_in_base(self):
+        comp = make_component(qualitative_value="\n\t")
+        assert comp.qualitative_value is None
+
+    def test_padded_valid_value_accepted_in_base(self):
+        """Whitespace-padded valid values should be stripped and accepted."""
+        comp = make_qualitative_component(qualitative_value=" Positive ")
+        assert comp.qualitative_value == "positive"
+
+    def test_empty_string_normalized_to_none_in_update(self):
+        update = LabTestComponentUpdate(qualitative_value="")
+        assert update.qualitative_value is None
+
+    def test_whitespace_only_normalized_to_none_in_update(self):
+        update = LabTestComponentUpdate(qualitative_value="   ")
+        assert update.qualitative_value is None
+
+    def test_padded_valid_value_accepted_in_update(self):
+        update = LabTestComponentUpdate(qualitative_value=" negative ")
+        assert update.qualitative_value == "negative"
+
+    def test_quantitative_edit_with_empty_qualitative_in_update(self):
+        """The exact scenario from issue #598: editing a quantitative test sends empty qualitative_value."""
+        update = LabTestComponentUpdate(
+            value=150.0,
+            unit="ng/mL",
+            result_type="quantitative",
+            qualitative_value="",
+        )
+        assert update.qualitative_value is None
+        assert update.value == 150.0

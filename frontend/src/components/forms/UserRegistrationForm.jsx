@@ -5,9 +5,10 @@ import { authService } from '../../services/auth/simpleAuthService';
 import { adminApiService } from '../../services/api/adminApi';
 import frontendLogger from '../../services/frontendLogger';
 import { Button, Checkbox, Select } from '../ui';
+import styles from './UserRegistrationForm.module.css';
 
 const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['admin', 'common']);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -63,10 +64,10 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
     return allPatients.map(patient => {
       const selfTag = patient.is_self_record ? ' [Self-Record]' : '';
       const ownerInfo = patient.owner_full_name
-        ? ` (${t('admin.createUser.linkPatient.owner', 'Owner')}: ${patient.owner_full_name})`
+        ? ` (${t('createUser.linkPatient.owner', 'Owner')}: ${patient.owner_full_name})`
         : '';
       const dobInfo = patient.birth_date
-        ? ` - ${t('admin.createUser.linkPatient.dob', 'DOB')}: ${patient.birth_date}`
+        ? ` - ${t('createUser.linkPatient.dob', 'DOB')}: ${patient.birth_date}`
         : '';
 
       return {
@@ -105,27 +106,27 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
 
   const validateForm = () => {
     if (!formData.firstName.trim()) {
-      setError(t('admin.createUser.validation.firstNameRequired', 'Please enter the first name'));
+      setError(t('createUser.validation.firstNameRequired', 'Please enter the first name'));
       return false;
     }
 
     if (!formData.lastName.trim()) {
-      setError(t('admin.createUser.validation.lastNameRequired', 'Please enter the last name'));
+      setError(t('createUser.validation.lastNameRequired', 'Please enter the last name'));
       return false;
     }
 
     if (formData.username.length < 3) {
-      setError(t('admin.createUser.validation.usernameMinLength', 'Username must be at least 3 characters long'));
+      setError(t('createUser.validation.usernameMinLength', 'Username must be at least 3 characters long'));
       return false;
     }
 
     if (formData.password.length < 6) {
-      setError(t('admin.createUser.validation.passwordMinLength', 'Password must be at least 6 characters long'));
+      setError(t('createUser.validation.passwordMinLength', 'Password must be at least 6 characters long'));
       return false;
     }
 
     if (!/[a-zA-Z]/.test(formData.password) || !/\d/.test(formData.password)) {
-      setError(t('admin.createUser.validation.passwordRequirements', 'Password must contain at least one letter and one number'));
+      setError(t('createUser.validation.passwordRequirements', 'Password must contain at least one letter and one number'));
       return false;
     }
 
@@ -200,7 +201,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
             linkedPatientId: result.data?.linked_patient_id,
           });
         } else {
-          setError(result.message || t('admin.createUser.errors.createFailed', 'Failed to create user'));
+          setError(result.message || t('createUser.errors.createFailed', 'Failed to create user'));
         }
       } else {
         const registerResult = await authService.register(buildPayload());
@@ -216,7 +217,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
         } else {
           setError(parseErrorMessage(
             registerResult.error,
-            t('admin.createUser.errors.accountCreateFailed', 'Failed to create account')
+            t('createUser.errors.accountCreateFailed', 'Failed to create account')
           ));
         }
       }
@@ -229,7 +230,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
 
       setError(parseErrorMessage(
         err,
-        t('admin.createUser.errors.createRetry', 'Failed to create user. Please try again.')
+        t('createUser.errors.createRetry', 'Failed to create user. Please try again.')
       ));
     } finally {
       setIsCreating(false);
@@ -237,10 +238,10 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {error && <div className="error-message">{error}</div>}
+    <form onSubmit={handleSubmit} className={styles.form}>
+      {error && <div className={styles.errorMessage}>{error}</div>}
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label htmlFor="username">{t('admin.createUser.username', 'Username')} *</label>
         <input
           type="text"
@@ -250,11 +251,11 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           onChange={handleChange}
           required
           disabled={isCreating}
-          placeholder={t('admin.createUser.usernamePlaceholder', 'Enter username')}
+          placeholder={t('createUser.usernamePlaceholder', 'Enter username')}
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label htmlFor="password">{t('admin.createUser.password', 'Password')} *</label>
         <input
           type="password"
@@ -264,23 +265,23 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           onChange={handleChange}
           required
           disabled={isCreating}
-          placeholder={t('admin.createUser.passwordPlaceholder', 'Enter password (min 6 chars, include letter & number)')}
+          placeholder={t('createUser.passwordPlaceholder', 'Enter password (min 6 chars, include letter & number)')}
           minLength={6}
         />
-        <div className="password-requirements">
-          <div className={`requirement ${formData.password.length >= 6 ? 'valid' : ''}`}>
+        <div className={styles.passwordRequirements}>
+          <div className={`${styles.requirement} ${formData.password.length >= 6 ? styles.valid : ''}`}>
             {t('admin.createUser.passwordReqs.minLength', 'At least 6 characters')}
           </div>
-          <div className={`requirement ${/[a-zA-Z]/.test(formData.password) ? 'valid' : ''}`}>
+          <div className={`${styles.requirement} ${/[a-zA-Z]/.test(formData.password) ? styles.valid : ''}`}>
             {t('admin.createUser.passwordReqs.hasLetter', 'Contains at least one letter')}
           </div>
-          <div className={`requirement ${/[0-9]/.test(formData.password) ? 'valid' : ''}`}>
+          <div className={`${styles.requirement} ${/[0-9]/.test(formData.password) ? styles.valid : ''}`}>
             {t('admin.createUser.passwordReqs.hasNumber', 'Contains at least one number')}
           </div>
         </div>
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label htmlFor="email">{t('admin.createUser.email', 'Email')} *</label>
         <input
           type="email"
@@ -290,12 +291,12 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           onChange={handleChange}
           required
           disabled={isCreating}
-          placeholder={t('admin.createUser.emailPlaceholder', 'Enter email address')}
+          placeholder={t('createUser.emailPlaceholder', 'Enter email address')}
         />
       </div>
 
       {isAdminContext && (
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="role">{t('admin.createUser.role', 'Role')} *</label>
           <select
             id="role"
@@ -305,13 +306,13 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
             required
             disabled={isCreating}
           >
-            <option value="user">{t('admin.createUser.roleUser', 'User')}</option>
-            <option value="admin">{t('admin.createUser.roleAdmin', 'Admin')}</option>
+            <option value="user">{t('createUser.roleUser', 'User')}</option>
+            <option value="admin">{t('createUser.roleAdmin', 'Admin')}</option>
           </select>
         </div>
       )}
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label htmlFor="firstName">{t('admin.createUser.firstName', 'First Name')} *</label>
         <input
           type="text"
@@ -321,11 +322,11 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           onChange={handleChange}
           required
           disabled={isCreating}
-          placeholder={t('admin.createUser.firstNamePlaceholder', 'Enter first name')}
+          placeholder={t('createUser.firstNamePlaceholder', 'Enter first name')}
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label htmlFor="lastName">{t('admin.createUser.lastName', 'Last Name')} *</label>
         <input
           type="text"
@@ -335,33 +336,33 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           onChange={handleChange}
           required
           disabled={isCreating}
-          placeholder={t('admin.createUser.lastNamePlaceholder', 'Enter last name')}
+          placeholder={t('createUser.lastNamePlaceholder', 'Enter last name')}
         />
       </div>
 
       {isAdminContext && (
-        <div className="form-group patient-link-section">
+        <div className={`${styles.formGroup} ${styles.patientLinkSection}`}>
           <Checkbox
             checked={linkExistingPatient}
             onChange={handleLinkToggle}
-            label={t('admin.createUser.linkPatient.checkbox', 'Link to existing patient record')}
+            label={t('createUser.linkPatient.checkbox', 'Link to existing patient record')}
             disabled={isCreating}
             id="linkExistingPatient"
           />
-          <p className="field-hint">
+          <p className={styles.fieldHint}>
             {t('admin.createUser.linkPatient.hint', 'Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).')}
           </p>
 
           {linkExistingPatient && (
-            <div className="patient-select-container">
+            <div className={styles.patientSelectContainer}>
               <Select
                 value={selectedPatientId}
                 onChange={handlePatientSelect}
                 options={patientOptions}
                 placeholder={
                   isLoadingPatients
-                    ? t('admin.createUser.linkPatient.loading', 'Loading patients...')
-                    : t('admin.createUser.linkPatient.selectPlaceholder', 'Select a patient...')
+                    ? t('createUser.linkPatient.loading', 'Loading patients...')
+                    : t('createUser.linkPatient.selectPlaceholder', 'Select a patient...')
                 }
                 disabled={isCreating || isLoadingPatients}
                 searchable
@@ -369,26 +370,26 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
               />
 
               {selectedPatient && (
-                <div className="selected-patient-card">
-                  <div className="selected-patient-info">
+                <div className={styles.selectedPatientCard}>
+                  <div className={styles.selectedPatientInfo}>
                     <p>
                       <strong>{selectedPatient.first_name} {selectedPatient.last_name}</strong>
                       {selectedPatient.is_self_record && (
-                        <span className="self-record-badge">
+                        <span className={styles.selfRecordBadge}>
                           {t('admin.createUser.linkPatient.selfRecordBadge', 'Self-Record')}
                         </span>
                       )}
                     </p>
-                    <p>{t('admin.createUser.linkPatient.patientId', 'ID')}: {selectedPatient.id}</p>
+                    <p>{t('createUser.linkPatient.patientId', 'ID')}: {selectedPatient.id}</p>
                     {selectedPatient.birth_date && (
-                      <p>{t('admin.createUser.linkPatient.dob', 'DOB')}: {selectedPatient.birth_date}</p>
+                      <p>{t('createUser.linkPatient.dob', 'DOB')}: {selectedPatient.birth_date}</p>
                     )}
                     {selectedPatient.owner_full_name && (
-                      <p>{t('admin.createUser.linkPatient.currentOwner', 'Current Owner')}: {selectedPatient.owner_full_name}</p>
+                      <p>{t('createUser.linkPatient.currentOwner', 'Current Owner')}: {selectedPatient.owner_full_name}</p>
                     )}
                   </div>
                   {selectedPatient.is_self_record && (
-                    <div className="self-record-warning">
+                    <div className={styles.selfRecordWarning}>
                       <strong>{t('admin.createUser.linkPatient.selfRecordWarningTitle', 'Note:')}</strong>{' '}
                       {t('admin.createUser.linkPatient.selfRecordWarning', 'This is the current owner\'s self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.')}
                     </div>
@@ -400,14 +401,14 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
         </div>
       )}
 
-      <div className="form-actions">
+      <div className={styles.formActions}>
         {onCancel && (
           <Button
             variant="secondary"
             onClick={onCancel}
             disabled={isCreating}
           >
-            {t('buttons.cancel', 'Cancel')}
+            {t('common:buttons.cancel', 'Cancel')}
           </Button>
         )}
         <Button
@@ -416,14 +417,14 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           disabled={isCreating}
           loading={isCreating}
         >
-          {t('admin.createUser.submitButton', 'Create Account')}
+          {t('createUser.submitButton', 'Create Account')}
         </Button>
       </div>
 
       {!isAdminContext && (
-        <div className="create-user-info">
+        <div className={styles.createUserInfo}>
           <p>
-            <strong>{t('admin.createUser.noteLabel', 'Note:')}</strong> {t('admin.createUser.noteText', 'A patient record will be automatically created for this user with default role "user".')}
+            <strong>{t('createUser.noteLabel', 'Note:')}</strong> {t('createUser.noteText', 'A patient record will be automatically created for this user with default role "user".')}
           </p>
         </div>
       )}

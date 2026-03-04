@@ -24,6 +24,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
+import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
@@ -41,6 +43,7 @@ const VisitViewModal = ({
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
+  const { getTagColor } = useTagColors();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('overview');
@@ -255,15 +258,11 @@ const VisitViewModal = ({
                       <Title order={4} mb="sm">{t('labels.tags', 'Tags')}</Title>
                       <Group gap="xs">
                         {visit.tags.map((tag, index) => (
-                          <Badge
+                          <ClickableTagBadge
                             key={index}
-                            variant="light"
-                            color="blue"
-                            size="sm"
-                            radius="md"
-                          >
-                            {tag}
-                          </Badge>
+                            tag={tag}
+                            color={getTagColor(tag)}
+                          />
                         ))}
                       </Group>
                     </div>

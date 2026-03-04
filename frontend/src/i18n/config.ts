@@ -16,7 +16,7 @@ i18n
     // This ensures i18n.language always matches our supported language codes
     load: 'languageOnly',
 
-    ns: ['common', 'medical', 'errors', 'navigation', 'notifications'],
+    ns: ['common', 'medical', 'errors', 'navigation', 'notifications', 'admin'],
     defaultNS: 'common',
 
     // Return key if translation is missing in development, fallback to English in production

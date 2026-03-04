@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.deps import BusinessLogicException, NotFoundException
+from app.api.deps import BusinessLogicException, NotFoundException, ValidationException
 from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.core.logging.helpers import log_data_access
+from app.core.logging.helpers import log_data_access, log_endpoint_error
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -27,6 +27,13 @@ from app.schemas.vitals import (
     VitalsStats,
     VitalsUpdate,
 )
+from app.schemas.vitals_import import (
+    VitalsImportDevicesResponse,
+    VitalsImportPreviewResponse,
+    VitalsImportResponse,
+    VitalsPreviewRow,
+)
+from app.services.vitals_parsers import vitals_parser_registry
 
 router = APIRouter()
 
@@ -154,6 +161,233 @@ def read_current_user_vitals_stats(
         )
 
         return stats
+
+
+# --- Vitals Import Endpoints ---
+
+MAX_IMPORT_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+
+def _read_csv_upload(file: UploadFile, request: Request) -> str:
+    """Read and validate a CSV upload, returning its text content."""
+    if not file or not file.filename:
+        raise ValidationException(
+            message="No file provided",
+            request=request,
+        )
+
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+    if ext != "csv":
+        raise ValidationException(
+            message="Only CSV files are supported",
+            request=request,
+        )
+
+    raw = file.file.read()
+    if len(raw) > MAX_IMPORT_FILE_SIZE:
+        raise ValidationException(
+            message="File exceeds 10 MB limit",
+            request=request,
+        )
+
+    # Decode with BOM handling
+    try:
+        csv_content = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        try:
+            csv_content = raw.decode("latin-1")
+        except UnicodeDecodeError:
+            raise ValidationException(
+                message="Unable to decode file. Please ensure it is UTF-8 encoded.",
+                request=request,
+            )
+
+    return csv_content
+
+
+@router.get("/import/devices", response_model=VitalsImportDevicesResponse)
+def get_import_devices(
+    *,
+    request: Request,
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Return list of supported import devices."""
+    devices = vitals_parser_registry.get_available_devices()
+    return VitalsImportDevicesResponse(devices=devices)
+
+
+@router.post(
+    "/patient/{patient_id}/import/preview",
+    response_model=VitalsImportPreviewResponse,
+)
+def preview_import(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int = Depends(deps.verify_patient_access),
+    device_key: str = Form(...),
+    file: UploadFile = File(...),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Parse an uploaded CSV and return a preview with duplicate detection."""
+    parser = vitals_parser_registry.get_parser(device_key)
+    if parser is None:
+        raise BusinessLogicException(
+            message=f"Unsupported device: {device_key}",
+            request=request,
+        )
+
+    csv_content = _read_csv_upload(file, request)
+
+    with handle_database_errors(request=request):
+        result = parser.parse(csv_content)
+
+        if result.errors:
+            log_endpoint_error(
+                logger, request, current_user_id,
+                "vitals_import_parse_failed",
+                errors=result.errors,
+            )
+            raise BusinessLogicException(
+                message=f"CSV parsing failed: {'; '.join(result.errors)}",
+                request=request,
+            )
+
+        duplicate_indices = vitals.find_duplicates(
+            db, patient_id=patient_id, readings=result.readings
+        )
+
+        preview_rows = []
+        for idx, reading in enumerate(result.readings[:10]):
+            preview_rows.append(
+                VitalsPreviewRow(
+                    recorded_date=reading.recorded_date,
+                    blood_glucose=reading.blood_glucose,
+                    device_used=reading.device_used,
+                    is_duplicate=idx in duplicate_indices,
+                )
+            )
+
+        log_data_access(
+            logger, request, current_user_id, "read", "Vitals",
+            patient_id=patient_id,
+            operation_type="import_preview",
+            count=len(result.readings),
+        )
+
+        return VitalsImportPreviewResponse(
+            device_name=result.device_name,
+            total_readings=len(result.readings),
+            preview_rows=preview_rows,
+            duplicate_count=len(duplicate_indices),
+            new_count=len(result.readings) - len(duplicate_indices),
+            skipped_rows=result.skipped_rows,
+            errors=result.errors,
+            warnings=result.warnings[:20],
+            date_range_start=result.date_range_start,
+            date_range_end=result.date_range_end,
+        )
+
+
+@router.post(
+    "/patient/{patient_id}/import/execute",
+    response_model=VitalsImportResponse,
+)
+def execute_import(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int = Depends(deps.verify_patient_access),
+    device_key: str = Form(...),
+    skip_duplicates: bool = Form(True),
+    file: UploadFile = File(...),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Execute the vitals import, creating records in the database."""
+    parser = vitals_parser_registry.get_parser(device_key)
+    if parser is None:
+        raise BusinessLogicException(
+            message=f"Unsupported device: {device_key}",
+            request=request,
+        )
+
+    csv_content = _read_csv_upload(file, request)
+
+    with handle_database_errors(request=request):
+        result = parser.parse(csv_content)
+
+        if result.errors:
+            raise BusinessLogicException(
+                message=f"CSV parsing failed: {'; '.join(result.errors)}",
+                request=request,
+            )
+
+        skip_indices = set()
+        if skip_duplicates:
+            skip_indices = vitals.find_duplicates(
+                db, patient_id=patient_id, readings=result.readings
+            )
+
+        imported_count = vitals.bulk_create(
+            db,
+            readings=result.readings,
+            patient_id=patient_id,
+            skip_indices=skip_indices,
+        )
+
+        log_data_access(
+            logger, request, current_user_id, "create", "Vitals",
+            patient_id=patient_id,
+            operation_type="import_execute",
+            count=imported_count,
+        )
+
+        return VitalsImportResponse(
+            imported_count=imported_count,
+            skipped_duplicates=len(skip_indices),
+            errors=result.errors,
+            total_processed=len(result.readings),
+        )
+
+
+@router.delete(
+    "/patient/{patient_id}/import/{import_source}/date/{date}",
+)
+def delete_imported_day(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int = Depends(deps.verify_patient_access),
+    import_source: str,
+    date: str,
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Delete all imported vitals for a patient on a specific date."""
+    # Validate date format
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+    except ValueError as exc:
+        raise ValidationException(
+            message="Invalid date format. Use YYYY-MM-DD.",
+            request=request,
+        ) from exc
+
+    with handle_database_errors(request=request):
+        deleted_count = vitals.bulk_delete_by_import(
+            db,
+            patient_id=patient_id,
+            import_source=import_source,
+            date_str=date,
+        )
+
+        log_data_access(
+            logger, request, current_user_id, "delete", "Vitals",
+            patient_id=patient_id,
+            operation_type="import_bulk_delete",
+            count=deleted_count,
+        )
+
+        return {"deleted_count": deleted_count}
 
 
 @router.get("/{vitals_id}", response_model=VitalsResponse)

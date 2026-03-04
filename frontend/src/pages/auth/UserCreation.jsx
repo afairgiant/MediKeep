@@ -1,13 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import UserRegistrationForm from '../../components/forms/UserRegistrationForm';
-import { Card, Text, Group, ThemeIcon, Container, Button } from '@mantine/core';
+import { Card, Text, Group, ThemeIcon, Container, Button, List } from '@mantine/core';
 import { IconUserPlus, IconArrowLeft } from '@tabler/icons-react';
 
 const UserCreation = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useTranslation('common');
 
   const handleSuccess = async ({ userData, formData }) => {
     // Public context success - auto-login and redirect to dashboard
@@ -16,30 +18,30 @@ const UserCreation = () => {
         username: formData.username,
         password: formData.password
       });
-      
+
       if (result.success) {
         // Add a small delay to ensure auth state is fully saved before navigation
         await new Promise(resolve => setTimeout(resolve, 500));
-        
-        navigate('/dashboard', { 
-          state: { 
-            message: `Welcome ${formData.firstName}! Your account has been created successfully.` 
-          } 
+
+        navigate('/dashboard', {
+          state: {
+            message: t('auth.userCreation.welcomeMessage', { name: formData.firstName })
+          }
         });
       } else {
         // If login result indicates failure, redirect to login page
-        navigate('/login', { 
-          state: { 
-            message: `Account created successfully! Please log in with your credentials.` 
-          } 
+        navigate('/login', {
+          state: {
+            message: t('auth.userCreation.accountCreated')
+          }
         });
       }
     } catch (error) {
       // If auto-login fails, redirect to login page with success message
-      navigate('/login', { 
-        state: { 
-          message: `Account created successfully! Please log in with your credentials.` 
-        } 
+      navigate('/login', {
+        state: {
+          message: t('auth.userCreation.accountCreated')
+        }
       });
     }
   };
@@ -60,20 +62,20 @@ const UserCreation = () => {
               onClick={() => navigate('/login')}
               color="gray"
             >
-              Back to Login
+              {t('auth.userCreation.backToLogin')}
             </Button>
           </Group>
-          
+
           <Group align="center" mb="xs">
             <ThemeIcon size="xl" variant="light" color="blue">
               <IconUserPlus size={24} />
             </ThemeIcon>
             <div>
               <h1 style={{ margin: 0, fontSize: '1.875rem', fontWeight: 600, color: '#1f2937' }}>
-                Create Your Account
+                {t('auth.userCreation.pageTitle')}
               </h1>
               <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280', fontSize: '0.875rem' }}>
-                Join MediKeep today and manage your health records securely
+                {t('auth.userCreation.pageSubtitle')}
               </p>
             </div>
           </Group>
@@ -87,10 +89,10 @@ const UserCreation = () => {
             </ThemeIcon>
             <div>
               <Text size="lg" fw={600}>
-                Account Details
+                {t('auth.userCreation.cardTitle')}
               </Text>
               <Text size="sm" c="dimmed">
-                Fill out the form below to create your new account
+                {t('auth.userCreation.cardSubtitle')}
               </Text>
             </div>
           </Group>
@@ -109,14 +111,14 @@ const UserCreation = () => {
               </ThemeIcon>
               <div>
                 <Text size="sm" fw={500}>
-                  What happens next?
+                  {t('auth.userCreation.whatHappensNext')}
                 </Text>
-                <Text size="xs" c="dimmed">
-                  • Your patient record will be automatically created<br/>
-                  • You'll be logged in immediately after account creation<br/>
-                  • You can start managing your medical information right away<br/>
-                  • All your data is secure and private
-                </Text>
+                <List size="xs" c="dimmed" listStyleType="disc" mt={4}>
+                  <List.Item>{t('auth.userCreation.nextSteps.autoRecord')}</List.Item>
+                  <List.Item>{t('auth.userCreation.nextSteps.loggedIn')}</List.Item>
+                  <List.Item>{t('auth.userCreation.nextSteps.startManaging')}</List.Item>
+                  <List.Item>{t('auth.userCreation.nextSteps.dataSecure')}</List.Item>
+                </List>
               </div>
             </Group>
           </Card>

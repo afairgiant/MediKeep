@@ -29,6 +29,7 @@
     "print": "Imprimir",
     "refresh": "Atualizar",
     "retry": "Tentar novamente",
+    "restore": "Restaurar",
     "continue": "Continuar",
     "skip": "Pular",
     "done": "Concluído",
@@ -104,7 +105,11 @@
     "address": "Endereço",
     "patientRecord": "Prontuário do Paciente",
     "medicalHistory": "Histórico Médico",
-    "practitioner": "Profissional"
+    "practitioner": "Profissional",
+    "firstName": "Primeiro Nome",
+    "lastName": "Sobrenome",
+    "role": "Cargo",
+    "note": "Nota"
   },
   "fields": {
     "notes": {
@@ -241,7 +246,12 @@
         "temperatureMin": "A temperatura deve ser de pelo menos {{min}}{{unit}}",
         "timeInFuture": "A hora selecionada não pode ser no futuro",
         "weightMax": "O peso não pode exceder {{max}} {{unit}}",
-        "weightMin": "O peso deve ser de pelo menos {{min}} {{unit}}"
+        "weightMin": "O peso deve ser de pelo menos {{min}} {{unit}}",
+        "firstNameRequired": "Por favor, digite seu primeiro nome",
+        "lastNameRequired": "Por favor, digite seu sobrenome",
+        "usernameLength": "O nome de usuário deve ter pelo menos 3 caracteres",
+        "passwordLength": "A senha deve ter pelo menos 6 caracteres",
+        "passwordRequirements": "A senha deve conter pelo menos uma letra e um número"
       },
       "additionalMeasurementsDesc": "Indicadores de saúde complementares",
       "bloodPressureDesc": "Medida em mmHg",
@@ -289,7 +299,8 @@
       "timezoneInfo": "Informações de Fuso Horário",
       "updateVitals": "Atualizar Sinais Vitais",
       "vitalSignsDesc": "Medições fisiológicas básicas",
-      "weightDesc": "Peso em {{unit}}"
+      "weightDesc": "Peso em {{unit}}",
+      "lockedByImport": "Gerenciado pela importação do dispositivo"
     },
     "modal": {
       "bloodGlucose": "Glicemia",
@@ -370,7 +381,46 @@
       "noRecordsDesc": "Os sinais vitais aparecerão aqui após serem registrados",
       "oxygenSat": "O2 Sat"
     },
-    "title": "Sinais Vitais"
+    "title": "Sinais Vitais",
+    "import": {
+      "title": "Importar sinais vitais",
+      "selectDevice": "Selecionar dispositivo",
+      "selectDevicePlaceholder": "Escolha o seu dispositivo...",
+      "uploadFile": "Enviar arquivo CSV",
+      "preview": "Visualizar",
+      "importButton": "Importar",
+      "back": "Voltar",
+      "importing": "Importando sinais vitais...",
+      "previewTitle": "Visualização da importação",
+      "totalReadings": "Total de leituras",
+      "duplicatesFound": "Duplicatas encontradas",
+      "newReadings": "Novas leituras",
+      "dateRange": "Período",
+      "skipDuplicates": "Ignorar leituras duplicadas",
+      "duplicateWarning": "{{count}} leituras já existem neste período. Marque a caixa acima para ignorá-las.",
+      "success": "{{count}} leituras importadas com sucesso",
+      "successWithSkipped": "{{imported}} leituras importadas ({{skipped}} duplicatas ignoradas)",
+      "noFile": "Por favor, selecione um arquivo CSV",
+      "noDevice": "Por favor, selecione um dispositivo",
+      "fileTooLarge": "O arquivo excede o limite de 10 MB",
+      "invalidFileType": "Apenas arquivos CSV são suportados",
+      "duplicate": "Duplicata",
+      "parsingFailed": "Falha ao analisar o arquivo CSV"
+    },
+    "summary": {
+      "dailySummary": "Resumo diário",
+      "readings": "{{count}} leituras",
+      "avgGlucose": "Méd",
+      "minGlucose": "Mín",
+      "maxGlucose": "Máx",
+      "expandDetails": "Mostrar leituras",
+      "collapseDetails": "Ocultar leituras",
+      "importedFrom": "Importado de {{source}}",
+      "glucoseTrend": "Tendência da glicemia",
+      "time": "Hora",
+      "confirmDeleteDay": "Excluir todas as {{count}} leituras importadas deste dia?",
+      "deleteDay": "Excluir dia"
+    }
   },
   "medications": {
     "title": "Medicamentos",
@@ -2560,6 +2610,45 @@
         "accountCreateFailed": "Falha ao criar conta",
         "createRetry": "Falha ao criar utilizador. Por favor, tente novamente."
       }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "ACESSE SUA CONTA",
+      "username": "Usuário",
+      "password": "Senha",
+      "usernamePlaceholder": "Digite seu usuário",
+      "passwordPlaceholder": "Digite sua senha",
+      "showPassword": "Mostrar senha",
+      "hidePassword": "Esconder senha",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "createAccount": "Criar nova conta",
+      "or": "ou",
+      "continueWith": "Continuar com {{provider}}",
+      "registrationDisabled": "O registro de novos usuários está atualmente desabilitado."
+    },
+    "userCreation": {
+      "backToLogin": "Voltar ao login",
+      "pageTitle": "Crie sua conta",
+      "pageSubtitle": "Junte-se ao MediKeep e gerencie seus registros médicos com segurança",
+      "cardTitle": "Detalhes da conta",
+      "cardSubtitle": "Preencha o formulário abaixo para criar sua conta",
+      "whatHappensNext": "O que acontece a seguir?",
+      "nextSteps": {
+        "autoRecord": "Seu registro de paciente será criado automaticamente",
+        "loggedIn": "Você fará login imediatamente após a criação da conta",
+        "startManaging": "Você poderá começar a gerenciar suas informações médicas imediatamente",
+        "dataSecure": "Todos os seus dados estão seguros e privados"
+      },
+      "welcomeMessage": "Bem-vindo {{name}}! Sua conta foi criada com sucesso.",
+      "accountCreated": "Conta criada com sucesso! Por favor, faça login com suas credenciais.",
+      "requirements": {
+        "length": "Pelo menos 6 caracteres",
+        "letter": "Contém pelo menos uma letra",
+        "number": "Contém pelo menos um número"
+      },
+      "note": "Um registro de paciente será criado automaticamente para este usuário com a função padrão \"usuário\"."
     }
   }
 }

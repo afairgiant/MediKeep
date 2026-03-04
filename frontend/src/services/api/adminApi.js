@@ -8,6 +8,22 @@ class AdminApiService extends BaseApiService {
     super('/admin');
   }
 
+  // Fetch a binary blob from an endpoint (used by CSV export methods)
+  async _fetchBlob(endpoint, queryParams = {}) {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value != null) searchParams.set(key, value);
+    }
+    const queryString = searchParams.toString();
+    const url = `${this.baseURL}${this.basePath}${endpoint}${queryString ? `?${queryString}` : ''}`;
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      throw new Error(`Export failed with status ${response.status}`);
+    }
+    return response.blob();
+  }
+
   // Dashboard endpoints
   async getDashboardStats() {
     return this.get('/dashboard/stats');
@@ -45,8 +61,13 @@ class AdminApiService extends BaseApiService {
     return this.get('/dashboard/storage-health');
   }
 
-  async getAnalyticsData(days = 7) {
-    return this.get('/dashboard/analytics-data', { days });
+  async getAnalyticsData(options = {}) {
+    const params = {};
+    if (options.days) params.days = options.days;
+    if (options.startDate) params.start_date = options.startDate;
+    if (options.endDate) params.end_date = options.endDate;
+    if (options.compare) params.compare = true;
+    return this.get('/dashboard/analytics-data', { params, signal: options.signal });
   }
 
   async getFrontendLogHealth() {
@@ -138,9 +159,16 @@ class AdminApiService extends BaseApiService {
     return this.get('/search', params);
   }
 
-  // Export data
-  async exportModelData(modelName, format = 'csv') {
-    return this.get(`/models/${modelName}/export`, { format });
+  // Export model data as CSV
+  async exportModelData(modelName, params = {}) {
+    const queryParams = {};
+    if (params.search) queryParams.search = params.search;
+    return this._fetchBlob(`/models/${modelName}/export`, queryParams);
+  }
+
+  // Export backup history as CSV
+  async exportBackups() {
+    return this._fetchBlob('/backups/export');
   }
 
   // System statistics
@@ -162,24 +190,11 @@ class AdminApiService extends BaseApiService {
   }
 
   async exportActivityLog(params = {}) {
-    const { search, action, entity_type, user_id, start_date, end_date } = params;
-    const searchParams = new URLSearchParams();
-    if (search) searchParams.set('search', search);
-    if (action) searchParams.set('action', action);
-    if (entity_type) searchParams.set('entity_type', entity_type);
-    if (user_id) searchParams.set('user_id', user_id);
-    if (start_date) searchParams.set('start_date', start_date);
-    if (end_date) searchParams.set('end_date', end_date);
-
-    const queryString = searchParams.toString();
-    const url = `${this.baseURL}${this.basePath}/activity-log/export${queryString ? `?${queryString}` : ''}`;
-
-    const headers = await this.getAuthHeaders();
-    const response = await fetch(url, { headers });
-    if (!response.ok) {
-      throw new Error(`Export failed with status ${response.status}`);
+    const queryParams = {};
+    for (const [key, value] of Object.entries(params)) {
+      if (value) queryParams[key] = value;
     }
-    return response.blob();
+    return this._fetchBlob('/activity-log/export', queryParams);
   }
 
   // Test admin access
@@ -211,16 +226,7 @@ class AdminApiService extends BaseApiService {
   }
 
   async downloadBackup(backupId) {
-    const response = await fetch(
-      `${this.baseURL}${this.basePath}/backups/${backupId}/download`,
-      {
-        headers: await this.getAuthHeaders(),
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.blob();
+    return this._fetchBlob(`/backups/${backupId}/download`);
   }
 
   async verifyBackup(backupId) {
@@ -345,6 +351,30 @@ class AdminApiService extends BaseApiService {
 
   async createUserWithPatientLink(userData) {
     return this.post('/user-management/users/create', userData);
+  }
+
+  // User Management endpoints
+  async getUserLoginHistory(userId, page = 1, perPage = 20) {
+    return this.get(`/user-management/users/${userId}/login-history`, {
+      page,
+      per_page: perPage,
+    });
+  }
+
+  async toggleUserActive(userId, isActive) {
+    return this.put(`/models/user/${userId}`, { is_active: isActive });
+  }
+
+  async changeUserRole(userId, role) {
+    return this.put(`/models/user/${userId}`, { role });
+  }
+
+  async deleteUser(userId) {
+    return this.delete(`/models/user/${userId}`);
+  }
+
+  async getUsers(params = {}) {
+    return this.get('/models/user/', params);
   }
 
   // Test Library Maintenance endpoints

@@ -29,6 +29,7 @@
     "print": "Imprimir",
     "refresh": "Actualizar",
     "retry": "Reintentar",
+    "restore": "Restaurar",
     "continue": "Continuar",
     "skip": "Omitir",
     "done": "Hecho",
@@ -2434,7 +2435,8 @@
         "weightMin": "El peso debe ser al menos {{min}} {{unit}}"
       },
       "vitalSignsDesc": "Mediciones fisiológicas principales",
-      "weightDesc": "Peso en {{unit}}"
+      "weightDesc": "Peso en {{unit}}",
+      "lockedByImport": "Gestionado por importación del dispositivo"
     },
     "healthSummary": "Resumen de salud",
     "loading": "Cargando signos vitales...",
@@ -2495,6 +2497,45 @@
       "mgdl": "mg/dL",
       "mmHg": "mmHg",
       "perMin": "/min"
+    },
+    "import": {
+      "title": "Importar signos vitales",
+      "selectDevice": "Seleccionar dispositivo",
+      "selectDevicePlaceholder": "Elija su dispositivo...",
+      "uploadFile": "Subir archivo CSV",
+      "preview": "Vista previa",
+      "importButton": "Importar",
+      "back": "Volver",
+      "importing": "Importando signos vitales...",
+      "previewTitle": "Vista previa de importación",
+      "totalReadings": "Total de lecturas",
+      "duplicatesFound": "Duplicados encontrados",
+      "newReadings": "Nuevas lecturas",
+      "dateRange": "Rango de fechas",
+      "skipDuplicates": "Omitir lecturas duplicadas",
+      "duplicateWarning": "{{count}} lecturas ya existen en este rango de fechas. Marque la casilla de arriba para omitirlas.",
+      "success": "{{count}} lecturas importadas correctamente",
+      "successWithSkipped": "{{imported}} lecturas importadas ({{skipped}} duplicados omitidos)",
+      "noFile": "Por favor, seleccione un archivo CSV",
+      "noDevice": "Por favor, seleccione un dispositivo",
+      "fileTooLarge": "El archivo supera el límite de 10 MB",
+      "invalidFileType": "Solo se admiten archivos CSV",
+      "duplicate": "Duplicado",
+      "parsingFailed": "Error al analizar el archivo CSV"
+    },
+    "summary": {
+      "dailySummary": "Resumen diario",
+      "readings": "{{count}} lecturas",
+      "avgGlucose": "Prom",
+      "minGlucose": "Mín",
+      "maxGlucose": "Máx",
+      "expandDetails": "Mostrar lecturas",
+      "collapseDetails": "Ocultar lecturas",
+      "importedFrom": "Importado desde {{source}}",
+      "glucoseTrend": "Tendencia de glucosa",
+      "time": "Hora",
+      "confirmDeleteDay": "¿Eliminar las {{count}} lecturas importadas de este día?",
+      "deleteDay": "Eliminar día"
     }
   },
   "allergies": {
@@ -2503,35 +2544,40 @@
       "loading": "Cargando alergias..."
     }
   },
-  "admin": {
-    "createUser": {
-      "username": "Nombre de usuario",
-      "usernamePlaceholder": "Introduce el nombre de usuario",
+  "auth": {
+    "login": {
+      "title": "INICIE SESIÓN EN SU CUENTA",
+      "username": "Usuario",
       "password": "Contraseña",
-      "passwordPlaceholder": "Introduce una contraseña (mín. 6 caracteres, incluye letra y número)",
-      "email": "Correo electrónico",
-      "emailPlaceholder": "Introduce la dirección de correo electrónico",
-      "role": "Rol",
-      "roleUser": "Usuario",
-      "roleAdmin": "Administrador",
-      "firstName": "Nombre",
-      "firstNamePlaceholder": "Introduce el nombre",
-      "lastName": "Apellido",
-      "lastNamePlaceholder": "Introduce el apellido",
-      "submitButton": "Crear cuenta",
-      "noteLabel": "Nota:",
-      "noteText": "Se creará automáticamente un registro de paciente para este usuario con el rol predeterminado \"usuario\".",
-      "validation": {
-        "firstNameRequired": "Introduce el nombre",
-        "lastNameRequired": "Introduce el apellido",
-        "usernameMinLength": "El nombre de usuario debe tener al menos 3 caracteres",
-        "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
-        "passwordRequirements": "La contraseña debe contener al menos una letra y un número"
+      "usernamePlaceholder": "Ingrese su usuario",
+      "passwordPlaceholder": "Ingrese su contraseña",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión...",
+      "createAccount": "Crear nueva cuenta",
+      "or": "o",
+      "continueWith": "Continuar con {{provider}}",
+      "registrationDisabled": "El registro de nuevos usuarios está actualmente deshabilitado."
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "Al menos 6 caracteres",
+        "letter": "Contiene al menos una letra",
+        "number": "Contiene al menos un número"
       },
-      "passwordReqs": {
-        "minLength": "Al menos 6 caracteres",
-        "hasLetter": "Contiene al menos una letra",
-        "hasNumber": "Contiene al menos un número"
+      "note": "Se creará automáticamente un registro de paciente para este usuario con el rol predeterminado \"usuario\".",
+      "backToLogin": "Volver al inicio de sesión",
+      "pageTitle": "Crea tu cuenta",
+      "pageSubtitle": "Únete a MediKeep y gestiona tus registros médicos de forma segura",
+      "cardTitle": "Detalles de la cuenta",
+      "cardSubtitle": "Completa el formulario a continuación para crear tu cuenta",
+      "whatHappensNext": "¿Qué sucede después?",
+      "nextSteps": {
+        "autoRecord": "Tu registro de paciente se creará automáticamente",
+        "loggedIn": "Iniciarás sesión inmediatamente después de crear la cuenta",
+        "startManaging": "Podrás comenzar a gestionar tu información médica de inmediato",
+        "dataSecure": "Todos tus datos están seguros y son privados"
       },
       "linkPatient": {
         "checkbox": "Vincular a un registro de paciente existente",
@@ -2560,6 +2606,8 @@
         "accountCreateFailed": "No se pudo crear la cuenta",
         "createRetry": "No se pudo crear el usuario. Por favor, inténtelo de nuevo."
       }
+      "welcomeMessage": "Bienvenido {{name}}! Tu cuenta ha sido creada exitosamente.",
+      "accountCreated": "Cuenta creada exitosamente! Por favor inicia sesión con tus credenciales."
     }
   }
 }

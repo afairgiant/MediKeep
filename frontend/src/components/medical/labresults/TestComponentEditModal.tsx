@@ -165,7 +165,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
         canonical_test_name: component.canonical_test_name || '',
         notes: component.notes || '',
         result_type: component.result_type || 'quantitative',
-        qualitative_value: component.qualitative_value || ''
+        qualitative_value: component.qualitative_value || undefined
       });
     }
   }, [component]);
@@ -303,7 +303,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
                 ...prev,
                 result_type: value as 'quantitative' | 'qualitative',
                 // Clear incompatible fields when switching
-                ...(value === 'qualitative' ? { value: undefined, unit: '', ref_range_min: undefined, ref_range_max: undefined } : { qualitative_value: '' })
+                ...(value === 'qualitative' ? { value: undefined, unit: '', ref_range_min: undefined, ref_range_max: undefined } : { qualitative_value: undefined })
               }));
             }}
             data={[
@@ -365,13 +365,13 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
 
           {formData.result_type === 'qualitative' && (
             <Select
-              label="Result"
-              placeholder="Select result"
+              label={t('testComponents.editModal.fields.result', 'Result')}
+              placeholder={t('testComponents.editModal.placeholders.result', 'Select result')}
               required
               data={QUALITATIVE_SELECT_OPTIONS}
               value={formData.qualitative_value || null}
               onChange={(value) => {
-                const qv = value || '';
+                const qv = value || undefined;
                 let autoStatus: string | undefined;
                 if (qv === 'positive' || qv === 'detected') autoStatus = 'abnormal';
                 else if (qv === 'negative' || qv === 'undetected') autoStatus = 'normal';

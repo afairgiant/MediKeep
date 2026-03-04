@@ -335,7 +335,12 @@ class Vitals(Base):
     )  # Where readings were taken (home, clinic, etc.)
     device_used = Column(
         String, nullable=True
-    )  # Device used for measurement    # Audit fields
+    )  # Device used for measurement
+    import_source = Column(
+        String, nullable=True, index=True
+    )  # e.g., "dexcom_clarity"; NULL for manual entries
+
+    # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
         DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False

@@ -1,4 +1,43 @@
 {
+  "auth": {
+    "login": {
+      "title": "LOGIN TO YOUR ACCOUNT",
+      "username": "Username",
+      "password": "Password",
+      "usernamePlaceholder": "Enter your username",
+      "passwordPlaceholder": "Enter your password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "createAccount": "Create new account",
+      "or": "or",
+      "continueWith": "Continue with {{provider}}",
+      "registrationDisabled": "New user registration is currently disabled."
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "At least 6 characters",
+        "letter": "Contains at least one letter",
+        "number": "Contains at least one number"
+      },
+      "note": "A patient record will be automatically created for this user with default role \"user\".",
+      "backToLogin": "Back to Login",
+      "pageTitle": "Create Your Account",
+      "pageSubtitle": "Join MediKeep today and manage your health records securely",
+      "cardTitle": "Account Details",
+      "cardSubtitle": "Fill out the form below to create your new account",
+      "whatHappensNext": "What happens next?",
+      "nextSteps": {
+        "autoRecord": "Your patient record will be automatically created",
+        "loggedIn": "You'll be logged in immediately after account creation",
+        "startManaging": "You can start managing your medical information right away",
+        "dataSecure": "All your data is secure and private"
+      },
+      "welcomeMessage": "Welcome {{name}}! Your account has been created successfully.",
+      "accountCreated": "Account created successfully! Please log in with your credentials."
+    }
+  },
   "buttons": {
     "save": "Save",
     "cancel": "Cancel",
@@ -29,6 +68,7 @@
     "print": "Print",
     "refresh": "Refresh",
     "retry": "Retry",
+    "restore": "Restore",
     "continue": "Continue",
     "skip": "Skip",
     "done": "Done",
@@ -104,7 +144,11 @@
     "address": "Address",
     "patientRecord": "Patient Record",
     "medicalHistory": "Medical History",
-    "practitioner": "Practitioner"
+    "practitioner": "Practitioner",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "role": "Role",
+    "note": "Note"
   },
   "fields": {
     "notes": {
@@ -249,7 +293,12 @@
         "painScaleMin": "Pain scale must be at least 0",
         "painScaleMax": "Pain scale cannot exceed 10",
         "deviceMaxLength": "Device name cannot exceed 100 characters",
-        "notesMaxLength": "Notes cannot exceed 1000 characters"
+        "notesMaxLength": "Notes cannot exceed 1000 characters",
+        "firstNameRequired": "Please enter your first name",
+        "lastNameRequired": "Please enter your last name",
+        "usernameLength": "Username must be at least 3 characters long",
+        "passwordLength": "Password must be at least 6 characters long",
+        "passwordRequirements": "Password must contain at least one letter and one number"
       },
       "sections": {
         "basicInfo": "Basic Information",
@@ -289,7 +338,8 @@
         "pharmacy": "Pharmacy",
         "ambulatory": "Ambulatory Care",
         "other": "Other"
-      }
+      },
+      "lockedByImport": "Managed by device import"
     },
     "modal": {
       "bloodGlucose": "Blood Glucose",
@@ -370,6 +420,45 @@
       "errorLoading": "Error loading vital signs",
       "noRecords": "No vital signs records found",
       "noRecordsDesc": "Vital signs will appear here once they have been recorded"
+    },
+    "import": {
+      "title": "Import Vitals",
+      "selectDevice": "Select Device",
+      "selectDevicePlaceholder": "Choose your device...",
+      "uploadFile": "Upload CSV File",
+      "preview": "Preview",
+      "importButton": "Import",
+      "back": "Back",
+      "importing": "Importing vitals...",
+      "previewTitle": "Import Preview",
+      "totalReadings": "Total Readings",
+      "duplicatesFound": "Duplicates Found",
+      "newReadings": "New Readings",
+      "dateRange": "Date Range",
+      "skipDuplicates": "Skip duplicate readings",
+      "duplicateWarning": "{{count}} readings already exist in this date range. Check the box above to skip them.",
+      "success": "Successfully imported {{count}} readings",
+      "successWithSkipped": "Imported {{imported}} readings ({{skipped}} duplicates skipped)",
+      "noFile": "Please select a CSV file",
+      "noDevice": "Please select a device",
+      "fileTooLarge": "File exceeds 10 MB limit",
+      "invalidFileType": "Only CSV files are supported",
+      "duplicate": "Duplicate",
+      "parsingFailed": "Failed to parse CSV file"
+    },
+    "summary": {
+      "dailySummary": "Daily Summary",
+      "readings": "{{count}} readings",
+      "avgGlucose": "Avg",
+      "minGlucose": "Min",
+      "maxGlucose": "Max",
+      "expandDetails": "Show readings",
+      "collapseDetails": "Hide readings",
+      "importedFrom": "Imported from {{source}}",
+      "glucoseTrend": "Glucose Trend",
+      "time": "Time",
+      "confirmDeleteDay": "Delete all {{count}} imported readings for this day?",
+      "deleteDay": "Delete Day"
     }
   },
   "medications": {
@@ -1960,6 +2049,8 @@
     },
     "menu": {
       "rename": "Rename Tag",
+      "edit": "Edit",
+      "search": "Search records",
       "replace": "Replace With...",
       "delete": "Delete Tag"
     },
@@ -1970,11 +2061,12 @@
       "submit": "Create Tag"
     },
     "editModal": {
-      "title": "Rename Tag",
-      "label": "New Tag Name",
+      "title": "Edit Tag",
+      "label": "Tag Name",
       "placeholder": "Enter new tag name...",
+      "colorLabel": "Tag Color",
       "description": "This will rename the tag across all {{count}} records.",
-      "submit": "Rename Tag"
+      "submit": "Save"
     },
     "deleteModal": {
       "title": "Delete Tag",
@@ -1992,6 +2084,7 @@
     "success": {
       "created": "Successfully created tag \"{{tag}}\"",
       "renamed": "Successfully renamed \"{{oldTag}}\" to \"{{newTag}}\"",
+      "updated": "Successfully updated tag \"{{tag}}\"",
       "deleted": "Successfully deleted tag \"{{tag}}\"",
       "replaced": "Successfully replaced \"{{oldTag}}\" with \"{{newTag}}\""
     },
@@ -1999,6 +2092,7 @@
       "loadFailed": "Failed to load tags",
       "createFailed": "Failed to create tag",
       "renameFailed": "Failed to rename tag",
+      "editFailed": "Failed to update tag",
       "deleteFailed": "Failed to delete tag",
       "replaceFailed": "Failed to replace tag"
     }
@@ -2503,63 +2597,117 @@
       "loading": "Loading allergies..."
     }
   },
-  "admin": {
-    "createUser": {
-      "username": "Username",
-      "usernamePlaceholder": "Enter username",
-      "password": "Password",
-      "passwordPlaceholder": "Enter password (min 6 chars, include letter & number)",
-      "email": "Email",
-      "emailPlaceholder": "Enter email address",
-      "role": "Role",
-      "roleUser": "User",
-      "roleAdmin": "Admin",
-      "firstName": "First Name",
-      "firstNamePlaceholder": "Enter first name",
-      "lastName": "Last Name",
-      "lastNamePlaceholder": "Enter last name",
-      "submitButton": "Create Account",
-      "noteLabel": "Note:",
-      "noteText": "A patient record will be automatically created for this user with default role \"user\".",
-      "validation": {
-        "firstNameRequired": "Please enter the first name",
-        "lastNameRequired": "Please enter the last name",
-        "usernameMinLength": "Username must be at least 3 characters long",
-        "passwordMinLength": "Password must be at least 6 characters long",
-        "passwordRequirements": "Password must contain at least one letter and one number"
-      },
-      "passwordReqs": {
-        "minLength": "At least 6 characters",
-        "hasLetter": "Contains at least one letter",
-        "hasNumber": "Contains at least one number"
-      },
-      "linkPatient": {
-        "checkbox": "Link to existing patient record",
-        "hint": "Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).",
-        "selectPlaceholder": "Select a patient...",
-        "loading": "Loading patients...",
-        "selfRecordBadge": "Self-Record",
-        "patientId": "ID",
-        "dob": "DOB",
-        "owner": "Owner",
-        "currentOwner": "Current Owner",
-        "selfRecordWarningTitle": "Note:",
-        "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient."
-      },
-      "successRedirect": "User created successfully! Redirecting...",
-      "autoFeaturesTitle": "Auto-Generated Features",
-      "autoFeatures": {
-        "patientRecord": "A patient record will be automatically created (or link to an existing one)",
-        "linkExisting": "Use 'Link to existing patient' to transfer a patient record to the new user",
-        "editAccess": "Original owner keeps edit access after transfer",
-        "timestamps": "Created/updated timestamps tracked automatically",
-        "immediateLogin": "New user can log in immediately after creation"
-      },
-      "errors": {
-        "createFailed": "Failed to create user",
-        "accountCreateFailed": "Failed to create account",
-        "createRetry": "Failed to create user. Please try again."
-      }
+  "search": {
+    "title": "Search Results",
+    "subtitle": "Search across all medical records",
+    "filters": "Filters",
+    "recordTypes": "Record Types",
+    "sortBy": "Sort By",
+    "sortRelevance": "Relevance",
+    "sortDate": "Date (Newest)",
+    "sortDateNewest": "Date (Newest First)",
+    "sortDateOldest": "Date (Oldest First)",
+    "sortType": "Type",
+    "sortTitle": "Title",
+    "columnType": "Record Type",
+    "columnTypeTip": "The category of medical record",
+    "columnName": "Name",
+    "columnNameTip": "The name or title of the record",
+    "columnDate": "Date",
+    "columnDetails": "Details",
+    "columnDetailsTip": "Key date for the record (e.g. when diagnosed, started, or performed)",
+    "columnTagsTip": "Tags assigned to this record",
+    "tags": "Tags",
+    "selectTags": "Select tags...",
+    "loadingTags": "Loading tags...",
+    "anyTag": "Any tag",
+    "allTags": "All tags",
+    "clearFilters": "Clear Filters",
+    "placeholder": "Search medical records...",
+    "searching": "Searching...",
+    "noResults": "No results found",
+    "showAll": "Show all {{count}} results",
+    "showLess": "Show less",
+    "textResults": "Text Search Results",
+    "tagResults": "Tag Results",
+    "resultsFor": "Search results for \"{{query}}\"",
+    "taggedWith": "Records tagged with: {{tags}}",
+    "textResultCount": "{{count}} text result",
+    "textResultCount_other": "{{count}} text results",
+    "tagResultCount": "{{count}} tag result",
+    "tagResultCount_other": "{{count}} tag results",
+    "filtered": "(filtered)",
+    "popularTags": "Popular Tags",
+    "addMoreTags": "Add more tags",
+    "activeFilters": "Active Filters",
+    "matchAll": "Match all",
+    "initialTitle": "Search your medical records",
+    "initialMessage": "Enter a search term or select tags from the sidebar to find records.",
+    "noResultsFiltered": "Try adjusting your filters, tags, or search terms",
+    "noResultsGeneral": "Try different search terms or check spelling",
+    "page": "page",
+    "perPage": "Items per page",
+    "noPatientTitle": "No patient selected",
+    "noPatientMessage": "Please select a patient from the dashboard to search medical records.",
+    "tagSearchFailed": "Tag search failed. Please try again.",
+    "searchFailed": "Search failed. Please try again.",
+    "dateRange": "Date Range",
+    "dateRangePlaceholder": "Select date range...",
+    "collapseFilters": "Collapse filters",
+    "expandFilters": "Expand filters",
+    "resultCount_one": "{{count}} record",
+    "resultCount_other": "{{count}} records",
+    "filterByTag": "Filter by tag: {{tag}}",
+    "viewTable": "Table view",
+    "viewCards": "Card view",
+    "previewRecord": "Preview record",
+    "openFullRecord": "Open Full Record",
+    "recentSearches": "Recent Searches",
+    "clearHistory": "Clear all",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last6Months": "Last 6 months",
+    "lastYear": "Last year",
+    "allTime": "All time",
+    "datePresets": "Quick presets",
+    "noRecentSearches": "No recent searches",
+    "activeFilterCount": "{{count}} active filters",
+    "removeTypeFilter": "Remove {{type}} filter",
+    "types": {
+      "medications": "Medications",
+      "conditions": "Conditions",
+      "labResults": "Lab Results",
+      "procedures": "Procedures",
+      "immunizations": "Immunizations",
+      "treatments": "Treatments",
+      "encounters": "Visits",
+      "allergies": "Allergies",
+      "vitals": "Vitals"
+    },
+    "fallbacks": {
+      "labResult": "Lab Result",
+      "medication": "Medication",
+      "condition": "Condition",
+      "procedure": "Procedure",
+      "immunization": "Immunization",
+      "treatment": "Treatment",
+      "encounter": "Encounter",
+      "allergy": "Allergy",
+      "record": "Record"
+    },
+    "subtitles": {
+      "result": "Result: {{value}}",
+      "dose": "Dose {{number}}"
+    },
+    "dateLabels": {
+      "tested": "Tested",
+      "started": "Started",
+      "diagnosed": "Diagnosed",
+      "performed": "Performed",
+      "given": "Given",
+      "visited": "Visited",
+      "identified": "Identified",
+      "recorded": "Recorded"
     }
   }
 }

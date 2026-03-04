@@ -29,6 +29,7 @@
     "print": "Stampa",
     "refresh": "Aggiorna",
     "retry": "Riprova",
+    "restore": "Ripristina",
     "continue": "Continua",
     "skip": "Salta",
     "done": "Fatto",
@@ -289,7 +290,8 @@
       "timezoneInfo": "Informazioni sul fuso orario",
       "updateVitals": "Aggiorna segni vitali",
       "vitalSignsDesc": "Misurazioni fisiologiche principali",
-      "weightDesc": "Peso in {{unit}}"
+      "weightDesc": "Peso in {{unit}}",
+      "lockedByImport": "Gestito dall'importazione del dispositivo"
     },
     "modal": {
       "bloodGlucose": "Glicemia",
@@ -370,7 +372,46 @@
       "noRecordsDesc": "I segni vitali appariranno qui una volta registrati",
       "oxygenSat": "O2 Sat"
     },
-    "title": "Segni vitali"
+    "title": "Segni vitali",
+    "import": {
+      "title": "Importa segni vitali",
+      "selectDevice": "Seleziona dispositivo",
+      "selectDevicePlaceholder": "Scegli il tuo dispositivo...",
+      "uploadFile": "Carica file CSV",
+      "preview": "Anteprima",
+      "importButton": "Importa",
+      "back": "Indietro",
+      "importing": "Importazione dei segni vitali in corso...",
+      "previewTitle": "Anteprima importazione",
+      "totalReadings": "Letture totali",
+      "duplicatesFound": "Duplicati trovati",
+      "newReadings": "Nuove letture",
+      "dateRange": "Intervallo di date",
+      "skipDuplicates": "Salta le letture duplicate",
+      "duplicateWarning": "{{count}} letture esistono già in questo intervallo di date. Seleziona la casella sopra per saltarle.",
+      "success": "{{count}} letture importate con successo",
+      "successWithSkipped": "{{imported}} letture importate ({{skipped}} duplicati saltati)",
+      "noFile": "Seleziona un file CSV",
+      "noDevice": "Seleziona un dispositivo",
+      "fileTooLarge": "Il file supera il limite di 10 MB",
+      "invalidFileType": "Sono supportati solo file CSV",
+      "duplicate": "Duplicato",
+      "parsingFailed": "Impossibile analizzare il file CSV"
+    },
+    "summary": {
+      "dailySummary": "Riepilogo giornaliero",
+      "readings": "{{count}} letture",
+      "avgGlucose": "Media",
+      "minGlucose": "Min",
+      "maxGlucose": "Max",
+      "expandDetails": "Mostra letture",
+      "collapseDetails": "Nascondi letture",
+      "importedFrom": "Importato da {{source}}",
+      "glucoseTrend": "Andamento della glicemia",
+      "time": "Ora",
+      "confirmDeleteDay": "Eliminare tutte le {{count}} letture importate per questo giorno?",
+      "deleteDay": "Elimina giorno"
+    }
   },
   "medications": {
     "title": "Farmaci",
@@ -2503,35 +2544,40 @@
       "loading": "Caricamento allergie..."
     }
   },
-  "admin": {
-    "createUser": {
+  "auth": {
+    "login": {
+      "title": "ACCEDI AL TUO ACCOUNT",
       "username": "Nome utente",
-      "usernamePlaceholder": "Inserisci il nome utente",
       "password": "Password",
-      "passwordPlaceholder": "Inserisci la password (min 6 caratteri, includi lettera e numero)",
-      "email": "Email",
-      "emailPlaceholder": "Inserisci l'indirizzo email",
-      "role": "Ruolo",
-      "roleUser": "Utente",
-      "roleAdmin": "Amministratore",
-      "firstName": "Nome",
-      "firstNamePlaceholder": "Inserisci il nome",
-      "lastName": "Cognome",
-      "lastNamePlaceholder": "Inserisci il cognome",
-      "submitButton": "Crea account",
-      "noteLabel": "Nota:",
-      "noteText": "Per questo utente verrà creato automaticamente un record paziente con il ruolo predefinito \"utente\".",
-      "validation": {
-        "firstNameRequired": "Inserisci il nome",
-        "lastNameRequired": "Inserisci il cognome",
-        "usernameMinLength": "Il nome utente deve contenere almeno 3 caratteri",
-        "passwordMinLength": "La password deve contenere almeno 6 caratteri",
-        "passwordRequirements": "La password deve contenere almeno una lettera e un numero"
+      "usernamePlaceholder": "Inserisci il tuo nome utente",
+      "passwordPlaceholder": "Inserisci la tua password",
+      "showPassword": "Mostra password",
+      "hidePassword": "Nascondi password",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso...",
+      "createAccount": "Crea un nuovo account",
+      "or": "o",
+      "continueWith": "Continua con {{provider}}",
+      "registrationDisabled": "La registrazione di nuovi utenti è attualmente disabilitata."
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "Almeno 6 caratteri",
+        "letter": "Contiene almeno una lettera",
+        "number": "Contiene almeno un numero"
       },
-      "passwordReqs": {
-        "minLength": "Almeno 6 caratteri",
-        "hasLetter": "Contiene almeno una lettera",
-        "hasNumber": "Contiene almeno un numero"
+      "note": "Verrà automaticamente creato un record paziente per questo utente con il ruolo predefinito \"utente\".",
+      "backToLogin": "Torna al login",
+      "pageTitle": "Crea il tuo account",
+      "pageSubtitle": "Unisciti a MediKeep e gestisci le tue cartelle cliniche in sicurezza",
+      "cardTitle": "Dettagli account",
+      "cardSubtitle": "Compila il modulo qui sotto per creare il tuo account",
+      "whatHappensNext": "Cosa succede dopo?",
+      "nextSteps": {
+        "autoRecord": "Il tuo record paziente verrà creato automaticamente",
+        "loggedIn": "Effettuerai l'accesso immediatamente dopo la creazione dell'account",
+        "startManaging": "Potrai iniziare a gestire le tue informazioni mediche subito",
+        "dataSecure": "Tutti i tuoi dati sono sicuri e privati"
       },
       "linkPatient": {
         "checkbox": "Collega a un record paziente esistente",
@@ -2560,6 +2606,8 @@
         "accountCreateFailed": "Impossibile creare l'account",
         "createRetry": "Impossibile creare l'utente. Riprovare."
       }
+      "welcomeMessage": "Benvenuto {{name}}! Il tuo account è stato creato con successo.",
+      "accountCreated": "Account creato con successo! Accedi con le tue credenziali."
     }
   }
 }

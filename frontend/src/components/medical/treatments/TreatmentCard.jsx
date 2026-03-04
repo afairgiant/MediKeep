@@ -91,15 +91,6 @@ const TreatmentCard = ({
       });
     }
 
-    // Add tags as badges
-    if (treatment.tags && treatment.tags.length > 0) {
-      badges.push({
-        label: `🏷️ ${treatment.tags[0]}${treatment.tags.length > 1 ? ` +${treatment.tags.length - 1}` : ''}`,
-        color: 'gray',
-        variant: 'outline'
-      });
-    }
-
     // Generate dynamic fields
     const fields = [
       {
@@ -165,7 +156,8 @@ const TreatmentCard = ({
       <BaseMedicalCard
         title={titleContent}
         subtitle={treatment.treatment_type ? getTreatmentTypeLabel(treatment.treatment_type) : null}
-        badges={badges.filter(badge => !badge.clickable)} // Only include non-clickable badges
+        badges={badges.filter(badge => !badge.clickable)}
+        tags={treatment.tags || []}
         fields={fields}
         notes={treatment.notes}
         entityType="treatment"

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   Group,
@@ -25,11 +26,7 @@ import {
   IconSettings,
   IconLock,
   IconBolt,
-  IconTestPipe,
   IconRefresh,
-  IconCheck,
-  IconX,
-  IconInfoCircle,
   IconCalendarEvent,
 } from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -52,6 +49,7 @@ const USAGE_STATUS = {
 };
 
 const SystemHealth = () => {
+  const { t } = useTranslation('admin');
   const { formatDate, formatDateTime } = useDateFormat();
   const [lastRefresh, setLastRefresh] = useState(null);
 
@@ -150,60 +148,6 @@ const SystemHealth = () => {
     loadScheduleSettings();
   }, [loadScheduleSettings]);
 
-  // Test Library State
-  const [testLibraryInfo, setTestLibraryInfo] = useState(null);
-  const [testLibraryLoading, setTestLibraryLoading] = useState(false);
-  const [testLibrarySyncing, setTestLibrarySyncing] = useState(false);
-  const [testLibraryError, setTestLibraryError] = useState(null);
-  const [syncResult, setSyncResult] = useState(null);
-
-  const loadTestLibraryInfo = useCallback(async () => {
-    setTestLibraryLoading(true);
-    setTestLibraryError(null);
-    try {
-      const info = await adminApiService.getTestLibraryInfo();
-      setTestLibraryInfo(info);
-    } catch (err) {
-      setTestLibraryError(err.message || 'Failed to load test library info');
-    } finally {
-      setTestLibraryLoading(false);
-    }
-  }, []);
-
-  const handleReloadTestLibrary = async () => {
-    setTestLibrarySyncing(true);
-    setTestLibraryError(null);
-    setSyncResult(null);
-    try {
-      const result = await adminApiService.reloadTestLibrary();
-      setSyncResult({ type: 'reload', ...result });
-      await loadTestLibraryInfo();
-    } catch (err) {
-      setTestLibraryError(err.message || 'Failed to reload test library');
-    } finally {
-      setTestLibrarySyncing(false);
-    }
-  };
-
-  const handleSyncTestLibrary = async (forceAll = false) => {
-    setTestLibrarySyncing(true);
-    setTestLibraryError(null);
-    setSyncResult(null);
-    try {
-      const result = await adminApiService.syncTestLibrary(forceAll);
-      setSyncResult({ type: 'sync', ...result });
-      await loadTestLibraryInfo();
-    } catch (err) {
-      setTestLibraryError(err.message || 'Failed to sync test library');
-    } finally {
-      setTestLibrarySyncing(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTestLibraryInfo();
-  }, [loadTestLibraryInfo]);
-
   const loading =
     healthLoading ||
     metricsLoading ||
@@ -237,7 +181,7 @@ const SystemHealth = () => {
         <Center h={400}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text c="dimmed">Loading system health...</Text>
+            <Text c="dimmed">{t('health.loading', 'Loading system health...')}</Text>
           </Stack>
         </Center>
       </AdminLayout>
@@ -256,17 +200,17 @@ const SystemHealth = () => {
                   <IconHeartRateMonitor size={24} />
                 </ThemeIcon>
                 <Text size="xl" fw={700}>
-                  System Health Monitor
+                  {t('health.title', 'System Health Monitor')}
                 </Text>
               </Group>
               <Text c="dimmed" size="md">
-                Real-time system status and performance metrics
+                {t('health.subtitle', 'Real-time system status and performance metrics')}
               </Text>
             </div>
             <Group>
               {lastRefresh && (
                 <Text size="sm" c="dimmed">
-                  Last updated: {formatDateTime(lastRefresh.toISOString())}
+                  {t('health.lastUpdated', 'Last updated: {{time}}', { time: formatDateTime(lastRefresh.toISOString()) })}
                 </Text>
               )}
               <Button
@@ -275,7 +219,7 @@ const SystemHealth = () => {
                 loading={loading}
                 variant="light"
               >
-                Refresh All
+                {t('dashboard.refreshAll', 'Refresh All')}
               </Button>
             </Group>
           </Group>
@@ -288,7 +232,7 @@ const SystemHealth = () => {
               <IconShieldCheck size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              Overall System Status
+              {t('health.overallStatus', 'Overall System Status')}
             </Text>
             <Badge
               variant="light"
@@ -304,7 +248,7 @@ const SystemHealth = () => {
                   <IconChartBar size={16} />
                 </ThemeIcon>
                 <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
-                  Total Records
+                  {t('health.totalRecords', 'Total Records')}
                 </Text>
               </Group>
               <Text size="xl" fw={700}>
@@ -317,7 +261,7 @@ const SystemHealth = () => {
                   <IconClock size={16} />
                 </ThemeIcon>
                 <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
-                  Application Uptime
+                  {t('health.applicationUptime', 'Application Uptime')}
                 </Text>
               </Group>
               <Text size="xl" fw={700}>
@@ -330,7 +274,7 @@ const SystemHealth = () => {
                   <IconDeviceFloppy size={16} />
                 </ThemeIcon>
                 <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
-                  Last Backup
+                  {t('health.lastBackup', 'Last Backup')}
                 </Text>
               </Group>
               {healthData?.last_backup ? (
@@ -339,11 +283,11 @@ const SystemHealth = () => {
                 </Text>
               ) : scheduleSettings?.last_run_status === 'failed' ? (
                 <Text size="xl" fw={700} c="red">
-                  Last run failed
+                  {t('health.lastRunFailed', 'Last run failed')}
                 </Text>
               ) : (
                 <Text size="xl" fw={700}>
-                  None yet
+                  {t('health.noneYet', 'None yet')}
                 </Text>
               )}
               {scheduleSettings?.last_run_status === 'failed' && scheduleSettings.last_run_at && (
@@ -356,24 +300,25 @@ const SystemHealth = () => {
                 <Group gap={4} mt={4}>
                   <IconCalendarEvent size={14} color="var(--mantine-color-green-6)" />
                   <Text size="xs" c="green">
-                    Scheduled: {
-                      scheduleSettings.preset === 'every_6_hours' ? 'Every 6 hours' :
-                      scheduleSettings.preset === 'every_12_hours' ? 'Every 12 hours' :
-                      scheduleSettings.preset === 'daily' ? 'Daily' :
-                      scheduleSettings.preset === 'weekly' ? 'Weekly' :
-                      scheduleSettings.preset
-                    }
+                    {t('health.scheduled', 'Scheduled: {{schedule}}', {
+                      schedule:
+                        scheduleSettings.preset === 'every_6_hours' ? t('health.schedulePresets.every_6_hours', 'Every 6 hours') :
+                        scheduleSettings.preset === 'every_12_hours' ? t('health.schedulePresets.every_12_hours', 'Every 12 hours') :
+                        scheduleSettings.preset === 'daily' ? t('health.schedulePresets.daily', 'Daily') :
+                        scheduleSettings.preset === 'weekly' ? t('health.schedulePresets.weekly', 'Weekly') :
+                        scheduleSettings.preset
+                    })}
                   </Text>
                 </Group>
               )}
               {scheduleSettings && !scheduleSettings.enabled && !healthData?.last_backup && (
                 <Text size="xs" c="dimmed" mt={4}>
-                  No schedule configured
+                  {t('health.noScheduleConfigured', 'No schedule configured')}
                 </Text>
               )}
               {scheduleSettings?.next_run_at && scheduleSettings.enabled && (
                 <Text size="xs" c="dimmed" mt={2}>
-                  Next: {formatDateTime(scheduleSettings.next_run_at)}
+                  {t('health.next', 'Next: {{time}}', { time: formatDateTime(scheduleSettings.next_run_at) })}
                 </Text>
               )}
             </Paper>
@@ -387,7 +332,7 @@ const SystemHealth = () => {
               <IconDatabase size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              Database Health
+              {t('health.database.title', 'Database Health')}
             </Text>
             <Badge
               variant="light"
@@ -403,34 +348,34 @@ const SystemHealth = () => {
           ) : (
             <Stack gap={0}>
               <HealthItem
-                label="Connection Status"
-                value={healthData?.database_status || 'Unknown'}
+                label={t('health.database.connectionStatus', 'Connection Status')}
+                value={healthData?.database_status || t('shared.unknown', 'Unknown')}
                 status={healthData?.database_status}
               />
               <HealthItem
-                label="Connection Test"
-                value={healthData?.database_connection_test ? 'Passed' : 'Failed'}
+                label={t('health.database.connectionTest', 'Connection Test')}
+                value={healthData?.database_connection_test ? t('health.database.passed', 'Passed') : t('health.database.failed', 'Failed')}
                 status={healthData?.database_connection_test ? 'healthy' : 'error'}
               />
               <HealthItem
-                label="Total Records"
+                label={t('health.totalRecords', 'Total Records')}
                 value={healthData?.total_records?.toLocaleString() || 0}
               />
               {healthData?.disk_usage && (
-                <HealthItem label="Database Size" value={healthData.disk_usage} />
+                <HealthItem label={t('health.database.databaseSize', 'Database Size')} value={healthData.disk_usage} />
               )}
               {detailedStats && (
                 <>
                   <HealthItem
-                    label="Active Users"
+                    label={t('health.database.activeUsers', 'Active Users')}
                     value={detailedStats.total_users}
                   />
                   <HealthItem
-                    label="Patient Records"
+                    label={t('health.database.patientRecords', 'Patient Records')}
                     value={detailedStats.total_patients}
                   />
                   <HealthItem
-                    label="Medical Records"
+                    label={t('health.database.medicalRecords', 'Medical Records')}
                     value={
                       (detailedStats.total_medications || 0) +
                       (detailedStats.total_lab_results || 0) +
@@ -451,7 +396,7 @@ const SystemHealth = () => {
                 <IconServer size={20} />
               </ThemeIcon>
               <Text fw={600} size="lg">
-                Storage Health
+                {t('health.storage.title', 'Storage Health')}
               </Text>
               <Badge
                 variant="light"
@@ -466,13 +411,29 @@ const SystemHealth = () => {
               </Alert>
             ) : (
               <Stack>
+                {/* App Storage Summary */}
+                {storageHealth.app_storage && (
+                  <div>
+                    <Group justify="space-between" mb="xs">
+                      <Text fw={500}>{t('health.storage.appStorage', 'App Storage')}</Text>
+                      <Text size="sm" c="dimmed">
+                        {storageHealth.app_storage.total_mb >= 1024
+                          ? `${(storageHealth.app_storage.total_mb / 1024).toFixed(2)} GB`
+                          : `${storageHealth.app_storage.total_mb.toFixed(2)} MB`}
+                        {' '}{t('health.storage.filesAcross', 'across {{count}} files', { count: storageHealth.app_storage.total_files })}
+                      </Text>
+                    </Group>
+                  </div>
+                )}
+
+                {/* Disk Usage */}
                 {storageHealth.disk_space && (
                   <div>
                     <Group justify="space-between" mb="xs">
-                      <Text fw={500}>Disk Usage</Text>
+                      <Text fw={500}>{t('health.storage.diskUsage', 'Disk Usage')}</Text>
                       <Text size="sm" c="dimmed">
                         {storageHealth.disk_space.usage_percent}% (
-                        {storageHealth.disk_space.free_gb}GB free)
+                        {t('health.storage.freeOf', '{{free}} GB free of {{total}} GB', { free: storageHealth.disk_space.free_gb, total: storageHealth.disk_space.total_gb })})
                       </Text>
                     </Group>
                     <Progress
@@ -511,7 +472,7 @@ const SystemHealth = () => {
               <IconSettings size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              Application Services
+              {t('health.services.title', 'Application Services')}
             </Text>
           </Group>
           {metricsError ? (
@@ -521,8 +482,8 @@ const SystemHealth = () => {
           ) : (
             <Stack gap={0}>
               <HealthItem
-                label="API Status"
-                value={`${systemMetrics?.services?.api?.status || 'Unknown'}${
+                label={t('health.services.apiStatus', 'API Status')}
+                value={`${systemMetrics?.services?.api?.status || t('shared.unknown', 'Unknown')}${
                   systemMetrics?.services?.api?.response_time_ms
                     ? ` (${systemMetrics.services.api.response_time_ms}ms)`
                     : ''
@@ -530,18 +491,18 @@ const SystemHealth = () => {
                 status={systemMetrics?.services?.api?.status}
               />
               <HealthItem
-                label="Authentication Service"
+                label={t('health.services.authService', 'Authentication Service')}
                 value={
-                  systemMetrics?.services?.authentication?.status || 'Unknown'
+                  systemMetrics?.services?.authentication?.status || t('shared.unknown', 'Unknown')
                 }
                 status={systemMetrics?.services?.authentication?.status}
               />
               <HealthItem
-                label="Frontend Logging"
+                label={t('health.services.frontendLogging', 'Frontend Logging')}
                 value={
                   systemMetrics?.services?.frontend_logging?.status ||
                   frontendLogHealth?.status ||
-                  'Unknown'
+                  t('shared.unknown', 'Unknown')
                 }
                 status={
                   systemMetrics?.services?.frontend_logging?.status ||
@@ -549,9 +510,9 @@ const SystemHealth = () => {
                 }
               />
               <HealthItem
-                label="Admin Interface"
+                label={t('health.services.adminInterface', 'Admin Interface')}
                 value={
-                  systemMetrics?.services?.admin_interface?.status || 'Unknown'
+                  systemMetrics?.services?.admin_interface?.status || t('shared.unknown', 'Unknown')
                 }
                 status={systemMetrics?.services?.admin_interface?.status}
               />
@@ -566,13 +527,13 @@ const SystemHealth = () => {
               <IconLock size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              Single Sign-On (SSO)
+              {t('health.sso.title', 'Single Sign-On (SSO)')}
             </Text>
             <Badge
               variant="light"
               color={ssoConfig?.enabled ? 'green' : 'blue'}
             >
-              {ssoConfig?.enabled ? 'Enabled' : 'Disabled'}
+              {ssoConfig?.enabled ? t('shared.enabled', 'Enabled') : t('shared.disabled', 'Disabled')}
             </Badge>
           </Group>
           {ssoError ? (
@@ -582,35 +543,35 @@ const SystemHealth = () => {
           ) : (
             <Stack gap={0}>
               <HealthItem
-                label="SSO Status"
-                value={ssoConfig?.enabled ? 'Enabled' : 'Disabled'}
+                label={t('health.sso.ssoStatus', 'SSO Status')}
+                value={ssoConfig?.enabled ? t('shared.enabled', 'Enabled') : t('shared.disabled', 'Disabled')}
                 status={ssoConfig?.enabled ? 'healthy' : 'info'}
               />
               {ssoConfig?.enabled && (
                 <>
                   <HealthItem
-                    label="Provider Type"
-                    value={ssoConfig.provider_type?.toUpperCase() || 'Unknown'}
+                    label={t('health.sso.providerType', 'Provider Type')}
+                    value={ssoConfig.provider_type?.toUpperCase() || t('shared.unknown', 'Unknown')}
                     status="info"
                   />
                   {SSO_PROVIDER_LABELS[ssoConfig.provider_type] && (
                     <HealthItem
-                      label="Provider"
+                      label={t('health.sso.provider', 'Provider')}
                       value={SSO_PROVIDER_LABELS[ssoConfig.provider_type]}
                       status="healthy"
                     />
                   )}
                   <HealthItem
-                    label="Registration via SSO"
-                    value={ssoConfig.registration_enabled ? 'Allowed' : 'Blocked'}
+                    label={t('health.sso.registrationViaSso', 'Registration via SSO')}
+                    value={ssoConfig.registration_enabled ? t('health.sso.allowed', 'Allowed') : t('health.sso.blocked', 'Blocked')}
                     status={ssoConfig.registration_enabled ? 'healthy' : 'warning'}
                   />
                 </>
               )}
               {!ssoConfig?.enabled && (
                 <HealthItem
-                  label="Info"
-                  value="Users can only log in with username/password"
+                  label={t('shared.info', 'Info')}
+                  value={t('health.sso.passwordOnlyInfo', 'Users can only log in with username/password')}
                   status="info"
                 />
               )}
@@ -626,158 +587,89 @@ const SystemHealth = () => {
                 <IconBolt size={20} />
               </ThemeIcon>
               <Text fw={600} size="lg">
-                Application Performance
+                {t('health.performance.title', 'Application Performance')}
               </Text>
             </Group>
-            <Stack gap={0}>
+            <Stack gap="md">
+              {/* App Memory Usage (process RSS) */}
+              {systemMetrics.application.memory_used_mb != null ? (
+                <div>
+                  <Group justify="space-between" mb="xs">
+                    <Text fw={500}>{t('health.performance.appMemory', 'App Memory (RSS)')}</Text>
+                    <Text size="sm" c="dimmed">
+                      {t('health.performance.memoryUsed', '{{used}} MB used (system: {{percent}}% of {{total}} MB)', { used: systemMetrics.application.memory_used_mb, percent: systemMetrics.application.memory_percent, total: systemMetrics.application.memory_total_mb })}
+                    </Text>
+                  </Group>
+                  <Progress
+                    value={systemMetrics.application.memory_percent}
+                    color={
+                      systemMetrics.application.memory_percent > 85
+                        ? 'red'
+                        : systemMetrics.application.memory_percent > 70
+                          ? 'yellow'
+                          : 'green'
+                    }
+                    size="lg"
+                    radius="md"
+                  />
+                </div>
+              ) : (
+                <HealthItem
+                  label={t('health.performance.memoryUsage', 'Memory Usage')}
+                  value={systemMetrics.application.memory_usage}
+                  status={USAGE_STATUS[systemMetrics.application.memory_usage] || 'error'}
+                />
+              )}
+
+              {/* CPU Usage */}
+              {systemMetrics.application.cpu_percent != null ? (
+                <div>
+                  <Group justify="space-between" mb="xs">
+                    <Text fw={500}>{t('health.performance.cpuUsage', 'CPU Usage')}</Text>
+                    <Text size="sm" c="dimmed">
+                      {t('health.performance.cpuDetails', 'App: {{appPercent}}% of {{cores}} cores (system: {{systemPercent}}%)', {
+                        appPercent: systemMetrics.application.app_cpu_percent ?? '\u2014',
+                        cores: systemMetrics.application.cpu_count || '\u2014',
+                        systemPercent: systemMetrics.application.cpu_percent
+                      })}
+                    </Text>
+                  </Group>
+                  <Progress
+                    value={systemMetrics.application.cpu_percent}
+                    color={
+                      systemMetrics.application.cpu_percent > 80
+                        ? 'red'
+                        : systemMetrics.application.cpu_percent > 50
+                          ? 'yellow'
+                          : 'green'
+                    }
+                    size="lg"
+                    radius="md"
+                  />
+                </div>
+              ) : (
+                <HealthItem
+                  label={t('health.performance.cpuUsage', 'CPU Usage')}
+                  value={systemMetrics.application.cpu_usage}
+                  status={USAGE_STATUS[systemMetrics.application.cpu_usage] || 'error'}
+                />
+              )}
+
+              {/* Response Time & System Load */}
               <HealthItem
-                label="Memory Usage"
-                value={systemMetrics.application.memory_usage}
-                status={USAGE_STATUS[systemMetrics.application.memory_usage] || 'error'}
+                label={t('health.performance.responseTime', 'Response Time')}
+                value={systemMetrics.application.response_time}
+                status="healthy"
               />
               <HealthItem
-                label="CPU Usage"
-                value={systemMetrics.application.cpu_usage}
-                status={USAGE_STATUS[systemMetrics.application.cpu_usage] || 'error'}
+                label={t('health.performance.systemLoad', 'System Load')}
+                value={systemMetrics.application.system_load}
+                status={USAGE_STATUS[systemMetrics.application.system_load] || 'error'}
               />
             </Stack>
           </Card>
         )}
 
-        {/* Test Library Maintenance */}
-        <Card shadow="sm" p="lg" mb="lg" withBorder>
-          <Group mb="md">
-            <ThemeIcon size="lg" variant="light" color="grape">
-              <IconTestPipe size={20} />
-            </ThemeIcon>
-            <Text fw={600} size="lg">
-              Test Library Maintenance
-            </Text>
-            <Badge
-              variant="light"
-              color={testLibraryError ? 'red' : 'green'}
-            >
-              {testLibraryError ? 'Error' : 'Operational'}
-            </Badge>
-          </Group>
-
-          {testLibraryError && (
-            <Alert color="red" variant="light" mb="md">
-              {testLibraryError}
-            </Alert>
-          )}
-
-          {testLibraryLoading ? (
-            <Center py="lg">
-              <Loader size="sm" />
-            </Center>
-          ) : (
-            <>
-              {testLibraryInfo && (
-                <Stack gap={0} mb="md">
-                  <HealthItem
-                    label="Library Version"
-                    value={testLibraryInfo.version}
-                    status="info"
-                  />
-                  <HealthItem
-                    label="Total Tests"
-                    value={testLibraryInfo.test_count}
-                    status="info"
-                  />
-                  <HealthItem
-                    label="Categories"
-                    value={
-                      testLibraryInfo.categories
-                        ? Object.entries(testLibraryInfo.categories)
-                            .map(([cat, count]) => `${cat}: ${count}`)
-                            .join(', ')
-                        : ''
-                    }
-                  />
-                </Stack>
-              )}
-
-              {syncResult && (
-                <Alert
-                  color={syncResult.success ? 'green' : 'red'}
-                  variant="light"
-                  icon={syncResult.success ? <IconCheck size={16} /> : <IconX size={16} />}
-                  mb="md"
-                  withCloseButton
-                  onClose={() => setSyncResult(null)}
-                  title={
-                    syncResult.type === 'reload'
-                      ? 'Library Reloaded'
-                      : 'Sync Complete'
-                  }
-                >
-                  {syncResult.type === 'sync' && (
-                    <Group gap="lg" mb="xs">
-                      <Text size="sm">
-                        Processed: {syncResult.components_processed}
-                      </Text>
-                      <Text size="sm">
-                        Names Updated: {syncResult.canonical_names_updated}
-                      </Text>
-                      <Text size="sm">
-                        Categories Updated: {syncResult.categories_updated}
-                      </Text>
-                    </Group>
-                  )}
-                  {syncResult.message && (
-                    <Text size="sm">{syncResult.message}</Text>
-                  )}
-                </Alert>
-              )}
-
-              <Group mt="md">
-                <Button
-                  variant="default"
-                  onClick={handleReloadTestLibrary}
-                  loading={testLibrarySyncing}
-                >
-                  Reload Library
-                </Button>
-                <Button
-                  variant="light"
-                  onClick={() => handleSyncTestLibrary(false)}
-                  loading={testLibrarySyncing}
-                >
-                  Sync Unmatched
-                </Button>
-                <Button
-                  variant="light"
-                  color="yellow"
-                  onClick={() => handleSyncTestLibrary(true)}
-                  loading={testLibrarySyncing}
-                >
-                  Force Sync All
-                </Button>
-              </Group>
-
-              <Alert
-                variant="light"
-                color="gray"
-                mt="md"
-                icon={<IconInfoCircle size={16} />}
-              >
-                <Text size="sm" mb={4}>
-                  <Text span fw={600}>Reload Library:</Text> Refreshes the test
-                  library from disk (use after updating test_library.json)
-                </Text>
-                <Text size="sm" mb={4}>
-                  <Text span fw={600}>Sync Unmatched:</Text> Updates components
-                  that don&apos;t have a canonical name yet
-                </Text>
-                <Text size="sm">
-                  <Text span fw={600}>Force Sync All:</Text> Re-matches all
-                  components (categories and canonical names)
-                </Text>
-              </Alert>
-            </>
-          )}
-        </Card>
       </div>
     </AdminLayout>
   );

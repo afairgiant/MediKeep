@@ -46,6 +46,10 @@ class User(Base):
     # Force password change on next login (e.g. for default/emergency accounts)
     must_change_password = Column(Boolean, default=False, nullable=False)
 
+    # Account status
+    is_active = Column(Boolean, default=True, nullable=False)
+    last_login_at = Column(DateTime, nullable=True)
+
     # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(
@@ -148,6 +152,7 @@ class UserTag(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     tag = Column(String(100), nullable=False)
+    color = Column(String(7), nullable=True)  # Hex color e.g. #228be6, NULL = default
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
 
     # Relationships

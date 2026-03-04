@@ -82,12 +82,13 @@ class TestTagServiceExactMatching:
         return {"diabetes": med1, "pre-diabetes": med2, "diabetes-type2": med3}
 
     def test_rename_tag_exact_match_only(
-        self, db_session: Session, medications_with_similar_tags
+        self, db_session: Session, test_user, medications_with_similar_tags
     ):
         """Test that renaming 'diabetes' doesn't affect 'pre-diabetes' or 'diabetes-type2'."""
         # Rename only 'diabetes' tag
         updated_count = tag_service.rename_tag_across_entities(
-            db_session, old_tag="diabetes", new_tag="type1-diabetes"
+            db_session, old_tag="diabetes", new_tag="type1-diabetes",
+            user_id=test_user.id
         )
 
         # Should update only 1 record
@@ -107,12 +108,12 @@ class TestTagServiceExactMatching:
         assert medications_with_similar_tags["diabetes-type2"].tags == ["diabetes-type2"]
 
     def test_delete_tag_exact_match_only(
-        self, db_session: Session, medications_with_similar_tags
+        self, db_session: Session, test_user, medications_with_similar_tags
     ):
         """Test that deleting 'diabetes' doesn't affect 'pre-diabetes' or 'diabetes-type2'."""
         # Delete only 'diabetes' tag
         updated_count = tag_service.delete_tag_across_entities(
-            db_session, tag="diabetes"
+            db_session, tag="diabetes", user_id=test_user.id
         )
 
         # Should update only 1 record
@@ -131,12 +132,13 @@ class TestTagServiceExactMatching:
         assert medications_with_similar_tags["diabetes-type2"].tags == ["diabetes-type2"]
 
     def test_replace_tag_exact_match_only(
-        self, db_session: Session, medications_with_similar_tags
+        self, db_session: Session, test_user, medications_with_similar_tags
     ):
         """Test that replacing 'diabetes' doesn't affect 'pre-diabetes' or 'diabetes-type2'."""
         # Replace only 'diabetes' tag
         updated_count = tag_service.replace_tag_across_entities(
-            db_session, old_tag="diabetes", new_tag="type1-diabetes"
+            db_session, old_tag="diabetes", new_tag="type1-diabetes",
+            user_id=test_user.id
         )
 
         # Should update only 1 record
@@ -155,7 +157,7 @@ class TestTagServiceExactMatching:
         assert medications_with_similar_tags["diabetes-type2"].tags == ["diabetes-type2"]
 
     def test_short_tag_doesnt_match_longer_tags(
-        self, db_session: Session, test_patient
+        self, db_session: Session, test_user, test_patient
     ):
         """Test that a short tag like 'tag' doesn't match 'tags' or 'my-tag'."""
         # Create medications with similar tags
@@ -204,7 +206,9 @@ class TestTagServiceExactMatching:
         db_session.commit()
 
         # Delete only 'tag' (not 'tags' or 'my-tag')
-        updated_count = tag_service.delete_tag_across_entities(db_session, tag="tag")
+        updated_count = tag_service.delete_tag_across_entities(
+            db_session, tag="tag", user_id=test_user.id
+        )
 
         # Should update only 1 record
         assert updated_count == 1
@@ -219,7 +223,7 @@ class TestTagServiceExactMatching:
         assert med3.tags == ["my-tag"]
 
     def test_tag_with_special_characters(
-        self, db_session: Session, test_patient
+        self, db_session: Session, test_user, test_patient
     ):
         """Test exact matching with tags containing special characters."""
         # Create medications with tags containing special chars
@@ -255,7 +259,8 @@ class TestTagServiceExactMatching:
 
         # Rename only 'covid-19'
         updated_count = tag_service.rename_tag_across_entities(
-            db_session, old_tag="covid-19", new_tag="sars-cov-2"
+            db_session, old_tag="covid-19", new_tag="sars-cov-2",
+            user_id=test_user.id
         )
 
         # Should update only 1 record

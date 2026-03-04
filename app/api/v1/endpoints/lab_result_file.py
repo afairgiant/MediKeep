@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
+from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
@@ -34,8 +35,12 @@ from app.schemas.lab_result_file import (
 logger = get_logger(__name__)
 router = APIRouter()
 
-# Configuration
-UPLOAD_DIRECTORY = "uploads/lab_result_files"
+
+def get_upload_directory() -> str:
+    """Get the lab result file upload directory path from settings."""
+    return str(settings.UPLOAD_DIR / "lab_result_files")
+
+
 MAX_FILE_SIZE = 1024 * 1024 * 1024  # 1GB (increased for archive support)
 ALLOWED_EXTENSIONS = {
     ".pdf",
@@ -196,11 +201,12 @@ async def upload_file(
         )
 
     # Create upload directory if it doesn't exist
-    os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+    upload_dir = get_upload_directory()
+    os.makedirs(upload_dir, exist_ok=True)
 
     # Generate unique filename
     unique_filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = os.path.join(UPLOAD_DIRECTORY, unique_filename)
+    file_path = os.path.join(upload_dir, unique_filename)
 
     # Save file
     try:
@@ -235,8 +241,6 @@ async def upload_file(
         )
 
     # Create file entry in database
-    from datetime import datetime
-
     file_create = LabResultFileCreate(
         lab_result_id=lab_result_id,
         file_name=file.filename,
@@ -707,16 +711,17 @@ def check_storage_health(current_user: User = Depends(deps.get_current_user)):
     Check storage system health.
     """
     try:
+        upload_dir = get_upload_directory()
         # Check if upload directory exists and is writable
-        os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+        os.makedirs(upload_dir, exist_ok=True)
 
         # Check available disk space
         import shutil
 
-        total, used, free = shutil.disk_usage(UPLOAD_DIRECTORY)
+        total, used, free = shutil.disk_usage(upload_dir)
 
         # Test write permissions
-        test_file = os.path.join(UPLOAD_DIRECTORY, "health_check.tmp")
+        test_file = os.path.join(upload_dir, "health_check.tmp")
         try:
             with open(test_file, "w") as f:
                 f.write("test")
@@ -727,7 +732,7 @@ def check_storage_health(current_user: User = Depends(deps.get_current_user)):
 
         return {
             "status": "healthy" if write_permission else "unhealthy",
-            "upload_directory": UPLOAD_DIRECTORY,
+            "upload_directory": upload_dir,
             "write_permission": write_permission,
             "disk_space": {
                 "total_gb": round(total / (1024**3), 2),
