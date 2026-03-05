@@ -1945,5 +1945,29 @@
   "form": {
     "invalidPhoneDigits": "Un numéro de téléphone ne peut contenir que des chiffres, des espaces, des tirets, des parenthèses, des points, et des +",
     "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide"
+  },
+  "componentCatalog": {
+    "searchPlaceholder": "Rechercher des tests...",
+    "filterCategory": "Categorie",
+    "filterStatus": "Statut",
+    "showing": "{{count}} tests uniques affiches",
+    "readingCount": "{{count}} mesures",
+    "readingCount_one": "{{count}} mesure",
+    "refRange": "Ref",
+    "noResults": "Aucun composant de test trouve",
+    "tryAdjusting": "Essayez d'ajuster vos criteres de recherche ou de filtre.",
+    "noData": "Ajoutez des resultats de laboratoire avec des composants pour les voir ici.",
+    "fetchError": "Echec du chargement du catalogue de tests",
+    "trend": {
+      "increasing": "En hausse",
+      "decreasing": "En baisse",
+      "stable": "Stable",
+      "worsening": "En deterioration",
+      "improving": "En amelioration"
+    },
+    "sort": {
+      "priority": "Priorite",
+      "alphabetical": "A-Z"
+    }
   }
 }

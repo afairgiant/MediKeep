@@ -54,6 +54,7 @@ function MedicalPageActions({
   secondaryActions = [],
   viewMode,
   onViewModeChange,
+  viewModes,
   showPrint = true,
   showViewToggle = true,
   mb = 'lg',
@@ -113,6 +114,7 @@ function MedicalPageActions({
           viewMode={viewMode}
           onViewModeChange={onViewModeChange}
           showPrint={showPrint}
+          {...(viewModes ? { modes: viewModes } : {})}
         />
       )}
     </Group>
@@ -149,6 +151,8 @@ MedicalPageActions.propTypes = {
   viewMode: PropTypes.string,
   /** Callback when view mode changes */
   onViewModeChange: PropTypes.func,
+  /** Array of view mode strings to show in ViewToggle (e.g. ['cards', 'table', 'components']) */
+  viewModes: PropTypes.arrayOf(PropTypes.string),
   /** Whether to show print button in ViewToggle (defaults to true) */
   showPrint: PropTypes.bool,
   /** Whether to show ViewToggle (defaults to true) */

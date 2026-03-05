@@ -1945,5 +1945,29 @@
         "description": "Sedi dello studio"
       }
     }
+  },
+  "componentCatalog": {
+    "searchPlaceholder": "Cerca test...",
+    "filterCategory": "Categoria",
+    "filterStatus": "Stato",
+    "showing": "{{count}} test unici visualizzati",
+    "readingCount": "{{count}} misurazioni",
+    "readingCount_one": "{{count}} misurazione",
+    "refRange": "Rif",
+    "noResults": "Nessun componente di test trovato",
+    "tryAdjusting": "Prova a modificare i criteri di ricerca o di filtro.",
+    "noData": "Aggiungi risultati di laboratorio con componenti per vederli qui.",
+    "fetchError": "Impossibile caricare il catalogo dei test",
+    "trend": {
+      "increasing": "In aumento",
+      "decreasing": "In diminuzione",
+      "stable": "Stabile",
+      "worsening": "In peggioramento",
+      "improving": "In miglioramento"
+    },
+    "sort": {
+      "priority": "Priorita",
+      "alphabetical": "A-Z"
+    }
   }
 }

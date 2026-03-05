@@ -1945,5 +1945,29 @@
         "description": "Ubicaciones de las oficinas del consultorio"
       }
     }
+  },
+  "componentCatalog": {
+    "searchPlaceholder": "Buscar pruebas...",
+    "filterCategory": "Categoria",
+    "filterStatus": "Estado",
+    "showing": "Mostrando {{count}} pruebas unicas",
+    "readingCount": "{{count}} lecturas",
+    "readingCount_one": "{{count}} lectura",
+    "refRange": "Ref",
+    "noResults": "No se encontraron componentes de prueba",
+    "tryAdjusting": "Intente ajustar sus criterios de busqueda o filtro.",
+    "noData": "Agregue resultados de laboratorio con componentes para verlos aqui.",
+    "fetchError": "Error al cargar el catalogo de pruebas",
+    "trend": {
+      "increasing": "En aumento",
+      "decreasing": "En descenso",
+      "stable": "Estable",
+      "worsening": "Empeorando",
+      "improving": "Mejorando"
+    },
+    "sort": {
+      "priority": "Prioridad",
+      "alphabetical": "A-Z"
+    }
   }
 }

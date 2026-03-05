@@ -1945,5 +1945,29 @@
         "description": "Localizacoes dos escritorios do consultorio"
       }
     }
+  },
+  "componentCatalog": {
+    "searchPlaceholder": "Pesquisar testes...",
+    "filterCategory": "Categoria",
+    "filterStatus": "Estado",
+    "showing": "Mostrando {{count}} testes unicos",
+    "readingCount": "{{count}} leituras",
+    "readingCount_one": "{{count}} leitura",
+    "refRange": "Ref",
+    "noResults": "Nenhum componente de teste encontrado",
+    "tryAdjusting": "Tente ajustar seus criterios de pesquisa ou filtro.",
+    "noData": "Adicione resultados laboratoriais com componentes para ve-los aqui.",
+    "fetchError": "Falha ao carregar o catalogo de testes",
+    "trend": {
+      "increasing": "Aumentando",
+      "decreasing": "Diminuindo",
+      "stable": "Estavel",
+      "worsening": "Piorando",
+      "improving": "Melhorando"
+    },
+    "sort": {
+      "priority": "Prioridade",
+      "alphabetical": "A-Z"
+    }
   }
 }

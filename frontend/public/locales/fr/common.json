@@ -203,7 +203,8 @@
   },
   "viewToggle": {
     "cards": "Cartes",
-    "table": "Tableau"
+    "table": "Tableau",
+    "components": "Composants"
   },
   "filters": {
     "title": "Filtres et recherche",

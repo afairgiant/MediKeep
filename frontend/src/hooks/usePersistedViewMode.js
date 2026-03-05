@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const LEGACY_KEY = 'medikeep_viewmode';
-const VALID_MODES = new Set(['cards', 'table']);
+const VALID_MODES = new Set(['cards', 'table', 'components']);
 
 function readValidMode(key) {
   try {

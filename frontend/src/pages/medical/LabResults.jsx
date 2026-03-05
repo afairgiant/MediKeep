@@ -35,6 +35,7 @@ import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
 import LabResultFormWrapper from '../../components/medical/labresults/LabResultFormWrapper';
 import LabResultQuickImportModal from '../../components/medical/labresults/LabResultQuickImportModal';
+import TestComponentCatalog from '../../components/medical/labresults/TestComponentCatalog';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Button,
@@ -548,13 +549,18 @@ const LabResults = () => {
             ]}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            viewModes={['cards', 'table', 'components']}
             mb={0}
           />
 
-          {/* Mantine Filter Controls */}
-          <MedicalPageFilters dataManagement={dataManagement} config={config} />
+          {/* Mantine Filter Controls - hidden in components view (it has its own) */}
+          {viewMode !== 'components' && (
+            <MedicalPageFilters dataManagement={dataManagement} config={config} />
+          )}
 
-          {filteredLabResults.length === 0 ? (
+          {viewMode === 'components' ? (
+            <TestComponentCatalog patientId={currentPatient?.id} />
+          ) : filteredLabResults.length === 0 ? (
             <EmptyState
               emoji="🧪"
               title={t('labResults.noResults', 'No Lab Results Found')}
