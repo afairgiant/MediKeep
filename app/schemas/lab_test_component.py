@@ -472,3 +472,32 @@ class LabTestComponentTrendResponse(BaseModel):
     is_aggregated: bool = False
     aggregation_period: Optional[str] = None  # "month", "week", etc.
     result_type: Optional[str] = "quantitative"
+
+
+# Component Catalog schemas
+
+class ComponentCatalogEntry(BaseModel):
+    """Single entry in the component catalog – one per unique test name."""
+
+    test_name: str
+    trend_test_name: str  # canonical_test_name or stripped test_name – use for trend lookups
+    abbreviation: Optional[str] = None
+    latest_value: Optional[float] = None
+    latest_qualitative_value: Optional[str] = None
+    unit: Optional[str] = None
+    status: Optional[str] = None
+    category: Optional[str] = None
+    result_type: Optional[str] = "quantitative"
+    reading_count: int = 1
+    trend_direction: str = "stable"
+    latest_date: Optional[str] = None
+    ref_range_min: Optional[float] = None
+    ref_range_max: Optional[float] = None
+    ref_range_text: Optional[str] = None
+
+
+class ComponentCatalogResponse(BaseModel):
+    """Paginated response for component catalog."""
+
+    items: List[ComponentCatalogEntry]
+    total: int

@@ -171,7 +171,8 @@
   },
   "viewToggle": {
     "cards": "Karten",
-    "table": "Tabelle"
+    "table": "Tabelle",
+    "components": "Komponenten"
   },
   "filters": {
     "title": "Filter & Suche",

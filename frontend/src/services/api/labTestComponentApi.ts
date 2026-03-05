@@ -131,6 +131,30 @@ export interface TestTemplateEntry extends TestTemplateItem {
   qualitative_value?: QualitativeValue | null;
 }
 
+// Component Catalog types
+export interface ComponentCatalogEntry {
+  test_name: string;
+  trend_test_name: string;
+  abbreviation?: string | null;
+  latest_value?: number | null;
+  latest_qualitative_value?: string | null;
+  unit?: string | null;
+  status?: 'normal' | 'high' | 'low' | 'critical' | 'abnormal' | 'borderline' | null;
+  category?: string | null;
+  result_type?: ResultType | null;
+  reading_count: number;
+  trend_direction: 'increasing' | 'decreasing' | 'stable' | 'worsening' | 'improving';
+  latest_date?: string | null;
+  ref_range_min?: number | null;
+  ref_range_max?: number | null;
+  ref_range_text?: string | null;
+}
+
+export interface ComponentCatalogResponse {
+  items: ComponentCatalogEntry[];
+  total: number;
+}
+
 class LabTestComponentApi {
   /**
    * Get all test components for a specific lab result
@@ -575,6 +599,51 @@ class LabTestComponentApi {
       logger.error('trend_data_fetch_error', {
         patientId,
         testName,
+        error: error.message,
+        component: 'LabTestComponentApi'
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get aggregated component catalog for a patient
+   */
+  async getComponentCatalog(
+    patientId: number,
+    options?: {
+      search?: string;
+      category?: string;
+      status?: string;
+      skip?: number;
+      limit?: number;
+    },
+    signal?: AbortSignal
+  ): Promise<ComponentCatalogResponse> {
+    try {
+      const params: Record<string, unknown> = {};
+      if (options?.search) params.search = options.search;
+      if (options?.category) params.category = options.category;
+      if (options?.status) params.status = options.status;
+      if (options?.skip !== undefined) params.skip = options.skip;
+      if (options?.limit !== undefined) params.limit = options.limit;
+
+      const response = await apiService.get(
+        `/lab-test-components/patient/${patientId}/component-catalog`,
+        { params, signal }
+      );
+
+      logger.debug('component_catalog_fetched', {
+        patientId,
+        itemCount: response?.items?.length || 0,
+        total: response?.total || 0,
+        component: 'LabTestComponentApi'
+      });
+
+      return response;
+    } catch (error: any) {
+      logger.error('component_catalog_fetch_error', {
+        patientId,
         error: error.message,
         component: 'LabTestComponentApi'
       });

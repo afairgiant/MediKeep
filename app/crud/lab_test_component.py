@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
@@ -313,6 +313,151 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
             .all()
         )
         return [result[0] for result in results]
+
+    def get_component_catalog(
+        self,
+        db: Session,
+        *,
+        patient_id: int,
+        search: Optional[str] = None,
+        category: Optional[str] = None,
+        status: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 200,
+    ) -> Dict[str, Any]:
+        """
+        Build an aggregated catalog of unique test components across all lab results
+        for a patient. Groups by normalized test name and returns the latest reading
+        plus trend direction for each unique test.
+        """
+        from app.models.labs import LabResult
+        from app.utils.trend_statistics import compute_trend_direction
+
+        query = (
+            db.query(self.model)
+            .join(self.model.lab_result)
+            .filter(LabResult.patient_id == patient_id)
+            .options(joinedload(self.model.lab_result))
+        )
+
+        if search:
+            escaped_search = search.replace('%', r'\%').replace('_', r'\_')
+            query = query.filter(
+                or_(
+                    self.model.test_name.ilike(f"%{escaped_search}%", escape='\\'),
+                    self.model.abbreviation.ilike(f"%{escaped_search}%", escape='\\'),
+                )
+            )
+
+        if category:
+            query = query.filter(self.model.category == category.lower())
+
+        # Order by completed_date desc so first item per group is the latest
+        query = query.order_by(
+            func.coalesce(
+                LabResult.completed_date,
+                func.date(self.model.created_at),
+            ).desc()
+        )
+
+        components = query.all()
+
+        # Group by normalized test name
+        groups: Dict[str, list] = {}
+        for comp in components:
+            key = (
+                comp.canonical_test_name.lower()
+                if comp.canonical_test_name
+                else comp.test_name.strip().rstrip(',;: ').lower()
+            )
+            groups.setdefault(key, []).append(comp)
+
+        # Build catalog entries
+        from app.schemas.lab_test_component import ComponentCatalogEntry
+
+        STATUS_SORT_ORDER = {
+            "critical": 0,
+            "abnormal": 1,
+            "high": 2,
+            "low": 3,
+            "borderline": 4,
+            "normal": 5,
+        }
+
+        entries: List[ComponentCatalogEntry] = []
+        for _key, group in groups.items():
+            latest = group[0]
+            latest_date = None
+            if latest.lab_result and latest.lab_result.completed_date:
+                latest_date = str(latest.lab_result.completed_date)
+            elif latest.created_at:
+                latest_date = str(latest.created_at.date())
+
+            # Compute trend from values (most-recent first -> reverse for chronological)
+            result_type = latest.result_type or "quantitative"
+            trend = "stable"
+            if result_type == "quantitative":
+                values = [c.value for c in group if c.value is not None]
+                if len(values) >= 3:
+                    trend = compute_trend_direction(list(reversed(values)))
+            else:
+                # Qualitative trend based on abnormal rate shift
+                if len(group) >= 4:
+                    mid = len(group) // 2
+                    recent_abnormal = sum(1 for c in group[:mid] if c.status != "normal")
+                    older_abnormal = sum(1 for c in group[mid:] if c.status != "normal")
+                    recent_rate = recent_abnormal / mid
+                    older_rate = older_abnormal / (len(group) - mid)
+                    if recent_rate > older_rate + 0.15:
+                        trend = "worsening"
+                    elif recent_rate < older_rate - 0.15:
+                        trend = "improving"
+
+            # Use canonical_test_name for trend matching when available,
+            # mirroring the exclusive matching logic in get_by_patient_and_test_name
+            trend_name = (
+                latest.canonical_test_name
+                if latest.canonical_test_name
+                else latest.test_name.strip().rstrip(',;: ')
+            )
+
+            entry = ComponentCatalogEntry(
+                test_name=latest.test_name.strip(),
+                trend_test_name=trend_name,
+                abbreviation=latest.abbreviation,
+                latest_value=latest.value,
+                latest_qualitative_value=latest.qualitative_value,
+                unit=latest.unit,
+                status=latest.status,
+                category=latest.category,
+                result_type=result_type,
+                reading_count=len(group),
+                trend_direction=trend,
+                latest_date=latest_date,
+                ref_range_min=latest.ref_range_min,
+                ref_range_max=latest.ref_range_max,
+                ref_range_text=latest.ref_range_text,
+            )
+            entries.append(entry)
+
+        # Post-aggregation status filter
+        if status:
+            status_lower = status.lower()
+            entries = [e for e in entries if e.status == status_lower]
+
+        # Sort: critical/abnormal first, then alphabetical
+        def sort_key(e: ComponentCatalogEntry):
+            return (
+                STATUS_SORT_ORDER.get(e.status or "", 6),
+                (e.test_name or "").lower(),
+            )
+
+        entries.sort(key=sort_key)
+
+        total = len(entries)
+        paginated = entries[skip : skip + limit]
+
+        return {"items": paginated, "total": total}
 
     def get_statistics_by_lab_result(
         self, db: Session, *, lab_result_id: int
