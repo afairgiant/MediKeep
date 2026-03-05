@@ -235,7 +235,13 @@
       "resultIndicator": "Indicador de resultado:",
       "relatedConditions": "Condiciones relacionadas",
       "linkConditionsTitle": "Vincular condiciones médicas",
-      "linkConditionsDescription": "Asocie este resultado de laboratorio con condiciones médicas relevantes para un mejor seguimiento y organización."
+      "linkConditionsDescription": "Asocie este resultado de laboratorio con condiciones médicas relevantes para un mejor seguimiento y organización.",
+      "testComponents": "Componentes de prueba (Opcional)",
+      "testComponentsDescription": "Opcionalmente agregue valores de prueba individuales. Tambien puede agregar mas despues.",
+      "addTestComponent": "Agregar componentes de prueba",
+      "hideTestComponents": "Ocultar componentes de prueba",
+      "addAnotherTest": "Agregar otra prueba",
+      "componentCreationWarning": "El resultado de laboratorio se guardo pero los componentes de prueba no se pudieron agregar. Puede agregarlos desde la pagina de visualizacion."
     },
     "testName": {
       "label": "Nombre del análisis",

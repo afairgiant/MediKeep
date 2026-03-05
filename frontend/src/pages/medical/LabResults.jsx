@@ -30,19 +30,19 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
-// Import new modular components
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
 import LabResultFormWrapper from '../../components/medical/labresults/LabResultFormWrapper';
 import LabResultQuickImportModal from '../../components/medical/labresults/LabResultQuickImportModal';
 import TestComponentCatalog from '../../components/medical/labresults/TestComponentCatalog';
+import { notifications } from '@mantine/notifications';
+import { labTestComponentApi } from '../../services/api/labTestComponentApi';
+import { sanitizeComponentForApi } from '../../utils/labTestComponentUtils';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   Button,
   Container,
   Stack,
-  Text,
-  Card,
   Paper,
 } from '@mantine/core';
 import { IconFileUpload } from '@tabler/icons-react';
@@ -147,7 +147,6 @@ const LabResults = () => {
   // Get standardized formatters for lab results
   const formatters = getEntityFormatters('lab_results', practitioners, null, null, formatDate);
 
-
   // Use standardized data management
   const dataManagement = useDataManagement(labResults || [], config);
 
@@ -211,6 +210,9 @@ const LabResults = () => {
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
   const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
 
+  // Test component inline entry state (create mode only)
+  const [testComponentMethods, setTestComponentMethods] = useState(null);
+
   // View modal navigation with URL deep linking
   const {
     isOpen: showViewModal,
@@ -253,6 +255,7 @@ const LabResults = () => {
     resetSubmission(); // Reset submission state
     setEditingLabResult(null);
     setDocumentManagerMethods(null); // Reset document manager methods
+    setTestComponentMethods(null); // Reset test component methods
     setFormData({
       test_name: '',
       test_code: '',
@@ -288,7 +291,6 @@ const LabResults = () => {
       tags: labResult.tags || [],
     });
 
-    // Note: File loading is now handled by DocumentManager component
     setShowModal(true);
   }, [resetSubmission]);
 
@@ -397,7 +399,6 @@ const LabResults = () => {
       ordered_date: formData.ordered_date || null,
       completed_date: formData.completed_date || null,
     };
-    
 
     try {
       let success;
@@ -422,9 +423,37 @@ const LabResults = () => {
       completeFormSubmission(success, resultId);
 
       if (success && resultId) {
+        // Submit inline test components (create mode only)
+        if (!editingLabResult && testComponentMethods?.hasPendingComponents?.()) {
+          try {
+            const pendingComponents = testComponentMethods.getPendingComponents();
+            const componentsToCreate = pendingComponents.map(c => sanitizeComponentForApi(c, resultId));
+            await labTestComponentApi.createBulkForLabResult(resultId, componentsToCreate);
+            logger.info('inline_test_components_created', {
+              message: 'Inline test components created with lab result',
+              labResultId: resultId,
+              componentCount: componentsToCreate.length,
+              component: 'LabResults',
+            });
+          } catch (componentError) {
+            logger.error('inline_test_components_error', {
+              message: 'Failed to create inline test components',
+              labResultId: resultId,
+              error: componentError.message,
+              component: 'LabResults',
+            });
+            notifications.show({
+              title: t('common:warning', 'Warning'),
+              message: t('medical:labResults.form.componentCreationWarning', 'Lab result saved but test components could not be added. You can add them from the view page.'),
+              color: 'yellow',
+              autoClose: 8000,
+            });
+          }
+        }
+
         // Check if we have files to upload
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
-        
+
         if (hasPendingFiles) {
           logger.info('lab_results_starting_file_upload', {
             message: 'Starting file upload process',
@@ -472,6 +501,7 @@ const LabResults = () => {
     updateItem,
     createItem,
     documentManagerMethods,
+    testComponentMethods,
     startSubmission,
     setError,
     completeFormSubmission,
@@ -479,6 +509,7 @@ const LabResults = () => {
     completeFileUpload,
     handleSubmissionFailure,
     refreshFileCount,
+    t,
   ]);
 
   const handleInputChange = useCallback(e => {
@@ -496,6 +527,7 @@ const LabResults = () => {
     setShowModal(false);
     setEditingLabResult(null);
     setDocumentManagerMethods(null); // Reset document manager methods
+    setTestComponentMethods(null); // Reset test component methods
     setFormData({
       test_name: '',
       test_code: '',
@@ -511,8 +543,93 @@ const LabResults = () => {
     });
   }, [isBlocking, resetSubmission]);
 
-  // File operations for view modal
-  // Note: File operations now handled by DocumentManager component
+  const renderViewContent = () => {
+    if (viewMode === 'components') {
+      return currentPatient?.id ? <TestComponentCatalog patientId={currentPatient.id} /> : null;
+    }
+
+    if (filteredLabResults.length === 0) {
+      return (
+        <EmptyState
+          emoji="🧪"
+          title={t('labResults.noResults', 'No Lab Results Found')}
+          hasActiveFilters={dataManagement.hasActiveFilters}
+          filteredMessage={t('labResults.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+          noDataMessage={t('labResults.startAdding', 'Start by adding your first lab result.')}
+          actionButton={
+            <Button variant="filled" onClick={handleAddLabResult}>
+              {t('labResults.addFirst', 'Add Your First Lab Result')}
+            </Button>
+          }
+        />
+      );
+    }
+
+    if (viewMode === 'cards') {
+      return (
+        <AnimatedCardGrid
+          items={filteredLabResults}
+          columns={{ base: 12, sm: 6, lg: 4 }}
+          renderCard={(result) => (
+            <LabResultCard
+              labResult={result}
+              onEdit={handleEditLabResult}
+              onDelete={() => handleDeleteLabResult(result.id)}
+              onView={handleViewLabResult}
+              practitioners={practitioners}
+              fileCount={fileCounts[result.id] || 0}
+              fileCountLoading={fileCountsLoading[result.id] || false}
+              navigate={navigate}
+            />
+          )}
+        />
+      );
+    }
+
+    return (
+      <Paper shadow="sm" radius="md" withBorder>
+        <ResponsiveTable
+          persistKey="lab-results"
+          data={filteredLabResults}
+          columns={[
+            { header: t('labResults.table.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
+            { header: t('labResults.table.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
+            { header: t('labResults.table.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
+            { header: t('labResults.table.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
+            { header: t('labels.status', 'Status'), accessor: 'status', priority: 'high', width: 120 },
+            { header: t('labResults.table.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
+            { header: t('labResults.table.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },
+            { header: t('labResults.table.completedDate', 'Completed Date'), accessor: 'completed_date', priority: 'low', width: 120 },
+            { header: t('labResults.table.files', 'Files'), accessor: 'files', priority: 'low', width: 150 },
+          ]}
+          patientData={currentPatient}
+          tableName={t('labResults.title', 'Lab Results')}
+          onView={handleViewLabResult}
+          onEdit={handleEditLabResult}
+          onDelete={handleDeleteLabResult}
+          formatters={{
+            ...formatters,
+            practitioner_id: (value) => {
+              if (!value) return '-';
+              const practitioner = practitioners.find(p => p.id === value);
+              return practitioner ? practitioner.name : `ID: ${value}`;
+            },
+            files: (value, item) => (
+              <FileCountBadge
+                count={fileCounts[item.id] || 0}
+                entityType="lab-result"
+                variant="text"
+                size="sm"
+                loading={fileCountsLoading[item.id] || false}
+              />
+            ),
+          }}
+          dataType="medical"
+          responsive={responsive}
+        />
+      </Paper>
+    );
+  };
 
   if (loading) {
     return (
@@ -558,85 +675,7 @@ const LabResults = () => {
             <MedicalPageFilters dataManagement={dataManagement} config={config} />
           )}
 
-          {viewMode === 'components' ? (
-            currentPatient?.id ? (
-              <TestComponentCatalog patientId={currentPatient.id} />
-            ) : null
-          ) : filteredLabResults.length === 0 ? (
-            <EmptyState
-              emoji="🧪"
-              title={t('labResults.noResults', 'No Lab Results Found')}
-              hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('labResults.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('labResults.startAdding', 'Start by adding your first lab result.')}
-              actionButton={
-                <Button variant="filled" onClick={handleAddLabResult}>
-                  {t('labResults.addFirst', 'Add Your First Lab Result')}
-                </Button>
-              }
-            />
-          ) : viewMode === 'cards' ? (
-            <AnimatedCardGrid
-              items={filteredLabResults}
-              columns={{ base: 12, sm: 6, lg: 4 }}
-              renderCard={(result) => (
-                <LabResultCard
-                  labResult={result}
-                  onEdit={handleEditLabResult}
-                  onDelete={() => handleDeleteLabResult(result.id)}
-                  onView={handleViewLabResult}
-                  practitioners={practitioners}
-                  fileCount={fileCounts[result.id] || 0}
-                  fileCountLoading={fileCountsLoading[result.id] || false}
-                  navigate={navigate}
-                />
-              )}
-            />
-          ) : (
-            <Paper shadow="sm" radius="md" withBorder>
-              <ResponsiveTable
-                persistKey="lab-results"
-                data={filteredLabResults}
-              columns={[
-                  { header: t('labResults.table.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
-                  { header: t('labResults.table.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
-                  { header: t('labResults.table.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
-                  { header: t('labResults.table.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
-                  { header: t('labels.status', 'Status'), accessor: 'status', priority: 'high', width: 120 },
-                  { header: t('labResults.table.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
-                  { header: t('labResults.table.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },
-                  { header: t('labResults.table.completedDate', 'Completed Date'), accessor: 'completed_date', priority: 'low', width: 120 },
-                  { header: t('labResults.table.files', 'Files'), accessor: 'files', priority: 'low', width: 150 }
-                ]}
-              patientData={currentPatient}
-              tableName={t('labResults.title', 'Lab Results')}
-              onView={handleViewLabResult}
-              onEdit={handleEditLabResult}
-              onDelete={handleDeleteLabResult}
-              formatters={{
-                ...formatters,
-                // Custom practitioner formatter for lab results (using practitioner_id)
-                practitioner_id: (value, item) => {
-                  if (!value) return '-';
-                  const practitioner = practitioners.find(p => p.id === value);
-                  return practitioner ? practitioner.name : `ID: ${value}`;
-                },
-                // Custom files formatter for lab results
-                files: (value, item) => (
-                  <FileCountBadge
-                    count={fileCounts[item.id] || 0}
-                    entityType="lab-result"
-                    variant="text"
-                    size="sm"
-                    loading={fileCountsLoading[item.id] || false}
-                  />
-                ),
-              }}
-              dataType="medical"
-              responsive={responsive}
-            />
-          </Paper>
-          )}
+          {renderViewContent()}
         </Stack>
       </Container>
 
@@ -656,6 +695,7 @@ const LabResults = () => {
           fetchLabResultConditions={fetchLabResultConditions}
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
+          onTestComponentRef={setTestComponentMethods}
           onFileUploadComplete={(success) => {
             if (success && editingLabResult) {
               refreshFileCount(editingLabResult.id);
