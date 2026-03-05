@@ -208,7 +208,8 @@
   },
   "viewToggle": {
     "cards": "Cards",
-    "table": "Tabela"
+    "table": "Tabela",
+    "components": "Componentes"
   },
   "filters": {
     "title": "Filtros e Pesquisa",

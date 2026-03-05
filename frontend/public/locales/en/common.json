@@ -247,7 +247,8 @@
   },
   "viewToggle": {
     "cards": "Cards",
-    "table": "Table"
+    "table": "Table",
+    "components": "Components"
   },
   "filters": {
     "title": "Filters & Search",

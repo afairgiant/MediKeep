@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 const LEGACY_KEY = 'medikeep_viewmode';
-const VALID_MODES = new Set(['cards', 'table']);
+const VALID_MODES = new Set(['cards', 'table', 'components']);
 
 function readValidMode(key) {
   try {
@@ -16,15 +16,15 @@ function readValidMode(key) {
 }
 
 /**
- * Persists a page-specific view mode ('cards' or 'table') in localStorage.
+ * Persists a page-specific view mode ('cards', 'table', or 'components') in localStorage.
  *
  * Storage key: `medikeep_viewmode_${pageKey}`. Falls back to the legacy global
  * key `medikeep_viewmode` on first load for migration, then persists to the
  * page-specific key via useEffect.
  *
  * @param {string} pageKey - Page identifier (e.g. 'medications', 'lab-results').
- * @param {'cards' | 'table'} [defaultMode='cards'] - Fallback when nothing is stored.
- * @returns {['cards' | 'table', (mode: 'cards' | 'table') => void]}
+ * @param {'cards' | 'table' | 'components'} [defaultMode='cards'] - Fallback when nothing is stored.
+ * @returns {['cards' | 'table' | 'components', (mode: 'cards' | 'table' | 'components') => void]}
  */
 export function usePersistedViewMode(pageKey, defaultMode = 'cards') {
   if (typeof pageKey !== 'string' || pageKey.trim().length === 0) {

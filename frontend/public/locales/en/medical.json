@@ -1945,5 +1945,38 @@
   "form": {
     "invalidPhoneDigits": "Phone number can only contain digits, spaces, dashes, parentheses, periods, and +",
     "invalidWebsiteUrl": "Please enter a valid website URL"
+  },
+  "componentCatalog": {
+    "searchPlaceholder": "Search tests...",
+    "filterCategory": "Category",
+    "filterStatus": "Status",
+    "showing": "Showing {{count}} unique tests",
+    "readingCount": "{{count}} readings",
+    "readingCount_one": "{{count}} reading",
+    "refRange": "Ref",
+    "noResults": "No Test Components Found",
+    "tryAdjusting": "Try adjusting your search or filter criteria.",
+    "noData": "Add lab results with test components to see them here.",
+    "fetchError": "Failed to load test catalog",
+    "trend": {
+      "increasing": "Increasing",
+      "decreasing": "Decreasing",
+      "stable": "Stable",
+      "worsening": "Worsening",
+      "improving": "Improving"
+    },
+    "sort": {
+      "priority": "Priority",
+      "alphabetical": "A-Z"
+    },
+    "status": {
+      "normal": "Normal",
+      "high": "High",
+      "low": "Low",
+      "critical": "Critical",
+      "abnormal": "Abnormal",
+      "borderline": "Borderline",
+      "unknown": "Unknown"
+    }
   }
 }

@@ -204,7 +204,8 @@
   },
   "viewToggle": {
     "cards": "Schede",
-    "table": "Tabella"
+    "table": "Tabella",
+    "components": "Componenti"
   },
   "filters": {
     "title": "Filtri e ricerca",

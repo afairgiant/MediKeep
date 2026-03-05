@@ -1945,5 +1945,38 @@
         "description": "Praxisstandorte"
       }
     }
+  },
+  "componentCatalog": {
+    "searchPlaceholder": "Tests suchen...",
+    "filterCategory": "Kategorie",
+    "filterStatus": "Status",
+    "showing": "{{count}} eindeutige Tests angezeigt",
+    "readingCount": "{{count}} Messungen",
+    "readingCount_one": "{{count}} Messung",
+    "refRange": "Ref",
+    "noResults": "Keine Testkomponenten gefunden",
+    "tryAdjusting": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen.",
+    "noData": "Fügen Sie Laborergebnisse mit Testkomponenten hinzu, um sie hier zu sehen.",
+    "fetchError": "Testkatalog konnte nicht geladen werden",
+    "trend": {
+      "increasing": "Steigend",
+      "decreasing": "Fallend",
+      "stable": "Stabil",
+      "worsening": "Verschlechternd",
+      "improving": "Verbessernd"
+    },
+    "sort": {
+      "priority": "Priorität",
+      "alphabetical": "A-Z"
+    },
+    "status": {
+      "normal": "Normal",
+      "high": "Hoch",
+      "low": "Niedrig",
+      "critical": "Kritisch",
+      "abnormal": "Abnormal",
+      "borderline": "Grenzwertig",
+      "unknown": "Unbekannt"
+    }
   }
 }

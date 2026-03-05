@@ -42,6 +42,7 @@ from app.schemas.lab_test_component import (
     LabTestComponentTrendDataPoint,
     LabTestComponentTrendStatistics,
     LabResultBasicForTrend,
+    ComponentCatalogResponse,
 )
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_data_access, log_endpoint_error, log_validation_error
@@ -453,6 +454,53 @@ def get_abbreviation_suggestions(
         abbreviations = lab_test_component.get_unique_abbreviations(db, limit=limit)
 
     return abbreviations
+
+
+# Component Catalog Endpoint
+@router.get("/patient/{patient_id}/component-catalog", response_model=ComponentCatalogResponse)
+def get_component_catalog(
+    *,
+    request: Request,
+    patient_id: int,
+    search: Optional[str] = Query(None, description="Search by test name or abbreviation"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    status: Optional[str] = Query(None, description="Filter by latest status"),
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(200, ge=1, le=500, description="Number of records to return"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """
+    Get an aggregated catalog of unique test components across all lab results for a patient.
+    Each entry represents a unique test name with its latest reading, trend, and count.
+    """
+
+    with handle_database_errors(request=request):
+        # Verify patient access
+        deps.verify_patient_access(patient_id, db, current_user)
+
+        # Sanitize search input if provided
+        validated_search = None
+        if search:
+            validated_search = validate_search_input(search)
+
+        result = lab_test_component.get_component_catalog(
+            db,
+            patient_id=patient_id,
+            search=validated_search,
+            category=category,
+            status=status,
+            skip=skip,
+            limit=limit,
+        )
+
+        log_data_access(
+            logger, request, current_user.id, "read", "ComponentCatalog",
+            patient_id=patient_id,
+            count=result["total"],
+        )
+
+        return result
 
 
 # Helper function for trend statistics
