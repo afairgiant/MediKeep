@@ -235,7 +235,13 @@
       "resultIndicator": "Result Indicator:",
       "relatedConditions": "Related Conditions",
       "linkConditionsTitle": "Link Medical Conditions",
-      "linkConditionsDescription": "Associate this lab result with relevant medical conditions for better tracking and organization."
+      "linkConditionsDescription": "Associate this lab result with relevant medical conditions for better tracking and organization.",
+      "testComponents": "Test Components (Optional)",
+      "testComponentsDescription": "Optionally add individual test values. You can also add more later.",
+      "addTestComponent": "Add Test Components",
+      "hideTestComponents": "Hide Test Components",
+      "addAnotherTest": "Add Another Test",
+      "componentCreationWarning": "Lab result saved but test components could not be added. You can add them from the view page."
     },
     "testName": {
       "label": "Test Name",

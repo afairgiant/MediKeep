@@ -35,12 +35,20 @@ import {
   IconMedicalCross
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import sanitizeHtml from 'sanitize-html';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
-import { getCategoryDisplayName, getCategoryColor, CATEGORY_SELECT_OPTIONS, QUALITATIVE_SELECT_OPTIONS, ComponentCategory, ComponentStatus } from '../../../constants/labCategories';
+import { getCategoryDisplayName, getCategoryColor, CATEGORY_SELECT_OPTIONS, QUALITATIVE_SELECT_OPTIONS } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 import { getAutocompleteOptions, extractTestName, getTestByName } from '../../../constants/testLibrary';
+import {
+  calculateStatus,
+  capitalizeStatus,
+  createEmptyRow,
+  getStatusInputColor,
+  hasFilledValue,
+  sanitizeComponentForApi,
+  ComponentRowData,
+} from '../../../utils/labTestComponentUtils';
 
 interface TestTemplate {
   id: string;
@@ -63,12 +71,12 @@ interface TestComponentTemplatesProps {
   disabled?: boolean;
 }
 
-const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
+function TestComponentTemplates({
   labResultId,
   onComponentsAdded,
   onError,
-  disabled = false
-}) => {
+  disabled = false,
+}: TestComponentTemplatesProps): React.ReactElement {
   const [selectedTemplate, setSelectedTemplate] = useState<TestTemplate | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -237,118 +245,46 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
   ];
 
   // Form state for entering test values and reference ranges
-  const [formValues, setFormValues] = useState<{
-    components: Array<{
-      test_name: string;
-      abbreviation?: string;
-      test_code?: string;
-      value: number | '';
-      unit: string;
-      ref_range_min: number | '';
-      ref_range_max: number | '';
-      ref_range_text?: string;
-      status?: string;
-      category?: string;
-      display_order?: number;
-      notes?: string;
-      result_type?: 'quantitative' | 'qualitative';
-      qualitative_value?: string;
-    }>;
-  }>({
+  const [formValues, setFormValues] = useState<{ components: ComponentRowData[] }>({
     components: []
   });
 
-  // Auto-calculate status based on value and reference range
-  const calculateStatus = useCallback((
-    value: number | '',
-    refMin: number | '',
-    refMax: number | ''
-  ): string | undefined => {
-    if (value === '' || value === null || value === undefined) return undefined;
-    if (typeof value !== 'number' || isNaN(value)) return undefined;
-
-    // If no reference range is provided, can't determine status
-    if ((refMin === '' || refMin === null || refMin === undefined) &&
-        (refMax === '' || refMax === null || refMax === undefined)) return undefined;
-
-    const min = typeof refMin === 'number' ? refMin : undefined;
-    const max = typeof refMax === 'number' ? refMax : undefined;
-
-    // Both min and max defined
-    if (min !== undefined && max !== undefined) {
-      if (value < min) return 'low';
-      if (value > max) return 'high';
-      return 'normal';
-    }
-    // Only min defined
-    if (min !== undefined && max === undefined) {
-      if (value < min) return 'low';
-      return 'normal';
-    }
-    // Only max defined
-    if (max !== undefined && min === undefined) {
-      if (value > max) return 'high';
-      return 'normal';
-    }
-
-    return undefined;
-  }, []);
-
   const validateForm = useCallback(() => {
-    const filledComponents = formValues.components.filter(component => {
-      if (component.result_type === 'qualitative') {
-        return !!component.qualitative_value;
-      }
-      return component.value !== '' && component.value !== null && component.value !== undefined &&
-             typeof component.value === 'number' && !isNaN(component.value);
-    });
-
-    return filledComponents.length > 0;
+    return formValues.components.some(hasFilledValue);
   }, [formValues.components]);
 
-  const updateComponent = (index: number, field: string, value: any) => {
+  const updateComponent = (index: number, field: string, value: unknown) => {
     setFormValues(prev => ({
       components: prev.components.map((comp, i) => {
-        if (i === index) {
-          const updatedComp = { ...comp, [field]: value };
+        if (i !== index) return comp;
 
-          // Auto-calculate status when value or ranges change
-          if (field === 'value' || field === 'ref_range_min' || field === 'ref_range_max') {
-            const newStatus = calculateStatus(
-              field === 'value' ? value : updatedComp.value,
-              field === 'ref_range_min' ? value : updatedComp.ref_range_min,
-              field === 'ref_range_max' ? value : updatedComp.ref_range_max
-            );
-            updatedComp.status = newStatus;
-          }
+        const updatedComp = { ...comp, [field]: value };
 
-          return updatedComp;
+        if (field === 'value' || field === 'ref_range_min' || field === 'ref_range_max') {
+          updatedComp.status = calculateStatus(
+            field === 'value' ? value as number | '' : updatedComp.value,
+            field === 'ref_range_min' ? value as number | '' : updatedComp.ref_range_min,
+            field === 'ref_range_max' ? value as number | '' : updatedComp.ref_range_max
+          );
         }
-        return comp;
+
+        return updatedComp;
+      })
+    }));
+  };
+
+  const updateComponentFields = (index: number, fields: Partial<ComponentRowData>) => {
+    setFormValues(prev => ({
+      components: prev.components.map((comp, i) => {
+        if (i !== index) return comp;
+        return { ...comp, ...fields };
       })
     }));
   };
 
   const addCustomRow = useCallback(() => {
     setFormValues(prev => ({
-      components: [
-        ...prev.components,
-        {
-          test_name: '',
-          abbreviation: '',
-          test_code: '',
-          value: '' as number | '',
-          unit: '',
-          ref_range_min: '' as number | '',
-          ref_range_max: '' as number | '',
-          ref_range_text: '',
-          status: '',
-          display_order: prev.components.length + 1,
-          notes: '',
-          result_type: 'quantitative' as 'quantitative' | 'qualitative',
-          qualitative_value: ''
-        }
-      ]
+      components: [...prev.components, createEmptyRow(prev.components.length + 1)]
     }));
   }, []);
 
@@ -357,21 +293,6 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       components: prev.components.filter((_, i) => i !== index)
     }));
   }, []);
-
-  const getStatusInputColor = (status: string | undefined): string => {
-    if (!status) return '#868e96';
-    switch (status) {
-      case 'high':
-      case 'critical':
-        return '#fa5252';
-      case 'low':
-        return '#fd7e14';
-      case 'normal':
-        return '#51cf66';
-      default:
-        return '#868e96';
-    }
-  };
 
   const filteredTemplates = testTemplates.filter(template => {
     const matchesSearch = searchQuery === '' ||
@@ -389,22 +310,17 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
   const handleTemplateSelect = useCallback((template: TestTemplate) => {
     setSelectedTemplate(template);
 
-    // Initialize form with template data
-    const components = template.tests.map(test => ({
+    // Initialize form with template data, using createEmptyRow as base for stable _rowId
+    const components = template.tests.map((test, idx) => ({
+      ...createEmptyRow(test.default_display_order ?? idx + 1),
       test_name: test.test_name,
       abbreviation: test.abbreviation || '',
       test_code: test.test_code || '',
-      value: '' as number | '',
       unit: test.unit,
-      ref_range_min: '' as number | '',
-      ref_range_max: '' as number | '',
-      ref_range_text: '',
-      status: '',
       category: template.category,
       display_order: test.default_display_order,
       notes: test.notes || '',
-      result_type: test.result_type || 'quantitative',
-      qualitative_value: ''
+      result_type: test.result_type || 'quantitative' as 'quantitative' | 'qualitative',
     }));
 
     setFormValues({ components });
@@ -445,19 +361,14 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
 
       // Filter to only include components with values (allow partial template entry)
       const filledComponents = components.filter(component => {
+        if (!hasFilledValue(component)) return false;
         if (component.result_type === 'qualitative') {
-          return !!component.qualitative_value && component.test_name.trim() !== '';
+          return component.test_name.trim() !== '';
         }
-
-        const hasValue = component.value !== '' && component.value !== null && component.value !== undefined &&
-                        typeof component.value === 'number' && !isNaN(component.value);
-
         if (selectedTemplate?.id === 'custom_entry') {
-          const hasRequiredFields = component.test_name.trim() !== '' && component.unit.trim() !== '';
-          return hasValue && hasRequiredFields;
+          return component.test_name.trim() !== '' && component.unit.trim() !== '';
         }
-
-        return hasValue;
+        return true;
       });
 
       logger.info('template_submitting_components', {
@@ -466,35 +377,10 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
         component: 'TestComponentTemplates'
       });
 
-      // Sanitize function to prevent XSS using sanitize-html library
-      const sanitizeInput = (input: string | undefined): string | null => {
-        if (!input) return null;
-        // Use sanitize-html to safely remove all HTML tags and scripts
-        const sanitized = sanitizeHtml(input, {
-          allowedTags: [], // Strip all HTML tags
-          allowedAttributes: {} // Strip all attributes
-        }).trim();
-        return sanitized || null;
-      };
-
-      // Convert form data to API format with sanitization
-      const componentsToCreate: LabTestComponentCreate[] = filledComponents.map(component => ({
-        lab_result_id: labResultId,
-        test_name: sanitizeInput(component.test_name) || '',
-        abbreviation: sanitizeInput(component.abbreviation),
-        test_code: sanitizeInput(component.test_code),
-        value: component.result_type === 'qualitative' ? null : component.value as number,
-        unit: component.result_type === 'qualitative' ? null : (sanitizeInput(component.unit) || ''),
-        ref_range_min: component.ref_range_min === '' ? null : component.ref_range_min as number,
-        ref_range_max: component.ref_range_max === '' ? null : component.ref_range_max as number,
-        ref_range_text: sanitizeInput(component.ref_range_text),
-        status: (component.status as ComponentStatus | null) || null,
-        category: (component.category as ComponentCategory | null) || null,
-        display_order: component.display_order || null,
-        notes: sanitizeInput(component.notes),
-        result_type: component.result_type || 'quantitative',
-        qualitative_value: component.qualitative_value || null
-      }));
+      // Convert form data to API format with sanitization using shared utility
+      const componentsToCreate: LabTestComponentCreate[] = filledComponents.map(
+        component => sanitizeComponentForApi(component, labResultId)
+      );
 
       // Call the API to create components in bulk
       const response = await labTestComponentApi.createBulkForLabResult(
@@ -692,7 +578,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                   {selectedTemplate.id === 'custom_entry' ? (
                     <>
                       Enter your own test components. Fill in the test name, unit, value, and optional reference ranges.
-                      Click "Add Another Test" to add more rows as needed.
+                      Click &ldquo;Add Another Test&rdquo; to add more rows as needed.
                     </>
                   ) : (
                     <>
@@ -774,28 +660,20 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                                 }
                               }}
                               onOptionSubmit={(value) => {
-                                // This fires when user selects from dropdown (clicks or presses Enter)
                                 const cleanTestName = extractTestName(value);
-
-                                // Set flag so onChange knows this was a selection
                                 justSelectedRef.current = { index, value: cleanTestName };
 
-                                // Update test name to clean version (without abbreviation)
-                                updateComponent(index, 'test_name', cleanTestName);
-
-                                // Auto-fill unit, category, abbreviation when selecting from library
                                 const libraryTest = getTestByName(cleanTestName);
-
-                                if (libraryTest) {
-                                  updateComponent(index, 'unit', libraryTest.default_unit);
-                                  updateComponent(index, 'category', libraryTest.category);
-                                  if (libraryTest.abbreviation) {
-                                    updateComponent(index, 'abbreviation', libraryTest.abbreviation);
-                                  }
-                                  if (libraryTest.result_type) {
-                                    updateComponent(index, 'result_type', libraryTest.result_type);
-                                  }
-                                }
+                                const autoFillFields: Partial<ComponentRowData> = {
+                                  test_name: cleanTestName,
+                                  ...(libraryTest && {
+                                    unit: libraryTest.default_unit,
+                                    category: libraryTest.category,
+                                    ...(libraryTest.abbreviation && { abbreviation: libraryTest.abbreviation }),
+                                    ...(libraryTest.result_type && { result_type: libraryTest.result_type }),
+                                  }),
+                                };
+                                updateComponentFields(index, autoFillFields);
                               }}
                               data={getAutocompleteOptions(component.test_name || '', 200)}
                               limit={200}
@@ -904,11 +782,7 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                           <TextInput
                             placeholder="Auto-calculated"
                             size="xs"
-                            value={
-                              component.status
-                                ? component.status.charAt(0).toUpperCase() + component.status.slice(1)
-                                : ''
-                            }
+                            value={capitalizeStatus(component.status)}
                             readOnly
                             styles={{
                               input: {
@@ -989,21 +863,13 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
                   loading={isSubmitting}
                 >
                   {(() => {
-                    const filledCount = formValues.components.filter(c =>
-                      c.result_type === 'qualitative'
-                        ? !!c.qualitative_value
-                        : (c.value !== '' && c.value !== null && c.value !== undefined &&
-                           typeof c.value === 'number' && !isNaN(c.value))
-                    ).length;
+                    const filledCount = formValues.components.filter(hasFilledValue).length;
                     const totalCount = formValues.components.length;
+                    const plural = filledCount !== 1 ? 's' : '';
 
-                    if (filledCount === 0) {
-                      return `Add Tests (0/${totalCount} filled)`;
-                    } else if (filledCount === totalCount) {
-                      return `Add ${filledCount} Test${filledCount !== 1 ? 's' : ''}`;
-                    } else {
-                      return `Add ${filledCount} of ${totalCount} Test${filledCount !== 1 ? 's' : ''}`;
-                    }
+                    if (filledCount === 0) return `Add Tests (0/${totalCount} filled)`;
+                    if (filledCount === totalCount) return `Add ${filledCount} Test${plural}`;
+                    return `Add ${filledCount} of ${totalCount} Test${plural}`;
                   })()}
                 </Button>
               </Group>
@@ -1013,6 +879,6 @@ const TestComponentTemplates: React.FC<TestComponentTemplatesProps> = ({
       </Stack>
     </Paper>
   );
-};
+}
 
 export default TestComponentTemplates;
