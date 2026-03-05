@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Paper, Title } from '@mantine/core';
 import MantineLabResultForm from '../MantineLabResultForm';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import InlineTestComponentEntry from './InlineTestComponentEntry';
 import logger from '../../../services/logger';
 
 const LabResultFormWrapper = ({
@@ -17,6 +18,7 @@ const LabResultFormWrapper = ({
   isLoading,
   statusMessage,
   onDocumentManagerRef,
+  onTestComponentRef,
   onFileUploadComplete,
   conditions,
   labResultConditions,
@@ -26,23 +28,14 @@ const LabResultFormWrapper = ({
   children
 }) => {
   const { t } = useTranslation('common');
-  const handleDocumentManagerRef = (methods) => {
-    if (onDocumentManagerRef) {
-      onDocumentManagerRef(methods);
-    }
-  };
-
   const handleDocumentError = (error) => {
     logger.error('document_manager_error', {
       message: `Document manager error in lab results ${editingItem ? 'edit' : 'create'}`,
       labResultId: editingItem?.id,
-      error: error,
+      error,
       component: 'LabResultFormWrapper',
     });
-    
-    if (onError) {
-      onError(error);
-    }
+    onError?.(error);
   };
 
   const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
@@ -54,10 +47,7 @@ const LabResultFormWrapper = ({
       failedCount,
       component: 'LabResultFormWrapper',
     });
-    
-    if (onFileUploadComplete) {
-      onFileUploadComplete(success, completedCount, failedCount);
-    }
+    onFileUploadComplete?.(success, completedCount, failedCount);
   };
 
   return (
@@ -77,7 +67,13 @@ const LabResultFormWrapper = ({
       isLoading={isLoading}
       statusMessage={statusMessage}
     >
-      {/* File Management Section for Both Create and Edit Mode */}
+      {!editingItem && (
+        <InlineTestComponentEntry
+          onRef={onTestComponentRef}
+          disabled={isLoading}
+        />
+      )}
+
       <Paper withBorder p="md" mt="md">
         <Title order={4} mb="md">
           {editingItem ? t('labResults.form.manageFiles', 'Manage Files') : t('labResults.form.addFilesOptional', 'Add Files (Optional)')}
@@ -86,7 +82,7 @@ const LabResultFormWrapper = ({
           entityType="lab-result"
           entityId={editingItem?.id}
           mode={editingItem ? 'edit' : 'create'}
-          onUploadPendingFiles={handleDocumentManagerRef}
+          onUploadPendingFiles={onDocumentManagerRef}
           showProgressModal={true}
           onUploadComplete={handleDocumentUploadComplete}
           onError={handleDocumentError}

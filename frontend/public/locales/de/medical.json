@@ -235,7 +235,13 @@
       "resultIndicator": "Ergebnisanzeige:",
       "relatedConditions": "Zugehörige Erkrankungen",
       "linkConditionsTitle": "Medizinische Erkrankungen verknüpfen",
-      "linkConditionsDescription": "Verknüpfen Sie dieses Laborergebnis mit relevanten medizinischen Erkrankungen für eine bessere Nachverfolgung und Organisation."
+      "linkConditionsDescription": "Verknüpfen Sie dieses Laborergebnis mit relevanten medizinischen Erkrankungen für eine bessere Nachverfolgung und Organisation.",
+      "testComponents": "Testkomponenten (Optional)",
+      "testComponentsDescription": "Fügen Sie optional einzelne Testwerte hinzu. Sie können später weitere hinzufügen.",
+      "addTestComponent": "Testkomponenten hinzufügen",
+      "hideTestComponents": "Testkomponenten ausblenden",
+      "addAnotherTest": "Weiteren Test hinzufügen",
+      "componentCreationWarning": "Das Laborergebnis wurde gespeichert, aber die Testkomponenten konnten nicht hinzugefügt werden. Sie können sie von der Ansichtsseite aus hinzufügen."
     },
     "testName": {
       "label": "Testname",
