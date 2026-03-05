@@ -1966,8 +1966,17 @@
       "improving": "In miglioramento"
     },
     "sort": {
-      "priority": "Priorita",
+      "priority": "Priorità",
       "alphabetical": "A-Z"
+    },
+    "status": {
+      "normal": "Normale",
+      "high": "Alto",
+      "low": "Basso",
+      "critical": "Critico",
+      "abnormal": "Anormale",
+      "borderline": "Limite",
+      "unknown": "Sconosciuto"
     }
   }
 }

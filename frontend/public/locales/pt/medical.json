@@ -1950,24 +1950,33 @@
     "searchPlaceholder": "Pesquisar testes...",
     "filterCategory": "Categoria",
     "filterStatus": "Estado",
-    "showing": "Mostrando {{count}} testes unicos",
+    "showing": "Mostrando {{count}} testes únicos",
     "readingCount": "{{count}} leituras",
     "readingCount_one": "{{count}} leitura",
     "refRange": "Ref",
     "noResults": "Nenhum componente de teste encontrado",
-    "tryAdjusting": "Tente ajustar seus criterios de pesquisa ou filtro.",
-    "noData": "Adicione resultados laboratoriais com componentes para ve-los aqui.",
-    "fetchError": "Falha ao carregar o catalogo de testes",
+    "tryAdjusting": "Tente ajustar seus critérios de pesquisa ou filtro.",
+    "noData": "Adicione resultados laboratoriais com componentes para vê-los aqui.",
+    "fetchError": "Falha ao carregar o catálogo de testes",
     "trend": {
       "increasing": "Aumentando",
       "decreasing": "Diminuindo",
-      "stable": "Estavel",
+      "stable": "Estável",
       "worsening": "Piorando",
       "improving": "Melhorando"
     },
     "sort": {
       "priority": "Prioridade",
       "alphabetical": "A-Z"
+    },
+    "status": {
+      "normal": "Normal",
+      "high": "Alto",
+      "low": "Baixo",
+      "critical": "Crítico",
+      "abnormal": "Anormal",
+      "borderline": "Limítrofe",
+      "unknown": "Desconhecido"
     }
   }
 }

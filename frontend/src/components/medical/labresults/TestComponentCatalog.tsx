@@ -36,14 +36,16 @@ interface TestComponentCatalogProps {
   patientId: number;
 }
 
-const STATUS_OPTIONS = [
-  { value: 'critical', label: 'Critical' },
-  { value: 'abnormal', label: 'Abnormal' },
-  { value: 'high', label: 'High' },
-  { value: 'low', label: 'Low' },
-  { value: 'borderline', label: 'Borderline' },
-  { value: 'normal', label: 'Normal' },
-];
+function getStatusOptions(t: (key: string, fallback: string) => string) {
+  return [
+    { value: 'critical', label: t('medical:componentCatalog.status.critical', 'Critical') },
+    { value: 'abnormal', label: t('medical:componentCatalog.status.abnormal', 'Abnormal') },
+    { value: 'high', label: t('medical:componentCatalog.status.high', 'High') },
+    { value: 'low', label: t('medical:componentCatalog.status.low', 'Low') },
+    { value: 'borderline', label: t('medical:componentCatalog.status.borderline', 'Borderline') },
+    { value: 'normal', label: t('medical:componentCatalog.status.normal', 'Normal') },
+  ];
+}
 
 type SortMode = 'priority' | 'alphabetical';
 
@@ -199,7 +201,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({ patientId }
           />
           <Select
             placeholder={t('medical:componentCatalog.filterStatus', 'Status')}
-            data={STATUS_OPTIONS}
+            data={getStatusOptions(t)}
             value={status}
             onChange={setStatus}
             clearable
@@ -291,7 +293,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({ patientId }
                 <AnimatedCardGrid
                   items={catItems}
                   columns={{ base: 12, md: 6, lg: 4 }}
-                  keyExtractor={(entry: ComponentCatalogEntry) => entry.test_name}
+                  keyExtractor={(entry: ComponentCatalogEntry) => entry.trend_test_name}
                   renderCard={(entry: ComponentCatalogEntry) => (
                     <TestComponentCatalogCard
                       entry={entry}

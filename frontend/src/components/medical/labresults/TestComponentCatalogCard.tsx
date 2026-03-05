@@ -46,17 +46,21 @@ function getStatusColor(status: string | null | undefined): string {
   }
 }
 
-function getStatusLabel(status: string | null | undefined): string {
-  if (!status) return 'Unknown';
-  switch (status.toLowerCase()) {
-    case 'normal': return 'Normal';
-    case 'high': return 'High';
-    case 'low': return 'Low';
-    case 'critical': return 'Critical';
-    case 'abnormal': return 'Abnormal';
-    case 'borderline': return 'Borderline';
-    default: return status;
+function getStatusLabel(status: string | null | undefined, t: (key: string, fallback: string) => string): string {
+  if (!status) return t('medical:componentCatalog.status.unknown', 'Unknown');
+  const key = status.toLowerCase();
+  const fallbacks: Record<string, string> = {
+    normal: 'Normal',
+    high: 'High',
+    low: 'Low',
+    critical: 'Critical',
+    abnormal: 'Abnormal',
+    borderline: 'Borderline',
+  };
+  if (key in fallbacks) {
+    return t(`medical:componentCatalog.status.${key}`, fallbacks[key]);
   }
+  return status;
 }
 
 function TrendIcon({ direction }: { direction: string }) {
@@ -158,7 +162,7 @@ const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({ ent
               color={getStatusColor(entry.status)}
               size="sm"
             >
-              {getStatusLabel(entry.status)}
+              {getStatusLabel(entry.status, t)}
             </Badge>
           )}
           <Group gap={4}>

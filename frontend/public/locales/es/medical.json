@@ -1948,16 +1948,16 @@
   },
   "componentCatalog": {
     "searchPlaceholder": "Buscar pruebas...",
-    "filterCategory": "Categoria",
+    "filterCategory": "Categoría",
     "filterStatus": "Estado",
-    "showing": "Mostrando {{count}} pruebas unicas",
+    "showing": "Mostrando {{count}} pruebas únicas",
     "readingCount": "{{count}} lecturas",
     "readingCount_one": "{{count}} lectura",
     "refRange": "Ref",
     "noResults": "No se encontraron componentes de prueba",
-    "tryAdjusting": "Intente ajustar sus criterios de busqueda o filtro.",
-    "noData": "Agregue resultados de laboratorio con componentes para verlos aqui.",
-    "fetchError": "Error al cargar el catalogo de pruebas",
+    "tryAdjusting": "Intente ajustar sus criterios de búsqueda o filtro.",
+    "noData": "Agregue resultados de laboratorio con componentes para verlos aquí.",
+    "fetchError": "Error al cargar el catálogo de pruebas",
     "trend": {
       "increasing": "En aumento",
       "decreasing": "En descenso",
@@ -1968,6 +1968,15 @@
     "sort": {
       "priority": "Prioridad",
       "alphabetical": "A-Z"
+    },
+    "status": {
+      "normal": "Normal",
+      "high": "Alto",
+      "low": "Bajo",
+      "critical": "Crítico",
+      "abnormal": "Anormal",
+      "borderline": "Límite",
+      "unknown": "Desconocido"
     }
   }
 }

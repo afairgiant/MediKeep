@@ -1968,6 +1968,15 @@
     "sort": {
       "priority": "Priority",
       "alphabetical": "A-Z"
+    },
+    "status": {
+      "normal": "Normal",
+      "high": "High",
+      "low": "Low",
+      "critical": "Critical",
+      "abnormal": "Abnormal",
+      "borderline": "Borderline",
+      "unknown": "Unknown"
     }
   }
 }

@@ -1948,26 +1948,35 @@
   },
   "componentCatalog": {
     "searchPlaceholder": "Rechercher des tests...",
-    "filterCategory": "Categorie",
+    "filterCategory": "Catégorie",
     "filterStatus": "Statut",
-    "showing": "{{count}} tests uniques affiches",
+    "showing": "{{count}} tests uniques affichés",
     "readingCount": "{{count}} mesures",
     "readingCount_one": "{{count}} mesure",
     "refRange": "Ref",
-    "noResults": "Aucun composant de test trouve",
-    "tryAdjusting": "Essayez d'ajuster vos criteres de recherche ou de filtre.",
-    "noData": "Ajoutez des resultats de laboratoire avec des composants pour les voir ici.",
-    "fetchError": "Echec du chargement du catalogue de tests",
+    "noResults": "Aucun composant de test trouvé",
+    "tryAdjusting": "Essayez d'ajuster vos critères de recherche ou de filtre.",
+    "noData": "Ajoutez des résultats de laboratoire avec des composants pour les voir ici.",
+    "fetchError": "Échec du chargement du catalogue de tests",
     "trend": {
       "increasing": "En hausse",
       "decreasing": "En baisse",
       "stable": "Stable",
-      "worsening": "En deterioration",
-      "improving": "En amelioration"
+      "worsening": "En détérioration",
+      "improving": "En amélioration"
     },
     "sort": {
-      "priority": "Priorite",
+      "priority": "Priorité",
       "alphabetical": "A-Z"
+    },
+    "status": {
+      "normal": "Normal",
+      "high": "Élevé",
+      "low": "Bas",
+      "critical": "Critique",
+      "abnormal": "Anormal",
+      "borderline": "Limite",
+      "unknown": "Inconnu"
     }
   }
 }

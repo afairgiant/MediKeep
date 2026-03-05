@@ -1956,7 +1956,7 @@
     "refRange": "Ref",
     "noResults": "Keine Testkomponenten gefunden",
     "tryAdjusting": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen.",
-    "noData": "Fugen Sie Laborergebnisse mit Testkomponenten hinzu, um sie hier zu sehen.",
+    "noData": "Fügen Sie Laborergebnisse mit Testkomponenten hinzu, um sie hier zu sehen.",
     "fetchError": "Testkatalog konnte nicht geladen werden",
     "trend": {
       "increasing": "Steigend",
@@ -1966,8 +1966,17 @@
       "improving": "Verbessernd"
     },
     "sort": {
-      "priority": "Prioritat",
+      "priority": "Priorität",
       "alphabetical": "A-Z"
+    },
+    "status": {
+      "normal": "Normal",
+      "high": "Hoch",
+      "low": "Niedrig",
+      "critical": "Kritisch",
+      "abnormal": "Abnormal",
+      "borderline": "Grenzwertig",
+      "unknown": "Unbekannt"
     }
   }
 }

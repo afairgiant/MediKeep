@@ -559,7 +559,9 @@ const LabResults = () => {
           )}
 
           {viewMode === 'components' ? (
-            <TestComponentCatalog patientId={currentPatient?.id} />
+            currentPatient?.id ? (
+              <TestComponentCatalog patientId={currentPatient.id} />
+            ) : null
           ) : filteredLabResults.length === 0 ? (
             <EmptyState
               emoji="🧪"
