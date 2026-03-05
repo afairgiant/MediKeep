@@ -237,11 +237,11 @@
       "linkConditionsTitle": "Vincular Condições Médicas",
       "linkConditionsDescription": "Associe este resultado de laboratório com condições médicas relevantes para melhor acompanhamento e organização.",
       "testComponents": "Componentes do teste (Opcional)",
-      "testComponentsDescription": "Opcionalmente adicione valores de teste individuais. Voce tambem pode adicionar mais depois.",
+      "testComponentsDescription": "Opcionalmente adicione valores de teste individuais. Você também pode adicionar mais depois.",
       "addTestComponent": "Adicionar componentes do teste",
       "hideTestComponents": "Ocultar componentes do teste",
       "addAnotherTest": "Adicionar outro teste",
-      "componentCreationWarning": "O resultado do laboratorio foi salvo mas os componentes do teste nao puderam ser adicionados. Voce pode adiciona-los na pagina de visualizacao."
+      "componentCreationWarning": "O resultado do laboratório foi salvo mas os componentes do teste não puderam ser adicionados. Você pode adicioná-los na página de visualização."
     },
     "testName": {
       "label": "Nome do Teste",

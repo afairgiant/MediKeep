@@ -241,7 +241,7 @@
       "addTestComponent": "Ajouter des composants de test",
       "hideTestComponents": "Masquer les composants de test",
       "addAnotherTest": "Ajouter un autre test",
-      "componentCreationWarning": "Le resultat de laboratoire a ete enregistre mais les composants de test n'ont pas pu etre ajoutes. Vous pouvez les ajouter depuis la page de visualisation."
+      "componentCreationWarning": "Le résultat de laboratoire a été enregistré mais les composants de test n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page de visualisation."
     },
     "testName": {
       "label": "Nom de l'analyse",

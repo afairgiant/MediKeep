@@ -439,7 +439,8 @@ const LabResults = () => {
             logger.error('inline_test_components_error', {
               message: 'Failed to create inline test components',
               labResultId: resultId,
-              error: componentError.message,
+              error: componentError?.message || String(componentError),
+              stack: componentError?.stack,
               component: 'LabResults',
             });
             notifications.show({

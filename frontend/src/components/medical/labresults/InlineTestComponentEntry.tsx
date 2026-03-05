@@ -103,7 +103,11 @@ function InlineTestComponentEntry({
   }, []);
 
   const removeRow = useCallback((index: number) => {
-    setComponents(prev => prev.filter((_, i) => i !== index));
+    setComponents(prev =>
+      prev
+        .filter((_, i) => i !== index)
+        .map((comp, i) => ({ ...comp, display_order: i + 1 }))
+    );
   }, []);
 
   const pendingCount = getPendingComponents().length;
@@ -136,7 +140,7 @@ function InlineTestComponentEntry({
           </Text>
 
           {components.map((component, index) => (
-            <Paper key={index} withBorder p="sm" radius="sm">
+            <Paper key={component._rowId} withBorder p="sm" radius="sm">
               <Stack gap="xs">
                 <Group justify="space-between" align="center">
                   <Text size="xs" fw={600} c="dimmed">

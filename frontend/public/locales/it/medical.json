@@ -241,7 +241,7 @@
       "addTestComponent": "Aggiungi componenti del test",
       "hideTestComponents": "Nascondi componenti del test",
       "addAnotherTest": "Aggiungi un altro test",
-      "componentCreationWarning": "Il risultato di laboratorio e stato salvato ma i componenti del test non sono stati aggiunti. Puoi aggiungerli dalla pagina di visualizzazione."
+      "componentCreationWarning": "Il risultato di laboratorio è stato salvato ma i componenti del test non sono stati aggiunti. Puoi aggiungerli dalla pagina di visualizzazione."
     },
     "testName": {
       "label": "Nome del test",

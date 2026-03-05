@@ -7,8 +7,11 @@ import sanitizeHtml from 'sanitize-html';
 import { LabTestComponentCreate, QualitativeValue } from '../services/api/labTestComponentApi';
 import { ComponentCategory, ComponentStatus } from '../constants/labCategories';
 
+let nextRowId = 1;
+
 /** Shape of a component row used in both TestComponentTemplates and InlineTestComponentEntry. */
 export interface ComponentRowData {
+  _rowId: number;
   test_name: string;
   abbreviation?: string;
   test_code?: string;
@@ -28,6 +31,7 @@ export interface ComponentRowData {
 /** Create an empty component row with default values. */
 export function createEmptyRow(displayOrder: number): ComponentRowData {
   return {
+    _rowId: nextRowId++,
     test_name: '',
     abbreviation: '',
     test_code: '',
@@ -56,9 +60,17 @@ export function hasFilledValue(component: ComponentRowData): boolean {
   return isValidNumber(component.value);
 }
 
-/** Check whether a component row is complete enough to submit (has value and test name). */
+/** Check whether a component row is complete enough to submit (has value, test name, and unit for quantitative). */
 export function isSubmittableComponent(component: ComponentRowData): boolean {
-  return hasFilledValue(component) && component.test_name.trim() !== '';
+  if (component.result_type === 'qualitative') {
+    return hasFilledValue(component) && component.test_name.trim() !== '';
+  }
+
+  return (
+    hasFilledValue(component) &&
+    component.test_name.trim() !== '' &&
+    component.unit.trim() !== ''
+  );
 }
 
 /**
@@ -97,6 +109,8 @@ export function getStatusInputColor(status: string | undefined): string {
       return '#fa5252';
     case 'low':
       return '#fd7e14';
+    case 'abnormal':
+      return '#fd7e14';
     case 'normal':
       return '#51cf66';
     default:
@@ -125,7 +139,7 @@ export function sanitizeComponentForApi(
     test_name: sanitizeInput(component.test_name) || '',
     abbreviation: sanitizeInput(component.abbreviation),
     test_code: sanitizeInput(component.test_code),
-    value: isQualitative ? null : (component.value as number),
+    value: isQualitative ? null : (isValidNumber(component.value) ? component.value : null),
     unit: isQualitative ? null : (sanitizeInput(component.unit) || ''),
     ref_range_min: component.ref_range_min === '' ? null : (component.ref_range_min as number),
     ref_range_max: component.ref_range_max === '' ? null : (component.ref_range_max as number),

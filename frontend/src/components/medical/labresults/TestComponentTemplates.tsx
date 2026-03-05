@@ -310,22 +310,17 @@ function TestComponentTemplates({
   const handleTemplateSelect = useCallback((template: TestTemplate) => {
     setSelectedTemplate(template);
 
-    // Initialize form with template data
-    const components = template.tests.map(test => ({
+    // Initialize form with template data, using createEmptyRow as base for stable _rowId
+    const components = template.tests.map((test, idx) => ({
+      ...createEmptyRow(test.default_display_order ?? idx + 1),
       test_name: test.test_name,
       abbreviation: test.abbreviation || '',
       test_code: test.test_code || '',
-      value: '' as number | '',
       unit: test.unit,
-      ref_range_min: '' as number | '',
-      ref_range_max: '' as number | '',
-      ref_range_text: '',
-      status: '',
       category: template.category,
       display_order: test.default_display_order,
       notes: test.notes || '',
-      result_type: test.result_type || 'quantitative',
-      qualitative_value: ''
+      result_type: test.result_type || 'quantitative' as 'quantitative' | 'qualitative',
     }));
 
     setFormValues({ components });
