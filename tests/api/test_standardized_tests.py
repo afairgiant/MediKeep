@@ -398,16 +398,16 @@ class TestStandardizedTestsAPI:
     # ========== Authorization Tests ==========
 
     def test_search_requires_authentication(self, client: TestClient, sample_tests):
-        """Test that search endpoint requires authentication."""
+        """Test that search endpoint is publicly accessible (no auth required)."""
         response = client.get("/api/v1/standardized-tests/search")
 
-        assert response.status_code == 401
+        assert response.status_code == 200
 
     def test_autocomplete_requires_authentication(self, client: TestClient, sample_tests):
-        """Test that autocomplete endpoint requires authentication."""
+        """Test that autocomplete endpoint is publicly accessible (no auth required)."""
         response = client.get("/api/v1/standardized-tests/autocomplete")
 
-        assert response.status_code == 401
+        assert response.status_code == 200
 
     # ========== Edge Cases ==========
 

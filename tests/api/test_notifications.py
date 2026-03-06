@@ -196,7 +196,9 @@ class TestChannelManagement:
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "already exists" in response.json()["detail"]
+        # The custom error handler wraps HTTPException into a ResponseModel where the
+        # error text is in "message", not "detail" (detail is None for non-validation errors)
+        assert "already exists" in response.json()["message"]
 
     def test_get_channel(self, client, user_token_headers):
         """Test getting a specific channel."""

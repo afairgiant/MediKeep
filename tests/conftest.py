@@ -18,6 +18,10 @@ os.environ["SKIP_MIGRATIONS"] = "true"  # Skip Alembic migrations for SQLite tes
 
 import pytest
 import pytest_asyncio
+
+# Reduce bcrypt rounds for faster test execution (default 12 rounds is ~250x slower)
+from app.core.utils.security import pwd_context
+pwd_context.update(bcrypt__rounds=4)
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
