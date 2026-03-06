@@ -236,12 +236,12 @@
       "relatedConditions": "Conditions concernées",
       "linkConditionsTitle": "Connecter des conditions médicales",
       "linkConditionsDescription": "Associez ces résultats d'analyse aux conditions médicales concernées pour améliorer le suivi et l'organisation.",
-      "testComponents": "Composants de test (Optionnel)",
-      "testComponentsDescription": "Ajoutez optionnellement des valeurs de test individuelles. Vous pourrez en ajouter d'autres plus tard.",
-      "addTestComponent": "Ajouter des composants de test",
-      "hideTestComponents": "Masquer les composants de test",
-      "addAnotherTest": "Ajouter un autre test",
-      "componentCreationWarning": "Le résultat de laboratoire a été enregistré mais les composants de test n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page de visualisation."
+	  "testComponents": "Composants d'analyse (optionnel)",
+      "testComponentsDescription": "Ajoutez optionnellement des valeurs d'analyse individuelles. Vous pouvez également en ajouter plus ultérieurement.",
+      "addTestComponent": "Ajouter des composants d'analyse",
+      "hideTestComponents": "Cacher les composants d'analyse",
+      "addAnotherTest": "Ajouter un autre résultat d'analyse",
+      "componentCreationWarning": "Résultat d'analyse sauvegardé, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page d'aperçu."
     },
     "testName": {
       "label": "Nom de l'analyse",
@@ -1951,25 +1951,25 @@
   "form": {
     "invalidPhoneDigits": "Un numéro de téléphone ne peut contenir que des chiffres, des espaces, des tirets, des parenthèses, des points, et des +",
     "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide"
-  },
+	},
   "componentCatalog": {
-    "searchPlaceholder": "Rechercher des tests...",
+    "searchPlaceholder": "Rechercher dans les résultats d'analyse...",
     "filterCategory": "Catégorie",
     "filterStatus": "Statut",
-    "showing": "{{count}} tests uniques affichés",
-    "readingCount": "{{count}} mesures",
-    "readingCount_one": "{{count}} mesure",
-    "refRange": "Ref",
-    "noResults": "Aucun composant de test trouvé",
-    "tryAdjusting": "Essayez d'ajuster vos critères de recherche ou de filtre.",
-    "noData": "Ajoutez des résultats de laboratoire avec des composants pour les voir ici.",
-    "fetchError": "Échec du chargement du catalogue de tests",
+    "showing": "Affichage de {{count}} résultat(s) unique(s)",
+    "readingCount": "{{count}} relevés",
+    "readingCount_one": "{{count}} relevé",
+    "refRange": "Réf",
+    "noResults": "Aucun composant d'analyse trouvé",
+    "tryAdjusting": "Essayez d'ajuster vos critères de recherche ou de tri.",
+    "noData": "Ajoutez des résultats d'analyse avec des composants d'analyse pour les voir ici.",
+    "fetchError": "Echec du chargement du catalogue de résultats d'analyse",
     "trend": {
-      "increasing": "En hausse",
-      "decreasing": "En baisse",
+      "increasing": "En augmentation",
+      "decreasing": "En réduction",
       "stable": "Stable",
-      "worsening": "En détérioration",
-      "improving": "En amélioration"
+      "worsening": "Empirant",
+      "improving": "S'améliorant"
     },
     "sort": {
       "priority": "Priorité",
@@ -1977,11 +1977,11 @@
     },
     "status": {
       "normal": "Normal",
-      "high": "Élevé",
+      "high": "Elevé",
       "low": "Bas",
       "critical": "Critique",
       "abnormal": "Anormal",
-      "borderline": "Limite",
+      "borderline": "Inconcluant",
       "unknown": "Inconnu"
     }
   }
