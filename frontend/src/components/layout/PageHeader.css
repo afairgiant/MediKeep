@@ -454,7 +454,7 @@
   }
 }
 
-/* Tablet: 768px - 1023px */
+/* Tablet: 769px - 992px */
 @media (min-width: 769px) and (max-width: 992px) {
   .dashboard-header {
     padding: 12px 18px !important;
@@ -480,6 +480,66 @@
 /* High DPI Screens */
 
 /* Print Styles */
+
+/* Header-inline mobile nav toggle */
+.header-mobile-nav-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 32px;
+  height: 32px;
+}
+
+.header-mobile-nav-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.header-mobile-nav-toggle:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.header-mobile-nav-toggle .hamburger-line {
+  display: block;
+  height: 2px;
+  width: 16px;
+  background: white;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.header-mobile-nav-toggle.active .hamburger-line:first-child {
+  transform: rotate(45deg) translate(4px, 4px);
+}
+
+.header-mobile-nav-toggle.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.header-mobile-nav-toggle.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(4px, -4px);
+}
+
+/* Standard (non-gradient) page header variant */
+.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle {
+  background: var(--color-bg-secondary, #f1f3f5);
+  border-color: var(--color-border-light, #e5e7eb);
+}
+
+.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle .hamburger-line {
+  background: var(--color-text-primary, #333);
+}
+
+.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle:hover {
+  background: var(--color-bg-tertiary, #e9ecef);
+}
 
 /* Accessibility - Focus States */
 .nav-dropdown-trigger:focus,
