@@ -48,6 +48,7 @@ class TestCompleteInvitationWorkflow:
     def alice_patient(self, db_session, alice):
         """Create patient for alice"""
         patient = Patient(
+            user_id=alice.id,
             owner_user_id=alice.id,
             first_name="Child",
             last_name="Patient",
@@ -62,13 +63,13 @@ class TestCompleteInvitationWorkflow:
     @pytest.fixture
     def alice_token_headers(self, alice):
         """Auth headers for alice"""
-        token = create_access_token(subject=alice.id)
+        token = create_access_token(data={"sub": alice.username})
         return {"Authorization": f"Bearer {token}"}
 
     @pytest.fixture
     def bob_token_headers(self, bob):
         """Auth headers for bob"""
-        token = create_access_token(subject=bob.id)
+        token = create_access_token(data={"sub": bob.username})
         return {"Authorization": f"Bearer {token}"}
 
     def test_complete_single_patient_workflow(self, client, db_session, alice_token_headers, bob_token_headers, alice_patient, alice, bob):
@@ -158,6 +159,7 @@ class TestCompleteInvitationWorkflow:
         patients = []
         for i in range(3):
             patient = Patient(
+                user_id=alice.id,
                 owner_user_id=alice.id,
                 first_name=f"Child{i}",
                 last_name="Patient",
@@ -350,7 +352,8 @@ class TestCompleteInvitationWorkflow:
             "shared_with_user_id": bob.id
         }
 
-        revoke_response = client.delete(
+        revoke_response = client.request(
+            "DELETE",
             "/api/v1/patient-sharing/revoke",
             json=revoke_payload,
             headers=alice_token_headers
@@ -410,6 +413,7 @@ class TestEdgeCases:
     def alice_patient(self, db_session, alice):
         """Create patient for alice"""
         patient = Patient(
+            user_id=alice.id,
             owner_user_id=alice.id,
             first_name="Test",
             last_name="Patient",
@@ -424,13 +428,13 @@ class TestEdgeCases:
     @pytest.fixture
     def alice_token_headers(self, alice):
         """Auth headers for alice"""
-        token = create_access_token(subject=alice.id)
+        token = create_access_token(data={"sub": alice.username})
         return {"Authorization": f"Bearer {token}"}
 
     @pytest.fixture
     def bob_token_headers(self, bob):
         """Auth headers for bob"""
-        token = create_access_token(subject=bob.id)
+        token = create_access_token(data={"sub": bob.username})
         return {"Authorization": f"Bearer {token}"}
 
     def test_cannot_send_duplicate_invitation(self, client, alice_token_headers, alice_patient, bob):
@@ -458,7 +462,7 @@ class TestEdgeCases:
         )
 
         assert response2.status_code == 409
-        assert "pending invitation" in response2.json()['detail'].lower()
+        assert "pending invitation" in response2.json()['message'].lower()
 
     def test_cannot_accept_others_invitation(self, client, db_session, alice_token_headers, bob_token_headers, alice_patient, bob):
         """Test that user cannot accept invitation meant for someone else"""
@@ -490,7 +494,7 @@ class TestEdgeCases:
         invitation_id = send_response.json()['invitation_id']
 
         # Charlie tries to accept (should fail)
-        charlie_token = create_access_token(subject=charlie.id)
+        charlie_token = create_access_token(data={"sub": charlie.username})
         charlie_headers = {"Authorization": f"Bearer {charlie_token}"}
 
         accept_response = client.post(
@@ -507,6 +511,7 @@ class TestEdgeCases:
         patients = []
         for i in range(3):
             patient = Patient(
+                user_id=alice.id,
                 owner_user_id=alice.id,
                 first_name=f"Patient{i}",
                 last_name="Test",
@@ -579,7 +584,7 @@ class TestEdgeCases:
         )
 
         assert accept_response.status_code == 400
-        assert "expired" in accept_response.json()['detail'].lower()
+        assert "expired" in accept_response.json()['message'].lower()
 
     def test_remove_own_access(self, client, db_session, alice_token_headers, bob_token_headers, alice_patient, alice, bob):
         """Test that recipient can remove their own access to a shared patient"""

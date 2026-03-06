@@ -1,6 +1,7 @@
 """
 Tests for TagService - verifying exact tag matching behavior.
 """
+import os
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -11,6 +12,11 @@ from app.crud.patient import patient as patient_crud
 from app.models.models import Medication
 from app.schemas.medication import MedicationCreate
 from app.schemas.patient import PatientCreate
+
+pytestmark = pytest.mark.skipif(
+    "sqlite" in os.environ.get("DATABASE_URL", "sqlite"),
+    reason="Tag service requires PostgreSQL JSON functions"
+)
 
 
 class TestTagServiceExactMatching:

@@ -86,9 +86,10 @@ def search_tests(
     # Search conditions (ordered by relevance)
     conditions = []
 
-    # 1. Exact match on test name or short name (highest priority)
+    # 1. Exact match on test name, short name, or LOINC code (highest priority)
     conditions.append(func.lower(StandardizedTest.test_name) == search_term)
     conditions.append(func.lower(StandardizedTest.short_name) == search_term)
+    conditions.append(func.lower(StandardizedTest.loinc_code) == search_term)
 
     # 2. Search in common_names JSON array (cross-database compatible)
     conditions.append(
@@ -98,10 +99,12 @@ def search_tests(
     # 3. Starts with query (with LIKE escaping)
     conditions.append(func.lower(StandardizedTest.test_name).startswith(search_term, autoescape=True))
     conditions.append(func.lower(StandardizedTest.short_name).startswith(search_term, autoescape=True))
+    conditions.append(func.lower(StandardizedTest.loinc_code).startswith(search_term, autoescape=True))
 
     # 4. Contains query (with LIKE escaping for literal matching)
     conditions.append(func.lower(StandardizedTest.test_name).contains(search_term, autoescape=True))
     conditions.append(func.lower(StandardizedTest.short_name).contains(search_term, autoescape=True))
+    conditions.append(func.lower(StandardizedTest.loinc_code).contains(search_term, autoescape=True))
 
     # 5. Word-based matching for multi-word queries (cross-database compatible)
     # Split search term and check if all words are present (with LIKE escaping)
@@ -124,14 +127,16 @@ def search_tests(
     # Order by relevance: exact matches first, then partial matches
     # Using CASE to create a relevance score (dialect-aware)
     relevance_score = case(
-        # Highest priority: exact match on test_name or short_name
+        # Highest priority: exact match on test_name, short_name, or loinc_code
         (func.lower(StandardizedTest.test_name) == search_term, 1),
         (func.lower(StandardizedTest.short_name) == search_term, 1),
+        (func.lower(StandardizedTest.loinc_code) == search_term, 1),
         # High priority: exact match in common_names JSON array (dialect-aware)
         (_get_json_array_search_condition(StandardizedTest.common_names, search_term), 2),
         # Medium priority: starts with query
         (func.lower(StandardizedTest.test_name).startswith(search_term, autoescape=True), 3),
         (func.lower(StandardizedTest.short_name).startswith(search_term, autoescape=True), 3),
+        (func.lower(StandardizedTest.loinc_code).startswith(search_term, autoescape=True), 3),
         # Low priority: contains query or word-based match
         else_=4
     )
