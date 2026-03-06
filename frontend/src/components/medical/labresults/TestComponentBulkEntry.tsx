@@ -95,7 +95,7 @@ export const REGEX_PATTERNS = {
   FULL_PATTERN: new RegExp(
     String.raw`^${TEST_NAME}:${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}(${UNIT_PATTERN})?${ZERO_OR_MORE_SPACES}` +
     String.raw`(?:\((?:.*?range.*?:${ZERO_OR_MORE_SPACES})?${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}${RANGE_SEPARATOR}${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}.*?\)|` +
-    String.raw`\((${COMPARISON_OP}${ZERO_OR_MORE_SPACES}[0-9.,]+)\)|` +
+    String.raw`\((?:.*?range.*?:${ZERO_OR_MORE_SPACES})?(${COMPARISON_OP}${ZERO_OR_MORE_SPACES}[0-9.,]+)\)|` +
     String.raw`\(Not\s+Estab\.?\)|` +
     String.raw`(\([^)]*\)))?`,
     'i'
@@ -118,7 +118,10 @@ export const REGEX_PATTERNS = {
   // Pattern 4: CSV-like "Test,Value,Unit,Range,Status"
   CSV_PATTERN: new RegExp(
     String.raw`^${TEST_NAME}[,\t]+${NUMERIC_VALUE}[,\t]+(${UNIT_PATTERN})` +
-    String.raw`(?:[,\t]+([^,\t]*?))?(?:[,\t]+([^,\t]*?))?$`,
+    String.raw`(?:[,\t]+${NUMERIC_VALUE}${ZERO_OR_MORE_SPACES}${RANGE_SEPARATOR}${ZERO_OR_MORE_SPACES}${NUMERIC_VALUE}` +
+    String.raw`|[,\t]+(${COMPARISON_OP}${ZERO_OR_MORE_SPACES}[0-9.,]+)` +
+    String.raw`|[,\t]+([^,\t]*?))?` +
+    String.raw`(?:[,\t]+${STATUS_VALUES})?$`,
     'i'
   )
 };
@@ -1436,14 +1439,24 @@ SARS-CoV-2: Not Detected`
               >
                 Clear All
               </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting || validComponents.length === 0}
-                loading={isSubmitting}
-                leftSection={<IconCheck size={16} />}
-              >
-                Add {validComponents.length} Component{validComponents.length !== 1 ? 's' : ''}
-              </Button>
+              {activeTab !== 'preview' ? (
+                <Button
+                  onClick={() => setActiveTab('preview')}
+                  disabled={validComponents.length === 0}
+                  leftSection={<IconTable size={16} />}
+                >
+                  Preview {validComponents.length} Component{validComponents.length !== 1 ? 's' : ''}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || validComponents.length === 0}
+                  loading={isSubmitting}
+                  leftSection={<IconCheck size={16} />}
+                >
+                  Add {validComponents.length} Component{validComponents.length !== 1 ? 's' : ''}
+                </Button>
+              )}
             </Group>
     </Box>
   );
