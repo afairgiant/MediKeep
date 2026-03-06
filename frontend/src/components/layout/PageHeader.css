@@ -213,19 +213,31 @@
 .dashboard-header {
   background: linear-gradient(
     135deg,
-    var(--color-primary, #667eea) 0%,
-    var(--color-primary-dark, #764ba2) 100%
+    #7048e8 0%,
+    #9775fa 100%
   ) !important;
   color: var(--color-text-light, white) !important;
   box-shadow: var(--shadow-md, 0 2px 10px rgba(0, 0, 0, 0.1)) !important;
-  border-bottom: 2px solid var(--border-color);
-  padding: 1rem 2rem !important;
+  border-bottom: none !important;
+  padding: 14px 20px !important;
+  border-radius: 8px;
+  min-height: auto !important;
 }
 
 .dashboard-header .page-title {
-  font-size: 2rem;
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-text-light, white) !important;
+}
+
+.dashboard-header .title-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Medical page variant styles */
@@ -426,8 +438,31 @@
 /* ============================= */
 
 /* Mobile: <768px */
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 10px 16px !important;
+    border-radius: 6px;
+  }
 
-/* Tablet: 768px - 1023px */
+  .dashboard-header .page-title {
+    font-size: 18px;
+  }
+
+  .dashboard-header .title-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Tablet: 769px - 992px */
+@media (min-width: 769px) and (max-width: 992px) {
+  .dashboard-header {
+    padding: 12px 18px !important;
+  }
+  .dashboard-header .page-title {
+    font-size: 20px;
+  }
+}
 
 
 /* Exactly 1024px - very tight spacing */
@@ -445,6 +480,66 @@
 /* High DPI Screens */
 
 /* Print Styles */
+
+/* Header-inline mobile nav toggle */
+.header-mobile-nav-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 32px;
+  height: 32px;
+}
+
+.header-mobile-nav-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.header-mobile-nav-toggle:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.header-mobile-nav-toggle .hamburger-line {
+  display: block;
+  height: 2px;
+  width: 16px;
+  background: white;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.header-mobile-nav-toggle.active .hamburger-line:first-child {
+  transform: rotate(45deg) translate(4px, 4px);
+}
+
+.header-mobile-nav-toggle.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.header-mobile-nav-toggle.active .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(4px, -4px);
+}
+
+/* Standard (non-gradient) page header variant */
+.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle {
+  background: var(--color-bg-secondary, #f1f3f5);
+  border-color: var(--color-border-light, #e5e7eb);
+}
+
+.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle .hamburger-line {
+  background: var(--color-text-primary, #333);
+}
+
+.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle:hover {
+  background: var(--color-bg-tertiary, #e9ecef);
+}
 
 /* Accessibility - Focus States */
 .nav-dropdown-trigger:focus,

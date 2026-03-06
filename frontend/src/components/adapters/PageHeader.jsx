@@ -42,6 +42,7 @@ const PageHeader = ({
   variant = 'medical',
   showGlobalActions = true,
   showNavigation = true,
+  showTitle = true,
   ...props
 }) => {
   const navigate = useNavigate();
@@ -138,6 +139,7 @@ const PageHeader = ({
         variant={variant}
         showGlobalActions={showGlobalActions}
         showNavigation={showNavigation}
+        showTitle={showTitle}
         {...props}
       />
     );
@@ -204,6 +206,7 @@ const PageHeader = ({
             </Group>
 
             {/* Center - Title */}
+            {showTitle && (
             <Group
               gap="xs"
               align="center"
@@ -231,6 +234,7 @@ const PageHeader = ({
                 {title}
               </Title>
             </Group>
+            )}
 
             {/* Right Section - Actions and Global Nav */}
             <Group

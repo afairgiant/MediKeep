@@ -1,11 +1,10 @@
 import logger from '../../services/logger';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { NavigationWrapper } from '../navigation';
 import { useViewport } from '../../hooks/useViewport';
-import ThemeToggle from '../ui/ThemeToggle';
 import LanguageSwitcher from '../shared/LanguageSwitcher';
 import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import './PageHeader.css';
@@ -25,10 +24,16 @@ const PageHeader = ({
   variant = 'medical', // 'medical' or 'dashboard'
   showGlobalActions = true,
   showNavigation = true,
+  showTitle = true,
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isMobile } = useViewport();
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  const toggleMobileNav = useCallback(() => {
+    setIsMobileNavOpen(prev => !prev);
+  }, []);
   
   // Check if user is admin
   const [adminStatus, setAdminStatus] = useState(false);
@@ -103,31 +108,33 @@ const PageHeader = ({
           )}
         </div>
         
-        <div className="header-center">
-          <h1 className="page-title">
-            {icon && <span className="title-icon">{icon}</span>}
-            {title}
-          </h1>
-        </div>
+        {showTitle && (
+          <div className="header-center">
+            <h1 className="page-title">
+              {icon && <span className="title-icon">{icon}</span>}
+              {title}
+            </h1>
+          </div>
+        )}
         
         <div className="header-right">
           <div className="header-actions">
             {/* Page-specific actions */}
             {actions}
             
-            {/* Global actions only for mobile (desktop has them in Account dropdown) */}
-            {showGlobalActions && isMobile && (
-              <div className="global-actions">
-                <button
-                  className="settings-button"
-                  onClick={() => navigate('/settings')}
-                  type="button"
-                  title="Settings"
-                >
-                  ⚙️
-                </button>
-                <ThemeToggle />
-              </div>
+            {/* Mobile hamburger toggle (replaces theme toggle - theme is in sidebar) */}
+            {isMobile && (
+              <button
+                className={`header-mobile-nav-toggle ${isMobileNavOpen ? 'active' : ''}`}
+                onClick={toggleMobileNav}
+                aria-label="Toggle navigation menu"
+                aria-expanded={isMobileNavOpen}
+                type="button"
+              >
+                <span className="hamburger-line"></span>
+                <span className="hamburger-line"></span>
+                <span className="hamburger-line"></span>
+              </button>
             )}
           </div>
         </div>
@@ -142,6 +149,8 @@ const PageHeader = ({
           backButtonText={backButtonText}
           backButtonPath={backButtonPath}
           onBackClick={onBackClick}
+          mobileNavOpen={isMobileNavOpen}
+          onMobileNavClose={() => setIsMobileNavOpen(false)}
         />
       )}
     </>

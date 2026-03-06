@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
-  Title,
   Text,
   Stack,
   Group,
@@ -13,8 +12,6 @@ import {
   Paper,
   Loader,
   Center,
-  Menu,
-  Alert,
   Modal,
   useMantineColorScheme,
 } from '@mantine/core';
@@ -164,11 +161,11 @@ const InvitationNotifications = () => {
 
   if (loading && !lastUpdate) {
     return (
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Group justify="space-between" mb="md">
-          <Title order={3} size="h4">
+      <Card shadow="sm" padding={16} radius="md" withBorder>
+        <Group justify="space-between" mb={12}>
+          <Text size="15px" fw={600}>
             {t('invitations.title', 'Invitations')}
-          </Title>
+          </Text>
         </Group>
         <Center py="md">
           <Loader size="sm" />
@@ -179,12 +176,12 @@ const InvitationNotifications = () => {
 
   return (
     <>
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Group justify="space-between" mb="md">
+      <Card shadow="sm" padding={16} radius="md" withBorder>
+        <Group justify="space-between" mb={12}>
           <Group gap="xs">
-            <Title order={3} size="h4">
+            <Text size="15px" fw={600}>
               {t('invitations.title', 'Invitations')}
-            </Title>
+            </Text>
             {pendingInvitations.length > 0 && (
               <Badge color="orange" size="sm" variant="filled">
                 {pendingInvitations.length}
@@ -217,11 +214,11 @@ const InvitationNotifications = () => {
         )}
 
         {pendingInvitations.length > 0 ? (
-          <Stack gap="xs">
+          <Stack gap={8}>
             {pendingInvitations.slice(0, 3).map((invitation) => (
               <Paper
                 key={invitation.id}
-                p="sm"
+                p="10px"
                 radius="md"
                 withBorder
                 styles={(theme) => ({
