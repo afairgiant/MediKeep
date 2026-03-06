@@ -250,159 +250,6 @@ def get_accessible_patients(
         )
 
 
-@router.get("/{patient_id}", response_model=PatientResponse)
-def get_patient(
-    *,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-    patient_id: int,
-    current_user: User = Depends(deps.get_current_user),
-) -> Any:
-    """
-    Get a specific patient by ID.
-    
-    User must have access to this patient.
-    """
-    with handle_database_errors(request=request):
-        service = PatientManagementService(db)
-        patient = service.get_patient(current_user, patient_id)
-        
-        if not patient:
-            raise NotFoundException(
-                resource="Patient",
-                message=f"Patient with ID {patient_id} not found",
-                request=request
-            )
-        
-        return PatientResponse.model_validate(patient)
-
-
-@router.put("/{patient_id}", response_model=PatientResponse)
-def update_patient(
-    *,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-    patient_id: int,
-    patient_in: PatientUpdateRequest,
-    current_user: User = Depends(deps.get_current_user),
-) -> Any:
-    """
-    Update a patient record.
-    
-    User must have edit permission for this patient.
-    
-    Common validation errors (422):
-    - Height must be between 1-108 inches (1-9 feet)
-    - Weight must be between 1-992 pounds
-    - Birth date cannot be in the future or >150 years ago
-    - Address must be at least 5 characters if provided
-    - Blood type must be valid (A+, A-, B+, B-, AB+, AB-, O+, O-)
-    - Gender must be valid (M, F, MALE, FEMALE, OTHER, U, UNKNOWN)
-    """
-    user_ip = request.client.host if request.client else "unknown"
-    
-    # Log the incoming request without sensitive data
-    log_endpoint_access(
-        logger, request, current_user.id, "patient_update_request",
-        patient_id=patient_id,
-        fields_provided=list(patient_in.model_dump(exclude_unset=True).keys())
-    )
-    
-    with handle_database_errors(request=request):
-        service = PatientManagementService(db)
-        
-        # Check if patient exists first
-        existing_patient = db.query(Patient).filter(Patient.id == patient_id).first()
-        if not existing_patient:
-            raise NotFoundException(
-                resource="Patient",
-                message=f"Patient with ID {patient_id} not found",
-                request=request
-            )
-        
-        # Check permissions
-        from app.services.patient_access import PatientAccessService
-        access_service = PatientAccessService(db)
-        if not access_service.can_access_patient(current_user, existing_patient, 'edit'):
-            raise ForbiddenException(
-                message="You don't have permission to edit this patient",
-                request=request
-            )
-        
-        # Filter out None values
-        patient_data = {k: v for k, v in patient_in.model_dump().items() if v is not None}
-        
-        # Log fields being updated without sensitive values
-        if patient_data:
-            log_endpoint_access(
-                logger, request, current_user.id, "patient_update_data_filtered",
-                patient_id=patient_id,
-                fields_updated=list(patient_data.keys())
-            )
-        
-        patient = service.update_patient(current_user, patient_id, patient_data)
-        
-        log_data_access(
-            logger, request, current_user.id, "update", "Patient",
-            record_id=patient_id,
-            patient_id=patient_id
-        )
-        
-        return PatientResponse.model_validate(patient)
-
-
-@router.delete("/{patient_id}")
-def delete_patient(
-    *,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-    patient_id: int,
-    current_user: User = Depends(deps.get_current_user),
-) -> Any:
-    """
-    Delete a patient record.
-    
-    Only the patient owner can delete the record.
-    This will also delete all associated medical records.
-    """
-    user_ip = request.client.host if request.client else "unknown"
-    
-    with handle_database_errors(request=request):
-        service = PatientManagementService(db)
-        
-        # Check if patient exists
-        patient = db.query(Patient).filter(Patient.id == patient_id).first()
-        if not patient:
-            raise NotFoundException(
-                resource="Patient",
-                message=f"Patient with ID {patient_id} not found",
-                request=request
-            )
-        
-        # Check ownership
-        if patient.owner_user_id != current_user.id:
-            raise ForbiddenException(
-                message="Only the patient owner can delete this record",
-                request=request
-            )
-        
-        success = service.delete_patient(current_user, patient_id)
-        
-        if success:
-            log_data_access(
-                logger, request, current_user.id, "delete", "Patient",
-                record_id=patient_id,
-                patient_id=patient_id
-            )
-            
-            return {"message": "Patient record and all associated medical records deleted successfully"}
-        else:
-            raise DatabaseException(
-                message="Failed to delete patient record",
-                request=request
-            )
-
-
 @router.get("/owned/list", response_model=List[PatientResponse])
 def get_owned_patients(
     *,
@@ -416,7 +263,7 @@ def get_owned_patients(
     with handle_database_errors(request=request):
         service = PatientManagementService(db)
         patients = service.get_owned_patients(current_user)
-        
+
         return [PatientResponse.model_validate(p) for p in patients]
 
 
@@ -429,13 +276,13 @@ def get_self_record(
 ) -> Any:
     """
     Get the user's self-record patient.
-    
+
     Returns null if the user doesn't have a self-record.
     """
     with handle_database_errors(request=request):
         service = PatientManagementService(db)
         patient = service.get_self_record(current_user)
-        
+
         if patient:
             return PatientResponse.model_validate(patient)
         else:
@@ -452,14 +299,14 @@ def switch_active_patient(
 ) -> Any:
     """
     Switch the user's active patient context (Netflix-style switching).
-    
+
     The user must have access to the specified patient.
     """
     user_ip = request.client.host if request.client else "unknown"
-    
+
     with handle_database_errors(request=request):
         service = PatientManagementService(db)
-        
+
         # Check if target patient exists and user has access
         target_patient = db.query(Patient).filter(Patient.id == switch_request.patient_id).first()
         if not target_patient:
@@ -468,14 +315,14 @@ def switch_active_patient(
                 message=f"Patient with ID {switch_request.patient_id} not found",
                 request=request
             )
-        
+
         patient = service.switch_active_patient(current_user, switch_request.patient_id)
-        
+
         log_endpoint_access(
             logger, request, current_user.id, "patient_switched",
             patient_id=switch_request.patient_id
         )
-        
+
         return PatientResponse.model_validate(patient)
 
 
@@ -488,13 +335,13 @@ def get_active_patient(
 ) -> Any:
     """
     Get the user's currently active patient.
-    
+
     Returns null if no active patient is set or if the active patient is no longer accessible.
     """
     with handle_database_errors(request=request):
         service = PatientManagementService(db)
         patient = service.get_active_patient(current_user)
-        
+
         if patient:
             return PatientResponse.model_validate(patient)
         else:
@@ -524,3 +371,156 @@ def get_patient_statistics(
             'active_patient_id': stats['active_patient_id'],
             'sharing_stats': stats['sharing_stats']
         }
+
+
+@router.get("/{patient_id}", response_model=PatientResponse)
+def get_patient(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Get a specific patient by ID.
+
+    User must have access to this patient.
+    """
+    with handle_database_errors(request=request):
+        service = PatientManagementService(db)
+        patient = service.get_patient(current_user, patient_id)
+
+        if not patient:
+            raise NotFoundException(
+                resource="Patient",
+                message=f"Patient with ID {patient_id} not found",
+                request=request
+            )
+
+        return PatientResponse.model_validate(patient)
+
+
+@router.put("/{patient_id}", response_model=PatientResponse)
+def update_patient(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    patient_in: PatientUpdateRequest,
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Update a patient record.
+
+    User must have edit permission for this patient.
+
+    Common validation errors (422):
+    - Height must be between 1-108 inches (1-9 feet)
+    - Weight must be between 1-992 pounds
+    - Birth date cannot be in the future or >150 years ago
+    - Address must be at least 5 characters if provided
+    - Blood type must be valid (A+, A-, B+, B-, AB+, AB-, O+, O-)
+    - Gender must be valid (M, F, MALE, FEMALE, OTHER, U, UNKNOWN)
+    """
+    user_ip = request.client.host if request.client else "unknown"
+
+    # Log the incoming request without sensitive data
+    log_endpoint_access(
+        logger, request, current_user.id, "patient_update_request",
+        patient_id=patient_id,
+        fields_provided=list(patient_in.model_dump(exclude_unset=True).keys())
+    )
+
+    with handle_database_errors(request=request):
+        service = PatientManagementService(db)
+
+        # Check if patient exists first
+        existing_patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        if not existing_patient:
+            raise NotFoundException(
+                resource="Patient",
+                message=f"Patient with ID {patient_id} not found",
+                request=request
+            )
+
+        # Check permissions
+        from app.services.patient_access import PatientAccessService
+        access_service = PatientAccessService(db)
+        if not access_service.can_access_patient(current_user, existing_patient, 'edit'):
+            raise ForbiddenException(
+                message="You don't have permission to edit this patient",
+                request=request
+            )
+
+        # Filter out None values
+        patient_data = {k: v for k, v in patient_in.model_dump().items() if v is not None}
+
+        # Log fields being updated without sensitive values
+        if patient_data:
+            log_endpoint_access(
+                logger, request, current_user.id, "patient_update_data_filtered",
+                patient_id=patient_id,
+                fields_updated=list(patient_data.keys())
+            )
+
+        patient = service.update_patient(current_user, patient_id, patient_data)
+
+        log_data_access(
+            logger, request, current_user.id, "update", "Patient",
+            record_id=patient_id,
+            patient_id=patient_id
+        )
+
+        return PatientResponse.model_validate(patient)
+
+
+@router.delete("/{patient_id}")
+def delete_patient(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int,
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Delete a patient record.
+
+    Only the patient owner can delete the record.
+    This will also delete all associated medical records.
+    """
+    user_ip = request.client.host if request.client else "unknown"
+
+    with handle_database_errors(request=request):
+        service = PatientManagementService(db)
+
+        # Check if patient exists
+        patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        if not patient:
+            raise NotFoundException(
+                resource="Patient",
+                message=f"Patient with ID {patient_id} not found",
+                request=request
+            )
+
+        # Check ownership
+        if patient.owner_user_id != current_user.id:
+            raise ForbiddenException(
+                message="Only the patient owner can delete this record",
+                request=request
+            )
+
+        success = service.delete_patient(current_user, patient_id)
+
+        if success:
+            log_data_access(
+                logger, request, current_user.id, "delete", "Patient",
+                record_id=patient_id,
+                patient_id=patient_id
+            )
+
+            return {"message": "Patient record and all associated medical records deleted successfully"}
+        else:
+            raise DatabaseException(
+                message="Failed to delete patient record",
+                request=request
+            )

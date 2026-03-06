@@ -182,8 +182,8 @@ class ProcedureResponse(ProcedureBase):
 
 
 class ProcedureWithRelations(ProcedureResponse):
-    patient: Optional[dict] = None
-    practitioner: Optional[dict] = None
+    patient: Optional["PatientResponse"] = None
+    practitioner: Optional["PractitionerSummary"] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -203,3 +203,10 @@ class ProcedureSummary(BaseModel):
         return _validate_procedure_outcome(v)
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# Late imports to avoid circular dependencies; must come after all class definitions.
+from app.schemas.patient import PatientResponse  # noqa: E402
+from app.schemas.practitioner import PractitionerSummary  # noqa: E402
+
+ProcedureWithRelations.model_rebuild()

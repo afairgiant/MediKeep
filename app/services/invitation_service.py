@@ -160,7 +160,12 @@ class InvitationService:
             # Check if expired
             if invitation.expires_at:
                 now = get_utc_now()
-                if invitation.expires_at < now:
+                expires_at = invitation.expires_at
+                # Ensure both datetimes are comparable (SQLite stores naive datetimes)
+                if expires_at.tzinfo is None:
+                    from datetime import timezone
+                    expires_at = expires_at.replace(tzinfo=timezone.utc)
+                if expires_at < now:
                     invitation.status = 'expired'
                     self.db.commit()
                     raise ValueError("Invitation has expired")
