@@ -52,6 +52,7 @@ import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import logger from '../services/logger';
 import { useAuth } from '../contexts/AuthContext';
+import { useViewport } from '../hooks/useViewport';
 import { useCurrentPatient, useCacheManager } from '../hooks/useGlobalData';
 import { useDateFormat } from '../hooks/useDateFormat';
 import {
@@ -69,6 +70,7 @@ const Dashboard = () => {
   const { t } = useTranslation(['navigation', 'common']);
   const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
+  const { isMobile } = useViewport();
   const {
     user: authUser,
     shouldShowProfilePrompts,
@@ -447,6 +449,14 @@ const Dashboard = () => {
     });
   }
 
+  const StatsRow = (props) => (
+    <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={12} {...props}>
+      {dashboardStatsCards.map((stat, index) => (
+        <StatCard key={index} stat={stat} />
+      ))}
+    </SimpleGrid>
+  );
+
   const StatCard = ({ stat }) => (
     <Paper
       className={`dashboard-stat-card ${stat.color}`}
@@ -456,7 +466,7 @@ const Dashboard = () => {
       h={90}
     >
       <Stack align="center" justify="center" h="100%">
-        <Text size="22px" fw={700} c={stat.color}>
+        <Text size={isMobile ? '18px' : '22px'} fw={700} c={stat.color}>
           {stat.value}
         </Text>
         <Text size="12px" c="dimmed" ta="center">
@@ -533,7 +543,7 @@ const Dashboard = () => {
       <Tooltip label={tooltip} position="left" disabled={!tooltip}>
         <Paper
           className={isClickable ? 'dashboard-activity-item' : undefined}
-          p="10px 12px"
+          p={isMobile ? '8px 10px' : '10px 12px'}
           radius="sm"
           withBorder
           style={{
@@ -672,7 +682,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <Container size={1200} py="xl">
+      <Container size={1400} py="xl">
         <Stack align="center" justify="center" style={{ minHeight: '60vh' }}>
           <Progress
             value={75}
@@ -689,7 +699,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Container size={1200} py="md" px={{ base: 12, sm: 16, md: 'md' }}>
+    <Container size={1400} py="md" px={{ base: 12, sm: 16, md: 'md' }}>
         <PageHeader
           title="MediKeep"
           icon={<img src="/medikeep-icon.svg" alt="" width={36} height={36} style={{ verticalAlign: 'middle' }} />}
@@ -726,6 +736,7 @@ const Dashboard = () => {
                 }}
                 title="Close welcome message"
                 style={{
+                  zIndex: 1,
                   '&:hover': {
                     backgroundColor: 'rgba(255,255,255,0.2)',
                   },
@@ -737,9 +748,10 @@ const Dashboard = () => {
               <Flex
                 justify="space-between"
                 align="center"
-                pr="xl"
+                pr={{ base: 32, sm: 'xl' }}
                 direction={{ base: 'column', sm: 'row' }}
-                gap={{ base: 8, sm: 0 }}
+                gap={{ base: 8, sm: 'xs' }}
+                wrap="wrap"
               >
                 <div>
                   <Title order={2} size="18px" fw={600} mb={4}>
@@ -773,16 +785,15 @@ const Dashboard = () => {
             justify="space-between"
             align="flex-end"
             gap="md"
-            direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
+            direction={{ base: 'column', sm: 'row' }}
             wrap="wrap"
-            mb={20}
             style={{ width: '100%' }}
           >
             {/* Patient Selector */}
             <Box
               style={{
                 flex: '1 1 auto',
-                maxWidth: '500px',
+                maxWidth: isMobile ? '100%' : '500px',
                 minWidth: '200px',
                 width: '100%',
               }}
@@ -796,8 +807,8 @@ const Dashboard = () => {
             </Box>
 
             {/* Search Bar + Advanced Search link */}
-            <Group gap="xs" align="flex-end" style={{ width: '100%', maxWidth: 350 }}>
-              <Box style={{ flex: 1, minWidth: 150 }}>
+            <Group gap="xs" align="flex-end" style={{ width: '100%', maxWidth: isMobile ? '100%' : 350 }}>
+              <Box style={{ flex: 1, minWidth: 120 }}>
                 <GlobalSearch
                   patientId={currentPatient?.id}
                   placeholder={t('dashboard.search.placeholder', 'Search medical records...')}
@@ -879,7 +890,7 @@ const Dashboard = () => {
               </Stack>
             </Grid.Col>
 
-            <Grid.Col span={{ base: 12, sm: 4 }}>
+            <Grid.Col span={{ base: 12, sm: 4 }} className="dashboard-sidebar">
               <Stack gap={16}>
                 {/* Additional Resources */}
                 <Card shadow="sm" padding={16} radius="md" withBorder>
@@ -944,11 +955,7 @@ const Dashboard = () => {
           </Grid>
 
           {/* Stats Row */}
-          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={12}>
-            {dashboardStatsCards.map((stat, index) => (
-              <StatCard key={index} stat={stat} />
-            ))}
-          </SimpleGrid>
+          <StatsRow />
         </Stack>
     </Container>
   );

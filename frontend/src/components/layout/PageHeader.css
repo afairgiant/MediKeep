@@ -455,6 +455,14 @@
 }
 
 /* Tablet: 768px - 1023px */
+@media (min-width: 769px) and (max-width: 992px) {
+  .dashboard-header {
+    padding: 12px 18px !important;
+  }
+  .dashboard-header .page-title {
+    font-size: 20px;
+  }
+}
 
 
 /* Exactly 1024px - very tight spacing */
