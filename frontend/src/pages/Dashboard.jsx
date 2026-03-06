@@ -689,7 +689,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Container size={1200} py="md">
+    <Container size={1200} py="md" px={{ base: 12, sm: 16, md: 'md' }}>
         <PageHeader
           title="MediKeep"
           icon={<img src="/medikeep-icon.svg" alt="" width={36} height={36} style={{ verticalAlign: 'middle' }} />}
@@ -697,7 +697,7 @@ const Dashboard = () => {
           showBackButton={false}
         />
 
-        <Stack gap={20} mt={20}>
+        <Stack gap={{ base: 16, md: 20 }} mt={{ base: 12, md: 20 }}>
           {/* Welcome Section */}
           {showWelcomeBox && (
             <Paper
@@ -734,7 +734,13 @@ const Dashboard = () => {
                 <IconX size={14} />
               </ActionIcon>
 
-              <Group justify="space-between" align="center" pr="xl">
+              <Flex
+                justify="space-between"
+                align="center"
+                pr="xl"
+                direction={{ base: 'column', sm: 'row' }}
+                gap={{ base: 8, sm: 0 }}
+              >
                 <div>
                   <Title order={2} size="18px" fw={600} mb={4}>
                     {t('dashboard.title', 'MediKeep Dashboard')}
@@ -749,6 +755,7 @@ const Dashboard = () => {
                     variant="filled"
                     size="lg"
                     radius="xl"
+                    style={{ alignSelf: 'flex-start' }}
                   >
                     {t('dashboard.hello', 'Hello')},{' '}
                     {authUser.fullName ||
@@ -757,7 +764,7 @@ const Dashboard = () => {
                     !
                   </Badge>
                 )}
-              </Group>
+              </Flex>
             </Paper>
           )}
 
@@ -777,6 +784,7 @@ const Dashboard = () => {
                 flex: '1 1 auto',
                 maxWidth: '500px',
                 minWidth: '200px',
+                width: '100%',
               }}
             >
               <PatientSelector
@@ -788,8 +796,8 @@ const Dashboard = () => {
             </Box>
 
             {/* Search Bar + Advanced Search link */}
-            <Group gap="xs" align="flex-end">
-              <Box style={{ width: 250, minWidth: 150 }}>
+            <Group gap="xs" align="flex-end" style={{ width: '100%', maxWidth: 350 }}>
+              <Box style={{ flex: 1, minWidth: 150 }}>
                 <GlobalSearch
                   patientId={currentPatient?.id}
                   placeholder={t('dashboard.search.placeholder', 'Search medical records...')}
@@ -819,14 +827,14 @@ const Dashboard = () => {
 
           {/* Main Content Grid */}
           <Grid mb={24}>
-            <Grid.Col span={{ base: 12, md: 8 }}>
-              <Stack gap={24}>
+            <Grid.Col span={{ base: 12, sm: 8 }}>
+              <Stack gap={{ base: 16, md: 24 }}>
                 {/* Core Medical Information */}
                 <div>
                   <Text size="16px" fw={600} mb={12}>
                     {t('dashboard.sections.coreMedical', 'Core Medical Information')}
                   </Text>
-                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={12}>
+                  <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
                     {coreModules.map((module, index) => (
                       <ModuleCard key={index} module={module} />
                     ))}
@@ -838,7 +846,7 @@ const Dashboard = () => {
                   <Text size="16px" fw={600} mb={12}>
                     {t('dashboard.sections.treatments', 'Treatments and Procedures')}
                   </Text>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={12}>
+                  <SimpleGrid cols={2} spacing={12}>
                     {treatmentModules.map((module, index) => (
                       <ModuleCard key={index} module={module} />
                     ))}
@@ -850,7 +858,7 @@ const Dashboard = () => {
                   <Text size="16px" fw={600} mb={12}>
                     {t('dashboard.sections.healthMonitoring', 'Health Monitoring')}
                   </Text>
-                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={12}>
+                  <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
                     {monitoringModules.map((module, index) => (
                       <ModuleCard key={index} module={module} />
                     ))}
@@ -862,7 +870,7 @@ const Dashboard = () => {
                   <Text size="16px" fw={600} mb={12}>
                     {t('dashboard.sections.prevention', 'Prevention & History')}
                   </Text>
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={12}>
+                  <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
                     {preventionModules.map((module, index) => (
                       <ModuleCard key={index} module={module} />
                     ))}
@@ -871,7 +879,7 @@ const Dashboard = () => {
               </Stack>
             </Grid.Col>
 
-            <Grid.Col span={{ base: 12, md: 4 }}>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
               <Stack gap={16}>
                 {/* Additional Resources */}
                 <Card shadow="sm" padding={16} radius="md" withBorder>

@@ -438,6 +438,21 @@
 /* ============================= */
 
 /* Mobile: <768px */
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 10px 16px !important;
+    border-radius: 6px;
+  }
+
+  .dashboard-header .page-title {
+    font-size: 18px;
+  }
+
+  .dashboard-header .title-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
 
 /* Tablet: 768px - 1023px */
 
