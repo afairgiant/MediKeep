@@ -4,6 +4,21 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 
+// ─── i18n mock (stable t reference to prevent infinite useEffect re-trigger) ─
+
+vi.mock('react-i18next', () => {
+  const t = (key, fallback) => (typeof fallback === 'string' ? fallback : key);
+  return {
+    useTranslation: () => ({
+      t,
+      i18n: { language: 'en', changeLanguage: () => Promise.resolve() },
+    }),
+    Trans: ({ children }) => children,
+    I18nextProvider: ({ children }) => children,
+    initReactI18next: { type: '3rdParty', init: () => {} },
+  };
+});
+
 // ─── CSS mock ────────────────────────────────────────────────────────────────
 
 vi.mock('../DataModels.css', () => ({}));
@@ -34,7 +49,35 @@ vi.mock('../../../contexts/ThemeContext', () => ({
 
 vi.mock('../../../services/api/adminApi', () => ({
   adminApiService: {
-    getAvailableModels: vi.fn().mockRejectedValue(new Error('No server')),
+    getAvailableModels: vi.fn().mockResolvedValue([
+      { name: 'user', verbose_name_plural: 'Users' },
+      { name: 'patient', verbose_name_plural: 'Patients' },
+      { name: 'practitioner', verbose_name_plural: 'Practitioners' },
+      { name: 'pharmacy', verbose_name_plural: 'Pharmacies' },
+      { name: 'medication', verbose_name_plural: 'Medications' },
+      { name: 'lab_result', verbose_name_plural: 'Lab Results' },
+      { name: 'lab_result_file', verbose_name_plural: 'Lab Files' },
+      { name: 'vitals', verbose_name_plural: 'Vital Signs' },
+      { name: 'condition', verbose_name_plural: 'Conditions' },
+      { name: 'allergy', verbose_name_plural: 'Allergies' },
+      { name: 'immunization', verbose_name_plural: 'Immunizations' },
+      { name: 'procedure', verbose_name_plural: 'Procedures' },
+      { name: 'treatment', verbose_name_plural: 'Treatments' },
+      { name: 'encounter', verbose_name_plural: 'Encounters' },
+      { name: 'patient_share', verbose_name_plural: 'Patient Shares' },
+      { name: 'invitation', verbose_name_plural: 'Invitations' },
+      { name: 'family_history_share', verbose_name_plural: 'Family History Shares' },
+      { name: 'emergency_contact', verbose_name_plural: 'Emergency Contacts' },
+      { name: 'insurance', verbose_name_plural: 'Insurance' },
+      { name: 'family_member', verbose_name_plural: 'Family Members' },
+      { name: 'family_condition', verbose_name_plural: 'Family Conditions' },
+      { name: 'entity_file', verbose_name_plural: 'Entity Files' },
+      { name: 'injury', verbose_name_plural: 'Injuries' },
+      { name: 'injury_type', verbose_name_plural: 'Injury Types' },
+      { name: 'symptom', verbose_name_plural: 'Symptoms' },
+      { name: 'symptom_occurrence', verbose_name_plural: 'Symptom Occurrences' },
+      { name: 'medical_equipment', verbose_name_plural: 'Medical Equipment' },
+    ]),
   },
 }));
 
@@ -58,10 +101,9 @@ const renderComponent = async (searchParams = '') => {
       </MantineProvider>
     </MemoryRouter>
   );
-  // Wait for async fallback to complete (API rejects, fallback models load)
-  // The yellow alert only appears after loading finishes with an error + fallback
+  // Wait for async model loading to complete (API resolves with model list)
   await waitFor(() => {
-    expect(screen.getByText(/Could not load models from server/)).toBeInTheDocument();
+    expect(screen.getByText('Users')).toBeInTheDocument();
   });
   return result;
 };
@@ -165,28 +207,36 @@ describe('DataModels', () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'medication' } });
-      expect(screen.getByText('Medications')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Medications')).toBeInTheDocument();
+      });
     });
 
     test('Users card is hidden when typing "medication"', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'medication' } });
-      expect(screen.queryByText('Users')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText('Users')).not.toBeInTheDocument();
+      });
     });
 
     test('Patients card is hidden when typing "medication"', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'medication' } });
-      expect(screen.queryByText('Patients')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText('Patients')).not.toBeInTheDocument();
+      });
     });
 
     test('filter is case-insensitive', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'MEDICATION' } });
-      expect(screen.getByText('Medications')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Medications')).toBeInTheDocument();
+      });
     });
 
     test('clear button appears once user types into filter', async () => {
@@ -200,22 +250,28 @@ describe('DataModels', () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'dosages' } });
-      expect(screen.getByText('Medications')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Medications')).toBeInTheDocument();
+      });
     });
 
     test('matches on model name (snake_case internal name)', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'lab_result' } });
-      expect(screen.getByText('Lab Results')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Lab Results')).toBeInTheDocument();
+      });
     });
 
     test('matches on category name', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'patient support' } });
-      expect(screen.getByText('Emergency Contacts')).toBeInTheDocument();
-      expect(screen.getByText('Insurance')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Emergency Contacts')).toBeInTheDocument();
+        expect(screen.getByText('Insurance')).toBeInTheDocument();
+      });
     });
   });
 
@@ -225,28 +281,36 @@ describe('DataModels', () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'user' } });
-      expect(screen.getAllByText('System').length).toBeGreaterThanOrEqual(1);
+      await waitFor(() => {
+        expect(screen.getAllByText('System').length).toBeGreaterThanOrEqual(1);
+      });
     });
 
     test('Medical Records category header is absent when filtering for "user"', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'user' } });
-      expect(screen.queryByText('Medical Records')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText('Medical Records')).not.toBeInTheDocument();
+      });
     });
 
     test('File Management category header is absent when filtering for "user"', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'user' } });
-      expect(screen.queryByText('File Management')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText('File Management')).not.toBeInTheDocument();
+      });
     });
 
     test('Core Medical category header is absent when filtering for "medication"', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'medication' } });
-      expect(screen.queryByText('Core Medical')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText('Core Medical')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -272,9 +336,11 @@ describe('DataModels', () => {
       const clearBtn = screen.getByLabelText('Clear filter');
       fireEvent.click(clearBtn);
 
-      expect(screen.getByText('Users')).toBeInTheDocument();
-      expect(screen.getByText('Medications')).toBeInTheDocument();
-      expect(screen.getByText('Patients')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Users')).toBeInTheDocument();
+        expect(screen.getByText('Medications')).toBeInTheDocument();
+        expect(screen.getByText('Patients')).toBeInTheDocument();
+      });
     });
 
     test('clicking clear hides the clear button itself', async () => {
@@ -295,8 +361,10 @@ describe('DataModels', () => {
 
       fireEvent.click(screen.getByLabelText('Clear filter'));
 
-      expect(screen.getAllByText('Medical Records').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText('File Management').length).toBeGreaterThanOrEqual(1);
+      await waitFor(() => {
+        expect(screen.getAllByText('Medical Records').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('File Management').length).toBeGreaterThanOrEqual(1);
+      });
     });
   });
 
@@ -306,34 +374,46 @@ describe('DataModels', () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'xyznonexistent' } });
-      expect(screen.getByText(/No models match/)).toBeInTheDocument();
+      await waitFor(() => {
+        // Mock t() returns the key when second arg is an object
+        expect(screen.getByText('dataModels.noMatchFilter')).toBeInTheDocument();
+      });
     });
 
-    test('the "no match" message includes the search query', async () => {
+    test('the "no match" message appears with the filter query in the input', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'xyznonexistent' } });
-      expect(screen.getByText(/xyznonexistent/)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('dataModels.noMatchFilter')).toBeInTheDocument();
+      });
+      expect(input.value).toBe('xyznonexistent');
     });
 
     test('no category headers are rendered when no models match', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'xyznonexistent' } });
-      expect(screen.queryByText('System')).not.toBeInTheDocument();
-      expect(screen.queryByText('Medical Records')).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText('System')).not.toBeInTheDocument();
+        expect(screen.queryByText('Medical Records')).not.toBeInTheDocument();
+      });
     });
 
     test('recovering from empty state by clearing shows all models again', async () => {
       await renderComponent();
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'xyznonexistent' } });
-      expect(screen.getByText(/No models match/)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('dataModels.noMatchFilter')).toBeInTheDocument();
+      });
 
       fireEvent.click(screen.getByLabelText('Clear filter'));
 
-      expect(screen.queryByText(/No models match/)).not.toBeInTheDocument();
-      expect(screen.getByText('Users')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.queryByText('dataModels.noMatchFilter')).not.toBeInTheDocument();
+        expect(screen.getByText('Users')).toBeInTheDocument();
+      });
     });
   });
 

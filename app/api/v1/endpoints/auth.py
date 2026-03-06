@@ -384,6 +384,29 @@ def login(
     }
 
 
+@router.post("/logout")
+def logout(
+    request: Request,
+    current_user: DBUser = Depends(deps.get_current_user),
+):
+    """
+    Logout the current user.
+
+    JWT is stateless, so this endpoint simply confirms the logout server-side.
+    The client is responsible for discarding the token after calling this endpoint.
+    """
+    log_security_event(
+        security_logger,
+        "user_logout",
+        request,
+        f"User logged out: {current_user.username}",
+        user_id=current_user.id,
+        username=current_user.username,
+    )
+
+    return {"status": "success", "data": {}, "message": "Logged out successfully"}
+
+
 class ChangePasswordRequest(BaseModel):
     currentPassword: str
     newPassword: str

@@ -342,16 +342,24 @@ class PatientManagementService:
         Returns:
             The Patient object that was switched to
         """
-        logger.info(f"User {user.id} switching to patient {patient_id}")
-        
+        logger.info("Switching active patient context", extra={
+            LogFields.EVENT: "active_patient_switch",
+            LogFields.USER_ID: user.id,
+            LogFields.PATIENT_ID: patient_id,
+        })
+
         # Verify access to the patient
         patient = self.get_patient(user, patient_id)
-        
+
         # Update user's active patient
         user.active_patient_id = patient_id
         self.db.commit()
-        
-        logger.info(f"User {user.id} switched to patient {patient_id}")
+
+        logger.info("Active patient context switched", extra={
+            LogFields.EVENT: "active_patient_switched",
+            LogFields.USER_ID: user.id,
+            LogFields.PATIENT_ID: patient_id,
+        })
         return patient
     
     def get_active_patient(self, user: User) -> Optional[Patient]:

@@ -1,43 +1,4 @@
 {
-  "auth": {
-    "login": {
-      "title": "CONNECTEZ-VOUS A VOTRE COMPTE",
-      "username": "Nom d'utilisateur",
-      "password": "Mot de passe",
-      "usernamePlaceholder": "Saisissez votre nom d'utilisateur",
-      "passwordPlaceholder": "Saisissez votre mot de passe",
-      "showPassword": "Afficher le mot de passe",
-      "hidePassword": "Cacher le mot de passe",
-      "submit": "Se connecter",
-      "submitting": "Connexion en cours...",
-      "createAccount": "Créer un nouveau compte",
-      "or": "ou",
-      "continueWith": "Continuer avec {{provider}}",
-      "registrationDisabled": "L'enregistrement de nouveaux utilisateurs est actuellement désactivée."
-    },
-    "userCreation": {
-      "requirements": {
-        "length": "Au moins 6 caractères",
-        "letter": "Contient au moins une lettre",
-        "number": "Contient au moins un chiffre"
-      },
-      "note": "Un dossier de patient sera automatiquement créé pour cet utilisateur avec le rôle par défaut \"Utilisateur\".",
-      "backToLogin": "Retour à la page de connexion",
-      "pageTitle": "Créer votre compte",
-      "pageSubtitle": "Rejoignez MediKeep aujourd'hui et gérez vos données de santé en toute sécurité",
-      "cardTitle": "Détails du compte",
-      "cardSubtitle": "Remplissez le formulaire ci-dessous pour créer votre nouveau compte",
-      "whatHappensNext": "Que se passe-t-il ensuite ?",
-      "nextSteps": {
-        "autoRecord": "Votre dossier de patient sera automatiquement créé",
-        "loggedIn": "Vous serez immédiatement connecté(e) après la création du compte",
-        "startManaging": "Vous pouvez commencer tout de suite à gérer vos informations de santé",
-        "dataSecure": "Toutes vos données sont privées et en sécurité"
-      },
-      "welcomeMessage": "Bienvenue, {{name}} ! Votre compte a été créé avec succès.",
-      "accountCreated": "Compte créé avec succès ! Veuillez vous connecter avec vos identifiants."
-    }
-  },
   "buttons": {
     "save": "Sauvegarder",
     "cancel": "Annuler",
@@ -68,15 +29,15 @@
     "print": "Imprimer",
     "refresh": "Rafraîchir",
     "retry": "Réessayer",
-	"restore": "Restaurer",
     "continue": "Continuer",
     "skip": "Ignorer",
     "done": "Fait",
     "linkMedication": "Connecter médicament",
     "linkMedications": "Connecter médicaments",
     "linkCondition": "Connecter condition",
-	"linkConditions": "Connecter conditions",
-	"saveChanges": "Sauvegarder changements"
+    "linkConditions": "Connecter conditions",
+    "saveChanges": "Sauvegarder changements",
+    "restore": "Restore"
   },
   "labels": {
     "loading": "Chargement...",
@@ -108,8 +69,8 @@
     "endDate": "Date de fin",
     "duration": "Durée",
     "notes": "Notes",
-	"tags": "Etiquettes",
-	"location": "Emplacement",
+    "tags": "Etiquettes",
+    "location": "Emplacement",
     "name": "Nom",
     "date": "Date",
     "time": "Heure",
@@ -127,8 +88,8 @@
     "noRating": "Aucun avis",
     "noMedicationsLinked": "Aucun médicament connecté à cette condition",
     "noConditionsLinked": "Aucune condition connectée à ces résultats d'analyse",
-	"noConditionsLinkedToMedication": "Aucune condition connectée à ce médicament",
-	"loadingRelatedConditions": "Chargement des conditions connectées...",
+    "noConditionsLinkedToMedication": "Aucune condition connectée à ce médicament",
+    "loadingRelatedConditions": "Chargement des conditions connectées...",
     "medicationsAvailableToLink": "{{count}} médicaments pouvant être connectés",
     "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
     "linkedMedications": "Médicaments connectés",
@@ -144,111 +105,111 @@
     "address": "Adresse",
     "patientRecord": "Dossier du patient",
     "medicalHistory": "Antécédents médicaux",
-	"practitioner": "Médecin",
-    "firstName": "Prénom",
-    "lastName": "Nom",
-    "role": "Rôle",
-    "note": "Note"
+    "practitioner": "Médecin",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "note": "Note",
+    "role": "Role"
   },
   "fields": {
     "notes": {
-        "label": "Notes",
-        "placeholder": "Informations supplémentaires...",
-        "description": "Tout détail ou note supplémentaire"
-      },
-      "tags": {
-        "label": "Etiquettes",
-        "placeholder": "Ajoutez des étiquettes pour organiser et trouver cette entrée",
-        "description": "Ajoutez des étiquettes pour vous aider à organiser et rechercher cette entrée ultérieurement."
-      },
-      "status": {
-        "label": "Statut",
-        "description": "Statut actuel",
-		"placeholder": "Sélectionnez le statut"
-      },
-      "severity": {
-        "label": "Sévérité",
-        "placeholder": "Sélectionnez le niveau de sévérité",
-        "description": "Niveau de sévérité"
-      },
-      "startDate": {
-        "label": "Date de début",
-        "placeholder": "Sélectionnez la date de début",
-        "description": "Quand cela a commencé"
-      },
-      "endDate": {
-        "label": "Date de fin",
-        "placeholder": "Sélectionnez la date de fin",
-        "description": "Quand cela s'est terminé (si applicable)"
-      },
-      "onsetDate": {
-        "label": "Date de survenue",
-        "placeholder": "Quand cela s'est produit pour la première fois",
-        "description": "Quand cela fut découvert pour la première fois"
-      },
-      "phoneNumber": {
-        "label": "Numéro de téléphone",
-        "placeholder": "06 12 34 56 78",
-        "description": "Numéro de contact primaire"
+      "label": "Notes",
+      "placeholder": "Informations supplémentaires...",
+      "description": "Tout détail ou note supplémentaire"
     },
-      "website": {
-        "label": "Site web",
-        "placeholder": "https://www.exemple.com",
-        "description": "URL du site web"
-      },
-      "fullName": {
-        "label": "Nom complet",
-        "placeholder": "Saisissez le nom complet",
-        "description": "Nom complet"
-      },
-      "email": {
-        "label": "Adresse email",
-        "placeholder": "nom@email.com",
-        "description": "Adresse email"
+    "tags": {
+      "label": "Etiquettes",
+      "placeholder": "Ajoutez des étiquettes pour organiser et trouver cette entrée",
+      "description": "Ajoutez des étiquettes pour vous aider à organiser et rechercher cette entrée ultérieurement."
+    },
+    "status": {
+      "label": "Statut",
+      "description": "Statut actuel",
+      "placeholder": "Sélectionnez le statut"
+    },
+    "severity": {
+      "label": "Sévérité",
+      "placeholder": "Sélectionnez le niveau de sévérité",
+      "description": "Niveau de sévérité"
+    },
+    "startDate": {
+      "label": "Date de début",
+      "placeholder": "Sélectionnez la date de début",
+      "description": "Quand cela a commencé"
+    },
+    "endDate": {
+      "label": "Date de fin",
+      "placeholder": "Sélectionnez la date de fin",
+      "description": "Quand cela s'est terminé (si applicable)"
+    },
+    "onsetDate": {
+      "label": "Date de survenue",
+      "placeholder": "Quand cela s'est produit pour la première fois",
+      "description": "Quand cela fut découvert pour la première fois"
+    },
+    "phoneNumber": {
+      "label": "Numéro de téléphone",
+      "placeholder": "06 12 34 56 78",
+      "description": "Numéro de contact primaire"
+    },
+    "website": {
+      "label": "Site web",
+      "placeholder": "https://www.exemple.com",
+      "description": "URL du site web"
+    },
+    "fullName": {
+      "label": "Nom complet",
+      "placeholder": "Saisissez le nom complet",
+      "description": "Nom complet"
+    },
+    "email": {
+      "label": "Adresse email",
+      "placeholder": "nom@email.com",
+      "description": "Adresse email"
     },
     "address": {
-        "label": "Adresse",
-        "placeholder": "Saisissez l'adresse",
-        "description": "Adresse physique"
+      "label": "Adresse",
+      "placeholder": "Saisissez l'adresse",
+      "description": "Adresse physique"
     }
   },
   "severity": {
-      "mild": "Bénigne - Gêne mineure",
-      "moderate": "Modérée - Symptômes notables",
-      "severe": "Sévère - Réaction significative",
-      "lifeThreatening": "Dangereux - Risque de choc anaphylactique",
-      "critical": "Critique - Danger de mort",
-      "mildImpact": "Bénigne - Impact mineur",
-      "moderateImpact": "Modérée - Impact notable",
-      "severeImpact": "Sévère - Impact significatif"
+    "mild": "Bénigne - Gêne mineure",
+    "moderate": "Modérée - Symptômes notables",
+    "severe": "Sévère - Réaction significative",
+    "lifeThreatening": "Dangereux - Risque de choc anaphylactique",
+    "critical": "Critique - Danger de mort",
+    "mildImpact": "Bénigne - Impact mineur",
+    "moderateImpact": "Modérée - Impact notable",
+    "severeImpact": "Sévère - Impact significatif"
   },
   "status": {
-      "active": "Actif",
-      "inactive": "Inactif",
-      "resolved": "Résolu",
-      "stopped": "Arrêté",
-      "onHold": "En suspens",
-      "completed": "Complété",
-      "planned": "Planifié",
-      "cancelled": "Annulé",
-      "pending": "En attente",
-      "expired": "Expiré"
+    "active": "Actif",
+    "inactive": "Inactif",
+    "resolved": "Résolu",
+    "stopped": "Arrêté",
+    "onHold": "En suspens",
+    "completed": "Complété",
+    "planned": "Planifié",
+    "cancelled": "Annulé",
+    "pending": "En attente",
+    "expired": "Expiré"
   },
   "statusDescriptions": {
-      "activeAllergic": "Actif - Actuellement allergique",
-      "inactiveAllergic": "Inactif - N'est plus allergique",
-      "resolvedAllergy": "Résolu - Allergie dépassée",
-      "activeCondition": "Actif - Condition en cours",
-      "resolvedCondition": "Résolu - N'est plus présente",
-      "chronicCondition": "Chronique - Condition à long terme",
-      "activeExperiencing": "Actif - En cours",
-      "resolvedExperiencing": "Résolu - Terminé",
-      "recurring": "Récurrent - Va et vient"
+    "activeAllergic": "Actif - Actuellement allergique",
+    "inactiveAllergic": "Inactif - N'est plus allergique",
+    "resolvedAllergy": "Résolu - Allergie dépassée",
+    "activeCondition": "Actif - Condition en cours",
+    "resolvedCondition": "Résolu - N'est plus présente",
+    "chronicCondition": "Chronique - Condition à long terme",
+    "activeExperiencing": "Actif - En cours",
+    "resolvedExperiencing": "Résolu - Terminé",
+    "recurring": "Récurrent - Va et vient"
   },
   "viewToggle": {
     "cards": "Cartes",
     "table": "Tableau",
-	"components": "Composants"
+    "components": "Composants"
   },
   "filters": {
     "title": "Filtres et recherche",
@@ -295,11 +256,11 @@
         "painScaleMax": "L'échelle de la douleur ne peut pas dépasser 10",
         "deviceMaxLength": "Le nom de l'outil ne peut pas dépasser 100 caractères",
         "notesMaxLength": "Les notes ne peuvent pas dépasser 1 000 caractères",
-        "firstNameRequired": "Veuillez saisir votre prénom",
-        "lastNameRequired": "Veuillez saisir votre nom de famille",
-        "usernameLength": "Le nom d'utilisateur doit contenir au moins 3 caractères",
-        "passwordLength": "Le mot de passe doit contenir au moins 6 caractères",
-        "passwordRequirements": "Le mot de passe doit contenir au moins une lettre et un chiffre"
+        "firstNameRequired": "Please enter your first name",
+        "lastNameRequired": "Please enter your last name",
+        "passwordLength": "Password must be at least 6 characters long",
+        "passwordRequirements": "Password must contain at least one letter and one number",
+        "usernameLength": "Username must be at least 3 characters long"
       },
       "sections": {
         "basicInfo": "Informations basiques",
@@ -340,7 +301,7 @@
         "ambulatory": "Soins ambulatoires",
         "other": "Autre"
       },
-      "lockedByImport": "Géré par l'importation système"
+      "lockedByImport": "Managed by device import"
     },
     "modal": {
       "bloodGlucose": "Taux de glucose dans le sang",
@@ -423,43 +384,43 @@
       "noRecordsDesc": "Les signes vitaux apparaîtront ici une fois qu'ils auront été saisis"
     },
     "import": {
-      "title": "Importer des signes vitaux",
-      "selectDevice": "Sélectionnez un appareil",
-      "selectDevicePlaceholder": "Choisissez votre appareil...",
-      "uploadFile": "Téléverser un fichier CSV",
-      "preview": "Aperçu",
-      "importButton": "Importer",
-      "back": "Retour",
-      "importing": "Importation des signes vitaux...",
-      "previewTitle": "Importer l'aperçu",
-      "totalReadings": "Relevés totaux",
-      "duplicatesFound": "Doublons trouvés",
-      "newReadings": "Nouveaux relevés",
-      "dateRange": "Plage temporelle",
-      "skipDuplicates": "Ignorer les relevés en double",
-      "duplicateWarning": "{{count}} relevés existent déjà dans cette plage temporelle. Cochez la case ci-dessus pour les ignorer.",
-      "success": "Importation réussie de {{count}} relevés",
-      "successWithSkipped": "Importation de {{imported}} relevés ({{skipped}} doublons ignorés)",
-      "noFile": "Veuillez sélectionner un fichier CSV",
-      "noDevice": "Veuillez sélectionner un appareil",
-      "fileTooLarge": "Ce fichier dépasse la limite de 10 Mb",
-      "invalidFileType": "Seuls les fichiers CSV sont supportés",
-      "duplicate": "Dupliquer",
-      "parsingFailed": "Echec de l'analyse du fichier CSV"
+      "back": "Back",
+      "dateRange": "Date Range",
+      "duplicate": "Duplicate",
+      "duplicateWarning": "{{count}} readings already exist in this date range. Check the box above to skip them.",
+      "duplicatesFound": "Duplicates Found",
+      "fileTooLarge": "File exceeds 10 MB limit",
+      "importButton": "Import",
+      "importing": "Importing vitals...",
+      "invalidFileType": "Only CSV files are supported",
+      "newReadings": "New Readings",
+      "noDevice": "Please select a device",
+      "noFile": "Please select a CSV file",
+      "parsingFailed": "Failed to parse CSV file",
+      "preview": "Preview",
+      "previewTitle": "Import Preview",
+      "selectDevice": "Select Device",
+      "selectDevicePlaceholder": "Choose your device...",
+      "skipDuplicates": "Skip duplicate readings",
+      "success": "Successfully imported {{count}} readings",
+      "successWithSkipped": "Imported {{imported}} readings ({{skipped}} duplicates skipped)",
+      "title": "Import Vitals",
+      "totalReadings": "Total Readings",
+      "uploadFile": "Upload CSV File"
     },
     "summary": {
-      "dailySummary": "Résumé quotidien",
-      "readings": "{{count}} relevés",
-      "avgGlucose": "Moyenne",
-      "minGlucose": "Min",
+      "avgGlucose": "Avg",
+      "collapseDetails": "Hide readings",
+      "confirmDeleteDay": "Delete all {{count}} imported readings for this day?",
+      "dailySummary": "Daily Summary",
+      "deleteDay": "Delete Day",
+      "expandDetails": "Show readings",
+      "glucoseTrend": "Glucose Trend",
+      "importedFrom": "Imported from {{source}}",
       "maxGlucose": "Max",
-      "expandDetails": "Afficher les relevés",
-      "collapseDetails": "Cacher les relevés",
-      "importedFrom": "Importé à partir de : {{source}}",
-      "glucoseTrend": "Tendance du glucose",
-      "time": "Heure",
-      "confirmDeleteDay": "Supprimer les {{count}} relevés importés pour cette journée ?",
-      "deleteDay": "Supprimer la journée"
+      "minGlucose": "Min",
+      "readings": "{{count}} readings",
+      "time": "Time"
     }
   },
   "medications": {
@@ -511,7 +472,7 @@
         "additionalNotes": "Notes supplémentaires",
         "sideEffects": "Effets secondaires",
         "attachedDocuments": "Pièces jointes",
-		"relatedConditions": "Conditions concernées"
+        "relatedConditions": "Conditions concernées"
       },
       "labels": {
         "medicationName": "Nom du médicament",
@@ -558,7 +519,7 @@
     "vitals": "Rechercher parmi les signes vitaux, notes...",
     "emergencyContacts": "Rechercher parmi les contacts, liens de parenté, numéros de téléphone, adresses email...",
     "familyHistory": "Rechercher parmi les membres de la famille, conditions, notes...",
-	"injuries": "Rechercher parmi les blessures, parties du corps, notes, étiquettes...",
+    "injuries": "Rechercher parmi les blessures, parties du corps, notes, étiquettes...",
     "generic": "Rechercher..."
   },
   "messages": {
@@ -848,7 +809,7 @@
       "viewSymptom": "Voir le symptôme",
       "duration": "Durée",
       "location": "Emplacement",
-	  "time": "Heure",
+      "time": "Heure",
       "timeOfDay": "Moment de la journée",
       "resolved": "Résolu",
       "occurrenceId": "ID de l'occurrence",
@@ -1195,7 +1156,7 @@
       "noComplications": "Aucune complication signalée",
       "clinicalNotes": "Notes cliniques",
       "noClinicalNotes": "Aucune note cliniques disponible",
-	  "outcome": "Résultat",
+      "outcome": "Résultat",
       "notSpecified": "Non spécifié",
       "close": "Fermer",
       "edit": "Editer"
@@ -1258,7 +1219,7 @@
       "clinicalNotes": "Notes cliniques",
       "clinicalNotesPlaceholder": "Saisissez les notes cliniques, observations, ou détails supplémentaires",
       "clinicalNotesDesc": "Informations supplémentaires sur cette procédure",
-	  "outcome": "Résultat",
+      "outcome": "Résultat",
       "outcomePlaceholder": "Sélectionnez le résultat",
       "outcomeDesc": "Résultat de la procédure",
       "outcomeSuccessful": "Succès",
@@ -1786,7 +1747,7 @@
     }
   },
   "practitioners": {
-   "title": "Professionnels de santé",
+    "title": "Professionnels de santé",
     "loading": "Chargement des médecins...",
     "errors": {
       "loadFailed": "Echec du chargement des médecins. Veuillez réessayer.",
@@ -1869,9 +1830,9 @@
     "card": {
       "address": "Adresse",
       "city": "Cité",
-	  "stateProvince": "Région / Etat / Province",
-	  "postalCode": "Code postal",
-	  "country": "Pays",
+      "stateProvince": "Région / Etat / Province",
+      "postalCode": "Code postal",
+      "country": "Pays",
       "storeNumber": "Numéro de la pharmacie",
       "phone": "Téléphone",
       "website": "Site web",
@@ -1883,9 +1844,9 @@
       "location": "EMPLACEMENT",
       "address": "Adresse",
       "city": "Cité",
-	  "stateProvince": "Région / Etat / Province",
-	  "postalCode": "Code postal",
-	  "country": "Pays",
+      "stateProvince": "Région / Etat / Province",
+      "postalCode": "Code postal",
+      "country": "Pays",
       "storeNumber": "Numéro du magasin",
       "contact": "INFORMATIONS DE CONTACT",
       "phone": "Téléphone",
@@ -2050,10 +2011,10 @@
     },
     "menu": {
       "rename": "Renommer l'étiquette",
-	  "edit": "Editer",
-	  "search": "Rechercher dans les données",
       "replace": "Remplacer par...",
-      "delete": "Supprimer l'étiquette"
+      "delete": "Supprimer l'étiquette",
+      "edit": "Edit",
+      "search": "Search records"
     },
     "createModal": {
       "title": "Créer une étiquette",
@@ -2065,9 +2026,9 @@
       "title": "Renommer l'étiquette",
       "label": "Nouveau nom de l'étiquette",
       "placeholder": "Saisissez le nouveau nom de l'étiquette...",
-	  "colorLabel": "Couleur de l'étiquette",
       "description": "Ceci renommera l'étiquette sur les {{count}} entrées où elle est appliquée.",
-      "submit": "Renommer l'étiquette"
+      "submit": "Renommer l'étiquette",
+      "colorLabel": "Tag Color"
     },
     "deleteModal": {
       "title": "Supprimer l'étiquette",
@@ -2085,17 +2046,17 @@
     "success": {
       "created": "Succès de la création de l'étiquette \"{{tag}}\"",
       "renamed": "Succès du renommage de l'étiquette \"{{oldTag}}\" vers \"{{newTag}}\"",
-	  "updated": "Succès de la mise à jour de l'étiquette \"{{tag}}\"",
       "deleted": "Succès de la suppression de l'étiquette \"{{tag}}\"",
-      "replaced": "Succès du remplacement de l'étiquette \"{{oldTag}}\" par \"{{newTag}}\""
+      "replaced": "Succès du remplacement de l'étiquette \"{{oldTag}}\" par \"{{newTag}}\"",
+      "updated": "Successfully updated tag \"{{tag}}\""
     },
     "errors": {
       "loadFailed": "Echec du chargement des étiquettes",
       "createFailed": "Echec de la création de l'étiquette",
       "renameFailed": "Echec du renommage de l'étiquette",
-	  "editFailed": "Echec de la mise à jour de l'étiquette",
       "deleteFailed": "Echec de la suppression de l'étiquette",
-      "replaceFailed": "Echec du remplacement de l'étiquette"
+      "replaceFailed": "Echec du remplacement de l'étiquette",
+      "editFailed": "Failed to update tag"
     }
   },
   "reportBuilder": {
@@ -2109,8 +2070,8 @@
     "buttons": {
       "settings": "Paramètres",
       "generateReport": "Générer le rapport ({{count}} entrées)",
-	  "generateReportWithCharts": "Générer le rapport ({{recordCount}} entrées, {{chartCount}} tableaux)",
-      "generateReportChartsOnly": "Générer le rapport ({{chartCount}} tableaux)",
+      "generateReportWithCharts": "Générer le rapport ({{recordCount}} entrées, {{chartCount}} graphiques)",
+      "generateReportChartsOnly": "Générer le rapport ({{chartCount}} graphiques)",
       "selectAll": "Sélectionner toutes les entrées",
       "clearSelections": "Tout désélectionner",
       "addRecords": "Ajouter des données médicales"
@@ -2161,30 +2122,30 @@
     "notifications": {
       "templateLoaded": "Modèle chargé",
       "templateLoadedMessage": "Modèle \"{{name}}\" chargé."
-	  },
+    },
     "trendCharts": {
-      "title": "Tableaux de tendances",
-      "description": "Sélectionnez les signes vitaux et les résultats d'analyse à inclure dans les tableaux de tendances dans votre rapport",
-      "emptyState": "Aucune donnée de tendances disponible. Ajoutez des signes vitaux ou des résultats d'analyse pour activer les tableaux de tendances.",
-      "maxReached": "Maximum de 10 tableaux atteint",
+      "title": "Graphiques de tendance",
+      "description": "Sélectionnez les signes vitaux et les analyses de laboratoire à inclure sous forme de graphiques de tendance dans votre rapport",
+      "emptyState": "Aucune donnée de tendance disponible. Ajoutez des signes vitaux ou des résultats d'analyses pour activer les graphiques de tendance.",
+      "maxReached": "Maximum de 10 graphiques atteint",
       "vitalCharts": {
-        "title": "Tableaux des signes vitaux",
-        "description": "Sélectionnez les signes vitaux à présenter"
+        "title": "Graphiques des signes vitaux",
+        "description": "Sélectionnez les signes vitaux à représenter graphiquement"
       },
       "labTestCharts": {
-        "title": "Tableaux de résultats d'analyse",
-        "description": "Recherchez et sélectionnez les résultats d'analyse à présenter",
-        "searchPlaceholder": "Rechercher dans les résultats d'analyse..."
+        "title": "Graphiques des analyses de laboratoire",
+        "description": "Recherchez et sélectionnez les analyses de laboratoire à représenter graphiquement",
+        "searchPlaceholder": "Rechercher des analyses de laboratoire..."
       },
-      "dateFrom": "De",
-      "dateTo": "à",
-      "selectedCharts": "Tableaux sélectionnés ({{count}})",
-      "recordCount": "{{count}} entrées",
-	"removeChart": "Retirer le tableau : {{name}}"
+      "dateFrom": "Du",
+      "dateTo": "Au",
+      "selectedCharts": "Graphiques sélectionnés ({{count}})",
+      "recordCount": "{{count}} enregistrements",
+      "removeChart": "Supprimer le graphique {{name}}"
     },
     "segmentControl": {
-      "records": "Données médicales",
-      "trendCharts": "Tableaux de tendances"
+      "records": "Dossiers médicaux",
+      "trendCharts": "Graphiques de tendance"
     }
   },
   "exportPage": {
@@ -2458,18 +2419,18 @@
     "categories": {
       "chemistry": "Chimie - Electrolytes et minéraux",
       "hematology": "Hématologie - Décomptes sanguins et fer",
-	  "hepatology": "Hépatologie - Enzymes et fonctions du foie",
+      "hepatology": "Hépatologie - Enzymes et fonctions du foie",
       "lipids": "Lipides - Cholestérol et triglycérides",
       "endocrinology": "Endocrinologie - Hormones et diabète",
-	  "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
+      "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
       "immunology": "Immunologie - Système immunitaire et anticorps",
       "microbiology": "Microbiologie - Infections et cultures",
       "toxicology": "Toxicologie - Dépistage de drogues et toxines",
       "genetics": "Génétique - Analyses génétiques",
       "molecular": "Moléculaire - Analyses d'ADN",
       "pathology": "Pathologie - Analyses de tissus et de biopsies",
-	  "hearing": "Audition - Audiométrie et analyses vestibulaires",
-	  "stomatology": "Stomatologie - Diagnostics oraux et salivaires",
+      "hearing": "Audition - Audiométrie et analyses vestibulaires",
+      "stomatology": "Stomatologie - Diagnostics oraux et salivaires",
       "other": "Autres analyses"
     }
   },
@@ -2550,7 +2511,7 @@
       "unitSystem": {
         "title": "Système de mesure",
         "description": "Choisissez si les mesures doivent être affichées en unités impériales (livres, pieds, degrés Farenheit) ou métriques (kilogrammes, centimètres, degrés Celsius)",
-		"imperial": "Impérial (livres, pieds, °F)",
+        "imperial": "Impérial (livres, pieds, °F)",
         "metric": "Métrique (kg, cm, °C)"
       },
       "dateFormat": {
@@ -2624,117 +2585,156 @@
       "loading": "Chargement des allergies..."
     }
   },
-  "search": {
-    "title": "Résultats de recherche",
-    "subtitle": "Recherchez dans toutes les données de santé",
-    "filters": "Filtres",
-    "recordTypes": "Types de données",
-    "sortBy": "Trier par",
-    "sortRelevance": "Pertinence",
-    "sortDate": "Date (plus récent)",
-    "sortDateNewest": "Date (plus récent d'abord)",
-    "sortDateOldest": "Date (plus ancien d'abord)",
-    "sortType": "Type",
-    "sortTitle": "Titre",
-    "columnType": "Type de données",
-    "columnTypeTip": "La catégorie de données de santé",
-    "columnName": "Nom",
-    "columnNameTip": "Le nom ou titre de la donnée",
-    "columnDate": "Date",
-    "columnDetails": "Détails",
-    "columnDetailsTip": "Date clé de la donnée (ex : date de diagnostic, de début, ou de réalisation)",
-    "columnTagsTip": "Etiquettes assignées à cette donnée",
-    "tags": "Etiquettes",
-    "selectTags": "Sélectionnez des étiquettes...",
-    "loadingTags": "Chargement des étiquettes...",
-    "anyTag": "N'importe quelle étiquette",
-    "allTags": "Toutes les étiquettes",
-    "clearFilters": "Réinitialiser les filtres",
-    "placeholder": "Rechercher dans les données de santé...",
-    "searching": "Recherche en cours...",
-    "noResults": "Aucun résultat trouvé",
-    "showAll": "Afficher les {{count}} résultats",
-    "showLess": "Afficher moins",
-    "textResults": "Résultats de recherche textuelle",
-    "tagResults": "Résultats des étiquettes",
-    "resultsFor": "Résultats de recherche pour \"{{query}}\"",
-    "taggedWith": "Données accompagnées des étiquettes : {{tags}}",
-    "textResultCount": "{{count}} résultat textuel",
-    "textResultCount_other": "{{count}} résultats textuels",
-    "tagResultCount": "{{count}} résultat d'étiquettes",
-    "tagResultCount_other": "{{count}} résultats d'étiquettes",
-    "filtered": "(filtré)",
-    "popularTags": "Etiquettes populaires",
-    "addMoreTags": "Ajouter plus d'étiquettes",
-    "activeFilters": "Filtres actifs",
-    "matchAll": "Faire tout correspondre",
-    "initialTitle": "Rechercher dans vos données de santé",
-    "initialMessage": "Saisissez un terme de recherche ou sélectionnez des étiquettes dans la barre latérale pour trouver des données.",
-    "noResultsFiltered": "Essayez d'ajuster vos filtres, étiquettes, ou termes de recherche",
-    "noResultsGeneral": "Essayez d'autres termes de recherche ou vérifiez votre orthographe",
-    "page": "page",
-    "perPage": "Objets par page",
-    "noPatientTitle": "Aucun patient sélectionné",
-    "noPatientMessage": "Veuillez sélectionner un patient dans le tableau de bord pour effectuer une recherche dans les données de santé.",
-    "tagSearchFailed": "Echec de la recherche par étiquette. Veuillez réessayer.",
-    "searchFailed": "Echec de la recherche. Veuillez réessayer.",
-    "dateRange": "Plage temporelle",
-    "dateRangePlaceholder": "Sélectionnez une plage temporelle...",
-    "collapseFilters": "Réduire les filtres",
-    "expandFilters": "Développer les filtres",
-    "resultCount_one": "{{count}} donnée",
-    "resultCount_other": "{{count}} données",
-    "filterByTag": "Filtrer par l'étiquette : {{tag}}",
-    "viewTable": "Affichage en tableau",
-    "viewCards": "Affichage en cartes",
-    "previewRecord": "Aperçu de la donnée",
-    "openFullRecord": "Ouvrir la donnée complète",
-    "recentSearches": "Recherches récentes",
-    "clearHistory": "Effacer tout",
-    "last7Days": "Les 7 derniers jours",
-    "last30Days": "Les 30 derniers jours",
-    "last6Months": "Les 6 derniers mois",
-    "lastYear": "L'an dernier",
-    "allTime": "Toutes périodes",
-    "datePresets": "Préréglages rapides",
-    "noRecentSearches": "Aucune recherche récente",
-    "activeFilterCount": "{{count}} filtres actifs",
-    "removeTypeFilter": "Retirer le filtre : {{type}}",
-    "types": {
-      "medications": "Médicaments",
-      "conditions": "Conditions",
-      "labResults": "Résultats d'analyse",
-      "procedures": "Procédures",
-      "immunizations": "Immunisations",
-      "treatments": "Traitements",
-      "encounters": "Visites",
-      "allergies": "Allergies",
-      "vitals": "Signes vitaux"
+  "auth": {
+    "login": {
+      "title": "CONNECTEZ-VOUS À VOTRE COMPTE",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "usernamePlaceholder": "Entrez votre nom d'utilisateur",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
+      "submit": "Se connecter",
+      "submitting": "Connexion en cours...",
+      "createAccount": "Créer un nouveau compte",
+      "or": "ou",
+      "continueWith": "Continuer avec {{provider}}",
+      "registrationDisabled": "L'inscription de nouveaux utilisateurs est actuellement désactivée."
     },
-    "fallbacks": {
-      "labResult": "Résultat d'analyse",
-      "medication": "Médicament",
-      "condition": "Condition",
-      "procedure": "Procédure",
-      "immunization": "Immunisation",
-      "treatment": "Traitement",
-      "encounter": "Viste",
-      "allergy": "Allergie",
-      "record": "Donnée"
-    },
-    "subtitles": {
-      "result": "Résultat : {{value}}",
-      "dose": "Dose {{number}}"
-    },
-    "dateLabels": {
-      "tested": "Analysé(e)",
-      "started": "Débuté(e)",
-      "diagnosed": "Diagnostiqué(e)",
-      "performed": "Accompli(e)",
-      "given": "Donné(e)",
-      "visited": "Visité(e)",
-      "identified": "Identifié(e)",
-      "recorded": "Enregistré(e)"
+    "userCreation": {
+      "requirements": {
+        "length": "Au moins 6 caractères",
+        "letter": "Contient au moins une lettre",
+        "number": "Contient au moins un chiffre"
+      },
+      "note": "Un dossier patient sera automatiquement créé pour cet utilisateur avec le rôle par défaut \"utilisateur\".",
+      "backToLogin": "Retour à la connexion",
+      "pageTitle": "Créez votre compte",
+      "pageSubtitle": "Rejoignez MediKeep et gérez vos dossiers médicaux en toute sécurité",
+      "cardTitle": "Détails du compte",
+      "cardSubtitle": "Remplissez le formulaire ci-dessous pour créer votre compte",
+      "whatHappensNext": "Que se passe-t-il ensuite ?",
+      "nextSteps": {
+        "autoRecord": "Votre dossier patient sera automatiquement créé",
+        "loggedIn": "Vous serez connecté immédiatement après la création du compte",
+        "startManaging": "Vous pourrez commencer à gérer vos informations médicales immédiatement",
+        "dataSecure": "Toutes vos données sont sécurisées et privées"
+      },
+      "welcomeMessage": "Bienvenue {{name}} ! Votre compte a été créé avec succès.",
+      "accountCreated": "Compte créé avec succès ! Veuillez vous connecter avec vos identifiants."
     }
+  },
+  "search": {
+    "activeFilterCount": "{{count}} active filters",
+    "activeFilters": "Active Filters",
+    "addMoreTags": "Add more tags",
+    "allTags": "All tags",
+    "allTime": "All time",
+    "anyTag": "Any tag",
+    "clearFilters": "Clear Filters",
+    "clearHistory": "Clear all",
+    "collapseFilters": "Collapse filters",
+    "columnDate": "Date",
+    "columnDetails": "Details",
+    "columnDetailsTip": "Key date for the record (e.g. when diagnosed, started, or performed)",
+    "columnName": "Name",
+    "columnNameTip": "The name or title of the record",
+    "columnTagsTip": "Tags assigned to this record",
+    "columnType": "Record Type",
+    "columnTypeTip": "The category of medical record",
+    "dateLabels": {
+      "diagnosed": "Diagnosed",
+      "given": "Given",
+      "identified": "Identified",
+      "performed": "Performed",
+      "recorded": "Recorded",
+      "started": "Started",
+      "tested": "Tested",
+      "visited": "Visited"
+    },
+    "datePresets": "Quick presets",
+    "dateRange": "Date Range",
+    "dateRangePlaceholder": "Select date range...",
+    "expandFilters": "Expand filters",
+    "fallbacks": {
+      "allergy": "Allergy",
+      "condition": "Condition",
+      "encounter": "Encounter",
+      "immunization": "Immunization",
+      "labResult": "Lab Result",
+      "medication": "Medication",
+      "procedure": "Procedure",
+      "record": "Record",
+      "treatment": "Treatment"
+    },
+    "filterByTag": "Filter by tag: {{tag}}",
+    "filtered": "(filtered)",
+    "filters": "Filters",
+    "initialMessage": "Enter a search term or select tags from the sidebar to find records.",
+    "initialTitle": "Search your medical records",
+    "last30Days": "Last 30 days",
+    "last6Months": "Last 6 months",
+    "last7Days": "Last 7 days",
+    "lastYear": "Last year",
+    "loadingTags": "Loading tags...",
+    "matchAll": "Match all",
+    "noPatientMessage": "Please select a patient from the dashboard to search medical records.",
+    "noPatientTitle": "No patient selected",
+    "noRecentSearches": "No recent searches",
+    "noResults": "No results found",
+    "noResultsFiltered": "Try adjusting your filters, tags, or search terms",
+    "noResultsGeneral": "Try different search terms or check spelling",
+    "openFullRecord": "Open Full Record",
+    "page": "page",
+    "perPage": "Items per page",
+    "placeholder": "Search medical records...",
+    "popularTags": "Popular Tags",
+    "previewRecord": "Preview record",
+    "recentSearches": "Recent Searches",
+    "recordTypes": "Record Types",
+    "removeTypeFilter": "Remove {{type}} filter",
+    "resultCount_one": "{{count}} record",
+    "resultCount_other": "{{count}} records",
+    "resultsFor": "Search results for \"{{query}}\"",
+    "searchFailed": "Search failed. Please try again.",
+    "searching": "Searching...",
+    "selectTags": "Select tags...",
+    "showAll": "Show all {{count}} results",
+    "showLess": "Show less",
+    "sortBy": "Sort By",
+    "sortDate": "Date (Newest)",
+    "sortDateNewest": "Date (Newest First)",
+    "sortDateOldest": "Date (Oldest First)",
+    "sortRelevance": "Relevance",
+    "sortTitle": "Title",
+    "sortType": "Type",
+    "subtitle": "Search across all medical records",
+    "subtitles": {
+      "dose": "Dose {{number}}",
+      "result": "Result: {{value}}"
+    },
+    "tagResultCount": "{{count}} tag result",
+    "tagResultCount_other": "{{count}} tag results",
+    "tagResults": "Tag Results",
+    "tagSearchFailed": "Tag search failed. Please try again.",
+    "taggedWith": "Records tagged with: {{tags}}",
+    "tags": "Tags",
+    "textResultCount": "{{count}} text result",
+    "textResultCount_other": "{{count}} text results",
+    "textResults": "Text Search Results",
+    "title": "Search Results",
+    "types": {
+      "allergies": "Allergies",
+      "conditions": "Conditions",
+      "encounters": "Visits",
+      "immunizations": "Immunizations",
+      "labResults": "Lab Results",
+      "medications": "Medications",
+      "procedures": "Procedures",
+      "treatments": "Treatments",
+      "vitals": "Vitals"
+    },
+    "viewCards": "Card view",
+    "viewTable": "Table view"
   }
 }

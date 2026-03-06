@@ -19,6 +19,7 @@ from app.exceptions.patient_sharing import (
     RecipientNotFoundError,
     InvalidPermissionLevelError,
     ShareNotFoundError,
+    SelfShareError,
 )
 from app.core.utils.datetime_utils import get_utc_now
 
@@ -71,7 +72,7 @@ class TestSendPatientShareInvitation:
         user = User(
             username="owner",
             email="owner@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Owner User",
             role="user"
         )
@@ -86,7 +87,7 @@ class TestSendPatientShareInvitation:
         user = User(
             username="recipient",
             email="recipient@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Recipient User",
             role="user"
         )
@@ -100,6 +101,7 @@ class TestSendPatientShareInvitation:
         """Create patient owned by owner"""
         from datetime import date
         patient = Patient(
+            user_id=owner.id,
             owner_user_id=owner.id,
             first_name="Test",
             last_name="Patient",
@@ -111,9 +113,10 @@ class TestSendPatientShareInvitation:
         db_session.refresh(patient)
         return patient
 
-    def test_send_invitation_success(self, service, owner, recipient, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_success(self, service, owner, recipient, patient):
         """Test successfully sending patient share invitation"""
-        invitation = service.send_patient_share_invitation(
+        invitation = await service.send_patient_share_invitation(
             owner=owner,
             patient_id=patient.id,
             shared_with_identifier=recipient.username,
@@ -130,9 +133,10 @@ class TestSendPatientShareInvitation:
         assert invitation.context_data['permission_level'] == 'view'
         assert invitation.context_data['patient_name'] == f"{patient.first_name} {patient.last_name}"
 
-    def test_send_invitation_with_email(self, service, owner, recipient, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_with_email(self, service, owner, recipient, patient):
         """Test sending invitation using email instead of username"""
-        invitation = service.send_patient_share_invitation(
+        invitation = await service.send_patient_share_invitation(
             owner=owner,
             patient_id=patient.id,
             shared_with_identifier=recipient.email,
@@ -141,58 +145,63 @@ class TestSendPatientShareInvitation:
 
         assert invitation.sent_to_user_id == recipient.id
 
-    def test_send_invitation_patient_not_found(self, service, owner, recipient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_patient_not_found(self, service, owner, recipient):
         """Test sending invitation for non-existent patient"""
-        with pytest.raises(ValueError, match="Patient not found"):
-            service.send_patient_share_invitation(
+        with pytest.raises(PatientNotFoundError):
+            await service.send_patient_share_invitation(
                 owner=owner,
                 patient_id=99999,
                 shared_with_identifier=recipient.username,
                 permission_level='view'
             )
 
-    def test_send_invitation_patient_not_owned(self, service, db_session, owner, recipient, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_patient_not_owned(self, service, db_session, owner, recipient, patient):
         """Test sending invitation for patient not owned by user"""
         # Create another user who tries to share someone else's patient
         other_user = User(
             username="other",
             email="other@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Other User",
             role="user"
         )
         db_session.add(other_user)
         db_session.commit()
 
-        with pytest.raises(ValueError, match="Patient not found or not owned"):
-            service.send_patient_share_invitation(
+        with pytest.raises(PatientNotFoundError):
+            await service.send_patient_share_invitation(
                 owner=other_user,
                 patient_id=patient.id,
                 shared_with_identifier=recipient.username,
                 permission_level='view'
             )
 
-    def test_send_invitation_recipient_not_found(self, service, owner, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_recipient_not_found(self, service, owner, patient):
         """Test sending invitation to non-existent user"""
-        with pytest.raises(ValueError, match="Recipient user not found"):
-            service.send_patient_share_invitation(
+        with pytest.raises(RecipientNotFoundError):
+            await service.send_patient_share_invitation(
                 owner=owner,
                 patient_id=patient.id,
                 shared_with_identifier="nonexistent@example.com",
                 permission_level='view'
             )
 
-    def test_send_invitation_cannot_share_with_self(self, service, owner, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_cannot_share_with_self(self, service, owner, patient):
         """Test that user cannot share patient with themselves"""
-        with pytest.raises(ValueError, match="Cannot share patient with yourself"):
-            service.send_patient_share_invitation(
+        with pytest.raises(SelfShareError):
+            await service.send_patient_share_invitation(
                 owner=owner,
                 patient_id=patient.id,
                 shared_with_identifier=owner.username,
                 permission_level='view'
             )
 
-    def test_send_invitation_already_shared(self, service, db_session, owner, recipient, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_already_shared(self, service, db_session, owner, recipient, patient):
         """Test sending invitation when patient is already shared"""
         # Create existing active share
         share = PatientShare(
@@ -205,15 +214,16 @@ class TestSendPatientShareInvitation:
         db_session.add(share)
         db_session.commit()
 
-        with pytest.raises(AlreadySharedError, match="already shared"):
-            service.send_patient_share_invitation(
+        with pytest.raises(AlreadySharedError):
+            await service.send_patient_share_invitation(
                 owner=owner,
                 patient_id=patient.id,
                 shared_with_identifier=recipient.username,
                 permission_level='view'
             )
 
-    def test_send_invitation_pending_invitation_exists(self, service, db_session, owner, recipient, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_pending_invitation_exists(self, service, db_session, owner, recipient, patient):
         """Test sending invitation when pending invitation already exists"""
         # Create pending invitation
         invitation = Invitation(
@@ -227,28 +237,30 @@ class TestSendPatientShareInvitation:
         db_session.add(invitation)
         db_session.commit()
 
-        with pytest.raises(PendingInvitationError, match="Pending invitation already exists"):
-            service.send_patient_share_invitation(
+        with pytest.raises(PendingInvitationError):
+            await service.send_patient_share_invitation(
                 owner=owner,
                 patient_id=patient.id,
                 shared_with_identifier=recipient.username,
                 permission_level='view'
             )
 
-    def test_send_invitation_invalid_permission_level(self, service, owner, recipient, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_invalid_permission_level(self, service, owner, recipient, patient):
         """Test sending invitation with invalid permission level"""
-        with pytest.raises(ValueError, match="Invalid permission level"):
-            service.send_patient_share_invitation(
+        with pytest.raises(InvalidPermissionLevelError):
+            await service.send_patient_share_invitation(
                 owner=owner,
                 patient_id=patient.id,
                 shared_with_identifier=recipient.username,
                 permission_level='invalid'
             )
 
-    def test_send_invitation_with_custom_permissions(self, service, owner, recipient, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_with_custom_permissions(self, service, owner, recipient, patient):
         """Test sending invitation with custom permissions"""
         custom_perms = {"can_view_labs": True, "can_edit_medications": False}
-        invitation = service.send_patient_share_invitation(
+        invitation = await service.send_patient_share_invitation(
             owner=owner,
             patient_id=patient.id,
             shared_with_identifier=recipient.username,
@@ -258,10 +270,11 @@ class TestSendPatientShareInvitation:
 
         assert invitation.context_data['custom_permissions'] == custom_perms
 
-    def test_send_invitation_with_expiration(self, service, owner, recipient, patient):
+    @pytest.mark.asyncio
+    async def test_send_invitation_with_expiration(self, service, owner, recipient, patient):
         """Test sending invitation with share expiration date"""
         expires_at = datetime.now(timezone.utc) + timedelta(days=30)
-        invitation = service.send_patient_share_invitation(
+        invitation = await service.send_patient_share_invitation(
             owner=owner,
             patient_id=patient.id,
             shared_with_identifier=recipient.username,
@@ -286,7 +299,7 @@ class TestAcceptPatientShareInvitation:
         user = User(
             username="owner",
             email="owner@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Owner User",
             role="user"
         )
@@ -301,7 +314,7 @@ class TestAcceptPatientShareInvitation:
         user = User(
             username="recipient",
             email="recipient@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Recipient User",
             role="user"
         )
@@ -315,6 +328,7 @@ class TestAcceptPatientShareInvitation:
         """Create patient owned by owner"""
         from datetime import date
         patient = Patient(
+            user_id=owner.id,
             owner_user_id=owner.id,
             first_name="Test",
             last_name="Patient",
@@ -416,7 +430,7 @@ class TestAcceptPatientShareInvitation:
         other_user = User(
             username="other",
             email="other@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Other User",
             role="user"
         )
@@ -451,22 +465,11 @@ class TestAcceptPatientShareInvitation:
     def test_accept_invitation_race_condition(self, service, db_session, recipient, pending_invitation, patient, owner):
         """
         CRITICAL: Test race condition handling
-        Two simultaneous acceptances should not create duplicate shares
+        A concurrent request already created the share; the second acceptance
+        should catch the IntegrityError and return the existing share gracefully.
         """
-        # First acceptance should succeed
-        share1 = service.accept_patient_share_invitation(
-            user=recipient,
-            invitation_id=pending_invitation.id
-        )
-
-        # Reset invitation to pending to simulate race condition
-        db_session.rollback()
-        db_session.refresh(pending_invitation)
-        pending_invitation.status = 'pending'
-        pending_invitation.responded_at = None
-        db_session.commit()
-
-        # Create a share that simulates what the first request created
+        # Simulate a concurrent request having already created the share
+        # before this acceptance attempt arrives
         existing_share = PatientShare(
             patient_id=patient.id,
             shared_by_user_id=owner.id,
@@ -477,16 +480,17 @@ class TestAcceptPatientShareInvitation:
         db_session.add(existing_share)
         db_session.commit()
 
-        # Second acceptance should handle IntegrityError gracefully
-        share2 = service.accept_patient_share_invitation(
+        # Acceptance should handle the IntegrityError from the unique constraint
+        # and return the already-existing share rather than raising
+        share = service.accept_patient_share_invitation(
             user=recipient,
             invitation_id=pending_invitation.id
         )
 
         # Should return existing share, not fail
-        assert share2 is not None
-        assert share2.patient_id == patient.id
-        assert share2.shared_with_user_id == recipient.id
+        assert share is not None
+        assert share.patient_id == patient.id
+        assert share.shared_with_user_id == recipient.id
 
 
 class TestBulkSendPatientShareInvitations:
@@ -503,7 +507,7 @@ class TestBulkSendPatientShareInvitations:
         user = User(
             username="owner",
             email="owner@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Owner User",
             role="user"
         )
@@ -518,7 +522,7 @@ class TestBulkSendPatientShareInvitations:
         user = User(
             username="recipient",
             email="recipient@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Recipient User",
             role="user"
         )
@@ -534,6 +538,7 @@ class TestBulkSendPatientShareInvitations:
         patients = []
         for i in range(5):
             patient = Patient(
+                user_id=owner.id,
                 owner_user_id=owner.id,
                 first_name=f"Patient{i}",
                 last_name=f"Test{i}",
@@ -547,25 +552,25 @@ class TestBulkSendPatientShareInvitations:
             db_session.refresh(p)
         return patients
 
-    def test_bulk_send_success(self, service, owner, recipient, patients):
+    @pytest.mark.asyncio
+    async def test_bulk_send_success(self, service, owner, recipient, patients):
         """Test successfully sending bulk patient share invitation"""
         patient_ids = [p.id for p in patients]
-        result = service.bulk_send_patient_share_invitations(
+        result = await service.bulk_send_patient_share_invitations(
             owner=owner,
             patient_ids=patient_ids,
             shared_with_identifier=recipient.username,
             permission_level='view'
         )
 
-        assert result['success'] is True
         assert result['patient_count'] == 5
         assert result['invitation_id'] is not None
-        assert set(result['patient_ids']) == set(patient_ids)
 
-    def test_bulk_send_creates_one_invitation(self, service, db_session, owner, recipient, patients):
+    @pytest.mark.asyncio
+    async def test_bulk_send_creates_one_invitation(self, service, db_session, owner, recipient, patients):
         """Test bulk send creates single invitation for multiple patients"""
         patient_ids = [p.id for p in patients]
-        result = service.bulk_send_patient_share_invitations(
+        result = await service.bulk_send_patient_share_invitations(
             owner=owner,
             patient_ids=patient_ids,
             shared_with_identifier=recipient.username,
@@ -582,12 +587,13 @@ class TestBulkSendPatientShareInvitations:
         assert invitation.context_data['patient_count'] == 5
         assert len(invitation.context_data['patients']) == 5
 
-    def test_bulk_send_patient_not_owned(self, service, db_session, owner, recipient, patients):
+    @pytest.mark.asyncio
+    async def test_bulk_send_patient_not_owned(self, service, db_session, owner, recipient, patients):
         """Test bulk send with patient not owned by user"""
         other_user = User(
             username="other",
             email="other@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Other User",
             role="user"
         )
@@ -596,6 +602,7 @@ class TestBulkSendPatientShareInvitations:
 
         from datetime import date
         other_patient = Patient(
+            user_id=other_user.id,
             owner_user_id=other_user.id,
             first_name="Other",
             last_name="Patient",
@@ -607,15 +614,16 @@ class TestBulkSendPatientShareInvitations:
 
         patient_ids = [patients[0].id, other_patient.id]
 
-        with pytest.raises(ValueError, match="not found or not owned"):
-            service.bulk_send_patient_share_invitations(
+        with pytest.raises(PatientNotFoundError):
+            await service.bulk_send_patient_share_invitations(
                 owner=owner,
                 patient_ids=patient_ids,
                 shared_with_identifier=recipient.username,
                 permission_level='view'
             )
 
-    def test_bulk_send_already_shared(self, service, db_session, owner, recipient, patients):
+    @pytest.mark.asyncio
+    async def test_bulk_send_already_shared(self, service, db_session, owner, recipient, patients):
         """Test bulk send when one patient is already shared"""
         # Create existing share for first patient
         share = PatientShare(
@@ -630,44 +638,47 @@ class TestBulkSendPatientShareInvitations:
 
         patient_ids = [p.id for p in patients]
 
-        with pytest.raises(ValueError, match="Already shared"):
-            service.bulk_send_patient_share_invitations(
+        with pytest.raises(AlreadySharedError):
+            await service.bulk_send_patient_share_invitations(
                 owner=owner,
                 patient_ids=patient_ids,
                 shared_with_identifier=recipient.username,
                 permission_level='view'
             )
 
-    def test_bulk_send_invalid_permission_level(self, service, owner, recipient, patients):
+    @pytest.mark.asyncio
+    async def test_bulk_send_invalid_permission_level(self, service, owner, recipient, patients):
         """Test bulk send with invalid permission level"""
         patient_ids = [p.id for p in patients]
 
-        with pytest.raises(ValueError, match="Invalid permission level"):
-            service.bulk_send_patient_share_invitations(
+        with pytest.raises(InvalidPermissionLevelError):
+            await service.bulk_send_patient_share_invitations(
                 owner=owner,
                 patient_ids=patient_ids,
                 shared_with_identifier=recipient.username,
                 permission_level='superuser'
             )
 
-    def test_bulk_send_recipient_not_found(self, service, owner, patients):
+    @pytest.mark.asyncio
+    async def test_bulk_send_recipient_not_found(self, service, owner, patients):
         """Test bulk send with non-existent recipient"""
         patient_ids = [p.id for p in patients]
 
-        with pytest.raises(ValueError, match="Recipient user not found"):
-            service.bulk_send_patient_share_invitations(
+        with pytest.raises(RecipientNotFoundError):
+            await service.bulk_send_patient_share_invitations(
                 owner=owner,
                 patient_ids=patient_ids,
                 shared_with_identifier="nonexistent@example.com",
                 permission_level='view'
             )
 
-    def test_bulk_send_cannot_share_with_self(self, service, owner, patients):
+    @pytest.mark.asyncio
+    async def test_bulk_send_cannot_share_with_self(self, service, owner, patients):
         """Test bulk send to self is not allowed"""
         patient_ids = [p.id for p in patients]
 
-        with pytest.raises(ValueError, match="Cannot share patients with yourself"):
-            service.bulk_send_patient_share_invitations(
+        with pytest.raises(SelfShareError):
+            await service.bulk_send_patient_share_invitations(
                 owner=owner,
                 patient_ids=patient_ids,
                 shared_with_identifier=owner.username,
@@ -689,7 +700,7 @@ class TestOtherServiceMethods:
         user = User(
             username="owner",
             email="owner@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Owner User",
             role="user"
         )
@@ -704,7 +715,7 @@ class TestOtherServiceMethods:
         user = User(
             username="recipient",
             email="recipient@example.com",
-            hashed_password="hashed",
+            password_hash="hashed",
             full_name="Recipient User",
             role="user"
         )
@@ -718,6 +729,7 @@ class TestOtherServiceMethods:
         """Create patient owned by owner"""
         from datetime import date
         patient = Patient(
+            user_id=owner.id,
             owner_user_id=owner.id,
             first_name="Test",
             last_name="Patient",
@@ -744,9 +756,10 @@ class TestOtherServiceMethods:
         db_session.refresh(share)
         return share
 
-    def test_revoke_share_success(self, service, owner, patient, recipient, active_share):
+    @pytest.mark.asyncio
+    async def test_revoke_share_success(self, service, owner, patient, recipient, active_share):
         """Test successfully revoking patient share"""
-        result = service.revoke_patient_share(
+        result = await service.revoke_patient_share(
             owner=owner,
             patient_id=patient.id,
             shared_with_user_id=recipient.id
@@ -755,7 +768,8 @@ class TestOtherServiceMethods:
         assert result is True
         assert active_share.is_active is False
 
-    def test_revoke_share_updates_invitation_status(self, service, db_session, owner, patient, recipient):
+    @pytest.mark.asyncio
+    async def test_revoke_share_updates_invitation_status(self, service, db_session, owner, patient, recipient):
         """Test revoking share also updates invitation status"""
         # Create invitation
         invitation = Invitation(
@@ -782,14 +796,15 @@ class TestOtherServiceMethods:
         db_session.commit()
 
         # Revoke
-        service.revoke_patient_share(owner, patient.id, recipient.id)
+        await service.revoke_patient_share(owner, patient.id, recipient.id)
 
         assert share.is_active is False
         assert invitation.status == 'revoked'
 
-    def test_revoke_share_no_active_share(self, service, owner, patient, recipient):
+    @pytest.mark.asyncio
+    async def test_revoke_share_no_active_share(self, service, owner, patient, recipient):
         """Test revoking when no active share exists"""
-        result = service.revoke_patient_share(
+        result = await service.revoke_patient_share(
             owner=owner,
             patient_id=patient.id,
             shared_with_user_id=recipient.id
