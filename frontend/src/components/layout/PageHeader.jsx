@@ -25,6 +25,7 @@ const PageHeader = ({
   variant = 'medical', // 'medical' or 'dashboard'
   showGlobalActions = true,
   showNavigation = true,
+  showTitle = true,
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -103,12 +104,14 @@ const PageHeader = ({
           )}
         </div>
         
-        <div className="header-center">
-          <h1 className="page-title">
-            {icon && <span className="title-icon">{icon}</span>}
-            {title}
-          </h1>
-        </div>
+        {showTitle && (
+          <div className="header-center">
+            <h1 className="page-title">
+              {icon && <span className="title-icon">{icon}</span>}
+              {title}
+            </h1>
+          </div>
+        )}
         
         <div className="header-right">
           <div className="header-actions">

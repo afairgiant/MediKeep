@@ -1,0 +1,98 @@
+/* Dashboard Page Styles */
+
+/* Module Card */
+.dashboard-module-card {
+  height: 110px;
+  padding: 20px 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.dashboard-module-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 3px 0 0 3px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.dashboard-module-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-module-card:hover::before {
+  opacity: 1;
+}
+
+.dashboard-module-card .icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Module card color variants for left border */
+.dashboard-module-card.blue::before { background: var(--mantine-color-blue-filled); }
+.dashboard-module-card.green::before { background: var(--mantine-color-green-filled); }
+.dashboard-module-card.teal::before { background: var(--mantine-color-teal-filled); }
+.dashboard-module-card.cyan::before { background: var(--mantine-color-cyan-filled); }
+.dashboard-module-card.indigo::before { background: var(--mantine-color-indigo-filled); }
+.dashboard-module-card.red::before { background: var(--mantine-color-red-filled); }
+.dashboard-module-card.pink::before { background: var(--mantine-color-pink-filled); }
+.dashboard-module-card.orange::before { background: var(--mantine-color-orange-filled); }
+.dashboard-module-card.purple::before,
+.dashboard-module-card.violet::before { background: var(--mantine-color-violet-filled); }
+.dashboard-module-card.grape::before { background: var(--mantine-color-grape-filled); }
+.dashboard-module-card.yellow::before { background: var(--mantine-color-yellow-filled); }
+.dashboard-module-card.dark::before { background: var(--mantine-color-dark-filled); }
+
+/* Stat Card */
+.dashboard-stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.dashboard-stat-card.blue::before { background: var(--mantine-color-blue-filled); }
+.dashboard-stat-card.green::before { background: var(--mantine-color-green-filled); }
+.dashboard-stat-card.orange::before { background: var(--mantine-color-orange-filled); }
+.dashboard-stat-card.violet::before { background: var(--mantine-color-violet-filled); }
+
+/* Resource and Activity Item Hover */
+.dashboard-resource-item,
+.dashboard-activity-item {
+  transition: all 0.2s ease;
+}
+
+.dashboard-resource-item:hover,
+.dashboard-activity-item:hover {
+  transform: translateX(4px);
+}
+
+/* Resource item icon */
+.dashboard-resource-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

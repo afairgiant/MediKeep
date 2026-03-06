@@ -213,19 +213,31 @@
 .dashboard-header {
   background: linear-gradient(
     135deg,
-    var(--color-primary, #667eea) 0%,
-    var(--color-primary-dark, #764ba2) 100%
+    #7048e8 0%,
+    #9775fa 100%
   ) !important;
   color: var(--color-text-light, white) !important;
   box-shadow: var(--shadow-md, 0 2px 10px rgba(0, 0, 0, 0.1)) !important;
-  border-bottom: 2px solid var(--border-color);
-  padding: 1rem 2rem !important;
+  border-bottom: none !important;
+  padding: 14px 20px !important;
+  border-radius: 8px;
+  min-height: auto !important;
 }
 
 .dashboard-header .page-title {
-  font-size: 2rem;
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-text-light, white) !important;
+}
+
+.dashboard-header .title-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Medical page variant styles */

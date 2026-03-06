@@ -11,21 +11,13 @@ import {
   Stack,
   Badge,
   ActionIcon,
-  Divider,
   Paper,
   SimpleGrid,
   ThemeIcon,
   Progress,
-  Timeline,
-  Button,
-  Notification,
-  Alert,
-  TextInput,
   Box,
   Flex,
   Tooltip,
-  HoverCard,
-  Select,
   useMantineColorScheme,
 } from '@mantine/core';
 import {
@@ -45,8 +37,6 @@ import {
   IconSettings,
   IconChevronRight,
   IconAlertCircle,
-  IconInfoCircle,
-  IconSearch,
   IconX,
   IconPhoneCall,
   IconUsers,
@@ -86,10 +76,8 @@ const Dashboard = () => {
   } = useAuth();
 
   // Using global state for patient data
-  const { patient: user, loading: patientLoading } = useCurrentPatient();
-  const { patient: currentPatient, loading: currentPatientLoading } = useCurrentPatient();
+  const { patient: currentPatient, loading: patientLoading } = useCurrentPatient();
   const {
-    invalidatePatient,
     refreshPatient,
     invalidateAll,
     setCurrentPatient,
@@ -151,10 +139,10 @@ const Dashboard = () => {
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
-  }, [currentPatient, user]);
+  }, [currentPatient]);
 
   useEffect(() => {
-    if (authUser && user) {
+    if (authUser && currentPatient) {
       // Reset welcome box for new user login (different user)
       const currentUserId = authUser.id;
       const dismissed = localStorage.getItem(
@@ -162,7 +150,7 @@ const Dashboard = () => {
       );
       setShowWelcomeBox(dismissed !== 'true');
     }
-  }, [authUser, user]);
+  }, [authUser, currentPatient]);
 
   const checkAdminStatus = async () => {
     try {
@@ -239,7 +227,7 @@ const Dashboard = () => {
   const fetchRecentActivity = async (patientId = null) => {
     try {
       setActivityLoading(true);
-      const targetPatientId = patientId || currentPatient?.id || user?.id;
+      const targetPatientId = patientId || currentPatient?.id;
       const activity = await apiService.getRecentActivity(targetPatientId);
 
       // Filter out erroneous "deleted" patient information activities
@@ -295,35 +283,28 @@ const Dashboard = () => {
   };
 
   // Dashboard stats data - using real data from API
-  const dashboardStatsCards = dashboardStats
-    ? [
-        {
-          label: t('dashboard.stats.totalRecords', 'Total Records'),
-          value: dashboardStats.total_records?.toString() || '0',
-          color: 'blue',
-        },
-        {
-          label: t('dashboard.stats.activeMedications', 'Active Medications'),
-          value: dashboardStats.active_medications?.toString() || '0',
-          color: 'green',
-        },
-        {
-          label: t('dashboard.stats.labResults', 'Lab Results'),
-          value: dashboardStats.total_lab_results?.toString() || '0',
-          color: 'orange',
-        },
-        {
-          label: t('dashboard.stats.procedures', 'Procedures'),
-          value: dashboardStats.total_procedures?.toString() || '0',
-          color: 'purple',
-        },
-      ]
-    : [
-        { label: t('dashboard.stats.totalRecords', 'Total Records'), value: '0', color: 'blue' },
-        { label: t('dashboard.stats.activeMedications', 'Active Medications'), value: '0', color: 'green' },
-        { label: t('dashboard.stats.labResults', 'Lab Results'), value: '0', color: 'orange' },
-        { label: t('dashboard.stats.procedures', 'Procedures'), value: '0', color: 'purple' },
-      ];
+  const dashboardStatsCards = [
+    {
+      label: t('dashboard.stats.totalRecords', 'Total Records'),
+      value: dashboardStats?.total_records?.toString() || '0',
+      color: 'blue',
+    },
+    {
+      label: t('dashboard.stats.activeMedications', 'Active Medications'),
+      value: dashboardStats?.active_medications?.toString() || '0',
+      color: 'green',
+    },
+    {
+      label: t('dashboard.stats.labResults', 'Lab Results'),
+      value: dashboardStats?.total_lab_results?.toString() || '0',
+      color: 'orange',
+    },
+    {
+      label: t('dashboard.stats.procedures', 'Procedures'),
+      value: dashboardStats?.total_procedures?.toString() || '0',
+      color: 'violet',
+    },
+  ];
 
   // Core medical modules - organized in 2x2 grid sections like the schematic
   const coreModules = [
@@ -399,7 +380,7 @@ const Dashboard = () => {
     {
       title: t('dashboard.modules.immunizations', 'Immunizations'),
       icon: IconVaccine,
-      color: 'purple',
+      color: 'violet',
       link: '/immunizations',
     },
     {
@@ -461,22 +442,28 @@ const Dashboard = () => {
     additionalModules.unshift({
       title: t('dashboard.modules.adminDashboard', 'Admin Dashboard'),
       icon: IconSettings,
-      color: 'dark',
+      color: 'indigo',
       link: '/admin',
     });
   }
 
   const StatCard = ({ stat }) => (
-    <Card shadow="sm" padding="lg" radius="md" withBorder h={100}>
+    <Paper
+      className={`dashboard-stat-card ${stat.color}`}
+      withBorder
+      radius="md"
+      p="md"
+      h={90}
+    >
       <Stack align="center" justify="center" h="100%">
-        <Text size="xl" fw={700} c={stat.color}>
+        <Text size="22px" fw={700} c={stat.color}>
           {stat.value}
         </Text>
-        <Text size="sm" c="dimmed" ta="center">
+        <Text size="12px" c="dimmed" ta="center">
           {stat.label}
         </Text>
       </Stack>
-    </Card>
+    </Paper>
   );
 
   const ModuleCard = ({ module }) => {
@@ -497,41 +484,25 @@ const Dashboard = () => {
     };
 
     return (
-      <Card
-        shadow="sm"
-        padding="lg"
-        radius="md"
+      <Paper
+        className={`dashboard-module-card ${module.color}`}
         withBorder
+        radius="md"
         onClick={handleClick}
-        style={{
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          height: '120px',
-        }}
-        styles={{
-          root: {
-            '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
-            },
-          },
-        }}
       >
         <Flex direction="column" justify="center" align="center" h="100%">
-          <ThemeIcon
-            color={module.color}
-            size={40}
-            radius="md"
-            variant="light"
+          <Box
+            className="icon-circle"
             mb="xs"
+            style={{ background: `var(--mantine-color-${module.color}-light)` }}
           >
-            <Icon size={24} />
-          </ThemeIcon>
-          <Text size="sm" fw={600} ta="center">
+            <Icon size={20} color={`var(--mantine-color-${module.color}-filled)`} />
+          </Box>
+          <Text size="13px" fw={600} ta="center">
             {module.title}
           </Text>
         </Flex>
-      </Card>
+      </Paper>
     );
   };
 
@@ -561,12 +532,12 @@ const Dashboard = () => {
     return (
       <Tooltip label={tooltip} position="left" disabled={!tooltip}>
         <Paper
-          p="sm"
-          radius="md"
+          className={isClickable ? 'dashboard-activity-item' : undefined}
+          p="10px 12px"
+          radius="sm"
           withBorder
           style={{
             cursor: isClickable ? 'pointer' : 'default',
-            transition: 'all 0.2s ease',
           }}
           styles={theme => ({
             root: {
@@ -579,7 +550,6 @@ const Dashboard = () => {
                         colorScheme === 'dark'
                           ? theme.colors.dark[6]
                           : theme.colors.gray[1],
-                      transform: 'translateX(4px)',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     },
                   }
@@ -593,8 +563,8 @@ const Dashboard = () => {
             <ThemeIcon
               color={ActivityIcon ? 'blue' : 'gray'}
               variant="light"
-              size="sm"
-              radius="md"
+              size={22}
+              radius={4}
               mt={2}
               style={{ flexShrink: 0 }}
             >
@@ -648,21 +618,21 @@ const Dashboard = () => {
   };
 
   const RecentActivityList = () => (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Group justify="space-between" mb="md">
-        <Title order={3} size="h4">
+    <Card shadow="sm" padding={16} radius="md" withBorder>
+      <Group justify="space-between" mb={12}>
+        <Text size="15px" fw={600}>
           {t('dashboard.sections.recentActivity', 'Recent Activity')}
-        </Title>
+        </Text>
       </Group>
 
       {lastActivityUpdate && (
-        <Text size="xs" c="dimmed" mb="sm">
+        <Text size="11px" c="dimmed" mb={10}>
           {t('dashboard.activity.lastUpdated', 'Last updated')}: {lastActivityUpdate.toLocaleTimeString()}
         </Text>
       )}
 
       {recentActivity.length > 0 ? (
-        <Stack gap="xs">
+        <Stack gap={8}>
           {recentActivity.slice(0, 4).map((activity, index) => (
             <ActivityItem
               key={`activity-${index}-${activity.id || 'no-id'}-${activity.timestamp || `index-${index}`}`}
@@ -702,7 +672,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
+      <Container size={1200} py="xl">
         <Stack align="center" justify="center" style={{ minHeight: '60vh' }}>
           <Progress
             value={75}
@@ -719,22 +689,20 @@ const Dashboard = () => {
   }
 
   return (
-    <>
-      <Container size="xl" py="md">
+    <Container size={1200} py="md">
         <PageHeader
           title="MediKeep"
-          icon={<img src="/medikeep-icon.svg" alt="" width={28} height={28} style={{ verticalAlign: 'middle' }} />}
+          icon={<img src="/medikeep-icon.svg" alt="" width={36} height={36} style={{ verticalAlign: 'middle' }} />}
           variant="dashboard"
           showBackButton={false}
         />
 
-        <Stack gap="lg">
+        <Stack gap={20} mt={20}>
           {/* Welcome Section */}
           {showWelcomeBox && (
             <Paper
-              p="md"
+              p="14px 20px"
               radius="md"
-              mb="xl"
               bg="var(--mantine-primary-color-filled)"
               c="white"
               pos="relative"
@@ -768,18 +736,19 @@ const Dashboard = () => {
 
               <Group justify="space-between" align="center" pr="xl">
                 <div>
-                  <Title order={2} size="h3" fw={600} mb={4}>
+                  <Title order={2} size="18px" fw={600} mb={4}>
                     {t('dashboard.title', 'MediKeep Dashboard')}
                   </Title>
-                  <Text size="sm" opacity={0.9}>
+                  <Text size="13px" opacity={0.9}>
                     {t('dashboard.subtitle', 'Manage your health information securely')}
                   </Text>
                 </div>
                 {authUser && (
                   <Badge
-                    color="rgba(255,255,255,0.2)"
+                    bg="rgba(255,255,255,0.2)"
                     variant="filled"
                     size="lg"
+                    radius="xl"
                   >
                     {t('dashboard.hello', 'Hello')},{' '}
                     {authUser.fullName ||
@@ -799,7 +768,7 @@ const Dashboard = () => {
             gap="md"
             direction={{ base: 'column', sm: 'column', md: 'row', lg: 'row' }}
             wrap="wrap"
-            mb="sm"
+            mb={20}
             style={{ width: '100%' }}
           >
             {/* Patient Selector */}
@@ -812,7 +781,7 @@ const Dashboard = () => {
             >
               <PatientSelector
                 onPatientChange={handlePatientChange}
-                currentPatientId={currentPatient?.id || user?.id}
+                currentPatientId={currentPatient?.id}
                 loading={patientSelectorLoading}
                 compact={true}
               />
@@ -849,15 +818,15 @@ const Dashboard = () => {
           </Flex>
 
           {/* Main Content Grid */}
-          <Grid mb="xl">
+          <Grid mb={24}>
             <Grid.Col span={{ base: 12, md: 8 }}>
-              <Stack gap="xl">
+              <Stack gap={24}>
                 {/* Core Medical Information */}
                 <div>
-                  <Title order={2} size="h3" mb="md">
+                  <Text size="16px" fw={600} mb={12}>
                     {t('dashboard.sections.coreMedical', 'Core Medical Information')}
-                  </Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                  </Text>
+                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={12}>
                     {coreModules.map((module, index) => (
                       <ModuleCard key={index} module={module} />
                     ))}
@@ -866,10 +835,10 @@ const Dashboard = () => {
 
                 {/* Treatments and Procedures */}
                 <div>
-                  <Title order={2} size="h3" mb="md">
+                  <Text size="16px" fw={600} mb={12}>
                     {t('dashboard.sections.treatments', 'Treatments and Procedures')}
-                  </Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                  </Text>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={12}>
                     {treatmentModules.map((module, index) => (
                       <ModuleCard key={index} module={module} />
                     ))}
@@ -878,10 +847,10 @@ const Dashboard = () => {
 
                 {/* Health Monitoring */}
                 <div>
-                  <Title order={2} size="h3" mb="md">
+                  <Text size="16px" fw={600} mb={12}>
                     {t('dashboard.sections.healthMonitoring', 'Health Monitoring')}
-                  </Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+                  </Text>
+                  <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing={12}>
                     {monitoringModules.map((module, index) => (
                       <ModuleCard key={index} module={module} />
                     ))}
@@ -890,10 +859,10 @@ const Dashboard = () => {
 
                 {/* Prevention & History */}
                 <div>
-                  <Title order={2} size="h3" mb="md">
+                  <Text size="16px" fw={600} mb={12}>
                     {t('dashboard.sections.prevention', 'Prevention & History')}
-                  </Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+                  </Text>
+                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={12}>
                     {preventionModules.map((module, index) => (
                       <ModuleCard key={index} module={module} />
                     ))}
@@ -903,20 +872,21 @@ const Dashboard = () => {
             </Grid.Col>
 
             <Grid.Col span={{ base: 12, md: 4 }}>
-              <Stack gap="md">
+              <Stack gap={16}>
                 {/* Additional Resources */}
-                <Card shadow="sm" padding="lg" radius="md" withBorder>
-                  <Title order={3} size="h4" mb="md">
+                <Card shadow="sm" padding={16} radius="md" withBorder>
+                  <Text size="15px" fw={600} mb={12}>
                     {t('dashboard.sections.additionalResources', 'Additional Resources')}
-                  </Title>
-                  <Stack gap="xs">
+                  </Text>
+                  <Stack gap={6}>
                     {additionalModules.map((module, index) => {
                       const Icon = module.icon;
                       return (
                         <Paper
                           key={index}
-                          p="sm"
-                          radius="md"
+                          className="dashboard-resource-item"
+                          p="8px 10px"
+                          radius="sm"
                           onClick={e => {
                             logger.info(
                               'Additional resource clicked:',
@@ -938,31 +908,18 @@ const Dashboard = () => {
                           }}
                           style={{ cursor: 'pointer' }}
                           withBorder
-                          styles={theme => ({
-                            root: {
-                              '&:hover': {
-                                backgroundColor:
-                                  colorScheme === 'dark'
-                                    ? theme.colors.dark[6]
-                                    : theme.colors.gray[1],
-                                transform: 'translateX(4px)',
-                                transition: 'all 0.2s ease',
-                              },
-                            },
-                          })}
                         >
                           <Group gap="sm">
-                            <ThemeIcon
-                              color={module.color}
-                              size="sm"
-                              variant="light"
+                            <Box
+                              className="dashboard-resource-icon"
+                              style={{ background: `var(--mantine-color-${module.color}-light)` }}
                             >
-                              <Icon size={14} />
-                            </ThemeIcon>
-                            <Text size="sm" fw={500} style={{ flex: 1 }}>
+                              <Icon size={12} color={`var(--mantine-color-${module.color}-filled)`} />
+                            </Box>
+                            <Text size="13px" fw={500} style={{ flex: 1 }}>
                               {module.title}
                             </Text>
-                            <IconChevronRight size={14} />
+                            <IconChevronRight size={14} color="var(--mantine-color-dimmed)" />
                           </Group>
                         </Paper>
                       );
@@ -979,14 +936,13 @@ const Dashboard = () => {
           </Grid>
 
           {/* Stats Row */}
-          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
+          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={12}>
             {dashboardStatsCards.map((stat, index) => (
               <StatCard key={index} stat={stat} />
             ))}
           </SimpleGrid>
         </Stack>
-      </Container>
-    </>
+    </Container>
   );
 };
 
