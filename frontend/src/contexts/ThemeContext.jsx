@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useMantineColorScheme } from '@mantine/core';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const ThemeContext = createContext();
 
@@ -11,102 +10,35 @@ export const useTheme = () => {
   return context;
 };
 
-// Inner component that has access to Mantine's color scheme
-const ThemeProviderInner = ({ children }) => {
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
+function getInitialTheme() {
+  const documentTheme = document.documentElement.getAttribute('data-theme');
+  if (documentTheme) return documentTheme;
 
-  const [theme, setTheme] = useState(() => {
-    // Check what's already on the document first
-    const documentTheme = document.documentElement.getAttribute('data-theme');
-    if (documentTheme) {
-      return documentTheme;
-    }
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) return savedTheme;
 
-    // Check localStorage next
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme;
-    }
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
 
-    // Check system preference last
-    if (
-      window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-    ) {
-      return 'dark';
-    }
+  return 'light';
+}
 
-    return 'light';
-  });
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-
-    // Also update Mantine's color scheme
-    setColorScheme(newTheme);
-  };
-
-  useEffect(() => {
-    // Apply theme to document for CSS custom properties
-    if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-
-    // Sync with Mantine's color scheme
-    if (colorScheme !== theme) {
-      setColorScheme(theme);
-    }
-  }, [theme, colorScheme, setColorScheme]);
-
-  const value = {
-    theme,
-    toggleTheme,
-    isDark: theme === 'dark',
-  };
-
-  return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-  );
-};
-
-// Wrapper component for when used outside MantineProvider
+// Single provider that works both with and without MantineProvider.
+// Theme state lives here, ABOVE MantineProvider, so forceColorScheme
+// can be passed as a prop - no async setColorScheme calls needed.
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    // Check what's already on the document first
-    const documentTheme = document.documentElement.getAttribute('data-theme');
-    if (documentTheme) {
-      return documentTheme;
-    }
+  const [theme, setTheme] = useState(getInitialTheme);
 
-    // Check localStorage next
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme;
-    }
-
-    // Check system preference last
-    if (
-      window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-    ) {
-      return 'dark';
-    }
-
-    return 'light';
-  });
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-  };
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => {
+      const newTheme = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme', newTheme);
+      return newTheme;
+    });
+  }, []);
 
   useEffect(() => {
-    // Apply theme to document
     if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
     } else {
@@ -125,5 +57,6 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-// Export the inner provider for use inside MantineProvider
-export const MantineIntegratedThemeProvider = ThemeProviderInner;
+// Kept for test compatibility - now a passthrough since Mantine sync
+// is handled via forceColorScheme prop in App.jsx
+export const MantineIntegratedThemeProvider = ({ children }) => children;
