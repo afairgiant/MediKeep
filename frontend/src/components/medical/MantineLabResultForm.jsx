@@ -161,7 +161,7 @@ const MantineLabResultForm = ({
       {editingLabResult && conditions.length > 0 && (
         <>
           <Divider label={t('labResults.form.relatedConditions')} labelPosition="center" mt="lg" />
-          <Paper withBorder p="md" bg="gray.1">
+          <Paper withBorder p="md" bg="var(--color-bg-secondary)">
             <Stack gap="md">
               <Title order={5}>{t('labResults.form.linkConditionsTitle')}</Title>
               <Text size="sm" c="dimmed">

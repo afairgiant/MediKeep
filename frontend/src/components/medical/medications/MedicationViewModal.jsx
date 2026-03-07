@@ -102,7 +102,7 @@ const MedicationViewModal = ({
     >
       <Stack gap="lg">
         {/* Header Card */}
-        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+        <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
           <Group justify="space-between" align="center">
             <div>
               <Title order={3} mb="xs">
@@ -329,7 +329,7 @@ const MedicationViewModal = ({
               <Stack gap="lg">
                 <div>
                   <Title order={4} mb="sm">{t('medications.modal.sections.additionalNotes', 'Additional Notes')}</Title>
-                  <Paper withBorder p="sm" bg="gray.1">
+                  <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                     <Text
                       size="sm"
                       style={{ whiteSpace: 'pre-wrap' }}
@@ -342,7 +342,7 @@ const MedicationViewModal = ({
 
                 <div>
                   <Title order={4} mb="sm">{t('medications.modal.sections.sideEffects', 'Side Effects')}</Title>
-                  <Paper withBorder p="sm" bg="gray.1">
+                  <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                     <Text
                       size="sm"
                       style={{ whiteSpace: 'pre-wrap' }}

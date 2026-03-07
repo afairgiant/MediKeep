@@ -49,7 +49,7 @@ const getCellBorderRadius = (hasDuration, isStart, isEnd, isMid) => {
  */
 const getCellBackgroundColor = (hasOccurrences, allResolved, hasDuration, severityColor) => {
   if (!hasOccurrences) return 'transparent';
-  if (allResolved) return 'var(--mantine-color-gray-1)';
+  if (allResolved) return 'var(--color-bg-secondary)';
   if (hasDuration) return `var(--mantine-color-${severityColor}-1)`;
   return `var(--mantine-color-${severityColor}-0)`;
 };
@@ -376,15 +376,15 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                 key={day}
                 p="xs"
                 style={{
-                  border: '1px solid #e9ecef',
+                  border: '1px solid var(--color-border-light)',
                   borderRadius: getCellBorderRadius(hasDuration, isStart, isEnd, isMid),
                   cursor: hasOccurrences ? 'pointer' : 'default',
                   backgroundColor: getCellBackgroundColor(hasOccurrences, allResolved, hasDuration, severityColor),
                   opacity: allResolved ? 0.7 : 1,
                   position: 'relative',
                   minHeight: '60px',
-                  borderLeft: hasDuration && !isStart ? 'none' : '1px solid #e9ecef',
-                  borderRight: hasDuration && !isEnd ? 'none' : '1px solid #e9ecef',
+                  borderLeft: hasDuration && !isStart ? 'none' : '1px solid var(--color-border-light)',
+                  borderRight: hasDuration && !isEnd ? 'none' : '1px solid var(--color-border-light)',
                 }}
                 onClick={() => handleDateClick(day)}
               >

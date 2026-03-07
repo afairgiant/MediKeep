@@ -277,7 +277,7 @@ function InlineTestComponentEntry({
                       readOnly
                       styles={{
                         input: {
-                          backgroundColor: '#f8f9fa',
+                          backgroundColor: 'var(--color-bg-secondary)',
                           color: getStatusInputColor(component.status),
                           fontWeight: 500,
                           cursor: 'default'

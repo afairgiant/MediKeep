@@ -493,7 +493,7 @@ const FileList = ({
       
       {/* Summary */}
       {processedFiles.length > 0 && (
-        <Paper withBorder p="sm" bg="gray.0">
+        <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
               Showing {processedFiles.length} of {files.length} files

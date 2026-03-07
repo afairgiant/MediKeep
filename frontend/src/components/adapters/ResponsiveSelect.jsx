@@ -365,7 +365,7 @@ export const ResponsiveSelect = memo(({
       />
       {/* Option count display rendered outside Select to avoid void element children error */}
       {processedOptions.length > 0 && showCount && (
-        <Group justify="space-between" px="xs" py="xs" bg="gray.0">
+        <Group justify="space-between" px="xs" py="xs" bg="var(--color-bg-secondary)">
           <Text size="xs" c="dimmed">
             {processedOptions.length} option{processedOptions.length !== 1 ? 's' : ''} available
           </Text>

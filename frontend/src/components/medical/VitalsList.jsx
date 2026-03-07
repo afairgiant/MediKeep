@@ -745,7 +745,7 @@ const VitalsList = ({
 
   // Render a single vital row (used for both individual records and expanded group readings)
   const renderVitalRow = (vital, isNested = false) => (
-    <Table.Tr key={vital.id} style={isNested ? { backgroundColor: 'var(--mantine-color-gray-0)' } : undefined}>
+    <Table.Tr key={vital.id} style={isNested ? { backgroundColor: 'var(--color-bg-secondary)' } : undefined}>
       <Table.Td>
         <Text size="sm" fw={500} pl={isNested ? 'md' : undefined}>
           {isNested ? formatDateTime(vital.recorded_date) : formatDate(vital.recorded_date)}
@@ -951,7 +951,7 @@ const VitalsList = ({
     return (
       <Table.Tr key={`${item.groupKey}-expanded`}>
         <Table.Td colSpan={colCount} style={{ padding: 0 }}>
-          <Paper p="md" style={{ backgroundColor: 'var(--mantine-color-gray-0)', borderRadius: 0 }}>
+          <Paper p="md" style={{ backgroundColor: 'var(--color-bg-secondary)', borderRadius: 0 }}>
             <Stack gap="md">
               {/* Mini glucose chart */}
               {chartData.length > 1 && (

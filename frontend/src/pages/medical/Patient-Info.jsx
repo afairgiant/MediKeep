@@ -416,8 +416,8 @@ const PatientInfo = () => {
                       size={200}
                       radius="md"
                       style={{
-                        border: '2px solid #e0e0e0',
-                        backgroundColor: '#f5f5f5',
+                        border: '2px solid var(--color-border-light)',
+                        backgroundColor: 'var(--color-bg-secondary)',
                       }}
                     />
                     <Stack gap="xs">

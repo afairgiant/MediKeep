@@ -379,7 +379,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
         {/* Time Range Filter */}
         {!loading && (
-          <Paper withBorder p="md" radius="md" bg="gray.0">
+          <Paper withBorder p="md" radius="md" bg="var(--color-bg-secondary)">
             <Stack gap="md">
               <Group justify="space-between" align="center">
                 <Group gap="xs">
@@ -557,7 +557,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
         {/* Empty State */}
         {trendData && trendData.data_points.length === 0 && !loading && (
-          <Paper withBorder p="xl" radius="md" bg="gray.0">
+          <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
             <Stack align="center" gap="md">
               <IconChartLine size={48} color="var(--mantine-color-gray-5)" />
               <Title order={3} c="dimmed">No trend data available</Title>
