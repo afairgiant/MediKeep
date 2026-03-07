@@ -399,7 +399,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
 
       {/* Quick Actions for Empty State */}
       {!isViewMode && components.length === 0 && !loading && !error && (
-        <Paper withBorder p="xl" radius="md" bg="gray.0">
+        <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
           <Stack align="center" gap="lg">
             <IconFlask size={48} color="var(--mantine-color-gray-5)" />
             <Stack align="center" gap="md">
@@ -432,7 +432,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
 
       {/* View Mode Info */}
       {isViewMode && components.length === 0 && !loading && (
-        <Paper withBorder p="xl" radius="md" bg="gray.0">
+        <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
           <Stack align="center" gap="md">
             <IconFlask size={48} color="var(--mantine-color-gray-5)" />
             <Title order={3} c="dimmed">{t('testComponents.noComponents', 'No test components')}</Title>

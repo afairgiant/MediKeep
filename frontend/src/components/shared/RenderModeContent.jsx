@@ -163,7 +163,7 @@ const RenderModeContent = memo(({
         {storageBackendSelector}
         
         {/* File Upload Section */}
-        <Paper withBorder p="md" bg="gray.1">
+        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
           <Group justify="space-between" align="center">
             <Text fw={500}>Add Document</Text>
             <Menu position="bottom-end" shadow="md" withinPortal zIndex={3000}>

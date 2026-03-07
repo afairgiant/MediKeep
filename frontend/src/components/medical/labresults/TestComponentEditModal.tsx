@@ -393,7 +393,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               readOnly
               styles={{
                 input: {
-                  backgroundColor: '#f8f9fa',
+                  backgroundColor: 'var(--color-bg-secondary)',
                   color: getStatusInputColor(formData.status),
                   fontWeight: 500
                 }

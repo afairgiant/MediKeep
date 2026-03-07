@@ -90,9 +90,6 @@ const StorageBackendSelector = ({
           disabled: item.disabled
         }))}
         styles={{
-          root: {
-            backgroundColor: 'var(--mantine-color-gray-1)',
-          },
           indicator: {
             boxShadow: 'var(--mantine-shadow-sm)',
           },

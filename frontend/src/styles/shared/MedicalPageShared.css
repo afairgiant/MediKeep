@@ -1033,5 +1033,5 @@
 }
 
 .clickable-card:hover {
-  background-color: var(--mantine-color-gray-0);
+  background-color: var(--color-bg-secondary);
 }
