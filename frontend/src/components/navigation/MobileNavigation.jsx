@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { IconX } from '@tabler/icons-react';
 import { getNavigationSections } from '../../config/navigation.config';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
@@ -41,7 +42,7 @@ const MobileNavigation = ({
       <nav className="mobile-navigation" onClick={(e) => e.stopPropagation()}>
         <div className="mobile-nav-header">
           <h3>{t('menu.dashboard', 'Navigation')}</h3>
-          <button className="mobile-nav-close" onClick={onClose}>✕</button>
+          <button className="mobile-nav-close" onClick={onClose} aria-label="Close navigation"><IconX size={18} /></button>
         </div>
 
         <div className="mobile-nav-content">

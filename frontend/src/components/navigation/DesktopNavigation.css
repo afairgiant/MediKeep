@@ -29,13 +29,17 @@
   font-size: 0.875rem;
 }
 
-.desktop-nav-trigger.account-trigger {
-  background: var(--color-primary);
-  color: white;
+.desktop-nav-trigger.section-active {
+  color: var(--color-primary-text, #667eea);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-primary, #667eea);
 }
 
-.desktop-nav-trigger.account-trigger:hover {
-  background: var(--color-primary-dark);
+.nav-section-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border-light, #e5e7eb);
+  margin: 0 4px;
 }
 
 .desktop-nav-dropdown {
