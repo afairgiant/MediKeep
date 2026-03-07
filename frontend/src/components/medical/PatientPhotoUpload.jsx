@@ -140,54 +140,58 @@ const PatientPhotoUpload = ({
         type="loading"
       />
 
-      <Stack gap="md" align="center">
-        {/* Photo Display */}
-        <Group align="center" gap="lg">
-          <Avatar
-            src={currentPhotoUrl}
-            size={200}
+      <Group
+        align="center"
+        gap="lg"
+        p="md"
+        style={{
+          border: '1px solid var(--mantine-color-default-border)',
+          borderRadius: 'var(--mantine-radius-md)',
+          background: 'var(--mantine-color-default-hover)',
+        }}
+      >
+        <Avatar
+          src={currentPhotoUrl}
+          size={100}
+          radius="xl"
+          styles={{
+            root: {
+              border: '3px solid var(--mantine-color-default-border)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            },
+          }}
+        />
+
+        <Stack gap="xs" style={{ flex: 1 }}>
+          <FileInput
+            accept="image/*"
+            onChange={handleUpload}
+            disabled={disabled || isUploading}
+            placeholder="Choose photo"
+            leftSection={<IconCamera size={16} />}
+            clearable={false}
             radius="md"
-            style={{
-              border: '2px solid #e0e0e0',
-              backgroundColor: '#f5f5f5',
-            }}
+            size="sm"
           />
 
-          <Stack gap="sm">
-            {/* Upload Button */}
-            <FileInput
-              accept="image/*"
-              onChange={handleUpload}
+          {currentPhotoUrl && (
+            <Button
+              variant="subtle"
+              color="red"
+              size="compact-sm"
+              onClick={handleDelete}
               disabled={disabled || isUploading}
-              placeholder="Choose photo"
-              leftSection={<IconCamera size={16} />}
-              style={{ minWidth: 200 }}
-              clearable={false}
-            />
+              leftSection={<IconTrash size={14} />}
+            >
+              Remove Photo
+            </Button>
+          )}
 
-            {/* Delete Button */}
-            {currentPhotoUrl && (
-              <Button
-                variant="outline"
-                color="red"
-                size="sm"
-                onClick={handleDelete}
-                disabled={disabled || isUploading}
-                leftSection={<IconTrash size={16} />}
-              >
-                Remove Photo
-              </Button>
-            )}
-          </Stack>
-        </Group>
-
-        {/* Help Text */}
-        <Text size="sm" c="dimmed" ta="center">
-          Accepts JPEG, PNG, GIF, or BMP images • Max size: 15MB
-          <br />
-          Photos are automatically resized and optimized
-        </Text>
-      </Stack>
+          <Text size="xs" c="dimmed">
+            JPEG, PNG, GIF, or BMP -- Max 15MB
+          </Text>
+        </Stack>
+      </Group>
     </Box>
   );
 };
