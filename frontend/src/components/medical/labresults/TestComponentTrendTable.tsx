@@ -139,7 +139,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
 
   if (trendData.data_points.length === 0) {
     return (
-      <Paper withBorder p="xl" radius="md" bg="gray.0">
+      <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
         <Text size="sm" c="dimmed" ta="center">
           No data points to display
         </Text>

@@ -1,7 +1,7 @@
 /* Immunization Page Styles */
 .immunization-container {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: var(--color-bg-secondary);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 

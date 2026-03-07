@@ -79,7 +79,7 @@ const ImmunizationViewModal = ({
     >
       <Stack gap="lg">
         {/* Header Card */}
-        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+        <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
           <Group justify="space-between" align="center">
             <div>
               <Title order={3} mb="xs">{immunization.vaccine_name}</Title>

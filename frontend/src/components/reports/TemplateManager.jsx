@@ -372,7 +372,7 @@ const TemplateManager = ({
  */
 const TemplateCard = ({ template, onLoad, onEdit, onDelete }) => {
   return (
-    <Paper p="sm" withBorder radius="sm" bg="gray.0">
+    <Paper p="sm" withBorder radius="sm" bg="var(--color-bg-secondary)">
       <Group justify="space-between">
         <Stack gap={2} style={{ flex: 1 }}>
           <Group>

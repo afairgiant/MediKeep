@@ -502,7 +502,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
       )}
 
       {/* Additional Insights */}
-      <Card withBorder p="md" radius="md" bg="gray.0">
+      <Card withBorder p="md" radius="md" bg="var(--color-bg-secondary)">
         <Stack gap="md">
           <Group gap="xs">
             <IconCategory size={20} />

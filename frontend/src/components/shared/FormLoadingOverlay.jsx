@@ -69,7 +69,7 @@ const FormLoadingOverlay = ({
           shadow="lg"
           p="xl"
           withBorder
-          bg="white"
+          bg="var(--mantine-color-body)"
           style={{
             minWidth: 300,
             textAlign: 'center',

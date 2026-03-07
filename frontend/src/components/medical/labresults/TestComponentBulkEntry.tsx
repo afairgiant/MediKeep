@@ -1220,7 +1220,7 @@ SARS-CoV-2: Not Detected`
                         </Group>
 
                         {/* Preview of extracted text */}
-                        <Box style={{ maxHeight: 150, overflow: 'auto', border: '1px solid #dee2e6', borderRadius: 4, padding: 8 }}>
+                        <Box style={{ maxHeight: 150, overflow: 'auto', border: '1px solid var(--color-border-light)', borderRadius: 4, padding: 8 }}>
                           <Text size="xs" ff="monospace" c="dimmed" style={{ whiteSpace: 'pre-wrap' }}>
                             {extractedText.slice(0, 500)}
                             {extractedText.length > 500 && '...'}

@@ -41,7 +41,7 @@ const RecordSelector = ({
   return (
     <Stack gap="sm">
       {/* Category header with select all */}
-      <Paper p="md" withBorder radius="md" bg="gray.0">
+      <Paper p="md" withBorder radius="md" bg="var(--color-bg-secondary)">
         <Group justify="space-between">
           <Group>
             <Text fw={500} size="lg">{categoryDisplayName}</Text>
