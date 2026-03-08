@@ -98,8 +98,8 @@ class AllergyResponse(AllergyBase):
 
 
 class AllergyWithRelations(AllergyResponse):
-    patient: Optional[dict] = None
-    medication: Optional[dict] = None
+    patient: Optional["PatientResponse"] = None
+    medication: Optional["MedicationResponse"] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -113,3 +113,10 @@ class AllergySummary(BaseModel):
     patient_name: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# Late imports to avoid circular dependencies; must come after all class definitions.
+from app.schemas.medication import MedicationResponse  # noqa: E402
+from app.schemas.patient import PatientResponse  # noqa: E402
+
+AllergyWithRelations.model_rebuild()

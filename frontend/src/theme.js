@@ -216,6 +216,13 @@ export const theme = createTheme({
         section: { color: 'var(--input-section-color)' },
       },
     },
+    SegmentedControl: {
+      styles: {
+        root: {
+          backgroundColor: 'var(--color-bg-secondary)',
+        },
+      },
+    },
   },
 
   /** Spacing scale */

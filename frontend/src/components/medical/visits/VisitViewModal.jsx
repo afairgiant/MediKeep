@@ -159,7 +159,7 @@ const VisitViewModal = ({
       >
         <Stack gap="lg">
           {/* Header Card */}
-          <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
             <Group justify="space-between" align="center">
               <div>
                 <Title order={3} mb="xs">
@@ -338,7 +338,7 @@ const VisitViewModal = ({
                   {visit.treatment_plan && (
                     <div>
                       <Title order={4} mb="sm">{t('visits.viewModal.treatmentPlan', 'Treatment Plan')}</Title>
-                      <Paper withBorder p="sm" bg="gray.1">
+                      <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                         <Text style={{ whiteSpace: 'pre-wrap' }}>
                           {visit.treatment_plan}
                         </Text>
@@ -350,7 +350,7 @@ const VisitViewModal = ({
                   {visit.follow_up_instructions && (
                     <div>
                       <Title order={4} mb="sm">{t('visits.viewModal.followUpInstructions', 'Follow-up Instructions')}</Title>
-                      <Paper withBorder p="sm" bg="gray.1">
+                      <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                         <Text style={{ whiteSpace: 'pre-wrap' }}>
                           {visit.follow_up_instructions}
                         </Text>
@@ -361,7 +361,7 @@ const VisitViewModal = ({
                   {/* Additional Notes */}
                   <div>
                     <Title order={4} mb="sm">{t('visits.viewModal.additionalNotes', 'Additional Notes')}</Title>
-                    <Paper withBorder p="sm" bg="gray.1">
+                    <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                       <Text
                         style={{ whiteSpace: 'pre-wrap' }}
                         c={visit.notes ? 'inherit' : 'dimmed'}

@@ -122,7 +122,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
     const data = payload[0].payload;
 
     return (
-      <Paper withBorder p="sm" shadow="md" radius="md" bg="white">
+      <Paper withBorder p="sm" shadow="md" radius="md" bg="var(--mantine-color-body)">
         <Stack gap="xs">
           <Text size="sm" fw={600}>
             {isAggregated && data.periodLabel ? data.periodLabel : data.date}
@@ -187,7 +187,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
 
   if (chartData.length === 0) {
     return (
-      <Paper withBorder p="xl" radius="md" bg="gray.0">
+      <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
         <Text size="sm" c="dimmed" ta="center">
           {t('vitals.trends.noDataPoints', 'No data points to display')}
         </Text>
@@ -202,7 +202,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
           data={chartData}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" />
 
           <XAxis
             dataKey="date"

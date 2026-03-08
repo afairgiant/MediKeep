@@ -100,7 +100,7 @@ const LabResultViewModal = ({
       >
         <Stack gap="lg">
           {/* Header Card */}
-          <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+          <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
             <Group justify="space-between" align="center">
               <div>
                 <Title order={3} mb="xs">{labResult.test_name}</Title>
@@ -230,7 +230,7 @@ const LabResultViewModal = ({
                   {/* Notes Section */}
                   <div>
                     <Title order={4} mb="sm">{t('labResults.modal.sections.notes', 'Notes')}</Title>
-                    <Paper withBorder p="sm" bg="gray.1">
+                    <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                       <Text
                         style={{ whiteSpace: 'pre-wrap' }}
                         c={labResult.notes ? 'inherit' : 'dimmed'}

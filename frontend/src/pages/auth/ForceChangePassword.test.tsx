@@ -77,8 +77,9 @@ describe('ForceChangePassword', () => {
 
     test('renders within login-container layout', () => {
       renderComponent();
-      expect(document.querySelector('.login-container')).toBeInTheDocument();
-      expect(document.querySelector('.login-form')).toBeInTheDocument();
+      // CSS Modules hash class names, so check for partial class match
+      expect(document.querySelector('[class*="loginContainer"]')).toBeInTheDocument();
+      expect(document.querySelector('[class*="loginForm"]')).toBeInTheDocument();
     });
 
     test('renders a submit button', () => {

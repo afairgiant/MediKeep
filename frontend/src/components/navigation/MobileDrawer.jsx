@@ -80,7 +80,7 @@ const MobileDrawer = ({
           top: '16px',
           left: '16px',
           zIndex: 1002,
-          backgroundColor: 'white',
+          backgroundColor: 'var(--color-bg-primary)',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
         }}
         size="lg"

@@ -1084,7 +1084,7 @@ const DocumentManager = ({
           )}
 
           {/* File Upload Section */}
-          <Paper withBorder p="md" bg="gray.1">
+          <Paper withBorder p="md" bg="var(--color-bg-secondary)">
             <Group justify="space-between" align="center">
               <Text fw={500}>Manage Documents</Text>
               <Menu position="bottom-end" shadow="md">

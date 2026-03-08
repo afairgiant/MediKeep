@@ -28,7 +28,7 @@ import { ResponsiveProvider } from './providers/ResponsiveProvider';
 // Authentication
 import { AuthProvider } from './contexts/AuthContext';
 import {
-  MantineIntegratedThemeProvider,
+  ThemeProvider,
   useTheme,
 } from './contexts/ThemeContext';
 import { AppDataProvider } from './contexts/AppDataContext';
@@ -333,6 +333,22 @@ function ActivityTracker() {
   return null;
 }
 
+// Bridge: reads theme from ThemeContext, passes forceColorScheme to MantineProvider
+// so both CSS variables and Mantine switch in the same render - no flash.
+function ThemedMantineProvider({ children }) {
+  const { theme: colorScheme } = useTheme();
+  return (
+    <MantineProvider theme={theme} forceColorScheme={colorScheme} cssVariablesResolver={cssVariablesResolver}>
+      <Notifications />
+      <ResponsiveProvider>
+        <DatesProvider settings={{}}>
+          {children}
+        </DatesProvider>
+      </ResponsiveProvider>
+    </MantineProvider>
+  );
+}
+
 function App() {
   useEffect(() => {
     // Initialize frontend logging
@@ -370,11 +386,8 @@ function App() {
         <AuthProvider>
           <UserPreferencesProvider>
             <AppDataProvider>
-              <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver}>
-                <Notifications />
-                <ResponsiveProvider>
-                  <DatesProvider settings={{}}>
-                    <MantineIntegratedThemeProvider>
+              <ThemeProvider>
+              <ThemedMantineProvider>
                     <NavigationTracker />
                     {/* <ActivityTracker /> */}
                     <div className="App">
@@ -670,10 +683,8 @@ function App() {
 
                     {/* Toast Notifications */}
                     <ThemedToastContainer />
-                    </MantineIntegratedThemeProvider>
-                  </DatesProvider>
-                </ResponsiveProvider>
-              </MantineProvider>
+              </ThemedMantineProvider>
+              </ThemeProvider>
             </AppDataProvider>
           </UserPreferencesProvider>
         </AuthProvider>

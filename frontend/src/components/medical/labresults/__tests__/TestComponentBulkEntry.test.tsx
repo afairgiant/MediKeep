@@ -233,6 +233,88 @@ describe('TestComponentBulkEntry Parser', () => {
       expect(result!.ref_range_max).toBe(1.0);
       expect(result!.status).toBe('high');
     });
+
+    it('should parse "Normal range:" prefix with less-than comparison', () => {
+      const result = parseLine('Cholesterol: 195 mg/dL (Normal range: <200)');
+      expect(result).not.toBeNull();
+      expect(result!.ref_range_text).toBe('<200');
+      expect(result!.ref_range_max).toBe(200);
+      expect(result!.ref_range_min).toBeNull();
+      expect(result!.status).toBe('normal');
+    });
+
+    it('should parse "Normal range:" prefix with greater-than comparison', () => {
+      const result = parseLine('HDL: 45 mg/dL (Normal range: >40)');
+      expect(result).not.toBeNull();
+      expect(result!.ref_range_text).toBe('>40');
+      expect(result!.ref_range_min).toBe(40);
+      expect(result!.ref_range_max).toBeNull();
+      expect(result!.status).toBe('normal');
+    });
+  });
+
+  describe('CSV_PATTERN: reference range parsing', () => {
+    it('should parse numeric range from CSV format', () => {
+      const result = parseLine('Glucose,125,mg/dL,70-100,Normal');
+      expect(result).not.toBeNull();
+      expect(result!.patternName).toBe('CSV_PATTERN');
+      expect(result!.test_name).toBe('Glucose');
+      expect(result!.value).toBe(125);
+      expect(result!.unit).toBe('mg/dL');
+      expect(result!.ref_range_min).toBe(70);
+      expect(result!.ref_range_max).toBe(100);
+    });
+
+    it('should parse BUN with numeric range', () => {
+      const result = parseLine('BUN,18,mg/dL,7-20,Normal');
+      expect(result).not.toBeNull();
+      expect(result!.ref_range_min).toBe(7);
+      expect(result!.ref_range_max).toBe(20);
+      expect(result!.status).toBe('normal');
+    });
+
+    it('should auto-calculate high status from CSV range', () => {
+      const result = parseLine('Glucose,125,mg/dL,70-100');
+      expect(result).not.toBeNull();
+      expect(result!.ref_range_min).toBe(70);
+      expect(result!.ref_range_max).toBe(100);
+      expect(result!.status).toBe('high');
+    });
+
+    it('should parse comparison operator range from CSV', () => {
+      const result = parseLine('Cholesterol,195,mg/dL,<200,Normal');
+      expect(result).not.toBeNull();
+      expect(result!.ref_range_text).toBe('<200');
+      expect(result!.ref_range_max).toBe(200);
+      expect(result!.ref_range_min).toBeNull();
+      expect(result!.status).toBe('normal');
+    });
+
+    it('should parse greater-than comparison from CSV', () => {
+      const result = parseLine('HDL,55,mg/dL,>40');
+      expect(result).not.toBeNull();
+      expect(result!.ref_range_text).toBe('>40');
+      expect(result!.ref_range_min).toBe(40);
+      expect(result!.ref_range_max).toBeNull();
+      expect(result!.status).toBe('normal');
+    });
+
+    it('should handle CSV with no range column', () => {
+      const result = parseLine('BUN,18,mg/dL');
+      expect(result).not.toBeNull();
+      expect(result!.test_name).toBe('BUN');
+      expect(result!.value).toBe(18);
+      expect(result!.unit).toBe('mg/dL');
+      expect(result!.ref_range_min).toBeNull();
+      expect(result!.ref_range_max).toBeNull();
+    });
+
+    it('should handle tab-separated CSV format', () => {
+      const result = parseLine('WBC\t7.5\tK/uL\t4.5-11.0\tNormal');
+      expect(result).not.toBeNull();
+      expect(result!.ref_range_min).toBe(4.5);
+      expect(result!.ref_range_max).toBe(11.0);
+    });
   });
 
   describe('Auto-status calculation edge cases', () => {

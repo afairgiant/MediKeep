@@ -81,11 +81,11 @@ class TestUserPreferencesLanguage:
         user_data = create_random_user(db_session)
         headers = create_user_authentication_headers(client=client, username=user_data["username"], password=user_data["password"])
 
-        # Try to set an unsupported language
+        # Try to set an unsupported language ("xx" is not a valid language code)
         response = client.put(
             "/api/v1/users/me/preferences",
             headers=headers,
-            json={"language": "es"}  # Spanish not supported yet
+            json={"language": "xx"}
         )
 
         assert response.status_code == 422
@@ -207,7 +207,7 @@ class TestUserPreferencesLanguage:
         self, client: TestClient, db_session: Session
     ):
         """Test that all supported languages can be set successfully."""
-        supported_languages = ["en", "fr", "de"]
+        supported_languages = ["en", "fr", "de", "es", "it", "pt"]
 
         for lang in supported_languages:
             # Create a new test user for each language
@@ -261,7 +261,7 @@ class TestLanguageValidation:
 
         # Invalid language should raise validation error
         with pytest.raises(ValueError, match="Language must be one of"):
-            UserPreferencesUpdate(language="es")
+            UserPreferencesUpdate(language="xx")
 
     def test_language_defaults_to_en(self):
         """Test that language defaults to 'en' when not specified."""

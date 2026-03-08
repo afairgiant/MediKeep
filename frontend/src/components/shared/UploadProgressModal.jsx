@@ -146,7 +146,7 @@ const UploadProgressModal = ({
     >
       <Stack gap="md">
         {/* Overall Progress */}
-        <Paper withBorder p="md" bg="gray.0">
+        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
           <Stack gap="sm">
             <Group justify="space-between" align="center">
               <Text fw={500}>Overall Progress</Text>

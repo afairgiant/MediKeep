@@ -284,8 +284,8 @@ const SSOCallback = () => {
         padding: '2rem'
       }}>
         <div style={{
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #3498db',
+          border: '4px solid var(--color-bg-tertiary)',
+          borderTop: '4px solid var(--mantine-color-blue-5)',
           borderRadius: '50%',
           width: '40px',
           height: '40px',
@@ -295,12 +295,12 @@ const SSOCallback = () => {
         <h2>Completing sign-in...</h2>
         <p>Please wait while we authenticate your account</p>
         {processingTime > 5 && (
-          <p style={{ color: '#666', fontSize: '0.9em', marginTop: '0.5rem' }}>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9em', marginTop: '0.5rem' }}>
             This is taking longer than usual. SSO provider may be slow to respond...
           </p>
         )}
         {processingTime > 15 && (
-          <p style={{ color: '#d9534f', fontSize: '0.9em', marginTop: '0.5rem' }}>
+          <p style={{ color: 'var(--color-danger)', fontSize: '0.9em', marginTop: '0.5rem' }}>
             Still waiting for SSO provider response. If this continues, please try again.
           </p>
         )}
@@ -329,21 +329,21 @@ const SSOCallback = () => {
         margin: '0 auto'
       }}>
         <div style={{
-          backgroundColor: '#f8f9fa',
-          border: '1px solid #dee2e6',
+          backgroundColor: 'var(--color-bg-secondary)',
+          border: '1px solid var(--color-border-light)',
           borderRadius: '8px',
           padding: '2rem',
           textAlign: 'center',
           width: '100%'
         }}>
-          <h2 style={{ color: '#dc3545', marginBottom: '1rem' }}>Authentication Failed</h2>
+          <h2 style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>Authentication Failed</h2>
           <div style={{ 
-            backgroundColor: '#f8d7da',
-            border: '1px solid #f5c6cb',
+            backgroundColor: 'var(--color-danger-light)',
+            border: '1px solid var(--color-danger)',
             borderRadius: '4px',
             padding: '1rem',
             marginBottom: '1.5rem',
-            color: '#721c24'
+            color: 'var(--color-danger-dark)'
           }}>
             {error}
           </div>
@@ -351,7 +351,7 @@ const SSOCallback = () => {
             <button 
               onClick={() => navigate('/login')}
               style={{
-                backgroundColor: '#007bff',
+                backgroundColor: 'var(--color-primary)',
                 color: 'white',
                 border: 'none',
                 padding: '0.5rem 1rem',
@@ -366,10 +366,10 @@ const SSOCallback = () => {
               <a 
                 href="mailto:admin@example.com"
                 style={{
-                  color: '#007bff',
+                  color: 'var(--color-primary)',
                   textDecoration: 'none',
                   padding: '0.5rem 1rem',
-                  border: '1px solid #007bff',
+                  border: '1px solid var(--color-primary)',
                   borderRadius: '4px',
                   fontSize: '1rem'
                 }}

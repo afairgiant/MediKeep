@@ -32,15 +32,16 @@ describe('Login Component', () => {
     test('renders login form with required fields', () => {
       render(<Login />);
 
-      expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+      expect(document.getElementById('username')).toBeInTheDocument();
+      expect(document.getElementById('password')).toBeInTheDocument();
+      expect(document.querySelector('button[type="submit"]')).toBeInTheDocument();
     });
 
     test('renders create account button', () => {
       render(<Login />);
 
-      expect(screen.getByText(/create new.*account/i)).toBeInTheDocument();
+      // Mock t() returns the key; createAccount button text comes from t('auth.login.createAccount')
+      expect(screen.getByText('auth.login.createAccount')).toBeInTheDocument();
     });
 
     test('renders with MediKeep title', () => {
@@ -52,8 +53,8 @@ describe('Login Component', () => {
     test('renders form inputs correctly', () => {
       render(<Login />);
 
-      const usernameInput = screen.getByLabelText(/username/i);
-      const passwordInput = screen.getByLabelText(/password/i);
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
 
       expect(usernameInput).toHaveAttribute('type', 'text');
       expect(passwordInput).toHaveAttribute('type', 'password');
@@ -94,8 +95,11 @@ describe('Login Component', () => {
     test('renders login container with proper styling', () => {
       render(<Login />);
 
-      expect(document.querySelector('.login-container')).toBeInTheDocument();
-      expect(document.querySelector('.login-form')).toBeInTheDocument();
+      // CSS Modules hash class names, so check for partial class match
+      const container = document.querySelector('[class*="loginContainer"]');
+      const form = document.querySelector('[class*="loginForm"]');
+      expect(container).toBeInTheDocument();
+      expect(form).toBeInTheDocument();
     });
   });
 });

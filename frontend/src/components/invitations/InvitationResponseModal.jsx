@@ -139,7 +139,7 @@ const InvitationResponseModal = ({
             
             <Stack gap="md">
                 {/* Invitation Header */}
-                <Paper p="md" bg="gray.0" radius="md">
+                <Paper p="md" bg="var(--color-bg-secondary)" radius="md">
                     <Group gap="sm" mb="sm">
                         <ThemeIcon color="blue" variant="light" size="lg">
                             {getInvitationIcon(invitation.invitation_type)}

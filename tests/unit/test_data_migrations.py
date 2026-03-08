@@ -41,8 +41,8 @@ class TestLabResultFilesMigration:
         mock_file.storage_backend = "local"
         return mock_file
 
-    @patch('app.core.data_migrations.get_db')
-    @patch('app.core.data_migrations.os.path.exists')
+    @patch('app.core.database.migrations.get_db')
+    @patch('app.core.database.migrations.os.path.exists')
     def test_migration_with_no_old_files(self, mock_exists, mock_get_db):
         """Test migration when there are no old lab result files."""
         # Setup
@@ -60,8 +60,8 @@ class TestLabResultFilesMigration:
         assert errors == []
         mock_db.query.assert_called_once()  # Only the count query should be called
 
-    @patch('app.core.data_migrations.get_db')
-    @patch('app.core.data_migrations.os.path.exists')
+    @patch('app.core.database.migrations.get_db')
+    @patch('app.core.database.migrations.os.path.exists')
     def test_migration_with_existing_files_on_disk(self, mock_exists, mock_get_db):
         """Test migration when old files exist on disk (local storage)."""
         # Setup
@@ -109,8 +109,8 @@ class TestLabResultFilesMigration:
         
         mock_db.commit.assert_called_once()
 
-    @patch('app.core.data_migrations.get_db')
-    @patch('app.core.data_migrations.os.path.exists')
+    @patch('app.core.database.migrations.get_db')
+    @patch('app.core.database.migrations.os.path.exists')
     def test_migration_with_missing_files_potential_paperless(self, mock_exists, mock_get_db):
         """Test migration when files don't exist on disk (potential paperless files)."""
         # Setup
@@ -156,8 +156,8 @@ class TestLabResultFilesMigration:
         
         mock_db.commit.assert_called_once()
 
-    @patch('app.core.data_migrations.get_db')
-    @patch('app.core.data_migrations.os.path.exists')
+    @patch('app.core.database.migrations.get_db')
+    @patch('app.core.database.migrations.os.path.exists')
     def test_migration_idempotency(self, mock_exists, mock_get_db):
         """Test that running migration twice doesn't duplicate files."""
         # Setup
@@ -168,8 +168,9 @@ class TestLabResultFilesMigration:
         lab_file = self.create_mock_lab_file()
         entity_file = self.create_mock_entity_file()
         
-        mock_db.query.return_value.count.side_effect = [1, 1]  # 1 lab file, 1 entity file (already migrated)
-        
+        mock_db.query.return_value.count.return_value = 1  # lab file count
+        mock_db.query.return_value.filter.return_value.count.return_value = 1  # entity file count (already migrated)
+
         # Execute
         migrated_count, errors = migrate_lab_result_files_to_entity_files()
         
@@ -181,8 +182,8 @@ class TestLabResultFilesMigration:
         mock_db.add.assert_not_called()
         mock_db.commit.assert_not_called()
 
-    @patch('app.core.data_migrations.get_db')
-    @patch('app.core.data_migrations.os.path.exists')
+    @patch('app.core.database.migrations.get_db')
+    @patch('app.core.database.migrations.os.path.exists')
     def test_migration_with_duplicate_detection(self, mock_exists, mock_get_db):
         """Test that duplicate files are properly detected and skipped."""
         # Setup
@@ -193,9 +194,10 @@ class TestLabResultFilesMigration:
         lab_file = self.create_mock_lab_file()
         existing_entity_file = self.create_mock_entity_file()
         
-        mock_db.query.return_value.count.side_effect = [1, 0]  # 1 lab file, 0 entity files in count
+        mock_db.query.return_value.count.return_value = 1  # lab file count
+        mock_db.query.return_value.filter.return_value.count.return_value = 0  # entity file count
         mock_db.query.return_value.all.return_value = [lab_file]
-        mock_db.query.return_value.first.return_value = existing_entity_file  # File already exists
+        mock_db.query.return_value.filter.return_value.first.return_value = existing_entity_file  # File already exists
         
         mock_exists.return_value = True
         
@@ -210,7 +212,7 @@ class TestLabResultFilesMigration:
         mock_db.add.assert_not_called()
         mock_db.commit.assert_not_called()
 
-    @patch('app.core.data_migrations.get_db')
+    @patch('app.core.database.migrations.get_db')
     def test_migration_handles_database_errors(self, mock_get_db):
         """Test that migration handles database errors gracefully."""
         # Setup
@@ -227,8 +229,8 @@ class TestLabResultFilesMigration:
         assert "Database error" in str(exc_info.value)
         mock_db.rollback.assert_called_once()
 
-    @patch('app.core.data_migrations.get_db')
-    @patch('app.core.data_migrations.os.path.exists')
+    @patch('app.core.database.migrations.get_db')
+    @patch('app.core.database.migrations.os.path.exists')
     def test_migration_with_multiple_files(self, mock_exists, mock_get_db):
         """Test migration with multiple lab result files."""
         # Setup
@@ -240,9 +242,10 @@ class TestLabResultFilesMigration:
         lab_file2 = self.create_mock_lab_file(lab_result_id=2, file_name="test2.pdf", file_path="/path/to/test2.pdf")
         lab_file3 = self.create_mock_lab_file(lab_result_id=3, file_name="test3.pdf", file_path="/missing/test3.pdf")
         
-        mock_db.query.return_value.count.side_effect = [3, 0]  # 3 lab files, 0 entity files
+        mock_db.query.return_value.count.return_value = 3  # lab file count
+        mock_db.query.return_value.filter.return_value.count.return_value = 0  # entity file count
         mock_db.query.return_value.all.return_value = [lab_file1, lab_file2, lab_file3]
-        mock_db.query.return_value.first.return_value = None  # No existing entity files
+        mock_db.query.return_value.filter.return_value.first.return_value = None  # No existing entity files
         
         # Mock file existence - first two exist, third doesn't
         mock_exists.side_effect = lambda path: path != "/missing/test3.pdf"
@@ -258,7 +261,7 @@ class TestLabResultFilesMigration:
         assert mock_db.add.call_count == 3
         mock_db.commit.assert_called_once()
 
-    @patch('app.core.data_migrations.migrate_lab_result_files_to_entity_files')
+    @patch('app.core.database.migrations.migrate_lab_result_files_to_entity_files')
     def test_run_startup_data_migrations_success(self, mock_migrate):
         """Test the startup data migrations runner."""
         # Setup
@@ -270,7 +273,7 @@ class TestLabResultFilesMigration:
         # Assert
         mock_migrate.assert_called_once()
 
-    @patch('app.core.data_migrations.migrate_lab_result_files_to_entity_files')
+    @patch('app.core.database.migrations.migrate_lab_result_files_to_entity_files')
     def test_run_startup_data_migrations_with_errors(self, mock_migrate):
         """Test startup migrations when there are errors."""
         # Setup
@@ -282,7 +285,7 @@ class TestLabResultFilesMigration:
         # Assert
         mock_migrate.assert_called_once()
 
-    @patch('app.core.data_migrations.migrate_lab_result_files_to_entity_files')
+    @patch('app.core.database.migrations.migrate_lab_result_files_to_entity_files')
     def test_run_startup_data_migrations_handles_failure(self, mock_migrate):
         """Test startup migrations when migration fails."""
         # Setup
@@ -298,8 +301,8 @@ class TestLabResultFilesMigration:
 class TestMigrationDataIntegrity:
     """Test data integrity aspects of the migration."""
 
-    @patch('app.core.data_migrations.get_db')
-    @patch('app.core.data_migrations.os.path.exists')
+    @patch('app.core.database.migrations.get_db')
+    @patch('app.core.database.migrations.os.path.exists')
     def test_all_lab_file_fields_preserved(self, mock_exists, mock_get_db):
         """Test that all important fields from LabResultFile are preserved in EntityFile."""
         # Setup
@@ -316,9 +319,10 @@ class TestMigrationDataIntegrity:
         lab_file.description = "Critical test results"
         lab_file.uploaded_at = datetime(2023, 1, 15, 10, 30, 0)
         
-        mock_db.query.return_value.count.side_effect = [1, 0]
+        mock_db.query.return_value.count.return_value = 1  # lab file count
+        mock_db.query.return_value.filter.return_value.count.return_value = 0  # entity file count
         mock_db.query.return_value.all.return_value = [lab_file]
-        mock_db.query.return_value.first.return_value = None
+        mock_db.query.return_value.filter.return_value.first.return_value = None
         mock_exists.return_value = True
         
         # Execute

@@ -143,7 +143,7 @@ const SearchResults = ({
                     transition: 'background-color 0.1s ease'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--mantine-color-gray-0)';
+                    e.target.style.backgroundColor = 'var(--color-bg-secondary)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'transparent';

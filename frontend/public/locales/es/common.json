@@ -105,7 +105,11 @@
     "noRating": "Sin valoración",
     "ratingStars": "{{count}}/5 estrellas",
     "visitWebsite": "Visitar sitio web ↗",
-    "practitioner": "Profesional"
+    "practitioner": "Profesional",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "note": "Note",
+    "role": "Role"
   },
   "fields": {
     "tags": {
@@ -2162,21 +2166,25 @@
       "label": "Nuevo nombre de la etiqueta",
       "placeholder": "Introduzca el nuevo nombre de la etiqueta...",
       "submit": "Renombrar etiqueta",
-      "title": "Renombrar etiqueta"
+      "title": "Renombrar etiqueta",
+      "colorLabel": "Tag Color"
     },
     "errors": {
       "createFailed": "Error al crear la etiqueta",
       "deleteFailed": "Error al eliminar la etiqueta",
       "loadFailed": "Error al cargar las etiquetas",
       "renameFailed": "Error al renombrar la etiqueta",
-      "replaceFailed": "Error al reemplazar la etiqueta"
+      "replaceFailed": "Error al reemplazar la etiqueta",
+      "editFailed": "Failed to update tag"
     },
     "icon": "🏷️",
     "loading": "Cargando etiquetas...",
     "menu": {
       "delete": "Eliminar etiqueta",
       "rename": "Renombrar etiqueta",
-      "replace": "Reemplazar con..."
+      "replace": "Reemplazar con...",
+      "edit": "Edit",
+      "search": "Search records"
     },
     "noTags": "No se encontraron etiquetas",
     "noTagsDescription": "Comience a usar etiquetas en sus registros médicos para verlas aquí.",
@@ -2193,7 +2201,8 @@
       "created": "Etiqueta \"{{tag}}\" creada exitosamente",
       "deleted": "Etiqueta \"{{tag}}\" eliminada exitosamente",
       "renamed": "\"{{oldTag}}\" renombrada exitosamente a \"{{newTag}}\"",
-      "replaced": "\"{{oldTag}}\" reemplazada exitosamente con \"{{newTag}}\""
+      "replaced": "\"{{oldTag}}\" reemplazada exitosamente con \"{{newTag}}\"",
+      "updated": "Successfully updated tag \"{{tag}}\""
     },
     "table": {
       "actions": "Acciones",
@@ -2459,7 +2468,12 @@
         "temperatureMin": "La temperatura debe ser al menos {{min}}{{unit}}",
         "timeInFuture": "La hora seleccionada no puede ser en el futuro",
         "weightMax": "El peso no puede exceder {{max}} {{unit}}",
-        "weightMin": "El peso debe ser al menos {{min}} {{unit}}"
+        "weightMin": "El peso debe ser al menos {{min}} {{unit}}",
+        "firstNameRequired": "Please enter your first name",
+        "lastNameRequired": "Please enter your last name",
+        "passwordLength": "Password must be at least 6 characters long",
+        "passwordRequirements": "Password must contain at least one letter and one number",
+        "usernameLength": "Username must be at least 3 characters long"
       },
       "vitalSignsDesc": "Mediciones fisiológicas principales",
       "weightDesc": "Peso en {{unit}}",
@@ -2606,35 +2620,121 @@
         "startManaging": "Podrás comenzar a gestionar tu información médica de inmediato",
         "dataSecure": "Todos tus datos están seguros y son privados"
       },
-      "linkPatient": {
-        "checkbox": "Vincular a un registro de paciente existente",
-        "hint": "En lugar de crear un nuevo registro de paciente, vincula el nuevo usuario a un paciente existente (p. ej., un niño que ahora necesita su propio acceso).",
-        "selectPlaceholder": "Selecciona un paciente...",
-        "loading": "Cargando pacientes...",
-        "selfRecordBadge": "Registro propio",
-        "patientId": "ID",
-        "dob": "Fecha de nacimiento",
-        "owner": "Titular",
-        "currentOwner": "Titular actual",
-        "selfRecordWarningTitle": "Nota:",
-        "selfRecordWarning": "Este es el autoregistro del titular actual. Se creará un nuevo autoregistro para el titular original copiando sus datos demográficos. El titular original recibirá acceso de edición a este paciente."
-      },
-      "successRedirect": "¡Usuario creado con éxito! Redirigiendo...",
-      "autoFeaturesTitle": "Funciones generadas automáticamente",
-      "autoFeatures": {
-        "patientRecord": "Se creará automáticamente un perfil de paciente (o se vinculará a uno existente)",
-        "linkExisting": "Use 'Vincular a paciente existente' para transferir un perfil de paciente al nuevo usuario",
-        "editAccess": "El titular original conserva el acceso de edición después de la transferencia",
-        "timestamps": "Las marcas de tiempo de creación/actualización se rastrean automáticamente",
-        "immediateLogin": "El nuevo usuario puede iniciar sesión inmediatamente después de la creación"
-      },
-      "errors": {
-        "createFailed": "No se pudo crear el usuario",
-        "accountCreateFailed": "No se pudo crear la cuenta",
-        "createRetry": "No se pudo crear el usuario. Por favor, inténtelo de nuevo."
-      }
       "welcomeMessage": "Bienvenido {{name}}! Tu cuenta ha sido creada exitosamente.",
       "accountCreated": "Cuenta creada exitosamente! Por favor inicia sesión con tus credenciales."
     }
+  },
+  "search": {
+    "activeFilterCount": "{{count}} active filters",
+    "activeFilters": "Active Filters",
+    "addMoreTags": "Add more tags",
+    "allTags": "All tags",
+    "allTime": "All time",
+    "anyTag": "Any tag",
+    "clearFilters": "Clear Filters",
+    "clearHistory": "Clear all",
+    "collapseFilters": "Collapse filters",
+    "columnDate": "Date",
+    "columnDetails": "Details",
+    "columnDetailsTip": "Key date for the record (e.g. when diagnosed, started, or performed)",
+    "columnName": "Name",
+    "columnNameTip": "The name or title of the record",
+    "columnTagsTip": "Tags assigned to this record",
+    "columnType": "Record Type",
+    "columnTypeTip": "The category of medical record",
+    "dateLabels": {
+      "diagnosed": "Diagnosed",
+      "given": "Given",
+      "identified": "Identified",
+      "performed": "Performed",
+      "recorded": "Recorded",
+      "started": "Started",
+      "tested": "Tested",
+      "visited": "Visited"
+    },
+    "datePresets": "Quick presets",
+    "dateRange": "Date Range",
+    "dateRangePlaceholder": "Select date range...",
+    "expandFilters": "Expand filters",
+    "fallbacks": {
+      "allergy": "Allergy",
+      "condition": "Condition",
+      "encounter": "Encounter",
+      "immunization": "Immunization",
+      "labResult": "Lab Result",
+      "medication": "Medication",
+      "procedure": "Procedure",
+      "record": "Record",
+      "treatment": "Treatment"
+    },
+    "filterByTag": "Filter by tag: {{tag}}",
+    "filtered": "(filtered)",
+    "filters": "Filters",
+    "initialMessage": "Enter a search term or select tags from the sidebar to find records.",
+    "initialTitle": "Search your medical records",
+    "last30Days": "Last 30 days",
+    "last6Months": "Last 6 months",
+    "last7Days": "Last 7 days",
+    "lastYear": "Last year",
+    "loadingTags": "Loading tags...",
+    "matchAll": "Match all",
+    "noPatientMessage": "Please select a patient from the dashboard to search medical records.",
+    "noPatientTitle": "No patient selected",
+    "noRecentSearches": "No recent searches",
+    "noResults": "No results found",
+    "noResultsFiltered": "Try adjusting your filters, tags, or search terms",
+    "noResultsGeneral": "Try different search terms or check spelling",
+    "openFullRecord": "Open Full Record",
+    "page": "page",
+    "perPage": "Items per page",
+    "placeholder": "Search medical records...",
+    "popularTags": "Popular Tags",
+    "previewRecord": "Preview record",
+    "recentSearches": "Recent Searches",
+    "recordTypes": "Record Types",
+    "removeTypeFilter": "Remove {{type}} filter",
+    "resultCount_one": "{{count}} record",
+    "resultCount_other": "{{count}} records",
+    "resultsFor": "Search results for \"{{query}}\"",
+    "searchFailed": "Search failed. Please try again.",
+    "searching": "Searching...",
+    "selectTags": "Select tags...",
+    "showAll": "Show all {{count}} results",
+    "showLess": "Show less",
+    "sortBy": "Sort By",
+    "sortDate": "Date (Newest)",
+    "sortDateNewest": "Date (Newest First)",
+    "sortDateOldest": "Date (Oldest First)",
+    "sortRelevance": "Relevance",
+    "sortTitle": "Title",
+    "sortType": "Type",
+    "subtitle": "Search across all medical records",
+    "subtitles": {
+      "dose": "Dose {{number}}",
+      "result": "Result: {{value}}"
+    },
+    "tagResultCount": "{{count}} tag result",
+    "tagResultCount_other": "{{count}} tag results",
+    "tagResults": "Tag Results",
+    "tagSearchFailed": "Tag search failed. Please try again.",
+    "taggedWith": "Records tagged with: {{tags}}",
+    "tags": "Tags",
+    "textResultCount": "{{count}} text result",
+    "textResultCount_other": "{{count}} text results",
+    "textResults": "Text Search Results",
+    "title": "Search Results",
+    "types": {
+      "allergies": "Allergies",
+      "conditions": "Conditions",
+      "encounters": "Visits",
+      "immunizations": "Immunizations",
+      "labResults": "Lab Results",
+      "medications": "Medications",
+      "procedures": "Procedures",
+      "treatments": "Treatments",
+      "vitals": "Vitals"
+    },
+    "viewCards": "Card view",
+    "viewTable": "Table view"
   }
 }

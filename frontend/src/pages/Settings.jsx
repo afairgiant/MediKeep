@@ -617,7 +617,7 @@ const Settings = () => {
                         width: '100px',
                         padding: '8px',
                         borderRadius: '4px',
-                        border: '1px solid #ccc',
+                        border: '1px solid var(--color-border-light)',
                         fontSize: '14px',
                         textAlign: 'right'
                       }}
