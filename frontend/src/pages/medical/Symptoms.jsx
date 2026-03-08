@@ -376,7 +376,7 @@ const Symptoms = () => {
   // No patient selected
   if (!currentPatient) {
     return (
-      <Container size="xl">
+      <Container size="xl" py="md">
         <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
         <Alert title={t('symptoms.noPatientSelected', 'No Patient Selected')} color="blue">
           {t('symptoms.selectPatientPrompt', 'Please select or create a patient to track symptoms.')}
@@ -386,7 +386,7 @@ const Symptoms = () => {
   }
 
   return (
-    <Container size="xl">
+    <Container size="xl" py="md">
       <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
 
       {/* Success/Error Messages */}
