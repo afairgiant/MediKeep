@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Header } from '../components/adapters';
-import Container from '../components/layout/Container';
+import { PageHeader } from '../components';
+import { Container } from '@mantine/core';
 import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';
 import DeleteAccountModal from '../components/auth/DeleteAccountModal';
@@ -405,19 +405,15 @@ const Settings = () => {
 
   if (!user) {
     return (
-      <Container>
-        <Header title={t('settings.title', 'Settings')} subtitle={t('labels.loading', 'Loading...')} showBackButton={true} />
+      <Container size="xl" py="md">
+        <PageHeader title={t('settings.title', 'Settings')} />
       </Container>
     );
   }
 
   return (
-    <Container>
-      <Header
-        title={t('settings.title', 'Settings')}
-        subtitle={t('settings.subtitle', 'Manage your application preferences and settings')}
-        showBackButton={true}
-      />
+    <Container size="xl" py="md">
+      <PageHeader title={t('settings.title', 'Settings')} />
 
       <div className="settings-tabs">
         {SETTINGS_TABS.map(tab => (

@@ -39,7 +39,7 @@ const PageHeader = ({
   onBackClick,
   actions,
   className = '',
-  variant = 'medical',
+  variant = 'dashboard',
   showGlobalActions = true,
   showNavigation = true,
   showTitle = true,
