@@ -18,8 +18,9 @@ class TimezoneService {
     if (this.initialized) return;
 
     try {
-      const data = await apiClient.get('/utils/timezone-info');
-      this.facilityTimezone = data.facility_timezone;
+      const response = await apiClient.get('/utils/timezone-info');
+      this.facilityTimezone = response.data.facility_timezone || 'UTC';
+      this.initialized = true;
       logger.debug('timezone_service_initialized', 'Timezone service initialized', {
         timezone: this.facilityTimezone,
         component: 'TimezoneService'
@@ -30,9 +31,8 @@ class TimezoneService {
         component: 'TimezoneService'
       });
       this.facilityTimezone = 'UTC';
+      // Do not set initialized=true on failure, so init() retries after login
     }
-
-    this.initialized = true;
   }
 
   formatDateTime(utcString, options = {}) {

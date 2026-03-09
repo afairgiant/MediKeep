@@ -1,4 +1,5 @@
 import logger from '../services/logger';
+import { timezoneService } from '../services/timezoneService';
 
 import {
   IconPill,
@@ -455,7 +456,10 @@ export const groupActivities = (activities, groupBy = 'date') => {
 
     switch (groupBy) {
       case 'date':
-        key = new Date(activity.timestamp).toDateString();
+        key = new Date(activity.timestamp).toLocaleDateString('en-US', {
+          timeZone: timezoneService.getFacilityTimezone(),
+          weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+        });
         break;
       case 'model_name':
         key = getModelDisplayName(activity.model_name);

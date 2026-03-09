@@ -70,6 +70,7 @@ import {
   unitLabels,
 } from '../../utils/unitConversion';
 import logger from '../../services/logger';
+import { timezoneService } from '../../services/timezoneService';
 
 const PAGE_SIZE_OPTIONS = [
   { value: '10', label: '10' },
@@ -927,7 +928,7 @@ const VitalsList = ({
       .filter(r => r.blood_glucose != null)
       .sort((a, b) => new Date(a.recorded_date) - new Date(b.recorded_date))
       .map(r => ({
-        time: new Date(r.recorded_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: new Date(r.recorded_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: timezoneService.getFacilityTimezone() }),
         glucose: r.blood_glucose,
       }));
   };

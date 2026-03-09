@@ -45,6 +45,7 @@ import { adminApiService } from '../../services/api/adminApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useAuth } from '../../contexts/AuthContext';
 import logger from '../../services/logger';
+import { timezoneService } from '../../services/timezoneService';
 
 const ROLE_COLORS = {
   admin: 'red',
@@ -345,6 +346,7 @@ const UserManagement = () => {
       const date = new Date(utcStr);
       if (isNaN(date.getTime())) return dateStr;
       return date.toLocaleString(undefined, {
+        timeZone: timezoneService.getFacilityTimezone(),
         year: 'numeric',
         month: 'short',
         day: 'numeric',

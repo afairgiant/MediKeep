@@ -10,6 +10,7 @@ import { apiService } from '../services/api';
 import patientApi from '../services/api/patientApi';
 import { useAuth } from './AuthContext';
 import logger from '../services/logger';
+import { timezoneService } from '../services/timezoneService';
 
 // App version for cache busting
 const APP_VERSION = '1.0.0';
@@ -549,6 +550,9 @@ export function AppDataProvider({ children }) {
               timestamp: new Date().toISOString()
             });
             
+            // Ensure timezone service is initialized after auth
+            timezoneService.init().catch(() => {});
+
             // Fetch fresh patient data immediately on login
             fetchCurrentPatient(true);
 

@@ -37,6 +37,7 @@ import { PatientSharingModal } from '../medical';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useCacheManager, useCurrentPatient } from '../../hooks/useGlobalData';
 import logger from '../../services/logger';
+import { timezoneService } from '../../services/timezoneService';
 
 const InvitationNotifications = () => {
   const { t } = useTranslation(['navigation', 'common']);
@@ -212,7 +213,7 @@ const InvitationNotifications = () => {
 
         {lastUpdate && (
           <Text size="xs" c="dimmed" mb="sm">
-            {t('invitations.lastUpdated', 'Last updated')}: {lastUpdate.toLocaleTimeString()}
+            {t('invitations.lastUpdated', 'Last updated')}: {lastUpdate.toLocaleTimeString([], { timeZone: timezoneService.getFacilityTimezone() })}
           </Text>
         )}
 

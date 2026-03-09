@@ -61,6 +61,7 @@ import { InvitationNotifications } from '../components/dashboard';
 import { apiService } from '../services/api';
 import frontendLogger from '../services/frontendLogger';
 import logger from '../services/logger';
+import { timezoneService } from '../services/timezoneService';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrentPatient, useCacheManager } from '../hooks/useGlobalData';
 import { useDateFormat } from '../hooks/useDateFormat';
@@ -657,7 +658,7 @@ const Dashboard = () => {
 
       {lastActivityUpdate && (
         <Text size="xs" c="dimmed" mb="sm">
-          {t('dashboard.activity.lastUpdated', 'Last updated')}: {lastActivityUpdate.toLocaleTimeString()}
+          {t('dashboard.activity.lastUpdated', 'Last updated')}: {lastActivityUpdate.toLocaleTimeString([], { timeZone: timezoneService.getFacilityTimezone() })}
         </Text>
       )}
 
