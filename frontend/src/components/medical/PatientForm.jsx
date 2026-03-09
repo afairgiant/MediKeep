@@ -34,12 +34,34 @@ import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import patientApi from '../../services/api/patientApi';
 import logger from '../../services/logger';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../../utils/constants';
 import {
   unitLabels,
   validationRanges,
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
+
+/**
+ * Parse a YYYY-MM-DD string as a local Date to avoid UTC timezone shift.
+ * API birth dates may include a time component (e.g., "2000-01-15T00:00:00")
+ * which would shift the date when parsed by new Date() in negative UTC offsets.
+ */
+function parseBirthDateAsLocal(dateString) {
+  const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/**
+ * Serialize a Date to YYYY-MM-DD using local date parts to avoid UTC timezone shift.
+ * Using toISOString() would convert to UTC first, potentially shifting the date.
+ */
+function serializeBirthDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 const PatientForm = ({
   patient = null,
@@ -48,9 +70,11 @@ const PatientForm = ({
   isModal = true,
 }) => {
   const { t } = useTranslation(['common', 'errors']);
-  const { unitSystem } = useUserPreferences();
+  const { unitSystem, dateFormat } = useUserPreferences();
   const labels = unitLabels[unitSystem];
   const ranges = validationRanges[unitSystem];
+
+  const dateInputFormat = DATE_FORMAT_OPTIONS[dateFormat]?.pattern || DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT].pattern;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -76,7 +100,7 @@ const PatientForm = ({
       setFormData({
         first_name: patient.first_name || '',
         last_name: patient.last_name || '',
-        birth_date: patient.birth_date ? new Date(patient.birth_date) : null,
+        birth_date: patient.birth_date ? parseBirthDateAsLocal(patient.birth_date) : null,
         gender: patient.gender || '',
         blood_type: patient.blood_type || '',
         // Convert stored imperial values to display format
@@ -110,7 +134,7 @@ const PatientForm = ({
         ...formData,
         birth_date: formData.birth_date
           ? formData.birth_date instanceof Date
-            ? formData.birth_date.toISOString().split('T')[0]
+            ? serializeBirthDate(formData.birth_date)
             : formData.birth_date
           : null,
         // Convert display values back to storage format (imperial)
@@ -240,7 +264,6 @@ const PatientForm = ({
     { value: 'other', label: t('patients.form.relationship.options.other') },
   ];
 
-
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Stack gap="md">
@@ -314,8 +337,9 @@ const PatientForm = ({
             <Group grow>
               <DateInput
                 label={t('patients.form.birthDate.label')}
-                placeholder={t('patients.form.birthDate.placeholder')}
+                placeholder={dateInputFormat}
                 required
+                valueFormat={dateInputFormat}
                 leftSection={<IconCalendar size="1rem" />}
                 value={formData.birth_date}
                 onChange={date =>
