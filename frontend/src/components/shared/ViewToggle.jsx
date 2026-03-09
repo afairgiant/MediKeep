@@ -7,11 +7,13 @@ const MODE_CONFIG = {
   components: { icon: '\uD83E\uDDEA', labelKey: 'viewToggle.components', fallback: 'Components' },
 };
 
-const ViewToggle = ({ viewMode, onViewModeChange, showPrint = false, modes = ['cards', 'table'] }) => {
+const ViewToggle = ({ viewMode, onViewModeChange, showPrint = false, modes = ['cards', 'table'], size }) => {
   const { t } = useTranslation('common');
 
+  const sizeClass = size ? `view-toggle-${size}` : '';
+
   return (
-    <div className="view-toggle-container">
+    <div className={`view-toggle-container ${sizeClass}`.trim()}>
       <div className="view-toggle">
         {modes.map((mode) => {
           const cfg = MODE_CONFIG[mode];
@@ -41,6 +43,7 @@ ViewToggle.propTypes = {
   onViewModeChange: PropTypes.func.isRequired,
   showPrint: PropTypes.bool,
   modes: PropTypes.arrayOf(PropTypes.string),
+  size: PropTypes.oneOf(['sm']),
 };
 
 export default ViewToggle;

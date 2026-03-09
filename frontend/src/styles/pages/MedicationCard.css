@@ -1,0 +1,44 @@
+/* MedicationCard - Compact card styles */
+
+/* Card hover effect (matches dashboard pattern) */
+.medication-card-compact {
+  transition: all 0.2s ease;
+}
+
+@media (hover: hover) {
+  .medication-card-compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Override clickable-card hover background (from MedicalPageShared.css) */
+.medication-card-compact.clickable-card:hover {
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
+}
+
+/* Dark mode: stronger hover shadow */
+[data-mantine-color-scheme="dark"] .medication-card-compact:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Footer section with Card.Section */
+.medication-card-footer {
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+  border-top: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  padding: 8px 12px;
+}
+
+/* Compact view toggle (sm size) */
+.view-toggle-sm .view-toggle-btn,
+.view-toggle-sm .print-button {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+/* Mobile: tighter footer padding */
+@media (max-width: 576px) {
+  .medication-card-footer {
+    padding: 6px 8px;
+  }
+}

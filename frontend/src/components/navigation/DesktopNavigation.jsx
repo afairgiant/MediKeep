@@ -78,6 +78,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
                       <span className="nav-icon">{item.icon}</span>
                     }
                     onClick={() => handleNavigation(item.path)}
+                    color={isCurrentPath(item.path) ? 'blue' : undefined}
                     className={isCurrentPath(item.path) ? 'nav-item-active' : ''}
                   >
                     {t(item.nameKey, item.name || item.nameKey)}

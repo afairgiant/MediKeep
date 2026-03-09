@@ -51,8 +51,19 @@
 }
 
 .nav-item-active {
-  color: var(--color-primary-text);
   font-weight: 600;
+}
+
+/* Light mode: blue-8 text (#1864ab) on blue-0 bg (#e7f5ff) = ~7.5:1 contrast ratio */
+.desktop-nav-dropdown .nav-item-active {
+  color: var(--mantine-color-blue-8) !important;
+  background-color: var(--mantine-color-blue-0) !important;
+}
+
+/* Dark mode: blue-1 text (#d0ebff) on blue-9 bg (#0c2d48) = ~10:1 contrast ratio */
+[data-mantine-color-scheme="dark"] .desktop-nav-dropdown .nav-item-active {
+  color: var(--mantine-color-blue-1) !important;
+  background-color: var(--mantine-color-blue-9) !important;
 }
 
 .theme-toggle-menu-item {

@@ -466,7 +466,7 @@ const Dashboard = () => {
       h={90}
     >
       <Stack align="center" justify="center" h="100%">
-        <Text size={isMobile ? '18px' : '22px'} fw={700} c={stat.color}>
+        <Text size={isMobile ? '18px' : '22px'} fw={700} c={colorScheme === 'dark' ? `${stat.color}.3` : stat.color}>
           {stat.value}
         </Text>
         <Text size="12px" c="dimmed" ta="center">

@@ -7,7 +7,6 @@ import {
   Group,
   Stack,
   Text,
-  Divider,
 } from '@mantine/core';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { createCardClickHandler } from '../../../utils/helpers';
@@ -18,6 +17,7 @@ import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { useTagColors } from '../../../hooks/useTagColors';
 import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
 import '../../../styles/shared/MedicalPageShared.css';
+import '../../../styles/pages/MedicationCard.css';
 
 const MedicationCard = ({
   medication,
@@ -54,18 +54,32 @@ const MedicationCard = ({
     }
   };
 
-  // Check if medication is inactive/stopped/finished/completed/on-hold
   const isInactive = ['inactive', 'stopped', 'completed', 'cancelled', 'on-hold'].includes(
     medication.status?.toLowerCase()
   );
+
+  const getDateDisplay = () => {
+    const start = medication.effective_period_start;
+    const end = medication.effective_period_end;
+    if (start && end) {
+      return `${formatLongDate(start)} - ${formatLongDate(end)}`;
+    }
+    if (start) {
+      return `${t('common:labels.started', 'Started')} ${formatLongDate(start)}`;
+    }
+    return null;
+  };
+
+  const dateDisplay = getDateDisplay();
 
   return (
     <Card
       withBorder
       shadow="sm"
       radius="md"
+      p="sm"
       h="100%"
-      className="clickable-card"
+      className="clickable-card medication-card-compact"
       onClick={createCardClickHandler(onView, medication)}
       style={{
         display: 'flex',
@@ -76,24 +90,25 @@ const MedicationCard = ({
       }}
     >
       <Stack gap="sm" style={{ flex: 1 }}>
-        <Group justify="space-between" align="flex-start">
-          <Stack gap="xs" style={{ flex: 1 }}>
-            <Text fw={600} size="lg">
-              {medication.medication_name}
-            </Text>
-            <Group gap="xs">
+        {/* Header */}
+        <Group justify="space-between" align="flex-start" wrap="nowrap">
+          <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+            <Group gap="xs" align="center" wrap="wrap">
+              <Text fw={600} size="sm" lineClamp={1}>
+                {medication.medication_name}
+              </Text>
               {medication.dosage && (
-                <Badge variant="light" color="blue" size="md">
+                <Badge variant="light" color="blue" size="xs">
                   {medication.dosage}
                 </Badge>
               )}
               {medication.medication_type && medication.medication_type !== 'prescription' && (
-                <Badge variant="light" color="grape" size="sm">
+                <Badge variant="light" color="grape" size="xs">
                   {getMedicationTypeLabel(medication.medication_type)}
                 </Badge>
               )}
             </Group>
-            <Group gap="xs">
+            <Group gap={4}>
               {medication.tags && medication.tags.length > 0 && medication.tags.slice(0, 2).map((tag) => (
                 <ClickableTagBadge
                   key={tag}
@@ -116,118 +131,116 @@ const MedicationCard = ({
               />
             </Group>
           </Stack>
-          <StatusBadge status={medication.status} />
+          <StatusBadge status={medication.status} size="sm" />
         </Group>
 
-        <Stack gap="xs">
-          {medication.frequency && (
-            <Group>
-              <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.frequency.label')}:
-              </Text>
-              <Text size="sm">{medication.frequency}</Text>
-            </Group>
-          )}
-          {medication.route && (
-            <Group>
-              <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.route.label')}:
-              </Text>
-              <Badge variant="light" color="cyan" size="sm">
+        {/* Body detail rows - always rendered for uniform height */}
+        <Stack gap={4}>
+          <Group>
+            <Text size="xs" fw={500} c="dimmed" w={90}>
+              {t('medications.frequency.label')}:
+            </Text>
+            <Text size="xs">{medication.frequency || '-'}</Text>
+          </Group>
+          <Group>
+            <Text size="xs" fw={500} c="dimmed" w={90}>
+              {t('medications.route.label')}:
+            </Text>
+            {medication.route ? (
+              <Badge variant="light" color="cyan" size="xs">
                 {medication.route}
               </Badge>
-            </Group>
-          )}
+            ) : (
+              <Text size="xs" c="dimmed">-</Text>
+            )}
+          </Group>
           <Group align="flex-start">
-            <Text size="sm" fw={500} c="dimmed" w={120}>
+            <Text size="xs" fw={500} c="dimmed" w={90}>
               {t('medications.indication.label')}:
             </Text>
-            <Text size="sm" style={{ flex: 1 }}>
+            <Text size="xs" style={{ flex: 1 }}>
               {getMedicationPurpose(medication)}
             </Text>
           </Group>
-          {medication.practitioner && (
-            <Group>
-              <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.prescribingProvider.label')}:
-              </Text>
+          <Group>
+            <Text size="xs" fw={500} c="dimmed" w={90}>
+              {t('medications.prescribingProvider.label')}:
+            </Text>
+            {medication.practitioner ? (
               <Text
-                size="sm"
+                size="xs"
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigateToEntity('practitioner', medication.practitioner.id, navigate);
+                }}
                 title={t('common:labels.viewPractitionerDetails')}
               >
                 {medication.practitioner.name}
               </Text>
-            </Group>
-          )}
-          {medication.pharmacy && (
-            <Group>
-              <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.pharmacy.label')}:
-              </Text>
+            ) : (
+              <Text size="xs" c="dimmed">-</Text>
+            )}
+          </Group>
+          <Group>
+            <Text size="xs" fw={500} c="dimmed" w={90}>
+              {t('medications.pharmacy.label')}:
+            </Text>
+            {medication.pharmacy ? (
               <Text
-                size="sm"
+                size="xs"
                 c="blue"
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigateToEntity('pharmacy', medication.pharmacy.id, navigate);
+                }}
                 title={t('common:labels.viewPharmacyDetails', 'View pharmacy details')}
               >
                 {medication.pharmacy.name}
               </Text>
-            </Group>
-          )}
-          {medication.effective_period_start && (
-            <Group>
-              <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('common:labels.startDate', 'Start Date')}:
-              </Text>
-              <Text size="sm">
-                {formatLongDate(medication.effective_period_start)}
-              </Text>
-            </Group>
-          )}
-          {medication.effective_period_end && (
-            <Group>
-              <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('common:labels.endDate', 'End Date')}:
-              </Text>
-              <Text size="sm">
-                {formatLongDate(medication.effective_period_end)}
-              </Text>
-            </Group>
-          )}
+            ) : (
+              <Text size="xs" c="dimmed">-</Text>
+            )}
+          </Group>
         </Stack>
       </Stack>
 
-      <Stack gap={0} mt="auto">
-        <Divider />
-        <Group justify="flex-end" gap="xs" pt="sm">
-          <Button
-            variant="filled"
-            size="xs"
-            onClick={() => onView(medication)}
-          >
-            {t('common:buttons.view')}
-          </Button>
-          <Button
-            variant="filled"
-            size="xs"
-            onClick={() => onEdit(medication)}
-          >
-            {t('common:buttons.edit')}
-          </Button>
-          <Button
-            variant="filled"
-            color="red"
-            size="xs"
-            onClick={() => onDelete(medication.id)}
-          >
-            {t('common:buttons.delete')}
-          </Button>
+      {/* Footer */}
+      <Card.Section mt="auto" className="medication-card-footer">
+        <Group justify="space-between" align="center" wrap="nowrap">
+          <Text size="xs" c="dark" style={{ flex: 1 }} truncate>
+            {dateDisplay || '\u00A0'}
+          </Text>
+          <Group gap={4} wrap="nowrap">
+            <Button
+              variant="subtle"
+              color="blue"
+              size="compact-xs"
+              onClick={(e) => { e.stopPropagation(); onView(medication); }}
+            >
+              {t('common:buttons.view')}
+            </Button>
+            <Button
+              variant="subtle"
+              color="dark"
+              size="compact-xs"
+              onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
+            >
+              {t('common:buttons.edit')}
+            </Button>
+            <Button
+              variant="subtle"
+              color="red"
+              size="compact-xs"
+              onClick={(e) => { e.stopPropagation(); onDelete(medication.id); }}
+            >
+              {t('common:buttons.delete')}
+            </Button>
+          </Group>
         </Group>
-      </Stack>
+      </Card.Section>
     </Card>
   );
 };
