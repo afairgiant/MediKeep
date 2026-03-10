@@ -6,7 +6,7 @@ import { timezoneService } from '../services/timezoneService';
 import { DATE_FORMATS } from './constants';
 
 /**
- * Format date for display using facility timezone
+ * Format date for display using configured timezone
  * @param {string|Date} utcDate - UTC date to format
  * @param {string} format - Format string (legacy parameter, maintained for compatibility)
  * @returns {string} - Formatted date
@@ -32,7 +32,7 @@ export const formatDate = (utcDate, format = DATE_FORMATS.DISPLAY) => {
 };
 
 /**
- * Format date and time for display using facility timezone
+ * Format date and time for display using configured timezone
  * @param {string|Date} utcDate - UTC date to format
  * @param {boolean} includeTimezone - Whether to include timezone abbreviation
  * @returns {string} - Formatted date and time
@@ -42,11 +42,11 @@ export const formatDateTime = (utcDate, includeTimezone = true) => {
 };
 
 /**
- * Get current facility time for form defaults
+ * Get current time in configured timezone for form defaults
  * @returns {string} - Current time in YYYY-MM-DDTHH:MM format
  */
-export const getCurrentFacilityTime = () => {
-  return timezoneService.getCurrentFacilityTime();
+export const getCurrentTime = () => {
+  return timezoneService.getCurrentTime();
 };
 
 /**

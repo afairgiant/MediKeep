@@ -13,6 +13,7 @@ import {
   getDateFormatLabel,
   getDateFormatExample,
 } from '../utils/dateFormatUtils';
+import { timezoneService } from '../services/timezoneService';
 import {
   formatDateTimeForInputWithPreference,
   getDateTimePlaceholder,
@@ -37,6 +38,7 @@ export const useDateFormat = () => {
   const formatDateWithTime = useCallback(
     (dateValue, options = {}) => {
       return formatDateWithPreference(dateValue, effectiveFormat, {
+        timezone: timezoneService.getTimezone(),
         ...options,
         includeTime: true,
       });
@@ -46,7 +48,10 @@ export const useDateFormat = () => {
 
   const formatDateTime = useCallback(
     (dateValue, options = {}) => {
-      return formatDateTimeWithPreference(dateValue, effectiveFormat, options);
+      return formatDateTimeWithPreference(dateValue, effectiveFormat, {
+        timezone: timezoneService.getTimezone(),
+        ...options,
+      });
     },
     [effectiveFormat]
   );
