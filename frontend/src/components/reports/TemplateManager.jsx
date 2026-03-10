@@ -225,6 +225,7 @@ const TemplateManager = ({
                 onLoad={() => onLoadTemplate(template.id)}
                 onEdit={() => handleEdit(template)}
                 onDelete={() => handleDelete(template)}
+                formatDate={formatDate}
               />
             ))}
           </Stack>
@@ -370,7 +371,7 @@ const TemplateManager = ({
 /**
  * Individual template card component
  */
-const TemplateCard = ({ template, onLoad, onEdit, onDelete }) => {
+const TemplateCard = ({ template, onLoad, onEdit, onDelete, formatDate }) => {
   return (
     <Paper p="sm" withBorder radius="sm" bg="var(--color-bg-secondary)">
       <Group justify="space-between">
@@ -386,30 +387,32 @@ const TemplateCard = ({ template, onLoad, onEdit, onDelete }) => {
               </Badge>
             )}
           </Group>
-          
+
           {template.description && (
             <Text size="xs" c="dimmed" lineClamp={1}>
               {template.description}
             </Text>
           )}
-          
-          <Group gap="xs">
-            <IconClock size={12} />
-            <Text size="xs" c="dimmed">
-              {formatDate(template.created_at)}
-            </Text>
-          </Group>
+
+          {template.created_at && formatDate && (
+            <Group gap="xs">
+              <IconClock size={12} aria-hidden="true" />
+              <Text size="xs" c="dimmed">
+                {formatDate(template.created_at)}
+              </Text>
+            </Group>
+          )}
         </Stack>
-        
+
         <Group gap="xs">
           <Button size="xs" variant="light" onClick={onLoad}>
             Load
           </Button>
-          <ActionIcon size="sm" variant="subtle" onClick={onEdit}>
-            <IconEdit size={16} />
+          <ActionIcon size="sm" variant="subtle" onClick={onEdit} aria-label={`Edit template ${template.name}`}>
+            <IconEdit size={16} aria-hidden="true" />
           </ActionIcon>
-          <ActionIcon size="sm" variant="subtle" color="red" onClick={onDelete}>
-            <IconTrash size={16} />
+          <ActionIcon size="sm" variant="subtle" color="red" onClick={onDelete} aria-label={`Delete template ${template.name}`}>
+            <IconTrash size={16} aria-hidden="true" />
           </ActionIcon>
         </Group>
       </Group>

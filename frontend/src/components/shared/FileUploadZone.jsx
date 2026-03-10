@@ -183,7 +183,7 @@ const FileUploadZone = ({
         onDragLeave={() => setDragActive(false)}
         style={{
           borderColor: dragActive ? 'var(--mantine-color-blue-6)' : undefined,
-          backgroundColor: dragActive ? 'var(--mantine-color-blue-0)' : undefined,
+          backgroundColor: dragActive ? 'var(--mantine-color-blue-light)' : undefined,
         }}
       >
         <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
