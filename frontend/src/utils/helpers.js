@@ -42,7 +42,7 @@ export const formatDateTime = (utcDate, includeTimezone = true) => {
 };
 
 /**
- * Get current facility time for form defaults
+ * Get current time in configured timezone for form defaults
  * @returns {string} - Current time in YYYY-MM-DDTHH:MM format
  */
 export const getCurrentTime = () => {

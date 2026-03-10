@@ -551,7 +551,7 @@ export function AppDataProvider({ children }) {
             });
             
             // Ensure timezone service is initialized after auth
-            timezoneService.init().catch(() => {});
+            timezoneService.init();
 
             // Fetch fresh patient data immediately on login
             fetchCurrentPatient(true);

@@ -16,7 +16,17 @@ class TimezoneService {
 
   async init() {
     if (this.initialized) return;
+    if (this._initPromise) return this._initPromise;
 
+    this._initPromise = this._doInit();
+    try {
+      await this._initPromise;
+    } finally {
+      this._initPromise = null;
+    }
+  }
+
+  async _doInit() {
     try {
       const response = await apiClient.get('/utils/timezone-info');
       this.timezone = response.data.facility_timezone || 'UTC';
