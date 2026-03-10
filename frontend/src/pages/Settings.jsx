@@ -16,6 +16,7 @@ import frontendLogger from '../services/frontendLogger';
 import { PAPERLESS_SETTING_KEYS, isPaperlessSetting } from '../constants/paperlessSettings';
 import { DEFAULT_DATE_FORMAT } from '../utils/constants';
 import { notifySuccess, notifyError, notifyInfo } from '../utils/notifyTranslated';
+import { timezoneService } from '../services/timezoneService';
 import '../styles/pages/Settings.css';
 
 const SETTINGS_TABS = ['general', 'documents', 'notifications', 'about'];
@@ -708,6 +709,15 @@ const Settings = () => {
                 <div className="settings-option-title">{t('settings.system.version.title', 'Application Version')}</div>
                 <div className="settings-option-description">
                   {renderVersionInfo()}
+                </div>
+              </div>
+            </div>
+
+            <div className="settings-option">
+              <div className="settings-option-info">
+                <div className="settings-option-title">{t('settings.system.timezone.title', 'Timezone')}</div>
+                <div className="settings-option-description">
+                  {timezoneService.getTimezone()}
                 </div>
               </div>
             </div>
