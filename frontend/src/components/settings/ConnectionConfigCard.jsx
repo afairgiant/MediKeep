@@ -258,28 +258,24 @@ const ConnectionConfigCard = ({
           className: 'connection-status-connected',
           icon: '✓',
           text: 'Connected',
-          color: '#28a745',
         };
       case 'failed':
         return {
           className: 'connection-status-failed',
           icon: '✗',
           text: 'Connection Failed',
-          color: '#dc3545',
         };
       case 'testing':
         return {
           className: 'connection-status-testing',
           icon: '⏳',
           text: 'Testing...',
-          color: '#ffc107',
         };
       default:
         return {
           className: 'connection-status-disconnected',
           icon: '○',
           text: 'Not Connected',
-          color: '#6c757d',
         };
     }
   };
@@ -302,7 +298,6 @@ const ConnectionConfigCard = ({
           >
             <span
               className="connection-status-icon"
-              style={{ color: statusInfo.color }}
             >
               {statusInfo.icon}
             </span>
@@ -394,6 +389,7 @@ const ConnectionConfigCard = ({
                   className="paperless-token-toggle"
                   onClick={() => setShowApiToken(!showApiToken)}
                   disabled={testingConnection}
+                  aria-label={showApiToken ? 'Hide API token' : 'Show API token'}
                 >
                   {showApiToken ? '👁️' : '👁️‍🗨️'}
                 </button>
@@ -461,6 +457,7 @@ const ConnectionConfigCard = ({
                     className="paperless-token-toggle"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={testingConnection}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>

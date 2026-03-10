@@ -57,6 +57,7 @@ function MedicalPageActions({
   viewModes,
   showPrint = true,
   showViewToggle = true,
+  viewToggleSize,
   mb = 'lg',
   align = 'center',
   buttonGap = 'sm',
@@ -114,6 +115,7 @@ function MedicalPageActions({
           viewMode={viewMode}
           onViewModeChange={onViewModeChange}
           showPrint={showPrint}
+          size={viewToggleSize}
           {...(viewModes ? { modes: viewModes } : {})}
         />
       )}
@@ -157,6 +159,8 @@ MedicalPageActions.propTypes = {
   showPrint: PropTypes.bool,
   /** Whether to show ViewToggle (defaults to true) */
   showViewToggle: PropTypes.bool,
+  /** Size variant for ViewToggle ('sm' for compact) */
+  viewToggleSize: PropTypes.oneOf(['sm']),
   /** Margin bottom for the container (defaults to 'lg') */
   mb: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   /** Vertical alignment of items (defaults to 'center') */

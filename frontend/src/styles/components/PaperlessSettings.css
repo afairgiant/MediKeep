@@ -109,7 +109,7 @@
 .paperless-form-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .paperless-form-input.error {
@@ -159,7 +159,7 @@
 }
 
 .paperless-radio-option:hover {
-  background-color: rgba(0, 123, 255, 0.05);
+  background-color: rgba(102, 126, 234, 0.05);
 }
 
 .paperless-radio-option input[type="radio"] {
@@ -210,7 +210,12 @@
 }
 
 .paperless-token-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--color-bg-tertiary);
+}
+
+.paperless-token-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .paperless-token-toggle:disabled {

@@ -243,10 +243,10 @@ const Immunization = () => {
   }
 
   return (
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('immunizations.title', 'Immunizations')} icon="💉" />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
@@ -258,9 +258,12 @@ const Immunization = () => {
             label: t('immunizations.addImmunization', 'Add New Immunization'),
             onClick: handleAddImmunization,
             leftSection: <IconPlus size={16} />,
+            size: 'sm',
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          viewToggleSize="sm"
+          mb={0}
         />
 
         {/* Mantine Filter Controls */}

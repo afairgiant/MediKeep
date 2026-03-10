@@ -2,11 +2,12 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, Button } from '@mantine/core';
-import { IconChevronDown } from '@tabler/icons-react';
+import { IconChevronDown, IconUser } from '@tabler/icons-react';
 import { getNavigationSections } from '../../config/navigation.config';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
 import LanguageSwitcher from '../shared/LanguageSwitcher';
+import './TabletNavigation.css';
 
 const TabletNavigation = ({ user, isAdmin, onLogout }) => {
   const navigate = useNavigate();
@@ -26,7 +27,11 @@ const TabletNavigation = ({ user, isAdmin, onLogout }) => {
   const handleNavigation = (path) => {
     navigate(path);
   };
-  
+
+  const isSectionActive = (section) => {
+    return section.items.some(item => isCurrentPath(item.path));
+  };
+
   return (
     <div className="tablet-navigation">
       <div className="tablet-nav-content">
@@ -36,7 +41,12 @@ const TabletNavigation = ({ user, isAdmin, onLogout }) => {
           return (
             <Menu key={key} position="bottom-start" offset={8}>
               <Menu.Target>
-                <Button variant="subtle" size="sm" rightSection={<IconChevronDown size={14} />}>
+                <Button
+                  variant="subtle"
+                  size="sm"
+                  className={isSectionActive(section) ? 'tablet-nav-trigger section-active' : ''}
+                  rightSection={<IconChevronDown size={14} />}
+                >
                   {section.titleKey ? t(section.titleKey, section.title) : section.title}
                 </Button>
               </Menu.Target>
@@ -59,10 +69,17 @@ const TabletNavigation = ({ user, isAdmin, onLogout }) => {
         })}
         
         <div className="nav-spacer" />
-        
+
+        <div className="tablet-nav-divider" />
+
         <Menu position="bottom-end" offset={8}>
           <Menu.Target>
-            <Button variant="subtle" size="sm" rightSection={<IconChevronDown size={14} />}>
+            <Button
+              variant="subtle"
+              size="sm"
+              leftSection={<IconUser size={16} />}
+              rightSection={<IconChevronDown size={14} />}
+            >
               {t('menu.profile', 'Account')}
             </Button>
           </Menu.Target>

@@ -9,9 +9,11 @@ import {
   Group,
   Text,
   Textarea,
-  Divider,
+  Box,
+  ThemeIcon,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { IconUser, IconStethoscope, IconHome, IconCheck, IconX } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
@@ -134,237 +136,262 @@ const MantinePatientForm = ({
     handleNumberChange,
   } = useFormHandlers(onInputChange);
 
-  return (
-    <Stack spacing="md">
-      <Text size="lg" fw={600} mb="sm">
-        {isCreating ? t('patients.form.createTitle') : t('patients.form.editTitle')}
+  const SectionHeader = ({ icon: Icon, color, children }) => (
+    <Group gap="xs" mb="sm">
+      <ThemeIcon variant="light" size="sm" radius="md" color={color}>
+        <Icon size={14} />
+      </ThemeIcon>
+      <Text size="sm" fw={600} tt="uppercase" c="dimmed">
+        {children}
       </Text>
+    </Group>
+  );
 
+  return (
+    <Stack gap="lg">
       {/* Patient Photo Section */}
       {!isCreating && formData.id && (
-        <>
-          <PatientPhotoUpload
-            key={photoKey}
-            patientId={formData.id}
-            currentPhotoUrl={photoUrl}
-            onPhotoChange={handlePhotoUpload}
-            onPhotoDelete={handlePhotoDelete}
-            disabled={saving}
-          />
-          <Divider />
-        </>
+        <PatientPhotoUpload
+          key={photoKey}
+          patientId={formData.id}
+          currentPhotoUrl={photoUrl}
+          onPhotoChange={handlePhotoUpload}
+          onPhotoDelete={handlePhotoDelete}
+          disabled={saving}
+        />
       )}
 
       {/* Show note for new patients */}
       {isCreating && (
-        <>
-          <Text size="sm" c="dimmed" ta="center" style={{ fontStyle: 'italic' }}>
-            {t('patients.form.saveFirstMessage')}
-          </Text>
-          <Divider />
-        </>
+        <Text size="sm" c="dimmed" ta="center" fs="italic">
+          {t('patients.form.saveFirstMessage')}
+        </Text>
       )}
 
-      {/* Basic Information */}
-      <Grid>
-        <Grid.Col span={6}>
-          <TextInput
-            label={t('patients.form.firstName.label')}
-            placeholder={t('patients.form.firstName.placeholder')}
-            value={formData.first_name}
-            onChange={handleTextInputChange('first_name')}
-            required
-            withAsterisk
-            disabled={saving}
-            description={t('patients.form.firstName.description')}
-          />
-        </Grid.Col>
-        <Grid.Col span={6}>
-          <TextInput
-            label={t('patients.form.lastName.label')}
-            placeholder={t('patients.form.lastName.placeholder')}
-            value={formData.last_name}
-            onChange={handleTextInputChange('last_name')}
-            required
-            withAsterisk
-            disabled={saving}
-            description={t('patients.form.lastName.description')}
-          />
-        </Grid.Col>
-      </Grid>
+      {/* Personal Information Section */}
+      <Box>
+        <SectionHeader icon={IconUser} color="blue">
+          {t('patientInfo.personalInfo', 'Personal Information')}
+        </SectionHeader>
 
-      {/* Birth Date and Gender */}
-      <Grid>
-        <Grid.Col span={6}>
-          <DateInput
-            label={t('patients.form.birthDate.label')}
-            placeholder={t('patients.form.birthDate.placeholder')}
-            value={
-              formData.birth_date
-                ? (() => {
-                    if (
-                      typeof formData.birth_date === 'string' &&
-                      /^\d{4}-\d{2}-\d{2}$/.test(formData.birth_date.trim())
-                    ) {
-                      const [year, month, day] = formData.birth_date
-                        .trim()
-                        .split('-')
-                        .map(Number);
-                      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-                        return new Date(year, month - 1, day); // month is 0-indexed
-                      }
-                    }
-                    return new Date(formData.birth_date);
-                  })()
-                : null
-            }
-            onChange={handleDateChange('birth_date')}
-            firstDayOfWeek={0}
-            required
-            withAsterisk
-            disabled={saving}
-            description={t('patients.form.birthDate.description')}
-            maxDate={new Date()} // Can't be in the future
-            popoverProps={{ withinPortal: true, zIndex: 3000 }}
-          />
-        </Grid.Col>
-        <Grid.Col span={6}>
+        <Stack gap="sm">
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
+              <TextInput
+                label={t('patients.form.firstName.label')}
+                placeholder={t('patients.form.firstName.placeholder')}
+                value={formData.first_name}
+                onChange={handleTextInputChange('first_name')}
+                required
+                withAsterisk
+                disabled={saving}
+                radius="md"
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
+              <TextInput
+                label={t('patients.form.lastName.label')}
+                placeholder={t('patients.form.lastName.placeholder')}
+                value={formData.last_name}
+                onChange={handleTextInputChange('last_name')}
+                required
+                withAsterisk
+                disabled={saving}
+                radius="md"
+              />
+            </Grid.Col>
+          </Grid>
+
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
+              <DateInput
+                label={t('patients.form.birthDate.label')}
+                placeholder={t('patients.form.birthDate.placeholder')}
+                value={
+                  formData.birth_date
+                    ? (() => {
+                        if (
+                          typeof formData.birth_date === 'string' &&
+                          /^\d{4}-\d{2}-\d{2}$/.test(formData.birth_date.trim())
+                        ) {
+                          const [year, month, day] = formData.birth_date
+                            .trim()
+                            .split('-')
+                            .map(Number);
+                          if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                            return new Date(year, month - 1, day);
+                          }
+                        }
+                        return new Date(formData.birth_date);
+                      })()
+                    : null
+                }
+                onChange={handleDateChange('birth_date')}
+                firstDayOfWeek={0}
+                required
+                withAsterisk
+                disabled={saving}
+                maxDate={new Date()}
+                popoverProps={{ withinPortal: true, zIndex: 3000 }}
+                radius="md"
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, sm: 6 }}>
+              <Select
+                label={t('patients.form.gender.label')}
+                placeholder={t('patients.form.gender.placeholder')}
+                value={formData.gender}
+                onChange={handleSelectChange('gender')}
+                disabled={saving}
+                data={[
+                  { value: 'M', label: t('patients.form.gender.options.male') },
+                  { value: 'F', label: t('patients.form.gender.options.female') },
+                  { value: 'OTHER', label: t('patients.form.gender.options.other') },
+                ]}
+                clearable
+                radius="md"
+              />
+            </Grid.Col>
+          </Grid>
+
           <Select
-            label={t('patients.form.gender.label')}
-            placeholder={t('patients.form.gender.placeholder')}
-            value={formData.gender}
-            onChange={handleSelectChange('gender')}
+            label={t('patients.form.relationship.label')}
+            placeholder={t('patients.form.relationship.placeholder')}
+            value={formData.relationship_to_self}
+            onChange={handleSelectChange('relationship_to_self')}
             disabled={saving}
-            data={[
-              { value: 'M', label: t('patients.form.gender.options.male') },
-              { value: 'F', label: t('patients.form.gender.options.female') },
-              { value: 'OTHER', label: t('patients.form.gender.options.other') },
-            ]}
-            description={t('patients.form.gender.description')}
-            clearable
-          />
-        </Grid.Col>
-      </Grid>
-
-      {/* Relationship to You */}
-      <Select
-        label={t('patients.form.relationship.label')}
-        placeholder={t('patients.form.relationship.placeholder')}
-        value={formData.relationship_to_self}
-        onChange={handleSelectChange('relationship_to_self')}
-        disabled={saving}
-        data={RELATIONSHIP_OPTIONS}
-        description={t('patients.form.relationship.description')}
-        clearable
-        searchable
-      />
-
-      {/* Address */}
-      <Textarea
-        label={t('patients.form.address.label')}
-        placeholder={t('patients.form.address.placeholder')}
-        value={formData.address}
-        onChange={handleTextInputChange('address')}
-        disabled={saving}
-        description={t('patients.form.address.description')}
-        minRows={2}
-        maxRows={4}
-      />
-
-      {/* Medical Information */}
-      <Text size="md" fw={500} mt="lg" mb="xs">
-        {t('patients.form.medicalInfoHeading')}
-      </Text>
-
-      <Grid>
-        <Grid.Col span={4}>
-          <Select
-            label={t('patients.form.bloodType.label')}
-            placeholder={t('patients.form.bloodType.placeholder')}
-            value={formData.blood_type}
-            onChange={handleSelectChange('blood_type')}
-            disabled={saving}
-            data={[
-              { value: 'A+', label: 'A+' },
-              { value: 'A-', label: 'A-' },
-              { value: 'B+', label: 'B+' },
-              { value: 'B-', label: 'B-' },
-              { value: 'AB+', label: 'AB+' },
-              { value: 'AB-', label: 'AB-' },
-              { value: 'O+', label: 'O+' },
-              { value: 'O-', label: 'O-' },
-            ]}
-            description={t('patients.form.bloodType.description')}
+            data={RELATIONSHIP_OPTIONS}
             clearable
             searchable
+            radius="md"
           />
-        </Grid.Col>
-        <Grid.Col span={4}>
-          <NumberInput
-            label={t('patients.form.height.label')}
-            placeholder={unitSystem === 'imperial' ? 'e.g., 70' : 'e.g., 178'}
-            value={
-              formData.height
-                ? convertForDisplay(formData.height, 'height', unitSystem)
-                : ''
-            }
-            onChange={value => {
-              const convertedValue = convertForStorage(
-                value,
-                'height',
-                unitSystem
-              );
-              handleNumberChange('height')(convertedValue);
-            }}
-            disabled={saving}
-            description={t('patients.form.height.description', { unit: labels.heightLong })}
-            min={ranges.height.min}
-            max={ranges.height.max}
-            step={unitSystem === 'imperial' ? 0.5 : 1}
-          />
-        </Grid.Col>
-        <Grid.Col span={4}>
-          <NumberInput
-            label={t('patients.form.weight.label')}
-            placeholder={unitSystem === 'imperial' ? 'e.g., 150' : 'e.g., 68'}
-            value={
-              formData.weight
-                ? convertForDisplay(formData.weight, 'weight', unitSystem)
-                : ''
-            }
-            onChange={value => {
-              const convertedValue = convertForStorage(
-                value,
-                'weight',
-                unitSystem
-              );
-              handleNumberChange('weight')(convertedValue);
-            }}
-            disabled={saving}
-            description={t('patients.form.weight.description', { unit: labels.weightLong })}
-            min={ranges.weight.min}
-            max={ranges.weight.max}
-            step={0.1}
-          />
-        </Grid.Col>
-      </Grid>
+        </Stack>
+      </Box>
 
-      {/* Primary Care Physician */}
-      <Select
-        label={t('patients.form.physician.label')}
-        placeholder={t('patients.form.physician.placeholder')}
-        value={formData.physician_id ? String(formData.physician_id) : ''}
-        onChange={handleSelectChange('physician_id')}
-        disabled={saving}
-        data={practitionerOptions}
-        description={t('patients.form.physician.description')}
-        clearable
-        searchable
-      />
+      {/* Address Section */}
+      <Box>
+        <SectionHeader icon={IconHome} color="teal">
+          {t('patients.form.address.label', 'Address')}
+        </SectionHeader>
+
+        <Textarea
+          placeholder={t('patients.form.address.placeholder')}
+          value={formData.address}
+          onChange={handleTextInputChange('address')}
+          disabled={saving}
+          minRows={2}
+          maxRows={4}
+          radius="md"
+        />
+      </Box>
+
+      {/* Medical Information Section */}
+      <Box>
+        <SectionHeader icon={IconStethoscope} color="violet">
+          {t('patients.form.medicalInfoHeading', 'Medical Information')}
+        </SectionHeader>
+
+        <Stack gap="sm">
+          <Grid>
+            <Grid.Col span={{ base: 12, sm: 4 }}>
+              <Select
+                label={t('patients.form.bloodType.label')}
+                placeholder={t('patients.form.bloodType.placeholder')}
+                value={formData.blood_type}
+                onChange={handleSelectChange('blood_type')}
+                disabled={saving}
+                data={[
+                  { value: 'A+', label: 'A+' },
+                  { value: 'A-', label: 'A-' },
+                  { value: 'B+', label: 'B+' },
+                  { value: 'B-', label: 'B-' },
+                  { value: 'AB+', label: 'AB+' },
+                  { value: 'AB-', label: 'AB-' },
+                  { value: 'O+', label: 'O+' },
+                  { value: 'O-', label: 'O-' },
+                ]}
+                clearable
+                searchable
+                radius="md"
+                description={'\u00A0'}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 6, sm: 4 }}>
+              <NumberInput
+                label={t('patients.form.height.label')}
+                placeholder={unitSystem === 'imperial' ? 'e.g., 70' : 'e.g., 178'}
+                value={
+                  formData.height
+                    ? convertForDisplay(formData.height, 'height', unitSystem)
+                    : ''
+                }
+                onChange={value => {
+                  const convertedValue = convertForStorage(
+                    value,
+                    'height',
+                    unitSystem
+                  );
+                  handleNumberChange('height')(convertedValue);
+                }}
+                disabled={saving}
+                description={labels.heightLong}
+                min={ranges.height.min}
+                max={ranges.height.max}
+                step={unitSystem === 'imperial' ? 0.5 : 1}
+                radius="md"
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 6, sm: 4 }}>
+              <NumberInput
+                label={t('patients.form.weight.label')}
+                placeholder={unitSystem === 'imperial' ? 'e.g., 150' : 'e.g., 68'}
+                value={
+                  formData.weight
+                    ? convertForDisplay(formData.weight, 'weight', unitSystem)
+                    : ''
+                }
+                onChange={value => {
+                  const convertedValue = convertForStorage(
+                    value,
+                    'weight',
+                    unitSystem
+                  );
+                  handleNumberChange('weight')(convertedValue);
+                }}
+                disabled={saving}
+                description={labels.weightLong}
+                min={ranges.weight.min}
+                max={ranges.weight.max}
+                step={0.1}
+                radius="md"
+              />
+            </Grid.Col>
+          </Grid>
+
+          <Select
+            label={t('patients.form.physician.label')}
+            placeholder={t('patients.form.physician.placeholder')}
+            value={formData.physician_id ? String(formData.physician_id) : ''}
+            onChange={handleSelectChange('physician_id')}
+            disabled={saving}
+            data={practitionerOptions}
+            clearable
+            searchable
+            radius="md"
+          />
+        </Stack>
+      </Box>
 
       {/* Form Actions */}
-      <Group justify="flex-end" mt="xl">
-        <Button variant="subtle" onClick={onCancel} disabled={saving}>
+      <Group justify="flex-end" mt="sm" pt="md" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+        <Button
+          variant="subtle"
+          color="gray"
+          onClick={onCancel}
+          disabled={saving}
+          leftSection={<IconX size={16} />}
+          radius="md"
+        >
           {t('buttons.cancel')}
         </Button>
         <Button
@@ -372,6 +399,8 @@ const MantinePatientForm = ({
           onClick={onSave}
           disabled={saving}
           loading={saving}
+          leftSection={!saving && <IconCheck size={16} />}
+          radius="md"
         >
           {saving
             ? t('patients.form.buttons.saving')

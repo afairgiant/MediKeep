@@ -926,10 +926,10 @@ const FamilyHistory = () => {
   }
 
   return (
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('familyHistory.title', 'Family History')} icon="👨‍👩‍👧‍👦" />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
 
       {/* Enhanced error display for shared family history loading failures (addresses reviewer feedback) */}
       <ErrorAlert error={currentError} onClose={clearSharedError} />
@@ -970,6 +970,7 @@ const FamilyHistory = () => {
             onClick: handleAddMember,
             leftSection: <IconUserPlus size={16} />,
             visible: activeTab === 'my-family',
+            size: 'sm',
           }}
           secondaryActions={[
             {
@@ -982,12 +983,14 @@ const FamilyHistory = () => {
               leftSection: <IconShare size={16} />,
               variant: bulkSelectionMode ? 'filled' : 'light',
               visible: activeTab === 'my-family',
+              size: 'sm',
             },
             {
               key: 'manage-invitations',
               label: t('familyHistory.manageInvitations', 'Manage Invitations'),
               onClick: openInvitationManager,
               leftSection: <IconMail size={16} />,
+              size: 'sm',
             },
             {
               key: 'share-selected',
@@ -996,10 +999,13 @@ const FamilyHistory = () => {
               leftSection: <IconSend size={16} />,
               variant: 'filled',
               visible: bulkSelectionMode && selectedMembersForBulkSharing.length > 0,
+              size: 'sm',
             },
           ]}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          viewToggleSize="sm"
+          mb={0}
         />
 
         {bulkSelectionMode && (

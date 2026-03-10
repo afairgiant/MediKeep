@@ -37,8 +37,13 @@ import {
   Container,
   Alert,
   Card,
-  Avatar,
+  SimpleGrid,
+  ThemeIcon,
 } from '@mantine/core';
+import { IconUser, IconStethoscope, IconPencil } from '@tabler/icons-react';
+
+// Hooks
+import { useViewport } from '../../hooks/useViewport';
 
 // Styles
 import '../../styles/shared/MedicalPageShared.css';
@@ -62,6 +67,7 @@ const PatientInfo = () => {
   const { invalidatePatientList, invalidatePatient } = useCacheManager();
   const { unitSystem } = useUserPreferences();
   const { formatLongDate } = useDateFormat();
+  const { isMobile, isTablet } = useViewport();
 
   // Combine loading states
   const loading = patientLoading || practitionersLoading;
@@ -371,9 +377,9 @@ const PatientInfo = () => {
   return (
     <>
       <Container size="xl" py="md">
-        <PageHeader title={t('patientInfo.title', 'Patient Information')} icon="📋" />
+        <PageHeader title={t('patientInfo.title', 'Patient Information')} icon="📋" variant="dashboard" />
 
-        <Stack gap="lg">
+        <Stack gap="xl" mt="lg">
           {isNewUser && (
             <Alert variant="light" color="blue" title={t('patientInfo.welcome.title', 'Welcome to MediKeep!')}>
               {t('patientInfo.welcome.message', 'Your account has been created successfully. Please complete your patient profile below to get started with managing your medical records.')}
@@ -394,134 +400,152 @@ const PatientInfo = () => {
             </Alert>
           )}
 
-          <Card withBorder shadow="sm" radius="md" className="patient-card">
-            <Stack gap="md">
-              <Group justify="space-between" align="center">
-                <Text size="xl" fw={600}>
-                  {t('patientInfo.personalInfo', 'Personal Information')}
-                </Text>
-                <Button variant="filled" size="sm" onClick={handleEditPatient}>
-                  {t('patientInfo.editProfile', 'Edit Profile')}
-                </Button>
-              </Group>
-
+          <Card withBorder shadow="sm" radius="md" className="patient-card" p={0}>
               {/* Patient Summary Display */}
               {patientData ? (
                 <div className="patient-details">
-                  {/* Patient Photo and Name Header */}
-                  <Group align="center" mb="md" gap="lg">
-                    <PatientAvatar
-                      photoUrl={photoUrl}
-                      patient={patientData}
-                      size={200}
-                      radius="md"
-                      style={{
-                        border: '2px solid var(--color-border-light)',
-                        backgroundColor: 'var(--color-bg-secondary)',
-                      }}
-                    />
-                    <Stack gap="xs">
-                      <Text size="xl" fw={600}>
-                        {patientData.first_name} {patientData.last_name}
-                      </Text>
-                      <Text size="sm" c="dimmed">
-                        Patient ID: {patientData.id}
-                      </Text>
-                    </Stack>
-                  </Group>
+                  {/* Hero Section */}
+                  <div className="patient-hero-wrapper">
+                    <div className="patient-hero" />
+                    <div className="patient-hero-actions">
+                      <Button
+                        variant="subtle"
+                        color="white"
+                        size="compact-sm"
+                        onClick={handleEditPatient}
+                        leftSection={<IconPencil size={14} />}
+                      >
+                        {t('patientInfo.editProfile', 'Edit Profile')}
+                      </Button>
+                    </div>
 
-                  <div className="detail-row">
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.firstName', 'First Name')}:</label>
-                      <span>{patientData.first_name || t('patientInfo.notProvided', 'Not provided')}</span>
-                    </div>
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.lastName', 'Last Name')}:</label>
-                      <span>{patientData.last_name || t('patientInfo.notProvided', 'Not provided')}</span>
-                    </div>
-                  </div>
-                  <div className="detail-row">
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.birthDate', 'Birth Date')}:</label>
-                      <span>
-                        {formatLongDate(patientData.birth_date, true)}
-                      </span>
-                    </div>
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.gender', 'Gender')}:</label>
-                      <span>{getGenderDisplay(patientData.gender)}</span>
-                    </div>
-                  </div>
-                  {patientData.relationship_to_self && (
-                    <div className="detail-group full-width">
-                      <label>{t('patientInfo.fields.relationship', 'Relationship to You')}:</label>
-                      <span>
-                        {patientData.relationship_to_self
-                          .split('_')
-                          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                          .join(' ')}
-                      </span>
-                    </div>
-                  )}
-                  <div className="detail-group full-width">
-                    <label>{t('patientInfo.fields.address', 'Address')}:</label>
-                    <span>{patientData.address || t('patientInfo.notProvided', 'Not provided')}</span>
-                  </div>
-                  <div className="detail-row">
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.bloodType', 'Blood Type')}:</label>
-                      <span>{patientData.blood_type || t('patientInfo.notProvided', 'Not provided')}</span>
-                    </div>
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.height', 'Height')}:</label>
-                      <span>
-                        {patientData.height
-                          ? formatMeasurement(
-                              convertForDisplay(
-                                patientData.height,
-                                'height',
-                                unitSystem
-                              ),
-                              'height',
-                              unitSystem
-                            )
-                          : t('patientInfo.notProvided', 'Not provided')}
-                      </span>
+                    <div className="patient-hero-profile">
+                      <div className="patient-hero-avatar">
+                        <PatientAvatar
+                          photoUrl={photoUrl}
+                          patient={patientData}
+                          size={isMobile ? 64 : isTablet ? 76 : 88}
+                          radius="xl"
+                        />
+                      </div>
+                      <div className="patient-hero-info">
+                        <Text size={isMobile ? 'lg' : 'xl'} fw={700} className="patient-hero-name-text" lh={1.2}>
+                          {patientData.first_name} {patientData.last_name}
+                        </Text>
+                        {patientData.relationship_to_self && (
+                          <div className="patient-hero-badge">
+                            <Text size="xs" fw={500} className="patient-hero-badge-text">
+                              {patientData.relationship_to_self
+                                .split('_')
+                                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(' ')}
+                            </Text>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="detail-row">
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.weight', 'Weight')}:</label>
-                      <span>
-                        {patientData.weight
-                          ? formatMeasurement(
-                              convertForDisplay(
-                                patientData.weight,
-                                'weight',
-                                unitSystem
-                              ),
-                              'weight',
-                              unitSystem
-                            )
-                          : t('patientInfo.notProvided', 'Not provided')}
-                      </span>
+
+                  <Stack gap="lg" p={isMobile ? 'md' : 'xl'} pt={isMobile ? 'sm' : 'lg'}>
+
+                    {/* Personal Details Section */}
+                    <div className="patient-section">
+                      <div className="patient-section-header">
+                        <ThemeIcon variant="light" size="sm">
+                          <IconUser size={14} />
+                        </ThemeIcon>
+                        <Text size="sm" fw={600} tt="uppercase">
+                          {t('patientInfo.personalInfo', 'Personal Information')}
+                        </Text>
+                      </div>
+                      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                        <div className="detail-group">
+                          <label>{t('patientInfo.fields.firstName', 'First Name')}:</label>
+                          <span>{patientData.first_name || t('patientInfo.notProvided', 'Not provided')}</span>
+                        </div>
+                        <div className="detail-group">
+                          <label>{t('patientInfo.fields.lastName', 'Last Name')}:</label>
+                          <span>{patientData.last_name || t('patientInfo.notProvided', 'Not provided')}</span>
+                        </div>
+                        <div className="detail-group">
+                          <label>{t('patientInfo.fields.birthDate', 'Birth Date')}:</label>
+                          <span>{formatLongDate(patientData.birth_date, true)}</span>
+                        </div>
+                        <div className="detail-group">
+                          <label>{t('patientInfo.fields.gender', 'Gender')}:</label>
+                          <span>{getGenderDisplay(patientData.gender)}</span>
+                        </div>
+                      </SimpleGrid>
+                      <div className="detail-group full-width" style={{ marginTop: 16 }}>
+                        <label>{t('patientInfo.fields.address', 'Address')}:</label>
+                        <span>{patientData.address || t('patientInfo.notProvided', 'Not provided')}</span>
+                      </div>
                     </div>
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.physician', 'Primary Care Physician')}:</label>
-                      <span>
-                        {getPractitionerDisplay(patientData.physician_id)}
-                      </span>
+
+                    {/* Medical Details Section */}
+                    <div className="patient-section">
+                      <div className="patient-section-header">
+                        <ThemeIcon variant="light" size="sm">
+                          <IconStethoscope size={14} />
+                        </ThemeIcon>
+                        <Text size="sm" fw={600} tt="uppercase">
+                          {t('patientInfo.medicalInfo', 'Medical Information')}
+                        </Text>
+                      </div>
+                      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                        <div className="detail-group">
+                          <label>{t('patientInfo.fields.bloodType', 'Blood Type')}:</label>
+                          <span>{patientData.blood_type || t('patientInfo.notProvided', 'Not provided')}</span>
+                        </div>
+                        <div className="detail-group">
+                          <label>{t('patientInfo.fields.height', 'Height')}:</label>
+                          <span>
+                            {patientData.height
+                              ? formatMeasurement(
+                                  convertForDisplay(
+                                    patientData.height,
+                                    'height',
+                                    unitSystem
+                                  ),
+                                  'height',
+                                  unitSystem
+                                )
+                              : t('patientInfo.notProvided', 'Not provided')}
+                          </span>
+                        </div>
+                        <div className="detail-group">
+                          <label>{t('patientInfo.fields.weight', 'Weight')}:</label>
+                          <span>
+                            {patientData.weight
+                              ? formatMeasurement(
+                                  convertForDisplay(
+                                    patientData.weight,
+                                    'weight',
+                                    unitSystem
+                                  ),
+                                  'weight',
+                                  unitSystem
+                                )
+                              : t('patientInfo.notProvided', 'Not provided')}
+                          </span>
+                        </div>
+                        <div className="detail-group">
+                          <label>{t('patientInfo.fields.physician', 'Primary Care Physician')}:</label>
+                          <span>{getPractitionerDisplay(patientData.physician_id)}</span>
+                        </div>
+                      </SimpleGrid>
                     </div>
-                  </div>
-                  {patientData.id && (
-                    <div className="detail-group">
-                      <label>{t('patientInfo.fields.patientId', 'Patient ID')}:</label>
-                      <span>{patientData.id}</span>
-                    </div>
-                  )}
+
+                    {/* De-emphasized Patient ID */}
+                    {patientData.id && (
+                      <Text size="xs" c="dimmed" ta="right" mt="md">
+                        {t('patientInfo.fields.patientId', 'Patient ID')}: {patientData.id}
+                      </Text>
+                    )}
+                  </Stack>
                 </div>
               ) : (
-                <Stack align="center" gap="md" py="xl">
+                <Stack align="center" gap="md" py="xl" px="md">
                   <Text size="lg" fw={500}>
                     {t('patientInfo.noProfile', 'No Patient Profile Found')}
                   </Text>
@@ -533,7 +557,6 @@ const PatientInfo = () => {
                   </Button>
                 </Stack>
               )}
-            </Stack>
           </Card>
         </Stack>
       </Container>

@@ -2,7 +2,11 @@ import {
   Modal,
   Stack,
   Alert,
+  Text,
+  Group,
+  ThemeIcon,
 } from '@mantine/core';
+import { IconUserEdit, IconUserPlus } from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import MantinePatientForm from '../MantinePatientForm';
 import logger from '../../../services/logger';
@@ -20,7 +24,7 @@ const PatientFormWrapper = ({
   statusMessage,
   isCreating = false,
   error = '',
-  onPhotoChange, // New callback for photo changes
+  onPhotoChange,
 }) => {
   const handleSubmit = (e) => {
     if (e && e.preventDefault) {
@@ -31,21 +35,41 @@ const PatientFormWrapper = ({
 
   if (!isOpen) return null;
 
+  const modalTitle = (
+    <Group gap="sm">
+      <ThemeIcon variant="light" size="md" radius="md" color={isCreating ? 'teal' : 'blue'}>
+        {isCreating ? <IconUserPlus size={16} /> : <IconUserEdit size={16} />}
+      </ThemeIcon>
+      <Text fw={600} size="lg">{title}</Text>
+    </Group>
+  );
+
   try {
     return (
       <Modal
         opened={isOpen}
         onClose={onClose}
-        title={title}
+        title={modalTitle}
         size="lg"
         closeOnClickOutside={!isLoading}
         closeOnEscape={!isLoading}
+        radius="lg"
+        overlayProps={{ backgroundOpacity: 0.4, blur: 4 }}
+        styles={{
+          header: {
+            borderBottom: '1px solid var(--mantine-color-default-border)',
+            paddingBottom: 12,
+          },
+          body: {
+            paddingTop: 16,
+          },
+        }}
       >
         <FormLoadingOverlay visible={isLoading} statusMessage={statusMessage} />
 
         <Stack gap="md">
           {error && (
-            <Alert variant="light" color="red" title="Error">
+            <Alert variant="light" color="red" title="Error" radius="md">
               {error}
             </Alert>
           )}
@@ -72,9 +96,9 @@ const PatientFormWrapper = ({
     });
 
     return (
-      <Modal opened={isOpen} onClose={onClose} title="Error">
+      <Modal opened={isOpen} onClose={onClose} title="Error" radius="lg">
         <Stack align="center" gap="md">
-          <Alert variant="light" color="red" title="Form Error">
+          <Alert variant="light" color="red" title="Form Error" radius="md">
             Unable to display the patient form. Please try refreshing the page.
           </Alert>
         </Stack>

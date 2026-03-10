@@ -447,13 +447,13 @@ const Insurance = () => {
   }
 
   return (
-    <Container size="xl">
+    <Container size="xl" py="sm">
       <PageHeader
         title={t('insurance.title', 'Insurance')}
         description={t('insurance.description', 'Manage your insurance information and digital cards')}
       />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
@@ -464,9 +464,11 @@ const Insurance = () => {
           primaryAction={{
             label: t('insurance.actions.addNew', '+ Add New Insurance'),
             onClick: handleAddNew,
+            size: 'sm',
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          viewToggleSize="sm"
           mb={0}
         />
 

@@ -194,6 +194,7 @@ const StoragePreferencesCard = ({
                     onChange={(e) => handleSyncPreferenceChange('paperless_sync_tags', e.target.checked)}
                     className="paperless-checkbox"
                     disabled={true}
+                    aria-label="Sync document tags and categories (Coming Soon)"
                   />
                   <div>
                     <span className="paperless-checkbox-label">

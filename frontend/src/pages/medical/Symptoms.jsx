@@ -376,7 +376,7 @@ const Symptoms = () => {
   // No patient selected
   if (!currentPatient) {
     return (
-      <Container size="xl">
+      <Container size="xl" py="sm">
         <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
         <Alert title={t('symptoms.noPatientSelected', 'No Patient Selected')} color="blue">
           {t('symptoms.selectPatientPrompt', 'Please select or create a patient to track symptoms.')}
@@ -386,10 +386,11 @@ const Symptoms = () => {
   }
 
   return (
-    <Container size="xl">
+    <Container size="xl" py="sm">
       <PageHeader title={t('symptoms.title', 'Symptoms')} icon="🩺" />
 
       {/* Success/Error Messages */}
+      <Stack gap="sm" mt="md">
       <MedicalPageAlerts
         error={error}
         successMessage={successMessage}
@@ -402,9 +403,10 @@ const Symptoms = () => {
           label: t('symptoms.addSymptom', 'Add Symptom'),
           onClick: handleAddSymptom,
           leftSection: <IconPlus size={16} />,
+          size: 'sm',
         }}
         showViewToggle={false}
-        mb="md"
+        mb={0}
       />
 
       {/* Tabs for different views */}
@@ -575,6 +577,7 @@ const Symptoms = () => {
           <SymptomCalendar patientId={currentPatient?.id} hidden={activeTab !== 'calendar'} />
         </Tabs.Panel>
       </Tabs>
+      </Stack>
 
       {/* View Symptom Details Modal */}
       <SymptomViewModal

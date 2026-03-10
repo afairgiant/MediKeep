@@ -163,11 +163,11 @@ const TabletSidebar = ({
                           gap: '12px',
                           padding: '12px 16px',
                           borderRadius: '6px',
-                          color: isActivePath(item.path, item.exact) 
-                            ? 'var(--mantine-color-blue-6)' 
+                          color: isActivePath(item.path, item.exact)
+                            ? 'var(--mantine-color-blue-light-color)'
                             : 'var(--mantine-color-gray-7)',
                           backgroundColor: isActivePath(item.path, item.exact)
-                            ? 'var(--mantine-color-blue-0)'
+                            ? 'var(--mantine-color-blue-light)'
                             : 'transparent',
                           '&:hover': {
                             backgroundColor: isActivePath(item.path, item.exact)

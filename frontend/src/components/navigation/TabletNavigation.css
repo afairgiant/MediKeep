@@ -1,0 +1,39 @@
+/* TabletNavigation.css */
+
+.tablet-navigation {
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-light);
+  position: sticky;
+  top: 72px;
+  z-index: 40;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tablet-nav-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  gap: 0.5rem;
+}
+
+.tablet-nav-trigger.section-active {
+  color: var(--color-primary-text, #667eea);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-primary, #667eea);
+}
+
+.tablet-nav-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border-light, #e5e7eb);
+  margin: 0 4px;
+}
+
+/* Dark mode support */
+[data-mantine-color-scheme='dark'] .tablet-navigation {
+  background: var(--mantine-color-dark-7, #1a1b1e);
+  border-color: var(--mantine-color-dark-4, #373a40);
+}

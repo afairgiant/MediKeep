@@ -361,10 +361,10 @@ const Medication = () => {
   }
 
   return (
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('medications.title', 'Medications')} icon="💊" />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
@@ -376,13 +376,16 @@ const Medication = () => {
             label: t('medications.addNew', 'Add New Medication'),
             onClick: handleAddMedication,
             leftSection: <IconPlus size={16} />,
+            size: 'sm',
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          viewToggleSize="sm"
+          mb={0}
         />
 
         {/* Quick Type Filters */}
-        <Paper p="md" mb="md" withBorder>
+        <Paper p="xs" radius="md" withBorder>
           <Group gap="xs" wrap="wrap">
             <Text size="sm" fw={500} c="dimmed">
               <IconFilter
@@ -403,7 +406,7 @@ const Medication = () => {
               }
             >
               {t('medications.allTypes', 'All Types')}
-              <Badge size="xs" ml={6} variant="filled" color="dark">
+              <Badge size="xs" ml={4} variant="filled" color="dark">
                 {medications.length}
               </Badge>
             </Button>
@@ -424,7 +427,7 @@ const Medication = () => {
               }
             >
               {t('medications.types.prescription')}
-              <Badge size="xs" ml={6} variant="filled" color="dark">
+              <Badge size="xs" ml={4} variant="filled" color="dark">
                 {
                   medications.filter(
                     m => m.medication_type === MEDICATION_TYPES.PRESCRIPTION
@@ -448,7 +451,7 @@ const Medication = () => {
               }
             >
               {t('medications.types.supplement')}
-              <Badge size="xs" ml={6} variant="filled" color="dark">
+              <Badge size="xs" ml={4} variant="filled" color="dark">
                 {
                   medications.filter(
                     m => m.medication_type === MEDICATION_TYPES.SUPPLEMENT
@@ -471,7 +474,7 @@ const Medication = () => {
               }
             >
               {t('medications.types.otc')}
-              <Badge size="xs" ml={6} variant="filled" color="dark">
+              <Badge size="xs" ml={4} variant="filled" color="dark">
                 {
                   medications.filter(
                     m => m.medication_type === MEDICATION_TYPES.OTC
@@ -495,7 +498,7 @@ const Medication = () => {
               }
             >
               {t('medications.types.herbal')}
-              <Badge size="xs" ml={6} variant="filled" color="dark">
+              <Badge size="xs" ml={4} variant="filled" color="dark">
                 {
                   medications.filter(
                     m => m.medication_type === MEDICATION_TYPES.HERBAL
@@ -528,7 +531,7 @@ const Medication = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
         >
           {processedMedications.length === 0 ? (
             <EmptyState
@@ -541,6 +544,7 @@ const Medication = () => {
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
               items={processedMedications}
+              staggerDelay={0.05}
               renderCard={(medication) => (
                 <MedicationCard
                   medication={medication}

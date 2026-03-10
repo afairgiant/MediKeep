@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, Button } from '@mantine/core';
-import { IconChevronDown } from '@tabler/icons-react';
+import { IconChevronDown, IconUser } from '@tabler/icons-react';
 import { getNavigationSections, VIEWPORT_CONFIGS } from '../../config/navigation.config';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
@@ -29,7 +29,11 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
   const handleNavigation = (path) => {
     navigate(path);
   };
-  
+
+  const isSectionActive = (section) => {
+    return section.items.some(item => isCurrentPath(item.path));
+  };
+
   // Determine if we should use compact mode (for laptop)
   const isCompact = viewport === 'laptop';
   
@@ -57,7 +61,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
               <Menu.Target>
                 <Button
                   variant="subtle"
-                  className="desktop-nav-trigger"
+                  className={isSectionActive(section) ? 'desktop-nav-trigger section-active' : 'desktop-nav-trigger'}
                   rightSection={<IconChevronDown size={14} />}
                   size={isCompact ? 'sm' : 'md'}
                 >
@@ -74,6 +78,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
                       <span className="nav-icon">{item.icon}</span>
                     }
                     onClick={() => handleNavigation(item.path)}
+                    color={isCurrentPath(item.path) ? 'blue' : undefined}
                     className={isCurrentPath(item.path) ? 'nav-item-active' : ''}
                   >
                     {t(item.nameKey, item.name || item.nameKey)}
@@ -86,7 +91,10 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
         
         {/* Spacer to push account to the right */}
         <div className="nav-spacer" />
-        
+
+        {/* Divider before Account */}
+        <div className="nav-section-divider" />
+
         {/* Account dropdown */}
         <Menu
           position={width <= 1280 ? "bottom-end" : "bottom-end"}
@@ -110,7 +118,8 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
           <Menu.Target>
             <Button
               variant="subtle"
-              className="desktop-nav-trigger account-trigger"
+              className="desktop-nav-trigger"
+              leftSection={<IconUser size={16} />}
               rightSection={<IconChevronDown size={14} />}
               size={isCompact ? 'sm' : 'md'}
             >
