@@ -1,23 +1,31 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Badge,
   Button,
   Card,
+  Divider,
   Group,
   Stack,
   Text,
-  Divider,
 } from '@mantine/core';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { createCardClickHandler } from '../../../utils/helpers';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useTagColors } from '../../../hooks/useTagColors';
+import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
-import { useTagColors } from '../../../hooks/useTagColors';
-import { MEDICATION_TYPES } from '../../../constants/medicationTypes';
 import '../../../styles/shared/MedicalPageShared.css';
+
+const TYPE_FALLBACKS = {
+  [MEDICATION_TYPES.PRESCRIPTION]: 'Prescription',
+  [MEDICATION_TYPES.OTC]: 'Over-the-Counter',
+  [MEDICATION_TYPES.SUPPLEMENT]: 'Supplement/Vitamin',
+  [MEDICATION_TYPES.HERBAL]: 'Herbal/Natural',
+};
+
+const INACTIVE_STATUSES = ['inactive', 'stopped', 'completed', 'cancelled', 'on-hold'];
 
 const MedicationCard = ({
   medication,
@@ -39,25 +47,24 @@ const MedicationCard = ({
   };
 
   const getMedicationTypeLabel = (type) => {
-    const typeKey = `medications.types.${type}`;
-    switch(type) {
-      case MEDICATION_TYPES.PRESCRIPTION:
-        return t('common:' + typeKey, 'Prescription');
-      case MEDICATION_TYPES.OTC:
-        return t('common:' + typeKey, 'Over-the-Counter');
-      case MEDICATION_TYPES.SUPPLEMENT:
-        return t('common:' + typeKey, 'Supplement/Vitamin');
-      case MEDICATION_TYPES.HERBAL:
-        return t('common:' + typeKey, 'Herbal/Natural');
-      default:
-        return type;
-    }
+    const fallback = TYPE_FALLBACKS[type];
+    if (!fallback) return type;
+    return t(`common:medications.types.${type}`, fallback);
   };
 
-  // Check if medication is inactive/stopped/finished/completed/on-hold
-  const isInactive = ['inactive', 'stopped', 'completed', 'cancelled', 'on-hold'].includes(
-    medication.status?.toLowerCase()
-  );
+  const isInactive = INACTIVE_STATUSES.includes(medication.status?.toLowerCase());
+
+  const handleEntityClick = (entityType, entityId) => (e) => {
+    e.stopPropagation();
+    navigateToEntity(entityType, entityId, navigate);
+  };
+
+  const handleEntityKeyDown = (entityType, entityId) => (e) => {
+    if (e.key === 'Enter') {
+      e.stopPropagation();
+      navigateToEntity(entityType, entityId, navigate);
+    }
+  };
 
   return (
     <Card
@@ -66,7 +73,16 @@ const MedicationCard = ({
       radius="md"
       h="100%"
       className="clickable-card"
+      role="button"
+      tabIndex={0}
+      aria-label={t('common:labels.viewDetails', { name: medication.medication_name, defaultValue: `View ${medication.medication_name} details` })}
       onClick={createCardClickHandler(onView, medication)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onView(medication);
+        }
+      }}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -154,9 +170,12 @@ const MedicationCard = ({
               <Text
                 size="sm"
                 c="blue"
+                role="link"
+                tabIndex={0}
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={() => navigateToEntity('practitioner', medication.practitioner.id, navigate)}
-                title={t('common:labels.viewPractitionerDetails')}
+                onClick={handleEntityClick('practitioner', medication.practitioner.id)}
+                onKeyDown={handleEntityKeyDown('practitioner', medication.practitioner.id)}
+                aria-label={t('common:labels.viewPractitionerDetails')}
               >
                 {medication.practitioner.name}
               </Text>
@@ -170,9 +189,12 @@ const MedicationCard = ({
               <Text
                 size="sm"
                 c="blue"
+                role="link"
+                tabIndex={0}
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={() => navigateToEntity('pharmacy', medication.pharmacy.id, navigate)}
-                title={t('common:labels.viewPharmacyDetails', 'View pharmacy details')}
+                onClick={handleEntityClick('pharmacy', medication.pharmacy.id)}
+                onKeyDown={handleEntityKeyDown('pharmacy', medication.pharmacy.id)}
+                aria-label={t('common:labels.viewPharmacyDetails', 'View pharmacy details')}
               >
                 {medication.pharmacy.name}
               </Text>
@@ -207,14 +229,14 @@ const MedicationCard = ({
           <Button
             variant="filled"
             size="xs"
-            onClick={() => onView(medication)}
+            onClick={(e) => { e.stopPropagation(); onView(medication); }}
           >
             {t('common:buttons.view')}
           </Button>
           <Button
             variant="filled"
             size="xs"
-            onClick={() => onEdit(medication)}
+            onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
           >
             {t('common:buttons.edit')}
           </Button>
@@ -222,7 +244,7 @@ const MedicationCard = ({
             variant="filled"
             color="red"
             size="xs"
-            onClick={() => onDelete(medication.id)}
+            onClick={(e) => { e.stopPropagation(); onDelete(medication.id); }}
           >
             {t('common:buttons.delete')}
           </Button>

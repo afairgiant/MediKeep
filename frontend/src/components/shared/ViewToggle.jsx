@@ -14,7 +14,7 @@ const ViewToggle = ({ viewMode, onViewModeChange, showPrint = false, modes = ['c
 
   return (
     <div className={`view-toggle-container ${sizeClass}`.trim()}>
-      <div className="view-toggle">
+      <div className="view-toggle" role="group" aria-label={t('viewToggle.label', 'View mode')}>
         {modes.map((mode) => {
           const cfg = MODE_CONFIG[mode];
           if (!cfg) return null;
@@ -23,6 +23,7 @@ const ViewToggle = ({ viewMode, onViewModeChange, showPrint = false, modes = ['c
               key={mode}
               className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
               onClick={() => onViewModeChange(mode)}
+              aria-pressed={viewMode === mode}
             >
               {cfg.icon} {t(cfg.labelKey, cfg.fallback)}
             </button>
