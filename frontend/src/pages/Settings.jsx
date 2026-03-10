@@ -415,10 +415,12 @@ const Settings = () => {
     <Container size="xl" py="md">
       <PageHeader title={t('settings.title', 'Settings')} />
 
-      <div className="settings-tabs">
+      <div className="settings-tabs" role="tablist">
         {SETTINGS_TABS.map(tab => (
           <button
             key={tab}
+            role="tab"
+            aria-selected={activeTab === tab}
             className={`settings-tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
@@ -429,7 +431,7 @@ const Settings = () => {
 
       {/* General Tab Content */}
       {activeTab === 'general' && (
-      <div className="settings-content">
+      <div className="settings-content" role="tabpanel">
         {/* Security Settings Section */}
         <Card>
           <div className="settings-section">
@@ -618,7 +620,7 @@ const Settings = () => {
                         textAlign: 'right'
                       }}
                     />
-                    <span style={{ marginLeft: '10px', fontSize: '14px', color: '#666' }}>
+                    <span style={{ marginLeft: '10px', fontSize: '14px', color: 'var(--color-text-muted)' }}>
                       {t('settings.preferences.sessionTimeout.range', 'minutes (5-1440)')}
                     </span>
                   </div>
@@ -640,7 +642,7 @@ const Settings = () => {
 
       {/* Documents Tab Content */}
       {activeTab === 'documents' && (
-      <div className="settings-content">
+      <div className="settings-content" role="tabpanel">
         <Card>
           <div className="settings-section">
             <h3 className="settings-section-title">{t('settings.sections.documentStorage', 'Document Storage')}</h3>
@@ -687,14 +689,14 @@ const Settings = () => {
 
       {/* Notifications Tab Content */}
       {activeTab === 'notifications' && (
-        <div className="settings-content">
+        <div className="settings-content" role="tabpanel">
           <NotificationSettings />
         </div>
       )}
 
       {/* About Tab Content */}
       {activeTab === 'about' && (
-      <div className="settings-content">
+      <div className="settings-content" role="tabpanel">
         <Card>
           <div className="settings-section">
             <h3 className="settings-section-title">{t('settings.sections.systemInfo', 'System Information')}</h3>

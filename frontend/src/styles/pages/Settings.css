@@ -47,7 +47,7 @@
 
 .settings-tab:focus-visible {
   outline: 2px solid var(--color-primary, #4f46e5);
-  outline-offset: -2px;
+  outline-offset: 2px;
   border-radius: 4px;
 }
 
@@ -94,7 +94,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .settings-option:last-child {
@@ -139,7 +139,7 @@
 }
 
 .settings-radio-option:hover {
-  background-color: var(--color-background-secondary, #f5f5f5);
+  background-color: var(--color-bg-secondary, #f5f5f5);
 }
 
 .settings-radio-option input[type='radio'] {
@@ -202,24 +202,24 @@
 
 .form-input {
   padding: 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-light);
   border-radius: 6px;
   font-size: 1rem;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
-  background-color: var(--color-background);
+  background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
 .form-input:disabled {
-  background-color: var(--color-background-secondary);
+  background-color: var(--color-bg-secondary);
   color: var(--color-text-muted);
   cursor: not-allowed;
 }
@@ -234,7 +234,7 @@
   display: flex;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .settings-placeholder-text {
@@ -269,7 +269,7 @@
 }
 
 .completion-percentage {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-dark);
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -285,7 +285,7 @@
 
 .completion-progress-bar {
   height: 6px;
-  background-color: var(--color-border);
+  background-color: var(--color-border-light);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 0.75rem;
@@ -352,7 +352,7 @@
 }
 
 .role-badge {
-  background-color: var(--color-background-secondary);
+  background-color: var(--color-bg-secondary);
   color: var(--color-text-primary);
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -383,7 +383,7 @@
 }
 
 .settings-changes-indicator {
-  color: #856404;
+  color: var(--color-warning-dark);
   font-size: 0.875rem;
   font-weight: 500;
 }
