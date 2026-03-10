@@ -450,7 +450,7 @@ export const ResponsiveTable = memo(({
               tabIndex={onRowClick || selectable ? 0 : undefined}
               style={{
                 cursor: onRowClick || selectable ? 'pointer' : 'default',
-                backgroundColor: isSelected ? 'var(--mantine-color-blue-0)' : undefined,
+                backgroundColor: isSelected ? 'var(--mantine-color-blue-light)' : undefined,
                 borderLeft: isInactive
                   ? '4px solid var(--mantine-color-red-6)'
                   : '4px solid var(--mantine-color-green-6)'

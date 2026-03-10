@@ -96,16 +96,26 @@ const RecordSelector = ({
  */
 const RecordItem = ({ record, selected, onToggle, formatDate }) => {
   return (
-    <Paper 
-      p="md" 
-      withBorder 
+    <Paper
+      p="md"
+      withBorder
       radius="sm"
-      style={{ 
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      aria-label={`${record.title}${record.key_info ? ` - ${record.key_info}` : ''}`}
+      style={{
         cursor: 'pointer',
         borderColor: selected ? 'var(--mantine-color-blue-5)' : undefined,
-        backgroundColor: selected ? 'var(--mantine-color-blue-0)' : undefined,
+        backgroundColor: selected ? 'var(--mantine-color-blue-light)' : undefined,
       }}
       onClick={onToggle}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
     >
       <Group justify="space-between" align="flex-start">
         <Stack gap={4} style={{ flex: 1 }}>
@@ -113,22 +123,22 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
           <Text size="xs" c="dimmed" lineClamp={2}>
             {record.key_info}
           </Text>
-          
+
           {/* Record metadata */}
           <Group gap="xs" wrap="wrap">
             {record.date && (
               <Text size="xs" c="dimmed">
-                📅 {formatDate(record.date)}
+                <span aria-hidden="true">📅 </span>{formatDate(record.date)}
               </Text>
             )}
             {record.practitioner && (
               <Text size="xs" c="dimmed">
-                👨‍⚕️ {record.practitioner}
+                <span aria-hidden="true">👨‍⚕️ </span>{record.practitioner}
               </Text>
             )}
             {record.status && (
-              <Badge 
-                size="xs" 
+              <Badge
+                size="xs"
                 color={getStatusColor(record.status)}
                 variant="dot"
               >
@@ -137,13 +147,14 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
             )}
           </Group>
         </Stack>
-        
+
         <Switch
           checked={selected}
           onChange={onToggle}
           color="blue"
           size="md"
-          onClick={(e) => e.stopPropagation()} // Prevent double toggle
+          aria-label={`Select ${record.title}`}
+          onClick={(e) => e.stopPropagation()}
         />
       </Group>
     </Paper>

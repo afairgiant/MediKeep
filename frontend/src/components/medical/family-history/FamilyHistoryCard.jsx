@@ -463,7 +463,7 @@ const FamilyHistoryCard = ({
           transition: 'all 0.2s ease',
           border: isSelected ? '2px solid var(--mantine-color-blue-6)' : 'none',
           borderRadius: '8px',
-          backgroundColor: isSelected ? 'var(--mantine-color-blue-0)' : 'transparent',
+          backgroundColor: isSelected ? 'var(--mantine-color-blue-light)' : 'transparent',
         }}
         onClick={isSelectable ? handleCardClick : undefined}
         onMouseEnter={(e) => {
