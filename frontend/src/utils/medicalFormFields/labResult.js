@@ -104,8 +104,9 @@ export const labResultFormFields = [
     placeholderKey: 'medical:labResults.additionalNotes.placeholder',
     descriptionKey: 'medical:labResults.additionalNotes.description',
     gridColumn: 12,
-    minRows: 3,
-    maxRows: 6,
+    minRows: 4,
+    maxRows: 12,
+    maxLength: 5000,
   },
   tagsFieldConfig,
 ];
