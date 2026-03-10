@@ -409,10 +409,10 @@ const TemplateCard = ({ template, onLoad, onEdit, onDelete, formatDate }) => {
             Load
           </Button>
           <ActionIcon size="sm" variant="subtle" onClick={onEdit} aria-label={`Edit template ${template.name}`}>
-            <IconEdit size={16} />
+            <IconEdit size={16} aria-hidden="true" />
           </ActionIcon>
           <ActionIcon size="sm" variant="subtle" color="red" onClick={onDelete} aria-label={`Delete template ${template.name}`}>
-            <IconTrash size={16} />
+            <IconTrash size={16} aria-hidden="true" />
           </ActionIcon>
         </Group>
       </Group>
