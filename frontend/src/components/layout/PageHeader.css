@@ -544,6 +544,7 @@
 /* Accessibility - Focus States */
 .nav-dropdown-trigger:focus,
 .mobile-nav-toggle:focus,
+.header-mobile-nav-toggle:focus,
 .back-button:focus {
   outline: 2px solid var(--color-primary, #667eea);
   outline-offset: 2px;
