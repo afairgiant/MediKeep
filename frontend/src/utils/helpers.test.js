@@ -22,7 +22,7 @@ vi.mock('../services/timezoneService', () => ({
         return 'Invalid Date';
       }
     }),
-    getCurrentFacilityTime: vi.fn(() => '2023-12-01T10:30'),
+    getCurrentTime: vi.fn(() => '2023-12-01T10:30'),
   },
 }));
 
@@ -36,7 +36,7 @@ vi.mock('../services/api/index', () => ({
 import {
   formatDate,
   formatDateTime,
-  getCurrentFacilityTime,
+  getCurrentTime,
   parseDateSafely,
   validateDateTime,
   debounce,
@@ -85,11 +85,11 @@ describe('Date and Time Utilities', () => {
     });
   });
 
-  describe('getCurrentFacilityTime', () => {
-    test('calls timezone service getCurrentFacilityTime', () => {
-      getCurrentFacilityTime();
+  describe('getCurrentTime', () => {
+    test('calls timezone service getCurrentTime', () => {
+      getCurrentTime();
       
-      expect(timezoneService.getCurrentFacilityTime).toHaveBeenCalled();
+      expect(timezoneService.getCurrentTime).toHaveBeenCalled();
     });
   });
 

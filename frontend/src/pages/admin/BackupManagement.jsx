@@ -1091,7 +1091,7 @@ const BackupManagement = () => {
                     <Group justify="space-between">
                       <Text fw={500}>{t('backup.schedule.nextScheduledRun', 'Next Scheduled Run')}</Text>
                       <Text size="sm" c="dimmed">
-                        {new Date(scheduleSettings.next_run_at).toLocaleString()}
+                        {formatDateTime(scheduleSettings.next_run_at)}
                       </Text>
                     </Group>
                   )}
@@ -1112,7 +1112,7 @@ const BackupManagement = () => {
                     >
                       <Text size="sm">
                         {t('backup.schedule.lastBackup', 'Last backup:')}{' '}
-                        {new Date(scheduleSettings.last_run_at).toLocaleString()}
+                        {formatDateTime(scheduleSettings.last_run_at)}
                         {' \u2014 '}
                         {scheduleSettings.last_run_status === 'success'
                           ? t('backup.schedule.completedSuccessfully', 'Completed successfully')

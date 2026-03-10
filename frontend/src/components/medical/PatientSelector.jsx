@@ -46,6 +46,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { notifySuccess, notifyError, notifyInfo } from '../../utils/notifyTranslated';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePatientList, useCacheManager } from '../../hooks/useGlobalData';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { formatRelationshipLabel } from '../../constants/relationshipOptions';
 import patientApi from '../../services/api/patientApi';
 import patientSharingApi from '../../services/api/patientSharingApi';
@@ -58,6 +59,14 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   const { t } = useTranslation('common');
   const { colorScheme } = useMantineColorScheme();
   const { user: currentUser } = useAuth();
+  const { formatDate } = useDateFormat();
+
+  // Strip any time component from date-only fields to prevent UTC timezone shift
+  const formatBirthDate = (birthDate) => {
+    if (!birthDate) return '';
+    const dateOnly = typeof birthDate === 'string' ? birthDate.split('T')[0] : birthDate;
+    return formatDate(dateOnly);
+  };
 
   // Helper function for relationship text color
   const getRelationshipTextColor = () => {
@@ -641,7 +650,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             )}
           </Text>
           <Text size="xs" c="dimmed">
-            {patient.birth_date} • {patient.privacy_level}
+            {formatBirthDate(patient.birth_date)} • {patient.privacy_level}
           </Text>
         </div>
         {getPatientBadge(patient)}
@@ -776,7 +785,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                       )}
                     </Text>
                     <Text size="xs" c="dimmed">
-                      {patient.birth_date}
+                      {formatBirthDate(patient.birth_date)}
                     </Text>
                   </div>
                 </Menu.Item>
@@ -875,7 +884,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                   )}
                 </Text>
                 <Text size="sm" c="dimmed">
-                  {t('patientSelector.labels.born', 'Born')}: {activePatient.birth_date}
+                  {t('patientSelector.labels.born', 'Born')}: {formatBirthDate(activePatient.birth_date)}
                 </Text>
               </div>
               {getPatientBadge(activePatient)}

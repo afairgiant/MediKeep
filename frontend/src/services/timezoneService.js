@@ -3,7 +3,7 @@ import logger from './logger';
 
 class TimezoneService {
   constructor() {
-    this.facilityTimezone = 'UTC';
+    this.timezone = 'UTC';
     this.dateLocale = 'en-US';
     this.dateFormatCode = 'mdy';
     this.initialized = false;
@@ -16,12 +16,23 @@ class TimezoneService {
 
   async init() {
     if (this.initialized) return;
+    if (this._initPromise) return this._initPromise;
 
+    this._initPromise = this._doInit();
     try {
-      const data = await apiClient.get('/utils/timezone-info');
-      this.facilityTimezone = data.facility_timezone;
+      await this._initPromise;
+    } finally {
+      this._initPromise = null;
+    }
+  }
+
+  async _doInit() {
+    try {
+      const response = await apiClient.get('/utils/timezone-info');
+      this.timezone = response.data.facility_timezone || 'UTC';
+      this.initialized = true;
       logger.debug('timezone_service_initialized', 'Timezone service initialized', {
-        timezone: this.facilityTimezone,
+        timezone: this.timezone,
         component: 'TimezoneService'
       });
     } catch (error) {
@@ -29,10 +40,9 @@ class TimezoneService {
         error: error.message,
         component: 'TimezoneService'
       });
-      this.facilityTimezone = 'UTC';
+      this.timezone = 'UTC';
+      // Do not set initialized=true on failure, so init() retries after login
     }
-
-    this.initialized = true;
   }
 
   formatDateTime(utcString, options = {}) {
@@ -45,7 +55,7 @@ class TimezoneService {
 
       if (dateOnly) {
         return date.toLocaleDateString(this.dateLocale, {
-          timeZone: this.facilityTimezone,
+          timeZone: this.timezone,
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
@@ -53,7 +63,7 @@ class TimezoneService {
       }
 
       const dateTimeOptions = {
-        timeZone: this.facilityTimezone,
+        timeZone: this.timezone,
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -76,12 +86,12 @@ class TimezoneService {
     }
   }
 
-  getCurrentFacilityTime() {
+  getCurrentTime() {
     try {
       const now = new Date();
       return now
         .toLocaleString('sv-SE', {
-          timeZone: this.facilityTimezone,
+          timeZone: this.timezone,
         })
         .replace(' ', 'T')
         .substring(0, 16);
@@ -90,8 +100,8 @@ class TimezoneService {
     }
   }
 
-  getFacilityTimezone() {
-    return this.facilityTimezone;
+  getTimezone() {
+    return this.timezone;
   }
 }
 
