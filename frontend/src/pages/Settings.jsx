@@ -421,7 +421,9 @@ const Settings = () => {
           <button
             key={tab}
             role="tab"
+            id={`settings-tab-${tab}`}
             aria-selected={activeTab === tab}
+            aria-controls={`settings-tabpanel-${tab}`}
             className={`settings-tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
@@ -432,7 +434,7 @@ const Settings = () => {
 
       {/* General Tab Content */}
       {activeTab === 'general' && (
-      <div className="settings-content" role="tabpanel">
+      <div className="settings-content" role="tabpanel" id="settings-tabpanel-general" aria-labelledby="settings-tab-general">
         {/* Security Settings Section */}
         <Card>
           <div className="settings-section">
@@ -643,7 +645,7 @@ const Settings = () => {
 
       {/* Documents Tab Content */}
       {activeTab === 'documents' && (
-      <div className="settings-content" role="tabpanel">
+      <div className="settings-content" role="tabpanel" id="settings-tabpanel-documents" aria-labelledby="settings-tab-documents">
         <Card>
           <div className="settings-section">
             <h3 className="settings-section-title">{t('settings.sections.documentStorage', 'Document Storage')}</h3>
@@ -690,14 +692,14 @@ const Settings = () => {
 
       {/* Notifications Tab Content */}
       {activeTab === 'notifications' && (
-        <div className="settings-content" role="tabpanel">
+        <div className="settings-content" role="tabpanel" id="settings-tabpanel-notifications" aria-labelledby="settings-tab-notifications">
           <NotificationSettings />
         </div>
       )}
 
       {/* About Tab Content */}
       {activeTab === 'about' && (
-      <div className="settings-content" role="tabpanel">
+      <div className="settings-content" role="tabpanel" id="settings-tabpanel-about" aria-labelledby="settings-tab-about">
         <Card>
           <div className="settings-section">
             <h3 className="settings-section-title">{t('settings.sections.systemInfo', 'System Information')}</h3>

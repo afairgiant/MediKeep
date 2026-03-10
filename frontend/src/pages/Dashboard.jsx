@@ -499,7 +499,15 @@ const Dashboard = () => {
         className={`dashboard-module-card ${module.color}`}
         withBorder
         radius="md"
+        role="button"
+        tabIndex={0}
         onClick={handleClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e);
+          }
+        }}
       >
         <Flex direction="column" justify="center" align="center" h="100%">
           <Box
@@ -740,9 +748,6 @@ const Dashboard = () => {
                 title="Close welcome message"
                 style={{
                   zIndex: 1,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                  },
                 }}
               >
                 <IconX size={14} />

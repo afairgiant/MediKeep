@@ -22,7 +22,6 @@ const PageHeader = ({
   actions,
   className = '',
   variant = 'dashboard', // 'medical' or 'dashboard'
-  showGlobalActions = true,
   showNavigation = true,
   showTitle = true,
 }) => {

@@ -78,7 +78,7 @@ const MedicationCard = ({
       aria-label={t('common:labels.viewDetails', { name: medication.medication_name, defaultValue: `View ${medication.medication_name} details` })}
       onClick={createCardClickHandler(onView, medication)}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if ((e.key === 'Enter' || e.key === ' ') && e.currentTarget === e.target) {
           e.preventDefault();
           onView(medication);
         }
