@@ -76,7 +76,7 @@ const VitalsForm = ({
   const { t } = useTranslation(['common', 'errors']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
   const lockedFields = vitals?._lockedFields || [];
-  const { isReady, getCurrentTime, facilityTimezone } = useTimezone();
+  const { isReady, getCurrentTime, timezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
   const { formatDateTimeInput, dateFormat, dateTimePlaceholder } = useDateFormat();
@@ -860,7 +860,7 @@ const VitalsForm = ({
           icon={<IconInfoCircle size={16} />}
           title={t('vitals.form.timezoneInfo', 'Timezone Information')}
         >
-          {t('vitals.form.timesShownIn', 'Times shown in {{timezone}}', { timezone: facilityTimezone })}
+          {t('vitals.form.timesShownIn', 'Times shown in {{timezone}}', { timezone: timezone })}
         </Alert>
       )}
 

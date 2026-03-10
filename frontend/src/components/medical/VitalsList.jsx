@@ -928,7 +928,7 @@ const VitalsList = ({
       .filter(r => r.blood_glucose != null)
       .sort((a, b) => new Date(a.recorded_date) - new Date(b.recorded_date))
       .map(r => ({
-        time: new Date(r.recorded_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: timezoneService.getFacilityTimezone() }),
+        time: new Date(r.recorded_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: timezoneService.getTimezone() }),
         glucose: r.blood_glucose,
       }));
   };

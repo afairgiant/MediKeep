@@ -35,7 +35,7 @@ export const useTimezone = () => {
       // For datetime strings, use the timezone service
       return timezoneService.formatDateTime(utcString, { dateOnly: true });
     },
-    getCurrentTime: () => timezoneService.getCurrentFacilityTime(),
-    facilityTimezone: timezoneService.getFacilityTimezone(),
+    getCurrentTime: () => timezoneService.getCurrentTime(),
+    timezone: timezoneService.getTimezone(),
   };
 };

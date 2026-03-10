@@ -658,7 +658,7 @@ const Dashboard = () => {
 
       {lastActivityUpdate && (
         <Text size="xs" c="dimmed" mb="sm">
-          {t('dashboard.activity.lastUpdated', 'Last updated')}: {lastActivityUpdate.toLocaleTimeString([], { timeZone: timezoneService.getFacilityTimezone() })}
+          {t('dashboard.activity.lastUpdated', 'Last updated')}: {lastActivityUpdate.toLocaleTimeString([], { timeZone: timezoneService.getTimezone() })}
         </Text>
       )}
 

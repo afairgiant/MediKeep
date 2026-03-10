@@ -346,7 +346,7 @@ const UserManagement = () => {
       const date = new Date(utcStr);
       if (isNaN(date.getTime())) return dateStr;
       return date.toLocaleString(undefined, {
-        timeZone: timezoneService.getFacilityTimezone(),
+        timeZone: timezoneService.getTimezone(),
         year: 'numeric',
         month: 'short',
         day: 'numeric',

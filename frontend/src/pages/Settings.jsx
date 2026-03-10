@@ -717,7 +717,7 @@ const Settings = () => {
               <div className="settings-option-info">
                 <div className="settings-option-title">{t('settings.system.timezone.title', 'Timezone')}</div>
                 <div className="settings-option-description">
-                  {timezoneService.getFacilityTimezone()}
+                  {timezoneService.getTimezone()}
                 </div>
               </div>
             </div>

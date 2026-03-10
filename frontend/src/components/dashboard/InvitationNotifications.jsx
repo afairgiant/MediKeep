@@ -213,7 +213,7 @@ const InvitationNotifications = () => {
 
         {lastUpdate && (
           <Text size="xs" c="dimmed" mb="sm">
-            {t('invitations.lastUpdated', 'Last updated')}: {lastUpdate.toLocaleTimeString([], { timeZone: timezoneService.getFacilityTimezone() })}
+            {t('invitations.lastUpdated', 'Last updated')}: {lastUpdate.toLocaleTimeString([], { timeZone: timezoneService.getTimezone() })}
           </Text>
         )}
 

@@ -38,7 +38,7 @@ export const useDateFormat = () => {
   const formatDateWithTime = useCallback(
     (dateValue, options = {}) => {
       return formatDateWithPreference(dateValue, effectiveFormat, {
-        timezone: timezoneService.getFacilityTimezone(),
+        timezone: timezoneService.getTimezone(),
         ...options,
         includeTime: true,
       });
@@ -49,7 +49,7 @@ export const useDateFormat = () => {
   const formatDateTime = useCallback(
     (dateValue, options = {}) => {
       return formatDateTimeWithPreference(dateValue, effectiveFormat, {
-        timezone: timezoneService.getFacilityTimezone(),
+        timezone: timezoneService.getTimezone(),
         ...options,
       });
     },

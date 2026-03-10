@@ -457,7 +457,7 @@ export const groupActivities = (activities, groupBy = 'date') => {
     switch (groupBy) {
       case 'date':
         key = new Date(activity.timestamp).toLocaleDateString('en-US', {
-          timeZone: timezoneService.getFacilityTimezone(),
+          timeZone: timezoneService.getTimezone(),
           weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
         });
         break;

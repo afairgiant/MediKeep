@@ -186,7 +186,7 @@ export const generatePrintFooter = () => {
   const now = new Date();
   return `
     <div class="footer">
-      Printed on ${formatDateWithPreference(now, timezoneService.dateFormatCode)} at ${now.toLocaleTimeString([], { timeZone: timezoneService.getFacilityTimezone() })}
+      Printed on ${formatDateWithPreference(now, timezoneService.dateFormatCode)} at ${now.toLocaleTimeString([], { timeZone: timezoneService.getTimezone() })}
     </div>
   `;
 };
