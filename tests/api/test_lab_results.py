@@ -478,6 +478,86 @@ class TestLabResultsAPI:
         assert response.status_code == 404, \
             f"Patient isolation failed: User2 accessed User1's lab result (got {response.status_code})"
 
+    def test_update_and_retrieve_long_notes(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Regression test: updating with >1000 char notes must not cause 500 on GET.
+
+        This was the original bug (#625): notes >1000 chars could be saved via
+        PUT (LabResultUpdate had no validator) but LabResultResponse inherited
+        a 1000-char validator from LabResultBase, causing serialization failure.
+        """
+        # Create a lab result
+        lab_result_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "test_name": "MRI Brain Scan",
+            "test_code": "MRI",
+            "status": "completed",
+            "ordered_date": "2024-01-01",
+            "completed_date": "2024-01-02",
+        }
+
+        create_response = client.post(
+            "/api/v1/lab-results/",
+            json=lab_result_data,
+            headers=authenticated_headers,
+        )
+        assert create_response.status_code == 201
+        lab_result_id = create_response.json()["id"]
+
+        # Update with notes that exceed the old 1000-char limit
+        long_notes = "Detailed MRI findings: " + "x" * 1500
+        update_data = {"notes": long_notes}
+
+        update_response = client.put(
+            f"/api/v1/lab-results/{lab_result_id}",
+            json=update_data,
+            headers=authenticated_headers,
+        )
+        assert update_response.status_code == 200
+        assert update_response.json()["notes"] == long_notes.strip()
+
+        # GET single - must not 500
+        get_response = client.get(
+            f"/api/v1/lab-results/{lab_result_id}",
+            headers=authenticated_headers,
+        )
+        assert get_response.status_code == 200
+        assert get_response.json()["notes"] == long_notes.strip()
+
+        # GET list - must not 500
+        list_response = client.get(
+            "/api/v1/lab-results/",
+            headers=authenticated_headers,
+        )
+        assert list_response.status_code == 200
+        assert any(r["id"] == lab_result_id for r in list_response.json())
+
+    def test_update_notes_exceeding_5000_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Notes exceeding 5000 chars should be rejected on update."""
+        lab_result_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "test_name": "Blood Test",
+            "test_code": "BT",
+            "status": "completed",
+            "ordered_date": "2024-01-01",
+        }
+
+        create_response = client.post(
+            "/api/v1/lab-results/",
+            json=lab_result_data,
+            headers=authenticated_headers,
+        )
+        assert create_response.status_code == 201
+        lab_result_id = create_response.json()["id"]
+
+        # Update with notes exceeding 5000 chars
+        update_data = {"notes": "x" * 5001}
+        update_response = client.put(
+            f"/api/v1/lab-results/{lab_result_id}",
+            json=update_data,
+            headers=authenticated_headers,
+        )
+        assert update_response.status_code == 422
+
     def test_lab_result_validation_errors(self, client: TestClient, authenticated_headers):
         """Test various validation error scenarios."""
         # Test missing required fields

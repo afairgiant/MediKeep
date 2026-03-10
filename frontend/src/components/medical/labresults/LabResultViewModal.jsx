@@ -20,6 +20,7 @@ import {
   IconUsers,
   IconTags,
   IconFileText,
+  IconNotes,
 } from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
@@ -59,6 +60,19 @@ const LabResultViewModal = ({
       setActiveTab(initialTab);
     }
   }, [isOpen, labResult?.id, initialTab]);
+
+  // Fall back to overview if the active tab is no longer available
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const conditionalTabs = {
+      notes: !!labResult?.notes,
+      tags: labResult?.tags?.length > 0,
+      conditions: !!fetchLabResultConditions,
+    };
+    if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, activeTab, labResult?.notes, labResult?.tags, fetchLabResultConditions]);
 
   const handleError = (error, context) => {
     logger.error('lab_result_view_modal_error', {
@@ -129,6 +143,11 @@ const LabResultViewModal = ({
               {fetchLabResultConditions && (
                 <Tabs.Tab value="conditions" leftSection={<IconUsers size={16} />}>
                   {t('labResults.modal.tabs.relatedConditions', 'Related Conditions')}
+                </Tabs.Tab>
+              )}
+              {labResult.notes && (
+                <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                  {t('labResults.modal.tabs.notes', 'Notes')}
                 </Tabs.Tab>
               )}
               {labResult.tags && labResult.tags.length > 0 && (
@@ -227,18 +246,6 @@ const LabResultViewModal = ({
                     </SimpleGrid>
                   </div>
 
-                  {/* Notes Section */}
-                  <div>
-                    <Title order={4} mb="sm">{t('labResults.modal.sections.notes', 'Notes')}</Title>
-                    <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
-                      <Text
-                        style={{ whiteSpace: 'pre-wrap' }}
-                        c={labResult.notes ? 'inherit' : 'dimmed'}
-                      >
-                        {labResult.notes || t('labResults.modal.noNotes', 'No notes available')}
-                      </Text>
-                    </Paper>
-                  </div>
                 </Stack>
               </Box>
             </Tabs.Panel>
@@ -268,6 +275,24 @@ const LabResultViewModal = ({
                     navigate={navigate}
                     isViewMode={true}
                   />
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Notes Tab */}
+            {labResult.notes && (
+              <Tabs.Panel value="notes">
+                <Box mt="md">
+                  <Stack gap="md">
+                    <Title order={4}>{t('labResults.modal.sections.notes', 'Notes')}</Title>
+                    <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
+                      <ScrollArea.Autosize mah={400}>
+                        <Text style={{ whiteSpace: 'pre-wrap' }}>
+                          {labResult.notes}
+                        </Text>
+                      </ScrollArea.Autosize>
+                    </Paper>
+                  </Stack>
                 </Box>
               </Tabs.Panel>
             )}

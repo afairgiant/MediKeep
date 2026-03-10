@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Stack, Group, Text, Badge, Button, Divider } from '@mantine/core';
 import StatusBadge from '../StatusBadge';
@@ -29,6 +29,7 @@ const BaseMedicalCard = ({
   getTagColor: getTagColorProp
 }) => {
   const { t } = useTranslation('common');
+  const [notesExpanded, setNotesExpanded] = useState(false);
   const { getTagColor: getTagColorHook } = useTagColors();
   const getTagColor = getTagColorProp || getTagColorHook;
   const handleError = (error, action) => {
@@ -149,10 +150,20 @@ const BaseMedicalCard = ({
           {notes && (
             <Stack gap="xs">
               <Divider />
-              <Stack gap="xs">
-                <Text size="sm" fw={500} c="dimmed">{t('labels.notes', 'Notes')}</Text>
-                <Text size="sm">{notes}</Text>
-              </Stack>
+              <Text size="sm" fw={500} c="dimmed">{t('labels.notes', 'Notes')}</Text>
+              <Text size="sm" lineClamp={notesExpanded ? undefined : 2}>{notes}</Text>
+              {notes.length > 120 && (
+                <Button
+                  variant="subtle"
+                  size="compact-xs"
+                  onClick={() => setNotesExpanded((prev) => !prev)}
+                  style={{ alignSelf: 'flex-start' }}
+                >
+                  {notesExpanded
+                    ? t('buttons.showLess', 'Show less')
+                    : t('buttons.showMore', 'Show more')}
+                </Button>
+              )}
             </Stack>
           )}
         </Stack>
