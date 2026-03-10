@@ -643,10 +643,10 @@ const LabResults = () => {
 
   return (
     <>
-      <Container size="xl" py="md">
+      <Container size="xl" py="sm">
         <PageHeader title={t('labResults.title', 'Lab Results')} icon="🧪" />
 
-        <Stack gap="lg">
+        <Stack gap="sm" mt="md">
           <MedicalPageAlerts
             error={error}
             successMessage={successMessage}
@@ -657,17 +657,20 @@ const LabResults = () => {
             primaryAction={{
               label: t('labResults.addNew', '+ Add New Lab Result'),
               onClick: handleAddLabResult,
+              size: 'sm',
             }}
             secondaryActions={[
               {
                 label: t('labResults.quickPdfImport', 'Quick PDF Import'),
                 onClick: () => setShowQuickImportModal(true),
                 leftSection: <IconFileUpload size={16} />,
+                size: 'sm',
               },
             ]}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
             viewModes={['cards', 'table', 'components']}
+            viewToggleSize="sm"
             mb={0}
           />
 

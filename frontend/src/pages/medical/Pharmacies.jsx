@@ -226,10 +226,10 @@ const Pharmacies = () => {
 
   return (
     <>
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('pharmacies.title', 'Pharmacies')} icon="💊" />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
@@ -241,8 +241,10 @@ const Pharmacies = () => {
             label: t('pharmacies.actions.addNew', 'Add New Pharmacy'),
             onClick: handleAddPharmacy,
             leftSection: <IconPlus size={16} />,
+            size: 'sm',
           }}
           showViewToggle={false}
+          mb={0}
         />
 
         {/* Mantine Filter Controls */}

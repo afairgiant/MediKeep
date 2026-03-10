@@ -506,10 +506,10 @@ const Vitals = () => {
   }
 
   return (
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('vitals.title', 'Vital Signs')} icon="❤️" />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={vitalsError}
           successMessage={successMessage}
@@ -521,6 +521,7 @@ const Vitals = () => {
             label: t('vitals.addNew', 'Add New Vital Signs'),
             onClick: handleAddNew,
             leftSection: <IconPlus size={16} />,
+            size: 'sm',
           }}
           secondaryActions={[{
             label: t('vitals.import.title', 'Import Vitals'),
@@ -531,6 +532,7 @@ const Vitals = () => {
           }]}
           showViewToggle={false}
           align="flex-start"
+          mb={0}
         />
 
         {/* Stats Overview */}

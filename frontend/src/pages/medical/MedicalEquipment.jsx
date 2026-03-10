@@ -261,10 +261,10 @@ const MedicalEquipment = () => {
 
   return (
     <>
-      <Container size="xl" py="md">
+      <Container size="xl" py="sm">
         <PageHeader title={t('equipment.title', 'Medical Equipment')} icon="🩺" />
 
-        <Stack gap="lg">
+        <Stack gap="sm" mt="md">
           <MedicalPageAlerts
             error={error}
             successMessage={successMessage}
@@ -275,9 +275,11 @@ const MedicalEquipment = () => {
             primaryAction={{
               label: t('equipment.addEquipment', '+ Add Equipment'),
               onClick: handleAddEquipment,
+              size: 'sm',
             }}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            viewToggleSize="sm"
             mb={0}
           />
 

@@ -261,10 +261,10 @@ const Injuries = () => {
   }
 
   return (
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('injuries.title', 'Injuries')} icon={<IconBandage size={24} />} />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
@@ -276,9 +276,12 @@ const Injuries = () => {
             label: t('injuries.addNew', 'Add New Injury'),
             onClick: handleAddInjury,
             leftSection: <IconPlus size={16} />,
+            size: 'sm',
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          viewToggleSize="sm"
+          mb={0}
         />
 
         {/* Mantine Filter Controls */}

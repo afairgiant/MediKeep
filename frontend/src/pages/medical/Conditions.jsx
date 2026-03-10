@@ -324,10 +324,10 @@ const Conditions = () => {
   }
 
   return (
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('conditions.title', 'Medical Conditions')} icon="🩺" />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
@@ -339,9 +339,12 @@ const Conditions = () => {
             label: t('conditions.addNew', 'Add New Condition'),
             onClick: handleAddCondition,
             leftSection: <IconPlus size={16} />,
+            size: 'sm',
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          viewToggleSize="sm"
+          mb={0}
         />
 
         {/* Mantine Filter Controls */}
