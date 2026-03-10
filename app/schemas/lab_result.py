@@ -178,14 +178,6 @@ class LabResultBase(TaggedEntityMixin):
 
         raise ValueError("completed_date must be a date string or date object")
 
-    @field_validator("notes")
-    @classmethod
-    def validate_notes(cls, v):
-        """Validate notes"""
-        if v and len(v.strip()) > 1000:
-            raise ValueError("Notes must be less than 1000 characters")
-        return v.strip() if v else None
-
     @model_validator(mode="after")
     def validate_date_order(self):
         """Validate that completed date is not before ordered date"""
@@ -200,6 +192,14 @@ class LabResultCreate(LabResultBase):
 
     patient_id: int
     practitioner_id: Optional[int] = None
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v):
+        """Validate notes length on creation"""
+        if v and len(v.strip()) > 5000:
+            raise ValueError("Notes must be less than 5000 characters")
+        return v.strip() if v else None
 
     @field_validator("patient_id")
     @classmethod
@@ -244,6 +244,16 @@ class LabResultUpdate(BaseModel):
             if len(v.strip()) > 50:
                 raise ValueError("Test code must be less than 50 characters")
             return v.strip().upper()
+        return v
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v):
+        """Validate notes length on update"""
+        if v is not None:
+            if len(v.strip()) > 5000:
+                raise ValueError("Notes must be less than 5000 characters")
+            return v.strip() if v else None
         return v
 
     @field_validator("status")
