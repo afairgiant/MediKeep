@@ -11,12 +11,12 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging.config import get_logger
 from app.models.models import (
     Allergy, Condition, EmergencyContact, Encounter, FamilyCondition, FamilyMember, Immunization,
-    Injury, InjuryType, Insurance, LabResult, LabTestComponent, Medication, Patient, Pharmacy,
+    Injury, InjuryType, Insurance, LabResult, Medication, Patient, Pharmacy,
     Practitioner, Procedure, ReportGenerationAudit, ReportTemplate, Symptom, SymptomOccurrence,
     Treatment, User, Vitals
 )
@@ -517,12 +517,6 @@ class CustomReportService:
                 if status:
                     parts.append(f"Status: {status}")
 
-                # Show summary of test components if loaded
-                test_components = getattr(item, 'test_components', None)
-                if test_components:
-                    component_count = len(test_components)
-                    parts.append(f"{component_count} test{'s' if component_count != 1 else ''}")
-
                 return " | ".join(parts) if parts else "Lab result details"
                 
             elif category == 'immunizations':
@@ -971,15 +965,19 @@ class CustomReportService:
         
         if category in shared_categories:
             # For shared resources, just filter by IDs
-            records = (self.db.query(model_class)
-                      .filter(model_class.id.in_(record_ids))
-                      .all())
+            query = (self.db.query(model_class)
+                    .filter(model_class.id.in_(record_ids)))
         else:
             # For patient-specific records, filter by patient_id and IDs
-            records = (self.db.query(model_class)
-                      .filter(model_class.patient_id == patient_id)
-                      .filter(model_class.id.in_(record_ids))
-                      .all())
+            query = (self.db.query(model_class)
+                    .filter(model_class.patient_id == patient_id)
+                    .filter(model_class.id.in_(record_ids)))
+
+        # Eager-load test components for lab results to avoid N+1 queries
+        if category == 'lab_results':
+            query = query.options(selectinload(LabResult.test_components))
+
+        records = query.all()
         
         logger.info(f"Retrieved {len(records)} {category} records for report generation")
         
@@ -1023,8 +1021,13 @@ class CustomReportService:
 
                 test_components = getattr(record, 'test_components', None)
                 if test_components:
+                    # Sort by display_order, then test_name, then id for deterministic output
+                    sorted_components = sorted(
+                        test_components,
+                        key=lambda c: (c.display_order or 999, c.test_name or '', c.id)
+                    )
                     record_dict['test_components'] = []
-                    for component in test_components:
+                    for component in sorted_components:
                         comp_dict = self._model_to_dict(component)
                         ref_range = self._build_reference_range(component)
                         if ref_range:

@@ -16,7 +16,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.logging.config import get_logger
 from app.models.models import (
@@ -30,7 +30,6 @@ from app.models.models import (
     Injury,
     Insurance,
     LabResult,
-    LabTestComponent,
     Medication,
     Patient,
     Pharmacy,
@@ -423,8 +422,8 @@ class ExportService:
         query = (
             self.db.query(LabResult)
             .options(joinedload(LabResult.practitioner))
-            .options(joinedload(LabResult.files))
-            .options(joinedload(LabResult.test_components))
+            .options(selectinload(LabResult.files))
+            .options(selectinload(LabResult.test_components))
             .filter(LabResult.patient_id == patient.id)
         )
         query = self._apply_date_filter(query, LabResult, start_date, end_date)
@@ -457,8 +456,12 @@ class ExportService:
 
             # Add test components (actual result values)
             if result.test_components:
+                sorted_components = sorted(
+                    result.test_components,
+                    key=lambda c: (c.display_order or 999, c.test_name or '', c.id)
+                )
                 components = []
-                for comp in result.test_components:
+                for comp in sorted_components:
                     comp_data = {
                         "test_name": comp.test_name,
                         "abbreviation": comp.abbreviation,
