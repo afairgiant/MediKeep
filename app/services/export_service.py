@@ -30,6 +30,7 @@ from app.models.models import (
     Injury,
     Insurance,
     LabResult,
+    LabTestComponent,
     Medication,
     Patient,
     Pharmacy,
@@ -422,7 +423,8 @@ class ExportService:
         query = (
             self.db.query(LabResult)
             .options(joinedload(LabResult.practitioner))
-            .options(joinedload(LabResult.files))  # Include files in the query
+            .options(joinedload(LabResult.files))
+            .options(joinedload(LabResult.test_components))
             .filter(LabResult.patient_id == patient.id)
         )
         query = self._apply_date_filter(query, LabResult, start_date, end_date)
@@ -452,6 +454,26 @@ class ExportService:
                 "ordered_by": result.practitioner.name if result.practitioner else None,
                 "notes": result.notes,
             }
+
+            # Add test components (actual result values)
+            if result.test_components:
+                components = []
+                for comp in result.test_components:
+                    comp_data = {
+                        "test_name": comp.test_name,
+                        "abbreviation": comp.abbreviation,
+                        "result_type": comp.result_type,
+                        "value": comp.value,
+                        "qualitative_value": comp.qualitative_value,
+                        "unit": comp.unit,
+                        "ref_range_min": comp.ref_range_min,
+                        "ref_range_max": comp.ref_range_max,
+                        "ref_range_text": comp.ref_range_text,
+                        "status": comp.status,
+                        "category": comp.category,
+                    }
+                    components.append(comp_data)
+                result_dict["test_components"] = components
 
             # Add file attachment information if files exist and include_files is True
             if include_files:

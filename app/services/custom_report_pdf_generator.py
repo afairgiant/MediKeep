@@ -1174,37 +1174,60 @@ class CustomReportPDFGenerator:
             
             for record in date_records:
                 name = record.get('test_name', 'Unnamed Test')
-                result = record.get('result_value', '')
-                unit = record.get('unit', '')
-                reference = record.get('reference_range', '')
-                
-                # Check if result is abnormal
-                is_abnormal = self._check_abnormal_result(result, reference, record.get('status', ''))
-                
-                # Build header with result
-                if is_abnormal:
-                    header = f"<b><font color='red'>{name}</font></b>"
-                else:
-                    header = f"<b>{name}</b>"
-                
-                header_parts = [header]
-                if result:
-                    result_display = f"{result}"
-                    if unit:
-                        result_display += f" {unit}"
-                    if is_abnormal:
-                        result_display = f"<font color='red'>{result_display} (ABNORMAL)</font>"
-                    header_parts.append(f": {result_display}")
-                
-                story.append(Paragraph(" ".join(header_parts), self.styles['SubsectionHeader']))
-                
+                labs_result = record.get('labs_result', '')
+
+                # Build header
+                header_parts = [f"<b>{name}</b>"]
+
+                if record.get('test_type'):
+                    header_parts.append(f" ({record['test_type']})")
+
+                if labs_result:
+                    if labs_result.lower() in ('abnormal', 'critical'):
+                        header_parts.append(f": <font color='red'>{labs_result} (ABNORMAL)</font>")
+                    else:
+                        header_parts.append(f": {labs_result}")
+
+                story.append(Paragraph("".join(header_parts), self.styles['SubsectionHeader']))
+
+                # Render individual test components (actual result values)
+                test_components = record.get('test_components', [])
+                if test_components:
+                    for component in test_components:
+                        comp_name = component.get('abbreviation') or component.get('test_name', '')
+                        comp_value = component.get('value')
+                        comp_qual = component.get('qualitative_value', '')
+                        comp_unit = component.get('unit', '')
+                        comp_ref = component.get('reference_range', '')
+                        comp_status = component.get('status', '')
+
+                        # Determine display value
+                        if comp_value is not None:
+                            display_value = str(comp_value)
+                        elif comp_qual:
+                            display_value = comp_qual
+                        else:
+                            display_value = ''
+
+                        is_abnormal = comp_status and comp_status.lower() in ('high', 'low', 'critical', 'abnormal')
+
+                        # Build component line
+                        comp_parts = [f"<b>{comp_name}</b>"]
+                        if display_value:
+                            value_str = display_value
+                            if comp_unit:
+                                value_str += f" {comp_unit}"
+                            if is_abnormal:
+                                value_str = f"<font color='red'>{value_str} ({comp_status.upper()})</font>"
+                            comp_parts.append(f": {value_str}")
+                        if comp_ref:
+                            comp_parts.append(f"  [Ref: {comp_ref}]")
+
+                        story.append(Paragraph(f"    {''.join(comp_parts)}", self.styles['CustomBody']))
+
                 # Details
                 details = []
-                
-                # Reference range is critical
-                if reference:
-                    details.append(f"<b>Normal Range:</b> {reference}")
-                
+
                 # Test metadata
                 test_info = []
                 if record.get('test_code'):
@@ -1213,7 +1236,7 @@ class CustomReportPDFGenerator:
                     test_info.append(f"Category: {record['test_category']}")
                 if test_info:
                     details.append(" | ".join(test_info))
-                
+
                 # Timing information
                 timing_info = []
                 if record.get('ordered_date') and len(records_by_date) == 1:
@@ -1222,7 +1245,7 @@ class CustomReportPDFGenerator:
                     timing_info.append(f"Completed: {self._format_date(record['completed_date'])}")
                 if timing_info:
                     details.append(" | ".join(timing_info))
-                
+
                 # Provider and facility
                 provider_info = []
                 if record.get('ordered_by'):
@@ -1231,32 +1254,25 @@ class CustomReportPDFGenerator:
                     provider_info.append(f"Lab: {record['facility']}")
                 if provider_info:
                     details.append(" | ".join(provider_info))
-                
+
                 # Status
                 if record.get('status'):
                     status_display = record['status']
-                    if record['status'].lower() in ['critical', 'urgent']:
+                    if record['status'].lower() in ('critical', 'urgent'):
                         status_display = f"<font color='red'>{status_display.upper()}</font>"
                     details.append(f"Status: {status_display}")
-                
+
                 if details:
                     for detail in details:
                         story.append(Paragraph(f"    {detail}", self.styles['CustomBody']))
-                
+
                 # Clinical notes
                 if record.get('notes'):
                     story.append(Paragraph(f"    <b>Lab Notes:</b> {record['notes']}", self.styles['CustomBody']))
-                
+
                 story.append(Spacer(1, 0.08*inch))
         
         return story
-    
-    def _check_abnormal_result(self, result: str, reference: str, status: str) -> bool:
-        """Check if a lab result is abnormal"""
-        if status and any(word in status.lower() for word in ['abnormal', 'high', 'low', 'critical']):
-            return True
-        # Could add more sophisticated checking based on reference ranges
-        return False
     
     def _format_immunizations(self, records: List[Dict[str, Any]]) -> List:
         """Format immunization records with complete vaccination history"""
