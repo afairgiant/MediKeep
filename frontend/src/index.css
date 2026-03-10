@@ -15,6 +15,9 @@
 @import './styles/pages/Practitioners.css';
 @import './styles/pages/EmergencyContacts.css';
 
+/* Import Dashboard Styles */
+@import './styles/dashboard.css';
+
 /* Import Print Styles */
 @import './styles/print.css';
 

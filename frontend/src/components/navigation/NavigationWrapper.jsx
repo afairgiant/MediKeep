@@ -21,11 +21,23 @@ const NavigationWrapper = ({
   backButtonPath = '/dashboard',
   onBackClick,
   className = '',
+  mobileNavOpen,
+  onMobileNavClose,
 }) => {
   const navigate = useNavigate();
   const { viewport, isMobile, isTablet } = useViewport();
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  
+
+  // Support both external (from PageHeader) and internal state
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isMobileNavOpen = mobileNavOpen !== undefined ? mobileNavOpen : internalOpen;
+  const closeMobileNav = useCallback(() => {
+    if (onMobileNavClose) {
+      onMobileNavClose();
+    } else {
+      setInternalOpen(false);
+    }
+  }, [onMobileNavClose]);
+
   // Handle logout - use the proper auth system
   const { logout } = useAuth();
   const handleLogout = useCallback(async () => {
@@ -43,7 +55,7 @@ const NavigationWrapper = ({
       window.location.href = '/login';
     }
   }, [logout]);
-  
+
   // Handle back navigation
   const handleBackClick = useCallback(() => {
     if (onBackClick) {
@@ -53,33 +65,8 @@ const NavigationWrapper = ({
     }
   }, [onBackClick, navigate, backButtonPath]);
   
-  // Toggle mobile navigation
-  const toggleMobileNav = useCallback(() => {
-    setIsMobileNavOpen(prev => !prev);
-  }, []);
-  
-  // Close mobile navigation
-  const closeMobileNav = useCallback(() => {
-    setIsMobileNavOpen(false);
-  }, []);
-  
   return (
     <div className={`navigation-wrapper ${className}`}>
-      {/* Mobile Navigation Toggle Button */}
-      {isMobile && (
-        <button
-          className={`mobile-nav-toggle ${isMobileNavOpen ? 'active' : ''}`}
-          onClick={toggleMobileNav}
-          aria-label="Toggle navigation menu"
-          aria-expanded={isMobileNavOpen}
-          type="button"
-        >
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-        </button>
-      )}
-      
       {/* Render appropriate navigation based on viewport */}
       {isMobile ? (
         <MobileNavigation
