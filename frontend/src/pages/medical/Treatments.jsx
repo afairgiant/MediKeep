@@ -291,10 +291,10 @@ const Treatments = () => {
 
   return (
     <>
-      <Container size="xl" py="md">
+      <Container size="xl" py="sm">
         <PageHeader title={t('treatments.title', 'Treatments')} icon="🩹" />
 
-        <Stack gap="lg">
+        <Stack gap="sm" mt="md">
           <MedicalPageAlerts
             error={error}
             successMessage={successMessage}
@@ -314,9 +314,11 @@ const Treatments = () => {
             primaryAction={{
               label: t('treatments.addTreatment', '+ Add Treatment'),
               onClick: handleAddTreatment,
+              size: 'sm',
             }}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            viewToggleSize="sm"
             mb={0}
           />
 

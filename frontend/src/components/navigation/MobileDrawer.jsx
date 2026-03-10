@@ -155,11 +155,11 @@ const MobileDrawer = ({
                             gap: '8px',
                             padding: responsive.breakpoint === 'xs' ? '16px 12px' : '20px 16px',
                             borderRadius: '8px',
-                            color: isActivePath(item.path, item.exact) 
-                              ? 'var(--mantine-color-blue-6)' 
+                            color: isActivePath(item.path, item.exact)
+                              ? 'var(--mantine-color-blue-light-color)'
                               : 'var(--mantine-color-gray-7)',
                             backgroundColor: isActivePath(item.path, item.exact)
-                              ? 'var(--mantine-color-blue-0)'
+                              ? 'var(--mantine-color-blue-light)'
                               : 'transparent',
                             border: isActivePath(item.path, item.exact)
                               ? '2px solid var(--mantine-color-blue-3)'

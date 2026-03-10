@@ -90,12 +90,17 @@ const NotificationHistory = ({ refreshKey = 0 }) => {
   return (
     <Card className="notification-history-card">
       <div className="notification-history">
-        <div className="notification-history-header" onClick={() => setExpanded(!expanded)} style={{ cursor: 'pointer' }}>
+        <button
+          className="notification-history-header"
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          type="button"
+        >
           <h3>
             {t('history.title', 'Notification History')}
-            <span className="expand-icon">{expanded ? '-' : '+'}</span>
+            <span className="expand-icon" aria-hidden="true">{expanded ? '−' : '+'}</span>
           </h3>
-        </div>
+        </button>
 
         {expanded && (
           <>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Header } from '../components/adapters';
-import Container from '../components/layout/Container';
+import { PageHeader } from '../components';
+import { Container } from '@mantine/core';
 import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';
 import DeleteAccountModal from '../components/auth/DeleteAccountModal';
@@ -406,24 +406,24 @@ const Settings = () => {
 
   if (!user) {
     return (
-      <Container>
-        <Header title={t('settings.title', 'Settings')} subtitle={t('labels.loading', 'Loading...')} showBackButton={true} />
+      <Container size="xl" py="md">
+        <PageHeader title={t('settings.title', 'Settings')} />
       </Container>
     );
   }
 
   return (
-    <Container>
-      <Header
-        title={t('settings.title', 'Settings')}
-        subtitle={t('settings.subtitle', 'Manage your application preferences and settings')}
-        showBackButton={true}
-      />
+    <Container size="xl" py="md">
+      <PageHeader title={t('settings.title', 'Settings')} />
 
-      <div className="settings-tabs">
+      <div className="settings-tabs" role="tablist">
         {SETTINGS_TABS.map(tab => (
           <button
             key={tab}
+            role="tab"
+            id={`settings-tab-${tab}`}
+            aria-selected={activeTab === tab}
+            aria-controls={`settings-tabpanel-${tab}`}
             className={`settings-tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
@@ -434,7 +434,7 @@ const Settings = () => {
 
       {/* General Tab Content */}
       {activeTab === 'general' && (
-      <div className="settings-content">
+      <div className="settings-content" role="tabpanel" id="settings-tabpanel-general" aria-labelledby="settings-tab-general">
         {/* Security Settings Section */}
         <Card>
           <div className="settings-section">
@@ -623,7 +623,7 @@ const Settings = () => {
                         textAlign: 'right'
                       }}
                     />
-                    <span style={{ marginLeft: '10px', fontSize: '14px', color: '#666' }}>
+                    <span style={{ marginLeft: '10px', fontSize: '14px', color: 'var(--color-text-muted)' }}>
                       {t('settings.preferences.sessionTimeout.range', 'minutes (5-1440)')}
                     </span>
                   </div>
@@ -645,7 +645,7 @@ const Settings = () => {
 
       {/* Documents Tab Content */}
       {activeTab === 'documents' && (
-      <div className="settings-content">
+      <div className="settings-content" role="tabpanel" id="settings-tabpanel-documents" aria-labelledby="settings-tab-documents">
         <Card>
           <div className="settings-section">
             <h3 className="settings-section-title">{t('settings.sections.documentStorage', 'Document Storage')}</h3>
@@ -692,14 +692,14 @@ const Settings = () => {
 
       {/* Notifications Tab Content */}
       {activeTab === 'notifications' && (
-        <div className="settings-content">
+        <div className="settings-content" role="tabpanel" id="settings-tabpanel-notifications" aria-labelledby="settings-tab-notifications">
           <NotificationSettings />
         </div>
       )}
 
       {/* About Tab Content */}
       {activeTab === 'about' && (
-      <div className="settings-content">
+      <div className="settings-content" role="tabpanel" id="settings-tabpanel-about" aria-labelledby="settings-tab-about">
         <Card>
           <div className="settings-section">
             <h3 className="settings-section-title">{t('settings.sections.systemInfo', 'System Information')}</h3>

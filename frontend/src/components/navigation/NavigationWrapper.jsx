@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useViewport } from '../../hooks/useViewport';
@@ -27,14 +27,10 @@ const NavigationWrapper = ({
   const navigate = useNavigate();
   const { viewport, isMobile, isTablet } = useViewport();
 
-  // Support both external (from PageHeader) and internal state
-  const [internalOpen, setInternalOpen] = useState(false);
-  const isMobileNavOpen = mobileNavOpen !== undefined ? mobileNavOpen : internalOpen;
+  const isMobileNavOpen = mobileNavOpen || false;
   const closeMobileNav = useCallback(() => {
     if (onMobileNavClose) {
       onMobileNavClose();
-    } else {
-      setInternalOpen(false);
     }
   }, [onMobileNavClose]);
 

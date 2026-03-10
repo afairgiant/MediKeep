@@ -12,6 +12,18 @@
   justify-content: space-between;
   align-items: center;
   user-select: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notification-history-header:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .notification-history-header h3 {

@@ -467,7 +467,7 @@ const Dashboard = () => {
       h={90}
     >
       <Stack align="center" justify="center" h="100%">
-        <Text size={isMobile ? '18px' : '22px'} fw={700} c={stat.color}>
+        <Text size={isMobile ? '18px' : '22px'} fw={700} c={colorScheme === 'dark' ? `${stat.color}.3` : stat.color}>
           {stat.value}
         </Text>
         <Text size="12px" c="dimmed" ta="center">
@@ -499,7 +499,15 @@ const Dashboard = () => {
         className={`dashboard-module-card ${module.color}`}
         withBorder
         radius="md"
+        role="button"
+        tabIndex={0}
         onClick={handleClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick(e);
+          }
+        }}
       >
         <Flex direction="column" justify="center" align="center" h="100%">
           <Box
@@ -740,9 +748,6 @@ const Dashboard = () => {
                 title="Close welcome message"
                 style={{
                   zIndex: 1,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                  },
                 }}
               >
                 <IconX size={14} />

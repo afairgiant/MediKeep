@@ -452,10 +452,10 @@ const Visits = () => {
 
   return (
     <>
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('visits.title', 'Medical Visits')} icon="📅" />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
@@ -467,9 +467,12 @@ const Visits = () => {
             label: t('visits.addVisit', 'Add New Visit'),
             onClick: handleAddVisit,
             leftSection: <IconPlus size={16} />,
+            size: 'sm',
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          viewToggleSize="sm"
+          mb={0}
         />
 
         {/* Mantine Filter Controls */}

@@ -318,10 +318,10 @@ const Practitioners = () => {
 
   return (
     <>
-    <Container size="xl" py="md">
+    <Container size="xl" py="sm">
       <PageHeader title={t('practitioners.title', 'Healthcare Practitioners')} icon="👨‍⚕️" />
 
-      <Stack gap="lg">
+      <Stack gap="sm" mt="md">
         <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
@@ -333,9 +333,12 @@ const Practitioners = () => {
             label: t('practitioners.actions.addNew', 'Add New Practitioner'),
             onClick: handleAddPractitioner,
             leftSection: <IconPlus size={16} />,
+            size: 'sm',
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          viewToggleSize="sm"
+          mb={0}
         />
 
         {/* Mantine Filter Controls */}

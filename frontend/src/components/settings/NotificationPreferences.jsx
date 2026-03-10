@@ -154,6 +154,10 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
                     <tr
                       className={`category-row ${isExpanded ? 'expanded' : 'collapsed'}`}
                       onClick={() => toggleCategory(category)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCategory(category); } }}
+                      tabIndex={0}
+                      role="button"
+                      aria-expanded={isExpanded}
                     >
                       <td colSpan={channels.length + 1} className="category-cell">
                         <span className="category-expand-icon">{isExpanded ? '−' : '+'}</span>
@@ -190,6 +194,7 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
                                       checked={isEnabled}
                                       onChange={() => handlePreferenceToggle(event.value, channel.id, isEnabled)}
                                       disabled={isDisabled}
+                                      aria-label={`${event.label} - ${channel.name}`}
                                     />
                                     <span className="toggle-slider"></span>
                                   </label>

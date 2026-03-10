@@ -29,13 +29,17 @@
   font-size: 0.875rem;
 }
 
-.desktop-nav-trigger.account-trigger {
-  background: var(--color-primary);
-  color: white;
+.desktop-nav-trigger.section-active {
+  color: var(--color-primary-text, #667eea);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-primary, #667eea);
 }
 
-.desktop-nav-trigger.account-trigger:hover {
-  background: var(--color-primary-dark);
+.nav-section-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border-light, #e5e7eb);
+  margin: 0 4px;
 }
 
 .desktop-nav-dropdown {
@@ -47,8 +51,19 @@
 }
 
 .nav-item-active {
-  color: var(--color-primary-text);
   font-weight: 600;
+}
+
+/* Light mode: blue-8 text (#1864ab) on blue-0 bg (#e7f5ff) = ~7.5:1 contrast ratio */
+.desktop-nav-dropdown .nav-item-active {
+  color: var(--mantine-color-blue-8) !important;
+  background-color: var(--mantine-color-blue-0) !important;
+}
+
+/* Dark mode: blue-1 text (#d0ebff) on blue-9 bg (#0c2d48) = ~10:1 contrast ratio */
+[data-mantine-color-scheme="dark"] .desktop-nav-dropdown .nav-item-active {
+  color: var(--mantine-color-blue-1) !important;
+  background-color: var(--mantine-color-blue-9) !important;
 }
 
 .theme-toggle-menu-item {

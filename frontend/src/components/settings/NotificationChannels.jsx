@@ -175,7 +175,7 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
                   <div className="channel-info">
                     <div className="channel-name">
                       {channel.name}
-                      {channel.is_verified && <span className="verified-badge" title={t('channels.verified', 'Verified')}>V</span>}
+                      {channel.is_verified && <span className="verified-badge" role="img" aria-label={t('channels.verified', 'Verified')}>V</span>}
                     </div>
                     <div className="channel-type">{typeInfo.label}</div>
                     <div className="channel-stats">

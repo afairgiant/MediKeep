@@ -21,8 +21,7 @@ const PageHeader = ({
   onBackClick,
   actions,
   className = '',
-  variant = 'medical', // 'medical' or 'dashboard'
-  showGlobalActions = true,
+  variant = 'dashboard', // 'medical' or 'dashboard'
   showNavigation = true,
   showTitle = true,
 }) => {
