@@ -61,6 +61,19 @@ const LabResultViewModal = ({
     }
   }, [isOpen, labResult?.id, initialTab]);
 
+  // Fall back to overview if the active tab is no longer available
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const conditionalTabs = {
+      notes: !!labResult?.notes,
+      tags: labResult?.tags?.length > 0,
+      conditions: !!fetchLabResultConditions,
+    };
+    if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
+      setActiveTab('overview');
+    }
+  }, [isOpen, activeTab, labResult?.notes, labResult?.tags, fetchLabResultConditions]);
+
   const handleError = (error, context) => {
     logger.error('lab_result_view_modal_error', {
       message: `Error in LabResultViewModal: ${context}`,

@@ -198,7 +198,7 @@ class LabResultCreate(LabResultBase):
     def validate_notes(cls, v):
         """Validate notes length on creation"""
         if v and len(v.strip()) > 5000:
-            raise ValueError("Notes must be less than 5000 characters")
+            raise ValueError("Notes must be 5000 characters or fewer")
         return v.strip() if v else None
 
     @field_validator("patient_id")
@@ -252,7 +252,7 @@ class LabResultUpdate(BaseModel):
         """Validate notes length on update"""
         if v is not None:
             if len(v.strip()) > 5000:
-                raise ValueError("Notes must be less than 5000 characters")
+                raise ValueError("Notes must be 5000 characters or fewer")
             return v.strip() if v else None
         return v
 
