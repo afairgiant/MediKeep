@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTimezone } from '../../hooks';
 
 const TimezoneIndicator = ({ className = '', showTime = false }) => {
-  const { facilityTimezone, formatDateTime, isReady } = useTimezone();
+  const { timezone, formatDateTime, isReady } = useTimezone();
   const [currentTime, setCurrentTime] = useState('');
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const TimezoneIndicator = ({ className = '', showTime = false }) => {
   return (
     <div className={`timezone-indicator ${className}`}>
       {showTime && <span className="timezone-current-time">{currentTime}</span>}
-      <span className="timezone-name">({facilityTimezone})</span>
+      <span className="timezone-name">({timezone})</span>
     </div>
   );
 };

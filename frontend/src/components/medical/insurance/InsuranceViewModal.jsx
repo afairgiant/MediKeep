@@ -85,7 +85,7 @@ const InsuranceViewModal = ({
     >
       <Stack gap="lg">
         {/* Header Card */}
-        <Paper withBorder p="md" style={{ backgroundColor: '#f8f9fa' }}>
+        <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
           <Group justify="space-between" align="center">
             <div>
               <Group mb="xs">
@@ -203,7 +203,7 @@ const InsuranceViewModal = ({
                 {insurance.notes && (
                   <div>
                     <Title order={4} mb="sm">{t('insurance.viewModal.notes', 'Notes')}</Title>
-                    <Paper withBorder p="sm" bg="gray.1">
+                    <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                       <Text style={{ whiteSpace: 'pre-wrap' }}>
                         {insurance.notes}
                       </Text>

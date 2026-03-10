@@ -54,7 +54,7 @@ const DesktopSidebar = ({
         height: '100vh',
         width: isOpen ? '280px' : '60px',
         borderRight: '1px solid var(--mantine-color-gray-3)',
-        backgroundColor: 'white',
+        backgroundColor: 'var(--color-bg-primary)',
         transition: 'all 0.3s ease',
         zIndex: 100
       }}

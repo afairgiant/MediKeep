@@ -17,7 +17,7 @@ class TestMigrationLogic:
 
     def test_no_old_files_scenario(self):
         """Test: No old lab result files exist."""
-        with patch('app.core.data_migrations.get_db') as mock_get_db:
+        with patch('app.core.database.migrations.get_db') as mock_get_db:
             mock_db = MagicMock()
             mock_get_db.return_value = iter([mock_db])
             
@@ -31,7 +31,7 @@ class TestMigrationLogic:
 
     def test_files_already_migrated_scenario(self):
         """Test: All files have already been migrated."""
-        with patch('app.core.data_migrations.get_db') as mock_get_db:
+        with patch('app.core.database.migrations.get_db') as mock_get_db:
             mock_db = MagicMock()
             mock_get_db.return_value = iter([mock_db])
             
@@ -60,8 +60,8 @@ class TestMigrationLogic:
 
     def test_storage_backend_logic(self):
         """Test storage backend detection logic."""
-        with patch('app.core.data_migrations.get_db') as mock_get_db, \
-             patch('app.core.data_migrations.os.path.exists') as mock_exists:
+        with patch('app.core.database.migrations.get_db') as mock_get_db, \
+             patch('app.core.database.migrations.os.path.exists') as mock_exists:
             
             mock_db = MagicMock()
             mock_get_db.return_value = iter([mock_db])
@@ -116,9 +116,9 @@ class TestMigrationLogic:
 
     def test_missing_file_warning(self):
         """Test that missing files (potential paperless) are handled correctly."""
-        with patch('app.core.data_migrations.get_db') as mock_get_db, \
-             patch('app.core.data_migrations.os.path.exists') as mock_exists, \
-             patch('app.core.data_migrations.logger') as mock_logger:
+        with patch('app.core.database.migrations.get_db') as mock_get_db, \
+             patch('app.core.database.migrations.os.path.exists') as mock_exists, \
+             patch('app.core.database.migrations.logger') as mock_logger:
             
             mock_db = MagicMock()
             mock_get_db.return_value = iter([mock_db])
@@ -174,8 +174,8 @@ class TestMigrationLogic:
 
     def test_data_preservation(self):
         """Test that all important data from lab files is preserved."""
-        with patch('app.core.data_migrations.get_db') as mock_get_db, \
-             patch('app.core.data_migrations.os.path.exists') as mock_exists:
+        with patch('app.core.database.migrations.get_db') as mock_get_db, \
+             patch('app.core.database.migrations.os.path.exists') as mock_exists:
             
             mock_db = MagicMock()
             mock_get_db.return_value = iter([mock_db])
@@ -222,7 +222,7 @@ class TestMigrationLogic:
 
     def test_error_handling(self):
         """Test that database errors are handled properly."""
-        with patch('app.core.data_migrations.get_db') as mock_get_db:
+        with patch('app.core.database.migrations.get_db') as mock_get_db:
             mock_db = MagicMock()
             mock_get_db.return_value = iter([mock_db])
             

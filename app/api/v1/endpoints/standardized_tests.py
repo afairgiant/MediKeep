@@ -141,7 +141,7 @@ def get_test_by_loinc(
     return test
 
 
-@router.get("/by-name/{test_name}", response_model=StandardizedTestResponse)
+@router.get("/by-name/{test_name:path}", response_model=StandardizedTestResponse)
 def get_test_by_name(
     test_name: str,
     db: Session = Depends(deps.get_db)

@@ -53,7 +53,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData })
     if (!active || !payload || !payload.length) return null;
     const data = payload[0].payload;
     return (
-      <Paper withBorder p="sm" shadow="md" radius="md" bg="white">
+      <Paper withBorder p="sm" shadow="md" radius="md" bg="var(--mantine-color-body)">
         <Stack gap="xs">
           <Text size="sm" fw={600}>{data.date}</Text>
           <Badge
@@ -71,7 +71,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData })
 
   if (chartData.length === 0) {
     return (
-      <Paper withBorder p="xl" radius="md" bg="gray.0">
+      <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
         <Text size="sm" c="dimmed" ta="center">No data points to display</Text>
       </Paper>
     );
@@ -82,7 +82,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData })
       <Paper withBorder p="md" radius="md">
         <ResponsiveContainer width="100%" height={300}>
           <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" />
             <XAxis
               dataKey="date"
               type="category"
@@ -197,7 +197,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
     const data = payload[0].payload;
 
     return (
-      <Paper withBorder p="sm" shadow="md" radius="md" bg="white">
+      <Paper withBorder p="sm" shadow="md" radius="md" bg="var(--mantine-color-body)">
         <Stack gap="xs">
           <Text size="sm" fw={600}>{data.date}</Text>
           <Group gap="xs" align="baseline">
@@ -231,7 +231,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
 
   if (chartData.length === 0) {
     return (
-      <Paper withBorder p="xl" radius="md" bg="gray.0">
+      <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
         <Text size="sm" c="dimmed" ta="center">
           No data points to display
         </Text>
@@ -243,7 +243,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
     <Stack gap="md">
       {/* Reference Range Legend */}
       {referenceRange && (referenceRange.min !== null || referenceRange.max !== null || referenceRange.text) && (
-        <Paper withBorder p="xs" radius="md" bg="gray.0">
+        <Paper withBorder p="xs" radius="md" bg="var(--color-bg-secondary)">
           <Group gap="xs">
             <Text size="xs" fw={600}>Reference Range:</Text>
             <Text size="xs">
@@ -263,7 +263,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
             data={chartData}
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e9ecef" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" />
 
             <XAxis
               dataKey="date"

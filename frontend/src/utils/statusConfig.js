@@ -113,7 +113,7 @@ export const STATUS_STYLES = {
   // Inactive/Stopped states - Gray
   inactive: {
     color: 'var(--mantine-color-gray-6)',
-    backgroundColor: 'var(--mantine-color-gray-1)',
+    backgroundColor: 'var(--color-bg-secondary)',
     borderColor: 'var(--mantine-color-gray-3)',
     icon: '⚫',
   },
@@ -159,7 +159,7 @@ export const STATUS_STYLES = {
   // Chronic states - Purple
   chronic: {
     color: 'var(--mantine-color-gray-7)',
-    backgroundColor: 'var(--mantine-color-gray-1)',
+    backgroundColor: 'var(--color-bg-secondary)',
     borderColor: 'var(--mantine-color-gray-4)',
     icon: '🔵',
   },
@@ -181,7 +181,7 @@ export const STATUS_STYLES = {
   // Lab/Procedure specific
   ordered: {
     color: 'var(--mantine-color-gray-6)',
-    backgroundColor: 'var(--mantine-color-gray-1)',
+    backgroundColor: 'var(--color-bg-secondary)',
     borderColor: 'var(--mantine-color-gray-3)',
     icon: '📋',
   },

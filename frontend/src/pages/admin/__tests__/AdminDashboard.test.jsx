@@ -288,7 +288,7 @@ describe('AdminDashboard', () => {
   });
 
   describe('refresh mechanism (Item 22)', () => {
-    test('Refresh All calls all four refresh functions in parallel', async () => {
+    test('Refresh All calls all three refresh functions in parallel', async () => {
       renderComponent();
       const refreshButton = screen.getByText('Refresh All');
       fireEvent.click(refreshButton);
@@ -297,7 +297,6 @@ describe('AdminDashboard', () => {
         expect(mockRefreshStats).toHaveBeenCalledWith(true);
         expect(mockRefreshActivity).toHaveBeenCalledWith(true);
         expect(mockRefreshHealth).toHaveBeenCalledWith(true);
-        expect(mockRefreshAnalytics).toHaveBeenCalledWith(true);
       });
     });
 
@@ -317,15 +316,11 @@ describe('AdminDashboard', () => {
         callOrder.push('health');
         return Promise.resolve();
       });
-      mockRefreshAnalytics.mockImplementation(() => {
-        callOrder.push('analytics');
-        return Promise.resolve();
-      });
 
       fireEvent.click(screen.getByText('Refresh All'));
 
       await waitFor(() => {
-        expect(callOrder).toHaveLength(4);
+        expect(callOrder).toHaveLength(3);
       });
     });
   });

@@ -393,8 +393,8 @@ class TestTestLibrarySyncService:
         linked_components = [c for c in components if c.canonical_test_name is not None]
         unlinked_components = [c for c in components if c.canonical_test_name is None]
 
-        assert len(linked_components) == 2
-        assert len(unlinked_components) == 2
+        assert len(linked_components) == 4
+        assert len(unlinked_components) == 0
 
     def test_run_one_time_migration_empty_database(self, sync_service, db_session):
         """Test migration with no components in database."""

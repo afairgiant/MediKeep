@@ -490,7 +490,7 @@ const BaseMedicalForm = ({
                   }}
                 >
                   {search.trim() && !exactOptionMatch && (
-                    <Combobox.Option value="$create" style={{ fontWeight: 'bold', borderBottom: '1px solid #e9ecef' }}>
+                    <Combobox.Option value="$create" style={{ fontWeight: 'bold', borderBottom: '1px solid var(--color-border-light)' }}>
                       {t('common:labels.addCustom', { value: search })}
                     </Combobox.Option>
                   )}

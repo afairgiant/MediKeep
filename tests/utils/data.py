@@ -75,10 +75,8 @@ def create_sample_practitioner(db: Session) -> dict:
         "specialty": random.choice(specialties),
         "phone_number": f"555-{random.randint(1000, 9999)}",
         "email": f"doctor{random.randint(1, 1000)}@example.com",
-        "address": f"{random.randint(100, 9999)} Medical Center Dr",
         "website": f"https://doctor{random.randint(1, 1000)}.com",
         "rating": round(random.uniform(3.0, 5.0), 1),
-        "status": "active"
     }
     
     return practitioner.create(db=db, obj_in=data)

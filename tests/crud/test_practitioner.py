@@ -287,7 +287,7 @@ class TestPractitionerCRUD:
         practitioner = practitioner_crud.create(db_session, obj_in=practitioner_data)
 
         assert practitioner.practice == "Mental Health Center"
-        assert "9195555555" in practitioner.phone_number or practitioner.phone_number == "9195555555"
+        assert practitioner.phone_number == "919-555-5555"
         assert practitioner.email == "fullinfo@example.com"
         assert "drfullinfo.com" in practitioner.website
         assert practitioner.rating == 4.8

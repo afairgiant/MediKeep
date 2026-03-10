@@ -592,7 +592,7 @@ function TestComponentTemplates({
               <ScrollArea h="calc(100vh - 350px)" type="auto">
                 <Stack gap="xs">
                   {/* Table Header */}
-                  <Paper withBorder p="xs" bg="gray.1">
+                  <Paper withBorder p="xs" bg="var(--color-bg-secondary)">
                     <Group gap="xs" wrap="nowrap">
                       <Box style={{ width: '180px', minWidth: '180px' }}>
                         <Text size="xs" fw={600}>Test Name</Text>
@@ -786,7 +786,7 @@ function TestComponentTemplates({
                             readOnly
                             styles={{
                               input: {
-                                backgroundColor: '#f8f9fa',
+                                backgroundColor: 'var(--color-bg-secondary)',
                                 color: getStatusInputColor(component.status),
                                 fontWeight: 500,
                                 cursor: 'default'

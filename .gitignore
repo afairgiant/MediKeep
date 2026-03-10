@@ -147,6 +147,7 @@ dist/
 
 .gitignore
 test_database.db-shm
+test_database.db-wal
 report.html
 
 audit/

@@ -8,6 +8,12 @@ import pytest
 from typing import Dict, Any
 
 
+pytestmark = pytest.mark.skipif(
+    not os.environ.get("API_BASE_URL"),
+    reason="E2E tests require a running server"
+)
+
+
 class TestUserWorkflows:
     """Test complete user workflows from registration to medical records management."""
 
@@ -26,9 +32,10 @@ class TestUserWorkflows:
         
         return {
             "username": f"testuser_{random_suffix}",
-            "email": f"test_{random_suffix}@example.com", 
+            "email": f"test_{random_suffix}@example.com",
             "password": "testpassword123",
-            "full_name": f"Test User {random_suffix}"
+            "full_name": f"Test User {random_suffix}",
+            "role": "user"
         }
 
     def test_complete_user_registration_flow(self, api_base_url: str, test_user_data: Dict[str, Any]):
