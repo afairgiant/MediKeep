@@ -142,6 +142,7 @@
       "patientInfo": "Informazioni del paziente",
       "medications": "Farmaci",
       "labResults": "Risultati di laboratorio",
+      "labMatrix": "Matrice di laboratorio",
       "conditions": "Condizioni",
       "allergies": "Allergie",
       "vitalSigns": "Segni vitali",
