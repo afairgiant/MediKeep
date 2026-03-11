@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: ${DB_NAME:-medical_records}
       POSTGRES_USER: ${DB_USER:-medapp}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      # For Docker secrets, use POSTGRES_PASSWORD_FILE instead (built-in to postgres image):
+      # POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - postgres_data-prod:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
