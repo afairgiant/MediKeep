@@ -49,6 +49,7 @@ import { apiService } from '../../../services/api';
 import { searchTests } from '../../../constants/testLibrary';
 import { ComponentCategory, ComponentStatus, getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 /**
  * Validates and normalizes a date value from DateInput.
@@ -398,6 +399,8 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   onError,
   disabled = false
 }) => {
+  const { dateInputFormat } = useDateFormat();
+
   const [rawText, setRawText] = useState('');
   const [debouncedText] = useDebouncedValue(rawText, 300);
   const [parsedComponents, setParsedComponents] = useState<ParsedTestComponent[]>([]);
@@ -1278,7 +1281,8 @@ SARS-CoV-2: Not Detected`
                         value={completedDate}
                         onChange={setCompletedDate}
                         label="Test Completed Date"
-                        placeholder="Select date"
+                        placeholder={dateInputFormat}
+                        valueFormat={dateInputFormat}
                         clearable
                         required
                         allowDeselect={false}

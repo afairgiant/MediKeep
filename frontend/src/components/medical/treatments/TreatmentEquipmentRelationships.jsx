@@ -33,6 +33,7 @@ import {
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import {
   EQUIPMENT_TYPE_OPTIONS,
   EQUIPMENT_STATUS_OPTIONS,
@@ -77,6 +78,7 @@ function TreatmentEquipmentRelationships({
   const safeEquipment = Array.isArray(equipment) ? equipment : [];
   const safePractitioners = Array.isArray(practitioners) ? practitioners : [];
   const { t } = useTranslation(['common', 'errors']);
+  const { dateInputFormat } = useDateFormat();
 
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -688,12 +690,13 @@ function TreatmentEquipmentRelationships({
                     />
                     <DateInput
                       label="Prescribed Date"
-                      placeholder="Select date"
+                      placeholder={dateInputFormat}
                       value={parseDateInput(newEquipment.prescribed_date)}
                       onChange={(date) => setNewEquipment(prev => ({
                         ...prev,
                         prescribed_date: date,
                       }))}
+                      valueFormat={dateInputFormat}
                       clearable
                       popoverProps={{ withinPortal: true, zIndex: 4000 }}
                     />

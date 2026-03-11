@@ -21,6 +21,7 @@ import {
   IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -45,6 +46,7 @@ const ProcedureFormWrapper = ({
   onError,
 }) => {
   const { t } = useTranslation('common');
+  const { dateInputFormat } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -197,7 +199,8 @@ const ProcedureFormWrapper = ({
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'procedure_date', value: formattedDate } });
                       }}
-                      placeholder={t('procedures.form.procedureDatePlaceholder', 'Select procedure date')}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       description={t('procedures.form.procedureDateDesc', 'When the procedure is scheduled or was performed')}
                       clearable
                       firstDayOfWeek={0}

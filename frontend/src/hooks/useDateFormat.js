@@ -92,6 +92,12 @@ export const useDateFormat = () => {
     [effectiveFormat]
   );
 
+  // Date-only input format pattern (e.g., "MM/DD/YYYY") for DateInput valueFormat/placeholder
+  const dateInputFormat = useMemo(
+    () => DATE_FORMAT_OPTIONS[effectiveFormat]?.pattern || DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT].pattern,
+    [effectiveFormat]
+  );
+
   return {
     formatDate,
     formatDateWithTime,
@@ -99,6 +105,7 @@ export const useDateFormat = () => {
     formatLongDate,
     formatDateTimeInput,
     dateFormat: effectiveFormat,
+    dateInputFormat,
     locale,
     formatLabel,
     formatExample,

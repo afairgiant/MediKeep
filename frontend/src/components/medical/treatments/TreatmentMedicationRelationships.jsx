@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import {
   Badge,
   Group,
@@ -89,6 +90,7 @@ function TreatmentMedicationRelationships({
   onEntityClick,
 }) {
   const { t } = useTranslation('common');
+  const { dateInputFormat } = useDateFormat();
   // Ensure medications is always an array
   const safeMedications = Array.isArray(medications) ? medications : [];
 
@@ -223,17 +225,19 @@ function TreatmentMedicationRelationships({
                         <Group grow gap="xs">
                           <DateInput
                             size="xs"
-                            placeholder="Start date"
+                            placeholder={dateInputFormat}
                             value={parseDateInput(editingRelationship?.specific_start_date)}
                             onChange={(date) => updateEditingRelationship('specific_start_date', formatDateInputChange(date))}
+                            valueFormat={dateInputFormat}
                             clearable
                             popoverProps={{ withinPortal: true, zIndex: 4000 }}
                           />
                           <DateInput
                             size="xs"
-                            placeholder="End date"
+                            placeholder={dateInputFormat}
                             value={parseDateInput(editingRelationship?.specific_end_date)}
                             onChange={(date) => updateEditingRelationship('specific_end_date', formatDateInputChange(date))}
+                            valueFormat={dateInputFormat}
                             clearable
                             popoverProps={{ withinPortal: true, zIndex: 4000 }}
                           />
@@ -369,17 +373,19 @@ function TreatmentMedicationRelationships({
               <Group grow gap="sm">
                 <DateInput
                   label="Treatment Start Date"
-                  placeholder="Override start date"
+                  placeholder={dateInputFormat}
                   value={parseDateInput(newRelationship.specific_start_date)}
                   onChange={(date) => updateNewRelationship('specific_start_date', formatDateInputChange(date))}
+                  valueFormat={dateInputFormat}
                   clearable
                   popoverProps={{ withinPortal: true, zIndex: 4000 }}
                 />
                 <DateInput
                   label="Treatment End Date"
-                  placeholder="Override end date"
+                  placeholder={dateInputFormat}
                   value={parseDateInput(newRelationship.specific_end_date)}
                   onChange={(date) => updateNewRelationship('specific_end_date', formatDateInputChange(date))}
+                  valueFormat={dateInputFormat}
                   clearable
                   popoverProps={{ withinPortal: true, zIndex: 4000 }}
                 />
