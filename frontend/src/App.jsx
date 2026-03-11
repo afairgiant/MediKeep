@@ -48,7 +48,6 @@ import ExportPage from './pages/ExportPage';
 import PatientInfo from './pages/medical/Patient-Info';
 import Medication from './pages/medical/Medication';
 import LabResults from './pages/medical/LabResults';
-import LabMatrix from './pages/medical/LabMatrix';
 import Immunization from './pages/medical/Immunization';
 import Insurance from './pages/medical/Insurance';
 import Allergies from './pages/medical/Allergies';
@@ -456,15 +455,6 @@ function App() {
                         />
                         {/* Generated entity routes */}
                         {generateEntityRoutes()}
-                        {/* Lab Comparison Matrix */}
-                        <Route
-                          path="/lab-matrix"
-                          element={
-                            <ProtectedRoute>
-                              <LabMatrix />
-                            </ProtectedRoute>
-                          }
-                        />
                         {/* Symptom Diary Route */}
                         <Route
                           path="/symptoms"

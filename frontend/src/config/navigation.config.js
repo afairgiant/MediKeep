@@ -49,13 +49,6 @@ export const NAVIGATION_SECTIONS = {
         featured: true,
       },
       {
-        nameKey: 'sidebarNav.items.labMatrix',
-        name: 'Lab Matrix',
-        path: '/lab-matrix',
-        icon: '📊',
-        id: 'lab-matrix',
-      },
-      {
         nameKey: 'sidebarNav.items.conditions',
         name: 'Conditions',
         path: buildEntityUrl(ENTITY_TYPES.CONDITION),
