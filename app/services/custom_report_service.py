@@ -11,13 +11,14 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import and_, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging.config import get_logger
 from app.models.models import (
     Allergy, Condition, EmergencyContact, Encounter, FamilyCondition, FamilyMember, Immunization,
-    Injury, InjuryType, Insurance, LabResult, Medication, Patient, Pharmacy, Practitioner, Procedure,
-    ReportGenerationAudit, ReportTemplate, Symptom, SymptomOccurrence, Treatment, User, Vitals
+    Injury, InjuryType, Insurance, LabResult, Medication, Patient, Pharmacy,
+    Practitioner, Procedure, ReportGenerationAudit, ReportTemplate, Symptom, SymptomOccurrence,
+    Treatment, User, Vitals
 )
 from app.schemas.custom_reports import (
     CategorySummary, CustomReportError, CustomReportRequest,
@@ -505,17 +506,17 @@ class CustomReportService:
                 
             elif category == 'lab_results':
                 parts = []
-                result_value = getattr(item, 'result_value', None)
-                reference_range = getattr(item, 'reference_range', None)
+                test_type = getattr(item, 'test_type', None)
+                labs_result = getattr(item, 'labs_result', None)
                 status = getattr(item, 'status', None)
-                
-                if result_value:
-                    parts.append(f"Result: {result_value}")
-                if reference_range:
-                    parts.append(f"Range: {reference_range}")
+
+                if test_type:
+                    parts.append(f"Type: {test_type}")
+                if labs_result:
+                    parts.append(f"Result: {labs_result}")
                 if status:
                     parts.append(f"Status: {status}")
-                
+
                 return " | ".join(parts) if parts else "Lab result details"
                 
             elif category == 'immunizations':
@@ -964,15 +965,19 @@ class CustomReportService:
         
         if category in shared_categories:
             # For shared resources, just filter by IDs
-            records = (self.db.query(model_class)
-                      .filter(model_class.id.in_(record_ids))
-                      .all())
+            query = (self.db.query(model_class)
+                    .filter(model_class.id.in_(record_ids)))
         else:
             # For patient-specific records, filter by patient_id and IDs
-            records = (self.db.query(model_class)
-                      .filter(model_class.patient_id == patient_id)
-                      .filter(model_class.id.in_(record_ids))
-                      .all())
+            query = (self.db.query(model_class)
+                    .filter(model_class.patient_id == patient_id)
+                    .filter(model_class.id.in_(record_ids)))
+
+        # Eager-load test components for lab results to avoid N+1 queries
+        if category == 'lab_results':
+            query = query.options(selectinload(LabResult.test_components))
+
+        records = query.all()
         
         logger.info(f"Retrieved {len(records)} {category} records for report generation")
         
@@ -996,102 +1001,47 @@ class CustomReportService:
                 
                 logger.info(f"Family member {family_member_id} has {len(family_conditions)} conditions")
             
-            # Special handling for encounters - include practitioner and condition names
-            elif category == 'encounters':
-                # Debug: Show all fields in the encounter record
-                logger.debug(f"Processing encounter {record.id}")
-                
-                # Get practitioner name if linked
-                if hasattr(record, 'practitioner_id') and record.practitioner_id:
-                    practitioner = self.db.query(Practitioner).filter(Practitioner.id == record.practitioner_id).first()
-                    if practitioner:
-                        record_dict['practitioner_name'] = practitioner.name
-                        logger.debug(f"Added practitioner information")
-                    else:
-                        logger.warning(f"Practitioner {record.practitioner_id} not found")
-                else:
-                    logger.debug(f"No practitioner linked to encounter {record.id}")
-                
-                # Get condition name if linked
-                if hasattr(record, 'condition_id') and record.condition_id:
-                    logger.debug(f"Looking up condition {record.condition_id}")
-                    condition = self.db.query(Condition).filter(Condition.id == record.condition_id).first()
-                    if condition:
-                        # Try multiple fields for condition name, as condition_name might be null
-                        condition_display = (
-                            condition.condition_name or 
-                            getattr(condition, 'diagnosis', None) or 
-                            getattr(condition, 'description', None) or 
-                            getattr(condition, 'icd_code', None) or
-                            f"Condition #{condition.id}"
-                        )
-                        record_dict['condition_name'] = condition_display
-                        logger.debug(f"Added condition information")
-                    else:
-                        logger.warning(f"Condition {record.condition_id} not found")
-                else:
-                    logger.debug(f"No condition linked to encounter {record.id}")
-                
-                logger.debug(f"Completed processing encounter {record.id}")
-            
-            # Special handling for treatments - include practitioner and condition names
-            elif category == 'treatments':
-                # Get practitioner name if linked
-                if hasattr(record, 'practitioner_id') and record.practitioner_id:
-                    practitioner = self.db.query(Practitioner).filter(Practitioner.id == record.practitioner_id).first()
-                    if practitioner:
-                        record_dict['practitioner_name'] = practitioner.name
-                
-                # Get condition name if linked
-                if hasattr(record, 'condition_id') and record.condition_id:
-                    condition = self.db.query(Condition).filter(Condition.id == record.condition_id).first()
-                    if condition:
-                        # Try multiple fields for condition name, as condition_name might be null
-                        condition_display = (
-                            condition.condition_name or 
-                            getattr(condition, 'diagnosis', None) or 
-                            getattr(condition, 'description', None) or 
-                            getattr(condition, 'icd_code', None) or
-                            f"Condition #{condition.id}"
-                        )
-                        record_dict['condition_name'] = condition_display
-                
-                logger.info(f"Treatment {record.id} enhanced with practitioner and condition info")
-            
-            # Special handling for procedures - include practitioner and condition names
-            elif category == 'procedures':
-                # Get practitioner name if linked
-                if hasattr(record, 'practitioner_id') and record.practitioner_id:
-                    practitioner = self.db.query(Practitioner).filter(Practitioner.id == record.practitioner_id).first()
-                    if practitioner:
-                        record_dict['practitioner_name'] = practitioner.name
-                
-                # Get condition name if linked
-                if hasattr(record, 'condition_id') and record.condition_id:
-                    condition = self.db.query(Condition).filter(Condition.id == record.condition_id).first()
-                    if condition:
-                        # Try multiple fields for condition name, as condition_name might be null
-                        condition_display = (
-                            condition.condition_name or 
-                            getattr(condition, 'diagnosis', None) or 
-                            getattr(condition, 'description', None) or 
-                            getattr(condition, 'icd_code', None) or
-                            f"Condition #{condition.id}"
-                        )
-                        record_dict['condition_name'] = condition_display
-                
-                logger.info(f"Procedure {record.id} enhanced with practitioner and condition info")
-            
-            # Special handling for medications - include pharmacy and prescriber names
+            # Enrich records with practitioner and condition names
+            elif category in ('encounters', 'treatments', 'procedures'):
+                practitioner_name = self._resolve_practitioner_name(record)
+                if practitioner_name:
+                    record_dict['practitioner_name'] = practitioner_name
+
+                condition_display = self._resolve_condition_display(record)
+                if condition_display:
+                    record_dict['condition_name'] = condition_display
+
+                logger.info(f"{category.rstrip('s').title()} {record.id} enhanced with practitioner and condition info")
+
+            # Special handling for lab results - include test components and practitioner
+            elif category == 'lab_results':
+                practitioner_name = self._resolve_practitioner_name(record)
+                if practitioner_name:
+                    record_dict['ordered_by'] = practitioner_name
+
+                test_components = getattr(record, 'test_components', None)
+                if test_components:
+                    # Sort by display_order, then test_name, then id for deterministic output
+                    sorted_components = sorted(
+                        test_components,
+                        key=lambda c: (c.display_order or 999, c.test_name or '', c.id)
+                    )
+                    record_dict['test_components'] = []
+                    for component in sorted_components:
+                        comp_dict = self._model_to_dict(component)
+                        ref_range = self._build_reference_range(component)
+                        if ref_range:
+                            comp_dict['reference_range'] = ref_range
+                        record_dict['test_components'].append(comp_dict)
+
+                logger.info(f"Lab result {record.id} enhanced with {len(record_dict.get('test_components', []))} test components")
+
             # Special handling for injuries - include practitioner and injury_type names
             elif category == 'injuries':
-                # Get practitioner name if linked
-                if hasattr(record, 'practitioner_id') and record.practitioner_id:
-                    practitioner = self.db.query(Practitioner).filter(Practitioner.id == record.practitioner_id).first()
-                    if practitioner:
-                        record_dict['practitioner'] = practitioner.name
+                practitioner_name = self._resolve_practitioner_name(record)
+                if practitioner_name:
+                    record_dict['practitioner'] = practitioner_name
 
-                # Get injury type name if linked
                 if hasattr(record, 'injury_type_id') and record.injury_type_id:
                     injury_type = self.db.query(InjuryType).filter(InjuryType.id == record.injury_type_id).first()
                     if injury_type:
@@ -1100,17 +1050,14 @@ class CustomReportService:
                 logger.info(f"Injury {record.id} enhanced with practitioner and injury type info")
 
             elif category == 'medications':
-                # Get pharmacy name if linked
                 if hasattr(record, 'pharmacy_id') and record.pharmacy_id:
                     pharmacy = self.db.query(Pharmacy).filter(Pharmacy.id == record.pharmacy_id).first()
                     if pharmacy:
                         record_dict['pharmacy_name'] = pharmacy.name
 
-                # Get prescriber name if linked
-                if hasattr(record, 'practitioner_id') and record.practitioner_id:
-                    practitioner = self.db.query(Practitioner).filter(Practitioner.id == record.practitioner_id).first()
-                    if practitioner:
-                        record_dict['prescribing_practitioner'] = practitioner.name
+                practitioner_name = self._resolve_practitioner_name(record)
+                if practitioner_name:
+                    record_dict['prescribing_practitioner'] = practitioner_name
 
                 logger.info(f"Medication {record.id} enhanced with pharmacy and practitioner info")
             
@@ -1119,6 +1066,44 @@ class CustomReportService:
         
         return result
     
+    def _resolve_practitioner_name(self, record) -> Optional[str]:
+        """Look up the practitioner name for a record with a practitioner_id foreign key."""
+        practitioner_id = getattr(record, 'practitioner_id', None)
+        if not practitioner_id:
+            return None
+        practitioner = self.db.query(Practitioner).filter(Practitioner.id == practitioner_id).first()
+        return practitioner.name if practitioner else None
+
+    def _resolve_condition_display(self, record) -> Optional[str]:
+        """Look up a display name for a record with a condition_id foreign key."""
+        condition_id = getattr(record, 'condition_id', None)
+        if not condition_id:
+            return None
+        condition = self.db.query(Condition).filter(Condition.id == condition_id).first()
+        if not condition:
+            return None
+        return (
+            condition.condition_name
+            or getattr(condition, 'diagnosis', None)
+            or getattr(condition, 'description', None)
+            or getattr(condition, 'icd_code', None)
+            or f"Condition #{condition.id}"
+        )
+
+    @staticmethod
+    def _build_reference_range(component) -> Optional[str]:
+        """Build a formatted reference range string from a test component."""
+        ref_parts = []
+        if component.ref_range_min is not None:
+            ref_parts.append(str(component.ref_range_min))
+        if component.ref_range_max is not None:
+            ref_parts.append(str(component.ref_range_max))
+        if ref_parts:
+            return " - ".join(ref_parts)
+        if component.ref_range_text:
+            return component.ref_range_text
+        return None
+
     def _model_to_dict(self, model_instance) -> Dict[str, Any]:
         """Convert SQLAlchemy model instance to dictionary"""
         result = {}
