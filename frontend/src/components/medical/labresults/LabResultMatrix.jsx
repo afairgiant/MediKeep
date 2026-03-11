@@ -277,7 +277,7 @@ const LabResultMatrix = React.memo(({ labResults }) => {
 
       {/* Matrix */}
       <Paper shadow="xs" withBorder style={{ overflow: 'hidden' }}>
-        <ScrollArea type="auto" offsetScrollbars style={{ maxHeight: 'calc(100vh - 300px)' }}>
+        <ScrollArea type="auto" offsetScrollbars>
           <table style={{
             borderCollapse: 'collapse',
             width: 'max-content',

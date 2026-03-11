@@ -674,7 +674,7 @@ const LabResults = () => {
             ]}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
-            viewModes={['cards', 'table', 'matrix', 'components']}
+            viewModes={['cards', 'table', 'matrix']}
             viewToggleSize="sm"
             mb={0}
           />
