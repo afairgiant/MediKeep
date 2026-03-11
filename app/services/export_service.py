@@ -16,7 +16,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.logging.config import get_logger
 from app.models.models import (
@@ -422,7 +422,8 @@ class ExportService:
         query = (
             self.db.query(LabResult)
             .options(joinedload(LabResult.practitioner))
-            .options(joinedload(LabResult.files))  # Include files in the query
+            .options(selectinload(LabResult.files))
+            .options(selectinload(LabResult.test_components))
             .filter(LabResult.patient_id == patient.id)
         )
         query = self._apply_date_filter(query, LabResult, start_date, end_date)
@@ -452,6 +453,30 @@ class ExportService:
                 "ordered_by": result.practitioner.name if result.practitioner else None,
                 "notes": result.notes,
             }
+
+            # Add test components (actual result values)
+            if result.test_components:
+                sorted_components = sorted(
+                    result.test_components,
+                    key=lambda c: (c.display_order or 999, c.test_name or '', c.id)
+                )
+                components = []
+                for comp in sorted_components:
+                    comp_data = {
+                        "test_name": comp.test_name,
+                        "abbreviation": comp.abbreviation,
+                        "result_type": comp.result_type,
+                        "value": comp.value,
+                        "qualitative_value": comp.qualitative_value,
+                        "unit": comp.unit,
+                        "ref_range_min": comp.ref_range_min,
+                        "ref_range_max": comp.ref_range_max,
+                        "ref_range_text": comp.ref_range_text,
+                        "status": comp.status,
+                        "category": comp.category,
+                    }
+                    components.append(comp_data)
+                result_dict["test_components"] = components
 
             # Add file attachment information if files exist and include_files is True
             if include_files:
