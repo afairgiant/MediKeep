@@ -38,10 +38,13 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import { SymptomViewModal } from '../../components/medical/symptoms';
 import { SYMPTOM_STATUS_COLORS } from '../../constants/symptomEnums';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePagination } from '../../hooks/usePagination';
+import PaginationControls from '../../components/shared/PaginationControls';
 
 const Symptoms = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Get current patient from global hook (same as Medication.js)
   const { patient } = usePatientWithStaticData();
@@ -368,6 +371,10 @@ const Symptoms = () => {
     }
   }, [error]);
 
+  const paginatedSymptoms = paginateData(symptoms);
+
+  useEffect(() => { clampPage(symptoms.length); }, [symptoms.length, clampPage]);
+
   // Loading state
   if (loading && symptoms.length === 0) {
     return <MedicalPageLoading message={t('symptoms.loading', 'Loading symptoms...')} />;
@@ -439,7 +446,7 @@ const Symptoms = () => {
             </Paper>
           ) : (
             <Stack gap="md">
-              {symptoms.map(symptom => (
+              {paginatedSymptoms.map(symptom => (
                 <Paper
                   key={symptom.id}
                   p="md"
@@ -565,6 +572,7 @@ const Symptoms = () => {
                   </Group>
                 </Paper>
               ))}
+              <PaginationControls page={page} totalPages={totalPages(symptoms.length)} pageSize={pageSize} totalRecords={symptoms.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
             </Stack>
           )}
         </Tabs.Panel>

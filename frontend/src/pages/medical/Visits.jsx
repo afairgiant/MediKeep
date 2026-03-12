@@ -2,13 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Container,
   Paper,
-  Text,
-  Title,
   Stack,
 } from '@mantine/core';
 import {
   IconPlus,
-  IconCalendar,
   IconShieldCheck,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
@@ -22,17 +19,13 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
-import { 
-  ERROR_MESSAGES, 
-  SUCCESS_MESSAGES,
-  getUserFriendlyError
-} from '../../constants/errorMessages';
+import { ERROR_MESSAGES } from '../../constants/errorMessages';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -41,8 +34,8 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-// Import new modular components
 import VisitCard from '../../components/medical/visits/VisitCard';
 import VisitViewModal from '../../components/medical/visits/VisitViewModal';
 import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
@@ -51,6 +44,7 @@ const Visits = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('visits');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
   const navigate = useNavigate();
   const responsive = useResponsive();
 
@@ -184,8 +178,6 @@ const Visits = () => {
     }
   }, [currentPatient?.id]);
 
-
-  // Helper function to get condition details
   const getConditionDetails = (conditionId) => {
     if (!conditionId || conditions.length === 0) return null;
     return conditions.find(cond => cond.id === conditionId);
@@ -444,11 +436,15 @@ const Visits = () => {
     }
   };
 
+  const filteredVisits = dataManagement.data;
+  const paginatedVisits = paginateData(filteredVisits);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(filteredVisits.length); }, [filteredVisits.length, clampPage]);
+
   if (loading) {
     return <MedicalPageLoading message={t('visits.loadingVisits', 'Loading visits...')} />;
   }
-
-  const filteredVisits = dataManagement.data;
 
   return (
     <>
@@ -475,10 +471,8 @@ const Visits = () => {
           mb={0}
         />
 
-        {/* Mantine Filter Controls */}
         <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
-        {/* Content */}
           {filteredVisits.length === 0 ? (
             <EmptyState
               icon={IconShieldCheck}
@@ -489,7 +483,7 @@ const Visits = () => {
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={filteredVisits}
+              items={paginatedVisits}
               columns={{ base: 12, md: 6, lg: 4 }}
               renderCard={(visit) => (
                 <VisitCard
@@ -509,7 +503,8 @@ const Visits = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
                 persistKey="visits"
-                data={filteredVisits}
+                data={paginatedVisits}
+                pagination={false}
                 columns={[
                   { header: t('visits.table.visitDate', 'Visit Date'), accessor: 'date', priority: 'high', width: 120 },
                   { header: t('visits.table.reason', 'Reason'), accessor: 'reason', priority: 'high', width: 150 },
@@ -540,6 +535,17 @@ const Visits = () => {
               />
             </Paper>
           )}
+          {filteredVisits.length > 0 && (
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(filteredVisits.length)}
+              pageSize={pageSize}
+              totalRecords={filteredVisits.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
+          )}
       </Stack>
       </Container>
 
@@ -560,7 +566,6 @@ const Visits = () => {
           }
         }}
       >
-        {/* Form Loading Overlay */}
         <FormLoadingOverlay
           visible={isBlocking}
           message={statusMessage?.title || 'Processing...'}
@@ -569,7 +574,6 @@ const Visits = () => {
         />
       </VisitFormWrapper>
 
-      {/* Visit View Modal */}
       <VisitViewModal
         isOpen={showViewModal}
         onClose={handleCloseViewModal}

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -26,6 +26,7 @@ import {
 } from '../../constants/errorMessages';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
+import { usePagination } from '../../hooks/usePagination';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
@@ -41,6 +42,7 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
 import {
@@ -62,6 +64,7 @@ const Insurance = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('insurance');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Modern data management with useMedicalData
   const {
@@ -176,6 +179,11 @@ const Insurance = () => {
     totalCount = 0,
     filteredCount = 0,
   } = dataManagement;
+
+  const paginatedInsurances = paginateData(processedInsurances);
+
+  useEffect(() => { resetPage(); }, [hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(processedInsurances.length); }, [processedInsurances.length, clampPage]);
 
   // Form state management
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -492,7 +500,7 @@ const Insurance = () => {
         <>
           {viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={processedInsurances}
+              items={paginatedInsurances}
               columns={{ base: 12, sm: 6, md: 4, lg: 3 }}
               renderCard={(insurance) => (
                 <InsuranceCard
@@ -510,7 +518,8 @@ const Insurance = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
               persistKey="insurance"
-              data={processedInsurances}
+              data={paginatedInsurances}
+              pagination={false}
               columns={[
                 { header: 'Type', accessor: 'insurance_type', priority: 'high', width: 100 },
                 { header: 'Company', accessor: 'company_name', priority: 'high', width: 180 },
@@ -536,6 +545,7 @@ const Insurance = () => {
             />
           </Paper>
           )}
+          <PaginationControls page={page} totalPages={totalPages(processedInsurances.length)} pageSize={pageSize} totalRecords={processedInsurances.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
         </>
       )}
       </Stack>

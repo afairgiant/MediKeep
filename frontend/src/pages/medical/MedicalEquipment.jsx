@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
@@ -7,6 +7,8 @@ import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
+import { usePagination } from '../../hooks/usePagination';
+import PaginationControls from '../../components/shared/PaginationControls';
 import logger from '../../services/logger';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -111,6 +113,7 @@ const useSimpleDataManagement = (data, config) => {
 const MedicalEquipment = () => {
   const { t } = useTranslation('common');
   const [viewMode, setViewMode] = usePersistedViewMode('medical-equipment');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Get practitioners data
   const { practitioners: practitionersObject } = usePatientWithStaticData();
@@ -249,6 +252,10 @@ const MedicalEquipment = () => {
   };
 
   const filteredEquipment = dataManagement.data;
+  const paginatedEquipment = paginateData(filteredEquipment);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(filteredEquipment.length); }, [filteredEquipment.length, clampPage]);
 
   if (loading) {
     return (
@@ -300,8 +307,9 @@ const MedicalEquipment = () => {
               }
             />
           ) : (
+            <>
             <AnimatedCardGrid
-              items={filteredEquipment}
+              items={paginatedEquipment}
               columns={{ base: 12, sm: 6, lg: 4 }}
               renderCard={(equip) => (
                 <EquipmentCard
@@ -319,6 +327,8 @@ const MedicalEquipment = () => {
                 />
               )}
             />
+            <PaginationControls page={page} totalPages={totalPages(filteredEquipment.length)} pageSize={pageSize} totalRecords={filteredEquipment.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+            </>
           )}
         </Stack>
       </Container>
