@@ -31,11 +31,13 @@ import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { useTranslation } from 'react-i18next';
 import { phoneTelHref } from '../../utils/phoneUtils';
@@ -44,6 +46,7 @@ import '../../styles/shared/MedicalPageShared.css';
 const EmergencyContacts = () => {
   const { t } = useTranslation('common');
   const [viewMode, setViewMode] = usePersistedViewMode('emergency-contacts');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -211,6 +214,10 @@ const EmergencyContacts = () => {
   };
 
   const filteredContacts = dataManagement.data;
+  const paginatedContacts = paginateData(filteredContacts);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(filteredContacts.length); }, [filteredContacts.length, clampPage]);
 
   // Helper function to get relationship icon
   const getRelationshipIcon = relationship => {
@@ -304,7 +311,7 @@ const EmergencyContacts = () => {
             </Paper>
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={filteredContacts}
+              items={paginatedContacts}
               columns={{ base: 12, md: 6, lg: 4 }}
               renderCard={(contact) => (
                 <Card
@@ -477,7 +484,8 @@ const EmergencyContacts = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
                 persistKey="emergency-contacts"
-                data={filteredContacts}
+                data={paginatedContacts}
+                pagination={false}
                 columns={[
                   { header: t('emergencyContacts.table.name'), accessor: 'name', priority: 'high', width: 200 },
                   { header: t('emergencyContacts.table.relationship'), accessor: 'relationship', priority: 'high', width: 150 },
@@ -547,6 +555,9 @@ const EmergencyContacts = () => {
                 responsive={responsive}
               />
             </Paper>
+          )}
+          {filteredContacts.length > 0 && (
+            <PaginationControls page={page} totalPages={totalPages(filteredContacts.length)} pageSize={pageSize} totalRecords={filteredContacts.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
           )}
       </Stack>
       </Container>

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Container,
-  Paper,
-  Text,
   Stack,
-  Title,
 } from '@mantine/core';
 import {
   IconPlus,
@@ -21,16 +18,18 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
+import { usePagination } from '../../hooks/usePagination';
 import { usePharmacies } from '../../hooks/useGlobalData';
 import { useTranslation } from 'react-i18next';
 
-// Modular components
 import PharmacyCard from '../../components/medical/pharmacy/PharmacyCard';
 import PharmacyViewModal from '../../components/medical/pharmacy/PharmacyViewModal';
 import PharmacyFormWrapper from '../../components/medical/pharmacy/PharmacyFormWrapper';
 
 const Pharmacies = () => {
   const { t } = useTranslation('common');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -198,6 +197,10 @@ const Pharmacies = () => {
 
   // Get processed data from data management
   const filteredPharmacies = dataManagement.data;
+  const paginatedPharmacies = paginateData(filteredPharmacies);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(filteredPharmacies.length); }, [filteredPharmacies.length, clampPage]);
 
   // Handle URL parameters for direct linking to specific pharmacies
   useEffect(() => {
@@ -218,7 +221,6 @@ const Pharmacies = () => {
       }
     }
   }, [location.search, filteredPharmacies, loading, showViewModal]);
-
 
   if (loading) {
     return <MedicalPageLoading message={t('pharmacies.loading', 'Loading pharmacies...')} />;
@@ -247,10 +249,8 @@ const Pharmacies = () => {
           mb={0}
         />
 
-        {/* Mantine Filter Controls */}
         <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
-        {/* Content */}
           {filteredPharmacies.length === 0 ? (
             <EmptyState
               icon={IconShieldCheck}
@@ -260,8 +260,9 @@ const Pharmacies = () => {
               noDataMessage={t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
             />
           ) : (
+            <>
             <AnimatedCardGrid
-              items={filteredPharmacies}
+              items={paginatedPharmacies}
               columns={{ base: 12, md: 6, lg: 4 }}
               renderCard={(pharmacy) => (
                 <PharmacyCard
@@ -274,6 +275,16 @@ const Pharmacies = () => {
                 />
               )}
             />
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(filteredPharmacies.length)}
+              pageSize={pageSize}
+              totalRecords={filteredPharmacies.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
+            </>
           )}
       </Stack>
       </Container>

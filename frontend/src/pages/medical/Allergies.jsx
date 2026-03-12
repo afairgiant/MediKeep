@@ -17,6 +17,7 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
 import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import { apiService } from '../../services/api';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
@@ -30,6 +31,7 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -41,6 +43,7 @@ const Allergies = () => {
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('allergies');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Standardized data management
   const {
@@ -206,6 +209,16 @@ const Allergies = () => {
 
   // Get processed data from data management
   const processedAllergies = dataManagement.data;
+  const paginatedAllergies = paginateData(processedAllergies);
+
+  // Reset page when filters change or data shrinks
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+
+  useEffect(() => {
+    clampPage(processedAllergies.length);
+  }, [processedAllergies.length, clampPage]);
 
   if (loading) {
     return <MedicalPageLoading message={t('allergies.messages.loading', 'Loading allergies...')} />;
@@ -267,7 +280,7 @@ const Allergies = () => {
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={processedAllergies}
+              items={paginatedAllergies}
               renderCard={(allergy) => (
                 <AllergyCard
                   allergy={allergy}
@@ -286,7 +299,8 @@ const Allergies = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
                 persistKey="allergies"
-                data={processedAllergies}
+                data={paginatedAllergies}
+                pagination={false}
                 columns={[
                   { header: t('allergies.allergen.label'), accessor: 'allergen', priority: 'high', width: 150 },
                   { header: t('allergies.reaction.label'), accessor: 'reaction', priority: 'high', width: 180 },
@@ -306,6 +320,17 @@ const Allergies = () => {
                 responsive={responsive}
               />
             </Paper>
+          )}
+          {processedAllergies.length > 0 && (
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(processedAllergies.length)}
+              pageSize={pageSize}
+              totalRecords={processedAllergies.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
         </motion.div>
 

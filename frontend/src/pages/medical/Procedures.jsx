@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -15,6 +15,7 @@ import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
 import {
@@ -30,6 +31,7 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
@@ -68,6 +70,7 @@ const Procedures = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('procedures');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Get practitioners data
   const { practitioners } = usePractitioners();
@@ -347,6 +350,10 @@ const Procedures = () => {
 
   // Get processed data from data management
   const filteredProcedures = dataManagement.data;
+  const paginatedProcedures = paginateData(filteredProcedures);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(filteredProcedures.length); }, [filteredProcedures.length, clampPage]);
 
   if (loading) {
     return (
@@ -399,7 +406,7 @@ const Procedures = () => {
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={filteredProcedures}
+              items={paginatedProcedures}
               columns={{ base: 12, sm: 6, lg: 4 }}
               renderCard={(procedure) => (
                 <ProcedureCard
@@ -418,7 +425,8 @@ const Procedures = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
                 persistKey="procedures"
-                data={filteredProcedures}
+                data={paginatedProcedures}
+                pagination={false}
                 columns={[
                   { header: t('procedures.table.procedureName'), accessor: 'procedure_name', priority: 'high', width: 200 },
                   { header: t('procedures.table.type'), accessor: 'procedure_type', priority: 'medium', width: 120 },
@@ -440,6 +448,9 @@ const Procedures = () => {
                 responsive={responsive}
               />
             </Paper>
+          )}
+          {filteredProcedures.length > 0 && (
+            <PaginationControls page={page} totalPages={totalPages(filteredProcedures.length)} pageSize={pageSize} totalRecords={filteredProcedures.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
           )}
         </Stack>
       </Container>

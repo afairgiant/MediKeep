@@ -15,6 +15,7 @@ import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
 import { 
   ERROR_MESSAGES, 
@@ -30,6 +31,7 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
 import LabResultFormWrapper from '../../components/medical/labresults/LabResultFormWrapper';
@@ -54,6 +56,7 @@ const LabResults = () => {
   const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('lab-results');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Modern data management with useMedicalData
   const {
@@ -202,6 +205,10 @@ const LabResults = () => {
 
   // Get processed data from data management
   const filteredLabResults = dataManagement.data;
+  const paginatedLabResults = paginateData(filteredLabResults);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(filteredLabResults.length); }, [filteredLabResults.length, clampPage]);
 
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
@@ -569,7 +576,7 @@ const LabResults = () => {
     if (viewMode === 'cards') {
       return (
         <AnimatedCardGrid
-          items={filteredLabResults}
+          items={paginatedLabResults}
           columns={{ base: 12, sm: 6, lg: 4 }}
           renderCard={(result) => (
             <LabResultCard
@@ -591,7 +598,8 @@ const LabResults = () => {
       <Paper shadow="sm" radius="md" withBorder>
         <ResponsiveTable
           persistKey="lab-results"
-          data={filteredLabResults}
+          data={paginatedLabResults}
+          pagination={false}
           columns={[
             { header: t('labResults.table.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
             { header: t('labResults.table.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
@@ -680,6 +688,9 @@ const LabResults = () => {
           )}
 
           {renderViewContent()}
+          {filteredLabResults.length > 0 && viewMode !== 'components' && (
+            <PaginationControls page={page} totalPages={totalPages(filteredLabResults.length)} pageSize={pageSize} totalRecords={filteredLabResults.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+          )}
         </Stack>
       </Container>
 

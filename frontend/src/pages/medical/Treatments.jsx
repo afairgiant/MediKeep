@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -14,6 +14,7 @@ import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
@@ -21,6 +22,7 @@ import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 
 // Modular components
 import TreatmentCard from '../../components/medical/treatments/TreatmentCard';
@@ -43,6 +45,7 @@ const Treatments = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('treatments');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Get practitioners data
   const { practitioners: practitionersObject } =
@@ -279,6 +282,10 @@ const Treatments = () => {
 
   // Get processed data from data management
   const filteredTreatments = dataManagement.data;
+  const paginatedTreatments = paginateData(filteredTreatments);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(filteredTreatments.length); }, [filteredTreatments.length, clampPage]);
 
   if (loading) {
     return (
@@ -340,7 +347,7 @@ const Treatments = () => {
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={filteredTreatments}
+              items={paginatedTreatments}
               columns={{ base: 12, sm: 6, lg: 4 }}
               renderCard={(treatment) => (
                 <TreatmentCard
@@ -367,7 +374,8 @@ const Treatments = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
               persistKey="treatments"
-              data={filteredTreatments}
+              data={paginatedTreatments}
+              pagination={false}
               columns={[
                   { header: 'Treatment', accessor: 'treatment_name', priority: 'high', width: 200 },
                   { header: 'Type', accessor: 'treatment_type', priority: 'medium', width: 120 },
@@ -422,6 +430,9 @@ const Treatments = () => {
               responsive={responsive}
             />
           </Paper>
+          )}
+          {filteredTreatments.length > 0 && (
+            <PaginationControls page={page} totalPages={totalPages(filteredTreatments.length)} pageSize={pageSize} totalRecords={filteredTreatments.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
           )}
         </Stack>
       </Container>

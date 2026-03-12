@@ -14,6 +14,7 @@ import {
 } from '@tabler/icons-react';
 import { useMedicalData, useDataManagement, useEntityFileCounts, useViewModalNavigation } from '../../hooks';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import { apiService } from '../../services/api';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -30,6 +31,7 @@ import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { withResponsive } from '../../hoc/withResponsive';
@@ -47,7 +49,8 @@ const Conditions = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('conditions');
-  
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+
   // Load medications and practitioners for linking dropdowns
   const [medications, setMedications] = useState([]);
   const [practitioners, setPractitioners] = useState([]);
@@ -317,7 +320,10 @@ const Conditions = () => {
   };
 
   const filteredConditions = dataManagement.data;
+  const paginatedConditions = paginateData(filteredConditions);
 
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(filteredConditions.length); }, [filteredConditions.length, clampPage]);
 
   if (loading) {
     return <MedicalPageLoading message={t('conditions.loading', 'Loading conditions...')} />;
@@ -382,7 +388,7 @@ const Conditions = () => {
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={filteredConditions}
+              items={paginatedConditions}
               renderCard={(condition) => (
                 <ConditionCard
                   condition={condition}
@@ -399,7 +405,8 @@ const Conditions = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
                 persistKey="conditions"
-                data={filteredConditions}
+                data={paginatedConditions}
+                pagination={false}
                 columns={[
                   { header: t('conditions.table.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },
                   { header: t('conditions.table.severity', 'Severity'), accessor: 'severity', priority: 'high', width: 120 },
@@ -427,6 +434,9 @@ const Conditions = () => {
                 responsive={responsive}
               />
             </Paper>
+          )}
+          {filteredConditions.length > 0 && (
+            <PaginationControls page={page} totalPages={totalPages(filteredConditions.length)} pageSize={pageSize} totalRecords={filteredConditions.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
           )}
         </motion.div>
 
