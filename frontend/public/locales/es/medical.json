@@ -171,6 +171,11 @@
       "placeholder": "Seleccione una farmacia",
       "description": "Farmacia donde se obtiene el medicamento"
     },
+    "sideEffects": {
+      "label": "Efectos secundarios",
+      "placeholder": "Liste los efectos secundarios conocidos o experimentados...",
+      "description": "Efectos secundarios conocidos o experimentados de este medicamento"
+    },
     "form": {
       "addMedication": "Añadir medicamento",
       "attachedDocuments": "Documentos adjuntos",

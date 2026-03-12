@@ -176,6 +176,8 @@ const Medication = () => {
     status: 'active',
     practitioner_id: null,
     pharmacy_id: null,
+    notes: '',
+    side_effects: '',
   });
 
   const handleInputChange = useCallback(e => {
@@ -210,6 +212,8 @@ const Medication = () => {
       status: 'active',
       practitioner_id: null,
       pharmacy_id: null,
+      notes: '',
+      side_effects: '',
       tags: [],
     });
     setEditingMedication(null);
@@ -243,6 +247,8 @@ const Medication = () => {
       pharmacy_id: medication.pharmacy_id
         ? String(medication.pharmacy_id)
         : null,
+      notes: medication.notes || '',
+      side_effects: medication.side_effects || '',
       tags: medication.tags || [],
     });
     setEditingMedication(medication);
@@ -294,6 +300,8 @@ const Medication = () => {
         pharmacy_id: formData.pharmacy_id
           ? parseInt(formData.pharmacy_id)
           : null,
+        notes: formData.notes?.trim() || null,
+        side_effects: formData.side_effects?.trim() || null,
         tags: formData.tags || [], // Include tags from form data
       };
 

@@ -1,7 +1,13 @@
 from datetime import date
 from typing import TYPE_CHECKING, Optional, List
 
-from pydantic import BaseModel, ConfigDict, model_validator, field_validator, ValidationInfo
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    model_validator,
+    field_validator,
+    ValidationInfo,
+)
 
 from app.models.enums import get_all_medication_statuses, get_all_medication_types
 from app.schemas.base_tags import TaggedEntityMixin
@@ -15,7 +21,7 @@ class MedicationBase(TaggedEntityMixin):
     """Base schema for Medication"""
 
     medication_name: str
-    medication_type: Optional[str] = 'prescription'
+    medication_type: Optional[str] = "prescription"
     dosage: Optional[str] = None
     frequency: Optional[str] = None
     route: Optional[str] = None
@@ -25,6 +31,8 @@ class MedicationBase(TaggedEntityMixin):
     status: Optional[str] = None
     practitioner_id: Optional[int] = None
     pharmacy_id: Optional[int] = None
+    notes: Optional[str] = None
+    side_effects: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -42,6 +50,8 @@ class MedicationBase(TaggedEntityMixin):
                 "medication_type",
                 "practitioner_id",
                 "pharmacy_id",
+                "notes",
+                "side_effects",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -111,9 +121,11 @@ class MedicationBase(TaggedEntityMixin):
         if v is not None:
             valid_types = get_all_medication_types()
             if v not in valid_types:
-                raise ValueError(f"Medication type must be one of: {', '.join(valid_types)}")
+                raise ValueError(
+                    f"Medication type must be one of: {', '.join(valid_types)}"
+                )
             return v
-        return 'prescription'
+        return "prescription"
 
     @field_validator("status")
     @classmethod
@@ -131,10 +143,7 @@ class MedicationBase(TaggedEntityMixin):
     def validate_effective_period(cls, v, info: ValidationInfo):
         """Validate that end date is after start date"""
         # Only validate if both dates are provided and not None
-        if (
-            v
-            and info.data.get("effective_period_start")
-        ):
+        if v and info.data.get("effective_period_start"):
             if v < info.data["effective_period_start"]:
                 raise ValueError("End date must be after start date")
         return v
@@ -146,6 +155,28 @@ class MedicationCreate(MedicationBase):
     patient_id: int
     practitioner_id: Optional[int] = None
     pharmacy_id: Optional[int] = None
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v):
+        """Validate notes length"""
+        if not v:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 1000:
+            raise ValueError("Notes must be less than 1000 characters")
+        return stripped or None
+
+    @field_validator("side_effects")
+    @classmethod
+    def validate_side_effects(cls, v):
+        """Validate side effects length"""
+        if not v:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 1000:
+            raise ValueError("Side effects must be less than 1000 characters")
+        return stripped or None
 
 
 class MedicationUpdate(BaseModel):
@@ -162,6 +193,8 @@ class MedicationUpdate(BaseModel):
     status: Optional[str] = None
     practitioner_id: Optional[int] = None
     pharmacy_id: Optional[int] = None
+    notes: Optional[str] = None
+    side_effects: Optional[str] = None
     tags: Optional[List[str]] = None
 
     @model_validator(mode="before")
@@ -181,6 +214,8 @@ class MedicationUpdate(BaseModel):
                 "status",
                 "practitioner_id",
                 "pharmacy_id",
+                "notes",
+                "side_effects",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -202,10 +237,7 @@ class MedicationUpdate(BaseModel):
     def validate_end_date(cls, v, info: ValidationInfo):
         """Validate end date - check against start date"""
         # Only validate if both dates are provided and not None
-        if (
-            v
-            and info.data.get("effective_period_start")
-        ):
+        if v and info.data.get("effective_period_start"):
             if v < info.data["effective_period_start"]:
                 raise ValueError("End date must be after start date")
         return v
@@ -237,7 +269,9 @@ class MedicationUpdate(BaseModel):
         if v is not None:
             valid_types = get_all_medication_types()
             if v not in valid_types:
-                raise ValueError(f"Medication type must be one of: {', '.join(valid_types)}")
+                raise ValueError(
+                    f"Medication type must be one of: {', '.join(valid_types)}"
+                )
             return v
         return v
 
@@ -250,6 +284,28 @@ class MedicationUpdate(BaseModel):
                 raise ValueError(f"Status must be one of: {', '.join(valid_statuses)}")
             return v.lower()
         return v
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v):
+        """Validate notes length"""
+        if v is None:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 1000:
+            raise ValueError("Notes must be less than 1000 characters")
+        return stripped or None
+
+    @field_validator("side_effects")
+    @classmethod
+    def validate_side_effects(cls, v):
+        """Validate side effects length"""
+        if v is None:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 1000:
+            raise ValueError("Side effects must be less than 1000 characters")
+        return stripped or None
 
 
 class MedicationResponse(MedicationBase):
