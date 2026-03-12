@@ -188,7 +188,7 @@
     "sideEffects": {
       "label": "Effets secondaires",
       "placeholder": "Listez les effets secondaires connus ou ressentis...",
-      "description": "Effets secondaires connus ou ressentis de ce medicament"
+      "description": "Effets secondaires connus ou ressentis de ce médicament"
     }
   },
   "labResults": {

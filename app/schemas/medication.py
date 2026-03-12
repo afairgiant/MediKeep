@@ -160,17 +160,23 @@ class MedicationCreate(MedicationBase):
     @classmethod
     def validate_notes(cls, v):
         """Validate notes length"""
-        if v and len(v.strip()) > 1000:
+        if not v:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 1000:
             raise ValueError("Notes must be less than 1000 characters")
-        return v.strip() if v else None
+        return stripped or None
 
     @field_validator("side_effects")
     @classmethod
     def validate_side_effects(cls, v):
         """Validate side effects length"""
-        if v and len(v.strip()) > 1000:
+        if not v:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 1000:
             raise ValueError("Side effects must be less than 1000 characters")
-        return v.strip() if v else None
+        return stripped or None
 
 
 class MedicationUpdate(BaseModel):
@@ -283,17 +289,23 @@ class MedicationUpdate(BaseModel):
     @classmethod
     def validate_notes(cls, v):
         """Validate notes length"""
-        if v is not None and len(v.strip()) > 1000:
+        if v is None:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 1000:
             raise ValueError("Notes must be less than 1000 characters")
-        return v.strip() if v else None
+        return stripped or None
 
     @field_validator("side_effects")
     @classmethod
     def validate_side_effects(cls, v):
         """Validate side effects length"""
-        if v is not None and len(v.strip()) > 1000:
+        if v is None:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 1000:
             raise ValueError("Side effects must be less than 1000 characters")
-        return v.strip() if v else None
+        return stripped or None
 
 
 class MedicationResponse(MedicationBase):
