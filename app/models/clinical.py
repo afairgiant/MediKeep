@@ -28,7 +28,7 @@ class Medication(Base):
 
     medication_name = Column(String, nullable=False)
     medication_type = Column(
-        String(20), nullable=False, default='prescription'
+        String(20), nullable=False, default="prescription"
     )  # Use MedicationType enum: prescription, otc, supplement, herbal
     dosage = Column(String, nullable=True)
     frequency = Column(String, nullable=True)
@@ -53,6 +53,10 @@ class Medication(Base):
 
     # Tagging system
     tags = Column(JSON, nullable=True, default=list)
+
+    # Notes and side effects
+    notes = Column(String, nullable=True)
+    side_effects = Column(String, nullable=True)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="medications")
@@ -155,6 +159,7 @@ class Encounter(Base):
 
 class Condition(Base):
     """Represents a medical condition or diagnosis for a patient."""
+
     __tablename__ = "conditions"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
@@ -227,6 +232,7 @@ class Condition(Base):
 
 class Immunization(Base):
     """Represents a vaccine or immunization administered to a patient."""
+
     __tablename__ = "immunizations"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"))
@@ -234,7 +240,9 @@ class Immunization(Base):
 
     # Primary vaccine information
     vaccine_name = Column(String, nullable=False)  # Name of the vaccine
-    vaccine_trade_name = Column(String, nullable=True)  # Formal/trade name (e.g., "Flublok TRIV 2025-2026 PFS")
+    vaccine_trade_name = Column(
+        String, nullable=True
+    )  # Formal/trade name (e.g., "Flublok TRIV 2025-2026 PFS")
     date_administered = Column(Date, nullable=False)  # Date when administered
     dose_number = Column(Integer, nullable=True)  # Dose number in series
     ndc_number = Column(String, nullable=True)  # NDC number of the vaccine
@@ -269,6 +277,7 @@ class Immunization(Base):
 
 class Allergy(Base):
     """Represents a patient allergy with reaction details and severity."""
+
     __tablename__ = "allergies"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
@@ -304,6 +313,7 @@ class Allergy(Base):
 
 class Vitals(Base):
     """Represents a set of vital sign measurements recorded for a patient."""
+
     __tablename__ = "vitals"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
@@ -333,9 +343,7 @@ class Vitals(Base):
     location = Column(
         String, nullable=True
     )  # Where readings were taken (home, clinic, etc.)
-    device_used = Column(
-        String, nullable=True
-    )  # Device used for measurement
+    device_used = Column(String, nullable=True)  # Device used for measurement
     import_source = Column(
         String, nullable=True, index=True
     )  # e.g., "dexcom_clarity"; NULL for manual entries
@@ -360,6 +368,7 @@ class Symptom(Base):
     Stores general information about the symptom.
     Individual episodes are tracked in SymptomOccurrence table.
     """
+
     __tablename__ = "symptoms"
 
     id = Column(Integer, primary_key=True)
@@ -367,10 +376,14 @@ class Symptom(Base):
 
     # Core symptom definition
     symptom_name = Column(String(200), nullable=False)
-    category = Column(String(100), nullable=True)  # e.g., "Neurological", "Gastrointestinal"
+    category = Column(
+        String(100), nullable=True
+    )  # e.g., "Neurological", "Gastrointestinal"
 
     # Overall status
-    status = Column(String(50), nullable=False, default="active")  # active, resolved, chronic
+    status = Column(
+        String(50), nullable=False, default="active"
+    )  # active, resolved, chronic
     is_chronic = Column(Boolean, default=False, nullable=False)
 
     # Occurrence tracking
@@ -385,7 +398,9 @@ class Symptom(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="symptoms")
@@ -395,24 +410,18 @@ class Symptom(Base):
         "SymptomOccurrence",
         back_populates="symptom",
         cascade="all, delete-orphan",
-        order_by="SymptomOccurrence.occurrence_date.desc()"
+        order_by="SymptomOccurrence.occurrence_date.desc()",
     )
 
     # Many-to-Many relationships through junction tables
     condition_relationships = orm_relationship(
-        "SymptomCondition",
-        back_populates="symptom",
-        cascade="all, delete-orphan"
+        "SymptomCondition", back_populates="symptom", cascade="all, delete-orphan"
     )
     medication_relationships = orm_relationship(
-        "SymptomMedication",
-        back_populates="symptom",
-        cascade="all, delete-orphan"
+        "SymptomMedication", back_populates="symptom", cascade="all, delete-orphan"
     )
     treatment_relationships = orm_relationship(
-        "SymptomTreatment",
-        back_populates="symptom",
-        cascade="all, delete-orphan"
+        "SymptomTreatment", back_populates="symptom", cascade="all, delete-orphan"
     )
 
     @hybrid_property
@@ -434,6 +443,7 @@ class SymptomOccurrence(Base):
     Individual episode/occurrence of a symptom.
     Tracks when the symptom happened and specific details about that episode.
     """
+
     __tablename__ = "symptom_occurrences"
 
     id = Column(Integer, primary_key=True)
@@ -446,17 +456,25 @@ class SymptomOccurrence(Base):
 
     # Duration and timing
     duration = Column(String(100), nullable=True)  # "30 minutes", "2 hours", "all day"
-    time_of_day = Column(String(50), nullable=True)  # morning, afternoon, evening, night (legacy)
+    time_of_day = Column(
+        String(50), nullable=True
+    )  # morning, afternoon, evening, night (legacy)
     occurrence_time = Column(Time, nullable=True)  # Precise time when episode started
 
     # Context
     location = Column(String(200), nullable=True)  # Body part/area affected
-    triggers = Column(JSON, nullable=True, default=list)  # Specific triggers for this occurrence
+    triggers = Column(
+        JSON, nullable=True, default=list
+    )  # Specific triggers for this occurrence
     relief_methods = Column(JSON, nullable=True, default=list)  # What helped
-    associated_symptoms = Column(JSON, nullable=True, default=list)  # Other symptoms present
+    associated_symptoms = Column(
+        JSON, nullable=True, default=list
+    )  # Other symptoms present
 
     # Impact
-    impact_level = Column(String(50), nullable=True)  # no_impact, mild, moderate, severe, debilitating
+    impact_level = Column(
+        String(50), nullable=True
+    )  # no_impact, mild, moderate, severe, debilitating
 
     # Resolution
     resolved_date = Column(Date, nullable=True)
@@ -468,7 +486,9 @@ class SymptomOccurrence(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     symptom = orm_relationship("Symptom", back_populates="occurrences")

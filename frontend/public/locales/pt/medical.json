@@ -184,6 +184,11 @@
       "label": "Farmácia",
       "placeholder": "Selecione a Farmácia",
       "description": "Farmácia onde a medicação foi dispensada"
+    },
+    "sideEffects": {
+      "label": "Efeitos colaterais",
+      "placeholder": "Liste os efeitos colaterais conhecidos ou experimentados...",
+      "description": "Efeitos colaterais conhecidos ou experimentados deste medicamento"
     }
   },
   "labResults": {
