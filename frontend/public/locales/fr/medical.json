@@ -184,6 +184,11 @@
       "label": "Pharmacie",
       "placeholder": "Sélectionnez une pharmacie",
       "description": "Pharmacie où le médicament est procuré"
+    },
+    "sideEffects": {
+      "label": "Effets secondaires",
+      "placeholder": "Listez les effets secondaires connus ou ressentis...",
+      "description": "Effets secondaires connus ou ressentis de ce medicament"
     }
   },
   "labResults": {

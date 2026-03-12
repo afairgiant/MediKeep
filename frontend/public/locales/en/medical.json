@@ -184,6 +184,11 @@
       "label": "Pharmacy",
       "placeholder": "Select Pharmacy",
       "description": "Pharmacy where medication is filled"
+    },
+    "sideEffects": {
+      "label": "Side Effects",
+      "placeholder": "List any known or experienced side effects...",
+      "description": "Known or experienced side effects of this medication"
     }
   },
   "labResults": {

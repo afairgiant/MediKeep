@@ -8,6 +8,7 @@ import {
   Button,
   Grid,
   TextInput,
+  Textarea,
   Select,
   Text,
   Title,
@@ -172,6 +173,17 @@ const MantineMedicationForm = ({
           />
         );
 
+      case 'textarea':
+        return (
+          <Textarea
+            {...commonProps}
+            value={formData[field.name] || ''}
+            onChange={handleTextInputChange(field.name)}
+            minRows={field.minRows || 3}
+            maxRows={field.maxRows || 6}
+          />
+        );
+
       case 'custom':
         if (field.component === 'TagInput') {
           return (
@@ -210,6 +222,10 @@ const MantineMedicationForm = ({
 
   const detailsFields = medicationFormFields.filter(f =>
     ['status', 'effective_period_start', 'effective_period_end', 'practitioner_id', 'pharmacy_id', 'tags'].includes(f.name)
+  );
+
+  const notesFields = medicationFormFields.filter(f =>
+    ['notes', 'side_effects'].includes(f.name)
   );
 
   return (
@@ -319,9 +335,13 @@ const MantineMedicationForm = ({
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
-                <Text size="sm" c="dimmed">
-                  {t('medications.form.notesPlaceholder')}
-                </Text>
+                <Grid>
+                  {notesFields.map(field => (
+                    <Grid.Col span={{ base: 12, sm: field.gridColumn || 12 }} key={field.name}>
+                      {renderField(field)}
+                    </Grid.Col>
+                  ))}
+                </Grid>
               </Box>
             </Tabs.Panel>
           </Tabs>

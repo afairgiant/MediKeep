@@ -184,6 +184,11 @@
       "label": "Apotheke",
       "placeholder": "Apotheke auswählen",
       "description": "Apotheke, in der das Medikament abgegeben wird"
+    },
+    "sideEffects": {
+      "label": "Nebenwirkungen",
+      "placeholder": "Listen Sie bekannte oder erlebte Nebenwirkungen auf...",
+      "description": "Bekannte oder erlebte Nebenwirkungen dieses Medikaments"
     }
   },
   "labResults": {
