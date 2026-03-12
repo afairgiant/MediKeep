@@ -25,8 +25,11 @@ import {
   IconDatabase,
 } from '@tabler/icons-react';
 import { exportService } from '../../services/exportService';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 const DataExport = () => {
+  const { dateInputFormat } = useDateFormat();
+
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
   const [formats, setFormats] = useState([]);
@@ -290,7 +293,8 @@ const DataExport = () => {
                 <DateInput
                   value={startDate}
                   onChange={setStartDate}
-                  placeholder="Filter from date"
+                  placeholder={dateInputFormat}
+                  valueFormat={dateInputFormat}
                   clearable
                 />
               </Grid.Col>
@@ -301,7 +305,8 @@ const DataExport = () => {
                 <DateInput
                   value={endDate}
                   onChange={setEndDate}
-                  placeholder="Filter to date"
+                  placeholder={dateInputFormat}
+                  valueFormat={dateInputFormat}
                   clearable
                 />
               </Grid.Col>

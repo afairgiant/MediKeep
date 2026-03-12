@@ -12,6 +12,7 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { useTranslation } from 'react-i18next';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -35,6 +36,7 @@ const EquipmentFormWrapper = ({
   isLoading = false,
 }) => {
   const { t } = useTranslation('common');
+  const { dateInputFormat } = useDateFormat();
 
   const {
     handleTextInputChange,
@@ -166,7 +168,8 @@ const EquipmentFormWrapper = ({
                   const formattedDate = formatDateInputChange(date);
                   onInputChange({ target: { name: 'prescribed_date', value: formattedDate } });
                 }}
-                placeholder={t('equipment.form.datePlaceholder', 'Select date')}
+                placeholder={dateInputFormat}
+                valueFormat={dateInputFormat}
                 clearable
                 popoverProps={{ withinPortal: true, zIndex: 3000 }}
               />
@@ -179,7 +182,8 @@ const EquipmentFormWrapper = ({
                   const formattedDate = formatDateInputChange(date);
                   onInputChange({ target: { name: 'last_service_date', value: formattedDate } });
                 }}
-                placeholder={t('equipment.form.datePlaceholder', 'Select date')}
+                placeholder={dateInputFormat}
+                valueFormat={dateInputFormat}
                 clearable
                 popoverProps={{ withinPortal: true, zIndex: 3000 }}
               />
@@ -192,7 +196,8 @@ const EquipmentFormWrapper = ({
                   const formattedDate = formatDateInputChange(date);
                   onInputChange({ target: { name: 'next_service_date', value: formattedDate } });
                 }}
-                placeholder={t('equipment.form.datePlaceholder', 'Select date')}
+                placeholder={dateInputFormat}
+                valueFormat={dateInputFormat}
                 clearable
                 minDate={parseDateInput(formData.last_service_date) || undefined}
                 popoverProps={{ withinPortal: true, zIndex: 3000 }}

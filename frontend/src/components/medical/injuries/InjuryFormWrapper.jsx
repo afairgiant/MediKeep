@@ -19,6 +19,7 @@ import {
   IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -47,6 +48,7 @@ const InjuryFormWrapper = ({
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common']);
+  const { dateInputFormat } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -211,10 +213,8 @@ const InjuryFormWrapper = ({
                       label={t('injuries.dateOfInjury.label', 'Date of Injury')}
                       value={parseDateInput(formData.date_of_injury)}
                       onChange={handleDateChange('date_of_injury')}
-                      placeholder={t(
-                        'injuries.dateOfInjury.placeholder',
-                        'When the injury occurred'
-                      )}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       maxDate={today}
                       clearable
                       firstDayOfWeek={0}

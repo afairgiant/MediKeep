@@ -20,6 +20,7 @@ import {
   IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -42,6 +43,7 @@ const AllergyFormWrapper = ({
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common']);
+  const { dateInputFormat } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -199,7 +201,8 @@ const AllergyFormWrapper = ({
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'onset_date', value: formattedDate } });
                       }}
-                      placeholder={t('allergies.onsetDate.placeholder')}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       description={t('allergies.onsetDate.description')}
                       clearable
                       firstDayOfWeek={0}
