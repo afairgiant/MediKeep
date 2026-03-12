@@ -144,8 +144,9 @@ describe('AnimatedCardGrid', () => {
         <AnimatedCardGrid items={mockItems} renderCard={mockRenderCard} />
       );
 
+      // 1 outer wrapper + 3 per-card wrappers = 4
       const motionDivs = screen.getAllByTestId('motion-div');
-      expect(motionDivs.length).toBe(3);
+      expect(motionDivs.length).toBe(4);
     });
 
     it('does not render motion.div wrappers when animate=false', () => {
@@ -163,14 +164,14 @@ describe('AnimatedCardGrid', () => {
   });
 
   describe('staggerDelay', () => {
-    it('applies default staggerDelay of 0.1', () => {
+    it('applies default staggerDelay of 0.03', () => {
       render(
         <AnimatedCardGrid items={mockItems} renderCard={mockRenderCard} />
       );
 
-      // Motion divs should be rendered with stagger delay
+      // 1 outer wrapper + 3 per-card wrappers = 4
       const motionDivs = screen.getAllByTestId('motion-div');
-      expect(motionDivs.length).toBe(3);
+      expect(motionDivs.length).toBe(4);
     });
 
     it('accepts custom staggerDelay', () => {
@@ -182,8 +183,9 @@ describe('AnimatedCardGrid', () => {
         />
       );
 
+      // 1 outer wrapper + 3 per-card wrappers = 4
       const motionDivs = screen.getAllByTestId('motion-div');
-      expect(motionDivs.length).toBe(3);
+      expect(motionDivs.length).toBe(4);
     });
   });
 

@@ -5,7 +5,7 @@ import { Group, Pagination, Select, Text } from '@mantine/core';
 /**
  * Shared pagination controls for medical record pages.
  * Shows page navigation, "Showing X-Y of Z" text, and page size selector.
- * Only renders when totalRecords > smallest page size option.
+ * Always renders when totalRecords > 0, including single-page results.
  */
 const PaginationControls = ({
   page,

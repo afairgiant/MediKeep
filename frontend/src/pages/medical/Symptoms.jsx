@@ -44,7 +44,7 @@ import PaginationControls from '../../components/shared/PaginationControls';
 const Symptoms = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Get current patient from global hook (same as Medication.js)
   const { patient } = usePatientWithStaticData();
