@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import {
   Modal,
   Tabs,
@@ -48,6 +49,7 @@ const ConditionFormWrapper = ({
   navigate,
 }) => {
   const { t } = useTranslation('common');
+  const { dateInputFormat } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -189,7 +191,8 @@ const ConditionFormWrapper = ({
                       label={t('conditions.form.fields.onsetDate', 'Onset Date')}
                       value={parseDateInput(formData.onset_date)}
                       onChange={handleDateChange('onset_date')}
-                      placeholder={t('conditions.form.placeholders.onsetDate', 'Select onset date')}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       description={t('conditions.form.descriptions.onsetDate', 'When the condition started')}
                       clearable
                       firstDayOfWeek={0}
@@ -202,7 +205,8 @@ const ConditionFormWrapper = ({
                       label={t('conditions.form.fields.endDate', 'End Date')}
                       value={parseDateInput(formData.end_date)}
                       onChange={handleDateChange('end_date')}
-                      placeholder={t('conditions.form.placeholders.endDate', 'Select end date')}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       description={t('conditions.form.descriptions.endDate', 'When the condition ended (if applicable)')}
                       clearable
                       firstDayOfWeek={0}

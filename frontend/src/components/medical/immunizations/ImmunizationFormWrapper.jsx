@@ -21,6 +21,7 @@ import {
   IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
@@ -42,6 +43,7 @@ const ImmunizationFormWrapper = ({
   statusMessage,
 }) => {
   const { t } = useTranslation('common');
+  const { dateInputFormat } = useDateFormat();
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -195,7 +197,8 @@ const ImmunizationFormWrapper = ({
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'expiration_date', value: formattedDate } });
                       }}
-                      placeholder={t('immunizations.form.expirationDatePlaceholder', 'Select expiration date')}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       description={t('immunizations.form.expirationDateDesc', 'When the vaccine expires')}
                       clearable
                       firstDayOfWeek={0}
@@ -235,7 +238,8 @@ const ImmunizationFormWrapper = ({
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'date_administered', value: formattedDate } });
                       }}
-                      placeholder={t('immunizations.form.dateAdministeredPlaceholder', 'Select administration date')}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       description={t('immunizations.form.dateAdministeredDesc', 'When the vaccine was administered')}
                       required
                       clearable

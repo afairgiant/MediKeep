@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
@@ -47,6 +48,7 @@ const MantineMedicationForm = ({
 }) => {
   // Translation
   const { t } = useTranslation(['medical', 'common']);
+  const { dateInputFormat } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -159,12 +161,13 @@ const MantineMedicationForm = ({
         return (
           <DateInput
             {...commonProps}
+            placeholder={dateInputFormat}
             value={parseDateInput(formData[field.name])}
             onChange={(date) => {
               const formattedDate = formatDateInputChange(date);
               onInputChange({ target: { name: field.name, value: formattedDate } });
             }}
-            valueFormat="YYYY-MM-DD"
+            valueFormat={dateInputFormat}
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );

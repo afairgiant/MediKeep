@@ -79,7 +79,7 @@ const VitalsForm = ({
   const { isReady, getCurrentTime, timezone } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
-  const { formatDateTimeInput, dateFormat, dateTimePlaceholder } = useDateFormat();
+  const { formatDateTimeInput, dateFormat, dateTimePlaceholder, dateInputFormat } = useDateFormat();
 
   // Generate dynamic configs based on user's unit system
   const FORM_FIELDS = useMemo(() => ({
@@ -669,9 +669,10 @@ const VitalsForm = ({
         <DateInput
           key={fieldName}
           label={config.label}
-          placeholder={t('vitals.form.selectDate', 'Select date')}
+          placeholder={dateInputFormat}
           value={value}
           onChange={val => handleInputChange(fieldName, val)}
+          valueFormat={dateInputFormat}
           leftSection={<IconComponent size={16} />}
           required={config.required}
           error={error}

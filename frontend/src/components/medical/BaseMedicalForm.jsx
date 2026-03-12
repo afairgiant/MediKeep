@@ -28,6 +28,7 @@ import { MedicalFormLayoutStrategy } from '../../strategies/MedicalFormLayoutStr
 import { TagInput } from '../common/TagInput';
 import { translateField } from '../../utils/translateField';
 import logger from '../../services/logger';
+import { useDateFormat } from '../../hooks/useDateFormat';
 
 // Initialize medical form layout strategy
 const medicalFormStrategy = new MedicalFormLayoutStrategy();
@@ -96,6 +97,8 @@ const BaseMedicalForm = ({
 
   // Translation hooks
   const { t } = useTranslation(['medical', 'common']);
+
+  const { dateInputFormat } = useDateFormat();
 
   const {
     handleTextInputChange,
@@ -278,6 +281,8 @@ const BaseMedicalForm = ({
         {...baseProps}
         value={dateValue}
         onChange={handleDateChange(name)}
+        valueFormat={dateInputFormat}
+        placeholder={dateInputFormat}
         firstDayOfWeek={0}
         clearable
         maxDate={dynamicMaxDate}
@@ -285,7 +290,7 @@ const BaseMedicalForm = ({
         popoverProps={{ withinPortal: true, zIndex: 3000 }}
       />
     );
-  }, [handleDateChange, formData]);
+  }, [handleDateChange, formData, dateInputFormat]);
 
   // Callback for time input fields
   const renderTimeField = useCallback((fieldConfig, baseProps) => {

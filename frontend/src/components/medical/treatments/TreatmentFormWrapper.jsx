@@ -28,6 +28,7 @@ import {
   IconDeviceDesktop,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
@@ -62,6 +63,7 @@ const TreatmentFormWrapper = ({
   isLoading = false,
 }) => {
   const { t } = useTranslation('common');
+  const { dateInputFormat } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -477,7 +479,8 @@ const TreatmentFormWrapper = ({
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'start_date', value: formattedDate } });
                       }}
-                      placeholder={t('treatments.form.selectStartDate', 'Select start date')}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       description={t('treatments.form.startDateDesc', 'When treatment is planned to begin or began')}
                       clearable
                       firstDayOfWeek={0}
@@ -492,7 +495,8 @@ const TreatmentFormWrapper = ({
                         const formattedDate = formatDateInputChange(date);
                         onInputChange({ target: { name: 'end_date', value: formattedDate } });
                       }}
-                      placeholder={t('treatments.form.selectEndDate', 'Select end date')}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
                       description={t('treatments.form.endDateDesc', 'When treatment ends (if applicable)')}
                       clearable
                       firstDayOfWeek={0}

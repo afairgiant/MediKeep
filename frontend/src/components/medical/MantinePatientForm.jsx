@@ -17,6 +17,7 @@ import { IconUser, IconStethoscope, IconHome, IconCheck, IconX } from '@tabler/i
 import { useTranslation } from 'react-i18next';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   unitLabels,
   validationRanges,
@@ -39,6 +40,7 @@ const MantinePatientForm = ({
   onPhotoChange, // New callback for photo changes
 }) => {
   const { unitSystem } = useUserPreferences();
+  const { dateInputFormat } = useDateFormat();
 
   // Photo state
   const [photoUrl, setPhotoUrl] = useState(null);
@@ -206,7 +208,7 @@ const MantinePatientForm = ({
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <DateInput
                 label={t('patients.form.birthDate.label')}
-                placeholder={t('patients.form.birthDate.placeholder')}
+                placeholder={dateInputFormat}
                 value={
                   formData.birth_date
                     ? (() => {
@@ -227,6 +229,7 @@ const MantinePatientForm = ({
                     : null
                 }
                 onChange={handleDateChange('birth_date')}
+                valueFormat={dateInputFormat}
                 firstDayOfWeek={0}
                 required
                 withAsterisk

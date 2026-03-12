@@ -50,9 +50,9 @@ vi.mock('../utils/dateFormatUtils', () => ({
 // Mock constants
 vi.mock('../utils/constants', () => ({
   DATE_FORMAT_OPTIONS: {
-    mdy: { code: 'mdy', label: 'MM/DD/YYYY (US)', locale: 'en-US' },
-    dmy: { code: 'dmy', label: 'DD/MM/YYYY (EU)', locale: 'en-GB' },
-    ymd: { code: 'ymd', label: 'YYYY-MM-DD (ISO)', locale: 'sv-SE' },
+    mdy: { code: 'mdy', label: 'MM/DD/YYYY (US)', locale: 'en-US', pattern: 'MM/DD/YYYY' },
+    dmy: { code: 'dmy', label: 'DD/MM/YYYY (EU)', locale: 'en-GB', pattern: 'DD/MM/YYYY' },
+    ymd: { code: 'ymd', label: 'YYYY-MM-DD (ISO)', locale: 'sv-SE', pattern: 'YYYY-MM-DD' },
   },
   DEFAULT_DATE_FORMAT: 'mdy',
 }));
@@ -92,6 +92,7 @@ describe('useDateFormat', () => {
     expect(result.current).toHaveProperty('formatLabel');
     expect(result.current).toHaveProperty('formatExample');
     expect(result.current).toHaveProperty('dateTimePlaceholder');
+    expect(result.current).toHaveProperty('dateInputFormat');
     expect(result.current).toHaveProperty('formatOptions');
   });
 
@@ -145,6 +146,12 @@ describe('useDateFormat', () => {
     const { result } = renderHook(() => useDateFormat());
 
     expect(result.current.formatExample).toBe('01/25/2026');
+  });
+
+  test('dateInputFormat returns the pattern for the active format', () => {
+    const { result } = renderHook(() => useDateFormat());
+
+    expect(result.current.dateInputFormat).toBe('MM/DD/YYYY');
   });
 
   test('formatOptions contains available format options', () => {

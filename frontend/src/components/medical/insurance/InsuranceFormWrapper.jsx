@@ -28,6 +28,7 @@ import { getFormFields } from '../../../utils/medicalFormFields';
 import { isValidPhoneNumber, isPhoneField } from '../../../utils/phoneUtils';
 import { formatDateInputChange, parseDateInput } from '../../../utils/dateUtils';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
@@ -47,6 +48,7 @@ const InsuranceFormWrapper = ({
   onFileUploadComplete,
 }) => {
   const { t } = useTranslation(['medical', 'common']);
+  const { dateInputFormat } = useDateFormat();
 
   // Get insurance form fields
   const fields = getFormFields('insurance');
@@ -404,12 +406,13 @@ const InsuranceFormWrapper = ({
         return (
           <DateInput
             {...commonProps}
+            placeholder={dateInputFormat}
             value={parseDateInput(formData[field.name])}
             onChange={(date) => {
               const formattedDate = formatDateInputChange(date);
               onInputChange({ target: { name: field.name, value: formattedDate } });
             }}
-            valueFormat="YYYY-MM-DD"
+            valueFormat={dateInputFormat}
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );

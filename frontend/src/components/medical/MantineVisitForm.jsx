@@ -26,6 +26,7 @@ import { visitFormFields } from '../../utils/medicalFormFields';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import { translateField } from '../../utils/translateField';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
@@ -48,6 +49,7 @@ const MantineVisitForm = ({
 }) => {
   // Translation hooks - medical for field translations, common for UI elements
   const { t } = useTranslation(['medical', 'common']);
+  const { dateInputFormat } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('info');
@@ -150,12 +152,13 @@ const MantineVisitForm = ({
         return (
           <DateInput
             {...commonProps}
+            placeholder={dateInputFormat}
             value={parseDateInput(formData[translatedField.name])}
             onChange={(date) => {
               const formattedDate = formatDateInputChange(date);
               onInputChange({ target: { name: translatedField.name, value: formattedDate } });
             }}
-            valueFormat="YYYY-MM-DD"
+            valueFormat={dateInputFormat}
             maxDate={translatedField.maxDate && typeof translatedField.maxDate === 'function' ? translatedField.maxDate() : translatedField.maxDate}
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />

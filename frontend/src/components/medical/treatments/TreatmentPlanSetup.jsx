@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 import {
   createDateSortedOptions,
   formatDateDisplay,
@@ -96,6 +97,7 @@ const TreatmentPlanSetup = ({
   onRelationshipsChange,
 }) => {
   const { t } = useTranslation('medical');
+  const { dateInputFormat } = useDateFormat();
   const [loading, setLoading] = useState(true);
 
   // Available entities for selection
@@ -351,8 +353,10 @@ const TreatmentPlanSetup = ({
                             <DateInput
                               size="xs"
                               label={t('treatments.medications.specificStartDate', 'Treatment Start Date')}
+                              placeholder={dateInputFormat}
                               value={parseDateInput(metadata.specific_start_date)}
                               onChange={(date) => updateItemMetadata('medications', medId, 'specific_start_date', formatDateInputChange(date))}
+                              valueFormat={dateInputFormat}
                               clearable
                               firstDayOfWeek={0}
                               popoverProps={{ withinPortal: true, zIndex: 4000 }}
@@ -360,8 +364,10 @@ const TreatmentPlanSetup = ({
                             <DateInput
                               size="xs"
                               label={t('treatments.medications.specificEndDate', 'Treatment End Date')}
+                              placeholder={dateInputFormat}
                               value={parseDateInput(metadata.specific_end_date)}
                               onChange={(date) => updateItemMetadata('medications', medId, 'specific_end_date', formatDateInputChange(date))}
+                              valueFormat={dateInputFormat}
                               clearable
                               firstDayOfWeek={0}
                               minDate={parseDateInput(metadata.specific_start_date) || undefined}
