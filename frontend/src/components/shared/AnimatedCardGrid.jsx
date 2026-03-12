@@ -1,6 +1,10 @@
+import { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Grid } from '@mantine/core';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Cap total stagger time so large pages don't feel slow
+const MAX_TOTAL_STAGGER = 0.4; // seconds
 
 /**
  * AnimatedCardGrid - A reusable component for displaying animated card grids
@@ -8,27 +12,10 @@ import { motion, AnimatePresence } from 'framer-motion';
  * Consolidates the repeated card grid + animation pattern across 14+ medical pages,
  * providing consistent animations and responsive layouts.
  *
- * @example
- * // Before (25-30 lines of code)
- * <Grid>
- *   <AnimatePresence>
- *     {items.map((item, index) => (
- *       <Grid.Col key={item.id} span={{ base: 12, md: 6, lg: 4 }}>
- *         <motion.div
- *           initial={{ opacity: 0, y: 20 }}
- *           animate={{ opacity: 1, y: 0 }}
- *           exit={{ opacity: 0, y: -20 }}
- *           transition={{ duration: 0.3, delay: index * 0.1 }}
- *         >
- *           <Card item={item} onEdit={...} onDelete={...} />
- *         </motion.div>
- *       </Grid.Col>
- *     ))}
- *   </AnimatePresence>
- * </Grid>
+ * Uses mode="wait" on AnimatePresence so old content fully exits before new content
+ * enters, preventing the visual overlap that occurs during pagination.
  *
  * @example
- * // After (5-10 lines of code)
  * <AnimatedCardGrid
  *   items={processedAllergies}
  *   renderCard={(allergy) => (
@@ -47,21 +34,19 @@ function AnimatedCardGrid({
   keyExtractor = (item) => item.id,
   columns = { base: 12, md: 6, lg: 4 },
   animate = true,
-  staggerDelay = 0.1,
+  staggerDelay = 0.03,
 }) {
-  // Early return for empty items
+  const contentKey = useMemo(
+    () => (items || []).map(keyExtractor).join(','),
+    [items, keyExtractor]
+  );
+
   if (!items || items.length === 0) {
     return null;
   }
 
-  // Animation variants for consistent animations
-  const cardVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
-  };
+  const effectiveStagger = Math.min(staggerDelay, MAX_TOTAL_STAGGER / items.length);
 
-  // Render grid without animation
   if (!animate) {
     return (
       <Grid>
@@ -74,25 +59,30 @@ function AnimatedCardGrid({
     );
   }
 
-  // Render grid with animation
   return (
-    <Grid>
-      <AnimatePresence>
-        {items.map((item, index) => (
-          <Grid.Col key={keyExtractor(item)} span={columns}>
-            <motion.div
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              variants={cardVariants}
-              transition={{ duration: 0.3, delay: index * staggerDelay }}
-            >
-              {renderCard(item)}
-            </motion.div>
-          </Grid.Col>
-        ))}
-      </AnimatePresence>
-    </Grid>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={contentKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
+      >
+        <Grid>
+          {items.map((item, index) => (
+            <Grid.Col key={keyExtractor(item)} span={columns}>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: index * effectiveStagger }}
+              >
+                {renderCard(item)}
+              </motion.div>
+            </Grid.Col>
+          ))}
+        </Grid>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -110,7 +100,7 @@ AnimatedCardGrid.propTypes = {
   ]),
   /** Whether to animate the cards (default: true) */
   animate: PropTypes.bool,
-  /** Delay between each card's animation in seconds (default: 0.1) */
+  /** Delay between each card's animation in seconds (default: 0.03, capped so total stagger stays under 0.4s) */
   staggerDelay: PropTypes.number,
 };
 

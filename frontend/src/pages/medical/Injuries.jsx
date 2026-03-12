@@ -27,10 +27,12 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import { InjuryCard, InjuryViewModal, InjuryFormWrapper } from '../../components/medical/injuries';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
 
 const Injuries = () => {
@@ -39,6 +41,7 @@ const Injuries = () => {
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('injuries');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Standardized data management
   const {
@@ -255,6 +258,10 @@ const Injuries = () => {
 
   // Get processed data from data management
   const processedInjuries = dataManagement.data;
+  const paginatedInjuries = paginateData(processedInjuries);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(processedInjuries.length); }, [processedInjuries.length, clampPage]);
 
   if (loading) {
     return <MedicalPageLoading message={t('injuries.messages.loading', 'Loading injuries...')} />;
@@ -318,7 +325,7 @@ const Injuries = () => {
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={processedInjuries}
+              items={paginatedInjuries}
               renderCard={(injury) => (
                 <InjuryCard
                   injury={injury}
@@ -338,7 +345,8 @@ const Injuries = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
                 persistKey="injuries"
-                data={processedInjuries}
+                data={paginatedInjuries}
+                pagination={false}
                 columns={[
                   { header: t('injuries.injuryName.label', 'Injury Name'), accessor: 'injury_name', priority: 'high', width: 180 },
                   { header: t('injuries.bodyPart.label', 'Body Part'), accessor: 'body_part', priority: 'high', width: 120 },
@@ -358,6 +366,9 @@ const Injuries = () => {
                 responsive={responsive}
               />
             </Paper>
+          )}
+          {processedInjuries.length > 0 && (
+            <PaginationControls page={page} totalPages={totalPages(processedInjuries.length)} pageSize={pageSize} totalRecords={processedInjuries.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
           )}
         </motion.div>
 

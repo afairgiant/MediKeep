@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import logger from '../../services/logger';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -36,9 +36,11 @@ import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 
 // Modular components
 import {
@@ -51,6 +53,7 @@ const Immunization = () => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('immunizations');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
   const navigate = useNavigate();
   const responsive = useResponsive();
 
@@ -230,6 +233,10 @@ const Immunization = () => {
 
   // Get processed data from data management
   const processedImmunizations = dataManagement.data;
+  const paginatedImmunizations = paginateData(processedImmunizations);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(processedImmunizations.length); }, [processedImmunizations.length, clampPage]);
 
   // Get practitioners data
   const { practitioners: practitionersObject } = usePatientWithStaticData();
@@ -304,7 +311,7 @@ const Immunization = () => {
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={processedImmunizations}
+              items={paginatedImmunizations}
               renderCard={(immunization) => (
                 <ImmunizationCard
                   immunization={immunization}
@@ -322,7 +329,8 @@ const Immunization = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
                 persistKey="immunizations"
-                data={processedImmunizations}
+                data={paginatedImmunizations}
+                pagination={false}
                 columns={[
                   { header: t('immunizations.table.vaccineName', 'Vaccine Name'), accessor: 'vaccine_name', priority: 'high', width: 200 },
                   {
@@ -360,6 +368,9 @@ const Immunization = () => {
                 responsive={responsive}
               />
             </Paper>
+          )}
+          {processedImmunizations.length > 0 && (
+            <PaginationControls page={page} totalPages={totalPages(processedImmunizations.length)} pageSize={pageSize} totalRecords={processedImmunizations.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
           )}
         </Stack>
     </Container>

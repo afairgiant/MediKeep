@@ -41,6 +41,7 @@ import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
+import PaginationControls from '../../components/shared/PaginationControls';
 import {
   MedicationCard,
   MedicationViewModal,
@@ -49,6 +50,7 @@ import {
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePagination } from '../../hooks/usePagination';
 import {
   MEDICATION_TYPES,
   MEDICATION_TYPE_LABELS,
@@ -61,6 +63,7 @@ const Medication = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('medications');
+  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
   // Form state - moved up to be available for refs logic
   const [showAddForm, setShowAddForm] = useState(false);
@@ -364,6 +367,11 @@ const Medication = () => {
     }));
   }, [dataManagement.data, practitioners, pharmacies]);
 
+  const paginatedMedications = paginateData(processedMedications);
+
+  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => { clampPage(processedMedications.length); }, [processedMedications.length, clampPage]);
+
   if (loading) {
     return <MedicalPageLoading message={t('medications.loading', 'Loading medications...')} />;
   }
@@ -551,7 +559,7 @@ const Medication = () => {
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
-              items={processedMedications}
+              items={paginatedMedications}
               staggerDelay={0.05}
               renderCard={(medication) => (
                 <MedicationCard
@@ -570,7 +578,8 @@ const Medication = () => {
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
                 persistKey="medications"
-                data={processedMedications}
+                data={paginatedMedications}
+                pagination={false}
                 columns={[
                   {
                     header: 'Medication Name',
@@ -650,6 +659,9 @@ const Medication = () => {
                 responsive={responsive}
               />
             </Paper>
+          )}
+          {processedMedications.length > 0 && (
+            <PaginationControls page={page} totalPages={totalPages(processedMedications.length)} pageSize={pageSize} totalRecords={processedMedications.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
           )}
         </motion.div>
 
