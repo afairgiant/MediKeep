@@ -45,7 +45,11 @@ const InsuranceFormWrapper = ({
   onSubmit,
   editingItem = null,
   children,
+  isLoading = false,
+  statusMessage,
+  onDocumentManagerRef,
   onFileUploadComplete,
+  onError,
 }) => {
   const { t } = useTranslation(['medical', 'common']);
   const { dateInputFormat } = useDateFormat();
@@ -67,6 +71,40 @@ const InsuranceFormWrapper = ({
     handleDateChange,
     handleNumberChange,
   } = useFormHandlers(onInputChange);
+
+  const handleDocumentManagerRef = (methods) => {
+    if (onDocumentManagerRef) {
+      onDocumentManagerRef(methods);
+    }
+  };
+
+  const handleDocumentError = (error) => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in insurance ${editingItem ? 'edit' : 'create'}`,
+      insuranceId: editingItem?.id,
+      error: error,
+      component: 'InsuranceFormWrapper',
+    });
+
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+    logger.info('insurance_upload_completed', {
+      message: 'File upload completed in insurance form',
+      insuranceId: editingItem?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'InsuranceFormWrapper',
+    });
+
+    if (onFileUploadComplete) {
+      onFileUploadComplete(success, completedCount, failedCount);
+    }
+  };
 
   // Reset tab and clear errors when modal opens/closes
   useEffect(() => {
@@ -490,6 +528,8 @@ const InsuranceFormWrapper = ({
       size="xl"
       centered
       zIndex={2000}
+      closeOnClickOutside={!isLoading}
+      closeOnEscape={!isLoading}
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
@@ -497,7 +537,7 @@ const InsuranceFormWrapper = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting} message={t('insurance.form.saving', 'Saving insurance...')} />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || t('insurance.form.saving', 'Saving insurance...')} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -518,11 +558,11 @@ const InsuranceFormWrapper = ({
                   {t('insurance.form.tabs.contact', 'Contact')}
                 </Tabs.Tab>
               )}
-              {editingItem && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('insurance.form.tabs.documents', 'Documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingItem
+                  ? t('insurance.form.tabs.documents', 'Documents')
+                  : t('insurance.form.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconFileText size={16} />}>
                 {t('insurance.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -602,29 +642,24 @@ const InsuranceFormWrapper = ({
             )}
 
             {/* Documents Tab */}
-            {editingItem && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <Stack gap="md">
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <Stack gap="md">
+                  {editingItem && (
                     <Title order={4}>{t('insurance.viewModal.attachedDocuments', 'Attached Documents')}</Title>
-                    <DocumentManagerWithProgress
-                      entityType="insurance"
-                      entityId={editingItem.id}
-                      mode="edit"
-                      onUploadComplete={(success, completedCount, failedCount) => {
-                        if (onFileUploadComplete) {
-                          onFileUploadComplete(success, completedCount, failedCount);
-                        }
-                      }}
-                      onError={(error) => {
-                        logger.error('Document manager error in insurance form:', error);
-                      }}
-                      showProgressModal={true}
-                    />
-                  </Stack>
-                </Box>
-              </Tabs.Panel>
-            )}
+                  )}
+                  <DocumentManagerWithProgress
+                    entityType="insurance"
+                    entityId={editingItem?.id || null}
+                    mode={editingItem ? 'edit' : 'create'}
+                    onUploadPendingFiles={handleDocumentManagerRef}
+                    onUploadComplete={handleDocumentUploadComplete}
+                    onError={handleDocumentError}
+                    showProgressModal={true}
+                  />
+                </Stack>
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">

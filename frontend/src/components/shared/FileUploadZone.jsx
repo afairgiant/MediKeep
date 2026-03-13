@@ -1,10 +1,3 @@
-import logger from '../../services/logger';
-import {
-  MEDICAL_DOCUMENT_EXTENSIONS,
-  MEDICAL_DOCUMENT_MIME_TYPES,
-  MEDICAL_DOCUMENT_CONFIG
-} from '../../constants/fileTypes';
-
 import React, { useState, useCallback } from 'react';
 import {
   Stack,
@@ -14,6 +7,7 @@ import {
   ThemeIcon,
   FileInput,
 } from '@mantine/core';
+import { Dropzone } from '@mantine/dropzone';
 import {
   IconUpload,
   IconX,
@@ -21,7 +15,13 @@ import {
   IconFolder,
   IconCloud
 } from '@tabler/icons-react';
-import { Dropzone } from '@mantine/dropzone';
+
+import {
+  MEDICAL_DOCUMENT_EXTENSIONS,
+  MEDICAL_DOCUMENT_MIME_TYPES,
+  MEDICAL_DOCUMENT_CONFIG
+} from '../../constants/fileTypes';
+import logger from '../../services/logger';
 
 const FileUploadZone = ({
   onUpload,
@@ -34,7 +34,8 @@ const FileUploadZone = ({
   className = '',
   selectedStorageBackend = 'local',
   paperlessSettings = null,
-  mode = 'view' // Add mode prop to adjust messaging
+  mode = 'view',
+  autoUpload = false,
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -109,11 +110,17 @@ const FileUploadZone = ({
       onValidationError(errorMessages.join('; '));
     }
 
+    // Auto-upload: skip staging step, pass directly to onUpload callback
+    if (autoUpload && validFiles.length > 0 && onUpload) {
+      onUpload(validFiles.map(({ file, description }) => ({ file, description })));
+      return;
+    }
+
     // Add valid files to selected list
     if (validFiles.length > 0) {
       setSelectedFiles(prev => [...prev, ...validFiles]);
     }
-  }, [disabled, maxFiles, validateFile, onValidationError, selectedFiles.length]);
+  }, [disabled, maxFiles, validateFile, onValidationError, selectedFiles.length, autoUpload, onUpload]);
 
   // Handle upload button click
   const handleUpload = useCallback(() => {

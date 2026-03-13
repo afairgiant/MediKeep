@@ -40,6 +40,10 @@ const AllergyFormWrapper = ({
   medicationsOptions = [],
   medicationsLoading = false,
   isLoading = false,
+  statusMessage,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common']);
@@ -56,6 +60,40 @@ const AllergyFormWrapper = ({
 
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
+
+  const handleDocumentManagerRef = (methods) => {
+    if (onDocumentManagerRef) {
+      onDocumentManagerRef(methods);
+    }
+  };
+
+  const handleDocumentError = (error) => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in allergies ${editingAllergy ? 'edit' : 'create'}`,
+      allergyId: editingAllergy?.id,
+      error: error,
+      component: 'AllergyFormWrapper',
+    });
+
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+    logger.info('allergies_upload_completed', {
+      message: 'File upload completed in allergies form',
+      allergyId: editingAllergy?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'AllergyFormWrapper',
+    });
+
+    if (onFileUploadComplete) {
+      onFileUploadComplete(success, completedCount, failedCount);
+    }
+  };
 
   // Reset tab when modal opens/closes
   useEffect(() => {
@@ -99,7 +137,7 @@ const AllergyFormWrapper = ({
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={t('allergies.messages.saving')} />
+      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || t('allergies.messages.saving')} />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -112,11 +150,11 @@ const AllergyFormWrapper = ({
               <Tabs.Tab value="reaction" leftSection={<IconAlertTriangle size={16} />}>
                 {t('allergies.tabs.reactionDetails')}
               </Tabs.Tab>
-              {editingAllergy && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('allergies.tabs.documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingAllergy
+                  ? t('allergies.form.tabs.documents', 'Documents')
+                  : t('allergies.form.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('allergies.tabs.notes')}
               </Tabs.Tab>
@@ -290,20 +328,20 @@ const AllergyFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Documents Tab (only when editing) */}
-            {editingAllergy && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <DocumentManagerWithProgress
-                    entityType="allergy"
-                    entityId={editingAllergy.id}
-                    onError={(error) => {
-                      logger.error('Document upload error', { error });
-                    }}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="allergy"
+                  entityId={editingAllergy?.id || null}
+                  mode={editingAllergy ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">

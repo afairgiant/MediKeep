@@ -1,5 +1,6 @@
 import React, {
   useState,
+  useRef,
   useEffect,
   useCallback,
   useMemo,
@@ -55,6 +56,8 @@ import {
   MEDICATION_TYPES,
   MEDICATION_TYPE_LABELS,
 } from '../../constants/medicationTypes';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import logger from '../../services/logger';
 
 const Medication = () => {
@@ -140,7 +143,7 @@ const Medication = () => {
   const dataManagement = useDataManagement(medications, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('medication', medications);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('medication', medications);
 
   // View modal navigation with URL deep linking
   const {
@@ -166,6 +169,12 @@ const Medication = () => {
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };
 
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
+  // Track if we need to refresh after form submission
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
   // Form data state
   const [formData, setFormData] = useState({
     medication_name: '',
@@ -181,6 +190,36 @@ const Medication = () => {
     pharmacy_id: null,
     notes: '',
     side_effects: '',
+  });
+
+  const {
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'medication',
+    onSuccess: () => {
+      resetForm();
+
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('medications_form_error', {
+        message: 'Form submission error in medications',
+        error,
+        component: 'Medication',
+      });
+    },
+    component: 'Medication',
   });
 
   const handleInputChange = useCallback(e => {
@@ -224,16 +263,20 @@ const Medication = () => {
   }, []);
 
   const handleAddMedication = () => {
+    resetSubmission();
+    setDocumentManagerMethods(null);
     resetForm();
     setShowAddForm(true);
   };
 
   const handleCloseForm = useCallback(() => {
+    if (isBlocking) return;
     setShowAddForm(false);
-    setEditingMedication(null); // Clear editing state when closing
-  }, []);
+    setEditingMedication(null);
+  }, [isBlocking]);
 
   const handleEditMedication = useCallback(medication => {
+    resetSubmission();
     setFormData({
       medication_name: medication.medication_name || '',
       medication_type: medication.medication_type || 'prescription',
@@ -275,7 +318,6 @@ const Medication = () => {
         return;
       }
 
-      // Validate medication name
       const medicationName = formData.medication_name?.trim() || '';
       if (!medicationName) {
         setError('Medication name is required');
@@ -287,9 +329,14 @@ const Medication = () => {
         return;
       }
 
-      // Prepare medication data - ensure empty strings become null for optional fields
+      startSubmission();
+
+      if (!canSubmit) {
+        return;
+      }
+
       const medicationData = {
-        medication_name: medicationName, // Required field, already trimmed
+        medication_name: medicationName,
         medication_type: formData.medication_type || 'prescription',
         dosage: formData.dosage?.trim() || null,
         frequency: formData.frequency?.trim() || null,
@@ -305,10 +352,9 @@ const Medication = () => {
           : null,
         notes: formData.notes?.trim() || null,
         side_effects: formData.side_effects?.trim() || null,
-        tags: formData.tags || [], // Include tags from form data
+        tags: formData.tags || [],
       };
 
-      // Add dates if provided
       if (formData.effective_period_start) {
         medicationData.effective_period_start = formData.effective_period_start;
       }
@@ -316,27 +362,62 @@ const Medication = () => {
         medicationData.effective_period_end = formData.effective_period_end;
       }
 
-      // Log the data being sent for debugging
-      logger.debug('Submitting medication data', {
-        component: 'Medication',
-        medicationData,
-        formData,
-      });
-
       try {
         let success;
+        let resultId;
+
         if (editingMedication) {
           success = await updateItem(editingMedication.id, medicationData);
+          resultId = editingMedication.id;
         } else {
-          success = await createItem(medicationData);
+          const result = await createItem(medicationData);
+          success = !!result;
+          resultId = result?.id;
+          if (success) {
+            needsRefreshAfterSubmissionRef.current = true;
+          }
         }
 
-        if (success) {
-          resetForm();
-          await refreshData();
+        completeFormSubmission(success, resultId);
+
+        if (success && resultId) {
+          const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+
+          if (hasPendingFiles) {
+            logger.info('medications_starting_file_upload', {
+              message: 'Starting file upload process',
+              medicationId: resultId,
+              pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+              component: 'Medication',
+            });
+
+            startFileUpload();
+
+            try {
+              await documentManagerMethods.uploadPendingFiles(resultId);
+              completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            } catch (uploadError) {
+              logger.error('medications_file_upload_error', {
+                message: 'File upload failed',
+                medicationId: resultId,
+                error: uploadError.message,
+                component: 'Medication',
+              });
+              completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+            }
+          } else {
+            completeFileUpload(true, 0, 0);
+          }
+        } else {
+          handleSubmissionFailure(new Error('Form submission failed'), 'form');
         }
       } catch (error) {
-        logger.error('Error during save operation:', error);
+        logger.error('medications_submission_error', {
+          message: 'Form submission failed',
+          error: error.message,
+          component: 'Medication',
+        });
+        handleSubmissionFailure(error, 'form');
       }
     },
     [
@@ -348,6 +429,14 @@ const Medication = () => {
       createItem,
       resetForm,
       refreshData,
+      startSubmission,
+      canSubmit,
+      completeFormSubmission,
+      startFileUpload,
+      completeFileUpload,
+      handleSubmissionFailure,
+      documentManagerMethods,
+      needsRefreshAfterSubmissionRef,
     ]
   );
 
@@ -541,6 +630,14 @@ const Medication = () => {
           editingMedication={editingMedication}
           conditions={conditions}
           navigate={navigate}
+          isLoading={isBlocking}
+          statusMessage={statusMessage}
+          onDocumentManagerRef={setDocumentManagerMethods}
+          onFileUploadComplete={(success, completedCount, failedCount) => {
+            if (success && editingMedication?.id) {
+              refreshFileCount(editingMedication.id);
+            }
+          }}
         />
 
         {/* Content */}

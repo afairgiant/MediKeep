@@ -149,11 +149,11 @@ const ProcedureFormWrapper = ({
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
                 {t('procedures.form.tabs.clinical', 'Clinical Details')}
               </Tabs.Tab>
-              {editingItem && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('procedures.form.tabs.documents', 'Documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingItem
+                  ? t('procedures.form.tabs.documents', 'Documents')
+                  : t('procedures.form.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('procedures.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -369,22 +369,20 @@ const ProcedureFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Documents Tab (only when editing) */}
-            {editingItem && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <DocumentManagerWithProgress
-                    entityType="procedure"
-                    entityId={editingItem.id}
-                    mode="edit"
-                    onUploadPendingFiles={handleDocumentManagerRef}
-                    showProgressModal={true}
-                    onUploadComplete={handleDocumentUploadComplete}
-                    onError={handleDocumentError}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="procedure"
+                  entityId={editingItem?.id || null}
+                  mode={editingItem ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">

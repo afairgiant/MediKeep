@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -29,6 +29,8 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import PaginationControls from '../../components/shared/PaginationControls';
 import { InjuryCard, InjuryViewModal, InjuryFormWrapper } from '../../components/medical/injuries';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
@@ -118,7 +120,7 @@ const Injuries = () => {
   }, []);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('injury', injuries);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('injury', injuries);
 
   // View modal navigation with URL deep linking
   const {
@@ -163,10 +165,47 @@ const Injuries = () => {
     tags: [],
   });
 
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
+  // Track if we need to refresh after form submission
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
   const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'injury',
+    onSuccess: () => {
+      resetForm();
+
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('injuries_form_error', {
+        message: 'Form submission error in injuries',
+        error,
+        component: 'Injuries',
+      });
+    },
+    component: 'Injuries',
+  });
 
   const resetForm = () => {
     setFormData({
@@ -189,11 +228,14 @@ const Injuries = () => {
   };
 
   const handleAddInjury = () => {
+    resetSubmission();
+    setDocumentManagerMethods(null);
     resetForm();
     setShowAddForm(true);
   };
 
   const handleEditInjury = injury => {
+    resetSubmission();
     setFormData({
       injury_name: injury.injury_name || '',
       injury_type_id: injury.injury_type_id || null,
@@ -221,6 +263,12 @@ const Injuries = () => {
       return;
     }
 
+    startSubmission();
+
+    if (!canSubmit) {
+      return;
+    }
+
     const injuryData = {
       ...formData,
       date_of_injury: formData.date_of_injury || null,
@@ -235,16 +283,62 @@ const Injuries = () => {
       patient_id: currentPatient.id,
     };
 
-    let success;
-    if (editingInjury) {
-      success = await updateItem(editingInjury.id, injuryData);
-    } else {
-      success = await createItem(injuryData);
-    }
+    try {
+      let success;
+      let resultId;
 
-    if (success) {
-      resetForm();
-      await refreshData();
+      if (editingInjury) {
+        success = await updateItem(editingInjury.id, injuryData);
+        resultId = editingInjury.id;
+      } else {
+        const result = await createItem(injuryData);
+        success = !!result;
+        resultId = result?.id;
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
+      }
+
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+
+        if (hasPendingFiles) {
+          logger.info('injuries_starting_file_upload', {
+            message: 'Starting file upload process',
+            injuryId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Injuries',
+          });
+
+          startFileUpload();
+
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+          } catch (uploadError) {
+            logger.error('injuries_file_upload_error', {
+              message: 'File upload failed',
+              injuryId: resultId,
+              error: uploadError.message,
+              component: 'Injuries',
+            });
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+          }
+        } else {
+          completeFileUpload(true, 0, 0);
+        }
+      } else {
+        handleSubmissionFailure(new Error('Form submission failed'), 'form');
+      }
+    } catch (error) {
+      logger.error('injuries_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'Injuries',
+      });
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -297,7 +391,7 @@ const Injuries = () => {
         {/* Form Modal */}
         <InjuryFormWrapper
           isOpen={showAddForm}
-          onClose={resetForm}
+          onClose={() => !isBlocking && resetForm()}
           title={editingInjury ? t('injuries.editTitle', 'Edit Injury') : t('injuries.addTitle', 'Add New Injury')}
           formData={formData}
           onInputChange={handleInputChange}
@@ -307,6 +401,14 @@ const Injuries = () => {
           practitionersLoading={practitionersLoading}
           injuryTypes={injuryTypes}
           injuryTypesLoading={injuryTypesLoading}
+          isLoading={isBlocking}
+          statusMessage={statusMessage}
+          onDocumentManagerRef={setDocumentManagerMethods}
+          onFileUploadComplete={(success, completedCount, failedCount) => {
+            if (success && editingInjury?.id) {
+              refreshFileCount(editingInjury.id);
+            }
+          }}
         />
 
         {/* Content */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -16,6 +16,8 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -104,7 +106,7 @@ const Treatments = () => {
   const dataManagement = useDataManagement(treatments, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('treatment', treatments);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('treatment', treatments);
 
   // View modal navigation with URL deep linking
   const {
@@ -136,7 +138,63 @@ const Treatments = () => {
     tags: [],
   });
 
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
+  // Track if we need to refresh after form submission
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'treatment',
+    onSuccess: () => {
+      setShowModal(false);
+      setEditingTreatment(null);
+      setFormData({
+        treatment_name: '',
+        treatment_type: '',
+        description: '',
+        start_date: '',
+        end_date: '',
+        status: 'planned',
+        dosage: '',
+        frequency: '',
+        mode: 'simple',
+        notes: '',
+        condition_id: '',
+        practitioner_id: '',
+        tags: [],
+      });
+      setDocumentManagerMethods(null);
+
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('treatments_form_error', {
+        message: 'Form submission error in treatments',
+        error,
+        component: 'Treatments',
+      });
+    },
+    component: 'Treatments',
+  });
+
   const handleAddTreatment = () => {
+    resetSubmission();
+    setDocumentManagerMethods(null);
     setEditingTreatment(null);
     setFormData({
       treatment_name: '',
@@ -157,6 +215,7 @@ const Treatments = () => {
   };
 
   const handleEditTreatment = treatment => {
+    resetSubmission();
     setEditingTreatment(treatment);
     setFormData({
       treatment_name: treatment.treatment_name || '',
@@ -187,13 +246,11 @@ const Treatments = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    // Validation - only treatment_name is required
     if (!formData.treatment_name.trim()) {
       setError('Treatment name is required');
       return;
     }
 
-    // Validate end date is after start date (only if both are provided)
     if (
       formData.end_date &&
       formData.start_date &&
@@ -205,6 +262,12 @@ const Treatments = () => {
 
     if (!currentPatient?.id) {
       setError('Patient information not available');
+      return;
+    }
+
+    startSubmission();
+
+    if (!canSubmit) {
       return;
     }
 
@@ -225,17 +288,62 @@ const Treatments = () => {
       practitioner_id: formData.practitioner_id || null,
     };
 
-    let success;
-    if (editingTreatment) {
-      success = await updateItem(editingTreatment.id, treatmentData);
-    } else {
-      success = await createItem(treatmentData);
-    }
+    try {
+      let success;
+      let resultId;
 
-    if (success) {
-      setShowModal(false);
-      await refreshData();
-      return success;
+      if (editingTreatment) {
+        success = await updateItem(editingTreatment.id, treatmentData);
+        resultId = editingTreatment.id;
+      } else {
+        const result = await createItem(treatmentData);
+        success = !!result;
+        resultId = result?.id;
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
+      }
+
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+
+        if (hasPendingFiles) {
+          logger.info('treatments_starting_file_upload', {
+            message: 'Starting file upload process',
+            treatmentId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Treatments',
+          });
+
+          startFileUpload();
+
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+          } catch (uploadError) {
+            logger.error('treatments_file_upload_error', {
+              message: 'File upload failed',
+              treatmentId: resultId,
+              error: uploadError.message,
+              component: 'Treatments',
+            });
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+          }
+        } else {
+          completeFileUpload(true, 0, 0);
+        }
+      } else {
+        handleSubmissionFailure(new Error('Form submission failed'), 'form');
+      }
+    } catch (error) {
+      logger.error('treatments_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'Treatments',
+      });
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -439,7 +547,7 @@ const Treatments = () => {
 
       <TreatmentFormWrapper
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => !isBlocking && setShowModal(false)}
         title={editingTreatment ? 'Edit Treatment' : 'Add New Treatment'}
         editingTreatment={editingTreatment}
         formData={formData}
@@ -449,7 +557,14 @@ const Treatments = () => {
         conditionsLoading={conditionsLoading}
         practitionersOptions={practitioners}
         practitionersLoading={false}
-        isLoading={false}
+        isLoading={isBlocking}
+        statusMessage={statusMessage}
+        onDocumentManagerRef={setDocumentManagerMethods}
+        onFileUploadComplete={(success, completedCount, failedCount) => {
+          if (success && editingTreatment?.id) {
+            refreshFileCount(editingTreatment.id);
+          }
+        }}
       />
 
       <TreatmentViewModal

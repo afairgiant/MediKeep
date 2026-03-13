@@ -71,7 +71,7 @@ const VisitFormWrapper = ({
       {!editingItem && (
         <Paper withBorder p="md" mt="md">
           <Title order={4} mb="md">
-            {t('visits.form.addFilesOptional', 'Add Files (Optional)')}
+            {t('visits.form.addFilesOptional', 'Add Files')}
           </Title>
           <DocumentManagerWithProgress
             entityType="visit"

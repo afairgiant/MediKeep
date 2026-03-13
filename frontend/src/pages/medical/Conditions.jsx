@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -37,6 +37,7 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import {
   ConditionCard,
   ConditionViewModal,
@@ -92,7 +93,7 @@ const Conditions = () => {
   const dataManagement = useDataManagement(conditions, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('condition', conditions);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('condition', conditions);
 
   // View modal navigation with URL deep linking
   const {
@@ -127,14 +128,69 @@ const Conditions = () => {
     pending_medication_ids: [], // For linking medications during creation
   });
 
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
+  // Track if we need to refresh after form submission
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'condition',
+    onSuccess: () => {
+      setShowModal(false);
+      setEditingCondition(null);
+      setFormData({
+        condition_name: '',
+        diagnosis: '',
+        notes: '',
+        status: 'active',
+        severity: '',
+        practitioner_id: '',
+        icd10_code: '',
+        snomed_code: '',
+        code_description: '',
+        onset_date: '',
+        end_date: '',
+        tags: [],
+        pending_medication_ids: [],
+      });
+      setDocumentManagerMethods(null);
+
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('conditions_form_error', {
+        message: 'Form submission error in conditions',
+        error,
+        component: 'Conditions',
+      });
+    },
+    component: 'Conditions',
+  });
+
   const handleAddCondition = () => {
+    resetSubmission();
+    setDocumentManagerMethods(null);
     setEditingCondition(null);
-    // Apply default status early to avoid validation conflicts
     setFormData({
       condition_name: '',
       diagnosis: '',
       notes: '',
-      status: 'active', // Default status applied early
+      status: 'active',
       severity: '',
       practitioner_id: '',
       icd10_code: '',
@@ -189,6 +245,7 @@ const Conditions = () => {
   };
 
   const handleEditCondition = condition => {
+    resetSubmission();
     setEditingCondition(condition);
     // Apply default status early if condition doesn't have one
     setFormData({
@@ -231,33 +288,37 @@ const Conditions = () => {
       return;
     }
 
-
-    // Validate dates
+    // Existing validation
     const todayString = getTodayString();
-    
+
     if (isDateInFuture(formData.onset_date)) {
       setError(`Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
       return;
     }
-    
+
     if (isDateInFuture(formData.end_date)) {
       setError(`End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
       return;
     }
-    
+
     if (isEndDateBeforeStartDate(formData.onset_date, formData.end_date)) {
       setError('End date cannot be before onset date');
       return;
     }
 
-    // Validate required fields
     if (!formData.status) {
       setError('Status is required. Please select a status.');
       return;
     }
-    
+
     if (!formData.diagnosis) {
       setError('Diagnosis is required.');
+      return;
+    }
+
+    startSubmission();
+
+    if (!canSubmit) {
       return;
     }
 
@@ -265,7 +326,7 @@ const Conditions = () => {
       condition_name: formData.condition_name || null,
       diagnosis: formData.diagnosis,
       notes: formData.notes || null,
-      status: formData.status || 'active', // Ensure status has a default
+      status: formData.status || 'active',
       severity: formData.severity || null,
       practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
       icd10_code: formData.icd10_code || null,
@@ -277,37 +338,83 @@ const Conditions = () => {
       patient_id: currentPatient.id,
     };
 
-
     const pendingMedications = formData.pending_medication_ids || [];
 
-    const result = editingCondition
-      ? await updateItem(editingCondition.id, conditionData)
-      : await createItem(conditionData);
+    try {
+      let success;
+      let resultId;
 
-    if (!result) {
-      return;
-    }
-
-    setShowModal(false);
-    await refreshData();
-
-    // If creating a new condition with pending medications, link them after creation
-    // The createItem hook returns the created entity directly
-    if (!editingCondition && pendingMedications.length > 0 && result.id) {
-      try {
-        await apiService.createConditionMedicationsBulk(result.id, {
-          medication_ids: pendingMedications.map(id => parseInt(id)),
-          relevance_note: null,
-        });
-        await fetchConditionMedications(result.id);
-      } catch (err) {
-        logger.error('Failed to link medications to new condition:', err);
-        notifications.show({
-          title: t('conditions.notifications.medicationLinkWarning', 'Medication Linking Issue'),
-          message: t('conditions.notifications.medicationLinkFailed', 'Condition was created, but some medications could not be linked. You can link them manually by editing the condition.'),
-          color: 'yellow',
-        });
+      if (editingCondition) {
+        const result = await updateItem(editingCondition.id, conditionData);
+        success = !!result;
+        resultId = editingCondition.id;
+      } else {
+        const result = await createItem(conditionData);
+        success = !!result;
+        resultId = result?.id;
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
       }
+
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
+        // Link pending medications for new conditions
+        if (!editingCondition && pendingMedications.length > 0) {
+          try {
+            await apiService.createConditionMedicationsBulk(resultId, {
+              medication_ids: pendingMedications.map(id => parseInt(id)),
+              relevance_note: null,
+            });
+            await fetchConditionMedications(resultId);
+          } catch (err) {
+            logger.error('Failed to link medications to new condition:', err);
+            notifications.show({
+              title: t('conditions.notifications.medicationLinkWarning', 'Medication Linking Issue'),
+              message: t('conditions.notifications.medicationLinkFailed', 'Condition was created, but some medications could not be linked. You can link them manually by editing the condition.'),
+              color: 'yellow',
+            });
+          }
+        }
+
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+
+        if (hasPendingFiles) {
+          logger.info('conditions_starting_file_upload', {
+            message: 'Starting file upload process',
+            conditionId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Conditions',
+          });
+
+          startFileUpload();
+
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+          } catch (uploadError) {
+            logger.error('conditions_file_upload_error', {
+              message: 'File upload failed',
+              conditionId: resultId,
+              error: uploadError.message,
+              component: 'Conditions',
+            });
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+          }
+        } else {
+          completeFileUpload(true, 0, 0);
+        }
+      } else {
+        handleSubmissionFailure(new Error('Form submission failed'), 'form');
+      }
+    } catch (error) {
+      logger.error('conditions_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'Conditions',
+      });
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -359,13 +466,21 @@ const Conditions = () => {
         {/* Form Modal */}
         <ConditionFormWrapper
           isOpen={showModal}
-          onClose={() => setShowModal(false)}
+          onClose={() => !isBlocking && setShowModal(false)}
           title={editingCondition ? t('conditions.editTitle', 'Edit Condition') : t('conditions.addTitle', 'Add New Condition')}
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
           editingCondition={editingCondition}
           practitioners={practitioners}
+          isLoading={isBlocking}
+          statusMessage={statusMessage}
+          onDocumentManagerRef={setDocumentManagerMethods}
+          onFileUploadComplete={(success, completedCount, failedCount) => {
+            if (success && editingCondition?.id) {
+              refreshFileCount(editingCondition.id);
+            }
+          }}
           medications={medications}
           conditionMedications={conditionMedications}
           fetchConditionMedications={fetchConditionMedications}

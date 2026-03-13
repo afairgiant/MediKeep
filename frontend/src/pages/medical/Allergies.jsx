@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -36,6 +36,8 @@ import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../compone
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 
 const Allergies = () => {
   const navigate = useNavigate();
@@ -94,7 +96,7 @@ const Allergies = () => {
   }, [currentPatient?.id]);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('allergy', allergies);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('allergy', allergies);
 
   // View modal navigation with URL deep linking
   const {
@@ -130,6 +132,44 @@ const Allergies = () => {
     tags: [],
   });
 
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
+  // Track if we need to refresh after form submission
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
+  // Form submission with uploads hook
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'allergy',
+    onSuccess: () => {
+      resetForm();
+
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('allergies_form_error', {
+        message: 'Form submission error in allergies',
+        error,
+        component: 'Allergies',
+      });
+    },
+    component: 'Allergies',
+  });
+
   const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -151,11 +191,24 @@ const Allergies = () => {
   };
 
   const handleAddAllergy = () => {
-    resetForm();
+    resetSubmission();
+    setDocumentManagerMethods(null);
+    setEditingAllergy(null);
+    setFormData({
+      allergen: '',
+      severity: '',
+      reaction: '',
+      onset_date: '',
+      status: 'active',
+      notes: '',
+      medication_id: '',
+      tags: [],
+    });
     setShowAddForm(true);
   };
 
   const handleEditAllergy = allergy => {
+    resetSubmission();
     setFormData({
       allergen: allergy.allergen || '',
       severity: allergy.severity || '',
@@ -178,6 +231,12 @@ const Allergies = () => {
       return;
     }
 
+    startSubmission();
+
+    if (!canSubmit) {
+      return;
+    }
+
     const allergyData = {
       ...formData,
       onset_date: formData.onset_date || null,
@@ -186,16 +245,62 @@ const Allergies = () => {
       patient_id: currentPatient.id,
     };
 
-    let success;
-    if (editingAllergy) {
-      success = await updateItem(editingAllergy.id, allergyData);
-    } else {
-      success = await createItem(allergyData);
-    }
+    try {
+      let success;
+      let resultId;
 
-    if (success) {
-      resetForm();
-      await refreshData();
+      if (editingAllergy) {
+        success = await updateItem(editingAllergy.id, allergyData);
+        resultId = editingAllergy.id;
+      } else {
+        const result = await createItem(allergyData);
+        success = !!result;
+        resultId = result?.id;
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
+      }
+
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+
+        if (hasPendingFiles) {
+          logger.info('allergies_starting_file_upload', {
+            message: 'Starting file upload process',
+            allergyId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Allergies',
+          });
+
+          startFileUpload();
+
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+          } catch (uploadError) {
+            logger.error('allergies_file_upload_error', {
+              message: 'File upload failed',
+              allergyId: resultId,
+              error: uploadError.message,
+              component: 'Allergies',
+            });
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+          }
+        } else {
+          completeFileUpload(true, 0, 0);
+        }
+      } else {
+        handleSubmissionFailure(new Error('Form submission failed'), 'form');
+      }
+    } catch (error) {
+      logger.error('allergies_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'Allergies',
+      });
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -254,7 +359,7 @@ const Allergies = () => {
         {/* Form Modal */}
         <AllergyFormWrapper
           isOpen={showAddForm}
-          onClose={resetForm}
+          onClose={() => !isBlocking && resetForm()}
           title={editingAllergy ? t('allergies.editTitle', 'Edit Allergy') : t('allergies.addTitle', 'Add New Allergy')}
           formData={formData}
           onInputChange={handleInputChange}
@@ -262,6 +367,14 @@ const Allergies = () => {
           editingAllergy={editingAllergy}
           medicationsOptions={medications}
           medicationsLoading={false}
+          isLoading={isBlocking}
+          statusMessage={statusMessage}
+          onDocumentManagerRef={setDocumentManagerMethods}
+          onFileUploadComplete={(success, completedCount, failedCount) => {
+            if (success && editingAllergy?.id) {
+              refreshFileCount(editingAllergy.id);
+            }
+          }}
         />
 
         {/* Content */}

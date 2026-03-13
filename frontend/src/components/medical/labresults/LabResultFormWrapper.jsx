@@ -82,7 +82,7 @@ const LabResultFormWrapper = ({
 
       <Paper withBorder p="md" mt="md">
         <Title order={4} mb="md">
-          {editingItem ? t('labResults.form.manageFiles', 'Manage Files') : t('labResults.form.addFilesOptional', 'Add Files (Optional)')}
+          {editingItem ? t('labResults.form.manageFiles', 'Manage Files') : t('labResults.form.addFilesOptional', 'Add Files')}
         </Title>
         <DocumentManagerWithProgress
           entityType="lab-result"
