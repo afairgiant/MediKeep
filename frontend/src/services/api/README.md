@@ -127,6 +127,19 @@ The comprehensive API service that provides all medical record management functi
 - `updateEncounter(encounterId, encounterData, signal)` - Update encounter
 - `deleteEncounter(encounterId, signal)` - Delete encounter
 
+#### Encounter-Lab Result Relationships
+
+- `getEncounterLabResults(encounterId, signal)` - Get lab results linked to an encounter
+- `linkEncounterLabResult(encounterId, data, signal)` - Link a lab result to an encounter
+- `linkEncounterLabResultsBulk(encounterId, data, signal)` - Bulk link lab results to an encounter
+- `updateEncounterLabResult(encounterId, relationshipId, data, signal)` - Update relationship
+- `unlinkEncounterLabResult(encounterId, relationshipId, signal)` - Unlink a lab result from an encounter
+- `getLabResultEncounters(labResultId, signal)` - Get encounters linked to a lab result
+- `createLabResultEncounter(labResultId, data, signal)` - Link an encounter to a lab result
+- `createLabResultEncountersBulk(labResultId, data, signal)` - Bulk link encounters to a lab result
+- `updateLabResultEncounter(labResultId, relationshipId, data, signal)` - Update relationship
+- `deleteLabResultEncounter(labResultId, relationshipId, signal)` - Unlink an encounter from a lab result
+
 ### Healthcare Providers
 
 - `getPractitioners(signal)` - Get all practitioners

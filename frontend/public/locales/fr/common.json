@@ -1419,6 +1419,7 @@
       "tabs": {
         "visitInfo": "Informations sur la visite",
         "clinical": "Données cliniques",
+        "labResults": "Résultats de laboratoire",
         "notes": "Notes",
         "documents": "Documents"
       },
@@ -1449,6 +1450,7 @@
         "visitInfo": "Informations sur la visite",
         "clinical": "Données cliniques",
         "documents": "Documents",
+        "labResults": "Résultats de laboratoire",
         "notes": "Notes"
       },
       "updateVisit": "Mettre à jour la visite",
@@ -2301,6 +2303,7 @@
         "overview": "Aperçu",
         "testComponents": "Composants des résultats",
         "relatedConditions": "Conditions connectées",
+        "visits": "Visites",
         "tags": "Etiquettes",
         "files": "Fichiers"
       },
@@ -2361,7 +2364,10 @@
     },
     "form": {
       "manageFiles": "Gérer les fichiers",
-      "addFilesOptional": "Ajouter des fichiers (optionnel)"
+      "addFilesOptional": "Ajouter des fichiers (optionnel)",
+      "linkedVisits": "Visites liées",
+      "linkVisitsTitle": "Lier aux visites",
+      "linkVisitsDescription": "Associer ce résultat de laboratoire aux visites lors desquelles il a été prescrit ou examiné."
     }
   },
   "testComponents": {

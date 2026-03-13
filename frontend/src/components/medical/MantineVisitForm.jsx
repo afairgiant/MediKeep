@@ -20,6 +20,7 @@ import {
   IconStethoscope,
   IconNotes,
   IconFileText,
+  IconFlask,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { visitFormFields } from '../../utils/medicalFormFields';
@@ -29,6 +30,7 @@ import { translateField } from '../../utils/translateField';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
+import EncounterLabResultRelationships from './visits/EncounterLabResultRelationships';
 import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
 
@@ -45,6 +47,10 @@ const MantineVisitForm = ({
   editingVisit = null,
   isLoading = false,
   statusMessage,
+  labResults = [],
+  encounterLabResults = {},
+  fetchEncounterLabResults,
+  navigate,
   children,
 }) => {
   // Translation hooks - medical for field translations, common for UI elements
@@ -91,7 +97,11 @@ const MantineVisitForm = ({
       await onSubmit(e);
       setIsSubmitting(false);
     } catch (error) {
-      logger.error('Error in visit form submission:', error);
+      logger.error('visit_form_submission_error', {
+        message: 'Error in visit form submission',
+        error: error.message,
+        component: 'MantineVisitForm',
+      });
       setIsSubmitting(false);
     }
   };
@@ -262,6 +272,11 @@ const MantineVisitForm = ({
                   {t('common:visits.form.tabs.documents', 'Documents')}
                 </Tabs.Tab>
               )}
+              {editingVisit && fetchEncounterLabResults && (
+                <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
+                  {t('common:visits.form.tabs.labResults', 'Lab Results')}
+                </Tabs.Tab>
+              )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('common:visits.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -300,11 +315,31 @@ const MantineVisitForm = ({
                       entityId={editingVisit.id}
                       mode="edit"
                       onError={(error) => {
-                        logger.error('Document manager error in visit form:', error);
+                        logger.error('document_manager_error', {
+                          message: 'Document manager error in visit form',
+                          visitId: editingVisit?.id,
+                          error: error.message,
+                          component: 'MantineVisitForm',
+                        });
                       }}
                       showProgressModal={true}
                     />
                   </Stack>
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Lab Results Tab */}
+            {editingVisit && fetchEncounterLabResults && (
+              <Tabs.Panel value="lab-results">
+                <Box mt="md">
+                  <EncounterLabResultRelationships
+                    encounterId={editingVisit.id}
+                    encounterLabResults={encounterLabResults}
+                    labResults={labResults}
+                    fetchEncounterLabResults={fetchEncounterLabResults}
+                    navigate={navigate}
+                  />
                 </Box>
               </Tabs.Panel>
             )}

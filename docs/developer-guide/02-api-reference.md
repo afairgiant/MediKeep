@@ -1497,6 +1497,87 @@ Base path: `/api/v1/encounters`
 }
 ```
 
+#### Encounter-Lab Result Relationships
+
+Bidirectional many-to-many linking between encounters and lab results. Accessible from both the encounter side and the lab result side.
+
+##### From Encounter Side
+
+Base path: `/api/v1/encounters/{encounter_id}/lab-results`
+
+`GET /encounters/{encounter_id}/lab-results`
+- **Purpose**: List all lab results linked to an encounter
+- **Authentication**: Yes
+- **Success Response** (200): Array of relationship objects with lab result details
+
+`POST /encounters/{encounter_id}/lab-results`
+- **Purpose**: Link a lab result to an encounter
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "lab_result_id": 5,
+  "purpose": "ordered_during",
+  "relevance_note": "CBC ordered during routine checkup"
+}
+```
+- **Purpose values**: `ordered_during`, `results_reviewed`, `follow_up_for`, `reference`, `other`
+- **Success Response** (201): Created relationship object
+
+`POST /encounters/{encounter_id}/lab-results/bulk`
+- **Purpose**: Bulk link multiple lab results to an encounter
+- **Authentication**: Yes
+- **Request Body**: Array of relationship objects
+
+`PUT /encounters/{encounter_id}/lab-results/{relationship_id}`
+- **Purpose**: Update a relationship (purpose, relevance_note)
+- **Request Body**:
+```json
+{
+  "purpose": "results_reviewed",
+  "relevance_note": "Updated note"
+}
+```
+- **Success Response** (200): Updated relationship object
+
+`DELETE /encounters/{encounter_id}/lab-results/{relationship_id}`
+- **Purpose**: Remove a lab result link from an encounter
+- **Success Response** (200): `{"message": "Encounter lab result relationship deleted successfully"}`
+
+##### From Lab Result Side
+
+Base path: `/api/v1/lab-results/{lab_result_id}/encounters`
+
+`GET /lab-results/{lab_result_id}/encounters`
+- **Purpose**: List all encounters linked to a lab result
+- **Authentication**: Yes
+- **Success Response** (200): Array of relationship objects with encounter details
+
+`POST /lab-results/{lab_result_id}/encounters`
+- **Purpose**: Link an encounter to a lab result
+- **Authentication**: Yes
+- **Request Body**:
+```json
+{
+  "lab_result_id": 3,
+  "purpose": "results_reviewed",
+  "relevance_note": "Results discussed during follow-up"
+}
+```
+- **Success Response** (201): Created relationship object
+
+`POST /lab-results/{lab_result_id}/encounters/bulk`
+- **Purpose**: Bulk link multiple encounters to a lab result
+- **Request Body**: Array of relationship objects
+
+`PUT /lab-results/{lab_result_id}/encounters/{relationship_id}`
+- **Purpose**: Update a relationship (purpose, relevance_note)
+- **Success Response** (200): Updated relationship object
+
+`DELETE /lab-results/{lab_result_id}/encounters/{relationship_id}`
+- **Purpose**: Remove an encounter link from a lab result
+- **Success Response** (200): `{"message": "Lab result encounter relationship deleted successfully"}`
+
 ### 6.8 Procedures
 
 Base path: `/api/v1/procedures`

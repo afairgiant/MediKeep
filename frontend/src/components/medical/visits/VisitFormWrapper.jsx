@@ -1,5 +1,6 @@
 import React from 'react';
 import { Paper, Title } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import MantineVisitForm from '../MantineVisitForm';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
@@ -19,25 +20,22 @@ const VisitFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
-  children
+  labResults,
+  encounterLabResults,
+  fetchEncounterLabResults,
+  navigate,
+  children,
 }) => {
-  const handleDocumentManagerRef = (methods) => {
-    if (onDocumentManagerRef) {
-      onDocumentManagerRef(methods);
-    }
-  };
+  const { t } = useTranslation('common');
 
   const handleDocumentError = (error) => {
     logger.error('document_manager_error', {
       message: `Document manager error in visits ${editingItem ? 'edit' : 'create'}`,
       visitId: editingItem?.id,
-      error: error,
+      error,
       component: 'VisitFormWrapper',
     });
-    
-    if (onError) {
-      onError(error);
-    }
+    onError?.(error);
   };
 
   const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
@@ -49,10 +47,7 @@ const VisitFormWrapper = ({
       failedCount,
       component: 'VisitFormWrapper',
     });
-    
-    if (onFileUploadComplete) {
-      onFileUploadComplete(success, completedCount, failedCount);
-    }
+    onFileUploadComplete?.(success, completedCount, failedCount);
   };
 
   return (
@@ -68,7 +63,28 @@ const VisitFormWrapper = ({
       editingVisit={editingItem}
       isLoading={isLoading}
       statusMessage={statusMessage}
+      labResults={labResults}
+      encounterLabResults={encounterLabResults}
+      fetchEncounterLabResults={fetchEncounterLabResults}
+      navigate={navigate}
     >
+      {!editingItem && (
+        <Paper withBorder p="md" mt="md">
+          <Title order={4} mb="md">
+            {t('visits.form.addFilesOptional', 'Add Files (Optional)')}
+          </Title>
+          <DocumentManagerWithProgress
+            entityType="visit"
+            entityId={null}
+            mode="create"
+            onUploadPendingFiles={onDocumentManagerRef}
+            showProgressModal={true}
+            onUploadComplete={handleDocumentUploadComplete}
+            onError={handleDocumentError}
+          />
+        </Paper>
+      )}
+
       {children}
     </MantineVisitForm>
   );

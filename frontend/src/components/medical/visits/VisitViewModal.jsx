@@ -20,9 +20,11 @@ import {
   IconStethoscope,
   IconNotes,
   IconFileText,
+  IconFlask,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import EncounterLabResultRelationships from './EncounterLabResultRelationships';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTagColors } from '../../../hooks/useTagColors';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
@@ -39,7 +41,10 @@ const VisitViewModal = ({
   navigate,
   onFileUploadComplete,
   isBlocking,
-  onError
+  onError,
+  labResults,
+  encounterLabResults,
+  fetchEncounterLabResults,
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
@@ -198,6 +203,11 @@ const VisitViewModal = ({
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
                 {t('visits.viewModal.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
+              {fetchEncounterLabResults && (
+                <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
+                  {t('visits.viewModal.tabs.labResults', 'Lab Results')}
+                </Tabs.Tab>
+              )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('visits.viewModal.tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -329,6 +339,22 @@ const VisitViewModal = ({
                 </Stack>
               </Box>
             </Tabs.Panel>
+
+            {/* Lab Results Tab */}
+            {fetchEncounterLabResults && (
+              <Tabs.Panel value="lab-results">
+                <Box mt="md">
+                  <EncounterLabResultRelationships
+                    encounterId={visit.id}
+                    encounterLabResults={encounterLabResults}
+                    labResults={labResults}
+                    fetchEncounterLabResults={fetchEncounterLabResults}
+                    navigate={navigate}
+                    isViewMode={false}
+                  />
+                </Box>
+              </Tabs.Panel>
+            )}
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">

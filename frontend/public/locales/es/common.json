@@ -849,6 +849,7 @@
         "overview": "Resumen",
         "testComponents": "Componentes de la prueba",
         "relatedConditions": "Condiciones relacionadas",
+        "visits": "Visitas",
         "tags": "Etiquetas",
         "files": "Archivos"
       },
@@ -905,7 +906,10 @@
     "errorOccurred": "Ha ocurrido un error",
     "form": {
       "addFilesOptional": "Añadir archivos (Opcional)",
-      "manageFiles": "Gestionar archivos"
+      "manageFiles": "Gestionar archivos",
+      "linkedVisits": "Visitas vinculadas",
+      "linkVisitsTitle": "Vincular a visitas",
+      "linkVisitsDescription": "Asocie este resultado de laboratorio con las visitas en las que se solicitó o revisó."
     },
     "keepEmptyLabResult": "Conservar resultado de laboratorio",
     "labResultCreated": "El resultado de laboratorio \"{{testName}}\" ha sido creado. Ahora puede cargar y analizar su PDF.",
@@ -2314,6 +2318,7 @@
       "tabs": {
         "clinical": "Clínico",
         "documents": "Documentos",
+        "labResults": "Resultados de laboratorio",
         "notes": "Notas",
         "visitInfo": "Información de la visita"
       },
@@ -2364,6 +2369,7 @@
       "tabs": {
         "clinical": "Clínico",
         "documents": "Documentos",
+        "labResults": "Resultados de laboratorio",
         "notes": "Notas",
         "visitInfo": "Información de la visita"
       },

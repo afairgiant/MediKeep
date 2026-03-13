@@ -1497,6 +1497,60 @@ class ApiService {
     );
   }
 
+  // Encounter - Lab Result Relationship methods (encounter side)
+  getEncounterLabResults(encounterId, signal) {
+    return this.get(`/encounters/${encounterId}/lab-results`, { signal });
+  }
+  linkEncounterLabResult(encounterId, data, signal) {
+    return this.post(`/encounters/${encounterId}/lab-results`, data, { signal });
+  }
+  linkEncounterLabResultsBulk(encounterId, data, signal) {
+    return this.post(`/encounters/${encounterId}/lab-results/bulk`, data, {
+      signal,
+    });
+  }
+  updateEncounterLabResult(encounterId, relationshipId, data, signal) {
+    return this.put(
+      `/encounters/${encounterId}/lab-results/${relationshipId}`,
+      data,
+      { signal }
+    );
+  }
+  unlinkEncounterLabResult(encounterId, relationshipId, signal) {
+    return this.delete(
+      `/encounters/${encounterId}/lab-results/${relationshipId}`,
+      { signal }
+    );
+  }
+
+  // Lab Result - Encounter Relationship methods (lab result side)
+  getLabResultEncounters(labResultId, signal) {
+    return this.get(`/lab-results/${labResultId}/encounters`, { signal });
+  }
+  createLabResultEncounter(labResultId, data, signal) {
+    return this.post(`/lab-results/${labResultId}/encounters`, data, {
+      signal,
+    });
+  }
+  createLabResultEncountersBulk(labResultId, data, signal) {
+    return this.post(`/lab-results/${labResultId}/encounters/bulk`, data, {
+      signal,
+    });
+  }
+  updateLabResultEncounter(labResultId, relationshipId, data, signal) {
+    return this.put(
+      `/lab-results/${labResultId}/encounters/${relationshipId}`,
+      data,
+      { signal }
+    );
+  }
+  deleteLabResultEncounter(labResultId, relationshipId, signal) {
+    return this.delete(
+      `/lab-results/${labResultId}/encounters/${relationshipId}`,
+      { signal }
+    );
+  }
+
   // Medication methods
   getMedications(signal) {
     return this.getEntities(ENTITY_TYPES.MEDICATION, signal);

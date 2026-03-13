@@ -4,7 +4,10 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import handle_database_errors
+from app.core.http.error_handling import (
+    handle_database_errors,
+    BusinessLogicException,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
@@ -15,11 +18,17 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.crud.encounter import encounter
+from app.crud.encounter import encounter, encounter_lab_result
+from app.crud.lab_result import lab_result
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.encounter import (
     EncounterCreate,
+    EncounterLabResultBulkCreate,
+    EncounterLabResultCreate,
+    EncounterLabResultResponse,
+    EncounterLabResultUpdate,
+    EncounterLabResultWithDetails,
     EncounterResponse,
     EncounterUpdate,
     EncounterWithRelations,
@@ -243,3 +252,192 @@ def get_patient_encounters(
         )
 
         return encounters
+
+
+# Encounter - Lab Result Relationship Endpoints
+
+
+@router.get(
+    "/{encounter_id}/lab-results",
+    response_model=List[EncounterLabResultWithDetails],
+)
+def get_encounter_lab_results(
+    *,
+    request: Request,
+    encounter_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Any:
+    """Get all lab result relationships for a specific encounter."""
+    with handle_database_errors(request=request):
+        db_encounter = encounter.get(db, id=encounter_id)
+        handle_not_found(db_encounter, "Encounter", request)
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+
+        results = encounter_lab_result.get_by_encounter_with_details(
+            db, encounter_id=encounter_id
+        )
+
+        enhanced = []
+        for rel, lab in results:
+            enhanced.append({
+                "id": rel.id,
+                "encounter_id": rel.encounter_id,
+                "lab_result_id": rel.lab_result_id,
+                "purpose": rel.purpose,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "lab_result_name": lab.test_name,
+                "lab_result_date": lab.ordered_date,
+                "lab_result_status": lab.status,
+                "encounter_reason": db_encounter.reason,
+                "encounter_date": db_encounter.date,
+            })
+        return enhanced
+
+
+@router.post(
+    "/{encounter_id}/lab-results",
+    response_model=EncounterLabResultResponse,
+)
+def create_encounter_lab_result(
+    *,
+    request: Request,
+    encounter_id: int,
+    link_in: EncounterLabResultCreate,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Any:
+    """Link a lab result to an encounter."""
+    with handle_database_errors(request=request):
+        db_encounter = encounter.get(db, id=encounter_id)
+        handle_not_found(db_encounter, "Encounter", request)
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+
+        db_lab = lab_result.get(db, id=link_in.lab_result_id)
+        handle_not_found(db_lab, "Lab result", request)
+
+        if db_lab.patient_id != current_user_patient_id:
+            raise BusinessLogicException(
+                message="Cannot link lab result that doesn't belong to the same patient",
+                request=request,
+            )
+
+        existing = encounter_lab_result.get_by_encounter_and_lab_result(
+            db, encounter_id=encounter_id, lab_result_id=link_in.lab_result_id
+        )
+        if existing:
+            raise BusinessLogicException(
+                message="This lab result is already linked to this encounter",
+                request=request,
+            )
+
+        from app.models.models import EncounterLabResult as ELRModel
+        obj = ELRModel(
+            encounter_id=encounter_id,
+            lab_result_id=link_in.lab_result_id,
+            purpose=link_in.purpose,
+            relevance_note=link_in.relevance_note,
+        )
+        db.add(obj)
+        db.commit()
+        db.refresh(obj)
+        return obj
+
+
+@router.post(
+    "/{encounter_id}/lab-results/bulk",
+    response_model=List[EncounterLabResultResponse],
+)
+def bulk_create_encounter_lab_results(
+    *,
+    request: Request,
+    encounter_id: int,
+    bulk_in: EncounterLabResultBulkCreate,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Any:
+    """Bulk link lab results to an encounter."""
+    with handle_database_errors(request=request):
+        db_encounter = encounter.get(db, id=encounter_id)
+        handle_not_found(db_encounter, "Encounter", request)
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+
+        for lr_id in bulk_in.lab_result_ids:
+            db_lab = lab_result.get(db, id=lr_id)
+            handle_not_found(db_lab, "Lab result", request)
+            if db_lab.patient_id != current_user_patient_id:
+                raise BusinessLogicException(
+                    message=f"Lab result {lr_id} doesn't belong to the same patient",
+                    request=request,
+                )
+
+        created = encounter_lab_result.create_bulk(
+            db,
+            encounter_id=encounter_id,
+            lab_result_ids=bulk_in.lab_result_ids,
+            purpose=bulk_in.purpose,
+            relevance_note=bulk_in.relevance_note,
+        )
+        return created
+
+
+@router.put(
+    "/{encounter_id}/lab-results/{relationship_id}",
+    response_model=EncounterLabResultResponse,
+)
+def update_encounter_lab_result(
+    *,
+    request: Request,
+    encounter_id: int,
+    relationship_id: int,
+    link_in: EncounterLabResultUpdate,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Any:
+    """Update an encounter-lab result relationship."""
+    with handle_database_errors(request=request):
+        db_encounter = encounter.get(db, id=encounter_id)
+        handle_not_found(db_encounter, "Encounter", request)
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+
+        relationship = encounter_lab_result.get(db, id=relationship_id)
+        handle_not_found(relationship, "Encounter lab result relationship", request)
+
+        if relationship.encounter_id != encounter_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this encounter",
+                request=request,
+            )
+
+        updated = encounter_lab_result.update(db, db_obj=relationship, obj_in=link_in)
+        return updated
+
+
+@router.delete("/{encounter_id}/lab-results/{relationship_id}")
+def delete_encounter_lab_result(
+    *,
+    request: Request,
+    encounter_id: int,
+    relationship_id: int,
+    db: Session = Depends(deps.get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Any:
+    """Unlink a lab result from an encounter."""
+    with handle_database_errors(request=request):
+        db_encounter = encounter.get(db, id=encounter_id)
+        handle_not_found(db_encounter, "Encounter", request)
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+
+        relationship = encounter_lab_result.get(db, id=relationship_id)
+        handle_not_found(relationship, "Encounter lab result relationship", request)
+
+        if relationship.encounter_id != encounter_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this encounter",
+                request=request,
+            )
+
+        encounter_lab_result.delete(db, id=relationship_id)
+        return {"message": "Encounter lab result relationship deleted successfully"}

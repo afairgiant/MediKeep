@@ -455,3 +455,39 @@ class TreatmentEquipment(Base):
         Index("idx_treatment_equipment_equipment_id", "equipment_id"),
         UniqueConstraint("treatment_id", "equipment_id", name="uq_treatment_equipment"),
     )
+
+
+# =============================================================================
+# Encounter-Lab Result Relationship Table
+# =============================================================================
+
+
+class EncounterLabResult(Base):
+    """
+    Junction table for many-to-many relationship between encounters and lab results.
+    Allows linking lab results to visits with a purpose label (ordered_during, results_reviewed, etc.).
+    """
+    __tablename__ = "encounter_lab_results"
+
+    id = Column(Integer, primary_key=True)
+    encounter_id = Column(Integer, ForeignKey("encounters.id", ondelete="CASCADE"), nullable=False)
+    lab_result_id = Column(Integer, ForeignKey("lab_results.id", ondelete="CASCADE"), nullable=False)
+
+    # Purpose of the link between encounter and lab result
+    purpose = Column(String, nullable=True)  # ordered_during, results_reviewed, follow_up_for, reference, other
+    relevance_note = Column(String, nullable=True)
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+
+    # Table Relationships
+    encounter = orm_relationship("Encounter", back_populates="lab_result_relationships")
+    lab_result = orm_relationship("LabResult", back_populates="encounter_relationships")
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_encounter_lab_result_encounter_id", "encounter_id"),
+        Index("idx_encounter_lab_result_lab_result_id", "lab_result_id"),
+        UniqueConstraint("encounter_id", "lab_result_id", name="uq_encounter_lab_result"),
+    )

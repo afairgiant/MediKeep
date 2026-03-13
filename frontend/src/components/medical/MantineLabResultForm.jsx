@@ -3,6 +3,7 @@ import { Divider, Stack, Title, Paper, Text, Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from './BaseMedicalForm';
 import ConditionRelationships from './ConditionRelationships';
+import LabResultEncounterRelationships from './labresults/LabResultEncounterRelationships';
 import { labResultFormFields } from '../../utils/medicalFormFields';
 
 const MantineLabResultForm = ({
@@ -19,6 +20,10 @@ const MantineLabResultForm = ({
   conditions = [],
   labResultConditions = {},
   fetchLabResultConditions,
+  // Encounter relationship props
+  encounters = [],
+  labResultEncounters = {},
+  fetchLabResultEncounters,
   navigate,
 }) => {
   const { t } = useTranslation('medical');
@@ -172,6 +177,28 @@ const MantineLabResultForm = ({
                 labResultConditions={labResultConditions}
                 conditions={conditions}
                 fetchLabResultConditions={fetchLabResultConditions}
+                navigate={navigate}
+              />
+            </Stack>
+          </Paper>
+        </>
+      )}
+
+      {/* Encounter Relationships Section for Edit Mode */}
+      {editingLabResult && encounters.length > 0 && (
+        <>
+          <Divider label={t('common:labResults.form.linkedVisits', 'Linked Visits')} labelPosition="center" mt="lg" />
+          <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+            <Stack gap="md">
+              <Title order={5}>{t('common:labResults.form.linkVisitsTitle', 'Link to Visits')}</Title>
+              <Text size="sm" c="dimmed">
+                {t('common:labResults.form.linkVisitsDescription', 'Associate this lab result with visits where it was ordered or reviewed.')}
+              </Text>
+              <LabResultEncounterRelationships
+                labResultId={editingLabResult.id}
+                labResultEncounters={labResultEncounters}
+                encounters={encounters}
+                fetchLabResultEncounters={fetchLabResultEncounters}
                 navigate={navigate}
               />
             </Stack>

@@ -91,6 +91,7 @@ from .associations import (
     TreatmentEncounter,
     TreatmentLabResult,
     TreatmentEquipment,
+    EncounterLabResult,
 )
 
 __all__ = [
@@ -150,4 +151,5 @@ __all__ = [
     "TreatmentEncounter",
     "TreatmentLabResult",
     "TreatmentEquipment",
+    "EncounterLabResult",
 ]
