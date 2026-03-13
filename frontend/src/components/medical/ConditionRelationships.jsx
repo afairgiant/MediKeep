@@ -308,6 +308,7 @@ const ConditionRelationships = ({
         title={t('modals.linkConditionToLabResult')}
         size="md"
         centered
+        zIndex={2100}
       >
         <Stack gap="md">
           <MultiSelect
@@ -321,6 +322,7 @@ const ConditionRelationships = ({
             }))}
             searchable
             clearable
+            comboboxProps={{ withinPortal: true, zIndex: 3000 }}
             required
           />
 

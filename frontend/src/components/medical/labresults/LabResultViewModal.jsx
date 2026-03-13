@@ -21,11 +21,13 @@ import {
   IconTags,
   IconFileText,
   IconNotes,
+  IconStethoscope,
 } from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { useTagColors } from '../../../hooks/useTagColors';
 import ConditionRelationships from '../ConditionRelationships';
+import LabResultEncounterRelationships from './LabResultEncounterRelationships';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import TestComponentsTab from './TestComponentsTab';
 import logger from '../../../services/logger';
@@ -45,7 +47,10 @@ const LabResultViewModal = ({
   isBlocking,
   onError,
   onLabResultUpdated,
-  initialTab = 'overview'
+  initialTab = 'overview',
+  encounters,
+  labResultEncounters,
+  fetchLabResultEncounters,
 }) => {
   const { t } = useTranslation('common');
   const { formatDate } = useDateFormat();
@@ -68,6 +73,7 @@ const LabResultViewModal = ({
       notes: !!labResult?.notes,
       tags: labResult?.tags?.length > 0,
       conditions: !!fetchLabResultConditions,
+      encounters: !!fetchLabResultEncounters,
     };
     if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
       setActiveTab('overview');
@@ -143,6 +149,11 @@ const LabResultViewModal = ({
               {fetchLabResultConditions && (
                 <Tabs.Tab value="conditions" leftSection={<IconUsers size={16} />}>
                   {t('labResults.modal.tabs.relatedConditions', 'Related Conditions')}
+                </Tabs.Tab>
+              )}
+              {fetchLabResultEncounters && (
+                <Tabs.Tab value="encounters" leftSection={<IconStethoscope size={16} />}>
+                  {t('labResults.modal.tabs.visits', 'Visits')}
                 </Tabs.Tab>
               )}
               {labResult.notes && (
@@ -274,6 +285,22 @@ const LabResultViewModal = ({
                     fetchLabResultConditions={fetchLabResultConditions}
                     navigate={navigate}
                     isViewMode={true}
+                  />
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Encounters/Visits Tab */}
+            {fetchLabResultEncounters && (
+              <Tabs.Panel value="encounters">
+                <Box mt="md">
+                  <LabResultEncounterRelationships
+                    labResultId={labResult.id}
+                    labResultEncounters={labResultEncounters}
+                    encounters={encounters}
+                    fetchLabResultEncounters={fetchLabResultEncounters}
+                    navigate={navigate}
+                    isViewMode={false}
                   />
                 </Box>
               </Tabs.Panel>

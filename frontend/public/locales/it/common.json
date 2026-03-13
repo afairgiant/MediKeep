@@ -1419,6 +1419,7 @@
       "tabs": {
         "visitInfo": "Informazioni visita",
         "clinical": "Clinico",
+        "labResults": "Risultati di laboratorio",
         "notes": "Note",
         "documents": "Documenti"
       },
@@ -1449,6 +1450,7 @@
         "visitInfo": "Informazioni visita",
         "clinical": "Clinico",
         "documents": "Documenti",
+        "labResults": "Risultati di laboratorio",
         "notes": "Note"
       },
       "updateVisit": "Aggiorna visita",
@@ -2301,6 +2303,7 @@
         "overview": "Panoramica",
         "testComponents": "Componenti del test",
         "relatedConditions": "Condizioni correlate",
+        "visits": "Visite",
         "tags": "Tag",
         "files": "File"
       },
@@ -2346,7 +2349,10 @@
     "editTitle": "Modifica risultato di laboratorio",
     "form": {
       "addFilesOptional": "Aggiungi file (Opzionale)",
-      "manageFiles": "Gestisci file"
+      "manageFiles": "Gestisci file",
+      "linkedVisits": "Visite collegate",
+      "linkVisitsTitle": "Collega alle visite",
+      "linkVisitsDescription": "Associa questo risultato di laboratorio alle visite in cui è stato ordinato o esaminato."
     },
     "loading": "Caricamento risultati di laboratorio...",
     "loadingHint": "Se impiega troppo tempo, ricarica la pagina",

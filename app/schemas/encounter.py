@@ -1,4 +1,4 @@
-from datetime import date as DateType
+from datetime import date as DateType, datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
@@ -254,3 +254,203 @@ class EncounterSummary(BaseModel):
     practitioner_name: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# Encounter - Lab Result Relationship Schemas
+
+ENCOUNTER_LAB_RESULT_PURPOSES = [
+    "ordered_during",
+    "results_reviewed",
+    "follow_up_for",
+    "reference",
+    "other",
+]
+
+
+class EncounterLabResultCreate(BaseModel):
+    """Schema for creating an encounter-lab result relationship"""
+
+    lab_result_id: int
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+
+    @field_validator("lab_result_id")
+    @classmethod
+    def validate_lab_result_id(cls, v):
+        """Validate lab result ID"""
+        return validate_positive_id(v, field_name="Lab result ID", required=True)
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        """Validate purpose"""
+        if v and v not in ENCOUNTER_LAB_RESULT_PURPOSES:
+            raise ValueError(
+                f"Purpose must be one of: {', '.join(ENCOUNTER_LAB_RESULT_PURPOSES)}"
+            )
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
+
+
+class EncounterLabResultUpdate(BaseModel):
+    """Schema for updating an encounter-lab result relationship"""
+
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        """Validate purpose"""
+        if v and v not in ENCOUNTER_LAB_RESULT_PURPOSES:
+            raise ValueError(
+                f"Purpose must be one of: {', '.join(ENCOUNTER_LAB_RESULT_PURPOSES)}"
+            )
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
+
+
+class EncounterLabResultResponse(BaseModel):
+    """Schema for encounter-lab result relationship response"""
+
+    id: int
+    encounter_id: int
+    lab_result_id: int
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EncounterLabResultWithDetails(EncounterLabResultResponse):
+    """Schema with display fields for both sides of the relationship"""
+
+    lab_result_name: Optional[str] = None
+    lab_result_date: Optional[DateType] = None
+    lab_result_status: Optional[str] = None
+    encounter_reason: Optional[str] = None
+    encounter_date: Optional[DateType] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EncounterLabResultBulkCreate(BaseModel):
+    """Schema for bulk creating encounter-lab result relationships"""
+
+    lab_result_ids: List[int]
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+
+    @field_validator("lab_result_ids")
+    @classmethod
+    def validate_lab_result_ids(cls, v):
+        """Validate lab result IDs list"""
+        if not v:
+            raise ValueError("At least one lab result ID is required")
+        for id_val in v:
+            if id_val <= 0:
+                raise ValueError("All lab result IDs must be positive integers")
+        return v
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        """Validate purpose"""
+        if v and v not in ENCOUNTER_LAB_RESULT_PURPOSES:
+            raise ValueError(
+                f"Purpose must be one of: {', '.join(ENCOUNTER_LAB_RESULT_PURPOSES)}"
+            )
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
+
+
+class LabResultEncounterCreate(BaseModel):
+    """Schema for creating a lab-result-side encounter link (uses encounter_id)"""
+
+    encounter_id: int
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+
+    @field_validator("encounter_id")
+    @classmethod
+    def validate_encounter_id(cls, v):
+        """Validate encounter ID"""
+        return validate_positive_id(v, field_name="Encounter ID", required=True)
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        """Validate purpose"""
+        if v and v not in ENCOUNTER_LAB_RESULT_PURPOSES:
+            raise ValueError(
+                f"Purpose must be one of: {', '.join(ENCOUNTER_LAB_RESULT_PURPOSES)}"
+            )
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None
+
+
+class LabResultEncounterBulkCreate(BaseModel):
+    """Schema for bulk creating lab-result-side encounter links"""
+
+    encounter_ids: List[int]
+    purpose: Optional[str] = None
+    relevance_note: Optional[str] = None
+
+    @field_validator("encounter_ids")
+    @classmethod
+    def validate_encounter_ids(cls, v):
+        """Validate encounter IDs list"""
+        if not v:
+            raise ValueError("At least one encounter ID is required")
+        for id_val in v:
+            if id_val <= 0:
+                raise ValueError("All encounter IDs must be positive integers")
+        return v
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        """Validate purpose"""
+        if v and v not in ENCOUNTER_LAB_RESULT_PURPOSES:
+            raise ValueError(
+                f"Purpose must be one of: {', '.join(ENCOUNTER_LAB_RESULT_PURPOSES)}"
+            )
+        return v
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        """Validate relevance note"""
+        if v and len(v.strip()) > 500:
+            raise ValueError("Relevance note must be less than 500 characters")
+        return v.strip() if v else None

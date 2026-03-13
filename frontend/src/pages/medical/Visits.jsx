@@ -158,9 +158,12 @@ const Visits = () => {
   // Get patient conditions for linking
   const [conditions, setConditions] = useState([]);
 
+  // Lab results for encounter-lab result linking
+  const [patientLabResults, setPatientLabResults] = useState([]);
+  const [encounterLabResults, setEncounterLabResults] = useState({});
+
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -171,12 +174,48 @@ const Visits = () => {
         .then(response => {
           setConditions(response || []);
         })
-        .catch(error => {
-          logger.error('Failed to fetch conditions:', error);
+        .catch(err => {
+          logger.error('medical_conditions_fetch_error', {
+            message: 'Failed to fetch conditions for visits',
+            patientId: currentPatient.id,
+            error: err.message,
+            component: 'Visits',
+          });
           setConditions([]);
+        });
+
+      apiService.getPatientLabResults(currentPatient.id)
+        .then(response => {
+          setPatientLabResults(response || []);
+        })
+        .catch(err => {
+          logger.error('medical_lab_results_fetch_error', {
+            message: 'Failed to fetch lab results for visits',
+            patientId: currentPatient.id,
+            error: err.message,
+            component: 'Visits',
+          });
+          setPatientLabResults([]);
         });
     }
   }, [currentPatient?.id]);
+
+  const fetchEncounterLabResults = async (encounterId) => {
+    try {
+      const response = await apiService.getEncounterLabResults(encounterId);
+      setEncounterLabResults(prev => ({
+        ...prev,
+        [encounterId]: response || [],
+      }));
+    } catch (err) {
+      logger.error('medical_encounter_lab_results_fetch_error', {
+        message: 'Failed to fetch encounter lab results',
+        encounterId,
+        error: err.message,
+        component: 'Visits',
+      });
+    }
+  };
 
   const getConditionDetails = (conditionId) => {
     if (!conditionId || conditions.length === 0) return null;
@@ -565,6 +604,10 @@ const Visits = () => {
             refreshFileCount(editingVisit.id);
           }
         }}
+        labResults={patientLabResults}
+        encounterLabResults={encounterLabResults}
+        fetchEncounterLabResults={fetchEncounterLabResults}
+        navigate={navigate}
       >
         <FormLoadingOverlay
           visible={isBlocking}
@@ -588,6 +631,9 @@ const Visits = () => {
             refreshFileCount(viewingVisit.id);
           }
         }}
+        labResults={patientLabResults}
+        encounterLabResults={encounterLabResults}
+        fetchEncounterLabResults={fetchEncounterLabResults}
       />
     </>
   );

@@ -23,6 +23,9 @@ const LabResultFormWrapper = ({
   conditions,
   labResultConditions,
   fetchLabResultConditions,
+  encounters,
+  labResultEncounters,
+  fetchLabResultEncounters,
   navigate,
   onError,
   children
@@ -63,6 +66,9 @@ const LabResultFormWrapper = ({
       conditions={conditions}
       labResultConditions={labResultConditions}
       fetchLabResultConditions={fetchLabResultConditions}
+      encounters={encounters}
+      labResultEncounters={labResultEncounters}
+      fetchLabResultEncounters={fetchLabResultEncounters}
       navigate={navigate}
       isLoading={isLoading}
       statusMessage={statusMessage}

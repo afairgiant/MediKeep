@@ -157,6 +157,10 @@ const LabResults = () => {
   const [conditions, setConditions] = useState([]);
   const [labResultConditions, setLabResultConditions] = useState({});
 
+  // Encounters for lab result-encounter linking
+  const [patientEncounters, setPatientEncounters] = useState([]);
+  const [labResultEncounters, setLabResultEncounters] = useState({});
+
   useEffect(() => {
     if (currentPatient?.id) {
       apiService
@@ -164,14 +168,29 @@ const LabResults = () => {
         .then(response => {
           setConditions(response || []);
         })
-        .catch(error => {
+        .catch(err => {
           logger.error('medical_conditions_fetch_error', {
             message: 'Failed to fetch conditions for lab results',
             patientId: currentPatient.id,
-            error: error.message,
+            error: err.message,
             component: 'LabResults',
           });
           setConditions([]);
+        });
+
+      apiService
+        .getPatientEncounters(currentPatient.id)
+        .then(response => {
+          setPatientEncounters(response || []);
+        })
+        .catch(err => {
+          logger.error('medical_encounters_fetch_error', {
+            message: 'Failed to fetch encounters for lab results',
+            patientId: currentPatient.id,
+            error: err.message,
+            component: 'LabResults',
+          });
+          setPatientEncounters([]);
         });
     }
   }, [currentPatient?.id]);
@@ -192,11 +211,32 @@ const LabResults = () => {
         [labResultId]: relationships || [],
       }));
       return relationships || [];
-    } catch (error) {
+    } catch (err) {
       logger.error('medical_conditions_fetch_error', {
         message: 'Failed to fetch lab result conditions',
         labResultId,
-        error: error.message,
+        error: err.message,
+        component: 'LabResults',
+      });
+      return [];
+    }
+  };
+
+  // Helper function to fetch encounter relationships for a lab result
+  const fetchLabResultEncounters = async labResultId => {
+    try {
+      const relationships =
+        await apiService.getLabResultEncounters(labResultId);
+      setLabResultEncounters(prev => ({
+        ...prev,
+        [labResultId]: relationships || [],
+      }));
+      return relationships || [];
+    } catch (err) {
+      logger.error('medical_encounters_fetch_error', {
+        message: 'Failed to fetch lab result encounters',
+        labResultId,
+        error: err.message,
         component: 'LabResults',
       });
       return [];
@@ -708,6 +748,9 @@ const LabResults = () => {
           conditions={conditions}
           labResultConditions={labResultConditions}
           fetchLabResultConditions={fetchLabResultConditions}
+          encounters={patientEncounters}
+          labResultEncounters={labResultEncounters}
+          fetchLabResultEncounters={fetchLabResultEncounters}
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
           onTestComponentRef={setTestComponentMethods}
@@ -746,6 +789,9 @@ const LabResults = () => {
           }
         }}
         onLabResultUpdated={handleLabResultUpdated}
+        encounters={patientEncounters}
+        labResultEncounters={labResultEncounters}
+        fetchLabResultEncounters={fetchLabResultEncounters}
       />
 
       {/* Quick PDF Import Modal */}

@@ -907,6 +907,7 @@
         "overview": "Übersicht",
         "testComponents": "Testkomponenten",
         "relatedConditions": "Verbundene Erkrankungen",
+        "visits": "Besuche",
         "tags": "Tags",
         "files": "Dateien"
       },
@@ -934,7 +935,10 @@
     },
     "form": {
       "manageFiles": "Dateien verwalten",
-      "addFilesOptional": "Dateien hinzufügen (Optional)"
+      "addFilesOptional": "Dateien hinzufügen (Optional)",
+      "linkedVisits": "Verknüpfte Besuche",
+      "linkVisitsTitle": "Mit Besuchen verknüpfen",
+      "linkVisitsDescription": "Verknüpfen Sie dieses Laborergebnis mit Besuchen, bei denen es angeordnet oder überprüft wurde."
     },
     "continueEditing": "Weiter bearbeiten",
     "createAndContinue": "Erstellen & PDF hochladen",
@@ -1709,6 +1713,7 @@
       "tabs": {
         "visitInfo": "Besuchsinfo",
         "clinical": "Klinisch",
+        "labResults": "Laborergebnisse",
         "notes": "Notizen",
         "documents": "Dokumente"
       },
@@ -1739,6 +1744,7 @@
         "visitInfo": "Besuchsinfo",
         "clinical": "Klinisch",
         "documents": "Dokumente",
+        "labResults": "Laborergebnisse",
         "notes": "Notizen"
       },
       "updateVisit": "Besuch Aktualisieren",

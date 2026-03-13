@@ -1458,6 +1458,7 @@
       "tabs": {
         "visitInfo": "Visit Info",
         "clinical": "Clinical",
+        "labResults": "Lab Results",
         "notes": "Notes",
         "documents": "Documents"
       },
@@ -1488,6 +1489,7 @@
         "visitInfo": "Visit Info",
         "clinical": "Clinical",
         "documents": "Documents",
+        "labResults": "Lab Results",
         "notes": "Notes"
       },
       "updateVisit": "Update Visit",
@@ -2340,6 +2342,7 @@
         "overview": "Overview",
         "testComponents": "Test Components",
         "relatedConditions": "Related Conditions",
+        "visits": "Visits",
         "tags": "Tags",
         "files": "Files"
       },
@@ -2400,7 +2403,10 @@
     },
     "form": {
       "manageFiles": "Manage Files",
-      "addFilesOptional": "Add Files (Optional)"
+      "addFilesOptional": "Add Files (Optional)",
+      "linkedVisits": "Linked Visits",
+      "linkVisitsTitle": "Link to Visits",
+      "linkVisitsDescription": "Associate this lab result with visits where it was ordered or reviewed."
     }
   },
   "testComponents": {
