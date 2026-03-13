@@ -45,6 +45,10 @@ const InjuryFormWrapper = ({
   injuryTypes = [],
   injuryTypesLoading = false,
   isLoading = false,
+  statusMessage,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common']);
@@ -59,6 +63,40 @@ const InjuryFormWrapper = ({
 
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
+
+  const handleDocumentManagerRef = (methods) => {
+    if (onDocumentManagerRef) {
+      onDocumentManagerRef(methods);
+    }
+  };
+
+  const handleDocumentError = (error) => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in injuries ${editingInjury ? 'edit' : 'create'}`,
+      injuryId: editingInjury?.id,
+      error: error,
+      component: 'InjuryFormWrapper',
+    });
+
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+    logger.info('injuries_upload_completed', {
+      message: 'File upload completed in injuries form',
+      injuryId: editingInjury?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'InjuryFormWrapper',
+    });
+
+    if (onFileUploadComplete) {
+      onFileUploadComplete(success, completedCount, failedCount);
+    }
+  };
 
   // Reset tab when modal opens/closes
   useEffect(() => {
@@ -110,7 +148,9 @@ const InjuryFormWrapper = ({
     >
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}
-        message={t('injuries.messages.saving', 'Saving injury...')}
+        message={statusMessage?.title || t('injuries.messages.saving', 'Saving injury...')}
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
       />
 
       <form onSubmit={handleSubmit}>
@@ -124,11 +164,11 @@ const InjuryFormWrapper = ({
               <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
                 {t('injuries.tabs.treatment', 'Treatment')}
               </Tabs.Tab>
-              {editingInjury && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('injuries.tabs.documents', 'Documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingInjury
+                  ? t('injuries.form.tabs.documents', 'Documents')
+                  : t('injuries.form.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('injuries.tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -387,17 +427,19 @@ const InjuryFormWrapper = ({
             </Tabs.Panel>
 
             {/* Documents Tab */}
-            {editingInjury && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <DocumentManagerWithProgress
-                    entityType="injury"
-                    entityId={editingInjury.id}
-                    readOnly={false}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="injury"
+                  entityId={editingInjury?.id || null}
+                  mode={editingInjury ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">

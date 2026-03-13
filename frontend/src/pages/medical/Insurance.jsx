@@ -567,8 +567,11 @@ const Insurance = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingItem={editingInsurance}
-        onFileUploadComplete={(success) => {
-          if (success && editingInsurance) {
+        isLoading={isBlocking}
+        statusMessage={statusMessage}
+        onDocumentManagerRef={setDocumentManagerMethods}
+        onFileUploadComplete={(success, completedCount, failedCount) => {
+          if (success && editingInsurance?.id) {
             refreshFileCount(editingInsurance.id);
           }
         }}

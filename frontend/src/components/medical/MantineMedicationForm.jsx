@@ -46,6 +46,10 @@ const MantineMedicationForm = ({
   conditions = [],
   navigate = null,
   children,
+  statusMessage,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
 }) => {
   // Translation
   const { t } = useTranslation(['medical', 'common']);
@@ -59,6 +63,40 @@ const MantineMedicationForm = ({
   const {
     handleTextInputChange,
   } = useFormHandlers(onInputChange);
+
+  const handleDocumentManagerRef = (methods) => {
+    if (onDocumentManagerRef) {
+      onDocumentManagerRef(methods);
+    }
+  };
+
+  const handleDocumentError = (error) => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in medications ${editingMedication ? 'edit' : 'create'}`,
+      medicationId: editingMedication?.id,
+      error: error,
+      component: 'MantineMedicationForm',
+    });
+
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+    logger.info('medications_upload_completed', {
+      message: 'File upload completed in medications form',
+      medicationId: editingMedication?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'MantineMedicationForm',
+    });
+
+    if (onFileUploadComplete) {
+      onFileUploadComplete(success, completedCount, failedCount);
+    }
+  };
 
   // Reset tab when modal opens/closes
   useEffect(() => {
@@ -236,6 +274,8 @@ const MantineMedicationForm = ({
       size="xl"
       centered
       zIndex={2000}
+      closeOnClickOutside={!isLoading}
+      closeOnEscape={!isLoading}
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
@@ -243,7 +283,12 @@ const MantineMedicationForm = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={t('medications.form.saving')} />
+      <FormLoadingOverlay
+        visible={isSubmitting || isLoading}
+        message={statusMessage?.title || t('medications.form.saving')}
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -256,11 +301,11 @@ const MantineMedicationForm = ({
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
                 {t('medications.tabs.details')}
               </Tabs.Tab>
-              {editingMedication && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('medications.tabs.documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingMedication
+                  ? t('medications.tabs.documents')
+                  : t('medications.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               {editingMedication && (
                 <Tabs.Tab value="conditions" leftSection={<IconStethoscope size={16} />}>
                   {t('medications.tabs.conditions')}
@@ -298,24 +343,24 @@ const MantineMedicationForm = ({
             </Tabs.Panel>
 
             {/* Documents Tab */}
-            {editingMedication && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <Stack gap="md">
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <Stack gap="md">
+                  {editingMedication && (
                     <Title order={4}>{t('medications.form.attachedDocuments')}</Title>
-                    <DocumentManagerWithProgress
-                      entityType="medication"
-                      entityId={editingMedication.id}
-                      mode="edit"
-                      onError={(error) => {
-                        logger.error('Document manager error in medication form:', error);
-                      }}
-                      showProgressModal={true}
-                    />
-                  </Stack>
-                </Box>
-              </Tabs.Panel>
-            )}
+                  )}
+                  <DocumentManagerWithProgress
+                    entityType="medication"
+                    entityId={editingMedication?.id || null}
+                    mode={editingMedication ? 'edit' : 'create'}
+                    onUploadPendingFiles={handleDocumentManagerRef}
+                    showProgressModal={true}
+                    onUploadComplete={handleDocumentUploadComplete}
+                    onError={handleDocumentError}
+                  />
+                </Stack>
+              </Box>
+            </Tabs.Panel>
 
             {/* Conditions Tab */}
             {editingMedication && (

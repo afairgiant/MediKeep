@@ -14,6 +14,11 @@ const MedicationFormWrapper = memo(({
   editingMedication,
   conditions,
   navigate,
+  isLoading,
+  statusMessage,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
 }) => {
   return (
     <MantineMedicationForm
@@ -28,12 +33,17 @@ const MedicationFormWrapper = memo(({
       editingMedication={editingMedication}
       conditions={conditions}
       navigate={navigate}
+      isLoading={isLoading}
+      statusMessage={statusMessage}
+      onDocumentManagerRef={onDocumentManagerRef}
+      onFileUploadComplete={onFileUploadComplete}
+      onError={onError}
     />
   );
 }, (prevProps, nextProps) => {
   // Custom comparison function to prevent unnecessary re-renders
   const keysToCompare = [
-    'isOpen', 'title', 'formData', 'editingMedication'
+    'isOpen', 'title', 'formData', 'editingMedication', 'isLoading', 'statusMessage'
   ];
   
   // Check primitive props

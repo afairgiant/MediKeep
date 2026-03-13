@@ -2348,7 +2348,7 @@
     },
     "editTitle": "Editar Resultado de Laboratório",
     "form": {
-      "addFilesOptional": "Adicionar Arquivos (Opcional)",
+      "addFilesOptional": "Adicionar Arquivos",
       "manageFiles": "Gerenciar Arquivos",
       "linkedVisits": "Visitas vinculadas",
       "linkVisitsTitle": "Vincular a visitas",

@@ -2403,7 +2403,7 @@
     },
     "form": {
       "manageFiles": "Manage Files",
-      "addFilesOptional": "Add Files (Optional)",
+      "addFilesOptional": "Add Files",
       "linkedVisits": "Linked Visits",
       "linkVisitsTitle": "Link to Visits",
       "linkVisitsDescription": "Associate this lab result with visits where it was ordered or reviewed."

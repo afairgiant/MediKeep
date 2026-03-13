@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import logger from '../../services/logger';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +41,7 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 
 // Modular components
 import {
@@ -92,7 +93,7 @@ const Immunization = () => {
   const dataManagement = useDataManagement(immunizations, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount } = useEntityFileCounts('immunization', immunizations);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('immunization', immunizations);
 
   // View modal navigation with URL deep linking
   const {
@@ -125,6 +126,43 @@ const Immunization = () => {
     tags: [],
   });
 
+  // Document management state
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
+  // Track if we need to refresh after form submission
+  const needsRefreshAfterSubmissionRef = useRef(false);
+
+  const {
+    submissionState,
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    canSubmit,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'immunization',
+    onSuccess: () => {
+      resetForm();
+
+      if (needsRefreshAfterSubmissionRef.current) {
+        needsRefreshAfterSubmissionRef.current = false;
+        refreshData();
+      }
+    },
+    onError: (error) => {
+      logger.error('immunizations_form_error', {
+        message: 'Form submission error in immunizations',
+        error,
+        component: 'Immunization',
+      });
+    },
+    component: 'Immunization',
+  });
+
   const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -155,11 +193,14 @@ const Immunization = () => {
   };
 
   const handleAddImmunization = () => {
+    resetSubmission();
+    setDocumentManagerMethods(null);
     resetForm();
     setShowAddForm(true);
   };
 
   const handleEditImmunization = immunization => {
+    resetSubmission();
     setFormData({
       vaccine_name: immunization.vaccine_name || '',
       vaccine_trade_name: immunization.vaccine_trade_name || '',
@@ -188,6 +229,12 @@ const Immunization = () => {
       return;
     }
 
+    startSubmission();
+
+    if (!canSubmit) {
+      return;
+    }
+
     const immunizationData = {
       vaccine_name: formData.vaccine_name,
       vaccine_trade_name: formData.vaccine_trade_name || null,
@@ -210,16 +257,64 @@ const Immunization = () => {
       tags: formData.tags || [],
     };
 
-    let success;
-    if (editingImmunization) {
-      success = await updateItem(editingImmunization.id, immunizationData);
-    } else {
-      success = await createItem(immunizationData);
-    }
+    try {
+      let success;
+      let resultId;
 
-    if (success) {
-      resetForm();
-      await refreshData();
+      if (editingImmunization) {
+        success = await updateItem(editingImmunization.id, immunizationData);
+        resultId = editingImmunization.id;
+      } else {
+        const result = await createItem(immunizationData);
+        success = !!result;
+        resultId = result?.id;
+        if (success) {
+          needsRefreshAfterSubmissionRef.current = true;
+        }
+      }
+
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+
+        if (hasPendingFiles) {
+          logger.info('immunizations_starting_file_upload', {
+            message: 'Starting file upload process',
+            immunizationId: resultId,
+            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+            component: 'Immunization',
+          });
+
+          const pendingCount = documentManagerMethods.getPendingFilesCount();
+
+          startFileUpload();
+
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            completeFileUpload(true, pendingCount, 0);
+          } catch (uploadError) {
+            logger.error('immunizations_file_upload_error', {
+              message: 'File upload failed',
+              immunizationId: resultId,
+              error: uploadError.message,
+              component: 'Immunization',
+            });
+            completeFileUpload(false, 0, pendingCount);
+          }
+        } else {
+          completeFileUpload(true, 0, 0);
+        }
+      } else {
+        handleSubmissionFailure(new Error('Form submission failed'), 'form');
+      }
+    } catch (error) {
+      logger.error('immunizations_submission_error', {
+        message: 'Form submission failed',
+        error: error.message,
+        component: 'Immunization',
+      });
+      handleSubmissionFailure(error, 'form');
     }
   };
 
@@ -279,7 +374,7 @@ const Immunization = () => {
         {/* Form Modal */}
         <ImmunizationFormWrapper
           isOpen={showAddForm}
-          onClose={resetForm}
+          onClose={() => !isBlocking && resetForm()}
           title={
             editingImmunization ? t('immunizations.editImmunization', 'Edit Immunization') : t('immunizations.addNewImmunization', 'Add New Immunization')
           }
@@ -288,6 +383,14 @@ const Immunization = () => {
           onSubmit={handleSubmit}
           editingImmunization={editingImmunization}
           practitioners={practitioners}
+          isLoading={isBlocking}
+          statusMessage={statusMessage}
+          onDocumentManagerRef={setDocumentManagerMethods}
+          onFileUploadComplete={(success, completedCount, failedCount) => {
+            if (success && editingImmunization?.id) {
+              refreshFileCount(editingImmunization.id);
+            }
+          }}
         />
 
         {/* View Details Modal */}

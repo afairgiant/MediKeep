@@ -307,16 +307,18 @@ const Procedures = () => {
             component: 'Procedures',
           });
 
+          const pendingCount = documentManagerMethods.getPendingFilesCount();
+
           // Start file upload process
           startFileUpload();
 
           try {
             // Upload files with progress tracking
             await documentManagerMethods.uploadPendingFiles(resultId);
-            
+
             // File upload completed successfully
-            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
-            
+            completeFileUpload(true, pendingCount, 0);
+
             // Refresh file count
             refreshFileCount(resultId);
           } catch (uploadError) {
@@ -326,9 +328,9 @@ const Procedures = () => {
               error: uploadError.message,
               component: 'Procedures',
             });
-            
+
             // File upload failed
-            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+            completeFileUpload(false, 0, pendingCount);
           }
         } else {
           // No files to upload, complete immediately

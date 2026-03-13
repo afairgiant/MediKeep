@@ -935,7 +935,7 @@
     },
     "form": {
       "manageFiles": "Dateien verwalten",
-      "addFilesOptional": "Dateien hinzufügen (Optional)",
+      "addFilesOptional": "Dateien hinzufügen",
       "linkedVisits": "Verknüpfte Besuche",
       "linkVisitsTitle": "Mit Besuchen verknüpfen",
       "linkVisitsDescription": "Verknüpfen Sie dieses Laborergebnis mit Besuchen, bei denen es angeordnet oder überprüft wurde."
