@@ -1,6 +1,3 @@
-import logger from '../../services/logger';
-import { MEDICAL_DOCUMENT_CONFIG } from '../../constants/fileTypes';
-
 import React, { memo } from 'react';
 import {
   Stack,
@@ -26,6 +23,9 @@ import {
   IconLink,
   IconChevronDown,
 } from '@tabler/icons-react';
+
+import { MEDICAL_DOCUMENT_CONFIG } from '../../constants/fileTypes';
+import logger from '../../services/logger';
 import FileList from './FileList';
 import FileUploadZone from './FileUploadZone';
 import StorageBackendSelector from './StorageBackendSelector';
@@ -72,15 +72,6 @@ const RenderModeContent = memo(({
       </Center>
     );
   }
-
-  // Performance optimization: Memoized storage backend selector with auto-sync indicator
-  // logger.debug('render_mode_content_storage_backend_check', 'Checking storage backend render', {
-  //   paperlessLoading,
-  //   selectedStorageBackend,
-  //   paperlessEnabled: paperlessSettings?.paperless_enabled,
-  //   mode,
-  //   component: 'RenderModeContent'
-  // });
 
   const storageBackendSelector = !paperlessLoading && (
     <Stack gap="xs">
@@ -266,14 +257,8 @@ const RenderModeContent = memo(({
         <FileUploadZone
           onUpload={uploadedFiles => {
             uploadedFiles.forEach(({ file, description }) => {
-              // Use different approaches based on mode
-              if (mode === 'create') {
-                // Creation mode: use pending files (no entity ID yet)
-                logger.info('RenderModeContent: adding to pending files for creation mode:', file.name);
-                onAddPendingFile(file, description);
-              } else if (handleImmediateUpload) {
-                // Edit/view mode: use immediate upload (entity ID exists)
-                logger.info('RenderModeContent: calling handleImmediateUpload for edit/view mode:', file.name);
+              if (handleImmediateUpload) {
+                logger.info('RenderModeContent: calling handleImmediateUpload for edit mode:', file.name);
                 handleImmediateUpload(file, description || '');
               } else {
                 logger.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
@@ -302,19 +287,7 @@ const RenderModeContent = memo(({
         <FileUploadZone
           onUpload={uploadedFiles => {
             uploadedFiles.forEach(({ file, description }) => {
-              // Use different approaches based on mode
-              if (mode === 'create') {
-                // Creation mode: use pending files (no entity ID yet)
-                logger.info('RenderModeContent: adding to pending files for creation mode:', file.name);
-                onAddPendingFile(file, description);
-              } else if (handleImmediateUpload) {
-                // Edit/view mode: use immediate upload (entity ID exists)
-                logger.info('RenderModeContent: calling handleImmediateUpload for edit/view mode:', file.name);
-                handleImmediateUpload(file, description || '');
-              } else {
-                logger.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
-                onAddPendingFile(file, description);
-              }
+              onAddPendingFile(file, description);
             });
           }}
           acceptedTypes={config?.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
@@ -323,6 +296,7 @@ const RenderModeContent = memo(({
           autoUpload={true}
           selectedStorageBackend={selectedStorageBackend}
           paperlessSettings={paperlessSettings}
+          mode={mode}
         />
 
         {pendingFilesList}

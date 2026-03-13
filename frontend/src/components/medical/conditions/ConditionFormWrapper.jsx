@@ -30,6 +30,7 @@ import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import MedicationRelationships from '../MedicationRelationships';
+import logger from '../../../services/logger';
 
 const ConditionFormWrapper = ({
   isOpen,
@@ -42,6 +43,9 @@ const ConditionFormWrapper = ({
   practitioners = [],
   isLoading = false,
   statusMessage,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
   // Medication relationship props (only used when editing)
   medications = [],
   conditionMedications = {},
@@ -64,6 +68,40 @@ const ConditionFormWrapper = ({
 
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
+
+  const handleDocumentManagerRef = (methods) => {
+    if (onDocumentManagerRef) {
+      onDocumentManagerRef(methods);
+    }
+  };
+
+  const handleDocumentError = (error) => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in conditions ${editingCondition ? 'edit' : 'create'}`,
+      conditionId: editingCondition?.id,
+      error: error,
+      component: 'ConditionFormWrapper',
+    });
+
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+    logger.info('conditions_upload_completed', {
+      message: 'File upload completed in conditions form',
+      conditionId: editingCondition?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'ConditionFormWrapper',
+    });
+
+    if (onFileUploadComplete) {
+      onFileUploadComplete(success, completedCount, failedCount);
+    }
+  };
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -105,7 +143,12 @@ const ConditionFormWrapper = ({
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || t('conditions.form.saving', 'Saving condition...')} />
+      <FormLoadingOverlay
+        visible={isSubmitting || isLoading}
+        message={statusMessage?.title || t('conditions.form.saving', 'Saving condition...')}
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -121,11 +164,11 @@ const ConditionFormWrapper = ({
               <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
                 {t('conditions.form.tabs.medications', 'Medications')}
               </Tabs.Tab>
-              {editingCondition && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('conditions.form.tabs.documents', 'Documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingCondition
+                  ? t('conditions.form.tabs.documents', 'Documents')
+                  : t('conditions.form.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('conditions.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -319,17 +362,20 @@ const ConditionFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Documents Tab (only when editing) */}
-            {editingCondition && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <DocumentManagerWithProgress
-                    entityType="condition"
-                    entityId={editingCondition.id}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="condition"
+                  entityId={editingCondition?.id || null}
+                  mode={editingCondition ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">

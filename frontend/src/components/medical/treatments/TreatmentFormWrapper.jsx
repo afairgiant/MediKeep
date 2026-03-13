@@ -61,6 +61,10 @@ const TreatmentFormWrapper = ({
   practitionersOptions = [],
   practitionersLoading = false,
   isLoading = false,
+  statusMessage,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
 }) => {
   const { t } = useTranslation('common');
   const { dateInputFormat } = useDateFormat();
@@ -74,6 +78,40 @@ const TreatmentFormWrapper = ({
 
   // Track pending relationships for creation mode
   const [pendingRelationships, setPendingRelationships] = useState(EMPTY_PENDING_RELATIONSHIPS);
+
+  const handleDocumentManagerRef = (methods) => {
+    if (onDocumentManagerRef) {
+      onDocumentManagerRef(methods);
+    }
+  };
+
+  const handleDocumentError = (error) => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in treatments ${editingTreatment ? 'edit' : 'create'}`,
+      treatmentId: editingTreatment?.id,
+      error: error,
+      component: 'TreatmentFormWrapper',
+    });
+
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+    logger.info('treatments_upload_completed', {
+      message: 'File upload completed in treatments form',
+      treatmentId: editingTreatment?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'TreatmentFormWrapper',
+    });
+
+    if (onFileUploadComplete) {
+      onFileUploadComplete(success, completedCount, failedCount);
+    }
+  };
 
   // Form handlers
   const {
@@ -247,10 +285,13 @@ const TreatmentFormWrapper = ({
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}
         message={
-          isSubmitting && pendingCount > 0 && !editingTreatment
+          statusMessage?.title ||
+          (isSubmitting && pendingCount > 0 && !editingTreatment
             ? t('treatments.form.creatingWithLinks', 'Creating treatment and linking items...')
-            : t('treatments.form.savingTreatment', 'Saving treatment...')
+            : t('treatments.form.savingTreatment', 'Saving treatment...'))
         }
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
       />
 
       <form onSubmit={handleSubmit}>
@@ -313,11 +354,11 @@ const TreatmentFormWrapper = ({
                   </Tabs.Tab>
                 </>
               )}
-              {editingTreatment && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('treatments.form.tabs.documents', 'Documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingTreatment
+                  ? t('treatments.form.tabs.documents', 'Documents')
+                  : t('treatments.form.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('treatments.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -591,20 +632,20 @@ const TreatmentFormWrapper = ({
               </Tabs.Panel>
             )}
 
-            {/* Documents Tab (only when editing) */}
-            {editingTreatment && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <DocumentManagerWithProgress
-                    entityType="treatment"
-                    entityId={editingTreatment.id}
-                    onError={(error) => {
-                      logger.error('Document upload error', { error });
-                    }}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="treatment"
+                  entityId={editingTreatment?.id || null}
+                  mode={editingTreatment ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">

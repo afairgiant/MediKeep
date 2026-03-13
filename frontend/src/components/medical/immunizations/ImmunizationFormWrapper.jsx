@@ -41,9 +41,47 @@ const ImmunizationFormWrapper = ({
   practitioners = [],
   isLoading = false,
   statusMessage,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
 }) => {
   const { t } = useTranslation('common');
   const { dateInputFormat } = useDateFormat();
+
+  const handleDocumentManagerRef = (methods) => {
+    if (onDocumentManagerRef) {
+      onDocumentManagerRef(methods);
+    }
+  };
+
+  const handleDocumentError = (error) => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in immunizations ${editingImmunization ? 'edit' : 'create'}`,
+      immunizationId: editingImmunization?.id,
+      error: error,
+      component: 'ImmunizationFormWrapper',
+    });
+
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+    logger.info('immunizations_upload_completed', {
+      message: 'File upload completed in immunizations form',
+      immunizationId: editingImmunization?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'ImmunizationFormWrapper',
+    });
+
+    if (onFileUploadComplete) {
+      onFileUploadComplete(success, completedCount, failedCount);
+    }
+  };
+
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,7 +141,12 @@ const ImmunizationFormWrapper = ({
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || t('immunizations.form.savingImmunization', 'Saving immunization...')} />
+      <FormLoadingOverlay
+        visible={isSubmitting || isLoading}
+        message={statusMessage?.title || t('immunizations.form.savingImmunization', 'Saving immunization...')}
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -116,11 +159,11 @@ const ImmunizationFormWrapper = ({
               <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
                 {t('immunizations.form.tabs.administration', 'Administration')}
               </Tabs.Tab>
-              {editingImmunization && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('immunizations.form.tabs.documents', 'Documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingImmunization
+                  ? t('immunizations.form.tabs.documents', 'Documents')
+                  : t('immunizations.form.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('immunizations.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -322,20 +365,20 @@ const ImmunizationFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Documents Tab (only when editing) */}
-            {editingImmunization && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <DocumentManagerWithProgress
-                    entityType="immunization"
-                    entityId={editingImmunization.id}
-                    onError={(error) => {
-                      logger.error('Document upload error', { error });
-                    }}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="immunization"
+                  entityId={editingImmunization?.id || null}
+                  mode={editingImmunization ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
