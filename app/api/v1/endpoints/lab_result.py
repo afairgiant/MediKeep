@@ -34,11 +34,19 @@ from app.api.v1.endpoints.utils import (
 from app.core.config import settings
 from app.core.database.database import get_db
 from app.crud.condition import condition as condition_crud
+from app.crud.encounter import encounter as encounter_crud, encounter_lab_result
 from app.crud.lab_result import lab_result, lab_result_condition
 from app.crud.lab_result_file import lab_result_file
 from app.models.activity_log import EntityType
 from app.models.models import EntityFile, User
 from app.services.generic_entity_file_service import GenericEntityFileService
+from app.schemas.encounter import (
+    EncounterLabResultBulkCreate,
+    EncounterLabResultCreate,
+    EncounterLabResultResponse,
+    EncounterLabResultUpdate,
+    EncounterLabResultWithDetails,
+)
 from app.schemas.lab_result import (
     LabResultConditionCreate,
     LabResultConditionResponse,
@@ -1002,6 +1010,237 @@ def delete_lab_result_condition(
         # Delete relationship
         lab_result_condition.delete(db, id=relationship_id)
         return {"message": "Lab result condition relationship deleted successfully"}
+
+
+# Lab Result - Encounter Relationship Endpoints
+
+
+@router.get(
+    "/{lab_result_id}/encounters",
+    response_model=List[EncounterLabResultWithDetails],
+)
+def get_lab_result_encounters(
+    *,
+    request: Request,
+    lab_result_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Get all encounter relationships for a specific lab result."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        if db_lab_result.patient_id != current_user_patient_id:
+            raise ForbiddenException(
+                message="Access denied to this lab result",
+                request=request,
+            )
+
+        relationships = encounter_lab_result.get_by_lab_result(
+            db, lab_result_id=lab_result_id
+        )
+
+        enhanced = []
+        for rel in relationships:
+            db_enc = encounter_crud.get(db, id=rel.encounter_id)
+            enhanced.append({
+                "id": rel.id,
+                "encounter_id": rel.encounter_id,
+                "lab_result_id": rel.lab_result_id,
+                "purpose": rel.purpose,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "lab_result_name": db_lab_result.test_name,
+                "lab_result_date": db_lab_result.ordered_date,
+                "lab_result_status": db_lab_result.status,
+                "encounter_reason": db_enc.reason if db_enc else None,
+                "encounter_date": db_enc.date if db_enc else None,
+            })
+        return enhanced
+
+
+@router.post(
+    "/{lab_result_id}/encounters",
+    response_model=EncounterLabResultResponse,
+)
+def create_lab_result_encounter(
+    *,
+    request: Request,
+    lab_result_id: int,
+    link_in: EncounterLabResultCreate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Link an encounter to a lab result."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        if db_lab_result.patient_id != current_user_patient_id:
+            raise ForbiddenException(
+                message="Access denied to this lab result",
+                request=request,
+            )
+
+        # link_in.lab_result_id is used as encounter_id from the lab result side
+        encounter_id = link_in.lab_result_id  # reusing field name from schema
+        db_enc = encounter_crud.get(db, id=encounter_id)
+        handle_not_found(db_enc, "Encounter", request)
+
+        if db_enc.patient_id != current_user_patient_id:
+            raise BusinessLogicException(
+                message="Cannot link encounter that doesn't belong to the same patient",
+                request=request,
+            )
+
+        existing = encounter_lab_result.get_by_encounter_and_lab_result(
+            db, encounter_id=encounter_id, lab_result_id=lab_result_id
+        )
+        if existing:
+            raise BusinessLogicException(
+                message="This encounter is already linked to this lab result",
+                request=request,
+            )
+
+        from app.models.models import EncounterLabResult as ELRModel
+        obj = ELRModel(
+            encounter_id=encounter_id,
+            lab_result_id=lab_result_id,
+            purpose=link_in.purpose,
+            relevance_note=link_in.relevance_note,
+        )
+        db.add(obj)
+        db.commit()
+        db.refresh(obj)
+        return obj
+
+
+@router.post(
+    "/{lab_result_id}/encounters/bulk",
+    response_model=List[EncounterLabResultResponse],
+)
+def bulk_create_lab_result_encounters(
+    *,
+    request: Request,
+    lab_result_id: int,
+    bulk_in: EncounterLabResultBulkCreate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Bulk link encounters to a lab result."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        if db_lab_result.patient_id != current_user_patient_id:
+            raise ForbiddenException(
+                message="Access denied to this lab result",
+                request=request,
+            )
+
+        # bulk_in.lab_result_ids is reused as encounter_ids from lab result side
+        encounter_ids = bulk_in.lab_result_ids
+        for enc_id in encounter_ids:
+            db_enc = encounter_crud.get(db, id=enc_id)
+            handle_not_found(db_enc, "Encounter", request)
+            if db_enc.patient_id != current_user_patient_id:
+                raise BusinessLogicException(
+                    message=f"Encounter {enc_id} doesn't belong to the same patient",
+                    request=request,
+                )
+
+        created = []
+        from app.models.models import EncounterLabResult as ELRModel
+        for enc_id in encounter_ids:
+            existing = encounter_lab_result.get_by_encounter_and_lab_result(
+                db, encounter_id=enc_id, lab_result_id=lab_result_id
+            )
+            if not existing:
+                obj = ELRModel(
+                    encounter_id=enc_id,
+                    lab_result_id=lab_result_id,
+                    purpose=bulk_in.purpose,
+                    relevance_note=bulk_in.relevance_note,
+                )
+                db.add(obj)
+                created.append(obj)
+        if created:
+            db.commit()
+            for obj in created:
+                db.refresh(obj)
+        return created
+
+
+@router.put(
+    "/{lab_result_id}/encounters/{relationship_id}",
+    response_model=EncounterLabResultResponse,
+)
+def update_lab_result_encounter(
+    *,
+    request: Request,
+    lab_result_id: int,
+    relationship_id: int,
+    link_in: EncounterLabResultUpdate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Update a lab result-encounter relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        if db_lab_result.patient_id != current_user_patient_id:
+            raise ForbiddenException(
+                message="Access denied to this lab result",
+                request=request,
+            )
+
+        relationship = encounter_lab_result.get(db, id=relationship_id)
+        handle_not_found(relationship, "Lab result encounter relationship", request)
+
+        if relationship.lab_result_id != lab_result_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this lab result",
+                request=request,
+            )
+
+        updated = encounter_lab_result.update(db, db_obj=relationship, obj_in=link_in)
+        return updated
+
+
+@router.delete("/{lab_result_id}/encounters/{relationship_id}")
+def delete_lab_result_encounter(
+    *,
+    request: Request,
+    lab_result_id: int,
+    relationship_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+):
+    """Unlink an encounter from a lab result."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        if db_lab_result.patient_id != current_user_patient_id:
+            raise ForbiddenException(
+                message="Access denied to this lab result",
+                request=request,
+            )
+
+        relationship = encounter_lab_result.get(db, id=relationship_id)
+        handle_not_found(relationship, "Lab result encounter relationship", request)
+
+        if relationship.lab_result_id != lab_result_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this lab result",
+                request=request,
+            )
+
+        encounter_lab_result.delete(db, id=relationship_id)
+        return {"message": "Lab result encounter relationship deleted successfully"}
 
 
 # OCR PDF Parsing Endpoint

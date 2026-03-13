@@ -153,6 +153,11 @@ class Encounter(Base):
         "TreatmentEncounter", back_populates="encounter", cascade="all, delete-orphan"
     )
 
+    # Many-to-Many relationship with lab results through junction table
+    lab_result_relationships = orm_relationship(
+        "EncounterLabResult", back_populates="encounter", cascade="all, delete-orphan"
+    )
+
     # Indexes for performance
     __table_args__ = (Index("idx_encounters_patient_id", "patient_id"),)
 
