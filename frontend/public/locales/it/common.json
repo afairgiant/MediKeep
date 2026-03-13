@@ -209,7 +209,8 @@
   "viewToggle": {
     "cards": "Schede",
     "table": "Tabella",
-    "components": "Componenti"
+    "components": "Componenti",
+    "matrix": "Matrice"
   },
   "filters": {
     "title": "Filtri e ricerca",

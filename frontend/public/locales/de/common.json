@@ -176,7 +176,8 @@
   "viewToggle": {
     "cards": "Karten",
     "table": "Tabelle",
-    "components": "Komponenten"
+    "components": "Komponenten",
+    "matrix": "Matrix"
   },
   "filters": {
     "title": "Filter & Suche",

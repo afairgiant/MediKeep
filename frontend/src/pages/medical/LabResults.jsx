@@ -34,7 +34,6 @@ import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
 import LabResultFormWrapper from '../../components/medical/labresults/LabResultFormWrapper';
 import LabResultQuickImportModal from '../../components/medical/labresults/LabResultQuickImportModal';
-import TestComponentCatalog from '../../components/medical/labresults/TestComponentCatalog';
 import LabResultMatrix from '../../components/medical/labresults/LabResultMatrix';
 import { notifications } from '@mantine/notifications';
 import { labTestComponentApi } from '../../services/api/labTestComponentApi';
@@ -550,10 +549,6 @@ const LabResults = () => {
       return <LabResultMatrix labResults={labResults} />;
     }
 
-    if (viewMode === 'components') {
-      return currentPatient?.id ? <TestComponentCatalog patientId={currentPatient.id} /> : null;
-    }
-
     if (filteredLabResults.length === 0) {
       return (
         <EmptyState
@@ -679,8 +674,8 @@ const LabResults = () => {
             mb={0}
           />
 
-          {/* Mantine Filter Controls - hidden in components/matrix view (they have their own) */}
-          {viewMode !== 'components' && viewMode !== 'matrix' && (
+          {/* Mantine Filter Controls - hidden in matrix view (it has its own) */}
+          {viewMode !== 'matrix' && (
             <MedicalPageFilters dataManagement={dataManagement} config={config} />
           )}
 

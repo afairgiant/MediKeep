@@ -248,7 +248,8 @@
   "viewToggle": {
     "cards": "Cards",
     "table": "Table",
-    "components": "Components"
+    "components": "Components",
+    "matrix": "Matrix"
   },
   "filters": {
     "title": "Filters & Search",

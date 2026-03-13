@@ -202,12 +202,12 @@
       "chemistry": "Chimie",
       "hematology": "Hématologie",
       "hepatology": "Hépatologie",
-	  "immunology": "Immunologie",
+      "immunology": "Immunologie",
       "genetics": "Génétique",
       "cardiology": "Cardiologie",
       "pulmonology": "Pulmonologie",
-	  "hearing": "Ouïe",
-	  "stomatology": "Stomatologie",
+      "hearing": "Ouïe",
+      "stomatology": "Stomatologie",
       "other": "Autre"
     },
     "testType": {
@@ -236,7 +236,7 @@
       "relatedConditions": "Conditions concernées",
       "linkConditionsTitle": "Connecter des conditions médicales",
       "linkConditionsDescription": "Associez ces résultats d'analyse aux conditions médicales concernées pour améliorer le suivi et l'organisation.",
-	  "testComponents": "Composants d'analyse (optionnel)",
+      "testComponents": "Composants d'analyse (optionnel)",
       "testComponentsDescription": "Ajoutez optionnellement des valeurs d'analyse individuelles. Vous pouvez également en ajouter plus ultérieurement.",
       "addTestComponent": "Ajouter des composants d'analyse",
       "hideTestComponents": "Cacher les composants d'analyse",
@@ -1232,19 +1232,19 @@
       }
     },
     "name": {
-        "label": "Nom complet",
-        "placeholder": "Dr. Jeanne Dupont",
-        "description": "Nom complet du docteur, dont son titre"
+      "label": "Nom complet",
+      "placeholder": "Dr. Jeanne Dupont",
+      "description": "Nom complet du docteur, dont son titre"
     },
     "specialty": {
-        "label": "Spécialité médicale",
-        "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
-        "description": "Sélectionnez dans la liste ou saisissez une spécialité"
+      "label": "Spécialité médicale",
+      "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
+      "description": "Sélectionnez dans la liste ou saisissez une spécialité"
     },
     "practice": {
-        "label": "Etablissement/Clinique",
-        "placeholder": "Cherchez ou créez un établissement...",
-        "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
+      "label": "Etablissement/Clinique",
+      "placeholder": "Cherchez ou créez un établissement...",
+      "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
     },
     "rating": {
       "label": "Avis",
@@ -1381,9 +1381,9 @@
       "description": "Nom spécifique ou identification de l'emplacement"
     },
     "streetAddress": {
-        "label": "Adresse physique",
-        "placeholder": "123 Grand-rue",
-        "description": "Adresse physique"
+      "label": "Adresse physique",
+      "placeholder": "123 Grand-rue",
+      "description": "Adresse physique"
     },
     "city": {
       "label": "Cité",
@@ -1951,7 +1951,7 @@
   "form": {
     "invalidPhoneDigits": "Un numéro de téléphone ne peut contenir que des chiffres, des espaces, des tirets, des parenthèses, des points, et des +",
     "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide"
-	},
+  },
   "componentCatalog": {
     "searchPlaceholder": "Rechercher dans les résultats d'analyse...",
     "filterCategory": "Catégorie",
@@ -1984,5 +1984,24 @@
       "borderline": "Inconcluant",
       "unknown": "Inconnu"
     }
+  },
+  "labMatrix": {
+    "filterAll": "Tous ({{count}})",
+    "filterAbnormalOnly": "Anormaux uniquement",
+    "filterByCategory": "Filtrer par catégorie...",
+    "resultsCount": "{{results}} résultats",
+    "parametersCount": "{{parameters}} paramètres",
+    "columnParameter": "Paramètre",
+    "columnUnit": "Unité",
+    "loading": "Chargement des données de la matrice...",
+    "noData": "Aucun composant de test trouvé. Ouvrez un résultat de laboratoire et ajoutez des composants, ou utilisez l'importation rapide PDF.",
+    "errorTitle": "Erreur lors du chargement de la matrice",
+    "legend": "Légende",
+    "statusNormal": "Normal",
+    "statusHigh": "Élevé",
+    "statusLow": "Bas",
+    "statusCritical": "Critique",
+    "statusAbnormal": "Anormal",
+    "statusBorderline": "Limite"
   }
 }
