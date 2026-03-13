@@ -148,7 +148,9 @@ const InjuryFormWrapper = ({
     >
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}
-        message={statusMessage || t('injuries.messages.saving', 'Saving injury...')}
+        message={statusMessage?.title || t('injuries.messages.saving', 'Saving injury...')}
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
       />
 
       <form onSubmit={handleSubmit}>

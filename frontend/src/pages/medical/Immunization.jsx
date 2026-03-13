@@ -42,7 +42,6 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 
 // Modular components
 import {
@@ -287,11 +286,13 @@ const Immunization = () => {
             component: 'Immunization',
           });
 
+          const pendingCount = documentManagerMethods.getPendingFilesCount();
+
           startFileUpload();
 
           try {
             await documentManagerMethods.uploadPendingFiles(resultId);
-            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            completeFileUpload(true, pendingCount, 0);
           } catch (uploadError) {
             logger.error('immunizations_file_upload_error', {
               message: 'File upload failed',
@@ -299,7 +300,7 @@ const Immunization = () => {
               error: uploadError.message,
               component: 'Immunization',
             });
-            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+            completeFileUpload(false, 0, pendingCount);
           }
         } else {
           completeFileUpload(true, 0, 0);

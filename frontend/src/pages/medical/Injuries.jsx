@@ -177,7 +177,6 @@ const Injuries = () => {
   };
 
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -312,11 +311,13 @@ const Injuries = () => {
             component: 'Injuries',
           });
 
+          const pendingCount = documentManagerMethods.getPendingFilesCount();
+
           startFileUpload();
 
           try {
             await documentManagerMethods.uploadPendingFiles(resultId);
-            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            completeFileUpload(true, pendingCount, 0);
           } catch (uploadError) {
             logger.error('injuries_file_upload_error', {
               message: 'File upload failed',
@@ -324,7 +325,7 @@ const Injuries = () => {
               error: uploadError.message,
               component: 'Injuries',
             });
-            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+            completeFileUpload(false, 0, pendingCount);
           }
         } else {
           completeFileUpload(true, 0, 0);

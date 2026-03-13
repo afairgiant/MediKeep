@@ -135,7 +135,6 @@ const Conditions = () => {
   const needsRefreshAfterSubmissionRef = useRef(false);
 
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -388,11 +387,13 @@ const Conditions = () => {
             component: 'Conditions',
           });
 
+          const pendingCount = documentManagerMethods.getPendingFilesCount();
+
           startFileUpload();
 
           try {
             await documentManagerMethods.uploadPendingFiles(resultId);
-            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            completeFileUpload(true, pendingCount, 0);
           } catch (uploadError) {
             logger.error('conditions_file_upload_error', {
               message: 'File upload failed',
@@ -400,7 +401,7 @@ const Conditions = () => {
               error: uploadError.message,
               component: 'Conditions',
             });
-            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+            completeFileUpload(false, 0, pendingCount);
           }
         } else {
           completeFileUpload(true, 0, 0);

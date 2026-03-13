@@ -136,7 +136,12 @@ const ProcedureFormWrapper = ({
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || t('procedures.form.savingProcedure', 'Saving procedure...')} />
+      <FormLoadingOverlay
+        visible={isSubmitting || isLoading}
+        message={statusMessage?.title || t('procedures.form.savingProcedure', 'Saving procedure...')}
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">

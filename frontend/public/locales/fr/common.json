@@ -2364,7 +2364,7 @@
     },
     "form": {
       "manageFiles": "Gérer les fichiers",
-      "addFilesOptional": "Ajouter des fichiers (optionnel)",
+      "addFilesOptional": "Ajouter des fichiers",
       "linkedVisits": "Visites liées",
       "linkVisitsTitle": "Lier aux visites",
       "linkVisitsDescription": "Associer ce résultat de laboratoire aux visites lors desquelles il a été prescrit ou examiné."

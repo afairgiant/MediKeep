@@ -537,7 +537,12 @@ const InsuranceFormWrapper = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || t('insurance.form.saving', 'Saving insurance...')} />
+      <FormLoadingOverlay
+        visible={isSubmitting || isLoading}
+        message={statusMessage?.title || t('insurance.form.saving', 'Saving insurance...')}
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">

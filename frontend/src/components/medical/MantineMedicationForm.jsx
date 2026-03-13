@@ -283,7 +283,12 @@ const MantineMedicationForm = ({
         }
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={statusMessage || t('medications.form.saving')} />
+      <FormLoadingOverlay
+        visible={isSubmitting || isLoading}
+        message={statusMessage?.title || t('medications.form.saving')}
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">

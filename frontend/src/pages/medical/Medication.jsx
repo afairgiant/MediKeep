@@ -57,7 +57,6 @@ import {
   MEDICATION_TYPE_LABELS,
 } from '../../constants/medicationTypes';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import logger from '../../services/logger';
 
 const Medication = () => {
@@ -391,11 +390,13 @@ const Medication = () => {
               component: 'Medication',
             });
 
+            const pendingCount = documentManagerMethods.getPendingFilesCount();
+
             startFileUpload();
 
             try {
               await documentManagerMethods.uploadPendingFiles(resultId);
-              completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+              completeFileUpload(true, pendingCount, 0);
             } catch (uploadError) {
               logger.error('medications_file_upload_error', {
                 message: 'File upload failed',
@@ -403,7 +404,7 @@ const Medication = () => {
                 error: uploadError.message,
                 component: 'Medication',
               });
-              completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+              completeFileUpload(false, 0, pendingCount);
             }
           } else {
             completeFileUpload(true, 0, 0);

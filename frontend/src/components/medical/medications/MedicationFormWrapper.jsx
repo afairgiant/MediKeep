@@ -43,7 +43,7 @@ const MedicationFormWrapper = memo(({
 }, (prevProps, nextProps) => {
   // Custom comparison function to prevent unnecessary re-renders
   const keysToCompare = [
-    'isOpen', 'title', 'formData', 'editingMedication', 'isLoading'
+    'isOpen', 'title', 'formData', 'editingMedication', 'isLoading', 'statusMessage'
   ];
   
   // Check primitive props

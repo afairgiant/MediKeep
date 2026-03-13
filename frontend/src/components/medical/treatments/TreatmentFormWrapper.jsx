@@ -285,11 +285,13 @@ const TreatmentFormWrapper = ({
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}
         message={
-          statusMessage ||
+          statusMessage?.title ||
           (isSubmitting && pendingCount > 0 && !editingTreatment
             ? t('treatments.form.creatingWithLinks', 'Creating treatment and linking items...')
             : t('treatments.form.savingTreatment', 'Saving treatment...'))
         }
+        submessage={statusMessage?.message}
+        type={statusMessage?.type || 'loading'}
       />
 
       <form onSubmit={handleSubmit}>

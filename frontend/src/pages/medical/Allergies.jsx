@@ -37,7 +37,7 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
+
 
 const Allergies = () => {
   const navigate = useNavigate();
@@ -140,7 +140,6 @@ const Allergies = () => {
 
   // Form submission with uploads hook
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -274,11 +273,13 @@ const Allergies = () => {
             component: 'Allergies',
           });
 
+          const pendingCount = documentManagerMethods.getPendingFilesCount();
+
           startFileUpload();
 
           try {
             await documentManagerMethods.uploadPendingFiles(resultId);
-            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            completeFileUpload(true, pendingCount, 0);
           } catch (uploadError) {
             logger.error('allergies_file_upload_error', {
               message: 'File upload failed',
@@ -286,7 +287,7 @@ const Allergies = () => {
               error: uploadError.message,
               component: 'Allergies',
             });
-            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+            completeFileUpload(false, 0, pendingCount);
           }
         } else {
           completeFileUpload(true, 0, 0);

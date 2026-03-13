@@ -905,7 +905,7 @@
     "emptyLabResultWarning": "Resultado de laboratorio creado pero vacío",
     "errorOccurred": "Ha ocurrido un error",
     "form": {
-      "addFilesOptional": "Añadir archivos (Opcional)",
+      "addFilesOptional": "Añadir archivos",
       "manageFiles": "Gestionar archivos",
       "linkedVisits": "Visitas vinculadas",
       "linkVisitsTitle": "Vincular a visitas",

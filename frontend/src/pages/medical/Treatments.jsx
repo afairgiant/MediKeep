@@ -17,7 +17,6 @@ import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -145,7 +144,6 @@ const Treatments = () => {
   const needsRefreshAfterSubmissionRef = useRef(false);
 
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -317,11 +315,13 @@ const Treatments = () => {
             component: 'Treatments',
           });
 
+          const pendingCount = documentManagerMethods.getPendingFilesCount();
+
           startFileUpload();
 
           try {
             await documentManagerMethods.uploadPendingFiles(resultId);
-            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+            completeFileUpload(true, pendingCount, 0);
           } catch (uploadError) {
             logger.error('treatments_file_upload_error', {
               message: 'File upload failed',
@@ -329,7 +329,7 @@ const Treatments = () => {
               error: uploadError.message,
               component: 'Treatments',
             });
-            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+            completeFileUpload(false, 0, pendingCount);
           }
         } else {
           completeFileUpload(true, 0, 0);
