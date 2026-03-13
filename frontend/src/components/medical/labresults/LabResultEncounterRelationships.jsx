@@ -69,9 +69,8 @@ const LabResultEncounterRelationships = ({
     setError(null);
 
     try {
-      // The lab-result-side endpoint reuses lab_result_id field as encounter_id
       await apiService.createLabResultEncounter(labResultId, {
-        lab_result_id: parseInt(newRelationship.encounter_id),
+        encounter_id: parseInt(newRelationship.encounter_id),
         purpose: newRelationship.purpose || null,
         relevance_note: newRelationship.relevance_note || null,
       });

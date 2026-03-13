@@ -41,11 +41,11 @@ from app.models.activity_log import EntityType
 from app.models.models import EntityFile, User
 from app.services.generic_entity_file_service import GenericEntityFileService
 from app.schemas.encounter import (
-    EncounterLabResultBulkCreate,
-    EncounterLabResultCreate,
     EncounterLabResultResponse,
     EncounterLabResultUpdate,
     EncounterLabResultWithDetails,
+    LabResultEncounterBulkCreate,
+    LabResultEncounterCreate,
 )
 from app.schemas.lab_result import (
     LabResultConditionCreate,
@@ -1037,13 +1037,12 @@ def get_lab_result_encounters(
                 request=request,
             )
 
-        relationships = encounter_lab_result.get_by_lab_result(
+        results = encounter_lab_result.get_by_lab_result_with_details(
             db, lab_result_id=lab_result_id
         )
 
         enhanced = []
-        for rel in relationships:
-            db_enc = encounter_crud.get(db, id=rel.encounter_id)
+        for rel, enc in results:
             enhanced.append({
                 "id": rel.id,
                 "encounter_id": rel.encounter_id,
@@ -1055,8 +1054,8 @@ def get_lab_result_encounters(
                 "lab_result_name": db_lab_result.test_name,
                 "lab_result_date": db_lab_result.ordered_date,
                 "lab_result_status": db_lab_result.status,
-                "encounter_reason": db_enc.reason if db_enc else None,
-                "encounter_date": db_enc.date if db_enc else None,
+                "encounter_reason": enc.reason,
+                "encounter_date": enc.date,
             })
         return enhanced
 
@@ -1069,7 +1068,7 @@ def create_lab_result_encounter(
     *,
     request: Request,
     lab_result_id: int,
-    link_in: EncounterLabResultCreate,
+    link_in: LabResultEncounterCreate,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
@@ -1084,8 +1083,7 @@ def create_lab_result_encounter(
                 request=request,
             )
 
-        # link_in.lab_result_id is used as encounter_id from the lab result side
-        encounter_id = link_in.lab_result_id  # reusing field name from schema
+        encounter_id = link_in.encounter_id
         db_enc = encounter_crud.get(db, id=encounter_id)
         handle_not_found(db_enc, "Encounter", request)
 
@@ -1125,7 +1123,7 @@ def bulk_create_lab_result_encounters(
     *,
     request: Request,
     lab_result_id: int,
-    bulk_in: EncounterLabResultBulkCreate,
+    bulk_in: LabResultEncounterBulkCreate,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
@@ -1140,8 +1138,7 @@ def bulk_create_lab_result_encounters(
                 request=request,
             )
 
-        # bulk_in.lab_result_ids is reused as encounter_ids from lab result side
-        encounter_ids = bulk_in.lab_result_ids
+        encounter_ids = bulk_in.encounter_ids
         for enc_id in encounter_ids:
             db_enc = encounter_crud.get(db, id=enc_id)
             handle_not_found(db_enc, "Encounter", request)

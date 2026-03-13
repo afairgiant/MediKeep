@@ -5,12 +5,9 @@ import pytest
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
 
-from app.crud.encounter import encounter as encounter_crud, encounter_lab_result
-from app.crud.lab_result import lab_result as lab_result_crud
+from app.crud.encounter import encounter_lab_result
 from app.crud.patient import patient as patient_crud
 from app.models.models import Encounter, LabResult, EncounterLabResult
-from app.schemas.encounter import EncounterCreate, EncounterLabResultCreate
-from app.schemas.lab_result import LabResultCreate
 from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user
 

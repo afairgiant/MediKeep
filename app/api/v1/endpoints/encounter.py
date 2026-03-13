@@ -7,7 +7,6 @@ from app.api import deps
 from app.core.http.error_handling import (
     handle_database_errors,
     BusinessLogicException,
-    ForbiddenException,
 )
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -275,13 +274,12 @@ def get_encounter_lab_results(
         handle_not_found(db_encounter, "Encounter", request)
         verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
 
-        relationships = encounter_lab_result.get_by_encounter(
+        results = encounter_lab_result.get_by_encounter_with_details(
             db, encounter_id=encounter_id
         )
 
         enhanced = []
-        for rel in relationships:
-            db_lab = lab_result.get(db, id=rel.lab_result_id)
+        for rel, lab in results:
             enhanced.append({
                 "id": rel.id,
                 "encounter_id": rel.encounter_id,
@@ -290,9 +288,9 @@ def get_encounter_lab_results(
                 "relevance_note": rel.relevance_note,
                 "created_at": rel.created_at,
                 "updated_at": rel.updated_at,
-                "lab_result_name": db_lab.test_name if db_lab else None,
-                "lab_result_date": db_lab.ordered_date if db_lab else None,
-                "lab_result_status": db_lab.status if db_lab else None,
+                "lab_result_name": lab.test_name,
+                "lab_result_date": lab.ordered_date,
+                "lab_result_status": lab.status,
                 "encounter_reason": db_encounter.reason,
                 "encounter_date": db_encounter.date,
             })

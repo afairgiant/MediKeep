@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
-from app.models.models import Encounter, EncounterLabResult
+from app.models.models import Encounter, EncounterLabResult, LabResult
 from app.schemas.encounter import (
     EncounterCreate,
     EncounterUpdate,
@@ -65,12 +65,42 @@ class CRUDEncounterLabResult(CRUDBase[EncounterLabResult, EncounterLabResultCrea
             .all()
         )
 
+    def get_by_encounter_with_details(
+        self, db: Session, *, encounter_id: int
+    ) -> List:
+        """Get all lab result relationships for an encounter with joined lab result data.
+
+        Returns a list of (EncounterLabResult, LabResult) tuples, eliminating
+        the N+1 query pattern of fetching each lab result individually.
+        """
+        return (
+            db.query(self.model, LabResult)
+            .join(LabResult, self.model.lab_result_id == LabResult.id)
+            .filter(self.model.encounter_id == encounter_id)
+            .all()
+        )
+
     def get_by_lab_result(
         self, db: Session, *, lab_result_id: int
     ) -> List[EncounterLabResult]:
         """Get all encounter relationships for a specific lab result"""
         return (
             db.query(self.model)
+            .filter(self.model.lab_result_id == lab_result_id)
+            .all()
+        )
+
+    def get_by_lab_result_with_details(
+        self, db: Session, *, lab_result_id: int
+    ) -> List:
+        """Get all encounter relationships for a lab result with joined encounter data.
+
+        Returns a list of (EncounterLabResult, Encounter) tuples, eliminating
+        the N+1 query pattern of fetching each encounter individually.
+        """
+        return (
+            db.query(self.model, Encounter)
+            .join(Encounter, self.model.encounter_id == Encounter.id)
             .filter(self.model.lab_result_id == lab_result_id)
             .all()
         )

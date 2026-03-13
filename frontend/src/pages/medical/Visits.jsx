@@ -598,6 +598,12 @@ const Visits = () => {
         practitioners={practitioners}
         conditions={conditions}
         editingItem={editingVisit}
+        onDocumentManagerRef={setDocumentManagerMethods}
+        onFileUploadComplete={(success) => {
+          if (success && editingVisit) {
+            refreshFileCount(editingVisit.id);
+          }
+        }}
         labResults={patientLabResults}
         encounterLabResults={encounterLabResults}
         fetchEncounterLabResults={fetchEncounterLabResults}

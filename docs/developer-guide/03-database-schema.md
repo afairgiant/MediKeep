@@ -1792,6 +1792,37 @@ JUNCTION TABLES (Many-to-Many)
 - Cascade deletes with either parent
 - Only one relationship per treatment/medication pair
 
+### encounter_lab_results
+**Purpose**: Many-to-many relationship between encounters and lab results
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| encounter_id | Integer | FK(encounters.id), NOT NULL | Associated encounter |
+| lab_result_id | Integer | FK(lab_results.id), NOT NULL | Associated lab result |
+| purpose | String | | ordered_during, results_reviewed, follow_up_for, reference, other |
+| relevance_note | String | | Clinical context for this relationship |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `encounter`: Many-to-one with Encounter
+- `lab_result`: Many-to-one with LabResult
+
+**Indexes**:
+- `idx_encounter_lab_result_encounter_id` on encounter_id
+- `idx_encounter_lab_result_lab_result_id` on lab_result_id
+
+**Constraints**:
+- `uq_encounter_lab_result` UNIQUE on (encounter_id, lab_result_id)
+
+**Business Rules**:
+- Links lab results to the encounters where they were ordered or reviewed
+- purpose field categorizes the nature of the relationship
+- relevance_note provides additional clinical context
+- Cascade deletes with either parent
+- Only one relationship per encounter/lab_result pair
+
 ### treatment_encounters
 **Purpose**: Many-to-many relationship between treatments and encounters
 

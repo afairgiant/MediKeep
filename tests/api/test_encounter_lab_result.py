@@ -6,13 +6,9 @@ lab-result-side (/lab-results/{id}/encounters) endpoints.
 """
 import pytest
 from datetime import date, timedelta
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
-from app.crud.practitioner import practitioner as practitioner_crud
 from app.schemas.patient import PatientCreate
-from app.schemas.practitioner import PractitionerCreate
 from tests.utils.user import create_random_user, create_user_token_headers
 
 
@@ -356,7 +352,7 @@ class TestEncounterLabResultAPI:
         response = client.post(
             f"/api/v1/lab-results/{test_lab_result['id']}/encounters",
             json={
-                "lab_result_id": test_encounter["id"],  # reused field = encounter_id
+                "encounter_id": test_encounter["id"],
                 "purpose": "results_reviewed",
                 "relevance_note": "Results reviewed at visit",
             },
@@ -376,7 +372,7 @@ class TestEncounterLabResultAPI:
         client.post(
             f"/api/v1/lab-results/{test_lab_result['id']}/encounters",
             json={
-                "lab_result_id": test_encounter["id"],
+                "encounter_id": test_encounter["id"],
                 "purpose": "ordered_during",
             },
             headers=authenticated_headers,
@@ -406,7 +402,7 @@ class TestEncounterLabResultAPI:
         response = client.post(
             f"/api/v1/lab-results/{test_lab_result['id']}/encounters/bulk",
             json={
-                "lab_result_ids": [test_encounter["id"], second_encounter["id"]],
+                "encounter_ids": [test_encounter["id"], second_encounter["id"]],
                 "purpose": "reference",
             },
             headers=authenticated_headers,
@@ -421,7 +417,7 @@ class TestEncounterLabResultAPI:
         """Test updating relationship from lab result side."""
         link_resp = client.post(
             f"/api/v1/lab-results/{test_lab_result['id']}/encounters",
-            json={"lab_result_id": test_encounter["id"]},
+            json={"encounter_id": test_encounter["id"]},
             headers=authenticated_headers,
         )
         rel_id = link_resp.json()["id"]
@@ -440,7 +436,7 @@ class TestEncounterLabResultAPI:
         """Test unlinking encounter from lab result side."""
         link_resp = client.post(
             f"/api/v1/lab-results/{test_lab_result['id']}/encounters",
-            json={"lab_result_id": test_encounter["id"]},
+            json={"encounter_id": test_encounter["id"]},
             headers=authenticated_headers,
         )
         rel_id = link_resp.json()["id"]
@@ -464,13 +460,13 @@ class TestEncounterLabResultAPI:
         """Test duplicate link rejected from lab result side."""
         client.post(
             f"/api/v1/lab-results/{test_lab_result['id']}/encounters",
-            json={"lab_result_id": test_encounter["id"]},
+            json={"encounter_id": test_encounter["id"]},
             headers=authenticated_headers,
         )
 
         response = client.post(
             f"/api/v1/lab-results/{test_lab_result['id']}/encounters",
-            json={"lab_result_id": test_encounter["id"]},
+            json={"encounter_id": test_encounter["id"]},
             headers=authenticated_headers,
         )
         assert response.status_code == 400
@@ -481,7 +477,7 @@ class TestEncounterLabResultAPI:
         """Test updating relationship from wrong lab result fails."""
         link_resp = client.post(
             f"/api/v1/lab-results/{test_lab_result['id']}/encounters",
-            json={"lab_result_id": test_encounter["id"]},
+            json={"encounter_id": test_encounter["id"]},
             headers=authenticated_headers,
         )
         rel_id = link_resp.json()["id"]
