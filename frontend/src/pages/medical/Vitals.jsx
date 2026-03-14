@@ -194,7 +194,6 @@ const Vitals = () => {
   const [showTrendsPanel, setShowTrendsPanel] = useState(false);
   const [selectedVitalType, setSelectedVitalType] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
 
   // Global data
   const { practitioners } = usePractitioners();
@@ -632,15 +631,6 @@ const Vitals = () => {
           isLoading={false}
           createItem={createItem}
           updateItem={updateItem}
-          onDocumentManagerRef={setDocumentManagerMethods}
-          onFileUploadComplete={(success) => {
-            if (success) {
-              refreshData();
-            }
-          }}
-          onError={(err) => {
-            logger.error('vital_document_error', { error: err, component: 'Vitals' });
-          }}
         />
 
         {/* Content */}

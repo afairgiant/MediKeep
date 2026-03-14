@@ -301,7 +301,7 @@
         "ambulatory": "Soins ambulatoires",
         "other": "Autre"
       },
-      "lockedByImport": "Managed by device import"
+      "lockedByImport": "Géré par la moyenne d'importation de l'appareil"
     },
     "modal": {
       "bloodGlucose": "Taux de glucose dans le sang",

@@ -28,7 +28,6 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
@@ -269,7 +268,6 @@ const LabResultFormWrapper = ({
   editingItem,
   practitioners = [],
   isLoading = false,
-  statusMessage,
   onDocumentManagerRef,
   onTestComponentRef,
   onPendingRelationshipsRef,
@@ -358,7 +356,7 @@ const LabResultFormWrapper = ({
     if (!option) return null;
     return (
       <Badge color={option.color} variant="light" size="sm">
-        {option.value.charAt(0).toUpperCase() + option.value.slice(1)}
+        {option.label}
       </Badge>
     );
   };
@@ -462,16 +460,9 @@ const LabResultFormWrapper = ({
       size="xl"
       centered
       zIndex={2000}
-      closeOnClickOutside={!isLoading}
-      closeOnEscape={!isLoading}
+      closeOnClickOutside={!isLoading && !isSubmitting}
+      closeOnEscape={!isLoading && !isSubmitting}
     >
-      <FormLoadingOverlay
-        visible={isSubmitting}
-        message={statusMessage?.title || t('labResults.messages.saving')}
-        submessage={statusMessage?.message}
-        type={statusMessage?.type || 'loading'}
-      />
-
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
@@ -664,7 +655,7 @@ const LabResultFormWrapper = ({
                           variant="light"
                           size="sm"
                         >
-                          {formData.status.charAt(0).toUpperCase() + formData.status.slice(1)}
+                          {statusOptions.find(opt => opt.value === formData.status)?.label || formData.status}
                         </Badge>
                       </Box>
                     </Grid.Col>

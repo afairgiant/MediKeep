@@ -340,7 +340,7 @@
         "ambulatory": "Ambulatory Care",
         "other": "Other"
       },
-      "lockedByImport": "Managed by device import"
+      "lockedByImport": "Managed by device import average"
     },
     "modal": {
       "bloodGlucose": "Blood Glucose",

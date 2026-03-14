@@ -36,13 +36,11 @@ import {
   IconDeviceFloppy,
   IconX,
   IconAlertTriangle,
-  IconInfoCircle,
   IconUser,
   IconMapPin,
   IconDevices,
   IconMoodSad,
   IconDropletFilled,
-  IconFileText,
 } from '@tabler/icons-react';
 import { DateInput, DatePicker, TimeInput } from '@mantine/dates';
 import { vitalsService } from '../../services/medical/vitalsService';
@@ -59,7 +57,6 @@ import {
 import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
-import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 
 const VitalsForm = ({
   vitals = null,
@@ -72,18 +69,19 @@ const VitalsForm = ({
   updateItem,
   error,
   clearError,
-  // Document support props
-  onDocumentManagerRef,
-  onFileUploadComplete,
-  onError,
 }) => {
   const { t } = useTranslation(['common', 'errors']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
   const lockedFields = vitals?._lockedFields || [];
-  const { isReady, getCurrentTime, timezone } = useTimezone();
+  const { getCurrentTime } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
-  const { formatDateTimeInput, dateFormat, dateTimePlaceholder, dateInputFormat } = useDateFormat();
+  const {
+    formatDateTimeInput,
+    dateFormat,
+    dateTimePlaceholder,
+    dateInputFormat,
+  } = useDateFormat();
 
   const FIELD_CONFIGS = useMemo(() => {
     const ranges = validationRanges[unitSystem];
@@ -96,7 +94,10 @@ const VitalsForm = ({
         required: true,
         icon: IconCalendar,
         validation: {
-          required: t('vitals.form.validation.dateRequired', 'Measurement date and time is required'),
+          required: t(
+            'vitals.form.validation.dateRequired',
+            'Measurement date and time is required'
+          ),
           custom: value => {
             const result = validateDateTime(value, 'Recorded Date');
             return result.isValid ? null : result.error;
@@ -113,8 +114,20 @@ const VitalsForm = ({
         max: 300,
         step: 1,
         validation: {
-          min: { value: 50, message: t('vitals.form.validation.systolicMin', 'Systolic BP must be at least 50 mmHg') },
-          max: { value: 300, message: t('vitals.form.validation.systolicMax', 'Systolic BP cannot exceed 300 mmHg') },
+          min: {
+            value: 50,
+            message: t(
+              'vitals.form.validation.systolicMin',
+              'Systolic BP must be at least 50 mmHg'
+            ),
+          },
+          max: {
+            value: 300,
+            message: t(
+              'vitals.form.validation.systolicMax',
+              'Systolic BP cannot exceed 300 mmHg'
+            ),
+          },
         },
       },
       diastolic_bp: {
@@ -127,8 +140,20 @@ const VitalsForm = ({
         max: 200,
         step: 1,
         validation: {
-          min: { value: 30, message: t('vitals.form.validation.diastolicMin', 'Diastolic BP must be at least 30 mmHg') },
-          max: { value: 200, message: t('vitals.form.validation.diastolicMax', 'Diastolic BP cannot exceed 200 mmHg') },
+          min: {
+            value: 30,
+            message: t(
+              'vitals.form.validation.diastolicMin',
+              'Diastolic BP must be at least 30 mmHg'
+            ),
+          },
+          max: {
+            value: 200,
+            message: t(
+              'vitals.form.validation.diastolicMax',
+              'Diastolic BP cannot exceed 200 mmHg'
+            ),
+          },
         },
       },
       heart_rate: {
@@ -141,8 +166,20 @@ const VitalsForm = ({
         max: 250,
         step: 1,
         validation: {
-          min: { value: 30, message: t('vitals.form.validation.heartRateMin', 'Heart rate must be at least 30 BPM') },
-          max: { value: 250, message: t('vitals.form.validation.heartRateMax', 'Heart rate cannot exceed 250 BPM') },
+          min: {
+            value: 30,
+            message: t(
+              'vitals.form.validation.heartRateMin',
+              'Heart rate must be at least 30 BPM'
+            ),
+          },
+          max: {
+            value: 250,
+            message: t(
+              'vitals.form.validation.heartRateMax',
+              'Heart rate cannot exceed 250 BPM'
+            ),
+          },
         },
       },
       temperature: {
@@ -157,11 +194,19 @@ const VitalsForm = ({
         validation: {
           min: {
             value: ranges.temperature.min,
-            message: t('vitals.form.validation.temperatureMin', 'Temperature must be at least {{min}}{{unit}}', { min: ranges.temperature.min, unit: labels.temperature }),
+            message: t(
+              'vitals.form.validation.temperatureMin',
+              'Temperature must be at least {{min}}{{unit}}',
+              { min: ranges.temperature.min, unit: labels.temperature }
+            ),
           },
           max: {
             value: ranges.temperature.max,
-            message: t('vitals.form.validation.temperatureMax', 'Temperature cannot exceed {{max}}{{unit}}', { max: ranges.temperature.max, unit: labels.temperature }),
+            message: t(
+              'vitals.form.validation.temperatureMax',
+              'Temperature cannot exceed {{max}}{{unit}}',
+              { max: ranges.temperature.max, unit: labels.temperature }
+            ),
           },
         },
       },
@@ -177,11 +222,19 @@ const VitalsForm = ({
         validation: {
           min: {
             value: ranges.weight.min,
-            message: t('vitals.form.validation.weightMin', 'Weight must be at least {{min}} {{unit}}', { min: ranges.weight.min, unit: labels.weight }),
+            message: t(
+              'vitals.form.validation.weightMin',
+              'Weight must be at least {{min}} {{unit}}',
+              { min: ranges.weight.min, unit: labels.weight }
+            ),
           },
           max: {
             value: ranges.weight.max,
-            message: t('vitals.form.validation.weightMax', 'Weight cannot exceed {{max}} {{unit}}', { max: ranges.weight.max, unit: labels.weight }),
+            message: t(
+              'vitals.form.validation.weightMax',
+              'Weight cannot exceed {{max}} {{unit}}',
+              { max: ranges.weight.max, unit: labels.weight }
+            ),
           },
         },
       },
@@ -195,8 +248,20 @@ const VitalsForm = ({
         max: 100,
         step: 1,
         validation: {
-          min: { value: 5, message: t('vitals.form.validation.respiratoryRateMin', 'Respiratory rate must be at least 5/min') },
-          max: { value: 100, message: t('vitals.form.validation.respiratoryRateMax', 'Respiratory rate cannot exceed 100/min') },
+          min: {
+            value: 5,
+            message: t(
+              'vitals.form.validation.respiratoryRateMin',
+              'Respiratory rate must be at least 5/min'
+            ),
+          },
+          max: {
+            value: 100,
+            message: t(
+              'vitals.form.validation.respiratoryRateMax',
+              'Respiratory rate cannot exceed 100/min'
+            ),
+          },
         },
       },
       oxygen_saturation: {
@@ -209,8 +274,20 @@ const VitalsForm = ({
         max: 100,
         step: 1,
         validation: {
-          min: { value: 50, message: t('vitals.form.validation.oxygenMin', 'Oxygen saturation must be at least 50%') },
-          max: { value: 100, message: t('vitals.form.validation.oxygenMax', 'Oxygen saturation cannot exceed 100%') },
+          min: {
+            value: 50,
+            message: t(
+              'vitals.form.validation.oxygenMin',
+              'Oxygen saturation must be at least 50%'
+            ),
+          },
+          max: {
+            value: 100,
+            message: t(
+              'vitals.form.validation.oxygenMax',
+              'Oxygen saturation cannot exceed 100%'
+            ),
+          },
         },
       },
       blood_glucose: {
@@ -223,8 +300,20 @@ const VitalsForm = ({
         max: 800,
         step: 1,
         validation: {
-          min: { value: 20, message: t('vitals.form.validation.bloodGlucoseMin', 'Blood glucose must be at least 20 mg/dL') },
-          max: { value: 800, message: t('vitals.form.validation.bloodGlucoseMax', 'Blood glucose cannot exceed 800 mg/dL') },
+          min: {
+            value: 20,
+            message: t(
+              'vitals.form.validation.bloodGlucoseMin',
+              'Blood glucose must be at least 20 mg/dL'
+            ),
+          },
+          max: {
+            value: 800,
+            message: t(
+              'vitals.form.validation.bloodGlucoseMax',
+              'Blood glucose cannot exceed 800 mg/dL'
+            ),
+          },
         },
       },
       a1c: {
@@ -237,8 +326,20 @@ const VitalsForm = ({
         max: 20,
         step: 0.1,
         validation: {
-          min: { value: 0, message: t('vitals.form.validation.a1cMin', 'A1C must be at least 0%') },
-          max: { value: 20, message: t('vitals.form.validation.a1cMax', 'A1C cannot exceed 20%') },
+          min: {
+            value: 0,
+            message: t(
+              'vitals.form.validation.a1cMin',
+              'A1C must be at least 0%'
+            ),
+          },
+          max: {
+            value: 20,
+            message: t(
+              'vitals.form.validation.a1cMax',
+              'A1C cannot exceed 20%'
+            ),
+          },
         },
       },
       pain_scale: {
@@ -251,47 +352,89 @@ const VitalsForm = ({
         max: 10,
         step: 1,
         validation: {
-          min: { value: 0, message: t('vitals.form.validation.painScaleMin', 'Pain scale must be at least 0') },
-          max: { value: 10, message: t('vitals.form.validation.painScaleMax', 'Pain scale cannot exceed 10') },
+          min: {
+            value: 0,
+            message: t(
+              'vitals.form.validation.painScaleMin',
+              'Pain scale must be at least 0'
+            ),
+          },
+          max: {
+            value: 10,
+            message: t(
+              'vitals.form.validation.painScaleMax',
+              'Pain scale cannot exceed 10'
+            ),
+          },
         },
       },
       location: {
         label: t('vitals.form.measurementLocation', 'Measurement Location'),
         type: 'select',
-        placeholder: t('vitals.form.locationPlaceholder', 'Where were these readings taken?'),
+        placeholder: t(
+          'vitals.form.locationPlaceholder',
+          'Where were these readings taken?'
+        ),
         icon: IconMapPin,
         options: [
           { value: 'home', label: t('vitals.form.locations.home', 'Home') },
-          { value: 'clinic', label: t('vitals.form.locations.clinic', 'Clinic') },
-          { value: 'hospital', label: t('vitals.form.locations.hospital', 'Hospital') },
-          { value: 'urgent_care', label: t('vitals.form.locations.urgentCare', 'Urgent Care') },
-          { value: 'pharmacy', label: t('vitals.form.locations.pharmacy', 'Pharmacy') },
-          { value: 'ambulatory', label: t('vitals.form.locations.ambulatory', 'Ambulatory Care') },
+          {
+            value: 'clinic',
+            label: t('vitals.form.locations.clinic', 'Clinic'),
+          },
+          {
+            value: 'hospital',
+            label: t('vitals.form.locations.hospital', 'Hospital'),
+          },
+          {
+            value: 'urgent_care',
+            label: t('vitals.form.locations.urgentCare', 'Urgent Care'),
+          },
+          {
+            value: 'pharmacy',
+            label: t('vitals.form.locations.pharmacy', 'Pharmacy'),
+          },
+          {
+            value: 'ambulatory',
+            label: t('vitals.form.locations.ambulatory', 'Ambulatory Care'),
+          },
           { value: 'other', label: t('vitals.form.locations.other', 'Other') },
         ],
       },
       device_used: {
         label: t('vitals.form.deviceUsed', 'Device/Equipment Used'),
         type: 'text',
-        placeholder: t('vitals.form.devicePlaceholder', 'e.g., Digital BP monitor, Thermometer model...'),
+        placeholder: t(
+          'vitals.form.devicePlaceholder',
+          'e.g., Digital BP monitor, Thermometer model...'
+        ),
         icon: IconDevices,
         validation: {
           maxLength: {
             value: 100,
-            message: t('vitals.form.validation.deviceMaxLength', 'Device name cannot exceed 100 characters'),
+            message: t(
+              'vitals.form.validation.deviceMaxLength',
+              'Device name cannot exceed 100 characters'
+            ),
           },
         },
       },
       notes: {
         label: t('common.fields.notes.label', 'Notes'),
         type: 'textarea',
-        placeholder: t('vitals.form.notesPlaceholder', 'Additional notes about the vital signs measurement...'),
+        placeholder: t(
+          'vitals.form.notesPlaceholder',
+          'Additional notes about the vital signs measurement...'
+        ),
         icon: IconNotes,
         rows: 3,
         validation: {
           maxLength: {
             value: 1000,
-            message: t('vitals.form.validation.notesMaxLength', 'Notes cannot exceed 1000 characters'),
+            message: t(
+              'vitals.form.validation.notesMaxLength',
+              'Notes cannot exceed 1000 characters'
+            ),
           },
         },
       },
@@ -376,7 +519,14 @@ const VitalsForm = ({
       // Sync manual datetime text input
       setManualDateTimeText(formatDateTimeInput(recordedDate, false));
     }
-  }, [vitals, isEdit, patientId, practitionerId, unitSystem, formatDateTimeInput]);
+  }, [
+    vitals,
+    isEdit,
+    patientId,
+    practitionerId,
+    unitSystem,
+    formatDateTimeInput,
+  ]);
 
   // Calculated values
   const calculatedBMI = useMemo(() => {
@@ -459,21 +609,24 @@ const VitalsForm = ({
   }, [formData, validateForm, touchedFields]);
 
   // Handle input changes
-  const handleInputChange = useCallback((fieldName, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: value,
-    }));
+  const handleInputChange = useCallback(
+    (fieldName, value) => {
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: value,
+      }));
 
-    // Mark field as touched
-    setTouchedFields(prev => new Set([...prev, fieldName]));
+      // Mark field as touched
+      setTouchedFields(prev => new Set([...prev, fieldName]));
 
-    // Sync manual text input when DateTimePicker changes
-    if (fieldName === 'recorded_date' && value instanceof Date) {
-      setManualDateTimeText(formatDateTimeInput(value, false));
-      setManualDateTimeError(null);
-    }
-  }, [formatDateTimeInput]);
+      // Sync manual text input when DateTimePicker changes
+      if (fieldName === 'recorded_date' && value instanceof Date) {
+        setManualDateTimeText(formatDateTimeInput(value, false));
+        setManualDateTimeError(null);
+      }
+    },
+    [formatDateTimeInput]
+  );
 
   // Handle manual datetime text input (for copy-paste from CSV)
   const handleManualDateTimeChange = useCallback(
@@ -493,7 +646,12 @@ const VitalsForm = ({
       } else if (date) {
         // Check if date is in the future
         if (date > new Date()) {
-          setManualDateTimeError(t('vitals.form.validation.dateInFuture', 'Date cannot be in the future'));
+          setManualDateTimeError(
+            t(
+              'vitals.form.validation.dateInFuture',
+              'Date cannot be in the future'
+            )
+          );
         } else {
           setManualDateTimeError(null);
           // Update the form data with parsed date
@@ -509,20 +667,23 @@ const VitalsForm = ({
   );
 
   // Handle date selection from the picker popover
-  const handleDatePickerSelect = useCallback((val, closePopover = false) => {
-    if (val) {
-      setFormData(prev => ({
-        ...prev,
-        recorded_date: val,
-      }));
-      setManualDateTimeText(formatDateTimeInput(val, false));
-      setManualDateTimeError(null);
-      setTouchedFields(prev => new Set([...prev, 'recorded_date']));
-    }
-    if (closePopover) {
-      setDatePickerOpened(false);
-    }
-  }, [formatDateTimeInput]);
+  const handleDatePickerSelect = useCallback(
+    (val, closePopover = false) => {
+      if (val) {
+        setFormData(prev => ({
+          ...prev,
+          recorded_date: val,
+        }));
+        setManualDateTimeText(formatDateTimeInput(val, false));
+        setManualDateTimeError(null);
+        setTouchedFields(prev => new Set([...prev, 'recorded_date']));
+      }
+      if (closePopover) {
+        setDatePickerOpened(false);
+      }
+    },
+    [formatDateTimeInput]
+  );
 
   // Handle form submission
   const handleSubmit = async e => {
@@ -577,9 +738,7 @@ const VitalsForm = ({
         blood_glucose: formData.blood_glucose
           ? parseFloat(formData.blood_glucose)
           : null,
-        a1c: formData.a1c
-          ? parseFloat(formData.a1c)
-          : null,
+        a1c: formData.a1c ? parseFloat(formData.a1c) : null,
         pain_scale: formData.pain_scale ? parseInt(formData.pain_scale) : null,
         // Text fields
         location: formData.location || null,
@@ -601,40 +760,17 @@ const VitalsForm = ({
       });
 
       await onSave(processedData);
-      notifySuccess('notifications:toasts.vitals.savedSuccess', { interpolation: { action: isEdit ? 'updated' : 'recorded' } });
+      notifySuccess('notifications:toasts.vitals.savedSuccess', {
+        interpolation: { action: isEdit ? 'updated' : 'recorded' },
+      });
     } catch (error) {
       logger.error('Error saving vitals:', error);
-      notifyError('notifications:toasts.vitals.saveFailed', { interpolation: { action: isEdit ? 'update' : 'save' } });
+      notifyError('notifications:toasts.vitals.saveFailed', {
+        interpolation: { action: isEdit ? 'update' : 'save' },
+      });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Document handlers
-  const handleDocumentManagerRef = (methods) => {
-    if (onDocumentManagerRef) onDocumentManagerRef(methods);
-  };
-
-  const handleDocumentError = (docError) => {
-    logger.error('document_manager_error', {
-      message: `Document manager error in vitals ${isEdit ? 'edit' : 'create'}`,
-      vitalId: vitals?.id,
-      error: docError,
-      component: 'VitalsForm',
-    });
-    if (onError) onError(docError);
-  };
-
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
-    logger.info('vitals_upload_completed', {
-      message: 'File upload completed in vitals form',
-      vitalId: vitals?.id,
-      success,
-      completedCount,
-      failedCount,
-      component: 'VitalsForm',
-    });
-    if (onFileUploadComplete) onFileUploadComplete(success, completedCount, failedCount);
   };
 
   // Render field with Mantine components
@@ -673,7 +809,15 @@ const VitalsForm = ({
         if (!dateStr) return;
         const [year, month, day] = dateStr.split('-').map(Number);
         const currentTime = isValidDate ? value : new Date();
-        const newDate = new Date(year, month - 1, day, currentTime.getHours(), currentTime.getMinutes(), 0, 0);
+        const newDate = new Date(
+          year,
+          month - 1,
+          day,
+          currentTime.getHours(),
+          currentTime.getMinutes(),
+          0,
+          0
+        );
         handleDatePickerSelect(newDate);
       };
 
@@ -711,7 +855,10 @@ const VitalsForm = ({
           <Popover.Target>
             <TextInput
               label={config.label}
-              placeholder={t('vitals.form.dateTimePlaceholder', dateTimePlaceholder)}
+              placeholder={t(
+                'vitals.form.dateTimePlaceholder',
+                dateTimePlaceholder
+              )}
               description={t(
                 'vitals.form.pasteDateTimeDescription',
                 'Type or paste date/time, or click calendar to select'
@@ -781,7 +928,14 @@ const VitalsForm = ({
           required={config.required}
           error={error}
           disabled={isLocked}
-          description={isLocked ? t('vitals.form.lockedByImport', 'Managed by device import') : undefined}
+          description={
+            isLocked
+              ? t(
+                  'vitals.form.lockedByImport',
+                  'Managed by device import average'
+                )
+              : undefined
+          }
         />
       );
     }
@@ -833,18 +987,6 @@ const VitalsForm = ({
 
   return (
     <Stack gap="lg">
-      {/* Timezone alert - applies globally */}
-      {isReady && (
-        <Alert
-          variant="light"
-          color="blue"
-          icon={<IconInfoCircle size={16} />}
-          title={t('vitals.form.timezoneInfo', 'Timezone Information')}
-        >
-          {t('vitals.form.timesShownIn', 'Times shown in {{timezone}}', { timezone: timezone })}
-        </Alert>
-      )}
-
       {/* Health warnings - applies globally */}
       {warnings.length > 0 && (
         <Alert
@@ -867,22 +1009,17 @@ const VitalsForm = ({
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="datetime" leftSection={<IconCalendar size={16} />}>
+              <Tabs.Tab
+                value="datetime"
+                leftSection={<IconCalendar size={16} />}
+              >
                 {t('vitals.tabs.dateTime', 'Date & Time')}
               </Tabs.Tab>
               <Tabs.Tab value="vitals" leftSection={<IconActivity size={16} />}>
                 {t('vitals.tabs.vitalSigns', 'Vital Signs')}
               </Tabs.Tab>
-              <Tabs.Tab value="additional" leftSection={<IconDropletFilled size={16} />}>
-                {t('vitals.tabs.additional', 'Additional')}
-              </Tabs.Tab>
               <Tabs.Tab value="context" leftSection={<IconMapPin size={16} />}>
                 {t('vitals.tabs.context', 'Context')}
-              </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                {isEdit
-                  ? t('vitals.tabs.documents', 'Documents')
-                  : t('vitals.tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('vitals.tabs.notes', 'Notes')}
@@ -893,9 +1030,7 @@ const VitalsForm = ({
             <Tabs.Panel value="datetime">
               <Box mt="md">
                 <Grid>
-                  <Grid.Col span={12}>
-                    {renderField('recorded_date')}
-                  </Grid.Col>
+                  <Grid.Col span={12}>{renderField('recorded_date')}</Grid.Col>
                 </Grid>
               </Box>
             </Tabs.Panel>
@@ -908,22 +1043,17 @@ const VitalsForm = ({
                   <Grid.Col span={6}>{renderField('systolic_bp')}</Grid.Col>
                   <Grid.Col span={6}>{renderField('diastolic_bp')}</Grid.Col>
                   <Grid.Col span={6}>{renderField('temperature')}</Grid.Col>
-                  <Grid.Col span={6}>{renderField('respiratory_rate')}</Grid.Col>
-                  <Grid.Col span={6}>{renderField('oxygen_saturation')}</Grid.Col>
-                </Grid>
-              </Box>
-            </Tabs.Panel>
-
-            {/* Additional Measurements Tab */}
-            <Tabs.Panel value="additional">
-              <Box mt="md">
-                <Grid>
+                  <Grid.Col span={6}>
+                    {renderField('respiratory_rate')}
+                  </Grid.Col>
+                  <Grid.Col span={6}>
+                    {renderField('oxygen_saturation')}
+                  </Grid.Col>
                   <Grid.Col span={6}>{renderField('blood_glucose')}</Grid.Col>
                   <Grid.Col span={6}>{renderField('a1c')}</Grid.Col>
                   <Grid.Col span={6}>{renderField('pain_scale')}</Grid.Col>
                   <Grid.Col span={6}>{renderField('weight')}</Grid.Col>
                 </Grid>
-                {/* Patient Height Info & BMI - placed here since weight is on this tab */}
                 {patientHeight ? (
                   <Alert
                     variant="light"
@@ -932,17 +1062,27 @@ const VitalsForm = ({
                     title={t('vitals.form.patientInfo', 'Patient Information')}
                     mt="md"
                   >
-                    {t('vitals.form.patientHeight', 'Patient Height: {{height}} inches (from profile)', { height: patientHeight })}
+                    {t(
+                      'vitals.form.patientHeight',
+                      'Patient Height: {{height}} inches (from profile)',
+                      { height: patientHeight }
+                    )}
                   </Alert>
                 ) : (
                   <Alert
                     variant="light"
                     color="orange"
                     icon={<IconAlertTriangle size={16} />}
-                    title={t('vitals.form.missingPatientInfo', 'Missing Patient Information')}
+                    title={t(
+                      'vitals.form.missingPatientInfo',
+                      'Missing Patient Information'
+                    )}
                     mt="md"
                   >
-                    {t('vitals.form.heightNotSet', 'Height not set in patient profile - BMI calculation unavailable')}
+                    {t(
+                      'vitals.form.heightNotSet',
+                      'Height not set in patient profile - BMI calculation unavailable'
+                    )}
                   </Alert>
                 )}
                 {calculatedBMI && (
@@ -965,21 +1105,6 @@ const VitalsForm = ({
                   <Grid.Col span={12}>{renderField('location')}</Grid.Col>
                   <Grid.Col span={12}>{renderField('device_used')}</Grid.Col>
                 </Grid>
-              </Box>
-            </Tabs.Panel>
-
-            {/* Documents Tab */}
-            <Tabs.Panel value="documents">
-              <Box mt="md">
-                <DocumentManagerWithProgress
-                  entityType="vitals"
-                  entityId={vitals?.id || null}
-                  mode={isEdit ? 'edit' : 'create'}
-                  onUploadPendingFiles={handleDocumentManagerRef}
-                  showProgressModal={true}
-                  onUploadComplete={handleDocumentUploadComplete}
-                  onError={handleDocumentError}
-                />
               </Box>
             </Tabs.Panel>
 
@@ -1015,7 +1140,9 @@ const VitalsForm = ({
               }
               loading={isLoading}
             >
-              {isEdit ? t('vitals.form.updateVitals', 'Update Vitals') : t('vitals.form.saveVitals', 'Save Vitals')}
+              {isEdit
+                ? t('vitals.form.updateVitals', 'Update Vitals')
+                : t('vitals.form.saveVitals', 'Save Vitals')}
             </Button>
           </Group>
         </Stack>

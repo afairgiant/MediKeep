@@ -128,8 +128,8 @@ const MantineEmergencyContactForm = ({
       size="xl"
       centered
       zIndex={2000}
-      closeOnClickOutside={!isLoading}
-      closeOnEscape={!isLoading}
+      closeOnClickOutside={!isLoading && !isSubmitting}
+      closeOnEscape={!isLoading && !isSubmitting}
     >
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}

@@ -247,7 +247,7 @@
       "hideTestComponents": "Testkomponenten ausblenden",
       "addAnotherTest": "Weiteren Test hinzufügen",
       "componentCreationWarning": "Das Laborergebnis wurde gespeichert, aber die Testkomponenten konnten nicht hinzugefügt werden. Sie können sie von der Ansichtsseite aus hinzufügen.",
-      "relationshipCreationWarning": "Laborergebnis gespeichert, aber einige Beziehungen konnten nicht erstellt werden. Sie konnen sie auf der Bearbeitungsseite hinzufugen."
+      "relationshipCreationWarning": "Laborergebnis gespeichert, aber einige Beziehungen konnten nicht erstellt werden. Sie können sie auf der Bearbeitungsseite hinzufügen."
     },
     "testName": {
       "label": "Testname",
@@ -331,14 +331,14 @@
       "resultsStatus": "Ergebnisse und Status",
       "testComponents": "Testkomponenten",
       "documents": "Dokumente",
-      "addFiles": "Dateien hinzufugen",
+      "addFiles": "Dateien hinzufügen",
       "relationships": "Beziehungen",
       "notes": "Notizen"
     },
     "messages": {
       "saving": "Laborergebnis wird gespeichert...",
-      "testComponentsEditInfo": "Testkomponenten konnen auf der Ansichtsseite verwaltet werden.",
-      "relationshipsCreateInfo": "Beziehungen konnen nach dem Speichern hinzugefugt werden.",
+      "testComponentsEditInfo": "Testkomponenten können auf der Ansichtsseite verwaltet werden.",
+      "relationshipsCreateInfo": "Beziehungen können nach dem Speichern hinzugefügt werden.",
       "relationshipsSaveFirst": "Speichern Sie zuerst das Laborergebnis, um Beziehungslinks zu erstellen."
     }
   },
@@ -1674,7 +1674,7 @@
       "basicInfo": "Grundinfo",
       "details": "Details",
       "documents": "Dokumente",
-      "addFiles": "Dateien hinzufugen",
+      "addFiles": "Dateien hinzufügen",
       "notes": "Notizen"
     },
     "messages": {
@@ -2027,7 +2027,7 @@
   "equipment": {
     "tabs": {
       "basicInfo": "Grundinfo",
-      "deviceDetails": "Geratedetails",
+      "deviceDetails": "Gerätedetails",
       "serviceDates": "Service und Termine",
       "notes": "Notizen"
     }

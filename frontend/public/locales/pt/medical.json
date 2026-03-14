@@ -247,7 +247,7 @@
       "hideTestComponents": "Ocultar componentes do teste",
       "addAnotherTest": "Adicionar outro teste",
       "componentCreationWarning": "O resultado do laboratório foi salvo mas os componentes do teste não puderam ser adicionados. Você pode adicioná-los na página de visualização.",
-      "relationshipCreationWarning": "Resultado salvo mas alguns relacionamentos nao puderam ser criados. Voce pode adiciona-los na pagina de edicao."
+      "relationshipCreationWarning": "Resultado salvo mas alguns relacionamentos não puderam ser criados. Você pode adicioná-los na página de edição."
     },
     "testName": {
       "label": "Nome do Teste",
@@ -327,18 +327,18 @@
       }
     },
     "tabs": {
-      "basicInfo": "Info Basica",
+      "basicInfo": "Info Básica",
       "resultsStatus": "Resultados e Status",
       "testComponents": "Componentes do Teste",
       "documents": "Documentos",
       "addFiles": "Adicionar Arquivos",
-      "relationships": "Relacoes",
+      "relationships": "Relações",
       "notes": "Notas"
     },
     "messages": {
       "saving": "Salvando resultado...",
-      "testComponentsEditInfo": "Os componentes do teste podem ser gerenciados na pagina de visualizacao.",
-      "relationshipsCreateInfo": "As relacoes podem ser adicionadas apos salvar.",
+      "testComponentsEditInfo": "Os componentes do teste podem ser gerenciados na página de visualização.",
+      "relationshipsCreateInfo": "As relações podem ser adicionadas após salvar.",
       "relationshipsSaveFirst": "Salve primeiro o resultado para criar links de relacionamento."
     }
   },
@@ -1072,7 +1072,7 @@
       }
     },
     "tabs": {
-      "basicInfo": "Info Basica",
+      "basicInfo": "Info Básica",
       "details": "Detalhes",
       "documents": "Documentos",
       "addFiles": "Adicionar Arquivos",
@@ -1395,7 +1395,7 @@
       "notes": "Notas"
     },
     "messages": {
-      "saving": "Salvando contato de emergencia..."
+      "saving": "Salvando contato de emergência..."
     },
     "title": "Contatos de Emergência",
     "form": {
@@ -2026,9 +2026,9 @@
   },
   "equipment": {
     "tabs": {
-      "basicInfo": "Info Basica",
+      "basicInfo": "Info Básica",
       "deviceDetails": "Detalhes do Dispositivo",
-      "serviceDates": "Servico e Datas",
+      "serviceDates": "Serviço e Datas",
       "notes": "Notas"
     }
   }

@@ -247,7 +247,7 @@
       "hideTestComponents": "Cacher les composants d'analyse",
       "addAnotherTest": "Ajouter un autre résultat d'analyse",
       "componentCreationWarning": "Résultat d'analyse sauvegardé, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page d'aperçu.",
-      "relationshipCreationWarning": "Resultat enregistre mais certaines relations n'ont pas pu etre creees. Vous pouvez les ajouter depuis la page de modification."
+      "relationshipCreationWarning": "Résultat enregistré mais certaines relations n'ont pas pu être créées. Vous pouvez les ajouter depuis la page de modification."
     },
     "testName": {
       "label": "Nom de l'analyse",
@@ -328,7 +328,7 @@
     },
     "tabs": {
       "basicInfo": "Info de Base",
-      "resultsStatus": "Resultats et Statut",
+      "resultsStatus": "Résultats et Statut",
       "testComponents": "Composants de Test",
       "documents": "Documents",
       "addFiles": "Ajouter des Fichiers",
@@ -336,10 +336,10 @@
       "notes": "Notes"
     },
     "messages": {
-      "saving": "Enregistrement du resultat...",
-      "testComponentsEditInfo": "Les composants de test peuvent etre geres depuis la page de visualisation.",
-      "relationshipsCreateInfo": "Les relations peuvent etre ajoutees apres l'enregistrement.",
-      "relationshipsSaveFirst": "Enregistrez d'abord le resultat pour creer des liens de relation."
+      "saving": "Enregistrement du résultat...",
+      "testComponentsEditInfo": "Les composants de test peuvent être gérés depuis la page de visualisation.",
+      "relationshipsCreateInfo": "Les relations peuvent être ajoutées après l'enregistrement.",
+      "relationshipsSaveFirst": "Enregistrez d'abord le résultat pour créer des liens de relation."
     }
   },
   "immunizations": {
@@ -1073,13 +1073,13 @@
     },
     "tabs": {
       "basicInfo": "Info de Base",
-      "details": "Details",
+      "details": "Détails",
       "documents": "Documents",
       "addFiles": "Ajouter des Fichiers",
       "notes": "Notes"
     },
     "messages": {
-      "saving": "Enregistrement du symptome..."
+      "saving": "Enregistrement du symptôme..."
     }
   },
   "familyHistory": {
@@ -1429,12 +1429,12 @@
   },
   "emergencyContacts": {
     "tabs": {
-      "contactInfo": "Coordonnees",
-      "details": "Details",
+      "contactInfo": "Coordonnées",
+      "details": "Détails",
       "notes": "Notes"
     },
     "messages": {
-      "saving": "Enregistrement du contact d urgence..."
+      "saving": "Enregistrement du contact d'urgence..."
     },
     "title": "Contacts d'urgence",
     "form": {
@@ -2027,7 +2027,7 @@
   "equipment": {
     "tabs": {
       "basicInfo": "Info de Base",
-      "deviceDetails": "Details de l'Appareil",
+      "deviceDetails": "Détails de l'Appareil",
       "serviceDates": "Service et Dates",
       "notes": "Notes"
     }
