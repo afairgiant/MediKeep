@@ -2583,6 +2583,15 @@
       "time": "Hora",
       "confirmDeleteDay": "¿Eliminar las {{count}} lecturas importadas de este día?",
       "deleteDay": "Eliminar día"
+    },
+    "tabs": {
+      "dateTime": "Fecha y Hora",
+      "vitalSigns": "Signos Vitales",
+      "additional": "Adicional",
+      "context": "Contexto",
+      "documents": "Documentos",
+      "addFiles": "Agregar Archivos",
+      "notes": "Notas"
     }
   },
   "allergies": {

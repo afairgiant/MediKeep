@@ -246,7 +246,8 @@
       "addTestComponent": "Aggiungi componenti del test",
       "hideTestComponents": "Nascondi componenti del test",
       "addAnotherTest": "Aggiungi un altro test",
-      "componentCreationWarning": "Il risultato di laboratorio è stato salvato ma i componenti del test non sono stati aggiunti. Puoi aggiungerli dalla pagina di visualizzazione."
+      "componentCreationWarning": "Il risultato di laboratorio è stato salvato ma i componenti del test non sono stati aggiunti. Puoi aggiungerli dalla pagina di visualizzazione.",
+      "relationshipCreationWarning": "Risultato salvato ma alcune relazioni non sono state create. Puoi aggiungerle dalla pagina di modifica."
     },
     "testName": {
       "label": "Nome del test",
@@ -324,6 +325,21 @@
         "worsening": "In peggioramento",
         "improving": "In miglioramento"
       }
+    },
+    "tabs": {
+      "basicInfo": "Info di Base",
+      "resultsStatus": "Risultati e Stato",
+      "testComponents": "Componenti del Test",
+      "documents": "Documenti",
+      "addFiles": "Aggiungi File",
+      "relationships": "Relazioni",
+      "notes": "Note"
+    },
+    "messages": {
+      "saving": "Salvataggio risultato...",
+      "testComponentsEditInfo": "I componenti del test possono essere gestiti dalla pagina di visualizzazione.",
+      "relationshipsCreateInfo": "Le relazioni possono essere aggiunte dopo il salvataggio.",
+      "relationshipsSaveFirst": "Salvare prima il risultato per creare i collegamenti di relazione."
     }
   },
   "immunizations": {
@@ -1054,6 +1070,16 @@
         "description": "Quanto è grave il sintomo durante questa occorrenza",
         "placeholder": "Selezioni il livello di gravità"
       }
+    },
+    "tabs": {
+      "basicInfo": "Info di Base",
+      "details": "Dettagli",
+      "documents": "Documenti",
+      "addFiles": "Aggiungi File",
+      "notes": "Note"
+    },
+    "messages": {
+      "saving": "Salvataggio sintomo..."
     }
   },
   "familyHistory": {
@@ -1363,6 +1389,14 @@
     }
   },
   "emergencyContacts": {
+    "tabs": {
+      "contactInfo": "Info Contatto",
+      "details": "Dettagli",
+      "notes": "Note"
+    },
+    "messages": {
+      "saving": "Salvataggio contatto di emergenza..."
+    },
     "title": "Contatti di emergenza",
     "form": {
       "name": {
@@ -1988,6 +2022,14 @@
       "abnormal": "Anormale",
       "borderline": "Limite",
       "unknown": "Sconosciuto"
+    }
+  },
+  "equipment": {
+    "tabs": {
+      "basicInfo": "Info di Base",
+      "deviceDetails": "Dettagli Dispositivo",
+      "serviceDates": "Servizio e Date",
+      "notes": "Note"
     }
   }
 }

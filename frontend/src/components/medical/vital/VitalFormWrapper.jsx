@@ -51,7 +51,7 @@ const VitalFormWrapper = ({
       opened={isOpen}
       onClose={handleFormCancel}
       title={title}
-      size="lg"
+      size="xl"
       centered
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}

@@ -246,7 +246,8 @@
       "addTestComponent": "Add Test Components",
       "hideTestComponents": "Hide Test Components",
       "addAnotherTest": "Add Another Test",
-      "componentCreationWarning": "Lab result saved but test components could not be added. You can add them from the view page."
+      "componentCreationWarning": "Lab result saved but test components could not be added. You can add them from the view page.",
+      "relationshipCreationWarning": "Lab result saved but some relationships could not be created. You can add them from the edit page."
     },
     "testName": {
       "label": "Test Name",
@@ -324,6 +325,21 @@
         "worsening": "Worsening",
         "improving": "Improving"
       }
+    },
+    "tabs": {
+      "basicInfo": "Basic Info",
+      "resultsStatus": "Results & Status",
+      "testComponents": "Test Components",
+      "documents": "Documents",
+      "addFiles": "Add Files",
+      "relationships": "Relationships",
+      "notes": "Notes"
+    },
+    "messages": {
+      "saving": "Saving lab result...",
+      "testComponentsEditInfo": "Test components can be managed from the view page after saving.",
+      "relationshipsCreateInfo": "Relationships can be added after saving the lab result.",
+      "relationshipsSaveFirst": "Save the lab result first to create relationship links."
     }
   },
   "immunizations": {
@@ -1054,6 +1070,16 @@
         "placeholder": "Select severity level",
         "description": "How severe the symptom is during this occurrence"
       }
+    },
+    "tabs": {
+      "basicInfo": "Basic Info",
+      "details": "Details",
+      "documents": "Documents",
+      "addFiles": "Add Files",
+      "notes": "Notes"
+    },
+    "messages": {
+      "saving": "Saving symptom..."
     }
   },
   "familyHistory": {
@@ -1402,6 +1428,14 @@
     }
   },
   "emergencyContacts": {
+    "tabs": {
+      "contactInfo": "Contact Info",
+      "details": "Details",
+      "notes": "Notes"
+    },
+    "messages": {
+      "saving": "Saving emergency contact..."
+    },
     "title": "Emergency Contacts",
     "form": {
       "name": {
@@ -1988,6 +2022,14 @@
       "abnormal": "Abnormal",
       "borderline": "Borderline",
       "unknown": "Unknown"
+    }
+  },
+  "equipment": {
+    "tabs": {
+      "basicInfo": "Basic Info",
+      "deviceDetails": "Device Details",
+      "serviceDates": "Service & Dates",
+      "notes": "Notes"
     }
   }
 }

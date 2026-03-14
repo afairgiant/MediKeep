@@ -12,8 +12,6 @@ import {
   Button,
   Group,
   Stack,
-  Paper,
-  Title,
   Text,
   Alert,
   Grid,
@@ -24,6 +22,7 @@ import {
   Loader,
   Select,
   Popover,
+  Tabs,
 } from '@mantine/core';
 import {
   IconCalendar,
@@ -37,8 +36,6 @@ import {
   IconDeviceFloppy,
   IconX,
   IconAlertTriangle,
-  IconInfoCircle,
-  IconTrendingUp,
   IconUser,
   IconMapPin,
   IconDevices,
@@ -76,59 +73,15 @@ const VitalsForm = ({
   const { t } = useTranslation(['common', 'errors']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
   const lockedFields = vitals?._lockedFields || [];
-  const { isReady, getCurrentTime, timezone } = useTimezone();
+  const { getCurrentTime } = useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
-  const { formatDateTimeInput, dateFormat, dateTimePlaceholder, dateInputFormat } = useDateFormat();
-
-  // Generate dynamic configs based on user's unit system
-  const FORM_FIELDS = useMemo(() => ({
-    basic: {
-      title: t('vitals.form.sections.basicInfo', 'Basic Information'),
-      icon: IconCalendar,
-      fields: ['recorded_date'],
-    },
-    bloodPressure: {
-      title: t('vitals.stats.bloodPressure', 'Blood Pressure'),
-      icon: IconHeart,
-      fields: ['systolic_bp', 'diastolic_bp'],
-      description: t('vitals.form.bloodPressureDesc', 'Measured in mmHg'),
-    },
-    physical: {
-      title: t('vitals.form.sections.physicalMeasurements', 'Physical Measurements'),
-      icon: IconWeight,
-      fields: ['weight'],
-      description: t('vitals.form.weightDesc', 'Weight in {{unit}}', { unit: unitLabels[unitSystem].weightLong }),
-    },
-    vitals: {
-      title: t('vitals.modal.vitalSigns', 'Vital Signs'),
-      icon: IconActivity,
-      fields: [
-        'heart_rate',
-        'temperature',
-        'respiratory_rate',
-        'oxygen_saturation',
-      ],
-      description: t('vitals.form.vitalSignsDesc', 'Core physiological measurements'),
-    },
-    additional: {
-      title: t('vitals.modal.additionalMeasurements', 'Additional Measurements'),
-      icon: IconDropletFilled,
-      fields: ['blood_glucose', 'a1c', 'pain_scale'],
-      description: t('vitals.form.additionalMeasurementsDesc', 'Supplementary health indicators'),
-    },
-    metadata: {
-      title: t('vitals.form.sections.recordingInfo', 'Recording Information'),
-      icon: IconMapPin,
-      fields: ['location', 'device_used'],
-      description: t('vitals.form.contextDesc', 'Context about the measurements'),
-    },
-    notes: {
-      title: t('vitals.form.sections.additionalInfo', 'Additional Information'),
-      icon: IconNotes,
-      fields: ['notes'],
-    },
-  }), [unitSystem, t]);
+  const {
+    formatDateTimeInput,
+    dateFormat,
+    dateTimePlaceholder,
+    dateInputFormat,
+  } = useDateFormat();
 
   const FIELD_CONFIGS = useMemo(() => {
     const ranges = validationRanges[unitSystem];
@@ -141,7 +94,10 @@ const VitalsForm = ({
         required: true,
         icon: IconCalendar,
         validation: {
-          required: t('vitals.form.validation.dateRequired', 'Measurement date and time is required'),
+          required: t(
+            'vitals.form.validation.dateRequired',
+            'Measurement date and time is required'
+          ),
           custom: value => {
             const result = validateDateTime(value, 'Recorded Date');
             return result.isValid ? null : result.error;
@@ -158,8 +114,20 @@ const VitalsForm = ({
         max: 300,
         step: 1,
         validation: {
-          min: { value: 50, message: t('vitals.form.validation.systolicMin', 'Systolic BP must be at least 50 mmHg') },
-          max: { value: 300, message: t('vitals.form.validation.systolicMax', 'Systolic BP cannot exceed 300 mmHg') },
+          min: {
+            value: 50,
+            message: t(
+              'vitals.form.validation.systolicMin',
+              'Systolic BP must be at least 50 mmHg'
+            ),
+          },
+          max: {
+            value: 300,
+            message: t(
+              'vitals.form.validation.systolicMax',
+              'Systolic BP cannot exceed 300 mmHg'
+            ),
+          },
         },
       },
       diastolic_bp: {
@@ -172,8 +140,20 @@ const VitalsForm = ({
         max: 200,
         step: 1,
         validation: {
-          min: { value: 30, message: t('vitals.form.validation.diastolicMin', 'Diastolic BP must be at least 30 mmHg') },
-          max: { value: 200, message: t('vitals.form.validation.diastolicMax', 'Diastolic BP cannot exceed 200 mmHg') },
+          min: {
+            value: 30,
+            message: t(
+              'vitals.form.validation.diastolicMin',
+              'Diastolic BP must be at least 30 mmHg'
+            ),
+          },
+          max: {
+            value: 200,
+            message: t(
+              'vitals.form.validation.diastolicMax',
+              'Diastolic BP cannot exceed 200 mmHg'
+            ),
+          },
         },
       },
       heart_rate: {
@@ -186,8 +166,20 @@ const VitalsForm = ({
         max: 250,
         step: 1,
         validation: {
-          min: { value: 30, message: t('vitals.form.validation.heartRateMin', 'Heart rate must be at least 30 BPM') },
-          max: { value: 250, message: t('vitals.form.validation.heartRateMax', 'Heart rate cannot exceed 250 BPM') },
+          min: {
+            value: 30,
+            message: t(
+              'vitals.form.validation.heartRateMin',
+              'Heart rate must be at least 30 BPM'
+            ),
+          },
+          max: {
+            value: 250,
+            message: t(
+              'vitals.form.validation.heartRateMax',
+              'Heart rate cannot exceed 250 BPM'
+            ),
+          },
         },
       },
       temperature: {
@@ -202,11 +194,19 @@ const VitalsForm = ({
         validation: {
           min: {
             value: ranges.temperature.min,
-            message: t('vitals.form.validation.temperatureMin', 'Temperature must be at least {{min}}{{unit}}', { min: ranges.temperature.min, unit: labels.temperature }),
+            message: t(
+              'vitals.form.validation.temperatureMin',
+              'Temperature must be at least {{min}}{{unit}}',
+              { min: ranges.temperature.min, unit: labels.temperature }
+            ),
           },
           max: {
             value: ranges.temperature.max,
-            message: t('vitals.form.validation.temperatureMax', 'Temperature cannot exceed {{max}}{{unit}}', { max: ranges.temperature.max, unit: labels.temperature }),
+            message: t(
+              'vitals.form.validation.temperatureMax',
+              'Temperature cannot exceed {{max}}{{unit}}',
+              { max: ranges.temperature.max, unit: labels.temperature }
+            ),
           },
         },
       },
@@ -222,11 +222,19 @@ const VitalsForm = ({
         validation: {
           min: {
             value: ranges.weight.min,
-            message: t('vitals.form.validation.weightMin', 'Weight must be at least {{min}} {{unit}}', { min: ranges.weight.min, unit: labels.weight }),
+            message: t(
+              'vitals.form.validation.weightMin',
+              'Weight must be at least {{min}} {{unit}}',
+              { min: ranges.weight.min, unit: labels.weight }
+            ),
           },
           max: {
             value: ranges.weight.max,
-            message: t('vitals.form.validation.weightMax', 'Weight cannot exceed {{max}} {{unit}}', { max: ranges.weight.max, unit: labels.weight }),
+            message: t(
+              'vitals.form.validation.weightMax',
+              'Weight cannot exceed {{max}} {{unit}}',
+              { max: ranges.weight.max, unit: labels.weight }
+            ),
           },
         },
       },
@@ -240,8 +248,20 @@ const VitalsForm = ({
         max: 100,
         step: 1,
         validation: {
-          min: { value: 5, message: t('vitals.form.validation.respiratoryRateMin', 'Respiratory rate must be at least 5/min') },
-          max: { value: 100, message: t('vitals.form.validation.respiratoryRateMax', 'Respiratory rate cannot exceed 100/min') },
+          min: {
+            value: 5,
+            message: t(
+              'vitals.form.validation.respiratoryRateMin',
+              'Respiratory rate must be at least 5/min'
+            ),
+          },
+          max: {
+            value: 100,
+            message: t(
+              'vitals.form.validation.respiratoryRateMax',
+              'Respiratory rate cannot exceed 100/min'
+            ),
+          },
         },
       },
       oxygen_saturation: {
@@ -254,8 +274,20 @@ const VitalsForm = ({
         max: 100,
         step: 1,
         validation: {
-          min: { value: 50, message: t('vitals.form.validation.oxygenMin', 'Oxygen saturation must be at least 50%') },
-          max: { value: 100, message: t('vitals.form.validation.oxygenMax', 'Oxygen saturation cannot exceed 100%') },
+          min: {
+            value: 50,
+            message: t(
+              'vitals.form.validation.oxygenMin',
+              'Oxygen saturation must be at least 50%'
+            ),
+          },
+          max: {
+            value: 100,
+            message: t(
+              'vitals.form.validation.oxygenMax',
+              'Oxygen saturation cannot exceed 100%'
+            ),
+          },
         },
       },
       blood_glucose: {
@@ -268,8 +300,20 @@ const VitalsForm = ({
         max: 800,
         step: 1,
         validation: {
-          min: { value: 20, message: t('vitals.form.validation.bloodGlucoseMin', 'Blood glucose must be at least 20 mg/dL') },
-          max: { value: 800, message: t('vitals.form.validation.bloodGlucoseMax', 'Blood glucose cannot exceed 800 mg/dL') },
+          min: {
+            value: 20,
+            message: t(
+              'vitals.form.validation.bloodGlucoseMin',
+              'Blood glucose must be at least 20 mg/dL'
+            ),
+          },
+          max: {
+            value: 800,
+            message: t(
+              'vitals.form.validation.bloodGlucoseMax',
+              'Blood glucose cannot exceed 800 mg/dL'
+            ),
+          },
         },
       },
       a1c: {
@@ -282,8 +326,20 @@ const VitalsForm = ({
         max: 20,
         step: 0.1,
         validation: {
-          min: { value: 0, message: t('vitals.form.validation.a1cMin', 'A1C must be at least 0%') },
-          max: { value: 20, message: t('vitals.form.validation.a1cMax', 'A1C cannot exceed 20%') },
+          min: {
+            value: 0,
+            message: t(
+              'vitals.form.validation.a1cMin',
+              'A1C must be at least 0%'
+            ),
+          },
+          max: {
+            value: 20,
+            message: t(
+              'vitals.form.validation.a1cMax',
+              'A1C cannot exceed 20%'
+            ),
+          },
         },
       },
       pain_scale: {
@@ -296,47 +352,89 @@ const VitalsForm = ({
         max: 10,
         step: 1,
         validation: {
-          min: { value: 0, message: t('vitals.form.validation.painScaleMin', 'Pain scale must be at least 0') },
-          max: { value: 10, message: t('vitals.form.validation.painScaleMax', 'Pain scale cannot exceed 10') },
+          min: {
+            value: 0,
+            message: t(
+              'vitals.form.validation.painScaleMin',
+              'Pain scale must be at least 0'
+            ),
+          },
+          max: {
+            value: 10,
+            message: t(
+              'vitals.form.validation.painScaleMax',
+              'Pain scale cannot exceed 10'
+            ),
+          },
         },
       },
       location: {
         label: t('vitals.form.measurementLocation', 'Measurement Location'),
         type: 'select',
-        placeholder: t('vitals.form.locationPlaceholder', 'Where were these readings taken?'),
+        placeholder: t(
+          'vitals.form.locationPlaceholder',
+          'Where were these readings taken?'
+        ),
         icon: IconMapPin,
         options: [
           { value: 'home', label: t('vitals.form.locations.home', 'Home') },
-          { value: 'clinic', label: t('vitals.form.locations.clinic', 'Clinic') },
-          { value: 'hospital', label: t('vitals.form.locations.hospital', 'Hospital') },
-          { value: 'urgent_care', label: t('vitals.form.locations.urgentCare', 'Urgent Care') },
-          { value: 'pharmacy', label: t('vitals.form.locations.pharmacy', 'Pharmacy') },
-          { value: 'ambulatory', label: t('vitals.form.locations.ambulatory', 'Ambulatory Care') },
+          {
+            value: 'clinic',
+            label: t('vitals.form.locations.clinic', 'Clinic'),
+          },
+          {
+            value: 'hospital',
+            label: t('vitals.form.locations.hospital', 'Hospital'),
+          },
+          {
+            value: 'urgent_care',
+            label: t('vitals.form.locations.urgentCare', 'Urgent Care'),
+          },
+          {
+            value: 'pharmacy',
+            label: t('vitals.form.locations.pharmacy', 'Pharmacy'),
+          },
+          {
+            value: 'ambulatory',
+            label: t('vitals.form.locations.ambulatory', 'Ambulatory Care'),
+          },
           { value: 'other', label: t('vitals.form.locations.other', 'Other') },
         ],
       },
       device_used: {
         label: t('vitals.form.deviceUsed', 'Device/Equipment Used'),
         type: 'text',
-        placeholder: t('vitals.form.devicePlaceholder', 'e.g., Digital BP monitor, Thermometer model...'),
+        placeholder: t(
+          'vitals.form.devicePlaceholder',
+          'e.g., Digital BP monitor, Thermometer model...'
+        ),
         icon: IconDevices,
         validation: {
           maxLength: {
             value: 100,
-            message: t('vitals.form.validation.deviceMaxLength', 'Device name cannot exceed 100 characters'),
+            message: t(
+              'vitals.form.validation.deviceMaxLength',
+              'Device name cannot exceed 100 characters'
+            ),
           },
         },
       },
       notes: {
         label: t('common.fields.notes.label', 'Notes'),
         type: 'textarea',
-        placeholder: t('vitals.form.notesPlaceholder', 'Additional notes about the vital signs measurement...'),
+        placeholder: t(
+          'vitals.form.notesPlaceholder',
+          'Additional notes about the vital signs measurement...'
+        ),
         icon: IconNotes,
         rows: 3,
         validation: {
           maxLength: {
             value: 1000,
-            message: t('vitals.form.validation.notesMaxLength', 'Notes cannot exceed 1000 characters'),
+            message: t(
+              'vitals.form.validation.notesMaxLength',
+              'Notes cannot exceed 1000 characters'
+            ),
           },
         },
       },
@@ -372,6 +470,7 @@ const VitalsForm = ({
   const [manualDateTimeText, setManualDateTimeText] = useState('');
   const [manualDateTimeError, setManualDateTimeError] = useState(null);
   const [datePickerOpened, setDatePickerOpened] = useState(false);
+  const [activeTab, setActiveTab] = useState('datetime');
 
   // Initialize manualDateTimeText with format-aware formatting once hook is ready
   // Re-format when date format preference changes (for new records only)
@@ -420,7 +519,14 @@ const VitalsForm = ({
       // Sync manual datetime text input
       setManualDateTimeText(formatDateTimeInput(recordedDate, false));
     }
-  }, [vitals, isEdit, patientId, practitionerId, unitSystem, formatDateTimeInput]);
+  }, [
+    vitals,
+    isEdit,
+    patientId,
+    practitionerId,
+    unitSystem,
+    formatDateTimeInput,
+  ]);
 
   // Calculated values
   const calculatedBMI = useMemo(() => {
@@ -503,21 +609,24 @@ const VitalsForm = ({
   }, [formData, validateForm, touchedFields]);
 
   // Handle input changes
-  const handleInputChange = useCallback((fieldName, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: value,
-    }));
+  const handleInputChange = useCallback(
+    (fieldName, value) => {
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: value,
+      }));
 
-    // Mark field as touched
-    setTouchedFields(prev => new Set([...prev, fieldName]));
+      // Mark field as touched
+      setTouchedFields(prev => new Set([...prev, fieldName]));
 
-    // Sync manual text input when DateTimePicker changes
-    if (fieldName === 'recorded_date' && value instanceof Date) {
-      setManualDateTimeText(formatDateTimeInput(value, false));
-      setManualDateTimeError(null);
-    }
-  }, [formatDateTimeInput]);
+      // Sync manual text input when DateTimePicker changes
+      if (fieldName === 'recorded_date' && value instanceof Date) {
+        setManualDateTimeText(formatDateTimeInput(value, false));
+        setManualDateTimeError(null);
+      }
+    },
+    [formatDateTimeInput]
+  );
 
   // Handle manual datetime text input (for copy-paste from CSV)
   const handleManualDateTimeChange = useCallback(
@@ -537,7 +646,12 @@ const VitalsForm = ({
       } else if (date) {
         // Check if date is in the future
         if (date > new Date()) {
-          setManualDateTimeError(t('vitals.form.validation.dateInFuture', 'Date cannot be in the future'));
+          setManualDateTimeError(
+            t(
+              'vitals.form.validation.dateInFuture',
+              'Date cannot be in the future'
+            )
+          );
         } else {
           setManualDateTimeError(null);
           // Update the form data with parsed date
@@ -553,20 +667,23 @@ const VitalsForm = ({
   );
 
   // Handle date selection from the picker popover
-  const handleDatePickerSelect = useCallback((val, closePopover = false) => {
-    if (val) {
-      setFormData(prev => ({
-        ...prev,
-        recorded_date: val,
-      }));
-      setManualDateTimeText(formatDateTimeInput(val, false));
-      setManualDateTimeError(null);
-      setTouchedFields(prev => new Set([...prev, 'recorded_date']));
-    }
-    if (closePopover) {
-      setDatePickerOpened(false);
-    }
-  }, [formatDateTimeInput]);
+  const handleDatePickerSelect = useCallback(
+    (val, closePopover = false) => {
+      if (val) {
+        setFormData(prev => ({
+          ...prev,
+          recorded_date: val,
+        }));
+        setManualDateTimeText(formatDateTimeInput(val, false));
+        setManualDateTimeError(null);
+        setTouchedFields(prev => new Set([...prev, 'recorded_date']));
+      }
+      if (closePopover) {
+        setDatePickerOpened(false);
+      }
+    },
+    [formatDateTimeInput]
+  );
 
   // Handle form submission
   const handleSubmit = async e => {
@@ -621,9 +738,7 @@ const VitalsForm = ({
         blood_glucose: formData.blood_glucose
           ? parseFloat(formData.blood_glucose)
           : null,
-        a1c: formData.a1c
-          ? parseFloat(formData.a1c)
-          : null,
+        a1c: formData.a1c ? parseFloat(formData.a1c) : null,
         pain_scale: formData.pain_scale ? parseInt(formData.pain_scale) : null,
         // Text fields
         location: formData.location || null,
@@ -645,17 +760,18 @@ const VitalsForm = ({
       });
 
       await onSave(processedData);
-      notifySuccess('notifications:toasts.vitals.savedSuccess', { interpolation: { action: isEdit ? 'updated' : 'recorded' } });
+      notifySuccess('notifications:toasts.vitals.savedSuccess', {
+        interpolation: { action: isEdit ? 'updated' : 'recorded' },
+      });
     } catch (error) {
       logger.error('Error saving vitals:', error);
-      notifyError('notifications:toasts.vitals.saveFailed', { interpolation: { action: isEdit ? 'update' : 'save' } });
+      notifyError('notifications:toasts.vitals.saveFailed', {
+        interpolation: { action: isEdit ? 'update' : 'save' },
+      });
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Form steps
-  const formSteps = Object.entries(FORM_FIELDS);
 
   // Render field with Mantine components
   const renderField = fieldName => {
@@ -693,7 +809,15 @@ const VitalsForm = ({
         if (!dateStr) return;
         const [year, month, day] = dateStr.split('-').map(Number);
         const currentTime = isValidDate ? value : new Date();
-        const newDate = new Date(year, month - 1, day, currentTime.getHours(), currentTime.getMinutes(), 0, 0);
+        const newDate = new Date(
+          year,
+          month - 1,
+          day,
+          currentTime.getHours(),
+          currentTime.getMinutes(),
+          0,
+          0
+        );
         handleDatePickerSelect(newDate);
       };
 
@@ -708,7 +832,7 @@ const VitalsForm = ({
         if (newDate <= now) {
           handleDatePickerSelect(newDate);
         } else {
-          toast.error(t('vitals.form.validation.timeInFuture', 'Selected time cannot be in the future'));
+          notifyError('vitals.form.validation.timeInFuture');
         }
       };
 
@@ -731,7 +855,10 @@ const VitalsForm = ({
           <Popover.Target>
             <TextInput
               label={config.label}
-              placeholder={t('vitals.form.dateTimePlaceholder', dateTimePlaceholder)}
+              placeholder={t(
+                'vitals.form.dateTimePlaceholder',
+                dateTimePlaceholder
+              )}
               description={t(
                 'vitals.form.pasteDateTimeDescription',
                 'Type or paste date/time, or click calendar to select'
@@ -801,7 +928,14 @@ const VitalsForm = ({
           required={config.required}
           error={error}
           disabled={isLocked}
-          description={isLocked ? t('vitals.form.lockedByImport', 'Managed by device import') : undefined}
+          description={
+            isLocked
+              ? t(
+                  'vitals.form.lockedByImport',
+                  'Managed by device import average'
+                )
+              : undefined
+          }
         />
       );
     }
@@ -853,19 +987,7 @@ const VitalsForm = ({
 
   return (
     <Stack gap="lg">
-      {/* Header */}
-      {isReady && (
-        <Alert
-          variant="light"
-          color="blue"
-          icon={<IconInfoCircle size={16} />}
-          title={t('vitals.form.timezoneInfo', 'Timezone Information')}
-        >
-          {t('vitals.form.timesShownIn', 'Times shown in {{timezone}}', { timezone: timezone })}
-        </Alert>
-      )}
-
-      {/* Warnings */}
+      {/* Health warnings - applies globally */}
       {warnings.length > 0 && (
         <Alert
           variant="light"
@@ -885,91 +1007,118 @@ const VitalsForm = ({
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
-          {/* Form Sections */}
-          {formSteps.map(([sectionKey, section], index) => {
-            const SectionIcon = section.icon;
-            return (
-              <Paper key={sectionKey} shadow="sm" p="md" radius="md">
-                <Stack gap="md">
-                  <Group gap="sm">
-                    <ActionIcon variant="light" size="md" radius="md">
-                      <SectionIcon size={18} />
-                    </ActionIcon>
-                    <Box>
-                      <Title order={4}>{section.title}</Title>
-                      {section.description && (
-                        <Text size="sm" c="dimmed">
-                          {section.description}
-                        </Text>
-                      )}
-                    </Box>
-                  </Group>
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <Tabs.List>
+              <Tabs.Tab
+                value="datetime"
+                leftSection={<IconCalendar size={16} />}
+              >
+                {t('vitals.tabs.dateTime', 'Date & Time')}
+              </Tabs.Tab>
+              <Tabs.Tab value="vitals" leftSection={<IconActivity size={16} />}>
+                {t('vitals.tabs.vitalSigns', 'Vital Signs')}
+              </Tabs.Tab>
+              <Tabs.Tab value="context" leftSection={<IconMapPin size={16} />}>
+                {t('vitals.tabs.context', 'Context')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('vitals.tabs.notes', 'Notes')}
+              </Tabs.Tab>
+            </Tabs.List>
 
-                  <Grid>
-                    {section.fields.map(fieldName => {
-                      const isFullWidth = fieldName === 'notes' || fieldName === 'recorded_date';
-                      return (
-                        <Grid.Col key={fieldName} span={isFullWidth ? 12 : 6}>
-                          {renderField(fieldName)}
-                        </Grid.Col>
-                      );
-                    })}
-                  </Grid>
-                </Stack>
-              </Paper>
-            );
-          })}
+            {/* Date & Time Tab */}
+            <Tabs.Panel value="datetime">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={12}>{renderField('recorded_date')}</Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          {/* Patient Height Info */}
-          {patientHeight ? (
-            <Alert
-              variant="light"
-              color="green"
-              icon={<IconUser size={16} />}
-              title={t('vitals.form.patientInfo', 'Patient Information')}
-            >
-              {t('vitals.form.patientHeight', 'Patient Height: {{height}} inches (from profile)', { height: patientHeight })}
-            </Alert>
-          ) : (
-            <Alert
-              variant="light"
-              color="orange"
-              icon={<IconAlertTriangle size={16} />}
-              title={t('vitals.form.missingPatientInfo', 'Missing Patient Information')}
-            >
-              {t('vitals.form.heightNotSet', 'Height not set in patient profile - BMI calculation unavailable')}
-            </Alert>
-          )}
-
-          {/* Calculated Values */}
-          {calculatedBMI && (
-            <Paper shadow="sm" p="md" radius="md">
-              <Stack gap="md">
-                <Group gap="sm">
-                  <ActionIcon
+            {/* Vital Signs Tab */}
+            <Tabs.Panel value="vitals">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={6}>{renderField('heart_rate')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('systolic_bp')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('diastolic_bp')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('temperature')}</Grid.Col>
+                  <Grid.Col span={6}>
+                    {renderField('respiratory_rate')}
+                  </Grid.Col>
+                  <Grid.Col span={6}>
+                    {renderField('oxygen_saturation')}
+                  </Grid.Col>
+                  <Grid.Col span={6}>{renderField('blood_glucose')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('a1c')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('pain_scale')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('weight')}</Grid.Col>
+                </Grid>
+                {patientHeight ? (
+                  <Alert
                     variant="light"
-                    size="md"
-                    radius="md"
-                    color="blue"
+                    color="green"
+                    icon={<IconUser size={16} />}
+                    title={t('vitals.form.patientInfo', 'Patient Information')}
+                    mt="md"
                   >
-                    <IconTrendingUp size={18} />
-                  </ActionIcon>
-                  <Title order={4}>{t('vitals.form.calculatedValues', 'Calculated Values')}</Title>
-                </Group>
+                    {t(
+                      'vitals.form.patientHeight',
+                      'Patient Height: {{height}} inches (from profile)',
+                      { height: patientHeight }
+                    )}
+                  </Alert>
+                ) : (
+                  <Alert
+                    variant="light"
+                    color="orange"
+                    icon={<IconAlertTriangle size={16} />}
+                    title={t(
+                      'vitals.form.missingPatientInfo',
+                      'Missing Patient Information'
+                    )}
+                    mt="md"
+                  >
+                    {t(
+                      'vitals.form.heightNotSet',
+                      'Height not set in patient profile - BMI calculation unavailable'
+                    )}
+                  </Alert>
+                )}
+                {calculatedBMI && (
+                  <Card shadow="xs" p="sm" radius="md" withBorder mt="md">
+                    <Group justify="space-between">
+                      <Text fw={500}>{t('vitals.stats.bmi', 'BMI')}</Text>
+                      <Badge size="lg" variant="light" color="blue">
+                        {calculatedBMI}
+                      </Badge>
+                    </Group>
+                  </Card>
+                )}
+              </Box>
+            </Tabs.Panel>
 
-                <Card shadow="xs" p="sm" radius="md" withBorder>
-                  <Group justify="space-between">
-                    <Text fw={500}>{t('vitals.stats.bmi', 'BMI')}</Text>
-                    <Badge size="lg" variant="light" color="blue">
-                      {calculatedBMI}
-                    </Badge>
-                  </Group>
-                </Card>
-              </Stack>
-            </Paper>
-          )}
+            {/* Context Tab */}
+            <Tabs.Panel value="context">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={12}>{renderField('location')}</Grid.Col>
+                  <Grid.Col span={12}>{renderField('device_used')}</Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          {/* Form Actions */}
+            {/* Notes Tab */}
+            <Tabs.Panel value="notes">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={12}>{renderField('notes')}</Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
+          </Tabs>
+
+          {/* Form Actions - outside tabs */}
           <Group justify="flex-end" gap="md">
             <Button
               variant="light"
@@ -991,7 +1140,9 @@ const VitalsForm = ({
               }
               loading={isLoading}
             >
-              {isEdit ? t('vitals.form.updateVitals', 'Update Vitals') : t('vitals.form.saveVitals', 'Save Vitals')}
+              {isEdit
+                ? t('vitals.form.updateVitals', 'Update Vitals')
+                : t('vitals.form.saveVitals', 'Save Vitals')}
             </Button>
           </Group>
         </Stack>
