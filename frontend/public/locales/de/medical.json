@@ -1989,5 +1989,24 @@
       "borderline": "Grenzwertig",
       "unknown": "Unbekannt"
     }
+  },
+  "labMatrix": {
+    "filterAll": "Alle ({{count}})",
+    "filterAbnormalOnly": "Nur Auffällige",
+    "filterByCategory": "Nach Kategorie filtern...",
+    "resultsCount": "{{results}} Ergebnisse",
+    "parametersCount": "{{parameters}} Parameter",
+    "columnParameter": "Parameter",
+    "columnUnit": "Einheit",
+    "loading": "Matrixdaten werden geladen...",
+    "noData": "Keine Testkomponenten gefunden. Öffne ein Laborergebnis und füge Testkomponenten hinzu, oder nutze den Schnell-PDF-Import.",
+    "errorTitle": "Fehler beim Laden der Matrix",
+    "legend": "Legende",
+    "statusNormal": "Normal",
+    "statusHigh": "Hoch",
+    "statusLow": "Niedrig",
+    "statusCritical": "Kritisch",
+    "statusAbnormal": "Auffällig",
+    "statusBorderline": "Grenzwertig"
   }
 }

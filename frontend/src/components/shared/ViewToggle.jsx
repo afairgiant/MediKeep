@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 const MODE_CONFIG = {
   cards: { icon: '\uD83D\uDCCB', labelKey: 'viewToggle.cards', fallback: 'Cards' },
   table: { icon: '\uD83D\uDCCA', labelKey: 'viewToggle.table', fallback: 'Table' },
+  matrix: { icon: '\uD83D\uDCC0', labelKey: 'viewToggle.matrix', fallback: 'Matrix' },
   components: { icon: '\uD83E\uDDEA', labelKey: 'viewToggle.components', fallback: 'Components' },
 };
 

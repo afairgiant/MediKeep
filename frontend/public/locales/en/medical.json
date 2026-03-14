@@ -1989,5 +1989,24 @@
       "borderline": "Borderline",
       "unknown": "Unknown"
     }
+  },
+  "labMatrix": {
+    "filterAll": "All ({{count}})",
+    "filterAbnormalOnly": "Abnormal Only",
+    "filterByCategory": "Filter by category...",
+    "resultsCount": "{{results}} results",
+    "parametersCount": "{{parameters}} parameters",
+    "columnParameter": "Parameter",
+    "columnUnit": "Unit",
+    "loading": "Loading matrix data...",
+    "noData": "No test components found. Open a lab result and add test components, or use Quick PDF Import.",
+    "errorTitle": "Error loading matrix",
+    "legend": "Legend",
+    "statusNormal": "Normal",
+    "statusHigh": "High",
+    "statusLow": "Low",
+    "statusCritical": "Critical",
+    "statusAbnormal": "Abnormal",
+    "statusBorderline": "Borderline"
   }
 }

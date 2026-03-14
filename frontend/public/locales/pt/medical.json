@@ -1989,5 +1989,24 @@
       "borderline": "Limítrofe",
       "unknown": "Desconhecido"
     }
+  },
+  "labMatrix": {
+    "filterAll": "Todos ({{count}})",
+    "filterAbnormalOnly": "Apenas anormais",
+    "filterByCategory": "Filtrar por categoria...",
+    "resultsCount": "{{results}} resultados",
+    "parametersCount": "{{parameters}} parâmetros",
+    "columnParameter": "Parâmetro",
+    "columnUnit": "Unidade",
+    "loading": "Carregando dados da matriz...",
+    "noData": "Nenhum componente de teste encontrado. Abra um resultado de laboratório e adicione componentes, ou use a importação rápida de PDF.",
+    "errorTitle": "Erro ao carregar a matriz",
+    "legend": "Legenda",
+    "statusNormal": "Normal",
+    "statusHigh": "Alto",
+    "statusLow": "Baixo",
+    "statusCritical": "Crítico",
+    "statusAbnormal": "Anormal",
+    "statusBorderline": "Limítrofe"
   }
 }
