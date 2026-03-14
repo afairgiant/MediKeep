@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Modal,
@@ -60,14 +60,14 @@ const LabResultViewModal = ({
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // Reset tab when labResult changes or initialTab changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setActiveTab(initialTab);
     }
   }, [isOpen, labResult?.id, initialTab]);
 
   // Fall back to overview if the active tab is no longer available
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isOpen) return;
     const conditionalTabs = {
       notes: !!labResult?.notes,
@@ -78,7 +78,7 @@ const LabResultViewModal = ({
     if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
       setActiveTab('overview');
     }
-  }, [isOpen, activeTab, labResult?.notes, labResult?.tags, fetchLabResultConditions]);
+  }, [isOpen, activeTab, labResult?.notes, labResult?.tags?.length, fetchLabResultConditions, fetchLabResultEncounters]);
 
   const handleError = (error, context) => {
     logger.error('lab_result_view_modal_error', {
@@ -279,6 +279,7 @@ const LabResultViewModal = ({
               <Tabs.Panel value="conditions">
                 <Box mt="md">
                   <ConditionRelationships
+                    key={`conditions-${labResult.id}`}
                     labResultId={labResult.id}
                     labResultConditions={labResultConditions}
                     conditions={conditions}
@@ -295,6 +296,7 @@ const LabResultViewModal = ({
               <Tabs.Panel value="encounters">
                 <Box mt="md">
                   <LabResultEncounterRelationships
+                    key={`encounters-${labResult.id}`}
                     labResultId={labResult.id}
                     labResultEncounters={labResultEncounters}
                     encounters={encounters}

@@ -18,6 +18,11 @@ const VitalFormWrapper = ({
   isLoading,
   createItem,
   updateItem,
+  // Document support
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
+  statusMessage,
 }) => {
   const handleError = (error) => {
     logger.error('vital_form_wrapper_error', {
@@ -51,7 +56,7 @@ const VitalFormWrapper = ({
       opened={isOpen}
       onClose={handleFormCancel}
       title={title}
-      size="lg"
+      size="xl"
       centered
       closeOnClickOutside={!isLoading}
       closeOnEscape={!isLoading}
@@ -67,6 +72,9 @@ const VitalFormWrapper = ({
         updateItem={updateItem}
         error={error}
         clearError={clearError}
+        onDocumentManagerRef={onDocumentManagerRef}
+        onFileUploadComplete={onFileUploadComplete}
+        onError={onError}
       />
     </Modal>
   );

@@ -207,12 +207,12 @@
       "chemistry": "Chimie",
       "hematology": "Hématologie",
       "hepatology": "Hépatologie",
-	  "immunology": "Immunologie",
+      "immunology": "Immunologie",
       "genetics": "Génétique",
       "cardiology": "Cardiologie",
       "pulmonology": "Pulmonologie",
-	  "hearing": "Ouïe",
-	  "stomatology": "Stomatologie",
+      "hearing": "Ouïe",
+      "stomatology": "Stomatologie",
       "other": "Autre"
     },
     "testType": {
@@ -241,12 +241,13 @@
       "relatedConditions": "Conditions concernées",
       "linkConditionsTitle": "Connecter des conditions médicales",
       "linkConditionsDescription": "Associez ces résultats d'analyse aux conditions médicales concernées pour améliorer le suivi et l'organisation.",
-	  "testComponents": "Composants d'analyse (optionnel)",
+      "testComponents": "Composants d'analyse (optionnel)",
       "testComponentsDescription": "Ajoutez optionnellement des valeurs d'analyse individuelles. Vous pouvez également en ajouter plus ultérieurement.",
       "addTestComponent": "Ajouter des composants d'analyse",
       "hideTestComponents": "Cacher les composants d'analyse",
       "addAnotherTest": "Ajouter un autre résultat d'analyse",
-      "componentCreationWarning": "Résultat d'analyse sauvegardé, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page d'aperçu."
+      "componentCreationWarning": "Résultat d'analyse sauvegardé, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page d'aperçu.",
+      "relationshipCreationWarning": "Resultat enregistre mais certaines relations n'ont pas pu etre creees. Vous pouvez les ajouter depuis la page de modification."
     },
     "testName": {
       "label": "Nom de l'analyse",
@@ -324,6 +325,21 @@
         "worsening": "S'aggrave",
         "improving": "S'améliore"
       }
+    },
+    "tabs": {
+      "basicInfo": "Info de Base",
+      "resultsStatus": "Resultats et Statut",
+      "testComponents": "Composants de Test",
+      "documents": "Documents",
+      "addFiles": "Ajouter des Fichiers",
+      "relationships": "Relations",
+      "notes": "Notes"
+    },
+    "messages": {
+      "saving": "Enregistrement du resultat...",
+      "testComponentsEditInfo": "Les composants de test peuvent etre geres depuis la page de visualisation.",
+      "relationshipsCreateInfo": "Les relations peuvent etre ajoutees apres l'enregistrement.",
+      "relationshipsSaveFirst": "Enregistrez d'abord le resultat pour creer des liens de relation."
     }
   },
   "immunizations": {
@@ -1054,6 +1070,16 @@
         "placeholder": "Sélectionnez le niveau de sévérité",
         "description": "A quel point le symptôme est sévère durant cette occurrence"
       }
+    },
+    "tabs": {
+      "basicInfo": "Info de Base",
+      "details": "Details",
+      "documents": "Documents",
+      "addFiles": "Ajouter des Fichiers",
+      "notes": "Notes"
+    },
+    "messages": {
+      "saving": "Enregistrement du symptome..."
     }
   },
   "familyHistory": {
@@ -1237,19 +1263,19 @@
       }
     },
     "name": {
-        "label": "Nom complet",
-        "placeholder": "Dr. Jeanne Dupont",
-        "description": "Nom complet du docteur, dont son titre"
+      "label": "Nom complet",
+      "placeholder": "Dr. Jeanne Dupont",
+      "description": "Nom complet du docteur, dont son titre"
     },
     "specialty": {
-        "label": "Spécialité médicale",
-        "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
-        "description": "Sélectionnez dans la liste ou saisissez une spécialité"
+      "label": "Spécialité médicale",
+      "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
+      "description": "Sélectionnez dans la liste ou saisissez une spécialité"
     },
     "practice": {
-        "label": "Etablissement/Clinique",
-        "placeholder": "Cherchez ou créez un établissement...",
-        "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
+      "label": "Etablissement/Clinique",
+      "placeholder": "Cherchez ou créez un établissement...",
+      "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
     },
     "rating": {
       "label": "Avis",
@@ -1386,9 +1412,9 @@
       "description": "Nom spécifique ou identification de l'emplacement"
     },
     "streetAddress": {
-        "label": "Adresse physique",
-        "placeholder": "123 Grand-rue",
-        "description": "Adresse physique"
+      "label": "Adresse physique",
+      "placeholder": "123 Grand-rue",
+      "description": "Adresse physique"
     },
     "city": {
       "label": "Cité",
@@ -1402,6 +1428,14 @@
     }
   },
   "emergencyContacts": {
+    "tabs": {
+      "contactInfo": "Coordonnees",
+      "details": "Details",
+      "notes": "Notes"
+    },
+    "messages": {
+      "saving": "Enregistrement du contact d urgence..."
+    },
     "title": "Contacts d'urgence",
     "form": {
       "name": {
@@ -1956,7 +1990,7 @@
   "form": {
     "invalidPhoneDigits": "Un numéro de téléphone ne peut contenir que des chiffres, des espaces, des tirets, des parenthèses, des points, et des +",
     "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide"
-	},
+  },
   "componentCatalog": {
     "searchPlaceholder": "Rechercher dans les résultats d'analyse...",
     "filterCategory": "Catégorie",
@@ -1988,6 +2022,14 @@
       "abnormal": "Anormal",
       "borderline": "Inconcluant",
       "unknown": "Inconnu"
+    }
+  },
+  "equipment": {
+    "tabs": {
+      "basicInfo": "Info de Base",
+      "deviceDetails": "Details de l'Appareil",
+      "serviceDates": "Service et Dates",
+      "notes": "Notes"
     }
   }
 }

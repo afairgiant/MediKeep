@@ -80,6 +80,8 @@ vi.mock('../../../services/api', () => ({
     getLabResult: vi.fn(() => Promise.resolve({})),
     getLabResultConditions: vi.fn(() => Promise.resolve([])),
     getPatientConditions: vi.fn(() => Promise.resolve([])),
+    getPatientEncounters: vi.fn(() => Promise.resolve([])),
+    getLabResultEncounters: vi.fn(() => Promise.resolve([])),
   },
 }));
 vi.mock('../../../services/logger', () => ({

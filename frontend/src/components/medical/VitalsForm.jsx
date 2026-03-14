@@ -12,8 +12,6 @@ import {
   Button,
   Group,
   Stack,
-  Paper,
-  Title,
   Text,
   Alert,
   Grid,
@@ -24,6 +22,7 @@ import {
   Loader,
   Select,
   Popover,
+  Tabs,
 } from '@mantine/core';
 import {
   IconCalendar,
@@ -38,12 +37,12 @@ import {
   IconX,
   IconAlertTriangle,
   IconInfoCircle,
-  IconTrendingUp,
   IconUser,
   IconMapPin,
   IconDevices,
   IconMoodSad,
   IconDropletFilled,
+  IconFileText,
 } from '@tabler/icons-react';
 import { DateInput, DatePicker, TimeInput } from '@mantine/dates';
 import { vitalsService } from '../../services/medical/vitalsService';
@@ -60,6 +59,7 @@ import {
 import { parseDateTimeString } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import logger from '../../services/logger';
+import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 
 const VitalsForm = ({
   vitals = null,
@@ -72,6 +72,10 @@ const VitalsForm = ({
   updateItem,
   error,
   clearError,
+  // Document support props
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onError,
 }) => {
   const { t } = useTranslation(['common', 'errors']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
@@ -80,55 +84,6 @@ const VitalsForm = ({
   const { patient: currentPatient } = useCurrentPatient();
   const { unitSystem, loading: preferencesLoading } = useUserPreferences();
   const { formatDateTimeInput, dateFormat, dateTimePlaceholder, dateInputFormat } = useDateFormat();
-
-  // Generate dynamic configs based on user's unit system
-  const FORM_FIELDS = useMemo(() => ({
-    basic: {
-      title: t('vitals.form.sections.basicInfo', 'Basic Information'),
-      icon: IconCalendar,
-      fields: ['recorded_date'],
-    },
-    bloodPressure: {
-      title: t('vitals.stats.bloodPressure', 'Blood Pressure'),
-      icon: IconHeart,
-      fields: ['systolic_bp', 'diastolic_bp'],
-      description: t('vitals.form.bloodPressureDesc', 'Measured in mmHg'),
-    },
-    physical: {
-      title: t('vitals.form.sections.physicalMeasurements', 'Physical Measurements'),
-      icon: IconWeight,
-      fields: ['weight'],
-      description: t('vitals.form.weightDesc', 'Weight in {{unit}}', { unit: unitLabels[unitSystem].weightLong }),
-    },
-    vitals: {
-      title: t('vitals.modal.vitalSigns', 'Vital Signs'),
-      icon: IconActivity,
-      fields: [
-        'heart_rate',
-        'temperature',
-        'respiratory_rate',
-        'oxygen_saturation',
-      ],
-      description: t('vitals.form.vitalSignsDesc', 'Core physiological measurements'),
-    },
-    additional: {
-      title: t('vitals.modal.additionalMeasurements', 'Additional Measurements'),
-      icon: IconDropletFilled,
-      fields: ['blood_glucose', 'a1c', 'pain_scale'],
-      description: t('vitals.form.additionalMeasurementsDesc', 'Supplementary health indicators'),
-    },
-    metadata: {
-      title: t('vitals.form.sections.recordingInfo', 'Recording Information'),
-      icon: IconMapPin,
-      fields: ['location', 'device_used'],
-      description: t('vitals.form.contextDesc', 'Context about the measurements'),
-    },
-    notes: {
-      title: t('vitals.form.sections.additionalInfo', 'Additional Information'),
-      icon: IconNotes,
-      fields: ['notes'],
-    },
-  }), [unitSystem, t]);
 
   const FIELD_CONFIGS = useMemo(() => {
     const ranges = validationRanges[unitSystem];
@@ -372,6 +327,7 @@ const VitalsForm = ({
   const [manualDateTimeText, setManualDateTimeText] = useState('');
   const [manualDateTimeError, setManualDateTimeError] = useState(null);
   const [datePickerOpened, setDatePickerOpened] = useState(false);
+  const [activeTab, setActiveTab] = useState('datetime');
 
   // Initialize manualDateTimeText with format-aware formatting once hook is ready
   // Re-format when date format preference changes (for new records only)
@@ -654,8 +610,32 @@ const VitalsForm = ({
     }
   };
 
-  // Form steps
-  const formSteps = Object.entries(FORM_FIELDS);
+  // Document handlers
+  const handleDocumentManagerRef = (methods) => {
+    if (onDocumentManagerRef) onDocumentManagerRef(methods);
+  };
+
+  const handleDocumentError = (docError) => {
+    logger.error('document_manager_error', {
+      message: `Document manager error in vitals ${isEdit ? 'edit' : 'create'}`,
+      vitalId: vitals?.id,
+      error: docError,
+      component: 'VitalsForm',
+    });
+    if (onError) onError(docError);
+  };
+
+  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+    logger.info('vitals_upload_completed', {
+      message: 'File upload completed in vitals form',
+      vitalId: vitals?.id,
+      success,
+      completedCount,
+      failedCount,
+      component: 'VitalsForm',
+    });
+    if (onFileUploadComplete) onFileUploadComplete(success, completedCount, failedCount);
+  };
 
   // Render field with Mantine components
   const renderField = fieldName => {
@@ -708,7 +688,7 @@ const VitalsForm = ({
         if (newDate <= now) {
           handleDatePickerSelect(newDate);
         } else {
-          toast.error(t('vitals.form.validation.timeInFuture', 'Selected time cannot be in the future'));
+          notifyError('vitals.form.validation.timeInFuture');
         }
       };
 
@@ -853,7 +833,7 @@ const VitalsForm = ({
 
   return (
     <Stack gap="lg">
-      {/* Header */}
+      {/* Timezone alert - applies globally */}
       {isReady && (
         <Alert
           variant="light"
@@ -865,7 +845,7 @@ const VitalsForm = ({
         </Alert>
       )}
 
-      {/* Warnings */}
+      {/* Health warnings - applies globally */}
       {warnings.length > 0 && (
         <Alert
           variant="light"
@@ -885,91 +865,135 @@ const VitalsForm = ({
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
-          {/* Form Sections */}
-          {formSteps.map(([sectionKey, section], index) => {
-            const SectionIcon = section.icon;
-            return (
-              <Paper key={sectionKey} shadow="sm" p="md" radius="md">
-                <Stack gap="md">
-                  <Group gap="sm">
-                    <ActionIcon variant="light" size="md" radius="md">
-                      <SectionIcon size={18} />
-                    </ActionIcon>
-                    <Box>
-                      <Title order={4}>{section.title}</Title>
-                      {section.description && (
-                        <Text size="sm" c="dimmed">
-                          {section.description}
-                        </Text>
-                      )}
-                    </Box>
-                  </Group>
+          <Tabs value={activeTab} onChange={setActiveTab}>
+            <Tabs.List>
+              <Tabs.Tab value="datetime" leftSection={<IconCalendar size={16} />}>
+                {t('vitals.tabs.dateTime', 'Date & Time')}
+              </Tabs.Tab>
+              <Tabs.Tab value="vitals" leftSection={<IconActivity size={16} />}>
+                {t('vitals.tabs.vitalSigns', 'Vital Signs')}
+              </Tabs.Tab>
+              <Tabs.Tab value="additional" leftSection={<IconDropletFilled size={16} />}>
+                {t('vitals.tabs.additional', 'Additional')}
+              </Tabs.Tab>
+              <Tabs.Tab value="context" leftSection={<IconMapPin size={16} />}>
+                {t('vitals.tabs.context', 'Context')}
+              </Tabs.Tab>
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {isEdit
+                  ? t('vitals.tabs.documents', 'Documents')
+                  : t('vitals.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('vitals.tabs.notes', 'Notes')}
+              </Tabs.Tab>
+            </Tabs.List>
 
-                  <Grid>
-                    {section.fields.map(fieldName => {
-                      const isFullWidth = fieldName === 'notes' || fieldName === 'recorded_date';
-                      return (
-                        <Grid.Col key={fieldName} span={isFullWidth ? 12 : 6}>
-                          {renderField(fieldName)}
-                        </Grid.Col>
-                      );
-                    })}
-                  </Grid>
-                </Stack>
-              </Paper>
-            );
-          })}
+            {/* Date & Time Tab */}
+            <Tabs.Panel value="datetime">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={12}>
+                    {renderField('recorded_date')}
+                  </Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          {/* Patient Height Info */}
-          {patientHeight ? (
-            <Alert
-              variant="light"
-              color="green"
-              icon={<IconUser size={16} />}
-              title={t('vitals.form.patientInfo', 'Patient Information')}
-            >
-              {t('vitals.form.patientHeight', 'Patient Height: {{height}} inches (from profile)', { height: patientHeight })}
-            </Alert>
-          ) : (
-            <Alert
-              variant="light"
-              color="orange"
-              icon={<IconAlertTriangle size={16} />}
-              title={t('vitals.form.missingPatientInfo', 'Missing Patient Information')}
-            >
-              {t('vitals.form.heightNotSet', 'Height not set in patient profile - BMI calculation unavailable')}
-            </Alert>
-          )}
+            {/* Vital Signs Tab */}
+            <Tabs.Panel value="vitals">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={6}>{renderField('heart_rate')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('systolic_bp')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('diastolic_bp')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('temperature')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('respiratory_rate')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('oxygen_saturation')}</Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          {/* Calculated Values */}
-          {calculatedBMI && (
-            <Paper shadow="sm" p="md" radius="md">
-              <Stack gap="md">
-                <Group gap="sm">
-                  <ActionIcon
+            {/* Additional Measurements Tab */}
+            <Tabs.Panel value="additional">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={6}>{renderField('blood_glucose')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('a1c')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('pain_scale')}</Grid.Col>
+                  <Grid.Col span={6}>{renderField('weight')}</Grid.Col>
+                </Grid>
+                {/* Patient Height Info & BMI - placed here since weight is on this tab */}
+                {patientHeight ? (
+                  <Alert
                     variant="light"
-                    size="md"
-                    radius="md"
-                    color="blue"
+                    color="green"
+                    icon={<IconUser size={16} />}
+                    title={t('vitals.form.patientInfo', 'Patient Information')}
+                    mt="md"
                   >
-                    <IconTrendingUp size={18} />
-                  </ActionIcon>
-                  <Title order={4}>{t('vitals.form.calculatedValues', 'Calculated Values')}</Title>
-                </Group>
+                    {t('vitals.form.patientHeight', 'Patient Height: {{height}} inches (from profile)', { height: patientHeight })}
+                  </Alert>
+                ) : (
+                  <Alert
+                    variant="light"
+                    color="orange"
+                    icon={<IconAlertTriangle size={16} />}
+                    title={t('vitals.form.missingPatientInfo', 'Missing Patient Information')}
+                    mt="md"
+                  >
+                    {t('vitals.form.heightNotSet', 'Height not set in patient profile - BMI calculation unavailable')}
+                  </Alert>
+                )}
+                {calculatedBMI && (
+                  <Card shadow="xs" p="sm" radius="md" withBorder mt="md">
+                    <Group justify="space-between">
+                      <Text fw={500}>{t('vitals.stats.bmi', 'BMI')}</Text>
+                      <Badge size="lg" variant="light" color="blue">
+                        {calculatedBMI}
+                      </Badge>
+                    </Group>
+                  </Card>
+                )}
+              </Box>
+            </Tabs.Panel>
 
-                <Card shadow="xs" p="sm" radius="md" withBorder>
-                  <Group justify="space-between">
-                    <Text fw={500}>{t('vitals.stats.bmi', 'BMI')}</Text>
-                    <Badge size="lg" variant="light" color="blue">
-                      {calculatedBMI}
-                    </Badge>
-                  </Group>
-                </Card>
-              </Stack>
-            </Paper>
-          )}
+            {/* Context Tab */}
+            <Tabs.Panel value="context">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={12}>{renderField('location')}</Grid.Col>
+                  <Grid.Col span={12}>{renderField('device_used')}</Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
 
-          {/* Form Actions */}
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="vitals"
+                  entityId={vitals?.id || null}
+                  mode={isEdit ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
+
+            {/* Notes Tab */}
+            <Tabs.Panel value="notes">
+              <Box mt="md">
+                <Grid>
+                  <Grid.Col span={12}>{renderField('notes')}</Grid.Col>
+                </Grid>
+              </Box>
+            </Tabs.Panel>
+          </Tabs>
+
+          {/* Form Actions - outside tabs */}
           <Group justify="flex-end" gap="md">
             <Button
               variant="light"

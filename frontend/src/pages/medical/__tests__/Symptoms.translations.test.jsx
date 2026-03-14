@@ -262,14 +262,15 @@ describe('Symptoms Page - Translations', () => {
       expect(screen.getByText('symptoms.addSymptomTitle')).toBeInTheDocument();
     });
 
-    it('should show save button text in add mode', async () => {
+    it('should show submit button in add mode', async () => {
       const user = userEvent.setup();
       await renderAndWait();
 
       await user.click(screen.getByTestId('add-symptom-btn'));
 
       expect(screen.getByTestId('symptom-form-modal')).toBeInTheDocument();
-      expect(screen.getByText('buttons.save')).toBeInTheDocument();
+      const modal = screen.getByTestId('symptom-form-modal');
+      expect(modal.querySelector('button[type="submit"]')).toBeInTheDocument();
     });
 
     it('should show cancel button in form modal', async () => {

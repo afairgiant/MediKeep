@@ -195,12 +195,6 @@ const LabResults = () => {
     }
   }, [currentPatient?.id]);
 
-  // Helper function to get condition details
-  const getConditionDetails = conditionId => {
-    if (!conditionId || conditions.length === 0) return null;
-    return conditions.find(cond => cond.id === conditionId);
-  };
-
   // Helper function to fetch condition relationships for a lab result
   const fetchLabResultConditions = async labResultId => {
     try {
@@ -260,6 +254,9 @@ const LabResults = () => {
   // Test component inline entry state (create mode only)
   const [testComponentMethods, setTestComponentMethods] = useState(null);
 
+  // Pending relationships state (create mode only)
+  const [pendingRelationshipsMethods, setPendingRelationshipsMethods] = useState(null);
+
   // View modal navigation with URL deep linking
   const {
     isOpen: showViewModal,
@@ -303,6 +300,7 @@ const LabResults = () => {
     setEditingLabResult(null);
     setDocumentManagerMethods(null); // Reset document manager methods
     setTestComponentMethods(null); // Reset test component methods
+    setPendingRelationshipsMethods(null); // Reset pending relationships
     setFormData({
       test_name: '',
       test_code: '',
@@ -499,6 +497,52 @@ const LabResults = () => {
           }
         }
 
+        // Submit pending relationships (create mode only)
+        if (!editingLabResult && pendingRelationshipsMethods?.hasPendingRelationships?.()) {
+          try {
+            const pending = pendingRelationshipsMethods.getPendingRelationships();
+
+            const conditionPromises = pending.conditions.map(condRel =>
+              apiService.createLabResultCondition(resultId, {
+                lab_result_id: resultId,
+                condition_id: condRel.condition_id,
+                relevance_note: condRel.relevance_note,
+              })
+            );
+
+            const encounterPromises = pending.encounters.map(encRel =>
+              apiService.createLabResultEncounter(resultId, {
+                encounter_id: encRel.encounter_id,
+                purpose: encRel.purpose,
+                relevance_note: encRel.relevance_note,
+              })
+            );
+
+            await Promise.all([...conditionPromises, ...encounterPromises]);
+
+            logger.info('pending_relationships_created', {
+              message: 'Pending relationships created with lab result',
+              labResultId: resultId,
+              conditionCount: pending.conditions.length,
+              encounterCount: pending.encounters.length,
+              component: 'LabResults',
+            });
+          } catch (relError) {
+            logger.error('pending_relationships_error', {
+              message: 'Failed to create pending relationships',
+              labResultId: resultId,
+              error: relError?.message || String(relError),
+              component: 'LabResults',
+            });
+            notifications.show({
+              title: t('common:warning', 'Warning'),
+              message: t('medical:labResults.form.relationshipCreationWarning', 'Lab result saved but some relationships could not be created. You can add them from the edit page.'),
+              color: 'yellow',
+              autoClose: 8000,
+            });
+          }
+        }
+
         // Check if we have files to upload
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
 
@@ -550,6 +594,7 @@ const LabResults = () => {
     createItem,
     documentManagerMethods,
     testComponentMethods,
+    pendingRelationshipsMethods,
     startSubmission,
     setError,
     completeFormSubmission,
@@ -576,6 +621,7 @@ const LabResults = () => {
     setEditingLabResult(null);
     setDocumentManagerMethods(null); // Reset document manager methods
     setTestComponentMethods(null); // Reset test component methods
+    setPendingRelationshipsMethods(null); // Reset pending relationships
     setFormData({
       test_name: '',
       test_code: '',
@@ -754,6 +800,7 @@ const LabResults = () => {
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
           onTestComponentRef={setTestComponentMethods}
+          onPendingRelationshipsRef={setPendingRelationshipsMethods}
           onFileUploadComplete={(success) => {
             if (success && editingLabResult) {
               refreshFileCount(editingLabResult.id);

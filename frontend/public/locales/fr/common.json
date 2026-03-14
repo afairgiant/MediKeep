@@ -421,6 +421,15 @@
       "minGlucose": "Min",
       "readings": "{{count}} readings",
       "time": "Time"
+    },
+    "tabs": {
+      "dateTime": "Date et Heure",
+      "vitalSigns": "Signes Vitaux",
+      "additional": "Supplémentaire",
+      "context": "Contexte",
+      "documents": "Documents",
+      "addFiles": "Ajouter des Fichiers",
+      "notes": "Notes"
     }
   },
   "medications": {

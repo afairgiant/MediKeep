@@ -157,6 +157,29 @@ vi.mock('@mantine/core', () => ({
   useMantineColorScheme: () => ({ colorScheme: 'light', setColorScheme: vi.fn() }),
 }));
 
+// usePagination – stub that passes data through without slicing
+vi.mock('../../../hooks/usePagination', () => ({
+  usePagination: () => ({
+    page: 1,
+    setPage: vi.fn(),
+    pageSize: 20,
+    handlePageSizeChange: vi.fn(),
+    paginateData: (data) => data,
+    totalPages: () => 1,
+    resetPage: vi.fn(),
+    clampPage: vi.fn(),
+    PAGE_SIZE_OPTIONS: [
+      { value: '10', label: '10' },
+      { value: '20', label: '20' },
+    ],
+  }),
+}));
+
+// PaginationControls – lightweight stub (avoids needing Group/Pagination/Select in @mantine/core mock)
+vi.mock('../../../components/shared/PaginationControls', () => ({
+  default: () => <div data-testid="pagination-controls" />,
+}));
+
 // Shared components
 vi.mock('../../../components', () => ({
   PageHeader: ({ title }) => <div data-testid="page-header">{title}</div>,
