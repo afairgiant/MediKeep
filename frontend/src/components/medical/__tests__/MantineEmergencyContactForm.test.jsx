@@ -66,7 +66,7 @@ describe('MantineEmergencyContactForm', () => {
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.secondaryPhone\.label/)).toBeInTheDocument();
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.email\.label/)).toBeInTheDocument();
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.address\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/common:labels\.notes/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/common:fields\.notes\.label/)).toBeInTheDocument();
 
       // Checkboxes
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.isPrimary\.label/)).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('MantineEmergencyContactForm', () => {
       // Button text: "Update Emergency Contact"
       const submitButton = document.querySelector('button[type="submit"]');
       expect(submitButton).toBeInTheDocument();
-      expect(submitButton.textContent).toContain('Update Emergency Contact');
+      expect(submitButton.textContent).toContain('common:buttons.update');
     });
   });
 
@@ -111,8 +111,8 @@ describe('MantineEmergencyContactForm', () => {
       const relationshipInput = getAllRelationshipInputs()[0];
       await userEvent.click(relationshipInput);
 
-      // Options use plain labels from EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS
-      const spouseOption = await screen.findByText('Spouse');
+      // Options use translation keys mapped from relationship key list
+      const spouseOption = await screen.findByText('medical:emergencyContacts.form.relationship.options.spouse');
       await userEvent.click(spouseOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -154,7 +154,7 @@ describe('MantineEmergencyContactForm', () => {
     test('handles textarea changes', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
-      const notesTextarea = screen.getByLabelText(/common:labels\.notes/);
+      const notesTextarea = screen.getByLabelText(/common:fields\.notes\.label/);
       fireEvent.change(notesTextarea, { target: { value: 'Available weekdays only' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -246,14 +246,14 @@ describe('MantineEmergencyContactForm', () => {
       const relationshipInput = getAllRelationshipInputs()[0];
       await userEvent.click(relationshipInput);
 
-      // Options come from EMERGENCY_CONTACT_RELATIONSHIP_OPTIONS with plain labels
-      expect(screen.getByText('Spouse')).toBeInTheDocument();
-      expect(screen.getByText('Parent')).toBeInTheDocument();
-      expect(screen.getByText('Child')).toBeInTheDocument();
-      expect(screen.getByText('Sibling')).toBeInTheDocument();
-      expect(screen.getByText('Friend')).toBeInTheDocument();
-      expect(screen.getByText('Caregiver')).toBeInTheDocument();
-      expect(screen.getByText('Other')).toBeInTheDocument();
+      // Options use translation keys mapped from relationship key list
+      expect(screen.getByText('medical:emergencyContacts.form.relationship.options.spouse')).toBeInTheDocument();
+      expect(screen.getByText('medical:emergencyContacts.form.relationship.options.parent')).toBeInTheDocument();
+      expect(screen.getByText('medical:emergencyContacts.form.relationship.options.child')).toBeInTheDocument();
+      expect(screen.getByText('medical:emergencyContacts.form.relationship.options.sibling')).toBeInTheDocument();
+      expect(screen.getByText('medical:emergencyContacts.form.relationship.options.friend')).toBeInTheDocument();
+      expect(screen.getByText('medical:emergencyContacts.form.relationship.options.caregiver')).toBeInTheDocument();
+      expect(screen.getByText('medical:emergencyContacts.form.relationship.options.other')).toBeInTheDocument();
     });
   });
 
@@ -431,7 +431,7 @@ describe('MantineEmergencyContactForm', () => {
 
       const relationshipInput = getAllRelationshipInputs()[0];
       await userEvent.click(relationshipInput);
-      const spouseOption = await screen.findByText('Spouse');
+      const spouseOption = await screen.findByText('medical:emergencyContacts.form.relationship.options.spouse');
       await userEvent.click(spouseOption);
 
       const phoneInput = screen.getByLabelText(/medical:emergencyContacts\.form\.primaryPhone\.label/);
@@ -449,7 +449,7 @@ describe('MantineEmergencyContactForm', () => {
       const addressInput = screen.getByLabelText(/medical:emergencyContacts\.form\.address\.label/);
       fireEvent.change(addressInput, { target: { value: '456 Oak Street, Springfield, IL 62701' } });
 
-      const notesInput = screen.getByLabelText(/common:labels\.notes/);
+      const notesInput = screen.getByLabelText(/common:fields\.notes\.label/);
       fireEvent.change(notesInput, { target: { value: 'Available 24/7, speaks English and Spanish' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();

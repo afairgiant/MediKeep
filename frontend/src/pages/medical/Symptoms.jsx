@@ -1,6 +1,7 @@
 import logger from '../../services/logger';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
 import {
   Container,
@@ -98,6 +99,35 @@ const Symptoms = () => {
   const [editingOccurrence, setEditingOccurrence] = useState(null);
   const [occurrenceFormData, setOccurrenceFormData] = useState(getDefaultOccurrenceFormData());
 
+  // Document manager methods ref for upload orchestration
+  const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
+
+  const {
+    startSubmission,
+    completeFormSubmission,
+    startFileUpload,
+    completeFileUpload,
+    handleSubmissionFailure,
+    resetSubmission,
+    isBlocking,
+    statusMessage,
+  } = useFormSubmissionWithUploads({
+    entityType: 'symptom',
+    onSuccess: () => {
+      setShowSymptomForm(false);
+      setEditingSymptom(null);
+      fetchSymptoms();
+    },
+    onError: (error) => {
+      logger.error('symptom_form_error', {
+        message: 'Form submission error in symptoms',
+        error,
+        component: 'Symptoms',
+      });
+    },
+    component: 'Symptoms',
+  });
+
   // Fetch symptoms function defined before hook usage
   const fetchSymptoms = useCallback(async () => {
     if (!currentPatient?.id) return;
@@ -155,6 +185,8 @@ const Symptoms = () => {
 
   // Symptom Definition Handlers
   const handleAddSymptom = () => {
+    resetSubmission();
+    setDocumentManagerMethods(null);
     setSymptomFormData({
       symptom_name: '',
       category: '',
@@ -171,6 +203,8 @@ const Symptoms = () => {
   };
 
   const handleEditSymptom = symptom => {
+    resetSubmission();
+    setDocumentManagerMethods(null);
     setSymptomFormData({
       symptom_name: symptom.symptom_name || '',
       category: symptom.category || '',
@@ -211,6 +245,8 @@ const Symptoms = () => {
       return;
     }
 
+    startSubmission();
+
     try {
       const submitData = {
         ...symptomFormData,
@@ -218,20 +254,46 @@ const Symptoms = () => {
         resolved_date: symptomFormData.resolved_date || null,
       };
 
+      let success;
+      let resultId;
+
       if (editingSymptom) {
         await symptomApi.update(editingSymptom.id, submitData);
-        setSuccessMessage('Symptom updated successfully');
+        success = true;
+        resultId = editingSymptom.id;
       } else {
-        await symptomApi.create(submitData);
-        setSuccessMessage('Symptom created successfully');
+        const result = await symptomApi.create(submitData);
+        success = !!result;
+        resultId = result?.id;
       }
 
-      setShowSymptomForm(false);
-      setEditingSymptom(null);
-      fetchSymptoms();
+      completeFormSubmission(success, resultId);
 
+      if (success && resultId) {
+        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+        if (hasPendingFiles) {
+          startFileUpload();
+          try {
+            await documentManagerMethods.uploadPendingFiles(resultId);
+            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
+          } catch (uploadError) {
+            logger.error('symptom_file_upload_error', {
+              message: 'File upload failed',
+              symptomId: resultId,
+              error: uploadError.message,
+              component: 'Symptoms',
+            });
+            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+          }
+        } else {
+          completeFileUpload(true, 0, 0);
+        }
+      }
+
+      setSuccessMessage(editingSymptom ? 'Symptom updated successfully' : 'Symptom created successfully');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
+      handleSubmissionFailure(err, 'form');
       logger.error('symptom_submit_error', {
         error: err.message,
         editing: !!editingSymptom,
@@ -603,15 +665,27 @@ const Symptoms = () => {
       <MantineSymptomForm
         isOpen={showSymptomForm}
         onClose={() => {
-          setShowSymptomForm(false);
-          setEditingSymptom(null);
+          if (!isBlocking) {
+            setShowSymptomForm(false);
+            setEditingSymptom(null);
+          }
         }}
         title={editingSymptom ? t('symptoms.editSymptomTitle', 'Edit Symptom') : t('symptoms.addSymptomTitle', 'Add New Symptom')}
         formData={symptomFormData}
         onInputChange={handleSymptomInputChange}
         onSubmit={handleSymptomSubmit}
         editingSymptom={editingSymptom}
-        submitButtonText={editingSymptom ? t('buttons.update', 'Update') : t('buttons.save', 'Save')}
+        isLoading={isBlocking}
+        statusMessage={statusMessage}
+        onDocumentManagerRef={setDocumentManagerMethods}
+        onFileUploadComplete={(success) => {
+          if (success) {
+            fetchSymptoms();
+          }
+        }}
+        onError={(error) => {
+          logger.error('symptom_document_error', { error, component: 'Symptoms' });
+        }}
       />
 
       {/* Occurrence Form Modal */}

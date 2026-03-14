@@ -83,17 +83,18 @@ describe('MantinePatientForm - Translations', () => {
   }
 
   describe('English Translations', () => {
-    it('should display form title for new patient', () => {
-      render(<MantinePatientForm {...defaultProps} />);
+    it('should display save first message for new patient form', () => {
+      render(<MantinePatientForm {...defaultProps} isCreating={true} />);
 
-      // i18n mock returns keys - title uses patients.form.createTitle
-      expect(screen.getByText('patients.form.createTitle')).toBeInTheDocument();
+      // Component renders saveFirstMessage when isCreating is true
+      expect(screen.getByText('patients.form.saveFirstMessage')).toBeInTheDocument();
     });
 
     it('should display medical info heading', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getByText('patients.form.medicalInfoHeading')).toBeInTheDocument();
+      // t() returns the fallback value 'Medical Information' when a default is provided
+      expect(screen.getByText('Medical Information')).toBeInTheDocument();
     });
 
     it('should display all field labels', () => {
@@ -210,7 +211,8 @@ describe('MantinePatientForm - Translations', () => {
     it('should handle address textarea changes', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const addressTextarea = screen.getByLabelText(/patients\.form\.address\.label/);
+      // Address textarea uses placeholder (no label prop), section header shows 'Address' as fallback
+      const addressTextarea = screen.getByPlaceholderText('patients.form.address.placeholder');
       fireEvent.change(addressTextarea, { target: { value: '123 Main St' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -227,7 +229,7 @@ describe('MantinePatientForm - Translations', () => {
       gender: 'M',
     };
 
-    it('should display edit title when not creating', () => {
+    it('should display save changes button when not creating', () => {
       render(
         <MantinePatientForm
           {...defaultProps}
@@ -236,7 +238,8 @@ describe('MantinePatientForm - Translations', () => {
         />
       );
 
-      expect(screen.getByText('patients.form.editTitle')).toBeInTheDocument();
+      // In edit mode, the save button shows 'saveChanges' text
+      expect(screen.getByText('patients.form.buttons.saveChanges')).toBeInTheDocument();
     });
 
     it('should display save changes button in edit mode', () => {
@@ -336,17 +339,19 @@ describe('MantinePatientForm - Translations', () => {
   });
 
   describe('Description Texts', () => {
-    it('should display field descriptions', () => {
+    it('should display section headers with fallback text', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getByText('patients.form.firstName.description')).toBeInTheDocument();
-      expect(screen.getByText('patients.form.lastName.description')).toBeInTheDocument();
+      // SectionHeaders use t() with fallback values which are returned by the mock
+      expect(screen.getByText('Personal Information')).toBeInTheDocument();
+      expect(screen.getByText('Medical Information')).toBeInTheDocument();
     });
 
-    it('should display birth date description', () => {
+    it('should display address section header', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getByText('patients.form.birthDate.description')).toBeInTheDocument();
+      // Address SectionHeader uses t('patients.form.address.label', 'Address')
+      expect(screen.getByText('Address')).toBeInTheDocument();
     });
   });
 

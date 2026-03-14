@@ -572,6 +572,7 @@ const EmergencyContacts = () => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
         editingContact={editingContact}
+        isLoading={false}
       />
 
       {/* View Modal */}

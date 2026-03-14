@@ -388,6 +388,15 @@
       "time": "Uhrzeit",
       "confirmDeleteDay": "Alle {{count}} importierten Messungen für diesen Tag löschen?",
       "deleteDay": "Tag löschen"
+    },
+    "tabs": {
+      "dateTime": "Datum und Uhrzeit",
+      "vitalSigns": "Vitalzeichen",
+      "additional": "Zusätzlich",
+      "context": "Kontext",
+      "documents": "Dokumente",
+      "addFiles": "Dateien hinzufügen",
+      "notes": "Notizen"
     }
   },
   "medications": {

@@ -1,10 +1,33 @@
 import { vi } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MantineProvider } from '@mantine/core';
 import '@testing-library/jest-dom';
+import render from '../../../../test-utils/render';
 import EquipmentFormWrapper from '../EquipmentFormWrapper';
+
+// Mock useDateFormat to avoid UserPreferencesProvider dependency
+vi.mock('../../../../hooks/useDateFormat', () => ({
+  default: () => ({
+    dateInputFormat: 'MM/DD/YYYY',
+    dateFormat: 'mdy',
+    formatDate: (d) => d,
+    formatDateWithTime: (d) => d,
+    formatDateTime: (d) => d,
+    formatLongDate: (d) => d,
+    formatDateTimeInput: (d) => d,
+    locale: 'en-US',
+    formatLabel: 'MM/DD/YYYY',
+    formatExample: '01/31/2024',
+    dateTimePlaceholder: 'MM/DD/YYYY HH:MM',
+    formatOptions: {},
+  }),
+  useDateFormat: () => ({
+    dateInputFormat: 'MM/DD/YYYY',
+    dateFormat: 'mdy',
+    formatDate: (d) => d,
+  }),
+}));
 
 // Mock Date Input component
 vi.mock('@mantine/dates', () => ({
@@ -74,11 +97,6 @@ vi.mock('../../../shared/SubmitButton', () => ({
 // Mock scrollIntoView for Mantine Combobox
 Element.prototype.scrollIntoView = vi.fn();
 
-// Wrapper component with Mantine provider
-const MantineWrapper = ({ children }) => (
-  <MantineProvider>{children}</MantineProvider>
-);
-
 describe('EquipmentFormWrapper', () => {
   const defaultFormData = {
     equipment_name: '',
@@ -117,63 +135,52 @@ describe('EquipmentFormWrapper', () => {
     vi.clearAllMocks();
   });
 
-  // Helper to find inputs by label text (works with Mantine TextInput)
-  function getTextInputByLabel(labelText) {
-    return screen.getByRole('textbox', { name: new RegExp(labelText, 'i') });
-  }
-
   describe('Rendering', () => {
     test('renders form modal when open', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
       expect(screen.getByText('Add New Equipment')).toBeInTheDocument();
     });
 
     test('does not render when closed', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} isOpen={false} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} isOpen={false} />);
 
       expect(screen.queryByText('Add New Equipment')).not.toBeInTheDocument();
     });
 
-    test('renders all form fields', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+    test('renders all form fields', async () => {
+      const user = userEvent.setup();
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
-      // Text inputs - Mantine TextInput renders input with role="textbox" associated to label
+      // Basic Info tab (default) - check name, type, status, practitioner
       expect(screen.getByLabelText(/Equipment Name/i)).toBeInTheDocument();
-
-      // Select fields use combobox pattern in Mantine - find by label text
       expect(screen.getByText('Equipment Type')).toBeInTheDocument();
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByText('Prescribed By')).toBeInTheDocument();
 
-      // Other text inputs
+      // Navigate to Device Details tab to check those fields
+      await user.click(screen.getByRole('tab', { name: /Device Details/i }));
       expect(screen.getByLabelText(/Manufacturer/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Model Number/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Serial Number/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Supplier/i)).toBeInTheDocument();
+
+      // Navigate to Service & Dates tab to check those fields
+      await user.click(screen.getByRole('tab', { name: /Service & Dates/i }));
       expect(screen.getByLabelText(/Usage Instructions/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/^Notes/i)).toBeInTheDocument();
+
+      // Navigate to Notes tab to check those fields
+      await user.click(screen.getByRole('tab', { name: /Notes/i }));
+      expect(screen.getByRole('textbox', { name: /^Notes/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/Tags/i)).toBeInTheDocument();
     });
 
-    test('renders date fields', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+    test('renders date fields', async () => {
+      const user = userEvent.setup();
+      render(<EquipmentFormWrapper {...defaultProps} />);
+
+      // Date fields are in the "Service & Dates" tab
+      await user.click(screen.getByRole('tab', { name: /Service & Dates/i }));
 
       expect(screen.getByTestId('date-prescribed-date')).toBeInTheDocument();
       expect(screen.getByTestId('date-last-service-date')).toBeInTheDocument();
@@ -187,22 +194,14 @@ describe('EquipmentFormWrapper', () => {
         editingEquipment: { id: 1, equipment_name: 'CPAP Machine' },
       };
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...editProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...editProps} />);
 
       expect(screen.getByText('Edit Equipment')).toBeInTheDocument();
       expect(screen.getByText('Update Equipment')).toBeInTheDocument();
     });
 
     test('shows create button in add mode', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
       expect(screen.getByText('Create Equipment')).toBeInTheDocument();
     });
@@ -212,12 +211,9 @@ describe('EquipmentFormWrapper', () => {
     test('handles equipment name input changes', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
+      // Equipment Name is on the Basic Info tab (default)
       const nameInput = screen.getByLabelText(/Equipment Name/i);
       await user.type(nameInput, 'R');
 
@@ -231,11 +227,10 @@ describe('EquipmentFormWrapper', () => {
     test('handles manufacturer input changes', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
+
+      // Manufacturer is on the Device Details tab
+      await user.click(screen.getByRole('tab', { name: /Device Details/i }));
 
       const manufacturerInput = screen.getByLabelText(/Manufacturer/i);
       await user.type(manufacturerInput, 'R');
@@ -250,11 +245,10 @@ describe('EquipmentFormWrapper', () => {
     test('handles model number input changes', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
+
+      // Model Number is on the Device Details tab
+      await user.click(screen.getByRole('tab', { name: /Device Details/i }));
 
       const modelInput = screen.getByLabelText(/Model Number/i);
       await user.type(modelInput, 'A');
@@ -269,11 +263,10 @@ describe('EquipmentFormWrapper', () => {
     test('handles serial number input changes', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
+
+      // Serial Number is on the Device Details tab
+      await user.click(screen.getByRole('tab', { name: /Device Details/i }));
 
       const serialInput = screen.getByLabelText(/Serial Number/i);
       await user.type(serialInput, 'S');
@@ -288,13 +281,9 @@ describe('EquipmentFormWrapper', () => {
     test('handles equipment type select changes', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
-      // Find the Equipment Type Select's input (Mantine searchable Select renders an input)
+      // Equipment Type is on the Basic Info tab (default)
       const typeInput = screen.getByPlaceholderText(/Select type/i);
       await user.click(typeInput);
 
@@ -308,13 +297,9 @@ describe('EquipmentFormWrapper', () => {
     });
 
     test('renders status select with default value', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
-      // Status Select renders with "Active" as the default selected value
+      // Status Select is on the Basic Info tab (default)
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Active')).toBeInTheDocument();
     });
@@ -322,13 +307,9 @@ describe('EquipmentFormWrapper', () => {
     test('handles practitioner select changes', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
-      // Find Prescribed By select input
+      // Prescribed By is on the Basic Info tab (default)
       const practitionerInput = screen.getByPlaceholderText(/Select practitioner/i);
       await user.click(practitionerInput);
 
@@ -344,11 +325,10 @@ describe('EquipmentFormWrapper', () => {
     test('handles usage instructions textarea changes', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
+
+      // Usage Instructions is on the Service & Dates tab
+      await user.click(screen.getByRole('tab', { name: /Service & Dates/i }));
 
       const instructionsTextarea = screen.getByLabelText(/Usage Instructions/i);
       await user.type(instructionsTextarea, 'U');
@@ -363,13 +343,12 @@ describe('EquipmentFormWrapper', () => {
     test('handles notes textarea changes', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
-      const notesTextarea = screen.getByLabelText(/^Notes/i);
+      // Notes is on the Notes tab
+      await user.click(screen.getByRole('tab', { name: /^Notes/i }));
+
+      const notesTextarea = screen.getByRole('textbox', { name: /^Notes/i });
       await user.type(notesTextarea, 'P');
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith(
@@ -392,11 +371,7 @@ describe('EquipmentFormWrapper', () => {
         },
       };
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...propsWithData} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...propsWithData} />);
 
       const submitButton = screen.getByText('Create Equipment');
       await user.click(submitButton);
@@ -407,11 +382,7 @@ describe('EquipmentFormWrapper', () => {
     test('calls onClose when cancel button is clicked', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
       const cancelButton = screen.getByText('Cancel');
       await user.click(cancelButton);
@@ -420,11 +391,7 @@ describe('EquipmentFormWrapper', () => {
     });
 
     test('submit button is disabled without required fields', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
       const submitButton = screen.getByTestId('submit-btn');
       expect(submitButton).toBeDisabled();
@@ -440,11 +407,7 @@ describe('EquipmentFormWrapper', () => {
         },
       };
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...propsWithData} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...propsWithData} />);
 
       const submitButton = screen.getByTestId('submit-btn');
       expect(submitButton).not.toBeDisabled();
@@ -452,7 +415,8 @@ describe('EquipmentFormWrapper', () => {
   });
 
   describe('Data Population', () => {
-    test('populates form with existing equipment data', () => {
+    test('populates form with existing equipment data', async () => {
+      const user = userEvent.setup();
       const populatedData = {
         equipment_name: 'Portable Nebulizer',
         equipment_type: 'nebulizer',
@@ -470,18 +434,24 @@ describe('EquipmentFormWrapper', () => {
         practitioner_id: '1',
       };
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} formData={populatedData} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} formData={populatedData} />);
 
+      // Basic Info tab (default) - equipment name is visible
       expect(screen.getByDisplayValue('Portable Nebulizer')).toBeInTheDocument();
+
+      // Device Details tab - manufacturer, model, serial, supplier
+      await user.click(screen.getByRole('tab', { name: /Device Details/i }));
       expect(screen.getByDisplayValue('Omron')).toBeInTheDocument();
       expect(screen.getByDisplayValue('NE-C801')).toBeInTheDocument();
       expect(screen.getByDisplayValue('SN-98765')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Medical Supply Co')).toBeInTheDocument();
+
+      // Service & Dates tab - usage instructions
+      await user.click(screen.getByRole('tab', { name: /Service & Dates/i }));
       expect(screen.getByDisplayValue('Use as needed for breathing treatments')).toBeInTheDocument();
+
+      // Notes tab - notes
+      await user.click(screen.getByRole('tab', { name: /^Notes/i }));
       expect(screen.getByDisplayValue('Keep clean and dry')).toBeInTheDocument();
     });
   });
@@ -490,12 +460,9 @@ describe('EquipmentFormWrapper', () => {
     test('displays all equipment type options', async () => {
       const user = userEvent.setup();
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
+      // Equipment Type is on the Basic Info tab (default)
       const typeInput = screen.getByPlaceholderText(/Select type/i);
       await user.click(typeInput);
 
@@ -510,13 +477,9 @@ describe('EquipmentFormWrapper', () => {
 
   describe('Status Options', () => {
     test('renders status select with correct default', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
-      // Status field is present with label and default "Active" value
+      // Status is on the Basic Info tab (default)
       expect(screen.getByText('Status')).toBeInTheDocument();
       // Default status is "active" which displays as "Active"
       expect(screen.getByDisplayValue('Active')).toBeInTheDocument();
@@ -525,21 +488,13 @@ describe('EquipmentFormWrapper', () => {
 
   describe('Loading State', () => {
     test('shows loading overlay when isLoading is true', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} isLoading={true} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} isLoading={true} />);
 
       expect(screen.getByText('Saving equipment...')).toBeInTheDocument();
     });
 
     test('disables cancel button when loading', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} isLoading={true} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} isLoading={true} />);
 
       // Mantine Button renders <button> - find by role
       const cancelButton = screen.getByRole('button', { name: /Cancel/i });
@@ -547,11 +502,7 @@ describe('EquipmentFormWrapper', () => {
     });
 
     test('disables practitioner select when practitioners loading', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} practitionersLoading={true} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} practitionersLoading={true} />);
 
       // Mantine Select's input should be disabled
       const practitionerInput = screen.getByPlaceholderText(/Select practitioner/i);
@@ -572,11 +523,7 @@ describe('EquipmentFormWrapper', () => {
       };
 
       expect(() => {
-        render(
-          <MantineWrapper>
-            <EquipmentFormWrapper {...propsWithNullData} />
-          </MantineWrapper>
-        );
+        render(<EquipmentFormWrapper {...propsWithNullData} />);
       }).not.toThrow();
     });
 
@@ -587,22 +534,14 @@ describe('EquipmentFormWrapper', () => {
       };
 
       expect(() => {
-        render(
-          <MantineWrapper>
-            <EquipmentFormWrapper {...propsWithNoPractitioners} />
-          </MantineWrapper>
-        );
+        render(<EquipmentFormWrapper {...propsWithNoPractitioners} />);
       }).not.toThrow();
     });
   });
 
   describe('Accessibility', () => {
     test('has proper form structure', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
       // Modal renders into a portal so use document.querySelector
       const form = document.querySelector('form');
@@ -610,12 +549,9 @@ describe('EquipmentFormWrapper', () => {
     });
 
     test('required fields have proper attributes', () => {
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...defaultProps} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...defaultProps} />);
 
+      // Equipment Name is on the Basic Info tab (default)
       const nameInput = screen.getByLabelText(/Equipment Name/i);
       expect(nameInput).toBeRequired();
     });
@@ -630,11 +566,7 @@ describe('EquipmentFormWrapper', () => {
         },
       };
 
-      render(
-        <MantineWrapper>
-          <EquipmentFormWrapper {...propsWithData} />
-        </MantineWrapper>
-      );
+      render(<EquipmentFormWrapper {...propsWithData} />);
 
       const submitButton = screen.getByTestId('submit-btn');
       expect(submitButton).toHaveAttribute('type', 'submit');

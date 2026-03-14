@@ -246,7 +246,8 @@
       "addTestComponent": "Agregar componentes de prueba",
       "hideTestComponents": "Ocultar componentes de prueba",
       "addAnotherTest": "Agregar otra prueba",
-      "componentCreationWarning": "El resultado de laboratorio se guardó pero los componentes de prueba no se pudieron agregar. Puede agregarlos desde la página de visualización."
+      "componentCreationWarning": "El resultado de laboratorio se guardó pero los componentes de prueba no se pudieron agregar. Puede agregarlos desde la página de visualización.",
+      "relationshipCreationWarning": "Resultado guardado pero algunas relaciones no pudieron ser creadas. Puede agregarlas desde la página de edición."
     },
     "testName": {
       "label": "Nombre del análisis",
@@ -324,6 +325,21 @@
         "worsening": "Empeorando",
         "improving": "Mejorando"
       }
+    },
+    "tabs": {
+      "basicInfo": "Info Básica",
+      "resultsStatus": "Resultados y Estado",
+      "testComponents": "Componentes de Prueba",
+      "documents": "Documentos",
+      "addFiles": "Agregar Archivos",
+      "relationships": "Relaciones",
+      "notes": "Notas"
+    },
+    "messages": {
+      "saving": "Guardando resultado...",
+      "testComponentsEditInfo": "Los componentes de prueba se pueden gestionar desde la página de visualización.",
+      "relationshipsCreateInfo": "Las relaciones se pueden agregar después de guardar.",
+      "relationshipsSaveFirst": "Guarde primero el resultado para crear enlaces de relación."
     }
   },
   "immunizations": {
@@ -597,6 +613,14 @@
     }
   },
   "emergencyContacts": {
+    "tabs": {
+      "contactInfo": "Datos de Contacto",
+      "details": "Detalles",
+      "notes": "Notas"
+    },
+    "messages": {
+      "saving": "Guardando contacto de emergencia..."
+    },
     "title": "Contactos de emergencia",
     "primaryPhone": {
       "label": "Teléfono principal",
@@ -1645,6 +1669,16 @@
         "description": "Qué tan severo es el síntoma durante esta ocurrencia",
         "placeholder": "Seleccione nivel de severidad"
       }
+    },
+    "tabs": {
+      "basicInfo": "Info Básica",
+      "details": "Detalles",
+      "documents": "Documentos",
+      "addFiles": "Agregar Archivos",
+      "notes": "Notas"
+    },
+    "messages": {
+      "saving": "Guardando síntoma..."
     }
   },
   "familyHistory": {
@@ -1988,6 +2022,14 @@
       "abnormal": "Anormal",
       "borderline": "Límite",
       "unknown": "Desconocido"
+    }
+  },
+  "equipment": {
+    "tabs": {
+      "basicInfo": "Info Básica",
+      "deviceDetails": "Detalles del Dispositivo",
+      "serviceDates": "Servicio y Fechas",
+      "notes": "Notas"
     }
   }
 }

@@ -340,7 +340,7 @@
         "ambulatory": "Ambulatory Care",
         "other": "Other"
       },
-      "lockedByImport": "Managed by device import"
+      "lockedByImport": "Managed by device import average"
     },
     "modal": {
       "bloodGlucose": "Blood Glucose",
@@ -460,6 +460,15 @@
       "time": "Time",
       "confirmDeleteDay": "Delete all {{count}} imported readings for this day?",
       "deleteDay": "Delete Day"
+    },
+    "tabs": {
+      "dateTime": "Date & Time",
+      "vitalSigns": "Vital Signs",
+      "additional": "Additional",
+      "context": "Context",
+      "documents": "Documents",
+      "addFiles": "Add Files",
+      "notes": "Notes"
     }
   },
   "medications": {

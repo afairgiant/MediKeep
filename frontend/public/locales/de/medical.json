@@ -246,7 +246,8 @@
       "addTestComponent": "Testkomponenten hinzufügen",
       "hideTestComponents": "Testkomponenten ausblenden",
       "addAnotherTest": "Weiteren Test hinzufügen",
-      "componentCreationWarning": "Das Laborergebnis wurde gespeichert, aber die Testkomponenten konnten nicht hinzugefügt werden. Sie können sie von der Ansichtsseite aus hinzufügen."
+      "componentCreationWarning": "Das Laborergebnis wurde gespeichert, aber die Testkomponenten konnten nicht hinzugefügt werden. Sie können sie von der Ansichtsseite aus hinzufügen.",
+      "relationshipCreationWarning": "Laborergebnis gespeichert, aber einige Beziehungen konnten nicht erstellt werden. Sie können sie auf der Bearbeitungsseite hinzufügen."
     },
     "testName": {
       "label": "Testname",
@@ -324,6 +325,21 @@
         "worsening": "Verschlechternd",
         "improving": "Verbessernd"
       }
+    },
+    "tabs": {
+      "basicInfo": "Grundinfo",
+      "resultsStatus": "Ergebnisse und Status",
+      "testComponents": "Testkomponenten",
+      "documents": "Dokumente",
+      "addFiles": "Dateien hinzufügen",
+      "relationships": "Beziehungen",
+      "notes": "Notizen"
+    },
+    "messages": {
+      "saving": "Laborergebnis wird gespeichert...",
+      "testComponentsEditInfo": "Testkomponenten können auf der Ansichtsseite verwaltet werden.",
+      "relationshipsCreateInfo": "Beziehungen können nach dem Speichern hinzugefügt werden.",
+      "relationshipsSaveFirst": "Speichern Sie zuerst das Laborergebnis, um Beziehungslinks zu erstellen."
     }
   },
   "immunizations": {
@@ -597,6 +613,14 @@
     "title": "Behandler"
   },
   "emergencyContacts": {
+    "tabs": {
+      "contactInfo": "Kontaktdaten",
+      "details": "Details",
+      "notes": "Notizen"
+    },
+    "messages": {
+      "saving": "Notfallkontakt wird gespeichert..."
+    },
     "form": {
       "name": {
         "label": "Vollständiger Name",
@@ -1645,6 +1669,16 @@
         "description": "Wie schwer das Symptom während dieses Auftretens ist",
         "placeholder": "Schweregrad auswählen"
       }
+    },
+    "tabs": {
+      "basicInfo": "Grundinfo",
+      "details": "Details",
+      "documents": "Dokumente",
+      "addFiles": "Dateien hinzufügen",
+      "notes": "Notizen"
+    },
+    "messages": {
+      "saving": "Symptom wird gespeichert..."
     }
   },
   "familyHistory": {
@@ -1988,6 +2022,14 @@
       "abnormal": "Abnormal",
       "borderline": "Grenzwertig",
       "unknown": "Unbekannt"
+    }
+  },
+  "equipment": {
+    "tabs": {
+      "basicInfo": "Grundinfo",
+      "deviceDetails": "Gerätedetails",
+      "serviceDates": "Service und Termine",
+      "notes": "Notizen"
     }
   }
 }

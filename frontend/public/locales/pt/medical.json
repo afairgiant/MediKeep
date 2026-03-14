@@ -246,7 +246,8 @@
       "addTestComponent": "Adicionar componentes do teste",
       "hideTestComponents": "Ocultar componentes do teste",
       "addAnotherTest": "Adicionar outro teste",
-      "componentCreationWarning": "O resultado do laboratório foi salvo mas os componentes do teste não puderam ser adicionados. Você pode adicioná-los na página de visualização."
+      "componentCreationWarning": "O resultado do laboratório foi salvo mas os componentes do teste não puderam ser adicionados. Você pode adicioná-los na página de visualização.",
+      "relationshipCreationWarning": "Resultado salvo mas alguns relacionamentos não puderam ser criados. Você pode adicioná-los na página de edição."
     },
     "testName": {
       "label": "Nome do Teste",
@@ -324,6 +325,21 @@
         "worsening": "A piorar",
         "improving": "A melhorar"
       }
+    },
+    "tabs": {
+      "basicInfo": "Info Básica",
+      "resultsStatus": "Resultados e Status",
+      "testComponents": "Componentes do Teste",
+      "documents": "Documentos",
+      "addFiles": "Adicionar Arquivos",
+      "relationships": "Relações",
+      "notes": "Notas"
+    },
+    "messages": {
+      "saving": "Salvando resultado...",
+      "testComponentsEditInfo": "Os componentes do teste podem ser gerenciados na página de visualização.",
+      "relationshipsCreateInfo": "As relações podem ser adicionadas após salvar.",
+      "relationshipsSaveFirst": "Salve primeiro o resultado para criar links de relacionamento."
     }
   },
   "immunizations": {
@@ -1054,6 +1070,16 @@
         "description": "Quão grave é o sintoma durante esta ocorrência",
         "placeholder": "Selecione o nível de gravidade"
       }
+    },
+    "tabs": {
+      "basicInfo": "Info Básica",
+      "details": "Detalhes",
+      "documents": "Documentos",
+      "addFiles": "Adicionar Arquivos",
+      "notes": "Notas"
+    },
+    "messages": {
+      "saving": "Salvando sintoma..."
     }
   },
   "familyHistory": {
@@ -1363,6 +1389,14 @@
     }
   },
   "emergencyContacts": {
+    "tabs": {
+      "contactInfo": "Info de Contato",
+      "details": "Detalhes",
+      "notes": "Notas"
+    },
+    "messages": {
+      "saving": "Salvando contato de emergência..."
+    },
     "title": "Contatos de Emergência",
     "form": {
       "name": {
@@ -1988,6 +2022,14 @@
       "abnormal": "Anormal",
       "borderline": "Limítrofe",
       "unknown": "Desconhecido"
+    }
+  },
+  "equipment": {
+    "tabs": {
+      "basicInfo": "Info Básica",
+      "deviceDetails": "Detalhes do Dispositivo",
+      "serviceDates": "Serviço e Datas",
+      "notes": "Notas"
     }
   }
 }

@@ -421,6 +421,15 @@
       "time": "Hora",
       "confirmDeleteDay": "Excluir todas as {{count}} leituras importadas deste dia?",
       "deleteDay": "Excluir dia"
+    },
+    "tabs": {
+      "dateTime": "Data e Hora",
+      "vitalSigns": "Sinais Vitais",
+      "additional": "Adicional",
+      "context": "Contexto",
+      "documents": "Documentos",
+      "addFiles": "Adicionar Arquivos",
+      "notes": "Notas"
     }
   },
   "medications": {
