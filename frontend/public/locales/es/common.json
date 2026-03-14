@@ -1931,7 +1931,32 @@
     "groupByPractice": "Agrupar por consultorio",
     "ungroupedTitle": "Profesionales independientes",
     "editPracticeError": "Error al cargar el consultorio para edicion",
-    "createPracticeError": "Error al crear el consultorio. Intentelo de nuevo."
+    "createPracticeError": "Error al crear el consultorio. Intentelo de nuevo.",
+    "tabs": {
+      "practitioners": "Profesionales",
+      "practices": "Consultorios"
+    },
+    "practices": {
+      "addNew": "Agregar consultorio",
+      "createTitle": "Agregar consultorio",
+      "createSuccess": "Consultorio creado correctamente",
+      "searchPlaceholder": "Buscar consultorios...",
+      "deleteConfirm": "¿Está seguro de que desea eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
+      "deleteSuccess": "Consultorio eliminado correctamente",
+      "deleteError": "Error al eliminar el consultorio",
+      "cannotDelete": "No se puede eliminar - tiene profesionales",
+      "totalCount": "{{count}} consultorios en total",
+      "unusedCount": "{{count}} sin usar",
+      "emptyTitle": "No se encontraron consultorios",
+      "emptyNoData": "Haga clic en \"Agregar consultorio\" para crear uno, o se crean automáticamente al agregar profesionales.",
+      "table": {
+        "name": "Nombre",
+        "phone": "Teléfono",
+        "website": "Sitio web",
+        "practitioners": "Profesionales",
+        "actions": "Acciones"
+      }
+    }
   },
   "reportBuilder": {
     "buttons": {

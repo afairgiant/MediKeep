@@ -6,8 +6,8 @@ import {
   Group,
   Paper,
   Switch,
+  Tabs,
   Text,
-  Title,
   Stack,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -34,7 +34,6 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import {
   usePractitioners,
-  useCacheManager,
   useDataManagement,
 } from '../../hooks';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
@@ -48,6 +47,7 @@ import PractitionerCard from '../../components/medical/practitioners/Practitione
 import PractitionerViewModal from '../../components/medical/practitioners/PractitionerViewModal';
 import PractitionerFormWrapper from '../../components/medical/practitioners/PractitionerFormWrapper';
 import PracticeEditModal from '../../components/medical/practitioners/PracticeEditModal';
+import PracticesList from '../../components/medical/practitioners/PracticesList';
 
 const Practitioners = () => {
   const { t } = useTranslation('common');
@@ -64,7 +64,6 @@ const Practitioners = () => {
     error: practitionersError,
     refresh,
   } = usePractitioners();
-  const { invalidatePractitioners } = useCacheManager();
 
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -310,8 +309,6 @@ const Practitioners = () => {
     }
   }, [location.search, filteredPractitioners, loading, showViewModal]);
 
-
-
   if (loading) {
     return <MedicalPageLoading message={t('practitioners.loading', 'Loading practitioners...')} />;
   }
@@ -321,256 +318,273 @@ const Practitioners = () => {
     <Container size="xl" py="sm">
       <PageHeader title={t('practitioners.title', 'Healthcare Practitioners')} icon="👨‍⚕️" />
 
-      <Stack gap="sm" mt="md">
-        <MedicalPageAlerts
+      <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
           onClearError={() => setError('')}
         />
 
-        <MedicalPageActions
-          primaryAction={{
-            label: t('practitioners.actions.addNew', 'Add New Practitioner'),
-            onClick: handleAddPractitioner,
-            leftSection: <IconPlus size={16} />,
-            size: 'sm',
-          }}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          viewToggleSize="sm"
-          mb={0}
-        />
+      <Tabs defaultValue="practitioners" mt="md">
+        <Tabs.List mb="sm">
+          <Tabs.Tab value="practitioners">
+            {t('practitioners.tabs.practitioners', 'Practitioners')}
+          </Tabs.Tab>
+          <Tabs.Tab value="practices" leftSection={<IconBuilding size={16} />}>
+            {t('practitioners.tabs.practices', 'Practices')}
+          </Tabs.Tab>
+        </Tabs.List>
 
-        {/* Mantine Filter Controls */}
-        <MedicalPageFilters dataManagement={dataManagement} config={config} />
-
-        {/* Group by Practice Toggle */}
-        <Group>
-          <Switch
-            label={t('practitioners.groupByPractice', 'Group by Practice')}
-            checked={groupByPractice}
-            onChange={(event) => setGroupByPractice(event.currentTarget.checked)}
-            size="sm"
-          />
-        </Group>
-
-        {/* Content */}
-          {filteredPractitioners.length === 0 ? (
-            <EmptyState
-              icon={IconShieldCheck}
-              title={t('practitioners.empty.title', 'No healthcare practitioners found')}
-              hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
+        <Tabs.Panel value="practitioners">
+          <Stack gap="sm">
+            <MedicalPageActions
+              primaryAction={{
+                label: t('practitioners.actions.addNew', 'Add New Practitioner'),
+                onClick: handleAddPractitioner,
+                leftSection: <IconPlus size={16} />,
+                size: 'sm',
+              }}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              viewToggleSize="sm"
+              mb={0}
             />
-          ) : groupByPractice && groupedPractitioners ? (
-            <Accordion variant="separated" multiple defaultValue={groupedPractitioners.practices.map(g => String(g.id))}>
-              {groupedPractitioners.practices.map(group => (
-                <Accordion.Item key={group.id} value={String(group.id)}>
-                  <Accordion.Control>
-                    <Group gap="xs" justify="space-between" wrap="nowrap" style={{ width: '100%' }}>
-                      <Group gap="xs">
-                        <IconBuilding size={18} />
-                        <Text fw={600}>{group.name}</Text>
-                        <Text size="sm" c="dimmed">({group.practitioners.length})</Text>
-                      </Group>
-                      <ActionIcon
-                        size="sm"
-                        variant="subtle"
-                        onClick={(e) => { e.stopPropagation(); handleEditPractice(group.id); }}
-                        title={t('practitioners.viewModal.editPractice')}
-                      >
-                        <IconEdit size={16} />
-                      </ActionIcon>
-                    </Group>
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    {viewMode === 'cards' ? (
-                      <AnimatedCardGrid
-                        items={group.practitioners}
-                        columns={{ base: 12, md: 6, lg: 4 }}
-                        renderCard={(practitioner) => (
-                          <PractitionerCard
-                            practitioner={practitioner}
-                            onEdit={handleEditPractitioner}
-                            onDelete={handleDeletePractitioner}
-                            onView={handleViewPractitioner}
-                            navigate={navigate}
-                            onError={(error) => {
-                              setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
-                              frontendLogger.logError('PractitionerCard error', {
-                                practitionerId: practitioner.id,
-                                error: error.message,
-                                page: 'Practitioners',
-                              });
-                            }}
-                          />
-                        )}
-                      />
-                    ) : (
-                      <Paper shadow="sm" radius="md" withBorder>
-                        <ResponsiveTable
-                          persistKey={`practitioners-group-${group.id}`}
-                          data={group.practitioners}
-                          columns={[
-                            { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                            { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                            { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                            { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                            { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
-                          ]}
-                          tableName={group.name}
-                          onView={handleViewPractitioner}
-                          onEdit={handleEditPractitioner}
-                          onDelete={handleDeletePractitioner}
-                          formatters={{
-                            name: defaultFormatters.primaryName,
-                            specialty: defaultFormatters.simple,
-                            phone_number: value => value || '-',
-                            email: value => value || '-',
-                            rating: value => value !== null && value !== undefined ? `${value}/5` : '-',
-                          }}
-                          dataType="medical"
-                          responsive={responsive}
-                        />
-                      </Paper>
-                    )}
-                  </Accordion.Panel>
-                </Accordion.Item>
-              ))}
-              {groupedPractitioners.ungrouped.length > 0 && (
-                <Accordion.Item value="ungrouped">
-                  <Accordion.Control>
-                    <Group gap="xs">
-                      <IconUser size={18} />
-                      <Text fw={600}>{t('practitioners.ungroupedTitle', 'Independent Practitioners')}</Text>
-                      <Text size="sm" c="dimmed">({groupedPractitioners.ungrouped.length})</Text>
-                    </Group>
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    {viewMode === 'cards' ? (
-                      <AnimatedCardGrid
-                        items={groupedPractitioners.ungrouped}
-                        columns={{ base: 12, md: 6, lg: 4 }}
-                        renderCard={(practitioner) => (
-                          <PractitionerCard
-                            practitioner={practitioner}
-                            onEdit={handleEditPractitioner}
-                            onDelete={handleDeletePractitioner}
-                            onView={handleViewPractitioner}
-                            navigate={navigate}
-                            onError={(error) => {
-                              setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
-                              frontendLogger.logError('PractitionerCard error', {
-                                practitionerId: practitioner.id,
-                                error: error.message,
-                                page: 'Practitioners',
-                              });
-                            }}
-                          />
-                        )}
-                      />
-                    ) : (
-                      <Paper shadow="sm" radius="md" withBorder>
-                        <ResponsiveTable
-                          persistKey="practitioners-ungrouped"
-                          data={groupedPractitioners.ungrouped}
-                          columns={[
-                            { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                            { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                            { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                            { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                            { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
-                          ]}
-                          tableName={t('practitioners.ungroupedTitle', 'Independent Practitioners')}
-                          onView={handleViewPractitioner}
-                          onEdit={handleEditPractitioner}
-                          onDelete={handleDeletePractitioner}
-                          formatters={{
-                            name: defaultFormatters.primaryName,
-                            specialty: defaultFormatters.simple,
-                            phone_number: value => value || '-',
-                            email: value => value || '-',
-                            rating: value => value !== null && value !== undefined ? `${value}/5` : '-',
-                          }}
-                          dataType="medical"
-                          responsive={responsive}
-                        />
-                      </Paper>
-                    )}
-                  </Accordion.Panel>
-                </Accordion.Item>
-              )}
-            </Accordion>
-          ) : viewMode === 'cards' ? (
-            <AnimatedCardGrid
-              items={filteredPractitioners}
-              columns={{ base: 12, md: 6, lg: 4 }}
-              renderCard={(practitioner) => (
-                <PractitionerCard
-                  practitioner={practitioner}
-                  onEdit={handleEditPractitioner}
-                  onDelete={handleDeletePractitioner}
-                  onView={handleViewPractitioner}
-                  navigate={navigate}
-                  onError={(error) => {
-                    setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
-                    frontendLogger.logError('PractitionerCard error', {
-                      practitionerId: practitioner.id,
-                      error: error.message,
-                      page: 'Practitioners',
-                    });
-                  }}
-                />
-              )}
-            />
-          ) : (
-            <Paper shadow="sm" radius="md" withBorder>
-              <ResponsiveTable
-                persistKey="practitioners"
-                data={filteredPractitioners}
-                columns={[
-                  { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                  { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                  { header: t('practitioners.table.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
-                  { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                  { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                  { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
-                ]}
-                tableName={t('practitioners.title', 'Healthcare Practitioners')}
-                onView={handleViewPractitioner}
-                onEdit={handleEditPractitioner}
-                onDelete={handleDeletePractitioner}
-                formatters={{
-                  name: defaultFormatters.primaryName,
-                  specialty: defaultFormatters.simple,
-                  practice_name: (value, row) => {
-                    if (!value || !row.practice_id) return '-';
-                    return (
-                      <Group gap={4} wrap="nowrap">
-                        <Text size="sm">{value}</Text>
-                        <ActionIcon
-                          size="xs"
-                          variant="subtle"
-                          onClick={(e) => { e.stopPropagation(); handleEditPractice(row.practice_id); }}
-                          title={t('practitioners.viewModal.editPractice')}
-                        >
-                          <IconEdit size={14} />
-                        </ActionIcon>
-                      </Group>
-                    );
-                  },
-                  phone_number: value => value || '-',
-                  email: value => value || '-',
-                  rating: value =>
-                    value !== null && value !== undefined ? `${value}/5` : '-',
-                }}
-                dataType="medical"
-                responsive={responsive}
+
+            {/* Mantine Filter Controls */}
+            <MedicalPageFilters dataManagement={dataManagement} config={config} />
+
+            {/* Group by Practice Toggle */}
+            <Group>
+              <Switch
+                label={t('practitioners.groupByPractice', 'Group by Practice')}
+                checked={groupByPractice}
+                onChange={(event) => setGroupByPractice(event.currentTarget.checked)}
+                size="sm"
               />
-            </Paper>
-          )}
-      </Stack>
+            </Group>
+
+            {/* Content */}
+              {filteredPractitioners.length === 0 ? (
+                <EmptyState
+                  icon={IconShieldCheck}
+                  title={t('practitioners.empty.title', 'No healthcare practitioners found')}
+                  hasActiveFilters={dataManagement.hasActiveFilters}
+                  filteredMessage={t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')}
+                  noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
+                />
+              ) : groupByPractice && groupedPractitioners ? (
+                <Accordion variant="separated" multiple defaultValue={groupedPractitioners.practices.map(g => String(g.id))}>
+                  {groupedPractitioners.practices.map(group => (
+                    <Accordion.Item key={group.id} value={String(group.id)}>
+                      <Accordion.Control>
+                        <Group gap="xs" justify="space-between" wrap="nowrap" style={{ width: '100%' }}>
+                          <Group gap="xs">
+                            <IconBuilding size={18} />
+                            <Text fw={600}>{group.name}</Text>
+                            <Text size="sm" c="dimmed">({group.practitioners.length})</Text>
+                          </Group>
+                          <ActionIcon
+                            size="sm"
+                            variant="subtle"
+                            onClick={(e) => { e.stopPropagation(); handleEditPractice(group.id); }}
+                            title={t('practitioners.viewModal.editPractice')}
+                          >
+                            <IconEdit size={16} />
+                          </ActionIcon>
+                        </Group>
+                      </Accordion.Control>
+                      <Accordion.Panel>
+                        {viewMode === 'cards' ? (
+                          <AnimatedCardGrid
+                            items={group.practitioners}
+                            columns={{ base: 12, md: 6, lg: 4 }}
+                            renderCard={(practitioner) => (
+                              <PractitionerCard
+                                practitioner={practitioner}
+                                onEdit={handleEditPractitioner}
+                                onDelete={handleDeletePractitioner}
+                                onView={handleViewPractitioner}
+                                navigate={navigate}
+                                onError={(error) => {
+                                  setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
+                                  frontendLogger.logError('PractitionerCard error', {
+                                    practitionerId: practitioner.id,
+                                    error: error.message,
+                                    page: 'Practitioners',
+                                  });
+                                }}
+                              />
+                            )}
+                          />
+                        ) : (
+                          <Paper shadow="sm" radius="md" withBorder>
+                            <ResponsiveTable
+                              persistKey={`practitioners-group-${group.id}`}
+                              data={group.practitioners}
+                              columns={[
+                                { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                                { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                                { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                                { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                                { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                              ]}
+                              tableName={group.name}
+                              onView={handleViewPractitioner}
+                              onEdit={handleEditPractitioner}
+                              onDelete={handleDeletePractitioner}
+                              formatters={{
+                                name: defaultFormatters.primaryName,
+                                specialty: defaultFormatters.simple,
+                                phone_number: value => value || '-',
+                                email: value => value || '-',
+                                rating: value => value !== null && value !== undefined ? `${value}/5` : '-',
+                              }}
+                              dataType="medical"
+                              responsive={responsive}
+                            />
+                          </Paper>
+                        )}
+                      </Accordion.Panel>
+                    </Accordion.Item>
+                  ))}
+                  {groupedPractitioners.ungrouped.length > 0 && (
+                    <Accordion.Item value="ungrouped">
+                      <Accordion.Control>
+                        <Group gap="xs">
+                          <IconUser size={18} />
+                          <Text fw={600}>{t('practitioners.ungroupedTitle', 'Independent Practitioners')}</Text>
+                          <Text size="sm" c="dimmed">({groupedPractitioners.ungrouped.length})</Text>
+                        </Group>
+                      </Accordion.Control>
+                      <Accordion.Panel>
+                        {viewMode === 'cards' ? (
+                          <AnimatedCardGrid
+                            items={groupedPractitioners.ungrouped}
+                            columns={{ base: 12, md: 6, lg: 4 }}
+                            renderCard={(practitioner) => (
+                              <PractitionerCard
+                                practitioner={practitioner}
+                                onEdit={handleEditPractitioner}
+                                onDelete={handleDeletePractitioner}
+                                onView={handleViewPractitioner}
+                                navigate={navigate}
+                                onError={(error) => {
+                                  setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
+                                  frontendLogger.logError('PractitionerCard error', {
+                                    practitionerId: practitioner.id,
+                                    error: error.message,
+                                    page: 'Practitioners',
+                                  });
+                                }}
+                              />
+                            )}
+                          />
+                        ) : (
+                          <Paper shadow="sm" radius="md" withBorder>
+                            <ResponsiveTable
+                              persistKey="practitioners-ungrouped"
+                              data={groupedPractitioners.ungrouped}
+                              columns={[
+                                { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                                { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                                { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                                { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                                { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                              ]}
+                              tableName={t('practitioners.ungroupedTitle', 'Independent Practitioners')}
+                              onView={handleViewPractitioner}
+                              onEdit={handleEditPractitioner}
+                              onDelete={handleDeletePractitioner}
+                              formatters={{
+                                name: defaultFormatters.primaryName,
+                                specialty: defaultFormatters.simple,
+                                phone_number: value => value || '-',
+                                email: value => value || '-',
+                                rating: value => value !== null && value !== undefined ? `${value}/5` : '-',
+                              }}
+                              dataType="medical"
+                              responsive={responsive}
+                            />
+                          </Paper>
+                        )}
+                      </Accordion.Panel>
+                    </Accordion.Item>
+                  )}
+                </Accordion>
+              ) : viewMode === 'cards' ? (
+                <AnimatedCardGrid
+                  items={filteredPractitioners}
+                  columns={{ base: 12, md: 6, lg: 4 }}
+                  renderCard={(practitioner) => (
+                    <PractitionerCard
+                      practitioner={practitioner}
+                      onEdit={handleEditPractitioner}
+                      onDelete={handleDeletePractitioner}
+                      onView={handleViewPractitioner}
+                      navigate={navigate}
+                      onError={(error) => {
+                        setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
+                        frontendLogger.logError('PractitionerCard error', {
+                          practitionerId: practitioner.id,
+                          error: error.message,
+                          page: 'Practitioners',
+                        });
+                      }}
+                    />
+                  )}
+                />
+              ) : (
+                <Paper shadow="sm" radius="md" withBorder>
+                  <ResponsiveTable
+                    persistKey="practitioners"
+                    data={filteredPractitioners}
+                    columns={[
+                      { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                      { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                      { header: t('practitioners.table.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
+                      { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                      { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                      { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                    ]}
+                    tableName={t('practitioners.title', 'Healthcare Practitioners')}
+                    onView={handleViewPractitioner}
+                    onEdit={handleEditPractitioner}
+                    onDelete={handleDeletePractitioner}
+                    formatters={{
+                      name: defaultFormatters.primaryName,
+                      specialty: defaultFormatters.simple,
+                      practice_name: (value, row) => {
+                        if (!value || !row.practice_id) return '-';
+                        return (
+                          <Group gap={4} wrap="nowrap">
+                            <Text size="sm">{value}</Text>
+                            <ActionIcon
+                              size="xs"
+                              variant="subtle"
+                              onClick={(e) => { e.stopPropagation(); handleEditPractice(row.practice_id); }}
+                              title={t('practitioners.viewModal.editPractice')}
+                            >
+                              <IconEdit size={14} />
+                            </ActionIcon>
+                          </Group>
+                        );
+                      },
+                      phone_number: value => value || '-',
+                      email: value => value || '-',
+                      rating: value =>
+                        value !== null && value !== undefined ? `${value}/5` : '-',
+                    }}
+                    dataType="medical"
+                    responsive={responsive}
+                  />
+                </Paper>
+              )}
+          </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="practices">
+          <PracticesList onPracticeSaved={handlePracticeSaved} />
+        </Tabs.Panel>
+      </Tabs>
       </Container>
 
       <PractitionerFormWrapper
