@@ -1822,7 +1822,32 @@
     "groupByPractice": "Raggruppa per studio",
     "ungroupedTitle": "Professionisti indipendenti",
     "editPracticeError": "Errore durante il caricamento dello studio per la modifica",
-    "createPracticeError": "Errore durante la creazione dello studio. Riprovare."
+    "createPracticeError": "Errore durante la creazione dello studio. Riprovare.",
+    "tabs": {
+      "practitioners": "Professionisti",
+      "practices": "Studi medici"
+    },
+    "practices": {
+      "addNew": "Aggiungi studio medico",
+      "createTitle": "Aggiungi studio medico",
+      "createSuccess": "Studio medico creato con successo",
+      "searchPlaceholder": "Cerca studi medici...",
+      "deleteConfirm": "Sei sicuro di voler eliminare \"{{name}}\"? Questa azione non può essere annullata.",
+      "deleteSuccess": "Studio medico eliminato con successo",
+      "deleteError": "Impossibile eliminare lo studio medico",
+      "cannotDelete": "Impossibile eliminare - ha professionisti associati",
+      "totalCount": "{{count}} studi medici in totale",
+      "unusedCount": "{{count}} inutilizzati",
+      "emptyTitle": "Nessuno studio medico trovato",
+      "emptyNoData": "Clicca su \"Aggiungi studio medico\" per crearne uno, oppure vengono creati automaticamente aggiungendo professionisti.",
+      "table": {
+        "name": "Nome",
+        "phone": "Telefono",
+        "website": "Sito web",
+        "practitioners": "Professionisti",
+        "actions": "Azioni"
+      }
+    }
   },
   "pharmacies": {
     "title": "Farmacie",

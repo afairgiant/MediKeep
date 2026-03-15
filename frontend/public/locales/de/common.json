@@ -2116,7 +2116,32 @@
     "groupByPractice": "Nach Praxis gruppieren",
     "ungroupedTitle": "Unabhaengige Aerzte",
     "editPracticeError": "Fehler beim Laden der Praxis zur Bearbeitung",
-    "createPracticeError": "Fehler beim Erstellen der Praxis. Bitte versuchen Sie es erneut."
+    "createPracticeError": "Fehler beim Erstellen der Praxis. Bitte versuchen Sie es erneut.",
+    "tabs": {
+      "practitioners": "Behandler",
+      "practices": "Praxen"
+    },
+    "practices": {
+      "addNew": "Praxis hinzufügen",
+      "createTitle": "Praxis hinzufügen",
+      "createSuccess": "Praxis erfolgreich erstellt",
+      "searchPlaceholder": "Praxen suchen...",
+      "deleteConfirm": "Möchten Sie \"{{name}}\" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteSuccess": "Praxis erfolgreich gelöscht",
+      "deleteError": "Praxis konnte nicht gelöscht werden",
+      "cannotDelete": "Löschen nicht möglich - Behandler zugeordnet",
+      "totalCount": "{{count}} Praxen insgesamt",
+      "unusedCount": "{{count}} ungenutzt",
+      "emptyTitle": "Keine Praxen gefunden",
+      "emptyNoData": "Klicken Sie auf \"Praxis hinzufügen\" oder Praxen werden automatisch beim Hinzufügen von Behandlern erstellt.",
+      "table": {
+        "name": "Name",
+        "phone": "Telefon",
+        "website": "Webseite",
+        "practitioners": "Behandler",
+        "actions": "Aktionen"
+      }
+    }
   },
   "pharmacies": {
     "title": "Apotheken",

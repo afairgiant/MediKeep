@@ -1,6 +1,7 @@
-from typing import Any, List
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -14,6 +15,7 @@ from app.api.v1.endpoints.utils import (
 )
 from app.crud.practice import practice
 from app.models.activity_log import EntityType
+from app.models.models import Practitioner as PractitionerModel
 from app.schemas.practice import (
     Practice,
     PracticeCreate,
@@ -47,7 +49,7 @@ def create_practice(
     )
 
 
-@router.get("/", response_model=List[Practice])
+@router.get("/", response_model=list[PracticeWithPractitioners])
 def read_practices(
     *,
     request: Request,
@@ -57,7 +59,7 @@ def read_practices(
     search: str = Query(None, min_length=1),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Retrieve practices with optional search."""
+    """Retrieve practices with optional search and practitioner counts."""
     with handle_database_errors(request=request):
         if search:
             practices = practice.search_by_name(
@@ -65,10 +67,28 @@ def read_practices(
             )
         else:
             practices = practice.get_multi(db, skip=skip, limit=limit)
+
+        practice_ids = [p.id for p in practices]
+        count_map = {}
+        if practice_ids:
+            counts = (
+                db.query(
+                    PractitionerModel.practice_id,
+                    func.count(PractitionerModel.id).label("cnt"),
+                )
+                .filter(PractitionerModel.practice_id.in_(practice_ids))
+                .group_by(PractitionerModel.practice_id)
+                .all()
+            )
+            count_map = {row.practice_id: row.cnt for row in counts}
+
+        for p in practices:
+            p.practitioner_count = count_map.get(p.id, 0)
+
         return practices
 
 
-@router.get("/summary", response_model=List[PracticeSummary])
+@router.get("/summary", response_model=list[PracticeSummary])
 def read_practices_summary(
     *,
     request: Request,
@@ -80,7 +100,7 @@ def read_practices_summary(
         return practice.get_all_practices_summary(db)
 
 
-@router.get("/search/by-name", response_model=List[Practice])
+@router.get("/search/by-name", response_model=list[Practice])
 def search_practices_by_name(
     *,
     request: Request,
@@ -105,7 +125,6 @@ def read_practice(
     with handle_database_errors(request=request):
         practice_obj = practice.get_with_practitioners(db, practice_id=practice_id)
         handle_not_found(practice_obj, "Practice", request)
-        # Add practitioner count
         practice_obj.practitioner_count = len(practice_obj.practitioners) if practice_obj.practitioners else 0
         return practice_obj
 
@@ -140,7 +159,15 @@ def delete_practice(
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Delete a practice. FK ondelete=SET NULL auto-nullifies practitioner references."""
+    """Delete a practice. Only allowed when no practitioners are linked."""
+    with handle_database_errors(request=request):
+        count = practice.get_practitioner_count(db, practice_id)
+        if count > 0:
+            raise HTTPException(
+                status_code=409,
+                detail="Cannot delete practice with active practitioners",
+            )
+
     return handle_delete_with_logging(
         db=db,
         crud_obj=practice,

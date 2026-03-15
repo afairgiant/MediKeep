@@ -1861,7 +1861,32 @@
     "groupByPractice": "Group by Practice",
     "ungroupedTitle": "Independent Practitioners",
     "editPracticeError": "Failed to load practice for editing",
-    "createPracticeError": "Failed to create practice. Please try again."
+    "createPracticeError": "Failed to create practice. Please try again.",
+    "tabs": {
+      "practitioners": "Practitioners",
+      "practices": "Practices"
+    },
+    "practices": {
+      "addNew": "Add Practice",
+      "createTitle": "Add Practice",
+      "createSuccess": "Practice created successfully",
+      "searchPlaceholder": "Search practices...",
+      "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+      "deleteSuccess": "Practice deleted successfully",
+      "deleteError": "Failed to delete practice",
+      "cannotDelete": "Cannot delete - has practitioners",
+      "totalCount": "{{count}} practices total",
+      "unusedCount": "{{count}} unused",
+      "emptyTitle": "No practices found",
+      "emptyNoData": "Click \"Add Practice\" to create one, or they are created automatically when adding practitioners.",
+      "table": {
+        "name": "Name",
+        "phone": "Phone",
+        "website": "Website",
+        "practitioners": "Practitioners",
+        "actions": "Actions"
+      }
+    }
   },
   "pharmacies": {
     "title": "Pharmacies",
