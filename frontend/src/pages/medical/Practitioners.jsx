@@ -325,7 +325,7 @@ const Practitioners = () => {
         />
 
       <Tabs defaultValue="practitioners" mt="md">
-        <Tabs.List mb="sm">
+        <Tabs.List mb="sm" className="no-print">
           <Tabs.Tab value="practitioners">
             {t('practitioners.tabs.practitioners', 'Practitioners')}
           </Tabs.Tab>
@@ -353,7 +353,7 @@ const Practitioners = () => {
             <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
             {/* Group by Practice Toggle */}
-            <Group>
+            <Group className="no-print">
               <Switch
                 label={t('practitioners.groupByPractice', 'Group by Practice')}
                 checked={groupByPractice}

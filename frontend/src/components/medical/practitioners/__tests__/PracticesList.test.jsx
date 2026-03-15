@@ -219,7 +219,7 @@ describe('PracticesList', () => {
     });
 
     test('calls delete API after confirmation for practice with 0 practitioners', async () => {
-      window.confirm = vi.fn(() => true);
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
       mockDeletePractice.mockResolvedValue({});
 
       render(
@@ -248,7 +248,7 @@ describe('PracticesList', () => {
     });
 
     test('does not delete when user cancels confirmation', async () => {
-      window.confirm = vi.fn(() => false);
+      vi.spyOn(window, 'confirm').mockReturnValue(false);
 
       render(
         <MantineWrapper>

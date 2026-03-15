@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import {
+  Alert,
   Badge,
   Button,
   Group,
@@ -23,7 +24,7 @@ import frontendLogger from '../../../services/frontendLogger';
 const PracticesList = ({ onPracticeSaved }) => {
   const { t } = useTranslation('common');
   const responsive = useResponsive();
-  const { practices, loading, refresh } = usePractices();
+  const { practices, loading, error, refresh } = usePractices();
 
   const [search, setSearch] = useState('');
   const [practiceEditData, setPracticeEditData] = useState(null);
@@ -120,6 +121,12 @@ const PracticesList = ({ onPracticeSaved }) => {
         </Button>
       </Group>
 
+      {error && (
+        <Alert color="red" mb="sm">
+          {t('practitioners.errors.loadFailed')}
+        </Alert>
+      )}
+
       {filteredPractices.length === 0 ? (
         <EmptyState
           icon={IconSearch}
@@ -167,7 +174,7 @@ const PracticesList = ({ onPracticeSaved }) => {
               id: (value, row) => {
                 const count = row.practitioner_count ?? 0;
                 return (
-                  <Group gap="xs" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+                  <Group gap="xs" wrap="nowrap" className="no-print" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="subtle"
                       size="compact-xs"
