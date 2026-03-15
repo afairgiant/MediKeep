@@ -2490,7 +2490,8 @@
       "preferences": "Préférences d'application",
       "documentStorage": "Stockage des documents",
       "gettingHelp": "Obtenir de l'aide",
-      "supportMediKeep": "Soutenir MediKeep"
+      "supportMediKeep": "Soutenir MediKeep",
+      "releaseNotes": "Notes de version"
     },
     "security": {
       "password": {
@@ -2546,6 +2547,21 @@
     "sponsor": {
       "description": "MediKeep est gratuit et open source. Si vous trouvez l'application utile, envisagez de parrainer le projet pour aider à financer son développement.",
       "button": "Parrainer sur GitHub"
+    },
+    "releaseNotes": {
+      "whatsNewTitle": "Nouveaut\u00e9s",
+      "whatsNewSubtitle": "Voici ce qui a chang\u00e9 depuis votre derni\u00e8re mise \u00e0 jour",
+      "currentVersion": "Actuelle",
+      "viewOnGithub": "Voir sur GitHub",
+      "dismiss": "Compris",
+      "loading": "Chargement des notes de version...",
+      "error": "Impossible de charger les notes de version",
+      "retry": "R\u00e9essayer",
+      "empty": "Aucune note de version disponible",
+      "publishedOn": "Publi\u00e9 le {{date}}",
+      "noChanges": "Aucun changement list\u00e9 pour cette version",
+      "showAll": "Afficher toutes les versions",
+      "showLess": "Afficher moins"
     },
     "preferences": {
       "unitSystem": {

@@ -29,12 +29,14 @@
 ## 1. API Overview & Standards
 
 ### Base Information
+
 - **Protocol**: HTTPS (recommended), HTTP (development only)
 - **Authentication**: JWT Bearer Token
 - **Content-Type**: `application/json`
 - **Character Encoding**: UTF-8
 
 ### Pagination Standards
+
 - **Default**: 20 items per page
 - **Maximum**: 100 items per page
 - **Query Parameters**:
@@ -44,15 +46,17 @@
 ### Response Formats
 
 #### Success Response
+
 ```json
 {
   "status": "success",
-  "data": { },
+  "data": {},
   "message": "Optional success message"
 }
 ```
 
 #### Error Response
+
 ```json
 {
   "status": "error",
@@ -62,6 +66,7 @@
 ```
 
 ### HTTP Status Codes
+
 - `200`: Successful GET/PUT/PATCH request
 - `201`: Resource created successfully
 - `204`: Successful DELETE (no content)
@@ -75,6 +80,7 @@
 - `500`: Internal server error
 
 ### Rate Limiting
+
 - Standard endpoints: 100 requests/minute
 - Authentication endpoints: 10 requests/minute
 - File upload endpoints: 50 requests/hour
@@ -88,10 +94,13 @@
 Base path: `/api/v1/auth`
 
 ### Check Registration Status
+
 `GET /auth/registration-status`
+
 - **Purpose**: Check if new user registration is enabled
 - **Authentication**: No
 - **Success Response** (200):
+
 ```json
 {
   "registration_enabled": true,
@@ -100,10 +109,13 @@ Base path: `/api/v1/auth`
 ```
 
 ### User Registration
+
 `POST /auth/register`
+
 - **Purpose**: Create a new user account
 - **Authentication**: No
 - **Request Body**:
+
 ```json
 {
   "username": "johndoe",
@@ -113,7 +125,9 @@ Base path: `/api/v1/auth`
   "last_name": "Doe"
 }
 ```
+
 - **Success Response** (201):
+
 ```json
 {
   "id": 1,
@@ -124,21 +138,27 @@ Base path: `/api/v1/auth`
   "created_at": "2025-10-04T10:30:00Z"
 }
 ```
+
 - **Error Responses**:
   - `400`: Validation failed (weak password, invalid email)
   - `403`: Registration disabled
   - `409`: Username or email already exists
 
 ### User Login
+
 `POST /auth/login`
+
 - **Purpose**: Authenticate and receive JWT token
 - **Authentication**: No
 - **Content-Type**: `application/x-www-form-urlencoded`
 - **Request Body** (form data):
+
 ```
 username=johndoe&password=SecurePass123!
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -146,28 +166,35 @@ username=johndoe&password=SecurePass123!
   "session_timeout_minutes": 60
 }
 ```
+
 - **Note**: The response does NOT include a user object. Use `GET /users/me` to retrieve user details after login. The `session_timeout_minutes` reflects the user's session timeout preference (or system default if not set).
 - **Error Responses**:
   - `401`: Invalid credentials
   - `429`: Too many login attempts (rate limited)
 
 ### Change Password
+
 `POST /auth/change-password`
+
 - **Purpose**: Update current user's password
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "current_password": "OldPass123!",
   "new_password": "NewPass456!"
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "message": "Password changed successfully"
 }
 ```
+
 - **Error Responses**:
   - `400`: Password validation failed (too weak, same as old)
   - `401`: Current password incorrect
@@ -181,10 +208,13 @@ Base path: `/api/v1/auth/sso`
 **Supported Providers**: Google, GitHub, OIDC, Authentik, Authelia, Keycloak
 
 ### Get SSO Configuration
+
 `GET /auth/sso/config`
+
 - **Purpose**: Check SSO availability and configuration
 - **Authentication**: No
 - **Success Response** (200):
+
 ```json
 {
   "enabled": true,
@@ -194,12 +224,15 @@ Base path: `/api/v1/auth/sso`
 ```
 
 ### Initiate SSO Login
+
 `POST /auth/sso/initiate`
+
 - **Purpose**: Start SSO authentication flow
 - **Authentication**: No
 - **Query Parameters**:
   - `return_url` (string, optional): URL to redirect after authentication
 - **Success Response** (200):
+
 ```json
 {
   "authorization_url": "https://accounts.google.com/o/oauth2/v2/auth?...",
@@ -208,17 +241,22 @@ Base path: `/api/v1/auth/sso`
 ```
 
 ### SSO Callback
+
 `POST /auth/sso/callback`
+
 - **Purpose**: Complete SSO authentication
 - **Authentication**: No
 - **Request Body**:
+
 ```json
 {
   "code": "authorization_code_from_provider",
   "state": "state_token_from_initiate"
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -235,7 +273,9 @@ Base path: `/api/v1/auth/sso`
   "is_new_user": false
 }
 ```
+
 - **Conflict Response** (200):
+
 ```json
 {
   "conflict": true,
@@ -246,10 +286,13 @@ Base path: `/api/v1/auth/sso`
 ```
 
 ### Resolve Account Conflict
+
 `POST /auth/sso/resolve-conflict`
+
 - **Purpose**: Handle SSO email conflicts with existing accounts
 - **Authentication**: No
 - **Request Body**:
+
 ```json
 {
   "temp_token": "temporary_token",
@@ -257,6 +300,7 @@ Base path: `/api/v1/auth/sso`
   "preference": "auto_link"
 }
 ```
+
 - **Actions**:
   - `link`: Link SSO to existing account
   - `create_separate`: Create new account with different email
@@ -266,10 +310,13 @@ Base path: `/api/v1/auth/sso`
   - `always_ask`: Prompt user each time
 
 ### GitHub Manual Linking
+
 `POST /auth/sso/resolve-github-link`
+
 - **Purpose**: Link GitHub account by verifying password
 - **Authentication**: No
 - **Request Body**:
+
 ```json
 {
   "temp_token": "temporary_token",
@@ -279,10 +326,13 @@ Base path: `/api/v1/auth/sso`
 ```
 
 ### Test SSO Connection
+
 `POST /auth/sso/test-connection`
+
 - **Purpose**: Test SSO provider connectivity (admin)
 - **Authentication**: No (but intended for admin use)
 - **Success Response** (200):
+
 ```json
 {
   "success": true,
@@ -297,10 +347,13 @@ Base path: `/api/v1/auth/sso`
 Base path: `/api/v1/users`
 
 ### Get Current User
+
 `GET /users/me`
+
 - **Purpose**: Retrieve authenticated user's profile
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "id": 1,
@@ -316,10 +369,13 @@ Base path: `/api/v1/users`
 ```
 
 ### Update Current User
+
 `PUT /users/me`
+
 - **Purpose**: Update user profile information
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "first_name": "John",
@@ -327,14 +383,18 @@ Base path: `/api/v1/users`
   "email": "newemail@example.com"
 }
 ```
+
 - **Success Response** (200): Updated user object
 
 ### Delete User Account
+
 `DELETE /users/me`
+
 - **Purpose**: Permanently delete user account and ALL associated data
 - **Authentication**: Yes
 - **Warning**: Deletes user, patient record, and all medical data (medications, lab results, etc.)
 - **Success Response** (200):
+
 ```json
 {
   "message": "Account and all associated data deleted successfully",
@@ -348,15 +408,19 @@ Base path: `/api/v1/users`
   }
 }
 ```
+
 - **Error Responses**:
   - `400`: Cannot delete last admin user
   - `404`: User not found
 
 ### Get User Preferences
+
 `GET /users/me/preferences`
+
 - **Purpose**: Retrieve user preferences/settings
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "user_id": 1,
@@ -367,10 +431,13 @@ Base path: `/api/v1/users`
 ```
 
 ### Update User Preferences
+
 `PUT /users/me/preferences`
+
 - **Purpose**: Update user preferences
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "theme": "dark",
@@ -385,10 +452,13 @@ Base path: `/api/v1/users`
 Base path: `/api/v1/patients`
 
 ### Get My Patient Record
+
 `GET /patients/me`
+
 - **Purpose**: Retrieve current user's patient record
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "id": 1,
@@ -402,14 +472,18 @@ Base path: `/api/v1/patients`
   "created_at": "2025-01-01T00:00:00Z"
 }
 ```
+
 - **Error Responses**:
   - `404`: Patient record not found
 
 ### Create My Patient Record
+
 `POST /patients/me`
+
 - **Purpose**: Create patient record for current user
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "first_name": "John",
@@ -423,6 +497,7 @@ Base path: `/api/v1/patients`
   "physician_id": 5
 }
 ```
+
 - **Note**: Height in inches, weight in pounds
 - **Success Response** (201): Created patient object
 - **Error Responses**:
@@ -430,24 +505,31 @@ Base path: `/api/v1/patients`
   - `400`: Validation failed (invalid date, missing required fields)
 
 ### Update My Patient Record
+
 `PUT /patients/me`
+
 - **Purpose**: Update current user's patient record
 - **Authentication**: Yes
 - **Request Body**: All fields optional
+
 ```json
 {
   "first_name": "Jonathan",
   "address": "456 New Address"
 }
 ```
+
 - **Success Response** (200): Updated patient object
 
 ### Delete My Patient Record
+
 `DELETE /patients/me`
+
 - **Purpose**: Delete patient record and ALL medical data
 - **Authentication**: Yes
 - **Warning**: Cascades to medications, lab results, allergies, conditions, procedures, treatments, encounters, vitals, immunizations
 - **Success Response** (200):
+
 ```json
 {
   "message": "Patient record and all associated medical records deleted successfully"
@@ -455,7 +537,9 @@ Base path: `/api/v1/patients`
 ```
 
 ### Get Patient Medications
+
 `GET /patients/{patient_id}/medications`
+
 - **Purpose**: Get all medications for a specific patient
 - **Authentication**: Yes (must have access to patient)
 - **Path Parameters**:
@@ -467,53 +551,72 @@ Base path: `/api/v1/patients`
 - **Success Response** (200): Array of medication objects with practitioner and pharmacy details
 
 ### Create Patient Medication
+
 `POST /patients/{patient_id}/medications`
+
 - **Purpose**: Create new medication for a patient
 - **Authentication**: Yes (must have write access to patient)
 - **Request Body**: See Medications section below
 
 ### Get Patient Conditions
+
 `GET /patients/{patient_id}/conditions`
+
 - **Purpose**: Get all medical conditions for a patient
 - **Authentication**: Yes
 
 ### Get Patient Allergies
+
 `GET /patients/{patient_id}/allergies`
+
 - **Purpose**: Get all allergies for a patient
 - **Authentication**: Yes
 
 ### Get Patient Immunizations
+
 `GET /patients/{patient_id}/immunizations`
+
 - **Purpose**: Get all immunizations for a patient
 - **Authentication**: Yes
 
 ### Get Patient Procedures
+
 `GET /patients/{patient_id}/procedures`
+
 - **Purpose**: Get all procedures for a patient
 - **Authentication**: Yes
 
 ### Get Patient Treatments
+
 `GET /patients/{patient_id}/treatments`
+
 - **Purpose**: Get all treatments for a patient
 - **Authentication**: Yes
 
 ### Get Patient Lab Results
+
 `GET /patients/{patient_id}/lab-results`
+
 - **Purpose**: Get all lab results for a patient
 - **Authentication**: Yes
 
 ### Get Patient Encounters
+
 `GET /patients/{patient_id}/encounters`
+
 - **Purpose**: Get all encounters (visits) for a patient
 - **Authentication**: Yes
 
 ### Get Recent Activity
+
 `GET /patients/me/recent-activity`
+
 - **Purpose**: Get recent medical-related activities
 - **Authentication**: Yes
 - **Query Parameters**:
   - `limit` (integer, default: 10, max: 100): Number of activities
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -527,12 +630,15 @@ Base path: `/api/v1/patients`
 ```
 
 ### Get Dashboard Statistics
+
 `GET /patients/me/dashboard-stats`
+
 - **Purpose**: Get comprehensive medical record statistics
 - **Authentication**: Yes
 - **Query Parameters**:
   - `patient_id` (integer, optional): Specific patient for Phase 1 patient switching
 - **Success Response** (200):
+
 ```json
 {
   "patient_id": 1,
@@ -550,7 +656,9 @@ Base path: `/api/v1/patients`
 ```
 
 ### Upload Patient Photo
+
 `POST /patients/{patient_id}/photo`
+
 - **Purpose**: Upload patient profile photo
 - **Authentication**: Yes (must have write access)
 - **Content-Type**: `multipart/form-data`
@@ -560,6 +668,7 @@ Base path: `/api/v1/patients`
   - Max size: 15MB
   - Accepted types: image/jpeg, image/png, image/gif, image/bmp
 - **Success Response** (201):
+
 ```json
 {
   "id": 1,
@@ -571,7 +680,9 @@ Base path: `/api/v1/patients`
 ```
 
 ### Get Patient Photo
+
 `GET /patients/{patient_id}/photo`
+
 - **Purpose**: Get patient photo file
 - **Authentication**: Yes
 - **Success Response** (200): Image file (image/jpeg)
@@ -579,13 +690,17 @@ Base path: `/api/v1/patients`
   - `Cache-Control: max-age=3600`
 
 ### Get Patient Photo Info
+
 `GET /patients/{patient_id}/photo/info`
+
 - **Purpose**: Get photo metadata without downloading file
 - **Authentication**: Yes
 - **Success Response** (200): Photo metadata object
 
 ### Delete Patient Photo
+
 `DELETE /patients/{patient_id}/photo`
+
 - **Purpose**: Delete patient photo
 - **Authentication**: Yes (must be owner)
 - **Success Response** (204): No content
@@ -597,9 +712,12 @@ Base path: `/api/v1/patient-management`
 **Purpose**: Netflix-style patient switching for managing multiple patient records
 
 #### Create Patient
+
 `POST /patient-management/`
+
 - **Purpose**: Create a new patient record (for managing family members, dependents, etc.)
 - **Request Body**:
+
 ```json
 {
   "first_name": "Jane",
@@ -614,16 +732,20 @@ Base path: `/api/v1/patient-management`
   "is_self_record": false
 }
 ```
+
 - **Success Response** (201): Created patient object
 
 #### List All Patients
+
 `GET /patient-management/`
+
 - **Purpose**: Get all accessible patients (owned + shared with user)
 - **Query Parameters**:
   - `skip`: Pagination offset
   - `limit`: Max items
   - `include_shared`: Include patients shared with user (default: true)
 - **Success Response** (200):
+
 ```json
 {
   "patients": [...],
@@ -634,53 +756,72 @@ Base path: `/api/v1/patient-management`
 ```
 
 #### Get Patient by ID
+
 `GET /patient-management/{patient_id}`
+
 - **Purpose**: Get specific patient details
 - **Success Response** (200): Patient object
 
 #### Update Patient
+
 `PUT /patient-management/{patient_id}`
+
 - **Purpose**: Update patient information
 - **Request Body**: Same as create (all fields optional)
 - **Success Response** (200): Updated patient object
 
 #### Delete Patient
+
 `DELETE /patient-management/{patient_id}`
+
 - **Purpose**: Delete a patient record
 - **Note**: Cannot delete if it's the last remaining patient
 - **Success Response** (200): `{"message": "Patient deleted successfully"}`
 
 #### List Owned Patients
+
 `GET /patient-management/owned/list`
+
 - **Purpose**: Get only patients owned by current user
 - **Success Response** (200): Array of owned patient objects
 
 #### Get Self Record
+
 `GET /patient-management/self-record`
+
 - **Purpose**: Get the user's own patient record (is_self_record=true)
 - **Success Response** (200): Patient object or null
 
 #### Switch Active Patient
+
 `POST /patient-management/switch`
+
 - **Purpose**: Switch the currently active patient context
 - **Request Body**:
+
 ```json
 {
   "patient_id": 3
 }
 ```
+
 - **Success Response** (200): New active patient object
 - **Use Case**: Switch between managing different family members
 
 #### Get Current Active Patient
+
 `GET /patient-management/active/current`
+
 - **Purpose**: Get the currently active patient
 - **Success Response** (200): Active patient object or null
 
 #### Get Patient Statistics
+
 `GET /patient-management/stats`
+
 - **Purpose**: Get statistics about accessible patients
 - **Success Response** (200):
+
 ```json
 {
   "total_patients": 5,
@@ -699,9 +840,12 @@ Base path: `/api/v1/patient-management`
 Base path: `/api/v1/medications`
 
 #### Create Medication
+
 `POST /medications/`
+
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -717,12 +861,15 @@ Base path: `/api/v1/medications`
   "pharmacy_id": 3
 }
 ```
+
 - **Route values**: `oral`, `injection`, `topical`, `intravenous`, `intramuscular`, `subcutaneous`, `inhalation`, `nasal`, `rectal`, `sublingual`
 - **Status values**: `active`, `stopped`, `on-hold`, `completed`, `cancelled`
 - **Success Response** (201): Medication object with relations
 
 #### List Medications
+
 `GET /medications/`
+
 - **Authentication**: Yes
 - **Query Parameters**:
   - `skip` (integer, default: 0)
@@ -733,30 +880,41 @@ Base path: `/api/v1/medications`
 - **Success Response** (200): Array of medications with practitioner, pharmacy, condition details
 
 #### Get Medication
+
 `GET /medications/{medication_id}`
+
 - **Authentication**: Yes
 - **Success Response** (200): Single medication with relations
 
 #### Update Medication
+
 `PUT /medications/{medication_id}`
+
 - **Authentication**: Yes
 - **Request Body**: Same as create, all fields optional
 
 #### Delete Medication
+
 `DELETE /medications/{medication_id}`
+
 - **Authentication**: Yes
 - **Success Response** (204): No content
 
 #### Get Patient Medications (Active Only)
+
 `GET /medications/patient/{patient_id}?active_only=true`
+
 - **Query Parameters**:
   - `active_only` (boolean): Filter only active medications
 
 #### Get Medication Treatments
+
 `GET /medications/{medication_id}/treatments`
+
 - **Purpose**: Get all treatments that use a specific medication (medication profile / treatment history)
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -785,6 +943,7 @@ Base path: `/api/v1/medications`
   }
 ]
 ```
+
 - Includes treatment details with condition, plus any treatment-specific overrides for this medication
 
 ### 6.2 Allergies
@@ -792,8 +951,11 @@ Base path: `/api/v1/medications`
 Base path: `/api/v1/allergies`
 
 #### Create Allergy
+
 `POST /allergies/`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -804,27 +966,37 @@ Base path: `/api/v1/allergies`
   "notes": "Confirmed by allergist"
 }
 ```
+
 - **Severity values**: `mild`, `moderate`, `severe`, `life-threatening`
 
 #### List Allergies
+
 `GET /allergies/`
+
 - **Query Parameters**:
   - `severity` (string, optional): Filter by severity
   - `allergen` (string, optional): Search allergen name
   - `tags` (array, optional): Filter by tags
 
 #### Get Active Allergies
+
 `GET /allergies/patient/{patient_id}/active`
+
 - **Purpose**: Get only active allergies for a patient
 
 #### Get Critical Allergies
+
 `GET /allergies/patient/{patient_id}/critical`
+
 - **Purpose**: Get severe and life-threatening allergies
 
 #### Check Allergen Conflict
+
 `GET /allergies/patient/{patient_id}/check/{allergen}`
+
 - **Purpose**: Check if patient has allergy to specific allergen
 - **Success Response** (200):
+
 ```json
 {
   "patient_id": 1,
@@ -838,8 +1010,11 @@ Base path: `/api/v1/allergies`
 Base path: `/api/v1/conditions`
 
 #### Create Condition
+
 `POST /conditions/`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -851,23 +1026,29 @@ Base path: `/api/v1/conditions`
   "notes": "Controlled with medication"
 }
 ```
+
 - **Status values**: `active`, `resolved`, `chronic`
 - **Severity values**: `mild`, `moderate`, `severe`
 
 #### List Conditions
+
 `GET /conditions/`
+
 - **Query Parameters**:
   - `status` (string, optional): Filter by status
   - `tags` (array, optional): Filter by tags
   - `tag_match_all` (boolean, default: false): Match all tags (AND) vs any tag (OR)
 
 #### Get Conditions for Dropdown
+
 `GET /conditions/dropdown`
+
 - **Purpose**: Get conditions formatted for dropdown selection in forms
 - **Authentication**: Yes
 - **Query Parameters**:
   - `active_only` (boolean, default: false): Only return active conditions
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -879,28 +1060,38 @@ Base path: `/api/v1/conditions`
 ```
 
 #### Get Condition by ID
+
 `GET /conditions/{condition_id}`
+
 - **Purpose**: Get condition with related information (patient, practitioner, treatments)
 - **Authentication**: Yes
 - **Success Response** (200): Condition object with relations
 
 #### Update Condition
+
 `PUT /conditions/{condition_id}`
+
 - **Request Body**: Same as create (all fields optional)
 - **Success Response** (200): Updated condition object
 
 #### Delete Condition
+
 `DELETE /conditions/{condition_id}`
+
 - **Success Response** (200): `{"message": "Condition deleted successfully"}`
 
 #### Get Active Conditions
+
 `GET /conditions/patient/{patient_id}/active`
+
 - **Purpose**: Get all active conditions for a patient
 - **Authentication**: Yes
 - **Success Response** (200): Array of active condition objects
 
 #### Get Patient Conditions
+
 `GET /conditions/patients/{patient_id}/conditions/`
+
 - **Purpose**: Get all conditions for a specific patient
 - **Authentication**: Yes
 - **Query Parameters**: `skip`, `limit`
@@ -909,10 +1100,13 @@ Base path: `/api/v1/conditions`
 #### Condition-Medication Linking
 
 ##### Get Condition Medications
+
 `GET /conditions/condition-medications/{condition_id}`
+
 - **Purpose**: Get all medications linked to a condition
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -927,33 +1121,42 @@ Base path: `/api/v1/conditions`
 ```
 
 ##### Link Medication to Condition
+
 `POST /conditions/{condition_id}/medications`
+
 - **Purpose**: Create a relationship between a condition and medication
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "medication_id": 5,
   "relevance_note": "Primary treatment for this condition"
 }
 ```
+
 - **Success Response** (201): Created relationship object
 - **Error Responses**:
   - `400`: Relationship already exists or medication belongs to different patient
   - `404`: Condition or medication not found
 
 ##### Bulk Link Medications to Condition
+
 `POST /conditions/{condition_id}/medications/bulk`
+
 - **Purpose**: Create multiple condition-medication relationships at once
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "medication_ids": [5, 8, 12],
   "relevance_note": "Treatments for managing this condition"
 }
 ```
+
 - **Success Response** (200): Array of created relationship objects
+
 ```json
 [
   {
@@ -975,6 +1178,7 @@ Base path: `/api/v1/conditions`
   // Note: medication_id 12 was already linked, so it was silently skipped
 ]
 ```
+
 - **Notes**:
   - Medications that are already linked to the condition are silently skipped
   - All medications must belong to the same patient as the condition
@@ -985,28 +1189,37 @@ Base path: `/api/v1/conditions`
   - `422`: Validation error (empty array, duplicate IDs, invalid IDs)
 
 ##### Update Condition-Medication Link
+
 `PUT /conditions/{condition_id}/medications/{relationship_id}`
+
 - **Purpose**: Update the relevance note for a condition-medication relationship
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "relevance_note": "Updated note about the relationship"
 }
 ```
+
 - **Success Response** (200): Updated relationship object
 
 ##### Remove Medication Link from Condition
+
 `DELETE /conditions/{condition_id}/medications/{relationship_id}`
+
 - **Purpose**: Remove the link between a condition and medication
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "Condition medication relationship deleted successfully"}`
 
 ##### Get Medication Conditions
+
 `GET /conditions/medication/{medication_id}/conditions`
+
 - **Purpose**: Get all conditions linked to a specific medication (reverse lookup)
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -1031,8 +1244,11 @@ Base path: `/api/v1/conditions`
 Base path: `/api/v1/immunizations`
 
 #### Create Immunization
+
 `POST /immunizations/`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -1050,10 +1266,13 @@ Base path: `/api/v1/immunizations`
 ```
 
 #### List Immunizations
+
 `GET /immunizations/`
 
 #### Get Upcoming Immunizations
+
 `GET /immunizations/patient/{patient_id}/upcoming`
+
 - **Purpose**: Get immunizations scheduled for the future
 
 ### 6.5 Vitals
@@ -1061,9 +1280,12 @@ Base path: `/api/v1/immunizations`
 Base path: `/api/v1/vitals`
 
 #### Create Vitals Record
+
 `POST /vitals/`
+
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -1085,6 +1307,7 @@ Base path: `/api/v1/vitals`
   "practitioner_id": 5
 }
 ```
+
 - **Note**: Temperature stored in Fahrenheit, weight in pounds, height in inches
 - **Validation**:
   - Systolic BP: 60-250 mmHg
@@ -1094,7 +1317,9 @@ Base path: `/api/v1/vitals`
   - Pain Scale: 0-10
 
 #### List Vitals
+
 `GET /vitals/`
+
 - **Authentication**: Yes
 - **Query Parameters**:
   - `skip` (integer, default: 0): Pagination offset
@@ -1106,29 +1331,38 @@ Base path: `/api/v1/vitals`
 - **Success Response** (200): Array of vitals records
 
 #### Get Vitals by ID
+
 `GET /vitals/{vitals_id}`
+
 - **Purpose**: Get vitals reading with related information
 - **Authentication**: Yes
 - **Success Response** (200): Vitals object with patient and practitioner details
 
 #### Update Vitals
+
 `PUT /vitals/{vitals_id}`
+
 - **Authentication**: Yes
 - **Request Body**: Same as create (all fields optional)
 - **Success Response** (200): Updated vitals object
 
 #### Delete Vitals
+
 `DELETE /vitals/{vitals_id}`
+
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "Vitals deleted successfully"}`
 
 #### Get Vitals Statistics
+
 `GET /vitals/stats`
+
 - **Purpose**: Get vitals statistics for the current user
 - **Authentication**: Yes
 - **Query Parameters**:
   - `patient_id` (integer, optional): Patient ID for patient switching
 - **Success Response** (200):
+
 ```json
 {
   "total_readings": 50,
@@ -1143,7 +1377,9 @@ Base path: `/api/v1/vitals`
 ```
 
 #### Get Patient Vitals (Paginated)
+
 `GET /vitals/patient/{patient_id}/paginated`
+
 - **Purpose**: Get paginated vitals readings with total count
 - **Authentication**: Yes
 - **Query Parameters**:
@@ -1151,6 +1387,7 @@ Base path: `/api/v1/vitals`
   - `limit` (integer, default: 10, max: 100): Items per page
   - `vital_type` (string, optional): Filter by vital type
 - **Success Response** (200):
+
 ```json
 {
   "items": [...],
@@ -1161,7 +1398,9 @@ Base path: `/api/v1/vitals`
 ```
 
 #### Get Patient Vitals
+
 `GET /vitals/patient/{patient_id}`
+
 - **Purpose**: Get all vitals for a specific patient
 - **Authentication**: Yes
 - **Query Parameters**:
@@ -1172,20 +1411,26 @@ Base path: `/api/v1/vitals`
 - **Success Response** (200): Array of vitals records
 
 #### Get Latest Vitals
+
 `GET /vitals/patient/{patient_id}/latest`
+
 - **Purpose**: Get most recent vital signs for a patient
 - **Authentication**: Yes
 - **Success Response** (200): Single vitals object
 - **Error Response** (404): No vitals readings found
 
 #### Get Patient Vitals Statistics
+
 `GET /vitals/patient/{patient_id}/stats`
+
 - **Purpose**: Get vitals statistics for a specific patient
 - **Authentication**: Yes
 - **Success Response** (200): Statistics object with averages and trends
 
 #### Get Vitals by Date Range
+
 `GET /vitals/patient/{patient_id}/date-range`
+
 - **Purpose**: Get vitals readings within a specific date range
 - **Authentication**: Yes
 - **Query Parameters**:
@@ -1197,7 +1442,9 @@ Base path: `/api/v1/vitals`
 - **Success Response** (200): Array of vitals records
 
 #### Create Patient Vitals
+
 `POST /vitals/patient/{patient_id}/vitals/`
+
 - **Purpose**: Create a new vitals reading for a specific patient
 - **Authentication**: Yes
 - **Request Body**: Same as main create endpoint
@@ -1209,9 +1456,12 @@ Base path: `/api/v1/vitals`
 Base path: `/api/v1/lab-results`
 
 #### Create Lab Result
+
 `POST /lab-results/`
+
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -1229,11 +1479,14 @@ Base path: `/api/v1/lab-results`
   "tags": ["annual", "routine"]
 }
 ```
+
 - **Status values**: `pending`, `preliminary`, `final`, `corrected`
 - **Success Response** (201): Lab result object
 
 #### List Lab Results
+
 `GET /lab-results/`
+
 - **Authentication**: Yes
 - **Query Parameters**:
   - `skip` (integer, default: 0): Pagination offset
@@ -1243,22 +1496,29 @@ Base path: `/api/v1/lab-results`
 - **Success Response** (200): Array of lab results with practitioner and patient details
 
 #### Get Lab Result by ID
+
 `GET /lab-results/{lab_result_id}`
+
 - **Purpose**: Get lab result with related data (patient, practitioner, files)
 - **Authentication**: Yes
 - **Success Response** (200): Lab result with relations
 
 #### Update Lab Result
+
 `PUT /lab-results/{lab_result_id}`
+
 - **Authentication**: Yes
 - **Request Body**: Same as create (all fields optional)
 - **Success Response** (200): Updated lab result
 
 #### Delete Lab Result
+
 `DELETE /lab-results/{lab_result_id}`
+
 - **Purpose**: Delete lab result and associated files
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "message": "Lab result and associated files deleted successfully",
@@ -1268,34 +1528,44 @@ Base path: `/api/v1/lab-results`
 ```
 
 #### Get Patient Lab Results
+
 `GET /lab-results/patient/{patient_id}`
+
 - **Purpose**: Get all lab results for a specific patient
 - **Authentication**: Yes
 - **Query Parameters**: `skip`, `limit`, `tags`, `tag_match_all`
 - **Success Response** (200): Array of lab results
 
 #### Get Patient Lab Results by Code
+
 `GET /lab-results/patient/{patient_id}/code/{code}`
+
 - **Purpose**: Get lab results for a patient filtered by test code
 - **Authentication**: Yes
 - **Success Response** (200): Array of lab results
 
 #### Get Practitioner Lab Results
+
 `GET /lab-results/practitioner/{practitioner_id}`
+
 - **Purpose**: Get lab results ordered by a specific practitioner (filtered to accessible patients)
 - **Authentication**: Yes
 - **Query Parameters**: `skip`, `limit`
 - **Success Response** (200): Array of lab results
 
 #### Search Lab Results by Code
+
 `GET /lab-results/search/code/{code}`
+
 - **Purpose**: Search lab results by exact test code
 - **Authentication**: Yes
 - **Query Parameters**: `skip`, `limit`
 - **Success Response** (200): Array of matching lab results
 
 #### Search Lab Results by Code Pattern
+
 `GET /lab-results/search/code-pattern/{code_pattern}`
+
 - **Purpose**: Search lab results by partial test code match
 - **Authentication**: Yes
 - **Query Parameters**: `skip`, `limit`
@@ -1304,10 +1574,13 @@ Base path: `/api/v1/lab-results`
 #### Lab Result File Management
 
 ##### Get Lab Result Files
+
 `GET /lab-results/{lab_result_id}/files`
+
 - **Purpose**: Get all files attached to a lab result
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -1324,7 +1597,9 @@ Base path: `/api/v1/lab-results`
 ```
 
 ##### Upload Lab Result File
+
 `POST /lab-results/{lab_result_id}/files`
+
 - **Purpose**: Upload a file to a lab result
 - **Authentication**: Yes
 - **Content-Type**: `multipart/form-data`
@@ -1336,7 +1611,9 @@ Base path: `/api/v1/lab-results`
 - **Success Response** (201): Created file object
 
 ##### Delete Lab Result File
+
 `DELETE /lab-results/{lab_result_id}/files/{file_id}`
+
 - **Purpose**: Delete a specific file from a lab result
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "File deleted successfully"}`
@@ -1344,10 +1621,13 @@ Base path: `/api/v1/lab-results`
 #### Lab Result Statistics
 
 ##### Get Patient Lab Result Count
+
 `GET /lab-results/stats/patient/{patient_id}/count`
+
 - **Purpose**: Get count of lab results for a patient
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "patient_id": 1,
@@ -1356,10 +1636,13 @@ Base path: `/api/v1/lab-results`
 ```
 
 ##### Get Practitioner Lab Result Count
+
 `GET /lab-results/stats/practitioner/{practitioner_id}/count`
+
 - **Purpose**: Get count of lab results ordered by a practitioner
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "practitioner_id": 5,
@@ -1368,10 +1651,13 @@ Base path: `/api/v1/lab-results`
 ```
 
 ##### Get Code Usage Count
+
 `GET /lab-results/stats/code/{code}/count`
+
 - **Purpose**: Get count of how many times a specific test code has been used
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "code": "CBC",
@@ -1382,10 +1668,13 @@ Base path: `/api/v1/lab-results`
 #### Lab Result - Condition Relationships
 
 ##### Get Lab Result Conditions
+
 `GET /lab-results/{lab_result_id}/conditions`
+
 - **Purpose**: Get all conditions linked to a lab result
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -1405,40 +1694,53 @@ Base path: `/api/v1/lab-results`
 ```
 
 ##### Link Condition to Lab Result
+
 `POST /lab-results/{lab_result_id}/conditions`
+
 - **Purpose**: Create a relationship between a lab result and condition
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "condition_id": 3,
   "relevance_note": "Monitoring glucose levels for diabetes management"
 }
 ```
+
 - **Success Response** (201): Created relationship object
 
 ##### Update Lab Result-Condition Link
+
 `PUT /lab-results/{lab_result_id}/conditions/{relationship_id}`
+
 - **Request Body**:
+
 ```json
 {
   "relevance_note": "Updated relevance note"
 }
 ```
+
 - **Success Response** (200): Updated relationship object
 
 ##### Remove Condition Link from Lab Result
+
 `DELETE /lab-results/{lab_result_id}/conditions/{relationship_id}`
+
 - **Success Response** (200): `{"message": "Lab result condition relationship deleted successfully"}`
 
 #### PDF OCR Extraction
+
 `POST /lab-results/{lab_result_id}/ocr-parse`
+
 - **Purpose**: Extract text from lab PDF using hybrid OCR approach
 - **Authentication**: Yes
 - **Content-Type**: `multipart/form-data`
 - **Request Body**: PDF file
 - **Max Size**: 15MB
 - **Success Response** (200):
+
 ```json
 {
   "status": "success",
@@ -1456,6 +1758,7 @@ Base path: `/api/v1/lab-results`
   "error": null
 }
 ```
+
 - **Note**: Returns raw text for client-side parsing. Does NOT save to database.
 
 ### Lab Test Components
@@ -1463,8 +1766,11 @@ Base path: `/api/v1/lab-results`
 Base path: `/api/v1/lab-test-components`
 
 #### Create Test Component
+
 `POST /lab-test-components/`
+
 - **Request Body**:
+
 ```json
 {
   "lab_result_id": 1,
@@ -1475,6 +1781,7 @@ Base path: `/api/v1/lab-test-components`
   "status": "normal"
 }
 ```
+
 - **Status values**: `normal`, `abnormal`, `critical`
 
 ### 6.7 Encounters
@@ -1482,8 +1789,11 @@ Base path: `/api/v1/lab-test-components`
 Base path: `/api/v1/encounters`
 
 #### Create Encounter
+
 `POST /encounters/`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -1506,14 +1816,17 @@ Bidirectional many-to-many linking between encounters and lab results. Accessibl
 Base path: `/api/v1/encounters/{encounter_id}/lab-results`
 
 `GET /encounters/{encounter_id}/lab-results`
+
 - **Purpose**: List all lab results linked to an encounter
 - **Authentication**: Yes
 - **Success Response** (200): Array of relationship objects with lab result details
 
 `POST /encounters/{encounter_id}/lab-results`
+
 - **Purpose**: Link a lab result to an encounter
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "lab_result_id": 5,
@@ -1521,26 +1834,32 @@ Base path: `/api/v1/encounters/{encounter_id}/lab-results`
   "relevance_note": "CBC ordered during routine checkup"
 }
 ```
+
 - **Purpose values**: `ordered_during`, `results_reviewed`, `follow_up_for`, `reference`, `other`
 - **Success Response** (201): Created relationship object
 
 `POST /encounters/{encounter_id}/lab-results/bulk`
+
 - **Purpose**: Bulk link multiple lab results to an encounter
 - **Authentication**: Yes
 - **Request Body**: Array of relationship objects
 
 `PUT /encounters/{encounter_id}/lab-results/{relationship_id}`
+
 - **Purpose**: Update a relationship (purpose, relevance_note)
 - **Request Body**:
+
 ```json
 {
   "purpose": "results_reviewed",
   "relevance_note": "Updated note"
 }
 ```
+
 - **Success Response** (200): Updated relationship object
 
 `DELETE /encounters/{encounter_id}/lab-results/{relationship_id}`
+
 - **Purpose**: Remove a lab result link from an encounter
 - **Success Response** (200): `{"message": "Encounter lab result relationship deleted successfully"}`
 
@@ -1549,14 +1868,17 @@ Base path: `/api/v1/encounters/{encounter_id}/lab-results`
 Base path: `/api/v1/lab-results/{lab_result_id}/encounters`
 
 `GET /lab-results/{lab_result_id}/encounters`
+
 - **Purpose**: List all encounters linked to a lab result
 - **Authentication**: Yes
 - **Success Response** (200): Array of relationship objects with encounter details
 
 `POST /lab-results/{lab_result_id}/encounters`
+
 - **Purpose**: Link an encounter to a lab result
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "lab_result_id": 3,
@@ -1564,17 +1886,21 @@ Base path: `/api/v1/lab-results/{lab_result_id}/encounters`
   "relevance_note": "Results discussed during follow-up"
 }
 ```
+
 - **Success Response** (201): Created relationship object
 
 `POST /lab-results/{lab_result_id}/encounters/bulk`
+
 - **Purpose**: Bulk link multiple encounters to a lab result
 - **Request Body**: Array of relationship objects
 
 `PUT /lab-results/{lab_result_id}/encounters/{relationship_id}`
+
 - **Purpose**: Update a relationship (purpose, relevance_note)
 - **Success Response** (200): Updated relationship object
 
 `DELETE /lab-results/{lab_result_id}/encounters/{relationship_id}`
+
 - **Purpose**: Remove an encounter link from a lab result
 - **Success Response** (200): `{"message": "Lab result encounter relationship deleted successfully"}`
 
@@ -1583,8 +1909,11 @@ Base path: `/api/v1/lab-results/{lab_result_id}/encounters`
 Base path: `/api/v1/procedures`
 
 #### Create Procedure
+
 `POST /procedures/`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -1602,12 +1931,16 @@ Base path: `/api/v1/procedures`
 Base path: `/api/v1/treatments`
 
 Treatments support two modes:
+
 - **Simple** (`"simple"`): Basic treatment tracking with schedule and dosage fields on the treatment itself.
 - **Advanced** (`"advanced"`): Medication-centric treatment plans where dosage, schedule, prescriber, and pharmacy can be overridden per linked medication.
 
 #### Create Treatment
+
 `POST /treatments/`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -1622,10 +1955,13 @@ Treatments support two modes:
   "notes": "For lower back pain"
 }
 ```
+
 - **Mode values**: `simple` (default), `advanced`
 
 #### List Treatments
+
 `GET /treatments/`
+
 - **Authentication**: Yes
 - **Query Parameters**:
   - `skip` (integer, default: 0): Pagination offset
@@ -1637,27 +1973,37 @@ Treatments support two modes:
 - **Success Response** (200): Array of treatment objects
 
 #### Get Treatment by ID
+
 `GET /treatments/{treatment_id}`
+
 - **Authentication**: Yes
 - **Success Response** (200): Treatment object with patient, practitioner, and condition relations
 
 #### Update Treatment
+
 `PUT /treatments/{treatment_id}`
+
 - **Authentication**: Yes
 - **Request Body**: Same as create (all fields optional)
 
 #### Delete Treatment
+
 `DELETE /treatments/{treatment_id}`
+
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "Treatment deleted successfully"}`
 
 #### Get Active Treatments for Patient
+
 `GET /treatments/patient/{patient_id}/active`
+
 - **Purpose**: Get only active treatments for a specific patient
 - **Success Response** (200): Array of treatment objects
 
 #### Get Ongoing Treatments
+
 `GET /treatments/ongoing`
+
 - **Purpose**: Get treatments with status active or in_progress
 - **Query Parameters**:
   - `patient_id` (integer, optional): Filter by patient ID (defaults to current user's patient)
@@ -1668,9 +2014,12 @@ Treatments support two modes:
 These endpoints manage the many-to-many relationship between treatments and medications. In **advanced mode**, each linked medication can have treatment-specific overrides for dosage, frequency, dates, prescriber, and pharmacy.
 
 ##### Get Treatment Medications (with Effective Values)
+
 `GET /treatments/{treatment_id}/medications`
+
 - **Purpose**: Get all medications linked to a treatment, with computed effective values
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -1686,7 +2035,11 @@ These endpoints manage the many-to-many relationship between treatments and medi
     "specific_pharmacy_id": null,
     "specific_start_date": "2026-01-09",
     "specific_end_date": null,
-    "specific_prescriber": { "id": 3, "name": "Dr. Smith", "specialty": "Cardiology" },
+    "specific_prescriber": {
+      "id": 3,
+      "name": "Dr. Smith",
+      "specialty": "Cardiology"
+    },
     "specific_pharmacy": null,
     "medication": {
       "id": 12,
@@ -1697,14 +2050,22 @@ These endpoints manage the many-to-many relationship between treatments and medi
       "status": "active",
       "effective_period_start": "2025-06-01",
       "effective_period_end": "2025-09-25",
-      "practitioner": { "id": 2, "name": "Dr. Jones", "specialty": "Internal Medicine" },
+      "practitioner": {
+        "id": 2,
+        "name": "Dr. Jones",
+        "specialty": "Internal Medicine"
+      },
       "pharmacy": { "id": 1, "name": "CVS", "brand": null }
     },
     "effective_dosage": "20mg",
     "effective_frequency": "Once daily",
     "effective_start_date": "2026-01-09",
     "effective_end_date": null,
-    "effective_prescriber": { "id": 3, "name": "Dr. Smith", "specialty": "Cardiology" },
+    "effective_prescriber": {
+      "id": 3,
+      "name": "Dr. Smith",
+      "specialty": "Cardiology"
+    },
     "effective_pharmacy": { "id": 1, "name": "CVS", "brand": null },
     "created_at": "2026-02-07T10:00:00Z",
     "updated_at": "2026-02-07T10:00:00Z"
@@ -1713,12 +2074,16 @@ These endpoints manage the many-to-many relationship between treatments and medi
 ```
 
 **Effective value logic**:
+
 - `effective_*` fields use the treatment-specific override (`specific_*`) if set, otherwise fall back to the base medication's value.
 - **Smart end date**: If `specific_start_date` is set but `specific_end_date` is not, and the medication's `effective_period_end` is before the overridden start date, `effective_end_date` is set to `null` (treated as "Ongoing") to avoid displaying a stale end date.
 
 ##### Link Medication to Treatment
+
 `POST /treatments/{treatment_id}/medications`
+
 - **Request Body**:
+
 ```json
 {
   "medication_id": 12,
@@ -1733,41 +2098,50 @@ These endpoints manage the many-to-many relationship between treatments and medi
   "specific_end_date": "2026-03-01"
 }
 ```
+
 - All fields except `medication_id` are optional
 - **Validation**: `specific_end_date` must be on or after `specific_start_date` if both are provided
 - **Success Response** (200): Created relationship object
 
 ##### Bulk Link Medications
+
 `POST /treatments/{treatment_id}/medications/bulk`
+
 - **Purpose**: Link multiple medications to a treatment at once
 - **Request Body**:
+
 ```json
 {
   "medication_ids": [12, 15, 18],
   "relevance_note": "Medications for treatment plan"
 }
 ```
+
 - Skips medications that are already linked (no error)
 - **Success Response** (200): Array of created relationship objects
 
 ##### Update Medication Link
+
 `PUT /treatments/{treatment_id}/medications/{relationship_id}`
+
 - **Request Body**: Same fields as create (all optional, except `medication_id` which is not updatable)
 - **Success Response** (200): Updated relationship object
 
 ##### Remove Medication from Treatment
+
 `DELETE /treatments/{treatment_id}/medications/{relationship_id}`
+
 - **Success Response** (200): `{"status": "success", "message": "Medication link removed"}`
 
 #### Treatment-Encounter, Lab Result, and Equipment Relationships
 
 Treatments also support relationships with encounters, lab results, and equipment using the same CRUD pattern:
 
-| Relationship | Base Path | Purpose |
-|---|---|---|
-| Encounters | `/{treatment_id}/encounters` | Link visits/encounters to treatment |
-| Lab Results | `/{treatment_id}/lab-results` | Link lab results to treatment |
-| Equipment | `/{treatment_id}/equipment` | Link medical equipment to treatment |
+| Relationship | Base Path                     | Purpose                             |
+| ------------ | ----------------------------- | ----------------------------------- |
+| Encounters   | `/{treatment_id}/encounters`  | Link visits/encounters to treatment |
+| Lab Results  | `/{treatment_id}/lab-results` | Link lab results to treatment       |
+| Equipment    | `/{treatment_id}/equipment`   | Link medical equipment to treatment |
 
 Each supports: `GET` (list), `POST` (link), `POST /bulk` (bulk link), `PUT /{id}` (update), `DELETE /{id}` (remove).
 
@@ -1776,9 +2150,12 @@ Each supports: `GET` (list), `POST` (link), `POST /bulk` (bulk link), `PUT /{id}
 Base path: `/api/v1/symptoms`
 
 #### Create Symptom
+
 `POST /symptoms/`
+
 - **Purpose**: Create a new symptom definition (reusable symptom type)
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -1790,7 +2167,9 @@ Base path: `/api/v1/symptoms`
 ```
 
 #### List Symptoms
+
 `GET /symptoms/`
+
 - **Query Parameters**:
   - `skip`: Pagination offset (default: 0)
   - `limit`: Max items (default: 100, max: 100)
@@ -1799,23 +2178,32 @@ Base path: `/api/v1/symptoms`
 - **Success Response** (200): Array of symptom objects
 
 #### Get Symptom by ID
+
 `GET /symptoms/{symptom_id}`
+
 - **Success Response** (200): Symptom object with details
 
 #### Update Symptom
+
 `PUT /symptoms/{symptom_id}`
+
 - **Request Body**: Same as create (all fields optional)
 
 #### Delete Symptom
+
 `DELETE /symptoms/{symptom_id}`
+
 - **Note**: Deletes symptom and all occurrences via cascade
 - **Success Response** (200): `{"message": "Symptom deleted successfully"}`
 
 #### Get Symptom Statistics
+
 `GET /symptoms/stats`
+
 - **Query Parameters**:
   - `patient_id`: Optional patient ID for patient switching
 - **Success Response** (200):
+
 ```json
 {
   "total_symptoms": 5,
@@ -1827,7 +2215,9 @@ Base path: `/api/v1/symptoms`
 ```
 
 #### Get Symptom Timeline
+
 `GET /symptoms/timeline`
+
 - **Query Parameters**:
   - `patient_id`: Optional patient ID
   - `start_date`: Start date (YYYY-MM-DD)
@@ -1836,9 +2226,12 @@ Base path: `/api/v1/symptoms`
 - **Success Response** (200): Array of timeline data points
 
 #### Log Symptom Occurrence
+
 `POST /symptoms/{symptom_id}/occurrences`
+
 - **Purpose**: Log a new episode/occurrence of an existing symptom
 - **Request Body**:
+
 ```json
 {
   "occurred_at": "2025-10-15T14:30:00Z",
@@ -1849,23 +2242,31 @@ Base path: `/api/v1/symptoms`
 ```
 
 #### List Symptom Occurrences
+
 `GET /symptoms/{symptom_id}/occurrences`
+
 - **Query Parameters**: `skip`, `limit`
 - **Success Response** (200): Array of occurrence objects
 
 #### Get Specific Occurrence
+
 `GET /symptoms/{symptom_id}/occurrences/{occurrence_id}`
 
 #### Update Occurrence
+
 `PUT /symptoms/{symptom_id}/occurrences/{occurrence_id}`
 
 #### Delete Occurrence
+
 `DELETE /symptoms/{symptom_id}/occurrences/{occurrence_id}`
 
 #### Link Symptom to Condition
+
 `POST /symptoms/{symptom_id}/link-condition`
+
 - **Purpose**: Associate symptom with a diagnosed condition
 - **Request Body**:
+
 ```json
 {
   "condition_id": 3,
@@ -1875,16 +2276,22 @@ Base path: `/api/v1/symptoms`
 ```
 
 #### Get Linked Conditions
+
 `GET /symptoms/{symptom_id}/conditions`
+
 - **Success Response** (200): Array of condition relationships
 
 #### Unlink Symptom from Condition
+
 `DELETE /symptoms/{symptom_id}/unlink-condition/{condition_id}`
 
 #### Link Symptom to Medication
+
 `POST /symptoms/{symptom_id}/link-medication`
+
 - **Purpose**: Associate symptom with medication (side effect or treatment)
 - **Request Body**:
+
 ```json
 {
   "medication_id": 5,
@@ -1895,14 +2302,19 @@ Base path: `/api/v1/symptoms`
 ```
 
 #### Get Linked Medications
+
 `GET /symptoms/{symptom_id}/medications`
 
 #### Unlink Symptom from Medication
+
 `DELETE /symptoms/{symptom_id}/unlink-medication/{medication_id}`
 
 #### Link Symptom to Treatment
+
 `POST /symptoms/{symptom_id}/link-treatment`
+
 - **Request Body**:
+
 ```json
 {
   "treatment_id": 2,
@@ -1912,9 +2324,11 @@ Base path: `/api/v1/symptoms`
 ```
 
 #### Get Linked Treatments
+
 `GET /symptoms/{symptom_id}/treatments`
 
 #### Unlink Symptom from Treatment
+
 `DELETE /symptoms/{symptom_id}/unlink-treatment/{treatment_id}`
 
 ### 6.11 Injuries
@@ -1928,10 +2342,13 @@ Base path: `/api/v1/injuries`
 Base path: `/api/v1/injury-types`
 
 ##### List All Injury Types
+
 `GET /injury-types/`
+
 - **Purpose**: Get all injury types for dropdown selection
 - **Authentication**: Yes
 - **Success Response** (200): Array of injury type objects
+
 ```json
 [
   {
@@ -1946,33 +2363,43 @@ Base path: `/api/v1/injury-types`
 ```
 
 ##### Get Injury Types Dropdown
+
 `GET /injury-types/dropdown`
+
 - **Purpose**: Get injury types formatted for dropdown (minimal response)
 - **Authentication**: Yes
 - **Success Response** (200): Array of dropdown options
 
 ##### Create Injury Type
+
 `POST /injury-types/`
+
 - **Purpose**: Create a user-defined injury type
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "name": "Custom Injury Type",
   "description": "Description of the injury type"
 }
 ```
+
 - **Note**: System types can only be created via database migration
 - **Error Responses**:
   - `400`: Name already exists
 
 ##### Get Injury Type
+
 `GET /injury-types/{injury_type_id}`
+
 - **Purpose**: Get a specific injury type by ID
 - **Success Response** (200): Injury type object
 
 ##### Delete Injury Type
+
 `DELETE /injury-types/{injury_type_id}`
+
 - **Purpose**: Delete a user-created injury type
 - **Note**: Cannot delete system types or types referenced by injuries
 - **Error Responses**:
@@ -1982,10 +2409,13 @@ Base path: `/api/v1/injury-types`
 #### Injuries CRUD
 
 ##### Create Injury
+
 `POST /injuries/`
+
 - **Purpose**: Create a new injury record
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -2004,13 +2434,16 @@ Base path: `/api/v1/injury-types`
   "tags": ["sports", "acute"]
 }
 ```
+
 - **Laterality values**: `left`, `right`, `bilateral`, `not_applicable`
 - **Severity values**: `mild`, `moderate`, `severe`, `life-threatening`
 - **Status values**: `active`, `healing`, `resolved`, `chronic`
 - **Success Response** (201): Injury with relations
 
 ##### List Injuries
+
 `GET /injuries/`
+
 - **Authentication**: Yes
 - **Query Parameters**:
   - `skip` (integer, default: 0): Pagination offset
@@ -2022,21 +2455,29 @@ Base path: `/api/v1/injury-types`
 - **Success Response** (200): Array of injuries with relations
 
 ##### Get Injury
+
 `GET /injuries/{injury_id}`
+
 - **Purpose**: Get injury by ID with related information
 - **Success Response** (200): Injury with relations
 
 ##### Update Injury
+
 `PUT /injuries/{injury_id}`
+
 - **Request Body**: Same fields as create (all optional)
 - **Success Response** (200): Updated injury with relations
 
 ##### Delete Injury
+
 `DELETE /injuries/{injury_id}`
+
 - **Success Response** (200): `{"message": "Injury deleted successfully"}`
 
 ##### Get Active Injuries
+
 `GET /injuries/patient/{patient_id}/active`
+
 - **Purpose**: Get all active injuries for a patient
 - **Success Response** (200): Array of active injuries with relations
 
@@ -2046,8 +2487,10 @@ Base path: `/api/v1/injury-types`
 
 **Get Linked Medications**
 `GET /injuries/{injury_id}/medications`
+
 - **Purpose**: Get all medications linked to an injury
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -2068,19 +2511,23 @@ Base path: `/api/v1/injury-types`
 
 **Link Medication to Injury**
 `POST /injuries/{injury_id}/medications`
+
 - **Request Body**:
+
 ```json
 {
   "medication_id": 5,
   "relevance_note": "Pain management"
 }
 ```
+
 - **Error Responses**:
   - `400`: Already linked or different patient
   - `404`: Medication not found
 
 **Unlink Medication from Injury**
 `DELETE /injuries/{injury_id}/medications/{medication_id}`
+
 - **Success Response** (200): `{"message": "Medication unlinked from injury"}`
 
 ##### Injury-Condition Links
@@ -2090,7 +2537,9 @@ Base path: `/api/v1/injury-types`
 
 **Link Condition to Injury**
 `POST /injuries/{injury_id}/conditions`
+
 - **Request Body**:
+
 ```json
 {
   "condition_id": 3,
@@ -2108,7 +2557,9 @@ Base path: `/api/v1/injury-types`
 
 **Link Treatment to Injury**
 `POST /injuries/{injury_id}/treatments`
+
 - **Request Body**:
+
 ```json
 {
   "treatment_id": 2,
@@ -2126,7 +2577,9 @@ Base path: `/api/v1/injury-types`
 
 **Link Procedure to Injury**
 `POST /injuries/{injury_id}/procedures`
+
 - **Request Body**:
+
 ```json
 {
   "procedure_id": 4,
@@ -2146,7 +2599,9 @@ Base path: `/api/v1/standardized-tests`
 **Purpose**: Search and autocomplete for standardized lab tests using LOINC codes
 
 #### Search Tests
+
 `GET /standardized-tests/search`
+
 - **Purpose**: Search for standardized tests
 - **Query Parameters**:
   - `query`: Search term (test name, LOINC code, etc.)
@@ -2154,6 +2609,7 @@ Base path: `/api/v1/standardized-tests`
   - `skip`: Pagination offset
   - `limit`: Max items
 - **Success Response** (200):
+
 ```json
 {
   "tests": [
@@ -2173,12 +2629,15 @@ Base path: `/api/v1/standardized-tests`
 ```
 
 #### Autocomplete
+
 `GET /standardized-tests/autocomplete`
+
 - **Purpose**: Get autocomplete suggestions for test names
 - **Query Parameters**:
   - `q`: Query string (min 2 characters)
   - `limit`: Max suggestions (default: 10)
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -2192,29 +2651,40 @@ Base path: `/api/v1/standardized-tests`
 ```
 
 #### Get Common Tests
+
 `GET /standardized-tests/common`
+
 - **Purpose**: Get frequently ordered tests
 - **Success Response** (200): Array of common test objects
 
 #### Get Tests by Category
+
 `GET /standardized-tests/by-category/{category}`
+
 - **Purpose**: Get all tests in a specific category
 - **Success Response** (200): Array of test objects
 
 #### Get Test by LOINC Code
+
 `GET /standardized-tests/by-loinc/{loinc_code}`
+
 - **Purpose**: Get test details by LOINC code
 - **Success Response** (200): Test object
 
 #### Get Test by Name
+
 `GET /standardized-tests/by-name/{test_name}`
+
 - **Purpose**: Get test details by exact name match
 - **Success Response** (200): Test object
 
 #### Get Test Count
+
 `GET /standardized-tests/count`
+
 - **Purpose**: Get total number of standardized tests in database
 - **Success Response** (200):
+
 ```json
 {
   "total_tests": 45672,
@@ -2224,15 +2694,20 @@ Base path: `/api/v1/standardized-tests`
 ```
 
 #### Batch Match Tests
+
 `POST /standardized-tests/batch-match`
+
 - **Purpose**: Match multiple test names to LOINC codes
 - **Request Body**:
+
 ```json
 {
   "test_names": ["Glucose", "Hemoglobin", "Cholesterol"]
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "matches": [
@@ -2257,8 +2732,11 @@ Base path: `/api/v1/standardized-tests`
 Base path: `/api/v1/insurances`
 
 #### Create Insurance Record
+
 `POST /insurances/`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -2277,8 +2755,11 @@ Base path: `/api/v1/insurances`
 Base path: `/api/v1/emergency-contacts`
 
 #### Create Emergency Contact
+
 `POST /emergency-contacts/`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -2296,9 +2777,12 @@ Base path: `/api/v1/emergency-contacts`
 Base path: `/api/v1/family-members`
 
 #### Create Family Member
+
 `POST /family-members/`
+
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -2309,10 +2793,13 @@ Base path: `/api/v1/family-members`
   "medical_history": "Diabetes, Hypertension"
 }
 ```
+
 - **Success Response** (201): Family member object
 
 #### List Family Members
+
 `GET /family-members/`
+
 - **Authentication**: Yes
 - **Query Parameters**:
   - `skip` (integer, default: 0): Pagination offset
@@ -2321,10 +2808,13 @@ Base path: `/api/v1/family-members`
 - **Success Response** (200): Array of family member objects with conditions
 
 #### Get Family Members for Dropdown
+
 `GET /family-members/dropdown`
+
 - **Purpose**: Get family members formatted for dropdown selection in forms
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -2336,24 +2826,32 @@ Base path: `/api/v1/family-members`
 ```
 
 #### Get Family Member by ID
+
 `GET /family-members/{family_member_id}`
+
 - **Purpose**: Get family member with conditions
 - **Authentication**: Yes
 - **Success Response** (200): Family member object with conditions
 
 #### Update Family Member
+
 `PUT /family-members/{family_member_id}`
+
 - **Authentication**: Yes
 - **Request Body**: Same as create (all fields optional)
 - **Success Response** (200): Updated family member object
 
 #### Delete Family Member
+
 `DELETE /family-members/{family_member_id}`
+
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "Family Member deleted successfully"}`
 
 #### Search Family Members
+
 `GET /family-members/search/`
+
 - **Purpose**: Search family members by name
 - **Authentication**: Yes
 - **Query Parameters**:
@@ -2363,10 +2861,13 @@ Base path: `/api/v1/family-members`
 #### Family Condition Management
 
 ##### Get Family Member Conditions
+
 `GET /family-members/{family_member_id}/conditions`
+
 - **Purpose**: Get all medical conditions for a specific family member
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -2381,10 +2882,13 @@ Base path: `/api/v1/family-members`
 ```
 
 ##### Create Family Condition
+
 `POST /family-members/{family_member_id}/conditions`
+
 - **Purpose**: Add a medical condition to a family member's history
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "condition_name": "Hypertension",
@@ -2392,16 +2896,21 @@ Base path: `/api/v1/family-members`
   "notes": "Started medication at 50"
 }
 ```
+
 - **Success Response** (201): Created condition object
 
 ##### Update Family Condition
+
 `PUT /family-members/{family_member_id}/conditions/{condition_id}`
+
 - **Authentication**: Yes
 - **Request Body**: Same fields as create (all optional)
 - **Success Response** (200): Updated condition object
 
 ##### Delete Family Condition
+
 `DELETE /family-members/{family_member_id}/conditions/{condition_id}`
+
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "Family Condition deleted successfully"}`
 
@@ -2410,8 +2919,11 @@ Base path: `/api/v1/family-members`
 Base path: `/api/v1/pharmacies`
 
 #### Create Pharmacy
+
 `POST /pharmacies/`
+
 - **Request Body**:
+
 ```json
 {
   "name": "CVS Pharmacy - Main Street",
@@ -2432,10 +2944,13 @@ Base path: `/api/v1/pharmacies`
   "specialty_services": "Vaccinations, Compounding, Medication Therapy Management"
 }
 ```
+
 - **Notes**: `zip_code` accepts international postal codes (US ZIP, Canadian, UK, etc.)
 
 #### List Pharmacies
+
 `GET /pharmacies/`
+
 - **Query Parameters**:
   - `skip` (integer, optional, default: 0): Number of records to skip (for pagination)
   - `limit` (integer, optional, default: 100): Maximum number of records to return
@@ -2445,8 +2960,11 @@ Base path: `/api/v1/pharmacies`
 Base path: `/api/v1/practitioners`
 
 #### Create Practitioner
+
 `POST /practitioners/`
+
 - **Request Body**:
+
 ```json
 {
   "name": "Dr. Sarah Smith",
@@ -2458,10 +2976,13 @@ Base path: `/api/v1/practitioners`
   "rating": 4.5
 }
 ```
+
 - **Notes**: `practice_id` links the practitioner to a Practice entity (optional). The legacy `practice` string field is still accepted for backward compatibility.
 
 #### List Practitioners
+
 `GET /practitioners/`
+
 - **Query Parameters**:
   - `skip` (integer, optional, default: 0): Number of records to skip
   - `limit` (integer, optional, default: 100, max: 100): Maximum records to return
@@ -2470,23 +2991,32 @@ Base path: `/api/v1/practitioners`
 - **Response** includes `practice_name` (resolved from the linked Practice entity) and timestamps (`created_at`, `updated_at`).
 
 #### Get Practitioner
+
 `GET /practitioners/{practitioner_id}`
+
 - **Response**: Full practitioner details with `practice_name` from linked Practice.
 
 #### Update Practitioner
+
 `PUT /practitioners/{practitioner_id}`
+
 - **Request Body**: Same fields as create, all optional.
 
 #### Delete Practitioner
+
 `DELETE /practitioners/{practitioner_id}`
 
 #### Search Practitioners by Name
+
 `GET /practitioners/search/by-name`
+
 - **Query Parameters**:
   - `name` (string, required, min: 2): Search term
 
 #### Get All Specialties
+
 `GET /practitioners/specialties`
+
 - **Response**: `{ "specialties": ["Cardiology", "Dermatology", ...] }`
 
 ### 7.6 Practices
@@ -2496,9 +3026,12 @@ Base path: `/api/v1/practices`
 **Purpose**: Manage medical practices or clinics that practitioners belong to.
 
 #### Create Practice
+
 `POST /practices/`
+
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "name": "City General Hospital",
@@ -2519,11 +3052,14 @@ Base path: `/api/v1/practices`
   ]
 }
 ```
+
 - **Success Response** (200): Created practice object with `id`, `created_at`, `updated_at`
 - **Notes**: Practice name must be unique (case-insensitive). Name must be 2-150 characters.
 
 #### List Practices
+
 `GET /practices/`
+
 - **Authentication**: Yes
 - **Query Parameters**:
   - `skip` (integer, optional, default: 0): Number of records to skip
@@ -2531,10 +3067,13 @@ Base path: `/api/v1/practices`
   - `search` (string, optional, min: 1): Search by practice name
 
 #### Get Practice Summaries
+
 `GET /practices/summary`
+
 - **Authentication**: Yes
 - **Purpose**: Lightweight list for dropdowns and selectors
 - **Success Response** (200):
+
 ```json
 [
   { "id": 1, "name": "City General Hospital" },
@@ -2543,15 +3082,20 @@ Base path: `/api/v1/practices`
 ```
 
 #### Search Practices by Name
+
 `GET /practices/search/by-name`
+
 - **Authentication**: Yes
 - **Query Parameters**:
   - `name` (string, required, min: 1): Search term
 
 #### Get Practice
+
 `GET /practices/{practice_id}`
+
 - **Authentication**: Yes
 - **Response**: Practice details with `practitioner_count` indicating how many practitioners are linked.
+
 ```json
 {
   "id": 1,
@@ -2569,12 +3113,16 @@ Base path: `/api/v1/practices`
 ```
 
 #### Update Practice
+
 `PUT /practices/{practice_id}`
+
 - **Authentication**: Yes
 - **Request Body**: Same fields as create, all optional.
 
 #### Delete Practice
+
 `DELETE /practices/{practice_id}`
+
 - **Authentication**: Yes
 - **Notes**: Deleting a practice sets `practice_id` to NULL on all linked practitioners (ON DELETE SET NULL).
 
@@ -2589,10 +3137,13 @@ Base path: `/api/v1/notifications`
 ### 8.1 Event Types
 
 #### Get Available Event Types
+
 `GET /notifications/event-types`
+
 - **Purpose**: Get list of available notification event types
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "event_types": [
@@ -2617,10 +3168,13 @@ Base path: `/api/v1/notifications`
 ### 8.2 Channel Management
 
 #### List Channels
+
 `GET /notifications/channels`
+
 - **Purpose**: List all notification channels for current user
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -2642,10 +3196,13 @@ Base path: `/api/v1/notifications`
 ```
 
 #### Create Channel
+
 `POST /notifications/channels`
+
 - **Purpose**: Create a new notification channel
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "name": "My Telegram",
@@ -2657,14 +3214,18 @@ Base path: `/api/v1/notifications`
   "is_enabled": true
 }
 ```
+
 - **Channel types**: `email`, `telegram`, `discord`, `slack`, `webhook`, `pushover`
 - **Success Response** (201): Created channel object
 
 #### Get Channel Details
+
 `GET /notifications/channels/{channel_id}`
+
 - **Purpose**: Get channel with masked configuration
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "id": 1,
@@ -2682,10 +3243,13 @@ Base path: `/api/v1/notifications`
 ```
 
 #### Update Channel
+
 `PUT /notifications/channels/{channel_id}`
+
 - **Purpose**: Update notification channel
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "name": "Updated Name",
@@ -2695,25 +3259,33 @@ Base path: `/api/v1/notifications`
   "is_enabled": false
 }
 ```
+
 - **Success Response** (200): Updated channel object
 
 #### Delete Channel
+
 `DELETE /notifications/channels/{channel_id}`
+
 - **Purpose**: Delete a notification channel
 - **Authentication**: Yes
 - **Success Response** (204): No content
 
 #### Test Channel
+
 `POST /notifications/channels/{channel_id}/test`
+
 - **Purpose**: Send a test notification to verify channel configuration
 - **Authentication**: Yes
 - **Request Body** (optional):
+
 ```json
 {
   "message": "Custom test message"
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "success": true,
@@ -2722,7 +3294,9 @@ Base path: `/api/v1/notifications`
   "sent_at": "2025-10-04T10:30:00Z"
 }
 ```
+
 - **Failure Response** (200):
+
 ```json
 {
   "success": false,
@@ -2735,10 +3309,13 @@ Base path: `/api/v1/notifications`
 ### 8.3 Preference Management
 
 #### List Preferences
+
 `GET /notifications/preferences`
+
 - **Purpose**: List all notification preferences for current user
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -2755,10 +3332,13 @@ Base path: `/api/v1/notifications`
 ```
 
 #### Get Preference Matrix
+
 `GET /notifications/preferences/matrix`
+
 - **Purpose**: Get full preference matrix (events x channels)
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "channels": [
@@ -2775,10 +3355,13 @@ Base path: `/api/v1/notifications`
 ```
 
 #### Set Preference
+
 `POST /notifications/preferences`
+
 - **Purpose**: Set or update a notification preference
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "channel_id": 1,
@@ -2787,12 +3370,15 @@ Base path: `/api/v1/notifications`
   "remind_before_minutes": 30
 }
 ```
+
 - **Success Response** (200): Updated preference object
 
 ### 8.4 Notification History
 
 #### Get History
+
 `GET /notifications/history`
+
 - **Purpose**: Get notification history for current user
 - **Authentication**: Yes
 - **Query Parameters**:
@@ -2801,6 +3387,7 @@ Base path: `/api/v1/notifications`
   - `status_filter` (string, optional): Filter by status
   - `event_type` (string, optional): Filter by event type
 - **Success Response** (200):
+
 ```json
 {
   "items": [
@@ -2831,7 +3418,9 @@ Base path: `/api/v1/notifications`
 Base path: `/api/v1/entity-files`
 
 ### Upload File
+
 `POST /entity-files/`
+
 - **Content-Type**: `multipart/form-data`
 - **Request Body**:
   - `file`: File to upload
@@ -2842,12 +3431,15 @@ Base path: `/api/v1/entity-files`
 - **Allowed Types**: PDF, JPEG, PNG, GIF
 
 ### List Files for Entity
+
 `GET /entity-files/{entity_type}/{entity_id}`
 
 ### Download File
+
 `GET /entity-files/{file_id}/download`
 
 ### Delete File
+
 `DELETE /entity-files/{file_id}`
 
 ---
@@ -2859,10 +3451,13 @@ Base path: `/api/v1/entity-files`
 Base path: `/api/v1/patient-sharing`
 
 #### Share Patient Record
+
 `POST /patient-sharing/`
+
 - **Purpose**: Share a patient record with another user via email invitation
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -2872,14 +3467,18 @@ Base path: `/api/v1/patient-sharing`
   "message": "Sharing medical records for consultation"
 }
 ```
+
 - **Access levels**: `view`, `edit`, `full`
 - **Success Response** (201): Share invitation object
 
 #### Bulk Invite
+
 `POST /patient-sharing/bulk-invite`
+
 - **Purpose**: Send sharing invitations to multiple recipients at once
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -2889,7 +3488,9 @@ Base path: `/api/v1/patient-sharing`
   "message": "Sharing medical records for consultation"
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "successful_invites": 2,
@@ -2899,34 +3500,45 @@ Base path: `/api/v1/patient-sharing`
 ```
 
 #### Revoke Access
+
 `DELETE /patient-sharing/{share_id}`
+
 - **Purpose**: Revoke a user's access to a shared patient record
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "Access revoked successfully"}`
 
 #### Remove My Access
+
 `DELETE /patient-sharing/remove-my-access/{patient_id}`
+
 - **Purpose**: Remove your own access to a patient record shared with you
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "Access removed successfully"}`
 
 #### List Patients Shared With Me
+
 `GET /patient-sharing/shared-with-me`
+
 - **Purpose**: Get all patient records that others have shared with you
 - **Authentication**: Yes
 - **Success Response** (200): Array of shared patient access objects
 
 #### List Patients I've Shared
+
 `GET /patient-sharing/shared-by-me`
+
 - **Purpose**: Get all patient records you have shared with others
 - **Authentication**: Yes
 - **Success Response** (200): Array of patient sharing objects with recipient info
 
 #### Get Sharing Statistics
+
 `GET /patient-sharing/stats/user`
+
 - **Purpose**: Get statistics about patient sharing for current user
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "total_shared_with_me": 3,
@@ -2937,10 +3549,13 @@ Base path: `/api/v1/patient-sharing`
 ```
 
 #### Cleanup Expired Shares
+
 `POST /patient-sharing/cleanup-expired`
+
 - **Purpose**: Remove expired sharing invitations (admin/scheduled task)
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "expired_shares_removed": 5,
@@ -2953,41 +3568,54 @@ Base path: `/api/v1/patient-sharing`
 Base path: `/api/v1/invitations`
 
 #### Get Pending Invitations
+
 `GET /invitations/pending`
+
 - **Purpose**: Get all pending invitations for the current user
 - **Authentication**: Yes
 - **Success Response** (200): Array of pending invitation objects
 
 #### Get Sent Invitations
+
 `GET /invitations/sent`
+
 - **Purpose**: Get all invitations sent by the current user
 - **Authentication**: Yes
 - **Success Response** (200): Array of sent invitation objects
 
 #### Respond to Invitation
+
 `POST /invitations/{invitation_id}/respond`
+
 - **Purpose**: Accept or reject an invitation
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "action": "accept"
 }
 ```
+
 - **Actions**: `accept`, `reject`
 - **Success Response** (200): Updated invitation object
 
 #### Revoke Invitation
+
 `POST /invitations/{invitation_id}/revoke`
+
 - **Purpose**: Revoke an invitation you sent (before it's accepted)
 - **Authentication**: Yes
 - **Success Response** (200): `{"message": "Invitation revoked successfully"}`
 
 #### Cleanup Expired Invitations
+
 `POST /invitations/cleanup`
+
 - **Purpose**: Remove expired invitations (admin/scheduled task)
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "message": "Expired 10 old invitations",
@@ -2996,10 +3624,13 @@ Base path: `/api/v1/invitations`
 ```
 
 #### Get Invitation Summary
+
 `GET /invitations/summary`
+
 - **Purpose**: Get summary counts of invitations by status
 - **Authentication**: Yes
 - **Success Response** (200):
+
 ```json
 {
   "pending_received": 2,
@@ -3017,9 +3648,12 @@ Base path: `/api/v1/family-history-sharing`
 **Purpose**: Share family medical history with relatives for better health tracking
 
 #### Get My Family History
+
 `GET /family-history-sharing/mine`
+
 - **Purpose**: Get all family history accessible to current user (owned + shared)
 - **Success Response** (200):
+
 ```json
 {
   "owned_family_members": [...],
@@ -3030,14 +3664,19 @@ Base path: `/api/v1/family-history-sharing`
 ```
 
 #### Get Family Member Shares
+
 `GET /family-history-sharing/{family_member_id}/shares`
+
 - **Purpose**: Get list of users who have access to this family member's history
 - **Success Response** (200): Array of share objects with user info
 
 #### Share Family Member
+
 `POST /family-history-sharing/{family_member_id}/shares`
+
 - **Purpose**: Share a family member's history with another user
 - **Request Body**:
+
 ```json
 {
   "shared_with_user_id": 5,
@@ -3045,23 +3684,31 @@ Base path: `/api/v1/family-history-sharing`
   "notes": "Sharing father's medical history"
 }
 ```
+
 - **Permission levels**: `view`, `edit`
 - **Success Response** (201): Created share object
 
 #### Revoke Family History Access
+
 `DELETE /family-history-sharing/{family_member_id}/shares/{user_id}`
+
 - **Purpose**: Remove a user's access to family member history
 - **Success Response** (200): `{"message": "Access revoked successfully"}`
 
 #### Remove My Access
+
 `DELETE /family-history-sharing/shared-with-me/{family_member_id}/remove-access`
+
 - **Purpose**: Remove own access to shared family history
 - **Success Response** (200): `{"message": "Access removed successfully"}`
 
 #### Bulk Invite
+
 `POST /family-history-sharing/bulk-invite`
+
 - **Purpose**: Invite multiple family members at once
 - **Request Body**:
+
 ```json
 {
   "family_member_ids": [1, 2, 3],
@@ -3070,7 +3717,9 @@ Base path: `/api/v1/family-history-sharing`
   "message": "Sharing our family medical history"
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "successful_invites": 5,
@@ -3080,22 +3729,30 @@ Base path: `/api/v1/family-history-sharing`
 ```
 
 #### Get Family Member Details
+
 `GET /family-history-sharing/{family_member_id}/details`
+
 - **Purpose**: Get detailed family member information with medical history
 - **Success Response** (200): Family member object with full medical history
 
 #### Get Family History Shared With Me
+
 `GET /family-history-sharing/shared-with-me`
+
 - **Purpose**: Get all family history shared with current user by others
 - **Success Response** (200): Array of shared family member objects
 
 #### Get My Own Family Members
+
 `GET /family-history-sharing/my-own`
+
 - **Purpose**: Get only family members owned by current user
 - **Success Response** (200): Array of owned family member objects
 
 #### Get Family History I've Shared
+
 `GET /family-history-sharing/shared-by-me`
+
 - **Purpose**: Get family history records that current user has shared with others
 - **Success Response** (200): Array of family members with share information
 
@@ -3108,12 +3765,15 @@ Base path: `/api/v1/family-history-sharing`
 Base path: `/api/v1/search`
 
 #### Global Search
+
 `GET /search/`
+
 - **Query Parameters**:
   - `q` (string, required): Search query
   - `type` (string, optional): Filter by record type
   - `patient_id` (integer, optional): Filter by patient
 - **Success Response** (200):
+
 ```json
 {
   "results": [
@@ -3135,13 +3795,16 @@ Base path: `/api/v1/tags`
 **Note**: Tags are stored directly on entities (medications, lab results, conditions, etc.) as arrays. The tags API provides cross-entity tag management, search, and autocomplete functionality.
 
 #### Get Popular Tags
+
 `GET /tags/popular`
+
 - **Purpose**: Get most popular tags across multiple entity types
 - **Authentication**: Yes
 - **Query Parameters**:
   - `entity_types` (array, default: all types): Entity types to search (lab_result, medication, condition, procedure, immunization, treatment, encounter, allergy, practice)
   - `limit` (integer, default: 20, max: 50): Maximum number of tags
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -3158,7 +3821,9 @@ Base path: `/api/v1/tags`
 ```
 
 #### Search by Tags
+
 `GET /tags/search`
+
 - **Purpose**: Search across entity types by tags
 - **Authentication**: Yes
 - **Query Parameters**:
@@ -3166,50 +3831,60 @@ Base path: `/api/v1/tags`
   - `entity_types` (array, default: all types): Entity types to search
   - `limit_per_entity` (integer, default: 10, max: 20): Max results per entity type
 - **Success Response** (200):
+
 ```json
 {
   "medication": [
-    {"id": 1, "medication_name": "Aspirin", "tags": ["cardiology", "daily"]}
+    { "id": 1, "medication_name": "Aspirin", "tags": ["cardiology", "daily"] }
   ],
   "condition": [
-    {"id": 3, "diagnosis": "Hypertension", "tags": ["cardiology", "chronic"]}
+    { "id": 3, "diagnosis": "Hypertension", "tags": ["cardiology", "chronic"] }
   ],
   "lab_result": []
 }
 ```
 
 #### Autocomplete Tags
+
 `GET /tags/autocomplete`
+
 - **Purpose**: Get tag suggestions for autocomplete as user types
 - **Authentication**: Yes
 - **Query Parameters**:
   - `q` (string, required, min: 1, max: 50): Query string
   - `limit` (integer, default: 10, max: 20): Maximum suggestions
 - **Success Response** (200):
+
 ```json
 ["cardiology", "cardiac", "cardio-checkup"]
 ```
 
 #### Get Tag Suggestions
+
 `GET /tags/suggestions`
+
 - **Purpose**: Get tag suggestions based on what users have actually created
 - **Authentication**: Yes
 - **Query Parameters**:
   - `entity_type` (string, optional): Suggest tags for specific entity type
   - `limit` (integer, default: 20, max: 50): Maximum suggestions
 - **Success Response** (200):
+
 ```json
 ["routine", "annual", "follow-up", "urgent", "cardiology"]
 ```
 
 #### Rename Tag
+
 `PUT /tags/rename`
+
 - **Purpose**: Rename a tag across all entities
 - **Authentication**: Yes
 - **Query Parameters**:
   - `old_tag` (string, required): Current tag name to rename
   - `new_tag` (string, required): New tag name
 - **Success Response** (200):
+
 ```json
 {
   "message": "Successfully renamed 'cardio' to 'cardiology'",
@@ -3218,12 +3893,15 @@ Base path: `/api/v1/tags`
 ```
 
 #### Delete Tag
+
 `DELETE /tags/delete`
+
 - **Purpose**: Delete a tag from all entities
 - **Authentication**: Yes
 - **Query Parameters**:
   - `tag` (string, required): Tag name to delete
 - **Success Response** (200):
+
 ```json
 {
   "message": "Successfully deleted tag 'old-tag'",
@@ -3232,13 +3910,16 @@ Base path: `/api/v1/tags`
 ```
 
 #### Replace Tag
+
 `PUT /tags/replace`
+
 - **Purpose**: Replace one tag with another across all entities
 - **Authentication**: Yes
 - **Query Parameters**:
   - `old_tag` (string, required): Tag to replace
   - `new_tag` (string, required): Replacement tag
 - **Success Response** (200):
+
 ```json
 {
   "message": "Successfully replaced 'cardio' with 'cardiology'",
@@ -3247,16 +3928,21 @@ Base path: `/api/v1/tags`
 ```
 
 #### Create Tag
+
 `POST /tags/create`
+
 - **Purpose**: Create a new tag in the user tags registry
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "tag": "new-category"
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "message": "Successfully created tag 'new-category'",
@@ -3273,8 +3959,11 @@ Base path: `/api/v1/tags`
 Base path: `/api/v1/custom-reports`
 
 #### Generate Report
+
 `POST /custom-reports/generate`
+
 - **Request Body**:
+
 ```json
 {
   "patient_id": 1,
@@ -3288,9 +3977,11 @@ Base path: `/api/v1/custom-reports`
 ```
 
 #### List Reports
+
 `GET /custom-reports/`
 
 #### Download Report
+
 `GET /custom-reports/{report_id}/download`
 
 ### 12.2 Export
@@ -3298,7 +3989,9 @@ Base path: `/api/v1/custom-reports`
 Base path: `/api/v1/export`
 
 #### Export Data
+
 `GET /export/{record_type}`
+
 - **Path Parameters**:
   - `record_type`: `medications`, `lab-results`, `allergies`, etc.
 - **Query Parameters**:
@@ -3315,8 +4008,11 @@ Base path: `/api/v1/export`
 Base path: `/api/v1/paperless`
 
 #### Upload to Paperless
+
 `POST /paperless/upload`
+
 - **Request Body**:
+
 ```json
 {
   "document_id": 123,
@@ -3326,9 +4022,11 @@ Base path: `/api/v1/paperless`
 ```
 
 #### Sync from Paperless
+
 `POST /paperless/sync`
 
 #### List Paperless Documents
+
 `GET /paperless/documents`
 
 ---
@@ -3340,10 +4038,13 @@ Base path: `/api/v1/paperless`
 Base path: `/api/v1/system`
 
 #### Health Check
+
 `GET /system/health`
+
 - **Authentication**: No
 - **Purpose**: Basic system health check
 - **Success Response** (200):
+
 ```json
 {
   "status": "healthy",
@@ -3357,10 +4058,13 @@ Base path: `/api/v1/system`
 ```
 
 #### Version Information
+
 `GET /system/version`
+
 - **Authentication**: No
 - **Purpose**: Get application version information
 - **Success Response** (200):
+
 ```json
 {
   "app_name": "MediKeep",
@@ -3370,11 +4074,14 @@ Base path: `/api/v1/system`
 ```
 
 #### Log Level Configuration
+
 `GET /system/log-level`
+
 - **Authentication**: No
 - **Rate Limit**: 60 requests/minute per IP
 - **Purpose**: Get current logging configuration for frontend integration
 - **Success Response** (200):
+
 ```json
 {
   "current_level": "INFO",
@@ -3401,12 +4108,15 @@ Base path: `/api/v1/system`
   }
 }
 ```
+
 - **Error Response** (429 - Rate Limit Exceeded):
+
 ```json
 {
   "detail": "Rate limit exceeded. Maximum 60 requests per minute."
 }
 ```
+
 - **Headers** (on rate limit):
   - `X-RateLimit-Limit`: 60
   - `X-RateLimit-Remaining`: 0
@@ -3414,11 +4124,14 @@ Base path: `/api/v1/system`
   - `Retry-After`: Seconds until reset
 
 #### Log Rotation Configuration
+
 `GET /system/log-rotation-config`
+
 - **Authentication**: No
 - **Rate Limit**: 60 requests/minute per IP
 - **Purpose**: Get current log rotation configuration and status
 - **Success Response** (200):
+
 ```json
 {
   "rotation_method": "python",
@@ -3459,6 +4172,7 @@ Base path: `/api/v1/system`
   "timestamp": "2025-10-19T12:00:00Z"
 }
 ```
+
 - **Use Cases**:
   - Monitor log file sizes and rotation status
   - Verify which rotation method is active (logrotate vs Python)
@@ -3466,22 +4180,61 @@ Base path: `/api/v1/system`
   - Troubleshoot log management issues
 
 #### System Backup
+
 `POST /system/backup`
+
 - **Authentication**: Yes (Admin only)
 
 #### System Restore
+
 `POST /system/restore`
+
 - **Authentication**: Yes (Admin only)
+
+#### Get Release Notes
+
+`GET /system/releases`
+
+- **Authentication**: No (public information)
+- **Purpose**: Get application release notes from GitHub
+- **Query Parameters**:
+
+| Parameter | Type    | Default | Description                                         |
+| --------- | ------- | ------- | --------------------------------------------------- |
+| limit     | integer | 10      | Maximum number of releases to return (capped at 20) |
+
+- **Success Response** (200):
+
+```json
+{
+  "releases": [
+    {
+      "tag_name": "v0.58.0",
+      "name": "v0.58.0",
+      "body": "## Changes\n- Feature X\n- Bug fix Y",
+      "published_at": "2026-03-15T00:00:00Z",
+      "html_url": "https://github.com/afairgiant/MediKeep/releases/tag/v0.58.0"
+    }
+  ],
+  "current_version": "0.58.0",
+  "timestamp": "2026-03-15T12:00:00Z"
+}
+```
+
+- **Error Handling**: Returns empty releases list on GitHub API failure (graceful degradation).
 
 ### 14.2 Utils
 
 Base path: `/api/v1/utils`
 
 #### Get Timezone Information
+
 `GET /utils/timezone-info`
+
 - **Purpose**: Get facility timezone information for proper date/time handling
 - **Authentication**: No
 - **Success Response** (200):
+
 ```json
 {
   "timezone": "America/New_York",
@@ -3498,10 +4251,13 @@ Base path: `/api/v1/frontend-logs`
 **Purpose**: Centralized logging for frontend events, errors, and user actions.
 
 #### Log Frontend Event
+
 `POST /frontend-logs/log`
+
 - **Purpose**: Log frontend events and errors from the React frontend
 - **Authentication**: Optional (user_id can be provided in request)
 - **Request Body**:
+
 ```json
 {
   "level": "error",
@@ -3521,9 +4277,11 @@ Base path: `/api/v1/frontend-logs`
   }
 }
 ```
+
 - **Log levels**: `error`, `warn`, `info`, `debug`
 - **Categories**: `error`, `user_action`, `performance`, `security`
 - **Success Response** (200):
+
 ```json
 {
   "status": "logged",
@@ -3532,10 +4290,13 @@ Base path: `/api/v1/frontend-logs`
 ```
 
 #### Log Frontend Error
+
 `POST /frontend-logs/error`
+
 - **Purpose**: Log frontend errors with detailed context (for React error boundaries)
 - **Authentication**: Optional
 - **Request Body**:
+
 ```json
 {
   "error_message": "Cannot read property 'id' of undefined",
@@ -3555,7 +4316,9 @@ Base path: `/api/v1/frontend-logs`
   }
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "status": "error_logged",
@@ -3564,10 +4327,13 @@ Base path: `/api/v1/frontend-logs`
 ```
 
 #### Log User Action
+
 `POST /frontend-logs/user-action`
+
 - **Purpose**: Log user actions for analytics and audit purposes
 - **Authentication**: Yes
 - **Request Body**:
+
 ```json
 {
   "action": "medication_created",
@@ -3581,7 +4347,9 @@ Base path: `/api/v1/frontend-logs`
   "url": "/medications/new"
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "status": "action_logged",
@@ -3590,10 +4358,13 @@ Base path: `/api/v1/frontend-logs`
 ```
 
 #### Health Check
+
 `GET /frontend-logs/health`
+
 - **Purpose**: Health check endpoint for frontend logging service
 - **Authentication**: No
 - **Success Response** (200):
+
 ```json
 {
   "status": "healthy",
@@ -3613,10 +4384,13 @@ Base path: `/api/v1/admin`
 ### 15.1 Dashboard & Statistics
 
 #### Get Dashboard Statistics
+
 `GET /admin/dashboard/stats`
+
 - **Purpose**: Get comprehensive dashboard statistics
 - **Authentication**: Yes (Admin only)
 - **Success Response** (200):
+
 ```json
 {
   "total_users": 150,
@@ -3638,7 +4412,9 @@ Base path: `/api/v1/admin`
 ```
 
 #### Get Recent Activity
+
 `GET /admin/dashboard/recent-activity`
+
 - **Purpose**: Get recent activity across all models
 - **Authentication**: Yes (Admin only)
 - **Query Parameters**:
@@ -3646,6 +4422,7 @@ Base path: `/api/v1/admin`
   - `action_filter` (string, optional): Filter by action (`created`, `updated`, `deleted`)
   - `entity_filter` (string, optional): Filter by entity type (`medication`, `patient`, etc.)
 - **Success Response** (200):
+
 ```json
 [
   {
@@ -3660,10 +4437,13 @@ Base path: `/api/v1/admin`
 ```
 
 #### Get System Health
+
 `GET /admin/dashboard/system-health`
+
 - **Purpose**: Get comprehensive system health information
 - **Authentication**: Yes (Admin only)
 - **Success Response** (200):
+
 ```json
 {
   "database_status": "healthy",
@@ -3677,18 +4457,21 @@ Base path: `/api/v1/admin`
 ```
 
 #### Get System Metrics
+
 `GET /admin/dashboard/system-metrics`
+
 - **Purpose**: Get detailed system performance metrics
 - **Authentication**: Yes (Admin only)
 - **Success Response** (200):
+
 ```json
 {
   "timestamp": "2025-10-04T10:30:00Z",
   "services": {
-    "api": {"status": "operational", "response_time_ms": 15.2},
-    "authentication": {"status": "operational"},
-    "frontend_logging": {"status": "operational"},
-    "admin_interface": {"status": "operational"}
+    "api": { "status": "operational", "response_time_ms": 15.2 },
+    "authentication": { "status": "operational" },
+    "frontend_logging": { "status": "operational" },
+    "admin_interface": { "status": "operational" }
   },
   "database": {
     "connection_pool_size": "Available",
@@ -3718,10 +4501,13 @@ Base path: `/api/v1/admin`
 ```
 
 #### Quick Health Check
+
 `GET /admin/dashboard/health-check`
+
 - **Purpose**: Quick health check for monitoring services
 - **Authentication**: No
 - **Success Response** (200):
+
 ```json
 {
   "status": "healthy",
@@ -3734,17 +4520,38 @@ Base path: `/api/v1/admin`
 ```
 
 #### Get Storage Health
+
 `GET /admin/dashboard/storage-health`
+
 - **Purpose**: Check storage system health
 - **Authentication**: Yes (Admin only)
 - **Success Response** (200):
+
 ```json
 {
   "status": "healthy",
   "directories": {
-    "uploads": {"path": "uploads/lab_result_files", "exists": true, "write_permission": true, "size_mb": 120.3, "file_count": 450},
-    "backups": {"path": "backups", "exists": true, "write_permission": true, "size_mb": 250.0, "file_count": 10},
-    "logs": {"path": "logs", "exists": true, "write_permission": true, "size_mb": 15.5, "file_count": 5}
+    "uploads": {
+      "path": "uploads/lab_result_files",
+      "exists": true,
+      "write_permission": true,
+      "size_mb": 120.3,
+      "file_count": 450
+    },
+    "backups": {
+      "path": "backups",
+      "exists": true,
+      "write_permission": true,
+      "size_mb": 250.0,
+      "file_count": 10
+    },
+    "logs": {
+      "path": "logs",
+      "exists": true,
+      "write_permission": true,
+      "size_mb": 15.5,
+      "file_count": 5
+    }
   },
   "disk_space": {
     "total_gb": 500.0,
@@ -3756,12 +4563,15 @@ Base path: `/api/v1/admin`
 ```
 
 #### Get Analytics Data
+
 `GET /admin/dashboard/analytics-data`
+
 - **Purpose**: Get analytics data for dashboard charts
 - **Authentication**: Yes (Admin only)
 - **Query Parameters**:
   - `days` (integer, default: 7): Number of days to analyze
 - **Success Response** (200):
+
 ```json
 {
   "weekly_activity": {
@@ -3782,10 +4592,13 @@ Base path: `/api/v1/admin`
 ```
 
 #### Test Admin Access
+
 `GET /admin/dashboard/test-access`
+
 - **Purpose**: Verify admin access and token validity
 - **Authentication**: Yes (Admin only)
 - **Success Response** (200):
+
 ```json
 {
   "message": "Admin access verified",
@@ -3802,41 +4615,59 @@ Base path: `/api/v1/admin/models`
 **Purpose**: Django-style generic CRUD operations for all models
 
 #### List Available Models
+
 `GET /admin/models/`
+
 - **Purpose**: Get list of all available models for management
 - **Authentication**: Yes (Admin only)
 - **Success Response** (200):
+
 ```json
 ["user", "patient", "medication", "lab_result", "condition", "allergy", ...]
 ```
 
 #### Get Model Metadata
+
 `GET /admin/models/{model_name}/metadata`
+
 - **Purpose**: Get metadata for a specific model (fields, types, relationships)
 - **Success Response** (200):
+
 ```json
 {
   "name": "medication",
   "table_name": "medications",
   "fields": [
-    {"name": "id", "type": "integer", "nullable": false, "primary_key": true},
-    {"name": "medication_name", "type": "string", "nullable": false, "max_length": 255},
-    {"name": "status", "type": "string", "choices": ["active", "stopped", "on-hold"]}
+    { "name": "id", "type": "integer", "nullable": false, "primary_key": true },
+    {
+      "name": "medication_name",
+      "type": "string",
+      "nullable": false,
+      "max_length": 255
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "choices": ["active", "stopped", "on-hold"]
+    }
   ],
-  "relationships": {"patient": "Patient", "practitioner": "Practitioner"},
+  "relationships": { "patient": "Patient", "practitioner": "Practitioner" },
   "display_name": "Medication",
   "verbose_name_plural": "Medications"
 }
 ```
 
 #### List Model Records
+
 `GET /admin/models/{model_name}/`
+
 - **Purpose**: Get paginated list of records
 - **Query Parameters**:
   - `page` (integer, default: 1): Page number
   - `per_page` (integer, default: 25, max: 100): Items per page
   - `search` (string, optional): Search term
 - **Success Response** (200):
+
 ```json
 {
   "items": [...],
@@ -3848,28 +4679,37 @@ Base path: `/api/v1/admin/models`
 ```
 
 #### Get Model Record
+
 `GET /admin/models/{model_name}/{record_id}`
+
 - **Purpose**: Get a specific record by ID
 - **Success Response** (200): Record object with all fields
 
 #### Create Model Record
+
 `POST /admin/models/{model_name}/`
+
 - **Purpose**: Create a new record
 - **Request Body**: Model-specific fields
 - **Success Response** (201): Created record object
 
 #### Update Model Record
+
 `PUT /admin/models/{model_name}/{record_id}`
+
 - **Purpose**: Update a record
 - **Note**: Password fields cannot be updated through this endpoint
 - **Request Body**: Fields to update
 - **Success Response** (200): Updated record object
 
 #### Delete Model Record
+
 `DELETE /admin/models/{model_name}/{record_id}`
+
 - **Purpose**: Delete a record
 - **Note**: Protects against deleting last user or last admin
 - **Success Response** (200):
+
 ```json
 {
   "message": "medication record 123 deleted successfully",
@@ -3878,14 +4718,18 @@ Base path: `/api/v1/admin/models`
 ```
 
 #### Admin Reset Password
+
 `POST /admin/models/users/{user_id}/reset-password`
+
 - **Purpose**: Admin reset of any user's password
 - **Request Body**:
+
 ```json
 {
   "new_password": "NewSecurePass123!"
 }
 ```
+
 - **Validation**: Min 6 chars, must contain letter and number
 - **Success Response** (200): `{"message": "Password reset successfully"}`
 
@@ -3894,15 +4738,20 @@ Base path: `/api/v1/admin/models`
 Base path: `/api/v1/admin/backup`
 
 #### Create Database Backup
+
 `POST /admin/backup/create-database`
+
 - **Purpose**: Create a database-only backup
 - **Request Body**:
+
 ```json
 {
   "description": "Weekly backup"
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "id": 1,
@@ -3916,21 +4765,28 @@ Base path: `/api/v1/admin/backup`
 ```
 
 #### Create Files Backup
+
 `POST /admin/backup/create-files`
+
 - **Purpose**: Create a files-only backup (uploads directory)
 - **Request Body**: Same as database backup
 - **Success Response** (200): Backup response object
 
 #### Create Full Backup
+
 `POST /admin/backup/create-full`
+
 - **Purpose**: Create a full system backup (database + files)
 - **Request Body**: Same as database backup
 - **Success Response** (200): Backup response object
 
 #### List Backups
+
 `GET /admin/backup/`
+
 - **Purpose**: List all backup records
 - **Success Response** (200):
+
 ```json
 {
   "backups": [
@@ -3950,16 +4806,21 @@ Base path: `/api/v1/admin/backup`
 ```
 
 #### Download Backup
+
 `GET /admin/backup/{backup_id}/download`
+
 - **Purpose**: Download a backup file
 - **Success Response**: File download (application/octet-stream)
 - **Error Responses**:
   - `404`: Backup or file not found
 
 #### Verify Backup
+
 `POST /admin/backup/{backup_id}/verify`
+
 - **Purpose**: Verify backup integrity
 - **Success Response** (200):
+
 ```json
 {
   "valid": true,
@@ -3969,29 +4830,40 @@ Base path: `/api/v1/admin/backup`
 ```
 
 #### Delete Backup
+
 `DELETE /admin/backup/{backup_id}`
+
 - **Purpose**: Delete a backup record and file
 - **Success Response** (200): Deletion confirmation
 
 #### Cleanup Old Backups
+
 `POST /admin/backup/cleanup`
+
 - **Purpose**: Clean up old backups based on retention policy
 - **Success Response** (200): Cleanup results
 
 #### Cleanup Orphaned Files
+
 `POST /admin/backup/cleanup-orphaned`
+
 - **Purpose**: Clean up orphaned backup files
 - **Success Response** (200): Cleanup results
 
 #### Cleanup All Old Data
+
 `POST /admin/backup/cleanup-all`
+
 - **Purpose**: Clean up old backups, orphaned files, and old trash
 - **Success Response** (200): Combined cleanup results
 
 #### Get Retention Settings
+
 `GET /admin/backup/settings/retention`
+
 - **Purpose**: Get current retention settings
 - **Success Response** (200):
+
 ```json
 {
   "backup_retention_days": 30,
@@ -4003,9 +4875,12 @@ Base path: `/api/v1/admin/backup`
 ```
 
 #### Update Retention Settings
+
 `POST /admin/backup/settings/retention`
+
 - **Purpose**: Update retention and admin settings
 - **Request Body**:
+
 ```json
 {
   "backup_retention_days": 45,
@@ -4015,10 +4890,13 @@ Base path: `/api/v1/admin/backup`
   "allow_user_registration": false
 }
 ```
+
 - **Success Response** (200): Updated settings
 
 #### Get Retention Stats
+
 `GET /admin/backup/retention/stats`
+
 - **Purpose**: Get backup retention statistics
 - **Success Response** (200): Statistics and cleanup preview
 
@@ -4027,11 +4905,14 @@ Base path: `/api/v1/admin/backup`
 Base path: `/api/v1/admin/restore`
 
 #### Upload Backup File
+
 `POST /admin/restore/upload`
+
 - **Purpose**: Upload an external backup file for restore
 - **Content-Type**: `multipart/form-data`
 - **Supported Files**: `.sql` (database), `.zip` (files or full)
 - **Success Response** (200):
+
 ```json
 {
   "success": true,
@@ -4044,9 +4925,12 @@ Base path: `/api/v1/admin/restore`
 ```
 
 #### Preview Restore
+
 `POST /admin/restore/preview/{backup_id}`
+
 - **Purpose**: Preview what will be affected by restore
 - **Success Response** (200):
+
 ```json
 {
   "backup_id": 5,
@@ -4064,9 +4948,12 @@ Base path: `/api/v1/admin/restore`
 ```
 
 #### Get Confirmation Token
+
 `GET /admin/restore/confirmation-token/{backup_id}`
+
 - **Purpose**: Generate confirmation token for restore
 - **Success Response** (200):
+
 ```json
 {
   "backup_id": 5,
@@ -4077,15 +4964,20 @@ Base path: `/api/v1/admin/restore`
 ```
 
 #### Execute Restore
+
 `POST /admin/restore/execute/{backup_id}`
+
 - **Purpose**: Execute restore with confirmation token
 - **Request Body**:
+
 ```json
 {
   "confirmation_token": "abc123..."
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "success": true,
@@ -4103,16 +4995,21 @@ Base path: `/api/v1/admin/restore`
 Base path: `/api/v1/admin/bulk`
 
 #### Bulk Delete
+
 `POST /admin/bulk/delete`
+
 - **Purpose**: Delete multiple records at once
 - **Request Body**:
+
 ```json
 {
   "model_name": "medication",
   "record_ids": [1, 2, 3, 4, 5]
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "success": true,
@@ -4123,9 +5020,12 @@ Base path: `/api/v1/admin/bulk`
 ```
 
 #### Bulk Update
+
 `POST /admin/bulk/update`
+
 - **Purpose**: Update multiple records with same data
 - **Request Body**:
+
 ```json
 {
   "model_name": "medication",
@@ -4135,7 +5035,9 @@ Base path: `/api/v1/admin/bulk`
   }
 }
 ```
+
 - **Success Response** (200):
+
 ```json
 {
   "success": true,
@@ -4150,14 +5052,19 @@ Base path: `/api/v1/admin/bulk`
 Base path: `/api/v1/admin/trash`
 
 #### List Trash Contents
+
 `GET /admin/trash/`
+
 - **Purpose**: List all files currently in trash
 - **Success Response** (200): Array of trash file objects
 
 #### Cleanup Old Trash
+
 `POST /admin/trash/cleanup`
+
 - **Purpose**: Clean up old files based on retention policy
 - **Success Response** (200):
+
 ```json
 {
   "deleted_count": 15,
@@ -4166,12 +5073,15 @@ Base path: `/api/v1/admin/trash`
 ```
 
 #### Restore File from Trash
+
 `POST /admin/trash/restore`
+
 - **Purpose**: Restore a file from trash
 - **Query Parameters**:
   - `trash_path` (string, required): Path to file in trash
   - `restore_path` (string, optional): Target restore path
 - **Success Response** (200):
+
 ```json
 {
   "status": "success",
@@ -4180,11 +5090,14 @@ Base path: `/api/v1/admin/trash`
 ```
 
 #### Permanently Delete from Trash
+
 `DELETE /admin/trash/permanently-delete`
+
 - **Purpose**: Permanently delete a file (cannot be recovered)
 - **Query Parameters**:
   - `trash_path` (string, required): Path to file in trash
 - **Success Response** (200):
+
 ```json
 {
   "status": "success",
@@ -4197,9 +5110,12 @@ Base path: `/api/v1/admin/trash`
 Base path: `/api/v1/admin/maintenance`
 
 #### Get Test Library Info
+
 `GET /admin/maintenance/test-library/info`
+
 - **Purpose**: Get information about the current test library
 - **Success Response** (200):
+
 ```json
 {
   "version": "1.2.0",
@@ -4213,10 +5129,13 @@ Base path: `/api/v1/admin/maintenance`
 ```
 
 #### Reload Test Library
+
 `POST /admin/maintenance/test-library/reload`
+
 - **Purpose**: Reload the test library from disk
 - **Use Case**: After updating test library JSON file
 - **Success Response** (200):
+
 ```json
 {
   "success": true,
@@ -4227,16 +5146,21 @@ Base path: `/api/v1/admin/maintenance`
 ```
 
 #### Sync Test Library
+
 `POST /admin/maintenance/test-library/sync`
+
 - **Purpose**: Sync lab test components with the test library
 - **Request Body**:
+
 ```json
 {
   "force_all": false
 }
 ```
+
 - **Note**: If `force_all` is true, re-processes all components. If false, only processes components without canonical names.
 - **Success Response** (200):
+
 ```json
 {
   "success": true,
@@ -4253,15 +5177,15 @@ Base path: `/api/v1/admin/maintenance`
 
 ### A. Error Codes Reference
 
-| Code | Meaning | Common Causes |
-|------|---------|---------------|
-| AUTH_001 | Invalid credentials | Wrong username/password |
-| AUTH_002 | Token expired | Session timeout |
-| AUTH_003 | Insufficient permissions | Accessing restricted resource |
-| VAL_001 | Validation failed | Invalid input data |
-| RES_001 | Resource not found | Invalid ID or deleted resource |
-| RES_002 | Resource conflict | Duplicate entry |
-| RATE_001 | Rate limit exceeded | Too many requests |
+| Code     | Meaning                  | Common Causes                  |
+| -------- | ------------------------ | ------------------------------ |
+| AUTH_001 | Invalid credentials      | Wrong username/password        |
+| AUTH_002 | Token expired            | Session timeout                |
+| AUTH_003 | Insufficient permissions | Accessing restricted resource  |
+| VAL_001  | Validation failed        | Invalid input data             |
+| RES_001  | Resource not found       | Invalid ID or deleted resource |
+| RES_002  | Resource conflict        | Duplicate entry                |
+| RATE_001 | Rate limit exceeded      | Too many requests              |
 
 ### B. Data Types
 
@@ -4290,6 +5214,7 @@ Base path: `/api/v1/admin/maintenance`
 ---
 
 **For Support:**
+
 - GitHub Issues: [github.com/afairgiant/MediKeep/issues](https://github.com/afairgiant/MediKeep/issues)
 - API Documentation: http://localhost:8005/docs (Swagger UI)
 - Developer Guide: [docs/developer-guide/](../developer-guide/)
