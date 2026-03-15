@@ -11,7 +11,7 @@ from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Query, Request, status
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
@@ -446,7 +446,7 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
 
 
 @router.get("/releases")
-async def get_releases(limit: int = 10) -> Dict[str, Any]:
+async def get_releases(limit: int = Query(default=10, ge=1, le=20)) -> Dict[str, Any]:
     """
     Get application release notes from GitHub.
 
@@ -461,7 +461,7 @@ async def get_releases(limit: int = 10) -> Dict[str, Any]:
     """
     try:
         service = get_release_notes_service()
-        releases = await service.get_releases(limit=min(limit, 20))
+        releases = await service.get_releases(limit=limit)
 
         return {
             "releases": releases,

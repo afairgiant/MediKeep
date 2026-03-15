@@ -159,7 +159,7 @@ describe('ReleaseNotesHistory', () => {
   });
 
   describe('successful data fetch', () => {
-    it('renders the release list after data loads', async () => {
+    it('renders only the latest release when collapsed', async () => {
       const releases = [
         makeRelease({ tag_name: 'v0.58.0', name: 'Release 0.58.0' }),
         makeRelease({ tag_name: 'v0.57.0', name: 'Release 0.57.0' }),
@@ -173,13 +173,13 @@ describe('ReleaseNotesHistory', () => {
       await waitFor(() => {
         expect(screen.getByText('Release 0.58.0')).toBeInTheDocument();
       });
-      expect(screen.getByText('Release 0.57.0')).toBeInTheDocument();
+      expect(screen.queryByText('Release 0.57.0')).not.toBeInTheDocument();
     });
 
-    it('renders an accordion item for each release', async () => {
+    it('renders all releases after clicking "Show all releases"', async () => {
       const releases = [
-        makeRelease({ tag_name: 'v0.58.0' }),
-        makeRelease({ tag_name: 'v0.57.0' }),
+        makeRelease({ tag_name: 'v0.58.0', name: 'Release 0.58.0' }),
+        makeRelease({ tag_name: 'v0.57.0', name: 'Release 0.57.0' }),
       ];
 
       mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
@@ -188,9 +188,12 @@ describe('ReleaseNotesHistory', () => {
       render(<ReleaseNotesHistory />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('accordion-item-v0.58.0')).toBeInTheDocument();
+        expect(screen.getByText('Release 0.58.0')).toBeInTheDocument();
       });
-      expect(screen.getByTestId('accordion-item-v0.57.0')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('Show all releases'));
+
+      expect(screen.getByText('Release 0.57.0')).toBeInTheDocument();
     });
 
     it('shows the "Current" badge for the release matching currentVersion', async () => {
@@ -224,7 +227,7 @@ describe('ReleaseNotesHistory', () => {
       expect(screen.queryByText('Current')).not.toBeInTheDocument();
     });
 
-    it('renders a "View on GitHub" link for each release', async () => {
+    it('renders a "View on GitHub" link for the visible release', async () => {
       const releases = [
         makeRelease({ tag_name: 'v0.58.0', html_url: 'https://github.com/example/v0.58.0' }),
         makeRelease({ tag_name: 'v0.57.0', html_url: 'https://github.com/example/v0.57.0' }),
@@ -236,8 +239,12 @@ describe('ReleaseNotesHistory', () => {
       render(<ReleaseNotesHistory />);
 
       await waitFor(() => {
-        expect(screen.getAllByText('View on GitHub')).toHaveLength(2);
+        expect(screen.getAllByText('View on GitHub')).toHaveLength(1);
       });
+
+      // Expand to see all
+      fireEvent.click(screen.getByText('Show all releases'));
+      expect(screen.getAllByText('View on GitHub')).toHaveLength(2);
     });
 
     it('renders release body content inside the accordion panel', async () => {
@@ -376,14 +383,14 @@ describe('ReleaseNotesHistory', () => {
       });
     });
 
-    it('requests 20 releases from getReleaseNotes', async () => {
+    it('requests 5 releases from getReleaseNotes', async () => {
       mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
       mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
       render(<ReleaseNotesHistory />);
 
       await waitFor(() => {
-        expect(mockGetReleaseNotes).toHaveBeenCalledWith(20);
+        expect(mockGetReleaseNotes).toHaveBeenCalledWith(5);
       });
     });
   });

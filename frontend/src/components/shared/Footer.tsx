@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Box, Text, Anchor, Group } from '@mantine/core';
-import { IconBrandGithub } from '@tabler/icons-react';
+import { IconBrandGithub, IconHeartFilled } from '@tabler/icons-react';
 
 interface FooterProps {
   className?: string;
@@ -36,6 +36,19 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
         >
           <IconBrandGithub size={16} />
           GitHub
+        </Anchor>
+        <Text size="sm" c="dimmed">•</Text>
+        <Anchor
+          href="https://github.com/sponsors/afairgiant"
+          target="_blank"
+          rel="noopener noreferrer"
+          size="sm"
+          c="dimmed"
+          style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+          aria-label="Sponsor MediKeep"
+        >
+          <IconHeartFilled size={14} style={{ color: 'var(--mantine-color-pink-5)' }} />
+          Sponsor
         </Anchor>
       </Group>
     </Box>

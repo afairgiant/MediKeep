@@ -33,13 +33,13 @@ export function isCurrentRelease(tagName: string, currentVersion: string): boole
  * Format an ISO date string as a human-readable locale date.
  */
 export function formatReleaseDate(dateString: string): string {
-  try {
-    return new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  } catch {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
     return dateString;
   }
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }

@@ -8,11 +8,9 @@ Covers:
 - Empty releases list is returned on service error rather than raising 500
 
 Patch strategy note:
-  The endpoint imports get_release_notes_service inside the function body:
-      from app.services.release_notes_service import get_release_notes_service
-  Because the import is local (not module-level), the name is not bound in the
-  system module's namespace. The correct patch target is therefore the original
-  definition site: "app.services.release_notes_service.get_release_notes_service".
+  The endpoint module imports get_release_notes_service at module scope, so the
+  bound name lives in the system module's namespace. The correct patch target is
+  "app.api.v1.endpoints.system.get_release_notes_service".
 """
 
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -24,7 +22,7 @@ from app.core.config import settings
 from app.main import app
 
 # Target for all service patches in this module
-_SERVICE_PATCH_TARGET = "app.services.release_notes_service.get_release_notes_service"
+_SERVICE_PATCH_TARGET = "app.api.v1.endpoints.system.get_release_notes_service"
 
 
 # ---------------------------------------------------------------------------
@@ -170,7 +168,7 @@ class TestCurrentVersion:
 
 
 class TestLimitParameter:
-    """Tests for the limit query parameter and its cap at 20."""
+    """Tests for the limit query parameter validated via Query(ge=1, le=20)."""
 
     def test_limit_parameter_is_forwarded_to_service(self, api_client: TestClient):
         """The endpoint passes the limit value on to service.get_releases."""
@@ -185,18 +183,15 @@ class TestLimitParameter:
 
         mock_service.get_releases.assert_called_once_with(limit=5)
 
-    def test_limit_is_capped_at_20(self, api_client: TestClient):
-        """When limit exceeds 20, the endpoint passes min(limit, 20) to the service."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
-            mock_service = AsyncMock()
-            mock_service.get_releases = AsyncMock(return_value=_make_sample_releases(20))
-            mock_factory.return_value = mock_service
+    def test_limit_above_20_returns_422(self, api_client: TestClient):
+        """When limit exceeds 20, FastAPI returns a 422 validation error."""
+        response = api_client.get("/api/v1/system/releases?limit=100")
+        assert response.status_code == 422
 
-            api_client.get("/api/v1/system/releases?limit=100")
-
-        mock_service.get_releases.assert_called_once_with(limit=20)
+    def test_limit_below_1_returns_422(self, api_client: TestClient):
+        """When limit is less than 1, FastAPI returns a 422 validation error."""
+        response = api_client.get("/api/v1/system/releases?limit=0")
+        assert response.status_code == 422
 
     def test_limit_equal_to_20_is_accepted(self, api_client: TestClient):
         """A limit of exactly 20 is passed through without modification."""

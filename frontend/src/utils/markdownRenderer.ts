@@ -41,10 +41,10 @@ export function renderReleaseMarkdown(markdown: string): string {
     '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
   );
 
-  // Convert #123 PR references to GitHub links (but not inside existing HTML tags)
+  // Convert #123 PR references to GitHub links (avoid lookbehind for older Safari compat)
   html = html.replace(
-    /(?<![&\w])#(\d+)/g,
-    `<a href="${GITHUB_REPO_URL}/pull/$1" target="_blank" rel="noopener noreferrer">#$1</a>`
+    /(^|[^&\w])#(\d+)/g,
+    `$1<a href="${GITHUB_REPO_URL}/pull/$2" target="_blank" rel="noopener noreferrer">#$2</a>`
   );
 
   // Convert `- item` list blocks into <ul><li>

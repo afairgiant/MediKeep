@@ -4213,7 +4213,7 @@ Base path: `/api/v1/system`
       "name": "v0.58.0",
       "body": "## Changes\n- Feature X\n- Bug fix Y",
       "published_at": "2026-03-15T00:00:00Z",
-      "html_url": "https://github.com/afairgiant/Medikeep/releases/tag/v0.58.0"
+      "html_url": "https://github.com/afairgiant/MediKeep/releases/tag/v0.58.0"
     }
   ],
   "current_version": "0.58.0",
