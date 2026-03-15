@@ -96,6 +96,8 @@ import { ENTITY_TYPES } from './utils/entityRelationships';
 import { useActivityTracker, useNavigationActivityTracker, useApiActivityTracker } from './hooks/useActivityTracker';
 import { apiClient } from './services/apiClient';
 import { useAuth } from './contexts/AuthContext';
+import { useReleaseNotes } from './hooks/useReleaseNotes';
+import WhatsNewModal from './components/settings/WhatsNewModal';
 import './App.css';
 
 // Entity to component mapping for dynamic route generation
@@ -333,6 +335,19 @@ function ActivityTracker() {
   return null;
 }
 
+// What's New trigger: shows release notes modal on first login after version change
+function WhatsNewTrigger() {
+  const { showModal, dismissModal, unseenReleases, currentVersion } = useReleaseNotes();
+  return (
+    <WhatsNewModal
+      opened={showModal}
+      onClose={dismissModal}
+      releases={unseenReleases}
+      currentVersion={currentVersion}
+    />
+  );
+}
+
 // Bridge: reads theme from ThemeContext, passes forceColorScheme to MantineProvider
 // so both CSS variables and Mantine switch in the same render - no flash.
 function ThemedMantineProvider({ children }) {
@@ -389,6 +404,7 @@ function App() {
               <ThemeProvider>
               <ThemedMantineProvider>
                     <NavigationTracker />
+                    <WhatsNewTrigger />
                     {/* <ActivityTracker /> */}
                     <div className="App">
                       <div style={{ flex: 1 }}>

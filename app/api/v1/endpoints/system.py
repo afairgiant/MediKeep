@@ -11,7 +11,7 @@ from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Query, Request, status
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
@@ -25,6 +25,7 @@ from app.core.logging.constants import (
     sanitize_log_input,
     validate_log_level,
 )
+from app.services.release_notes_service import get_release_notes_service
 
 # Constants
 BYTES_PER_MB = 1048576  # 1024 * 1024
@@ -442,3 +443,44 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error. Please try again later.",
         )
+
+
+@router.get("/releases")
+async def get_releases(limit: int = Query(default=10, ge=1, le=20)) -> Dict[str, Any]:
+    """
+    Get application release notes from GitHub.
+
+    Returns recent releases with version info for the frontend
+    to display release notes and "What's New" notifications.
+
+    Args:
+        limit: Maximum number of releases to return (capped at 20)
+
+    Returns:
+        Dict containing releases list, current version, and timestamp
+    """
+    try:
+        service = get_release_notes_service()
+        releases = await service.get_releases(limit=limit)
+
+        return {
+            "releases": releases,
+            "current_version": settings.VERSION,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+    except Exception as e:
+        app_logger.error(
+            f"Release notes endpoint error: {e}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "release_notes_endpoint_error",
+                LogFields.ERROR: sanitize_log_input(str(e)),
+            },
+        )
+
+        # Return empty releases on error rather than failing
+        return {
+            "releases": [],
+            "current_version": settings.VERSION,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }

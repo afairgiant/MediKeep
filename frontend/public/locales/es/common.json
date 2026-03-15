@@ -2116,7 +2116,8 @@
       "security": "Seguridad",
       "systemInfo": "Información del sistema",
       "gettingHelp": "Obtener ayuda",
-      "supportMediKeep": "Apoyar MediKeep"
+      "supportMediKeep": "Apoyar MediKeep",
+      "releaseNotes": "Notas de la versi\u00f3n"
     },
     "security": {
       "password": {
@@ -2166,6 +2167,21 @@
     "sponsor": {
       "description": "MediKeep es gratuito y de código abierto. Si te resulta útil, considera patrocinar el proyecto para ayudar a financiar el desarrollo.",
       "button": "Patrocinar en GitHub"
+    },
+    "releaseNotes": {
+      "whatsNewTitle": "Novedades",
+      "whatsNewSubtitle": "Esto es lo que ha cambiado desde tu \u00faltima actualizaci\u00f3n",
+      "currentVersion": "Actual",
+      "viewOnGithub": "Ver en GitHub",
+      "dismiss": "Entendido",
+      "loading": "Cargando notas de la versi\u00f3n...",
+      "error": "No se pudieron cargar las notas de la versi\u00f3n",
+      "retry": "Intentar de nuevo",
+      "empty": "No hay notas de la versi\u00f3n disponibles",
+      "publishedOn": "Publicado el {{date}}",
+      "noChanges": "No se enumeran cambios para esta versi\u00f3n",
+      "showAll": "Mostrar todas las versiones",
+      "showLess": "Mostrar menos"
     },
     "tabs": {
       "general": "General",

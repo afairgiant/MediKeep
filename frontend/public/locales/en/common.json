@@ -2529,7 +2529,8 @@
       "preferences": "Application Preferences",
       "documentStorage": "Document Storage",
       "gettingHelp": "Getting Help",
-      "supportMediKeep": "Support MediKeep"
+      "supportMediKeep": "Support MediKeep",
+      "releaseNotes": "Release Notes"
     },
     "security": {
       "password": {
@@ -2585,6 +2586,21 @@
     "sponsor": {
       "description": "MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going.",
       "button": "Sponsor on GitHub"
+    },
+    "releaseNotes": {
+      "whatsNewTitle": "What's New",
+      "whatsNewSubtitle": "Here's what changed since your last update",
+      "currentVersion": "Current",
+      "viewOnGithub": "View on GitHub",
+      "dismiss": "Got it",
+      "loading": "Loading release notes...",
+      "error": "Unable to load release notes",
+      "retry": "Try Again",
+      "empty": "No release notes available",
+      "publishedOn": "Released {{date}}",
+      "noChanges": "No changes listed for this release",
+      "showAll": "Show all releases",
+      "showLess": "Show less"
     },
     "preferences": {
       "unitSystem": {
