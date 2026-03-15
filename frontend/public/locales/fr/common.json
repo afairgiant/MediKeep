@@ -1822,7 +1822,32 @@
     "groupByPractice": "Regrouper par établissement",
     "ungroupedTitle": "Médecins indépendants",
     "editPracticeError": "Echec du chargement de l'établissement pour l'éditer",
-    "createPracticeError": "Echec de la création de l'établissement. Veuillez réessayer."
+    "createPracticeError": "Echec de la création de l'établissement. Veuillez réessayer.",
+    "tabs": {
+      "practitioners": "Praticiens",
+      "practices": "Cabinets"
+    },
+    "practices": {
+      "addNew": "Ajouter un cabinet",
+      "createTitle": "Ajouter un cabinet",
+      "createSuccess": "Cabinet créé avec succès",
+      "searchPlaceholder": "Rechercher des cabinets...",
+      "deleteConfirm": "Voulez-vous vraiment supprimer \"{{name}}\" ? Cette action est irréversible.",
+      "deleteSuccess": "Cabinet supprimé avec succès",
+      "deleteError": "Échec de la suppression du cabinet",
+      "cannotDelete": "Suppression impossible - des praticiens sont associés",
+      "totalCount": "{{count}} cabinets au total",
+      "unusedCount": "{{count}} inutilisé(s)",
+      "emptyTitle": "Aucun cabinet trouvé",
+      "emptyNoData": "Cliquez sur \"Ajouter un cabinet\" pour en créer un, ou ils sont créés automatiquement lors de l'ajout de praticiens.",
+      "table": {
+        "name": "Nom",
+        "phone": "Téléphone",
+        "website": "Site web",
+        "practitioners": "Praticiens",
+        "actions": "Actions"
+      }
+    }
   },
   "pharmacies": {
     "title": "Pharmacies",

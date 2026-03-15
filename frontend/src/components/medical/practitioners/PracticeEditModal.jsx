@@ -12,28 +12,35 @@ import { useTranslation } from 'react-i18next';
 import apiService from '../../../services/api';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 
+const emptyForm = {
+  name: '',
+  phone_number: '',
+  fax_number: '',
+  website: '',
+  patient_portal_url: '',
+  notes: '',
+};
+
 const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
   const { t } = useTranslation(['common', 'medical']);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone_number: '',
-    fax_number: '',
-    website: '',
-    patient_portal_url: '',
-    notes: '',
-  });
+  const isEditing = Boolean(practiceData);
+  const [formData, setFormData] = useState(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (practiceData && isOpen) {
-      setFormData({
-        name: practiceData.name || '',
-        phone_number: practiceData.phone_number || '',
-        fax_number: practiceData.fax_number || '',
-        website: practiceData.website || '',
-        patient_portal_url: practiceData.patient_portal_url || '',
-        notes: practiceData.notes || '',
-      });
+    if (isOpen) {
+      if (practiceData) {
+        setFormData({
+          name: practiceData.name || '',
+          phone_number: practiceData.phone_number || '',
+          fax_number: practiceData.fax_number || '',
+          website: practiceData.website || '',
+          patient_portal_url: practiceData.patient_portal_url || '',
+          notes: practiceData.notes || '',
+        });
+      } else {
+        setFormData(emptyForm);
+      }
     }
   }, [practiceData, isOpen]);
 
@@ -55,10 +62,16 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
       });
       payload.name = formData.name.trim();
 
-      await apiService.updatePractice(practiceData.id, payload);
+      if (isEditing) {
+        await apiService.updatePractice(practiceData.id, payload);
+      } else {
+        await apiService.createPractice(payload);
+      }
       notifications.show({
         title: t('common:messages.updateSuccess', 'Success'),
-        message: t('common:practitioners.viewModal.practiceUpdateSuccess', 'Practice updated successfully'),
+        message: isEditing
+          ? t('common:practitioners.viewModal.practiceUpdateSuccess', 'Practice updated successfully')
+          : t('common:practitioners.practices.createSuccess', 'Practice created successfully'),
         color: 'green',
       });
       onSaved();
@@ -74,13 +87,16 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
     }
   };
 
-  if (!isOpen || !practiceData) return null;
+  if (!isOpen) return null;
 
   return (
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={t('common:practitioners.viewModal.editPractice', 'Edit Practice')}
+      title={isEditing
+        ? t('common:practitioners.viewModal.editPractice', 'Edit Practice')
+        : t('common:practitioners.practices.createTitle', 'Add Practice')
+      }
       size="md"
       centered
       zIndex={2100}
