@@ -739,7 +739,8 @@
       "preferences": "Anwendungseinstellungen",
       "documentStorage": "Dokumentenspeicherung",
       "gettingHelp": "Hilfe erhalten",
-      "supportMediKeep": "MediKeep unterstützen"
+      "supportMediKeep": "MediKeep unterstützen",
+      "releaseNotes": "Versionshinweise"
     },
     "security": {
       "password": {
@@ -795,6 +796,21 @@
     "sponsor": {
       "description": "MediKeep ist kostenlos und Open Source. Wenn Sie es nützlich finden, erwägen Sie, das Projekt zu sponsern, um die Entwicklung zu unterstützen.",
       "button": "Auf GitHub sponsern"
+    },
+    "releaseNotes": {
+      "whatsNewTitle": "Was ist neu",
+      "whatsNewSubtitle": "Das hat sich seit Ihrem letzten Update ge\u00e4ndert",
+      "currentVersion": "Aktuell",
+      "viewOnGithub": "Auf GitHub ansehen",
+      "dismiss": "Verstanden",
+      "loading": "Versionshinweise werden geladen...",
+      "error": "Versionshinweise konnten nicht geladen werden",
+      "retry": "Erneut versuchen",
+      "empty": "Keine Versionshinweise verf\u00fcgbar",
+      "publishedOn": "Ver\u00f6ffentlicht am {{date}}",
+      "noChanges": "Keine \u00c4nderungen f\u00fcr diese Version aufgef\u00fchrt",
+      "showAll": "Alle Versionen anzeigen",
+      "showLess": "Weniger anzeigen"
     },
     "preferences": {
       "unitSystem": {

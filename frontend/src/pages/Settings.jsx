@@ -17,6 +17,7 @@ import { PAPERLESS_SETTING_KEYS, isPaperlessSetting } from '../constants/paperle
 import { DEFAULT_DATE_FORMAT } from '../utils/constants';
 import { notifySuccess, notifyError, notifyInfo } from '../utils/notifyTranslated';
 import { timezoneService } from '../services/timezoneService';
+import ReleaseNotesHistory from '../components/settings/ReleaseNotesHistory';
 import '../styles/pages/Settings.css';
 
 const SETTINGS_TABS = ['general', 'documents', 'notifications', 'about'];
@@ -784,6 +785,14 @@ const Settings = () => {
                 </Button>
               </div>
             </div>
+          </div>
+        </Card>
+
+        {/* Release Notes Section */}
+        <Card>
+          <div className="settings-section">
+            <h3 className="settings-section-title">{t('settings.sections.releaseNotes', 'Release Notes')}</h3>
+            <ReleaseNotesHistory />
           </div>
         </Card>
       </div>
