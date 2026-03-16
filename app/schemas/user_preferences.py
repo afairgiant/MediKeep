@@ -1,5 +1,7 @@
+import re
 from datetime import datetime
 from typing import Optional
+from urllib.parse import urlparse
 
 from pydantic import BaseModel, field_validator, ValidationInfo, ConfigDict
 
@@ -9,6 +11,52 @@ SUPPORTED_LANGUAGES = ["en", "fr", "de", "es", "it", "pt"]
 # Supported date formats - single source of truth
 # mdy = MM/DD/YYYY (US), dmy = DD/MM/YYYY (European), ymd = YYYY-MM-DD (ISO)
 SUPPORTED_DATE_FORMATS = ["mdy", "dmy", "ymd"]
+
+# Valid storage backends
+VALID_STORAGE_BACKENDS = ["local", "paperless", "papra"]
+
+# Compiled URL pattern for validation (module-level for reuse)
+_URL_PATTERN = re.compile(
+    r'^https?://'
+    r'(?:'
+    r'[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?'
+    r'|'
+    r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+    r')'
+    r'(?::\d+)?'
+    r'(?:/.*)?$', re.IGNORECASE
+)
+
+
+def _validate_integration_url(v: Optional[str]) -> Optional[str]:
+    """Validate an integration URL (Paperless/Papra). Returns cleaned URL or raises ValueError."""
+    if v is None or v == "":
+        return v
+
+    if not v.startswith(('http://', 'https://')):
+        raise ValueError('URL must start with http:// or https://')
+
+    parsed = urlparse(v)
+
+    is_local = (
+        parsed.hostname in ['localhost', '127.0.0.1'] or
+        (parsed.hostname and (
+            parsed.hostname.startswith('192.168.') or
+            parsed.hostname.startswith('10.') or
+            (parsed.hostname.startswith('172.') and
+             len(parsed.hostname.split('.')) >= 2 and
+             parsed.hostname.split('.')[1].isdigit() and
+             16 <= int(parsed.hostname.split('.')[1]) <= 31)
+        ))
+    )
+
+    if not is_local and not v.startswith('https://'):
+        raise ValueError('External URLs must use HTTPS for security')
+
+    if not _URL_PATTERN.match(v):
+        raise ValueError('Invalid URL format')
+
+    return v.rstrip('/')
 
 
 class UserPreferencesBase(BaseModel):
@@ -26,6 +74,10 @@ class UserPreferencesBase(BaseModel):
     default_storage_backend: Optional[str] = "local"
     paperless_auto_sync: Optional[bool] = False
     paperless_sync_tags: Optional[bool] = True
+    papra_enabled: Optional[bool] = False
+    papra_url: Optional[str] = None
+    papra_api_token: Optional[str] = None
+    papra_organization_id: Optional[str] = None
 
     @field_validator("session_timeout_minutes")
     @classmethod
@@ -121,51 +173,13 @@ class UserPreferencesBase(BaseModel):
     @classmethod
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
-        if v is None or v == "":
-            return v
+        return _validate_integration_url(v)
 
-        # Allow HTTP for localhost/local development, require HTTPS for external URLs
-        from urllib.parse import urlparse
-        parsed = urlparse(v)
-
-        if not v.startswith(('http://', 'https://')):
-            raise ValueError('URL must start with http:// or https://')
-
-        # Check if it's a local development URL
-        is_local = (
-            parsed.hostname in ['localhost', '127.0.0.1'] or
-            (parsed.hostname and (
-                parsed.hostname.startswith('192.168.') or
-                parsed.hostname.startswith('10.') or
-                (parsed.hostname.startswith('172.') and
-                 len(parsed.hostname.split('.')) >= 2 and
-                 parsed.hostname.split('.')[1].isdigit() and
-                 16 <= int(parsed.hostname.split('.')[1]) <= 31)
-            ))
-        )
-
-        # For external URLs, require HTTPS for security
-        if not is_local and not v.startswith('https://'):
-            raise ValueError('External URLs must use HTTPS for security')
-
-        # Basic URL format validation - simplified for local development
-        import re
-        # More permissive regex that allows IP addresses and domains
-        url_pattern = re.compile(
-            r'^https?://'  # Allow both http and https
-            r'(?:'
-            r'[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?'  # domain or hostname
-            r'|'
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'  # IP address
-            r')'
-            r'(?::\d+)?'  # optional port
-            r'(?:/.*)?$', re.IGNORECASE  # optional path
-        )
-
-        if not url_pattern.match(v):
-            raise ValueError('Invalid URL format')
-
-        return v.rstrip('/')
+    @field_validator("papra_url")
+    @classmethod
+    def validate_papra_url(cls, v):
+        """Validate Papra URL format if provided."""
+        return _validate_integration_url(v)
 
     @field_validator("default_storage_backend")
     @classmethod
@@ -174,10 +188,9 @@ class UserPreferencesBase(BaseModel):
         if v is None:
             return "local"
 
-        allowed_backends = ["local", "paperless"]
-        if v not in allowed_backends:
+        if v not in VALID_STORAGE_BACKENDS:
             raise ValueError(
-                f"Storage backend must be one of: {', '.join(allowed_backends)}"
+                f"Storage backend must be one of: {', '.join(VALID_STORAGE_BACKENDS)}"
             )
         return v
 
@@ -202,6 +215,10 @@ class UserPreferencesUpdate(BaseModel):
     default_storage_backend: Optional[str] = None
     paperless_auto_sync: Optional[bool] = None
     paperless_sync_tags: Optional[bool] = None
+    papra_enabled: Optional[bool] = None
+    papra_url: Optional[str] = None
+    papra_api_token: Optional[str] = None
+    papra_organization_id: Optional[str] = None
 
     @field_validator("session_timeout_minutes")
     @classmethod
@@ -255,51 +272,7 @@ class UserPreferencesUpdate(BaseModel):
     @classmethod
     def validate_paperless_url(cls, v):
         """Validate paperless URL format if provided."""
-        if v is None or v == "":
-            return v
-
-        # Allow HTTP for localhost/local development, require HTTPS for external URLs
-        from urllib.parse import urlparse
-        parsed = urlparse(v)
-
-        if not v.startswith(('http://', 'https://')):
-            raise ValueError('URL must start with http:// or https://')
-
-        # Check if it's a local development URL
-        is_local = (
-            parsed.hostname in ['localhost', '127.0.0.1'] or
-            (parsed.hostname and (
-                parsed.hostname.startswith('192.168.') or
-                parsed.hostname.startswith('10.') or
-                (parsed.hostname.startswith('172.') and
-                 len(parsed.hostname.split('.')) >= 2 and
-                 parsed.hostname.split('.')[1].isdigit() and
-                 16 <= int(parsed.hostname.split('.')[1]) <= 31)
-            ))
-        )
-
-        # For external URLs, require HTTPS for security
-        if not is_local and not v.startswith('https://'):
-            raise ValueError('External URLs must use HTTPS for security')
-
-        # Basic URL format validation - simplified for local development
-        import re
-        # More permissive regex that allows IP addresses and domains
-        url_pattern = re.compile(
-            r'^https?://'  # Allow both http and https
-            r'(?:'
-            r'[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?'  # domain or hostname
-            r'|'
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'  # IP address
-            r')'
-            r'(?::\d+)?'  # optional port
-            r'(?:/.*)?$', re.IGNORECASE  # optional path
-        )
-
-        if not url_pattern.match(v):
-            raise ValueError('Invalid URL format')
-
-        return v.rstrip('/')
+        return _validate_integration_url(v)
 
     @field_validator("default_storage_backend")
     @classmethod
@@ -308,12 +281,17 @@ class UserPreferencesUpdate(BaseModel):
         if v is None:
             return v
 
-        allowed_backends = ["local", "paperless"]
-        if v not in allowed_backends:
+        if v not in VALID_STORAGE_BACKENDS:
             raise ValueError(
-                f"Storage backend must be one of: {', '.join(allowed_backends)}"
+                f"Storage backend must be one of: {', '.join(VALID_STORAGE_BACKENDS)}"
             )
         return v
+
+    @field_validator("papra_url")
+    @classmethod
+    def validate_papra_url(cls, v):
+        """Validate Papra URL format if provided."""
+        return _validate_integration_url(v)
 
 
 class UserPreferences(UserPreferencesBase):
@@ -339,48 +317,7 @@ class PaperlessConnectionData(BaseModel):
     @classmethod
     def validate_url(cls, v):
         """Validate paperless URL format and security."""
-        # Allow HTTP for localhost/local development, require HTTPS for external URLs
-        from urllib.parse import urlparse
-        parsed = urlparse(v)
-
-        if not v.startswith(('http://', 'https://')):
-            raise ValueError('URL must start with http:// or https://')
-
-        # Check if it's a local development URL
-        is_local = (
-            parsed.hostname in ['localhost', '127.0.0.1'] or
-            (parsed.hostname and (
-                parsed.hostname.startswith('192.168.') or
-                parsed.hostname.startswith('10.') or
-                (parsed.hostname.startswith('172.') and
-                 len(parsed.hostname.split('.')) >= 2 and
-                 parsed.hostname.split('.')[1].isdigit() and
-                 16 <= int(parsed.hostname.split('.')[1]) <= 31)
-            ))
-        )
-
-        # For external URLs, require HTTPS for security
-        if not is_local and not v.startswith('https://'):
-            raise ValueError('External URLs must use HTTPS for security')
-
-        # Basic URL format validation - simplified for local development
-        import re
-        # More permissive regex that allows IP addresses and domains
-        url_pattern = re.compile(
-            r'^https?://'  # Allow both http and https
-            r'(?:'
-            r'[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?'  # domain or hostname
-            r'|'
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'  # IP address
-            r')'
-            r'(?::\d+)?'  # optional port
-            r'(?:/.*)?$', re.IGNORECASE  # optional path
-        )
-
-        if not url_pattern.match(v):
-            raise ValueError('Invalid URL format')
-
-        return v.rstrip('/')
+        return _validate_integration_url(v)
 
     @field_validator('paperless_api_token')
     @classmethod
@@ -429,4 +366,28 @@ class PaperlessConnectionData(BaseModel):
         if not token and (not username or not v):
             raise ValueError('Either API token or username/password combination is required')
 
+        return v
+
+
+class PapraConnectionData(BaseModel):
+    """Schema for Papra connection data with validation."""
+
+    papra_url: str
+    papra_api_token: Optional[str] = None
+    papra_organization_id: Optional[str] = None
+
+    @field_validator('papra_url')
+    @classmethod
+    def validate_url(cls, v):
+        """Validate Papra URL format and security."""
+        return _validate_integration_url(v)
+
+    @field_validator('papra_api_token')
+    @classmethod
+    def validate_api_token(cls, v):
+        """Validate API token format if provided."""
+        if v is not None and v.strip():
+            if len(v.strip()) < 10:
+                raise ValueError('API token appears to be too short')
+            return v.strip()
         return v

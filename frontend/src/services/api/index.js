@@ -1397,6 +1397,56 @@ class ApiService {
     }
   }
 
+  // Check Papra document sync status
+  async checkPapraSyncStatus(signal) {
+    let timeoutId;
+    const timeoutSignal = new AbortController();
+
+    try {
+      if (!signal) {
+        timeoutId = setTimeout(() => {
+          timeoutSignal.abort();
+        }, 30000);
+      }
+
+      const finalSignal = signal || timeoutSignal.signal;
+
+      const result = await this.post(
+        '/entity-files/sync/papra',
+        {},
+        {
+          signal: finalSignal,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+            Expires: '0',
+          },
+        }
+      );
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      return result;
+    } catch (error) {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      logger.error(
+        'api_papra_sync_check_error',
+        'Failed to check Papra sync status',
+        {
+          error: error.message,
+          component: 'ApiService',
+        }
+      );
+
+      throw error;
+    }
+  }
+
   // Update processing files status by checking Paperless task completion
   updateProcessingFiles(signal) {
     try {

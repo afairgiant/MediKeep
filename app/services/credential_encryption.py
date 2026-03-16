@@ -149,17 +149,30 @@ class CredentialEncryption:
         return bool(re.match(r'^[a-f0-9]{40}$', token))
 
 
-# Global instance for use throughout the application
+# Global instances for use throughout the application
 credential_encryption = CredentialEncryption()
+
+
+class PapraCredentialEncryption(CredentialEncryption):
+    """Credential encryption using Papra-specific salt for key isolation."""
+
+    def __init__(self):
+        """Initialize with Papra-specific salt."""
+        self.salt = settings.PAPRA_SALT.encode()
+        self.key = self._derive_key(settings.SECRET_KEY.encode(), self.salt)
+        self.cipher = Fernet(self.key)
+
+
+papra_credential_encryption = PapraCredentialEncryption()
 
 
 def encrypt_paperless_token(token: str) -> Optional[str]:
     """
     Convenience function to encrypt a paperless API token.
-    
+
     Args:
         token: The API token to encrypt
-        
+
     Returns:
         Encrypted token or None if token is empty
     """
@@ -169,11 +182,37 @@ def encrypt_paperless_token(token: str) -> Optional[str]:
 def decrypt_paperless_token(encrypted_token: str) -> Optional[str]:
     """
     Convenience function to decrypt a paperless API token.
-    
+
     Args:
         encrypted_token: The encrypted token to decrypt
-        
+
     Returns:
         Decrypted token or None if encrypted_token is empty
     """
     return credential_encryption.decrypt_token(encrypted_token)
+
+
+def encrypt_papra_token(token: str) -> Optional[str]:
+    """
+    Convenience function to encrypt a Papra API token.
+
+    Args:
+        token: The API token to encrypt
+
+    Returns:
+        Encrypted token or None if token is empty
+    """
+    return papra_credential_encryption.encrypt_token(token)
+
+
+def decrypt_papra_token(encrypted_token: str) -> Optional[str]:
+    """
+    Convenience function to decrypt a Papra API token.
+
+    Args:
+        encrypted_token: The encrypted token to decrypt
+
+    Returns:
+        Decrypted token or None if encrypted_token is empty
+    """
+    return papra_credential_encryption.decrypt_token(encrypted_token)

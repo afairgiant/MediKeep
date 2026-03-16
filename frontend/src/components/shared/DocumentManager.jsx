@@ -1078,6 +1078,13 @@ const DocumentManager = ({
                 paperlessSettings?.paperless_url &&
                 (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)
               }
+              papraEnabled={paperlessSettings?.papra_enabled || false}
+              papraConnected={
+                paperlessSettings?.papra_enabled &&
+                paperlessSettings?.papra_url &&
+                paperlessSettings?.papra_has_token &&
+                paperlessSettings?.papra_organization_id
+              }
               disabled={loading}
               size="sm"
             />
@@ -1142,6 +1149,13 @@ const DocumentManager = ({
                 paperlessSettings?.paperless_enabled &&
                 paperlessSettings?.paperless_url &&
                 (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)
+              }
+              papraEnabled={paperlessSettings?.papra_enabled || false}
+              papraConnected={
+                paperlessSettings?.papra_enabled &&
+                paperlessSettings?.papra_url &&
+                paperlessSettings?.papra_has_token &&
+                paperlessSettings?.papra_organization_id
               }
               disabled={loading}
               size="sm"
@@ -1376,6 +1390,13 @@ const DocumentManager = ({
                 paperlessSettings?.paperless_enabled &&
                 paperlessSettings?.paperless_url &&
                 (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)
+              }
+              papraEnabled={paperlessSettings?.papra_enabled || false}
+              papraConnected={
+                paperlessSettings?.papra_enabled &&
+                paperlessSettings?.papra_url &&
+                paperlessSettings?.papra_has_token &&
+                paperlessSettings?.papra_organization_id
               }
               disabled={loading}
               size="sm"

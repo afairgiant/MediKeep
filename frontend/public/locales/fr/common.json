@@ -2592,6 +2592,24 @@
         "cleaning": "Nettoyage..."
       }
     },
+    "papra": {
+      "title": "Integration Papra",
+      "description": "Connectez-vous a votre instance Papra pour la gestion des documents",
+      "enabled": "Activer Papra",
+      "url": "URL Papra",
+      "urlPlaceholder": "https://votre-instance-papra.com",
+      "apiToken": "Jeton API",
+      "apiTokenPlaceholder": "Entrez votre jeton API Papra",
+      "organization": "Organisation",
+      "organizationPlaceholder": "Selectionnez une organisation",
+      "testConnection": "Tester la connexion",
+      "connectionSuccess": "Connexion reussie",
+      "connectionFailed": "Echec de la connexion",
+      "fetchingOrgs": "Chargement des organisations...",
+      "noOrganizations": "Aucune organisation trouvee",
+      "tokenRequired": "Le jeton API est requis",
+      "urlRequired": "L'URL Papra est requise"
+    },
     "actions": {
       "unsavedChanges": "Changements non sauvegardés",
       "reset": "Réinitialiser les changements",

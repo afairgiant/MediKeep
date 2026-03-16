@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../components';
-import { Container } from '@mantine/core';
+import { Container, Collapse, UnstyledButton, Group, Text } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
 import { Card, Button } from '../components/ui';
 import ChangePasswordModal from '../components/auth/ChangePasswordModal';
 import DeleteAccountModal from '../components/auth/DeleteAccountModal';
 import PaperlessSettings from '../components/settings/PaperlessSettings';
+import PapraSettings from '../components/settings/PapraSettings';
+import StoragePreferencesCard from '../components/settings/StoragePreferencesCard';
 import NotificationSettings from '../components/settings/NotificationSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
@@ -14,6 +18,7 @@ import { updateUserPreferences } from '../services/api/userPreferencesApi';
 import { cleanupOutOfSyncFiles } from '../services/api/paperlessApi.jsx';
 import frontendLogger from '../services/frontendLogger';
 import { PAPERLESS_SETTING_KEYS, isPaperlessSetting } from '../constants/paperlessSettings';
+import { isPapraSetting } from '../constants/papraSettings';
 import { DEFAULT_DATE_FORMAT } from '../utils/constants';
 import { notifySuccess, notifyError, notifyInfo } from '../utils/notifyTranslated';
 import { timezoneService } from '../services/timezoneService';
@@ -113,6 +118,8 @@ const Settings = () => {
   const [localPreferences, setLocalPreferences] = useState({});
   const [savingPreferences, setSavingPreferences] = useState(false);
   const [cleaningFiles, setCleaningFiles] = useState(false);
+  const [paperlessOpen, { toggle: togglePaperless }] = useDisclosure(false);
+  const [papraOpen, { toggle: togglePapra }] = useDisclosure(false);
 
   // Initialize local preferences when context loads
   useEffect(() => {
@@ -121,12 +128,14 @@ const Settings = () => {
     }
   }, [userPreferences]);
 
+  const isDocumentSetting = (key) => isPaperlessSetting(key) || isPapraSetting(key);
+
   const hasGeneralChanges = getChangedKeys(
-    localPreferences, userPreferences, key => !isPaperlessSetting(key)
+    localPreferences, userPreferences, key => !isDocumentSetting(key)
   ).length > 0;
 
   const hasDocumentChanges = getChangedKeys(
-    localPreferences, userPreferences, isPaperlessSetting
+    localPreferences, userPreferences, isDocumentSetting
   ).length > 0;
 
   const handleUnitSystemChange = newUnitSystem => {
@@ -190,13 +199,16 @@ const Settings = () => {
         return userPreferences;
       }
 
-      // Split fields into paperless and general settings
+      // Split fields into paperless, papra, and general settings
       const paperlessFields = {};
+      const papraFields = {};
       const generalFields = {};
 
       Object.keys(fieldsToUpdate).forEach(key => {
         if (PAPERLESS_SETTING_KEYS.includes(key)) {
           paperlessFields[key] = fieldsToUpdate[key];
+        } else if (isPapraSetting(key)) {
+          papraFields[key] = fieldsToUpdate[key];
         } else {
           generalFields[key] = fieldsToUpdate[key];
         }
@@ -252,12 +264,20 @@ const Settings = () => {
         updatedPreferences = { ...updatedPreferences, ...paperlessResponse };
       }
 
+      // Update papra settings separately
+      if (Object.keys(papraFields).length > 0) {
+        const { saveSettings } = await import('../services/api/papraApi.jsx');
+        const papraResponse = await saveSettings(papraFields);
+        updatedPreferences = { ...updatedPreferences, ...papraResponse };
+      }
+
       // Update the context but preserve local form values for credentials and API token
       const updatedPreferencesWithLocalCredentials = {
         ...updatedPreferences,
         paperless_username: localPreferences.paperless_username || '',
         paperless_password: localPreferences.paperless_password || '',
-        paperless_api_token: localPreferences.paperless_api_token || ''
+        paperless_api_token: localPreferences.paperless_api_token || '',
+        papra_api_token: localPreferences.papra_api_token || '',
       };
 
       // Debug what we're setting in local preferences
@@ -297,12 +317,15 @@ const Settings = () => {
         component: 'Settings',
       });
 
+      notifySuccess('notifications:toasts.settings.saved', { fallback: 'Settings saved successfully' });
+
       return updatedPreferences;
     } catch (error) {
       frontendLogger.logError('Failed to save user preferences', {
         error: error.message,
         component: 'Settings',
       });
+      notifyError('notifications:toasts.settings.saveFailed', { fallback: 'Failed to save settings' });
       throw error;
     } finally {
       setSavingPreferences(false);
@@ -647,19 +670,72 @@ const Settings = () => {
       {/* Documents Tab Content */}
       {activeTab === 'documents' && (
       <div className="settings-content" role="tabpanel" id="settings-tabpanel-documents" aria-labelledby="settings-tab-documents">
+        {/* Storage Preferences - default backend selection + stats */}
+        <StoragePreferencesCard
+          preferences={localPreferences}
+          onUpdate={(updates) => setLocalPreferences(prev => ({ ...prev, ...updates }))}
+          connectionEnabled={localPreferences?.paperless_enabled && localPreferences?.paperless_url}
+          papraConnectionEnabled={localPreferences?.papra_enabled && localPreferences?.papra_url && localPreferences?.papra_has_token}
+        />
+
+        {/* Paperless-ngx Connection Settings - Collapsible */}
+        <Card>
+          <UnstyledButton onClick={togglePaperless} w="100%" p="md">
+            <Group justify="space-between">
+              <Group gap="sm">
+                {paperlessOpen ? <IconChevronDown size={18} /> : <IconChevronRight size={18} />}
+                <Text fw={600} size="md">Paperless-ngx</Text>
+                {localPreferences?.paperless_enabled && (
+                  <Text size="xs" c="green" fw={500}>Enabled</Text>
+                )}
+              </Group>
+              <Text size="sm" c="dimmed">
+                {t('settings.documents.paperlessDescription', 'Configure Paperless-ngx document management integration')}
+              </Text>
+            </Group>
+          </UnstyledButton>
+          <Collapse in={paperlessOpen}>
+            <div style={{ padding: '0 var(--mantine-spacing-md) var(--mantine-spacing-md)' }}>
+              <PaperlessSettings
+                preferences={localPreferences}
+                onPreferencesUpdate={newPrefs => setLocalPreferences(newPrefs)}
+                loading={loadingPreferences}
+              />
+            </div>
+          </Collapse>
+        </Card>
+
+        {/* Papra Connection Settings - Collapsible */}
+        <Card>
+          <UnstyledButton onClick={togglePapra} w="100%" p="md">
+            <Group justify="space-between">
+              <Group gap="sm">
+                {papraOpen ? <IconChevronDown size={18} /> : <IconChevronRight size={18} />}
+                <Text fw={600} size="md">Papra</Text>
+                {localPreferences?.papra_enabled && (
+                  <Text size="xs" c="green" fw={500}>Enabled</Text>
+                )}
+              </Group>
+              <Text size="sm" c="dimmed">
+                {t('settings.papra.description')}
+              </Text>
+            </Group>
+          </UnstyledButton>
+          <Collapse in={papraOpen}>
+            <div style={{ padding: '0 var(--mantine-spacing-md) var(--mantine-spacing-md)' }}>
+              <PapraSettings
+                settings={localPreferences}
+                onSettingChange={(key, value) => setLocalPreferences(prev => ({ ...prev, [key]: value }))}
+                onSave={handleSavePreferences}
+                loading={savingPreferences}
+              />
+            </div>
+          </Collapse>
+        </Card>
+
+        {/* File Cleanup */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.documentStorage', 'Document Storage')}</h3>
-            <div className="settings-section-description">
-              {t('settings.documents.description', 'Configure how your medical documents are stored and managed')}
-            </div>
-
-            <PaperlessSettings
-              preferences={localPreferences}
-              onPreferencesUpdate={newPrefs => setLocalPreferences(newPrefs)}
-              loading={loadingPreferences}
-            />
-
             <div className="settings-option">
               <div className="settings-option-info">
                 <div className="settings-option-title">{t('settings.documents.cleanup.title', 'File Cleanup')}</div>

@@ -151,6 +151,8 @@ class EntityFileCreate(EntityFileBase):
     last_sync_at: Optional[datetime] = None
     paperless_document_id: Optional[str] = None
     paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
+    papra_document_id: Optional[str] = None
+    papra_organization_id: Optional[str] = None
 
     @field_validator("entity_id")
     @classmethod
@@ -286,9 +288,11 @@ class EntityFileResponse(EntityFileBase):
     id: int
     entity_type: str
     entity_id: int
-    storage_backend: Optional[str] = "local"  # 'local' or 'paperless'
+    storage_backend: Optional[str] = "local"  # 'local', 'paperless', or 'papra'
     paperless_document_id: Optional[str] = None
     paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
+    papra_document_id: Optional[str] = None
+    papra_organization_id: Optional[str] = None
     sync_status: Optional[str] = "synced"  # 'synced', 'pending', 'failed', 'processing', 'duplicate', 'missing'
     uploaded_at: Optional[datetime] = None
     created_at: Optional[datetime] = None

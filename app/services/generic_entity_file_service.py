@@ -153,10 +153,11 @@ class GenericEntityFileService:
             self._validate_entity_type(entity_type)
 
             # Validate storage backend
-            if storage_backend not in ["local", "paperless"]:
+            valid_backends = ["local", "paperless", "papra"]
+            if storage_backend not in valid_backends:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid storage backend: {storage_backend}. Must be 'local' or 'paperless'",
+                    detail=f"Invalid storage backend: {storage_backend}. Must be one of: {', '.join(valid_backends)}",
                 )
 
             # If paperless is selected, validate configuration before attempting upload
@@ -176,11 +177,37 @@ class GenericEntityFileService:
                 # Check if we have either token OR username/password credentials
                 has_token = bool(user_prefs.paperless_api_token_encrypted)
                 has_credentials = bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted)
-                
+
                 if not user_prefs.paperless_url or (not has_token and not has_credentials):
                     raise HTTPException(
                         status_code=400,
                         detail="Paperless configuration is incomplete. Please configure URL and authentication credentials (token or username/password) in settings.",
+                    )
+
+            # If Papra is selected, validate configuration before attempting upload
+            if storage_backend == "papra":
+                user_prefs = (
+                    db.query(UserPreferences)
+                    .filter(UserPreferences.user_id == current_user_id)
+                    .first()
+                )
+
+                if not user_prefs or not user_prefs.papra_enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Papra integration is not enabled. Please enable it in settings before uploading to Papra.",
+                    )
+
+                if not user_prefs.papra_url or not user_prefs.papra_api_token_encrypted:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Papra configuration is incomplete. Please configure URL and API token in settings.",
+                    )
+
+                if not user_prefs.papra_organization_id:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Papra organization is not configured. Please select an organization in settings.",
                     )
 
             # Read file content once for both backends
@@ -211,7 +238,21 @@ class GenericEntityFileService:
                 )
                 logger.info(f"Paperless upload completed: file_id={result.id}")
                 return result
-            else:
+            elif storage_backend == "papra":
+                result = await self._upload_to_papra(
+                    db,
+                    entity_type,
+                    entity_id,
+                    file,
+                    file_content,
+                    file_size,
+                    description,
+                    category,
+                    current_user_id,
+                )
+                logger.info(f"Papra upload completed: file_id={result.id}")
+                return result
+            elif storage_backend == "local":
                 result = await self._upload_to_local(
                     db,
                     entity_type,
@@ -224,6 +265,11 @@ class GenericEntityFileService:
                 )
                 logger.info(f"Local upload completed: file_id={result.id}")
                 return result
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unsupported storage backend: {storage_backend}",
+                )
 
         except HTTPException:
             raise
@@ -521,7 +567,16 @@ class GenericEntityFileService:
                                     status_code=500,
                                     detail=f"Failed to delete file from Paperless. The document may still exist on the Paperless server.",
                                 )
-            else:
+            elif file_record.storage_backend == "papra":
+                # Handle Papra file deletion
+                papra_deleted = await self._delete_from_papra(db, file_record, current_user_id)
+                if not papra_deleted:
+                    logger.error(f"Papra deletion failed for document {file_record.papra_document_id}")
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Failed to delete file from Papra. The document may still exist on the Papra server.",
+                    )
+            elif file_record.storage_backend == "local":
                 # Handle local file deletion
                 file_path = file_record.file_path
                 if os.path.exists(file_path):
@@ -530,6 +585,11 @@ class GenericEntityFileService:
                         reason=f"Deleted via API for {file_record.entity_type} {file_record.entity_id}",
                     )
                     logger.info(f"File moved to trash: {trash_result}")
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unsupported storage backend: {file_record.storage_backend}",
+                )
 
             # Remove from database only after successful deletion from storage backend
             db.delete(file_record)
@@ -589,7 +649,9 @@ class GenericEntityFileService:
             })
             if file_record.storage_backend == "paperless":
                 return await self._get_paperless_download_info(db, file_record, current_user_id)
-            else:
+            elif file_record.storage_backend == "papra":
+                return await self._get_papra_download_info(db, file_record, current_user_id)
+            elif file_record.storage_backend == "local":
                 # Handle local file download
                 if not os.path.exists(file_record.file_path):
                     raise HTTPException(
@@ -601,6 +663,11 @@ class GenericEntityFileService:
                     file_record.file_path,
                     file_record.file_name,
                     file_record.file_type or "application/octet-stream",
+                )
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unsupported storage backend: {file_record.storage_backend}",
                 )
 
         except HTTPException:
@@ -722,7 +789,10 @@ class GenericEntityFileService:
                         raise
                 
                 return file_content, file_record.file_name, file_record.file_type
-            else:
+            elif file_record.storage_backend == 'papra':
+                # Handle Papra files - same pattern as download
+                return await self._get_papra_download_info(db, file_record, current_user_id)
+            elif file_record.storage_backend == 'local':
                 # Handle local files
                 file_path = file_record.file_path
                 if not os.path.exists(file_path):
@@ -730,9 +800,14 @@ class GenericEntityFileService:
                         status_code=404,
                         detail="File not found on disk"
                     )
-                
+
                 return file_path, file_record.file_name, file_record.file_type
-                
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unsupported storage backend: {file_record.storage_backend}"
+                )
+
         except HTTPException:
             raise
         except Exception as e:
@@ -1049,6 +1124,190 @@ class GenericEntityFileService:
             raise HTTPException(
                 status_code=500, detail=f"Failed to upload to paperless: {str(e)}"
             )
+
+    async def _upload_to_papra(
+        self,
+        db: Session,
+        entity_type: str,
+        entity_id: int,
+        file: UploadFile,
+        file_content: bytes,
+        file_size: int,
+        description: Optional[str],
+        category: Optional[str],
+        current_user_id: int,
+    ) -> EntityFileResponse:
+        """Upload file to Papra document management system."""
+        try:
+            from app.services.papra_client import create_papra_client
+
+            user_prefs = (
+                db.query(UserPreferences)
+                .filter(UserPreferences.user_id == current_user_id)
+                .first()
+            )
+
+            papra_client = create_papra_client(
+                url=user_prefs.papra_url,
+                encrypted_token=user_prefs.papra_api_token_encrypted,
+                organization_id=user_prefs.papra_organization_id,
+                user_id=current_user_id,
+            )
+
+            logger.info(
+                f"Starting Papra upload for '{file.filename}'",
+                extra={
+                    "file_name": file.filename,
+                    "file_size": file_size,
+                    "entity_type": entity_type,
+                    "entity_id": entity_id,
+                    "user_id": current_user_id,
+                }
+            )
+
+            async with papra_client:
+                upload_result = await papra_client.upload_document(
+                    file_data=file_content,
+                    filename=file.filename,
+                    title=description or file.filename,
+                    content_type=file.content_type,
+                )
+
+            # Papra is synchronous - document_id is returned immediately
+            document_id = upload_result.get("document_id")
+            if not document_id:
+                raise Exception("No document ID returned from Papra")
+
+            file_create = EntityFileCreate(
+                entity_type=entity_type,
+                entity_id=entity_id,
+                file_name=file.filename,
+                file_path="papra://",
+                file_type=file.content_type,
+                file_size=file_size,
+                description=description,
+                category=category,
+                storage_backend="papra",
+                uploaded_at=get_utc_now(),
+                sync_status="synced",
+                last_sync_at=get_utc_now(),
+                papra_document_id=document_id,
+                papra_organization_id=user_prefs.papra_organization_id,
+            )
+
+            entity_file = EntityFile(**file_create.model_dump())
+            db.add(entity_file)
+            db.commit()
+            db.refresh(entity_file)
+
+            logger.info(
+                f"File uploaded to Papra: {file.filename} for {entity_type} {entity_id} "
+                f"(document_id: {document_id})"
+            )
+
+            return EntityFileResponse.model_validate(entity_file)
+
+        except Exception as e:
+            logger.error(f"Error uploading to Papra: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to upload to Papra: {str(e)}"
+            )
+
+    async def _get_papra_download_info(
+        self, db: Session, file_record, current_user_id: Optional[int] = None
+    ):
+        """Get download info for a Papra-stored file."""
+        try:
+            from app.services.papra_client import create_papra_client
+
+            if not file_record.papra_document_id:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Papra document ID not found"
+                )
+
+            if not current_user_id:
+                raise HTTPException(
+                    status_code=401,
+                    detail="User authentication required for Papra file access"
+                )
+
+            user_prefs = (
+                db.query(UserPreferences)
+                .filter(UserPreferences.user_id == current_user_id)
+                .first()
+            )
+
+            if not user_prefs or not user_prefs.papra_enabled:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Papra integration is not enabled"
+                )
+
+            org_id = file_record.papra_organization_id or user_prefs.papra_organization_id
+
+            papra_client = create_papra_client(
+                url=user_prefs.papra_url,
+                encrypted_token=user_prefs.papra_api_token_encrypted,
+                organization_id=org_id,
+                user_id=current_user_id,
+            )
+
+            async with papra_client:
+                file_content = await papra_client.download_document(
+                    file_record.papra_document_id
+                )
+
+            return file_content, file_record.file_name, file_record.file_type or "application/octet-stream"
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error downloading from Papra: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to download file from Papra: {str(e)}"
+            )
+
+    async def _delete_from_papra(
+        self, db: Session, file_record, current_user_id: Optional[int] = None
+    ) -> bool:
+        """Delete a file from Papra."""
+        try:
+            from app.services.papra_client import create_papra_client
+
+            if not file_record.papra_document_id:
+                logger.warning("No Papra document ID found, skipping remote deletion")
+                return True
+
+            user_prefs = (
+                db.query(UserPreferences)
+                .filter(UserPreferences.user_id == current_user_id)
+                .first()
+            )
+
+            if not user_prefs or not user_prefs.papra_enabled:
+                logger.warning("Papra not enabled, skipping remote deletion")
+                return True
+
+            org_id = file_record.papra_organization_id or user_prefs.papra_organization_id
+
+            papra_client = create_papra_client(
+                url=user_prefs.papra_url,
+                encrypted_token=user_prefs.papra_api_token_encrypted,
+                organization_id=org_id,
+                user_id=current_user_id,
+            )
+
+            async with papra_client:
+                result = await papra_client.delete_document(file_record.papra_document_id)
+
+            logger.info(f"Papra document {file_record.papra_document_id} deleted: {result}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Error deleting from Papra: {str(e)}")
+            return False
 
     def update_file_metadata(
         self,
@@ -1689,6 +1948,111 @@ class GenericEntityFileService:
         except Exception as e:
             logger.error(f"Error checking paperless sync status: {str(e)}")
             # Return empty dict to indicate complete failure
+            return {}
+
+    async def check_papra_sync_status(
+        self, db: Session, current_user_id: int
+    ) -> Dict[int, bool]:
+        """
+        Check sync status for all Papra documents for a user.
+        Verifies if documents still exist on the Papra server.
+
+        Args:
+            db: Database session
+            current_user_id: User ID to check documents for
+
+        Returns:
+            Dictionary mapping file_id to existence status (True = exists, False = missing)
+        """
+        try:
+            from app.services.papra_client import create_papra_client
+            from app.models.models import Patient
+
+            # Get all papra files for this user across all entity types
+            papra_files = (
+                db.query(EntityFile)
+                .filter(
+                    EntityFile.storage_backend == "papra",
+                    EntityFile.papra_document_id.isnot(None),
+                )
+                .all()
+            )
+
+            if not papra_files:
+                logger.info(f"No Papra files found for sync check (user: {current_user_id})")
+                return {}
+
+            # Get user's Papra configuration
+            user_prefs = (
+                db.query(UserPreferences)
+                .filter(UserPreferences.user_id == current_user_id)
+                .first()
+            )
+
+            if not user_prefs or not user_prefs.papra_enabled:
+                logger.warning(f"Cannot check Papra sync: not enabled (user: {current_user_id})")
+                return {}
+
+            if not user_prefs.papra_url or not user_prefs.papra_api_token_encrypted:
+                logger.warning(f"Cannot check Papra sync: incomplete config (user: {current_user_id})")
+                return {}
+
+            sync_status = {}
+            missing_count = 0
+
+            logger.info(f"Starting Papra sync check for {len(papra_files)} documents (user: {current_user_id})")
+
+            papra_client = create_papra_client(
+                url=user_prefs.papra_url,
+                encrypted_token=user_prefs.papra_api_token_encrypted,
+                organization_id=user_prefs.papra_organization_id,
+                user_id=current_user_id,
+            )
+
+            async with papra_client:
+                for file_record in papra_files:
+                    try:
+                        doc_id = file_record.papra_document_id
+                        org_id = file_record.papra_organization_id or user_prefs.papra_organization_id
+
+                        # Check if document exists via get_document_info (returns None for 404)
+                        doc_info = await papra_client.get_document_info(doc_id)
+                        exists = doc_info is not None
+
+                        sync_status[file_record.id] = exists
+
+                        if not exists:
+                            old_status = file_record.sync_status
+                            file_record.sync_status = "missing"
+                            file_record.last_sync_at = get_utc_now()
+                            missing_count += 1
+                            logger.warning(
+                                f"Papra document missing: {file_record.file_name} "
+                                f"(id: {file_record.id}, doc_id: {doc_id}, {old_status} -> missing)"
+                            )
+                        else:
+                            if file_record.sync_status in ["missing", "error"]:
+                                file_record.sync_status = "synced"
+                            file_record.last_sync_at = get_utc_now()
+
+                    except Exception as e:
+                        logger.error(f"Error checking Papra document {file_record.papra_document_id}: {str(e)}")
+                        sync_status[file_record.id] = None
+                        file_record.sync_status = "error"
+                        file_record.last_sync_at = get_utc_now()
+
+            db.commit()
+
+            synced_count = len(papra_files) - missing_count
+            logger.info(
+                f"Papra sync check completed (user: {current_user_id}): "
+                f"{len(papra_files)} total, {synced_count} synced, {missing_count} missing"
+            )
+
+            return sync_status
+
+        except Exception as e:
+            logger.error(f"Error checking Papra sync status: {str(e)}")
             return {}
 
     async def _resolve_task_uuids_to_document_ids(self, db: Session, paperless_service, paperless_files: List) -> None:

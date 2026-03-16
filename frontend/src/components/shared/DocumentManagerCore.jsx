@@ -343,14 +343,12 @@ const useDocumentManagerCore = ({
       // Use current values from refs for stable dependencies
       const currentFiles = filesRef.current || files;
       const paperlessFiles = currentFiles.filter(f => f.storage_backend === 'paperless');
-      
-      // Check sync status for Paperless files
-      
-      // For manual sync, always try the API call even if frontend doesn't see paperless files
-      // The backend might know about files that need sync checking
-      if (paperlessFiles.length === 0 && !isManualSync) {
-        // No Paperless files found, skipping automatic sync check
-        logger.debug('No Paperless files found, skipping automatic sync check', {
+      const currentPapraFiles = currentFiles.filter(f => f.storage_backend === 'papra');
+      const hasRemoteFiles = paperlessFiles.length > 0 || currentPapraFiles.length > 0;
+
+      // For manual sync, always try the API call even if frontend doesn't see remote files
+      if (!hasRemoteFiles && !isManualSync) {
+        logger.debug('No remote files found, skipping automatic sync check', {
           entityType,
           entityId,
           isManualSync,
@@ -359,29 +357,30 @@ const useDocumentManagerCore = ({
         return;
       }
 
-      if (!paperlessSettings?.paperless_enabled) {
-        logger.warn('paperless_not_enabled_sync_skip', 'Paperless not enabled, skipping sync check', {
+      const hasPaperless = paperlessSettings?.paperless_enabled;
+      const hasPapra = paperlessSettings?.papra_enabled;
+
+      if (!hasPaperless && !hasPapra) {
+        logger.warn('no_remote_backend_enabled_sync_skip', 'No remote backend enabled, skipping sync check', {
           entityType,
           entityId,
           isManualSync,
-          paperlessFilesCount: paperlessFiles.length,
           component: 'DocumentManagerCore',
         });
-        
+
         if (isManualSync) {
-          // Show notification for manual sync when paperless not enabled
           const { notifications } = await import('@mantine/notifications');
           const { IconExclamationMark } = await import('@tabler/icons-react');
-          
+
           notifications.show({
-            title: 'Sync Check Failed',
-            message: 'Paperless integration is not enabled. Please enable it in Settings.',
+            title: 'Sync Check Skipped',
+            message: 'No remote storage integration is enabled. Enable Paperless or Papra in Settings.',
             color: 'orange',
             icon: <IconExclamationMark size={16} />,
             autoClose: 5000,
           });
         }
-        
+
         if (isManualSync) setSyncLoading(false);
         return;
       }
@@ -422,20 +421,39 @@ const useDocumentManagerCore = ({
         // Continue with sync check even if processing update fails
       }
 
-      const status = await apiService.checkPaperlessSyncStatus();
+      // Run Paperless sync check
+      const paperlessStatus = await apiService.checkPaperlessSyncStatus();
+
+      // Run Papra sync check
+      let papraStatus = {};
+      const papraFiles = currentFiles.filter(f => f.storage_backend === 'papra');
+      if (papraFiles.length > 0 || isManualSync) {
+        try {
+          papraStatus = await apiService.checkPapraSyncStatus();
+        } catch (papraErr) {
+          logger.warn('papra_sync_check_failed', {
+            error: papraErr.message,
+            component: 'DocumentManagerCore',
+          });
+        }
+      }
+
+      // Merge both sync statuses
+      const status = { ...paperlessStatus, ...papraStatus };
       setSyncStatus(status);
-      
+
       // Count missing files for logging and user notification
       const missingCount = Object.values(status).filter(exists => !exists).length;
       const totalChecked = Object.keys(status).length;
-      
-      logger.info('Paperless sync status check completed', {
+
+      logger.info('Remote sync status check completed', {
         entityType,
         entityId,
         isManualSync,
         totalFilesChecked: totalChecked,
         missingFilesFound: missingCount,
-        syncStatus: status,
+        paperlessChecked: Object.keys(paperlessStatus).length,
+        papraChecked: Object.keys(papraStatus).length,
         component: 'DocumentManagerCore',
       });
 
@@ -443,7 +461,7 @@ const useDocumentManagerCore = ({
       if (isManualSync) {
         const { notifications } = await import('@mantine/notifications');
         const { IconCheck, IconAlertTriangle } = await import('@tabler/icons-react');
-        
+
         if (missingCount > 0) {
           notifications.show({
             title: 'Sync Check Complete',
@@ -455,7 +473,7 @@ const useDocumentManagerCore = ({
         } else {
           notifications.show({
             title: 'Sync Check Complete',
-            message: `All ${totalChecked} Paperless documents are synced and available.`,
+            message: `All ${totalChecked} remote documents are synced and available.`,
             color: 'green',
             icon: <IconCheck size={16} />,
             autoClose: 5000,

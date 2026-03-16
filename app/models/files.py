@@ -37,13 +37,22 @@ class EntityFile(Base):
     # Storage backend tracking
     storage_backend = Column(
         String(20), default="local", nullable=False
-    )  # 'local' or 'paperless'
+    )  # 'local', 'paperless', or 'papra'
     paperless_document_id = Column(
         String(255), nullable=True
     )  # ID in paperless-ngx system
     paperless_task_uuid = Column(
         String(255), nullable=True
     )  # UUID of the task in paperless-ngx system
+
+    # Papra integration fields
+    papra_document_id = Column(
+        String(255), nullable=True
+    )  # ID in Papra system
+    papra_organization_id = Column(
+        String(255), nullable=True
+    )  # Organization ID in Papra system
+
     sync_status = Column(
         String(20), default="synced", nullable=False
     )  # 'synced', 'pending', 'processing', 'failed', 'missing'
@@ -62,6 +71,7 @@ class EntityFile(Base):
         Index("idx_created_at", "created_at"),
         Index("idx_storage_backend", "storage_backend"),
         Index("idx_paperless_document_id", "paperless_document_id"),
+        Index("idx_papra_document_id", "papra_document_id"),
         Index("idx_sync_status", "sync_status"),
     )
 

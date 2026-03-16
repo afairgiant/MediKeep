@@ -23,6 +23,7 @@ from app.core.logging.constants import LogFields
 from app.models.models import User
 from app.services.export_service import ExportService
 from app.services.paperless_client import create_paperless_client
+from app.services.papra_client import create_papra_client
 
 logger = get_logger(__name__, "app")
 
@@ -290,6 +291,40 @@ async def export_patient_data(
                                                             paperless_error
                                                         ),
                                                         "paperless_document_id": paperless_doc_id,
+                                                    },
+                                                )
+                                elif storage_backend == "papra":
+                                    # Handle Papra documents
+                                    papra_doc_id = file_info.get("papra_document_id")
+                                    papra_org_id = file_info.get("papra_organization_id")
+                                    if papra_doc_id and paperless_user:
+                                        if (
+                                            getattr(paperless_user, 'papra_enabled', False)
+                                            and getattr(paperless_user, 'papra_url', None)
+                                            and getattr(paperless_user, 'papra_organization_id', None)
+                                        ):
+                                            try:
+                                                async with create_papra_client(
+                                                    url=paperless_user.papra_url,
+                                                    encrypted_token=paperless_user.papra_api_token_encrypted,
+                                                    organization_id=papra_org_id or paperless_user.papra_organization_id,
+                                                    user_id=current_user_id,
+                                                ) as client:
+                                                    doc_content = await client.download_document(papra_doc_id)
+                                                    zip_file.writestr(
+                                                        f"lab_files/{safe_filename}",
+                                                        doc_content,
+                                                    )
+                                                    files_added += 1
+                                            except Exception as papra_error:
+                                                logger.warning(
+                                                    f"Failed to download Papra document: {papra_doc_id}",
+                                                    extra={
+                                                        LogFields.CATEGORY: "app",
+                                                        LogFields.EVENT: "export_papra_download_failed",
+                                                        LogFields.USER_ID: current_user_id,
+                                                        LogFields.ERROR: str(papra_error),
+                                                        "papra_document_id": papra_doc_id,
                                                     },
                                                 )
                             except Exception as file_error:

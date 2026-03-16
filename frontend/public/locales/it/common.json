@@ -2533,6 +2533,24 @@
       },
       "description": "Configura come vengono archiviati e gestiti i tuoi documenti medici"
     },
+    "papra": {
+      "title": "Integrazione Papra",
+      "description": "Connettiti alla tua istanza Papra per la gestione dei documenti",
+      "enabled": "Abilita Papra",
+      "url": "URL Papra",
+      "urlPlaceholder": "https://la-tua-istanza-papra.com",
+      "apiToken": "Token API",
+      "apiTokenPlaceholder": "Inserisci il tuo token API Papra",
+      "organization": "Organizzazione",
+      "organizationPlaceholder": "Seleziona un'organizzazione",
+      "testConnection": "Testa connessione",
+      "connectionSuccess": "Connessione riuscita",
+      "connectionFailed": "Connessione fallita",
+      "fetchingOrgs": "Caricamento organizzazioni...",
+      "noOrganizations": "Nessuna organizzazione trovata",
+      "tokenRequired": "Il token API e richiesto",
+      "urlRequired": "L'URL Papra e richiesto"
+    },
     "preferences": {
       "dateFormat": {
         "description": "Scegli come vengono visualizzate le date nell'applicazione",

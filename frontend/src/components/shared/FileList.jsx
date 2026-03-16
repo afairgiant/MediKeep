@@ -88,6 +88,14 @@ const FileList = ({
         description: 'Stored in paperless-ngx'
       };
     }
+    if (storageBackend === 'papra') {
+      return {
+        icon: IconCloud,
+        color: 'teal',
+        label: 'Papra',
+        description: 'Stored in Papra'
+      };
+    }
     return {
       icon: IconFolder,
       color: 'blue',
@@ -278,18 +286,19 @@ const FileList = ({
           processedFiles.map((file) => {
             const { icon: FileIcon, color } = getFileIcon(file.file_name, file.file_type);
             const isMarkedForDeletion = filesToDelete.includes(file.id);
-            // Check if file is missing (deleted from Paperless OR no document ID)
-            const isMissing = file.storage_backend === 'paperless' && 
+            // Check if file is missing (deleted from remote OR no document ID)
+            const isRemoteBackend = file.storage_backend === 'paperless' || file.storage_backend === 'papra';
+            const isMissing = isRemoteBackend &&
                              (file.sync_status === 'missing' || syncStatus[file.id] === false);
-            
-            // Check if file is still processing
+
+            // Check if file is still processing (Paperless only - Papra is synchronous)
             const isProcessing = file.storage_backend === 'paperless' && file.sync_status === 'processing';
-            
+
             // Check if file is a duplicate
-            const isDuplicate = file.storage_backend === 'paperless' && file.sync_status === 'duplicate';
-            
+            const isDuplicate = isRemoteBackend && file.sync_status === 'duplicate';
+
             // Check if file processing failed
-            const isFailed = file.storage_backend === 'paperless' && file.sync_status === 'failed';
+            const isFailed = isRemoteBackend && file.sync_status === 'failed';
 
             // Check if this is a linked document (not uploaded by us)
             const isLinkedDocument = file.file_path && file.file_path.startsWith('paperless://document/');

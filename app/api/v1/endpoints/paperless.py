@@ -492,12 +492,22 @@ async def get_storage_usage_stats(
         paperless_files = db.query(EntityFile).filter(
             EntityFile.storage_backend == "paperless"
         ).all()
-        
+
         paperless_stats = {
             "count": len(paperless_files),
             "size": sum(f.file_size or 0 for f in paperless_files)
         }
-        
+
+        # Get papra files count and size
+        papra_files = db.query(EntityFile).filter(
+            EntityFile.storage_backend == "papra"
+        ).all()
+
+        papra_stats = {
+            "count": len(papra_files),
+            "size": sum(f.file_size or 0 for f in papra_files)
+        }
+
         log_endpoint_access(
             logger,
             request,
@@ -505,12 +515,14 @@ async def get_storage_usage_stats(
             "storage_stats_retrieved",
             message=f"Storage stats retrieved for user {current_user.id}",
             local_files=local_stats["count"],
-            paperless_files=paperless_stats["count"]
+            paperless_files=paperless_stats["count"],
+            papra_files=papra_stats["count"]
         )
 
         return {
             "local": local_stats,
-            "paperless": paperless_stats
+            "paperless": paperless_stats,
+            "papra": papra_stats
         }
     
     except SQLAlchemyError as e:

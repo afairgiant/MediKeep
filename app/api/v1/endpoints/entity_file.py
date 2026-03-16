@@ -1339,6 +1339,55 @@ async def check_paperless_sync_status(
         )
 
 
+@router.post("/sync/papra")
+async def check_papra_sync_status(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Dict[int, bool]:
+    """
+    Check sync status for all Papra documents.
+
+    Returns:
+        Dictionary mapping file_id to existence status (True = exists, False = missing)
+    """
+    log_endpoint_access(
+        logger,
+        request,
+        current_user_id,
+        "papra_sync_check_started",
+        message=f"Starting Papra sync check for user {current_user_id}"
+    )
+    try:
+        sync_status = await file_service.check_papra_sync_status(db, current_user_id)
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "papra_sync_check_completed",
+            message=f"Checked Papra sync status for user {current_user_id}",
+            files_checked=len(sync_status)
+        )
+
+        return sync_status
+
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to check Papra sync status",
+            e,
+            user_id=current_user_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check Papra sync status: {str(e)}",
+        )
+
+
 @router.post("/processing/update")
 async def update_processing_files(
     *,

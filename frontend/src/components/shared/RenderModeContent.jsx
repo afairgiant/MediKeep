@@ -147,7 +147,7 @@ const RenderModeContent = memo(({
   );
 
   if (mode === 'view') {
-    const hasPaperlessFiles = files.some(f => f.storage_backend === 'paperless');
+    const hasRemoteFiles = files.some(f => f.storage_backend === 'paperless' || f.storage_backend === 'papra');
     
     return (
       <Stack gap="md">
@@ -187,7 +187,7 @@ const RenderModeContent = memo(({
         </Paper>
 
         {/* Files List with Sync Check for Paperless files */}
-        {hasPaperlessFiles && (
+        {hasRemoteFiles && (
           <Group justify="space-between" align="center">
             <Text fw={500}>Files</Text>
             <Button
@@ -216,7 +216,7 @@ const RenderModeContent = memo(({
   }
 
   if (mode === 'edit') {
-    const hasPaperlessFiles = files.some(f => f.storage_backend === 'paperless');
+    const hasRemoteFiles = files.some(f => f.storage_backend === 'paperless' || f.storage_backend === 'papra');
     
     return (
       <Stack gap="md">
@@ -227,7 +227,7 @@ const RenderModeContent = memo(({
           <Stack gap="md">
             <Group justify="space-between" align="center">
               <Title order={5}>Current Files:</Title>
-              {hasPaperlessFiles && (
+              {hasRemoteFiles && (
                 <Button
                   variant="light"
                   size="xs"
