@@ -1264,11 +1264,16 @@ const useDocumentManagerCore = ({
   const handleImmediateDelete = useCallback(async fileId => {
     // Find the file to check if it's a linked document
     const file = files.find(f => f.id === fileId);
-    const isLinkedDocument = file?.file_path && file.file_path.startsWith('paperless://document/');
+    const isLinkedPaperless = file?.file_path && file.file_path.startsWith('paperless://document/');
+    const isLinkedPapra = file?.file_path && file.file_path.startsWith('papra://document/');
+    const isLinkedDocument = isLinkedPaperless || isLinkedPapra;
 
-    const confirmMessage = isLinkedDocument
-      ? 'Are you sure you want to unlink this document? It will remain in Paperless.'
-      : 'Are you sure you want to delete this file?';
+    let confirmMessage = 'Are you sure you want to delete this file?';
+    if (isLinkedPaperless) {
+      confirmMessage = 'Are you sure you want to unlink this document? It will remain in Paperless.';
+    } else if (isLinkedPapra) {
+      confirmMessage = 'Are you sure you want to unlink this document? It will remain in Papra.';
+    }
 
     if (!window.confirm(confirmMessage)) {
       return;

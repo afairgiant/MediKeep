@@ -572,9 +572,13 @@ async def get_paperless_settings(
                 "paperless_auth_method": "none",
                 "default_storage_backend": "local",
                 "paperless_auto_sync": False,
-                "paperless_sync_tags": True
+                "paperless_sync_tags": True,
+                "papra_enabled": False,
+                "papra_url": "",
+                "papra_has_token": False,
+                "papra_organization_id": "",
             }
-        
+
         # Return settings without encrypted credentials, but include whether they exist
         return {
             "paperless_enabled": user_prefs.paperless_enabled or False,
@@ -584,7 +588,11 @@ async def get_paperless_settings(
             "paperless_auth_method": get_preferred_auth_method(user_prefs),
             "default_storage_backend": user_prefs.default_storage_backend or "local",
             "paperless_auto_sync": user_prefs.paperless_auto_sync or False,
-            "paperless_sync_tags": user_prefs.paperless_sync_tags or True
+            "paperless_sync_tags": user_prefs.paperless_sync_tags or True,
+            "papra_enabled": user_prefs.papra_enabled or False,
+            "papra_url": user_prefs.papra_url or "",
+            "papra_has_token": bool(user_prefs.papra_api_token_encrypted),
+            "papra_organization_id": user_prefs.papra_organization_id or "",
         }
     
     except SQLAlchemyError as e:

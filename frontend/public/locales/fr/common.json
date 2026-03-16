@@ -2339,7 +2339,7 @@
         "relatedConditions": "Conditions connectées",
         "visits": "Visites",
         "tags": "Etiquettes",
-        "files": "Fichiers"
+        "files": "Documents"
       },
       "sections": {
         "testInfo": "Informations de l'analyse",
@@ -2347,7 +2347,7 @@
         "orderingPractitioner": "Médecin prescrivant",
         "notes": "Notes",
         "tags": "Etiquettes",
-        "associatedFiles": "Fichiers associés"
+        "associatedFiles": "Documents associés"
       },
       "labels": {
         "testCode": "Code de l'analyse",
@@ -2381,7 +2381,7 @@
       "orderingPractitioner": "Médecin prescrivant",
       "orderedDate": "Date de prescription",
       "completedDate": "Date de réalisation",
-      "files": "Fichiers"
+      "files": "Documents"
     },
     "card": {
       "testCode": "Code de l'analyse",

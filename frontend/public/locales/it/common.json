@@ -2339,7 +2339,7 @@
         "relatedConditions": "Condizioni correlate",
         "visits": "Visite",
         "tags": "Tag",
-        "files": "File"
+        "files": "Documenti"
       },
       "sections": {
         "testInfo": "Informazioni sul test",
@@ -2347,7 +2347,7 @@
         "orderingPractitioner": "Medico richiedente",
         "notes": "Note",
         "tags": "Tag",
-        "associatedFiles": "File associati"
+        "associatedFiles": "Documenti associati"
       },
       "labels": {
         "testCode": "Codice test",
@@ -2396,7 +2396,7 @@
       "category": "Categoria",
       "completedDate": "Data di completamento",
       "facility": "Struttura",
-      "files": "File",
+      "files": "Documenti",
       "orderedDate": "Data di richiesta",
       "orderingPractitioner": "Professionista richiedente",
       "testName": "Nome del test",

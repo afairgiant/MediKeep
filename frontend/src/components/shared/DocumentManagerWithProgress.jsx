@@ -17,7 +17,9 @@ import ProgressTracking from './ProgressTracking';
 import RenderModeContent from './RenderModeContent';
 import DocumentManagerErrorBoundary from './DocumentManagerErrorBoundary';
 import LinkPaperlessDocumentModal from './LinkPaperlessDocumentModal';
+import LinkPapraDocumentModal from './LinkPapraDocumentModal';
 import { linkPaperlessDocument } from '../../services/api/paperlessApi';
+import { linkPapraDocument } from '../../services/api/papraApi.jsx';
 import logger from '../../services/logger';
 
 // Separate component to properly handle React Hooks
@@ -35,10 +37,13 @@ const DocumentManagerContent = ({
   setShowUploadModal,
   showLinkModal,
   setShowLinkModal,
+  showPapraLinkModal,
+  setShowPapraLinkModal,
   fileUpload,
   setFileUpload,
   handleFileUploadSubmit,
   handleLinkDocument,
+  handleLinkPapraDocument,
   updateHandlersRef,
   className
 }) => {
@@ -103,6 +108,7 @@ const DocumentManagerContent = ({
           config={config}
           onUploadModalOpen={() => setShowUploadModal(true)}
           onLinkModalOpen={() => setShowLinkModal(true)}
+          onPapraLinkModalOpen={() => setShowPapraLinkModal(true)}
           onCheckSyncStatus={coreHandlers.handleCheckSyncStatus}
           onDownloadFile={coreHandlers.handleDownloadFile}
           onViewFile={coreHandlers.handleViewFile}
@@ -176,6 +182,15 @@ const DocumentManagerContent = ({
         entityType={entityType}
         entityId={entityId}
       />
+
+      {/* Link Papra Document Modal */}
+      <LinkPapraDocumentModal
+        opened={showPapraLinkModal}
+        onClose={() => setShowPapraLinkModal(false)}
+        onLinkDocument={handleLinkPapraDocument}
+        entityType={entityType}
+        entityId={entityId}
+      />
     </Stack>
   );
 };
@@ -196,6 +211,7 @@ const DocumentManagerWithProgress = React.memo(({
   // Local state for modals
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
+  const [showPapraLinkModal, setShowPapraLinkModal] = useState(false);
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
 
   // Refs to store handlers for stable callback functions
@@ -211,38 +227,49 @@ const DocumentManagerWithProgress = React.memo(({
     setShowUploadModal(false);
   }, [fileUpload.file, fileUpload.description]);
 
-  // Handler for linking Paperless documents
-  const handleLinkDocument = useCallback(async (linkData) => {
-    try {
-      logger.info('document_manager_link_paperless', 'Linking Paperless document', {
-        component: 'DocumentManagerWithProgress',
-        entityType,
-        entityId,
-        paperlessDocId: linkData.paperless_document_id,
-      });
+  // Shared handler for linking documents from remote backends (Paperless, Papra)
+  const createLinkHandler = useCallback((backendName, linkApiFn) => {
+    return async (linkData) => {
+      const eventPrefix = `document_manager_link_${backendName.toLowerCase()}`;
+      try {
+        logger.info(eventPrefix, `Linking ${backendName} document`, {
+          component: 'DocumentManagerWithProgress',
+          entityType,
+          entityId,
+        });
 
-      await linkPaperlessDocument(entityType, entityId, linkData);
+        await linkApiFn(entityType, entityId, linkData);
 
-      // Refresh file list after successful link
-      if (handlersRef.current?.loadFiles) {
-        await handlersRef.current.loadFiles();
+        if (handlersRef.current?.loadFiles) {
+          await handlersRef.current.loadFiles();
+        }
+
+        logger.info(`${eventPrefix}_success`, `${backendName} document linked successfully`, {
+          component: 'DocumentManagerWithProgress',
+          entityType,
+          entityId,
+        });
+      } catch (error) {
+        logger.error(`${eventPrefix}_error`, `Failed to link ${backendName} document`, {
+          component: 'DocumentManagerWithProgress',
+          error: error.message,
+          entityType,
+          entityId,
+        });
+        throw error;
       }
-
-      logger.info('document_manager_link_success', 'Paperless document linked successfully', {
-        component: 'DocumentManagerWithProgress',
-        entityType,
-        entityId,
-      });
-    } catch (error) {
-      logger.error('document_manager_link_error', 'Failed to link Paperless document', {
-        component: 'DocumentManagerWithProgress',
-        error: error.message,
-        entityType,
-        entityId,
-      });
-      throw error;
-    }
+    };
   }, [entityType, entityId]);
+
+  const handleLinkDocument = useCallback(
+    (linkData) => createLinkHandler('Paperless', linkPaperlessDocument)(linkData),
+    [createLinkHandler]
+  );
+
+  const handleLinkPapraDocument = useCallback(
+    (linkData) => createLinkHandler('Papra', linkPapraDocument)(linkData),
+    [createLinkHandler]
+  );
 
   // Expose upload function to parent when handlers change
   useEffect(() => {
@@ -298,10 +325,13 @@ const DocumentManagerWithProgress = React.memo(({
           setShowUploadModal={setShowUploadModal}
           showLinkModal={showLinkModal}
           setShowLinkModal={setShowLinkModal}
+          showPapraLinkModal={showPapraLinkModal}
+          setShowPapraLinkModal={setShowPapraLinkModal}
           fileUpload={fileUpload}
           setFileUpload={setFileUpload}
           handleFileUploadSubmit={handleFileUploadSubmit}
           handleLinkDocument={handleLinkDocument}
+          handleLinkPapraDocument={handleLinkPapraDocument}
           updateHandlersRef={updateHandlersRef}
           className={className}
         />;

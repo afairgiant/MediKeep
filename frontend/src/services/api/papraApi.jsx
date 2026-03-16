@@ -55,9 +55,40 @@ export const getOrganizations = async () => {
   return apiService.get('/papra/organizations');
 };
 
+/**
+ * Search documents in connected Papra instance
+ * @param {string} query - Search query
+ * @param {Object} options - Search options
+ * @param {number} options.page - Page number (0-indexed)
+ * @param {number} options.pageSize - Results per page
+ * @returns {Promise} Search results with results array and count
+ */
+export const searchPapraDocuments = async (query = '', { page = 0, pageSize = 20 } = {}) => {
+  const params = new URLSearchParams();
+  if (query) params.append('query', query);
+  params.append('page', page.toString());
+  params.append('page_size', pageSize.toString());
+  return apiService.get(`/papra/documents/search?${params.toString()}`);
+};
+
+/**
+ * Link an existing Papra document to a MediKeep entity
+ * @param {string} entityType - Type of entity (e.g., 'visit', 'lab-result')
+ * @param {number} entityId - ID of the entity
+ * @param {Object} data - Link data
+ * @param {string} data.papra_document_id - Papra document ID (e.g., "doc_xxx")
+ * @param {string} [data.description] - Optional description for the linked document
+ * @returns {Promise} Created file record
+ */
+export const linkPapraDocument = async (entityType, entityId, data) => {
+  return apiService.post(`/entity-files/${entityType}/${entityId}/link-papra`, data);
+};
+
 export default {
   testConnection,
   getSettings,
   saveSettings,
   getOrganizations,
+  searchPapraDocuments,
+  linkPapraDocument,
 };

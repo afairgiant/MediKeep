@@ -365,6 +365,38 @@ class EntityFileLinkPaperlessRequest(BaseModel):
         return v.strip() if v else None
 
 
+class EntityFileLinkPapraRequest(BaseModel):
+    """Schema for linking an existing Papra document to an entity"""
+
+    papra_document_id: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+
+    @field_validator("papra_document_id")
+    @classmethod
+    def validate_papra_document_id(cls, v):
+        """Validate Papra document ID"""
+        if not v or not v.strip():
+            raise ValueError("Papra document ID is required")
+        return v.strip()
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v):
+        """Validate description"""
+        if v and len(v.strip()) > 1000:
+            raise ValueError("Description must be less than 1000 characters")
+        return v.strip() if v else None
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, v):
+        """Validate category"""
+        if v and len(v.strip()) > 100:
+            raise ValueError("Category must be less than 100 characters")
+        return v.strip() if v else None
+
+
 class FileDownloadResponse(BaseModel):
     """Schema for file download response"""
 

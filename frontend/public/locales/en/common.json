@@ -2378,7 +2378,7 @@
         "relatedConditions": "Related Conditions",
         "visits": "Visits",
         "tags": "Tags",
-        "files": "Files"
+        "files": "Documents"
       },
       "sections": {
         "testInfo": "Test Information",
@@ -2386,7 +2386,7 @@
         "orderingPractitioner": "Ordering Practitioner",
         "notes": "Notes",
         "tags": "Tags",
-        "associatedFiles": "Associated Files"
+        "associatedFiles": "Associated Documents"
       },
       "labels": {
         "testCode": "Test Code",
@@ -2420,7 +2420,7 @@
       "orderingPractitioner": "Ordering Practitioner",
       "orderedDate": "Ordered Date",
       "completedDate": "Completed Date",
-      "files": "Files"
+      "files": "Documents"
     },
     "card": {
       "testCode": "Test Code",

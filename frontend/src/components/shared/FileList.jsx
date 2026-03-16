@@ -301,7 +301,10 @@ const FileList = ({
             const isFailed = isRemoteBackend && file.sync_status === 'failed';
 
             // Check if this is a linked document (not uploaded by us)
-            const isLinkedDocument = file.file_path && file.file_path.startsWith('paperless://document/');
+            const isLinkedDocument = file.file_path && (
+              file.file_path.startsWith('paperless://document/') ||
+              file.file_path.startsWith('papra://document/')
+            );
 
             return (
               <Paper

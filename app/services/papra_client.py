@@ -219,6 +219,62 @@ class PapraClient:
             logger.error(f"Papra delete connection error: {e}")
             raise PapraConnectionError(f"Connection error during delete: {e}")
 
+    async def search_documents(self, query: str = "", page: int = 0, page_size: int = 20) -> dict:
+        """
+        Search or list documents in the organization.
+
+        Args:
+            query: Optional search query string; empty string returns all documents.
+            page: Zero-based page index.
+            page_size: Number of documents per page.
+
+        Returns:
+            Dict with ``documents`` list and ``documentsCount`` integer as returned
+            by the Papra API.
+
+        Raises:
+            PapraClientError: If the request fails.
+        """
+        await self._ensure_session()
+
+        try:
+            params = {
+                "pageIndex": page,
+                "pageSize": page_size,
+            }
+            if query:
+                params["searchQuery"] = query
+
+            url = self._org_url("/documents")
+            logger.debug(f"Searching Papra documents: query={query!r} page={page} page_size={page_size}")
+
+            async with self._session.get(url, params=params) as response:
+                if response.status != 200:
+                    error_text = await response.text()
+                    raise PapraClientError(
+                        f"Document search failed with status {response.status}: {error_text}"
+                    )
+
+                data = await response.json()
+                # Normalise to always return the expected shape
+                if isinstance(data, dict):
+                    return {
+                        "documents": data.get("documents", []),
+                        "documentsCount": data.get("documentsCount", 0),
+                    }
+                # Unexpected shape – return empty
+                logger.warning(f"Unexpected Papra search response shape: {type(data)}")
+                return {"documents": [], "documentsCount": 0}
+
+        except aiohttp.ClientError as e:
+            logger.error(f"Papra search connection error: {e}")
+            raise PapraConnectionError(f"Connection error during document search: {e}")
+        except PapraClientError:
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected Papra search error: {e}")
+            raise PapraClientError(f"Document search error: {e}")
+
     async def get_document_info(self, document_id: str) -> Optional[dict]:
         """
         Get document metadata.

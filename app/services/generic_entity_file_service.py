@@ -498,84 +498,123 @@ class GenericEntityFileService:
                 error_message=f"Failed to update file record: {str(e)}",
             )
 
+    async def _handle_remote_backend_deletion(
+        self,
+        db: Session,
+        file_record: EntityFile,
+        backend_name: str,
+        document_id_attr: str,
+        link_prefix: str,
+        delete_fn,
+        current_user_id: Optional[int],
+    ) -> bool:
+        """
+        Handle deletion logic for remote storage backends (Paperless, Papra).
+
+        Determines whether to unlink (linked docs), skip deletion (multiple
+        references or missing docs), or actually delete from the remote backend.
+
+        Args:
+            db: Database session
+            file_record: The EntityFile record being deleted
+            backend_name: Display name of the backend ("Paperless" or "Papra")
+            document_id_attr: Attribute name for the document ID on EntityFile
+            link_prefix: URL prefix that identifies linked documents (e.g. "paperless://document/")
+            delete_fn: Async callable to perform the actual remote deletion
+            current_user_id: ID of the user performing the deletion
+
+        Returns:
+            True if this is a linked document (unlink only), False otherwise
+        """
+        document_id = getattr(file_record, document_id_attr)
+        is_linked = file_record.file_path and file_record.file_path.startswith(link_prefix)
+
+        if is_linked:
+            logger.info(
+                f"Document {document_id} is a linked document. "
+                f"Unlinking from MediKeep only, will NOT delete from {backend_name}."
+            )
+            return True
+
+        # Uploaded document - check if other records reference it
+        doc_id_column = getattr(EntityFile, document_id_attr)
+        other_references = (
+            db.query(EntityFile)
+            .filter(
+                doc_id_column == document_id,
+                EntityFile.storage_backend == file_record.storage_backend,
+                EntityFile.id != file_record.id,
+            )
+            .count()
+        )
+
+        if other_references > 0:
+            logger.info(
+                f"{backend_name} document {document_id} has {other_references} other references. "
+                f"Skipping {backend_name} deletion, only removing database record."
+            )
+        elif file_record.sync_status == "missing":
+            logger.info(
+                f"Document {document_id} is marked as missing. "
+                f"Skipping {backend_name} deletion since document is not accessible."
+            )
+        else:
+            logger.info(
+                f"Attempting to delete uploaded document {document_id} "
+                f"from {backend_name} (sync_status: {file_record.sync_status})"
+            )
+            deleted = await delete_fn(db, file_record, current_user_id)
+            if not deleted:
+                logger.error(f"{backend_name} deletion failed for document {document_id}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=(
+                        f"Failed to delete file from {backend_name}. "
+                        f"The document may still exist on the {backend_name} server."
+                    ),
+                )
+
+        return False
+
     async def delete_file(self, db: Session, file_id: int, current_user_id: Optional[int] = None) -> FileOperationResult:
         """
-        Delete a file by its ID from both local and paperless storage.
+        Delete a file by its ID from local, Paperless, or Papra storage.
 
         Args:
             db: Database session
             file_id: ID of the file to delete
+            current_user_id: ID of the user performing the deletion
 
         Returns:
             FileOperationResult with operation details
         """
         try:
-            # Get file record
             file_record = self.get_file_by_id(db, file_id)
             if not file_record:
                 raise HTTPException(
                     status_code=404, detail=f"File not found: {file_id}"
                 )
 
-            # Track whether this is a linked document for success message
             is_linked_document = False
 
-            # Route to appropriate storage backend for deletion
             if file_record.storage_backend == "paperless":
-                # Check if this is a linked document (not uploaded by us)
-                is_linked_document = file_record.file_path and file_record.file_path.startswith("paperless://document/")
-
-                if is_linked_document:
-                    logger.info(
-                        f"Document {file_record.paperless_document_id} is a linked document. "
-                        f"Unlinking from MediKeep only, will NOT delete from Paperless."
-                    )
-                    # Don't delete from Paperless - this document was linked, not uploaded by us
-                else:
-                    # This is an uploaded document, check if other records reference it
-                    other_references = (
-                        db.query(EntityFile)
-                        .filter(
-                            EntityFile.paperless_document_id == file_record.paperless_document_id,
-                            EntityFile.storage_backend == "paperless",
-                            EntityFile.id != file_record.id
-                        )
-                        .count()
-                    )
-
-                    if other_references > 0:
-                        logger.info(
-                            f"Paperless document {file_record.paperless_document_id} has {other_references} other references. "
-                            f"Skipping Paperless deletion, only removing database record."
-                        )
-                        # Don't delete from Paperless since other records reference it
-                    else:
-                        # Check if document is missing - if so, don't try to delete from Paperless
-                        if file_record.sync_status == "missing":
-                            logger.info(
-                                f"Document {file_record.paperless_document_id} is marked as missing. "
-                                f"Skipping Paperless deletion since document is not accessible."
-                            )
-                            # Document is missing from Paperless, we'll just remove the database record below
-                        else:
-                            # Document exists in Paperless and was uploaded by us, try to delete it
-                            logger.info(f"Attempting to delete uploaded document {file_record.paperless_document_id} from Paperless (sync_status: {file_record.sync_status})")
-                            paperless_deleted = await self._delete_from_paperless(db, file_record, current_user_id)
-                            if not paperless_deleted:
-                                logger.error(f"Paperless deletion failed for document {file_record.paperless_document_id}")
-                                raise HTTPException(
-                                    status_code=500,
-                                    detail=f"Failed to delete file from Paperless. The document may still exist on the Paperless server.",
-                                )
+                is_linked_document = await self._handle_remote_backend_deletion(
+                    db, file_record,
+                    backend_name="Paperless",
+                    document_id_attr="paperless_document_id",
+                    link_prefix="paperless://document/",
+                    delete_fn=self._delete_from_paperless,
+                    current_user_id=current_user_id,
+                )
             elif file_record.storage_backend == "papra":
-                # Handle Papra file deletion
-                papra_deleted = await self._delete_from_papra(db, file_record, current_user_id)
-                if not papra_deleted:
-                    logger.error(f"Papra deletion failed for document {file_record.papra_document_id}")
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Failed to delete file from Papra. The document may still exist on the Papra server.",
-                    )
+                is_linked_document = await self._handle_remote_backend_deletion(
+                    db, file_record,
+                    backend_name="Papra",
+                    document_id_attr="papra_document_id",
+                    link_prefix="papra://document/",
+                    delete_fn=self._delete_from_papra,
+                    current_user_id=current_user_id,
+                )
             elif file_record.storage_backend == "local":
                 # Handle local file deletion
                 file_path = file_record.file_path
@@ -603,12 +642,18 @@ class GenericEntityFileService:
                 f"File {operation_type} successfully: {file_record.file_name} from {file_record.storage_backend} storage"
             )
 
+            result_path = file_record.file_path
+            if not result_path:
+                if file_record.storage_backend == "paperless":
+                    result_path = f"paperless:{file_record.paperless_document_id}"
+                elif file_record.storage_backend == "papra":
+                    result_path = f"papra:{file_record.papra_document_id}"
+
             return FileOperationResult(
                 success=True,
                 message=success_message,
                 file_id=file_id,
-                file_path=file_record.file_path
-                or f"paperless:{file_record.paperless_document_id}",
+                file_path=result_path,
             )
 
         except HTTPException:

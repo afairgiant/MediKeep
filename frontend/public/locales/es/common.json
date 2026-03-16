@@ -851,7 +851,7 @@
         "relatedConditions": "Condiciones relacionadas",
         "visits": "Visitas",
         "tags": "Etiquetas",
-        "files": "Archivos"
+        "files": "Documentos"
       },
       "sections": {
         "testInfo": "Información de la prueba",
@@ -859,7 +859,7 @@
         "orderingPractitioner": "Profesional que ordena",
         "notes": "Notas",
         "tags": "Etiquetas",
-        "associatedFiles": "Archivos asociados"
+        "associatedFiles": "Documentos asociados"
       },
       "labels": {
         "testCode": "Código de prueba",
@@ -934,7 +934,7 @@
       "category": "Categoría",
       "completedDate": "Fecha de finalización",
       "facility": "Centro médico",
-      "files": "Archivos",
+      "files": "Documentos",
       "orderedDate": "Fecha de solicitud",
       "orderingPractitioner": "Profesional solicitante",
       "testName": "Nombre de la prueba",

@@ -42,6 +42,7 @@ import {
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
 import { getPaperlessSettings, linkPaperlessDocument } from '../../services/api/paperlessApi.jsx';
+import { linkPapraDocument } from '../../services/api/papraApi.jsx';
 import logger from '../../services/logger';
 import FileUploadZone from './FileUploadZone';
 import FileList from './FileList';
@@ -49,6 +50,7 @@ import FileCountBadge from './FileCountBadge';
 import StorageBackendSelector from './StorageBackendSelector';
 import useDocumentManagerCore from './DocumentManagerCore';
 import LinkPaperlessDocumentModal from './LinkPaperlessDocumentModal';
+import LinkPapraDocumentModal from './LinkPapraDocumentModal';
 
 const DocumentManager = ({
   entityType,
@@ -98,6 +100,7 @@ const DocumentManager = ({
   const [error, setError] = useState('');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
+  const [isPapraLinkModalOpen, setIsPapraLinkModalOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState({});
   const [syncLoading, setSyncLoading] = useState(false);
 
@@ -698,6 +701,55 @@ const DocumentManager = ({
     }
   };
 
+  // Handle linking existing Papra document
+  const handleLinkPapraDocument = async (linkData) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      logger.info('document_manager_link_papra', {
+        message: 'Linking Papra document',
+        entityType,
+        entityId,
+        papraDocumentId: linkData.papra_document_id,
+        component: 'DocumentManager',
+      });
+
+      await linkPapraDocument(entityType, entityId, linkData);
+
+      // Reload files to show the newly linked document
+      await loadFiles();
+
+      logger.info('document_manager_link_papra_success', {
+        message: 'Papra document linked successfully',
+        entityType,
+        entityId,
+        papraDocumentId: linkData.papra_document_id,
+        component: 'DocumentManager',
+      });
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to link document';
+      setError(errorMessage);
+
+      if (onError) {
+        onError(errorMessage);
+      }
+
+      logger.error('document_manager_link_papra_error', {
+        message: 'Failed to link Papra document',
+        entityType,
+        entityId,
+        error: err.message,
+        component: 'DocumentManager',
+      });
+
+      // Re-throw so modal can handle it
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Batch upload pending files (for create/edit mode)
   const uploadPendingFiles = useCallback(async targetEntityId => {
     const currentPendingFiles = pendingFilesRef.current;
@@ -1110,12 +1162,20 @@ const DocumentManager = ({
                   >
                     Upload New File
                   </Menu.Item>
-                  {paperlessSettings?.paperless_enabled && (
+                  {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
                     <Menu.Item
                       leftSection={<IconLink size={16} />}
                       onClick={() => setShowLinkModal(true)}
                     >
                       Link Existing Paperless Document
+                    </Menu.Item>
+                  )}
+                  {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
+                    <Menu.Item
+                      leftSection={<IconLink size={16} />}
+                      onClick={() => setIsPapraLinkModalOpen(true)}
+                    >
+                      Link Existing Papra Document
                     </Menu.Item>
                   )}
                 </Menu.Dropdown>
@@ -1191,26 +1251,46 @@ const DocumentManager = ({
             </Stack>
           )}
 
-          {/* Add New Files */}
-          <FileUploadZone
-            onUpload={uploadedFiles => {
-              logger.info('FileUploadZone onUpload called with:', uploadedFiles);
-              // Immediately upload each file using DocumentManagerCore
-              uploadedFiles.forEach(({ file, description }) => {
-                logger.info('Starting immediate upload for:', file.name);
-                if (documentManager.handleImmediateUpload) {
-                  documentManager.handleImmediateUpload(file, description || '');
-                } else {
-                  logger.error('handleImmediateUpload not available on documentManager');
-                }
-              });
-            }}
-            acceptedTypes={config.acceptedTypes}
-            maxSize={config.maxSize}
-            maxFiles={config.maxFiles}
-            selectedStorageBackend={selectedStorageBackend}
-            paperlessSettings={paperlessSettings}
-          />
+          {/* Add Document Menu */}
+          <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+            <Group justify="space-between" align="center">
+              <Text fw={500}>Manage Documents</Text>
+              <Menu position="bottom-end" shadow="md">
+                <Menu.Target>
+                  <Button
+                    rightSection={<IconChevronDown size={16} />}
+                    disabled={loading}
+                  >
+                    Add Document
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={<IconUpload size={16} />}
+                    onClick={() => setShowUploadModal(true)}
+                  >
+                    Upload New File
+                  </Menu.Item>
+                  {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
+                    <Menu.Item
+                      leftSection={<IconLink size={16} />}
+                      onClick={() => setShowLinkModal(true)}
+                    >
+                      Link Existing Paperless Document
+                    </Menu.Item>
+                  )}
+                  {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
+                    <Menu.Item
+                      leftSection={<IconLink size={16} />}
+                      onClick={() => setIsPapraLinkModalOpen(true)}
+                    >
+                      Link Existing Papra Document
+                    </Menu.Item>
+                  )}
+                </Menu.Dropdown>
+              </Menu>
+            </Group>
+          </Paper>
 
           {/* Pending Files */}
           {pendingFiles.length > 0 && (
@@ -1403,25 +1483,46 @@ const DocumentManager = ({
             />
           )}
 
-          <FileUploadZone
-            onUpload={uploadedFiles => {
-              logger.info('FileUploadZone onUpload called with:', uploadedFiles);
-              // Immediately upload each file using DocumentManagerCore
-              uploadedFiles.forEach(({ file, description }) => {
-                logger.info('Starting immediate upload for:', file.name);
-                if (documentManager.handleImmediateUpload) {
-                  documentManager.handleImmediateUpload(file, description || '');
-                } else {
-                  logger.error('handleImmediateUpload not available on documentManager');
-                }
-              });
-            }}
-            acceptedTypes={config.acceptedTypes}
-            maxSize={config.maxSize}
-            maxFiles={config.maxFiles}
-            selectedStorageBackend={selectedStorageBackend}
-            paperlessSettings={paperlessSettings}
-          />
+          {/* Add Document Menu */}
+          <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+            <Group justify="space-between" align="center">
+              <Text fw={500}>Manage Documents</Text>
+              <Menu position="bottom-end" shadow="md">
+                <Menu.Target>
+                  <Button
+                    rightSection={<IconChevronDown size={16} />}
+                    disabled={loading}
+                  >
+                    Add Document
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={<IconUpload size={16} />}
+                    onClick={() => setShowUploadModal(true)}
+                  >
+                    Upload New File
+                  </Menu.Item>
+                  {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
+                    <Menu.Item
+                      leftSection={<IconLink size={16} />}
+                      onClick={() => setShowLinkModal(true)}
+                    >
+                      Link Existing Paperless Document
+                    </Menu.Item>
+                  )}
+                  {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
+                    <Menu.Item
+                      leftSection={<IconLink size={16} />}
+                      onClick={() => setIsPapraLinkModalOpen(true)}
+                    >
+                      Link Existing Papra Document
+                    </Menu.Item>
+                  )}
+                </Menu.Dropdown>
+              </Menu>
+            </Group>
+          </Paper>
 
           {/* Pending Files */}
           {pendingFiles.length > 0 && (
@@ -1438,23 +1539,23 @@ const DocumentManager = ({
 
                   return (
                     <Paper key={pendingFile.id} withBorder p="sm" bg={
-                      isCompleted ? "green.1" : 
+                      isCompleted ? "green.1" :
                       isDuplicate ? "orange.1" :
-                      isFailed ? "red.1" : 
-                      isUploading ? "yellow.1" : 
+                      isFailed ? "red.1" :
+                      isUploading ? "yellow.1" :
                       "blue.1"
                     }>
                       <Group justify="space-between" align="flex-start">
                         <Group gap="xs" style={{ flex: 1 }}>
-                          <ThemeIcon 
-                            variant="light" 
+                          <ThemeIcon
+                            variant="light"
                             color={
-                              isCompleted ? "green" : 
+                              isCompleted ? "green" :
                               isDuplicate ? "orange" :
-                              isFailed ? "red" : 
-                              isUploading ? "yellow" : 
+                              isFailed ? "red" :
+                              isUploading ? "yellow" :
                               "blue"
-                            } 
+                            }
                             size="sm"
                           >
                             {isCompleted ? (
@@ -1498,15 +1599,15 @@ const DocumentManager = ({
                                 </Badge>
                               )}
                             </Group>
-                            
+
                             {/* Progress bar for uploads */}
                             {(isUploading || isCompleted || isDuplicate || isFailed) && (
-                              <Progress 
+                              <Progress
                                 value={progressValue}
                                 color={
-                                  isCompleted ? "green" : 
+                                  isCompleted ? "green" :
                                   isDuplicate ? "orange" :
-                                  isFailed ? "red" : 
+                                  isFailed ? "red" :
                                   "blue"
                                 }
                                 size="sm"
@@ -1514,7 +1615,7 @@ const DocumentManager = ({
                                 animated={isUploading}
                               />
                             )}
-                            
+
                             {/* Error message for failed uploads */}
                             {isFailed && fileProgress?.error && (
                               <Alert variant="light" color="red" size="xs" p="xs">
@@ -1531,7 +1632,7 @@ const DocumentManager = ({
                                 </Stack>
                               </Alert>
                             )}
-                            
+
                             {/* Warning message for duplicate uploads */}
                             {isDuplicate && fileProgress?.error && (
                               <Alert variant="light" color="orange" size="xs" p="xs">
@@ -1734,6 +1835,15 @@ const DocumentManager = ({
         opened={showLinkModal}
         onClose={() => setShowLinkModal(false)}
         onLinkDocument={handleLinkPaperlessDocument}
+        entityType={entityType}
+        entityId={entityId}
+      />
+
+      {/* Link Papra Document Modal */}
+      <LinkPapraDocumentModal
+        opened={isPapraLinkModalOpen}
+        onClose={() => setIsPapraLinkModalOpen(false)}
+        onLinkDocument={handleLinkPapraDocument}
         entityType={entityType}
         entityId={entityId}
       />

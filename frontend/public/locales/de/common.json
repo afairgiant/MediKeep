@@ -929,7 +929,7 @@
       "orderingPractitioner": "Anordnender Arzt",
       "orderedDate": "Anordnungsdatum",
       "completedDate": "Abschlussdatum",
-      "files": "Dateien"
+      "files": "Dokumente"
     },
     "card": {
       "testCode": "Testcode",
@@ -952,7 +952,7 @@
         "relatedConditions": "Verbundene Erkrankungen",
         "visits": "Besuche",
         "tags": "Tags",
-        "files": "Dateien"
+        "files": "Dokumente"
       },
       "sections": {
         "testInfo": "Testinformationen",
@@ -960,7 +960,7 @@
         "orderingPractitioner": "Anordnender Arzt",
         "notes": "Notizen",
         "tags": "Tags",
-        "associatedFiles": "Zugehörige Dateien"
+        "associatedFiles": "Zugehörige Dokumente"
       },
       "labels": {
         "testCode": "Testcode",

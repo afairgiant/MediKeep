@@ -27,6 +27,7 @@ from app.services.credential_encryption import (
     encrypt_papra_token,
 )
 from app.services.papra_auth import PapraAuth
+from app.services.papra_client import PapraClientError, PapraConnectionError, create_papra_client
 
 logger = get_logger(__name__, "app")
 
@@ -161,10 +162,11 @@ async def test_papra_connection(
     except ValueError as exc:
         log_endpoint_error(
             logger,
-            request=request,
+            request,
+            "Invalid Papra connection parameters",
+            exc,
             user_id=current_user_id,
             event="papra_connection_test_invalid_params",
-            error=str(exc),
             papra_url=connection_data.papra_url,
         )
         raise HTTPException(
@@ -283,10 +285,11 @@ async def list_papra_organizations(
     except SQLAlchemyError as exc:
         log_endpoint_error(
             logger,
-            request=request,
+            request,
+            "Database error listing Papra organizations",
+            exc,
             user_id=current_user_id,
             event="papra_list_organizations_db_error",
-            error=str(exc),
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -357,10 +360,11 @@ async def get_papra_settings(
     except SQLAlchemyError as exc:
         log_endpoint_error(
             logger,
-            request=request,
+            request,
+            "Database error retrieving Papra settings",
+            exc,
             user_id=current_user_id,
             event="papra_settings_db_error",
-            error=str(exc),
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -478,10 +482,11 @@ async def update_papra_settings(
     except ValueError as exc:
         log_endpoint_error(
             logger,
-            request=request,
+            request,
+            "Invalid Papra settings data",
+            exc,
             user_id=current_user_id,
             event="papra_settings_validation_error",
-            error=str(exc),
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -491,10 +496,11 @@ async def update_papra_settings(
     except SQLAlchemyError as exc:
         log_endpoint_error(
             logger,
-            request=request,
+            request,
+            "Database error saving Papra settings",
+            exc,
             user_id=current_user_id,
             event="papra_settings_db_error",
-            error=str(exc),
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -516,4 +522,184 @@ async def update_papra_settings(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An internal error occurred while saving Papra settings.",
+        ) from exc
+
+
+@router.get("/documents/search", response_model=Dict[str, Any])
+async def search_papra_documents(
+    request: Request,
+    query: str = "",
+    page: int = 0,
+    page_size: int = 20,
+    current_user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """
+    Search or list documents available in the user's configured Papra organization.
+
+    Args:
+        query: Optional search string; omit or leave empty to list all documents.
+        page: Zero-based page index (default 0).
+        page_size: Number of results per page (default 20).
+        current_user_id: Current authenticated user ID.
+        db: Database session.
+
+    Returns:
+        Dict with ``results`` (list of document dicts) and ``count`` (total number
+        of matching documents as reported by Papra).
+
+    Raises:
+        HTTPException: 400 if Papra is not configured or token cannot be decrypted,
+                       500 on connection or internal error.
+    """
+    log_endpoint_access(
+        logger,
+        request=request,
+        user_id=current_user_id,
+        event="papra_document_search_started",
+        message=f"Papra document search requested by user {current_user_id}",
+        query=query,
+        page=page,
+        page_size=page_size,
+    )
+
+    try:
+        prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
+
+        if not prefs or not prefs.papra_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Papra integration is not enabled.",
+            )
+
+        if not prefs.papra_url or not prefs.papra_api_token_encrypted:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Papra is not fully configured. Please save your Papra URL, "
+                    "API token, and organization in settings."
+                ),
+            )
+
+        if not prefs.papra_organization_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No Papra organization selected. Please select an organization in settings.",
+            )
+
+        try:
+            raw_token = decrypt_papra_token(prefs.papra_api_token_encrypted)
+        except SecurityError as exc:
+            logger.error(
+                "Failed to decrypt Papra token for document search",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "papra_token_decryption_failed",
+                    LogFields.USER_ID: current_user_id,
+                    LogFields.ERROR: str(exc),
+                },
+            )
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="A security error occurred while accessing your Papra credentials.",
+            ) from exc
+
+        if not raw_token:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Stored Papra API token could not be read. Please re-save your settings.",
+            )
+
+        papra_client = create_papra_client(
+            url=prefs.papra_url,
+            encrypted_token=prefs.papra_api_token_encrypted,
+            organization_id=prefs.papra_organization_id,
+            user_id=current_user_id,
+        )
+
+        async with papra_client:
+            search_result = await papra_client.search_documents(
+                query=query,
+                page=page,
+                page_size=page_size,
+            )
+
+        documents = search_result.get("documents", [])
+        total_count = search_result.get("documentsCount", 0)
+
+        log_endpoint_access(
+            logger,
+            request=request,
+            user_id=current_user_id,
+            event="papra_document_search_succeeded",
+            message=(
+                f"Papra document search returned {len(documents)} result(s) "
+                f"(total {total_count}) for user {current_user_id}"
+            ),
+            result_count=len(documents),
+            total_count=total_count,
+        )
+
+        return {"results": documents, "count": total_count}
+
+    except HTTPException:
+        raise
+
+    except PapraConnectionError as exc:
+        log_endpoint_error(
+            logger,
+            request,
+            "Papra connection error during document search",
+            exc,
+            user_id=current_user_id,
+            event="papra_document_search_connection_error",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unable to connect to Papra: {exc}",
+        ) from exc
+
+    except PapraClientError as exc:
+        log_endpoint_error(
+            logger,
+            request,
+            "Papra client error during document search",
+            exc,
+            user_id=current_user_id,
+            event="papra_document_search_client_error",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Papra error: {exc}",
+        ) from exc
+
+    except SQLAlchemyError as exc:
+        log_endpoint_error(
+            logger,
+            request,
+            "Database error during Papra document search",
+            exc,
+            user_id=current_user_id,
+            event="papra_document_search_db_error",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="A database error occurred while searching Papra documents.",
+        ) from exc
+
+    except Exception as exc:
+        logger.error(
+            "Unexpected error searching Papra documents",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "papra_document_search_error",
+                LogFields.USER_ID: current_user_id,
+                LogFields.ERROR: str(exc),
+                "error_type": type(exc).__name__,
+                "stack_trace": traceback.format_exc(),
+            },
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal error occurred while searching Papra documents.",
         ) from exc
