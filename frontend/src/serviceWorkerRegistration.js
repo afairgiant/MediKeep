@@ -74,14 +74,17 @@ function registerValidSW(swUrl, config) {
         };
       };
 
-      // Reload the page once the new service worker takes control
-      let refreshing = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
-          window.location.reload();
-        }
-      });
+      // Reload the page once a new service worker takes control (updates only).
+      // On first install there is no existing controller, so we skip the reload.
+      if (navigator.serviceWorker.controller) {
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+      }
     })
     .catch(error => {
       logger.error('service_worker_registration_failed', 'Service worker registration failed', {

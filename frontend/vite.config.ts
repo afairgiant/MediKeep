@@ -23,12 +23,18 @@ export default defineConfig({
       writeBundle(options) {
         const outDir = options.dir || path.resolve(__dirname, 'build');
         const swPath = path.join(outDir, 'service-worker.js');
-        if (fs.existsSync(swPath)) {
-          let content = fs.readFileSync(swPath, 'utf-8');
-          const hash = crypto.createHash('md5').update(content + Date.now()).digest('hex').slice(0, 10);
-          content = content.replace('__SW_VERSION__', hash);
-          fs.writeFileSync(swPath, content, 'utf-8');
+        if (!fs.existsSync(swPath)) {
+          this.warn('service-worker.js not found in build output — SW version injection skipped');
+          return;
         }
+        let content = fs.readFileSync(swPath, 'utf-8');
+        if (!content.includes('__SW_VERSION__')) {
+          this.warn('__SW_VERSION__ placeholder not found in service-worker.js — cache versioning will not work');
+          return;
+        }
+        const hash = crypto.createHash('md5').update(content + Date.now()).digest('hex').slice(0, 10);
+        content = content.replace('__SW_VERSION__', hash);
+        fs.writeFileSync(swPath, content, 'utf-8');
       },
     },
   ],

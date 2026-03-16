@@ -20,7 +20,11 @@ class CachedStaticFiles(StaticFiles):
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         async def send_with_cache(message):
             if message["type"] == "http.response.start":
-                headers = list(message.get("headers", []))
+                headers = [
+                    (k, v)
+                    for k, v in message.get("headers", [])
+                    if k.lower() != b"cache-control"
+                ]
                 headers.append((b"cache-control", self._cache_control.encode()))
                 message["headers"] = headers
             await send(message)
@@ -150,7 +154,7 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
                 return FileResponse(
                     icon_path,
                     media_type="image/png",
-                    headers={"Cache-Control": "public, max-age=86400, no-cache"},
+                    headers={"Cache-Control": "public, max-age=86400"},
                 )
             return {"error": "icon-256.png not found"}
 
@@ -162,7 +166,7 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
                 return FileResponse(
                     icon_path,
                     media_type="image/png",
-                    headers={"Cache-Control": "public, max-age=86400, no-cache"},
+                    headers={"Cache-Control": "public, max-age=86400"},
                 )
             return {"error": "icon-192.png not found"}
 

@@ -78,10 +78,12 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(request)
         .then(response => {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(request, responseToCache))
-            .catch(error => console.error('SW: Cache put failed:', error));
+          if (response.ok && response.type === 'basic') {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(request, responseToCache))
+              .catch(error => console.error('SW: Cache put failed:', error));
+          }
           return response;
         })
         .catch(() => {
