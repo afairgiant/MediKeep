@@ -3,10 +3,29 @@ import os
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.types import Receive, Scope, Send
 
 from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
+
+
+class CachedStaticFiles(StaticFiles):
+    """StaticFiles subclass that injects a Cache-Control header into every response."""
+
+    def __init__(self, *, directory: str, cache_control: str) -> None:
+        self._cache_control = cache_control
+        super().__init__(directory=directory)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        async def send_with_cache(message):
+            if message["type"] == "http.response.start":
+                headers = list(message.get("headers", []))
+                headers.append((b"cache-control", self._cache_control.encode()))
+                message["headers"] = headers
+            await send(message)
+
+        await super().__call__(scope, receive, send_with_cache)
 
 
 def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
@@ -59,13 +78,27 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
         # Vite generates index.html with references like /assets/xxx.js
         assets_dir = os.path.join(static_dir, "assets")
         if os.path.exists(assets_dir):
-            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+            app.mount(
+                "/assets",
+                CachedStaticFiles(
+                    directory=assets_dir,
+                    cache_control="public, max-age=31536000, immutable",
+                ),
+                name="assets",
+            )
             logger.info(f"Serving Vite assets from: {assets_dir}")
 
         # Mount locales directory for i18n
         locales_dir = os.path.join(static_dir, "locales")
         if os.path.exists(locales_dir):
-            app.mount("/locales", StaticFiles(directory=locales_dir), name="locales")
+            app.mount(
+                "/locales",
+                CachedStaticFiles(
+                    directory=locales_dir,
+                    cache_control="public, max-age=3600",
+                ),
+                name="locales",
+            )
             logger.info(f"Serving i18n locales from: {locales_dir}")
 
         # Also mount at /static for backward compatibility
@@ -114,7 +147,11 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             """Serve PWA icon 256x250"""
             icon_path = os.path.join(html_dir, "icon-256.png")
             if os.path.exists(icon_path):
-                return FileResponse(icon_path, media_type="image/png")
+                return FileResponse(
+                    icon_path,
+                    media_type="image/png",
+                    headers={"Cache-Control": "public, max-age=86400, no-cache"},
+                )
             return {"error": "icon-256.png not found"}
 
         @app.get("/icon-192.png")
@@ -122,7 +159,11 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             """Serve PWA icon 192x192"""
             icon_path = os.path.join(html_dir, "icon-192.png")
             if os.path.exists(icon_path):
-                return FileResponse(icon_path, media_type="image/png")
+                return FileResponse(
+                    icon_path,
+                    media_type="image/png",
+                    headers={"Cache-Control": "public, max-age=86400, no-cache"},
+                )
             return {"error": "icon-192.png not found"}
 
         @app.get("/offline.html")
@@ -130,7 +171,11 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             """Serve offline fallback page"""
             offline_path = os.path.join(html_dir, "offline.html")
             if os.path.exists(offline_path):
-                return FileResponse(offline_path, media_type="text/html")
+                return FileResponse(
+                    offline_path,
+                    media_type="text/html",
+                    headers={"Cache-Control": "no-cache"},
+                )
             return {"error": "offline.html not found"}
 
         # Catch-all route for React Router (must be last)
