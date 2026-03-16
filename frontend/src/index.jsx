@@ -23,15 +23,7 @@ reportWebVitals();
 if (isProduction()) {
   import('./serviceWorkerRegistration').then(({ register }) => {
     register({
-      onUpdate: (registration) => {
-        // New version available - could show toast notification to user
-        logger.info('app_update_available', 'New app version available', {
-          component: 'index',
-          action: 'service_worker_update'
-        });
-      },
-      onSuccess: (registration) => {
-        // Content cached for offline use
+      onSuccess: () => {
         logger.info('app_offline_ready', 'App ready for offline use', {
           component: 'index',
           action: 'service_worker_success'

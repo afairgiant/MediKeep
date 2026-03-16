@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
+import fs from 'fs';
+import crypto from 'crypto';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,15 +16,27 @@ export default defineConfig({
     }),
     svgr(), // Allows importing SVGs as React components
     tsconfigPaths(), // Respects tsconfig baseUrl: "src"
-    // Disable ESLint plugin during dev - it's causing constant restarts
-    // You can run `npm run lint` separately to check for issues
-    // eslint({
-    //   cache: false,
-    //   include: ['src/**/*.js', 'src/**/*.jsx'],
-    //   exclude: ['node_modules', 'build', 'dist', 'src/**/*.ts', 'src/**/*.tsx'],
-    //   failOnError: false,
-    //   failOnWarning: false,
-    // }),
+    // Inject build version into service-worker.js so the browser detects SW updates
+    {
+      name: 'sw-version-inject',
+      apply: 'build',
+      writeBundle(options) {
+        const outDir = options.dir || path.resolve(__dirname, 'build');
+        const swPath = path.join(outDir, 'service-worker.js');
+        if (!fs.existsSync(swPath)) {
+          this.warn('service-worker.js not found in build output — SW version injection skipped');
+          return;
+        }
+        let content = fs.readFileSync(swPath, 'utf-8');
+        if (!content.includes('__SW_VERSION__')) {
+          this.warn('__SW_VERSION__ placeholder not found in service-worker.js — cache versioning will not work');
+          return;
+        }
+        const hash = crypto.createHash('md5').update(content + Date.now()).digest('hex').slice(0, 10);
+        content = content.replace('__SW_VERSION__', hash);
+        fs.writeFileSync(swPath, content, 'utf-8');
+      },
+    },
   ],
 
   // Development server configuration
