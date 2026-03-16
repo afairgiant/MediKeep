@@ -52,9 +52,13 @@ function registerValidSW(swUrl, config) {
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              logger.info('service_worker_update_available', 'New content available, will refresh on next visit', {
+              // An update is available — tell the new SW to activate immediately
+              logger.info('service_worker_update_available', 'New content available, activating update', {
                 component: 'serviceWorkerRegistration'
               });
+              if (registration.waiting) {
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+              }
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
@@ -69,6 +73,15 @@ function registerValidSW(swUrl, config) {
           }
         };
       };
+
+      // Reload the page once the new service worker takes control
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
     })
     .catch(error => {
       logger.error('service_worker_registration_failed', 'Service worker registration failed', {

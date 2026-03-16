@@ -79,7 +79,10 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             """Serve React app index.html for root path"""
             index_path = os.path.join(html_dir, "index.html")
             if os.path.exists(index_path):
-                return FileResponse(index_path)
+                return FileResponse(
+                    index_path,
+                    headers={"Cache-Control": "no-cache"},
+                )
             return {"error": "React app index.html not found"}
 
         @app.get("/manifest.json")
@@ -87,7 +90,11 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             """Serve PWA manifest.json"""
             manifest_path = os.path.join(html_dir, "manifest.json")
             if os.path.exists(manifest_path):
-                return FileResponse(manifest_path, media_type="application/json")
+                return FileResponse(
+                    manifest_path,
+                    media_type="application/json",
+                    headers={"Cache-Control": "no-cache"},
+                )
             return {"error": "manifest.json not found"}
 
         @app.get("/service-worker.js")
@@ -95,7 +102,11 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             """Serve PWA service worker"""
             sw_path = os.path.join(html_dir, "service-worker.js")
             if os.path.exists(sw_path):
-                return FileResponse(sw_path, media_type="application/javascript")
+                return FileResponse(
+                    sw_path,
+                    media_type="application/javascript",
+                    headers={"Cache-Control": "no-cache, no-store"},
+                )
             return {"error": "service-worker.js not found"}
 
         @app.get("/icon-256.png")
@@ -153,7 +164,10 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
             # Serve index.html for all other paths (React Router handles routing)
             index_path = os.path.join(html_dir, "index.html")
             if os.path.exists(index_path):
-                return FileResponse(index_path)
+                return FileResponse(
+                    index_path,
+                    headers={"Cache-Control": "no-cache"},
+                )
             return {"error": "React app index.html not found"}
 
     else:
