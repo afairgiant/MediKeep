@@ -1,8 +1,8 @@
 // Safe Medical Records PWA Service Worker
 // IMPORTANT: No structured logging to prevent infinite loops
-const CACHE_NAME = 'medical-records-v2';
+const SW_VERSION = '__SW_VERSION__';
+const CACHE_NAME = 'medical-records-' + SW_VERSION;
 const STATIC_ASSETS = [
-  '/',
   '/manifest.json',
   '/icon-256.png',
   '/icon-192.png',
@@ -11,11 +11,9 @@ const STATIC_ASSETS = [
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
-  console.log('SW: Installing service worker');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('SW: Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       })
       .catch(error => {
@@ -27,13 +25,11 @@ self.addEventListener('install', event => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
-  console.log('SW: Activating service worker');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('SW: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -43,7 +39,7 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache or network
+// Fetch event - network-first for navigation, cache-first for hashed assets
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
@@ -63,7 +59,6 @@ self.addEventListener('fetch', event => {
 
   // Skip service worker files to prevent loops
   if (url.pathname.includes('service-worker') ||
-      url.pathname === '/manifest.json' ||
       url.pathname.includes('sw.js')) {
     return;
   }
@@ -78,35 +73,68 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Cache-first strategy for static assets
-  event.respondWith(
-    caches.match(request)
-      .then(response => {
-        if (response) {
+  // Navigation requests (HTML pages) — network-first strategy
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response.ok && response.type === 'basic') {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(request, responseToCache))
+              .catch(error => console.error('SW: Cache put failed:', error));
+          }
           return response;
-        }
+        })
+        .catch(() => {
+          return caches.match(request)
+            .then(cached => cached || caches.match('/offline.html'));
+        })
+    );
+    return;
+  }
 
-        // Fetch from network and cache successful responses
-        return fetch(request).then(response => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
+  // Hashed assets (/assets/*) — cache-first (immutable content-hashed filenames)
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(request)
+        .then(response => {
+          if (response) {
             return response;
           }
+          return fetch(request).then(networkResponse => {
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+              return networkResponse;
+            }
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(request, responseToCache))
+              .catch(error => console.error('SW: Cache put failed:', error));
+            return networkResponse;
+          });
+        })
+        .catch(error => {
+          console.error('SW: Fetch failed:', error);
+          return caches.match(request);
+        })
+    );
+    return;
+  }
 
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(request, responseToCache))
-            .catch(error => console.error('SW: Cache put failed:', error));
-
+  // All other static resources — network-first
+  event.respondWith(
+    fetch(request)
+      .then(response => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
-        });
-      })
-      .catch(error => {
-        console.error('SW: Fetch failed:', error);
-        // Return offline page for navigation requests
-        if (request.mode === 'navigate') {
-          return caches.match('/offline.html');
         }
-        // For other requests, try to return a cached version
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME)
+          .then(cache => cache.put(request, responseToCache))
+          .catch(error => console.error('SW: Cache put failed:', error));
+        return response;
+      })
+      .catch(() => {
         return caches.match(request);
       })
   );
@@ -115,7 +143,6 @@ self.addEventListener('fetch', event => {
 // Handle messages from client
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('SW: Received SKIP_WAITING message');
     self.skipWaiting();
   }
 });
