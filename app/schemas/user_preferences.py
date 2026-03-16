@@ -305,6 +305,15 @@ class UserPreferences(UserPreferencesBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserPreferencesResponse(UserPreferences):
+    """Response schema for GET /users/me/preferences with computed flags."""
+
+    paperless_has_token: bool = False
+    paperless_has_credentials: bool = False
+    papra_has_token: bool = False
+    papra_organization_id: Optional[str] = None
+
+
 class PaperlessConnectionData(BaseModel):
     """Schema for paperless connection data with validation."""
 

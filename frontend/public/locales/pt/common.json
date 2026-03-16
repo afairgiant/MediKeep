@@ -2534,22 +2534,22 @@
       "description": "Configure como seus documentos médicos são armazenados e gerenciados"
     },
     "papra": {
-      "title": "Integracao Papra",
-      "description": "Conecte-se a sua instancia Papra para gerenciamento de documentos",
+      "title": "Integração Papra",
+      "description": "Conecte-se à sua instância Papra para gerenciamento de documentos",
       "enabled": "Habilitar Papra",
       "url": "URL do Papra",
-      "urlPlaceholder": "https://sua-instancia-papra.com",
+      "urlPlaceholder": "https://sua-instância-papra.com",
       "apiToken": "Token API",
       "apiTokenPlaceholder": "Insira seu token API do Papra",
-      "organization": "Organizacao",
-      "organizationPlaceholder": "Selecione uma organizacao",
-      "testConnection": "Testar conexao",
-      "connectionSuccess": "Conexao bem-sucedida",
-      "connectionFailed": "Falha na conexao",
-      "fetchingOrgs": "Carregando organizacoes...",
-      "noOrganizations": "Nenhuma organizacao encontrada",
-      "tokenRequired": "O token API e obrigatorio",
-      "urlRequired": "A URL do Papra e obrigatoria"
+      "organization": "Organização",
+      "organizationPlaceholder": "Selecione uma organização",
+      "testConnection": "Testar conexão",
+      "connectionSuccess": "Conexão bem-sucedida",
+      "connectionFailed": "Falha na conexão",
+      "fetchingOrgs": "Carregando organizações...",
+      "noOrganizations": "Nenhuma organização encontrada",
+      "tokenRequired": "O token API é obrigatório",
+      "urlRequired": "A URL do Papra é obrigatória"
     },
     "preferences": {
       "dateFormat": {

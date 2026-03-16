@@ -16,7 +16,7 @@ from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActivityLog, EntityType
 from app.models.models import User as UserModel
 from app.schemas.user import User, UserUpdate
-from app.schemas.user_preferences import UserPreferences, UserPreferencesUpdate
+from app.schemas.user_preferences import UserPreferences, UserPreferencesResponse, UserPreferencesUpdate
 from app.services.user_deletion_service import UserDeletionService
 
 router = APIRouter()
@@ -163,13 +163,13 @@ def delete_current_user_account(
         )
 
 
-@router.get("/me/preferences")
+@router.get("/me/preferences", response_model=UserPreferencesResponse)
 def get_current_user_preferences(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user: UserModel = Depends(deps.get_current_user),
-) -> Any:
+) -> UserPreferencesResponse:
     """Get current user's preferences."""
     try:
         preferences = user_preferences.get_or_create_by_user_id(

@@ -233,12 +233,22 @@ const LinkPapraDocumentModal = ({
                   key={doc.id}
                   withBorder
                   p="md"
+                  role="button"
+                  tabIndex={0}
+                  aria-selected={selectedDoc?.id === doc.id}
+                  aria-label={`Select document: ${doc.name}`}
                   style={{
                     cursor: 'pointer',
                     backgroundColor:
                       selectedDoc?.id === doc.id ? '#e7f5ff' : 'transparent',
                   }}
                   onClick={() => handleSelectDocument(doc)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSelectDocument(doc);
+                    }
+                  }}
                 >
                   <Group justify="space-between" align="flex-start">
                     <Group align="flex-start" gap="md" style={{ flex: 1 }}>

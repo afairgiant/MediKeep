@@ -10,7 +10,7 @@ import traceback
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -41,6 +41,25 @@ class PapraSettingsUpdate(BaseModel):
     papra_api_token: Optional[str] = None
     papra_organization_id: Optional[str] = None
     papra_enabled: Optional[bool] = None
+
+    @field_validator("papra_url")
+    @classmethod
+    def validate_url(cls, v):
+        """Validate Papra URL format if provided."""
+        if v is None or v == "":
+            return v
+        from app.schemas.user_preferences import _validate_integration_url
+        return _validate_integration_url(v)
+
+    @field_validator("papra_api_token")
+    @classmethod
+    def validate_api_token(cls, v):
+        """Validate API token format if provided."""
+        if v is not None and v.strip():
+            if len(v.strip()) < 10:
+                raise ValueError("API token appears to be too short")
+            return v.strip()
+        return v
 
 
 def _mask_token(token: Optional[str]) -> Optional[str]:
@@ -347,7 +366,8 @@ async def get_papra_settings(
         prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
 
         if not prefs:
-            return {
+            # Default setting values, not passwords
+            return {  # nosec B105
                 "papra_enabled": False,
                 "papra_url": "",
                 "papra_has_token": False,

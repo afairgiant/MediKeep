@@ -198,13 +198,14 @@ async def export_patient_data(
                     zip_buffer = io.BytesIO()
                     files_added = 0
 
-                    # Query user once if there are paperless files to export
-                    has_paperless_files = any(
-                        f.get("storage_backend") == "paperless" for f in files_info
+                    # Query user once if there are remote-backend files to export
+                    has_remote_files = any(
+                        f.get("storage_backend") in ("paperless", "papra")
+                        for f in files_info
                     )
-                    paperless_user = None
-                    if has_paperless_files:
-                        paperless_user = (
+                    remote_user = None
+                    if has_remote_files:
+                        remote_user = (
                             db.query(User)
                             .filter(User.id == current_user_id)
                             .first()
@@ -258,16 +259,16 @@ async def export_patient_data(
                                     paperless_doc_id = file_info.get(
                                         "paperless_document_id"
                                     )
-                                    if paperless_doc_id and paperless_user:
+                                    if paperless_doc_id and remote_user:
                                         if (
-                                            paperless_user.paperless_enabled
-                                            and paperless_user.paperless_url
+                                            remote_user.paperless_enabled
+                                            and remote_user.paperless_url
                                         ):
                                             try:
                                                 # Use async context manager for proper cleanup
                                                 async with create_paperless_client(
-                                                    url=paperless_user.paperless_url,
-                                                    encrypted_token=paperless_user.paperless_api_token_encrypted,
+                                                    url=remote_user.paperless_url,
+                                                    encrypted_token=remote_user.paperless_api_token_encrypted,
                                                     user_id=current_user_id,
                                                 ) as client:
                                                     doc_content = (
@@ -297,17 +298,17 @@ async def export_patient_data(
                                     # Handle Papra documents
                                     papra_doc_id = file_info.get("papra_document_id")
                                     papra_org_id = file_info.get("papra_organization_id")
-                                    if papra_doc_id and paperless_user:
+                                    if papra_doc_id and remote_user:
                                         if (
-                                            getattr(paperless_user, 'papra_enabled', False)
-                                            and getattr(paperless_user, 'papra_url', None)
-                                            and getattr(paperless_user, 'papra_organization_id', None)
+                                            getattr(remote_user, 'papra_enabled', False)
+                                            and getattr(remote_user, 'papra_url', None)
+                                            and getattr(remote_user, 'papra_organization_id', None)
                                         ):
                                             try:
                                                 async with create_papra_client(
-                                                    url=paperless_user.papra_url,
-                                                    encrypted_token=paperless_user.papra_api_token_encrypted,
-                                                    organization_id=papra_org_id or paperless_user.papra_organization_id,
+                                                    url=remote_user.papra_url,
+                                                    encrypted_token=remote_user.papra_api_token_encrypted,
+                                                    organization_id=papra_org_id or remote_user.papra_organization_id,
                                                     user_id=current_user_id,
                                                 ) as client:
                                                     doc_content = await client.download_document(papra_doc_id)

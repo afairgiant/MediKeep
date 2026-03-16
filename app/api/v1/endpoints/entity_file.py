@@ -1585,7 +1585,7 @@ async def check_papra_sync_status(
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
-) -> Dict[int, bool]:
+) -> Dict[int, Optional[bool]]:
     """
     Check sync status for all Papra documents.
 

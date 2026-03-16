@@ -530,7 +530,8 @@ class GenericEntityFileService:
         is_linked = file_record.file_path and file_record.file_path.startswith(link_prefix)
 
         if is_linked:
-            logger.info(
+            # Log message, not SQL query
+            logger.info(  # nosec B608
                 f"Document {document_id} is a linked document. "
                 f"Unlinking from MediKeep only, will NOT delete from {backend_name}."
             )
@@ -1997,9 +1998,9 @@ class GenericEntityFileService:
 
     async def check_papra_sync_status(
         self, db: Session, current_user_id: int
-    ) -> Dict[int, bool]:
+    ) -> Dict[int, Optional[bool]]:
         """
-        Check sync status for all Papra documents for a user.
+        Check sync status for all Papra documents belonging to the current user.
         Verifies if documents still exist on the Papra server.
 
         Args:
@@ -2007,21 +2008,40 @@ class GenericEntityFileService:
             current_user_id: User ID to check documents for
 
         Returns:
-            Dictionary mapping file_id to existence status (True = exists, False = missing)
+            Dictionary mapping file_id to existence status
+            (True = exists, False = missing, None = error)
         """
         try:
             from app.services.papra_client import create_papra_client
-            from app.models.models import Patient
+            from app.models.models import Patient, LabResult, Procedure
+            from app.models.models import Insurance, Encounter
 
-            # Get all papra files for this user across all entity types
-            papra_files = (
-                db.query(EntityFile)
-                .filter(
-                    EntityFile.storage_backend == "papra",
-                    EntityFile.papra_document_id.isnot(None),
+            # Scope query to current user by joining through entity -> Patient -> User
+            papra_files = []
+            entity_joins = [
+                ("lab-result", LabResult),
+                ("procedure", Procedure),
+                ("insurance", Insurance),
+                ("encounter", Encounter),
+            ]
+
+            for entity_type_str, entity_model in entity_joins:
+                files = (
+                    db.query(EntityFile)
+                    .join(
+                        entity_model,
+                        (EntityFile.entity_type == entity_type_str)
+                        & (EntityFile.entity_id == entity_model.id),
+                    )
+                    .join(Patient, entity_model.patient_id == Patient.id)
+                    .filter(
+                        Patient.user_id == current_user_id,
+                        EntityFile.storage_backend == "papra",
+                        EntityFile.papra_document_id.isnot(None),
+                    )
+                    .all()
                 )
-                .all()
-            )
+                papra_files.extend(files)
 
             if not papra_files:
                 logger.info(f"No Papra files found for sync check (user: {current_user_id})")
@@ -2058,9 +2078,7 @@ class GenericEntityFileService:
                 for file_record in papra_files:
                     try:
                         doc_id = file_record.papra_document_id
-                        org_id = file_record.papra_organization_id or user_prefs.papra_organization_id
 
-                        # Check if document exists via get_document_info (returns None for 404)
                         doc_info = await papra_client.get_document_info(doc_id)
                         exists = doc_info is not None
 
