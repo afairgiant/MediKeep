@@ -31,6 +31,7 @@ from app.schemas.entity_file import (
     EntityFileResponse,
     EntityType,
     EntityFileLinkPaperlessRequest,
+    EntityFileLinkPapraRequest,
     FileBatchCountRequest,
     FileBatchCountResponse,
     FileOperationResult,
@@ -41,6 +42,11 @@ from app.services.paperless_client import (
     create_paperless_client,
     PaperlessClientError,
     PaperlessConnectionError as NewPaperlessConnectionError,
+)
+from app.services.papra_client import (
+    create_papra_client,
+    PapraClientError,
+    PapraConnectionError,
 )
 from app.crud.user_preferences import user_preferences
 from app.core.utils.datetime_utils import get_utc_now
@@ -756,6 +762,239 @@ async def link_paperless_document(
         )
 
 
+@router.post(
+    "/{entity_type}/{entity_id}/link-papra",
+    response_model=EntityFileResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def link_papra_document(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    entity_type: str,
+    entity_id: int,
+    link_request: EntityFileLinkPapraRequest,
+    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+) -> EntityFileResponse:
+    """
+    Link an existing Papra document to an entity without re-uploading.
+
+    Creates an EntityFile record that references a document already stored in
+    Papra, allowing users to associate existing Papra documents with MediKeep
+    records without duplicating files.
+
+    Args:
+        entity_type: Type of entity (lab-result, insurance, visit, procedure, etc.)
+        entity_id: ID of the entity
+        link_request: Link request containing the Papra document ID and optional
+            description and category.
+
+    Returns:
+        Created EntityFile record.
+
+    Raises:
+        HTTPException: If the document does not exist in Papra, if the user lacks
+            access, or if the Papra integration is not configured.
+    """
+    try:
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "papra_document_link_requested",
+            message=f"Papra document link request for {entity_type} {entity_id}",
+            entity_type=entity_type,
+            entity_id=entity_id,
+            papra_document_id=link_request.papra_document_id,
+        )
+
+        # Get the parent entity and verify access
+        parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
+        if not parent_entity:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"{entity_type.title()} not found",
+            )
+
+        # Verify user has access to the patient that owns this entity
+        entity_patient_id = getattr(parent_entity, "patient_id", None)
+        if entity_patient_id:
+            deps.verify_patient_access(entity_patient_id, db, current_user)
+
+        # Get user's Papra preferences
+        user_prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
+
+        if not user_prefs or not user_prefs.papra_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Papra integration is not enabled",
+            )
+
+        if not user_prefs.papra_url or not user_prefs.papra_api_token_encrypted:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Papra configuration is incomplete",
+            )
+
+        if not user_prefs.papra_organization_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No Papra organization selected. Please select an organization in settings.",
+            )
+
+        # Create Papra client and verify document exists
+        papra_client = create_papra_client(
+            url=user_prefs.papra_url,
+            encrypted_token=user_prefs.papra_api_token_encrypted,
+            organization_id=user_prefs.papra_organization_id,
+            user_id=current_user_id,
+        )
+
+        async with papra_client:
+            doc_info = await papra_client.get_document_info(link_request.papra_document_id)
+
+            if not doc_info:
+                log_endpoint_error(
+                    logger,
+                    request,
+                    "Document not found in Papra",
+                    Exception(f"Document {link_request.papra_document_id} not found"),
+                    user_id=current_user_id,
+                    papra_document_id=link_request.papra_document_id,
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Document {link_request.papra_document_id} not found in Papra",
+                )
+
+            # Extract metadata from Papra document info
+            file_type = doc_info.get("mimeType") or "application/octet-stream"
+
+            # Determine file extension from MIME type
+            mime_to_ext = {
+                "application/pdf": ".pdf",
+                "image/jpeg": ".jpg",
+                "image/png": ".png",
+                "image/tiff": ".tiff",
+                "text/plain": ".txt",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+                "application/msword": ".doc",
+            }
+            extension = mime_to_ext.get(file_type, "")
+
+            doc_id = link_request.papra_document_id
+            file_name = doc_info.get("name") or f"document_{doc_id}{extension}"
+            file_size = doc_info.get("originalSize")
+            org_id = doc_info.get("organizationId") or user_prefs.papra_organization_id
+
+            # Build a virtual file path – the file lives in Papra
+            file_path = f"papra://document/{doc_id}"
+
+            # Create EntityFile record (no local file – exists only in Papra)
+            entity_file = EntityFile(
+                entity_type=entity_type,
+                entity_id=entity_id,
+                file_name=file_name,
+                file_path=file_path,
+                file_type=file_type,
+                file_size=file_size,
+                description=link_request.description or f"Linked from Papra (ID: {doc_id})",
+                category=link_request.category,
+                storage_backend="papra",
+                papra_document_id=doc_id,
+                papra_organization_id=org_id,
+                sync_status="synced",
+                uploaded_at=get_utc_now(),
+                created_at=get_utc_now(),
+                updated_at=get_utc_now(),
+            )
+
+            db.add(entity_file)
+            db.commit()
+            db.refresh(entity_file)
+
+            # Log the creation activity
+            try:
+                log_create(
+                    db=db,
+                    entity_type=ActivityEntityType.ENTITY_FILE,
+                    entity_obj=entity_file,
+                    user_id=current_user_id,
+                )
+            except Exception as log_error:
+                # Don't fail the request if activity logging fails
+                logger.error(f"Failed to log Papra file link: {log_error}", extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "logging_failure",
+                    LogFields.ERROR: str(log_error),
+                })
+
+            log_data_access(
+                logger,
+                request,
+                current_user_id,
+                "create",
+                "EntityFile",
+                record_id=entity_file.id,
+                entity_type=entity_type,
+                entity_id=entity_id,
+                papra_document_id=doc_id,
+                link_type="existing_document",
+            )
+
+            return EntityFileResponse.from_orm(entity_file)
+
+    except (HTTPException, NotFoundException, MedicalRecordsAPIException):
+        raise
+
+    except PapraConnectionError as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Papra connection error during link",
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            papra_document_id=link_request.papra_document_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unable to connect to Papra: {str(e)}",
+        )
+
+    except PapraClientError as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Papra client error during link",
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            papra_document_id=link_request.papra_document_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Papra error: {str(e)}",
+        )
+
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Unexpected error linking Papra document",
+            e,
+            user_id=current_user_id,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            papra_document_id=link_request.papra_document_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to link Papra document: {str(e)}",
+        )
+
+
 @router.get("/files/{file_id}/download")
 async def download_file(
     *,
@@ -1336,6 +1575,55 @@ async def check_paperless_sync_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to check paperless sync status: {str(e)}",
+        )
+
+
+@router.post("/sync/papra")
+async def check_papra_sync_status(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+) -> Dict[int, Optional[bool]]:
+    """
+    Check sync status for all Papra documents.
+
+    Returns:
+        Dictionary mapping file_id to existence status (True = exists, False = missing)
+    """
+    log_endpoint_access(
+        logger,
+        request,
+        current_user_id,
+        "papra_sync_check_started",
+        message=f"Starting Papra sync check for user {current_user_id}"
+    )
+    try:
+        sync_status = await file_service.check_papra_sync_status(db, current_user_id)
+
+        log_endpoint_access(
+            logger,
+            request,
+            current_user_id,
+            "papra_sync_check_completed",
+            message=f"Checked Papra sync status for user {current_user_id}",
+            files_checked=len(sync_status)
+        )
+
+        return sync_status
+
+    except Exception as e:
+        log_endpoint_error(
+            logger,
+            request,
+            "Failed to check Papra sync status",
+            e,
+            user_id=current_user_id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check Papra sync status: {str(e)}",
         )
 
 

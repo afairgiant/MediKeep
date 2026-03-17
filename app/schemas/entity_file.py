@@ -151,6 +151,8 @@ class EntityFileCreate(EntityFileBase):
     last_sync_at: Optional[datetime] = None
     paperless_document_id: Optional[str] = None
     paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
+    papra_document_id: Optional[str] = None
+    papra_organization_id: Optional[str] = None
 
     @field_validator("entity_id")
     @classmethod
@@ -286,9 +288,11 @@ class EntityFileResponse(EntityFileBase):
     id: int
     entity_type: str
     entity_id: int
-    storage_backend: Optional[str] = "local"  # 'local' or 'paperless'
+    storage_backend: Optional[str] = "local"  # 'local', 'paperless', or 'papra'
     paperless_document_id: Optional[str] = None
     paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
+    papra_document_id: Optional[str] = None
+    papra_organization_id: Optional[str] = None
     sync_status: Optional[str] = "synced"  # 'synced', 'pending', 'failed', 'processing', 'duplicate', 'missing'
     uploaded_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
@@ -342,6 +346,38 @@ class EntityFileLinkPaperlessRequest(BaseModel):
         # Paperless document IDs are numeric strings
         if not v.strip().isdigit():
             raise ValueError("Paperless document ID must be numeric")
+        return v.strip()
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v):
+        """Validate description"""
+        if v and len(v.strip()) > 1000:
+            raise ValueError("Description must be less than 1000 characters")
+        return v.strip() if v else None
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, v):
+        """Validate category"""
+        if v and len(v.strip()) > 100:
+            raise ValueError("Category must be less than 100 characters")
+        return v.strip() if v else None
+
+
+class EntityFileLinkPapraRequest(BaseModel):
+    """Schema for linking an existing Papra document to an entity"""
+
+    papra_document_id: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+
+    @field_validator("papra_document_id")
+    @classmethod
+    def validate_papra_document_id(cls, v):
+        """Validate Papra document ID"""
+        if not v or not v.strip():
+            raise ValueError("Papra document ID is required")
         return v.strip()
 
     @field_validator("description")

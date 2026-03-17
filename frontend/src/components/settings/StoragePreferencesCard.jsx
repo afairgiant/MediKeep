@@ -9,12 +9,13 @@ import frontendLogger from '../../services/frontendLogger';
  * Handles storage backend preferences, including default storage selection,
  * sync options, and storage usage statistics.
  */
-const StoragePreferencesCard = ({ 
-  preferences, 
-  onUpdate, 
-  connectionEnabled = false 
+const StoragePreferencesCard = ({
+  preferences,
+  onUpdate,
+  connectionEnabled = false,
+  papraConnectionEnabled = false
 }) => {
-  const [storageStats, setStorageStats] = useState({ local: null, paperless: null });
+  const [storageStats, setStorageStats] = useState({ local: null, paperless: null, papra: null });
   const [loadingStats, setLoadingStats] = useState(false);
 
   /**
@@ -58,26 +59,18 @@ const StoragePreferencesCard = ({
     if (backend === 'paperless') {
       updates.paperless_enabled = true;
     }
-    
+
+    // If switching to papra, enable papra integration
+    if (backend === 'papra') {
+      updates.papra_enabled = true;
+    }
+
     onUpdate(updates);
     
     frontendLogger.logInfo('Storage backend preference changed', {
       component: 'StoragePreferencesCard',
       newBackend: backend,
       paperlessEnabled: updates.paperless_enabled
-    });
-  };
-
-  /**
-   * Handle sync preference changes
-   */
-  const handleSyncPreferenceChange = (field, value) => {
-    onUpdate({ [field]: value });
-    
-    frontendLogger.logInfo('Sync preference changed', {
-      component: 'StoragePreferencesCard',
-      field,
-      value
     });
   };
 
@@ -159,56 +152,36 @@ const StoragePreferencesCard = ({
                   </div>
                 </label>
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Sync Options */}
-        {connectionEnabled && (
-          <div className="paperless-form-section">
-            <div className="paperless-form-group">
-              <label className="paperless-form-label">Sync Options</label>
-              
-              <div className="paperless-checkbox-group">
-                <label className="paperless-checkbox-option">
+              {/* Papra Storage Option */}
+              <div className={`paperless-storage-option ${!papraConnectionEnabled ? 'disabled' : ''}`}>
+                <label className="paperless-storage-option-label">
                   <input
-                    type="checkbox"
-                    checked={preferences.paperless_auto_sync !== undefined ? preferences.paperless_auto_sync : true}
-                    onChange={(e) => handleSyncPreferenceChange('paperless_auto_sync', e.target.checked)}
-                    className="paperless-checkbox"
+                    type="radio"
+                    name="storage-backend"
+                    value="papra"
+                    checked={preferences.default_storage_backend === 'papra'}
+                    onChange={(e) => handleStorageBackendChange(e.target.value)}
+                    disabled={!papraConnectionEnabled}
+                    className="paperless-storage-radio"
                   />
-                  <div>
-                    <span className="paperless-checkbox-label">
-                      Enable automatic sync status checking
-                    </span>
-                    <div className="paperless-checkbox-description">
-                      Automatically check if documents still exist in Paperless when pages load
+                  <div className="paperless-storage-option-content">
+                    <div className="paperless-storage-option-header">
+                      <span className="paperless-storage-icon">📄</span>
+                      <span className="paperless-storage-title">Papra</span>
+                      {!papraConnectionEnabled && (
+                        <span className="paperless-storage-badge">Connection Required</span>
+                      )}
                     </div>
-                  </div>
-                </label>
-
-                <label className="paperless-checkbox-option" style={{ opacity: 0.6, cursor: 'not-allowed' }}>
-                  <input
-                    type="checkbox"
-                    checked={preferences.paperless_sync_tags !== undefined ? preferences.paperless_sync_tags : true}
-                    onChange={(e) => handleSyncPreferenceChange('paperless_sync_tags', e.target.checked)}
-                    className="paperless-checkbox"
-                    disabled={true}
-                    aria-label="Sync document tags and categories (Coming Soon)"
-                  />
-                  <div>
-                    <span className="paperless-checkbox-label">
-                      Sync document tags and categories
-                    </span>
-                    <div className="paperless-checkbox-description">
-                      Keep document metadata synchronized with Paperless (Coming Soon)
+                    <div className="paperless-storage-description">
+                      Organization-based document management with Papra
                     </div>
                   </div>
                 </label>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Storage Usage Statistics */}
         <div className="paperless-form-section">
@@ -244,8 +217,20 @@ const StoragePreferencesCard = ({
                     </div>
                   </div>
                 )}
-                
-                {!storageStats.local && !storageStats.paperless && (
+
+                {storageStats.papra && (
+                  <div className="paperless-storage-stat">
+                    <div className="storage-stat-icon">📄</div>
+                    <div className="storage-stat-content">
+                      <div className="storage-stat-label">Papra</div>
+                      <div className="storage-stat-value">
+                        {storageStats.papra.count} files ({formatBytes(storageStats.papra.size)})
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!storageStats.local && !storageStats.paperless && !storageStats.papra && (
                   <div className="paperless-storage-stats-empty">
                     No storage usage data available
                   </div>

@@ -25,6 +25,7 @@ from app.api.v1.endpoints import (
     medication,
     notifications,
     paperless,
+    papra,
     patients,
     patient_management,
     patient_sharing,
@@ -132,6 +133,9 @@ api_router.include_router(system.router, prefix="/system", tags=["system"])
 
 # Paperless-ngx integration endpoints
 api_router.include_router(paperless.router, prefix="/paperless", tags=["paperless"])
+
+# Papra integration endpoints
+api_router.include_router(papra.router, prefix="/papra", tags=["papra"])
 
 # Admin endpoints
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])

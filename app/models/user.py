@@ -130,9 +130,15 @@ class UserPreferences(Base):
     paperless_password_encrypted = Column(Text, nullable=True)  # Encrypted password
     default_storage_backend = Column(
         String(20), default="local", nullable=False
-    )  # 'local' or 'paperless'
+    )  # 'local', 'paperless', or 'papra'
     paperless_auto_sync = Column(Boolean, default=False, nullable=False)
     paperless_sync_tags = Column(Boolean, default=True, nullable=False)
+
+    # Papra integration fields
+    papra_enabled = Column(Boolean, default=False, nullable=False)
+    papra_url = Column(String(500), nullable=True)
+    papra_api_token_encrypted = Column(Text, nullable=True)  # Encrypted API token
+    papra_organization_id = Column(String(255), nullable=True)  # Default organization ID
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)

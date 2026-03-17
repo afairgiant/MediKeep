@@ -170,7 +170,7 @@ const LabResultViewModal = ({
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="files" leftSection={<IconFileText size={16} />}>
-                {t('labResults.modal.tabs.files', 'Files')}
+                {t('labResults.modal.tabs.files', 'Documents')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -350,7 +350,7 @@ const LabResultViewModal = ({
             <Tabs.Panel value="files">
               <Box mt="md">
                 <Stack gap="md">
-                  <Title order={4}>{t('labResults.modal.sections.associatedFiles', 'Associated Files')}</Title>
+                  <Title order={4}>{t('labResults.modal.sections.associatedFiles', 'Associated Documents')}</Title>
                   <DocumentManagerWithProgress
                     entityType="lab-result"
                     entityId={labResult.id}

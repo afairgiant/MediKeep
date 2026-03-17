@@ -23,6 +23,7 @@ from app.core.logging.constants import LogFields
 from app.models.models import User
 from app.services.export_service import ExportService
 from app.services.paperless_client import create_paperless_client
+from app.services.papra_client import create_papra_client
 
 logger = get_logger(__name__, "app")
 
@@ -197,13 +198,14 @@ async def export_patient_data(
                     zip_buffer = io.BytesIO()
                     files_added = 0
 
-                    # Query user once if there are paperless files to export
-                    has_paperless_files = any(
-                        f.get("storage_backend") == "paperless" for f in files_info
+                    # Query user once if there are remote-backend files to export
+                    has_remote_files = any(
+                        f.get("storage_backend") in ("paperless", "papra")
+                        for f in files_info
                     )
-                    paperless_user = None
-                    if has_paperless_files:
-                        paperless_user = (
+                    remote_user = None
+                    if has_remote_files:
+                        remote_user = (
                             db.query(User)
                             .filter(User.id == current_user_id)
                             .first()
@@ -257,16 +259,16 @@ async def export_patient_data(
                                     paperless_doc_id = file_info.get(
                                         "paperless_document_id"
                                     )
-                                    if paperless_doc_id and paperless_user:
+                                    if paperless_doc_id and remote_user:
                                         if (
-                                            paperless_user.paperless_enabled
-                                            and paperless_user.paperless_url
+                                            remote_user.paperless_enabled
+                                            and remote_user.paperless_url
                                         ):
                                             try:
                                                 # Use async context manager for proper cleanup
                                                 async with create_paperless_client(
-                                                    url=paperless_user.paperless_url,
-                                                    encrypted_token=paperless_user.paperless_api_token_encrypted,
+                                                    url=remote_user.paperless_url,
+                                                    encrypted_token=remote_user.paperless_api_token_encrypted,
                                                     user_id=current_user_id,
                                                 ) as client:
                                                     doc_content = (
@@ -290,6 +292,40 @@ async def export_patient_data(
                                                             paperless_error
                                                         ),
                                                         "paperless_document_id": paperless_doc_id,
+                                                    },
+                                                )
+                                elif storage_backend == "papra":
+                                    # Handle Papra documents
+                                    papra_doc_id = file_info.get("papra_document_id")
+                                    papra_org_id = file_info.get("papra_organization_id")
+                                    if papra_doc_id and remote_user:
+                                        if (
+                                            getattr(remote_user, 'papra_enabled', False)
+                                            and getattr(remote_user, 'papra_url', None)
+                                            and getattr(remote_user, 'papra_organization_id', None)
+                                        ):
+                                            try:
+                                                async with create_papra_client(
+                                                    url=remote_user.papra_url,
+                                                    encrypted_token=remote_user.papra_api_token_encrypted,
+                                                    organization_id=papra_org_id or remote_user.papra_organization_id,
+                                                    user_id=current_user_id,
+                                                ) as client:
+                                                    doc_content = await client.download_document(papra_doc_id)
+                                                    zip_file.writestr(
+                                                        f"lab_files/{safe_filename}",
+                                                        doc_content,
+                                                    )
+                                                    files_added += 1
+                                            except Exception as papra_error:
+                                                logger.warning(
+                                                    f"Failed to download Papra document: {papra_doc_id}",
+                                                    extra={
+                                                        LogFields.CATEGORY: "app",
+                                                        LogFields.EVENT: "export_papra_download_failed",
+                                                        LogFields.USER_ID: current_user_id,
+                                                        LogFields.ERROR: str(papra_error),
+                                                        "papra_document_id": papra_doc_id,
                                                     },
                                                 )
                             except Exception as file_error:

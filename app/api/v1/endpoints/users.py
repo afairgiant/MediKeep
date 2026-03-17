@@ -16,7 +16,7 @@ from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActivityLog, EntityType
 from app.models.models import User as UserModel
 from app.schemas.user import User, UserUpdate
-from app.schemas.user_preferences import UserPreferences, UserPreferencesUpdate
+from app.schemas.user_preferences import UserPreferences, UserPreferencesResponse, UserPreferencesUpdate
 from app.services.user_deletion_service import UserDeletionService
 
 router = APIRouter()
@@ -163,19 +163,32 @@ def delete_current_user_account(
         )
 
 
-@router.get("/me/preferences", response_model=UserPreferences)
+@router.get("/me/preferences", response_model=UserPreferencesResponse)
 def get_current_user_preferences(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user: UserModel = Depends(deps.get_current_user),
-) -> Any:
+) -> UserPreferencesResponse:
     """Get current user's preferences."""
     try:
         preferences = user_preferences.get_or_create_by_user_id(
             db, user_id=int(current_user.id)
         )
-        return preferences
+
+        # Build response dict with computed fields the frontend needs
+        from app.schemas.user_preferences import UserPreferences as UserPrefsSchema
+        response = UserPrefsSchema.model_validate(preferences).model_dump()
+
+        # Add computed boolean flags for credential existence
+        response["paperless_has_token"] = bool(preferences.paperless_api_token_encrypted)
+        response["paperless_has_credentials"] = bool(
+            preferences.paperless_username_encrypted and preferences.paperless_password_encrypted
+        )
+        response["papra_has_token"] = bool(preferences.papra_api_token_encrypted)
+        response["papra_organization_id"] = preferences.papra_organization_id
+
+        return response
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -243,6 +256,10 @@ def update_current_user_preferences(
                 updated_preferences.paperless_password_encrypted
             ),
             "default_storage_backend": updated_preferences.default_storage_backend,
+            "papra_enabled": updated_preferences.papra_enabled,
+            "papra_url": updated_preferences.papra_url,
+            "papra_has_token": bool(updated_preferences.papra_api_token_encrypted),
+            "papra_organization_id": updated_preferences.papra_organization_id,
             "created_at": updated_preferences.created_at,
             "updated_at": updated_preferences.updated_at,
         }

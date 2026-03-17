@@ -20,15 +20,12 @@ const StorageBackendSelector = ({
   onChange,
   paperlessEnabled = false,
   paperlessConnected = false,
+  papraEnabled = false,
+  papraConnected = false,
   disabled = false,
   size = 'sm',
   className = ''
 }) => {
-  // Always show the selector, but disable paperless option if not enabled
-  // if (!paperlessEnabled) {
-  //   return null;
-  // }
-
   const data = [
     {
       value: 'local',
@@ -47,7 +44,19 @@ const StorageBackendSelector = ({
         : paperlessEnabled
           ? 'Paperless enabled but connection not verified - check Settings'
           : 'Paperless not enabled - enable in Settings',
-      disabled: false  // Always allow selection, let upload handle errors
+      disabled: false
+    },
+    {
+      value: 'papra',
+      label: 'Papra',
+      icon: papraConnected ? IconCloud : IconServer,
+      color: papraConnected ? 'teal' : 'orange',
+      description: papraConnected
+        ? 'Store files in your Papra instance'
+        : papraEnabled
+          ? 'Papra enabled but connection not verified - check Settings'
+          : 'Papra not enabled - enable in Settings',
+      disabled: false
     }
   ];
 
@@ -56,12 +65,21 @@ const StorageBackendSelector = ({
       <Group gap="xs" align="center">
         <Text size="sm" fw={500}>Storage Backend:</Text>
         {paperlessConnected && (
-          <Badge 
-            size="xs" 
-            color="green" 
+          <Badge
+            size="xs"
+            color="green"
             leftSection={<IconCheck size={10} />}
           >
             Paperless Ready
+          </Badge>
+        )}
+        {papraConnected && (
+          <Badge
+            size="xs"
+            color="teal"
+            leftSection={<IconCheck size={10} />}
+          >
+            Papra Ready
           </Badge>
         )}
       </Group>

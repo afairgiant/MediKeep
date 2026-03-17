@@ -2378,7 +2378,7 @@
         "relatedConditions": "Related Conditions",
         "visits": "Visits",
         "tags": "Tags",
-        "files": "Files"
+        "files": "Documents"
       },
       "sections": {
         "testInfo": "Test Information",
@@ -2386,7 +2386,7 @@
         "orderingPractitioner": "Ordering Practitioner",
         "notes": "Notes",
         "tags": "Tags",
-        "associatedFiles": "Associated Files"
+        "associatedFiles": "Associated Documents"
       },
       "labels": {
         "testCode": "Test Code",
@@ -2420,7 +2420,7 @@
       "orderingPractitioner": "Ordering Practitioner",
       "orderedDate": "Ordered Date",
       "completedDate": "Completed Date",
-      "files": "Files"
+      "files": "Documents"
     },
     "card": {
       "testCode": "Test Code",
@@ -2630,6 +2630,24 @@
         "button": "Cleanup Files",
         "cleaning": "Cleaning..."
       }
+    },
+    "papra": {
+      "title": "Papra Integration",
+      "description": "Connect to your Papra instance for document management",
+      "enabled": "Enable Papra",
+      "url": "Papra URL",
+      "urlPlaceholder": "https://your-papra-instance.com",
+      "apiToken": "API Token",
+      "apiTokenPlaceholder": "Enter your Papra API token",
+      "organization": "Organization",
+      "organizationPlaceholder": "Select an organization",
+      "testConnection": "Test Connection",
+      "connectionSuccess": "Connection successful",
+      "connectionFailed": "Connection failed",
+      "fetchingOrgs": "Fetching organizations...",
+      "noOrganizations": "No organizations found",
+      "tokenRequired": "API token is required",
+      "urlRequired": "Papra URL is required"
     },
     "actions": {
       "unsavedChanges": "You have unsaved changes",
