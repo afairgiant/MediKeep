@@ -4,7 +4,7 @@
  * Ensures all translation keys are consistent across language files
  * and that no keys are missing between locales.
  *
- * Covers all 6 supported locales (en, de, es, fr, it, pt)
+ * Covers all 7 supported locales (en, de, es, fr, it, pt, ru)
  * and all 5 namespaces (common, medical, errors, navigation, notifications).
  */
 
@@ -56,7 +56,7 @@ const findMissingKeys = (baseKeys, compareKeys) => {
 };
 
 describe('Translation Key Consistency', () => {
-  const locales = ['en', 'de', 'es', 'fr', 'it', 'pt'];
+  const locales = ['en', 'de', 'es', 'fr', 'it', 'pt', 'ru'];
   const namespaces = ['common', 'medical', 'errors', 'navigation', 'notifications'];
 
   describe('All language files exist', () => {

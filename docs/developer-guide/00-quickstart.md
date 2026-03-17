@@ -304,7 +304,7 @@ MediKeep/
 │   ├── components/        # React components (medical, navigation, shared, etc.)
 │   ├── contexts/          # React contexts (Auth, App, Theme, Preferences)
 │   ├── hooks/             # Custom hooks (~30)
-│   ├── i18n/              # Localization (6 languages)
+│   ├── i18n/              # Localization (7 languages)
 │   ├── pages/             # Route page components
 │   ├── services/          # API services, logger, auth
 │   ├── types/             # TypeScript type definitions

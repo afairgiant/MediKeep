@@ -1,0 +1,172 @@
+{
+  "menu": {
+    "dashboard": "Панель управления",
+    "backToDashboard": "Вернуться к панели управления",
+    "patients": "Пациенты",
+    "medicalRecords": "Медицинские записи",
+    "settings": "Настройки",
+    "reports": "Отчёты",
+    "administration": "Администрирование",
+    "logout": "Выйти",
+    "profile": "Профиль",
+    "help": "Помощь"
+  },
+  "pages": {
+    "dashboard": "Панель управления",
+    "patientList": "Список пациентов",
+    "patientDetails": "Данные пациента",
+    "medicalHistory": "История болезни",
+    "settings": "Настройки",
+    "userProfile": "Профиль пользователя",
+    "preferences": "Предпочтения",
+    "reports": "Отчёты",
+    "help": "Помощь и поддержка"
+  },
+  "sections": {
+    "overview": "Обзор",
+    "personalInfo": "Личная информация",
+    "medicalInfo": "Медицинская информация",
+    "documents": "Документы",
+    "timeline": "Хронология",
+    "familyHistory": "Семейный анамнез",
+    "emergencyContacts": "Экстренные контакты",
+    "insurance": "Страхование",
+    "preferences": "Предпочтения"
+  },
+  "medicalRecords": {
+    "allergies": "Аллергии",
+    "conditions": "Заболевания",
+    "medications": "Лекарства",
+    "labResults": "Результаты анализов",
+    "immunizations": "Прививки",
+    "procedures": "Процедуры",
+    "visits": "Визиты",
+    "treatments": "Лечение",
+    "symptoms": "Симптомы",
+    "injuries": "Травмы",
+    "practitioners": "Врачи",
+    "pharmacies": "Аптеки",
+    "medicalEquipment": "Медицинское оборудование"
+  },
+  "dashboard": {
+    "title": "Панель управления MediKeep",
+    "subtitle": "Безопасное управление вашей медицинской информацией",
+    "hello": "Здравствуйте",
+    "loading": "Загрузка медицинской панели управления...",
+    "sections": {
+      "coreMedical": "Основная медицинская информация",
+      "treatments": "Лечение и процедуры",
+      "healthMonitoring": "Мониторинг здоровья",
+      "prevention": "Профилактика и история",
+      "additionalResources": "Дополнительные ресурсы",
+      "recentActivity": "Недавняя активность"
+    },
+    "stats": {
+      "totalRecords": "Всего записей",
+      "activeMedications": "Активные лекарства",
+      "labResults": "Результаты анализов",
+      "procedures": "Процедуры"
+    },
+    "modules": {
+      "patientInfo": "Информация о пациенте",
+      "medications": "Лекарства",
+      "labResults": "Результаты анализов",
+      "treatments": "Лечение",
+      "procedures": "Процедуры",
+      "vitalSigns": "Жизненные показатели",
+      "symptoms": "Симптомы",
+      "conditions": "Заболевания",
+      "allergies": "Аллергии",
+      "injuries": "Травмы",
+      "immunizations": "Прививки",
+      "visitHistory": "История визитов",
+      "familyHistory": "Семейный анамнез",
+      "insurance": "Страхование",
+      "emergencyContacts": "Экстренные контакты",
+      "exportRecords": "Экспорт записей",
+      "practitioners": "Врачи",
+      "pharmacies": "Аптеки",
+      "medicalEquipment": "Медицинское оборудование",
+      "adminDashboard": "Панель администратора"
+    },
+    "activity": {
+      "noActivity": "Нет недавней активности",
+      "noActivityDescription": "Здесь будет отображаться активность по вашим медицинским записям",
+      "lastUpdated": "Последнее обновление"
+    },
+    "search": {
+      "placeholder": "Поиск по медицинским записям..."
+    }
+  },
+  "invitations": {
+    "title": "Приглашения",
+    "lastUpdated": "Последнее обновление",
+    "from": "От",
+    "viewAll": "Показать все {{count}} приглашений",
+    "noPending": "Нет ожидающих приглашений",
+    "noPendingDescription": "Новые приглашения к совместному доступу будут отображаться здесь",
+    "manageAll": "Управление всеми приглашениями",
+    "sharePatient": "Поделиться пациентом",
+    "confirmTitle": "Подтверждение принятия приглашения",
+    "confirmQuestion": "Вы уверены, что хотите принять это приглашение?",
+    "confirmDescription": "Приняв приглашение, вы получите доступ к просмотру общей медицинской информации.",
+    "acceptButton": "Принять приглашение",
+    "types": {
+      "familyHistory": "Семейный анамнез",
+      "patientRecord": "Запись пациента"
+    }
+  },
+  "activity": {
+    "actions": {
+      "created": "Создано",
+      "updated": "Обновлено",
+      "deleted": "Удалено",
+      "added": "Добавлено",
+      "modified": "Изменено",
+      "removed": "Удалено",
+      "completed": "Завершено",
+      "cancelled": "Отменено",
+      "scheduled": "Запланировано",
+      "viewed": "Просмотрено"
+    }
+  },
+  "sidebarNav": {
+    "sections": {
+      "medicalRecords": "Медицинские записи",
+      "careAndTreatment": "Уход и лечение",
+      "misc": "Прочее",
+      "tools": "Инструменты",
+      "administration": "Администрирование"
+    },
+    "items": {
+      "patientInfo": "Информация о пациенте",
+      "medications": "Лекарства",
+      "labResults": "Результаты анализов",
+      "conditions": "Заболевания",
+      "allergies": "Аллергии",
+      "vitalSigns": "Жизненные показатели",
+      "symptoms": "Симптомы",
+      "injuries": "Травмы",
+      "treatments": "Лечение",
+      "procedures": "Процедуры",
+      "immunizations": "Прививки",
+      "visitHistory": "История визитов",
+      "familyHistory": "Семейный анамнез",
+      "practitioners": "Врачи",
+      "pharmacies": "Аптеки",
+      "insurance": "Страхование",
+      "medicalEquipment": "Медицинское оборудование",
+      "emergencyContacts": "Экстренные контакты",
+      "tagManagement": "Управление тегами",
+      "customReports": "Пользовательские отчёты",
+      "exportRecords": "Экспорт записей",
+      "settings": "Настройки",
+      "adminDashboard": "Панель администратора",
+      "dataModels": "Модели данных",
+      "backupManagement": "Управление резервными копиями",
+      "systemHealth": "Состояние системы",
+      "language": "Язык",
+      "theme": "Тема"
+    }
+  }
+}
