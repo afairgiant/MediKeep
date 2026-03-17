@@ -187,6 +187,21 @@ class Settings:  # App Info
     PAPERLESS_RETRY_ATTEMPTS: int = int(os.getenv("PAPERLESS_RETRY_ATTEMPTS", "3"))
     PAPERLESS_SALT: str = get_secret("PAPERLESS_SALT", "paperless_integration_salt_v1")
 
+    # Papra Integration Configuration
+    PAPRA_REQUEST_TIMEOUT: int = int(
+        os.getenv("PAPRA_REQUEST_TIMEOUT", "30")
+    )  # seconds
+    PAPRA_CONNECT_TIMEOUT: int = int(
+        os.getenv("PAPRA_CONNECT_TIMEOUT", "10")
+    )  # seconds
+    PAPRA_UPLOAD_TIMEOUT: int = int(
+        os.getenv("PAPRA_UPLOAD_TIMEOUT", "300")
+    )  # 5 minutes for uploads
+    PAPRA_MAX_UPLOAD_SIZE: int = int(
+        os.getenv("PAPRA_MAX_UPLOAD_SIZE", str(100 * 1024 * 1024))
+    )  # 100MB
+    PAPRA_SALT: str = get_secret("PAPRA_SALT", "papra_integration_salt_v1")
+
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     LOG_DIR: str = _get_windows_path_helper("logs") or os.getenv("LOG_DIR", "./logs")

@@ -158,6 +158,13 @@ const FileUploadZone = ({
         color: 'green'
       };
     }
+    if (selectedStorageBackend === 'papra') {
+      return {
+        icon: IconCloud,
+        label: 'Papra',
+        color: 'teal'
+      };
+    }
     return {
       icon: IconFolder,
       label: 'Local Storage',

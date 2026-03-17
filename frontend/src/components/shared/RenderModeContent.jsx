@@ -24,10 +24,7 @@ import {
   IconChevronDown,
 } from '@tabler/icons-react';
 
-import { MEDICAL_DOCUMENT_CONFIG } from '../../constants/fileTypes';
-import logger from '../../services/logger';
 import FileList from './FileList';
-import FileUploadZone from './FileUploadZone';
 import StorageBackendSelector from './StorageBackendSelector';
 
 /**
@@ -47,21 +44,18 @@ const RenderModeContent = memo(({
   syncLoading,
   pendingFiles,
   filesToDelete,
-  config,
   onUploadModalOpen,
   onLinkModalOpen,
+  onPapraLinkModalOpen,
   onCheckSyncStatus,
   onDownloadFile,
   onViewFile,
   onImmediateDelete,
   onMarkFileForDeletion,
   onUnmarkFileForDeletion,
-  onAddPendingFile,
   onRemovePendingFile,
   onPendingFileDescriptionChange,
-  handleImmediateUpload, // For immediate uploads
 }) => {
-  // Performance optimization: Early return for loading state
   if (loading && files.length === 0) {
     return (
       <Center py="xl">
@@ -73,6 +67,10 @@ const RenderModeContent = memo(({
     );
   }
 
+  const hasRemoteFiles = files.some(
+    f => f.storage_backend === 'paperless' || f.storage_backend === 'papra'
+  );
+
   const storageBackendSelector = !paperlessLoading && (
     <Stack gap="xs">
       <StorageBackendSelector
@@ -83,6 +81,12 @@ const RenderModeContent = memo(({
           paperlessSettings?.paperless_enabled &&
           paperlessSettings?.paperless_url &&
           (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)
+        }
+        papraEnabled={paperlessSettings?.papra_enabled || false}
+        papraConnected={
+          paperlessSettings?.papra_enabled &&
+          paperlessSettings?.papra_url &&
+          paperlessSettings?.papra_has_token
         }
         disabled={loading}
         size="sm"
@@ -100,7 +104,61 @@ const RenderModeContent = memo(({
     </Stack>
   );
 
-  // Performance optimization: Memoized pending files list
+  const addDocumentMenu = (label) => (
+    <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+      <Group justify="space-between" align="center">
+        <Text fw={500}>{label}</Text>
+        <Menu position="bottom-end" shadow="md" withinPortal zIndex={3000}>
+          <Menu.Target>
+            <Button
+              rightSection={<IconChevronDown size={16} />}
+              disabled={loading}
+            >
+              Add Document
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<IconUpload size={16} />}
+              onClick={onUploadModalOpen}
+            >
+              Upload New File
+            </Menu.Item>
+            {paperlessSettings?.paperless_enabled && (
+              <Menu.Item
+                leftSection={<IconLink size={16} />}
+                onClick={onLinkModalOpen}
+              >
+                Link Existing Paperless Document
+              </Menu.Item>
+            )}
+            {paperlessSettings?.papra_enabled && (
+              <Menu.Item
+                leftSection={<IconLink size={16} />}
+                onClick={onPapraLinkModalOpen}
+              >
+                Link Existing Papra Document
+              </Menu.Item>
+            )}
+          </Menu.Dropdown>
+        </Menu>
+      </Group>
+    </Paper>
+  );
+
+  const syncCheckButton = hasRemoteFiles && (
+    <Button
+      variant="light"
+      size="xs"
+      leftSection={<IconRefresh size={14} />}
+      loading={syncLoading}
+      onClick={onCheckSyncStatus}
+      title="Check sync status with remote storage"
+    >
+      Sync Check
+    </Button>
+  );
+
   const pendingFilesList = pendingFiles.length > 0 && (
     <Stack gap="md">
       <Title order={5}>Files to Upload:</Title>
@@ -147,62 +205,18 @@ const RenderModeContent = memo(({
   );
 
   if (mode === 'view') {
-    const hasPaperlessFiles = files.some(f => f.storage_backend === 'paperless');
-    
     return (
       <Stack gap="md">
         {storageBackendSelector}
-        
-        {/* File Upload Section */}
-        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-          <Group justify="space-between" align="center">
-            <Text fw={500}>Add Document</Text>
-            <Menu position="bottom-end" shadow="md" withinPortal zIndex={3000}>
-              <Menu.Target>
-                <Button
-                  rightSection={<IconChevronDown size={16} />}
-                  disabled={loading}
-                >
-                  Add Document
-                </Button>
-              </Menu.Target>
-              <Menu.Dropdown>
-                <Menu.Item
-                  leftSection={<IconUpload size={16} />}
-                  onClick={onUploadModalOpen}
-                >
-                  Upload New File
-                </Menu.Item>
-                {paperlessSettings?.paperless_enabled && (
-                  <Menu.Item
-                    leftSection={<IconLink size={16} />}
-                    onClick={onLinkModalOpen}
-                  >
-                    Link Existing Paperless Document
-                  </Menu.Item>
-                )}
-              </Menu.Dropdown>
-            </Menu>
-          </Group>
-        </Paper>
+        {addDocumentMenu('Add Document')}
 
-        {/* Files List with Sync Check for Paperless files */}
-        {hasPaperlessFiles && (
+        {hasRemoteFiles && (
           <Group justify="space-between" align="center">
             <Text fw={500}>Files</Text>
-            <Button
-              variant="light"
-              size="xs"
-              leftSection={<IconRefresh size={14} />}
-              loading={syncLoading}
-              onClick={onCheckSyncStatus}
-              title="Check sync status with Paperless"
-            >
-              Sync Check
-            </Button>
+            {syncCheckButton}
           </Group>
         )}
-        
+
         <FileList
           files={files}
           syncStatus={syncStatus}
@@ -216,29 +230,15 @@ const RenderModeContent = memo(({
   }
 
   if (mode === 'edit') {
-    const hasPaperlessFiles = files.some(f => f.storage_backend === 'paperless');
-    
     return (
       <Stack gap="md">
         {storageBackendSelector}
 
-        {/* Existing Files */}
         {files.length > 0 && (
           <Stack gap="md">
             <Group justify="space-between" align="center">
               <Title order={5}>Current Files:</Title>
-              {hasPaperlessFiles && (
-                <Button
-                  variant="light"
-                  size="xs"
-                  leftSection={<IconRefresh size={14} />}
-                  loading={syncLoading}
-                  onClick={onCheckSyncStatus}
-                  title="Check sync status with Paperless"
-                >
-                  Sync Check
-                </Button>
-              )}
+              {syncCheckButton}
             </Group>
             <FileList
               files={files}
@@ -253,27 +253,7 @@ const RenderModeContent = memo(({
           </Stack>
         )}
 
-        {/* Add New Files */}
-        <FileUploadZone
-          onUpload={uploadedFiles => {
-            uploadedFiles.forEach(({ file, description }) => {
-              if (handleImmediateUpload) {
-                logger.info('RenderModeContent: calling handleImmediateUpload for edit mode:', file.name);
-                handleImmediateUpload(file, description || '');
-              } else {
-                logger.error('RenderModeContent: handleImmediateUpload not available, falling back to pending');
-                onAddPendingFile(file, description);
-              }
-            });
-          }}
-          acceptedTypes={config?.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
-          maxSize={config?.maxSize || MEDICAL_DOCUMENT_CONFIG.maxSize}
-          maxFiles={config?.maxFiles || MEDICAL_DOCUMENT_CONFIG.maxFiles}
-          selectedStorageBackend={selectedStorageBackend}
-          paperlessSettings={paperlessSettings}
-          mode={mode}
-        />
-
+        {addDocumentMenu('Manage Documents')}
         {pendingFilesList}
       </Stack>
     );
@@ -283,22 +263,7 @@ const RenderModeContent = memo(({
     return (
       <Stack gap="md">
         {storageBackendSelector}
-
-        <FileUploadZone
-          onUpload={uploadedFiles => {
-            uploadedFiles.forEach(({ file, description }) => {
-              onAddPendingFile(file, description);
-            });
-          }}
-          acceptedTypes={config?.acceptedTypes || MEDICAL_DOCUMENT_CONFIG.acceptedTypes}
-          maxSize={config?.maxSize || MEDICAL_DOCUMENT_CONFIG.maxSize}
-          maxFiles={config?.maxFiles || MEDICAL_DOCUMENT_CONFIG.maxFiles}
-          autoUpload={true}
-          selectedStorageBackend={selectedStorageBackend}
-          paperlessSettings={paperlessSettings}
-          mode={mode}
-        />
-
+        {addDocumentMenu('Manage Documents')}
         {pendingFilesList}
       </Stack>
     );

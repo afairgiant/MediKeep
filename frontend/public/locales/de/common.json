@@ -841,6 +841,24 @@
         "cleaning": "Aufräumen..."
       }
     },
+    "papra": {
+      "title": "Papra-Integration",
+      "description": "Verbinden Sie sich mit Ihrer Papra-Instanz fuer die Dokumentenverwaltung",
+      "enabled": "Papra aktivieren",
+      "url": "Papra-URL",
+      "urlPlaceholder": "https://ihre-papra-instanz.com",
+      "apiToken": "API-Token",
+      "apiTokenPlaceholder": "Geben Sie Ihren Papra API-Token ein",
+      "organization": "Organisation",
+      "organizationPlaceholder": "Organisation auswaehlen",
+      "testConnection": "Verbindung testen",
+      "connectionSuccess": "Verbindung erfolgreich",
+      "connectionFailed": "Verbindung fehlgeschlagen",
+      "fetchingOrgs": "Organisationen werden geladen...",
+      "noOrganizations": "Keine Organisationen gefunden",
+      "tokenRequired": "API-Token ist erforderlich",
+      "urlRequired": "Papra-URL ist erforderlich"
+    },
     "actions": {
       "unsavedChanges": "Sie haben nicht gespeicherte Änderungen",
       "reset": "Änderungen zurücksetzen",
@@ -911,7 +929,7 @@
       "orderingPractitioner": "Anordnender Arzt",
       "orderedDate": "Anordnungsdatum",
       "completedDate": "Abschlussdatum",
-      "files": "Dateien"
+      "files": "Dokumente"
     },
     "card": {
       "testCode": "Testcode",
@@ -934,7 +952,7 @@
         "relatedConditions": "Verbundene Erkrankungen",
         "visits": "Besuche",
         "tags": "Tags",
-        "files": "Dateien"
+        "files": "Dokumente"
       },
       "sections": {
         "testInfo": "Testinformationen",
@@ -942,7 +960,7 @@
         "orderingPractitioner": "Anordnender Arzt",
         "notes": "Notizen",
         "tags": "Tags",
-        "associatedFiles": "Zugehörige Dateien"
+        "associatedFiles": "Zugehörige Dokumente"
       },
       "labels": {
         "testCode": "Testcode",

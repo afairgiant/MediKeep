@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Button } from '../ui';
+import { Card } from '../ui';
 import ConnectionConfigCard from './ConnectionConfigCard';
-import StoragePreferencesCard from './StoragePreferencesCard';
-import { testPaperlessConnection, updatePaperlessSettings } from '../../services/api/paperlessApi.jsx';
+import { testPaperlessConnection } from '../../services/api/paperlessApi.jsx';
 import frontendLogger from '../../services/frontendLogger';
 import '../../styles/components/PaperlessSettings.css';
 
@@ -210,12 +209,54 @@ const PaperlessSettings = ({
         serverInfo={serverInfo}
       />
 
-      {/* Storage Preferences - only show if connection is successful */}
-      <StoragePreferencesCard
-        preferences={preferences}
-        onUpdate={handleLocalUpdate}
-        connectionEnabled={connectionStatus === 'connected'}
-      />
+      {/* Sync Options - only show if connected */}
+      {connectionStatus === 'connected' && (
+        <Card>
+          <div className="paperless-form-section">
+            <div className="paperless-form-group">
+              <label className="paperless-form-label">Sync Options</label>
+
+              <div className="paperless-checkbox-group">
+                <label className="paperless-checkbox-option">
+                  <input
+                    type="checkbox"
+                    checked={preferences.paperless_auto_sync !== undefined ? preferences.paperless_auto_sync : true}
+                    onChange={(e) => handleLocalUpdate({ paperless_auto_sync: e.target.checked })}
+                    className="paperless-checkbox"
+                  />
+                  <div>
+                    <span className="paperless-checkbox-label">
+                      Enable automatic sync status checking
+                    </span>
+                    <div className="paperless-checkbox-description">
+                      Automatically check if documents still exist in Paperless when pages load
+                    </div>
+                  </div>
+                </label>
+
+                <label className="paperless-checkbox-option" style={{ opacity: 0.6, cursor: 'not-allowed' }}>
+                  <input
+                    type="checkbox"
+                    checked={preferences.paperless_sync_tags !== undefined ? preferences.paperless_sync_tags : true}
+                    onChange={(e) => handleLocalUpdate({ paperless_sync_tags: e.target.checked })}
+                    className="paperless-checkbox"
+                    disabled={true}
+                    aria-label="Sync document tags and categories (Coming Soon)"
+                  />
+                  <div>
+                    <span className="paperless-checkbox-label">
+                      Sync document tags and categories
+                    </span>
+                    <div className="paperless-checkbox-description">
+                      Keep document metadata synchronized with Paperless (Coming Soon)
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
     </div>
   );

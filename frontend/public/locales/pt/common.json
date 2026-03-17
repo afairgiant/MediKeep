@@ -2339,7 +2339,7 @@
         "relatedConditions": "Condições Relacionadas",
         "visits": "Visitas",
         "tags": "Etiquetas",
-        "files": "Arquivos"
+        "files": "Documentos"
       },
       "sections": {
         "testInfo": "Informações do Teste",
@@ -2347,7 +2347,7 @@
         "orderingPractitioner": "Profissional Solicitante",
         "notes": "Notas",
         "tags": "Etiquetas",
-        "associatedFiles": "Arquivos Associados"
+        "associatedFiles": "Documentos Associados"
       },
       "labels": {
         "testCode": "Código do Teste",
@@ -2396,7 +2396,7 @@
       "category": "Categoria",
       "completedDate": "Data de Conclusão",
       "facility": "Instalação",
-      "files": "Arquivos",
+      "files": "Documentos",
       "orderedDate": "Data de Solicitação",
       "orderingPractitioner": "Profissional Solicitante",
       "testName": "Nome do Teste",
@@ -2532,6 +2532,24 @@
         "title": "Limpeza de Arquivos"
       },
       "description": "Configure como seus documentos médicos são armazenados e gerenciados"
+    },
+    "papra": {
+      "title": "Integração Papra",
+      "description": "Conecte-se à sua instância Papra para gerenciamento de documentos",
+      "enabled": "Habilitar Papra",
+      "url": "URL do Papra",
+      "urlPlaceholder": "https://sua-instância-papra.com",
+      "apiToken": "Token API",
+      "apiTokenPlaceholder": "Insira seu token API do Papra",
+      "organization": "Organização",
+      "organizationPlaceholder": "Selecione uma organização",
+      "testConnection": "Testar conexão",
+      "connectionSuccess": "Conexão bem-sucedida",
+      "connectionFailed": "Falha na conexão",
+      "fetchingOrgs": "Carregando organizações...",
+      "noOrganizations": "Nenhuma organização encontrada",
+      "tokenRequired": "O token API é obrigatório",
+      "urlRequired": "A URL do Papra é obrigatória"
     },
     "preferences": {
       "dateFormat": {
