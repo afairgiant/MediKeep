@@ -320,13 +320,7 @@ class TestInsuranceAPI:
     def test_get_insurance_by_id(
         self, client: TestClient, user_with_patient, authenticated_headers, sample_insurance_data
     ):
-        """Test getting a specific insurance by ID.
-
-        TODO: API BUG - AttributeError: 'User' object has no attribute 'patient_record'
-        The insurance GET endpoint tries to access current_user.patient_record, but the User
-        model doesn't have this attribute. Should use active_patient_id or patient relationship.
-        This causes a 500 error on ALL insurance GET by ID requests.
-        """
+        """Test getting a specific insurance by ID."""
         create_response = client.post(
             "/api/v1/insurances/",
             json=sample_insurance_data,
@@ -334,24 +328,15 @@ class TestInsuranceAPI:
         )
         insurance_id = create_response.json()["id"]
 
-        try:
-            response = client.get(
-                f"/api/v1/insurances/{insurance_id}",
-                headers=authenticated_headers
-            )
+        response = client.get(
+            f"/api/v1/insurances/{insurance_id}",
+            headers=authenticated_headers
+        )
 
-            # TODO: API bug - accepts 500 as expected until fixed
-            # API returns 500 due to patient_record attribute bug
-            assert response.status_code in [200, 500]
-
-            if response.status_code == 200:
-                # When API is fixed, test should verify correct behavior
-                data = response.json()
-                assert data["id"] == insurance_id
-                assert data["company_name"] == "Blue Cross Blue Shield"
-        except Exception as e:
-            # API throws unhandled exception due to patient_record bug
-            pytest.skip(f"API bug: GET insurance raises exception (User.patient_record missing): {e}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == insurance_id
+        assert data["company_name"] == "Blue Cross Blue Shield"
 
     def test_update_insurance(
         self, client: TestClient, user_with_patient, authenticated_headers, sample_insurance_data
@@ -474,13 +459,7 @@ class TestInsuranceAPI:
     def test_primary_insurance_mutual_exclusivity(
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
-        """Test that setting one insurance as primary unsets others of same type.
-
-        TODO: API BUG - Multiple issues prevent full testing:
-        1. GET /insurances/{id} returns 500 (User has no 'patient_record' attribute)
-        2. PATCH /insurances/{id}/set-primary endpoint may not exist
-        Test accepts current broken behavior.
-        """
+        """Test that setting one insurance as primary unsets others of same type."""
         # Create two medical insurances
         insurance1_data = {
             "insurance_type": "medical",
@@ -520,57 +499,33 @@ class TestInsuranceAPI:
         assert resp2.status_code == 200
         insurance2_id = resp2.json()["id"]
 
-        try:
-            # TODO: API bug - set-primary endpoint may not exist
-            # Try to set second insurance as primary
-            response = client.patch(
-                f"/api/v1/insurances/{insurance2_id}/set-primary",
-                headers=authenticated_headers
-            )
+        # Set second insurance as primary
+        response = client.patch(
+            f"/api/v1/insurances/{insurance2_id}/set-primary",
+            headers=authenticated_headers
+        )
+        assert response.status_code == 200
 
-            # Accept current behavior: endpoint may not exist (404/405) or work (200)
-            assert response.status_code in [200, 404, 405]
+        # Verify second is now primary
+        check2 = client.get(
+            f"/api/v1/insurances/{insurance2_id}",
+            headers=authenticated_headers
+        )
+        assert check2.status_code == 200
+        assert check2.json()["is_primary"] is True
 
-            # Only verify if set-primary worked
-            if response.status_code == 200:
-                # Try to verify second is now primary
-                check2 = client.get(
-                    f"/api/v1/insurances/{insurance2_id}",
-                    headers=authenticated_headers
-                )
-
-                # TODO: API bug - GET returns 500
-                # Accept 500 or 200
-                assert check2.status_code in [200, 500]
-
-                if check2.status_code == 200:
-                    assert check2.json()["is_primary"] is True
-
-                # Try to verify first is no longer primary (mutual exclusivity)
-                check1 = client.get(
-                    f"/api/v1/insurances/{insurance1_id}",
-                    headers=authenticated_headers
-                )
-
-                # Accept 500 or 200
-                assert check1.status_code in [200, 500]
-
-                if check1.status_code == 200:
-                    first_is_primary = check1.json()["is_primary"]
-                    # Ideally should be False for mutual exclusivity
-                    assert isinstance(first_is_primary, bool)
-        except Exception as e:
-            # API throws unhandled exception due to patient_record bug
-            pytest.skip(f"API bug: Insurance endpoint raises exception: {e}")
+        # Verify first is no longer primary (mutual exclusivity)
+        check1 = client.get(
+            f"/api/v1/insurances/{insurance1_id}",
+            headers=authenticated_headers
+        )
+        assert check1.status_code == 200
+        assert check1.json()["is_primary"] is False
 
     def test_search_insurances_by_company(
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
-        """Test searching insurances by company name.
-
-        TODO: API BUG - Search endpoint may not be implemented (404/405 expected)
-        Test accepts current broken behavior.
-        """
+        """Test searching insurances by company name."""
         insurances = [
             {
                 "insurance_type": "medical",
@@ -599,24 +554,15 @@ class TestInsuranceAPI:
                 headers=authenticated_headers
             )
 
-        try:
-            response = client.get(
-                "/api/v1/insurances/search?company=United",
-                headers=authenticated_headers
-            )
+        response = client.get(
+            "/api/v1/insurances/search?company=United",
+            headers=authenticated_headers
+        )
 
-            # TODO: API bug - search endpoint may not exist
-            # Accept 404/405 (not implemented) or 200 (working)
-            assert response.status_code in [200, 404, 405]
-
-            # Only verify response if endpoint exists and works
-            if response.status_code == 200:
-                data = response.json()
-                assert len(data) >= 1
-                assert any("United" in ins["company_name"] for ins in data)
-        except Exception as e:
-            # API may throw exception
-            pytest.skip(f"API bug: Search endpoint raises exception: {e}")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) >= 1
+        assert any("United" in ins["company_name"] for ins in data)
 
     def test_insurance_validation_missing_required_fields(
         self, client: TestClient, authenticated_headers
@@ -723,12 +669,7 @@ class TestInsuranceAPI:
         assert response.status_code == 422
 
     def test_insurance_patient_isolation(self, client: TestClient, db_session: Session):
-        """Test that users can only access their own insurances.
-
-        TODO: API BUG - GET /insurances/{id} returns 500 instead of 404/403
-        AttributeError: 'User' object has no attribute 'patient_record'
-        This prevents proper authorization testing. Test accepts 500 as current broken behavior.
-        """
+        """Test that users can only access their own insurances."""
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
             first_name="User",
@@ -776,29 +717,20 @@ class TestInsuranceAPI:
         )
         insurance_id = create_response.json()["id"]
 
-        try:
-            # Try to access user1's insurance as user2
-            response = client.get(
-                f"/api/v1/insurances/{insurance_id}",
-                headers=headers2
-            )
+        # Try to access user1's insurance as user2
+        response = client.get(
+            f"/api/v1/insurances/{insurance_id}",
+            headers=headers2
+        )
+        assert response.status_code in [403, 404]
 
-            # TODO: API bug - returns 500 instead of proper authorization error
-            # Accept 500 (current bug), 404, or 403 (proper behavior)
-            assert response.status_code in [404, 403, 500]
-
-            # Try to update user1's insurance as user2
-            update_response = client.put(
-                f"/api/v1/insurances/{insurance_id}",
-                json={"status": "inactive"},
-                headers=headers2
-            )
-
-            # Should also be blocked (404, 403, or 500 due to bug)
-            assert update_response.status_code in [404, 403, 500]
-        except Exception as e:
-            # API throws unhandled exception due to patient_record bug
-            pytest.skip(f"API bug: Insurance endpoint raises exception (User.patient_record missing): {e}")
+        # Try to update user1's insurance as user2
+        update_response = client.put(
+            f"/api/v1/insurances/{insurance_id}",
+            json={"status": "inactive"},
+            headers=headers2
+        )
+        assert update_response.status_code in [403, 404]
 
     def test_insurance_pagination(
         self, client: TestClient, user_with_patient, authenticated_headers
