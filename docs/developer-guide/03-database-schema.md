@@ -541,6 +541,7 @@ JUNCTION TABLES (Many-to-Many)
 | oxygen_saturation | Float | | SpO2 percentage |
 | respiratory_rate | Integer | | Breaths per minute |
 | blood_glucose | Float | | Blood glucose (mg/dL) |
+| glucose_context | String | nullable | Context for glucose reading (fasting, before_meal, after_meal, random) |
 | a1c | Float | | Hemoglobin A1C (%) |
 | bmi | Float | | Body Mass Index (calculated) |
 | pain_scale | Integer | | Pain scale 0-10 |
