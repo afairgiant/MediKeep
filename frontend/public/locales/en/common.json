@@ -1510,6 +1510,7 @@
         "visitInfo": "Visit Info",
         "clinical": "Clinical",
         "documents": "Documents",
+        "addFiles": "Add Files",
         "labResults": "Lab Results",
         "notes": "Notes"
       },
