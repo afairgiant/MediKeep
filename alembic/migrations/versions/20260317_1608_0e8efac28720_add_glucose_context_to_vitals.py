@@ -17,8 +17,6 @@ depends_on = None
 
 def upgrade() -> None:
     op.add_column('vitals', sa.Column('glucose_context', sa.String(), nullable=True))
-    # Migrate any existing 'postprandial' values to 'after_meal'
-    op.execute("UPDATE vitals SET glucose_context = 'after_meal' WHERE glucose_context = 'postprandial'")
 
 
 def downgrade() -> None:

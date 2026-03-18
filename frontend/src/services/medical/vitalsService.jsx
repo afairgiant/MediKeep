@@ -306,7 +306,7 @@ class VitalsService {
     // Glucose context validation
     if (vitalsData.glucose_context) {
       if (!GLUCOSE_CONTEXT_VALUES.includes(vitalsData.glucose_context)) {
-        errors.glucose_context = 'Glucose context must be fasting, before_meal, after_meal, or random';
+        errors.glucose_context = `Glucose context must be one of: ${GLUCOSE_CONTEXT_VALUES.join(', ')}`;
       }
     }
 

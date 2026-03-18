@@ -21,6 +21,7 @@ from app.crud.vitals import vitals
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.vitals import (
+    VALID_GLUCOSE_CONTEXTS,
     VitalsCreate,
     VitalsPaginatedResponse,
     VitalsResponse,
@@ -39,6 +40,25 @@ router = APIRouter()
 
 # Initialize logger
 logger = get_logger(__name__, "app")
+
+
+def _normalize_glucose_context(
+    glucose_context: Optional[str], request: Request
+) -> Optional[str]:
+    """Normalize and validate glucose_context query parameter.
+
+    Returns the normalized value or None. Raises ValidationException on invalid input.
+    """
+    if glucose_context is None:
+        return None
+    normalized = glucose_context.strip().lower()
+    if normalized not in VALID_GLUCOSE_CONTEXTS:
+        raise ValidationException(
+            message=f"Invalid glucose_context '{glucose_context}'. "
+            f"Must be one of: {', '.join(sorted(VALID_GLUCOSE_CONTEXTS))}",
+            request=request,
+        )
+    return normalized
 
 
 @router.post("/", response_model=VitalsResponse)
@@ -80,7 +100,8 @@ def read_vitals(
     ),
     days: Optional[int] = Query(None, description="Get readings from last N days"),
     glucose_context: Optional[str] = Query(
-        None, description="Filter by glucose context: fasting, before_meal, after_meal, random"
+        None,
+        description="Filter by glucose context: fasting, before_meal, after_meal, random",
     ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
@@ -94,6 +115,8 @@ def read_vitals(
     - days: Recent readings (e.g., last 30 days)
     - glucose_context: Blood glucose measurement context (fasting, before_meal, after_meal, random)
     """
+
+    glucose_context = _normalize_glucose_context(glucose_context, request)
 
     with handle_database_errors(request=request):
         # Apply filters based on query parameters
@@ -512,7 +535,8 @@ def read_patient_vitals_paginated(
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
     ),
     glucose_context: Optional[str] = Query(
-        None, description="Filter by glucose context: fasting, before_meal, after_meal, random"
+        None,
+        description="Filter by glucose context: fasting, before_meal, after_meal, random",
     ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -524,6 +548,8 @@ def read_patient_vitals_paginated(
     - skip: Current offset
     - limit: Page size
     """
+    glucose_context = _normalize_glucose_context(glucose_context, request)
+
     with handle_database_errors(request=request):
         try:
             total_count = vitals.count_by_patient(
@@ -589,11 +615,14 @@ def read_patient_vitals(
     ),
     days: Optional[int] = Query(None, description="Get readings from last N days"),
     glucose_context: Optional[str] = Query(
-        None, description="Filter by glucose context: fasting, before_meal, after_meal, random"
+        None,
+        description="Filter by glucose context: fasting, before_meal, after_meal, random",
     ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get all vitals readings for a specific patient."""
+    glucose_context = _normalize_glucose_context(glucose_context, request)
+
     with handle_database_errors(request=request):
         try:
             if days:
@@ -706,11 +735,14 @@ def read_patient_vitals_date_range(
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
     ),
     glucose_context: Optional[str] = Query(
-        None, description="Filter by glucose context: fasting, before_meal, after_meal, random"
+        None,
+        description="Filter by glucose context: fasting, before_meal, after_meal, random",
     ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get vitals readings for a patient within a specific date range, optionally filtered by vital type."""
+    glucose_context = _normalize_glucose_context(glucose_context, request)
+
     with handle_database_errors(request=request):
         try:
             vitals_list = vitals.get_by_patient_date_range(
