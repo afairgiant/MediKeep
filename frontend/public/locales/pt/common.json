@@ -314,6 +314,8 @@
       "painScale": "Escala de Dor",
       "physicalMeasurements": "Medidas Físicas",
       "practitionerId": "ID do Profissional",
+      "glucoseContext": "Tipo de medição",
+      "glucoseContextPlaceholder": "Opcional",
       "recordedBy": "Registrado Por",
       "recordedDate": "Data do Registro",
       "respiratoryRate": "Frequência Respiratória",
@@ -421,6 +423,16 @@
       "time": "Hora",
       "confirmDeleteDay": "Excluir todas as {{count}} leituras importadas deste dia?",
       "deleteDay": "Excluir dia"
+    },
+    "glucoseContext": {
+      "fasting": "Em jejum",
+      "before_meal": "Antes da refeição",
+      "after_meal": "Após a refeição",
+      "random": "Aleatório"
+    },
+    "trends": {
+      "glucoseContextFilter": "Tipo de glicose",
+      "allContexts": "Todos os tipos"
     },
     "tabs": {
       "dateTime": "Data e Hora",

@@ -643,6 +643,171 @@ class TestVitalsAPI:
         # Verify all 150 records are returned (not capped at 100)
         assert len(data) == num_records
 
+    def test_create_vitals_with_glucose_context(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test creating vitals with valid glucose_context values."""
+        patient = test_patient_with_practitioner["patient"]
+        practitioner = test_patient_with_practitioner["practitioner"]
+
+        for context in ["fasting", "before_meal", "after_meal", "random"]:
+            vitals_data = {
+                "patient_id": patient.id,
+                "practitioner_id": practitioner.id,
+                "recorded_date": "2024-01-15T10:30:00",
+                "blood_glucose": 100.0,
+                "glucose_context": context,
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+            data = response.json()
+            assert data["glucose_context"] == context
+            assert data["blood_glucose"] == 100.0
+
+    def test_create_vitals_with_null_glucose_context(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test creating vitals without glucose_context (backward compatibility)."""
+        patient = test_patient_with_practitioner["patient"]
+
+        vitals_data = {
+            "patient_id": patient.id,
+            "recorded_date": "2024-01-15T10:30:00",
+            "blood_glucose": 95.0,
+        }
+        response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["glucose_context"] is None
+        assert data["blood_glucose"] == 95.0
+
+    def test_reject_invalid_glucose_context(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test that invalid glucose_context values are rejected."""
+        patient = test_patient_with_practitioner["patient"]
+
+        vitals_data = {
+            "patient_id": patient.id,
+            "recorded_date": "2024-01-15T10:30:00",
+            "blood_glucose": 100.0,
+            "glucose_context": "invalid_value",
+        }
+        response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+        assert response.status_code == 422
+
+    def test_glucose_context_case_insensitive(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test that glucose_context is normalized to lowercase."""
+        patient = test_patient_with_practitioner["patient"]
+
+        vitals_data = {
+            "patient_id": patient.id,
+            "recorded_date": "2024-01-15T10:30:00",
+            "blood_glucose": 110.0,
+            "glucose_context": "Fasting",
+        }
+        response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["glucose_context"] == "fasting"
+
+    def test_update_glucose_context(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test updating glucose_context on an existing record."""
+        patient = test_patient_with_practitioner["patient"]
+
+        # Create vitals with fasting context
+        vitals_data = {
+            "patient_id": patient.id,
+            "recorded_date": "2024-01-15T10:30:00",
+            "blood_glucose": 90.0,
+            "glucose_context": "fasting",
+        }
+        response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+        assert response.status_code == 200
+        vitals_id = response.json()["id"]
+
+        # Update to after_meal
+        update_data = {"glucose_context": "after_meal"}
+        response = authenticated_client.put(f"/api/v1/vitals/{vitals_id}", json=update_data)
+        assert response.status_code == 200
+        assert response.json()["glucose_context"] == "after_meal"
+
+        # Clear glucose_context
+        update_data = {"glucose_context": None}
+        response = authenticated_client.put(f"/api/v1/vitals/{vitals_id}", json=update_data)
+        assert response.status_code == 200
+        assert response.json()["glucose_context"] is None
+
+    def test_filter_vitals_by_glucose_context(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test filtering vitals by glucose_context via API."""
+        patient = test_patient_with_practitioner["patient"]
+
+        from datetime import timedelta
+
+        # Create vitals with different contexts
+        contexts = ["fasting", "before_meal", "after_meal", "random", None]
+        base_date = datetime(2024, 6, 1, 8, 0, 0)
+
+        for i, ctx in enumerate(contexts):
+            vitals_data = {
+                "patient_id": patient.id,
+                "recorded_date": (base_date + timedelta(hours=i)).isoformat(),
+                "blood_glucose": 80.0 + i * 10,
+            }
+            if ctx is not None:
+                vitals_data["glucose_context"] = ctx
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # Filter by fasting
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}?vital_type=blood_glucose&glucose_context=fasting"
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["glucose_context"] == "fasting"
+
+        # Filter by after_meal
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}?vital_type=blood_glucose&glucose_context=after_meal"
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["glucose_context"] == "after_meal"
+
+    def test_glucose_context_in_paginated_endpoint(self, authenticated_client: TestClient, test_patient_with_practitioner):
+        """Test glucose_context filter in paginated endpoint."""
+        patient = test_patient_with_practitioner["patient"]
+
+        from datetime import timedelta
+        base_date = datetime(2024, 7, 1, 8, 0, 0)
+
+        # Create 3 fasting and 2 after_meal readings
+        for i in range(3):
+            vitals_data = {
+                "patient_id": patient.id,
+                "recorded_date": (base_date + timedelta(hours=i)).isoformat(),
+                "blood_glucose": 85.0 + i,
+                "glucose_context": "fasting",
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        for i in range(2):
+            vitals_data = {
+                "patient_id": patient.id,
+                "recorded_date": (base_date + timedelta(hours=10 + i)).isoformat(),
+                "blood_glucose": 140.0 + i,
+                "glucose_context": "after_meal",
+            }
+            response = authenticated_client.post("/api/v1/vitals/", json=vitals_data)
+            assert response.status_code == 200
+
+        # Paginated filter by fasting
+        response = authenticated_client.get(
+            f"/api/v1/vitals/patient/{patient.id}/paginated?vital_type=blood_glucose&glucose_context=fasting&limit=10"
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 3
+        assert all(v["glucose_context"] == "fasting" for v in data["items"])
+
     def test_paginated_endpoint_limit_validation(self, authenticated_client: TestClient, test_patient_with_practitioner):
         """Test paginated endpoint validates limit parameter."""
         patient = test_patient_with_practitioner["patient"]

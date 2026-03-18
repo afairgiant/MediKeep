@@ -49,7 +49,9 @@ def _apply_vital_type_filter(query: Query, vital_type: str) -> Query:
     """
     columns = VITAL_TYPE_COLUMNS.get(vital_type)
     if columns is None:
-        raise ValueError(f"Unknown vital_type '{vital_type}' - call _validate_vital_type first")
+        raise ValueError(
+            f"Unknown vital_type '{vital_type}' - call _validate_vital_type first"
+        )
     for column in columns:
         query = query.filter(column.isnot(None))
     return query
@@ -77,6 +79,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         vital_type: Optional[str] = None,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
+        glucose_context: Optional[str] = None,
     ) -> int:
         """Get total count of vitals records for a patient with optional filters.
 
@@ -85,6 +88,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             vital_type: Optional filter by vital type.
             start_date: Optional start date filter.
             end_date: Optional end date filter.
+            glucose_context: Optional filter by glucose context (fasting, before_meal, after_meal, random).
 
         Returns:
             Total count of matching records.
@@ -102,6 +106,9 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         if end_date:
             query = query.filter(Vitals.recorded_date <= end_date)
 
+        if glucose_context:
+            query = query.filter(Vitals.glucose_context == glucose_context)
+
         return query.scalar() or 0
 
     def get_by_patient_date_range(
@@ -113,23 +120,28 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         end_date: datetime,
         skip: int = 0,
         limit: int = 10000,
-        vital_type: Optional[str] = None
+        vital_type: Optional[str] = None,
+        glucose_context: Optional[str] = None,
     ) -> List[Vitals]:
         """Get vitals readings for a patient within a date range, optionally filtered by vital type.
 
         Args:
             vital_type: One of: blood_pressure, heart_rate, temperature, weight,
                        oxygen_saturation, blood_glucose, a1c. Invalid values raise ValueError.
+            glucose_context: Optional filter by glucose context (fasting, before_meal, after_meal, random).
         """
         query = db.query(self.model).filter(
             Vitals.patient_id == patient_id,
             Vitals.recorded_date >= start_date,
-            Vitals.recorded_date <= end_date
+            Vitals.recorded_date <= end_date,
         )
 
         if vital_type:
             _validate_vital_type(vital_type)
             query = _apply_vital_type_filter(query, vital_type)
+
+        if glucose_context:
+            query = query.filter(Vitals.glucose_context == glucose_context)
 
         return (
             query.order_by(desc(Vitals.recorded_date)).offset(skip).limit(limit).all()
@@ -155,18 +167,23 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         patient_id: int,
         vital_type: str,
         skip: int = 0,
-        limit: int = 10000
+        limit: int = 10000,
+        glucose_context: Optional[str] = None,
     ) -> List[Vitals]:
         """Get vitals readings for a specific vital type (e.g., only blood pressure).
 
         Args:
             vital_type: One of: blood_pressure, heart_rate, temperature, weight,
                        oxygen_saturation, blood_glucose, a1c. Invalid values raise ValueError.
+            glucose_context: Optional filter by glucose context (fasting, before_meal, after_meal, random).
         """
         _validate_vital_type(vital_type)
 
         query = db.query(self.model).filter(Vitals.patient_id == patient_id)
         query = _apply_vital_type_filter(query, vital_type)
+
+        if glucose_context:
+            query = query.filter(Vitals.glucose_context == glucose_context)
 
         return (
             query.order_by(desc(Vitals.recorded_date)).offset(skip).limit(limit).all()
@@ -221,7 +238,11 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         current_bmi = latest_bmi_reading.bmi if latest_bmi_reading else None
 
         # If no stored BMI, try to calculate from latest weight and height
-        if current_bmi is None and latest_weight_reading and latest_weight_reading.weight:
+        if (
+            current_bmi is None
+            and latest_weight_reading
+            and latest_weight_reading.weight
+        ):
             latest_height_reading = (
                 db.query(self.model)
                 .filter(Vitals.patient_id == patient_id, Vitals.height.isnot(None))
@@ -317,11 +338,7 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
             .order_by(desc(Vitals.recorded_date))
             .first()
         )
-        current_a1c = (
-            latest_a1c_reading.a1c
-            if latest_a1c_reading
-            else None
-        )
+        current_a1c = latest_a1c_reading.a1c if latest_a1c_reading else None
 
         # Helper function to safely round values
         def safe_round(value, digits=1):

@@ -455,6 +455,7 @@ const VitalsForm = ({
     oxygen_saturation: '',
     blood_glucose: '',
     a1c: '',
+    glucose_context: '',
     pain_scale: '',
     location: '',
     device_used: '',
@@ -510,6 +511,7 @@ const VitalsForm = ({
         oxygen_saturation: vitals.oxygen_saturation || '',
         blood_glucose: vitals.blood_glucose || '',
         a1c: vitals.a1c || '',
+        glucose_context: vitals.glucose_context || '',
         pain_scale: vitals.pain_scale || '',
         location: vitals.location || '',
         device_used: vitals.device_used || '',
@@ -739,6 +741,7 @@ const VitalsForm = ({
           ? parseFloat(formData.blood_glucose)
           : null,
         a1c: formData.a1c ? parseFloat(formData.a1c) : null,
+        glucose_context: formData.glucose_context || null,
         pain_scale: formData.pain_scale ? parseInt(formData.pain_scale) : null,
         // Text fields
         location: formData.location || null,
@@ -1051,6 +1054,23 @@ const VitalsForm = ({
                   </Grid.Col>
                   <Grid.Col span={6}>{renderField('blood_glucose')}</Grid.Col>
                   <Grid.Col span={6}>{renderField('a1c')}</Grid.Col>
+                  <Grid.Col span={6}>
+                    <Select
+                      label={t('vitals.modal.glucoseContext', 'Measurement Type')}
+                      placeholder={t('vitals.modal.glucoseContextPlaceholder', 'Optional')}
+                      value={formData.glucose_context || null}
+                      onChange={(val) => handleInputChange('glucose_context', val || '')}
+                      data={[
+                        { value: 'fasting', label: t('vitals.glucoseContext.fasting', 'Fasting') },
+                        { value: 'before_meal', label: t('vitals.glucoseContext.before_meal', 'Before Meal') },
+                        { value: 'after_meal', label: t('vitals.glucoseContext.after_meal', 'After Meal') },
+                        { value: 'random', label: t('vitals.glucoseContext.random', 'Random') },
+                      ]}
+                      leftSection={<IconDropletFilled size={16} />}
+                      clearable
+                      disabled={!formData.blood_glucose}
+                    />
+                  </Grid.Col>
                   <Grid.Col span={6}>{renderField('pain_scale')}</Grid.Col>
                   <Grid.Col span={6}>{renderField('weight')}</Grid.Col>
                 </Grid>

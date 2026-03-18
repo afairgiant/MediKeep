@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from '../apiClient';
+import { GLUCOSE_CONTEXT_VALUES } from '../../components/medical/vitals/types';
 
 class VitalsService {
   /**
@@ -299,6 +300,13 @@ class VitalsService {
     if (vitalsData.blood_glucose) {
       if (vitalsData.blood_glucose < 20 || vitalsData.blood_glucose > 800) {
         errors.blood_glucose = 'Blood glucose must be between 20-800 mg/dL';
+      }
+    }
+
+    // Glucose context validation
+    if (vitalsData.glucose_context) {
+      if (!GLUCOSE_CONTEXT_VALUES.includes(vitalsData.glucose_context)) {
+        errors.glucose_context = 'Glucose context must be fasting, before_meal, after_meal, or random';
       }
     }
 

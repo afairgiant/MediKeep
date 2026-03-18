@@ -338,6 +338,7 @@ class Vitals(Base):
     respiratory_rate = Column(Integer, nullable=True)  # Breaths per minute
     blood_glucose = Column(Float, nullable=True)  # Blood glucose (mg/dL)
     a1c = Column(Float, nullable=True)  # Hemoglobin A1C (%)
+    glucose_context = Column(String, nullable=True)  # fasting, before_meal, after_meal, random
 
     # Additional measurements
     bmi = Column(Float, nullable=True)  # Body Mass Index (calculated)
