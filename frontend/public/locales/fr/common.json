@@ -318,7 +318,9 @@
       "painScale": "Echelle de la douleur",
       "notes": "Notes",
       "recordedBy": "Mesuré par",
-      "practitionerId": "ID du médecin"
+      "practitionerId": "ID du médecin",
+      "glucoseContext": "Type de mesure",
+      "glucoseContextPlaceholder": "Optionnel"
     },
     "units": {
       "mgdl": "mg/dL",
@@ -421,6 +423,16 @@
       "minGlucose": "Min",
       "readings": "{{count}} readings",
       "time": "Time"
+    },
+    "glucoseContext": {
+      "fasting": "À jeun",
+      "before_meal": "Avant le repas",
+      "after_meal": "Après le repas",
+      "random": "Aléatoire"
+    },
+    "trends": {
+      "glucoseContextFilter": "Type de glycémie",
+      "allContexts": "Tous les types"
     },
     "tabs": {
       "dateTime": "Date et Heure",

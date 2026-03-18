@@ -99,7 +99,7 @@ from app.schemas.procedure import ProcedureCreate
 from app.schemas.symptom import SymptomCreate, SymptomOccurrenceCreate
 from app.schemas.treatment import TreatmentCreate
 from app.schemas.user import UserCreate
-from app.schemas.vitals import VitalsCreate
+from app.schemas.vitals import VALID_GLUCOSE_CONTEXTS, VitalsCreate
 
 router = APIRouter()
 
@@ -427,6 +427,8 @@ FIELD_DISPLAY_CONFIG = {
             "oxygen_saturation",
             "respiratory_rate",
             "blood_glucose",
+            "a1c",
+            "glucose_context",
             "bmi",
             "pain_scale",
             "location",
@@ -1193,6 +1195,8 @@ def get_model_metadata(model_class: Type[Any]) -> ModelMetadata:
             choices = ["patient", "admin", "staff"]
         elif column.name == "sso_linking_preference":
             choices = ["auto_link", "create_separate", "always_ask"]
+        elif column.name == "glucose_context":
+            choices = sorted(VALID_GLUCOSE_CONTEXTS)
 
         fields.append(
             ModelField(

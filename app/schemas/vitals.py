@@ -15,6 +15,20 @@ def serialize_datetime_utc(value: Optional[datetime]) -> Optional[str]:
     return value.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+VALID_GLUCOSE_CONTEXTS = {"fasting", "before_meal", "after_meal", "random"}
+
+
+def _validate_glucose_context_strict(v):
+    """Shared strict validator for glucose context on write operations."""
+    if v is not None:
+        v = v.strip().lower()
+        if v not in VALID_GLUCOSE_CONTEXTS:
+            raise ValueError(
+                f"Glucose context must be one of: {', '.join(sorted(VALID_GLUCOSE_CONTEXTS))}"
+            )
+    return v
+
+
 class VitalsBase(BaseModel):
     """Base schema for Vitals"""
 
@@ -29,6 +43,7 @@ class VitalsBase(BaseModel):
     respiratory_rate: Optional[int] = None
     blood_glucose: Optional[float] = None
     a1c: Optional[float] = None
+    glucose_context: Optional[str] = None
     bmi: Optional[float] = None
     pain_scale: Optional[int] = None
     notes: Optional[str] = None
@@ -130,6 +145,14 @@ class VitalsBase(BaseModel):
                 raise ValueError("A1C must be between 0-20%")
         return v
 
+    @field_validator("glucose_context")
+    @classmethod
+    def normalize_glucose_context(cls, v):
+        """Normalize glucose context (strip/lowercase). Lenient on read for DB compat."""
+        if v is not None and isinstance(v, str):
+            v = v.strip().lower()
+        return v
+
     @field_validator("bmi")
     @classmethod
     def validate_bmi(cls, v):
@@ -176,7 +199,11 @@ class VitalsBase(BaseModel):
 class VitalsCreate(VitalsBase):
     """Schema for creating new vitals"""
 
-    pass
+    @field_validator("glucose_context")
+    @classmethod
+    def validate_glucose_context(cls, v):
+        """Strict validation for glucose context on create."""
+        return _validate_glucose_context_strict(v)
 
 
 class VitalsUpdate(BaseModel):
@@ -193,12 +220,19 @@ class VitalsUpdate(BaseModel):
     respiratory_rate: Optional[int] = None
     blood_glucose: Optional[float] = None
     a1c: Optional[float] = None
+    glucose_context: Optional[str] = None
     bmi: Optional[float] = None
     pain_scale: Optional[int] = None
     notes: Optional[str] = None
     location: Optional[str] = None
     device_used: Optional[str] = None
     practitioner_id: Optional[int] = None
+
+    @field_validator("glucose_context")
+    @classmethod
+    def validate_glucose_context(cls, v):
+        """Strict validation for glucose context on update."""
+        return _validate_glucose_context_strict(v)
 
 
 class VitalsResponse(VitalsBase):

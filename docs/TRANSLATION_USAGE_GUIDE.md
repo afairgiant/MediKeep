@@ -902,6 +902,80 @@ function TreatmentForm() {
 }
 ```
 
+### Vitals Recording with Glucose Context
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function VitalsForm() {
+  const { t } = useTranslation('medical');
+
+  return (
+    <>
+      <NumberInput
+        label={t('vitals.bloodGlucose.label')}
+        placeholder={t('vitals.bloodGlucose.placeholder')}
+        description={t('vitals.bloodGlucose.description')}
+      />
+
+      <Select
+        label={t('vitals.modal.glucoseContext')}
+        placeholder={t('vitals.modal.glucoseContextPlaceholder')}
+        data={[
+          { value: 'fasting', label: t('vitals.glucoseContext.fasting') },
+          { value: 'before_meal', label: t('vitals.glucoseContext.before_meal') },
+          { value: 'after_meal', label: t('vitals.glucoseContext.after_meal') },
+          { value: 'random', label: t('vitals.glucoseContext.random') },
+        ]}
+      />
+
+      <NumberInput
+        label={t('vitals.heartRate.label')}
+        placeholder={t('vitals.heartRate.placeholder')}
+        description={t('vitals.heartRate.description')}
+      />
+
+      <NumberInput
+        label={t('vitals.temperature.label')}
+        placeholder={t('vitals.temperature.placeholder')}
+        description={t('vitals.temperature.description')}
+      />
+
+      <Textarea
+        label={t('common.fields.notes.label')}
+        placeholder={t('common.fields.notes.placeholder')}
+      />
+    </>
+  );
+}
+```
+
+### Glucose Context Filtering in Trends
+
+```jsx
+import { useTranslation } from 'react-i18next';
+
+function VitalsTrendChart() {
+  const { t } = useTranslation('medical');
+
+  return (
+    <>
+      <Label>{t('vitals.trends.glucoseContextFilter')}</Label>
+      <Select
+        placeholder={t('vitals.trends.allContexts')}
+        data={[
+          { value: null, label: t('vitals.trends.allContexts') },
+          { value: 'fasting', label: t('vitals.glucoseContext.fasting') },
+          { value: 'before_meal', label: t('vitals.glucoseContext.before_meal') },
+          { value: 'after_meal', label: t('vitals.glucoseContext.after_meal') },
+          { value: 'random', label: t('vitals.glucoseContext.random') },
+        ]}
+      />
+    </>
+  );
+}
+```
+
 ---
 
 ## Testing Your Translations

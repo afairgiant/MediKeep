@@ -264,7 +264,9 @@
       "notes": "Notizen",
       "recordedBy": "Aufgezeichnet Von",
       "practitionerId": "Arzt-ID",
-      "a1c": "A1C"
+      "a1c": "A1C",
+      "glucoseContext": "Messungstyp",
+      "glucoseContextPlaceholder": "Optional"
     },
     "form": {
       "sections": {
@@ -388,6 +390,16 @@
       "time": "Uhrzeit",
       "confirmDeleteDay": "Alle {{count}} importierten Messungen für diesen Tag löschen?",
       "deleteDay": "Tag löschen"
+    },
+    "glucoseContext": {
+      "fasting": "Nüchtern",
+      "before_meal": "Vor der Mahlzeit",
+      "after_meal": "Nach der Mahlzeit",
+      "random": "Zufällig"
+    },
+    "trends": {
+      "glucoseContextFilter": "Blutzuckertyp",
+      "allContexts": "Alle Typen"
     },
     "tabs": {
       "dateTime": "Datum und Uhrzeit",

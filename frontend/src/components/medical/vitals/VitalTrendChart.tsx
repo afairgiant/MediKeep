@@ -19,20 +19,42 @@ import {
 } from 'recharts';
 import { Paper, Stack, Text, Group, Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
-import { VitalTrendResponse, VitalDataPoint, AggregatedDataPoint, AggregationPeriod } from './types';
+import { VitalTrendResponse, VitalDataPoint, AggregatedDataPoint, AggregationPeriod, GlucoseContext, GLUCOSE_CONTEXT_COLORS, GLUCOSE_DEFAULT_COLOR, GLUCOSE_CONTEXT_MANTINE_COLORS, GLUCOSE_DEFAULT_MANTINE_COLOR } from './types';
 import { convertToChartData } from '../../../utils/vitalDataAggregation';
 import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
+
+// Static dot renderers (no component state dependencies, stable references for Recharts)
+const getGlucoseDotColor = (context: string | null | undefined): string =>
+  (context && GLUCOSE_CONTEXT_COLORS[context as GlucoseContext]) || GLUCOSE_DEFAULT_COLOR;
+
+const renderGlucoseDot = (props: any): React.ReactElement => {
+  const { cx, cy, payload } = props;
+  const color = getGlucoseDotColor(payload?.glucose_context);
+  return <circle cx={cx} cy={cy} r={4} fill={color} stroke="#fff" strokeWidth={2} />;
+};
+
+const renderPrimaryDot = (props: any): React.ReactElement => {
+  const { cx, cy } = props;
+  return <circle cx={cx} cy={cy} r={4} fill="#228be6" stroke="#fff" strokeWidth={2} />;
+};
+
+const renderSecondaryDot = (props: any): React.ReactElement => {
+  const { cx, cy } = props;
+  return <circle cx={cx} cy={cy} r={4} fill="#fa5252" stroke="#fff" strokeWidth={2} />;
+};
 
 interface VitalTrendChartProps {
   trendData: VitalTrendResponse;
   aggregatedDataPoints?: AggregatedDataPoint[];
   aggregationPeriod?: AggregationPeriod | null;
+  glucoseContextFilter?: string;
 }
 
 const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
   trendData,
   aggregatedDataPoints = [],
-  aggregationPeriod = null
+  aggregationPeriod = null,
+  glucoseContextFilter
 }) => {
   const { t } = useTranslation('common');
 
@@ -64,7 +86,8 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
       return {
         date: dateStr,
         value: point.value,
-        secondaryValue: point.secondary_value
+        secondaryValue: point.secondary_value,
+        glucose_context: point.glucose_context
       };
     }).reverse(); // Reverse to show oldest first (left to right)
   }, [trendData.data_points, aggregatedDataPoints, isAggregated]);
@@ -88,17 +111,12 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
     return generateYAxisConfig([...primaryValues, ...secondaryValues, ...aggregatedBounds]);
   }, [chartData, isAggregated]);
 
-  // Custom dot renderer for primary data points (systolic for BP)
-  const renderPrimaryDot = (props: any): React.ReactElement => {
-    const { cx, cy } = props;
-    return <circle cx={cx} cy={cy} r={4} fill="#228be6" stroke="#fff" strokeWidth={2} />;
-  };
+  const isBloodGlucose = trendData.vital_type === 'blood_glucose';
 
-  // Custom dot renderer for secondary data points (diastolic for BP)
-  const renderSecondaryDot = (props: any): React.ReactElement => {
-    const { cx, cy } = props;
-    return <circle cx={cx} cy={cy} r={4} fill="#fa5252" stroke="#fff" strokeWidth={2} />;
-  };
+  // When filtering by a specific glucose context, match line color to the dot color
+  const lineColor = isBloodGlucose && glucoseContextFilter && glucoseContextFilter !== 'all'
+    ? GLUCOSE_CONTEXT_COLORS[glucoseContextFilter as GlucoseContext] || '#228be6'
+    : '#228be6';
 
   // Get labels for blood pressure or other dual-value vitals
   const getPrimaryLabel = () => {
@@ -178,6 +196,15 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
                   {t('vitals.trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
                 </Text>
               )}
+              {isBloodGlucose && data.glucose_context && (
+                <Badge
+                  size="sm"
+                  variant="light"
+                  color={GLUCOSE_CONTEXT_MANTINE_COLORS[data.glucose_context as GlucoseContext] ?? GLUCOSE_DEFAULT_MANTINE_COLOR}
+                >
+                  {String(t(`vitals.glucoseContext.${data.glucose_context}`, data.glucose_context))}
+                </Badge>
+              )}
             </>
           )}
         </Stack>
@@ -236,7 +263,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
             <Line
               type="monotone"
               dataKey="max"
-              stroke="#228be6"
+              stroke={lineColor}
               strokeWidth={1}
               strokeDasharray="3 3"
               dot={false}
@@ -248,9 +275,11 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
           <Line
             type="monotone"
             dataKey="value"
-            stroke="#228be6"
+            stroke={lineColor}
             strokeWidth={2}
-            dot={isAggregated ? { r: 3, fill: '#228be6', stroke: '#fff', strokeWidth: 1 } : renderPrimaryDot}
+            dot={isAggregated
+              ? { r: 3, fill: lineColor, stroke: '#fff', strokeWidth: 1 }
+              : (isBloodGlucose && !isAggregated ? renderGlucoseDot : renderPrimaryDot)}
             name={hasSecondaryValue ? getPrimaryLabel() : trendData.vital_type_label}
             connectNulls
           />
@@ -260,7 +289,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
             <Line
               type="monotone"
               dataKey="min"
-              stroke="#228be6"
+              stroke={lineColor}
               strokeWidth={1}
               strokeDasharray="3 3"
               dot={false}

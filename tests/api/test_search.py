@@ -134,7 +134,6 @@ class TestSearchAPI:
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
         """Test search pagination."""
-        # Only search medications to avoid conditions/allergies/immunizations bugs
         response = client.get(
             "/api/v1/search/?q=a&types=medications&skip=0&limit=1",
             headers=authenticated_headers
@@ -256,7 +255,6 @@ class TestSearchAPI:
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
         """Test that search response has correct structure."""
-        # Only search medications to avoid conditions/allergies/immunizations bugs
         response = client.get(
             "/api/v1/search/?q=Lisinopril&types=medications",
             headers=authenticated_headers
@@ -540,7 +538,6 @@ class TestSearchAPI:
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
         """Test that search results actually contain the search term."""
-        # Only search medications to avoid conditions/allergies/immunizations bugs
         search_term = "Lisinopril"
 
         response = client.get(
@@ -570,7 +567,6 @@ class TestSearchAPI:
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
         """Test that pagination returns consistent results."""
-        # Only search medications to avoid conditions/allergies/immunizations bugs
         # Get first page
         response1 = client.get(
             "/api/v1/search/?q=a&types=medications&skip=0&limit=2",
@@ -635,8 +631,7 @@ class TestSearchAPI:
             headers=authenticated_headers
         )
 
-        # TODO: May fail if search includes other models with bugs
-        assert response.status_code in [200, 500]
+        assert response.status_code == 200
 
         if response.status_code == 200:
             data = response.json()

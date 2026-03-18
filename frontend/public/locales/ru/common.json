@@ -357,7 +357,9 @@
       "painScale": "Шкала боли",
       "notes": "Заметки",
       "recordedBy": "Записано",
-      "practitionerId": "ID врача"
+      "practitionerId": "ID врача",
+      "glucoseContext": "Тип измерения",
+      "glucoseContextPlaceholder": "Необязательно"
     },
     "units": {
       "mgdl": "mg/dL",
@@ -460,6 +462,16 @@
       "time": "Время",
       "confirmDeleteDay": "Удалить все {{count}} импортированных показаний за этот день?",
       "deleteDay": "Удалить день"
+    },
+    "glucoseContext": {
+      "fasting": "Натощак",
+      "before_meal": "До еды",
+      "after_meal": "После еды",
+      "random": "Случайный"
+    },
+    "trends": {
+      "glucoseContextFilter": "Тип сахара в крови",
+      "allContexts": "Все типы"
     },
     "tabs": {
       "dateTime": "Дата и время",

@@ -176,6 +176,13 @@ const VitalViewModal = ({
           icon: IconDroplet,
           unit: vital.blood_glucose ? t('vitals.units.mgdl', 'mg/dL') : '',
         },
+        ...(vital.blood_glucose ? [{
+          label: t('vitals.modal.glucoseContext', 'Measurement Type'),
+          value: vital.glucose_context
+            ? t(`vitals.glucoseContext.${vital.glucose_context}`, vital.glucose_context)
+            : t('labels.notSpecified', 'Not specified'),
+          icon: IconDroplet,
+        }] : []),
         {
           label: t('vitals.modal.a1c', 'A1C'),
           value: vital.a1c || t('labels.notAvailable', 'N/A'),

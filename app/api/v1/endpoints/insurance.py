@@ -108,13 +108,72 @@ def get_insurances(
         return paginated_insurances
 
 
+@router.get("/expiring", response_model=List[Insurance])
+def get_expiring_insurances(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    days: int = Query(30, ge=1, le=365, description="Days ahead to check for expiration"),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Get insurance records expiring within specified days."""
+
+    with handle_database_errors(request=request):
+        expiring_insurances = insurance.get_expiring_soon(
+            db=db, patient_id=target_patient_id, days=days
+        )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Insurance",
+            patient_id=target_patient_id,
+            count=len(expiring_insurances)
+        )
+
+        return expiring_insurances
+
+
+@router.get("/search", response_model=List[Insurance])
+def search_insurances(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    company: str = Query(..., min_length=1, description="Company name to search for"),
+    target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Search insurance records by company name."""
+
+    with handle_database_errors(request=request):
+        search_results = insurance.search_by_company(
+            db=db, patient_id=target_patient_id, company_name=company
+        )
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Insurance",
+            patient_id=target_patient_id,
+            count=len(search_results)
+        )
+
+        return search_results
+
+
 @router.get("/{insurance_id}", response_model=Insurance)
 def get_insurance(
     *,
     request: Request,
     insurance_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get insurance record by ID."""
     with handle_database_errors(request=request):
@@ -123,17 +182,17 @@ def get_insurance(
 
         # Verify patient ownership using current user's patient record
         verify_patient_ownership(
-            insurance_obj, current_user.patient_record.id, "insurance"
+            insurance_obj, current_user_patient_id, "insurance"
         )
 
         log_data_access(
             logger,
             request,
-            current_user.id,
+            current_user_id,
             "read",
             "Insurance",
             record_id=insurance_id,
-            patient_id=current_user.patient_record.id
+            patient_id=current_user_patient_id
         )
 
         return insurance_obj
@@ -258,61 +317,3 @@ def set_primary_insurance(
         )
 
         return updated_insurance
-
-
-@router.get("/expiring", response_model=List[Insurance])
-def get_expiring_insurances(
-    *,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-    days: int = Query(30, ge=1, le=365, description="Days ahead to check for expiration"),
-    target_patient_id: int = Depends(deps.get_accessible_patient_id),
-    current_user_id: int = Depends(deps.get_current_user_id),
-) -> Any:
-    """Get insurance records expiring within specified days."""
-
-    with handle_database_errors(request=request):
-        expiring_insurances = insurance.get_expiring_soon(
-            db=db, patient_id=target_patient_id, days=days
-        )
-
-        log_data_access(
-            logger,
-            request,
-            current_user_id,
-            "read",
-            "Insurance",
-            patient_id=target_patient_id,
-            count=len(expiring_insurances)
-        )
-
-        return expiring_insurances
-
-
-@router.get("/search", response_model=List[Insurance])
-def search_insurances(
-    *,
-    request: Request,
-    db: Session = Depends(deps.get_db),
-    company: str = Query(..., min_length=1, description="Company name to search for"),
-    target_patient_id: int = Depends(deps.get_accessible_patient_id),
-    current_user_id: int = Depends(deps.get_current_user_id),
-) -> Any:
-    """Search insurance records by company name."""
-
-    with handle_database_errors(request=request):
-        search_results = insurance.search_by_company(
-            db=db, patient_id=target_patient_id, company_name=company
-        )
-
-        log_data_access(
-            logger,
-            request,
-            current_user_id,
-            "read",
-            "Insurance",
-            patient_id=target_patient_id,
-            count=len(search_results)
-        )
-
-        return search_results
