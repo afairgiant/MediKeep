@@ -2377,6 +2377,7 @@
       "tabs": {
         "clinical": "Clínico",
         "documents": "Documentos",
+        "addFiles": "Agregar archivos",
         "labResults": "Resultados de laboratorio",
         "notes": "Notas",
         "visitInfo": "Información de la visita"

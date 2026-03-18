@@ -1799,6 +1799,7 @@
         "visitInfo": "Besuchsinfo",
         "clinical": "Klinisch",
         "documents": "Dokumente",
+        "addFiles": "Dateien hinzufügen",
         "labResults": "Laborergebnisse",
         "notes": "Notizen"
       },

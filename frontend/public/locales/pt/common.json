@@ -1471,6 +1471,7 @@
         "visitInfo": "Informações da Visita",
         "clinical": "Clínico",
         "documents": "Documentos",
+        "addFiles": "Adicionar arquivos",
         "labResults": "Resultados laboratoriais",
         "notes": "Notas"
       },

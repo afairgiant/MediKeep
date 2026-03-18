@@ -12,7 +12,6 @@ import {
   Textarea,
   NumberInput,
   Text,
-  Title,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
@@ -51,6 +50,9 @@ const MantineVisitForm = ({
   encounterLabResults = {},
   fetchEncounterLabResults,
   navigate,
+  onDocumentManagerRef,
+  onFileUploadComplete,
+  onDocumentError,
   children,
 }) => {
   // Translation hooks - medical for field translations, common for UI elements
@@ -267,11 +269,11 @@ const MantineVisitForm = ({
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
                 {t('common:visits.form.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
-              {editingVisit && (
-                <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                  {t('common:visits.form.tabs.documents', 'Documents')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingVisit
+                  ? t('common:visits.form.tabs.documents', 'Documents')
+                  : t('common:visits.form.tabs.addFiles', 'Add Files')}
+              </Tabs.Tab>
               {editingVisit && fetchEncounterLabResults && (
                 <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
                   {t('common:visits.form.tabs.labResults', 'Lab Results')}
@@ -305,29 +307,19 @@ const MantineVisitForm = ({
             </Tabs.Panel>
 
             {/* Documents Tab */}
-            {editingVisit && (
-              <Tabs.Panel value="documents">
-                <Box mt="md">
-                  <Stack gap="md">
-                    <Title order={4}>{t('common:visits.viewModal.attachedDocuments', 'Attached Documents')}</Title>
-                    <DocumentManagerWithProgress
-                      entityType="visit"
-                      entityId={editingVisit.id}
-                      mode="edit"
-                      onError={(error) => {
-                        logger.error('document_manager_error', {
-                          message: 'Document manager error in visit form',
-                          visitId: editingVisit?.id,
-                          error: error.message,
-                          component: 'MantineVisitForm',
-                        });
-                      }}
-                      showProgressModal={true}
-                    />
-                  </Stack>
-                </Box>
-              </Tabs.Panel>
-            )}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="visit"
+                  entityId={editingVisit?.id || null}
+                  mode={editingVisit ? 'edit' : 'create'}
+                  onUploadPendingFiles={onDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={onFileUploadComplete}
+                  onError={onDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
 
             {/* Lab Results Tab */}
             {editingVisit && fetchEncounterLabResults && (

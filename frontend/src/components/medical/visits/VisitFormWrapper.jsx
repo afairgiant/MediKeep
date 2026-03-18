@@ -1,8 +1,5 @@
 import React from 'react';
-import { Paper, Title } from '@mantine/core';
-import { useTranslation } from 'react-i18next';
 import MantineVisitForm from '../MantineVisitForm';
-import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import logger from '../../../services/logger';
 
 const VisitFormWrapper = ({
@@ -26,8 +23,6 @@ const VisitFormWrapper = ({
   navigate,
   children,
 }) => {
-  const { t } = useTranslation('common');
-
   const handleDocumentError = (error) => {
     logger.error('document_manager_error', {
       message: `Document manager error in visits ${editingItem ? 'edit' : 'create'}`,
@@ -67,24 +62,10 @@ const VisitFormWrapper = ({
       encounterLabResults={encounterLabResults}
       fetchEncounterLabResults={fetchEncounterLabResults}
       navigate={navigate}
+      onDocumentManagerRef={onDocumentManagerRef}
+      onFileUploadComplete={handleDocumentUploadComplete}
+      onDocumentError={handleDocumentError}
     >
-      {!editingItem && (
-        <Paper withBorder p="md" mt="md">
-          <Title order={4} mb="md">
-            {t('visits.form.addFilesOptional', 'Add Files')}
-          </Title>
-          <DocumentManagerWithProgress
-            entityType="visit"
-            entityId={null}
-            mode="create"
-            onUploadPendingFiles={onDocumentManagerRef}
-            showProgressModal={true}
-            onUploadComplete={handleDocumentUploadComplete}
-            onError={handleDocumentError}
-          />
-        </Paper>
-      )}
-
       {children}
     </MantineVisitForm>
   );
