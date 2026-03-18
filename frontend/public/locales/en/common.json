@@ -357,7 +357,9 @@
       "painScale": "Pain Scale",
       "notes": "Notes",
       "recordedBy": "Recorded By",
-      "practitionerId": "Practitioner ID"
+      "practitionerId": "Practitioner ID",
+      "glucoseContext": "Measurement Type",
+      "glucoseContextPlaceholder": "Optional"
     },
     "units": {
       "mgdl": "mg/dL",
@@ -460,6 +462,16 @@
       "time": "Time",
       "confirmDeleteDay": "Delete all {{count}} imported readings for this day?",
       "deleteDay": "Delete Day"
+    },
+    "glucoseContext": {
+      "fasting": "Fasting",
+      "before_meal": "Before Meal",
+      "after_meal": "After Meal",
+      "random": "Random"
+    },
+    "trends": {
+      "glucoseContextFilter": "Blood Sugar Type",
+      "allContexts": "All Types"
     },
     "tabs": {
       "dateTime": "Date & Time",

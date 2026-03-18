@@ -21,6 +21,7 @@ from app.crud.vitals import vitals
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.vitals import (
+    VALID_GLUCOSE_CONTEXTS,
     VitalsCreate,
     VitalsPaginatedResponse,
     VitalsResponse,
@@ -39,6 +40,25 @@ router = APIRouter()
 
 # Initialize logger
 logger = get_logger(__name__, "app")
+
+
+def _normalize_glucose_context(
+    glucose_context: Optional[str], request: Request
+) -> Optional[str]:
+    """Normalize and validate glucose_context query parameter.
+
+    Returns the normalized value or None. Raises ValidationException on invalid input.
+    """
+    if glucose_context is None:
+        return None
+    normalized = glucose_context.strip().lower()
+    if normalized not in VALID_GLUCOSE_CONTEXTS:
+        raise ValidationException(
+            message=f"Invalid glucose_context '{glucose_context}'. "
+            f"Must be one of: {', '.join(sorted(VALID_GLUCOSE_CONTEXTS))}",
+            request=request,
+        )
+    return normalized
 
 
 @router.post("/", response_model=VitalsResponse)
@@ -68,10 +88,21 @@ def read_vitals(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=10000, le=10000),
-    vital_type: Optional[str] = Query(None, description="Filter by vital type (blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose)"),
-    start_date: Optional[str] = Query(None, description="Start date for date range filter (ISO format)"),
-    end_date: Optional[str] = Query(None, description="End date for date range filter (ISO format)"),
+    vital_type: Optional[str] = Query(
+        None,
+        description="Filter by vital type (blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose)",
+    ),
+    start_date: Optional[str] = Query(
+        None, description="Start date for date range filter (ISO format)"
+    ),
+    end_date: Optional[str] = Query(
+        None, description="End date for date range filter (ISO format)"
+    ),
     days: Optional[int] = Query(None, description="Get readings from last N days"),
+    glucose_context: Optional[str] = Query(
+        None,
+        description="Filter by glucose context: fasting, before_meal, after_meal, random",
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -82,7 +113,10 @@ def read_vitals(
     - vital_type: Specific vital type (e.g., blood_pressure, heart_rate)
     - start_date/end_date: Date range filtering
     - days: Recent readings (e.g., last 30 days)
+    - glucose_context: Blood glucose measurement context (fasting, before_meal, after_meal, random)
     """
+
+    glucose_context = _normalize_glucose_context(glucose_context, request)
 
     with handle_database_errors(request=request):
         # Apply filters based on query parameters
@@ -93,15 +127,16 @@ def read_vitals(
             )
         elif start_date and end_date:
             # Date range filtering
-            start_dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
-            end_dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
             vitals_list = vitals.get_by_patient_date_range(
                 db=db,
                 patient_id=target_patient_id,
                 start_date=start_dt,
                 end_date=end_dt,
                 skip=skip,
-                limit=limit
+                limit=limit,
+                glucose_context=glucose_context,
             )
         elif vital_type:
             # Filter by vital type
@@ -110,7 +145,8 @@ def read_vitals(
                 patient_id=target_patient_id,
                 vital_type=vital_type,
                 skip=skip,
-                limit=limit
+                limit=limit,
+                glucose_context=glucose_context,
             )
         else:
             # Get all vitals
@@ -125,7 +161,7 @@ def read_vitals(
             "read",
             "Vitals",
             patient_id=target_patient_id,
-            count=len(vitals_list)
+            count=len(vitals_list),
         )
 
         return vitals_list
@@ -136,7 +172,9 @@ def read_current_user_vitals_stats(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
-    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
+    patient_id: Optional[int] = Query(
+        None, description="Patient ID for Phase 1 patient switching"
+    ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get vitals statistics for the current user or specified patient (Phase 1 support)."""
@@ -157,7 +195,7 @@ def read_current_user_vitals_stats(
             "read",
             "Vitals",
             patient_id=target_patient_id,
-            operation_type="stats"
+            operation_type="stats",
         )
 
         return stats
@@ -244,7 +282,9 @@ def preview_import(
 
         if result.errors:
             log_endpoint_error(
-                logger, request, current_user_id,
+                logger,
+                request,
+                current_user_id,
                 "vitals_import_parse_failed",
                 errors=result.errors,
             )
@@ -269,7 +309,11 @@ def preview_import(
             )
 
         log_data_access(
-            logger, request, current_user_id, "read", "Vitals",
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Vitals",
             patient_id=patient_id,
             operation_type="import_preview",
             count=len(result.readings),
@@ -336,7 +380,11 @@ def execute_import(
         )
 
         log_data_access(
-            logger, request, current_user_id, "create", "Vitals",
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "Vitals",
             patient_id=patient_id,
             operation_type="import_execute",
             count=imported_count,
@@ -381,7 +429,11 @@ def delete_imported_day(
         )
 
         log_data_access(
-            logger, request, current_user_id, "delete", "Vitals",
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "Vitals",
             patient_id=patient_id,
             operation_type="import_bulk_delete",
             count=deleted_count,
@@ -414,7 +466,7 @@ def read_vitals_by_id(
             "read",
             "Vitals",
             record_id=vitals_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return vitals_obj
@@ -482,6 +534,10 @@ def read_patient_vitals_paginated(
         None,
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
     ),
+    glucose_context: Optional[str] = Query(
+        None,
+        description="Filter by glucose context: fasting, before_meal, after_meal, random",
+    ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get paginated vitals readings for a specific patient with total count.
@@ -492,10 +548,15 @@ def read_patient_vitals_paginated(
     - skip: Current offset
     - limit: Page size
     """
+    glucose_context = _normalize_glucose_context(glucose_context, request)
+
     with handle_database_errors(request=request):
         try:
             total_count = vitals.count_by_patient(
-                db=db, patient_id=patient_id, vital_type=vital_type
+                db=db,
+                patient_id=patient_id,
+                vital_type=vital_type,
+                glucose_context=glucose_context,
             )
 
             # Order by recorded_date descending for consistent pagination
@@ -506,6 +567,7 @@ def read_patient_vitals_paginated(
                     vital_type=vital_type,
                     skip=skip,
                     limit=limit,
+                    glucose_context=glucose_context,
                 )
             else:
                 vitals_list = vitals.get_by_patient(
@@ -552,9 +614,15 @@ def read_patient_vitals(
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
     ),
     days: Optional[int] = Query(None, description="Get readings from last N days"),
+    glucose_context: Optional[str] = Query(
+        None,
+        description="Filter by glucose context: fasting, before_meal, after_meal, random",
+    ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get all vitals readings for a specific patient."""
+    glucose_context = _normalize_glucose_context(glucose_context, request)
+
     with handle_database_errors(request=request):
         try:
             if days:
@@ -565,7 +633,12 @@ def read_patient_vitals(
             elif vital_type:
                 # Get by specific vital type
                 vitals_list = vitals.get_by_vital_type(
-                    db=db, patient_id=patient_id, vital_type=vital_type, skip=skip, limit=limit
+                    db=db,
+                    patient_id=patient_id,
+                    vital_type=vital_type,
+                    skip=skip,
+                    limit=limit,
+                    glucose_context=glucose_context,
                 )
             else:
                 # Get all readings for patient
@@ -584,7 +657,7 @@ def read_patient_vitals(
             patient_id=patient_id,
             count=len(vitals_list),
             vital_type=vital_type,
-            days=days
+            days=days,
         )
 
         return vitals_list
@@ -605,7 +678,7 @@ def read_patient_latest_vitals(
             raise NotFoundException(
                 resource="Vitals",
                 message="No vitals readings found for this patient",
-                request=request
+                request=request,
             )
 
         log_data_access(
@@ -616,7 +689,7 @@ def read_patient_latest_vitals(
             "Vitals",
             patient_id=patient_id,
             record_id=latest_vitals.id,
-            operation_type="latest"
+            operation_type="latest",
         )
 
         return latest_vitals
@@ -641,7 +714,7 @@ def read_patient_vitals_stats(
             "read",
             "Vitals",
             patient_id=patient_id,
-            operation_type="stats"
+            operation_type="stats",
         )
 
         return stats
@@ -661,9 +734,15 @@ def read_patient_vitals_date_range(
         None,
         description="Filter by vital type: blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose, a1c",
     ),
+    glucose_context: Optional[str] = Query(
+        None,
+        description="Filter by glucose context: fasting, before_meal, after_meal, random",
+    ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get vitals readings for a patient within a specific date range, optionally filtered by vital type."""
+    glucose_context = _normalize_glucose_context(glucose_context, request)
+
     with handle_database_errors(request=request):
         try:
             vitals_list = vitals.get_by_patient_date_range(
@@ -674,6 +753,7 @@ def read_patient_vitals_date_range(
                 skip=skip,
                 limit=limit,
                 vital_type=vital_type,
+                glucose_context=glucose_context,
             )
         except ValueError as e:
             raise BusinessLogicException(message=str(e), request=request)
@@ -688,7 +768,7 @@ def read_patient_vitals_date_range(
             count=len(vitals_list),
             start_date=str(start_date),
             end_date=str(end_date),
-            vital_type=vital_type
+            vital_type=vital_type,
         )
 
         return vitals_list
@@ -708,7 +788,7 @@ def create_patient_vitals(
     if vitals_in.patient_id != patient_id:
         raise BusinessLogicException(
             message="Patient ID in URL does not match patient ID in request body",
-            request=request
+            request=request,
         )
 
     return create_vitals(

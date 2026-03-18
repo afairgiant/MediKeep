@@ -67,7 +67,7 @@ interface RawTrendData {
   vital_type: VitalType;
   vital_type_label: string;
   base_unit: string;
-  data_points: { id: number; value: number; secondary_value: number | null; recorded_date: string }[];
+  data_points: VitalDataPoint[];
   reference_range: VitalTrendResponse['reference_range'];
 }
 
@@ -91,6 +91,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('chart');
   const [timeRange, setTimeRange] = useState<string>('all');
+  const [glucoseContextFilter, setGlucoseContextFilter] = useState<string>('all');
   // Aggregation state
   const [aggregationPeriod, setAggregationPeriod] = useState<AggregationPeriod | null>(null);
   const [aggregatedDataPoints, setAggregatedDataPoints] = useState<AggregatedDataPoint[]>([]);
@@ -157,6 +158,11 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         vital_type: backendVitalType
       };
 
+      // Add glucose context filter for blood glucose queries
+      if (glucoseContextFilter && glucoseContextFilter !== 'all' && backendVitalType === 'blood_glucose') {
+        params.glucose_context = glucoseContextFilter;
+      }
+
       let records;
       if (dateRange?.startDate && dateRange?.endDate) {
         records = await vitalsService.getPatientVitalsDateRange(
@@ -191,7 +197,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     }
 
     return allRecords;
-  }, []);
+  }, [glucoseContextFilter]);
 
   const loadTrendData = useCallback(async () => {
     if (!vitalType || !patientId) return;
@@ -248,7 +254,8 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
             id: vital.id,
             value: value,
             secondary_value: secondaryValue,
-            recorded_date: vital.recorded_date
+            recorded_date: vital.recorded_date,
+            glucose_context: vital.glucose_context || null
           };
         })
         .sort((a: VitalDataPoint, b: VitalDataPoint) =>
@@ -322,6 +329,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       setActiveTab('chart');
       setAggregationPeriod(null);
       setAggregatedDataPoints([]);
+      setGlucoseContextFilter('all');
     }
   }, [opened]);
 
@@ -582,6 +590,26 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
                 comboboxProps={{ withinPortal: true, zIndex: 3000 }}
               />
 
+              {vitalType === 'blood_glucose' && (
+                <Select
+                  label={t('vitals.trends.glucoseContextFilter', 'Blood Sugar Type')}
+                  placeholder={t('vitals.trends.allContexts', 'All Types')}
+                  value={glucoseContextFilter}
+                  onChange={(value) => setGlucoseContextFilter(value || 'all')}
+                  data={[
+                    { value: 'all', label: t('vitals.trends.allContexts', 'All Types') },
+                    { value: 'fasting', label: t('vitals.glucoseContext.fasting', 'Fasting') },
+                    { value: 'before_meal', label: t('vitals.glucoseContext.before_meal', 'Before Meal') },
+                    { value: 'after_meal', label: t('vitals.glucoseContext.after_meal', 'After Meal') },
+                    { value: 'random', label: t('vitals.glucoseContext.random', 'Random') },
+                  ]}
+                  leftSection={<IconFilter size={16} />}
+                  size="md"
+                  allowDeselect={false}
+                  comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                />
+              )}
+
               {timeRange !== 'all' && (
                 <Paper withBorder p="sm" radius="sm" bg="blue.0">
                   <Group gap="xs" justify="center">
@@ -708,6 +736,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
                 trendData={trendData}
                 aggregatedDataPoints={convertedAggregatedDataPoints}
                 aggregationPeriod={aggregationPeriod}
+                glucoseContextFilter={glucoseContextFilter}
               />
             </Tabs.Panel>
 

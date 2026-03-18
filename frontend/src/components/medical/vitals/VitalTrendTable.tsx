@@ -15,10 +15,11 @@ import {
   Stack,
   Pagination,
   Select,
+  Badge,
 } from '@mantine/core';
 import { IconChevronUp, IconChevronDown, IconSelector } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { VitalTrendResponse, VitalDataPoint } from './types';
+import { VitalTrendResponse, VitalDataPoint, GlucoseContext, GLUCOSE_CONTEXT_MANTINE_COLORS, GLUCOSE_DEFAULT_MANTINE_COLOR } from './types';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface VitalTrendTableProps {
@@ -67,6 +68,7 @@ function Th({ children, sorted, reversed, onSort }: ThProps) {
 const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
   const { t } = useTranslation('common');
   const { formatLongDate } = useDateFormat();
+  const isBloodGlucose = trendData.vital_type === 'blood_glucose';
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -163,6 +165,11 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
               >
                 {t('labels.value', 'Value')}
               </Th>
+              {isBloodGlucose && (
+                <Table.Th>
+                  <Text fw={500} size="sm">{t('vitals.modal.glucoseContext', 'Type')}</Text>
+                </Table.Th>
+              )}
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -182,6 +189,21 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
                     <Text size="xs" c="dimmed">{trendData.unit}</Text>
                   </Group>
                 </Table.Td>
+                {isBloodGlucose && (
+                  <Table.Td>
+                    {point.glucose_context ? (
+                      <Badge
+                        size="sm"
+                        variant="light"
+                        color={GLUCOSE_CONTEXT_MANTINE_COLORS[point.glucose_context as GlucoseContext] ?? GLUCOSE_DEFAULT_MANTINE_COLOR}
+                      >
+                        {String(t(`vitals.glucoseContext.${point.glucose_context}`, point.glucose_context))}
+                      </Badge>
+                    ) : (
+                      <Text size="xs" c="dimmed">{t('labels.none', '-')}</Text>
+                    )}
+                  </Table.Td>
+                )}
               </Table.Tr>
             ))}
           </Table.Tbody>

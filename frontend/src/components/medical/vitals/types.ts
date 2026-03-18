@@ -13,11 +13,34 @@ export type VitalType =
   | 'a1c'
   | 'bmi';
 
+export type GlucoseContext = 'fasting' | 'before_meal' | 'after_meal' | 'random';
+
+export const GLUCOSE_CONTEXT_COLORS: Record<GlucoseContext, string> = {
+  fasting: '#228be6',      // blue
+  before_meal: '#40c057',  // green
+  after_meal: '#fd7e14',   // orange
+  random: '#e64980',       // pink
+};
+export const GLUCOSE_DEFAULT_COLOR = '#e64980'; // pink for unclassified
+
+// Mantine color names for Badge components (vs hex values above for SVG/Recharts)
+export const GLUCOSE_CONTEXT_MANTINE_COLORS: Record<GlucoseContext, string> = {
+  fasting: 'blue',
+  before_meal: 'green',
+  after_meal: 'orange',
+  random: 'pink',
+};
+export const GLUCOSE_DEFAULT_MANTINE_COLOR = 'pink';
+
+// Canonical list of valid glucose context values (single source of truth for frontend)
+export const GLUCOSE_CONTEXT_VALUES: GlucoseContext[] = ['fasting', 'before_meal', 'after_meal', 'random'];
+
 export interface VitalDataPoint {
   id: number;
   value: number;
   secondary_value?: number | null; // For blood pressure (diastolic)
   recorded_date: string;
+  glucose_context?: string | null;
 }
 
 // Re-export aggregation types from utility for convenience

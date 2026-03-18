@@ -71,6 +71,7 @@ import {
 } from '../../utils/unitConversion';
 import logger from '../../services/logger';
 import { timezoneService } from '../../services/timezoneService';
+import { GLUCOSE_CONTEXT_MANTINE_COLORS, GLUCOSE_DEFAULT_MANTINE_COLOR } from './vitals/types';
 
 const PAGE_SIZE_OPTIONS = [
   { value: '10', label: '10' },
@@ -817,9 +818,20 @@ const VitalsList = ({
       </Table.Td>
       <Table.Td>
         {vital.blood_glucose ? (
-          <Text size="sm" fw={500}>
-            {vital.blood_glucose} mg/dL
-          </Text>
+          <Group gap="xs" wrap="nowrap">
+            <Text size="sm" fw={500}>
+              {vital.blood_glucose} mg/dL
+            </Text>
+            {vital.glucose_context && (
+              <Badge
+                size="xs"
+                variant="light"
+                color={GLUCOSE_CONTEXT_MANTINE_COLORS[vital.glucose_context] ?? GLUCOSE_DEFAULT_MANTINE_COLOR}
+              >
+                {t(`vitals.glucoseContext.${vital.glucose_context}`, vital.glucose_context)}
+              </Badge>
+            )}
+          </Group>
         ) : (
           <Text size="sm" c="dimmed">
             N/A

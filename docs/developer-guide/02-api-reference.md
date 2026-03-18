@@ -1299,6 +1299,7 @@ Base path: `/api/v1/vitals`
   "oxygen_saturation": 98,
   "respiratory_rate": 16,
   "blood_glucose": 95,
+  "glucose_context": "fasting",
   "bmi": 24.5,
   "pain_scale": 0,
   "notes": "Routine checkup",
@@ -1325,6 +1326,7 @@ Base path: `/api/v1/vitals`
   - `skip` (integer, default: 0): Pagination offset
   - `limit` (integer, default: 10000, max: 10000): Items per page
   - `vital_type` (string, optional): Filter by vital type (blood_pressure, heart_rate, temperature, weight, oxygen_saturation, blood_glucose)
+  - `glucose_context` (string, optional): Filter by glucose context (fasting, before_meal, after_meal, random)
   - `start_date` (string, optional): Start date for date range filter (ISO format)
   - `end_date` (string, optional): End date for date range filter (ISO format)
   - `days` (integer, optional): Get readings from last N days
@@ -1386,6 +1388,7 @@ Base path: `/api/v1/vitals`
   - `skip` (integer, default: 0): Pagination offset
   - `limit` (integer, default: 10, max: 100): Items per page
   - `vital_type` (string, optional): Filter by vital type
+  - `glucose_context` (string, optional): Filter by glucose context (fasting, before_meal, after_meal, random)
 - **Success Response** (200):
 
 ```json
@@ -1407,6 +1410,7 @@ Base path: `/api/v1/vitals`
   - `skip` (integer, default: 0): Pagination offset
   - `limit` (integer, default: 10000, max: 10000): Items per page
   - `vital_type` (string, optional): Filter by vital type
+  - `glucose_context` (string, optional): Filter by glucose context (fasting, before_meal, after_meal, random)
   - `days` (integer, optional): Get readings from last N days
 - **Success Response** (200): Array of vitals records
 
@@ -1439,6 +1443,7 @@ Base path: `/api/v1/vitals`
   - `skip` (integer, default: 0): Pagination offset
   - `limit` (integer, default: 10000, max: 10000): Items per page
   - `vital_type` (string, optional): Filter by vital type
+  - `glucose_context` (string, optional): Filter by glucose context (fasting, before_meal, after_meal, random)
 - **Success Response** (200): Array of vitals records
 
 #### Create Patient Vitals
