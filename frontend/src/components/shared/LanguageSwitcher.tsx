@@ -25,6 +25,7 @@ const LANGUAGES: Language[] = [
   { value: 'it', label: 'Italiano', shortLabel: 'IT' },
   { value: 'pt', label: 'Português', shortLabel: 'PT' },
   { value: 'ru', label: 'Русский', shortLabel: 'RU' },
+  { value: 'sv', label: 'Svenska', shortLabel: 'SV' },
   { value: 'nl', label: 'Nederlands', shortLabel: 'NL' },
 ];
 

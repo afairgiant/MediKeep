@@ -11,7 +11,7 @@ import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
 import i18n from '../i18n';
 
 // Supported languages - must match backend validation
-const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'ru', 'nl'];
+const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'ru', 'sv', 'nl'];
 
 /**
  * User Preferences Context

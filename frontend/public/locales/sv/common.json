@@ -1,0 +1,2827 @@
+{
+  "auth": {
+    "login": {
+      "title": "LOGGA IN PÅ DITT KONTO",
+      "username": "Användarnamn",
+      "password": "Lösenord",
+      "usernamePlaceholder": "Ange ditt användarnamn",
+      "passwordPlaceholder": "Ange ditt lösenord",
+      "showPassword": "Visa lösenord",
+      "hidePassword": "Dölj lösenord",
+      "submit": "Logga in",
+      "submitting": "Loggar in...",
+      "createAccount": "Skapa nytt konto",
+      "or": "eller",
+      "continueWith": "Fortsätt med {{provider}}",
+      "registrationDisabled": "Registrering av nya användare är för närvarande inaktiverad."
+    },
+    "userCreation": {
+      "requirements": {
+        "length": "Minst 6 tecken",
+        "letter": "Innehåller minst en bokstav",
+        "number": "Innehåller minst en siffra"
+      },
+      "note": "En patientjournal skapas automatiskt för denna användare med standardrollen \"user\".",
+      "backToLogin": "Tillbaka till inloggning",
+      "pageTitle": "Skapa ditt konto",
+      "pageSubtitle": "Gå med i MediKeep idag och hantera dina hälsojournaler säkert",
+      "cardTitle": "Kontouppgifter",
+      "cardSubtitle": "Fyll i formuläret nedan för att skapa ditt nya konto",
+      "whatHappensNext": "Vad händer härnäst?",
+      "nextSteps": {
+        "autoRecord": "Din patientjournal skapas automatiskt",
+        "loggedIn": "Du loggas in direkt efter att kontot har skapats",
+        "startManaging": "Du kan börja hantera din medicinska information direkt",
+        "dataSecure": "All din data är säker och privat"
+      },
+      "welcomeMessage": "Välkommen {{name}}! Ditt konto har skapats.",
+      "accountCreated": "Kontot har skapats! Logga in med dina inloggningsuppgifter."
+    }
+  },
+  "buttons": {
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "delete": "Radera",
+    "edit": "Redigera",
+    "close": "Stäng",
+    "submit": "Skicka",
+    "add": "Lägg till",
+    "addNew": "Lägg till ny",
+    "create": "Skapa",
+    "update": "Uppdatera",
+    "remove": "Ta bort",
+    "confirm": "Bekräfta",
+    "back": "Tillbaka",
+    "next": "Nästa",
+    "finish": "Slutför",
+    "upload": "Ladda upp",
+    "download": "Ladda ner",
+    "export": "Exportera",
+    "import": "Importera",
+    "search": "Sök",
+    "filter": "Filtrera",
+    "clear": "Rensa",
+    "clearAll": "Rensa alla",
+    "reset": "Återställ",
+    "apply": "Tillämpa",
+    "view": "Visa",
+    "print": "Skriv ut",
+    "refresh": "Uppdatera",
+    "retry": "Försök igen",
+    "restore": "Återställ",
+    "continue": "Fortsätt",
+    "skip": "Hoppa över",
+    "done": "Klar",
+    "linkMedication": "Länka läkemedel",
+    "linkMedications": "Länka läkemedel",
+    "linkCondition": "Länka tillstånd",
+    "linkConditions": "Länka tillstånd",
+    "saveChanges": "Spara ändringar"
+  },
+  "labels": {
+    "loading": "Laddar...",
+    "noData": "Ingen data tillgänglig",
+    "noResults": "Inga resultat hittades",
+    "search": "Sök",
+    "filter": "Filtrera",
+    "sort": "Sortera",
+    "actions": "Åtgärder",
+    "status": "Status",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "all": "Alla",
+    "none": "Ingen",
+    "other": "Annat",
+    "optional": "Valfritt",
+    "required": "Obligatoriskt",
+    "yes": "Ja",
+    "no": "Nej",
+    "unknown": "Okänt",
+    "notSpecified": "Ej angivet",
+    "notCompleted": "Ej slutfört",
+    "pending": "Väntande",
+    "error": "Fel",
+    "success": "Lyckades",
+    "viewPractitionerDetails": "Visa vårdgivarinformation",
+    "viewPharmacyDetails": "Visa apoteksinformation",
+    "startDate": "Startdatum",
+    "endDate": "Slutdatum",
+    "duration": "Varaktighet",
+    "notes": "Anteckningar",
+    "tags": "Taggar",
+    "location": "Plats",
+    "name": "Namn",
+    "date": "Datum",
+    "time": "Tid",
+    "description": "Beskrivning",
+    "details": "Detaljer",
+    "settings": "Inställningar",
+    "preferences": "Inställningar",
+    "profile": "Profil",
+    "account": "Konto",
+    "help": "Hjälp",
+    "support": "Support",
+    "loadingOption": "Laddar {{option}}...",
+    "addCustom": "+ Lägg till \"{{value}}\"",
+    "ratingStars": "{{count}}/5 stjärnor",
+    "noRating": "Inget betyg",
+    "noMedicationsLinked": "Inga läkemedel länkade till detta tillstånd",
+    "noConditionsLinked": "Inga tillstånd länkade till detta labbresultat",
+    "noConditionsLinkedToMedication": "Inga tillstånd länkade till detta läkemedel",
+    "loadingRelatedConditions": "Laddar relaterade tillstånd...",
+    "medicationsAvailableToLink": "{{count}} läkemedel tillgängliga att länka",
+    "conditionsAvailableToLink": "{{count}} tillstånd tillgängliga att länka",
+    "linkedMedications": "Länkade läkemedel",
+    "visitWebsite": "Besök webbplats ↗",
+    "severity": "Allvarlighetsgrad",
+    "onsetDate": "Debutdatum",
+    "facility": "Vårdinrättning",
+    "phoneNumber": "Telefonnummer",
+    "website": "Webbplats",
+    "fullName": "Fullständigt namn",
+    "relationship": "Relation",
+    "email": "E-postadress",
+    "address": "Adress",
+    "patientRecord": "Patientjournal",
+    "medicalHistory": "Medicinsk historik",
+    "practitioner": "Vårdgivare",
+    "firstName": "Förnamn",
+    "lastName": "Efternamn",
+    "role": "Roll",
+    "note": "Anteckning"
+  },
+  "fields": {
+    "notes": {
+      "label": "Anteckningar",
+      "placeholder": "Ytterligare information...",
+      "description": "Eventuella ytterligare detaljer eller anteckningar"
+    },
+    "tags": {
+      "label": "Taggar",
+      "placeholder": "Lägg till taggar för att organisera och hitta denna post",
+      "description": "Lägg till taggar för att organisera och söka efter denna post senare"
+    },
+    "status": {
+      "label": "Status",
+      "description": "Aktuell status",
+      "placeholder": "Välj status"
+    },
+    "severity": {
+      "label": "Allvarlighetsgrad",
+      "placeholder": "Välj allvarlighetsgrad",
+      "description": "Allvarlighetsgrad"
+    },
+    "startDate": {
+      "label": "Startdatum",
+      "placeholder": "Välj startdatum",
+      "description": "När detta började"
+    },
+    "endDate": {
+      "label": "Slutdatum",
+      "placeholder": "Välj slutdatum",
+      "description": "När detta slutade (om tillämpligt)"
+    },
+    "onsetDate": {
+      "label": "Debutdatum",
+      "placeholder": "När inträffade detta första gången",
+      "description": "När detta först upptäcktes"
+    },
+    "phoneNumber": {
+      "label": "Telefonnummer",
+      "placeholder": "(555) 123-4567",
+      "description": "Primärt kontaktnummer"
+    },
+    "website": {
+      "label": "Webbplats",
+      "placeholder": "https://www.example.com",
+      "description": "Webbplatsens URL"
+    },
+    "fullName": {
+      "label": "Fullständigt namn",
+      "placeholder": "Ange fullständigt namn",
+      "description": "Fullständigt namn"
+    },
+    "email": {
+      "label": "E-postadress",
+      "placeholder": "t.ex. namn@email.com",
+      "description": "E-postadress"
+    },
+    "address": {
+      "label": "Adress",
+      "placeholder": "Ange adress",
+      "description": "Fysisk adress"
+    }
+  },
+  "severity": {
+    "mild": "Mild - Lätt obehag",
+    "moderate": "Måttlig - Märkbara symtom",
+    "severe": "Svår - Betydande reaktion",
+    "lifeThreatening": "Livshotande - Risk för anafylaxi",
+    "critical": "Kritisk - Livshotande",
+    "mildImpact": "Mild - Lätt påverkan",
+    "moderateImpact": "Måttlig - Märkbar påverkan",
+    "severeImpact": "Svår - Betydande påverkan"
+  },
+  "status": {
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "resolved": "Löst",
+    "stopped": "Avslutad",
+    "onHold": "Pausad",
+    "completed": "Slutförd",
+    "planned": "Planerad",
+    "cancelled": "Avbokad",
+    "pending": "Väntande",
+    "expired": "Utgången"
+  },
+  "statusDescriptions": {
+    "activeAllergic": "Aktiv - För närvarande allergisk",
+    "inactiveAllergic": "Inaktiv - Inte längre allergisk",
+    "resolvedAllergy": "Löst - Vuxit ifrån allergin",
+    "activeCondition": "Aktiv - Pågående tillstånd",
+    "resolvedCondition": "Löst - Inte längre närvarande",
+    "chronicCondition": "Kronisk - Långvarigt tillstånd",
+    "activeExperiencing": "Aktiv - Upplever för närvarande",
+    "resolvedExperiencing": "Löst - Upplever inte längre",
+    "recurring": "Återkommande - Kommer och går"
+  },
+  "viewToggle": {
+    "cards": "Kort",
+    "table": "Tabell",
+    "components": "Komponenter"
+  },
+  "filters": {
+    "title": "Filter och sök",
+    "itemCount": "{{filtered}} av {{total}} objekt",
+    "moreFilters": "{{count}} fler filter",
+    "active": "Aktiv",
+    "clear": "Rensa"
+  },
+  "vitals": {
+    "form": {
+      "selectDate": "Välj datum",
+      "selectDateTime": "Välj datum och tid",
+      "pasteDateTime": "Klistra in eller skriv datum/tid",
+      "pasteDateTimePlaceholder": "t.ex. 2015-07-29 23:58:21",
+      "dateTimePlaceholder": "t.ex. 2015-07-29 23:58",
+      "dateTimePlaceholder_dmy": "t.ex. 29/07/2015 23:58",
+      "dateTimePlaceholder_ymd": "t.ex. 2015-07-29 23:58",
+      "pasteDateTimeDescription": "Skriv eller klistra in datum/tid, eller klicka på kalendern för att välja",
+      "openCalendar": "Öppna kalender",
+      "selectTime": "Tid",
+      "validation": {
+        "bloodGlucoseMin": "Blodsocker måste vara minst 20 mg/dL",
+        "bloodGlucoseMax": "Blodsocker kan inte överstiga 800 mg/dL",
+        "a1cMin": "A1C måste vara minst 0%",
+        "a1cMax": "A1C kan inte överstiga 20%",
+        "dateInFuture": "Datum kan inte vara i framtiden",
+        "timeInFuture": "Vald tid kan inte vara i framtiden",
+        "dateRequired": "Mätdatum och tid krävs",
+        "systolicMin": "Systoliskt blodtryck måste vara minst 50 mmHg",
+        "systolicMax": "Systoliskt blodtryck kan inte överstiga 300 mmHg",
+        "diastolicMin": "Diastoliskt blodtryck måste vara minst 30 mmHg",
+        "diastolicMax": "Diastoliskt blodtryck kan inte överstiga 200 mmHg",
+        "heartRateMin": "Hjärtfrekvens måste vara minst 30 BPM",
+        "heartRateMax": "Hjärtfrekvens kan inte överstiga 250 BPM",
+        "temperatureMin": "Temperatur måste vara minst {{min}}{{unit}}",
+        "temperatureMax": "Temperatur kan inte överstiga {{max}}{{unit}}",
+        "weightMin": "Vikt måste vara minst {{min}} {{unit}}",
+        "weightMax": "Vikt kan inte överstiga {{max}} {{unit}}",
+        "respiratoryRateMin": "Andningsfrekvens måste vara minst 5/min",
+        "respiratoryRateMax": "Andningsfrekvens kan inte överstiga 100/min",
+        "oxygenMin": "Syremättnad måste vara minst 50%",
+        "oxygenMax": "Syremättnad kan inte överstiga 100%",
+        "painScaleMin": "Smärtskala måste vara minst 0",
+        "painScaleMax": "Smärtskala kan inte överstiga 10",
+        "deviceMaxLength": "Enhetsnamn kan inte överstiga 100 tecken",
+        "notesMaxLength": "Anteckningar kan inte överstiga 1000 tecken",
+        "firstNameRequired": "Ange ditt förnamn",
+        "lastNameRequired": "Ange ditt efternamn",
+        "usernameLength": "Användarnamn måste vara minst 3 tecken långt",
+        "passwordLength": "Lösenord måste vara minst 6 tecken långt",
+        "passwordRequirements": "Lösenord måste innehålla minst en bokstav och en siffra"
+      },
+      "sections": {
+        "basicInfo": "Grundläggande information",
+        "physicalMeasurements": "Fysiska mätningar",
+        "recordingInfo": "Registreringsinformation",
+        "additionalInfo": "Ytterligare information"
+      },
+      "bloodPressureDesc": "Mätt i mmHg",
+      "weightDesc": "Vikt i {{unit}}",
+      "vitalSignsDesc": "Grundläggande fysiologiska mätningar",
+      "additionalMeasurementsDesc": "Kompletterande hälsoindikatorer",
+      "contextDesc": "Kontext kring mätningarna",
+      "recordedDateTime": "Mätdatum och tid",
+      "systolicBP": "Systoliskt blodtryck",
+      "diastolicBP": "Diastoliskt blodtryck",
+      "measurementLocation": "Mätplats",
+      "locationPlaceholder": "Var togs dessa mätningar?",
+      "deviceUsed": "Använd enhet/utrustning",
+      "devicePlaceholder": "t.ex. Digital blodtrycksmätare, Termometermodell...",
+      "notesPlaceholder": "Ytterligare anteckningar om vitalparametermätningen...",
+      "painScaleUnit": "(0-10)",
+      "timezoneInfo": "Tidszonsinformation",
+      "timesShownIn": "Tider visas i {{timezone}}",
+      "healthAlerts": "Hälsovarningar",
+      "patientInfo": "Patientinformation",
+      "patientHeight": "Patientlängd: {{height}} tum (från profil)",
+      "missingPatientInfo": "Saknad patientinformation",
+      "heightNotSet": "Längd ej angiven i patientprofil - BMI-beräkning ej tillgänglig",
+      "calculatedValues": "Beräknade värden",
+      "updateVitals": "Uppdatera vitalparametrar",
+      "saveVitals": "Spara vitalparametrar",
+      "locations": {
+        "home": "Hemma",
+        "clinic": "Mottagning",
+        "hospital": "Sjukhus",
+        "urgentCare": "Akutmottagning",
+        "pharmacy": "Apotek",
+        "ambulatory": "Ambulant vård",
+        "other": "Övrigt"
+      },
+      "lockedByImport": "Hanteras av enhetsimportens medelvärde"
+    },
+    "modal": {
+      "bloodGlucose": "Blodsocker",
+      "a1c": "A1C",
+      "title": "Detaljer för vitalparametrar",
+      "basicInfo": "Grundläggande information",
+      "vitalSigns": "Vitalparametrar",
+      "physicalMeasurements": "Fysiska mätningar",
+      "additionalMeasurements": "Ytterligare mätningar",
+      "recordedDate": "Registrerat datum",
+      "deviceUsed": "Använd enhet",
+      "respiratoryRate": "Andningsfrekvens",
+      "height": "Längd",
+      "painScale": "Smärtskala",
+      "notes": "Anteckningar",
+      "recordedBy": "Registrerad av",
+      "practitionerId": "Vårdgivar-ID",
+      "glucoseContext": "Mättyp",
+      "glucoseContextPlaceholder": "Valfritt"
+    },
+    "units": {
+      "mgdl": "mg/dL",
+      "mmHg": "mmHg",
+      "bpm": "BPM",
+      "fahrenheit": "°F",
+      "celsius": "°C",
+      "lbs": "lbs",
+      "kg": "kg",
+      "inches": "tum",
+      "cm": "cm",
+      "perMin": "/min"
+    },
+    "stats": {
+      "bloodGlucoseDesc": "Klicka för att filtrera poster med blodsocker",
+      "a1cDesc": "Klicka för att filtrera poster med A1C",
+      "bloodPressure": "Blodtryck",
+      "bloodPressureDesc": "Klicka för att filtrera poster med blodtryck",
+      "heartRate": "Hjärtfrekvens",
+      "heartRateDesc": "Klicka för att filtrera poster med hjärtfrekvens",
+      "temperature": "Senaste temperatur",
+      "temperatureDesc": "Klicka för att filtrera poster med temperatur",
+      "weight": "Senaste vikt",
+      "weightDesc": "Klicka för att filtrera poster med vikt",
+      "bmi": "BMI",
+      "bmiDesc": "Body Mass Index"
+    },
+    "categories": {
+      "prediabetes": "Prediabetes",
+      "diabetes": "Diabetes",
+      "low": "Lågt",
+      "high": "Högt",
+      "normal": "Normalt"
+    },
+    "title": "Vitalparametrar",
+    "loading": "Laddar vitalparametrar...",
+    "noPatientSelected": "Ingen patient vald",
+    "selectPatientPrompt": "Välj en patient för att visa och hantera vitalparametrar.",
+    "addNew": "Lägg till nya vitalparametrar",
+    "addTitle": "Lägg till vitalparametrar",
+    "editTitle": "Redigera vitalparametrar",
+    "healthSummary": "Hälsoöversikt",
+    "summaryDescription": "Senaste avläsningar och medelvärden - Klicka på ett kort för att filtrera tabellen nedan",
+    "loadingStats": "Laddar hälsostatistik...",
+    "statsLoadError": "Kunde inte ladda hälsostatistik",
+    "filteredBy": "Filtrerat efter",
+    "clearFilter": "Rensa filter",
+    "noDataAvailable": "Inga vitalparameterdata tillgängliga",
+    "recordVitalsPrompt": "Registrera din första vitalparametermätning för att börja spåra hälsovärden.",
+    "card": {
+      "recordedDate": "Registrerat datum",
+      "location": "Plats",
+      "recordedBy": "Registrerad av",
+      "oxygenSaturation": "Syremättnad",
+      "notRecorded": "Ej registrerad",
+      "title": "Vitalparameterregistrering"
+    },
+    "table": {
+      "date": "Datum",
+      "oxygenSat": "O2-mättn.",
+      "errorLoading": "Fel vid laddning av vitalparametrar",
+      "noRecords": "Inga vitalparameterregistreringar hittades",
+      "noRecordsDesc": "Vitalparametrar visas här när de har registrerats"
+    },
+    "import": {
+      "title": "Importera vitalparametrar",
+      "selectDevice": "Välj enhet",
+      "selectDevicePlaceholder": "Välj din enhet...",
+      "uploadFile": "Ladda upp CSV-fil",
+      "preview": "Förhandsgranska",
+      "importButton": "Importera",
+      "back": "Tillbaka",
+      "importing": "Importerar vitalparametrar...",
+      "previewTitle": "Importförhandsgranskning",
+      "totalReadings": "Totalt antal avläsningar",
+      "duplicatesFound": "Dubbletter hittade",
+      "newReadings": "Nya avläsningar",
+      "dateRange": "Datumintervall",
+      "skipDuplicates": "Hoppa över dubblettavläsningar",
+      "duplicateWarning": "{{count}} avläsningar finns redan i detta datumintervall. Markera rutan ovan för att hoppa över dem.",
+      "success": "{{count}} avläsningar importerades",
+      "successWithSkipped": "{{imported}} avläsningar importerade ({{skipped}} dubbletter hoppades över)",
+      "noFile": "Välj en CSV-fil",
+      "noDevice": "Välj en enhet",
+      "fileTooLarge": "Filen överstiger gränsen på 10 MB",
+      "invalidFileType": "Endast CSV-filer stöds",
+      "duplicate": "Dubblett",
+      "parsingFailed": "Kunde inte tolka CSV-filen"
+    },
+    "summary": {
+      "dailySummary": "Daglig sammanfattning",
+      "readings": "{{count}} avläsningar",
+      "avgGlucose": "Medel",
+      "minGlucose": "Min",
+      "maxGlucose": "Max",
+      "expandDetails": "Visa avläsningar",
+      "collapseDetails": "Dölj avläsningar",
+      "importedFrom": "Importerad från {{source}}",
+      "glucoseTrend": "Glukosförlopp",
+      "time": "Tid",
+      "confirmDeleteDay": "Ta bort alla {{count}} importerade avläsningar för denna dag?",
+      "deleteDay": "Ta bort dag"
+    },
+    "glucoseContext": {
+      "fasting": "Fastande",
+      "before_meal": "Före måltid",
+      "after_meal": "Efter måltid",
+      "random": "Slumpmässig"
+    },
+    "trends": {
+      "glucoseContextFilter": "Blodsockertyp",
+      "allContexts": "Alla typer"
+    },
+    "tabs": {
+      "dateTime": "Datum och tid",
+      "vitalSigns": "Vitalparametrar",
+      "additional": "Ytterligare",
+      "context": "Kontext",
+      "documents": "Dokument",
+      "addFiles": "Lägg till filer",
+      "notes": "Anteckningar"
+    }
+  },
+  "medications": {
+    "title": "Läkemedel",
+    "addNew": "Lägg till nytt läkemedel",
+    "quickFilter": "Snabbfilter",
+    "allTypes": "Alla typer",
+    "types": {
+      "prescription": "Receptbelagt",
+      "otc": "Receptfritt",
+      "supplement": "Kosttillskott/Vitamin",
+      "herbal": "Växtbaserat/Naturläkemedel"
+    },
+    "treatments": {
+      "treatmentPlan": "Behandlingsplan"
+    },
+    "loading": "Laddar läkemedel...",
+    "error": "Fel",
+    "success": "Lyckades",
+    "noMedications": "Inga läkemedel eller kosttillskott hittades",
+    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
+    "clickToStart": "Klicka på \"Lägg till nytt läkemedel\" för att komma igång.",
+    "fields": {
+      "frequency": "Frekvens",
+      "route": "Administreringsväg",
+      "purpose": "Syfte",
+      "prescriber": "Förskrivare",
+      "pharmacy": "Apotek",
+      "startDate": "Startdatum",
+      "endDate": "Slutdatum",
+      "noIndication": "Ingen indikation angiven",
+      "viewPractitioner": "Visa vårdgivarinformation",
+      "viewPharmacy": "Visa apoteksinformation"
+    },
+    "modal": {
+      "details": "Detaljer",
+      "tabs": {
+        "overview": "Översikt",
+        "dosageRefills": "Dosering och påfyllning",
+        "notes": "Anteckningar",
+        "documents": "Dokument"
+      },
+      "sections": {
+        "basicInfo": "Grundläggande information",
+        "timeline": "Tidslinje",
+        "prescriberPharmacy": "Förskrivare och apotek",
+        "tags": "Taggar",
+        "dosageInfo": "Doseringsinformation",
+        "additionalNotes": "Ytterligare anteckningar",
+        "sideEffects": "Biverkningar",
+        "attachedDocuments": "Bifogade dokument",
+        "relatedConditions": "Relaterade tillstånd"
+      },
+      "labels": {
+        "medicationName": "Läkemedelsnamn",
+        "purposeIndication": "Syfte/Indikation",
+        "medicationType": "Läkemedelstyp",
+        "dosage": "Dosering",
+        "form": "Form"
+      },
+      "notSpecified": "Ej angivet",
+      "ongoing": "Pågående",
+      "noNotes": "Inga anteckningar tillgängliga",
+      "noSideEffects": "Inga biverkningar rapporterade",
+      "editMedication": "Redigera läkemedel"
+    },
+    "conditions": {
+      "loading": "Laddar relaterade tillstånd...",
+      "noLinked": "Inga tillstånd länkade till detta läkemedel",
+      "orphanedTitle": "Detta tillstånd har raderats men relationen finns kvar",
+      "viewDetails": "Klicka för att visa tillståndsinformation",
+      "removeLink": "Ta bort tillståndslänk",
+      "confirmRemove": "Ta bort denna tillståndslänk?",
+      "failedToAdd": "Kunde inte lägga till tillståndsrelation",
+      "failedToRemove": "Kunde inte ta bort tillståndsrelation",
+      "availableToLink": "{{count}} tillstånd tillgängligt att länka",
+      "availableToLink_plural": "{{count}} tillstånd tillgängliga att länka",
+      "linkToMedication": "Länka tillstånd till läkemedel",
+      "selectCondition": "Välj tillstånd",
+      "selectConditionPlaceholder": "Välj ett tillstånd att länka"
+    }
+  },
+  "searchPlaceholders": {
+    "conditions": "Sök tillstånd, anteckningar, taggar...",
+    "insurance": "Sök försäkringsbolag, medlemsnamn...",
+    "medications": "Sök läkemedel, indikationer, doseringar, taggar...",
+    "procedures": "Sök procedurer, anteckningar, taggar...",
+    "treatments": "Sök behandlingar, anteckningar, taggar...",
+    "visits": "Sök besök, anledningar, anteckningar, taggar...",
+    "immunizations": "Sök vaccinationer, vacciner, taggar...",
+    "allergies": "Sök allergier, reaktioner, taggar...",
+    "symptoms": "Sök symtom, beskrivningar, taggar...",
+    "practitioners": "Sök vårdgivare...",
+    "pharmacies": "Sök apotek...",
+    "labResults": "Sök labbresultat, testkoder, vårdinrättningar, vårdgivare, taggar...",
+    "vitals": "Sök anteckningar om vitalparametrar...",
+    "emergencyContacts": "Sök kontakter, relationer, telefon, e-post...",
+    "familyHistory": "Sök familjemedlemmar, tillstånd, anteckningar...",
+    "injuries": "Sök skador, kroppsdelar, anteckningar, taggar...",
+    "generic": "Sök..."
+  },
+  "messages": {
+    "confirmDelete": "Är du säker på att du vill radera detta objekt?",
+    "confirmDeleteMultiple": "Är du säker på att du vill radera dessa {{count}} objekt?",
+    "unsavedChanges": "Du har osparade ändringar. Är du säker på att du vill lämna?",
+    "saveSuccess": "Sparades",
+    "deleteSuccess": "Raderades",
+    "updateSuccess": "Uppdaterades",
+    "createSuccess": "Skapades",
+    "operationSuccess": "Åtgärden slutfördes",
+    "operationFailed": "Åtgärden misslyckades. Försök igen.",
+    "pleaseWait": "Vänta...",
+    "processing": "Bearbetar...",
+    "confirmRemoveMedicationRelationship": "Är du säker på att du vill ta bort denna läkemedelsrelation?",
+    "confirmRemoveConditionRelationship": "Är du säker på att du vill ta bort denna tillståndsrelation?"
+  },
+  "modals": {
+    "linkMedicationToCondition": "Länka läkemedel till tillstånd",
+    "linkMedicationsToCondition": "Länka läkemedel till tillstånd",
+    "linkConditionsToMedication": "Länka tillstånd till läkemedel",
+    "linkConditionToLabResult": "Länka tillstånd till labbresultat",
+    "selectMedication": "Välj läkemedel",
+    "selectMedications": "Välj läkemedel",
+    "selectConditions": "Välj tillstånd",
+    "selectCondition": "Välj tillstånd",
+    "chooseMedicationToLink": "Välj läkemedel att länka",
+    "chooseConditionsToLink": "Välj tillstånd att länka",
+    "chooseConditionToLink": "Välj ett tillstånd att länka",
+    "relevanceNoteOptional": "Relevansanteckning (valfritt)",
+    "noRelevanceNoteProvided": "Ingen relevansanteckning angiven",
+    "relevanceNote": "Relevansanteckning",
+    "describeConditionRelevance": "Beskriv hur detta tillstånd relaterar till labbresultatet (valfritt)",
+    "describeConditionRelevanceMedication": "Beskriv hur dessa tillstånd relaterar till detta läkemedel (valfritt)",
+    "describeMedicationRelevance": "Beskriv hur dessa läkemedel relaterar till tillståndet (valfritt)"
+  },
+  "time": {
+    "today": "Idag",
+    "yesterday": "Igår",
+    "tomorrow": "Imorgon",
+    "thisWeek": "Denna vecka",
+    "lastWeek": "Förra veckan",
+    "thisMonth": "Denna månad",
+    "lastMonth": "Förra månaden",
+    "thisYear": "I år",
+    "lastYear": "Förra året",
+    "custom": "Anpassad",
+    "morning": "Morgon",
+    "afternoon": "Eftermiddag",
+    "evening": "Kväll",
+    "night": "Natt",
+    "day": "dag",
+    "days": "dagar",
+    "month": "månad",
+    "months": "månader",
+    "year": "år",
+    "years": "år",
+    "ended": "avslutad",
+    "ongoing": "pågående"
+  },
+  "pagination": {
+    "page": "Sida",
+    "of": "av",
+    "showing": "Visar",
+    "to": "till",
+    "results": "resultat",
+    "showingRange": "Visar {{start}} till {{end}} av {{total}} resultat",
+    "itemsPerPage": "Objekt per sida",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "first": "Första",
+    "last": "Sista"
+  },
+  "patients": {
+    "form": {
+      "createTitle": "Skapa ny patient",
+      "editTitle": "Redigera patient",
+      "saveFirstMessage": "Spara patientinformation först, sedan kan du lägga till ett foto",
+      "sections": {
+        "basicInformation": "Grundläggande information",
+        "medicalInformation": "Medicinsk information",
+        "contactInformation": "Kontaktinformation"
+      },
+      "selfRecord": {
+        "label": "Detta är min egen journal",
+        "description": "Markera detta om du skapar en journal för dig själv"
+      },
+      "firstName": {
+        "label": "Förnamn",
+        "placeholder": "Ange förnamn",
+        "description": "Patientens förnamn"
+      },
+      "lastName": {
+        "label": "Efternamn",
+        "placeholder": "Ange efternamn",
+        "description": "Patientens efternamn"
+      },
+      "birthDate": {
+        "label": "Födelsedatum",
+        "placeholder": "Välj födelsedatum",
+        "description": "Patientens födelsedatum"
+      },
+      "gender": {
+        "label": "Kön",
+        "placeholder": "Välj kön",
+        "description": "Patientens kön",
+        "options": {
+          "select": "Välj kön",
+          "male": "Man",
+          "female": "Kvinna",
+          "other": "Annat",
+          "preferNotToSay": "Vill inte ange"
+        }
+      },
+      "relationship": {
+        "label": "Relation till dig",
+        "placeholder": "Välj relation (valfritt)",
+        "description": "Hur är denna person relaterad till dig?",
+        "options": {
+          "select": "Välj relation (valfritt)",
+          "self": "Jag själv",
+          "spouse": "Make/Maka",
+          "partner": "Partner",
+          "child": "Barn",
+          "son": "Son",
+          "daughter": "Dotter",
+          "parent": "Förälder",
+          "father": "Far",
+          "mother": "Mor",
+          "sibling": "Syskon",
+          "brother": "Bror",
+          "sister": "Syster",
+          "grandparent": "Mor-/farförälder",
+          "grandchild": "Barnbarn",
+          "otherFamily": "Övrig familj",
+          "friend": "Vän",
+          "other": "Annat"
+        }
+      },
+      "address": {
+        "label": "Adress",
+        "placeholder": "Ange adress",
+        "description": "Fullständig adress för journalen (valfritt)"
+      },
+      "medicalInfoHeading": "Medicinsk information",
+      "bloodType": {
+        "label": "Blodgrupp",
+        "placeholder": "Välj blodgrupp",
+        "description": "Viktigt vid nödsituationer"
+      },
+      "height": {
+        "label": "Längd",
+        "placeholder": {
+          "imperial": "Ange längd i tum",
+          "metric": "Ange längd i centimeter"
+        },
+        "description": "Längd i {{unit}}"
+      },
+      "weight": {
+        "label": "Vikt",
+        "placeholder": {
+          "imperial": "Ange vikt i pund",
+          "metric": "Ange vikt i kilogram"
+        },
+        "description": "Vikt i {{unit}}"
+      },
+      "physician": {
+        "label": "Husläkare",
+        "placeholder": "Välj läkare (valfritt)",
+        "description": "Din primära läkare för löpande vård"
+      },
+      "buttons": {
+        "saving": "Sparar...",
+        "createPatient": "Skapa patient",
+        "updatePatient": "Uppdatera patient",
+        "saveChanges": "Spara ändringar",
+        "cancel": "Avbryt"
+      },
+      "messages": {
+        "createSuccess": "Skapade {{firstName}} {{lastName}} framgångsrikt",
+        "updateSuccess": "Uppdaterade {{firstName}} {{lastName}} framgångsrikt"
+      }
+    }
+  },
+  "patientSelector": {
+    "title": "Patientväljare",
+    "badges": {
+      "self": "Egen",
+      "shared": "Delad"
+    },
+    "labels": {
+      "currentlyViewing": "Visar just nu:",
+      "switchTo": "Byt till en annan patient:",
+      "switching": "Byter patient...",
+      "patientActions": "Patientåtgärder",
+      "born": "Född"
+    },
+    "tooltips": {
+      "expand": "Expandera patientväljaren",
+      "minimize": "Minimera till en rad",
+      "switchPatient": "Byt patient",
+      "refresh": "Uppdatera patienter",
+      "addNew": "Lägg till ny patient"
+    },
+    "buttons": {
+      "retry": "Försök igen",
+      "addNew": "Lägg till ny patient",
+      "editPatient": "Redigera patient",
+      "sharePatient": "Dela patient",
+      "deletePatient": "Ta bort patient",
+      "removeAccess": "Ta bort åtkomst"
+    },
+    "placeholders": {
+      "loading": "Laddar...",
+      "select": "Välj en patient att byta till..."
+    },
+    "stats": {
+      "owned": "Egna",
+      "shared": "Delade",
+      "total": "Totalt"
+    },
+    "errors": {
+      "loadFailed": "Kunde inte ladda patienter",
+      "noPatients": "Inga patienter hittades"
+    },
+    "messages": {
+      "noAccess": "Du har inte åtkomst till några patienter ännu. Skapa en ny patient för att komma igång."
+    },
+    "modals": {
+      "createTitle": "Skapa ny patient",
+      "editTitle": "Redigera patient"
+    }
+  },
+  "symptoms": {
+    "title": "Symtom",
+    "noPatientSelected": "Ingen patient vald",
+    "selectPatientPrompt": "Vänligen välj eller skapa en patient för att spåra symtom.",
+    "addSymptom": "Lägg till symtom",
+    "addSymptomTitle": "Lägg till nytt symtom",
+    "editSymptomTitle": "Redigera symtom",
+    "logEpisode": "Logga episod",
+    "logEpisodeTitle": "Logga episod",
+    "editEpisode": "Redigera episod",
+    "editEpisodeTitle": "Redigera episod",
+    "confirmDeleteSymptom": "Är du säker på att du vill ta bort detta symtom och alla dess förekomster?",
+    "chronic": "Kronisk",
+    "category": "Kategori",
+    "first": "Första",
+    "last": "Senaste",
+    "episode": "episod",
+    "episodes": "episoder",
+    "commonTriggers": "Vanliga utlösande faktorer",
+    "moreCount": "+{{count}} till",
+    "noRecords": "Inga symtom registrerade ännu",
+    "noRecordsPrompt": "Klicka på \"Lägg till symtom\" för att börja spåra ett nytt symtom",
+    "occurrence": {
+      "additionalNotes": {
+        "label": "Ytterligare anteckningar",
+        "placeholder": "Ytterligare detaljer om denna episod...",
+        "description": "Annan relevant information om denna förekomst"
+      }
+    },
+    "tabs": {
+      "list": "Lista",
+      "timeline": "Tidslinje",
+      "calendar": "Kalender"
+    },
+    "timeline": {
+      "title": "Symtomtidslinje",
+      "noEpisodes": "Inga symtomepisoder registrerade under denna period",
+      "recorded": "registrerad",
+      "filters": {
+        "allDates": "Alla datum",
+        "lastWeek": "Senaste veckan",
+        "lastMonth": "Senaste månaden",
+        "last3Months": "Senaste 3 månaderna",
+        "lastYear": "Senaste året"
+      }
+    },
+    "calendar": {
+      "title": "Symtomkalender",
+      "ongoing": "Pågående",
+      "noEpisodes": "Inga symtomepisoder registrerade denna månad",
+      "episodesOn": "Symtomepisoder den {{date}}",
+      "noOccurrences": "Inga förekomster hittades för detta datum",
+      "pain": "Smärta",
+      "viewSymptom": "Visa symtom",
+      "duration": "Varaktighet",
+      "location": "Plats",
+      "time": "Tid",
+      "timeOfDay": "Tid på dygnet",
+      "resolved": "Löst",
+      "occurrenceId": "Förekomst-ID",
+      "weekDays": {
+        "sun": "Sön",
+        "mon": "Mån",
+        "tue": "Tis",
+        "wed": "Ons",
+        "thu": "Tor",
+        "fri": "Fre",
+        "sat": "Lör"
+      }
+    },
+    "viewModal": {
+      "title": "{{name}} - Detaljer",
+      "confirmDeleteEpisode": "Är du säker på att du vill ta bort denna episod?",
+      "basicInfo": "Grundläggande information",
+      "symptomName": "Symtomnamn",
+      "notSpecified": "Ej angivet",
+      "type": "Typ",
+      "acute": "Akut",
+      "timeline": "Tidslinje",
+      "noEpisodesLogged": "Inga episoder loggade",
+      "totalEpisodes": "Totalt antal episoder",
+      "episodeHistory": "Episodhistorik",
+      "logNewEpisode": "Logga ny episod",
+      "noEpisodesYet": "Inga episoder loggade ännu",
+      "logFirstEpisode": "Logga första episoden",
+      "time": "Tid",
+      "impact": "Påverkan",
+      "triggers": "Utlösande faktorer",
+      "relief": "Lindring",
+      "generalNotes": "Allmänna anteckningar",
+      "noNotesProvided": "Inga anteckningar angivna",
+      "attachedDocuments": "Bifogade dokument",
+      "deleteSymptom": "Ta bort symtom",
+      "editSymptom": "Redigera symtom",
+      "tabs": {
+        "overview": "Översikt",
+        "episodes": "Episoder ({{count}})",
+        "notes": "Anteckningar",
+        "documents": "Dokument"
+      }
+    }
+  },
+  "conditions": {
+    "title": "Medicinska tillstånd",
+    "loading": "Laddar tillstånd...",
+    "addNew": "Lägg till nytt tillstånd",
+    "editTitle": "Redigera tillstånd",
+    "addTitle": "Lägg till nytt tillstånd",
+    "noResults": "Inga medicinska tillstånd hittades",
+    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
+    "getStarted": "Klicka på \"Lägg till nytt tillstånd\" för att komma igång.",
+    "table": {
+      "condition": "Tillstånd",
+      "severity": "Allvarlighetsgrad",
+      "onsetDate": "Debutdatum",
+      "endDate": "Slutdatum",
+      "status": "Status",
+      "icd10": "ICD-10",
+      "notes": "Anteckningar"
+    },
+    "card": {
+      "onsetDate": "Debut",
+      "endDate": "Slut",
+      "duration": "Varaktighet",
+      "snomedCode": "SNOMED-kod",
+      "codeDescription": "Kodbeskrivning",
+      "durationEnded": "{{duration}} (avslutad)",
+      "durationOngoing": "{{duration}} (pågående)"
+    },
+    "modal": {
+      "title": "Tillståndsdetaljer",
+      "tabs": {
+        "overview": "Översikt",
+        "clinical": "Kliniska detaljer",
+        "notes": "Anteckningar",
+        "documents": "Dokument"
+      },
+      "sections": {
+        "basicInfo": "Grundläggande information",
+        "timeline": "Tidslinje",
+        "relatedInfo": "Relaterad information",
+        "tags": "Taggar",
+        "medicalCodes": "Medicinska koder",
+        "clinicalNotes": "Kliniska anteckningar"
+      },
+      "labels": {
+        "diagnosis": "Diagnos",
+        "conditionName": "Tillståndsnamn",
+        "severity": "Allvarlighetsgrad",
+        "onsetDate": "Debut",
+        "endDate": "Slut",
+        "duration": "Varaktighet",
+        "relatedMedication": "Relaterat läkemedel",
+        "practitioner": "Vårdgivare",
+        "icd10Code": "ICD-10-kod",
+        "snomedCode": "SNOMED-kod",
+        "codeDescription": "Kodbeskrivning"
+      },
+      "noMedicationLinked": "Inget läkemedel länkat",
+      "noPractitionerAssigned": "Ingen vårdgivare tilldelad",
+      "noNotesAvailable": "Inga kliniska anteckningar tillgängliga"
+    },
+    "form": {
+      "saving": "Sparar tillstånd...",
+      "createCondition": "Skapa tillstånd",
+      "updateCondition": "Uppdatera tillstånd",
+      "tabs": {
+        "basicInfo": "Grundläggande information",
+        "clinical": "Kliniska detaljer",
+        "documents": "Dokument",
+        "notes": "Anteckningar"
+      },
+      "fields": {
+        "diagnosis": "Diagnos",
+        "conditionName": "Tillståndsnamn",
+        "severity": "Allvarlighetsgrad",
+        "status": "Status",
+        "onsetDate": "Debutdatum",
+        "endDate": "Slutdatum",
+        "relatedMedication": "Relaterat läkemedel",
+        "practitioner": "Vårdgivare",
+        "tags": "Taggar",
+        "icd10Code": "ICD-10-kod",
+        "snomedCode": "SNOMED-kod",
+        "codeDescription": "Kodbeskrivning",
+        "clinicalNotes": "Kliniska anteckningar"
+      },
+      "placeholders": {
+        "diagnosis": "Ange diagnos",
+        "conditionName": "Ange tillståndsnamn",
+        "severity": "Välj allvarlighetsgrad",
+        "status": "Välj status",
+        "onsetDate": "Välj debutdatum",
+        "endDate": "Välj slutdatum",
+        "medication": "Välj läkemedel",
+        "practitioner": "Välj vårdgivare",
+        "tags": "Lägg till taggar...",
+        "icd10Code": "t.ex. E11.9",
+        "snomedCode": "t.ex. 44054006",
+        "codeDescription": "Beskrivning av den medicinska koden",
+        "notes": "Ange kliniska anteckningar, observationer eller ytterligare detaljer"
+      },
+      "descriptions": {
+        "diagnosis": "Primär diagnos eller tillstånd",
+        "conditionName": "Valfritt alternativt namn",
+        "onsetDate": "När tillståndet började",
+        "endDate": "När tillståndet avslutades (om tillämpligt)",
+        "medication": "Länka detta tillstånd till ett läkemedel",
+        "practitioner": "Associerad vårdgivare",
+        "tags": "Lägg till taggar för att kategorisera och organisera tillstånd",
+        "icd10Code": "Internationell klassificering av sjukdomar-kod",
+        "snomedCode": "SNOMED CT-kod",
+        "codeDescription": "Läsbar beskrivning av de medicinska koderna",
+        "notes": "Ytterligare information om detta tillstånd"
+      },
+      "severity": {
+        "mild": "Mild",
+        "moderate": "Måttlig",
+        "severe": "Svår",
+        "critical": "Kritisk"
+      },
+      "status": {
+        "active": "Aktiv",
+        "inactive": "Inaktiv",
+        "resolved": "Löst",
+        "chronic": "Kronisk"
+      }
+    }
+  },
+  "treatments": {
+    "title": "Behandlingar",
+    "loadingTreatments": "Laddar behandlingar...",
+    "addTreatment": "+ Lägg till behandling",
+    "noTreatmentsFound": "Inga behandlingar hittades",
+    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
+    "startAdding": "Börja med att lägga till din första behandling.",
+    "addFirstTreatment": "Lägg till din första behandling",
+    "conditionsLoadingError": "Fel vid laddning av tillstånd",
+    "card": {
+      "subtitle": "Medicinsk behandling",
+      "conditionId": "Tillstånd #{{id}}",
+      "startDate": "Startdatum",
+      "endDate": "Slutdatum",
+      "amount": "Mängd",
+      "frequency": "Frekvens",
+      "description": "Beskrivning",
+      "notSpecified": "Ej angivet",
+      "relatedCondition": "Relaterat tillstånd",
+      "viewConditionDetails": "Visa tillståndsdetaljer"
+    },
+    "viewModal": {
+      "title": "Behandlingsdetaljer",
+      "tabs": {
+        "overview": "Översikt",
+        "schedule": "Schema och dosering",
+        "notes": "Anteckningar",
+        "documents": "Dokument"
+      },
+      "basicInformation": "Grundläggande information",
+      "treatmentName": "Behandlingsnamn",
+      "treatmentType": "Behandlingstyp",
+      "status": "Status",
+      "description": "Beskrivning",
+      "notSpecified": "Ej angivet",
+      "practitioner": "Vårdgivare",
+      "doctor": "Läkare",
+      "practitionerId": "Vårdgivare #{{id}}",
+      "specialty": "Specialitet",
+      "practice": "Mottagning",
+      "relatedCondition": "Relaterat tillstånd",
+      "diagnosis": "Diagnos",
+      "conditionId": "Tillstånd #{{id}}",
+      "noConditionLinked": "Inget tillstånd länkat",
+      "severity": "Allvarlighetsgrad",
+      "conditionStatus": "Tillståndsstatus",
+      "tags": "Taggar",
+      "schedule": "Schema",
+      "startDate": "Startdatum",
+      "endDate": "Slutdatum",
+      "dosageFrequency": "Dosering och frekvens",
+      "amountDosage": "Mängd/Dosering",
+      "frequency": "Frekvens",
+      "treatmentNotes": "Behandlingsanteckningar",
+      "noNotesAvailable": "Inga anteckningar tillgängliga",
+      "close": "Stäng",
+      "edit": "Redigera"
+    },
+    "form": {
+      "savingTreatment": "Sparar behandling...",
+      "tabs": {
+        "basicInfo": "Grundläggande info",
+        "scheduleDosage": "Schema och dosering",
+        "documents": "Dokument",
+        "notes": "Anteckningar"
+      },
+      "treatmentName": "Behandlingsnamn",
+      "enterTreatmentName": "Ange behandlingsnamn",
+      "treatmentNameDesc": "Namn på behandlingen",
+      "treatmentType": "Behandlingstyp",
+      "treatmentTypePlaceholder": "t.ex. Fysioterapi, Kirurgi",
+      "treatmentTypeDesc": "Typ eller kategori av behandling",
+      "status": "Status",
+      "selectStatus": "Välj status",
+      "statusDesc": "Aktuell behandlingsstatus",
+      "statusPlanned": "Planerad",
+      "statusActive": "Aktiv",
+      "statusOnHold": "Pausad",
+      "statusCompleted": "Slutförd",
+      "statusCancelled": "Avbokad",
+      "relatedCondition": "Relaterat tillstånd",
+      "selectCondition": "Välj tillstånd",
+      "relatedConditionDesc": "Länka denna behandling till ett tillstånd",
+      "practitioner": "Vårdgivare",
+      "selectPractitioner": "Välj vårdgivare",
+      "practitionerDesc": "Vårdgivare som administrerar behandlingen",
+      "description": "Beskrivning",
+      "descriptionPlaceholder": "Beskriv behandlingen",
+      "descriptionDesc": "Kort beskrivning av behandlingen",
+      "tags": "Taggar",
+      "tagsDesc": "Lägg till taggar för att kategorisera och organisera behandlingar",
+      "tagsPlaceholder": "Lägg till taggar...",
+      "startDate": "Startdatum",
+      "selectStartDate": "Välj startdatum",
+      "startDateDesc": "När behandlingen börjar",
+      "endDate": "Slutdatum",
+      "selectEndDate": "Välj slutdatum",
+      "endDateDesc": "När behandlingen slutar (om tillämpligt)",
+      "dosageAmount": "Dosering/Mängd",
+      "dosagePlaceholder": "t.ex. 10mg, 1 session",
+      "dosageDesc": "Mängd eller dosering per behandling",
+      "frequency": "Frekvens",
+      "frequencyPlaceholder": "t.ex. Dagligen, Två gånger per vecka",
+      "frequencyDesc": "Hur ofta behandlingen administreras",
+      "treatmentNotes": "Behandlingsanteckningar",
+      "notesPlaceholder": "Ange behandlingsanteckningar, observationer eller ytterligare detaljer",
+      "notesDesc": "Ytterligare information om denna behandling",
+      "cancel": "Avbryt",
+      "updateTreatment": "Uppdatera behandling",
+      "createTreatment": "Skapa behandling"
+    }
+  },
+  "procedures": {
+    "title": "Ingrepp",
+    "loadingProcedures": "Laddar ingrepp...",
+    "loadingRefresh": "Om detta tar för lång tid, vänligen uppdatera sidan",
+    "error": "Fel",
+    "success": "Lyckades",
+    "addProcedure": "+ Lägg till ingrepp",
+    "noProceduresFound": "Inga ingrepp hittades",
+    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
+    "startAdding": "Börja med att lägga till ditt första ingrepp.",
+    "addFirstProcedure": "Lägg till ditt första ingrepp",
+    "editProcedure": "Redigera ingrepp",
+    "addNewProcedure": "Lägg till nytt ingrepp",
+    "processing": "Bearbetar...",
+    "card": {
+      "procedureDate": "Ingreppsdatum",
+      "code": "Kod",
+      "setting": "Vårdmiljö",
+      "duration": "Varaktighet",
+      "durationMinutes": "{{minutes}} minuter",
+      "facility": "Vårdinrättning",
+      "doctor": "Läkare",
+      "practitionerId": "Utövare-ID: {{id}}",
+      "viewPractitioner": "Visa utövardetaljer",
+      "description": "Beskrivning",
+      "complications": "Komplikationer",
+      "notSpecified": "Ej angivet"
+    },
+    "viewModal": {
+      "title": "Ingreppsinformation",
+      "tabs": {
+        "overview": "Översikt",
+        "clinical": "Kliniska detaljer",
+        "notes": "Anteckningar",
+        "documents": "Dokument"
+      },
+      "basicInfo": "Grundläggande information",
+      "procedureName": "Ingreppets namn",
+      "procedureType": "Typ av ingrepp",
+      "procedureCode": "Ingreppskod",
+      "date": "Datum",
+      "status": "Status",
+      "setting": "Vårdmiljö",
+      "duration": "Varaktighet",
+      "durationMinutes": "{{minutes}} minuter",
+      "facility": "Vårdinrättning",
+      "practitioner": "Utövare",
+      "doctor": "Läkare",
+      "practitionerId": "Utövare-ID: {{id}}",
+      "viewPractitioner": "Visa utövardetaljer",
+      "specialty": "Specialitet",
+      "description": "Beskrivning",
+      "noDescription": "Ingen beskrivning tillgänglig",
+      "tags": "Taggar",
+      "anesthesiaInfo": "Anestesiinformation",
+      "anesthesiaType": "Typ av anestesi",
+      "anesthesiaNotes": "Anestesianteckningar",
+      "noAnesthesiaNotes": "Inga anestesianteckningar tillgängliga",
+      "complications": "Komplikationer",
+      "noComplications": "Inga komplikationer rapporterade",
+      "clinicalNotes": "Kliniska anteckningar",
+      "noClinicalNotes": "Inga kliniska anteckningar tillgängliga",
+      "outcome": "Resultat",
+      "notSpecified": "Ej angivet",
+      "close": "Stäng",
+      "edit": "Redigera"
+    },
+    "form": {
+      "savingProcedure": "Sparar ingrepp...",
+      "tabs": {
+        "basicInfo": "Grundinfo",
+        "clinical": "Kliniska detaljer",
+        "documents": "Dokument",
+        "notes": "Anteckningar"
+      },
+      "procedureName": "Ingreppets namn",
+      "procedureNamePlaceholder": "Ange namn på ingreppet",
+      "procedureNameDesc": "Namn på ingreppet",
+      "procedureType": "Typ av ingrepp",
+      "procedureTypePlaceholder": "t.ex. Kirurgiskt, Diagnostiskt",
+      "procedureTypeDesc": "Typ eller kategori av ingrepp",
+      "procedureCode": "Ingreppskod",
+      "procedureCodePlaceholder": "t.ex. CPT-kod",
+      "procedureCodeDesc": "Medicinsk faktureringskod",
+      "procedureDate": "Ingreppsdatum",
+      "procedureDatePlaceholder": "Välj datum för ingreppet",
+      "procedureDateDesc": "När ingreppet utfördes",
+      "status": "Status",
+      "statusPlaceholder": "Välj status",
+      "statusDesc": "Aktuell status för ingreppet",
+      "statusScheduled": "Planerat",
+      "statusInProgress": "Pågående",
+      "statusCompleted": "Slutfört",
+      "statusPostponed": "Uppskjutet",
+      "statusCancelled": "Inställt",
+      "practitioner": "Utövare",
+      "practitionerPlaceholder": "Välj utövare",
+      "practitionerDesc": "Vårdgivare som utför ingreppet",
+      "setting": "Vårdmiljö",
+      "settingPlaceholder": "t.ex. Slutenvård, Öppenvård",
+      "settingDesc": "Var ingreppet utfördes",
+      "facility": "Vårdinrättning",
+      "facilityPlaceholder": "t.ex. Sjukhusnamn",
+      "facilityDesc": "Medicinsk vårdinrättning",
+      "duration": "Varaktighet (minuter)",
+      "durationPlaceholder": "Ange varaktighet",
+      "durationDesc": "Hur länge ingreppet tog",
+      "description": "Beskrivning",
+      "descriptionPlaceholder": "Beskriv ingreppet",
+      "descriptionDesc": "Kort beskrivning av ingreppet",
+      "tags": "Taggar",
+      "tagsDesc": "Lägg till taggar för att kategorisera och organisera ingrepp",
+      "tagsPlaceholder": "Lägg till taggar...",
+      "anesthesiaType": "Typ av anestesi",
+      "anesthesiaTypePlaceholder": "t.ex. Generell, Lokal, Regional",
+      "anesthesiaTypeDesc": "Typ av anestesi som användes",
+      "anesthesiaNotes": "Anestesianteckningar",
+      "anesthesiaNotesPlaceholder": "Ange anestesidetaljer och anteckningar",
+      "anesthesiaNotesDesc": "Ytterligare anestesiinformation",
+      "complications": "Komplikationer",
+      "complicationsPlaceholder": "Dokumentera eventuella komplikationer",
+      "complicationsDesc": "Eventuella problem eller komplikationer som uppstod",
+      "clinicalNotes": "Kliniska anteckningar",
+      "clinicalNotesPlaceholder": "Ange kliniska anteckningar, observationer eller ytterligare detaljer",
+      "clinicalNotesDesc": "Ytterligare information om detta ingrepp",
+      "outcome": "Resultat",
+      "outcomePlaceholder": "Välj resultat",
+      "outcomeDesc": "Resultat av ingreppet",
+      "outcomeSuccessful": "Lyckat",
+      "outcomeAbnormal": "Avvikande",
+      "outcomeComplications": "Komplikationer",
+      "outcomeInconclusive": "Ej konklusivt",
+      "outcomePending": "Väntande",
+      "cancel": "Avbryt",
+      "createProcedure": "Skapa ingrepp",
+      "updateProcedure": "Uppdatera ingrepp"
+    },
+    "table": {
+      "procedureName": "Ingreppets namn",
+      "type": "Typ",
+      "code": "Kod",
+      "date": "Datum",
+      "status": "Status",
+      "setting": "Vårdmiljö",
+      "facility": "Vårdinrättning",
+      "practitioner": "Utövare",
+      "description": "Beskrivning"
+    }
+  },
+  "immunizations": {
+    "title": "Vaccinationer",
+    "loadingImmunizations": "Laddar vaccinationer...",
+    "error": "Fel",
+    "success": "Lyckades",
+    "addImmunization": "Lägg till ny vaccination",
+    "editImmunization": "Redigera vaccination",
+    "addNewImmunization": "Lägg till ny vaccination",
+    "noImmunizationsFound": "Inga vaccinationer hittades",
+    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
+    "clickToGetStarted": "Klicka på \"Lägg till ny vaccination\" för att komma igång.",
+    "table": {
+      "vaccineName": "Vaccinnamn",
+      "dateAdministered": "Administreringsdatum",
+      "doseNumber": "Dosnummer",
+      "manufacturer": "Tillverkare",
+      "site": "Injektionsställe",
+      "route": "Administreringsväg",
+      "lotNumber": "Batchnummer",
+      "expirationDate": "Utgångsdatum",
+      "notes": "Anteckningar",
+      "tradeName": "Handelsnamn",
+      "practitioner": "Utövare"
+    },
+    "card": {
+      "dose": "Dos {{number}}",
+      "dateAdministered": "Administreringsdatum",
+      "lotNumber": "Batchnummer",
+      "ndcNumber": "NDC-nummer",
+      "injectionSite": "Injektionsställe",
+      "route": "Administreringsväg",
+      "location": "Plats",
+      "expirationDate": "Utgångsdatum",
+      "practitioner": "Utövare",
+      "viewPractitioner": "Visa utövardetaljer",
+      "practitionerId": "ID: {{id}}",
+      "notSpecified": "Ej angivet"
+    },
+    "viewModal": {
+      "title": "Vaccinationsdetaljer",
+      "dose": "Dos {{number}}",
+      "tabs": {
+        "overview": "Översikt",
+        "administration": "Administrering",
+        "notes": "Anteckningar",
+        "documents": "Dokument"
+      },
+      "vaccineInfo": "Vaccininformation",
+      "vaccineName": "Vaccinnamn",
+      "tradeName": "Handelsnamn",
+      "manufacturer": "Tillverkare",
+      "doseNumber": "Dosnummer",
+      "doseHash": "Dos #{{number}}",
+      "lotNumber": "Batchnummer",
+      "ndcNumber": "NDC-nummer",
+      "expirationDate": "Utgångsdatum",
+      "adminDetails": "Administreringsdetaljer",
+      "dateAdministered": "Administreringsdatum",
+      "adminSite": "Administreringsställe",
+      "route": "Administreringsväg",
+      "locationFacility": "Plats/Vårdinrättning",
+      "viewPractitioner": "Visa utövardetaljer",
+      "practitionerId": "Utövare-ID: {{id}}"
+    },
+    "form": {
+      "savingImmunization": "Sparar vaccination...",
+      "tabs": {
+        "basicInfo": "Grundinfo",
+        "administration": "Administrering",
+        "documents": "Dokument",
+        "notes": "Anteckningar"
+      },
+      "vaccineName": "Vaccinnamn",
+      "vaccineNamePlaceholder": "t.ex. Influensavaccin, COVID-19, Tdap",
+      "vaccineNameDesc": "Vanligt namn för vaccinet",
+      "tradeName": "Formellt/Handelsnamn",
+      "tradeNamePlaceholder": "t.ex. Flublok TRIV 2025-2026 PFS",
+      "tradeNameDesc": "Fullständigt formellt namn från vaccindokumentation",
+      "manufacturer": "Tillverkare",
+      "manufacturerPlaceholder": "Ange tillverkare",
+      "manufacturerDesc": "Vaccintillverkare",
+      "doseNumber": "Dosnummer",
+      "doseNumberPlaceholder": "Ange dosnummer",
+      "doseNumberDesc": "Vilken dos i serien",
+      "lotNumber": "Batchnummer",
+      "lotNumberPlaceholder": "Ange batchnummer",
+      "lotNumberDesc": "Vaccinets batchnummer",
+      "ndcNumber": "NDC-nummer",
+      "ndcNumberPlaceholder": "t.ex. 12345-6789-01",
+      "ndcNumberDesc": "National Drug Code",
+      "expirationDate": "Utgångsdatum",
+      "expirationDatePlaceholder": "Välj utgångsdatum",
+      "expirationDateDesc": "När vaccinet går ut",
+      "tags": "Taggar",
+      "tagsDesc": "Lägg till taggar för att kategorisera och organisera vaccinationer",
+      "tagsPlaceholder": "Lägg till taggar...",
+      "dateAdministered": "Administreringsdatum",
+      "dateAdministeredPlaceholder": "Välj administreringsdatum",
+      "dateAdministeredDesc": "När vaccinet administrerades",
+      "adminSite": "Administreringsställe",
+      "adminSitePlaceholder": "Välj administreringsställe",
+      "adminSiteDesc": "Var vaccinet administrerades",
+      "siteLeftArm": "Vänster arm",
+      "siteRightArm": "Höger arm",
+      "siteLeftThigh": "Vänster lår",
+      "siteRightThigh": "Höger lår",
+      "siteLeftDeltoid": "Vänster deltoideus",
+      "siteRightDeltoid": "Höger deltoideus",
+      "siteOral": "Oral",
+      "siteNasal": "Nasal",
+      "adminRoute": "Administreringsväg",
+      "adminRoutePlaceholder": "Välj administreringsväg",
+      "adminRouteDesc": "Administreringsmetod",
+      "routeIM": "Intramuskulär (IM)",
+      "routeSC": "Subkutan (SC)",
+      "routeID": "Intradermal (ID)",
+      "routeOral": "Oral",
+      "routeNasal": "Nasal",
+      "routeIV": "Intravenös (IV)",
+      "location": "Plats/Vårdinrättning",
+      "locationPlaceholder": "t.ex. Apotek, Sjukhus, Klinik",
+      "locationDesc": "Var vaccinet administrerades",
+      "practitioner": "Utövare",
+      "practitionerPlaceholder": "Välj administrerande utövare",
+      "practitionerDesc": "Vårdgivare som administrerade vaccinet",
+      "clinicalNotes": "Kliniska anteckningar",
+      "clinicalNotesPlaceholder": "Ange kliniska anteckningar, reaktioner eller ytterligare detaljer",
+      "clinicalNotesDesc": "Ytterligare information om denna vaccination",
+      "createImmunization": "Skapa vaccination",
+      "updateImmunization": "Uppdatera vaccination",
+      "siteOther": "Annat",
+      "cancel": "Avbryt"
+    }
+  },
+  "visits": {
+    "title": "Medicinska besök",
+    "loadingVisits": "Laddar besök...",
+    "error": "Fel",
+    "success": "Lyckades",
+    "addVisit": "Lägg till nytt besök",
+    "addNewVisit": "Lägg till nytt besök",
+    "editVisit": "Redigera besök",
+    "noVisitsFound": "Inga medicinska besök hittades",
+    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
+    "clickToGetStarted": "Klicka på \"Lägg till nytt besök\" för att komma igång.",
+    "table": {
+      "visitDate": "Besöksdatum",
+      "reason": "Orsak",
+      "visitType": "Besökstyp",
+      "facility": "Vårdinrättning",
+      "relatedCondition": "Relaterat tillstånd",
+      "diagnosis": "Diagnos"
+    },
+    "card": {
+      "noPractitionerAssigned": "Ingen utövare tilldelad",
+      "practitionerId": "Utövare-ID: {{id}}",
+      "chiefComplaint": "Huvudbesvär",
+      "location": "Plats",
+      "duration": "Varaktighet",
+      "durationMinutes": "{{minutes}} minuter",
+      "relatedCondition": "Relaterat tillstånd",
+      "viewPractitioner": "Visa utövardetaljer",
+      "viewCondition": "Visa tillståndsdetaljer",
+      "generalVisit": "Allmänt besök",
+      "diagnosisAssessment": "Diagnos/Bedömning",
+      "treatmentPlan": "Behandlingsplan",
+      "followUpInstructions": "Uppföljningsinstruktioner"
+    },
+    "viewModal": {
+      "title": "Besök - {{date}}",
+      "generalVisit": "Allmänt besök",
+      "noPractitionerAssigned": "Ingen utövare tilldelad",
+      "practitionerId": "Utövare-ID: {{id}}",
+      "tabs": {
+        "visitInfo": "Besöksinformation",
+        "clinical": "Kliniskt",
+        "labResults": "Labbresultat",
+        "notes": "Anteckningar",
+        "documents": "Dokument"
+      },
+      "visitInformation": "Besöksinformation",
+      "reason": "Orsak",
+      "visitType": "Besökstyp",
+      "priority": "Prioritet",
+      "location": "Plats",
+      "duration": "Varaktighet",
+      "durationMinutes": "{{minutes}} minuter",
+      "doctor": "Läkare",
+      "specialty": "Specialitet",
+      "relatedCondition": "Relaterat tillstånd",
+      "viewCondition": "Visa tillståndsdetaljer",
+      "clinicalInformation": "Klinisk information",
+      "chiefComplaint": "Huvudbesvär",
+      "diagnosis": "Diagnos",
+      "treatmentPlan": "Behandlingsplan",
+      "followUpInstructions": "Uppföljningsinstruktioner",
+      "additionalNotes": "Ytterligare anteckningar",
+      "noNotesAvailable": "Inga anteckningar tillgängliga",
+      "attachedDocuments": "Bifogade dokument",
+      "editVisit": "Redigera besök"
+    },
+    "form": {
+      "savingVisit": "Sparar besök...",
+      "tabs": {
+        "visitInfo": "Besöksinformation",
+        "clinical": "Kliniskt",
+        "documents": "Dokument",
+        "addFiles": "Lägg till filer",
+        "labResults": "Labbresultat",
+        "notes": "Anteckningar"
+      },
+      "updateVisit": "Uppdatera besök",
+      "addVisit": "Lägg till besök",
+      "fields": {
+        "reason": {
+          "label": "Besöksorsak",
+          "placeholder": "t.ex. Årskontroll, Uppföljning, Symtomgranskning",
+          "description": "Primärt syfte med detta medicinska besök"
+        },
+        "visitDate": {
+          "label": "Besöksdatum",
+          "placeholder": "Välj besöksdatum",
+          "description": "När besöket ägde rum"
+        },
+        "attendingPractitioner": {
+          "label": "Ansvarig utövare",
+          "placeholder": "Välj utövare (valfritt)",
+          "description": "Läkare som genomförde besöket"
+        },
+        "visitType": {
+          "placeholder": "Välj besökstyp",
+          "description": "Typ av medicinskt besök"
+        },
+        "priority": {
+          "placeholder": "Välj prioritetsnivå",
+          "description": "Besökets prioritetsnivå"
+        },
+        "relatedCondition": {
+          "label": "Relaterat tillstånd (valfritt)",
+          "placeholder": "Välj ett tillstånd som detta besök är relaterat till",
+          "description": "Koppla detta besök till ett specifikt tillstånd om tillämpligt"
+        },
+        "chiefComplaint": {
+          "placeholder": "Primärt besvär eller symtom som rapporterats",
+          "description": "Huvudsakligt hälsobesvär eller symtom som föranledde besöket"
+        },
+        "durationMinutes": {
+          "label": "Varaktighet (minuter)",
+          "placeholder": "Besökets varaktighet",
+          "description": "Hur länge besöket varade"
+        },
+        "location": {
+          "placeholder": "Var besöket ägde rum",
+          "description": "Var besöket genomfördes"
+        },
+        "diagnosisAssessment": {
+          "label": "Diagnos/Bedömning",
+          "placeholder": "Klinisk bedömning eller diagnos från besöket...",
+          "description": "Medicinsk diagnos eller klinisk bedömning"
+        },
+        "treatmentPlan": {
+          "placeholder": "Rekommenderad behandling eller nästa steg...",
+          "description": "Behandlingsrekommendationer och förskrivna åtgärder"
+        },
+        "followUpInstructions": {
+          "placeholder": "Uppföljningsinstruktioner...",
+          "description": "Instruktioner för fortsatt vård och uppföljningsbesök"
+        },
+        "additionalNotes": {
+          "label": "Ytterligare anteckningar",
+          "placeholder": "Övriga viktiga detaljer om besöket...",
+          "description": "Eventuella ytterligare observationer, anteckningar eller viktiga detaljer"
+        }
+      },
+      "visitTypeOptions": {
+        "annualCheckup": "Årskontroll",
+        "followUp": "Uppföljning",
+        "consultation": "Konsultation",
+        "emergency": "Akut",
+        "preventiveCare": "Förebyggande vård",
+        "routineVisit": "Rutinbesök",
+        "specialistReferral": "Specialistremiss"
+      },
+      "priorityOptions": {
+        "routine": "Rutinmässig",
+        "urgent": "Brådskande",
+        "emergency": "Akut"
+      },
+      "locationOptions": {
+        "doctorsOffice": "Läkarmottagning",
+        "hospital": "Sjukhus",
+        "clinic": "Klinik",
+        "telehealth": "Telemedicin/Virtuellt",
+        "urgentCare": "Akutvård",
+        "emergencyRoom": "Akutmottagning",
+        "homeVisit": "Hembesök"
+      }
+    }
+  },
+  "familyHistory": {
+    "title": "Familjehistorik",
+    "loadingFamilyHistory": "Laddar familjehistorik...",
+    "pageTitle": "Familjemedicinsk historik",
+    "conditionCountAcrossMembers": "{{conditionCount}} tillstånd hos {{memberCount}} familjemedlem(mar)",
+    "memberCountRecorded": "{{count}} familjemedlem(mar) registrerade",
+    "sharedConditionCountAcrossMembers": "{{conditionCount}} tillstånd hos {{memberCount}} delade familjemedlem(mar)",
+    "sharedMemberCount": "{{filteredCount}} av {{totalCount}} familjemedlem(mar) delade med dig",
+    "addFamilyMember": "Lägg till familjemedlem",
+    "sharingMode": "Delningsläge",
+    "endSharingMode": "Avsluta delningsläge",
+    "manageInvitations": "Hantera inbjudningar",
+    "shareSelected": "Dela valda ({{count}})",
+    "sharingModeActive": "Delningsläge aktivt",
+    "clickToSelectForSharing": "Klicka på familjemedlemskort för att välja dem för delning. {{count}} valda.",
+    "sharedMembersCannotBeSelected": "Delade familjemedlemmar kan inte väljas för ytterligare delning.",
+    "sharedTableName": "Delad familjehistorik",
+    "tabs": {
+      "myFamily": "Min familj",
+      "sharedWithMe": "Delat med mig"
+    },
+    "emptyState": {
+      "noFamilyMembers": "Inga familjemedlemmar ännu",
+      "startBuilding": "Börja bygga din familjemedicinska historik genom att lägga till din första familjemedlem.",
+      "addFirstMember": "Lägg till din första familjemedlem"
+    },
+    "table": {
+      "familyMember": "Familjemedlem",
+      "relationship": "Relation",
+      "condition": "Tillstånd",
+      "type": "Typ",
+      "diagnosisAge": "Ålder vid diagnos",
+      "sharedBy": "Delad av",
+      "noConditions": "Inga tillstånd",
+      "yearsOld": "{{age}} år",
+      "unknown": "Okänd"
+    },
+    "card": {
+      "subtitle": "Familjemedlem",
+      "notSelectable": "Ej valbar",
+      "shared": "Delad",
+      "selected": "Vald",
+      "age": "Ålder",
+      "years": "år",
+      "deceased": "Avliden",
+      "gender": "Kön",
+      "birthYear": "Födelseår",
+      "deathYear": "Dödsår",
+      "sharedBy": "Delad av",
+      "conditionCount": "{{count}} tillstånd",
+      "medicalConditions": "Medicinska tillstånd",
+      "addCondition": "Lägg till tillstånd",
+      "noConditionsRecorded": "Inga medicinska tillstånd registrerade",
+      "diagnosedAtAge": "Diagnostiserad vid {{age}} års ålder",
+      "cannotEditSharedMember": "Kan inte redigera delad familjemedlem"
+    },
+    "viewModal": {
+      "title": "{{name}} - Familjemedicinsk historik",
+      "relationship": "Relation",
+      "sharedAt": "Delad den",
+      "sharingNote": "Delningsanteckning",
+      "cannotEditShared": "Kan inte redigera delad familjemedlem",
+      "editMember": "Redigera familjemedlem",
+      "cannotAddConditionsShared": "Kan inte lägga till tillstånd för delad familjemedlem",
+      "addCondition": "Lägg till medicinskt tillstånd",
+      "cannotEditConditionsShared": "Kan inte redigera tillstånd för delad familjemedlem",
+      "editCondition": "Redigera tillstånd",
+      "cannotDeleteConditionsShared": "Kan inte ta bort tillstånd för delad familjemedlem",
+      "deleteCondition": "Ta bort tillstånd",
+      "editFamilyMember": "Redigera familjemedlem"
+    },
+    "notifications": {
+      "cannotEdit": "Kan inte redigera",
+      "cannotEditShared": "Du kan inte redigera delade familjehistorikposter",
+      "cannotDelete": "Kan inte ta bort",
+      "cannotDeleteShared": "Du kan inte ta bort delade familjehistorikposter"
+    },
+    "confirmations": {
+      "deleteMember": "Är du säker på att du vill ta bort denna familjemedlem?",
+      "deleteCondition": "Är du säker på att du vill ta bort detta tillstånd?"
+    },
+    "errors": {
+      "updatedButFailedRefresh": "Familjemedlem uppdaterad, men det gick inte att uppdatera listan. Vänligen ladda om sidan för att se ändringarna.",
+      "createdButFailedRefresh": "Familjemedlem skapad, men det gick inte att uppdatera listan. Vänligen ladda om sidan för att se ändringarna.",
+      "failedToDeleteCondition": "Det gick inte att ta bort tillståndet",
+      "familyMemberNotAvailable": "Familjemedlemsinformation ej tillgänglig",
+      "failedToSaveCondition": "Det gick inte att spara tillståndet"
+    },
+    "form": {
+      "addMemberTitle": "Lägg till familjemedlem",
+      "editMemberTitle": "Redigera familjemedlem",
+      "addConditionForMember": "Lägg till tillstånd för {{name}}",
+      "editConditionForMember": "Redigera tillstånd för {{name}}",
+      "member": {
+        "name": {
+          "label": "Fullständigt namn",
+          "placeholder": "Ange familjemedlemmens namn",
+          "description": "Familjemedlemmens fullständiga namn"
+        },
+        "relationship": {
+          "label": "Relation",
+          "placeholder": "Välj relation",
+          "description": "Relation till dig"
+        },
+        "gender": {
+          "label": "Kön",
+          "placeholder": "Välj kön",
+          "description": "Familjemedlemmens kön"
+        },
+        "birthYear": {
+          "label": "Födelseår",
+          "placeholder": "t.ex. 1965",
+          "description": "Året familjemedlemmen föddes"
+        },
+        "deceased": {
+          "label": "Avliden",
+          "description": "Markera om familjemedlemmen är avliden"
+        },
+        "deathYear": {
+          "label": "Dödsår",
+          "placeholder": "t.ex. 2020",
+          "description": "Året familjemedlemmen gick bort"
+        },
+        "notes": {
+          "placeholder": "Ytterligare information om familjemedlemmen...",
+          "description": "Eventuella ytterligare anteckningar eller viktig information"
+        },
+        "relationshipOptions": {
+          "father": "Far",
+          "mother": "Mor",
+          "brother": "Bror",
+          "sister": "Syster",
+          "paternalGrandfather": "Farfar",
+          "paternalGrandmother": "Farmor",
+          "maternalGrandfather": "Morfar",
+          "maternalGrandmother": "Mormor",
+          "uncle": "Farbror/Morbror",
+          "aunt": "Faster/Moster",
+          "cousin": "Kusin",
+          "other": "Annat"
+        },
+        "genderOptions": {
+          "male": "Man",
+          "female": "Kvinna"
+        }
+      },
+      "condition": {
+        "conditionName": {
+          "label": "Tillståndsnamn",
+          "placeholder": "t.ex. Diabetes, Hjärtsjukdom, Cancer",
+          "description": "Namn på det medicinska tillståndet"
+        },
+        "conditionType": {
+          "label": "Tillståndstyp",
+          "placeholder": "Välj tillståndstyp",
+          "description": "Kategori av medicinskt tillstånd"
+        },
+        "severity": {
+          "label": "Allvarlighetsgrad",
+          "placeholder": "Välj allvarlighetsgrad",
+          "description": "Hur allvarligt tillståndet var/är"
+        },
+        "diagnosisAge": {
+          "label": "Ålder vid diagnos",
+          "placeholder": "t.ex. 45",
+          "description": "Ålder vid diagnos"
+        },
+        "status": {
+          "label": "Status",
+          "placeholder": "Välj status",
+          "description": "Aktuell status för tillståndet"
+        },
+        "icd10Code": {
+          "label": "ICD-10-kod",
+          "placeholder": "t.ex. E11.9",
+          "description": "Medicinsk diagnoskod (om känd)"
+        },
+        "notes": {
+          "placeholder": "Ytterligare detaljer om tillståndet...",
+          "description": "Behandlingsdetaljer, utfall eller annan relevant information"
+        },
+        "typeOptions": {
+          "cardiovascular": "Kardiovaskulär - Hjärta och blodkärl",
+          "diabetes": "Diabetes - Blodsockerrubbningar",
+          "cancer": "Cancer - Maligna tillstånd",
+          "mentalHealth": "Psykisk hälsa - Psykologiska tillstånd",
+          "neurological": "Neurologisk - Hjärna och nervsystem",
+          "autoimmune": "Autoimmun - Immunsystemrubbningar",
+          "genetic": "Genetisk - Ärftliga tillstånd",
+          "respiratory": "Respiratorisk - Lung- och andningssjukdomar",
+          "endocrine": "Endokrin - Hormonrubbningar",
+          "other": "Annat - Specificera i anteckningar"
+        },
+        "severityOptions": {
+          "mild": "💛 Mild - Lätt påverkan",
+          "moderate": "⚡ Måttlig - Märkbar påverkan",
+          "severe": "⚠️ Svår - Betydande påverkan",
+          "critical": "🚨 Kritisk - Livshotande"
+        },
+        "statusOptions": {
+          "active": "Aktiv - Pågående tillstånd",
+          "resolved": "Löst - Inte längre närvarande",
+          "chronic": "Kronisk - Långvarigt tillstånd"
+        }
+      }
+    }
+  },
+  "practitioners": {
+    "title": "Vårdgivare",
+    "loading": "Laddar vårdgivare...",
+    "errors": {
+      "loadFailed": "Kunde inte ladda vårdgivare. Försök igen.",
+      "generic": "Ett fel uppstod. Försök igen."
+    },
+    "actions": {
+      "addNew": "Lägg till ny vårdgivare"
+    },
+    "empty": {
+      "title": "Inga vårdgivare hittades",
+      "filtered": "Försök justera din sökning eller filterkriterier.",
+      "noData": "Klicka på \"Lägg till ny vårdgivare\" för att komma igång."
+    },
+    "table": {
+      "name": "Namn",
+      "specialty": "Specialitet",
+      "practice": "Mottagning",
+      "phone": "Telefon",
+      "email": "E-post",
+      "rating": "Betyg"
+    },
+    "card": {
+      "subtitle": "Vårdgivare",
+      "practice": "Mottagning",
+      "phone": "Telefon",
+      "email": "E-post",
+      "website": "Webbplats",
+      "visitWebsite": "Besök webbplats",
+      "rating": "Betyg"
+    },
+    "viewModal": {
+      "title": "Vårdgivardetaljer",
+      "subtitle": "Vårdgivare",
+      "practitionerContact": "VÅRDGIVARKONTAKT",
+      "practice": "Mottagning",
+      "specialty": "Specialitet",
+      "phone": "Telefon",
+      "email": "E-post",
+      "website": "Webbplats",
+      "visitWebsite": "Besök webbplats",
+      "rating": "Betyg",
+      "editButton": "Redigera vårdgivare",
+      "practiceDetails": "MOTTAGNINGSDETALJER",
+      "practicePhone": "Telefon",
+      "practiceFax": "Fax",
+      "practiceWebsite": "Webbplats",
+      "practicePortal": "Patientportal",
+      "practiceNotes": "Anteckningar",
+      "practiceLocations": "Platser",
+      "editPractice": "Redigera mottagning",
+      "noPractice": "Ingen mottagning kopplad",
+      "savePractice": "Spara mottagning",
+      "practiceUpdateSuccess": "Mottagningen uppdaterades",
+      "practiceUpdateError": "Kunde inte uppdatera mottagningen",
+      "practiceLoadError": "Kunde inte ladda mottagningsdetaljer"
+    },
+    "form": {
+      "addTitle": "Lägg till ny vårdgivare",
+      "editTitle": "Redigera vårdgivare"
+    },
+    "groupByPractice": "Gruppera efter mottagning",
+    "ungroupedTitle": "Fristående vårdgivare",
+    "editPracticeError": "Kunde inte ladda mottagningen för redigering",
+    "createPracticeError": "Kunde inte skapa mottagning. Försök igen.",
+    "tabs": {
+      "practitioners": "Vårdgivare",
+      "practices": "Mottagningar"
+    },
+    "practices": {
+      "addNew": "Lägg till mottagning",
+      "createTitle": "Lägg till mottagning",
+      "createSuccess": "Mottagningen skapades",
+      "searchPlaceholder": "Sök mottagningar...",
+      "deleteConfirm": "Är du säker på att du vill ta bort \"{{name}}\"? Denna åtgärd kan inte ångras.",
+      "deleteSuccess": "Mottagningen togs bort",
+      "deleteError": "Kunde inte ta bort mottagningen",
+      "cannotDelete": "Kan inte ta bort - har vårdgivare",
+      "totalCount": "{{count}} mottagningar totalt",
+      "unusedCount": "{{count}} oanvända",
+      "emptyTitle": "Inga mottagningar hittades",
+      "emptyNoData": "Klicka på \"Lägg till mottagning\" för att skapa en, eller så skapas de automatiskt när du lägger till vårdgivare.",
+      "table": {
+        "name": "Namn",
+        "phone": "Telefon",
+        "website": "Webbplats",
+        "practitioners": "Vårdgivare",
+        "actions": "Åtgärder"
+      }
+    }
+  },
+  "pharmacies": {
+    "title": "Apotek",
+    "loading": "Laddar apotek...",
+    "errors": {
+      "loadFailed": "Kunde inte ladda apotek. Försök igen."
+    },
+    "actions": {
+      "addNew": "Lägg till nytt apotek"
+    },
+    "empty": {
+      "title": "Inga apotek hittades",
+      "filtered": "Försök justera din sökning eller filterkriterier.",
+      "noData": "Klicka på \"Lägg till nytt apotek\" för att komma igång."
+    },
+    "card": {
+      "address": "Adress",
+      "city": "Stad",
+      "stateProvince": "Län / Region",
+      "postalCode": "Postnummer",
+      "country": "Land",
+      "storeNumber": "Butiksnummer",
+      "phone": "Telefon",
+      "website": "Webbplats",
+      "specialtyServices": "Specialiteter"
+    },
+    "viewModal": {
+      "title": "Apoteksdetaljer",
+      "subtitle": "Apotek",
+      "location": "PLATS",
+      "address": "Adress",
+      "city": "Stad",
+      "stateProvince": "Län / Region",
+      "postalCode": "Postnummer",
+      "country": "Land",
+      "storeNumber": "Butik #",
+      "contact": "KONTAKTINFORMATION",
+      "phone": "Telefon",
+      "website": "Webbplats",
+      "specialtyServices": "Specialiteter",
+      "editButton": "Redigera apotek"
+    },
+    "form": {
+      "addTitle": "Lägg till nytt apotek",
+      "editTitle": "Redigera apotek"
+    }
+  },
+  "emergencyContacts": {
+    "title": "Nödkontakter",
+    "description": "Hantera nödkontaktinformation",
+    "actions": {
+      "addNew": "Lägg till nödkontakt"
+    },
+    "page": {
+      "loading": "Laddar nödkontakter...",
+      "noContacts": "Inga nödkontakter hittades",
+      "noContactsDescription": "Det är viktigt att ha nödkontakter tillgängliga vid medicinska nödsituationer.",
+      "filterDescription": "Försök justera din sökning eller filterkriterier.",
+      "tableName": "Nödkontakter"
+    },
+    "form": {
+      "addTitle": "Lägg till nödkontakt",
+      "editTitle": "Redigera nödkontakt"
+    },
+    "card": {
+      "primary": "PRIMÄR",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "relationship": "Relation:",
+      "phone": "Telefon:",
+      "secondaryPhone": "Sekundär telefon:",
+      "email": "E-post:",
+      "address": "Adress:",
+      "notes": "Anteckningar"
+    },
+    "viewModal": {
+      "title": "Nödkontaktdetaljer",
+      "icon": "🚨",
+      "contactInfo": "Kontaktinformation",
+      "primaryPhone": "Primär telefon",
+      "secondaryPhone": "Sekundär telefon",
+      "emailAddress": "E-postadress",
+      "address": "Adress",
+      "notes": "Anteckningar",
+      "noNotes": "Inga anteckningar tillgängliga",
+      "editContact": "Redigera kontakt"
+    },
+    "table": {
+      "name": "Namn",
+      "relationship": "Relation",
+      "phone": "Telefon",
+      "email": "E-post",
+      "primary": "Primär",
+      "status": "Status"
+    }
+  },
+  "insurance": {
+    "title": "Försäkring",
+    "description": "Hantera din försäkringsinformation och digitala kort",
+    "actions": {
+      "addNew": "+ Lägg till ny försäkring"
+    },
+    "form": {
+      "addTitle": "Lägg till ny försäkring",
+      "editTitle": "Redigera försäkring",
+      "saving": "Sparar försäkring...",
+      "tabs": {
+        "basicInfo": "Grundinfo",
+        "member": "Medlem",
+        "coverage": "Täckning",
+        "contact": "Kontakt",
+        "documents": "Dokument",
+        "notes": "Anteckningar"
+      },
+      "coveragePeriodStatus": "Täckningsperiod och status",
+      "updateInsurance": "Uppdatera försäkring",
+      "addInsurance": "Lägg till försäkring"
+    },
+    "card": {
+      "primary": "Primär",
+      "deductible": "Självrisk",
+      "pcpCopay": "Husläkare egenavgift",
+      "specialistCopay": "Specialist egenavgift",
+      "annualMax": "Årligt max",
+      "preventive": "Förebyggande",
+      "basic": "Grundläggande",
+      "examCopay": "Undersökningsavgift",
+      "frameAllowance": "Bågbidrag",
+      "bin": "BIN",
+      "pcn": "PCN",
+      "member": "Medlem",
+      "memberId": "Medlems-ID",
+      "group": "Grupp",
+      "plan": "Plan",
+      "effective": "Giltig från",
+      "expires": "Utgår",
+      "holder": "Innehavare"
+    },
+    "viewModal": {
+      "title": "Försäkringsdetaljer",
+      "insuranceLabel": "Försäkring",
+      "tabs": {
+        "overview": "Översikt",
+        "coverage": "Täckning",
+        "contact": "Kontakt",
+        "documents": "Dokument"
+      },
+      "memberInfo": "Medlemsinformation",
+      "memberName": "Medlemsnamn",
+      "policyHolder": "Försäkringsinnehavare",
+      "sameAsMember": "Samma som medlem",
+      "relationship": "Relation",
+      "self": "Själv",
+      "groupNumber": "Gruppnummer",
+      "employerGroup": "Arbetsgivare/Gruppsponsor",
+      "coveragePeriod": "Täckningsperiod",
+      "effectiveDate": "Startdatum",
+      "expirationDate": "Utgångsdatum",
+      "ongoing": "Pågående",
+      "notes": "Anteckningar",
+      "coverageDetails": "Täckningsdetaljer",
+      "deductible": "Självrisk",
+      "outOfPocketMax": "Max egenavgift",
+      "copay": "Egenavgift",
+      "coinsurance": "Medförsäkring",
+      "prescriptionCoverage": "Recepttäckning",
+      "visionCoverage": "Syntäckning",
+      "dentalCoverage": "Tandvårdstäckning",
+      "mentalHealthCoverage": "Psykisk hälsotäckning",
+      "additionalDetails": "Ytterligare täckningsdetaljer",
+      "contactInfo": "Kontaktinformation",
+      "customerServicePhone": "Kundtjänsttelefon",
+      "claimsPhone": "Skaderegleringstelefon",
+      "website": "Webbplats",
+      "email": "E-post",
+      "claimsAddress": "Skaderegleringsadress",
+      "pharmacyNetworkInfo": "Apoteksnätverksinformation",
+      "attachedDocuments": "Bifogade dokument",
+      "printCard": "Skriv ut kort"
+    }
+  },
+  "tagManagement": {
+    "title": "Tagghantering",
+    "icon": "🏷️",
+    "loading": "Laddar taggar...",
+    "allTags": "Alla taggar",
+    "searchPlaceholder": "Sök taggar...",
+    "createTag": "Skapa tagg",
+    "noTags": "Inga taggar hittades",
+    "noTagsSearch": "Inga taggar matchar din sökning.",
+    "noTagsDescription": "Börja använda taggar i dina medicinska journaler för att se dem här.",
+    "table": {
+      "tagName": "Taggnamn",
+      "usageCount": "Användningsantal",
+      "usedIn": "Använd i",
+      "actions": "Åtgärder"
+    },
+    "menu": {
+      "rename": "Byt namn på tagg",
+      "edit": "Redigera",
+      "search": "Sök poster",
+      "replace": "Ersätt med...",
+      "delete": "Ta bort tagg"
+    },
+    "createModal": {
+      "title": "Skapa ny tagg",
+      "label": "Taggnamn",
+      "placeholder": "Ange taggnamn...",
+      "submit": "Skapa tagg"
+    },
+    "editModal": {
+      "title": "Redigera tagg",
+      "label": "Taggnamn",
+      "placeholder": "Ange nytt taggnamn...",
+      "colorLabel": "Taggfärg",
+      "description": "Detta kommer att byta namn på taggen i alla {{count}} poster.",
+      "submit": "Spara"
+    },
+    "deleteModal": {
+      "title": "Ta bort tagg",
+      "message": "Är du säker på att du vill ta bort taggen \"{{tag}}\"?",
+      "description": "Detta kommer att ta bort taggen från alla {{count}} poster. Denna åtgärd kan inte ångras.",
+      "submit": "Ta bort tagg"
+    },
+    "replaceModal": {
+      "title": "Ersätt tagg",
+      "label": "Ersätt med",
+      "placeholder": "Ange ersättningstaggnamn...",
+      "description": "Detta kommer att ersätta \"{{oldTag}}\" med \"{{newTag}}\" i alla {{count}} poster.",
+      "submit": "Ersätt tagg"
+    },
+    "success": {
+      "created": "Taggen \"{{tag}}\" skapades",
+      "renamed": "Bytte namn på \"{{oldTag}}\" till \"{{newTag}}\"",
+      "updated": "Taggen \"{{tag}}\" uppdaterades",
+      "deleted": "Taggen \"{{tag}}\" togs bort",
+      "replaced": "Ersatte \"{{oldTag}}\" med \"{{newTag}}\""
+    },
+    "errors": {
+      "loadFailed": "Kunde inte ladda taggar",
+      "createFailed": "Kunde inte skapa tagg",
+      "renameFailed": "Kunde inte byta namn på tagg",
+      "editFailed": "Kunde inte uppdatera tagg",
+      "deleteFailed": "Kunde inte ta bort tagg",
+      "replaceFailed": "Kunde inte ersätta tagg"
+    }
+  },
+  "reportBuilder": {
+    "title": "Anpassad rapportgenerator",
+    "icon": "📊",
+    "loading": "Laddar rapportgenerator...",
+    "configuration": {
+      "title": "Rapportkonfiguration",
+      "description": "Välj medicinska journaler att inkludera i din anpassade rapport"
+    },
+    "buttons": {
+      "settings": "Inställningar",
+      "generateReport": "Generera rapport ({{count}} poster)",
+      "generateReportWithCharts": "Generera rapport ({{recordCount}} poster, {{chartCount}} diagram)",
+      "generateReportChartsOnly": "Generera rapport ({{chartCount}} diagram)",
+      "selectAll": "Markera alla poster",
+      "clearSelections": "Rensa alla val",
+      "addRecords": "Lägg till medicinska journaler"
+    },
+    "progress": {
+      "recordsSelected": "Poster valda"
+    },
+    "noData": {
+      "title": "Ingen medicinsk data tillgänglig",
+      "description": "Lägg till några medicinska journaler först för att använda rapportgeneratorn."
+    },
+    "categories": {
+      "medications": "Mediciner",
+      "conditions": "Tillstånd",
+      "procedures": "Ingrepp",
+      "lab_results": "Labbresultat",
+      "immunizations": "Vaccinationer",
+      "allergies": "Allergier",
+      "treatments": "Behandlingar",
+      "encounters": "Besök",
+      "vitals": "Vitalparametrar",
+      "practitioners": "Vårdgivare",
+      "pharmacies": "Apotek",
+      "emergency_contacts": "Nödkontakter",
+      "family_history": "Familjehistorik",
+      "symptoms": "Symtom",
+      "injuries": "Skador",
+      "insurance": "Försäkring"
+    },
+    "settingsModal": {
+      "title": "Rapportinställningar",
+      "reportTitle": {
+        "label": "Rapporttitel"
+      },
+      "includePatientInfo": {
+        "label": "Inkludera patientinformation",
+        "description": "Lägg till demografisk och kontaktinformation"
+      },
+      "includeProfilePicture": {
+        "label": "Inkludera profilbild",
+        "description": "Lägg till patientfoto i rapporthuvudet"
+      },
+      "includeSummary": {
+        "label": "Inkludera sammanfattande statistik",
+        "description": "Lägg till översikt och statistiksektion"
+      }
+    },
+    "notifications": {
+      "templateLoaded": "Mall laddad",
+      "templateLoadedMessage": "Mallen \"{{name}}\" har laddats."
+    },
+    "trendCharts": {
+      "title": "Trenddiagram",
+      "description": "Välj vitalparametrar och labbtester att inkludera som trenddiagram i din rapport",
+      "emptyState": "Ingen trenddata tillgänglig. Lägg till vitalparametrar eller labbresultat för att aktivera trenddiagram.",
+      "maxReached": "Maximalt 10 diagram har nåtts",
+      "vitalCharts": {
+        "title": "Vitalparameterdiagram",
+        "description": "Välj vitalparametrar att visa i diagram"
+      },
+      "labTestCharts": {
+        "title": "Labbtestdiagram",
+        "description": "Sök och välj labbtester att visa i diagram",
+        "searchPlaceholder": "Sök labbtester..."
+      },
+      "dateFrom": "Från",
+      "dateTo": "Till",
+      "selectedCharts": "Valda diagram ({{count}})",
+      "recordCount": "{{count}} poster",
+      "removeChart": "Ta bort {{name}}-diagram"
+    },
+    "segmentControl": {
+      "records": "Medicinska journaler",
+      "trendCharts": "Trenddiagram"
+    }
+  },
+  "exportPage": {
+    "title": "Exportera hälsojournaler",
+    "icon": "📤",
+    "description": "Ladda ner din medicinska data i olika format för säkerhetskopiering eller delning med vårdgivare",
+    "loading": "Laddar exportalternativ...",
+    "availableData": {
+      "title": "Tillgänglig data",
+      "moreItems": "+{{count}} fler"
+    },
+    "scopes": {
+      "all": "Alla poster",
+      "medications": "Mediciner",
+      "lab_results": "Labbresultat",
+      "allergies": "Allergier",
+      "conditions": "Medicinska tillstånd",
+      "immunizations": "Vaccinationer",
+      "procedures": "Ingrepp",
+      "treatments": "Behandlingar",
+      "encounters": "Besök",
+      "vitals": "Vitalparametrar",
+      "emergency_contacts": "Nödkontakter",
+      "practitioners": "Vårdgivare",
+      "pharmacies": "Apotek",
+      "symptoms": "Symtom",
+      "injuries": "Skador",
+      "family_history": "Familjehistorik",
+      "insurance": "Försäkring"
+    },
+    "exportMode": {
+      "title": "Exportläge",
+      "singleExport": "Enkel export",
+      "bulkExport": "Massexport",
+      "singleDescription": "Exportera en enskild datatyp i ditt valda format",
+      "bulkDescription": "Exportera flera datatyper tillsammans i en ZIP-fil"
+    },
+    "configuration": {
+      "title": "Exportkonfiguration",
+      "format": {
+        "label": "Exportformat",
+        "placeholder": "Välj format"
+      },
+      "dataToExport": {
+        "label": "Data att exportera",
+        "placeholder": "Välj datatyp"
+      },
+      "bulkSelection": {
+        "label": "Välj datatyper för massexport"
+      },
+      "dateRange": {
+        "startDate": "Startdatum (valfritt)",
+        "endDate": "Slutdatum (valfritt)"
+      },
+      "includeFiles": "Inkludera bifogade filer (skapar ZIP-fil)",
+      "includePatientInfo": {
+        "label": "Inkludera patientinformation (namn, demografi, etc.)",
+        "description": "Avmarkera för att exkludera personliga patientuppgifter av integritetsskäl"
+      }
+    },
+    "buttons": {
+      "exporting": "Exporterar...",
+      "creatingZip": "Skapar ZIP...",
+      "exportAs": "Exportera {{scope}} som {{format}}",
+      "bulkExport": "Massexportera {{count}} typer som ZIP",
+      "refreshPage": "Uppdatera sidan",
+      "retry": "Försök igen",
+      "goToDashboard": "Gå till instrumentpanelen"
+    },
+    "information": {
+      "title": "Exportinformation",
+      "json": {
+        "title": "JSON-format:",
+        "description": "Maskinläsbart strukturerat dataformat, idealiskt för import till andra system eller applikationer."
+      },
+      "csv": {
+        "title": "CSV-format:",
+        "description": "Kommaseparerade värden lämpliga för kalkylprogram som Excel eller Google Kalkylark."
+      },
+      "pdf": {
+        "title": "PDF-format:",
+        "description": "Läsbart dokumentformat perfekt för utskrift eller delning med vårdgivare."
+      },
+      "bulk": {
+        "title": "Massexport:",
+        "description": "Skapar en ZIP-fil med flera datatyper i ditt valda format för omfattande datasäkerhetskopiering."
+      },
+      "fileAttachments": {
+        "title": "Bifogade filer:",
+        "description": "När det är tillgängligt för PDF-exporter kan labbresultatfiler inkluderas i ett ZIP-arkiv."
+      }
+    },
+    "errors": {
+      "sessionExpired": "Din session har löpt ut. Uppdatera sidan eller logga in igen för att använda exportfunktioner.",
+      "noActivePatient": "Ingen patientprofil är vald. Välj en patient från instrumentpanelen för att använda exportfunktionen.",
+      "loadFailed": "Kunde inte ladda exportdata: {{message}}",
+      "validationFailed": "{{errors}}",
+      "exportFailed": "Exporten misslyckades: {{message}}",
+      "bulkExportFailed": "Massexporten misslyckades: {{message}}",
+      "noDataType": "Välj minst en datatyp för massexport",
+      "invalidSettings": "Kontrollera dina exportinställningar. Se till att du har valt en giltig datatyp och format.",
+      "noDataFound": "Ingen data hittades för de valda exportkriterierna. Försök välja en annan datatyp eller datumintervall.",
+      "bulkInvalidSettings": "Kontrollera dina massexportinställningar. Se till att du har valt minst en datatyp och ett giltigt format.",
+      "bulkNoDataFound": "Ingen data hittades för de valda exportkriterierna. Försök välja andra datatyper eller justera datumintervallet."
+    },
+    "success": {
+      "exportComplete": "Exporten slutförd! Din {{format}}-fil har laddats ner.",
+      "bulkExportComplete": "Massexporten slutförd! Din ZIP-fil med {{count}} datatyper har laddats ner."
+    }
+  },
+  "labResults": {
+    "title": "Labbresultat",
+    "addNew": "+ Lägg till nytt labbresultat",
+    "quickPdfImport": "Snabb PDF-import",
+    "quickImportModalTitle": "Snabb PDF-import - Steg {{step}} av 2",
+    "quickFormInstructions": "Ange ett namn för detta labbresultat, sedan kan du ladda upp och tolka din PDF.",
+    "testNameLabel": "Labbtestnamn",
+    "testNamePlaceholder": "t.ex. Endokrint blodprov etc.",
+    "testNameDescription": "Detta är det enda obligatoriska fältet - du kan lägga till fler detaljer senare",
+    "testNameRequired": "Testnamn krävs",
+    "testNameTooShort": "Testnamnet måste vara minst {{minLength}} tecken",
+    "testNameTooLong": "Testnamnet kan inte överstiga {{maxLength}} tecken",
+    "patientIdRequired": "Patient-ID krävs. Välj en patient först.",
+    "createAndContinue": "Skapa och ladda upp PDF",
+    "creatingLabResult": "Skapar labbresultat...",
+    "createFailed": "Kunde inte skapa labbresultat",
+    "createFailedTryAgain": "Kunde inte skapa labbresultat. Försök igen.",
+    "networkError": "Nätverksfel. Kontrollera din anslutning och försök igen.",
+    "timeoutError": "Förfrågan tog för lång tid. Försök igen.",
+    "labResultCreated": "Labbresultatet \"{{testName}}\" har skapats. Nu kan du ladda upp och tolka din PDF.",
+    "labResultDeleted": "Labbresultat borttaget",
+    "deleteFailed": "Kunde inte ta bort labbresultatet",
+    "errorOccurred": "Ett fel uppstod",
+    "quickImportSuccess": "Labbresultat och testkomponenter importerades",
+    "unsavedDataWarning": "Osparad tolkad data",
+    "unsavedDataMessage": "Du har {{count}} tolkade testkomponent(er) som inte har lagts till ännu. Om du stänger nu förlorar du denna tolkade data.",
+    "unsavedDataInstructions": "Klicka på \"Lägg till komponenter\" i förhandsgranskningsfliken för att spara din tolkade data innan du stänger.",
+    "continueEditing": "Fortsätt redigera",
+    "discardParsedData": "Kassera tolkad data",
+    "emptyLabResultWarning": "Labbresultat skapat men tomt",
+    "emptyLabResultMessage": "Du skapade ett labbresultat men lade inte till några testkomponenter. Vill du ta bort detta labbresultat?",
+    "deleteEmptyLabResult": "Ta bort labbresultat",
+    "keepEmptyLabResult": "Behåll labbresultat",
+    "stepperLabels": {
+      "labResultInfo": "Labbresultatinfo",
+      "enterTestName": "Ange testnamn",
+      "uploadParse": "Ladda upp och tolka",
+      "importFromPdf": "Importera från PDF"
+    },
+    "modal": {
+      "title": "Labbresultatdetaljer",
+      "tabs": {
+        "overview": "Översikt",
+        "testComponents": "Testkomponenter",
+        "relatedConditions": "Relaterade tillstånd",
+        "visits": "Besök",
+        "tags": "Taggar",
+        "files": "Dokument"
+      },
+      "sections": {
+        "testInfo": "Testinformation",
+        "testResults": "Testresultat",
+        "orderingPractitioner": "Beställande vårdgivare",
+        "notes": "Anteckningar",
+        "tags": "Taggar",
+        "associatedFiles": "Tillhörande dokument"
+      },
+      "labels": {
+        "testCode": "Testkod",
+        "category": "Kategori",
+        "testType": "Testtyp",
+        "facility": "Anläggning",
+        "labResult": "Labbresultat",
+        "orderedDate": "Beställningsdatum",
+        "completedDate": "Slutfört datum",
+        "doctor": "Läkare",
+        "specialty": "Specialitet"
+      },
+      "noNotes": "Inga anteckningar tillgängliga",
+      "editLabResult": "Redigera labbresultat"
+    },
+    "error": "Fel",
+    "success": "Lyckades",
+    "loading": "Laddar labbresultat...",
+    "loadingHint": "Om detta tar för lång tid, ladda om sidan",
+    "addTitle": "Lägg till nytt labbresultat",
+    "editTitle": "Redigera labbresultat",
+    "noResults": "Inga labbresultat hittades",
+    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
+    "startAdding": "Börja lägga till ditt första labbresultat.",
+    "addFirst": "Lägg till ditt första labbresultat",
+    "table": {
+      "testName": "Testnamn",
+      "category": "Kategori",
+      "type": "Typ",
+      "facility": "Anläggning",
+      "orderingPractitioner": "Beställande vårdgivare",
+      "orderedDate": "Beställningsdatum",
+      "completedDate": "Slutfört datum",
+      "files": "Dokument"
+    },
+    "card": {
+      "testCode": "Testkod",
+      "type": "Typ",
+      "facility": "Anläggning",
+      "ordered": "Beställd",
+      "completed": "Slutförd",
+      "result": "Resultat",
+      "doctor": "Läkare",
+      "notSpecified": "Ej angiven",
+      "notCompleted": "Ej slutförd",
+      "pending": "Väntande",
+      "viewPractitioner": "Visa vårdgivardetaljer"
+    },
+    "form": {
+      "manageFiles": "Hantera filer",
+      "addFilesOptional": "Lägg till filer",
+      "linkedVisits": "Kopplade besök",
+      "linkVisitsTitle": "Koppla till besök",
+      "linkVisitsDescription": "Koppla detta labbresultat till besök där det beställdes eller granskades."
+    }
+  },
+  "testComponents": {
+    "title": "Testkomponenter",
+    "testCount": "{{count}} test",
+    "testCount_plural": "{{count}} tester",
+    "addTests": "Lägg till tester",
+    "addTestComponents": "Lägg till testkomponenter",
+    "refreshComponents": "Uppdatera komponenter",
+    "errorLoading": "Fel vid laddning av testkomponenter",
+    "noComponents": "Inga testkomponenter",
+    "noComponentsDescription": "Detta labbresultat har inga enskilda testkomponenter ännu.",
+    "tabs": {
+      "testResults": "Testresultat",
+      "statistics": "Statistik"
+    },
+    "emptyState": {
+      "description": "Mallar tillhandahåller vanliga labbpaneler (CBC, CMP, etc.) där du kan ange värden och intervall. Massimport låter dig kopiera/klistra in resultat från labbrapporter för automatisk tolkning."
+    },
+    "notifications": {
+      "componentDeleted": "Komponent borttagen",
+      "hasBeenDeleted": "{{name}} har tagits bort"
+    },
+    "editModal": {
+      "title": "Redigera testkomponent",
+      "updating": "Uppdaterar testkomponent...",
+      "editing": "Redigerar",
+      "notDetermined": "Ej fastställt",
+      "fields": {
+        "testName": "Testnamn",
+        "abbreviation": "Förkortning",
+        "testCode": "Testkod",
+        "value": "Värde",
+        "unit": "Enhet",
+        "referenceRange": "Referensintervall",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "rangeText": "Intervalltext (alternativ)",
+        "status": "Status (autoberäknad)",
+        "category": "Kategori"
+      },
+      "placeholders": {
+        "testName": "t.ex. Hemoglobin",
+        "abbreviation": "t.ex. HGB",
+        "testCode": "t.ex. 718-7",
+        "value": "Ange testvärde",
+        "unit": "t.ex. g/dL",
+        "minValue": "Minimivärde",
+        "maxValue": "Maximivärde",
+        "rangeText": "t.ex. 'Negativt' eller 'Man: 13,5-17,5, Kvinna: 12,0-15,5'",
+        "category": "Välj kategori",
+        "notes": "Ytterligare anteckningar om detta testresultat"
+      }
+    },
+    "categories": {
+      "chemistry": "Kemi - Elektrolyter och mineraler",
+      "hematology": "Hematologi - Blodvärden och järn",
+      "hepatology": "Hepatologi - Leverenzymer och leverfunktion",
+      "lipids": "Lipider - Kolesterol och triglycerider",
+      "endocrinology": "Endokrinologi - Hormoner och diabetes",
+      "cardiology": "Kardiologi - Hjärta och hjärtmarkörer",
+      "immunology": "Immunologi - Immunsystem och antikroppar",
+      "microbiology": "Mikrobiologi - Infektioner och odlingar",
+      "toxicology": "Toxikologi - Läkemedels- och toxinscreening",
+      "genetics": "Genetik - Genetisk testning",
+      "molecular": "Molekylär - DNA-tester",
+      "pathology": "Patologi - Vävnads- och biopsianalys",
+      "hearing": "Hörsel - Audiometri och vestibulära tester",
+      "stomatology": "Stomatologi - Saliv- och mundiagnostik",
+      "other": "Övriga tester"
+    }
+  },
+  "settings": {
+    "title": "Inställningar",
+    "subtitle": "Hantera dina applikationsinställningar och preferenser",
+    "tabs": {
+      "general": "Allmänt",
+      "documents": "Dokument",
+      "notifications": "Aviseringar",
+      "about": "Om"
+    },
+    "sections": {
+      "security": "Säkerhet",
+      "accountManagement": "Kontohantering",
+      "systemInfo": "Systeminformation",
+      "preferences": "Applikationsinställningar",
+      "documentStorage": "Dokumentlagring",
+      "gettingHelp": "Få hjälp",
+      "supportMediKeep": "Stöd MediKeep",
+      "releaseNotes": "Versionsanteckningar"
+    },
+    "security": {
+      "password": {
+        "title": "Lösenord",
+        "description": "Ändra ditt kontolösenord för att hålla ditt konto säkert",
+        "button": "Ändra lösenord",
+        "currentPassword": "Nuvarande lösenord",
+        "newPassword": "Nytt lösenord",
+        "confirmPassword": "Bekräfta nytt lösenord",
+        "passwordHelp": "Minst 6 tecken, måste innehålla en bokstav och en siffra.",
+        "forceChange": {
+          "title": "Lösenordsbyte krävs",
+          "subtitle": "Ditt konto kräver ett lösenordsbyte innan du kan fortsätta. Ange ett nytt lösenord nedan.",
+          "submit": "Ange nytt lösenord",
+          "submitting": "Ändrar lösenord...",
+          "errors": {
+            "allFieldsRequired": "Alla fält är obligatoriska.",
+            "passwordsMustMatch": "De nya lösenorden matchar inte.",
+            "passwordTooShort": "Nytt lösenord måste vara minst 6 tecken.",
+            "passwordMustDiffer": "Nytt lösenord måste skilja sig från ditt nuvarande lösenord.",
+            "passwordComplexity": "Nytt lösenord måste innehålla minst en bokstav och en siffra.",
+            "changeFailed": "Kunde inte ändra lösenord. Försök igen."
+          }
+        }
+      }
+    },
+    "account": {
+      "deleteAccount": {
+        "title": "Ta bort konto",
+        "description": "Ta bort ditt konto permanent och all tillhörande medicinsk data. Denna åtgärd kan inte ångras.",
+        "button": "Ta bort konto"
+      }
+    },
+    "system": {
+      "version": {
+        "title": "Applikationsversion",
+        "loading": "Laddar versionsinformation...",
+        "unavailable": "Versionsinformation ej tillgänglig",
+        "unknownApp": "Okänd app",
+        "unknownVersion": "Okänd version"
+      }
+    },
+    "help": {
+      "documentation": {
+        "title": "Dokumentation",
+        "description": "Bläddra i wikin för guider, installationsinstruktioner och funktionsdokumentation."
+      },
+      "issues": {
+        "title": "Rapportera ett problem",
+        "description": "Hittat en bugg eller har ett funktionsförslag? Öppna ett ärende på GitHub."
+      }
+    },
+    "sponsor": {
+      "description": "MediKeep är gratis och öppen källkod. Om du tycker det är användbart, överväg att sponsra projektet för att hjälpa till att finansiera utvecklingen.",
+      "button": "Sponsra på GitHub"
+    },
+    "releaseNotes": {
+      "whatsNewTitle": "Nyheter",
+      "whatsNewSubtitle": "Här är vad som ändrats sedan din senaste uppdatering",
+      "currentVersion": "Aktuell",
+      "viewOnGithub": "Visa på GitHub",
+      "dismiss": "Uppfattat",
+      "loading": "Laddar versionsanteckningar...",
+      "error": "Kunde inte ladda versionsanteckningar",
+      "retry": "Försök igen",
+      "empty": "Inga versionsanteckningar tillgängliga",
+      "publishedOn": "Släppt {{date}}",
+      "noChanges": "Inga ändringar listade för denna version",
+      "showAll": "Visa alla versioner",
+      "showLess": "Visa färre"
+    },
+    "preferences": {
+      "unitSystem": {
+        "title": "Enhetssystem",
+        "description": "Välj om mätningar ska visas i imperial (pund, fot, °F) eller metriskt (kilogram, centimeter, °C)",
+        "imperial": "Imperial (lbs, fot, °F)",
+        "metric": "Metriskt (kg, cm, °C)"
+      },
+      "dateFormat": {
+        "title": "Datumformat",
+        "description": "Välj hur datum visas i hela applikationen",
+        "mdy": "MM/DD/ÅÅÅÅ (US)",
+        "dmy": "DD/MM/ÅÅÅÅ (Europeiskt)",
+        "ymd": "ÅÅÅÅ-MM-DD (ISO)"
+      },
+      "sessionTimeout": {
+        "title": "Sessionstimeout",
+        "description": "Ange hur lång inaktivitet som tillåts innan din session löper ut (i minuter)",
+        "range": "minuter (5-1440)"
+      }
+    },
+    "documents": {
+      "description": "Konfigurera hur dina medicinska dokument lagras och hanteras",
+      "cleanup": {
+        "title": "Filrensning",
+        "description": "Rensa osynkroniserade filer och lös inkonsekvenser i dokumentlagring. Detta återställer misslyckade uppladdningar, rensar övergivna uppgifter och åtgärdar databassynkproblem.",
+        "button": "Rensa filer",
+        "cleaning": "Rensar..."
+      }
+    },
+    "papra": {
+      "title": "Papra-integration",
+      "description": "Anslut till din Papra-instans för dokumenthantering",
+      "enabled": "Aktivera Papra",
+      "url": "Papra URL",
+      "urlPlaceholder": "https://din-papra-instans.com",
+      "apiToken": "API-token",
+      "apiTokenPlaceholder": "Ange din Papra API-token",
+      "organization": "Organisation",
+      "organizationPlaceholder": "Välj en organisation",
+      "testConnection": "Testa anslutning",
+      "connectionSuccess": "Anslutningen lyckades",
+      "connectionFailed": "Anslutningen misslyckades",
+      "fetchingOrgs": "Hämtar organisationer...",
+      "noOrganizations": "Inga organisationer hittades",
+      "tokenRequired": "API-token krävs",
+      "urlRequired": "Papra URL krävs"
+    },
+    "actions": {
+      "unsavedChanges": "Du har osparade ändringar",
+      "reset": "Återställ ändringar",
+      "save": "Spara alla ändringar",
+      "saving": "Sparar..."
+    }
+  },
+  "patientInfo": {
+    "title": "Patientinformation",
+    "loading": "Laddar patientinformation...",
+    "personalInfo": "Personuppgifter",
+    "editProfile": "Redigera profil",
+    "error": "Fel",
+    "welcome": {
+      "title": "Välkommen till MediKeep!",
+      "message": "Ditt konto har skapats. Fyll i din patientprofil nedan för att börja hantera dina medicinska journaler."
+    },
+    "fields": {
+      "firstName": "Förnamn",
+      "lastName": "Efternamn",
+      "birthDate": "Födelsedatum",
+      "gender": "Kön",
+      "relationship": "Relation till dig",
+      "address": "Adress",
+      "bloodType": "Blodgrupp",
+      "height": "Längd",
+      "weight": "Vikt",
+      "physician": "Primär läkare",
+      "patientId": "Patient-ID"
+    },
+    "gender": {
+      "male": "Man",
+      "female": "Kvinna"
+    },
+    "notProvided": "Ej angivet",
+    "notSpecified": "Ej specificerat",
+    "notAssigned": "Ej tilldelat",
+    "noProfile": "Ingen patientprofil hittades",
+    "createPrompt": "Skapa din patientprofil för att komma igång.",
+    "createProfile": "Skapa profil",
+    "editTitle": "Redigera patientinformation",
+    "createTitle": "Skapa patientprofil"
+  },
+  "allergies": {
+    "addNew": "Lägg till ny allergi",
+    "messages": {
+      "loading": "Laddar allergier..."
+    }
+  },
+  "search": {
+    "title": "Sökresultat",
+    "subtitle": "Sök i alla medicinska journaler",
+    "filters": "Filter",
+    "recordTypes": "Posttyper",
+    "sortBy": "Sortera efter",
+    "sortRelevance": "Relevans",
+    "sortDate": "Datum (nyaste)",
+    "sortDateNewest": "Datum (nyaste först)",
+    "sortDateOldest": "Datum (äldsta först)",
+    "sortType": "Typ",
+    "sortTitle": "Titel",
+    "columnType": "Posttyp",
+    "columnTypeTip": "Kategorin för den medicinska posten",
+    "columnName": "Namn",
+    "columnNameTip": "Namnet eller titeln på posten",
+    "columnDate": "Datum",
+    "columnDetails": "Detaljer",
+    "columnDetailsTip": "Nyckeldatum för posten (t.ex. när diagnostiserad, påbörjad eller utförd)",
+    "columnTagsTip": "Taggar tilldelade till denna post",
+    "tags": "Taggar",
+    "selectTags": "Välj taggar...",
+    "loadingTags": "Laddar taggar...",
+    "anyTag": "Valfri tagg",
+    "allTags": "Alla taggar",
+    "clearFilters": "Rensa filter",
+    "placeholder": "Sök medicinska journaler...",
+    "searching": "Söker...",
+    "noResults": "Inga resultat hittades",
+    "showAll": "Visa alla {{count}} resultat",
+    "showLess": "Visa färre",
+    "textResults": "Textsökresultat",
+    "tagResults": "Taggresultat",
+    "resultsFor": "Sökresultat för \"{{query}}\"",
+    "taggedWith": "Poster taggade med: {{tags}}",
+    "textResultCount": "{{count}} textresultat",
+    "textResultCount_other": "{{count}} textresultat",
+    "tagResultCount": "{{count}} taggresultat",
+    "tagResultCount_other": "{{count}} taggresultat",
+    "filtered": "(filtrerat)",
+    "popularTags": "Populära taggar",
+    "addMoreTags": "Lägg till fler taggar",
+    "activeFilters": "Aktiva filter",
+    "matchAll": "Matcha alla",
+    "initialTitle": "Sök i dina medicinska journaler",
+    "initialMessage": "Ange en sökterm eller välj taggar från sidofältet för att hitta poster.",
+    "noResultsFiltered": "Försök justera dina filter, taggar eller söktermer",
+    "noResultsGeneral": "Försök med andra söktermer eller kontrollera stavningen",
+    "page": "sida",
+    "perPage": "Poster per sida",
+    "noPatientTitle": "Ingen patient vald",
+    "noPatientMessage": "Välj en patient från instrumentpanelen för att söka i medicinska journaler.",
+    "tagSearchFailed": "Taggsökningen misslyckades. Försök igen.",
+    "searchFailed": "Sökningen misslyckades. Försök igen.",
+    "dateRange": "Datumintervall",
+    "dateRangePlaceholder": "Välj datumintervall...",
+    "collapseFilters": "Dölj filter",
+    "expandFilters": "Visa filter",
+    "resultCount_one": "{{count}} post",
+    "resultCount_other": "{{count}} poster",
+    "filterByTag": "Filtrera efter tagg: {{tag}}",
+    "viewTable": "Tabellvy",
+    "viewCards": "Kortvy",
+    "previewRecord": "Förhandsgranska post",
+    "openFullRecord": "Öppna fullständig post",
+    "recentSearches": "Senaste sökningar",
+    "clearHistory": "Rensa alla",
+    "last7Days": "Senaste 7 dagarna",
+    "last30Days": "Senaste 30 dagarna",
+    "last6Months": "Senaste 6 månaderna",
+    "lastYear": "Senaste året",
+    "allTime": "Alla tider",
+    "datePresets": "Snabbval",
+    "noRecentSearches": "Inga senaste sökningar",
+    "activeFilterCount": "{{count}} aktiva filter",
+    "removeTypeFilter": "Ta bort {{type}}-filter",
+    "types": {
+      "medications": "Mediciner",
+      "conditions": "Tillstånd",
+      "labResults": "Labbresultat",
+      "procedures": "Ingrepp",
+      "immunizations": "Vaccinationer",
+      "treatments": "Behandlingar",
+      "encounters": "Besök",
+      "allergies": "Allergier",
+      "vitals": "Vitalparametrar"
+    },
+    "fallbacks": {
+      "labResult": "Labbresultat",
+      "medication": "Medicin",
+      "condition": "Tillstånd",
+      "procedure": "Ingrepp",
+      "immunization": "Vaccination",
+      "treatment": "Behandling",
+      "encounter": "Besök",
+      "allergy": "Allergi",
+      "record": "Post"
+    },
+    "subtitles": {
+      "result": "Resultat: {{value}}",
+      "dose": "Dos {{number}}"
+    },
+    "dateLabels": {
+      "tested": "Testad",
+      "started": "Påbörjad",
+      "diagnosed": "Diagnostiserad",
+      "performed": "Utförd",
+      "given": "Given",
+      "visited": "Besökt",
+      "identified": "Identifierad",
+      "recorded": "Registrerad"
+    }
+  }
+}
