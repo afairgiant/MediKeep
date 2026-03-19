@@ -7,9 +7,9 @@
   "channels": {
     "title": "Meldingskanalen",
     "description": "Voeg meldingskanalen toe en beheer ze",
-    "add": "Kanaal Toevoegen",
-    "edit": "Kanaal Bewerken",
-    "delete": "Kanaal Verwijderen",
+    "add": "Kanaal toevoegen",
+    "edit": "Kanaal bewerken",
+    "delete": "Kanaal verwijderen",
     "test": "Testen",
     "testing": "Testen...",
     "testSuccess": "Testmelding succesvol verzonden!",
@@ -38,7 +38,7 @@
       "title": "Kanaalgegevens",
       "name": {
         "label": "Kanaalnaam",
-        "placeholder": "bijv. Mijn Discord Server",
+        "placeholder": "bijv. Mijn Discord server",
         "description": "Een herkenbare naam om dit kanaal te identificeren"
       },
       "type": {
@@ -47,7 +47,7 @@
         "description": "De service om meldingen door te sturen"
       },
       "enabled": {
-        "label": "Kanaal Inschakelen",
+        "label": "Kanaal inschakelen",
         "description": "Ontvang meldingen via dit kanaal"
       },
       "configSection": "Kanaalconfiguratie"
@@ -59,49 +59,49 @@
         "description": "Maak een webhook aan in uw Discord serverinstellingen"
       },
       "username": {
-        "label": "Bot Gebruikersnaam (Optioneel)",
+        "label": "Bot gebruikersnaam (optioneel)",
         "placeholder": "MediKeep",
         "description": "Aangepaste naam voor de meldingsbot"
       },
       "avatarUrl": {
-        "label": "Avatar URL (Optioneel)",
+        "label": "Avatar URL (optioneel)",
         "placeholder": "https://example.com/avatar.png",
         "description": "Aangepaste avatar voor de meldingsbot"
       }
     },
     "email": {
       "smtpHost": {
-        "label": "SMTP Server",
+        "label": "SMTP server",
         "placeholder": "smtp.gmail.com",
         "description": "De SMTP-server van uw e-mailprovider"
       },
       "smtpPort": {
-        "label": "SMTP Poort",
+        "label": "SMTP poort",
         "placeholder": "587",
         "description": "Meestal 587 (TLS) of 465 (SSL)"
       },
       "smtpUser": {
-        "label": "SMTP Gebruikersnaam",
+        "label": "SMTP gebruikersnaam",
         "placeholder": "uw-email@gmail.com",
         "description": "Uw e-mailadres of gebruikersnaam"
       },
       "smtpPassword": {
-        "label": "SMTP Wachtwoord",
+        "label": "SMTP wachtwoord",
         "placeholder": "App-wachtwoord of e-mailwachtwoord",
         "description": "Gebruik voor Gmail een App-wachtwoord"
       },
       "fromEmail": {
-        "label": "Afzender E-mail",
+        "label": "Afzender e-mail",
         "placeholder": "meldingen@voorbeeld.nl",
         "description": "Het e-mailadres van de afzender"
       },
       "toEmail": {
-        "label": "Ontvanger E-mail",
+        "label": "Ontvanger e-mail",
         "placeholder": "uw-email@voorbeeld.nl",
         "description": "Waar meldingen naartoe gestuurd worden"
       },
       "useTls": {
-        "label": "TLS Gebruiken",
+        "label": "TLS gebruiken",
         "description": "TLS-versleuteling inschakelen (aanbevolen)"
       }
     },
@@ -112,7 +112,7 @@
         "description": "Uw Gotify server URL"
       },
       "appToken": {
-        "label": "App Token",
+        "label": "App token",
         "placeholder": "Applicatietoken van Gotify",
         "description": "Maak een applicatie aan in Gotify om een token te verkrijgen"
       },
@@ -129,16 +129,16 @@
         "description": "URL om meldingsgegevens te ontvangen"
       },
       "method": {
-        "label": "HTTP Methode",
+        "label": "HTTP methode",
         "description": "HTTP-methode voor het webhook-verzoek"
       },
       "headers": {
-        "label": "Aangepaste Headers (Optioneel)",
+        "label": "Aangepaste headers (optioneel)",
         "placeholder": "{\"Authorization\": \"Bearer token\"}",
         "description": "JSON-object met aangepaste headers"
       },
       "authToken": {
-        "label": "Auth Token (Optioneel)",
+        "label": "Auth token (optioneel)",
         "placeholder": "Bearer token of API-sleutel",
         "description": "Autorisatietoken voor de webhook"
       }
@@ -153,14 +153,14 @@
     "saveSuccess": "Voorkeur opgeslagen",
     "saveFailed": "Voorkeur opslaan mislukt",
     "eventHeader": "Gebeurtenis",
-    "comingSoon": "Binnenkort Beschikbaar",
+    "comingSoon": "Binnenkort beschikbaar",
     "categories": {
       "system": "Systeemgebeurtenissen",
-      "medical": "Medische Gebeurtenissen",
-      "collaboration": "Delen & Samenwerking",
-      "sharing": "Delen & Uitnodigingen",
+      "medical": "Medische gebeurtenissen",
+      "collaboration": "Delen & samenwerking",
+      "sharing": "Delen & uitnodigingen",
       "security": "Beveiligingswaarschuwingen",
-      "other": "Overige Gebeurtenissen"
+      "other": "Overige gebeurtenissen"
     }
   },
 
@@ -170,47 +170,47 @@
       "description": "Handmatige testmelding"
     },
     "backup_completed": {
-      "name": "Back-up Voltooid",
+      "name": "Back-up voltooid",
       "description": "Wanneer een back-up succesvol is voltooid"
     },
     "backup_failed": {
-      "name": "Back-up Mislukt",
+      "name": "Back-up mislukt",
       "description": "Wanneer een back-up mislukt"
     },
     "lab_result_available": {
-      "name": "Laboratoriumuitslagen Beschikbaar",
+      "name": "Laboratoriumuitslagen beschikbaar",
       "description": "Wanneer nieuwe laboratoriumuitslagen zijn toegevoegd"
     },
     "lab_result_abnormal": {
-      "name": "Afwijkende Laboratoriumuitslagen",
+      "name": "Afwijkende laboratoriumuitslagen",
       "description": "Wanneer laboratoriumuitslagen buiten het normale bereik vallen"
     },
     "immunization_due": {
-      "name": "Vaccinatie Gepland",
+      "name": "Vaccinatie gepland",
       "description": "Wanneer een vaccinatie binnenkort moet plaatsvinden"
     },
     "immunization_overdue": {
-      "name": "Vaccinatie Achterstallig",
+      "name": "Vaccinatie achterstallig",
       "description": "Wanneer een vaccinatie over de datum is"
     },
     "invitation_received": {
-      "name": "Uitnodiging Ontvangen",
+      "name": "Uitnodiging ontvangen",
       "description": "Wanneer iemand dossiers met u deelt"
     },
     "invitation_accepted": {
-      "name": "Uitnodiging Geaccepteerd",
+      "name": "Uitnodiging geaccepteerd",
       "description": "Wanneer uw deeluitnodiging is geaccepteerd"
     },
     "share_revoked": {
-      "name": "Deling Ingetrokken",
+      "name": "Deling ingetrokken",
       "description": "Wanneer toegang tot gedeelde dossiers is ingetrokken"
     },
     "login_from_new_device": {
-      "name": "Inloggen vanaf Nieuw Apparaat",
+      "name": "Inloggen vanaf nieuw apparaat",
       "description": "Wanneer er op uw account is ingelogd vanaf een nieuw apparaat"
     },
     "password_changed": {
-      "name": "Wachtwoord Gewijzigd",
+      "name": "Wachtwoord gewijzigd",
       "description": "Wanneer uw wachtwoord is gewijzigd"
     }
   },
@@ -221,8 +221,8 @@
     "loading": "Geschiedenis laden...",
     "noHistory": "Nog geen meldingen verzonden",
     "noHistoryHint": "Meldingen verschijnen hier zodra ze zijn verzonden",
-    "showMore": "Meer Tonen",
-    "showLess": "Minder Tonen",
+    "showMore": "Meer tonen",
+    "showLess": "Minder tonen",
     "page": "Pagina {{current}} van {{total}}",
     "status": {
       "sent": "Verzonden",
@@ -326,24 +326,24 @@
     },
     "invitations": {
       "respondFailed": "Reageren op uitnodiging mislukt",
-      "cancelled": "Uitnodiging Geannuleerd",
+      "cancelled": "Uitnodiging geannuleerd",
       "cancelledMessage": "De uitnodiging is geannuleerd.",
       "cancelFailed": "Uitnodiging annuleren mislukt",
-      "accessRevoked": "Toegang Ingetrokken",
+      "accessRevoked": "Toegang ingetrokken",
       "accessRevokedMessage": "De toegang is ingetrokken.",
       "revokeFailed": "Toegang intrekken mislukt",
-      "alreadyRevoked": "Reeds Ingetrokken",
+      "alreadyRevoked": "Reeds ingetrokken",
       "alreadyRevokedMessage": "Deze uitnodiging is al ingetrokken."
     },
     "photo": {
-      "pleaseWait": "Even Geduld",
+      "pleaseWait": "Even geduld",
       "photoBeingUploaded": "Er wordt momenteel een foto geüpload. Wacht tot dit is voltooid.",
       "uploadSuccess": "Foto succesvol geüpload",
-      "uploadFailed": "Upload Mislukt",
-      "deleteFailed": "Verwijderen Mislukt"
+      "uploadFailed": "Upload mislukt",
+      "deleteFailed": "Verwijderen mislukt"
     },
     "reports": {
-      "noRecordsSelected": "Geen Dossiers Geselecteerd",
+      "noRecordsSelected": "Geen dossiers geselecteerd",
       "noRecordsMessage": "Selecteer ten minste één dossier uit de onderstaande categorieën om een rapport te genereren.",
       "validationError": "Validatiefout",
       "templateNameRequired": "Sjabloonnaam is verplicht",
@@ -354,10 +354,10 @@
       "templateLoaded": "Sjabloon \"{{name}}\" geladen"
     },
     "labResults": {
-      "parseWarning": "Sommige Regels Konden Niet Worden Verwerkt",
-      "noTextToParse": "Geen Tekst om te Verwerken",
+      "parseWarning": "Sommige regels konden niet worden verwerkt",
+      "noTextToParse": "Geen tekst om te verwerken",
       "noTextMessage": "Plak laboratoriumuitslagen in het invoerveld.",
-      "textParsed": "Tekst Verwerkt",
+      "textParsed": "Tekst verwerkt",
       "parsedCount": "{{count}} testcomponenten gevonden. Bekijk ze in het Voorbeeldtabblad.",
       "addedSuccess": "Gelukt!",
       "addedMessage": "{{count}} testcomponenten toegevoegd aan het laboratoriumresultaat.",
@@ -365,14 +365,14 @@
       "deletedSuccess": "Component verwijderd",
       "deletedMessage": "{{name}} is verwijderd",
       "updateFailed": "Component bijwerken mislukt",
-      "templateApplied": "Sjabloon Toegepast",
+      "templateApplied": "Sjabloon toegepast",
       "templateAppliedMessage": "{{count}} componenten toegevoegd vanuit sjabloon \"{{name}}\".",
       "trendExportSuccess": "Grafiek succesvol geëxporteerd",
       "trendExportFailed": "Grafiek exporteren mislukt"
     },
     "documents": {
-      "uploadFailed": "Upload Mislukt",
-      "deleteFailed": "Verwijderen Mislukt",
+      "uploadFailed": "Upload mislukt",
+      "deleteFailed": "Verwijderen mislukt",
       "linkSuccess": "Document succesvol gekoppeld",
       "linkFailed": "Document koppelen mislukt",
       "unlinkSuccess": "Document succesvol ontkoppeld",
@@ -386,30 +386,30 @@
       "revokeFailed": "Toegang intrekken mislukt"
     },
     "upload": {
-      "failed": "Upload Mislukt",
-      "completedWithErrors": "Upload Voltooid met Fouten",
+      "failed": "Upload mislukt",
+      "completedWithErrors": "Upload voltooid met fouten",
       "partialSuccess": "{{completed}}/{{total}} bestanden succesvol geüpload. {{failed}} mislukt.",
-      "documentAdded": "Document Toegevoegd aan Paperless",
+      "documentAdded": "Document toegevoegd aan Paperless",
       "fileUploadedSuccess": "\"{{fileName}}\" succesvol geüpload naar Paperless!",
       "backgroundProcessing": "\"{{fileName}}\" wordt op de achtergrond verwerkt. U ontvangt een melding wanneer dit is voltooid.",
-      "duplicateDocument": "Dubbel Document",
-      "paperlessUploadFailed": "Paperless Upload Mislukt",
-      "fileUploadFailed": "Bestandsupload Mislukt"
+      "duplicateDocument": "Dubbel document",
+      "paperlessUploadFailed": "Paperless upload mislukt",
+      "fileUploadFailed": "Bestandsupload mislukt"
     },
     "generic": {
-      "operationFailed": "Bewerking Mislukt",
-      "saveFailed": "Opslaan Mislukt",
-      "deleteFailed": "Verwijderen Mislukt",
-      "downloadFailed": "Downloaden Mislukt",
+      "operationFailed": "Bewerking mislukt",
+      "saveFailed": "Opslaan mislukt",
+      "deleteFailed": "Verwijderen mislukt",
+      "downloadFailed": "Downloaden mislukt",
       "success": "Gelukt!",
       "warning": "Waarschuwing",
       "error": "Fout",
       "operationSuccess": "{{operation}} succesvol voltooid!",
       "allOperationsSuccess": "Alle {{total}} {{operation}}s succesvol voltooid!",
       "operationPartial": "{{success}}/{{total}} {{operation}}s succesvol voltooid. {{failed}} mislukt.",
-      "operationPartialTitle": "{{operation}} Voltooid met Fouten",
+      "operationPartialTitle": "{{operation}} voltooid met fouten",
       "allOperationsFailed": "Alle {{operation}}s mislukt. Probeer het opnieuw.",
-      "operationFailedTitle": "{{operation}} Mislukt"
+      "operationFailedTitle": "{{operation}} mislukt"
     }
   }
 }

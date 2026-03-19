@@ -1,9 +1,9 @@
 {
   "menu": {
     "dashboard": "Dashboard",
-    "backToDashboard": "Terug naar Dashboard",
+    "backToDashboard": "Terug naar dashboard",
     "patients": "Patiënten",
-    "medicalRecords": "Medische Dossiers",
+    "medicalRecords": "Medische dossiers",
     "settings": "Instellingen",
     "reports": "Rapporten",
     "administration": "Administratie",
@@ -15,17 +15,17 @@
     "dashboard": "Dashboard",
     "patientList": "Patiëntenlijst",
     "patientDetails": "Patiëntgegevens",
-    "medicalHistory": "Medische Geschiedenis",
+    "medicalHistory": "Medische geschiedenis",
     "settings": "Instellingen",
     "userProfile": "Gebruikersprofiel",
     "preferences": "Voorkeuren",
     "reports": "Rapporten",
-    "help": "Help & Ondersteuning"
+    "help": "Help & ondersteuning"
   },
   "sections": {
     "overview": "Overzicht",
-    "personalInfo": "Persoonlijke Informatie",
-    "medicalInfo": "Medische Informatie",
+    "personalInfo": "Persoonlijke informatie",
+    "medicalInfo": "Medische informatie",
     "documents": "Documenten",
     "timeline": "Tijdlijn",
     "familyHistory": "Familiegeschiedenis",
@@ -46,24 +46,24 @@
     "injuries": "Verwondingen",
     "practitioners": "Zorgverleners",
     "pharmacies": "Apotheken",
-    "medicalEquipment": "Medische Apparatuur"
+    "medicalEquipment": "Medische apparatuur"
   },
   "dashboard": {
-    "title": "MediKeep Dashboard",
+    "title": "MediKeep dashboard",
     "subtitle": "Beheer uw gezondheidsinformatie veilig",
     "hello": "Hallo",
     "loading": "Uw medisch dashboard wordt geladen...",
     "sections": {
-      "coreMedical": "Kerninformatie Medisch",
-      "treatments": "Behandelingen en Ingrepen",
+      "coreMedical": "Kerninformatie medisch",
+      "treatments": "Behandelingen en ingrepen",
       "healthMonitoring": "Gezondheidsmonitoring",
-      "prevention": "Preventie & Geschiedenis",
-      "additionalResources": "Aanvullende Informatie",
-      "recentActivity": "Recente Activiteit"
+      "prevention": "Preventie & geschiedenis",
+      "additionalResources": "Aanvullende informatie",
+      "recentActivity": "Recente activiteit"
     },
     "stats": {
-      "totalRecords": "Totaal Dossiers",
-      "activeMedications": "Actieve Medicatie",
+      "totalRecords": "Totaal dossiers",
+      "activeMedications": "Actieve medicatie",
       "labResults": "Laboratoriumuitslagen",
       "procedures": "Ingrepen"
     },
@@ -73,7 +73,7 @@
       "labResults": "Laboratoriumuitslagen",
       "treatments": "Behandelingen",
       "procedures": "Ingrepen",
-      "vitalSigns": "Vitale Functies",
+      "vitalSigns": "Vitale functies",
       "symptoms": "Symptomen",
       "conditions": "Aandoeningen",
       "allergies": "Allergieën",
@@ -83,10 +83,10 @@
       "familyHistory": "Familiegeschiedenis",
       "insurance": "Verzekering",
       "emergencyContacts": "Noodcontacten",
-      "exportRecords": "Dossiers Exporteren",
+      "exportRecords": "Dossiers exporteren",
       "practitioners": "Zorgverleners",
       "pharmacies": "Apotheken",
-      "medicalEquipment": "Medische Apparatuur",
+      "medicalEquipment": "Medische apparatuur",
       "adminDashboard": "Beheerderspaneel"
     },
     "activity": {
@@ -105,12 +105,12 @@
     "viewAll": "Bekijk alle {{count}} uitnodigingen",
     "noPending": "Geen openstaande uitnodigingen",
     "noPendingDescription": "Nieuwe deeluitnodigingen verschijnen hier",
-    "manageAll": "Alle Uitnodigingen Beheren",
-    "sharePatient": "Patiënt Delen",
-    "confirmTitle": "Bevestig Acceptatie Uitnodiging",
+    "manageAll": "Alle uitnodigingen beheren",
+    "sharePatient": "Patiënt delen",
+    "confirmTitle": "Bevestig acceptatie uitnodiging",
     "confirmQuestion": "Weet u zeker dat u deze uitnodiging wilt accepteren?",
     "confirmDescription": "Door te accepteren krijgt u toegang om de gedeelde medische informatie te bekijken.",
-    "acceptButton": "Uitnodiging Accepteren",
+    "acceptButton": "Uitnodiging accepteren",
     "types": {
       "familyHistory": "Familiegeschiedenis",
       "patientRecord": "Patiëntdossier"
@@ -132,8 +132,8 @@
   },
   "sidebarNav": {
     "sections": {
-      "medicalRecords": "Medische Dossiers",
-      "careAndTreatment": "Zorg & Behandeling",
+      "medicalRecords": "Medische dossiers",
+      "careAndTreatment": "Zorg & behandeling",
       "misc": "Overig",
       "tools": "Hulpmiddelen",
       "administration": "Administratie"
@@ -144,7 +144,7 @@
       "labResults": "Laboratoriumuitslagen",
       "conditions": "Aandoeningen",
       "allergies": "Allergieën",
-      "vitalSigns": "Vitale Functies",
+      "vitalSigns": "Vitale functies",
       "symptoms": "Symptomen",
       "injuries": "Verwondingen",
       "treatments": "Behandelingen",
@@ -155,11 +155,11 @@
       "practitioners": "Zorgverleners",
       "pharmacies": "Apotheken",
       "insurance": "Verzekering",
-      "medicalEquipment": "Medische Apparatuur",
+      "medicalEquipment": "Medische apparatuur",
       "emergencyContacts": "Noodcontacten",
       "tagManagement": "Tagbeheer",
-      "customReports": "Aangepaste Rapporten",
-      "exportRecords": "Dossiers Exporteren",
+      "customReports": "Aangepaste rapporten",
+      "exportRecords": "Dossiers exporteren",
       "settings": "Instellingen",
       "adminDashboard": "Beheerderspaneel",
       "dataModels": "Datamodellen",
