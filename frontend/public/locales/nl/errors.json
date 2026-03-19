@@ -1,0 +1,90 @@
+{
+  "upload": {
+    "failed": "Bestand uploaden mislukt. Probeer het opnieuw.",
+    "connectionError": "Verbindingsfout. Controleer uw netwerk en probeer het opnieuw.",
+    "fileTooLarge": "Bestandsgrootte overschrijdt de maximale limiet.",
+    "invalidFileType": "Bestandstype wordt niet ondersteund.",
+    "fileProcessingFailed": "Bestand verwerken mislukt. Probeer een ander bestand.",
+    "duplicateFile": "Dit bestand is al geüpload.",
+    "batchUploadFailed": "Sommige bestanden zijn niet geüpload. Controleer de individuele bestandsfouten.",
+    "partialUploadSuccess": "Upload voltooid met enkele fouten. Controleer de mislukte bestanden.",
+    "allUploadsFailed": "Alle uploads zijn mislukt. Controleer uw verbinding en probeer het opnieuw."
+  },
+  "paperless": {
+    "unavailable": "Documentbeheerservice is momenteel niet beschikbaar.",
+    "notEnabled": "Paperless-integratie is niet ingeschakeld. Schakel deze in bij Instellingen.",
+    "configIncomplete": "Paperless-configuratie is onvolledig. Controleer uw instellingen.",
+    "uploadFailed": "Uploaden naar Paperless-documentbeheersysteem mislukt.",
+    "connectionFailed": "Kan geen verbinding maken met Paperless-service. Controleer de configuratie.",
+    "authFailed": "Authenticatie met Paperless-service mislukt. Controleer de inloggegevens.",
+    "duplicateDocument": "Dit document bestaat al in Paperless. Identieke documenten kunnen niet tweemaal worden geüpload.",
+    "taskFailed": "Document uploaden naar Paperless mislukt. Probeer het opnieuw of neem contact op met ondersteuning.",
+    "taskTimeout": "Documentverwerking is verlopen. Het document wordt mogelijk nog verwerkt in Paperless."
+  },
+  "form": {
+    "submissionFailed": "Formulier opslaan mislukt. Controleer uw invoer en probeer het opnieuw.",
+    "requiredFieldMissing": "Vul alle verplichte velden in.",
+    "invalidDate": "Voer een geldige datum in.",
+    "invalidEmail": "Voer een geldig e-mailadres in.",
+    "invalidPhone": "Voer een geldig telefoonnummer in.",
+    "invalidPhoneDigits": "Voer een geldig telefoonnummer in",
+    "invalidWebsiteUrl": "Voer een geldige website-URL in",
+    "patientNotSelected": "Selecteer een patiënt.",
+    "entityNotFound": "Het gevraagde item kon niet worden gevonden.",
+    "medicationNotSelected": "Selecteer een medicatie",
+    "conditionNotSelected": "Selecteer een aandoening",
+    "mustBeValidNumber": "Moet een geldig getal zijn"
+  },
+  "patientForm": {
+    "error": "Fout",
+    "firstNameRequired": "Voornaam is verplicht",
+    "lastNameRequired": "Achternaam is verplicht",
+    "birthDateRequired": "Geboortedatum is verplicht",
+    "birthDateFuture": "Geboortedatum kan niet in de toekomst liggen",
+    "createFailed": "Aanmaken mislukt: {{message}}",
+    "updateFailed": "Bijwerken mislukt: {{message}}"
+  },
+  "file": {
+    "deleteFailed": "Bestand verwijderen mislukt. Probeer het opnieuw.",
+    "downloadFailed": "Bestand downloaden mislukt. Probeer het opnieuw.",
+    "viewFailed": "Bestand openen voor weergave mislukt. Probeer het opnieuw.",
+    "notFound": "Bestand niet gevonden."
+  },
+  "network": {
+    "unavailable": "Netwerk niet beschikbaar. Controleer uw verbinding.",
+    "timeout": "Verzoek verlopen. Probeer het opnieuw.",
+    "serverError": "Serverfout opgetreden. Probeer het later opnieuw.",
+    "connectionError": "Verbindingsfout. Controleer uw netwerk en probeer het opnieuw."
+  },
+  "general": {
+    "unknownError": "Er is een onverwachte fout opgetreden. Probeer het opnieuw.",
+    "permissionDenied": "U heeft geen toestemming om deze actie uit te voeren.",
+    "sessionExpired": "Uw sessie is verlopen. Log opnieuw in.",
+    "rateLimitExceeded": "Te veel verzoeken. Wacht even en probeer het opnieuw.",
+    "maintenanceMode": "Het systeem is momenteel in onderhoud. Probeer het later opnieuw.",
+    "storageFull": "Opslaglimiet bereikt. Maak ruimte vrij en probeer het opnieuw.",
+    "validationError": "Controleer uw invoer en probeer het opnieuw."
+  },
+  "success": {
+    "uploadSuccess": "Bestand succesvol geüpload!",
+    "uploadMultipleSuccess": "Alle bestanden succesvol geüpload!",
+    "formSaved": "Formulier succesvol opgeslagen!",
+    "fileDeleted": "Bestand succesvol verwijderd.",
+    "paperlessSyncSuccess": "Succesvol gesynchroniseerd met Paperless-documentbeheer.",
+    "batchUploadSuccess": "Alle bestanden succesvol geüpload!"
+  },
+  "warnings": {
+    "partialSuccess": "Bewerking voltooid met enkele waarschuwingen.",
+    "slowConnection": "Upload duurt langer dan gebruikelijk vanwege een trage verbinding.",
+    "largeFileWarning": "Groot bestand gedetecteerd. Upload kan enkele minuten duren.",
+    "duplicateWarning": "Dit bestand lijkt een duplicaat te zijn."
+  },
+  "relationships": {
+    "addConditionFailed": "Aandoeningrelatie toevoegen mislukt",
+    "addMedicationFailed": "Medicatierelatie toevoegen mislukt",
+    "addFailed": "Relatie toevoegen mislukt",
+    "updateFailed": "Relatie bijwerken mislukt",
+    "deleteFailed": "Relatie verwijderen mislukt",
+    "fetchFailed": "Relaties laden mislukt"
+  }
+}

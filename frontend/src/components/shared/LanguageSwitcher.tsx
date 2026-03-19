@@ -26,6 +26,7 @@ const LANGUAGES: Language[] = [
   { value: 'pt', label: 'Português', shortLabel: 'PT' },
   { value: 'ru', label: 'Русский', shortLabel: 'RU' },
   { value: 'sv', label: 'Svenska', shortLabel: 'SV' },
+  { value: 'nl', label: 'Nederlands', shortLabel: 'NL' },
 ];
 
 const SUPPORTED_LANGUAGE_CODES = LANGUAGES.map(l => l.value);
