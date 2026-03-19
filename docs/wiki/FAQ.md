@@ -86,7 +86,7 @@ Yes! You can:
 
 ### Does MediKeep support multiple languages?
 
-Yes. MediKeep supports 7 languages: English, French, German, Spanish, Italian, Portuguese, and Russian.
+Yes. MediKeep supports 8 languages: English, French, German, Spanish, Italian, Portuguese, Russian, and Swedish.
 
 ---
 

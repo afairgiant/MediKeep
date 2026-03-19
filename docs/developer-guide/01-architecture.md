@@ -26,7 +26,7 @@
 - **Backend**: FastAPI, Python 3.12+
 - **Database**: PostgreSQL 15+, SQLAlchemy 2.0, Alembic migrations
 - **Authentication**: JWT access tokens, SSO (Google, GitHub, Microsoft/Azure AD)
-- **Localization**: i18next (7 languages: en, fr, de, es, it, pt, ru)
+- **Localization**: i18next (8 languages: en, fr, de, es, it, pt, ru, sv)
 - **Deployment**: Docker (single container, frontend + backend)
 - **Testing**: Vitest (frontend), Pytest (backend)
 

@@ -1,0 +1,172 @@
+{
+  "menu": {
+    "dashboard": "Instrumentpanel",
+    "backToDashboard": "Tillbaka till instrumentpanelen",
+    "patients": "Patienter",
+    "medicalRecords": "Journaler",
+    "settings": "Inst\u00e4llningar",
+    "reports": "Rapporter",
+    "administration": "Administration",
+    "logout": "Logga ut",
+    "profile": "Profil",
+    "help": "Hj\u00e4lp"
+  },
+  "pages": {
+    "dashboard": "Instrumentpanel",
+    "patientList": "Patientlista",
+    "patientDetails": "Patientdetaljer",
+    "medicalHistory": "Sjukdomshistorik",
+    "settings": "Inst\u00e4llningar",
+    "userProfile": "Anv\u00e4ndarprofil",
+    "preferences": "Preferenser",
+    "reports": "Rapporter",
+    "help": "Hj\u00e4lp och support"
+  },
+  "sections": {
+    "overview": "\u00d6versikt",
+    "personalInfo": "Personlig information",
+    "medicalInfo": "Medicinsk information",
+    "documents": "Dokument",
+    "timeline": "Tidslinje",
+    "familyHistory": "Familjehistorik",
+    "emergencyContacts": "N\u00f6dkontakter",
+    "insurance": "F\u00f6rs\u00e4kring",
+    "preferences": "Preferenser"
+  },
+  "medicalRecords": {
+    "allergies": "Allergier",
+    "conditions": "Tillst\u00e5nd",
+    "medications": "Mediciner",
+    "labResults": "Labbresultat",
+    "immunizations": "Vaccinationer",
+    "procedures": "Ingrepp",
+    "visits": "Bes\u00f6k",
+    "treatments": "Behandlingar",
+    "symptoms": "Symtom",
+    "injuries": "Skador",
+    "practitioners": "V\u00e5rdgivare",
+    "pharmacies": "Apotek",
+    "medicalEquipment": "Medicinsk utrustning"
+  },
+  "dashboard": {
+    "title": "MediKeep Instrumentpanel",
+    "subtitle": "Hantera din h\u00e4lsoinformation s\u00e4kert",
+    "hello": "Hej",
+    "loading": "Laddar din medicinska instrumentpanel...",
+    "sections": {
+      "coreMedical": "Medicinsk k\u00e4rninfo",
+      "treatments": "Behandlingar och ingrepp",
+      "healthMonitoring": "H\u00e4lso\u00f6vervakning",
+      "prevention": "Prevention och historik",
+      "additionalResources": "Ytterligare resurser",
+      "recentActivity": "Senaste aktivitet"
+    },
+    "stats": {
+      "totalRecords": "Totalt antal poster",
+      "activeMedications": "Aktiva mediciner",
+      "labResults": "Labbresultat",
+      "procedures": "Ingrepp"
+    },
+    "modules": {
+      "patientInfo": "Patientinformation",
+      "medications": "Mediciner",
+      "labResults": "Labbresultat",
+      "treatments": "Behandlingar",
+      "procedures": "Ingrepp",
+      "vitalSigns": "Vitalparametrar",
+      "symptoms": "Symtom",
+      "conditions": "Tillst\u00e5nd",
+      "allergies": "Allergier",
+      "injuries": "Skador",
+      "immunizations": "Vaccinationer",
+      "visitHistory": "Bes\u00f6kshistorik",
+      "familyHistory": "Familjehistorik",
+      "insurance": "F\u00f6rs\u00e4kring",
+      "emergencyContacts": "N\u00f6dkontakter",
+      "exportRecords": "Exportera journaler",
+      "practitioners": "V\u00e5rdgivare",
+      "pharmacies": "Apotek",
+      "medicalEquipment": "Medicinsk utrustning",
+      "adminDashboard": "Adminpanel"
+    },
+    "activity": {
+      "noActivity": "Ingen senaste aktivitet",
+      "noActivityDescription": "Dina journalaktiviteter visas h\u00e4r",
+      "lastUpdated": "Senast uppdaterad"
+    },
+    "search": {
+      "placeholder": "S\u00f6k i journaler..."
+    }
+  },
+  "invitations": {
+    "title": "Inbjudningar",
+    "lastUpdated": "Senast uppdaterad",
+    "from": "Fr\u00e5n",
+    "viewAll": "Visa alla {{count}} inbjudningar",
+    "noPending": "Inga v\u00e4ntande inbjudningar",
+    "noPendingDescription": "Nya delningsinbjudningar visas h\u00e4r",
+    "manageAll": "Hantera alla inbjudningar",
+    "sharePatient": "Dela patient",
+    "confirmTitle": "Bekr\u00e4fta godk\u00e4nnande av inbjudan",
+    "confirmQuestion": "\u00c4r du s\u00e4ker p\u00e5 att du vill godk\u00e4nna denna inbjudan?",
+    "confirmDescription": "Genom att godk\u00e4nna f\u00e5r du tillg\u00e5ng att se den delade medicinska informationen.",
+    "acceptButton": "Godk\u00e4nn inbjudan",
+    "types": {
+      "familyHistory": "Familjehistorik",
+      "patientRecord": "Patientjournal"
+    }
+  },
+  "activity": {
+    "actions": {
+      "created": "Skapad",
+      "updated": "Uppdaterad",
+      "deleted": "Borttagen",
+      "added": "Tillagd",
+      "modified": "\u00c4ndrad",
+      "removed": "Borttagen",
+      "completed": "Slutf\u00f6rd",
+      "cancelled": "Avbruten",
+      "scheduled": "Schemalagd",
+      "viewed": "Visad"
+    }
+  },
+  "sidebarNav": {
+    "sections": {
+      "medicalRecords": "Journaler",
+      "careAndTreatment": "V\u00e5rd och behandling",
+      "misc": "\u00d6vrigt",
+      "tools": "Verktyg",
+      "administration": "Administration"
+    },
+    "items": {
+      "patientInfo": "Patientinfo",
+      "medications": "Mediciner",
+      "labResults": "Labbresultat",
+      "conditions": "Tillst\u00e5nd",
+      "allergies": "Allergier",
+      "vitalSigns": "Vitalparametrar",
+      "symptoms": "Symtom",
+      "injuries": "Skador",
+      "treatments": "Behandlingar",
+      "procedures": "Ingrepp",
+      "immunizations": "Vaccinationer",
+      "visitHistory": "Bes\u00f6kshistorik",
+      "familyHistory": "Familjehistorik",
+      "practitioners": "V\u00e5rdgivare",
+      "pharmacies": "Apotek",
+      "insurance": "F\u00f6rs\u00e4kring",
+      "medicalEquipment": "Medicinsk utrustning",
+      "emergencyContacts": "N\u00f6dkontakter",
+      "tagManagement": "Etiketthantering",
+      "customReports": "Anpassade rapporter",
+      "exportRecords": "Exportera journaler",
+      "settings": "Inst\u00e4llningar",
+      "adminDashboard": "Adminpanel",
+      "dataModels": "Datamodeller",
+      "backupManagement": "S\u00e4kerhetskopiering",
+      "systemHealth": "Systemh\u00e4lsa",
+      "language": "Spr\u00e5k",
+      "theme": "Tema"
+    }
+  }
+}
