@@ -190,6 +190,14 @@ class LabTestComponentBase(BaseModel):
             raise ValueError(f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}")
         return normalized
 
+
+# Fields that participate in result-type validity checks (used by Update validator)
+_RESULT_TYPE_FIELDS = frozenset({"result_type", "value", "unit", "qualitative_value"})
+
+
+class LabTestComponentCreate(LabTestComponentBase):
+    """Schema for creating a new lab test component"""
+
     @model_validator(mode="after")
     def validate_ref_range(self):
         """Validate that ref_range_max is greater than ref_range_min"""
@@ -253,11 +261,6 @@ class LabTestComponentBase(BaseModel):
             # Lower bound only (e.g., "> 39")
             self.status = "low" if self.value < self.ref_range_min else "normal"
         return self
-
-
-class LabTestComponentCreate(LabTestComponentBase):
-    """Schema for creating a new lab test component"""
-    pass
 
 
 class LabTestComponentUpdate(BaseModel):
@@ -354,6 +357,24 @@ class LabTestComponentUpdate(BaseModel):
         if self.ref_range_min is not None and self.ref_range_max is not None:
             if self.ref_range_max <= self.ref_range_min:
                 raise ValueError("Reference range maximum must be greater than minimum")
+        return self
+
+    @model_validator(mode="after")
+    def validate_result_type_fields(self):
+        """Prevent updates that would leave a component in an invalid state."""
+        # Only validate if result_type-related fields are being updated
+        if not _RESULT_TYPE_FIELDS.intersection(self.model_fields_set):
+            return self
+
+        rt = self.result_type  # may be None if not being updated
+        if rt == "quantitative":
+            if "value" in self.model_fields_set and self.value is None:
+                raise ValueError("Value cannot be cleared for quantitative tests")
+            if "unit" in self.model_fields_set and not self.unit:
+                raise ValueError("Unit cannot be cleared for quantitative tests")
+        elif rt == "qualitative":
+            if "qualitative_value" in self.model_fields_set and not self.qualitative_value:
+                raise ValueError("Qualitative value cannot be cleared for qualitative tests")
         return self
 
 
