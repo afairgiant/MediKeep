@@ -276,11 +276,13 @@ class TestQualitativeValueNormalization:
         assert comp.qualitative_value == "positive"
 
     def test_empty_string_normalized_to_none_in_update(self):
-        update = LabTestComponentUpdate(qualitative_value="")
+        """Empty string qualitative_value normalizes to None. Include result_type
+        to avoid triggering the cross-field 'clearing without result_type' guard."""
+        update = LabTestComponentUpdate(qualitative_value="", result_type="quantitative", value=1.0, unit="x")
         assert update.qualitative_value is None
 
     def test_whitespace_only_normalized_to_none_in_update(self):
-        update = LabTestComponentUpdate(qualitative_value="   ")
+        update = LabTestComponentUpdate(qualitative_value="   ", result_type="quantitative", value=1.0, unit="x")
         assert update.qualitative_value is None
 
     def test_padded_valid_value_accepted_in_update(self):
@@ -392,12 +394,14 @@ class TestUpdateCrossFieldValidation:
             LabTestComponentUpdate(
                 result_type="quantitative",
                 value=None,
+                unit="mg/dL",
             )
 
     def test_clearing_unit_on_quantitative_rejected(self):
         with pytest.raises(ValidationError, match="Unit cannot be cleared"):
             LabTestComponentUpdate(
                 result_type="quantitative",
+                value=5.0,
                 unit="",
             )
 
@@ -412,6 +416,7 @@ class TestUpdateCrossFieldValidation:
         update = LabTestComponentUpdate(
             result_type="quantitative",
             value=42.0,
+            unit="mg/dL",
         )
         assert update.value == 42.0
 
@@ -421,6 +426,48 @@ class TestUpdateCrossFieldValidation:
         assert update.notes == "Updated notes"
 
     def test_updating_only_unit_accepted(self):
-        """Updating just unit without result_type should pass (no result_type to check against)."""
+        """Updating just unit without result_type should pass (not clearing)."""
         update = LabTestComponentUpdate(unit="mmol/L")
         assert update.unit == "mmol/L"
+
+    def test_clearing_value_without_result_type_rejected(self):
+        """Clearing value without specifying result_type is ambiguous."""
+        with pytest.raises(ValidationError, match="result_type must be provided"):
+            LabTestComponentUpdate(value=None)
+
+    def test_clearing_unit_without_result_type_rejected(self):
+        """Clearing unit without specifying result_type is ambiguous."""
+        with pytest.raises(ValidationError, match="result_type must be provided"):
+            LabTestComponentUpdate(unit="")
+
+    def test_switching_to_quantitative_requires_value_and_unit(self):
+        """Changing result_type to quantitative must include value and unit."""
+        with pytest.raises(ValidationError, match="value and unit must be provided"):
+            LabTestComponentUpdate(result_type="quantitative", value=42.0)
+
+    def test_switching_to_qualitative_requires_qualitative_value(self):
+        """Changing result_type to qualitative must include qualitative_value."""
+        with pytest.raises(ValidationError, match="qualitative_value must be provided"):
+            LabTestComponentUpdate(result_type="qualitative")
+
+    def test_switching_to_quantitative_with_all_fields_accepted(self):
+        update = LabTestComponentUpdate(
+            result_type="quantitative",
+            value=5.0,
+            unit="mg/dL",
+        )
+        assert update.result_type == "quantitative"
+        assert update.value == 5.0
+
+    def test_switching_to_qualitative_with_qualitative_value_accepted(self):
+        update = LabTestComponentUpdate(
+            result_type="qualitative",
+            qualitative_value="positive",
+        )
+        assert update.result_type == "qualitative"
+        assert update.qualitative_value == "positive"
+
+    def test_updating_value_without_result_type_accepted(self):
+        """Updating value (not clearing) without result_type is fine."""
+        update = LabTestComponentUpdate(value=42.0)
+        assert update.value == 42.0

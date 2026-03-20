@@ -366,14 +366,39 @@ class LabTestComponentUpdate(BaseModel):
         if not _RESULT_TYPE_FIELDS.intersection(self.model_fields_set):
             return self
 
-        rt = self.result_type  # may be None if not being updated
+        is_clearing_value = "value" in self.model_fields_set and self.value is None
+        is_clearing_unit = "unit" in self.model_fields_set and not self.unit
+        is_clearing_qual = "qualitative_value" in self.model_fields_set and not self.qualitative_value
+
+        rt = self.result_type  # None if not being updated
+
+        # Clearing required fields without specifying result_type is ambiguous —
+        # we can't know whether the existing component is quantitative or qualitative
+        if rt is None and (is_clearing_value or is_clearing_unit or is_clearing_qual):
+            raise ValueError(
+                "result_type must be provided when clearing value, unit, or qualitative_value"
+            )
+
+        # Switching result_type requires the dependent fields for the new type
+        if "result_type" in self.model_fields_set:
+            if rt == "quantitative":
+                if "value" not in self.model_fields_set or "unit" not in self.model_fields_set:
+                    raise ValueError(
+                        "value and unit must be provided when setting result_type to quantitative"
+                    )
+            elif rt == "qualitative":
+                if "qualitative_value" not in self.model_fields_set:
+                    raise ValueError(
+                        "qualitative_value must be provided when setting result_type to qualitative"
+                    )
+
         if rt == "quantitative":
-            if "value" in self.model_fields_set and self.value is None:
+            if is_clearing_value:
                 raise ValueError("Value cannot be cleared for quantitative tests")
-            if "unit" in self.model_fields_set and not self.unit:
+            if is_clearing_unit:
                 raise ValueError("Unit cannot be cleared for quantitative tests")
         elif rt == "qualitative":
-            if "qualitative_value" in self.model_fields_set and not self.qualitative_value:
+            if is_clearing_qual:
                 raise ValueError("Qualitative value cannot be cleared for qualitative tests")
         return self
 
