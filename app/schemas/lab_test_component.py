@@ -190,6 +190,14 @@ class LabTestComponentBase(BaseModel):
             raise ValueError(f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}")
         return normalized
 
+
+# Fields that participate in result-type validity checks (used by Update validator)
+_RESULT_TYPE_FIELDS = frozenset({"result_type", "value", "unit", "qualitative_value"})
+
+
+class LabTestComponentCreate(LabTestComponentBase):
+    """Schema for creating a new lab test component"""
+
     @model_validator(mode="after")
     def validate_ref_range(self):
         """Validate that ref_range_max is greater than ref_range_min"""
@@ -253,11 +261,6 @@ class LabTestComponentBase(BaseModel):
             # Lower bound only (e.g., "> 39")
             self.status = "low" if self.value < self.ref_range_min else "normal"
         return self
-
-
-class LabTestComponentCreate(LabTestComponentBase):
-    """Schema for creating a new lab test component"""
-    pass
 
 
 class LabTestComponentUpdate(BaseModel):
@@ -354,6 +357,49 @@ class LabTestComponentUpdate(BaseModel):
         if self.ref_range_min is not None and self.ref_range_max is not None:
             if self.ref_range_max <= self.ref_range_min:
                 raise ValueError("Reference range maximum must be greater than minimum")
+        return self
+
+    @model_validator(mode="after")
+    def validate_result_type_fields(self):
+        """Prevent updates that would leave a component in an invalid state."""
+        # Only validate if result_type-related fields are being updated
+        if not _RESULT_TYPE_FIELDS.intersection(self.model_fields_set):
+            return self
+
+        is_clearing_value = "value" in self.model_fields_set and self.value is None
+        is_clearing_unit = "unit" in self.model_fields_set and not self.unit
+        is_clearing_qual = "qualitative_value" in self.model_fields_set and not self.qualitative_value
+
+        rt = self.result_type  # None if not being updated
+
+        # Clearing required fields without specifying result_type is ambiguous —
+        # we can't know whether the existing component is quantitative or qualitative
+        if rt is None and (is_clearing_value or is_clearing_unit or is_clearing_qual):
+            raise ValueError(
+                "result_type must be provided when clearing value, unit, or qualitative_value"
+            )
+
+        # Switching result_type requires the dependent fields for the new type
+        if "result_type" in self.model_fields_set:
+            if rt == "quantitative":
+                if "value" not in self.model_fields_set or "unit" not in self.model_fields_set:
+                    raise ValueError(
+                        "value and unit must be provided when setting result_type to quantitative"
+                    )
+            elif rt == "qualitative":
+                if "qualitative_value" not in self.model_fields_set:
+                    raise ValueError(
+                        "qualitative_value must be provided when setting result_type to qualitative"
+                    )
+
+        if rt == "quantitative":
+            if is_clearing_value:
+                raise ValueError("Value cannot be cleared for quantitative tests")
+            if is_clearing_unit:
+                raise ValueError("Unit cannot be cleared for quantitative tests")
+        elif rt == "qualitative":
+            if is_clearing_qual:
+                raise ValueError("Qualitative value cannot be cleared for qualitative tests")
         return self
 
 

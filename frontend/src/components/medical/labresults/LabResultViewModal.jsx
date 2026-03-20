@@ -97,6 +97,10 @@ const LabResultViewModal = ({
     handleError(error, 'document_manager');
   };
 
+  const handleTestComponentsError = (error) => {
+    handleError(error, 'test_components');
+  };
+
   if (!labResult) return null;
 
   try {
@@ -268,7 +272,7 @@ const LabResultViewModal = ({
                   key={`test-components-${labResult.id}`}
                   labResultId={labResult.id}
                   isViewMode={false}
-                  onError={handleError}
+                  onError={handleTestComponentsError}
                   onLabResultUpdated={onLabResultUpdated}
                 />
               </Box>

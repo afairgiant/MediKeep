@@ -1,5 +1,5 @@
 """
-Unit tests for LabTestComponentBase and LabTestComponentUpdate schema validation
+Unit tests for LabTestComponent schema validation
 
 Tests cover:
 1. Full range (min and max) auto-status calculation
@@ -10,17 +10,23 @@ Tests cover:
 6. Qualitative test creation and validation
 7. Qualitative auto-status calculation
 8. Cross-field validation (quantitative vs qualitative)
-9. Empty/whitespace qualitative value normalization (Base + Update schemas)
+9. Empty/whitespace qualitative value normalization (Create + Update schemas)
+10. Response serialization with NULL values (regression #667)
+11. Update schema cross-field validation (#667)
 """
 
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.lab_test_component import LabTestComponentBase, LabTestComponentUpdate
+from app.schemas.lab_test_component import (
+    LabTestComponentCreate,
+    LabTestComponentResponse,
+    LabTestComponentUpdate,
+)
 
 
 def make_component(**overrides):
-    """Helper to create a LabTestComponentBase with sensible defaults."""
+    """Helper to create a LabTestComponentCreate with sensible defaults."""
     defaults = {
         "test_name": "Test",
         "value": 5.0,
@@ -28,11 +34,11 @@ def make_component(**overrides):
         "lab_result_id": 1,
     }
     defaults.update(overrides)
-    return LabTestComponentBase(**defaults)
+    return LabTestComponentCreate(**defaults)
 
 
 def make_qualitative_component(**overrides):
-    """Helper to create a qualitative LabTestComponentBase."""
+    """Helper to create a qualitative LabTestComponentCreate."""
     defaults = {
         "test_name": "HIV 1 Antibody",
         "lab_result_id": 1,
@@ -42,7 +48,7 @@ def make_qualitative_component(**overrides):
         "unit": None,
     }
     defaults.update(overrides)
-    return LabTestComponentBase(**defaults)
+    return LabTestComponentCreate(**defaults)
 
 
 class TestAutoCalculateStatusFullRange:
@@ -222,7 +228,7 @@ class TestCrossFieldValidation:
 
     def test_qualitative_requires_qualitative_value(self):
         with pytest.raises(ValidationError, match="Qualitative value is required"):
-            LabTestComponentBase(
+            LabTestComponentCreate(
                 test_name="HIV",
                 lab_result_id=1,
                 result_type="qualitative",
@@ -251,30 +257,32 @@ class TestCrossFieldValidation:
 class TestQualitativeValueNormalization:
     """Tests for empty/whitespace qualitative value handling (issue #598)."""
 
-    def test_empty_string_normalized_to_none_in_base(self):
+    def test_empty_string_normalized_to_none_in_create(self):
         """Empty string qualitative_value should become None (not trigger validation error)."""
         comp = make_component(qualitative_value="")
         assert comp.qualitative_value is None
 
-    def test_whitespace_only_normalized_to_none_in_base(self):
+    def test_whitespace_only_normalized_to_none_in_create(self):
         comp = make_component(qualitative_value="   ")
         assert comp.qualitative_value is None
 
-    def test_whitespace_tabs_normalized_to_none_in_base(self):
+    def test_whitespace_tabs_normalized_to_none_in_create(self):
         comp = make_component(qualitative_value="\n\t")
         assert comp.qualitative_value is None
 
-    def test_padded_valid_value_accepted_in_base(self):
+    def test_padded_valid_value_accepted_in_create(self):
         """Whitespace-padded valid values should be stripped and accepted."""
         comp = make_qualitative_component(qualitative_value=" Positive ")
         assert comp.qualitative_value == "positive"
 
     def test_empty_string_normalized_to_none_in_update(self):
-        update = LabTestComponentUpdate(qualitative_value="")
+        """Empty string qualitative_value normalizes to None. Include result_type
+        to avoid triggering the cross-field 'clearing without result_type' guard."""
+        update = LabTestComponentUpdate(qualitative_value="", result_type="quantitative", value=1.0, unit="x")
         assert update.qualitative_value is None
 
     def test_whitespace_only_normalized_to_none_in_update(self):
-        update = LabTestComponentUpdate(qualitative_value="   ")
+        update = LabTestComponentUpdate(qualitative_value="   ", result_type="quantitative", value=1.0, unit="x")
         assert update.qualitative_value is None
 
     def test_padded_valid_value_accepted_in_update(self):
@@ -291,3 +299,175 @@ class TestQualitativeValueNormalization:
         )
         assert update.qualitative_value is None
         assert update.value == 150.0
+
+
+class TestResponseSerializationRegression:
+    """Regression tests for #667: Response must not crash on NULL values from DB."""
+
+    def test_quantitative_with_null_value(self):
+        """A quantitative component with value=NULL should serialize without error."""
+        resp = LabTestComponentResponse(
+            id=1,
+            test_name="Glucose",
+            lab_result_id=1,
+            result_type="quantitative",
+            value=None,
+            unit="mg/dL",
+        )
+        assert resp.value is None
+        assert resp.result_type == "quantitative"
+
+    def test_quantitative_with_null_unit(self):
+        """A quantitative component with unit=NULL should serialize without error."""
+        resp = LabTestComponentResponse(
+            id=2,
+            test_name="Glucose",
+            lab_result_id=1,
+            result_type="quantitative",
+            value=100.0,
+            unit=None,
+        )
+        assert resp.unit is None
+
+    def test_quantitative_with_null_value_and_unit(self):
+        """Both value and unit NULL should serialize without error."""
+        resp = LabTestComponentResponse(
+            id=3,
+            test_name="Glucose",
+            lab_result_id=1,
+            result_type="quantitative",
+            value=None,
+            unit=None,
+        )
+        assert resp.value is None
+        assert resp.unit is None
+
+    def test_qualitative_with_null_qualitative_value(self):
+        """A qualitative component with qualitative_value=NULL should serialize."""
+        resp = LabTestComponentResponse(
+            id=4,
+            test_name="HIV",
+            lab_result_id=1,
+            result_type="qualitative",
+            qualitative_value=None,
+            value=None,
+            unit=None,
+        )
+        assert resp.qualitative_value is None
+
+    def test_response_does_not_auto_calculate_status(self):
+        """Response schema should not auto-calculate status."""
+        resp = LabTestComponentResponse(
+            id=5,
+            test_name="Glucose",
+            lab_result_id=1,
+            result_type="quantitative",
+            value=100.0,
+            unit="mg/dL",
+            ref_range_min=70.0,
+            ref_range_max=99.0,
+            status=None,
+        )
+        assert resp.status is None
+
+    def test_response_does_not_reject_inverted_ref_range(self):
+        """Response schema should not reject stored data with inverted ranges."""
+        resp = LabTestComponentResponse(
+            id=6,
+            test_name="Glucose",
+            lab_result_id=1,
+            result_type="quantitative",
+            value=100.0,
+            unit="mg/dL",
+            ref_range_min=200.0,
+            ref_range_max=100.0,
+        )
+        assert resp.ref_range_min == 200.0
+        assert resp.ref_range_max == 100.0
+
+
+class TestUpdateCrossFieldValidation:
+    """Tests for LabTestComponentUpdate cross-field validation (#667)."""
+
+    def test_clearing_value_on_quantitative_rejected(self):
+        with pytest.raises(ValidationError, match="Value cannot be cleared"):
+            LabTestComponentUpdate(
+                result_type="quantitative",
+                value=None,
+                unit="mg/dL",
+            )
+
+    def test_clearing_unit_on_quantitative_rejected(self):
+        with pytest.raises(ValidationError, match="Unit cannot be cleared"):
+            LabTestComponentUpdate(
+                result_type="quantitative",
+                value=5.0,
+                unit="",
+            )
+
+    def test_clearing_qualitative_value_on_qualitative_rejected(self):
+        with pytest.raises(ValidationError, match="Qualitative value cannot be cleared"):
+            LabTestComponentUpdate(
+                result_type="qualitative",
+                qualitative_value="",
+            )
+
+    def test_updating_value_on_quantitative_accepted(self):
+        update = LabTestComponentUpdate(
+            result_type="quantitative",
+            value=42.0,
+            unit="mg/dL",
+        )
+        assert update.value == 42.0
+
+    def test_unrelated_fields_skip_validation(self):
+        """Updating non-result-type fields should not trigger cross-field validation."""
+        update = LabTestComponentUpdate(notes="Updated notes")
+        assert update.notes == "Updated notes"
+
+    def test_updating_only_unit_accepted(self):
+        """Updating just unit without result_type should pass (not clearing)."""
+        update = LabTestComponentUpdate(unit="mmol/L")
+        assert update.unit == "mmol/L"
+
+    def test_clearing_value_without_result_type_rejected(self):
+        """Clearing value without specifying result_type is ambiguous."""
+        with pytest.raises(ValidationError, match="result_type must be provided"):
+            LabTestComponentUpdate(value=None)
+
+    def test_clearing_unit_without_result_type_rejected(self):
+        """Clearing unit without specifying result_type is ambiguous."""
+        with pytest.raises(ValidationError, match="result_type must be provided"):
+            LabTestComponentUpdate(unit="")
+
+    def test_switching_to_quantitative_requires_value_and_unit(self):
+        """Changing result_type to quantitative must include value and unit."""
+        with pytest.raises(ValidationError, match="value and unit must be provided"):
+            LabTestComponentUpdate(result_type="quantitative", value=42.0)
+
+    def test_switching_to_qualitative_requires_qualitative_value(self):
+        """Changing result_type to qualitative must include qualitative_value."""
+        with pytest.raises(ValidationError, match="qualitative_value must be provided"):
+            LabTestComponentUpdate(result_type="qualitative")
+
+    def test_switching_to_quantitative_with_all_fields_accepted(self):
+        update = LabTestComponentUpdate(
+            result_type="quantitative",
+            value=5.0,
+            unit="mg/dL",
+        )
+        assert update.result_type == "quantitative"
+        assert update.value == 5.0
+
+    def test_switching_to_qualitative_with_qualitative_value_accepted(self):
+        update = LabTestComponentUpdate(
+            result_type="qualitative",
+            qualitative_value="positive",
+        )
+        assert update.result_type == "qualitative"
+        assert update.qualitative_value == "positive"
+
+    def test_updating_value_without_result_type_accepted(self):
+        """Updating value (not clearing) without result_type is fine."""
+        update = LabTestComponentUpdate(value=42.0)
+        assert update.value == 42.0
