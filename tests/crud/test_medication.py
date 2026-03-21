@@ -40,9 +40,9 @@ class TestMedicationCRUD:
             effective_period_start=date(2024, 1, 1),
             status="active"
         )
-        
+
         medication = medication_crud.create(db_session, obj_in=medication_data)
-        
+
         assert medication is not None
         assert medication.medication_name == "Aspirin"
         assert medication.dosage == "100mg"
@@ -50,6 +50,49 @@ class TestMedicationCRUD:
         assert medication.route == "oral"
         assert medication.patient_id == test_patient.id
         assert medication.status == "active"
+
+    def test_create_medication_with_notes(self, db_session: Session, test_patient):
+        """Test creating a medication with notes and side_effects."""
+        medication_data = MedicationCreate(
+            patient_id=test_patient.id,
+            medication_name="Metformin",
+            dosage="500mg",
+            notes="Take with food",
+            side_effects="Nausea",
+        )
+
+        medication = medication_crud.create(db_session, obj_in=medication_data)
+
+        assert medication.notes == "Take with food"
+        assert medication.side_effects == "Nausea"
+
+    def test_update_medication_notes_and_clear(self, db_session: Session, test_patient):
+        """Test setting and then clearing medication notes."""
+        medication_data = MedicationCreate(
+            patient_id=test_patient.id,
+            medication_name="Aspirin",
+            dosage="100mg",
+            notes="Initial note",
+        )
+        created = medication_crud.create(db_session, obj_in=medication_data)
+        assert created.notes == "Initial note"
+
+        # Update with new notes
+        updated = medication_crud.update(
+            db_session,
+            db_obj=created,
+            obj_in=MedicationUpdate(notes="Updated note", side_effects="Headache"),
+        )
+        assert updated.notes == "Updated note"
+        assert updated.side_effects == "Headache"
+
+        # Clear notes by setting to None
+        cleared = medication_crud.update(
+            db_session,
+            db_obj=updated,
+            obj_in=MedicationUpdate(notes=None),
+        )
+        assert cleared.notes is None
 
     def test_get_active_by_patient(self, db_session: Session, test_patient):
         """Test getting active medications for a patient."""

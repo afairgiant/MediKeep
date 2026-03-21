@@ -130,8 +130,7 @@
       "saving": "Salvando medicação...",
       "updateMedication": "Atualizar Medicação",
       "addMedication": "Adicionar Medicação",
-      "notesPlaceholder": "Notas adicionais e informações sobre esta medicação podem ser adicionadas aqui em futuras atualizações.",
-      "attachedDocuments": "Documentos Anexados"
+"attachedDocuments": "Documentos Anexados"
     },
     "medicationName": {
       "label": "Nome da Medicação",

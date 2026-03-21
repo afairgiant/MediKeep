@@ -629,6 +629,92 @@ describe('Medication Page Integration Tests', () => {
   });
 
   // ============================================================
+  // Notes Functionality
+  // ============================================================
+  describe('Notes Functionality', () => {
+    test('submits notes with new medication', async () => {
+      const mockCreateItem = vi.fn().mockResolvedValue({});
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        createItem: mockCreateItem,
+      });
+
+      renderWithPatient(<Medication />);
+
+      const addButton = screen.getByTestId('add-button');
+      await userEvent.click(addButton);
+
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), {
+        target: { value: 'Aspirin', name: 'medication_name' },
+      });
+      fireEvent.change(within(form).getByLabelText('Notes'), {
+        target: { value: 'Take with food', name: 'notes' },
+      });
+      fireEvent.click(within(form).getByText('Submit'));
+
+      await waitFor(() => {
+        expect(mockCreateItem).toHaveBeenCalledWith(
+          expect.objectContaining({
+            medication_name: 'Aspirin',
+            notes: 'Take with food',
+          })
+        );
+      });
+    });
+
+    test('notes are loaded when editing existing medication with notes', async () => {
+      const medicationWithNotes = {
+        ...mockMedications[0],
+        notes: 'Take with food',
+        side_effects: 'Nausea',
+      };
+      const updatedItems = [medicationWithNotes, ...mockMedications.slice(1)];
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        items: updatedItems,
+      });
+      useDataManagement.mockReturnValue({
+        ...mockDataManagement,
+        data: updatedItems,
+      });
+
+      renderWithPatient(<Medication />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Lisinopril')).toBeInTheDocument();
+      });
+
+      const medWrapper = screen.getByTestId('card-wrapper-1');
+      const editButton = within(medWrapper).getByText('Edit');
+      await userEvent.click(editButton);
+
+      const form = screen.getByTestId('form-modal');
+      expect(within(form).getByLabelText('Notes')).toHaveValue('Take with food');
+    });
+
+    test('notes display in view modal', async () => {
+      const medicationWithNotes = {
+        ...mockMedications[0],
+        notes: 'Take in the morning',
+        side_effects: 'Dry cough',
+      };
+
+      useViewModalNavigation.mockReturnValue({
+        isOpen: true,
+        viewingItem: medicationWithNotes,
+        openModal: vi.fn(),
+        closeModal: vi.fn(),
+      });
+
+      renderWithPatient(<Medication />);
+
+      const modal = screen.getByTestId('view-modal');
+      expect(within(modal).getByText('Lisinopril')).toBeInTheDocument();
+    });
+  });
+
+  // ============================================================
   // Conditions Integration (commit 3e0dcd3)
   // ============================================================
   describe('Conditions Integration', () => {

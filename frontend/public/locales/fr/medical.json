@@ -130,8 +130,7 @@
       "saving": "Sauvegarde du médicament...",
       "updateMedication": "Mettre à jour le médicament",
       "addMedication": "Ajouter un médicament",
-      "notesPlaceholder": "Des notes et informations supplémentaires sur ce médicament peuvent être ajoutées ici lors de futures mises à jour.",
-      "attachedDocuments": "Pièces jointes"
+"attachedDocuments": "Pièces jointes"
     },
     "medicationName": {
       "label": "Nom du médicament",

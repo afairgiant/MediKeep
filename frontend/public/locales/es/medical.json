@@ -179,8 +179,7 @@
     "form": {
       "addMedication": "Añadir medicamento",
       "attachedDocuments": "Documentos adjuntos",
-      "notesPlaceholder": "Aquí se pueden añadir notas adicionales e información sobre este medicamento en futuras actualizaciones.",
-      "saving": "Guardando medicamento...",
+"saving": "Guardando medicamento...",
       "updateMedication": "Actualizar medicamento"
     },
     "tabs": {

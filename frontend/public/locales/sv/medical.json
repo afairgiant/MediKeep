@@ -130,8 +130,7 @@
       "saving": "Sparar lakemedel...",
       "updateMedication": "Uppdatera lakemedel",
       "addMedication": "Lagg till lakemedel",
-      "notesPlaceholder": "Ytterligare anteckningar och information om detta lakemedel kan laggas till har i framtida uppdateringar.",
-      "attachedDocuments": "Bifogade dokument"
+"attachedDocuments": "Bifogade dokument"
     },
     "medicationName": {
       "label": "Lakemedelsnamn",

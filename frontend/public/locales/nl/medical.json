@@ -130,8 +130,7 @@
       "saving": "Medicatie opslaan...",
       "updateMedication": "Medicatie bijwerken",
       "addMedication": "Medicatie toevoegen",
-      "notesPlaceholder": "Aanvullende notities en informatie over deze medicatie kunnen hier in toekomstige updates worden toegevoegd.",
-      "attachedDocuments": "Bijgevoegde documenten"
+"attachedDocuments": "Bijgevoegde documenten"
     },
     "medicationName": {
       "label": "Naam medicatie",

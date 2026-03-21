@@ -130,8 +130,7 @@
       "saving": "Saving medication...",
       "updateMedication": "Update Medication",
       "addMedication": "Add Medication",
-      "notesPlaceholder": "Additional notes and information about this medication can be added here in future updates.",
-      "attachedDocuments": "Attached Documents"
+"attachedDocuments": "Attached Documents"
     },
     "medicationName": {
       "label": "Medication Name",
