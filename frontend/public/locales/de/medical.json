@@ -130,8 +130,7 @@
       "saving": "Medikament wird gespeichert...",
       "updateMedication": "Medikament aktualisieren",
       "addMedication": "Medikament hinzufügen",
-      "notesPlaceholder": "Zusätzliche Notizen und Informationen zu diesem Medikament können in zukünftigen Updates hinzugefügt werden.",
-      "attachedDocuments": "Angehängte Dokumente"
+"attachedDocuments": "Angehängte Dokumente"
     },
     "medicationName": {
       "label": "Medikamentenname",

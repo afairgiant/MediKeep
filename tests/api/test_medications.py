@@ -470,3 +470,92 @@ class TestMedicationAPI:
         )
 
         assert response.status_code == 422
+
+    def test_create_medication_with_notes(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test creating a medication with notes and side_effects fields."""
+        medication_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Metformin",
+            "dosage": "500mg",
+            "frequency": "twice daily",
+            "notes": "Take with food",
+            "side_effects": "Nausea",
+        }
+
+        response = client.post(
+            "/api/v1/medications/",
+            json=medication_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["notes"] == "Take with food"
+        assert data["side_effects"] == "Nausea"
+
+    def test_create_medication_notes_max_length(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that notes exceeding 1000 characters fail validation."""
+        medication_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Aspirin",
+            "notes": "x" * 1001,
+        }
+
+        response = client.post(
+            "/api/v1/medications/",
+            json=medication_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 422
+
+    def test_update_medication_notes(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test updating notes and side_effects on an existing medication."""
+        medication_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Lisinopril",
+            "dosage": "10mg",
+            "status": "active",
+        }
+
+        create_response = client.post(
+            "/api/v1/medications/",
+            json=medication_data,
+            headers=authenticated_headers
+        )
+        medication_id = create_response.json()["id"]
+
+        update_data = {
+            "notes": "Take in the morning",
+            "side_effects": "Dry cough",
+        }
+
+        response = client.put(
+            f"/api/v1/medications/{medication_id}",
+            json=update_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["notes"] == "Take in the morning"
+        assert data["side_effects"] == "Dry cough"
+        assert data["medication_name"] == "Lisinopril"  # Unchanged
+
+    def test_create_medication_notes_empty_string_becomes_null(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that an empty string for notes is stored as null."""
+        medication_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Aspirin",
+            "notes": "",
+        }
+
+        response = client.post(
+            "/api/v1/medications/",
+            json=medication_data,
+            headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["notes"] is None

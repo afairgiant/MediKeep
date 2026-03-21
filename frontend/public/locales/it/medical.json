@@ -130,8 +130,7 @@
       "saving": "Salvataggio farmaco...",
       "updateMedication": "Aggiorna farmaco",
       "addMedication": "Aggiungi farmaco",
-      "notesPlaceholder": "Note aggiuntive e informazioni su questo farmaco possono essere aggiunte qui in futuri aggiornamenti.",
-      "attachedDocuments": "Documenti allegati"
+"attachedDocuments": "Documenti allegati"
     },
     "medicationName": {
       "label": "Nome del farmaco",
