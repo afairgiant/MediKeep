@@ -164,13 +164,13 @@ const ConditionFormWrapper = ({
               <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
                 {t('conditions.form.tabs.medications', 'Medications')}
               </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('conditions.form.tabs.notes', 'Notes')}
+              </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingCondition
                   ? t('conditions.form.tabs.documents', 'Documents')
                   : t('conditions.form.tabs.addFiles', 'Add Files')}
-              </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('conditions.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -362,21 +362,6 @@ const ConditionFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Documents Tab */}
-            <Tabs.Panel value="documents">
-              <Box mt="md">
-                <DocumentManagerWithProgress
-                  entityType="condition"
-                  entityId={editingCondition?.id || null}
-                  mode={editingCondition ? 'edit' : 'create'}
-                  onUploadPendingFiles={handleDocumentManagerRef}
-                  showProgressModal={true}
-                  onUploadComplete={handleDocumentUploadComplete}
-                  onError={handleDocumentError}
-                />
-              </Box>
-            </Tabs.Panel>
-
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
@@ -389,6 +374,21 @@ const ConditionFormWrapper = ({
                   rows={5}
                   minRows={3}
                   autosize
+                />
+              </Box>
+            </Tabs.Panel>
+
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="condition"
+                  entityId={editingCondition?.id || null}
+                  mode={editingCondition ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
                 />
               </Box>
             </Tabs.Panel>

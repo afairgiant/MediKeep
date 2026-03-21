@@ -159,13 +159,13 @@ const ImmunizationFormWrapper = ({
               <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
                 {t('immunizations.form.tabs.administration', 'Administration')}
               </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('immunizations.form.tabs.notes', 'Notes')}
+              </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingImmunization
                   ? t('immunizations.form.tabs.documents', 'Documents')
                   : t('immunizations.form.tabs.addFiles', 'Add Files')}
-              </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('immunizations.form.tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -365,21 +365,6 @@ const ImmunizationFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Documents Tab */}
-            <Tabs.Panel value="documents">
-              <Box mt="md">
-                <DocumentManagerWithProgress
-                  entityType="immunization"
-                  entityId={editingImmunization?.id || null}
-                  mode={editingImmunization ? 'edit' : 'create'}
-                  onUploadPendingFiles={handleDocumentManagerRef}
-                  showProgressModal={true}
-                  onUploadComplete={handleDocumentUploadComplete}
-                  onError={handleDocumentError}
-                />
-              </Box>
-            </Tabs.Panel>
-
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
@@ -392,6 +377,21 @@ const ImmunizationFormWrapper = ({
                   rows={5}
                   minRows={3}
                   autosize
+                />
+              </Box>
+            </Tabs.Panel>
+
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="immunization"
+                  entityId={editingImmunization?.id || null}
+                  mode={editingImmunization ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
                 />
               </Box>
             </Tabs.Panel>
