@@ -155,13 +155,13 @@ const AllergyFormWrapper = ({
               <Tabs.Tab value="reaction" leftSection={<IconAlertTriangle size={16} />}>
                 {t('allergies.tabs.reactionDetails')}
               </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('allergies.tabs.notes')}
+              </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingAllergy
                   ? t('allergies.form.tabs.documents', 'Documents')
                   : t('allergies.form.tabs.addFiles', 'Add Files')}
-              </Tabs.Tab>
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('allergies.tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -333,21 +333,6 @@ const AllergyFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Documents Tab */}
-            <Tabs.Panel value="documents">
-              <Box mt="md">
-                <DocumentManagerWithProgress
-                  entityType="allergy"
-                  entityId={editingAllergy?.id || null}
-                  mode={editingAllergy ? 'edit' : 'create'}
-                  onUploadPendingFiles={handleDocumentManagerRef}
-                  showProgressModal={true}
-                  onUploadComplete={handleDocumentUploadComplete}
-                  onError={handleDocumentError}
-                />
-              </Box>
-            </Tabs.Panel>
-
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
               <Box mt="md">
@@ -360,6 +345,21 @@ const AllergyFormWrapper = ({
                   rows={5}
                   minRows={3}
                   autosize
+                />
+              </Box>
+            </Tabs.Panel>
+
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="allergy"
+                  entityId={editingAllergy?.id || null}
+                  mode={editingAllergy ? 'edit' : 'create'}
+                  onUploadPendingFiles={handleDocumentManagerRef}
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
                 />
               </Box>
             </Tabs.Panel>

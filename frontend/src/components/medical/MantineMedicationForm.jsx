@@ -301,11 +301,6 @@ const MantineMedicationForm = ({
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
                 {t('medications.tabs.details')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                {editingMedication
-                  ? t('medications.tabs.documents')
-                  : t('medications.tabs.addFiles', 'Add Files')}
-              </Tabs.Tab>
               {editingMedication && (
                 <Tabs.Tab value="conditions" leftSection={<IconStethoscope size={16} />}>
                   {t('medications.tabs.conditions')}
@@ -313,6 +308,11 @@ const MantineMedicationForm = ({
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('medications.tabs.notes')}
+              </Tabs.Tab>
+              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+                {editingMedication
+                  ? t('medications.tabs.documents')
+                  : t('medications.tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -342,26 +342,6 @@ const MantineMedicationForm = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Documents Tab */}
-            <Tabs.Panel value="documents">
-              <Box mt="md">
-                <Stack gap="md">
-                  {editingMedication && (
-                    <Title order={4}>{t('medications.form.attachedDocuments')}</Title>
-                  )}
-                  <DocumentManagerWithProgress
-                    entityType="medication"
-                    entityId={editingMedication?.id || null}
-                    mode={editingMedication ? 'edit' : 'create'}
-                    onUploadPendingFiles={handleDocumentManagerRef}
-                    showProgressModal={true}
-                    onUploadComplete={handleDocumentUploadComplete}
-                    onError={handleDocumentError}
-                  />
-                </Stack>
-              </Box>
-            </Tabs.Panel>
-
             {/* Conditions Tab */}
             {editingMedication && (
               <Tabs.Panel value="conditions">
@@ -387,6 +367,26 @@ const MantineMedicationForm = ({
                     </Grid.Col>
                   ))}
                 </Grid>
+              </Box>
+            </Tabs.Panel>
+
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <Stack gap="md">
+                  {editingMedication && (
+                    <Title order={4}>{t('medications.form.attachedDocuments')}</Title>
+                  )}
+                  <DocumentManagerWithProgress
+                    entityType="medication"
+                    entityId={editingMedication?.id || null}
+                    mode={editingMedication ? 'edit' : 'create'}
+                    onUploadPendingFiles={handleDocumentManagerRef}
+                    showProgressModal={true}
+                    onUploadComplete={handleDocumentUploadComplete}
+                    onError={handleDocumentError}
+                  />
+                </Stack>
               </Box>
             </Tabs.Panel>
           </Tabs>
