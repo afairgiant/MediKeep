@@ -54,7 +54,8 @@ class CustomReportPDFGenerator:
             'family_history': 'Family History',
             'symptoms': 'Symptoms',
             'injuries': 'Injuries',
-            'insurance': 'Insurance'
+            'insurance': 'Insurance',
+            'medical_equipment': 'Medical Equipment',
         }
 
     def _try_register_font(self, font_name: str, font_paths: List[str]) -> bool:
@@ -883,6 +884,8 @@ class CustomReportPDFGenerator:
             story.extend(self._format_injuries(records))
         elif category == 'insurance':
             story.extend(self._format_insurance(records))
+        elif category == 'medical_equipment':
+            story.extend(self._format_medical_equipment(records))
         else:
             # Generic formatting for unknown categories
             story.extend(self._format_generic_records(records))
@@ -944,6 +947,10 @@ class CustomReportPDFGenerator:
         # Critical medical details
         details = []
         
+        # Medication type (prescription, OTC, supplement, herbal)
+        if record.get('medication_type'):
+            details.append(f"<b>Type:</b> {record['medication_type'].replace('_', ' ').title()}")
+
         # Indication (purpose) is very important for medical providers - make it prominent
         if record.get('indication'):
             details.append(f"<b>Purpose:</b> <b>{record['indication']}</b>")
@@ -991,13 +998,31 @@ class CustomReportPDFGenerator:
             for detail in details:
                 story.append(Paragraph(f"    {detail}", self.styles['CustomBody']))
         
+        # Associated conditions
+        associated_conditions = record.get('associated_conditions', [])
+        if associated_conditions:
+            condition_parts = []
+            for cond in associated_conditions:
+                cond_text = cond.get('condition_name', '')
+                if cond.get('relevance_note'):
+                    cond_text += f" ({cond['relevance_note']})"
+                if cond_text:
+                    condition_parts.append(cond_text)
+            if condition_parts:
+                details_text = "; ".join(condition_parts)
+                story.append(Paragraph(f"    <b>For Condition(s):</b> {details_text}", self.styles['CustomBody']))
+
         # Special notes
         if record.get('notes'):
             story.append(Paragraph(f"    <b>Notes:</b> {record['notes']}", self.styles['CustomBody']))
-        
+
+        if record.get('tags'):
+            tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+            story.append(Paragraph(f"    <i>Tags: {tags}</i>", self.styles['SmallText']))
+
         story.append(Spacer(1, 0.08*inch))
         return story
-    
+
     def _format_conditions(self, records: List[Dict[str, Any]]) -> List:
         """Format condition records with comprehensive medical information"""
         story = []
@@ -1058,7 +1083,20 @@ class CustomReportPDFGenerator:
             details.append(f"Managing Provider: {record['practitioner_name']}")
         
         # Associated medications
-        if record.get('medication_name'):
+        associated_medications = record.get('associated_medications', [])
+        if associated_medications:
+            med_parts = []
+            for med in associated_medications:
+                med_text = med.get('medication_name', '')
+                if med.get('dosage'):
+                    med_text += f" {med['dosage']}"
+                if med.get('relevance_note'):
+                    med_text += f" ({med['relevance_note']})"
+                if med_text:
+                    med_parts.append(med_text)
+            if med_parts:
+                details.append(f"<b>Medications:</b> {'; '.join(med_parts)}")
+        elif record.get('medication_name'):
             details.append(f"<b>Treatment:</b> {record['medication_name']}")
         
         # Clinical notes and diagnosis details
@@ -1071,10 +1109,14 @@ class CustomReportPDFGenerator:
         
         if record.get('notes'):
             story.append(Paragraph(f"    <b>Clinical Notes:</b> {record['notes']}", self.styles['CustomBody']))
-        
+
+        if record.get('tags'):
+            tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+            story.append(Paragraph(f"    <i>Tags: {tags}</i>", self.styles['SmallText']))
+
         story.append(Spacer(1, 0.08*inch))
         return story
-    
+
     def _format_procedures(self, records: List[Dict[str, Any]]) -> List:
         """Format procedure records with complete procedural history"""
         story = []
@@ -1150,11 +1192,15 @@ class CustomReportPDFGenerator:
                 story.append(Paragraph(f"    <b>Procedure Notes:</b> {record['notes']}", self.styles['CustomBody']))
             if record.get('anesthesia_notes'):
                 story.append(Paragraph(f"    <b>Anesthesia Notes:</b> {record['anesthesia_notes']}", self.styles['CustomBody']))
-            
+
+            if record.get('tags'):
+                tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+                story.append(Paragraph(f"    <i>Tags: {tags}</i>", self.styles['SmallText']))
+
             story.append(Spacer(1, 0.08*inch))
-        
+
         return story
-    
+
     def _format_lab_results(self, records: List[Dict[str, Any]]) -> List:
         """Format lab result records with clinical significance"""
         story = []
@@ -1360,7 +1406,11 @@ class CustomReportPDFGenerator:
                     story.append(Paragraph(f"    <b>Reaction:</b> {record['adverse_reaction']}", self.styles['CustomBody']))
                 if record.get('notes'):
                     story.append(Paragraph(f"    <b>Notes:</b> {record['notes']}", self.styles['CustomBody']))
-                
+
+                if record.get('tags'):
+                    tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+                    story.append(Paragraph(f"    <i>Tags: {tags}</i>", self.styles['SmallText']))
+
                 story.append(Spacer(1, 0.08*inch))
             
             if len(vaccines_by_type) > 1:
@@ -1429,11 +1479,15 @@ class CustomReportPDFGenerator:
             
             if record.get('notes'):
                 story.append(Paragraph(f"    <b>Additional Info:</b> {record['notes']}", self.styles['CustomBody']))
-            
+
+            if record.get('tags'):
+                tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+                story.append(Paragraph(f"    <i>Tags: {tags}</i>", self.styles['SmallText']))
+
             story.append(Spacer(1, 0.08*inch))
-        
+
         return story
-    
+
     def _format_treatments(self, records: List[Dict[str, Any]]) -> List:
         """Format treatment records with comprehensive treatment information"""
         story = []
@@ -1511,11 +1565,15 @@ class CustomReportPDFGenerator:
             # Notes
             if record.get('notes'):
                 story.append(Paragraph(f"    <b>Notes:</b> {record['notes']}", self.styles['CustomBody']))
-            
+
+            if record.get('tags'):
+                tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+                story.append(Paragraph(f"    <i>Tags: {tags}</i>", self.styles['SmallText']))
+
             story.append(Spacer(1, 0.08*inch))
-        
+
         return story
-    
+
     def _format_encounters(self, records: List[Dict[str, Any]]) -> List:
         """Format encounter/visit records with key visit information"""
         story = []
@@ -1582,11 +1640,15 @@ class CustomReportPDFGenerator:
             # Visit notes (detailed clinical notes)
             if record.get('notes'):
                 story.append(Paragraph(f"    <b>Visit Notes:</b> {record['notes']}", self.styles['CustomBody']))
-            
+
+            if record.get('tags'):
+                tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+                story.append(Paragraph(f"    <i>Tags: {tags}</i>", self.styles['SmallText']))
+
             story.append(Spacer(1, 0.08*inch))
-        
+
         return story
-    
+
     def _format_practitioners(self, records: List[Dict[str, Any]]) -> List:
         """Format practitioner records"""
         story = []
@@ -2055,6 +2117,71 @@ class CustomReportPDFGenerator:
             story.append(Paragraph(f"  Notes: {record['notes']}", self.styles['CustomBody']))
 
         story.append(Spacer(1, 0.08*inch))
+        return story
+
+    def _format_medical_equipment(self, records: List[Dict[str, Any]]) -> List:
+        """Format medical equipment records"""
+        story = []
+
+        active_equip = [r for r in records if (r.get('status') or '').lower() == 'active']
+        inactive_equip = [r for r in records if (r.get('status') or '').lower() != 'active']
+
+        for group_label, group in [('Active', active_equip), ('Inactive / Replaced', inactive_equip)]:
+            if not group:
+                continue
+            story.append(Paragraph(f"<b>{group_label}</b>", self.styles['SubsectionHeader']))
+            for record in group:
+                name = record.get('equipment_name', 'Unnamed Equipment')
+                equip_type = record.get('equipment_type', '')
+                header_parts = [f"<b>{name}</b>"]
+                if equip_type:
+                    header_parts.append(f"({equip_type})")
+                story.append(Paragraph(" ".join(header_parts), self.styles['CustomBody']))
+
+                details = []
+                # Identification
+                id_parts = []
+                if record.get('manufacturer'):
+                    id_parts.append(f"Manufacturer: {record['manufacturer']}")
+                if record.get('model_number'):
+                    id_parts.append(f"Model: {record['model_number']}")
+                if record.get('serial_number'):
+                    id_parts.append(f"Serial: {record['serial_number']}")
+                if id_parts:
+                    details.append(" | ".join(id_parts))
+
+                # Dates and supplier
+                service_parts = []
+                if record.get('prescribed_date'):
+                    service_parts.append(f"Prescribed: {self._format_date(record['prescribed_date'])}")
+                if record.get('last_service_date'):
+                    service_parts.append(f"Last Service: {self._format_date(record['last_service_date'])}")
+                if record.get('next_service_date'):
+                    service_parts.append(f"Next Service: {self._format_date(record['next_service_date'])}")
+                if record.get('supplier'):
+                    service_parts.append(f"Supplier: {record['supplier']}")
+                if service_parts:
+                    details.append(" | ".join(service_parts))
+
+                # Prescribed by
+                if record.get('prescribed_by'):
+                    details.append(f"Prescribed by: {record['prescribed_by']}")
+
+                if details:
+                    for detail in details:
+                        story.append(Paragraph(f"    {detail}", self.styles['CustomBody']))
+
+                if record.get('usage_instructions'):
+                    story.append(Paragraph(f"    <b>Usage:</b> {record['usage_instructions']}", self.styles['CustomBody']))
+                if record.get('notes'):
+                    story.append(Paragraph(f"    <b>Notes:</b> {record['notes']}", self.styles['CustomBody']))
+
+                if record.get('tags'):
+                    tags = record['tags'] if isinstance(record['tags'], str) else ', '.join(record['tags'])
+                    story.append(Paragraph(f"    <i>Tags: {tags}</i>", self.styles['SmallText']))
+
+                story.append(Spacer(1, 0.08 * inch))
+
         return story
 
     def _create_trend_charts_section(self, chart_data_list: List[Dict[str, Any]]) -> List:
