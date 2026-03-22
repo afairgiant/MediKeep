@@ -137,6 +137,11 @@
       "placeholder": "ex : Lisinopril, Metformine",
       "description": "Nom de marque ou générique du médicament (2 caractères minimum)"
     },
+    "alternativeName": {
+      "label": "Nom alternatif",
+      "placeholder": "ex. nom de marque ou nom générique",
+      "description": "Nom alternatif ou de marque facultatif (2-100 caractères)"
+    },
     "medicationType": {
       "label": "Type de médicament",
       "placeholder": "Sélectionnez le type",

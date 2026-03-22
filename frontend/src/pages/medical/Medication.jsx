@@ -177,6 +177,7 @@ const Medication = () => {
   // Form data state
   const [formData, setFormData] = useState({
     medication_name: '',
+    alternative_name: '',
     medication_type: 'prescription',
     dosage: '',
     frequency: '',
@@ -243,6 +244,7 @@ const Medication = () => {
   const resetForm = useCallback(() => {
     setFormData({
       medication_name: '',
+      alternative_name: '',
       medication_type: 'prescription',
       dosage: '',
       frequency: '',
@@ -278,6 +280,7 @@ const Medication = () => {
     resetSubmission();
     setFormData({
       medication_name: medication.medication_name || '',
+      alternative_name: medication.alternative_name || '',
       medication_type: medication.medication_type || 'prescription',
       dosage: medication.dosage || '',
       frequency: medication.frequency || '',
@@ -336,6 +339,7 @@ const Medication = () => {
 
       const medicationData = {
         medication_name: medicationName,
+        alternative_name: formData.alternative_name?.trim() || null,
         medication_type: formData.medication_type || 'prescription',
         dosage: formData.dosage?.trim() || null,
         frequency: formData.frequency?.trim() || null,

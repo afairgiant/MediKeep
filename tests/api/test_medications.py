@@ -485,7 +485,7 @@ class TestMedicationAPI:
         response = client.post(
             "/api/v1/medications/",
             json=medication_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -504,7 +504,7 @@ class TestMedicationAPI:
         response = client.post(
             "/api/v1/medications/",
             json=medication_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422
@@ -521,7 +521,7 @@ class TestMedicationAPI:
         create_response = client.post(
             "/api/v1/medications/",
             json=medication_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         medication_id = create_response.json()["id"]
 
@@ -533,7 +533,7 @@ class TestMedicationAPI:
         response = client.put(
             f"/api/v1/medications/{medication_id}",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -553,9 +553,111 @@ class TestMedicationAPI:
         response = client.post(
             "/api/v1/medications/",
             json=medication_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
         assert data["notes"] is None
+
+    # --- Alternative Name Tests ---
+
+    def test_create_medication_with_alternative_name(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test creating a medication with alternative_name set."""
+        medication_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Acetaminophen",
+            "alternative_name": "Paracetamol",
+            "route": "oral",
+            "status": "active",
+        }
+
+        response = client.post(
+            "/api/v1/medications/",
+            json=medication_data,
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["medication_name"] == "Acetaminophen"
+        assert data["alternative_name"] == "Paracetamol"
+
+    def test_create_medication_alternative_name_optional(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test creating a medication without alternative_name succeeds and field is None."""
+        medication_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Ibuprofen",
+            "route": "oral",
+            "status": "active",
+        }
+
+        response = client.post(
+            "/api/v1/medications/",
+            json=medication_data,
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("alternative_name") is None
+
+    def test_update_medication_alternative_name(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test updating a medication's alternative_name."""
+        create_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Metformin",
+            "route": "oral",
+            "status": "active",
+        }
+        create_response = client.post(
+            "/api/v1/medications/",
+            json=create_data,
+            headers=authenticated_headers,
+        )
+        assert create_response.status_code == 200
+        medication_id = create_response.json()["id"]
+
+        update_data = {"alternative_name": "Glucophage"}
+        update_response = client.put(
+            f"/api/v1/medications/{medication_id}",
+            json=update_data,
+            headers=authenticated_headers,
+        )
+
+        assert update_response.status_code == 200
+        assert update_response.json()["alternative_name"] == "Glucophage"
+
+    def test_create_medication_alternative_name_too_short(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that a 1-character alternative_name is rejected."""
+        medication_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Aspirin",
+            "alternative_name": "A",
+            "route": "oral",
+        }
+
+        response = client.post(
+            "/api/v1/medications/",
+            json=medication_data,
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 422
+
+    def test_create_medication_alternative_name_too_long(self, client: TestClient, user_with_patient, authenticated_headers):
+        """Test that a 101-character alternative_name is rejected."""
+        medication_data = {
+            "patient_id": user_with_patient["patient"].id,
+            "medication_name": "Aspirin",
+            "alternative_name": "A" * 101,
+            "route": "oral",
+        }
+
+        response = client.post(
+            "/api/v1/medications/",
+            json=medication_data,
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 422

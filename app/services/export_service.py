@@ -389,6 +389,7 @@ class ExportService:
             {
                 "id": med.id,
                 "medication_name": med.medication_name,
+                "alternative_name": med.alternative_name,
                 "dosage": med.dosage,
                 "frequency": med.frequency,
                 "route": med.route,
@@ -1701,6 +1702,7 @@ class ExportService:
         header_mapping = {
             "id": "ID",
             "medication_name": "Medication",
+            "alternative_name": "Alternative Name",
             "dosage": "Dosage",
             "frequency": "Frequency",
             "route": "Route",
@@ -1925,6 +1927,7 @@ class ExportService:
             if section_name == "medications":
                 field_order = [
                     "medication_name",
+                    "alternative_name",
                     "dosage",
                     "frequency",
                     "route",

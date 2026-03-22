@@ -21,6 +21,7 @@ class MedicationBase(TaggedEntityMixin):
     """Base schema for Medication"""
 
     medication_name: str
+    alternative_name: Optional[str] = None
     medication_type: Optional[str] = "prescription"
     dosage: Optional[str] = None
     frequency: Optional[str] = None
@@ -42,6 +43,7 @@ class MedicationBase(TaggedEntityMixin):
             for field in [
                 "effective_period_start",
                 "effective_period_end",
+                "alternative_name",
                 "dosage",
                 "frequency",
                 "route",
@@ -77,6 +79,17 @@ class MedicationBase(TaggedEntityMixin):
         if len(v) > 100:
             raise ValueError("Medication name must be less than 100 characters")
         return v.strip()
+
+    @field_validator("alternative_name")
+    @classmethod
+    def validate_alternative_name(cls, v):
+        if v is not None:
+            if len(v.strip()) < 2:
+                raise ValueError("Alternative name must be at least 2 characters long")
+            if len(v) > 100:
+                raise ValueError("Alternative name must be 100 characters or fewer")
+            return v.strip()
+        return v
 
     @field_validator("dosage")
     @classmethod
@@ -183,6 +196,7 @@ class MedicationUpdate(BaseModel):
     """Schema for updating an existing medication"""
 
     medication_name: Optional[str] = None
+    alternative_name: Optional[str] = None
     medication_type: Optional[str] = None
     dosage: Optional[str] = None
     frequency: Optional[str] = None
@@ -204,6 +218,7 @@ class MedicationUpdate(BaseModel):
         if isinstance(values, dict):
             for field in [
                 "medication_name",
+                "alternative_name",
                 "medication_type",
                 "dosage",
                 "frequency",
@@ -229,6 +244,17 @@ class MedicationUpdate(BaseModel):
                 raise ValueError("Medication name must be at least 2 characters long")
             if len(v) > 100:
                 raise ValueError("Medication name must be less than 100 characters")
+            return v.strip()
+        return v
+
+    @field_validator("alternative_name")
+    @classmethod
+    def validate_alternative_name(cls, v):
+        if v is not None:
+            if len(v.strip()) < 2:
+                raise ValueError("Alternative name must be at least 2 characters long")
+            if len(v) > 100:
+                raise ValueError("Alternative name must be 100 characters or fewer")
             return v.strip()
         return v
 

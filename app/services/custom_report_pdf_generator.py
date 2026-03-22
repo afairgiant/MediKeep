@@ -917,15 +917,15 @@ class CustomReportPDFGenerator:
         
         # Medication name with dosage and frequency
         name = record.get('medication_name', 'Unnamed Medication')
-        generic = record.get('generic_name', '')
+        alternative_name = record.get('alternative_name', '')
         dosage = record.get('dosage', '')
         frequency = record.get('frequency', '')
         route = record.get('route', '')
-        
+
         # Main header line with key medication info
         header_parts = [f"<b>{name}</b>"]
-        if generic and generic != name:
-            header_parts.append(f"({generic})")
+        if alternative_name and alternative_name != name:
+            header_parts.append(f"({alternative_name})")
         
         # Dosage and frequency are critical - make them prominent
         dosage_freq = []

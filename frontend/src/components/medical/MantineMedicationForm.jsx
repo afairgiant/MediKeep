@@ -253,18 +253,10 @@ const MantineMedicationForm = ({
     }
   };
 
-  // Group fields by section for tabs
-  const basicFields = medicationFormFields.filter(f =>
-    ['medication_name', 'medication_type', 'dosage', 'frequency', 'route', 'indication'].includes(f.name)
-  );
-
-  const detailsFields = medicationFormFields.filter(f =>
-    ['status', 'effective_period_start', 'effective_period_end', 'practitioner_id', 'pharmacy_id', 'tags'].includes(f.name)
-  );
-
-  const notesFields = medicationFormFields.filter(f =>
-    ['notes', 'side_effects'].includes(f.name)
-  );
+  // Group fields by section for tabs (section is declared on each field in medication.js)
+  const basicFields = medicationFormFields.filter(f => f.section === 'basic');
+  const detailsFields = medicationFormFields.filter(f => f.section === 'details');
+  const notesFields = medicationFormFields.filter(f => f.section === 'notes');
 
   return (
     <Modal

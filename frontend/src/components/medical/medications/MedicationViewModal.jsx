@@ -154,6 +154,12 @@ const MedicationViewModal = ({
                       <Text size="sm">{medication.medication_name}</Text>
                     </Stack>
                     <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.alternativeName', 'Alternative Name')}</Text>
+                      <Text size="sm" c={medication.alternative_name ? 'inherit' : 'dimmed'}>
+                        {medication.alternative_name || t('medications.modal.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.purposeIndication', 'Purpose/Indication')}</Text>
                       <Text size="sm" c={medication.indication ? 'inherit' : 'dimmed'}>
                         {getMedicationPurpose(medication)}

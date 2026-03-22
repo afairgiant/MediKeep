@@ -124,6 +124,11 @@
       "placeholder": "ej: Hidroferol, Metformina",
       "description": "Nombre de marca o genérico del medicamento (mínimo 2 caracteres)"
     },
+    "alternativeName": {
+      "label": "Nombre alternativo",
+      "placeholder": "ej. nombre de marca o nombre genérico",
+      "description": "Nombre alternativo o de marca opcional (2-100 caracteres)"
+    },
     "medicationType": {
       "label": "Tipo de medicamento",
       "placeholder": "Seleccione el tipo",
