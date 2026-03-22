@@ -137,6 +137,11 @@
       "placeholder": "bijv. Lisinopril, Metformine",
       "description": "Generieke naam of merknaam van de medicatie (min. 2 tekens)"
     },
+    "alternativeName": {
+      "label": "Alternatieve naam",
+      "placeholder": "bijv. merknaam of generieke naam",
+      "description": "Optionele alternatieve of merknaam (2-100 tekens)"
+    },
     "medicationType": {
       "label": "Type medicatie",
       "placeholder": "Selecteer type",

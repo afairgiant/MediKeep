@@ -1,5 +1,10 @@
 /**
  * Medication form field configuration
+ *
+ * Each field declares a `section` that maps to a form tab:
+ *   'basic'   - Basic Info tab
+ *   'details' - Details tab
+ *   'notes'   - Notes tab
  */
 
 import {
@@ -11,6 +16,7 @@ import { tagsFieldConfig } from './shared';
 export const medicationFormFields = [
   {
     name: 'medication_name',
+    section: 'basic',
     type: 'text',
     labelKey: 'medical:medications.medicationName.label',
     placeholderKey: 'medical:medications.medicationName.placeholder',
@@ -21,7 +27,20 @@ export const medicationFormFields = [
     maxLength: 255,
   },
   {
+    name: 'alternative_name',
+    section: 'basic',
+    type: 'text',
+    labelKey: 'medical:medications.alternativeName.label',
+    placeholderKey: 'medical:medications.alternativeName.placeholder',
+    descriptionKey: 'medical:medications.alternativeName.description',
+    required: false,
+    gridColumn: 6,
+    minLength: 2,
+    maxLength: 100,
+  },
+  {
     name: 'medication_type',
+    section: 'basic',
     type: 'select',
     labelKey: 'medical:medications.medicationType.label',
     placeholderKey: 'medical:medications.medicationType.placeholder',
@@ -35,6 +54,7 @@ export const medicationFormFields = [
   },
   {
     name: 'dosage',
+    section: 'basic',
     type: 'text',
     labelKey: 'medical:medications.dosage.label',
     placeholderKey: 'medical:medications.dosage.placeholder',
@@ -43,6 +63,7 @@ export const medicationFormFields = [
   },
   {
     name: 'frequency',
+    section: 'basic',
     type: 'text',
     labelKey: 'medical:medications.frequency.label',
     placeholderKey: 'medical:medications.frequency.placeholder',
@@ -51,6 +72,7 @@ export const medicationFormFields = [
   },
   {
     name: 'route',
+    section: 'basic',
     type: 'select',
     labelKey: 'medical:medications.route.label',
     placeholderKey: 'medical:medications.route.placeholder',
@@ -73,6 +95,7 @@ export const medicationFormFields = [
   },
   {
     name: 'indication',
+    section: 'basic',
     type: 'text',
     labelKey: 'medical:medications.indication.label',
     placeholderKey: 'medical:medications.indication.placeholder',
@@ -81,6 +104,7 @@ export const medicationFormFields = [
   },
   {
     name: 'status',
+    section: 'details',
     type: 'select',
     labelKey: 'common:fields.status.label',
     descriptionKey: 'common:fields.status.description',
@@ -94,6 +118,7 @@ export const medicationFormFields = [
   },
   {
     name: 'effective_period_start',
+    section: 'details',
     type: 'date',
     labelKey: 'common:fields.startDate.label',
     placeholderKey: 'common:fields.startDate.placeholder',
@@ -102,6 +127,7 @@ export const medicationFormFields = [
   },
   {
     name: 'effective_period_end',
+    section: 'details',
     type: 'date',
     labelKey: 'common:fields.endDate.label',
     placeholderKey: 'common:fields.endDate.placeholder',
@@ -110,6 +136,7 @@ export const medicationFormFields = [
   },
   {
     name: 'practitioner_id',
+    section: 'details',
     type: 'select',
     labelKey: 'medical:medications.prescribingProvider.label',
     placeholderKey: 'medical:medications.prescribingProvider.placeholder',
@@ -122,6 +149,7 @@ export const medicationFormFields = [
   },
   {
     name: 'pharmacy_id',
+    section: 'details',
     type: 'select',
     labelKey: 'medical:medications.pharmacy.label',
     placeholderKey: 'medical:medications.pharmacy.placeholder',
@@ -134,6 +162,7 @@ export const medicationFormFields = [
   },
   {
     name: 'notes',
+    section: 'notes',
     type: 'textarea',
     labelKey: 'common:fields.notes.label',
     placeholderKey: 'common:fields.notes.placeholder',
@@ -144,6 +173,7 @@ export const medicationFormFields = [
   },
   {
     name: 'side_effects',
+    section: 'notes',
     type: 'textarea',
     labelKey: 'medical:medications.sideEffects.label',
     placeholderKey: 'medical:medications.sideEffects.placeholder',
@@ -152,5 +182,5 @@ export const medicationFormFields = [
     minRows: 3,
     maxRows: 6,
   },
-  tagsFieldConfig,
+  { ...tagsFieldConfig, section: 'details' },
 ];

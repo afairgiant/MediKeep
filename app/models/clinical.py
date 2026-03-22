@@ -27,6 +27,7 @@ class Medication(Base):
     id = Column(Integer, primary_key=True)
 
     medication_name = Column(String, nullable=False)
+    alternative_name = Column(String, nullable=True)
     medication_type = Column(
         String(20), nullable=False, default="prescription"
     )  # Use MedicationType enum: prescription, otc, supplement, herbal

@@ -305,3 +305,34 @@ class TestMedicationCRUD:
         first_page_ids = {med.id for med in first_page}
         second_page_ids = {med.id for med in second_page}
         assert first_page_ids.isdisjoint(second_page_ids)
+    # --- Alternative Name Tests ---
+
+    def test_create_medication_with_alternative_name(self, db_session: Session, test_patient):
+        """Test creating a medication with alternative_name and verifying it persists."""
+        medication_data = MedicationCreate(
+            patient_id=test_patient.id,
+            medication_name="Acetaminophen",
+            alternative_name="Paracetamol",
+            route="oral",
+            status="active",
+        )
+
+        medication = medication_crud.create(db_session, obj_in=medication_data)
+
+        assert medication is not None
+        assert medication.medication_name == "Acetaminophen"
+        assert medication.alternative_name == "Paracetamol"
+
+    def test_create_medication_alternative_name_optional(self, db_session: Session, test_patient):
+        """Test creating a medication without alternative_name results in None."""
+        medication_data = MedicationCreate(
+            patient_id=test_patient.id,
+            medication_name="Ibuprofen",
+            route="oral",
+            status="active",
+        )
+
+        medication = medication_crud.create(db_session, obj_in=medication_data)
+
+        assert medication is not None
+        assert medication.alternative_name is None

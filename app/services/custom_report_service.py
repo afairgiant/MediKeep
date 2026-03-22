@@ -325,7 +325,7 @@ class CustomReportService:
         category_field_map = {
             'medications': {
                 'primary': ['medication_name'],
-                'fallbacks': ['generic_name', 'brand_name', 'indication', 'dosage']
+                'fallbacks': ['alternative_name', 'indication', 'dosage']
             },
             'conditions': {
                 'primary': ['condition_name'],

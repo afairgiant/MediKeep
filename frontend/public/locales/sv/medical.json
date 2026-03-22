@@ -137,6 +137,11 @@
       "placeholder": "t.ex. Lisinopril, Metformin",
       "description": "Generiskt namn eller varumarke for lakemedlet (minst 2 tecken)"
     },
+    "alternativeName": {
+      "label": "Alternativt namn",
+      "placeholder": "t.ex. varumärkesnamn eller generiskt namn",
+      "description": "Valfritt alternativt namn eller varumärkesnamn (2-100 tecken)"
+    },
     "medicationType": {
       "label": "Lakemedelstyp",
       "placeholder": "Valj typ",
