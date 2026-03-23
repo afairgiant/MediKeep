@@ -15,11 +15,12 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging.config import get_logger
 from app.models.models import (
-    Allergy, Condition, EmergencyContact, Encounter, FamilyCondition, FamilyMember, Immunization,
-    Injury, InjuryType, Insurance, LabResult, Medication, Patient, Pharmacy,
-    Practitioner, Procedure, ReportGenerationAudit, ReportTemplate, Symptom, SymptomOccurrence,
-    Treatment, User, Vitals
+    Allergy, Condition, ConditionMedication, EmergencyContact, Encounter, FamilyCondition,
+    FamilyMember, Immunization, Injury, InjuryType, Insurance, LabResult, Medication, Patient,
+    Pharmacy, Practitioner, Procedure, ReportGenerationAudit, ReportTemplate, Symptom,
+    SymptomOccurrence, Treatment, User, Vitals
 )
+from app.models.procedures import MedicalEquipment
 from app.schemas.custom_reports import (
     CategorySummary, CustomReportError, CustomReportRequest,
     DataSummaryResponse, RecordSummary, ReportTemplate as ReportTemplateSchema,
@@ -51,7 +52,8 @@ class CustomReportService:
         'family_history': FamilyMember,
         'symptoms': Symptom,
         'injuries': Injury,
-        'insurance': Insurance
+        'insurance': Insurance,
+        'medical_equipment': MedicalEquipment,
     }
     
     def __init__(self, db: Session):
@@ -1059,7 +1061,48 @@ class CustomReportService:
                 if practitioner_name:
                     record_dict['prescribing_practitioner'] = practitioner_name
 
-                logger.info(f"Medication {record.id} enhanced with pharmacy and practitioner info")
+                condition_rels = (
+                    self.db.query(ConditionMedication)
+                    .filter(ConditionMedication.medication_id == record.id)
+                    .all()
+                )
+                associated_conditions = []
+                for rel in condition_rels:
+                    condition = self.db.query(Condition).filter(Condition.id == rel.condition_id).first()
+                    if condition:
+                        entry = {"condition_name": condition.condition_name or f"Condition #{condition.id}"}
+                        if rel.relevance_note:
+                            entry["relevance_note"] = rel.relevance_note
+                        associated_conditions.append(entry)
+                if associated_conditions:
+                    record_dict['associated_conditions'] = associated_conditions
+
+                logger.info(f"Medication {record.id} enhanced with pharmacy, practitioner, and condition info")
+
+            elif category == 'conditions':
+                practitioner_name = self._resolve_practitioner_name(record)
+                if practitioner_name:
+                    record_dict['practitioner_name'] = practitioner_name
+
+                med_rels = (
+                    self.db.query(ConditionMedication)
+                    .filter(ConditionMedication.condition_id == record.id)
+                    .all()
+                )
+                associated_medications = []
+                for rel in med_rels:
+                    medication = self.db.query(Medication).filter(Medication.id == rel.medication_id).first()
+                    if medication:
+                        entry = {"medication_name": medication.medication_name or f"Medication #{medication.id}"}
+                        if medication.dosage:
+                            entry["dosage"] = medication.dosage
+                        if rel.relevance_note:
+                            entry["relevance_note"] = rel.relevance_note
+                        associated_medications.append(entry)
+                if associated_medications:
+                    record_dict['associated_medications'] = associated_medications
+
+                logger.info(f"Condition {record.id} enhanced with practitioner and medication info")
             
             logger.debug(f"Processed record {record.id}")
             result.append(record_dict)

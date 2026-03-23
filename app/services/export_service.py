@@ -248,6 +248,10 @@ class ExportService:
                 export_data["insurance"] = self._export_insurance(
                     patient, start_date, end_date
                 )
+            elif scope == "medical_equipment":
+                export_data["medical_equipment"] = self._export_medical_equipment(
+                    patient, start_date, end_date
+                )
             else:
                 raise ValueError(f"Unsupported export scope: {scope}")
 
@@ -336,6 +340,9 @@ class ExportService:
             "injuries": self._export_injuries(patient, start_date, end_date),
             "family_history": self._export_family_history(patient, start_date, end_date),
             "insurance": self._export_insurance(patient, start_date, end_date),
+            "medical_equipment": self._export_medical_equipment(
+                patient, start_date, end_date
+            ),
         }
 
     def _apply_date_filter(
@@ -377,38 +384,62 @@ class ExportService:
         self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
     ) -> List[Dict[str, Any]]:
         """Export medications data."""
+        from app.models.models import ConditionMedication
         query = (
             self.db.query(Medication)
             .options(joinedload(Medication.practitioner))
+            .options(joinedload(Medication.pharmacy))
+            .options(
+                selectinload(Medication.condition_relationships).joinedload(
+                    ConditionMedication.condition
+                )
+            )
             .filter(Medication.patient_id == patient.id)
         )
         query = self._apply_date_filter(query, Medication, start_date, end_date)
         medications = query.all()
 
-        return [
-            {
-                "id": med.id,
-                "medication_name": med.medication_name,
-                "alternative_name": med.alternative_name,
-                "dosage": med.dosage,
-                "frequency": med.frequency,
-                "route": med.route,
-                "indication": med.indication,
-                "start_date": (
-                    med.effective_period_start.isoformat()
-                    if med.effective_period_start is not None
-                    else None
-                ),
-                "end_date": (
-                    med.effective_period_end.isoformat()
-                    if med.effective_period_end is not None
-                    else None
-                ),
-                "status": med.status,
-                "prescribed_by": med.practitioner.name if med.practitioner else None,
-            }
-            for med in medications
-        ]
+        result = []
+        for med in medications:
+            associated_conditions = [
+                {
+                    "condition_id": rel.condition_id,
+                    "condition_name": rel.condition.condition_name if rel.condition else None,
+                    "relevance_note": rel.relevance_note,
+                }
+                for rel in med.condition_relationships
+                if rel.condition is not None
+            ]
+            result.append(
+                {
+                    "id": med.id,
+                    "medication_name": med.medication_name,
+                    "alternative_name": med.alternative_name,
+                    "medication_type": med.medication_type,
+                    "dosage": med.dosage,
+                    "frequency": med.frequency,
+                    "route": med.route,
+                    "indication": med.indication,
+                    "start_date": (
+                        med.effective_period_start.isoformat()
+                        if med.effective_period_start is not None
+                        else None
+                    ),
+                    "end_date": (
+                        med.effective_period_end.isoformat()
+                        if med.effective_period_end is not None
+                        else None
+                    ),
+                    "status": med.status,
+                    "prescribed_by": med.practitioner.name if med.practitioner else None,
+                    "pharmacy": med.pharmacy.name if med.pharmacy else None,
+                    "side_effects": med.side_effects,
+                    "notes": med.notes,
+                    "tags": med.tags,
+                    "associated_conditions": associated_conditions,
+                }
+            )
+        return result
 
     def _export_lab_results(
         self,
@@ -453,6 +484,7 @@ class ExportService:
                 ),
                 "ordered_by": result.practitioner.name if result.practitioner else None,
                 "notes": result.notes,
+                "tags": result.tags,
             }
 
             # Add test components (actual result values)
@@ -589,6 +621,7 @@ class ExportService:
                 ),
                 "status": allergy.status,
                 "notes": allergy.notes,
+                "tags": allergy.tags,
             }
             for allergy in allergies
         ]
@@ -597,32 +630,60 @@ class ExportService:
         self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
     ) -> List[Dict[str, Any]]:
         """Export conditions data."""
+        from app.models.models import ConditionMedication
         query = (
             self.db.query(Condition)
             .options(joinedload(Condition.practitioner))
+            .options(
+                selectinload(Condition.medication_relationships).joinedload(
+                    ConditionMedication.medication
+                )
+            )
             .filter(Condition.patient_id == patient.id)
         )
         query = self._apply_date_filter(query, Condition, start_date, end_date)
         conditions = query.all()
 
-        return [
-            {
-                "id": condition.id,
-                "condition_name": condition.condition_name,
-                "diagnosis": condition.diagnosis,
-                "status": condition.status,
-                "onset_date": (
-                    condition.onset_date.isoformat()
-                    if condition.onset_date is not None
-                    else None
-                ),
-                "diagnosed_by": (
-                    condition.practitioner.name if condition.practitioner else None
-                ),
-                "notes": condition.notes,
-            }
-            for condition in conditions
-        ]
+        result = []
+        for condition in conditions:
+            associated_medications = [
+                {
+                    "medication_id": rel.medication_id,
+                    "medication_name": rel.medication.medication_name if rel.medication else None,
+                    "relevance_note": rel.relevance_note,
+                }
+                for rel in condition.medication_relationships
+                if rel.medication is not None
+            ]
+            result.append(
+                {
+                    "id": condition.id,
+                    "condition_name": condition.condition_name,
+                    "diagnosis": condition.diagnosis,
+                    "status": condition.status,
+                    "onset_date": (
+                        condition.onset_date.isoformat()
+                        if condition.onset_date is not None
+                        else None
+                    ),
+                    "end_date": (
+                        condition.end_date.isoformat()
+                        if condition.end_date is not None
+                        else None
+                    ),
+                    "severity": condition.severity,
+                    "icd10_code": condition.icd10_code,
+                    "snomed_code": condition.snomed_code,
+                    "code_description": condition.code_description,
+                    "diagnosed_by": (
+                        condition.practitioner.name if condition.practitioner else None
+                    ),
+                    "notes": condition.notes,
+                    "tags": condition.tags,
+                    "associated_medications": associated_medications,
+                }
+            )
+        return result
 
     def _export_immunizations(
         self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
@@ -655,7 +716,11 @@ class ExportService:
                     else None
                 ),
                 "administered_by": imm.practitioner.name if imm.practitioner else None,
+                "vaccine_trade_name": imm.vaccine_trade_name,
+                "ndc_number": imm.ndc_number,
+                "location": imm.location,
                 "notes": imm.notes,
+                "tags": imm.tags,
             }
             for imm in immunizations
         ]
@@ -681,7 +746,15 @@ class ExportService:
                 "status": proc.status,
                 "performed_by": proc.practitioner.name if proc.practitioner else None,
                 "facility": proc.facility,
+                "procedure_type": proc.procedure_type,
+                "outcome": proc.outcome,
+                "procedure_setting": proc.procedure_setting,
+                "procedure_complications": proc.procedure_complications,
+                "procedure_duration": proc.procedure_duration,
+                "anesthesia_type": proc.anesthesia_type,
+                "anesthesia_notes": proc.anesthesia_notes,
                 "notes": proc.notes,
+                "tags": proc.tags,
             }
             for proc in procedures
         ]
@@ -721,7 +794,10 @@ class ExportService:
                 "prescribed_by": (
                     treatment.practitioner.name if treatment.practitioner else None
                 ),
+                "dosage": treatment.dosage,
+                "mode": treatment.mode,
                 "notes": treatment.notes,
+                "tags": treatment.tags,
             }
             for treatment in treatments
         ]
@@ -733,6 +809,7 @@ class ExportService:
         query = (
             self.db.query(Encounter)
             .options(joinedload(Encounter.practitioner))
+            .options(joinedload(Encounter.condition))
             .filter(Encounter.patient_id == patient.id)
         )
         query = self._apply_date_filter(query, Encounter, start_date, end_date)
@@ -744,10 +821,22 @@ class ExportService:
                     encounter.date.isoformat() if encounter.date is not None else None
                 ),
                 "reason": encounter.reason,
+                "visit_type": encounter.visit_type,
+                "chief_complaint": encounter.chief_complaint,
+                "diagnosis": encounter.diagnosis,
+                "treatment_plan": encounter.treatment_plan,
+                "follow_up_instructions": encounter.follow_up_instructions,
+                "duration_minutes": encounter.duration_minutes,
+                "location": encounter.location,
+                "priority": encounter.priority,
                 "practitioner": (
                     encounter.practitioner.name if encounter.practitioner else None
                 ),
+                "condition": (
+                    encounter.condition.condition_name if encounter.condition else None
+                ),
                 "notes": encounter.notes,
+                "tags": encounter.tags,
             }
             for encounter in encounters
         ]
@@ -806,10 +895,13 @@ class ExportService:
                     "oxygen_saturation": vital.oxygen_saturation,
                     "respiratory_rate": vital.respiratory_rate,
                     "blood_glucose": vital.blood_glucose,
+                    "a1c": vital.a1c,
+                    "glucose_context": vital.glucose_context,
                     "bmi": bmi_value,
                     "pain_scale": vital.pain_scale,
                     "location": vital.location,
                     "device_used": vital.device_used,
+                    "import_source": vital.import_source,
                     "recorded_by": (
                         vital.practitioner.name if vital.practitioner else None
                     ),
@@ -1191,6 +1283,52 @@ class ExportService:
             for insurance in insurances
         ]
 
+    def _export_medical_equipment(
+        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+    ) -> List[Dict[str, Any]]:
+        """Export medical equipment data."""
+        from app.models.procedures import MedicalEquipment
+
+        query = (
+            self.db.query(MedicalEquipment)
+            .options(joinedload(MedicalEquipment.practitioner))
+            .filter(MedicalEquipment.patient_id == patient.id)
+        )
+        query = self._apply_date_filter(query, MedicalEquipment, start_date, end_date)
+        equipment_list = query.all()
+        return [
+            {
+                "id": equip.id,
+                "equipment_name": equip.equipment_name,
+                "equipment_type": equip.equipment_type,
+                "manufacturer": equip.manufacturer,
+                "model_number": equip.model_number,
+                "serial_number": equip.serial_number,
+                "status": equip.status,
+                "prescribed_date": (
+                    equip.prescribed_date.isoformat()
+                    if equip.prescribed_date is not None
+                    else None
+                ),
+                "last_service_date": (
+                    equip.last_service_date.isoformat()
+                    if equip.last_service_date is not None
+                    else None
+                ),
+                "next_service_date": (
+                    equip.next_service_date.isoformat()
+                    if equip.next_service_date is not None
+                    else None
+                ),
+                "supplier": equip.supplier,
+                "usage_instructions": equip.usage_instructions,
+                "prescribed_by": equip.practitioner.name if equip.practitioner else None,
+                "notes": equip.notes,
+                "tags": equip.tags,
+            }
+            for equip in equipment_list
+        ]
+
     async def get_export_summary(self, user_id: int) -> Dict[str, Any]:
         """Get summary of available data for export using active patient."""
         # Get the active patient for the user
@@ -1262,8 +1400,19 @@ class ExportService:
                 "insurance": self.db.query(Insurance)
                 .filter(Insurance.patient_id == patient.id)
                 .count(),
+                "medical_equipment": self._count_medical_equipment(patient.id),
             },
         }
+
+    def _count_medical_equipment(self, patient_id: int) -> int:
+        """Count medical equipment records for a patient."""
+        from app.models.procedures import MedicalEquipment
+
+        return (
+            self.db.query(MedicalEquipment)
+            .filter(MedicalEquipment.patient_id == patient_id)
+            .count()
+        )
 
     def _get_related_practitioner_ids(self, patient: Patient) -> List[int]:
         """Get all practitioner IDs related to a patient."""
@@ -1420,6 +1569,9 @@ class ExportService:
             "effective_date",
             "expiration_date",
             "resolved_date",
+            "prescribed_date",
+            "last_service_date",
+            "next_service_date",
         ]:
             str_value = str(value)
             if "T" in str_value:
@@ -1441,6 +1593,12 @@ class ExportService:
                 return "Yes" if value else "No"
             elif str(value).lower() in ["true", "false"]:
                 return "Yes" if str(value).lower() == "true" else "No"
+
+        # Format tags (list of strings)
+        if field_name == "tags" and isinstance(value, list):
+            if not value:
+                return ""
+            return ", ".join(str(t) for t in value)
 
         # Format other lists/dicts as JSON
         if isinstance(value, (list, dict)):
@@ -1703,6 +1861,7 @@ class ExportService:
             "id": "ID",
             "medication_name": "Medication",
             "alternative_name": "Alternative Name",
+            "medication_type": "Medication Type",
             "dosage": "Dosage",
             "frequency": "Frequency",
             "route": "Route",
@@ -1711,6 +1870,10 @@ class ExportService:
             "end_date": "End Date",
             "status": "Status",
             "prescribed_by": "Prescribed By",
+            "pharmacy": "Pharmacy",
+            "side_effects": "Side Effects",
+            "associated_conditions": "Associated Conditions",
+            "associated_medications": "Associated Medications",
             "test_name": "Test Name",
             "test_code": "Code",
             "test_category": "Category",
@@ -1726,27 +1889,47 @@ class ExportService:
             "onset_date": "Onset Date",
             "condition_name": "Condition",
             "diagnosis": "Diagnosis",
-            "onset_date": "Onset Date",
             "diagnosed_by": "Diagnosed By",
+            "end_date": "End Date",
+            "icd10_code": "ICD-10 Code",
+            "snomed_code": "SNOMED Code",
+            "code_description": "Code Description",
             "vaccine_name": "Vaccine",
+            "vaccine_trade_name": "Trade Name",
             "date_administered": "Date Given",
             "dose_number": "Dose #",
+            "ndc_number": "NDC Number",
             "lot_number": "Lot #",
             "manufacturer": "Manufacturer",
             "site": "Site",
             "expiration_date": "Expires",
             "administered_by": "Given By",
             "procedure_name": "Procedure",
+            "procedure_type": "Procedure Type",
             "code": "Code",
             "date": "Date",
             "description": "Description",
             "performed_by": "Performed By",
+            "procedure_setting": "Setting",
+            "procedure_complications": "Complications",
+            "procedure_duration": "Duration (min)",
+            "anesthesia_type": "Anesthesia Type",
+            "anesthesia_notes": "Anesthesia Notes",
             "treatment_name": "Treatment",
             "treatment_type": "Type",
             "treatment_category": "Category",
             "outcome": "Outcome",
+            "dosage": "Dosage",
+            "mode": "Mode",
             "location": "Location",
             "reason": "Reason",
+            "visit_type": "Visit Type",
+            "chief_complaint": "Chief Complaint",
+            "treatment_plan": "Treatment Plan",
+            "follow_up_instructions": "Follow-up Instructions",
+            "duration_minutes": "Duration (min)",
+            "priority": "Priority",
+            "condition": "Related Condition",
             "practitioner": "Practitioner",
             "recorded_date": "Recorded",
             "systolic_bp": "Systolic BP",
@@ -1758,11 +1941,24 @@ class ExportService:
             "oxygen_saturation": "O2 Saturation",
             "respiratory_rate": "Respiratory Rate",
             "blood_glucose": "Blood Glucose",
+            "a1c": "A1C (%)",
+            "glucose_context": "Glucose Context",
             "bmi": "BMI",
             "pain_scale": "Pain Scale",
             "device_used": "Device Used",
+            "import_source": "Import Source",
             "recorded_by": "Recorded By",
             "notes": "Notes",
+            # Medical Equipment
+            "equipment_name": "Equipment",
+            "equipment_type": "Type",
+            "model_number": "Model #",
+            "serial_number": "Serial #",
+            "prescribed_date": "Prescribed Date",
+            "last_service_date": "Last Service",
+            "next_service_date": "Next Service",
+            "supplier": "Supplier",
+            "usage_instructions": "Usage Instructions",
             "attached_files": "Attached Files",
             # Emergency contacts
             "name": "Name",
@@ -1853,7 +2049,6 @@ class ExportService:
                 "onset_date",
                 "recorded_date",
                 "date",
-                "onset_date",
                 "created_at",
                 "updated_at",
                 "first_occurrence_date",
@@ -1862,6 +2057,9 @@ class ExportService:
                 "effective_date",
                 "expiration_date",
                 "resolved_date",
+                "prescribed_date",
+                "last_service_date",
+                "next_service_date",
             ]:
                 if "T" in str_value:
                     return str_value.split("T")[0]
@@ -1890,6 +2088,40 @@ class ExportService:
                     return f"{rating_num:.1f}/5.0"
                 except (ValueError, TypeError):
                     pass
+
+            # Format tags
+            if field_name == "tags" and isinstance(value, list):
+                if not value:
+                    return "N/A"
+                return ", ".join(str(t) for t in value)
+
+            # Format associated conditions (for medications)
+            if field_name == "associated_conditions" and isinstance(value, list):
+                if not value:
+                    return "None"
+                parts = []
+                for cond in value:
+                    if isinstance(cond, dict):
+                        text = cond.get("condition_name") or "Unknown Condition"
+                        if cond.get("relevance_note"):
+                            text += f" ({cond['relevance_note']})"
+                        parts.append(f"• {text}")
+                return "\n".join(parts)
+
+            # Format associated medications (for conditions)
+            if field_name == "associated_medications" and isinstance(value, list):
+                if not value:
+                    return "None"
+                parts = []
+                for med in value:
+                    if isinstance(med, dict):
+                        text = med.get("medication_name") or "Unknown Medication"
+                        if med.get("dosage"):
+                            text += f" {med['dosage']}"
+                        if med.get("relevance_note"):
+                            text += f" ({med['relevance_note']})"
+                        parts.append(f"• {text}")
+                return "\n".join(parts)
 
             # Format nested conditions (for family history)
             if field_name == "conditions" and isinstance(value, list):
@@ -1928,6 +2160,7 @@ class ExportService:
                 field_order = [
                     "medication_name",
                     "alternative_name",
+                    "medication_type",
                     "dosage",
                     "frequency",
                     "route",
@@ -1936,7 +2169,11 @@ class ExportService:
                     "end_date",
                     "status",
                     "prescribed_by",
+                    "pharmacy",
+                    "side_effects",
+                    "associated_conditions",
                     "notes",
+                    "tags",
                 ]
             elif section_name == "lab_results":
                 field_order = [
@@ -1961,15 +2198,23 @@ class ExportService:
                     "onset_date",
                     "status",
                     "notes",
+                    "tags",
                 ]
             elif section_name == "conditions":
                 field_order = [
                     "condition_name",
                     "diagnosis",
                     "onset_date",
+                    "end_date",
                     "status",
+                    "severity",
+                    "icd10_code",
+                    "snomed_code",
+                    "code_description",
                     "diagnosed_by",
+                    "associated_medications",
                     "notes",
+                    "tags",
                 ]
             elif section_name == "vitals":
                 field_order = [
@@ -1983,9 +2228,12 @@ class ExportService:
                     "oxygen_saturation",
                     "respiratory_rate",
                     "blood_glucose",
+                    "a1c",
+                    "glucose_context",
                     "bmi",
                     "pain_scale",
                     "device_used",
+                    "import_source",
                     "location",
                     "recorded_by",
                     "notes",
@@ -2048,6 +2296,94 @@ class ExportService:
                     "coverage_details",
                     "contact_info",
                     "notes",
+                ]
+            elif section_name == "immunizations":
+                field_order = [
+                    "vaccine_name",
+                    "vaccine_trade_name",
+                    "date_administered",
+                    "dose_number",
+                    "ndc_number",
+                    "lot_number",
+                    "manufacturer",
+                    "site",
+                    "route",
+                    "expiration_date",
+                    "location",
+                    "administered_by",
+                    "notes",
+                    "tags",
+                ]
+            elif section_name == "procedures":
+                field_order = [
+                    "procedure_name",
+                    "procedure_type",
+                    "code",
+                    "date",
+                    "status",
+                    "outcome",
+                    "facility",
+                    "procedure_setting",
+                    "procedure_duration",
+                    "procedure_complications",
+                    "anesthesia_type",
+                    "anesthesia_notes",
+                    "performed_by",
+                    "description",
+                    "notes",
+                    "tags",
+                ]
+            elif section_name == "treatments":
+                field_order = [
+                    "treatment_name",
+                    "treatment_type",
+                    "treatment_category",
+                    "start_date",
+                    "end_date",
+                    "status",
+                    "frequency",
+                    "dosage",
+                    "mode",
+                    "outcome",
+                    "location",
+                    "prescribed_by",
+                    "description",
+                    "notes",
+                    "tags",
+                ]
+            elif section_name == "encounters":
+                field_order = [
+                    "date",
+                    "reason",
+                    "visit_type",
+                    "chief_complaint",
+                    "diagnosis",
+                    "treatment_plan",
+                    "follow_up_instructions",
+                    "duration_minutes",
+                    "location",
+                    "priority",
+                    "practitioner",
+                    "condition",
+                    "notes",
+                    "tags",
+                ]
+            elif section_name == "medical_equipment":
+                field_order = [
+                    "equipment_name",
+                    "equipment_type",
+                    "manufacturer",
+                    "model_number",
+                    "serial_number",
+                    "status",
+                    "prescribed_date",
+                    "last_service_date",
+                    "next_service_date",
+                    "supplier",
+                    "usage_instructions",
+                    "prescribed_by",
+                    "notes",
+                    "tags",
                 ]
             else:
                 # Default order - use all available fields
