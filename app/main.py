@@ -26,7 +26,7 @@ logger = get_logger(__name__, "app")
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    openapi_url="/api/v1/openapi.json" if settings.DEBUG else None,
+    openapi_url="/api/v1/openapi.json" if settings.ENABLE_API_DOCS else None,
 )
 
 # Add middleware stack (execution order is reverse of registration)
@@ -37,11 +37,11 @@ app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(TrailingSlashMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID"],
+    expose_headers=["X-Request-ID", "Content-Disposition"],
 )
 
 # Setup comprehensive error handling system

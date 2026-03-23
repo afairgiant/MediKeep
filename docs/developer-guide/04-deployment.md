@@ -144,13 +144,14 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
 
       # Security
-      SECRET_KEY: ${SECRET_KEY}
+      SECRET_KEY: ${SECRET_KEY}  # REQUIRED - set in .env
       ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-admin123}
 
       # Application Settings
       TZ: ${TZ:-America/New_York}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DEBUG: ${DEBUG:-false}
+      ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
 
       # SSL Configuration (optional)
       ENABLE_SSL: ${ENABLE_SSL:-false}
@@ -210,7 +211,7 @@ DB_PASSWORD=your-very-secure-database-password-here
 # Application Port
 APP_PORT=8000
 
-# Security - CHANGE THIS!
+# Security - REQUIRED (auto-generates ephemeral key if not set)
 SECRET_KEY=your-very-secure-secret-key-min-32-chars-for-jwt-tokens
 
 # Default Admin Password (only affects fresh installations)
@@ -221,6 +222,8 @@ TZ=America/New_York
 
 # Logging
 LOG_LEVEL=INFO
+DEBUG=false
+ENABLE_API_DOCS=false  # Set to true to expose Swagger docs
 
 # SSL (set to true after setting up certificates)
 ENABLE_SSL=false
@@ -396,11 +399,14 @@ DB_PASSWORD=secure-password-here
 
 | Variable                      | Type    | Default                   | Required | Description                                |
 | ----------------------------- | ------- | ------------------------- | -------- | ------------------------------------------ |
-| `SECRET_KEY`                  | string  | `your_default_secret_key` | Yes      | JWT signing key (min 32 chars recommended) |
+| `SECRET_KEY`                  | string  | *(auto-generated)*        | Yes      | JWT signing key (min 32 chars). Auto-generates a random ephemeral key if not set. |
 | `ALGORITHM`                   | string  | `HS256`                   | No       | JWT algorithm (hardcoded)                  |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | integer | `480`                     | No       | JWT token expiration (8 hours)             |
 | `ADMIN_DEFAULT_PASSWORD`      | string  | `admin123`                | No       | Default admin password for fresh installs  |
 | `ALLOW_USER_REGISTRATION`     | boolean | `true`                    | No       | Allow new user registration                |
+| `DEBUG`                       | boolean | `false`                   | No       | Enable debug mode                          |
+| `ENABLE_API_DOCS`             | boolean | `false`                   | No       | Expose OpenAPI/Swagger docs at `/api/v1/openapi.json` |
+| `CORS_ALLOWED_ORIGINS`        | string  | `http://localhost:3000`   | No       | Comma-separated list of allowed CORS origins |
 
 **Example:**
 

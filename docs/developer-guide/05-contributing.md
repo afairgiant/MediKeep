@@ -611,7 +611,8 @@ DB_NAME=medikeep_dev
 DB_USER=medikeep
 DB_PASSWORD=your_password
 SECRET_KEY=dev-secret-key
-DEBUG=True
+DEBUG=true
+ENABLE_API_DOCS=true
 
 # Frontend (.env) - Vite uses VITE_ prefix
 VITE_API_URL=/api/v1
