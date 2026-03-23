@@ -19,10 +19,7 @@ os.environ["SKIP_MIGRATIONS"] = "true"  # Skip Alembic migrations for SQLite tes
 import pytest
 import pytest_asyncio
 
-# Reduce bcrypt rounds for faster test execution (default 12 rounds is ~250x slower)
 import bcrypt
-_original_gensalt = bcrypt.gensalt
-bcrypt.gensalt = lambda rounds=4, prefix=b"2b": _original_gensalt(rounds=4, prefix=prefix)
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
@@ -42,6 +39,22 @@ from app.core.events import setup_event_system
 
 # Initialize event system for tests
 setup_event_system()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def reduce_bcrypt_rounds() -> Generator[None, None, None]:
+    """Reduce bcrypt rounds for faster test execution (default 12 is ~250x slower)."""
+    original_gensalt = bcrypt.gensalt
+
+    def fast_gensalt(rounds: int = 4, prefix: bytes = b"2b") -> bytes:
+        return original_gensalt(rounds=4, prefix=prefix)
+
+    bcrypt.gensalt = fast_gensalt
+    try:
+        yield
+    finally:
+        bcrypt.gensalt = original_gensalt
+
 
 # Test database setup
 @pytest.fixture(scope="session")
