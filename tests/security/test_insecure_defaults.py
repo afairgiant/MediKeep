@@ -5,8 +5,6 @@ Finding 5 (admin password) intentionally kept as-is per project decision.
 """
 import inspect
 
-import pytest
-
 
 KNOWN_INSECURE_SECRETS = [
     "your_default_secret_key",

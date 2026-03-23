@@ -55,7 +55,7 @@ services:
       DB_NAME: ${DB_NAME:-medical_records}
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
-      SECRET_KEY: ${SECRET_KEY}  # REQUIRED - set in .env
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env for persistent JWTs}
       DEBUG: ${DEBUG:-false}
       ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
@@ -145,7 +145,7 @@ Default credentials: `admin` / `admin123`
 | Variable      | Description                         | Required |
 | ------------- | ----------------------------------- | -------- |
 | `DB_PASSWORD` | Database password                   | Yes      |
-| `SECRET_KEY`  | JWT signing key (use random string). Auto-generates ephemeral key if not set. | Yes      |
+| `SECRET_KEY`  | JWT signing key (use random string). Auto-generates ephemeral key if not set; required for persistent JWTs. | Recommended |
 
 ### Optional Settings
 

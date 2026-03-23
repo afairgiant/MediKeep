@@ -73,16 +73,18 @@ def _get_secret_key() -> str:
 
     Called once at module import time. If the configured key is missing,
     empty, or matches a known insecure default, a random key is generated
-    for this process. Sessions will not survive restarts until a real
-    SECRET_KEY is configured.
+    for this process. JWT tokens and data/configs encrypted with keys
+    derived from SECRET_KEY will not survive restarts until a real,
+    stable SECRET_KEY is configured.
     """
     key = get_secret("SECRET_KEY", "")
     if key in _KNOWN_INSECURE_SECRETS or len(key) < 32:
         logger = logging.getLogger("app.core.config")
         logger.warning(
             "SECRET_KEY is not configured or uses an insecure default. "
-            "A random key has been generated for this session. "
-            "Set SECRET_KEY in your environment for persistent sessions."
+            "A random key has been generated for this process only. "
+            "Set a stable SECRET_KEY in your environment so JWT tokens "
+            "and encrypted data/configs remain valid across restarts."
         )
         return secrets.token_urlsafe(64)
     return key

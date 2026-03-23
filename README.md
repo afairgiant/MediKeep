@@ -97,10 +97,10 @@ services:
       DB_NAME: ${DB_NAME:-medical_records}
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
-      SECRET_KEY: ${SECRET_KEY}  # REQUIRED - set in .env
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env for persistent JWTs}
       DEBUG: ${DEBUG:-false}
       ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
-      TZ: $(TZ:-America/New_York)
+      TZ: ${TZ:-America/New_York}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       #PUID: ${PUID} # Enable if using bind mounts
       #PGID: ${PGID} # Enable if using bind mounts

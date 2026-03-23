@@ -610,7 +610,7 @@ DB_PORT=5432
 DB_NAME=medikeep_dev
 DB_USER=medikeep
 DB_PASSWORD=your_password
-SECRET_KEY=dev-secret-key
+SECRET_KEY=dev-secret-key-change-me-please-123456
 DEBUG=true
 ENABLE_API_DOCS=true
 

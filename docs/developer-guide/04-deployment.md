@@ -144,7 +144,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
 
       # Security
-      SECRET_KEY: ${SECRET_KEY}  # REQUIRED - set in .env
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env for persistent JWTs}
       ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-admin123}
 
       # Application Settings
@@ -399,7 +399,7 @@ DB_PASSWORD=secure-password-here
 
 | Variable                      | Type    | Default                   | Required | Description                                |
 | ----------------------------- | ------- | ------------------------- | -------- | ------------------------------------------ |
-| `SECRET_KEY`                  | string  | *(auto-generated)*        | Yes      | JWT signing key (min 32 chars). Auto-generates a random ephemeral key if not set. |
+| `SECRET_KEY`                  | string  | *(auto-generated)*        | Recommended | JWT signing key (min 32 chars). Auto-generates ephemeral key if not set; JWTs and encrypted configs won't survive restarts without it. |
 | `ALGORITHM`                   | string  | `HS256`                   | No       | JWT algorithm (hardcoded)                  |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | integer | `480`                     | No       | JWT token expiration (8 hours)             |
 | `ADMIN_DEFAULT_PASSWORD`      | string  | `admin123`                | No       | Default admin password for fresh installs  |
