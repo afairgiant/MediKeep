@@ -106,7 +106,6 @@ hiddenimports = [
     'pystray._win32',
 
     # Other critical imports
-    'passlib.handlers.bcrypt',
     'python_dotenv',
 ]
 

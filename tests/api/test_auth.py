@@ -60,7 +60,6 @@ class TestAuthEndpoints:
             "email": "newuser@example.com",
             "password": "newpassword123",
             "full_name": "New User",
-            "role": "user"  # Required field
         }
 
         response = client.post("/api/v1/auth/register", json=user_data)
@@ -90,7 +89,6 @@ class TestAuthEndpoints:
             "email": "different@example.com",
             "password": "password123",
             "full_name": "Different User",
-            "role": "user"
         }
 
         response = client.post("/api/v1/auth/register", json=new_user_data)
@@ -113,7 +111,6 @@ class TestAuthEndpoints:
             "email": existing_email,
             "password": "password123",
             "full_name": "Different User",
-            "role": "user"
         }
 
         response = client.post("/api/v1/auth/register", json=new_user_data)
@@ -131,7 +128,6 @@ class TestAuthEndpoints:
             "email": "invalid-email",
             "password": "password123",
             "full_name": "Test User",
-            "role": "user"
         }
 
         response = client.post("/api/v1/auth/register", json=user_data)
@@ -179,7 +175,6 @@ class TestAuthEndpoints:
             "email": "patient@example.com",
             "password": "password123",
             "full_name": "Patient User",
-            "role": "user"
         }
 
         response = client.post("/api/v1/auth/register", json=user_data)
@@ -272,7 +267,6 @@ class TestAuthEndpoints:
             "email": "redirect@example.com",
             "password": "password123",
             "full_name": "Redirect User",
-            "role": "user"
         }
 
         # Register user

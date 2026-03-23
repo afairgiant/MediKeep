@@ -15,7 +15,7 @@ from app.crud.user import user
 from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActivityLog, EntityType
 from app.models.models import User as UserModel
-from app.schemas.user import User, UserUpdate
+from app.schemas.user import User, UserSelfUpdate
 from app.schemas.user_preferences import UserPreferences, UserPreferencesResponse, UserPreferencesUpdate
 from app.services.user_deletion_service import UserDeletionService
 
@@ -36,7 +36,7 @@ def update_current_user(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
-    user_in: UserUpdate,
+    user_in: UserSelfUpdate,
     current_user: UserModel = Depends(deps.get_current_user),
 ) -> Any:
     """Update current user profile."""

@@ -20,8 +20,9 @@ import pytest
 import pytest_asyncio
 
 # Reduce bcrypt rounds for faster test execution (default 12 rounds is ~250x slower)
-from app.core.utils.security import pwd_context
-pwd_context.update(bcrypt__rounds=4)
+import bcrypt
+_original_gensalt = bcrypt.gensalt
+bcrypt.gensalt = lambda rounds=4, prefix=b"2b": _original_gensalt(rounds=4, prefix=prefix)
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session

@@ -311,7 +311,7 @@ class ApiService {
 
   // Update user profile
   updateUserProfile(profileData, signal) {
-    return this.put('/auth/profile/', profileData, { signal });
+    return this.put('/users/me', profileData, { signal });
   }
 
   changePassword(passwordData, signal) {
