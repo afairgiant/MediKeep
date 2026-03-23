@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 from typing import Optional
 from datetime import datetime
 
@@ -149,6 +149,145 @@ class UserCreate(UserBase):
     @classmethod
     def validate_last_name(cls, v):
         """Validate last name if provided."""
+        if v is not None:
+            if len(v.strip()) < 1:
+                raise ValueError("Last name cannot be empty")
+            if len(v) > 50:
+                raise ValueError("Last name must be less than 50 characters")
+            return v.strip().title()
+        return v
+
+
+class UserRegistration(BaseModel):
+    """
+    Schema for public user registration.
+
+    Intentionally excludes role -- all self-registered users get role='user'.
+    This prevents privilege escalation via the registration endpoint.
+    See: GHSA-xx23-8fx5-ph4q finding 1.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    username: str
+    email: EmailStr
+    full_name: str
+    password: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v):
+        if not v or len(v.strip()) < 3:
+            raise ValueError("Username must be at least 3 characters long")
+        if len(v) > 50:
+            raise ValueError("Username must be less than 50 characters")
+        if not v.replace("_", "").replace("-", "").isalnum():
+            raise ValueError(
+                "Username can only contain letters, numbers, underscores, and hyphens"
+            )
+        return v.lower().strip()
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, v):
+        if not v or len(v.strip()) < 2:
+            raise ValueError("Full name must be at least 2 characters long")
+        if len(v) > 100:
+            raise ValueError("Full name must be less than 100 characters")
+        return v.strip()
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters long")
+        if len(v) > 128:
+            raise ValueError("Password must be less than 128 characters")
+        has_letter = any(c.isalpha() for c in v)
+        has_number = any(c.isdigit() for c in v)
+        if not (has_letter and has_number):
+            raise ValueError("Password must contain at least one letter and one number")
+        return v
+
+    @field_validator("first_name")
+    @classmethod
+    def validate_first_name(cls, v):
+        if v is not None:
+            if len(v.strip()) < 1:
+                raise ValueError("First name cannot be empty")
+            if len(v) > 50:
+                raise ValueError("First name must be less than 50 characters")
+            return v.strip().title()
+        return v
+
+    @field_validator("last_name")
+    @classmethod
+    def validate_last_name(cls, v):
+        if v is not None:
+            if len(v.strip()) < 1:
+                raise ValueError("Last name cannot be empty")
+            if len(v) > 50:
+                raise ValueError("Last name must be less than 50 characters")
+            return v.strip().title()
+        return v
+
+
+class UserSelfUpdate(BaseModel):
+    """
+    Schema for users updating their own profile.
+
+    Excludes role and is_active -- only admins can change these.
+    See: GHSA-xx23-8fx5-ph4q finding 2.
+    """
+
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v):
+        if v is not None:
+            if len(v.strip()) < 3:
+                raise ValueError("Username must be at least 3 characters long")
+            if len(v) > 50:
+                raise ValueError("Username must be less than 50 characters")
+            if not v.replace("_", "").replace("-", "").isalnum():
+                raise ValueError(
+                    "Username can only contain letters, numbers, underscores, and hyphens"
+                )
+            return v.lower().strip()
+        return v
+
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, v):
+        if v is not None:
+            if len(v.strip()) < 2:
+                raise ValueError("Full name must be at least 2 characters long")
+            if len(v) > 100:
+                raise ValueError("Full name must be less than 100 characters")
+            return v.strip()
+        return v
+
+    @field_validator("first_name")
+    @classmethod
+    def validate_first_name(cls, v):
+        if v is not None:
+            if len(v.strip()) < 1:
+                raise ValueError("First name cannot be empty")
+            if len(v) > 50:
+                raise ValueError("First name must be less than 50 characters")
+            return v.strip().title()
+        return v
+
+    @field_validator("last_name")
+    @classmethod
+    def validate_last_name(cls, v):
         if v is not None:
             if len(v.strip()) < 1:
                 raise ValueError("Last name cannot be empty")

@@ -25,7 +25,7 @@ from app.models.activity_log import ActionType, EntityType
 from app.models.base import get_utc_now
 from app.models.models import Patient, User as DBUser
 from app.schemas.patient import PatientCreate
-from app.schemas.user import Token, User, UserCreate
+from app.schemas.user import Token, User, UserCreate, UserRegistration
 
 router = APIRouter()
 
@@ -48,7 +48,7 @@ def get_registration_status():
 def register(
     *,
     db: Session = Depends(deps.get_db),
-    user_in: UserCreate,
+    user_in: UserRegistration,
     request: Request,
 ):
     """
@@ -100,9 +100,20 @@ def register(
             request=request
         )
 
+    # SECURITY: Force role='user' for all public registrations (GHSA-xx23-8fx5-ph4q)
+    user_create = UserCreate(
+        username=user_in.username,
+        email=user_in.email,
+        full_name=user_in.full_name,
+        password=user_in.password,
+        first_name=user_in.first_name,
+        last_name=user_in.last_name,
+        role="user",
+    )
+
     # Create new user with database error handling
     with handle_database_errors(request=request):
-        new_user = user.create(db, obj_in=user_in)
+        new_user = user.create(db, obj_in=user_create)
 
     # Log user registration in activity log
     log_create(

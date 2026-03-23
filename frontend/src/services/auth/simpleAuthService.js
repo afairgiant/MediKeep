@@ -241,10 +241,8 @@ class SimpleAuthService {
         category: 'auth_registration_attempt'
       });
 
-      // Add default role if not provided
       const registrationData = {
         ...userData,
-        role: userData.role || 'user', // Default to 'user' role
       };
 
       const response = await this.makeRequest('/auth/register', {

@@ -150,15 +150,20 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
     return fallback;
   };
 
-  const buildPayload = () => ({
-    username: formData.username,
-    password: formData.password,
-    email: formData.email,
-    full_name: `${formData.firstName} ${formData.lastName}`,
-    first_name: formData.firstName,
-    last_name: formData.lastName,
-    role: formData.role,
-  });
+  const buildPayload = () => {
+    const payload = {
+      username: formData.username,
+      password: formData.password,
+      email: formData.email,
+      full_name: `${formData.firstName} ${formData.lastName}`,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+    };
+    if (isAdminContext) {
+      payload.role = formData.role;
+    }
+    return payload;
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
