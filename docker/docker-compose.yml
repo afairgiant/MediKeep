@@ -43,7 +43,9 @@ services:
       DB_NAME: ${DB_NAME:-medical_records}
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
-      SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or Docker secrets for persistent JWTs}
+      DEBUG: ${DEBUG:-false}
+      ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       TZ: ${TZ:-America/New_York}
       # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS

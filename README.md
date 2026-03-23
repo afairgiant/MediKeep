@@ -97,8 +97,10 @@ services:
       DB_NAME: ${DB_NAME:-medical_records}
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
-      SECRET_KEY: ${SECRET_KEY:-your-secret-key-here}
-      TZ: $(TZ:-America/New_York)
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env for persistent JWTs}
+      DEBUG: ${DEBUG:-false}
+      ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
+      TZ: ${TZ:-America/New_York}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       #PUID: ${PUID} # Enable if using bind mounts
       #PGID: ${PGID} # Enable if using bind mounts
@@ -165,11 +167,13 @@ DB_PASSWORD=your_secure_database_password_here #Change me
 # Application port
 APP_PORT=8005
 
-# Application Security Key
+# Application Security Key (REQUIRED - sessions are ephemeral without this)
 SECRET_KEY=your-very-secure-secret-key-for-jwt-tokens-change-this-in-production
 
 TZ=America/New_York
 LOG_LEVEL=INFO #INFO or DEBUG
+DEBUG=false
+ENABLE_API_DOCS=false  # Set to true to expose Swagger docs
 ENABLE_SSL=false # false or true
 ```
 

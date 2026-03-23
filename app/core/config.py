@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 import os
+import secrets
 from pathlib import Path
 from urllib.parse import quote_plus
 
@@ -58,13 +59,68 @@ DB_USER = quote_plus(_DB_USER_RAW) if _DB_USER_RAW else ""
 DB_PASS = quote_plus(_DB_PASS_RAW) if _DB_PASS_RAW else ""
 
 
+_KNOWN_INSECURE_SECRETS = [
+    "your_default_secret_key",
+    "your-secret-key-here",
+    "change-me",
+    "secret",
+    "",
+]
+
+
+def _get_secret_key() -> str:
+    """Get SECRET_KEY, generating a random one if not configured.
+
+    Called once at module import time. If the configured key is missing,
+    empty, or matches a known insecure default, a random key is generated
+    for this process. JWT tokens and data/configs encrypted with keys
+    derived from SECRET_KEY will not survive restarts until a real,
+    stable SECRET_KEY is configured.
+    """
+    key = get_secret("SECRET_KEY", "")
+    if key in _KNOWN_INSECURE_SECRETS or len(key) < 32:
+        logger = logging.getLogger("app.core.config")
+        logger.warning(
+            "SECRET_KEY is not configured or uses an insecure default. "
+            "A random key has been generated for this process only. "
+            "Set a stable SECRET_KEY in your environment so JWT tokens "
+            "and encrypted data/configs remain valid across restarts."
+        )
+        return secrets.token_urlsafe(64)
+    return key
+
+
+_resolved_secret_key = _get_secret_key()
+
+
+def _derive_salt(purpose: str) -> str:
+    """Derive an integration salt from the secret key for a specific purpose.
+
+    Called at class definition time. Uses _resolved_secret_key to ensure
+    consistency with any ephemeral key that was generated.
+    """
+    env_name = f"{purpose.upper()}_SALT"
+    salt_from_env = get_secret(env_name, "")
+    known_default = f"{purpose}_integration_salt_v1"
+    if salt_from_env in (known_default, ""):
+        return hashlib.sha256(
+            f"{_resolved_secret_key}:{purpose}".encode()
+        ).hexdigest()
+    return salt_from_env
+
+
 class Settings:  # App Info
     APP_NAME: str = "MediKeep"
     VERSION: str = "0.59.0"
 
     DEBUG: bool = (
-        os.getenv("DEBUG", "True").lower() == "true"
-    )  # Enable debug by default in development
+        os.getenv("DEBUG", "False").lower() == "true"
+    )
+
+    # Controls OpenAPI/Swagger docs visibility (decoupled from DEBUG)
+    ENABLE_API_DOCS: bool = (
+        os.getenv("ENABLE_API_DOCS", "False").lower() == "true"
+    )
     # Database Configuration
     DATABASE_URL: str = get_secret(
         "DATABASE_URL",
@@ -97,7 +153,14 @@ class Settings:  # App Info
 
     # Security Configuration
     ALGORITHM: str = "HS256"
-    SECRET_KEY: str = get_secret("SECRET_KEY", "your_default_secret_key")
+    SECRET_KEY: str = _resolved_secret_key
+
+    # CORS Configuration
+    CORS_ALLOWED_ORIGINS: list = [
+        o.strip()
+        for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+        if o.strip()
+    ]
 
     # Token Settings
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
@@ -185,7 +248,7 @@ class Settings:  # App Info
         os.getenv("PAPERLESS_MAX_UPLOAD_SIZE", str(50 * 1024 * 1024))
     )  # 50MB
     PAPERLESS_RETRY_ATTEMPTS: int = int(os.getenv("PAPERLESS_RETRY_ATTEMPTS", "3"))
-    PAPERLESS_SALT: str = get_secret("PAPERLESS_SALT", "paperless_integration_salt_v1")
+    PAPERLESS_SALT: str = _derive_salt("paperless")
 
     # Papra Integration Configuration
     PAPRA_REQUEST_TIMEOUT: int = int(
@@ -200,7 +263,7 @@ class Settings:  # App Info
     PAPRA_MAX_UPLOAD_SIZE: int = int(
         os.getenv("PAPRA_MAX_UPLOAD_SIZE", str(100 * 1024 * 1024))
     )  # 100MB
-    PAPRA_SALT: str = get_secret("PAPRA_SALT", "papra_integration_salt_v1")
+    PAPRA_SALT: str = _derive_salt("papra")
 
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

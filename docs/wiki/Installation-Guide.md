@@ -55,7 +55,9 @@ services:
       DB_NAME: ${DB_NAME:-medical_records}
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
-      SECRET_KEY: ${SECRET_KEY}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env for persistent JWTs}
+      DEBUG: ${DEBUG:-false}
+      ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       TZ: ${TZ:-UTC}
     volumes:
@@ -143,17 +145,20 @@ Default credentials: `admin` / `admin123`
 | Variable      | Description                         | Required |
 | ------------- | ----------------------------------- | -------- |
 | `DB_PASSWORD` | Database password                   | Yes      |
-| `SECRET_KEY`  | JWT signing key (use random string) | Yes      |
+| `SECRET_KEY`  | JWT signing key (use random string). Auto-generates ephemeral key if not set; required for persistent JWTs. | Recommended |
 
 ### Optional Settings
 
-| Variable    | Description             | Default         |
-| ----------- | ----------------------- | --------------- |
-| `APP_PORT`  | Port to access MediKeep | 8005            |
-| `DB_NAME`   | Database name           | medical_records |
-| `DB_USER`   | Database user           | medapp          |
-| `LOG_LEVEL` | Logging level           | INFO            |
-| `TZ`        | Timezone                | UTC             |
+| Variable          | Description                                          | Default               |
+| ----------------- | ---------------------------------------------------- | --------------------- |
+| `APP_PORT`        | Port to access MediKeep                              | 8005                  |
+| `DB_NAME`         | Database name                                        | medical_records       |
+| `DB_USER`         | Database user                                        | medapp                |
+| `LOG_LEVEL`       | Logging level                                        | INFO                  |
+| `TZ`              | Timezone                                             | UTC                   |
+| `DEBUG`           | Enable debug mode                                    | false                 |
+| `ENABLE_API_DOCS` | Expose OpenAPI/Swagger docs                          | false                 |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins    | http://localhost:3000 |
 
 ### Docker Secrets (Optional)
 

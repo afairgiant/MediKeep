@@ -92,7 +92,8 @@ DB_PASSWORD=dev_password
 
 # Security
 SECRET_KEY=dev-secret-key-change-in-production
-DEBUG=True
+DEBUG=true
+ENABLE_API_DOCS=true
 
 # Application
 APP_NAME=MediKeep
