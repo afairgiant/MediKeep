@@ -64,6 +64,8 @@ class CustomReportService:
         # Cache for frequently accessed summaries (5 minutes timeout)
         self._summary_cache = {}
         self._cache_timeout = 300
+        # Default unit system, updated per-request when user prefs are loaded
+        self._user_unit_system = "imperial"
         logger.debug("CustomReportService initialized")
     
     async def get_data_summary_for_selection(self, user_id: int) -> DataSummaryResponse:
@@ -72,7 +74,11 @@ class CustomReportService:
         Implements caching for performance optimization.
         """
         logger.debug(f"Fetching data summary for user {user_id}")
-        
+
+        # Load user preferences for unit display in summaries
+        user_prefs = user_preferences_crud.get_by_user_id(self.db, user_id=user_id)
+        self._user_unit_system = (user_prefs and user_prefs.unit_system) or "imperial"
+
         # Get the active patient for the user first
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -553,7 +559,7 @@ class CustomReportService:
                 return " | ".join(parts) if parts else "Treatment details"
                 
             elif category == 'vitals':
-                return self._format_vitals_info(item)
+                return self._format_vitals_info(item, unit_system=self._user_unit_system)
                 
             elif category == 'encounters':
                 parts = []
@@ -846,6 +852,7 @@ class CustomReportService:
             unit_system = (user_prefs and user_prefs.unit_system) or 'imperial'
             language = (user_prefs and user_prefs.language) or 'en'
             date_format = (user_prefs and user_prefs.date_format) or 'mdy'
+            self._user_unit_system = unit_system
 
             # Collect selected data
             report_data = {}
@@ -872,6 +879,7 @@ class CustomReportService:
                 trend_chart_data = self._generate_trend_charts(
                     patient.id, request.trend_charts,
                     unit_system=unit_system, language=language,
+                    date_format=date_format,
                 )
 
             # Fail only if no records AND no charts were produced
@@ -934,6 +942,19 @@ class CustomReportService:
             converted["values"] = [converter_fn(v) if v is not None else None for v in converted["values"]]
         converted["unit"] = unit_labels.get(label_key, data.get("unit", ""))
 
+        # Convert reference range so the normal band matches converted values
+        if "reference_range" in converted and converted["reference_range"] is not None:
+            ref = converted["reference_range"]
+            if isinstance(ref, (list, tuple)):
+                converted["reference_range"] = [
+                    converter_fn(v) if isinstance(v, (int, float)) else v for v in ref
+                ]
+            elif isinstance(ref, dict):
+                converted["reference_range"] = {
+                    k: (converter_fn(v) if isinstance(v, (int, float)) else v)
+                    for k, v in ref.items()
+                }
+
         # Recalculate statistics with converted values
         if converted.get("values"):
             vals = [v for v in converted["values"] if v is not None]
@@ -952,6 +973,7 @@ class CustomReportService:
         trend_charts: "TrendChartSelection",
         unit_system: str = "imperial",
         language: str = "en",
+        date_format: str = "mdy",
     ) -> List[Dict[str, Any]]:
         """Generate trend chart images and collect their data for PDF inclusion."""
         from app.services.trend_data_fetcher import TrendDataFetcher
@@ -960,7 +982,7 @@ class CustomReportService:
 
         fetcher = TrendDataFetcher(self.db)
         generator = TrendChartGenerator()
-        translator = get_translator(language)
+        translator = get_translator(language, date_format)
         chart_results = []
 
         # Build a unified list of (label, fetch_fn, render_fn, chart_type) tasks

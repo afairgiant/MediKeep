@@ -59,6 +59,8 @@
     "website": "Веб-сайт",
     "tags": "Теги",
     "bloodPressure": "Артериальное давление",
+    "systolicBp": "Систолическое АД",
+    "diastolicBp": "Диастолическое АД",
     "heartRate": "Частота пульса",
     "temperature": "Температура",
     "weight": "Вес",

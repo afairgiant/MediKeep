@@ -59,6 +59,8 @@
     "website": "Website",
     "tags": "Tags",
     "bloodPressure": "Bloeddruk",
+    "systolicBp": "Systolische BD",
+    "diastolicBp": "Diastolische BD",
     "heartRate": "Hartslag",
     "temperature": "Temperatuur",
     "weight": "Gewicht",

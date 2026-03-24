@@ -396,7 +396,7 @@ class CustomReportPDFGenerator:
         # Name and basic info
         name = f"{patient_data.get('first_name', '')} {patient_data.get('last_name', '')}".strip()
         if name:
-            patient_info.append([f"{t.text('patient_information')}:", name])
+            patient_info.append([f"{t.field('name')}:", name])
 
         dob = patient_data.get('date_of_birth')
         if dob:

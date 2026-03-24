@@ -59,6 +59,8 @@
     "website": "Site web",
     "tags": "Étiquettes",
     "bloodPressure": "Pression artérielle",
+    "systolicBp": "PA systolique",
+    "diastolicBp": "PA diastolique",
     "heartRate": "Fréquence cardiaque",
     "temperature": "Température",
     "weight": "Poids",

@@ -59,6 +59,8 @@
     "website": "Webbplats",
     "tags": "Taggar",
     "bloodPressure": "Blodtryck",
+    "systolicBp": "Systoliskt BT",
+    "diastolicBp": "Diastoliskt BT",
     "heartRate": "Hjärtfrekvens",
     "temperature": "Temperatur",
     "weight": "Vikt",
