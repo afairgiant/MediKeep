@@ -185,9 +185,11 @@ async def export_patient_data(
                 )
 
         elif format == ExportFormat.CSV:
-            media_type = "text/csv"
+            media_type = "text/csv; charset=utf-8"
             filename = f"medical_records_{scope.value}_{timestamp}.csv"
-            content = export_service.convert_to_csv(export_data, scope.value)
+            csv_str = export_service.convert_to_csv(export_data, scope.value)
+            # Prepend UTF-8 BOM so Excel opens the file with correct encoding
+            content = "\ufeff" + csv_str
 
         elif format == ExportFormat.PDF:
             if include_files:
@@ -655,7 +657,7 @@ async def create_bulk_export(
                         )
                         filename = f"medical_records_{scope}_{timestamp}.json"
                     elif request.format == ExportFormat.CSV:
-                        content = export_service.convert_to_csv(export_data, scope)
+                        content = "\ufeff" + export_service.convert_to_csv(export_data, scope)
                         filename = f"medical_records_{scope}_{timestamp}.csv"
                     elif request.format == ExportFormat.PDF:
                         content = await export_service.convert_to_pdf(
