@@ -185,6 +185,7 @@
     "primaryInsurance": "Primary Insurance",
     "secondaryInsurance": "Secondary/Additional Insurance",
     "notSpecified": "Not specified",
+    "trend": "Trend",
     "notice": "Notice"
   }
 }

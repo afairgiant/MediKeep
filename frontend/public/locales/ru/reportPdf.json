@@ -185,6 +185,7 @@
     "primaryInsurance": "Основная страховка",
     "secondaryInsurance": "Дополнительная страховка",
     "notSpecified": "Не указано",
+    "trend": "Тренд",
     "notice": "Уведомление"
   }
 }

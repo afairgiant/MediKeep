@@ -185,6 +185,7 @@
     "primaryInsurance": "Hauptversicherung",
     "secondaryInsurance": "Zusatzversicherung",
     "notSpecified": "Nicht angegeben",
+    "trend": "Trend",
     "notice": "Hinweis"
   }
 }
