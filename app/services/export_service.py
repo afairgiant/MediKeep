@@ -19,6 +19,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.logging.config import get_logger
+from app.services.report_translations import get_translator
 from app.models.models import (
     Allergy,
     Condition,
@@ -110,6 +111,8 @@ class ExportService:
         include_files: bool = False,
         include_patient_info: bool = True,
         unit_system: str = "imperial",
+        language: str = "en",
+        date_format: str = "mdy",
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """
         Export patient data based on specified parameters.
@@ -151,11 +154,13 @@ class ExportService:
             export_data = {
                 "export_metadata": {
                     "generated_at": datetime.now().isoformat(),
-                    "format": format,  # Use the actual format requested
+                    "format": format,
                     "scope": scope,
                     "include_files": include_files,
                     "include_patient_info": include_patient_info,
                     "unit_system": unit_system,
+                    "language": language,
+                    "date_format": date_format,
                     "date_range": {
                         "start": start_date.isoformat() if start_date else None,
                         "end": end_date.isoformat() if end_date else None,
@@ -1472,8 +1477,15 @@ class ExportService:
         return [pid for (pid,) in pharmacy_ids]
 
     def convert_to_csv(self, export_data: Dict[str, Any], scope: str) -> str:
-        """Convert export data to CSV format with clean formatting."""
+        """Convert export data to CSV format with translated headers."""
         output = io.StringIO()
+
+        # Get translator from export metadata
+        csv_metadata = export_data.get("export_metadata", {})
+        t = get_translator(
+            csv_metadata.get("language", "en"),
+            csv_metadata.get("date_format", "mdy"),
+        )
 
         # Add patient info header if available
         if "patient_info" in export_data:
@@ -1481,16 +1493,17 @@ class ExportService:
             height_unit = patient_info.get("height_unit", "inches")
             weight_unit = patient_info.get("weight_unit", "lbs")
 
-            output.write("# PATIENT INFORMATION\n")
+            output.write(f"# {t.text('patient_information').upper()}\n")
             output.write(
-                f"# Name: {patient_info.get('first_name', '')} {patient_info.get('last_name', '')}\n"
+                f"# {t.field('name')}: {patient_info.get('first_name', '')} {patient_info.get('last_name', '')}\n"
             )
-            output.write(f"# Birth Date: {patient_info.get('birth_date', '')}\n")
-            output.write(f"# Blood Type: {patient_info.get('blood_type', '')}\n")
+            birth_date_str = t.format_date(patient_info.get("birth_date")) if patient_info.get("birth_date") else ""
+            output.write(f"# {t.text('birth_date')}: {birth_date_str}\n")
+            output.write(f"# {t.text('blood_type')}: {patient_info.get('blood_type', '')}\n")
             if patient_info.get("height"):
-                output.write(f"# Height: {patient_info.get('height')} {height_unit}\n")
+                output.write(f"# {t.field('height')}: {patient_info.get('height')} {height_unit}\n")
             if patient_info.get("weight"):
-                output.write(f"# Weight: {patient_info.get('weight')} {weight_unit}\n")
+                output.write(f"# {t.field('weight')}: {patient_info.get('weight')} {weight_unit}\n")
             output.write("\n")
 
         if scope == "all":
@@ -1499,8 +1512,8 @@ class ExportService:
                 if data_type in ["patient_info", "export_metadata"]:
                     continue
                 if records and isinstance(records, list) and len(records) > 0:
-                    output.write(f"# {data_type.upper().replace('_', ' ')}\n")
-                    self._write_csv_section(output, records)
+                    output.write(f"# {t.category(data_type).upper()}\n")
+                    self._write_csv_section(output, records, translator=t)
                     output.write("\n")
         else:
             # For specific scope, write the relevant data
@@ -1508,13 +1521,12 @@ class ExportService:
             if data_key in export_data and export_data[data_key]:
                 records = export_data[data_key]
                 if isinstance(records, list) and len(records) > 0:
-                    # Add a header comment for the data type
-                    output.write(f"# {scope.upper().replace('_', ' ')} DATA\n")
-                    self._write_csv_section(output, records)
+                    output.write(f"# {t.category(scope).upper()}\n")
+                    self._write_csv_section(output, records, translator=t)
                 else:
-                    output.write(f"# No {scope.replace('_', ' ')} data found\n")
+                    output.write(f"# {t.text('no_data')}\n")
             else:
-                output.write(f"# No {scope.replace('_', ' ')} data found\n")
+                output.write(f"# {t.text('no_data')}\n")
 
         return output.getvalue()
 
@@ -1606,8 +1618,8 @@ class ExportService:
 
         return str(value)
 
-    def _write_csv_section(self, output: io.StringIO, records: List[Dict[str, Any]]):
-        """Write a section of data to CSV with proper formatting."""
+    def _write_csv_section(self, output: io.StringIO, records: List[Dict[str, Any]], translator=None):
+        """Write a section of data to CSV with translated headers."""
         if not records:
             return
 
@@ -1617,24 +1629,37 @@ class ExportService:
             fieldnames.update(record.keys())
         fieldnames = sorted(list(fieldnames))
 
-        writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
+        # Build translated header row
+        if translator:
+            translated_headers = {f: translator.field(f) for f in fieldnames}
+        else:
+            translated_headers = {f: f.replace("_", " ").title() for f in fieldnames}
+
+        # Use translated names as CSV column headers
+        writer = csv.DictWriter(output, fieldnames=[translated_headers[f] for f in fieldnames], extrasaction="ignore")
         writer.writeheader()
-        # Write each record, handling missing fields gracefully
+        # Write each record, mapping raw field names to translated header names
         for record in records:
-            # Ensure all values are formatted properly
             clean_record = {}
             for field in fieldnames:
                 value = record.get(field)
-                clean_record[field] = self._format_csv_value(field, value)
+                clean_record[translated_headers[field]] = self._format_csv_value(field, value)
             writer.writerow(clean_record)
 
     async def convert_to_pdf(
         self, export_data: Dict[str, Any], include_files: bool = False
     ) -> bytes:
-        """Convert export data to PDF format."""
+        """Convert export data to PDF format with translated labels."""
         try:
             logger.info(
                 f"Starting PDF generation for data with keys: {list(export_data.keys())}"
+            )
+
+            # Get translator from export metadata
+            metadata = export_data.get("export_metadata", {})
+            t = get_translator(
+                metadata.get("language", "en"),
+                metadata.get("date_format", "mdy"),
             )
 
             buffer = io.BytesIO()
@@ -1657,12 +1682,12 @@ class ExportService:
                 spaceAfter=30,
                 alignment=1,  # Center alignment
             )
-            story.append(Paragraph("Medical Records Export", title_style))
+            story.append(Paragraph(t.text("report_summary"), title_style))
             story.append(Spacer(1, 12))
 
             # Patient Info
             if "patient_info" in export_data:
-                story.append(Paragraph("Patient Information", styles["Heading2"]))
+                story.append(Paragraph(t.text("patient_information"), styles["Heading2"]))
                 patient_info = export_data["patient_info"]
 
                 # Create patient info table with safe data handling
@@ -1672,13 +1697,13 @@ class ExportService:
 
                 patient_data = [
                     [
-                        "Name",
+                        t.field("name"),
                         f"{patient_info.get('first_name', '')} {patient_info.get('last_name', '')}".strip(),
                     ],
-                    ["Birth Date", str(patient_info.get("birth_date", "N/A"))],
-                    ["Blood Type", str(patient_info.get("blood_type", "N/A"))],
+                    [t.text("birth_date"), t.format_date(patient_info.get("birth_date")) if patient_info.get("birth_date") else "N/A"],
+                    [t.text("blood_type"), str(patient_info.get("blood_type", "N/A"))],
                     [
-                        "Height",
+                        t.field("height"),
                         (
                             f"{patient_info.get('height', 'N/A')} {height_unit}"
                             if patient_info.get("height")
@@ -1686,14 +1711,14 @@ class ExportService:
                         ),
                     ],
                     [
-                        "Weight",
+                        t.field("weight"),
                         (
                             f"{patient_info.get('weight', 'N/A')} {weight_unit}"
                             if patient_info.get("weight")
                             else "N/A"
                         ),
                     ],
-                    ["Gender", str(patient_info.get("gender", "N/A"))],
+                    [t.text("gender"), str(patient_info.get("gender", "N/A"))],
                 ]
 
                 patient_table = Table(patient_data, colWidths=[2 * inch, 4 * inch])
@@ -1723,7 +1748,7 @@ class ExportService:
                     continue
 
                 # Add section heading with modern styling
-                section_title = section_name.replace("_", " ").title()
+                section_title = t.category(section_name)
 
                 # Create a modern section header style
                 section_header_style = ParagraphStyle(
@@ -1745,32 +1770,21 @@ class ExportService:
                 if isinstance(section_data, list) and len(section_data) > 0:
                     # Use card-based format for better readability with long text fields
                     self._add_card_based_section(
-                        story, section_data, section_name, styles
+                        story, section_data, section_name, styles, translator=t
                     )
 
                 else:
-                    story.append(Paragraph("No data available", styles["Normal"]))
+                    story.append(Paragraph(t.text("no_data"), styles["Normal"]))
 
                 story.append(Spacer(1, 20))
 
             # Export metadata
             if "export_metadata" in export_data:
-                story.append(Paragraph("Export Information", styles["Heading2"]))
-                metadata = export_data["export_metadata"]
+                gen_date = t.format_date(metadata.get("generated_at"), include_time=True)
                 story.append(
                     Paragraph(
-                        f"Generated: {metadata.get('generated_at', 'N/A')}",
+                        f"{t.text('generated_on')}: {gen_date} | {t.text('confidential_notice')}",
                         styles["Normal"],
-                    )
-                )
-                story.append(
-                    Paragraph(
-                        f"Format: {metadata.get('format', 'N/A')}", styles["Normal"]
-                    )
-                )
-                story.append(
-                    Paragraph(
-                        f"Scope: {metadata.get('scope', 'N/A')}", styles["Normal"]
                     )
                 )
 
@@ -1778,11 +1792,12 @@ class ExportService:
                     "date_range", {}
                 ).get("end"):
                     date_range = metadata.get("date_range", {})
-                    start_date = date_range.get("start", "N/A")
-                    end_date = date_range.get("end", "N/A")
+                    start_date_str = t.format_date(date_range.get("start")) if date_range.get("start") else "N/A"
+                    end_date_str = t.format_date(date_range.get("end")) if date_range.get("end") else "N/A"
                     story.append(
                         Paragraph(
-                            f"Date Range: {start_date} to {end_date}", styles["Normal"]
+                            f"{t.field('start_date')}: {start_date_str} - {t.field('end_date')}: {end_date_str}",
+                            styles["Normal"],
                         )
                     )
 
@@ -1831,12 +1846,14 @@ class ExportService:
             error_buffer.close()
             return error_pdf_bytes
 
-    def _add_card_based_section(self, story, section_data, section_name, styles):
+    def _add_card_based_section(self, story, section_data, section_name, styles, translator=None):
         """Add a section using card-based format instead of tables for better readability."""
         from reportlab.lib import colors
         from reportlab.lib.units import inch
         from reportlab.platypus import Paragraph, Table, TableStyle
         from reportlab.lib.styles import ParagraphStyle
+
+        t = translator
 
         # Create styles for wrapping text in table cells
         cell_value_style = ParagraphStyle(
@@ -1856,180 +1873,19 @@ class ExportService:
             alignment=2,  # Right align
         )
 
-        # Create user-friendly field names
-        header_mapping = {
-            "id": "ID",
-            "medication_name": "Medication",
-            "alternative_name": "Alternative Name",
-            "medication_type": "Medication Type",
-            "dosage": "Dosage",
-            "frequency": "Frequency",
-            "route": "Route",
-            "indication": "Indication",
-            "start_date": "Start Date",
-            "end_date": "End Date",
-            "status": "Status",
-            "prescribed_by": "Prescribed By",
-            "pharmacy": "Pharmacy",
-            "side_effects": "Side Effects",
-            "associated_conditions": "Associated Conditions",
-            "associated_medications": "Associated Medications",
-            "test_name": "Test Name",
-            "test_code": "Code",
-            "test_category": "Category",
-            "test_type": "Type",
-            "facility": "Facility",
-            "labs_result": "Result",
-            "ordered_date": "Ordered",
-            "completed_date": "Completed",
-            "ordered_by": "Ordered By",
-            "allergen": "Allergen",
-            "reaction": "Reaction",
-            "severity": "Severity",
-            "onset_date": "Onset Date",
-            "condition_name": "Condition",
-            "diagnosis": "Diagnosis",
-            "diagnosed_by": "Diagnosed By",
-            "end_date": "End Date",
-            "icd10_code": "ICD-10 Code",
-            "snomed_code": "SNOMED Code",
-            "code_description": "Code Description",
-            "vaccine_name": "Vaccine",
-            "vaccine_trade_name": "Trade Name",
-            "date_administered": "Date Given",
-            "dose_number": "Dose #",
-            "ndc_number": "NDC Number",
-            "lot_number": "Lot #",
-            "manufacturer": "Manufacturer",
-            "site": "Site",
-            "expiration_date": "Expires",
-            "administered_by": "Given By",
-            "procedure_name": "Procedure",
-            "procedure_type": "Procedure Type",
-            "code": "Code",
-            "date": "Date",
-            "description": "Description",
-            "performed_by": "Performed By",
-            "procedure_setting": "Setting",
-            "procedure_complications": "Complications",
-            "procedure_duration": "Duration (min)",
-            "anesthesia_type": "Anesthesia Type",
-            "anesthesia_notes": "Anesthesia Notes",
-            "treatment_name": "Treatment",
-            "treatment_type": "Type",
-            "treatment_category": "Category",
-            "outcome": "Outcome",
-            "dosage": "Dosage",
-            "mode": "Mode",
-            "location": "Location",
-            "reason": "Reason",
-            "visit_type": "Visit Type",
-            "chief_complaint": "Chief Complaint",
-            "treatment_plan": "Treatment Plan",
-            "follow_up_instructions": "Follow-up Instructions",
-            "duration_minutes": "Duration (min)",
-            "priority": "Priority",
-            "condition": "Related Condition",
-            "practitioner": "Practitioner",
-            "recorded_date": "Recorded",
-            "systolic_bp": "Systolic BP",
-            "diastolic_bp": "Diastolic BP",
-            "heart_rate": "Heart Rate",
-            "temperature": "Temperature",
-            "weight": "Weight",
-            "height": "Height",
-            "oxygen_saturation": "O2 Saturation",
-            "respiratory_rate": "Respiratory Rate",
-            "blood_glucose": "Blood Glucose",
-            "a1c": "A1C (%)",
-            "glucose_context": "Glucose Context",
-            "bmi": "BMI",
-            "pain_scale": "Pain Scale",
-            "device_used": "Device Used",
-            "import_source": "Import Source",
-            "recorded_by": "Recorded By",
-            "notes": "Notes",
-            # Medical Equipment
-            "equipment_name": "Equipment",
-            "equipment_type": "Type",
-            "model_number": "Model #",
-            "serial_number": "Serial #",
-            "prescribed_date": "Prescribed Date",
-            "last_service_date": "Last Service",
-            "next_service_date": "Next Service",
-            "supplier": "Supplier",
-            "usage_instructions": "Usage Instructions",
-            "attached_files": "Attached Files",
-            # Emergency contacts
-            "name": "Name",
-            "relationship": "Relationship",
-            "phone_number": "Phone Number",
-            "secondary_phone": "Secondary Phone",
-            "email": "Email",
-            "is_primary": "Primary Contact",
-            "is_active": "Active",
-            "address": "Address",
-            # Practitioners
-            "specialty": "Specialty",
-            "practice": "Practice",
-            "website": "Website",
-            "rating": "Rating",
-            "is_primary_physician": "Primary Physician",
-            # Pharmacies
-            "brand": "Brand",
-            "street_address": "Street Address",
-            "city": "City",
-            "state": "State / Province",
-            "zip_code": "Postal Code",
-            "country": "Country",
-            "store_number": "Store Number",
-            "fax_number": "Fax Number",
-            "hours": "Hours",
-            "drive_through": "Drive Through",
-            "twenty_four_hour": "24 Hour Service",
-            "specialty_services": "Specialty Services",
-            # Symptoms
-            "symptom_name": "Symptom",
-            "category": "Category",
-            "is_chronic": "Chronic",
-            "first_occurrence_date": "First Occurrence",
-            "last_occurrence_date": "Last Occurrence",
-            "typical_triggers": "Typical Triggers",
-            "general_notes": "General Notes",
-            "occurrence_count": "Occurrence Count",
-            "occurrences": "Occurrences",
-            # Injuries
-            "injury_name": "Injury",
-            "injury_type": "Type",
-            "body_part": "Body Part",
-            "laterality": "Laterality",
-            "date_of_injury": "Date of Injury",
-            "mechanism": "Mechanism",
-            "treatment_received": "Treatment Received",
-            "recovery_notes": "Recovery Notes",
-            # Family History
-            "gender": "Gender",
-            "birth_year": "Birth Year",
-            "death_year": "Death Year",
-            "is_deceased": "Deceased",
-            "conditions": "Conditions",
-            "diagnosis_age": "Diagnosis Age",
-            "condition_type": "Condition Type",
-            "icd10_code": "ICD-10 Code",
-            # Insurance
-            "insurance_type": "Insurance Type",
-            "company_name": "Company",
-            "employer_group": "Employer/Group",
-            "member_name": "Member Name",
-            "member_id": "Member ID",
-            "group_number": "Group Number",
-            "plan_name": "Plan Name",
-            "policy_holder_name": "Policy Holder",
-            "relationship_to_holder": "Relationship",
-            "effective_date": "Effective Date",
-            "expiration_date": "Expiration Date",
-            "coverage_details": "Coverage Details",
-            "contact_info": "Contact Info",
+        # Use translator for field labels, with fallback to title-cased field name
+        def get_field_label(field_name):
+            if t:
+                return t.field(field_name)
+            return field_name.replace("_", " ").title()
+
+        _date_fields = {
+            "start_date", "end_date", "ordered_date", "completed_date",
+            "date_administered", "onset_date", "recorded_date", "date",
+            "created_at", "updated_at", "first_occurrence_date",
+            "last_occurrence_date", "date_of_injury", "effective_date",
+            "expiration_date", "resolved_date", "prescribed_date",
+            "last_service_date", "next_service_date",
         }
 
         def format_value(field_name, value):
@@ -2037,34 +1893,18 @@ class ExportService:
             if value is None or value == "":
                 return "N/A"
 
-            str_value = str(value)
-
-            # Format dates (remove timestamps)
-            if field_name in [
-                "start_date",
-                "end_date",
-                "ordered_date",
-                "completed_date",
-                "date_administered",
-                "onset_date",
-                "recorded_date",
-                "date",
-                "created_at",
-                "updated_at",
-                "first_occurrence_date",
-                "last_occurrence_date",
-                "date_of_injury",
-                "effective_date",
-                "expiration_date",
-                "resolved_date",
-                "prescribed_date",
-                "last_service_date",
-                "next_service_date",
-            ]:
+            # Format dates using translator's date preference
+            if field_name in _date_fields:
+                if t:
+                    return t.format_date(value)
+                str_value = str(value)
                 if "T" in str_value:
                     return str_value.split("T")[0]
                 elif len(str_value) > 10 and ":" in str_value:
                     return str_value.split(" ")[0]
+                return str_value
+
+            str_value = str(value)
 
             # Format boolean values
             if field_name in [
@@ -2392,9 +2232,7 @@ class ExportService:
             # Add fields to card in order
             for field_name in field_order:
                 if field_name in record:
-                    display_name = header_mapping.get(
-                        field_name, field_name.replace("_", " ").title()
-                    )
+                    display_name = get_field_label(field_name)
                     formatted_value = format_value(field_name, record[field_name])
 
                     if formatted_value != "N/A":  # Only show fields with values

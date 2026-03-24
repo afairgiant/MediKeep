@@ -26,9 +26,11 @@ import {
 } from '@tabler/icons-react';
 import { exportService } from '../../services/exportService';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 
 const DataExport = () => {
   const { dateInputFormat } = useDateFormat();
+  const { unitSystem } = useUserPreferences();
 
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState(null);
@@ -77,6 +79,7 @@ const DataExport = () => {
       const params = {
         format: selectedFormat,
         scope: selectedScope,
+        unit_system: unitSystem,
         ...(startDate && { start_date: startDate }),
         ...(endDate && { end_date: endDate }),
         ...(selectedFormat === 'pdf' && { include_files: includeFiles }),
@@ -105,6 +108,7 @@ const DataExport = () => {
       const params = {
         scopes: selectedScopes,
         format: selectedFormat,
+        unit_system: unitSystem,
         ...(startDate && { start_date: startDate }),
         ...(endDate && { end_date: endDate }),
       };
