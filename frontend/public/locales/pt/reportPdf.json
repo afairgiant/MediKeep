@@ -186,6 +186,7 @@
     "secondaryInsurance": "Seguro Secundário/Adicional",
     "notSpecified": "Não especificado",
     "trend": "Tendência",
+    "trendChartTitle": "Tendência de {{name}}",
     "notice": "Aviso"
   }
 }

@@ -186,6 +186,7 @@
     "secondaryInsurance": "Zusatzversicherung",
     "notSpecified": "Nicht angegeben",
     "trend": "Trend",
+    "trendChartTitle": "{{name}} - Trend",
     "notice": "Hinweis"
   }
 }

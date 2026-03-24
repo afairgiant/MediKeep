@@ -186,6 +186,7 @@
     "secondaryInsurance": "Secondary/Additional Insurance",
     "notSpecified": "Not specified",
     "trend": "Trend",
+    "trendChartTitle": "{{name}} Trend",
     "notice": "Notice"
   }
 }

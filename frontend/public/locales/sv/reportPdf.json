@@ -186,6 +186,7 @@
     "secondaryInsurance": "Sekundär/tilläggsförsäkring",
     "notSpecified": "Ej angivet",
     "trend": "Trend",
+    "trendChartTitle": "{{name}} - Trend",
     "notice": "Meddelande"
   }
 }
