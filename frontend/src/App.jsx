@@ -166,6 +166,9 @@ function NavigationTracker() {
     const currentPath = location.pathname;
     const previousPath = previousLocation.current;
     if (currentPath !== previousPath) {
+      // Reset scroll position to top on route change
+      window.scrollTo(0, 0);
+
       // Track navigation as user activity (for session timeout)
       trackNavigationActivity({
         fromPath: previousPath,
