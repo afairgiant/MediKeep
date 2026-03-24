@@ -19,6 +19,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.logging.config import get_logger
+from app.services.report_translations import get_translator
 from app.models.models import (
     Allergy,
     Condition,
@@ -110,6 +111,8 @@ class ExportService:
         include_files: bool = False,
         include_patient_info: bool = True,
         unit_system: str = "imperial",
+        language: str = "en",
+        date_format: str = "mdy",
     ) -> Dict[str, Union[Any, List[Dict[str, Any]]]]:
         """
         Export patient data based on specified parameters.
@@ -151,11 +154,13 @@ class ExportService:
             export_data = {
                 "export_metadata": {
                     "generated_at": datetime.now().isoformat(),
-                    "format": format,  # Use the actual format requested
+                    "format": format,
                     "scope": scope,
                     "include_files": include_files,
                     "include_patient_info": include_patient_info,
                     "unit_system": unit_system,
+                    "language": language,
+                    "date_format": date_format,
                     "date_range": {
                         "start": start_date.isoformat() if start_date else None,
                         "end": end_date.isoformat() if end_date else None,
@@ -1472,8 +1477,15 @@ class ExportService:
         return [pid for (pid,) in pharmacy_ids]
 
     def convert_to_csv(self, export_data: Dict[str, Any], scope: str) -> str:
-        """Convert export data to CSV format with clean formatting."""
+        """Convert export data to CSV format with translated headers."""
         output = io.StringIO()
+
+        # Get translator from export metadata
+        csv_metadata = export_data.get("export_metadata", {})
+        t = get_translator(
+            csv_metadata.get("language", "en"),
+            csv_metadata.get("date_format", "mdy"),
+        )
 
         # Add patient info header if available
         if "patient_info" in export_data:
@@ -1481,16 +1493,17 @@ class ExportService:
             height_unit = patient_info.get("height_unit", "inches")
             weight_unit = patient_info.get("weight_unit", "lbs")
 
-            output.write("# PATIENT INFORMATION\n")
+            output.write(f"# {t.text('patient_information').upper()}\n")
             output.write(
-                f"# Name: {patient_info.get('first_name', '')} {patient_info.get('last_name', '')}\n"
+                f"# {t.field('name')}: {patient_info.get('first_name', '')} {patient_info.get('last_name', '')}\n"
             )
-            output.write(f"# Birth Date: {patient_info.get('birth_date', '')}\n")
-            output.write(f"# Blood Type: {patient_info.get('blood_type', '')}\n")
+            birth_date_str = t.format_date(patient_info.get("birth_date")) if patient_info.get("birth_date") else ""
+            output.write(f"# {t.text('birth_date')}: {birth_date_str}\n")
+            output.write(f"# {t.text('blood_type')}: {patient_info.get('blood_type', '')}\n")
             if patient_info.get("height"):
-                output.write(f"# Height: {patient_info.get('height')} {height_unit}\n")
+                output.write(f"# {t.field('height')}: {patient_info.get('height')} {height_unit}\n")
             if patient_info.get("weight"):
-                output.write(f"# Weight: {patient_info.get('weight')} {weight_unit}\n")
+                output.write(f"# {t.field('weight')}: {patient_info.get('weight')} {weight_unit}\n")
             output.write("\n")
 
         if scope == "all":
@@ -1499,7 +1512,7 @@ class ExportService:
                 if data_type in ["patient_info", "export_metadata"]:
                     continue
                 if records and isinstance(records, list) and len(records) > 0:
-                    output.write(f"# {data_type.upper().replace('_', ' ')}\n")
+                    output.write(f"# {t.category(data_type).upper()}\n")
                     self._write_csv_section(output, records)
                     output.write("\n")
         else:
@@ -1508,13 +1521,12 @@ class ExportService:
             if data_key in export_data and export_data[data_key]:
                 records = export_data[data_key]
                 if isinstance(records, list) and len(records) > 0:
-                    # Add a header comment for the data type
-                    output.write(f"# {scope.upper().replace('_', ' ')} DATA\n")
+                    output.write(f"# {t.category(scope).upper()}\n")
                     self._write_csv_section(output, records)
                 else:
-                    output.write(f"# No {scope.replace('_', ' ')} data found\n")
+                    output.write(f"# {t.text('no_data')}\n")
             else:
-                output.write(f"# No {scope.replace('_', ' ')} data found\n")
+                output.write(f"# {t.text('no_data')}\n")
 
         return output.getvalue()
 
@@ -1631,10 +1643,17 @@ class ExportService:
     async def convert_to_pdf(
         self, export_data: Dict[str, Any], include_files: bool = False
     ) -> bytes:
-        """Convert export data to PDF format."""
+        """Convert export data to PDF format with translated labels."""
         try:
             logger.info(
                 f"Starting PDF generation for data with keys: {list(export_data.keys())}"
+            )
+
+            # Get translator from export metadata
+            metadata = export_data.get("export_metadata", {})
+            t = get_translator(
+                metadata.get("language", "en"),
+                metadata.get("date_format", "mdy"),
             )
 
             buffer = io.BytesIO()
@@ -1657,12 +1676,12 @@ class ExportService:
                 spaceAfter=30,
                 alignment=1,  # Center alignment
             )
-            story.append(Paragraph("Medical Records Export", title_style))
+            story.append(Paragraph(t.text("report_summary"), title_style))
             story.append(Spacer(1, 12))
 
             # Patient Info
             if "patient_info" in export_data:
-                story.append(Paragraph("Patient Information", styles["Heading2"]))
+                story.append(Paragraph(t.text("patient_information"), styles["Heading2"]))
                 patient_info = export_data["patient_info"]
 
                 # Create patient info table with safe data handling
@@ -1672,13 +1691,13 @@ class ExportService:
 
                 patient_data = [
                     [
-                        "Name",
+                        t.field("name"),
                         f"{patient_info.get('first_name', '')} {patient_info.get('last_name', '')}".strip(),
                     ],
-                    ["Birth Date", str(patient_info.get("birth_date", "N/A"))],
-                    ["Blood Type", str(patient_info.get("blood_type", "N/A"))],
+                    [t.text("birth_date"), t.format_date(patient_info.get("birth_date")) if patient_info.get("birth_date") else "N/A"],
+                    [t.text("blood_type"), str(patient_info.get("blood_type", "N/A"))],
                     [
-                        "Height",
+                        t.field("height"),
                         (
                             f"{patient_info.get('height', 'N/A')} {height_unit}"
                             if patient_info.get("height")
@@ -1686,14 +1705,14 @@ class ExportService:
                         ),
                     ],
                     [
-                        "Weight",
+                        t.field("weight"),
                         (
                             f"{patient_info.get('weight', 'N/A')} {weight_unit}"
                             if patient_info.get("weight")
                             else "N/A"
                         ),
                     ],
-                    ["Gender", str(patient_info.get("gender", "N/A"))],
+                    [t.text("gender"), str(patient_info.get("gender", "N/A"))],
                 ]
 
                 patient_table = Table(patient_data, colWidths=[2 * inch, 4 * inch])
@@ -1723,7 +1742,7 @@ class ExportService:
                     continue
 
                 # Add section heading with modern styling
-                section_title = section_name.replace("_", " ").title()
+                section_title = t.category(section_name)
 
                 # Create a modern section header style
                 section_header_style = ParagraphStyle(
@@ -1749,28 +1768,17 @@ class ExportService:
                     )
 
                 else:
-                    story.append(Paragraph("No data available", styles["Normal"]))
+                    story.append(Paragraph(t.text("no_data"), styles["Normal"]))
 
                 story.append(Spacer(1, 20))
 
             # Export metadata
             if "export_metadata" in export_data:
-                story.append(Paragraph("Export Information", styles["Heading2"]))
-                metadata = export_data["export_metadata"]
+                gen_date = t.format_date(metadata.get("generated_at"), include_time=True)
                 story.append(
                     Paragraph(
-                        f"Generated: {metadata.get('generated_at', 'N/A')}",
+                        f"{t.text('generated_on')}: {gen_date} | {t.text('confidential_notice')}",
                         styles["Normal"],
-                    )
-                )
-                story.append(
-                    Paragraph(
-                        f"Format: {metadata.get('format', 'N/A')}", styles["Normal"]
-                    )
-                )
-                story.append(
-                    Paragraph(
-                        f"Scope: {metadata.get('scope', 'N/A')}", styles["Normal"]
                     )
                 )
 
@@ -1778,11 +1786,12 @@ class ExportService:
                     "date_range", {}
                 ).get("end"):
                     date_range = metadata.get("date_range", {})
-                    start_date = date_range.get("start", "N/A")
-                    end_date = date_range.get("end", "N/A")
+                    start_date_str = t.format_date(date_range.get("start")) if date_range.get("start") else "N/A"
+                    end_date_str = t.format_date(date_range.get("end")) if date_range.get("end") else "N/A"
                     story.append(
                         Paragraph(
-                            f"Date Range: {start_date} to {end_date}", styles["Normal"]
+                            f"{t.field('start_date')}: {start_date_str} - {t.field('end_date')}: {end_date_str}",
+                            styles["Normal"],
                         )
                     )
 

@@ -20,6 +20,7 @@ from app.api.deps import get_current_user_id, get_db
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.core.logging.constants import LogFields
+from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.models.models import User
 from app.services.export_service import ExportService
 from app.services.paperless_client import create_paperless_client
@@ -136,6 +137,11 @@ async def export_patient_data(
             unit_system=unit_system,
         )
 
+        # Read user preferences for language and date format
+        user_prefs = user_preferences_crud.get_by_user_id(db, user_id=current_user_id)
+        language = (user_prefs and user_prefs.language) or "en"
+        date_format_pref = (user_prefs and user_prefs.date_format) or "mdy"
+
         export_service = ExportService(db)
 
         # Generate the export
@@ -148,6 +154,8 @@ async def export_patient_data(
             include_files=include_files,
             include_patient_info=include_patient_info,
             unit_system=unit_system,
+            language=language,
+            date_format=date_format_pref,
         )
 
         # Determine content type and filename
@@ -607,6 +615,11 @@ async def create_bulk_export(
             format_type=request.format.value,
         )
 
+        # Read user preferences for language and date format
+        user_prefs = user_preferences_crud.get_by_user_id(db, user_id=current_user_id)
+        language = (user_prefs and user_prefs.language) or "en"
+        date_format_pref = (user_prefs and user_prefs.date_format) or "mdy"
+
         export_service = ExportService(db)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -628,6 +641,8 @@ async def create_bulk_export(
                         include_files=False,  # Files not supported in bulk export
                         include_patient_info=request.include_patient_info,
                         unit_system=request.unit_system,
+                        language=language,
+                        date_format=date_format_pref,
                     )
 
                     # Convert to appropriate format

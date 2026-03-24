@@ -26,7 +26,8 @@ from app.schemas.custom_reports import (
     DataSummaryResponse, RecordSummary, ReportTemplate as ReportTemplateSchema,
     SelectiveRecordRequest
 )
-from app.services.export_service import ExportService
+from app.crud.user_preferences import user_preferences as user_preferences_crud
+from app.services.export_service import ExportService, UnitConverter
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 
 logger = get_logger(__name__, "app")
@@ -725,15 +726,19 @@ class CustomReportService:
         except Exception:
             return "Details not available"
     
-    def _format_vitals_info(self, vital: Vitals) -> str:
-        """Format vital signs into a readable summary"""
+    def _format_vitals_info(self, vital: Vitals, unit_system: str = "imperial") -> str:
+        """Format vital signs into a readable summary with unit conversion"""
         parts = []
+        unit_labels = UnitConverter.get_unit_labels(unit_system)
         if hasattr(vital, 'blood_pressure_systolic') and vital.blood_pressure_systolic:
             parts.append(f"BP: {vital.blood_pressure_systolic}/{vital.blood_pressure_diastolic or '?'}")
         if hasattr(vital, 'heart_rate') and vital.heart_rate:
             parts.append(f"HR: {vital.heart_rate}")
         if hasattr(vital, 'temperature') and vital.temperature:
-            parts.append(f"Temp: {vital.temperature}°")
+            temp = vital.temperature
+            if unit_system == "metric":
+                temp = UnitConverter.fahrenheit_to_celsius(temp)
+            parts.append(f"Temp: {temp}{unit_labels['temperature']}")
         return " | ".join(parts) if parts else "No measurements"
     
     def _get_last_update_timestamp(self, patient_id: int) -> Optional[datetime]:
@@ -836,6 +841,12 @@ class CustomReportService:
             if not patient:
                 raise CustomReportError("No active patient found")
 
+            # Read user preferences for unit system, language, and date format
+            user_prefs = user_preferences_crud.get_by_user_id(self.db, user_id=user_id)
+            unit_system = (user_prefs and user_prefs.unit_system) or 'imperial'
+            language = (user_prefs and user_prefs.language) or 'en'
+            date_format = (user_prefs and user_prefs.date_format) or 'mdy'
+
             # Collect selected data
             report_data = {}
             failed_categories = []
@@ -859,7 +870,8 @@ class CustomReportService:
             trend_chart_data = []
             if request.trend_charts:
                 trend_chart_data = self._generate_trend_charts(
-                    patient.id, request.trend_charts
+                    patient.id, request.trend_charts,
+                    unit_system=unit_system, language=language,
                 )
 
             # Fail only if no records AND no charts were produced
@@ -878,7 +890,10 @@ class CustomReportService:
                 report_data,
                 request,
                 failed_categories,
-                trend_chart_data
+                trend_chart_data,
+                unit_system=unit_system,
+                language=language,
+                date_format=date_format,
             )
 
             # Log successful generation
@@ -898,17 +913,54 @@ class CustomReportService:
             await self._log_report_generation_failed(user_id, request, str(e))
             raise
 
+    # Vital types that need unit conversion when metric
+    _CONVERTIBLE_VITALS = {
+        "temperature": ("fahrenheit_to_celsius", "temperature"),
+        "weight": ("lbs_to_kg", "weight"),
+        "height": ("inches_to_cm", "height"),
+    }
+
+    def _convert_trend_data_units(self, data: Dict[str, Any], vital_type: str, unit_system: str) -> Dict[str, Any]:
+        """Convert trend data values and unit labels if user prefers metric."""
+        if unit_system != "metric" or vital_type not in self._CONVERTIBLE_VITALS:
+            return data
+
+        converter_name, label_key = self._CONVERTIBLE_VITALS[vital_type]
+        converter_fn = getattr(UnitConverter, converter_name)
+        unit_labels = UnitConverter.get_unit_labels("metric")
+
+        converted = dict(data)
+        if "values" in converted and converted["values"]:
+            converted["values"] = [converter_fn(v) if v is not None else None for v in converted["values"]]
+        converted["unit"] = unit_labels.get(label_key, data.get("unit", ""))
+
+        # Recalculate statistics with converted values
+        if converted.get("values"):
+            vals = [v for v in converted["values"] if v is not None]
+            if vals:
+                converted["statistics"] = {
+                    "mean": round(sum(vals) / len(vals), 1),
+                    "min": round(min(vals), 1),
+                    "max": round(max(vals), 1),
+                    "count": len(vals),
+                }
+        return converted
+
     def _generate_trend_charts(
         self,
         patient_id: int,
-        trend_charts: "TrendChartSelection"
+        trend_charts: "TrendChartSelection",
+        unit_system: str = "imperial",
+        language: str = "en",
     ) -> List[Dict[str, Any]]:
         """Generate trend chart images and collect their data for PDF inclusion."""
         from app.services.trend_data_fetcher import TrendDataFetcher
         from app.services.trend_chart_generator import TrendChartGenerator
+        from app.services.report_translations import get_translator
 
         fetcher = TrendDataFetcher(self.db)
         generator = TrendChartGenerator()
+        translator = get_translator(language)
         chart_results = []
 
         # Build a unified list of (label, fetch_fn, render_fn, chart_type) tasks
@@ -931,6 +983,16 @@ class CustomReportService:
         for label, fetch_fn, render_fn, chart_type in chart_tasks:
             try:
                 data = fetch_fn()
+
+                # Convert units for vital charts if user prefers metric
+                if chart_type == "vital":
+                    data = self._convert_trend_data_units(data, label, unit_system)
+                    # Use translated display name for vital fields
+                    field_key = label.replace("-", "_")
+                    translated_name = translator.field(field_key)
+                    if translated_name != field_key.replace("_", " ").title() or language == "en":
+                        data["display_name"] = translated_name
+
                 png_bytes = render_fn(data)
                 if png_bytes:
                     chart_results.append({
@@ -1165,8 +1227,11 @@ class CustomReportService:
         request: CustomReportRequest,
         failed_categories: List[str],
         trend_chart_data: Optional[List[Dict[str, Any]]] = None,
+        unit_system: str = "imperial",
+        language: str = "en",
+        date_format: str = "mdy",
     ) -> bytes:
-        """Generate PDF report using the new custom PDF generator"""
+        """Generate PDF report using the custom PDF generator with user preferences"""
         # Prepare data for PDF generator
         pdf_data = {
             'patient': self._model_to_dict(patient) if request.include_patient_info else None,
@@ -1179,6 +1244,10 @@ class CustomReportService:
             'include_summary': request.include_summary,
             'include_profile_picture': request.include_profile_picture,
             'trend_charts': trend_chart_data if trend_chart_data else None,
+            # User preferences for formatting
+            'unit_system': unit_system,
+            'language': language,
+            'date_format': date_format,
         }
 
         # Use new PDF generator
