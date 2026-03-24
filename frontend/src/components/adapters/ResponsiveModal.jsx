@@ -79,7 +79,10 @@ export const ResponsiveModal = memo(({
   // Accessibility
   'aria-labelledby': ariaLabelledBy,
   'aria-describedby': ariaDescribedBy,
-  
+
+  // Extract styles to merge with internal styles instead of replacing
+  styles: callerStyles,
+
   ...props
 }) => {
   const { breakpoint, deviceType, isMobile, isTablet, isDesktop, width, height } = useResponsive();
@@ -320,6 +323,8 @@ export const ResponsiveModal = memo(({
         scrollbarSize={isMobile ? 0 : 8}
         scrollHideDelay={500}
         type={isMobile ? 'never' : 'auto'}
+        scrollbars="y"
+        offsetScrollbars
         styles={(theme) => ({
           scrollbar: {
             '&:hover': {
@@ -376,33 +381,45 @@ export const ResponsiveModal = memo(({
       
       // Styling
       className={className}
-      
-      // Mobile-specific styles
-      styles={(theme) => ({
-        inner: {
-          paddingLeft: isMobile ? 0 : theme.spacing.md,
-          paddingRight: isMobile ? 0 : theme.spacing.md,
-          paddingTop: isMobile ? 0 : theme.spacing.md,
-          paddingBottom: isMobile ? 0 : theme.spacing.md
-        },
-        content: {
-          maxHeight: shouldUseScrollArea ? undefined : responsiveMaxHeight,
-          overflow: shouldUseScrollArea ? 'visible' : 'auto'
-        },
-        header: {
-          position: modalConfig.fullScreen ? 'sticky' : 'relative',
-          top: modalConfig.fullScreen ? 0 : undefined,
-          zIndex: modalConfig.fullScreen ? 1000 : undefined,
-          backgroundColor: modalConfig.fullScreen ? theme.colors.white : undefined,
-          borderBottom: modalConfig.fullScreen ? `${rem(1)} solid ${theme.colors.gray[2]}` : 'none'
-        },
-        title: {
-          fontSize: isMobile ? theme.fontSizes.lg : theme.fontSizes.xl,
-          fontWeight: formType === 'emergency' ? 700 : 600
+
+      // Responsive styles merged with caller styles
+      styles={(theme) => {
+        const internal = {
+          inner: {
+            paddingLeft: isMobile ? 0 : theme.spacing.md,
+            paddingRight: isMobile ? 0 : theme.spacing.md,
+            paddingTop: isMobile ? 0 : theme.spacing.md,
+            paddingBottom: isMobile ? 0 : theme.spacing.md
+          },
+          content: {
+            maxHeight: shouldUseScrollArea ? undefined : responsiveMaxHeight,
+            overflow: shouldUseScrollArea ? 'visible' : 'auto'
+          },
+          body: {
+            overflow: shouldUseScrollArea ? 'visible' : undefined
+          },
+          header: {
+            position: modalConfig.fullScreen ? 'sticky' : 'relative',
+            top: modalConfig.fullScreen ? 0 : undefined,
+            zIndex: modalConfig.fullScreen ? 1000 : undefined,
+            backgroundColor: modalConfig.fullScreen ? theme.colors.white : undefined,
+            borderBottom: modalConfig.fullScreen ? `${rem(1)} solid ${theme.colors.gray[2]}` : 'none'
+          },
+          title: {
+            fontSize: isMobile ? theme.fontSizes.lg : theme.fontSizes.xl,
+            fontWeight: formType === 'emergency' ? 700 : 600
+          }
+        };
+        const external = typeof callerStyles === 'function' ? callerStyles(theme) : (callerStyles || {});
+        // Merge caller styles over internal styles per key
+        const merged = { ...internal };
+        for (const key of Object.keys(external)) {
+          merged[key] = { ...merged[key], ...external[key] };
         }
-      })}
-      
-      // Additional props
+        return merged;
+      }}
+
+      // Additional props (styles excluded - merged above)
       {...props}
     >
       <Box
