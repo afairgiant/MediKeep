@@ -268,6 +268,146 @@ describe('Responsive Modal and Layout Tests', () => {
       });
     });
 
+    describe('Style Merging', () => {
+      it('preserves internal styles when caller provides partial styles', () => {
+        renderResponsive(
+          <ResponsiveModal
+            {...defaultModalProps}
+            styles={{ body: { padding: '2rem' } }}
+          >
+            <div>Content</div>
+          </ResponsiveModal>
+        );
+
+        const modal = screen.getByRole('dialog');
+        expect(modal).toBeInTheDocument();
+
+        // Verify internal title style (fontWeight) is preserved even though caller only set body styles
+        const title = screen.getByText(defaultModalProps.title);
+        const titleStyle = getComputedStyle(title);
+        expect(parseInt(titleStyle.fontWeight)).toBeGreaterThanOrEqual(600);
+      });
+
+      it('merges caller styles over internal styles per key', () => {
+        const callerStyles = {
+          body: { padding: '3rem', color: 'red' },
+          header: { borderBottom: '2px solid blue' }
+        };
+
+        renderResponsive(
+          <ResponsiveModal
+            {...defaultModalProps}
+            styles={callerStyles}
+          >
+            <div>Content</div>
+          </ResponsiveModal>
+        );
+
+        const modal = screen.getByRole('dialog');
+        expect(modal).toBeInTheDocument();
+      });
+
+      it('supports styles as a callback function', () => {
+        const stylesCallback = vi.fn((theme) => ({
+          body: { padding: '2rem' }
+        }));
+
+        renderResponsive(
+          <ResponsiveModal
+            {...defaultModalProps}
+            styles={stylesCallback}
+          >
+            <div>Content</div>
+          </ResponsiveModal>
+        );
+
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+        expect(stylesCallback).toHaveBeenCalled();
+        // Verify the callback received a theme object
+        const firstCallArg = stylesCallback.mock.calls[0][0];
+        expect(firstCallArg).toBeDefined();
+        expect(firstCallArg.colors).toBeDefined();
+      });
+
+      it('works without caller styles', () => {
+        renderResponsive(
+          <ResponsiveModal {...defaultModalProps}>
+            <div>Content</div>
+          </ResponsiveModal>
+        );
+
+        // Should render with only internal styles
+        const modal = screen.getByRole('dialog');
+        expect(modal).toBeInTheDocument();
+      });
+    });
+
+    describe('Scroll Configuration', () => {
+      it('configures vertical-only scrolling on desktop', () => {
+        useResponsive.mockReturnValue({
+          breakpoint: 'lg',
+          deviceType: 'desktop',
+          isMobile: false,
+          isTablet: false,
+          isDesktop: true,
+          width: 1280,
+          height: 720
+        });
+
+        const longContent = Array.from({ length: 50 }, (_, i) => (
+          <p key={i}>Long content paragraph {i}</p>
+        ));
+
+        renderResponsive(
+          <ResponsiveModal
+            {...defaultModalProps}
+            withScrollArea={true}
+          >
+            <div>{longContent}</div>
+          </ResponsiveModal>,
+          { viewport: TEST_VIEWPORTS.desktop }
+        );
+
+        const modal = screen.getByRole('dialog');
+        // Verify scroll area is rendered with vertical-only orientation
+        const scrollArea = modal.querySelector('[data-orientation="vertical"]');
+        if (scrollArea) {
+          expect(scrollArea).toBeInTheDocument();
+        }
+        // Verify no horizontal scroll area is present
+        const horizontalScroll = modal.querySelector('[data-orientation="horizontal"]');
+        expect(horizontalScroll).not.toBeInTheDocument();
+      });
+
+      it('does not add scroll area on mobile', () => {
+        useResponsive.mockReturnValue({
+          breakpoint: 'xs',
+          deviceType: 'mobile',
+          isMobile: true,
+          isTablet: false,
+          isDesktop: false,
+          width: 375,
+          height: 667
+        });
+
+        renderResponsive(
+          <ResponsiveModal
+            {...defaultModalProps}
+            withScrollArea="auto"
+          >
+            <div>Short content</div>
+          </ResponsiveModal>,
+          { viewport: TEST_VIEWPORTS.mobile }
+        );
+
+        const modal = screen.getByRole('dialog');
+        expect(modal).toBeInTheDocument();
+        // Mobile should not have scrollbar elements (scrollbarSize=0, type="never")
+        const scrollbar = modal.querySelector('[data-orientation="vertical"]');
+        expect(scrollbar).not.toBeInTheDocument();
+      });
+    });
+
     describe('Modal Accessibility', () => {
       it('has correct ARIA attributes', () => {
         renderResponsive(

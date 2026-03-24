@@ -383,7 +383,7 @@ export const ResponsiveModal = memo(({
       className={className}
 
       // Responsive styles merged with caller styles
-      styles={(theme) => {
+      styles={(theme, props, ctx) => {
         const internal = {
           inner: {
             paddingLeft: isMobile ? 0 : theme.spacing.md,
@@ -410,8 +410,7 @@ export const ResponsiveModal = memo(({
             fontWeight: formType === 'emergency' ? 700 : 600
           }
         };
-        const external = typeof callerStyles === 'function' ? callerStyles(theme) : (callerStyles || {});
-        // Merge caller styles over internal styles per key
+        const external = typeof callerStyles === 'function' ? callerStyles(theme, props, ctx) : (callerStyles || {});
         const merged = { ...internal };
         for (const key of Object.keys(external)) {
           merged[key] = { ...merged[key], ...external[key] };
