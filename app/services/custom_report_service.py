@@ -1015,6 +1015,10 @@ class CustomReportService:
                     if translated_name != field_key.replace("_", " ").title() or language == "en":
                         data["display_name"] = translated_name
 
+                # Set translated chart title using template so locales control word order
+                display = data.get("display_name", label)
+                data["chart_title"] = translator.text("trend_chart_title", name=display)
+
                 png_bytes = render_fn(data)
                 if png_bytes:
                     chart_results.append({

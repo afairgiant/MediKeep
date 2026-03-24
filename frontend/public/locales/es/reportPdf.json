@@ -185,6 +185,8 @@
     "primaryInsurance": "Seguro principal",
     "secondaryInsurance": "Seguro secundario/adicional",
     "notSpecified": "No especificado",
+    "trend": "Tendencia",
+    "trendChartTitle": "Tendencia de {{name}}",
     "notice": "Aviso"
   }
 }

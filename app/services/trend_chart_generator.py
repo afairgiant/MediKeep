@@ -115,7 +115,8 @@ class TrendChartGenerator:
             # Labels
             ylabel = f"{display_name} ({unit})" if unit else display_name
             ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT)
-            ax.set_title(f"{display_name} Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
+            chart_title = vital_data.get("chart_title", f"{display_name} Trend")
+            ax.set_title(chart_title, fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
 
             _format_date_axis(ax, vital_data.get("date_from"), vital_data.get("date_to"))
 
@@ -161,8 +162,10 @@ class TrendChartGenerator:
             _add_trend_line(ax, dates, systolic)
             _add_trend_line(ax, dates, diastolic)
 
-            ax.set_ylabel("Blood Pressure (mmHg)", fontsize=9, color=COLOR_TEXT)
-            ax.set_title("Blood Pressure Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
+            bp_display = bp_data.get("display_name", "Blood Pressure")
+            ax.set_ylabel(f"{bp_display} (mmHg)", fontsize=9, color=COLOR_TEXT)
+            bp_title = bp_data.get("chart_title", f"{bp_display} Trend")
+            ax.set_title(bp_title, fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
             ax.legend(loc="lower left", fontsize=7, framealpha=0.9,
                         bbox_to_anchor=(0.0, 1.02), ncol=2, borderaxespad=0)
 
@@ -240,7 +243,8 @@ class TrendChartGenerator:
 
             ylabel = f"{display_name} ({unit})" if unit else display_name
             ax.set_ylabel(ylabel, fontsize=9, color=COLOR_TEXT)
-            ax.set_title(f"{display_name} Trend", fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
+            lab_title = lab_data.get("chart_title", f"{display_name} Trend")
+            ax.set_title(lab_title, fontsize=11, color=COLOR_TEXT, fontweight="bold", pad=14)
 
             _format_date_axis(ax, lab_data.get("date_from"), lab_data.get("date_to"))
 

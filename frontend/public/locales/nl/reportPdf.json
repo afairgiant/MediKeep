@@ -185,6 +185,8 @@
     "primaryInsurance": "Primaire verzekering",
     "secondaryInsurance": "Secundaire/aanvullende verzekering",
     "notSpecified": "Niet opgegeven",
+    "trend": "Trend",
+    "trendChartTitle": "{{name}} - Trend",
     "notice": "Mededeling"
   }
 }
