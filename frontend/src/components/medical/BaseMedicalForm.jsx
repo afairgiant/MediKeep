@@ -679,7 +679,6 @@ const BaseMedicalForm = ({
           paddingBottom: '1rem'
         }
       }), [layoutConfig.container.padding])}
-      overflow="inside"
       lockScroll
       closeOnClickOutside
       trapFocus
