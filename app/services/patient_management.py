@@ -87,7 +87,11 @@ class PatientManagementService:
             self.db.add(patient)
             self.db.commit()
             self.db.refresh(patient)
-            
+
+            # Auto-set as active patient if user doesn't have one
+            if not user.active_patient_id:
+                self.ensure_active_patient(user)
+
             logger.info(f"Created patient {patient.id} for user {user.id}")
             return patient
             
@@ -383,6 +387,39 @@ class PatientManagementService:
             self.db.commit()
             return None
     
+    def ensure_active_patient(self, user: User) -> Optional[Patient]:
+        """
+        Ensure the user has an active patient set. If not, auto-resolve by
+        selecting the best available owned patient (self-record first, then lowest ID).
+
+        Args:
+            user: The user to check/resolve active patient for
+
+        Returns:
+            The active Patient object, or None if the user owns no patients
+        """
+        if user.active_patient_id:
+            return self.get_active_patient(user)
+
+        candidate = (
+            self.db.query(Patient)
+            .filter(Patient.owner_user_id == user.id)
+            .order_by(Patient.is_self_record.desc(), Patient.id.asc())
+            .first()
+        )
+
+        if candidate:
+            user.active_patient_id = candidate.id
+            self.db.commit()
+            self.db.refresh(user)
+            logger.info("Active patient auto-resolved", extra={
+                LogFields.EVENT: "active_patient_auto_resolved",
+                LogFields.USER_ID: user.id,
+                LogFields.PATIENT_ID: candidate.id,
+            })
+
+        return candidate
+
     def transfer_patient_ownership(
         self,
         patient_id: int,

@@ -494,7 +494,8 @@ def get_current_user_patient_id(
     Get the current user's active patient ID.
 
     This is a convenience dependency that handles getting the user's active patient record
-    and returns the patient_id for use in medical record endpoints.
+    and returns the patient_id for use in medical record endpoints. If no active patient
+    is set, attempts to auto-resolve by selecting the user's best owned patient.
 
     Args:
         db: Database session
@@ -504,8 +505,7 @@ def get_current_user_patient_id(
         Active patient ID for the current user
 
     Raises:
-        NotFoundException: If patient record not found
-        ValueError: If no active patient is selected
+        NotFoundException: If no patient records found or active patient not accessible
     """
     from app.models.models import User, Patient
 
@@ -518,14 +518,27 @@ def get_current_user_patient_id(
         )
     
     if not user.active_patient_id:
-        raise ValueError("No active patient selected for user")
-    
+        # Auto-resolve: find an owned patient and set as active
+        from app.services.patient_management import PatientManagementService
+        try:
+            patient_service = PatientManagementService(db)
+            resolved = patient_service.ensure_active_patient(user)
+        except Exception:
+            db.rollback()
+            resolved = None
+
+        if not resolved:
+            raise NotFoundException(
+                message="No patient records found for user",
+                request=None
+            )
+
     # Verify the active patient exists and belongs to this user
     patient_record = db.query(Patient).filter(
         Patient.id == user.active_patient_id,
         Patient.user_id == current_user_id
     ).first()
-    
+
     if not patient_record:
         raise NotFoundException(
             message="Active patient record not found",
