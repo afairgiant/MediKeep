@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, HTTPException, Depends, Query, Request
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
@@ -15,6 +16,7 @@ from app.core.utils.security import create_access_token
 from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActionType, EntityType
 from app.models.base import get_utc_now
+from app.services.patient_management import PatientManagementService
 from app.services.sso_service import SSOService
 
 logger = get_logger(__name__, "sso")
@@ -73,6 +75,20 @@ def _complete_sso_login(
         description=activity_description,
         request=req,
     )
+
+    # Auto-set active patient if not already set (matches regular login behavior)
+    if not sso_user.active_patient_id:
+        try:
+            patient_service = PatientManagementService(db)
+            patient_service.ensure_active_patient(sso_user)
+        except (SQLAlchemyError, ValueError) as e:
+            db.rollback()
+            log_endpoint_error(
+                logger, req,
+                "Failed to set active patient during SSO login", e,
+                user_id=sso_user.id,
+            )
+            # Continue login without active patient - user can set it later
 
     try:
         sso_user.last_login_at = get_utc_now()

@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -298,40 +299,20 @@ def login(
 
     # Check if user has an active patient, if not try to set one
     if not db_user.active_patient_id:
-        # Single query with priority ordering: self-records first, then by ID
-        available_patient = db.query(Patient).filter(
-            Patient.owner_user_id == db_user.id
-        ).order_by(
-            Patient.is_self_record.desc(),
-            Patient.id.asc()
-        ).first()
-
-        if available_patient:
-            try:
-                db_user.active_patient_id = available_patient.id
-                db.commit()
-                db.refresh(db_user)
-
-                log_endpoint_access(
-                    logger,
-                    request,
-                    db_user.id,
-                    "active_patient_auto_set",
-                    message="Auto-setting active patient during login",
-                    patient_id=available_patient.id,
-                    is_self_record=available_patient.is_self_record,
-                )
-            except Exception as e:
-                db.rollback()
-                log_endpoint_error(
-                    logger,
-                    request,
-                    "Failed to set active patient during login",
-                    e,
-                    user_id=db_user.id,
-                    patient_id=available_patient.id,
-                )
-                # Continue login without active patient - user can set it later
+        from app.services.patient_management import PatientManagementService
+        try:
+            patient_service = PatientManagementService(db)
+            patient_service.ensure_active_patient(db_user)
+        except (SQLAlchemyError, ValueError) as e:
+            db.rollback()
+            log_endpoint_error(
+                logger,
+                request,
+                "Failed to set active patient during login",
+                e,
+                user_id=db_user.id,
+            )
+            # Continue login without active patient - user can set it later
 
     # Get full name, use username as fallback if not set
     full_name = getattr(db_user, "full_name", None) or db_user.username
