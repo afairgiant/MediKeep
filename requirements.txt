@@ -74,7 +74,6 @@ apprise>=1.9.0           # Multi-channel notification library
 pdfplumber==0.11.9       # PDF text extraction
 pdf2image==1.17.0        # PDF to image conversion for OCR
 pytesseract==0.3.13      # Tesseract OCR wrapper
-pygments>=2.18.0,<2.19.0 # Pinned: CVE-2026-4539 ReDoS in AdlLexer (2.19.0-2.19.2)
 
 # Background task scheduling
 APScheduler>=3.10.0,<4.0.0   # Async scheduler for auto-backups
