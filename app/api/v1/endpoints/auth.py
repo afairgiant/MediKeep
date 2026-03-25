@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -298,11 +299,11 @@ def login(
 
     # Check if user has an active patient, if not try to set one
     if not db_user.active_patient_id:
+        from app.services.patient_management import PatientManagementService
         try:
-            from app.services.patient_management import PatientManagementService
             patient_service = PatientManagementService(db)
             patient_service.ensure_active_patient(db_user)
-        except Exception as e:
+        except (SQLAlchemyError, ValueError) as e:
             db.rollback()
             log_endpoint_error(
                 logger,

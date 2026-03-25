@@ -3,6 +3,7 @@ from typing import Optional, NamedTuple
 from fastapi import Depends, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -21,7 +22,7 @@ from app.core.http.error_handling import (
 )
 from app.core.http.response_models import ExceptionCode
 from app.api.v1.endpoints.system import get_client_ip
-from app.core.logging.constants import sanitize_log_input
+from app.core.logging.constants import LogFields, sanitize_log_input
 from app.crud.user import user
 from app.models.models import User
 
@@ -518,13 +519,19 @@ def get_current_user_patient_id(
         )
     
     if not user.active_patient_id:
-        # Auto-resolve: find an owned patient and set as active
         from app.services.patient_management import PatientManagementService
         try:
             patient_service = PatientManagementService(db)
             resolved = patient_service.ensure_active_patient(user)
-        except Exception:
+        except (SQLAlchemyError, ValueError) as e:
             db.rollback()
+            security_logger.warning(
+                "Failed to auto-resolve active patient",
+                extra={
+                    LogFields.USER_ID: current_user_id,
+                    LogFields.ERROR: str(e),
+                }
+            )
             resolved = None
 
         if not resolved:
@@ -533,10 +540,13 @@ def get_current_user_patient_id(
                 request=None
             )
 
+        # ensure_active_patient already verified ownership
+        return resolved.id
+
     # Verify the active patient exists and belongs to this user
     patient_record = db.query(Patient).filter(
         Patient.id == user.active_patient_id,
-        Patient.user_id == current_user_id
+        Patient.owner_user_id == current_user_id
     ).first()
 
     if not patient_record:

@@ -88,9 +88,19 @@ class PatientManagementService:
             self.db.commit()
             self.db.refresh(patient)
 
-            # Auto-set as active patient if user doesn't have one
             if not user.active_patient_id:
-                self.ensure_active_patient(user)
+                try:
+                    self.ensure_active_patient(user)
+                except (IntegrityError, ValueError) as e:
+                    logger.error(
+                        "Failed to set active patient after patient creation",
+                        extra={
+                            LogFields.EVENT: "active_patient_set_failed",
+                            LogFields.USER_ID: user.id,
+                            LogFields.PATIENT_ID: patient.id,
+                            LogFields.ERROR: str(e),
+                        }
+                    )
 
             logger.info(f"Created patient {patient.id} for user {user.id}")
             return patient
@@ -398,8 +408,12 @@ class PatientManagementService:
         Returns:
             The active Patient object, or None if the user owns no patients
         """
+        # get_active_patient() clears an invalid active_patient_id and returns None,
+        # so we fall through to auto-resolve if the stored ID was stale.
         if user.active_patient_id:
-            return self.get_active_patient(user)
+            active = self.get_active_patient(user)
+            if active is not None:
+                return active
 
         candidate = (
             self.db.query(Patient)
@@ -411,7 +425,6 @@ class PatientManagementService:
         if candidate:
             user.active_patient_id = candidate.id
             self.db.commit()
-            self.db.refresh(user)
             logger.info("Active patient auto-resolved", extra={
                 LogFields.EVENT: "active_patient_auto_resolved",
                 LogFields.USER_ID: user.id,
