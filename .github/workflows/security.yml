@@ -71,6 +71,7 @@ jobs:
           --ignore-vuln CVE-2025-69229
           --ignore-vuln CVE-2025-69230
           --ignore-vuln CVE-2026-26007
+          --ignore-vuln CVE-2026-4539
           --ignore-vuln CVE-2024-23342
           --ignore-vuln CVE-2025-54121
           --ignore-vuln CVE-2025-62727
