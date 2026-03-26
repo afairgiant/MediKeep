@@ -223,9 +223,8 @@ const DocumentManagerWithProgress = React.memo(({
     } else {
       await handlersRef.current.handleImmediateUpload(file, description);
     }
-    setFileUpload({ file: null, description: '' });
-    setShowUploadModal(false);
-  }, [mode]);
+    handleUploadModalClose();
+  }, [mode, handleUploadModalClose]);
 
   // Shared handler for linking documents from remote backends (Paperless, Papra)
   const createLinkHandler = useCallback((backendName, linkApiFn) => {
