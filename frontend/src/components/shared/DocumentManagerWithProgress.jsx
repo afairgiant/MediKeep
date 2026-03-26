@@ -41,7 +41,8 @@ const DocumentManagerContent = ({
   setShowPapraLinkModal,
   fileUpload,
   setFileUpload,
-  handleFileUploadSubmit,
+  onUploadModalClose,
+  handleUploadConfirm,
   handleLinkDocument,
   handleLinkPapraDocument,
   updateHandlersRef,
@@ -122,56 +123,45 @@ const DocumentManagerContent = ({
         />
       </DocumentManagerErrorBoundary>
 
-      {/* Upload Modal for View Mode */}
+      {/* Upload Modal */}
       <Modal
         opened={showUploadModal}
-        onClose={() => {
-          setShowUploadModal(false);
-          setFileUpload({ file: null, description: '' });
-        }}
+        onClose={onUploadModalClose}
         title="Upload File"
         centered
         zIndex={3001}
       >
-        <form onSubmit={handleFileUploadSubmit}>
-          <Stack gap="md">
-            <FileInput
-              placeholder="Select a file to upload"
-              value={fileUpload.file}
-              onChange={file => setFileUpload(prev => ({ ...prev, file }))}
-              accept={config.acceptedTypes?.join(',')}
+        <Stack gap="md">
+          <FileInput
+            placeholder="Select a file to upload"
+            value={fileUpload.file}
+            onChange={file => setFileUpload(prev => ({ ...prev, file }))}
+            accept={config.acceptedTypes?.join(',')}
+            leftSection={<IconUpload size={16} />}
+          />
+          <TextInput
+            placeholder="File description (optional)"
+            value={fileUpload.description}
+            onChange={e =>
+              setFileUpload(prev => ({
+                ...prev,
+                description: e.target.value,
+              }))
+            }
+          />
+          <Group justify="flex-end">
+            <Button variant="outline" onClick={onUploadModalClose}>
+              Cancel
+            </Button>
+            <Button
+              disabled={!fileUpload.file || coreHandlers.loading}
               leftSection={<IconUpload size={16} />}
-            />
-            <TextInput
-              placeholder="File description (optional)"
-              value={fileUpload.description}
-              onChange={e =>
-                setFileUpload(prev => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-            />
-            <Group justify="flex-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowUploadModal(false);
-                  setFileUpload({ file: null, description: '' });
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={!fileUpload.file || coreHandlers.loading}
-                leftSection={<IconUpload size={16} />}
-              >
-                Upload
-              </Button>
-            </Group>
-          </Stack>
-        </form>
+              onClick={handleUploadConfirm}
+            >
+              Upload
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
 
       {/* Link Paperless Document Modal */}
@@ -214,18 +204,27 @@ const DocumentManagerWithProgress = React.memo(({
   const [showPapraLinkModal, setShowPapraLinkModal] = useState(false);
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
 
-  // Refs to store handlers for stable callback functions
+  // Refs to store handlers and current fileUpload for stable callbacks
   const handlersRef = useRef(null);
+  const fileUploadRef = useRef(fileUpload);
+  useEffect(() => { fileUploadRef.current = fileUpload; }, [fileUpload]);
 
-  // Performance optimization: Memoize form submission handler
-  const handleFileUploadSubmit = useCallback(async (e) => {
-    e.preventDefault();
-    if (!fileUpload.file || !handlersRef.current) return;
-
-    await handlersRef.current.handleImmediateUpload(fileUpload.file, fileUpload.description);
-    setFileUpload({ file: null, description: '' });
+  const handleUploadModalClose = useCallback(() => {
     setShowUploadModal(false);
-  }, [fileUpload.file, fileUpload.description]);
+    setFileUpload({ file: null, description: '' });
+  }, []);
+
+  const handleUploadConfirm = useCallback(async () => {
+    const { file, description } = fileUploadRef.current;
+    if (!file || !handlersRef.current) return;
+
+    if (mode === 'create') {
+      handlersRef.current.handleAddPendingFile(file, description);
+    } else {
+      await handlersRef.current.handleImmediateUpload(file, description);
+    }
+    handleUploadModalClose();
+  }, [mode, handleUploadModalClose]);
 
   // Shared handler for linking documents from remote backends (Paperless, Papra)
   const createLinkHandler = useCallback((backendName, linkApiFn) => {
@@ -329,7 +328,8 @@ const DocumentManagerWithProgress = React.memo(({
           setShowPapraLinkModal={setShowPapraLinkModal}
           fileUpload={fileUpload}
           setFileUpload={setFileUpload}
-          handleFileUploadSubmit={handleFileUploadSubmit}
+          onUploadModalClose={handleUploadModalClose}
+          handleUploadConfirm={handleUploadConfirm}
           handleLinkDocument={handleLinkDocument}
           handleLinkPapraDocument={handleLinkPapraDocument}
           updateHandlersRef={updateHandlersRef}

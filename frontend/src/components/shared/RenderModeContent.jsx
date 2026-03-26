@@ -111,6 +111,7 @@ const RenderModeContent = memo(({
         <Menu position="bottom-end" shadow="md" withinPortal zIndex={3000}>
           <Menu.Target>
             <Button
+              type="button"
               rightSection={<IconChevronDown size={16} />}
               disabled={loading}
             >
@@ -148,6 +149,7 @@ const RenderModeContent = memo(({
 
   const syncCheckButton = hasRemoteFiles && (
     <Button
+      type="button"
       variant="light"
       size="xs"
       leftSection={<IconRefresh size={14} />}
