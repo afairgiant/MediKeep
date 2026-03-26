@@ -56,7 +56,7 @@ const findMissingKeys = (baseKeys, compareKeys) => {
 };
 
 describe('Translation Key Consistency', () => {
-  const locales = ['en', 'de', 'es', 'fr', 'it', 'pt', 'ru', 'nl'];
+  const locales = ['en', 'de', 'es', 'fr', 'it', 'pt', 'ru', 'nl', 'pl'];
   const namespaces = ['common', 'medical', 'errors', 'navigation', 'notifications'];
 
   describe('All language files exist', () => {

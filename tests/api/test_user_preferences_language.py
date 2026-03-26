@@ -92,6 +92,25 @@ class TestUserPreferencesLanguage:
         data = response.json()
         assert data["language"] == "nl"
 
+    def test_update_language_to_polish(
+        self, client: TestClient, db_session: Session
+    ):
+        """Test updating user language preference to Dutch."""
+        # Create a test user
+        user_data = create_random_user(db_session)
+        headers = create_user_authentication_headers(client=client, username=user_data["username"], password=user_data["password"])
+
+        # Update language to Dutch
+        response = client.put(
+            "/api/v1/users/me/preferences",
+            headers=headers,
+            json={"language": "pl"}
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["language"] == "pl"
+
     def test_reject_unsupported_language(
         self, client: TestClient, db_session: Session
     ):
@@ -226,7 +245,7 @@ class TestUserPreferencesLanguage:
         self, client: TestClient, db_session: Session
     ):
         """Test that all supported languages can be set successfully."""
-        supported_languages = ["en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl"]
+        supported_languages = ["en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl", "pl"]
 
         for lang in supported_languages:
             # Create a new test user for each language
