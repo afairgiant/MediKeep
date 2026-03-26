@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
 import {
@@ -102,6 +102,52 @@ const Symptoms = () => {
   // Document manager methods ref for upload orchestration
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
 
+  // Fetch guard — incremented on each intentional fetch so stale responses are ignored
+  const fetchIdRef = useRef(0);
+
+  const patientId = currentPatient?.id;
+  const fetchSymptoms = useCallback(async () => {
+    if (!patientId) return;
+
+    const id = ++fetchIdRef.current;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const data = await symptomApi.getAll({
+        patient_id: patientId,
+      });
+
+      // Only apply if this is still the latest fetch
+      if (id === fetchIdRef.current) {
+        setSymptoms(data || []);
+      }
+    } catch (err) {
+      if (id === fetchIdRef.current) {
+        logger.error('symptoms_page_fetch_error', {
+          error: err.message,
+          component: 'Symptoms',
+        });
+        setError('Failed to load symptoms. Please try again.');
+      }
+    } finally {
+      if (id === fetchIdRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [patientId]);
+
+  // Fetch symptoms when patient ID changes (effect only re-fires when the primitive ID changes)
+  useEffect(() => {
+    if (patientId) {
+      fetchSymptoms();
+    } else {
+      setSymptoms([]);
+      setLoading(false);
+    }
+  }, [patientId, fetchSymptoms]);
+
   const {
     startSubmission,
     completeFormSubmission,
@@ -127,50 +173,6 @@ const Symptoms = () => {
     },
     component: 'Symptoms',
   });
-
-  // Fetch symptoms function defined before hook usage
-  const fetchSymptoms = useCallback(async () => {
-    if (!currentPatient?.id) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      logger.debug('symptoms_page_fetch', {
-        patientId: currentPatient?.id,
-        component: 'Symptoms',
-      });
-
-      const data = await symptomApi.getAll({
-        patient_id: currentPatient.id,
-      });
-
-      setSymptoms(data || []);
-
-      logger.info('symptoms_page_fetch_success', {
-        count: data?.length || 0,
-        component: 'Symptoms',
-      });
-    } catch (err) {
-      logger.error('symptoms_page_fetch_error', {
-        error: err.message,
-        component: 'Symptoms',
-      });
-      setError('Failed to load symptoms. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPatient]);
-
-  // Fetch symptoms when patient changes
-  useEffect(() => {
-    if (currentPatient?.id) {
-      fetchSymptoms();
-    } else {
-      setSymptoms([]);
-      setLoading(false);
-    }
-  }, [currentPatient?.id, fetchSymptoms]);
 
   // View modal navigation with URL deep linking
   const {
