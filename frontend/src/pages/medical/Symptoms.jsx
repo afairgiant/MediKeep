@@ -143,9 +143,16 @@ const Symptoms = () => {
     if (patientId) {
       fetchSymptoms();
     } else {
+      // Invalidate any in-flight fetch for the now-cleared patient
+      fetchIdRef.current++;
       setSymptoms([]);
       setLoading(false);
     }
+
+    // Cleanup: invalidate any in-flight fetch when dependencies change or on unmount
+    return () => {
+      fetchIdRef.current++;
+    };
   }, [patientId, fetchSymptoms]);
 
   const {
