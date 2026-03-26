@@ -1,88 +1,88 @@
 {
   "upload": {
-    "failed": "Det gick inte att ladda upp filen. F\u00f6rs\u00f6k igen.",
-    "connectionError": "Anslutningsfel. Kontrollera din n\u00e4tverksanslutning och f\u00f6rs\u00f6k igen.",
-    "fileTooLarge": "Filstorleken \u00f6verskrider den maximala gr\u00e4nsen.",
-    "invalidFileType": "Filtypen st\u00f6ds inte.",
-    "fileProcessingFailed": "Det gick inte att bearbeta filen. F\u00f6rs\u00f6k med en annan fil.",
-    "duplicateFile": "Den h\u00e4r filen har redan laddats upp.",
+    "failed": "Det gick inte att ladda upp filen. Försök igen.",
+    "connectionError": "Anslutningsfel. Kontrollera din nätverksanslutning och försök igen.",
+    "fileTooLarge": "Filstorleken överskrider den maximala gränsen.",
+    "invalidFileType": "Filtypen stöds inte.",
+    "fileProcessingFailed": "Det gick inte att bearbeta filen. Försök med en annan fil.",
+    "duplicateFile": "Den här filen har redan laddats upp.",
     "batchUploadFailed": "Vissa filer kunde inte laddas upp. Kontrollera enskilda filfel.",
-    "partialUploadSuccess": "Uppladdningen slutf\u00f6rdes med vissa fel. Granska misslyckade filer.",
-    "allUploadsFailed": "Alla filuppladdningar misslyckades. Kontrollera din anslutning och f\u00f6rs\u00f6k igen."
+    "partialUploadSuccess": "Uppladdningen slutfördes med vissa fel. Granska misslyckade filer.",
+    "allUploadsFailed": "Alla filuppladdningar misslyckades. Kontrollera din anslutning och försök igen."
   },
   "paperless": {
-    "unavailable": "Dokumenthanteringstj\u00e4nsten \u00e4r f\u00f6r n\u00e4rvarande inte tillg\u00e4nglig.",
-    "notEnabled": "Paperless-integrationen \u00e4r inte aktiverad. Aktivera den i Inst\u00e4llningar.",
-    "configIncomplete": "Paperless-konfigurationen \u00e4r ofullst\u00e4ndig. Kontrollera dina inst\u00e4llningar.",
+    "unavailable": "Dokumenthanteringstjänsten är för närvarande inte tillgänglig.",
+    "notEnabled": "Paperless-integrationen är inte aktiverad. Aktivera den i Inställningar.",
+    "configIncomplete": "Paperless-konfigurationen är ofullständig. Kontrollera dina inställningar.",
     "uploadFailed": "Det gick inte att ladda upp till Paperless dokumenthanteringssystem.",
-    "connectionFailed": "Det gick inte att ansluta till Paperless-tj\u00e4nsten. Kontrollera konfigurationen.",
-    "authFailed": "Autentiseringen misslyckades med Paperless-tj\u00e4nsten. Kontrollera inloggningsuppgifterna.",
-    "duplicateDocument": "Det h\u00e4r dokumentet finns redan i Paperless. Identiska dokument kan inte laddas upp tv\u00e5 g\u00e5nger.",
-    "taskFailed": "Dokumentuppladdning till Paperless misslyckades. F\u00f6rs\u00f6k igen eller kontakta support.",
-    "taskTimeout": "Dokumentbearbetningen tog f\u00f6r l\u00e5ng tid. Dokumentet kan fortfarande bearbetas i Paperless."
+    "connectionFailed": "Det gick inte att ansluta till Paperless-tjänsten. Kontrollera konfigurationen.",
+    "authFailed": "Autentiseringen misslyckades med Paperless-tjänsten. Kontrollera inloggningsuppgifterna.",
+    "duplicateDocument": "Det här dokumentet finns redan i Paperless. Identiska dokument kan inte laddas upp två gånger.",
+    "taskFailed": "Dokumentuppladdning till Paperless misslyckades. Försök igen eller kontakta support.",
+    "taskTimeout": "Dokumentbearbetningen tog för lång tid. Dokumentet kan fortfarande bearbetas i Paperless."
   },
   "form": {
-    "submissionFailed": "Det gick inte att spara formul\u00e4ret. Kontrollera dina uppgifter och f\u00f6rs\u00f6k igen.",
-    "requiredFieldMissing": "Fyll i alla obligatoriska f\u00e4lt.",
+    "submissionFailed": "Det gick inte att spara formuläret. Kontrollera dina uppgifter och försök igen.",
+    "requiredFieldMissing": "Fyll i alla obligatoriska fält.",
     "invalidDate": "Ange ett giltigt datum.",
     "invalidEmail": "Ange en giltig e-postadress.",
     "invalidPhone": "Ange ett giltigt telefonnummer.",
     "invalidPhoneDigits": "Ange ett giltigt telefonnummer",
     "invalidWebsiteUrl": "Ange en giltig webbadress",
-    "patientNotSelected": "V\u00e4lj en patient.",
-    "entityNotFound": "Det beg\u00e4rda objektet kunde inte hittas.",
-    "medicationNotSelected": "V\u00e4lj ett l\u00e4kemedel",
-    "conditionNotSelected": "V\u00e4lj ett tillst\u00e5nd",
-    "mustBeValidNumber": "M\u00e5ste vara ett giltigt nummer"
+    "patientNotSelected": "Välj en patient.",
+    "entityNotFound": "Det begärda objektet kunde inte hittas.",
+    "medicationNotSelected": "Välj ett läkemedel",
+    "conditionNotSelected": "Välj ett tillstånd",
+    "mustBeValidNumber": "Måste vara ett giltigt nummer"
   },
   "patientForm": {
     "error": "Fel",
-    "firstNameRequired": "F\u00f6rnamn kr\u00e4vs",
-    "lastNameRequired": "Efternamn kr\u00e4vs",
-    "birthDateRequired": "F\u00f6delsedatum kr\u00e4vs",
-    "birthDateFuture": "F\u00f6delsedatum kan inte vara i framtiden",
+    "firstNameRequired": "Förnamn krävs",
+    "lastNameRequired": "Efternamn krävs",
+    "birthDateRequired": "Födelsedatum krävs",
+    "birthDateFuture": "Födelsedatum kan inte vara i framtiden",
     "createFailed": "Skapandet misslyckades: {{message}}",
     "updateFailed": "Uppdateringen misslyckades: {{message}}"
   },
   "file": {
-    "deleteFailed": "Det gick inte att ta bort filen. F\u00f6rs\u00f6k igen.",
-    "downloadFailed": "Det gick inte att ladda ner filen. F\u00f6rs\u00f6k igen.",
-    "viewFailed": "Det gick inte att \u00f6ppna filen f\u00f6r visning. F\u00f6rs\u00f6k igen.",
+    "deleteFailed": "Det gick inte att ta bort filen. Försök igen.",
+    "downloadFailed": "Det gick inte att ladda ner filen. Försök igen.",
+    "viewFailed": "Det gick inte att öppna filen för visning. Försök igen.",
     "notFound": "Filen hittades inte."
   },
   "network": {
-    "unavailable": "N\u00e4tverket \u00e4r inte tillg\u00e4ngligt. Kontrollera din anslutning.",
-    "timeout": "F\u00f6rfr\u00e5gan tog f\u00f6r l\u00e5ng tid. F\u00f6rs\u00f6k igen.",
-    "serverError": "Ett serverfel uppstod. F\u00f6rs\u00f6k igen senare.",
-    "connectionError": "Anslutningsfel. Kontrollera din n\u00e4tverksanslutning och f\u00f6rs\u00f6k igen."
+    "unavailable": "Nätverket är inte tillgängligt. Kontrollera din anslutning.",
+    "timeout": "Förfrågan tog för lång tid. Försök igen.",
+    "serverError": "Ett serverfel uppstod. Försök igen senare.",
+    "connectionError": "Anslutningsfel. Kontrollera din nätverksanslutning och försök igen."
   },
   "general": {
-    "unknownError": "Ett ov\u00e4ntat fel uppstod. F\u00f6rs\u00f6k igen.",
-    "permissionDenied": "Du har inte beh\u00f6righet att utf\u00f6ra den h\u00e4r \u00e5tg\u00e4rden.",
-    "sessionExpired": "Din session har g\u00e5tt ut. Logga in igen.",
-    "rateLimitExceeded": "F\u00f6r m\u00e5nga f\u00f6rfr\u00e5gningar. V\u00e4nta en stund och f\u00f6rs\u00f6k igen.",
-    "maintenanceMode": "Systemet \u00e4r f\u00f6r n\u00e4rvarande under underh\u00e5ll. F\u00f6rs\u00f6k igen senare.",
-    "storageFull": "Lagringsgr\u00e4nsen \u00e4r n\u00e5dd. Frig\u00f6r utrymme och f\u00f6rs\u00f6k igen.",
-    "validationError": "Kontrollera dina uppgifter och f\u00f6rs\u00f6k igen."
+    "unknownError": "Ett oväntat fel uppstod. Försök igen.",
+    "permissionDenied": "Du har inte behörighet att utföra den här åtgärden.",
+    "sessionExpired": "Din session har gått ut. Logga in igen.",
+    "rateLimitExceeded": "För många förfrågningar. Vänta en stund och försök igen.",
+    "maintenanceMode": "Systemet är för närvarande under underhåll. Försök igen senare.",
+    "storageFull": "Lagringsgränsen är nådd. Frigör utrymme och försök igen.",
+    "validationError": "Kontrollera dina uppgifter och försök igen."
   },
   "success": {
     "uploadSuccess": "Filen har laddats upp!",
     "uploadMultipleSuccess": "Alla filer har laddats upp!",
-    "formSaved": "Formul\u00e4ret har sparats!",
+    "formSaved": "Formuläret har sparats!",
     "fileDeleted": "Filen har tagits bort.",
     "paperlessSyncSuccess": "Synkronisering med Paperless dokumenthantering lyckades.",
     "batchUploadSuccess": "Alla filer har laddats upp!"
   },
   "warnings": {
-    "partialSuccess": "\u00c5tg\u00e4rden slutf\u00f6rdes med vissa varningar.",
-    "slowConnection": "Uppladdningen tar l\u00e4ngre tid \u00e4n vanligt p\u00e5 grund av l\u00e5ngsam anslutning.",
+    "partialSuccess": "Åtgärden slutfördes med vissa varningar.",
+    "slowConnection": "Uppladdningen tar längre tid än vanligt på grund av långsam anslutning.",
     "largeFileWarning": "Stor fil identifierad. Uppladdningen kan ta flera minuter.",
-    "duplicateWarning": "Den h\u00e4r filen verkar vara en dubblett."
+    "duplicateWarning": "Den här filen verkar vara en dubblett."
   },
   "relationships": {
-    "addConditionFailed": "Det gick inte att l\u00e4gga till tillst\u00e5ndsrelationen",
-    "addMedicationFailed": "Det gick inte att l\u00e4gga till l\u00e4kemedelsrelationen",
-    "addFailed": "Det gick inte att l\u00e4gga till relationen",
+    "addConditionFailed": "Det gick inte att lägga till tillståndsrelationen",
+    "addMedicationFailed": "Det gick inte att lägga till läkemedelsrelationen",
+    "addFailed": "Det gick inte att lägga till relationen",
     "updateFailed": "Det gick inte att uppdatera relationen",
     "deleteFailed": "Det gick inte att ta bort relationen",
     "fetchFailed": "Det gick inte att ladda relationer"

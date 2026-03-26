@@ -126,7 +126,7 @@
     "clearFilter": "Rensa filter",
     "filterAriaLabel": "Filtrera datamodeller",
     "noMatchFilter": "Inga modeller matchar \"{{query}}\"",
-    "fallbackWarning": "Kunde inte ladda modeller från servern. Visar inbyggd modelllista.",
+    "fallbackWarning": "Kunde inte ladda modeller från servern. Visar inbyggd modellista.",
     "categories": {
       "system": "System",
       "coreMedical": "Medicinsk kärna",
