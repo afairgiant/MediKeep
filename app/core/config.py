@@ -103,24 +103,18 @@ def _derive_salt(purpose: str) -> str:
     salt_from_env = get_secret(env_name, "")
     known_default = f"{purpose}_integration_salt_v1"
     if salt_from_env in (known_default, ""):
-        return hashlib.sha256(
-            f"{_resolved_secret_key}:{purpose}".encode()
-        ).hexdigest()
+        return hashlib.sha256(f"{_resolved_secret_key}:{purpose}".encode()).hexdigest()
     return salt_from_env
 
 
 class Settings:  # App Info
     APP_NAME: str = "MediKeep"
-    VERSION: str = "0.59.0"
+    VERSION: str = "0.60.0"
 
-    DEBUG: bool = (
-        os.getenv("DEBUG", "False").lower() == "true"
-    )
+    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
 
     # Controls OpenAPI/Swagger docs visibility (decoupled from DEBUG)
-    ENABLE_API_DOCS: bool = (
-        os.getenv("ENABLE_API_DOCS", "False").lower() == "true"
-    )
+    ENABLE_API_DOCS: bool = os.getenv("ENABLE_API_DOCS", "False").lower() == "true"
     # Database Configuration
     DATABASE_URL: str = get_secret(
         "DATABASE_URL",
