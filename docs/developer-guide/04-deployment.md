@@ -500,7 +500,7 @@ SSO_ENABLED=true
 SSO_PROVIDER_TYPE=google
 SSO_CLIENT_ID=your-client-id.apps.googleusercontent.com
 SSO_CLIENT_SECRET=your-client-secret
-SSO_REDIRECT_URI=https://medikeep.example.com/api/v1/sso/callback
+SSO_REDIRECT_URI=https://medikeep.example.com/auth/sso/callback
 SSO_ALLOWED_DOMAINS=["example.com"]
 ```
 
@@ -512,7 +512,7 @@ SSO_PROVIDER_TYPE=keycloak
 SSO_CLIENT_ID=medikeep
 SSO_CLIENT_SECRET=your-secret
 SSO_ISSUER_URL=https://keycloak.example.com/realms/master
-SSO_REDIRECT_URI=https://medikeep.example.com/api/v1/sso/callback
+SSO_REDIRECT_URI=https://medikeep.example.com/auth/sso/callback
 ```
 
 ### Paperless-ngx Integration

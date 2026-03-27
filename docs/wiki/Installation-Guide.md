@@ -175,7 +175,7 @@ SSO_ENABLED=true
 SSO_PROVIDER_TYPE=github  # google, github, oidc, authentik, authelia, keycloak
 SSO_CLIENT_ID=your-client-id
 SSO_CLIENT_SECRET=your-client-secret
-SSO_REDIRECT_URI=http://localhost:8005/api/v1/sso/callback
+SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback
 ```
 
 See [SSO Quick Start](SSO-Quick-Start) for detailed setup.
