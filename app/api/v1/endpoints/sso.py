@@ -219,10 +219,7 @@ async def sso_callback(
         )
         raise HTTPException(
             status_code=403,
-            detail={
-                "message": "Registration is currently disabled",
-                "error_code": "REGISTRATION_DISABLED"
-            }
+            detail="Registration is currently disabled. Please contact an administrator."
         )
     except SSOAuthenticationError as e:
         log_security_event(
@@ -232,10 +229,7 @@ async def sso_callback(
         )
         raise HTTPException(
             status_code=400,
-            detail={
-                "message": "SSO authentication failed",
-                "error_code": "AUTH_FAILED"
-            }
+            detail=str(e)
         )
     except Exception as e:
         log_endpoint_error(
@@ -272,10 +266,7 @@ async def resolve_account_conflict(
         )
         raise HTTPException(
             status_code=400,
-            detail={
-                "message": "Account conflict resolution failed",
-                "error_code": "CONFLICT_RESOLUTION_FAILED"
-            }
+            detail=str(e)
         )
     except Exception as e:
         log_endpoint_error(
@@ -313,10 +304,7 @@ async def resolve_github_manual_link(
         )
         raise HTTPException(
             status_code=400,
-            detail={
-                "message": "GitHub account linking failed",
-                "error_code": "GITHUB_LINK_FAILED"
-            }
+            detail=str(e)
         )
     except Exception as e:
         log_endpoint_error(
@@ -332,7 +320,17 @@ async def resolve_github_manual_link(
 async def test_sso_connection(request: Request):
     """Test SSO provider connection (for admin use)"""
     try:
-        result = sso_service.test_connection()
+        result = await sso_service.test_connection()
+        if result["success"]:
+            log_endpoint_access(
+                logger, request, None, "sso_test_connection_success",
+                message=result["message"],
+            )
+        else:
+            log_security_event(
+                logger, "sso_test_connection_failed", request,
+                result["message"],
+            )
         return {"success": result["success"], "message": result["message"]}
     except Exception as e:
         log_endpoint_error(

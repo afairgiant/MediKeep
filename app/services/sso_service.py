@@ -2,6 +2,7 @@ from typing import Dict, Optional
 import secrets
 import asyncio
 from datetime import datetime, timedelta
+import httpx
 from app.auth.sso.providers import create_sso_provider
 from app.auth.sso.exceptions import *
 from app.core.config import settings
@@ -55,59 +56,115 @@ class SSOService:
     
     async def complete_authentication(self, code: str, state: str, db: Session) -> Dict:
         """Complete SSO authentication - no retry for OAuth codes (they're single-use)"""
-        # Validate state
-        self._validate_state(state)
-        
+        # Validate state and consume it (single-use)
+        self._validate_and_consume_state(state)
+
         try:
             provider = create_sso_provider()
-            
-            # Exchange code for token (OAuth codes are single-use, no retry!)
-            token_data = await provider.exchange_code_for_token(code)
-            
-            # Get user information
-            user_info = await provider.get_user_info(token_data["access_token"])
-            
-            # Validate email domain if configured
-            if not self._validate_email_domain(user_info.email):
-                raise SSOAuthenticationError(
-                    f"Email domain not allowed: {user_info.email.split('@')[1]}"
-                )
-            
-            # Find or create user
-            result = self._find_or_create_user(user_info, db)
-            
-            # Log success (handle both regular and conflict responses)
-            if result.get("conflict"):
-                logger.info(
-                    f"SSO authentication detected conflict for {user_info.email}",
-                    extra={"category": "sso", "event": "auth_conflict"}
-                )
-            else:
-                logger.info(
-                    f"SSO authentication successful for {user_info.email}",
-                    extra={
-                        "category": "sso", 
-                        "event": "auth_success",
-                        "is_new_user": result["is_new_user"]
-                    }
-                )
-            
-            return result
-            
         except Exception as e:
-            logger.error(f"SSO authentication failed: {str(e)}")
-            raise SSOAuthenticationError("Authentication failed")
+            logger.error(
+                "Failed to create SSO provider",
+                extra={"category": "sso", "event": "provider_creation_failed", "error": str(e)}
+            )
+            raise SSOAuthenticationError("SSO provider configuration error")
+
+        # Exchange code for token (OAuth codes are single-use, no retry!)
+        try:
+            token_data = await provider.exchange_code_for_token(code)
+        except Exception as e:
+            error_detail = self._extract_oauth_error(e)
+            logger.error(
+                f"SSO token exchange failed: {error_detail}",
+                extra={"category": "sso", "event": "token_exchange_failed", "error": error_detail}
+            )
+            raise SSOAuthenticationError(f"Token exchange failed: {error_detail}")
+
+        # Get user information from provider
+        try:
+            user_info = await provider.get_user_info(token_data["access_token"])
+        except Exception as e:
+            logger.error(
+                f"Failed to retrieve user info from SSO provider: {str(e)}",
+                extra={"category": "sso", "event": "user_info_failed", "error": str(e)}
+            )
+            raise SSOAuthenticationError("Failed to retrieve user info from SSO provider")
+
+        # Validate email domain if configured
+        if not self._validate_email_domain(user_info.email):
+            raise SSOAuthenticationError(
+                f"Email domain not allowed: {user_info.email.split('@')[1]}"
+            )
+
+        # Find or create user
+        try:
+            result = self._find_or_create_user(user_info, db)
+        except (SSOAuthenticationError, SSORegistrationBlockedError):
+            raise
+        except Exception as e:
+            logger.error(
+                f"Failed to find or create SSO user: {str(e)}",
+                extra={"category": "sso", "event": "user_creation_failed", "error": str(e)}
+            )
+            raise SSOAuthenticationError("Failed to create or link user account")
+
+        # Log success (handle both regular and conflict responses)
+        if result.get("conflict"):
+            logger.info(
+                f"SSO authentication detected conflict for {user_info.email}",
+                extra={"category": "sso", "event": "auth_conflict"}
+            )
+        else:
+            logger.info(
+                f"SSO authentication successful for {user_info.email}",
+                extra={
+                    "category": "sso",
+                    "event": "auth_success",
+                    "is_new_user": result["is_new_user"]
+                }
+            )
+
+        return result
     
-    def _validate_state(self, state: str):
-        """Validate CSRF state token"""
+    def _validate_and_consume_state(self, state: str):
+        """Validate and consume CSRF state token (single-use)"""
         if state not in _state_storage:
             raise SSOAuthenticationError("Invalid or expired state parameter")
-        
+
         # Check if state is expired (10 minutes)
         state_data = _state_storage[state]
         if datetime.utcnow() - state_data["created_at"] > timedelta(minutes=10):
             del _state_storage[state]
             raise SSOAuthenticationError("State parameter expired")
+
+        del _state_storage[state]
+
+    @staticmethod
+    def _extract_oauth_error(exc: Exception) -> str:
+        """Extract a meaningful error message from an OAuth-related exception."""
+        if isinstance(exc, httpx.HTTPStatusError):
+            try:
+                body = exc.response.json()
+                error = body.get("error", "")
+                description = body.get("error_description", "")
+                if error and description:
+                    return f"{error} - {description}"
+                if error:
+                    return error
+            except (ValueError, KeyError):
+                pass
+            return f"HTTP {exc.response.status_code} from provider"
+
+        if isinstance(exc, httpx.TimeoutException):
+            return "SSO provider request timed out"
+
+        if isinstance(exc, httpx.ConnectError):
+            return "Could not connect to SSO provider"
+
+        # For ValueError (raised by GitHub provider with parsed error)
+        if isinstance(exc, ValueError):
+            return str(exc)
+
+        return str(exc)
     
     def _validate_email_domain(self, email: str) -> bool:
         """Check if email domain is allowed"""
@@ -449,13 +506,93 @@ class SSOService:
         
         return result
 
-    def test_connection(self) -> Dict[str, bool]:
-        """Test SSO provider connection (for admin dashboard)"""
+    async def test_connection(self) -> Dict:
+        """Test SSO provider connection by validating credentials with the provider.
+
+        Sends a dummy token exchange to detect misconfigurations:
+        - invalid_client -> wrong client ID or secret
+        - redirect_uri_mismatch -> redirect URI not registered with provider
+        - invalid_grant -> credentials and redirect URI are valid (dummy code rejected as expected)
+        """
+        if not settings.SSO_ENABLED:
+            return {"success": False, "message": "SSO is not enabled"}
+
         try:
             provider = create_sso_provider()
-            # Simple connectivity test - just check if we can create auth URL
-            test_state = "test_" + secrets.token_urlsafe(16)
-            auth_url = provider.get_auth_url(test_state)
-            return {"success": True, "message": "SSO provider configuration is valid"}
         except Exception as e:
-            return {"success": False, "message": "SSO test failed"}
+            return {"success": False, "message": f"Provider configuration error: {str(e)}"}
+
+        # Verify we can build an auth URL (basic config check)
+        try:
+            provider.get_auth_url("test_" + secrets.token_urlsafe(16))
+        except Exception as e:
+            return {"success": False, "message": f"Failed to build auth URL: {str(e)}"}
+
+        # Send a dummy token exchange to validate client credentials and redirect URI
+        log_extra = {
+            "category": "sso",
+            "event": "sso_test_connection",
+            "provider": settings.SSO_PROVIDER_TYPE,
+            "redirect_uri": provider.redirect_uri,
+            "token_url": provider.get_token_url(),
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.post(
+                    provider.get_token_url(),
+                    data={
+                        "grant_type": "authorization_code",
+                        "code": "dummy_validation_code",
+                        "client_id": provider.client_id,
+                        "client_secret": provider.client_secret,
+                        "redirect_uri": provider.redirect_uri,
+                    },
+                )
+
+            # Parse the provider's error response
+            try:
+                body = response.json()
+            except (ValueError, KeyError):
+                body = {}
+
+            error = body.get("error", "")
+            error_description = body.get("error_description", "")
+
+            logger.info(
+                f"SSO test connection response: HTTP {response.status_code}, "
+                f"error={error}, description={error_description}",
+                extra={**log_extra, "status_code": response.status_code,
+                       "oauth_error": error, "oauth_error_description": error_description}
+            )
+
+            if error == "invalid_grant":
+                return {
+                    "success": True,
+                    "message": "SSO configuration is valid. Client credentials and redirect URI verified."
+                }
+            elif error == "invalid_client":
+                return {
+                    "success": False,
+                    "message": "Invalid client credentials. Check SSO_CLIENT_ID and SSO_CLIENT_SECRET."
+                }
+            elif error == "redirect_uri_mismatch":
+                return {
+                    "success": False,
+                    "message": f"Redirect URI mismatch. The URI '{provider.redirect_uri}' is not registered with your OAuth provider."
+                }
+            elif error:
+                detail = f"{error}: {error_description}" if error_description else error
+                return {"success": False, "message": f"Provider error: {detail}"}
+            else:
+                return {"success": False, "message": f"Unexpected response (HTTP {response.status_code})"}
+
+        except httpx.TimeoutException:
+            logger.error("SSO test connection timed out", extra=log_extra)
+            return {"success": False, "message": "Connection timed out reaching SSO provider"}
+        except httpx.ConnectError as e:
+            logger.error(f"SSO test connection failed: {str(e)}", extra=log_extra)
+            return {"success": False, "message": "Could not connect to SSO provider. Check network access."}
+        except Exception as e:
+            logger.error(f"SSO test connection error: {str(e)}", extra=log_extra)
+            return {"success": False, "message": f"Connection test failed: {str(e)}"}
