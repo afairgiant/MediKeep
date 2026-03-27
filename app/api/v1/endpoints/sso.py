@@ -320,7 +320,17 @@ async def resolve_github_manual_link(
 async def test_sso_connection(request: Request):
     """Test SSO provider connection (for admin use)"""
     try:
-        result = sso_service.test_connection()
+        result = await sso_service.test_connection()
+        if result["success"]:
+            log_endpoint_access(
+                logger, request, None, "sso_test_connection_success",
+                message=result["message"],
+            )
+        else:
+            log_security_event(
+                logger, "sso_test_connection_failed", request,
+                result["message"],
+            )
         return {"success": result["success"], "message": result["message"]}
     except Exception as e:
         log_endpoint_error(

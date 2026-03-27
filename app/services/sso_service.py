@@ -506,13 +506,93 @@ class SSOService:
         
         return result
 
-    def test_connection(self) -> Dict[str, bool]:
-        """Test SSO provider connection (for admin dashboard)"""
+    async def test_connection(self) -> Dict:
+        """Test SSO provider connection by validating credentials with the provider.
+
+        Sends a dummy token exchange to detect misconfigurations:
+        - invalid_client -> wrong client ID or secret
+        - redirect_uri_mismatch -> redirect URI not registered with provider
+        - invalid_grant -> credentials and redirect URI are valid (dummy code rejected as expected)
+        """
+        if not settings.SSO_ENABLED:
+            return {"success": False, "message": "SSO is not enabled"}
+
         try:
             provider = create_sso_provider()
-            # Simple connectivity test - just check if we can create auth URL
-            test_state = "test_" + secrets.token_urlsafe(16)
-            auth_url = provider.get_auth_url(test_state)
-            return {"success": True, "message": "SSO provider configuration is valid"}
         except Exception as e:
-            return {"success": False, "message": "SSO test failed"}
+            return {"success": False, "message": f"Provider configuration error: {str(e)}"}
+
+        # Verify we can build an auth URL (basic config check)
+        try:
+            provider.get_auth_url("test_" + secrets.token_urlsafe(16))
+        except Exception as e:
+            return {"success": False, "message": f"Failed to build auth URL: {str(e)}"}
+
+        # Send a dummy token exchange to validate client credentials and redirect URI
+        log_extra = {
+            "category": "sso",
+            "event": "sso_test_connection",
+            "provider": settings.SSO_PROVIDER_TYPE,
+            "redirect_uri": provider.redirect_uri,
+            "token_url": provider.get_token_url(),
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.post(
+                    provider.get_token_url(),
+                    data={
+                        "grant_type": "authorization_code",
+                        "code": "dummy_validation_code",
+                        "client_id": provider.client_id,
+                        "client_secret": provider.client_secret,
+                        "redirect_uri": provider.redirect_uri,
+                    },
+                )
+
+            # Parse the provider's error response
+            try:
+                body = response.json()
+            except (ValueError, KeyError):
+                body = {}
+
+            error = body.get("error", "")
+            error_description = body.get("error_description", "")
+
+            logger.info(
+                f"SSO test connection response: HTTP {response.status_code}, "
+                f"error={error}, description={error_description}",
+                extra={**log_extra, "status_code": response.status_code,
+                       "oauth_error": error, "oauth_error_description": error_description}
+            )
+
+            if error == "invalid_grant":
+                return {
+                    "success": True,
+                    "message": "SSO configuration is valid. Client credentials and redirect URI verified."
+                }
+            elif error == "invalid_client":
+                return {
+                    "success": False,
+                    "message": "Invalid client credentials. Check SSO_CLIENT_ID and SSO_CLIENT_SECRET."
+                }
+            elif error == "redirect_uri_mismatch":
+                return {
+                    "success": False,
+                    "message": f"Redirect URI mismatch. The URI '{provider.redirect_uri}' is not registered with your OAuth provider."
+                }
+            elif error:
+                detail = f"{error}: {error_description}" if error_description else error
+                return {"success": False, "message": f"Provider error: {detail}"}
+            else:
+                return {"success": False, "message": f"Unexpected response (HTTP {response.status_code})"}
+
+        except httpx.TimeoutException:
+            logger.error("SSO test connection timed out", extra=log_extra)
+            return {"success": False, "message": "Connection timed out reaching SSO provider"}
+        except httpx.ConnectError as e:
+            logger.error(f"SSO test connection failed: {str(e)}", extra=log_extra)
+            return {"success": False, "message": "Could not connect to SSO provider. Check network access."}
+        except Exception as e:
+            logger.error(f"SSO test connection error: {str(e)}", extra=log_extra)
+            return {"success": False, "message": f"Connection test failed: {str(e)}"}

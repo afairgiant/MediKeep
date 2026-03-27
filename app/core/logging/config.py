@@ -145,29 +145,41 @@ def _get_rotation_method() -> str:
 
 class ConsoleFormatterWithRequestID(logging.Formatter):
     """
-    Custom console formatter that includes request ID for better debugging.
+    Custom console formatter that includes request ID and key extra fields
+    for better debugging in docker logs.
 
-    Format: timestamp level [logger] [req:request_id] message
-    Example: 2025-10-10 19:00:00 INFO [app.middleware] [req:a1b2c3d4] Request started
-
-    This formatter adds a request_id_display attribute to the record for
-    robust formatting without fragile string parsing, as suggested by Copilot AI.
+    Format: timestamp level [logger] [req:request_id] message | key=value ...
+    Example: 2025-10-10 19:00:00 WARNING [sso.endpoint] SSO failed | error=redirect_uri_mismatch event=sso_auth_failed
     """
 
+    # Extra fields to surface in console output when present
+    _CONSOLE_EXTRA_FIELDS = (
+        LogFields.EVENT, LogFields.ERROR, LogFields.CATEGORY,
+        "oauth_error", "oauth_error_description", "redirect_uri",
+        "provider", "status_code", "username",
+    )
+
     def format(self, record: logging.LogRecord) -> str:
-        # Extract request_id from record and create display attribute
         request_id = getattr(record, LogFields.REQUEST_ID, None)
 
         if request_id:
-            # Add a formatted display attribute that's used in the format string
-            # Format: "[req:xxx] " with trailing space
             record.request_id_display = f"[req:{request_id}] "
         else:
-            # Empty string if no request_id (most logs won't have it)
             record.request_id_display = ""
 
-        # Format using the standard formatter (which now includes %(request_id_display)s)
-        return super().format(record)
+        formatted = super().format(record)
+
+        # Append key extra fields for WARNING+ logs (security events, errors)
+        if record.levelno >= logging.WARNING:
+            extras = []
+            for field in self._CONSOLE_EXTRA_FIELDS:
+                value = getattr(record, field, None)
+                if value is not None:
+                    extras.append(f"{field}={value}")
+            if extras:
+                formatted = f"{formatted} | {' '.join(extras)}"
+
+        return formatted
 
 
 class MedicalRecordsJSONFormatter(logging.Formatter):
