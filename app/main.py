@@ -74,7 +74,7 @@ app.add_event_handler("shutdown", shutdown_event)
 @app.get("/health")
 def health():
     """Health check endpoint"""
-    logger.info(
+    logger.debug(
         "Health check requested", extra={"category": "app", "event": "health_check"}
     )
     return {"status": "ok", "app": settings.APP_NAME, "version": settings.VERSION}
