@@ -238,7 +238,12 @@ def log_data_access(
     if count is not None:
         message += f" - {count} records"
 
-    logger.info(message, extra=extra)
+    # Demote read operations to DEBUG to reduce noise in docker logs;
+    # mutations (create/update/delete) stay at INFO for audit visibility
+    if operation.lower() == "read":
+        logger.debug(message, extra=extra)
+    else:
+        logger.info(message, extra=extra)
 
 
 def log_performance(

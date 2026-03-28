@@ -435,6 +435,11 @@ def get_logger(name: str, category: str = "app") -> logging.Logger:
     Returns:
         Configured logger instance
     """
+    # Strip leading 'app.' from module names to avoid doubled prefix
+    # e.g., __name__ = "app.core.logging.middleware" with category "app"
+    # would produce "medical_records.app.app.core.logging.middleware" without this
+    if name.startswith("app."):
+        name = name[4:]
     return logging.getLogger(f"medical_records.{category}.{name}")
 
 
