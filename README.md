@@ -55,8 +55,6 @@ Ensure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compos
 Create a `docker-compose.yml` file with content:
 
 ```yaml
-new
-
 services:
   # PostgreSQL Database Service
   postgres:
