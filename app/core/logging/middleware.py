@@ -38,7 +38,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         skip_paths = [
             "/icon-", "/favicon", ".png", ".jpg", ".jpeg", ".gif", ".svg",
             ".css", ".js", "/static/", "/health", "/manifest.json",
-            "/service-worker.js", "/offline.html", "/frontend-logs/"
+            "/service-worker.js", "/offline.html", "/frontend-logs"
         ]
 
         # Check if we should skip logging for this path
@@ -120,6 +120,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
             # Log the error
             self._log_request_error(
+                request=request,
                 method=method,
                 path=path,
                 error=str(e),
@@ -227,6 +228,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         user_id: Optional[int] = None,
         duration_ms: Optional[int] = None,
         correlation_id: Optional[str] = None,
+        request: Optional[Request] = None,
     ):
         """Log request errors."""
         extra_data = {
@@ -240,6 +242,12 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             "duration": duration_ms,
             "correlation_id": correlation_id,
         }
+
+        # Include request_id if available (set by RequestIDMiddleware)
+        if request:
+            request_id = getattr(request.state, "request_id", None)
+            if request_id:
+                extra_data["request_id"] = request_id
         self.logger.error(
             f"Request failed: {method} {path} - {error}", extra=extra_data
         )
