@@ -133,10 +133,13 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Check if token is expired
+  // Check if token is expired (adjusted for clock skew between server and client)
   const isTokenExpired = tokenExpiry => {
     if (!tokenExpiry) return true;
-    return Date.now() >= tokenExpiry;
+    const parsed = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+    const clockOffset = Number.isFinite(parsed) ? parsed : 0;
+    const adjustedNow = Date.now() + clockOffset * 1000;
+    return adjustedNow >= tokenExpiry;
   };
 
   // Check if user should see patient profile completion prompts (first login only)
@@ -550,6 +553,12 @@ export function AuthProvider({ children }) {
             const payload = JSON.parse(atob(tokenParts[1]));
             if (payload.exp) {
               tokenExpiry = payload.exp * 1000; // Convert from seconds to milliseconds
+            }
+            // Store clock offset for client-side expiry checks (handles clock skew between server and client)
+            const issuedAt = Number(payload.iat);
+            if (Number.isFinite(issuedAt)) {
+              const clockOffset = Math.round(issuedAt - Date.now() / 1000);
+              localStorage.setItem('medapp_clockOffset', clockOffset.toString());
             }
           }
         } catch (e) {

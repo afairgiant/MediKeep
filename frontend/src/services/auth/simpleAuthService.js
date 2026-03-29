@@ -133,7 +133,11 @@ class SimpleAuthService {
     const payload = this.parseJWT(targetToken);
     if (!payload || !payload.exp) return false;
 
-    return payload.exp > Math.floor(Date.now() / 1000);
+    const currentTime = Math.floor(Date.now() / 1000);
+    const parsed = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+    const clockOffset = Number.isFinite(parsed) ? parsed : 0;
+    const serverTime = currentTime + clockOffset;
+    return payload.exp > serverTime;
   }
   // Login user
   async login(credentials) {
@@ -211,6 +215,13 @@ class SimpleAuthService {
 
       // Store user
       secureStorage.setJSON(this.userKey, user);
+
+      // Store clock offset for client-side expiry checks (handles clock skew between server and client)
+      const issuedAt = Number(payload.iat);
+      if (Number.isFinite(issuedAt)) {
+        const clockOffset = Math.round(issuedAt - Date.now() / 1000);
+        localStorage.setItem('medapp_clockOffset', clockOffset.toString());
+      }
 
       return {
         success: true,

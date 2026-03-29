@@ -28,22 +28,28 @@ class BaseApiService {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const currentTime = Date.now() / 1000;
+        // Adjust for clock skew between server and client PCs
+        const parsedOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+        const clockOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
+        const serverTime = currentTime + clockOffset;
 
         // Check if token expires soon (within 5 minutes)
-        if (payload.exp - currentTime < 300) {
+        if (payload.exp - serverTime < 300) {
           logger.warn('api_token_warning', {
             message: 'Token expires soon, consider refresh',
-            expiresIn: payload.exp - currentTime,
-            currentTime
+            expiresIn: payload.exp - serverTime,
+            serverTime,
+            clockOffset
           });
         }
 
         // Check if token is already expired
-        if (payload.exp < currentTime) {
+        if (payload.exp < serverTime) {
           logger.error('api_token_error', {
             message: 'Token expired, removing',
             tokenExpired: payload.exp,
-            currentTime
+            serverTime,
+            clockOffset
           });
           secureStorage.removeItem('token');
           return { 'Content-Type': 'application/json' };
@@ -145,12 +151,15 @@ class BaseApiService {
 
           const payload = JSON.parse(atob(token.split('.')[1]));
           const currentTime = Date.now() / 1000;
+          const clockOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+          const serverTime = currentTime + clockOffset;
 
-          if (payload.exp < currentTime) {
+          if (payload.exp < serverTime) {
             logger.error('api_auth_error', {
               message: 'Token expired for admin request',
               tokenExpired: payload.exp,
-              currentTime,
+              serverTime,
+              clockOffset,
               url,
               action: 'redirect_to_login'
             });
@@ -192,7 +201,10 @@ class BaseApiService {
 
         const payload = JSON.parse(atob(token.split('.')[1]));
         const currentTime = Date.now() / 1000;
-        if (payload.exp < currentTime) {
+        const parsedOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+        const clockOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
+        const serverTime = currentTime + clockOffset;
+        if (payload.exp < serverTime) {
           secureStorage.removeItem('token');
           window.location.href = '/login';
           return true;
