@@ -133,12 +133,14 @@ class UserPreferences(Base):
     )  # 'local', 'paperless', or 'papra'
     paperless_auto_sync = Column(Boolean, default=False, nullable=False)
     paperless_sync_tags = Column(Boolean, default=True, nullable=False)
+    paperless_connection_verified = Column(Boolean, default=False, nullable=False)
 
     # Papra integration fields
     papra_enabled = Column(Boolean, default=False, nullable=False)
     papra_url = Column(String(500), nullable=True)
     papra_api_token_encrypted = Column(Text, nullable=True)  # Encrypted API token
     papra_organization_id = Column(String(255), nullable=True)  # Default organization ID
+    papra_connection_verified = Column(Boolean, default=False, nullable=False)
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)

@@ -17,6 +17,7 @@ const ConnectionConfigCard = ({
   onConnectionTest,
   testingConnection = false,
   serverInfo = null,
+  disabled = false,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showApiToken, setShowApiToken] = useState(false);
@@ -282,7 +283,7 @@ const ConnectionConfigCard = ({
 
   const statusInfo = getConnectionStatusInfo();
   // Can test if we have URL (credentials can be saved or provided)
-  const canTest = preferences.paperless_url && !testingConnection;
+  const canTest = preferences.paperless_url && !testingConnection && !disabled;
 
   return (
     <Card>
@@ -317,7 +318,7 @@ const ConnectionConfigCard = ({
               placeholder="https://paperless.example.com"
               value={preferences.paperless_url || ''}
               onChange={handleUrlChange}
-              disabled={testingConnection}
+              disabled={disabled || testingConnection}
             />
             {validationErrors.url && (
               <div className="paperless-form-error">{validationErrors.url}</div>
@@ -342,7 +343,7 @@ const ConnectionConfigCard = ({
                     value="token"
                     checked={authMethod === 'token'}
                     onChange={() => handleAuthMethodChange('token')}
-                    disabled={testingConnection}
+                    disabled={disabled || testingConnection}
                   />
                   <span>API Token (Recommended)</span>
                 </label>
@@ -353,7 +354,7 @@ const ConnectionConfigCard = ({
                     value="credentials"
                     checked={authMethod === 'credentials'}
                     onChange={() => handleAuthMethodChange('credentials')}
-                    disabled={testingConnection}
+                    disabled={disabled || testingConnection}
                   />
                   <span>Username & Password</span>
                 </label>
@@ -382,13 +383,13 @@ const ConnectionConfigCard = ({
                   placeholder="Enter your API token"
                   value={preferences.paperless_api_token || ''}
                   onChange={handleApiTokenChange}
-                  disabled={testingConnection}
+                  disabled={disabled || testingConnection}
                 />
                 <button
                   type="button"
                   className="paperless-token-toggle"
                   onClick={() => setShowApiToken(!showApiToken)}
-                  disabled={testingConnection}
+                  disabled={disabled || testingConnection}
                   aria-label={showApiToken ? 'Hide API token' : 'Show API token'}
                 >
                   {showApiToken ? '👁️' : '👁️‍🗨️'}
@@ -423,7 +424,7 @@ const ConnectionConfigCard = ({
                   placeholder="Enter your username"
                   value={preferences.paperless_username || ''}
                   onChange={handleUsernameChange}
-                  disabled={testingConnection}
+                  disabled={disabled || testingConnection}
                 />
                 {validationErrors.username && (
                   <div className="paperless-form-error">
@@ -450,13 +451,13 @@ const ConnectionConfigCard = ({
                     placeholder="Enter your password"
                     value={preferences.paperless_password || ''}
                     onChange={handlePasswordChange}
-                    disabled={testingConnection}
+                    disabled={disabled || testingConnection}
                   />
                   <button
                     type="button"
                     className="paperless-token-toggle"
                     onClick={() => setShowPassword(!showPassword)}
-                    disabled={testingConnection}
+                    disabled={disabled || testingConnection}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? '👁️' : '👁️‍🗨️'}

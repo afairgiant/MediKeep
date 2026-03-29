@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../ui';
 import { getStorageUsageStats } from '../../services/api/paperlessApi.jsx';
 import frontendLogger from '../../services/frontendLogger';
+import '../../styles/components/PaperlessSettings.css';
 
 /**
  * StoragePreferencesCard Component
@@ -55,16 +56,6 @@ const StoragePreferencesCard = ({
       default_storage_backend: backend
     };
     
-    // If switching to paperless, enable paperless integration
-    if (backend === 'paperless') {
-      updates.paperless_enabled = true;
-    }
-
-    // If switching to papra, enable papra integration
-    if (backend === 'papra') {
-      updates.papra_enabled = true;
-    }
-
     onUpdate(updates);
     
     frontendLogger.logInfo('Storage backend preference changed', {
