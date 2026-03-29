@@ -138,6 +138,18 @@ const Settings = () => {
     localPreferences, userPreferences, isDocumentSetting
   ).length > 0;
 
+  // Connection-ready checks for storage backend selection.
+  // Requires enabled + a verified connection (successful test persisted server-side).
+  const paperlessConnectionReady = !!(
+    localPreferences?.paperless_enabled &&
+    localPreferences?.paperless_connection_verified
+  );
+
+  const papraConnectionReady = !!(
+    localPreferences?.papra_enabled &&
+    localPreferences?.papra_connection_verified
+  );
+
   const handleUnitSystemChange = newUnitSystem => {
     setLocalPreferences(prev => ({
       ...prev,
@@ -674,8 +686,8 @@ const Settings = () => {
         <StoragePreferencesCard
           preferences={localPreferences}
           onUpdate={(updates) => setLocalPreferences(prev => ({ ...prev, ...updates }))}
-          connectionEnabled={localPreferences?.paperless_enabled && localPreferences?.paperless_url}
-          papraConnectionEnabled={localPreferences?.papra_enabled && localPreferences?.papra_url && localPreferences?.papra_has_token}
+          connectionEnabled={paperlessConnectionReady}
+          papraConnectionEnabled={papraConnectionReady}
         />
 
         {/* Paperless-ngx Connection Settings - Collapsible */}
@@ -686,7 +698,9 @@ const Settings = () => {
                 {paperlessOpen ? <IconChevronDown size={18} /> : <IconChevronRight size={18} />}
                 <Text fw={600} size="md">Paperless-ngx</Text>
                 {localPreferences?.paperless_enabled && (
-                  <Text size="xs" c="green" fw={500}>Enabled</Text>
+                  <Text size="xs" c={localPreferences?.paperless_connection_verified ? 'green' : 'yellow'} fw={500}>
+                    {localPreferences?.paperless_connection_verified ? 'Connected' : 'Enabled'}
+                  </Text>
                 )}
               </Group>
               <Text size="sm" c="dimmed">
@@ -713,7 +727,9 @@ const Settings = () => {
                 {papraOpen ? <IconChevronDown size={18} /> : <IconChevronRight size={18} />}
                 <Text fw={600} size="md">Papra</Text>
                 {localPreferences?.papra_enabled && (
-                  <Text size="xs" c="green" fw={500}>Enabled</Text>
+                  <Text size="xs" c={localPreferences?.papra_connection_verified ? 'green' : 'yellow'} fw={500}>
+                    {localPreferences?.papra_connection_verified ? 'Connected' : 'Enabled'}
+                  </Text>
                 )}
               </Group>
               <Text size="sm" c="dimmed">
@@ -726,7 +742,6 @@ const Settings = () => {
               <PapraSettings
                 settings={localPreferences}
                 onSettingChange={(key, value) => setLocalPreferences(prev => ({ ...prev, [key]: value }))}
-                onSave={handleSavePreferences}
                 loading={savingPreferences}
               />
             </div>

@@ -82,6 +82,7 @@ def _build_settings_response(prefs: UserPreferences) -> Dict[str, Any]:
         "papra_enabled": prefs.papra_enabled or False,
         "papra_url": prefs.papra_url or "",
         "papra_has_token": bool(prefs.papra_api_token_encrypted),
+        "papra_connection_verified": prefs.papra_connection_verified or False,
         "papra_token_preview": _mask_token(raw_token),
         "papra_organization_id": prefs.papra_organization_id or "",
     }
@@ -153,6 +154,11 @@ async def test_papra_connection(
         if success:
             # Also fetch organizations so the frontend can populate the selector
             organizations = await auth.list_organizations()
+
+            # Mark connection as verified in the database
+            prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
+            if prefs:
+                user_preferences.update(db, db_obj=prefs, obj_in={"papra_connection_verified": True})
 
             log_endpoint_access(
                 logger,
@@ -371,6 +377,7 @@ async def get_papra_settings(
                 "papra_enabled": False,
                 "papra_url": "",
                 "papra_has_token": False,
+                "papra_connection_verified": False,
                 "papra_token_preview": None,
                 "papra_organization_id": "",
             }
@@ -481,6 +488,10 @@ async def update_papra_settings(
                 )
 
             update_data["papra_api_token_encrypted"] = encrypted
+
+        # Reset connection verified only if URL changed (new server = must re-verify)
+        if "papra_url" in update_data and update_data["papra_url"] != (prefs.papra_url or ""):
+            update_data["papra_connection_verified"] = False
 
         updated_prefs = user_preferences.update(db, db_obj=prefs, obj_in=update_data)
 

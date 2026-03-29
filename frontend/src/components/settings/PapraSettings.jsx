@@ -1,17 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import {
-  TextInput,
-  PasswordInput,
-  Switch,
-  Button,
-  Select,
-  Group,
-  Stack,
-  Alert,
-  LoadingOverlay,
-} from '@mantine/core';
+import { Select, Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
+import IntegrationSettingsCard from './IntegrationSettingsCard';
 import { testConnection, getOrganizations } from '../../services/api/papraApi.jsx';
 import { PAPRA_SETTING_KEYS } from '../../constants/papraSettings.jsx';
 import logger from '../../services/logger';
@@ -19,19 +10,11 @@ import logger from '../../services/logger';
 /**
  * PapraSettings Component
  *
- * Settings card for configuring the Papra document management integration.
- * Supports enabling/disabling the integration, URL and token configuration,
- * connection testing, and organization selection.
- *
- * Usage:
- *   <PapraSettings
- *     settings={settings}
- *     onSettingChange={(key, value) => handleChange(key, value)}
- *     onSave={() => handleSave()}
- *     loading={isSaving}
- *   />
+ * Manages Papra integration settings using the shared
+ * IntegrationSettingsCard template. Adds organization selector
+ * as a Papra-specific extra after successful connection.
  */
-const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
+const PapraSettings = ({ settings, onSettingChange, loading }) => {
   const { t } = useTranslation('common');
 
   const [testingConnection, setTestingConnection] = useState(false);
@@ -44,6 +27,7 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
   const papraApiToken = settings?.[PAPRA_SETTING_KEYS.apiToken] ?? '';
   const papraOrganizationId = settings?.[PAPRA_SETTING_KEYS.organizationId] ?? '';
   const papraHasSavedToken = settings?.papra_has_token ?? false;
+  const isVerified = settings?.papra_connection_verified ?? false;
   const hasConnection = papraEnabled && papraUrl && papraHasSavedToken;
   const orgsLoadedRef = useRef(false);
 
@@ -79,9 +63,7 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
   }, [hasConnection]);
 
   const handleTestConnection = async () => {
-    if (!papraUrl || (!papraApiToken && !papraHasSavedToken)) {
-      return;
-    }
+    if (!papraUrl || (!papraApiToken && !papraHasSavedToken)) return;
 
     setTestingConnection(true);
     setConnectionStatus(null);
@@ -89,7 +71,6 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
     setOrganizations([]);
 
     try {
-      // Send token if available in form, otherwise backend uses saved credentials
       const result = await testConnection({
         papra_url: papraUrl,
         papra_api_token: papraApiToken || '',
@@ -98,21 +79,15 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
       if (result && result.status === 'success') {
         setConnectionStatus('success');
         setConnectionMessage(t('settings.papra.connectionSuccess'));
-
-        logger.info('papra_connection_test_success', {
-          component: 'PapraSettings',
-        });
+        // Optimistically mark verified so StoragePreferencesCard unlocks immediately
+        onSettingChange('papra_connection_verified', true);
+        logger.info('papra_connection_test_success', { component: 'PapraSettings' });
 
         const orgList = result.organizations || [];
-        logger.info('papra_organizations_received', {
-          component: 'PapraSettings',
-          count: orgList.length,
-        });
         setOrganizations(mapOrganizations(orgList));
       } else {
         setConnectionStatus('error');
         setConnectionMessage(result?.message || t('settings.papra.connectionFailed'));
-
         logger.warn('papra_connection_test_failed', {
           component: 'PapraSettings',
           message: result?.message,
@@ -121,7 +96,6 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
     } catch (error) {
       setConnectionStatus('error');
       setConnectionMessage(error.message || t('settings.papra.connectionFailed'));
-
       logger.error('papra_connection_test_error', {
         component: 'PapraSettings',
         error: error.message,
@@ -131,95 +105,50 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
     }
   };
 
-  const canTestConnection = Boolean(papraUrl && (papraApiToken || papraHasSavedToken));
+  const handleEnabledChange = (checked) => {
+    onSettingChange(PAPRA_SETTING_KEYS.enabled, checked);
+    // If disabling and currently the active backend, fall back to local
+    if (!checked && settings?.default_storage_backend === 'papra') {
+      onSettingChange('default_storage_backend', 'local');
+    }
+  };
 
   return (
-    <div style={{ position: 'relative' }}>
-      <LoadingOverlay visible={loading} />
-
-      <Stack gap="md">
-        <Switch
-          label={t('settings.papra.enabled')}
-          checked={papraEnabled}
-          onChange={(event) =>
-            onSettingChange(PAPRA_SETTING_KEYS.enabled, event.currentTarget.checked)
-          }
-        />
-
-        <TextInput
-          label={t('settings.papra.url')}
-          placeholder={t('settings.papra.urlPlaceholder')}
-          value={papraUrl}
-          onChange={(event) =>
-            onSettingChange(PAPRA_SETTING_KEYS.url, event.currentTarget.value)
-          }
-          disabled={!papraEnabled}
-        />
-
-        <PasswordInput
-          label={t('settings.papra.apiToken')}
-          placeholder={papraHasSavedToken && !papraApiToken
-            ? 'Token saved - leave blank to keep current'
-            : t('settings.papra.apiTokenPlaceholder')}
-          value={papraApiToken}
-          onChange={(event) =>
-            onSettingChange(PAPRA_SETTING_KEYS.apiToken, event.currentTarget.value)
-          }
-          disabled={!papraEnabled}
-        />
-
-        {(hasConnection || connectionStatus === 'success') && (
+    <IntegrationSettingsCard
+      name="Papra"
+      enabled={papraEnabled}
+      onEnabledChange={handleEnabledChange}
+      url={papraUrl}
+      onUrlChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.url, value)}
+      urlPlaceholder={t('settings.papra.urlPlaceholder')}
+      token={papraApiToken}
+      onTokenChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.apiToken, value)}
+      tokenPlaceholder={t('settings.papra.apiTokenPlaceholder')}
+      hasTokenSaved={papraHasSavedToken}
+      onTestConnection={handleTestConnection}
+      testingConnection={testingConnection}
+      connectionStatus={connectionStatus}
+      connectionMessage={connectionMessage}
+      loading={loading}
+      renderExtras={({ connectionStatus: status }) =>
+        (hasConnection || status === 'success' || isVerified) && (
           <Select
             label={t('settings.papra.organization')}
             placeholder={t('settings.papra.organizationPlaceholder')}
             data={organizations}
             value={papraOrganizationId || null}
-            onChange={(value) =>
-              onSettingChange(PAPRA_SETTING_KEYS.organizationId, value ?? '')
-            }
+            onChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.organizationId, value ?? '')}
             disabled={!papraEnabled}
           />
-        )}
-
-        {connectionStatus === 'success' && (
-          <Alert color="green" variant="light">
-            {connectionMessage}
-          </Alert>
-        )}
-
-        {connectionStatus === 'error' && (
-          <Alert color="red" variant="light">
-            {connectionMessage}
-          </Alert>
-        )}
-
-        <Group justify="flex-end">
-          <Button
-            variant="default"
-            onClick={handleTestConnection}
-            loading={testingConnection}
-            disabled={!papraEnabled || !canTestConnection}
-          >
-            {t('settings.papra.testConnection')}
-          </Button>
-
-          <Button onClick={onSave} loading={loading} disabled={!papraEnabled}>
-            {t('common.save', 'Save')}
-          </Button>
-        </Group>
-      </Stack>
-    </div>
+        )
+      }
+    />
   );
 };
 
 PapraSettings.propTypes = {
-  /** Current settings object keyed by backend setting names */
   settings: PropTypes.object.isRequired,
-  /** Callback invoked when a single setting value changes */
   onSettingChange: PropTypes.func.isRequired,
-  /** Callback invoked when the user requests a save */
-  onSave: PropTypes.func.isRequired,
-  /** Whether a save operation is in progress */
   loading: PropTypes.bool,
 };
 

@@ -357,6 +357,11 @@ async def test_paperless_connection(
             result["used_saved_credentials"] = use_saved_credentials
             logger.debug(f"Final result with auth method: {result}")
             
+            # Mark connection as verified in the database
+            prefs = user_preferences.get_by_user_id(db, user_id=current_user.id)
+            if prefs:
+                user_preferences.update(db, db_obj=prefs, obj_in={"paperless_connection_verified": True})
+
             log_external_service(
                 logger,
                 service="paperless",
@@ -603,6 +608,7 @@ async def get_paperless_settings(
                 "paperless_url": "",
                 "paperless_has_token": False,
                 "paperless_has_credentials": False,
+                "paperless_connection_verified": False,
                 "paperless_auth_method": "none",
                 "default_storage_backend": "local",
                 "paperless_auto_sync": False,
@@ -610,6 +616,7 @@ async def get_paperless_settings(
                 "papra_enabled": False,
                 "papra_url": "",
                 "papra_has_token": False,
+                "papra_connection_verified": False,
                 "papra_organization_id": "",
             }
 
@@ -619,6 +626,7 @@ async def get_paperless_settings(
             "paperless_url": user_prefs.paperless_url or "",
             "paperless_has_token": bool(user_prefs.paperless_api_token_encrypted),
             "paperless_has_credentials": bool(user_prefs.paperless_username_encrypted and user_prefs.paperless_password_encrypted),
+            "paperless_connection_verified": user_prefs.paperless_connection_verified or False,
             "paperless_auth_method": get_preferred_auth_method(user_prefs),
             "default_storage_backend": user_prefs.default_storage_backend or "local",
             "paperless_auto_sync": user_prefs.paperless_auto_sync or False,
@@ -626,6 +634,7 @@ async def get_paperless_settings(
             "papra_enabled": user_prefs.papra_enabled or False,
             "papra_url": user_prefs.papra_url or "",
             "papra_has_token": bool(user_prefs.papra_api_token_encrypted),
+            "papra_connection_verified": user_prefs.papra_connection_verified or False,
             "papra_organization_id": user_prefs.papra_organization_id or "",
         }
     
@@ -704,10 +713,14 @@ async def update_paperless_settings(
             
         if "paperless_auto_sync" in settings:
             update_data["paperless_auto_sync"] = settings["paperless_auto_sync"]
-            
+
         if "paperless_sync_tags" in settings:
             update_data["paperless_sync_tags"] = settings["paperless_sync_tags"]
-        
+
+        # Reset connection verified only if URL changed (new server = must re-verify)
+        if "paperless_url" in update_data and update_data["paperless_url"] != (user_prefs.paperless_url or ""):
+            update_data["paperless_connection_verified"] = False
+
         # Update preferences
         updated_prefs = user_preferences.update(db, db_obj=user_prefs, obj_in=update_data)
         
@@ -722,6 +735,7 @@ async def update_paperless_settings(
             "paperless_url": updated_prefs.paperless_url or "",
             "paperless_has_token": bool(updated_prefs.paperless_api_token_encrypted),
             "paperless_has_credentials": bool(updated_prefs.paperless_username_encrypted and updated_prefs.paperless_password_encrypted),
+            "paperless_connection_verified": updated_prefs.paperless_connection_verified or False,
             "paperless_auth_method": get_preferred_auth_method(updated_prefs),
             "default_storage_backend": updated_prefs.default_storage_backend or "local",
             "paperless_auto_sync": updated_prefs.paperless_auto_sync or False,
