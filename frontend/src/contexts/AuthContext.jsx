@@ -136,7 +136,8 @@ export function AuthProvider({ children }) {
   // Check if token is expired (adjusted for clock skew between server and client)
   const isTokenExpired = tokenExpiry => {
     if (!tokenExpiry) return true;
-    const clockOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+    const parsed = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+    const clockOffset = Number.isFinite(parsed) ? parsed : 0;
     const adjustedNow = Date.now() + clockOffset * 1000;
     return adjustedNow >= tokenExpiry;
   };
@@ -554,8 +555,9 @@ export function AuthProvider({ children }) {
               tokenExpiry = payload.exp * 1000; // Convert from seconds to milliseconds
             }
             // Store clock offset for client-side expiry checks (handles clock skew between server and client)
-            if (payload.iat) {
-              const clockOffset = Math.round(payload.iat - Date.now() / 1000);
+            const issuedAt = Number(payload.iat);
+            if (Number.isFinite(issuedAt)) {
+              const clockOffset = Math.round(issuedAt - Date.now() / 1000);
               localStorage.setItem('medapp_clockOffset', clockOffset.toString());
             }
           }

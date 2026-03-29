@@ -32,6 +32,31 @@ class TestAuthEndpoints:
         assert data["token_type"] == "bearer"
         # Token response doesn't include user data, just the token
 
+    def test_login_token_contains_iat_claim(self, client: TestClient, db_session: Session):
+        """Test that JWT tokens include an iat (issued-at) claim for clock skew detection."""
+        import base64
+        import json
+
+        user_data = create_random_user(db_session)
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]}
+        )
+
+        assert response.status_code == 200
+        token = response.json()["access_token"]
+
+        # Decode JWT payload (no signature verification needed for claim check)
+        payload_b64 = token.split(".")[1]
+        # Add padding if needed
+        payload_b64 += "=" * (4 - len(payload_b64) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64))
+
+        assert "iat" in payload, "JWT must include 'iat' claim for client clock skew handling"
+        assert isinstance(payload["iat"], (int, float)), "'iat' must be a numeric timestamp"
+        assert "exp" in payload
+        assert payload["iat"] <= payload["exp"], "'iat' must not be after 'exp'"
+
     def test_login_invalid_credentials(self, client: TestClient):
         """Test login with invalid credentials."""
         response = client.post(

@@ -29,7 +29,8 @@ class BaseApiService {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const currentTime = Date.now() / 1000;
         // Adjust for clock skew between server and client PCs
-        const clockOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+        const parsedOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+        const clockOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
         const serverTime = currentTime + clockOffset;
 
         // Check if token expires soon (within 5 minutes)
@@ -200,7 +201,8 @@ class BaseApiService {
 
         const payload = JSON.parse(atob(token.split('.')[1]));
         const currentTime = Date.now() / 1000;
-        const clockOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+        const parsedOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+        const clockOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
         const serverTime = currentTime + clockOffset;
         if (payload.exp < serverTime) {
           secureStorage.removeItem('token');

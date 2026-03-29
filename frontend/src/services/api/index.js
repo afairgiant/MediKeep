@@ -92,7 +92,8 @@ class ApiService {
 
         const currentTime = Date.now() / 1000;
         // Adjust for clock skew between server and client PCs
-        const clockOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+        const parsedOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
+        const clockOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
         const serverTime = currentTime + clockOffset;
         if (payload.exp < serverTime) {
           logger.warn('Token expired, removing from storage');
