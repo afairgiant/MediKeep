@@ -212,6 +212,12 @@ class SimpleAuthService {
       // Store user
       secureStorage.setJSON(this.userKey, user);
 
+      // Store clock offset for client-side expiry checks (handles clock skew between server and client)
+      if (payload.iat) {
+        const clockOffset = Math.round(payload.iat - Date.now() / 1000);
+        localStorage.setItem('medapp_clockOffset', clockOffset.toString());
+      }
+
       return {
         success: true,
         user,
