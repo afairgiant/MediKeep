@@ -78,6 +78,8 @@ const PaperlessSettings = ({
       if (result.status === 'connected') {
         setConnectionStatus('success');
         setConnectionMessage('Connected successfully');
+        // Optimistically mark verified so StoragePreferencesCard unlocks immediately
+        handleUpdate({ paperless_connection_verified: true });
         frontendLogger.logInfo('Paperless connection test successful', {
           component: 'PaperlessSettings',
           authMethod: result.auth_method,
@@ -105,6 +107,7 @@ const PaperlessSettings = ({
   const paperlessEnabled = preferences.paperless_enabled ?? false;
   const hasTokenSaved = preferences.paperless_has_token ?? false;
   const hasCredentialsSaved = preferences.paperless_has_credentials ?? false;
+  const isVerified = preferences.paperless_connection_verified ?? false;
 
   return (
     <IntegrationSettingsCard
@@ -117,6 +120,7 @@ const PaperlessSettings = ({
       token={authMethod === 'token' ? (preferences.paperless_api_token || '') : ''}
       onTokenChange={(value) => handleUpdate({ paperless_api_token: value })}
       hasTokenSaved={hasTokenSaved}
+      hasAlternateAuth={authMethod === 'credentials' && ((preferences.paperless_username && preferences.paperless_password) || hasCredentialsSaved)}
       onTestConnection={handleTestConnection}
       testingConnection={testingConnection}
       connectionStatus={connectionStatus}
@@ -161,12 +165,12 @@ const PaperlessSettings = ({
         </>
       )}
       renderExtras={({ connectionStatus: status }) =>
-        status === 'success' && (
+        (status === 'success' || isVerified) && (
           <>
             <Switch
               label="Enable automatic sync status checking"
               description="Automatically check if documents still exist in Paperless when pages load"
-              checked={preferences.paperless_auto_sync ?? true}
+              checked={preferences.paperless_auto_sync ?? false}
               onChange={(e) => handleUpdate({ paperless_auto_sync: e.currentTarget.checked })}
             />
             <Switch

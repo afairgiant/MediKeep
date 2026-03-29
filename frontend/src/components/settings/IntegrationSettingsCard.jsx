@@ -7,8 +7,17 @@ import {
   Group,
   Stack,
   Alert,
-  Text,
 } from '@mantine/core';
+
+const isLocalHostname = (hostname) => {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+  if (hostname.startsWith('192.168.') || hostname.startsWith('10.')) return true;
+  if (hostname.startsWith('172.')) {
+    const second = parseInt(hostname.split('.')[1], 10);
+    if (second >= 16 && second <= 31) return true;
+  }
+  return false;
+};
 
 /**
  * IntegrationSettingsCard
@@ -18,7 +27,7 @@ import {
  * and connection status. Integration-specific sections are passed via render props.
  *
  * @param {Object} props
- * @param {string} props.name - Display name of the integration (e.g. "Paperless-ngx")
+ * @param {string} props.name - Display name of the integration
  * @param {boolean} props.enabled - Whether the integration is enabled
  * @param {function} props.onEnabledChange - Callback when enable toggle changes
  * @param {string} props.url - Server URL value
@@ -28,13 +37,14 @@ import {
  * @param {function} props.onTokenChange - Callback when token changes
  * @param {string} [props.tokenPlaceholder] - Token input placeholder text
  * @param {boolean} props.hasTokenSaved - Whether a token is saved server-side
+ * @param {boolean} [props.hasAlternateAuth] - Whether alternate auth exists (e.g. username/password)
  * @param {function} props.onTestConnection - Callback to trigger connection test
  * @param {boolean} props.testingConnection - Whether a test is in progress
  * @param {string|null} props.connectionStatus - 'success', 'error', or null
  * @param {string} [props.connectionMessage] - Message to show with connection status
  * @param {function} [props.validateUrl] - Custom URL validator, returns error string or null
- * @param {function} [props.renderAuthExtras] - Render prop for extra auth fields (e.g. username/password)
- * @param {function} [props.renderExtras] - Render prop for integration-specific sections after connection
+ * @param {function} [props.renderAuthExtras] - Render prop for extra auth fields
+ * @param {function} [props.renderExtras] - Render prop for integration-specific sections
  * @param {boolean} [props.loading] - Whether a save operation is in progress
  */
 const IntegrationSettingsCard = ({
@@ -48,6 +58,7 @@ const IntegrationSettingsCard = ({
   onTokenChange,
   tokenPlaceholder,
   hasTokenSaved = false,
+  hasAlternateAuth = false,
   onTestConnection,
   testingConnection = false,
   connectionStatus = null,
@@ -65,12 +76,7 @@ const IntegrationSettingsCard = ({
     if (!value) return 'URL is required';
     try {
       const parsed = new URL(value);
-      const isLocal =
-        parsed.hostname === 'localhost' ||
-        parsed.hostname === '127.0.0.1' ||
-        parsed.hostname.startsWith('192.168.') ||
-        parsed.hostname.startsWith('10.');
-      if (!isLocal && parsed.protocol !== 'https:') {
+      if (!isLocalHostname(parsed.hostname) && parsed.protocol !== 'https:') {
         return 'External URLs must use HTTPS';
       }
     } catch {
@@ -103,8 +109,8 @@ const IntegrationSettingsCard = ({
       setUrlError(uErr);
       return;
     }
-    // Token is optional if saved credentials exist
-    if (!token && !hasTokenSaved) {
+    // Token is optional if saved credentials or alternate auth (e.g. username/password) exists
+    if (!token && !hasTokenSaved && !hasAlternateAuth) {
       setTokenError('API token is required');
       return;
     }
@@ -113,8 +119,9 @@ const IntegrationSettingsCard = ({
     onTestConnection();
   };
 
-  const canTest = enabled && url && !testingConnection;
-  const disabled = !enabled;
+  const busy = loading || testingConnection;
+  const disabled = !enabled || loading;
+  const canTest = enabled && url && !busy;
 
   return (
     <Stack gap="md">
@@ -122,6 +129,7 @@ const IntegrationSettingsCard = ({
         label={`Enable ${name} integration`}
         checked={enabled}
         onChange={(event) => onEnabledChange(event.currentTarget.checked)}
+        disabled={loading}
       />
 
       <TextInput

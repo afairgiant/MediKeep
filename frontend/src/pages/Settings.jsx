@@ -742,7 +742,6 @@ const Settings = () => {
               <PapraSettings
                 settings={localPreferences}
                 onSettingChange={(key, value) => setLocalPreferences(prev => ({ ...prev, [key]: value }))}
-                onSave={handleSavePreferences}
                 loading={savingPreferences}
               />
             </div>

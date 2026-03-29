@@ -14,7 +14,7 @@ import logger from '../../services/logger';
  * IntegrationSettingsCard template. Adds organization selector
  * as a Papra-specific extra after successful connection.
  */
-const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
+const PapraSettings = ({ settings, onSettingChange, loading }) => {
   const { t } = useTranslation('common');
 
   const [testingConnection, setTestingConnection] = useState(false);
@@ -27,6 +27,7 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
   const papraApiToken = settings?.[PAPRA_SETTING_KEYS.apiToken] ?? '';
   const papraOrganizationId = settings?.[PAPRA_SETTING_KEYS.organizationId] ?? '';
   const papraHasSavedToken = settings?.papra_has_token ?? false;
+  const isVerified = settings?.papra_connection_verified ?? false;
   const hasConnection = papraEnabled && papraUrl && papraHasSavedToken;
   const orgsLoadedRef = useRef(false);
 
@@ -78,6 +79,8 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
       if (result && result.status === 'success') {
         setConnectionStatus('success');
         setConnectionMessage(t('settings.papra.connectionSuccess'));
+        // Optimistically mark verified so StoragePreferencesCard unlocks immediately
+        onSettingChange('papra_connection_verified', true);
         logger.info('papra_connection_test_success', { component: 'PapraSettings' });
 
         const orgList = result.organizations || [];
@@ -128,7 +131,7 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
       connectionMessage={connectionMessage}
       loading={loading}
       renderExtras={({ connectionStatus: status }) =>
-        (hasConnection || status === 'success') && (
+        (hasConnection || status === 'success' || isVerified) && (
           <Select
             label={t('settings.papra.organization')}
             placeholder={t('settings.papra.organizationPlaceholder')}
@@ -146,7 +149,6 @@ const PapraSettings = ({ settings, onSettingChange, onSave, loading }) => {
 PapraSettings.propTypes = {
   settings: PropTypes.object.isRequired,
   onSettingChange: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
   loading: PropTypes.bool,
 };
 
