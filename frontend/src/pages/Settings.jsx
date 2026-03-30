@@ -233,38 +233,14 @@ const Settings = () => {
         const generalResponse = await updateUserPreferences(generalFields);
         updatedPreferences = { ...updatedPreferences, ...generalResponse };
 
-        // Check if a new token was returned (happens when session timeout changes)
-        if (generalResponse.new_token) {
-          frontendLogger.logInfo('New token received after session timeout change', {
+        // Update session timeout in AuthContext if it changed
+        if (generalFields.session_timeout_minutes && generalResponse.session_timeout_minutes) {
+          const { secureStorage } = await import('../utils/secureStorage');
+          await secureStorage.setItem('sessionTimeoutMinutes', generalResponse.session_timeout_minutes.toString());
+
+          frontendLogger.logInfo('Session timeout preference updated', {
             component: 'Settings',
             newTimeout: generalResponse.session_timeout_minutes
-          });
-
-          // Update the stored token with the new one
-          const { secureStorage } = await import('../utils/secureStorage');
-          await secureStorage.setItem('token', generalResponse.new_token);
-
-          // Calculate new token expiry (timeout in minutes -> milliseconds from now)
-          const newTokenExpiry = Date.now() + (generalResponse.session_timeout_minutes * 60 * 1000);
-          await secureStorage.setItem('tokenExpiry', newTokenExpiry.toString());
-
-          frontendLogger.logInfo('Token updated with new expiration', {
-            component: 'Settings',
-            expiryDate: new Date(newTokenExpiry).toISOString(),
-            timeoutMinutes: generalResponse.session_timeout_minutes
-          });
-
-          notifySuccess('notifications:toasts.settings.sessionTimeoutUpdated', { interpolation: { minutes: generalResponse.session_timeout_minutes } });
-        }
-
-        // Debug the API response specifically for timeout
-        if (generalFields.session_timeout_minutes) {
-          frontendLogger.debug('settings_timeout_update_response', 'General API Response for timeout update', {
-            requestedTimeout: generalFields.session_timeout_minutes,
-            responseTimeout: generalResponse.session_timeout_minutes,
-            tokenRegenerated: !!generalResponse.new_token,
-            fullResponse: generalResponse,
-            component: 'Settings'
           });
         }
       }

@@ -5,7 +5,7 @@
 import logger from '../services/logger';
 
 const STORAGE_PREFIX = 'medapp_';
-const SENSITIVE_KEYS = ['token', 'user', 'tokenExpiry']; // Keys that require encryption
+const SENSITIVE_KEYS = []; // Auth keys (token, user, tokenExpiry) stored as plain text — encryption was incompatible with PWA lifecycle (sessionStorage key lost on relaunch). See Option C spec for HttpOnly cookie migration.
 const ENCRYPTION_INIT_RETRY_DELAY = 100; // ms to wait before retrying encryption init
 const ENCRYPTED_DATA_MARKER = '__encrypted__';
 
@@ -210,7 +210,7 @@ class SecureStorage {
   /**
    * Decrypt sensitive data using AES-GCM
    * @param {string} encryptedData - Base64 encoded encrypted data
-   * @returns {string} - Decrypted data
+   * @returns {string|null} - Decrypted data, or null if decryption fails
    */
   async decryptData(encryptedData) {
     await this.waitForInit();
@@ -242,12 +242,10 @@ class SecureStorage {
       const decoder = new TextDecoder();
       return decoder.decode(decryptedBuffer);
     } catch (error) {
-      // Try base64 fallback
-      try {
-        return decodeURIComponent(atob(encryptedData));
-      } catch {
-        return encryptedData;
-      }
+      logger.warn('SecureStorage: Decryption failed, data unreadable with current key', {
+        category: 'secure_storage_decrypt_fail'
+      });
+      return null;
     }
   }
 
@@ -390,6 +388,14 @@ class SecureStorage {
             
             // Handle encrypted format
             const decryptedValue = await this.decryptData(wrapper.data);
+            if (decryptedValue === null) {
+              logger.warn('SecureStorage: Removing unreadable encrypted data', {
+                key: key,
+                category: 'secure_storage_cleanup'
+              });
+              localStorage.removeItem(prefixedKey);
+              return null;
+            }
             return decryptedValue;
           } catch (decryptError) {
             logger.error('SecureStorage: Failed to decrypt sensitive data', {
@@ -501,51 +507,46 @@ export const legacyMigration = {
     try {
       // Wait for encryption to be ready
       await secureStorage.waitForInit();
-      
-      // Migrate token
-      const token = localStorage.getItem('token');
-      if (token) {
-        await secureStorage.setItem('token', token);
-        localStorage.removeItem('token');
-      }
 
-      // Migrate user data
-      const user = localStorage.getItem('user');
-      if (user) {
-        await secureStorage.setItem('user', user);
-        localStorage.removeItem('user');
-      }
+      // First, clear any old encrypted auth data that can no longer be decrypted
+      // (e.g., after PWA relaunch when sessionStorage key was lost)
+      this._clearEncryptedAuthData();
 
-      // Migrate token expiry
-      const tokenExpiry = localStorage.getItem('tokenExpiry');
-      if (tokenExpiry) {
-        await secureStorage.setItem('tokenExpiry', tokenExpiry);
-        localStorage.removeItem('tokenExpiry');
-      }
-      
-      // Also check for prefixed but unencrypted sensitive data and mark for re-encryption
-      const prefixedKeys = Object.keys(localStorage).filter(key => key.startsWith(STORAGE_PREFIX));
-      for (const prefixedKey of prefixedKeys) {
-        const key = prefixedKey.replace(STORAGE_PREFIX, '');
-        if (SENSITIVE_KEYS.includes(key)) {
-          const value = localStorage.getItem(prefixedKey);
-          // Don't re-encrypt if already in encrypted or fallback format
-          if (value && !secureStorage.isEncryptedFormat(value)) {
-            logger.info('SecureStorage: Migrating unencrypted sensitive key', {
-              key: key,
-              category: 'secure_storage_migration'
-            });
-            // Re-save to trigger encryption
-            await secureStorage.setItem(key, value);
-          }
+      // Migrate unprefixed legacy keys
+      const legacyKeys = ['token', 'user', 'tokenExpiry'];
+      for (const key of legacyKeys) {
+        const value = localStorage.getItem(key);
+        if (value) {
+          await secureStorage.setItem(key, value);
+          localStorage.removeItem(key);
         }
       }
+
     } catch (error) {
       logger.error('SecureStorage: Migration error', {
         error: error.message,
         category: 'secure_storage_migration_error'
       });
-      // Don't fail silently for migration errors
+    }
+  },
+
+  /**
+   * Clear old encrypted auth data that can no longer be decrypted.
+   * This handles the transition from encrypted to plain-text auth storage.
+   * Users will need to re-login once after this migration runs.
+   */
+  _clearEncryptedAuthData() {
+    const authKeys = ['token', 'user', 'tokenExpiry'];
+    for (const key of authKeys) {
+      const prefixedKey = `${STORAGE_PREFIX}${key}`;
+      const value = localStorage.getItem(prefixedKey);
+      if (value && secureStorage.isEncryptedFormat(value)) {
+        logger.info('SecureStorage: Clearing old encrypted auth data, re-login required', {
+          key: key,
+          category: 'secure_storage_encrypted_auth_migration'
+        });
+        localStorage.removeItem(prefixedKey);
+      }
     }
   }
 };

@@ -63,7 +63,7 @@ class UserPreferencesBase(BaseModel):
     """Base User Preferences schema with common fields."""
 
     unit_system: str
-    session_timeout_minutes: Optional[int] = 30
+    session_timeout_minutes: Optional[int] = 120
     language: Optional[str] = "en"
     date_format: Optional[str] = "mdy"
     paperless_enabled: Optional[bool] = False

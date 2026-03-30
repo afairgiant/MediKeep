@@ -317,14 +317,14 @@ def login(
     # Get full name, use username as fallback if not set
     full_name = getattr(db_user, "full_name", None) or db_user.username
 
-    # Get user's timeout preference BEFORE creating the token
+    # Get user's timeout preference for the frontend inactivity timer
     from app.crud.user_preferences import user_preferences
     preferences = user_preferences.get_or_create_by_user_id(db, user_id=db_user.id)
     session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
-    # Create access token with user role and additional info
-    # Use user's session timeout preference for token expiration
-    access_token_expires = timedelta(minutes=session_timeout_minutes)
+    # Create access token - JWT expiry uses server config (8 hours),
+    # NOT user's session_timeout_minutes (which only controls frontend inactivity timer)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={
             "sub": db_user.username,
@@ -362,10 +362,10 @@ def login(
         request,
         db_user.id,
         "token_created",
-        message=f"JWT token created with {session_timeout_minutes} minute expiration",
+        message=f"JWT token created with {settings.ACCESS_TOKEN_EXPIRE_MINUTES} minute expiration",
         username=form_data.username,
-        session_timeout_minutes=session_timeout_minutes,
-        used_user_preference=bool(preferences and preferences.session_timeout_minutes),
+        jwt_expiry_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+        inactivity_timeout_minutes=session_timeout_minutes,
     )
 
     return {
