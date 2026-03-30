@@ -23,7 +23,7 @@ const initialState = {
   error: null,
   tokenExpiry: null,
   lastActivity: Date.now(),
-  sessionTimeoutMinutes: 30, // Default timeout
+  sessionTimeoutMinutes: 120, // Default timeout
   mustChangePassword: false,
 };
 
@@ -60,7 +60,7 @@ function authReducer(state, action) {
         error: null,
         tokenExpiry: action.payload.tokenExpiry,
         lastActivity: Date.now(),
-        sessionTimeoutMinutes: action.payload.sessionTimeoutMinutes || 30,
+        sessionTimeoutMinutes: action.payload.sessionTimeoutMinutes || 120,
         mustChangePassword: action.payload.mustChangePassword || false,
       };
 
@@ -171,7 +171,7 @@ export function AuthProvider({ children }) {
 
         if (storedToken && storedUser && storedExpiry) {
           const tokenExpiry = parseInt(storedExpiry);
-          const sessionTimeoutMinutes = storedSessionTimeout ? parseInt(storedSessionTimeout) : 30;
+          const sessionTimeoutMinutes = storedSessionTimeout ? parseInt(storedSessionTimeout) : 120;
 
           if (!isTokenExpired(tokenExpiry)) {
             // Token is still valid, verify with server
@@ -400,7 +400,7 @@ export function AuthProvider({ children }) {
       try {
         const timeSinceLastActivity = Date.now() - state.lastActivity;
         // Use user's custom timeout or fallback to config
-        const sessionTimeoutMs = (state.sessionTimeoutMinutes || 30) * 60 * 1000;
+        const sessionTimeoutMs = (state.sessionTimeoutMinutes || 120) * 60 * 1000;
 
         if (timeSinceLastActivity > sessionTimeoutMs) {
           secureActivityLogger.logSessionEvent({
@@ -413,7 +413,7 @@ export function AuthProvider({ children }) {
           logger.warn('Session expired due to inactivity', {
             category: 'auth_session_expired',
             timeSinceLastActivity: Math.floor(timeSinceLastActivity / 1000),
-            sessionTimeoutMinutes: state.sessionTimeoutMinutes || 30,
+            sessionTimeoutMinutes: state.sessionTimeoutMinutes || 120,
             userId: state.user?.id,
             timestamp: new Date().toISOString()
           });
@@ -442,11 +442,11 @@ export function AuthProvider({ children }) {
     try {
       activityTimer = setInterval(checkActivity, config.SESSION_CHECK_INTERVAL);
       
-      const sessionTimeoutMs = (state.sessionTimeoutMinutes || 30) * 60 * 1000;
+      const sessionTimeoutMs = (state.sessionTimeoutMinutes || 120) * 60 * 1000;
       secureActivityLogger.logSessionEvent({
         action: 'session_monitoring_started',
         sessionTimeout: sessionTimeoutMs,
-        sessionTimeoutMinutes: state.sessionTimeoutMinutes || 30,
+        sessionTimeoutMinutes: state.sessionTimeoutMinutes || 120,
         checkInterval: config.SESSION_CHECK_INTERVAL
       });
     } catch (error) {
@@ -647,7 +647,7 @@ export function AuthProvider({ children }) {
       });
 
       // Get session timeout from result or use default
-      const sessionTimeoutMinutes = (isSSO ? 30 : result?.sessionTimeoutMinutes) || 30;
+      const sessionTimeoutMinutes = (isSSO ? 120 : result?.sessionTimeoutMinutes) || 120;
       const mustChangePassword = isSSO ? false : (result?.mustChangePassword || false);
 
       // Store in localStorage - MUST await to prevent race conditions

@@ -12,7 +12,7 @@ import { env as viteEnv } from './env';
  */
 export const ACTIVITY_CONFIG = {
   // Session timeout settings
-  SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes - main session timeout
+  SESSION_TIMEOUT: 120 * 60 * 1000, // 120 minutes - main session timeout
   SESSION_CHECK_INTERVAL: 60 * 1000, // 1 minute - how often to check for timeout
   
   // Activity tracking throttle intervals

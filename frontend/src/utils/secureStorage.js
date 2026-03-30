@@ -242,12 +242,10 @@ class SecureStorage {
       const decoder = new TextDecoder();
       return decoder.decode(decryptedBuffer);
     } catch (error) {
-      // Try base64 fallback
-      try {
-        return decodeURIComponent(atob(encryptedData));
-      } catch {
-        return encryptedData;
-      }
+      logger.warn('SecureStorage: Decryption failed, data unreadable with current key', {
+        category: 'secure_storage_decrypt_fail'
+      });
+      return null;
     }
   }
 
@@ -390,6 +388,14 @@ class SecureStorage {
             
             // Handle encrypted format
             const decryptedValue = await this.decryptData(wrapper.data);
+            if (decryptedValue === null) {
+              logger.warn('SecureStorage: Removing unreadable encrypted data', {
+                key: key,
+                category: 'secure_storage_cleanup'
+              });
+              localStorage.removeItem(prefixedKey);
+              return null;
+            }
             return decryptedValue;
           } catch (decryptError) {
             logger.error('SecureStorage: Failed to decrypt sensitive data', {

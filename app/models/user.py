@@ -113,8 +113,8 @@ class UserPreferences(Base):
     # Unit system preference: 'imperial' or 'metric'
     unit_system = Column(String, default="imperial", nullable=False)
 
-    # Session timeout in minutes (default 30 minutes)
-    session_timeout_minutes = Column(Integer, default=30, nullable=False)
+    # Session timeout in minutes (default 120 minutes)
+    session_timeout_minutes = Column(Integer, default=120, nullable=False)
 
     # Language preference (ISO 639-1 code, e.g., 'en', 'es', 'fr')
     language = Column(String(10), default="en", nullable=False)
