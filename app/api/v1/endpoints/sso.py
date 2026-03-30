@@ -103,13 +103,15 @@ def _complete_sso_login(
         else settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
+    # JWT expiry uses server config (8 hours), not user preference
+    # User's session_timeout_minutes only controls frontend inactivity timer
     access_token = create_access_token(
         data={
             "sub": sso_user.username,
             "role": sso_user.role if sso_user.role in ["admin", "user", "guest"] else "user",
             "user_id": sso_user.id,
         },
-        expires_delta=timedelta(minutes=session_timeout_minutes),
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
     log_endpoint_access(

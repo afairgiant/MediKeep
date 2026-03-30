@@ -397,3 +397,44 @@ class TestAuthEndpoints:
         )
         assert re_login_response.status_code == 200
         assert re_login_response.json()["must_change_password"] is False
+
+    def test_login_token_uses_server_expiry_not_user_preference(self, client: TestClient, db_session: Session):
+        """Test that JWT expiry uses ACCESS_TOKEN_EXPIRE_MINUTES, not user's session_timeout_minutes."""
+        import base64
+        import json
+        from app.core.config import settings
+
+        user_data = create_random_user(db_session)
+
+        # Set user's session timeout to something different from server config
+        from app.crud.user_preferences import user_preferences
+        from app.schemas.user_preferences import UserPreferencesUpdate
+        db_user = user_crud.get_by_username(db_session, username=user_data["username"])
+        prefs = user_preferences.get_or_create_by_user_id(db_session, user_id=db_user.id)
+        user_preferences.update_by_user_id(
+            db_session,
+            user_id=db_user.id,
+            obj_in=UserPreferencesUpdate(session_timeout_minutes=15)
+        )
+
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]}
+        )
+
+        assert response.status_code == 200
+        token = response.json()["access_token"]
+
+        # Decode JWT payload
+        payload_b64 = token.split(".")[1]
+        payload_b64 += "=" * (4 - len(payload_b64) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64))
+
+        # Token lifetime should be server config (480 min), not user preference (15 min)
+        token_lifetime_minutes = (payload["exp"] - payload["iat"]) / 60
+        assert token_lifetime_minutes == pytest.approx(settings.ACCESS_TOKEN_EXPIRE_MINUTES, abs=1), \
+            f"JWT lifetime should be {settings.ACCESS_TOKEN_EXPIRE_MINUTES} min (server config), got {token_lifetime_minutes:.0f} min"
+
+        # session_timeout_minutes should still be in the response for frontend inactivity timer
+        data = response.json()
+        assert data["session_timeout_minutes"] == 15
