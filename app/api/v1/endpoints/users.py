@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -6,10 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_delete, log_update
-from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
-from app.core.utils.security import create_access_token
+from app.core.logging.helpers import log_endpoint_error, log_security_event
 from app.crud.patient import patient
 from app.crud.user import user
 from app.crud.user_preferences import user_preferences
@@ -214,16 +211,10 @@ def update_current_user_preferences(
     """
     Update current user's preferences.
 
-    If session_timeout_minutes is changed, a new JWT token with the updated
-    expiration time will be generated and returned.
+    Session timeout preference controls the frontend inactivity timer only.
+    JWT expiry is fixed at server config and does not change with this preference.
     """
     try:
-        # Get current preferences to check if session timeout changed
-        current_preferences = user_preferences.get_or_create_by_user_id(
-            db, user_id=int(current_user.id)
-        )
-        old_timeout = current_preferences.session_timeout_minutes if current_preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
-
         # Update preferences
         updated_preferences = user_preferences.update_by_user_id(
             db, user_id=int(current_user.id), obj_in=preferences_in
@@ -233,11 +224,6 @@ def update_current_user_preferences(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to update user preferences",
             )
-
-        # Check if session timeout was changed
-        new_timeout = updated_preferences.session_timeout_minutes
-        timeout_changed = (preferences_in.session_timeout_minutes is not None and
-                          new_timeout != old_timeout)
 
         response_data = {
             "id": updated_preferences.id,
@@ -263,36 +249,6 @@ def update_current_user_preferences(
             "created_at": updated_preferences.created_at,
             "updated_at": updated_preferences.updated_at,
         }
-
-        # If session timeout changed, generate a new token with updated expiration
-        if timeout_changed:
-            access_token_expires = timedelta(minutes=new_timeout)
-            new_token = create_access_token(
-                data={
-                    "sub": current_user.username,
-                    "role": (
-                        current_user.role if current_user.role in ["admin", "user", "guest"] else "user"
-                    ),
-                    "user_id": current_user.id,
-                    "full_name": getattr(current_user, "full_name", None) or current_user.username,
-                },
-                expires_delta=access_token_expires,
-            )
-
-            log_endpoint_access(
-                logger,
-                request,
-                current_user.id,
-                "session_timeout_updated_token_regenerated",
-                message=f"Session timeout changed from {old_timeout} to {new_timeout} minutes, new token generated",
-                username=current_user.username,
-                old_timeout=old_timeout,
-                new_timeout=new_timeout,
-            )
-
-            # Return preferences with new token
-            response_data["new_token"] = new_token
-            response_data["token_type"] = "bearer"
 
         return response_data
 
