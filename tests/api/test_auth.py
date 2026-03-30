@@ -49,7 +49,9 @@ class TestAuthEndpoints:
         # Decode JWT payload (no signature verification needed for claim check)
         payload_b64 = token.split(".")[1]
         # Add padding if needed
-        payload_b64 += "=" * (4 - len(payload_b64) % 4)
+        padding_len = (-len(payload_b64)) % 4
+        if padding_len:
+            payload_b64 += "=" * padding_len
         payload = json.loads(base64.urlsafe_b64decode(payload_b64))
 
         assert "iat" in payload, "JWT must include 'iat' claim for client clock skew handling"
@@ -427,7 +429,9 @@ class TestAuthEndpoints:
 
         # Decode JWT payload
         payload_b64 = token.split(".")[1]
-        payload_b64 += "=" * (4 - len(payload_b64) % 4)
+        padding_len = (-len(payload_b64)) % 4
+        if padding_len:
+            payload_b64 += "=" * padding_len
         payload = json.loads(base64.urlsafe_b64decode(payload_b64))
 
         # Token lifetime should be server config (480 min), not user preference (15 min)

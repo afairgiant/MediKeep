@@ -210,7 +210,7 @@ class SecureStorage {
   /**
    * Decrypt sensitive data using AES-GCM
    * @param {string} encryptedData - Base64 encoded encrypted data
-   * @returns {string} - Decrypted data
+   * @returns {string|null} - Decrypted data, or null if decryption fails
    */
   async decryptData(encryptedData) {
     await this.waitForInit();
@@ -522,23 +522,6 @@ export const legacyMigration = {
         }
       }
 
-      // Also check for prefixed but unencrypted sensitive data and mark for re-encryption
-      const prefixedKeys = Object.keys(localStorage).filter(key => key.startsWith(STORAGE_PREFIX));
-      for (const prefixedKey of prefixedKeys) {
-        const key = prefixedKey.replace(STORAGE_PREFIX, '');
-        if (SENSITIVE_KEYS.includes(key)) {
-          const value = localStorage.getItem(prefixedKey);
-          // Don't re-encrypt if already in encrypted or fallback format
-          if (value && !secureStorage.isEncryptedFormat(value)) {
-            logger.info('SecureStorage: Migrating unencrypted sensitive key', {
-              key: key,
-              category: 'secure_storage_migration'
-            });
-            // Re-save to trigger encryption
-            await secureStorage.setItem(key, value);
-          }
-        }
-      }
     } catch (error) {
       logger.error('SecureStorage: Migration error', {
         error: error.message,
@@ -558,18 +541,11 @@ export const legacyMigration = {
       const prefixedKey = `${STORAGE_PREFIX}${key}`;
       const value = localStorage.getItem(prefixedKey);
       if (value && secureStorage.isEncryptedFormat(value)) {
-        try {
-          const wrapper = JSON.parse(value);
-          if (wrapper.marker === ENCRYPTED_DATA_MARKER) {
-            logger.info('SecureStorage: Clearing old encrypted auth data, re-login required', {
-              key: key,
-              category: 'secure_storage_encrypted_auth_migration'
-            });
-            localStorage.removeItem(prefixedKey);
-          }
-        } catch {
-          // Not valid JSON, leave it alone
-        }
+        logger.info('SecureStorage: Clearing old encrypted auth data, re-login required', {
+          key: key,
+          category: 'secure_storage_encrypted_auth_migration'
+        });
+        localStorage.removeItem(prefixedKey);
       }
     }
   }
