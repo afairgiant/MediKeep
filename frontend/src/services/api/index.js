@@ -1,7 +1,6 @@
 import logger from '../logger.js';
 import { ENTITY_TYPES } from '../../utils/entityRelationships';
 import { extractErrorMessage } from '../../utils/errorUtils';
-import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import { getApiUrl, isDevelopment } from '../../config/env';
 
 // Map entity types to their API endpoint paths
@@ -59,56 +58,8 @@ class ApiService {
       : '/api/v1'; // In production, use relative path
   }
 
-  async getAuthHeaders() {
-    // Migrate legacy data first
-    await legacyMigration.migrateFromLocalStorage();
-    const token = await secureStorage.getItem('token');
-    const headers = { 'Content-Type': 'application/json' };
-
-    if (token) {
-      try {
-        // Validate token format before parsing
-        if (typeof token !== 'string' || token.trim() === '') {
-          throw new Error('Token is empty or not a string');
-        }
-
-        const tokenParts = token.split('.');
-        if (tokenParts.length !== 3) {
-          throw new Error(
-            `Invalid JWT format - expected 3 parts, got ${tokenParts.length}`
-          );
-        }
-
-        // Check if token is expired
-        const payload = JSON.parse(atob(tokenParts[1]));
-
-        // Validate required JWT claims
-        if (!payload.sub) {
-          throw new Error('Token missing subject claim');
-        }
-        if (!payload.exp) {
-          throw new Error('Token missing expiration claim');
-        }
-
-        const currentTime = Date.now() / 1000;
-        // Adjust for clock skew between server and client PCs
-        const parsedOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
-        const clockOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
-        const serverTime = currentTime + clockOffset;
-        if (payload.exp < serverTime) {
-          logger.warn('Token expired, removing from storage');
-          secureStorage.removeItem('token');
-          return headers;
-        }
-
-        headers['Authorization'] = `Bearer ${token}`;
-      } catch (e) {
-        logger.error('Invalid token format', { error: e.message });
-        secureStorage.removeItem('token');
-      }
-    }
-
-    return headers;
+  getAuthHeaders() {
+    return { 'Content-Type': 'application/json' };
   }
   async handleResponse(response, method, url) {
     if (!response.ok) {
@@ -126,12 +77,10 @@ class ApiService {
 
         // Log authentication errors with more detail
         if (response.status === 401 || response.status === 403) {
-          const authHeaders = await this.getAuthHeaders();
           logger.error('Authentication Error:', {
             status: response.status,
             url: url,
             error: fullErrorData,
-            hasToken: !!authHeaders.Authorization,
           });
         }
 
@@ -196,17 +145,14 @@ class ApiService {
       url += `?${searchParams.toString()}`;
     }
 
-    // Get token but don't fail if it doesn't exist - let backend handle authentication
-    // Migrate legacy data first
-    await legacyMigration.migrateFromLocalStorage();
-    const token = await secureStorage.getItem('token');
+    // Auth is handled by HttpOnly cookie sent automatically with credentials: 'include'
     const config = {
       method,
       signal,
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }), // Only include auth token if available
         ...customHeaders,
       },
     };
@@ -233,7 +179,6 @@ class ApiService {
           `${method} request attempt ${i + 1}/${urls.length} to ${fullUrl}`,
           {
             url: fullUrl,
-            hasAuth: !!token,
             method: method,
           }
         );
@@ -1010,97 +955,16 @@ class ApiService {
         component: 'ApiService',
       });
 
-      // Get authentication token
-      // Migrate legacy data first
-      await legacyMigration.migrateFromLocalStorage();
-      const token = await secureStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required to view files');
-      }
-
-      // Validate and check token (with improved error handling)
-      try {
-        // Validate token format
-        if (typeof token !== 'string' || token.trim() === '') {
-          throw new Error('Token is empty or not a string');
-        }
-
-        const tokenParts = token.split('.');
-        if (tokenParts.length !== 3) {
-          throw new Error(
-            `Invalid JWT format - expected 3 parts, got ${tokenParts.length}`
-          );
-        }
-
-        // More robust JWT payload parsing
-        let payload;
-        try {
-          // Add padding if needed for base64 decoding
-          let base64Payload = tokenParts[1];
-          while (base64Payload.length % 4) {
-            base64Payload += '=';
-          }
-          const decodedPayload = atob(base64Payload);
-          payload = JSON.parse(decodedPayload);
-        } catch (parseError) {
-          logger.warn(
-            'jwt_payload_parse_warning',
-            'JWT payload parsing failed but continuing with file view',
-            {
-              error: parseError.message,
-              fileId,
-              fileName,
-              component: 'ApiService',
-            }
-          );
-          // For file viewing, we'll continue even if payload parsing fails
-          // as long as we have a token - the server will validate it properly
-          payload = {};
-        }
-
-        // Only validate claims if we successfully parsed the payload
-        if (payload.exp) {
-          const currentTime = Date.now() / 1000;
-          if (payload.exp < currentTime) {
-            throw new Error('Session expired. Please log in again.');
-          }
-        }
-      } catch (e) {
-        // Only throw errors for critical authentication issues
-        if (
-          e.message.includes('Session expired') ||
-          e.message.includes('Token is empty') ||
-          e.message.includes('Invalid JWT format')
-        ) {
-          throw e;
-        }
-        // For other token validation issues during file viewing, log warning but continue
-        logger.warn(
-          'jwt_validation_warning',
-          'Token validation warning during file view, continuing anyway',
-          {
-            error: e.message,
-            fileId,
-            fileName,
-            component: 'ApiService',
-          }
-        );
-      }
-
-      // Construct view URL with authentication token
-      // Use the base URL from environment variable, removing /api/v1 suffix if present
+      // Construct view URL -- the HttpOnly cookie is sent automatically by the
+      // browser for same-origin requests opened via window.open().
       const envBaseUrl = getApiUrl();
       const baseUrl = envBaseUrl.endsWith('/api/v1')
         ? envBaseUrl.slice(0, -7)
         : envBaseUrl;
-      const viewUrl = `${baseUrl}/api/v1/entity-files/files/${fileId}/view?token=${encodeURIComponent(token)}`;
+      const viewUrl = `${baseUrl}/api/v1/entity-files/files/${fileId}/view`;
 
-      // Open in new tab
       const newWindow = window.open(viewUrl, '_blank', 'noopener,noreferrer');
 
-      // Note: In modern browsers, window.open() may return null even when successful
-      // due to security restrictions, especially with 'noopener' flag
-      // We'll log a warning but not fail the operation since the file often opens anyway
       if (!newWindow) {
         logger.warn(
           'popup_detection_warning',
@@ -1108,29 +972,23 @@ class ApiService {
           {
             fileId,
             fileName,
-            viewUrl: viewUrl.replace(/token=[^&]+/, 'token=***'),
+            viewUrl,
             component: 'ApiService',
           }
         );
-        // Don't throw error - let the operation succeed since file often opens despite null return
       }
 
-      // Note: window.open() for external URLs doesn't provide success/failure feedback
-      // We log success here assuming the tab opened successfully
       logger.info(
         'api_view_entity_file_success',
         'File viewer opened successfully',
         {
           fileId,
           fileName,
-          viewUrl: viewUrl.replace(/token=[^&]+/, 'token=***'), // Hide token in logs
+          viewUrl,
           component: 'ApiService',
         }
       );
 
-      // Return success - we can't actually verify if the file loaded successfully
-      // since it opens in a new tab/window, but if window.open() didn't return null,
-      // the tab was created
       return { success: true, message: 'File opened in new tab' };
     } catch (error) {
       logger.error('api_view_entity_file_error', 'Failed to view entity file', {
@@ -1154,18 +1012,13 @@ class ApiService {
         component: 'ApiService',
       });
 
-      // Use direct fetch to get full response with headers
-      // Migrate legacy data first
-      await legacyMigration.migrateFromLocalStorage();
-      const token = await secureStorage.getItem('token');
+      // Use direct fetch with cookie auth to get full response with headers
       const response = await fetch(
         `${this.baseURL}/entity-files/files/${fileId}/download`,
         {
           method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
           signal,
         }
       );

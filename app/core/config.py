@@ -161,6 +161,14 @@ class Settings:  # App Info
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480")
     )  # 8 hours
 
+    # HttpOnly Cookie Authentication (Option C)
+    AUTH_COOKIE_NAME: str = "medapp_session"
+    AUTH_COOKIE_HTTPONLY: bool = True
+    AUTH_COOKIE_SAMESITE: str = "lax"
+    AUTH_COOKIE_SECURE: bool = os.getenv("AUTH_COOKIE_SECURE", "False").lower() == "true"
+    AUTH_COOKIE_PATH: str = "/"
+    AUTH_COOKIE_DOMAIN: str | None = os.getenv("AUTH_COOKIE_DOMAIN", None) or None
+
     # File Storage
     # Use Windows AppData paths when running as EXE, otherwise use default paths
     UPLOAD_DIR: Path = _get_windows_path_helper("uploads") or Path(

@@ -10,18 +10,15 @@ import logger from '../services/logger';
 import { getActivityConfig } from '../config/activityConfig';
 import secureActivityLogger from '../utils/secureActivityLogger';
 import { isAdminRole } from '../utils/authUtils';
-import { secureStorage, legacyMigration } from '../utils/secureStorage';
 import { getUserPreferences } from '../services/api/userPreferencesApi';
 import i18n from '../i18n';
 
 // Auth State Management
 const initialState = {
   user: null,
-  token: null,
   isAuthenticated: false,
   isLoading: true,
   error: null,
-  tokenExpiry: null,
   lastActivity: Date.now(),
   sessionTimeoutMinutes: 120, // Default timeout
   mustChangePassword: false,
@@ -33,7 +30,6 @@ const AUTH_ACTIONS = {
   LOGIN_SUCCESS: 'LOGIN_SUCCESS',
   LOGIN_FAILURE: 'LOGIN_FAILURE',
   LOGOUT: 'LOGOUT',
-  TOKEN_REFRESH: 'TOKEN_REFRESH',
   UPDATE_ACTIVITY: 'UPDATE_ACTIVITY',
   SET_ERROR: 'SET_ERROR',
   CLEAR_ERROR: 'CLEAR_ERROR',
@@ -54,11 +50,9 @@ function authReducer(state, action) {
       return {
         ...state,
         user: action.payload.user,
-        token: action.payload.token,
         isAuthenticated: true,
         isLoading: false,
         error: null,
-        tokenExpiry: action.payload.tokenExpiry,
         lastActivity: Date.now(),
         sessionTimeoutMinutes: action.payload.sessionTimeoutMinutes || 120,
         mustChangePassword: action.payload.mustChangePassword || false,
@@ -74,25 +68,15 @@ function authReducer(state, action) {
       return {
         ...state,
         user: null,
-        token: null,
         isAuthenticated: false,
         isLoading: false,
         error: action.payload,
-        tokenExpiry: null,
       };
 
     case AUTH_ACTIONS.LOGOUT:
       return {
         ...initialState,
         isLoading: false,
-      };
-
-    case AUTH_ACTIONS.TOKEN_REFRESH:
-      return {
-        ...state,
-        token: action.payload.token,
-        tokenExpiry: action.payload.tokenExpiry,
-        lastActivity: Date.now(),
       };
 
     case AUTH_ACTIONS.UPDATE_ACTIVITY:
@@ -133,15 +117,6 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Check if token is expired (adjusted for clock skew between server and client)
-  const isTokenExpired = tokenExpiry => {
-    if (!tokenExpiry) return true;
-    const parsed = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
-    const clockOffset = Number.isFinite(parsed) ? parsed : 0;
-    const adjustedNow = Date.now() + clockOffset * 1000;
-    return adjustedNow >= tokenExpiry;
-  };
-
   // Check if user should see patient profile completion prompts (first login only)
   const shouldShowProfilePrompts = patient => {
     return (
@@ -155,359 +130,128 @@ export function AuthProvider({ children }) {
     return state.user && isFirstLogin(state.user.username);
   };
 
-  // Initialize auth state on app load
+  // Initialize auth state on app load.
+  // The HttpOnly cookie is sent automatically -- we verify the session by
+  // calling /users/me. If the cookie is valid the user is returned; otherwise
+  // we treat the session as expired.
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
 
-        // Migrate legacy localStorage data if present
-        await legacyMigration.migrateFromLocalStorage();
-        
-        const storedToken = await secureStorage.getItem('token');
-        const storedUser = await secureStorage.getItem('user');
-        const storedExpiry = await secureStorage.getItem('tokenExpiry');
-        const storedSessionTimeout = await secureStorage.getItem('sessionTimeoutMinutes');
+        logger.info('Verifying session with server', {
+          category: 'auth_restore_attempt',
+          timestamp: new Date().toISOString()
+        });
 
-        if (storedToken && storedUser && storedExpiry) {
-          const tokenExpiry = parseInt(storedExpiry);
-          const sessionTimeoutMinutes = storedSessionTimeout ? parseInt(storedSessionTimeout) : 120;
+        const user = await authService.getCurrentUser();
 
-          if (!isTokenExpired(tokenExpiry)) {
-            // Token is still valid, verify with server
-            try {
-              logger.info('Verifying stored token with server', {
-                category: 'auth_restore_attempt',
-                tokenExpiry: tokenExpiry,
-                currentTime: Date.now(),
-                hoursUntilExpiry: ((tokenExpiry - Date.now()) / (1000 * 60 * 60)).toFixed(2),
-                sessionTimeoutMinutes: sessionTimeoutMinutes,
-                timestamp: new Date().toISOString()
-              });
-
-              // getCurrentUser() calls the backend so must_change_password is always
-              // authoritative — never read from client-side storage which can be cleared.
-              const user = await authService.getCurrentUser();
-
-              // A null return means the backend rejected the token (e.g. expired or
-              // deleted user). Treat it the same as a failed verification.
-              if (!user) {
-                clearAuthData();
-                dispatch({ type: AUTH_ACTIONS.LOGOUT });
-                return;
-              }
-
-              const mustChangePassword = user.must_change_password === true;
-              dispatch({
-                type: AUTH_ACTIONS.LOGIN_SUCCESS,
-                payload: {
-                  user,
-                  token: storedToken,
-                  tokenExpiry,
-                  sessionTimeoutMinutes,
-                  mustChangePassword,
-                },
-              });
-
-              logger.info('Authentication restored successfully', {
-                category: 'auth_restore_success',
-                userId: user.id,
-                username: user.username,
-                timestamp: new Date().toISOString()
-              });
-
-              // Load user's language preference from backend
-              try {
-                const userPrefs = await getUserPreferences();
-                if (userPrefs.language && userPrefs.language !== i18n.language) {
-                  await i18n.changeLanguage(userPrefs.language);
-                  logger.info('User language preference loaded from backend', {
-                    category: 'language_loaded',
-                    language: userPrefs.language,
-                    userId: user.id,
-                    timestamp: new Date().toISOString()
-                  });
-                }
-              } catch (langError) {
-                // Don't fail auth if language loading fails
-                logger.warn('Failed to load user language preference', {
-                  category: 'language_load_failed',
-                  error: langError.message,
-                  userId: user.id,
-                  timestamp: new Date().toISOString()
-                });
-              }
-            } catch (error) {
-              // Token invalid on server, clear local storage
-              logger.warn('Stored token invalid on server, clearing auth data', {
-                category: 'auth_restore_failure',
-                error: error.message,
-                errorStack: error.stack,
-                tokenExpiry: tokenExpiry,
-                currentTime: Date.now(),
-                wasExpired: tokenExpiry < Date.now(),
-                timestamp: new Date().toISOString()
-              });
-              clearAuthData();
-              dispatch({ type: AUTH_ACTIONS.LOGOUT });
-            }
-          } else {
-            // Token expired, try to refresh
-            try {
-              // Check if refreshToken method exists
-              if (typeof authService.refreshToken !== 'function') {
-                logger.warn('Token refresh not available, logging out', {
-                  category: 'auth_refresh_unavailable'
-                });
-                clearAuthData();
-                dispatch({ type: AUTH_ACTIONS.LOGOUT });
-                return;
-              }
-              
-              const refreshResult = await authService.refreshToken();
-              if (refreshResult.success) {
-                dispatch({
-                  type: AUTH_ACTIONS.TOKEN_REFRESH,
-                  payload: {
-                    token: refreshResult.token,
-                    tokenExpiry: refreshResult.tokenExpiry,
-                  },
-                });
-                await updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
-                
-                logger.info('Token refreshed successfully during auth initialization', {
-                  category: 'auth_refresh_success',
-                  timestamp: new Date().toISOString()
-                });
-              } else {
-                logger.warn('Token refresh failed during auth initialization', {
-                  category: 'auth_refresh_failure',
-                  timestamp: new Date().toISOString()
-                });
-                clearAuthData();
-                dispatch({ type: AUTH_ACTIONS.LOGOUT });
-              }
-            } catch (error) {
-              logger.error('Token refresh error during auth initialization', {
-                category: 'auth_refresh_error',
-                error: error.message,
-                timestamp: new Date().toISOString()
-              });
-              clearAuthData();
-              dispatch({ type: AUTH_ACTIONS.LOGOUT });
-            }
-          }
-        } else {
-          // No stored auth data
-          logger.info('No stored authentication data found', {
-            category: 'auth_init_no_data',
+        if (!user) {
+          logger.info('No valid session found', {
+            category: 'auth_init_no_session',
             timestamp: new Date().toISOString()
           });
+          clearAuthData();
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
+          return;
         }
+
+        const mustChangePassword = user.must_change_password === true;
+
+        // Load user preferences from backend (session timeout + language)
+        let sessionTimeoutMinutes = 120;
+        try {
+          const userPrefs = await getUserPreferences();
+          if (userPrefs.session_timeout_minutes) {
+            sessionTimeoutMinutes = userPrefs.session_timeout_minutes;
+            localStorage.setItem('medapp_sessionTimeoutMinutes', sessionTimeoutMinutes.toString());
+          }
+          if (userPrefs.language && userPrefs.language !== i18n.language) {
+            await i18n.changeLanguage(userPrefs.language);
+          }
+        } catch (prefError) {
+          // Fall back to cached localStorage value
+          const cached = localStorage.getItem('medapp_sessionTimeoutMinutes');
+          if (cached) sessionTimeoutMinutes = parseInt(cached);
+          logger.warn('Failed to load user preferences, using cached timeout', {
+            category: 'prefs_load_failed',
+            error: prefError.message,
+            sessionTimeoutMinutes,
+          });
+        }
+
+        dispatch({
+          type: AUTH_ACTIONS.LOGIN_SUCCESS,
+          payload: { user, sessionTimeoutMinutes, mustChangePassword },
+        });
+
+        logger.info('Authentication restored successfully', {
+          category: 'auth_restore_success',
+          userId: user.id,
+          username: user.username,
+          sessionTimeoutMinutes,
+        });
       } catch (error) {
         logger.error('auth_context_init_error', {
           message: 'Auth initialization failed',
           error: error.message,
           stack: error.stack,
-          hasStoredToken: !!(await secureStorage.getItem('token')),
-          hasStoredUser: !!(await secureStorage.getItem('user')),
-          hasStoredExpiry: !!(await secureStorage.getItem('tokenExpiry')),
           timestamp: new Date().toISOString()
         });
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       } finally {
-        // Always ensure loading is set to false when initialization completes
-        // This prevents indefinite loading states
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
 
     initializeAuth();
   }, []);
-  // Auto-refresh token before expiry - DISABLED
-  // NOTE: Token refresh is not implemented on the backend (see simpleAuthService.js:324-328)
-  // This auto-refresh logic was causing users to be logged out 5 minutes before their
-  // actual token expiration because the refresh would fail and trigger a logout.
-  // The JWT tokens are now set to the full user-configured timeout duration,
-  // and users will be logged out only when:
-  // 1. The token actually expires (not 5 minutes early), OR
-  // 2. Inactivity timeout is reached (managed by the activity tracking below)
-  //
-  // If token refresh is implemented in the future, uncomment this code.
-  /*
-  useEffect(() => {
-    if (!state.isAuthenticated || !state.tokenExpiry) {
-      return;
-    }
 
-    const refreshBuffer = 5 * 60 * 1000; // 5 minutes before expiry
-    const timeUntilRefresh = state.tokenExpiry - Date.now() - refreshBuffer;
+  // Refs so the interval closure reads fresh values without re-registering
+  const lastActivityRef = React.useRef(state.lastActivity);
+  const sessionTimeoutRef = React.useRef(state.sessionTimeoutMinutes);
+  useEffect(() => { lastActivityRef.current = state.lastActivity; }, [state.lastActivity]);
+  useEffect(() => { sessionTimeoutRef.current = state.sessionTimeoutMinutes; }, [state.sessionTimeoutMinutes]);
 
-    if (timeUntilRefresh > 0) {
-      const refreshTimer = setTimeout(async () => {
-        try {
-          // Check if refreshToken method exists
-          if (typeof authService.refreshToken !== 'function') {
-            clearAuthData();
-            dispatch({ type: AUTH_ACTIONS.LOGOUT });
-            return;
-          }
-
-          const refreshResult = await authService.refreshToken();
-          if (refreshResult.success) {
-            dispatch({
-              type: AUTH_ACTIONS.TOKEN_REFRESH,
-              payload: {
-                token: refreshResult.token,
-                tokenExpiry: refreshResult.tokenExpiry,
-              },
-            });
-            await updateStoredToken(refreshResult.token, refreshResult.tokenExpiry);
-          } else {
-            clearAuthData();
-            dispatch({ type: AUTH_ACTIONS.LOGOUT });
-          }
-        } catch (error) {
-          logger.error('auth_context_refresh_error', {
-            message: 'Token refresh failed',
-            error: error.message,
-            stack: error.stack,
-            isAuthenticated: state.isAuthenticated,
-            hasToken: !!state.token,
-            tokenExpiry: state.tokenExpiry,
-            timeUntilExpiry: state.tokenExpiry ? state.tokenExpiry - Date.now() : null,
-            timestamp: new Date().toISOString()
-          });
-          clearAuthData();
-          dispatch({ type: AUTH_ACTIONS.LOGOUT });
-        }
-      }, timeUntilRefresh);
-
-      return () => clearTimeout(refreshTimer);
-    }
-  }, [state.tokenExpiry, state.isAuthenticated]);
-  */
-
-  // Enhanced activity tracking for auto-logout with proper error handling
+  // Inactivity check -- single interval, created once on login, torn down on logout
   useEffect(() => {
     if (!state.isAuthenticated) return;
 
-    const config = getActivityConfig();
-    let activityTimer = null;
+    const { SESSION_CHECK_INTERVAL } = getActivityConfig();
 
-    const checkActivity = () => {
-      try {
-        const timeSinceLastActivity = Date.now() - state.lastActivity;
-        // Use user's custom timeout or fallback to config
-        const sessionTimeoutMs = (state.sessionTimeoutMinutes || 120) * 60 * 1000;
+    const activityTimer = setInterval(() => {
+      const idle = Date.now() - lastActivityRef.current;
+      const timeoutMs = (sessionTimeoutRef.current || 120) * 60 * 1000;
 
-        if (timeSinceLastActivity > sessionTimeoutMs) {
-          secureActivityLogger.logSessionEvent({
-            action: 'session_expired',
-            reason: 'inactivity',
-            timeSinceLastActivity,
-            sessionTimeout: sessionTimeoutMs
-          });
-
-          logger.warn('Session expired due to inactivity', {
-            category: 'auth_session_expired',
-            timeSinceLastActivity: Math.floor(timeSinceLastActivity / 1000),
-            sessionTimeoutMinutes: state.sessionTimeoutMinutes || 120,
-            userId: state.user?.id,
-            timestamp: new Date().toISOString()
-          });
-
-          notifyInfo('notifications:toasts.auth.sessionExpired');
-          clearAuthData();
-          dispatch({ type: AUTH_ACTIONS.LOGOUT });
-        }
-      } catch (error) {
-        secureActivityLogger.logActivityError(error, {
-          component: 'AuthContext',
-          action: 'checkActivity'
+      if (idle > timeoutMs) {
+        logger.warn('Session expired due to inactivity', {
+          category: 'auth_session_expired',
+          idleSeconds: Math.floor(idle / 1000),
+          sessionTimeoutMinutes: sessionTimeoutRef.current || 120,
         });
-        
-        // On error, err on the side of caution and logout
-        logger.error('Session check failed, logging out for security', {
-          error: error.message,
-          category: 'auth_context_error'
-        });
+        notifyInfo('notifications:toasts.auth.sessionExpired');
         clearAuthData();
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
-    };
+    }, SESSION_CHECK_INTERVAL);
 
-    // Set up the activity check timer
-    try {
-      activityTimer = setInterval(checkActivity, config.SESSION_CHECK_INTERVAL);
-      
-      const sessionTimeoutMs = (state.sessionTimeoutMinutes || 120) * 60 * 1000;
-      secureActivityLogger.logSessionEvent({
-        action: 'session_monitoring_started',
-        sessionTimeout: sessionTimeoutMs,
-        sessionTimeoutMinutes: state.sessionTimeoutMinutes || 120,
-        checkInterval: config.SESSION_CHECK_INTERVAL
-      });
-    } catch (error) {
-      secureActivityLogger.logActivityError(error, {
-        component: 'AuthContext',
-        action: 'setup_activity_timer'
-      });
-    }
-
-    // Cleanup function
-    return () => {
-      try {
-        if (activityTimer) {
-          clearInterval(activityTimer);
-          secureActivityLogger.logSessionEvent({
-            action: 'session_monitoring_stopped'
-          });
-        }
-      } catch (error) {
-        secureActivityLogger.logActivityError(error, {
-          component: 'AuthContext',
-          action: 'cleanup_activity_timer'
-        });
-      }
-    };
-  }, [state.lastActivity, state.isAuthenticated]);
+    return () => clearInterval(activityTimer);
+  }, [state.isAuthenticated]);
 
   // Helper functions
+  // Clear client-side auth data. The HttpOnly cookie is cleared server-side on logout.
   const clearAuthData = () => {
-    secureStorage.removeItem('token');
-    secureStorage.removeItem('user');
-    secureStorage.removeItem('tokenExpiry');
-    secureStorage.removeItem('sessionTimeoutMinutes');
-    secureStorage.removeItem('mustChangePassword');
+    localStorage.removeItem('medapp_sessionTimeoutMinutes');
 
-    // Clear any cached app data to ensure fresh data on next login
-    const cacheKeys = Object.keys(localStorage).filter(key => 
-      key.startsWith('appData_') || 
-      key.startsWith('patient_') || 
+    const cacheKeys = Object.keys(localStorage).filter(key =>
+      key.startsWith('appData_') ||
+      key.startsWith('patient_') ||
       key.startsWith('cache_')
     );
-    
-    cacheKeys.forEach(key => {
-      // Legacy cleanup - remove from both storages
-      localStorage.removeItem(key);
-      secureStorage.removeItem(key);
-    });
-    
-    // Note: We don't clear first login status as it should persist across sessions
+    cacheKeys.forEach(key => localStorage.removeItem(key));
   };
 
-  const updateStoredToken = async (token, tokenExpiry) => {
-    await secureStorage.setItem('token', token);
-    await secureStorage.setItem('tokenExpiry', tokenExpiry.toString());
-  };
-
-  const updateStoredUser = async user => {
-    await secureStorage.setJSON('user', user);
-  };
-
-  // Update user data in context and storage
+  // Update user data in context -- preserve existing session state
   const updateUser = updatedUserData => {
     const updatedUser = { ...state.user, ...updatedUserData };
 
@@ -515,66 +259,41 @@ export function AuthProvider({ children }) {
       type: AUTH_ACTIONS.LOGIN_SUCCESS,
       payload: {
         user: updatedUser,
-        token: state.token,
-        tokenExpiry: state.tokenExpiry,
+        sessionTimeoutMinutes: state.sessionTimeoutMinutes,
+        mustChangePassword: state.mustChangePassword,
       },
     });
 
-    // Note: Not awaiting here as this is called synchronously from components
-    // The storage will complete in the background
-    secureStorage.setJSON('user', updatedUser);
     return updatedUser;
   };
 
-  // Auth Actions - handles both username/password credentials and SSO user/token
-  const login = async (credentialsOrUser, tokenFromSSO = null) => {
+  // Auth Actions - handles both username/password credentials and SSO user object.
+  // The token is stored as an HttpOnly cookie by the server -- the frontend
+  // only manages user state and session timeout preferences.
+  // For SSO: pass { sso: true } as second arg to distinguish from regular login.
+  const login = async (credentialsOrUser, ssoFlag = null) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-      // Check if this is SSO login (user object + token) or regular login (credentials)
-      const isSSO = tokenFromSSO !== null && typeof credentialsOrUser === 'object' && credentialsOrUser.username;
-      
-      let user, token, tokenExpiry, result;
-      
+      // Check if this is SSO login (user object) or regular login (credentials).
+      // SSO callers pass a truthy second arg (legacy: token string; new: { sso: true }).
+      const isSSO = ssoFlag !== null && typeof credentialsOrUser === 'object' && credentialsOrUser.username;
+
+      let user, result;
+
       if (isSSO) {
-        // SSO login - we already have user and token
+        // SSO login - user object is provided directly by the SSO callback
         user = {
           ...credentialsOrUser,
-          // Ensure isAdmin property is set based on role
           isAdmin: isAdminRole(credentialsOrUser.role)
         };
-        token = tokenFromSSO;
-        
-        // Try to extract expiry from the SSO token
-        try {
-          const tokenParts = token.split('.');
-          if (tokenParts.length === 3) {
-            const payload = JSON.parse(atob(tokenParts[1]));
-            if (payload.exp) {
-              tokenExpiry = payload.exp * 1000; // Convert from seconds to milliseconds
-            }
-            // Store clock offset for client-side expiry checks (handles clock skew between server and client)
-            const issuedAt = Number(payload.iat);
-            if (Number.isFinite(issuedAt)) {
-              const clockOffset = Math.round(issuedAt - Date.now() / 1000);
-              localStorage.setItem('medapp_clockOffset', clockOffset.toString());
-            }
-          }
-        } catch (e) {
-          logger.warn('Failed to extract expiry from SSO token', {
-            category: 'auth_sso_token_parse',
-            error: e.message
-          });
-        }
-        
+
         logger.info('Processing SSO login', {
           category: 'auth_sso_login',
           username: user.username,
           userId: user.id,
           role: user.role,
-          isAdmin: user.isAdmin,
-          tokenExpiry: tokenExpiry,
           timestamp: new Date().toISOString()
         });
       } else {
@@ -588,87 +307,36 @@ export function AuthProvider({ children }) {
           });
           return { success: false, error: result.error };
         }
-        
+
         user = result.user;
-        token = result.token;
-        tokenExpiry = result.tokenExpiry; // Get the actual token expiry from the result
-        
+
         logger.info('Processing regular login', {
           category: 'auth_regular_login',
           username: user.username,
           userId: user.id,
-          tokenExpiry: tokenExpiry,
           timestamp: new Date().toISOString()
         });
       }
 
-      // Use the actual token expiry from the auth service (or fallback to 24 hours for SSO)
-      if (isSSO && !tokenExpiry) {
-        tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;  // 24 hours fallback for SSO
-      }
-      
-      // Fallback if tokenExpiry is still not set
-      if (!tokenExpiry) {
-        tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;  // 24 hours fallback
-      }
-
-      // Clear any existing cache data before login
-      // This ensures fresh data is loaded for the new user session
-      logger.info('Clearing cache before login', {
-        category: 'auth_cache_clear',
-        username: user.username,
-        userId: user.id,
-        timestamp: new Date().toISOString()
-      });
-
       // Clear any existing cached data from localStorage
-      const cacheKeys = Object.keys(localStorage).filter(key => 
-        key.startsWith('appData_') || 
-        key.startsWith('patient_') || 
+      const cacheKeys = Object.keys(localStorage).filter(key =>
+        key.startsWith('appData_') ||
+        key.startsWith('patient_') ||
         key.startsWith('cache_')
       );
-      
-      cacheKeys.forEach(key => {
-        // Legacy cleanup - remove from both storages
-        localStorage.removeItem(key);
-        secureStorage.removeItem(key);
-      });
-
-      // Log token expiry details for debugging
-      const expiryDate = new Date(tokenExpiry);
-      const hoursUntilExpiry = (tokenExpiry - Date.now()) / (1000 * 60 * 60);
-      logger.info('Token expiry details before storage', {
-        category: 'auth_token_expiry',
-        tokenExpiry: tokenExpiry,
-        expiryDate: expiryDate.toISOString(),
-        hoursUntilExpiry: hoursUntilExpiry.toFixed(2),
-        currentTime: Date.now(),
-        isExpired: tokenExpiry < Date.now()
-      });
+      cacheKeys.forEach(key => localStorage.removeItem(key));
 
       // Get session timeout from result or use default
       const sessionTimeoutMinutes = (isSSO ? 120 : result?.sessionTimeoutMinutes) || 120;
       const mustChangePassword = isSSO ? false : (result?.mustChangePassword || false);
 
-      // Store in localStorage - MUST await to prevent race conditions
-      await updateStoredToken(token, tokenExpiry);
-      await updateStoredUser(user);
-      await secureStorage.setItem('sessionTimeoutMinutes', sessionTimeoutMinutes.toString());
-      await secureStorage.setItem('mustChangePassword', mustChangePassword ? 'true' : 'false');
-
-      logger.info('Session timeout stored', {
-        category: 'auth_session_timeout',
-        sessionTimeoutMinutes: sessionTimeoutMinutes,
-        userId: user.id,
-        timestamp: new Date().toISOString()
-      });
+      // Store session timeout preference in localStorage (not sensitive)
+      localStorage.setItem('medapp_sessionTimeoutMinutes', sessionTimeoutMinutes.toString());
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
         payload: {
           user,
-          token,
-          tokenExpiry,
           sessionTimeoutMinutes,
           mustChangePassword,
         },
@@ -687,7 +355,6 @@ export function AuthProvider({ children }) {
           });
         }
       } catch (langError) {
-        // Don't fail auth if language loading fails
         logger.warn('Failed to load user language preference after login', {
           category: 'language_load_failed',
           error: langError.message,
@@ -716,19 +383,15 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      // Call backend logout if token exists
-      if (state.token) {
-        await authService.logout();
-      }
+      // Call backend logout to clear the HttpOnly cookie
+      await authService.logout();
     } catch (error) {
       logger.error('auth_context_logout_error', {
         message: 'Logout API call failed',
         error: error.message,
         stack: error.stack,
         isAuthenticated: state.isAuthenticated,
-        hasToken: !!state.token,
         userId: state.user?.id,
-        userRole: state.user?.role,
         timestamp: new Date().toISOString()
       });
     } finally {
@@ -744,15 +407,13 @@ export function AuthProvider({ children }) {
 
   const updateActivity = () => {
     try {
-      // Throttle activity updates to prevent excessive re-renders during form interactions
       const now = Date.now();
       const timeSinceLastUpdate = now - state.lastActivity;
-      
-      // Only update if it's been at least 5 seconds since last update
+
       if (timeSinceLastUpdate < 5000) {
         return;
       }
-      
+
       dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
       
       // Log activity update in development mode only
@@ -782,7 +443,6 @@ export function AuthProvider({ children }) {
   };
 
   const clearMustChangePassword = () => {
-    secureStorage.removeItem('mustChangePassword');
     dispatch({ type: AUTH_ACTIONS.CLEAR_MUST_CHANGE_PASSWORD });
   };
 
@@ -802,21 +462,16 @@ export function AuthProvider({ children }) {
   };
 
   const updateSessionTimeout = (timeoutMinutes) => {
-    dispatch({ 
-      type: AUTH_ACTIONS.UPDATE_SESSION_TIMEOUT, 
-      payload: timeoutMinutes 
-    });
-    logger.info('Session timeout updated', {
-      category: 'auth_timeout_update',
-      newTimeout: timeoutMinutes,
-      userId: state.user?.id
+    localStorage.setItem('medapp_sessionTimeoutMinutes', timeoutMinutes.toString());
+    dispatch({
+      type: AUTH_ACTIONS.UPDATE_SESSION_TIMEOUT,
+      payload: timeoutMinutes
     });
   };
 
   const contextValue = {
     // State
     user: state.user,
-    token: state.token,
     isAuthenticated: state.isAuthenticated,
     isLoading: state.isLoading,
     error: state.error,

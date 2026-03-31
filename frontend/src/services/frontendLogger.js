@@ -98,6 +98,7 @@ class FrontendLogger {
 
       const response = await fetch(`${this.baseURL}/system/log-level`, {
         method: 'GET',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -557,14 +558,9 @@ class FrontendLogger {
 
   async sendToBackend(logType, data) {
     try {
-      const token = localStorage.getItem('token');
       const headers = {
         'Content-Type': 'application/json',
       };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
       // Transform data to match backend schema
       let transformedData;
@@ -643,6 +639,7 @@ class FrontendLogger {
         `${this.baseURL}/frontend-logs/${endpoint}`,
         {
           method: 'POST',
+          credentials: 'include',
           headers: headers,
           body: JSON.stringify(transformedData),
         }

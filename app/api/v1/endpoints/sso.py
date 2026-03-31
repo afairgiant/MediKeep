@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, HTTPException, Depends, Query, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -12,6 +13,7 @@ from app.auth.sso.exceptions import *
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
+from app.core.utils.cookie_auth import set_auth_cookie
 from app.core.utils.security import create_access_token
 from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActionType, EntityType
@@ -103,26 +105,25 @@ def _complete_sso_login(
         else settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
-    # JWT expiry uses server config (8 hours), not user preference
-    # User's session_timeout_minutes only controls frontend inactivity timer
+    jwt_lifetime = max(settings.ACCESS_TOKEN_EXPIRE_MINUTES, session_timeout_minutes)
     access_token = create_access_token(
         data={
             "sub": sso_user.username,
             "role": sso_user.role if sso_user.role in ["admin", "user", "guest"] else "user",
             "user_id": sso_user.id,
         },
-        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        expires_delta=timedelta(minutes=jwt_lifetime),
     )
 
     log_endpoint_access(
         logger, req, sso_user.id, log_event_name,
-        message=f"SSO JWT token created with {settings.ACCESS_TOKEN_EXPIRE_MINUTES} minute expiration",
+        message=f"SSO JWT token created with {jwt_lifetime} minute expiration",
         username=sso_user.username,
-        jwt_expiry_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+        jwt_expiry_minutes=jwt_lifetime,
         inactivity_timeout_minutes=session_timeout_minutes,
     )
 
-    return {
+    response_data = {
         "access_token": access_token,
         "token_type": "bearer",  # nosec B105 - OAuth2 token type, not a password
         "user": {
@@ -136,6 +137,9 @@ def _complete_sso_login(
         "is_new_user": result["is_new_user"],
         "session_timeout_minutes": session_timeout_minutes,
     }
+    response = JSONResponse(content=response_data)
+    set_auth_cookie(response, access_token, max_age_minutes=jwt_lifetime)
+    return response
 
 @router.get("/config")
 async def get_sso_config(request: Request):

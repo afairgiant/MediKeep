@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Request, status
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
@@ -18,6 +19,7 @@ from app.core.logging.helpers import (
     log_endpoint_error,
     log_security_event,
 )
+from app.core.utils.cookie_auth import set_auth_cookie, clear_auth_cookie
 from app.core.utils.security import create_access_token, verify_password
 from app.crud.patient import patient
 from app.crud.user import user
@@ -322,9 +324,10 @@ def login(
     preferences = user_preferences.get_or_create_by_user_id(db, user_id=db_user.id)
     session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
-    # Create access token - JWT expiry uses server config (8 hours),
-    # NOT user's session_timeout_minutes (which only controls frontend inactivity timer)
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    # JWT must outlive the user's inactivity timeout, otherwise the cookie
+    # expires before the frontend timer fires and the user gets a hard 401.
+    jwt_lifetime = max(settings.ACCESS_TOKEN_EXPIRE_MINUTES, session_timeout_minutes)
+    access_token_expires = timedelta(minutes=jwt_lifetime)
     access_token = create_access_token(
         data={
             "sub": db_user.username,
@@ -362,18 +365,20 @@ def login(
         request,
         db_user.id,
         "token_created",
-        message=f"JWT token created with {settings.ACCESS_TOKEN_EXPIRE_MINUTES} minute expiration",
+        message=f"JWT token created with {jwt_lifetime} minute expiration",
         username=form_data.username,
-        jwt_expiry_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+        jwt_expiry_minutes=jwt_lifetime,
         inactivity_timeout_minutes=session_timeout_minutes,
     )
 
-    return {
+    response = JSONResponse(content={
         "access_token": access_token,
         "token_type": "bearer",
         "session_timeout_minutes": session_timeout_minutes,
         "must_change_password": bool(db_user.must_change_password),
-    }
+    })
+    set_auth_cookie(response, access_token, max_age_minutes=jwt_lifetime)
+    return response
 
 
 @router.post("/logout")
@@ -396,7 +401,9 @@ def logout(
         username=current_user.username,
     )
 
-    return {"status": "success", "data": {}, "message": "Logged out successfully"}
+    response = JSONResponse(content={"status": "success", "data": {}, "message": "Logged out successfully"})
+    clear_auth_cookie(response)
+    return response
 
 
 class ChangePasswordRequest(BaseModel):

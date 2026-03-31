@@ -127,9 +127,9 @@ const SSOCallback = () => {
         category: 'sso_callback_component'
       });
 
-      // Update auth context with SSO login (user, token)
+      // Update auth context with SSO login
       if (login) {
-        login(result.user, result.token);
+        login(result.user, { sso: true });
       }
       
       // Determine where to redirect
@@ -191,7 +191,7 @@ const SSOCallback = () => {
 
         // Update auth context with resolved login
         if (login) {
-          login(result.user, result.token);
+          login(result.user, { sso: true });
         }
 
         // Hide the modal and redirect
