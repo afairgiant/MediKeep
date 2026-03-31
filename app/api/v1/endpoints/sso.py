@@ -117,9 +117,9 @@ def _complete_sso_login(
 
     log_endpoint_access(
         logger, req, sso_user.id, log_event_name,
-        message=f"SSO JWT token created with {settings.ACCESS_TOKEN_EXPIRE_MINUTES} minute expiration",
+        message=f"SSO JWT token created with {jwt_lifetime} minute expiration",
         username=sso_user.username,
-        jwt_expiry_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+        jwt_expiry_minutes=jwt_lifetime,
         inactivity_timeout_minutes=session_timeout_minutes,
     )
 

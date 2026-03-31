@@ -405,7 +405,9 @@ class TestAuthEndpoints:
     # ------------------------------------------------------------------
 
     def test_login_sets_httponly_cookie(self, client: TestClient, db_session: Session):
-        """Test that login sets an HttpOnly session cookie alongside the JSON body token."""
+        """Test that login sets an HttpOnly session cookie with correct attributes."""
+        from app.core.config import settings
+
         user_data = create_random_user(db_session)
         response = client.post(
             "/api/v1/auth/login",
@@ -415,8 +417,12 @@ class TestAuthEndpoints:
         assert response.status_code == 200
         # JSON body still contains token (backward compat)
         assert "access_token" in response.json()
-        # Cookie is set
-        assert "medapp_session" in response.cookies
+        # Cookie is set with configured name
+        assert settings.AUTH_COOKIE_NAME in response.cookies
+        # Verify HttpOnly and SameSite via Set-Cookie header
+        set_cookie = response.headers.get("set-cookie", "")
+        assert "httponly" in set_cookie.lower(), "Cookie must be HttpOnly"
+        assert "samesite=lax" in set_cookie.lower(), "Cookie must have SameSite=Lax"
 
     def test_cookie_auth_accepted(self, client: TestClient, db_session: Session):
         """Test that cookie-based auth works for protected endpoints."""
@@ -478,26 +484,30 @@ class TestAuthEndpoints:
 
     def test_header_takes_precedence_over_cookie(self, client: TestClient, db_session: Session):
         """Test that when both header and cookie are present, the header token is used."""
-        # Create two users
+        from app.core.config import settings
+
         user_a = create_random_user(db_session)
         user_b = create_random_user(db_session)
 
-        # Login as user A to set cookie
+        # Login as user A to get a cookie
         login_a = client.post(
             "/api/v1/auth/login",
             data={"username": user_a["username"], "password": user_a["password"]}
         )
         assert login_a.status_code == 200
-        # Cookie is now set for user A
+        cookie_a = login_a.cookies[settings.AUTH_COOKIE_NAME]
 
-        # Login as user B to get a header token (don't overwrite cookies)
+        # Login as user B to get a header token (this overwrites the cookie to user B)
         login_b = client.post(
             "/api/v1/auth/login",
             data={"username": user_b["username"], "password": user_b["password"]}
         )
         token_b = login_b.json()["access_token"]
 
-        # Request with user B's header -- should identify as user B despite user A's cookie
+        # Restore user A's cookie so both cookie (A) and header (B) are present
+        client.cookies.set(settings.AUTH_COOKIE_NAME, cookie_a)
+
+        # Header should win -- response should identify as user B
         me_response = client.get(
             "/api/v1/users/me",
             headers={"Authorization": f"Bearer {token_b}"}
@@ -505,19 +515,18 @@ class TestAuthEndpoints:
         assert me_response.status_code == 200
         assert me_response.json()["username"] == user_b["username"]
 
-    def test_login_token_uses_server_expiry_not_user_preference(self, client: TestClient, db_session: Session):
-        """Test that JWT expiry uses ACCESS_TOKEN_EXPIRE_MINUTES, not user's session_timeout_minutes."""
+    def test_jwt_lifetime_uses_server_default_when_user_timeout_is_lower(self, client: TestClient, db_session: Session):
+        """JWT lifetime = max(ACCESS_TOKEN_EXPIRE_MINUTES, user timeout). When user timeout < server default, JWT uses server default."""
         import base64
         import json
         from app.core.config import settings
 
         user_data = create_random_user(db_session)
 
-        # Set user's session timeout to something different from server config
         from app.crud.user_preferences import user_preferences
         from app.schemas.user_preferences import UserPreferencesUpdate
         db_user = user_crud.get_by_username(db_session, username=user_data["username"])
-        prefs = user_preferences.get_or_create_by_user_id(db_session, user_id=db_user.id)
+        user_preferences.get_or_create_by_user_id(db_session, user_id=db_user.id)
         user_preferences.update_by_user_id(
             db_session,
             user_id=db_user.id,
@@ -532,18 +541,53 @@ class TestAuthEndpoints:
         assert response.status_code == 200
         token = response.json()["access_token"]
 
-        # Decode JWT payload
         payload_b64 = token.split(".")[1]
         padding_len = (-len(payload_b64)) % 4
         if padding_len:
             payload_b64 += "=" * padding_len
         payload = json.loads(base64.urlsafe_b64decode(payload_b64))
 
-        # Token lifetime should be server config (480 min), not user preference (15 min)
         token_lifetime_minutes = (payload["exp"] - payload["iat"]) / 60
         assert token_lifetime_minutes == pytest.approx(settings.ACCESS_TOKEN_EXPIRE_MINUTES, abs=1), \
-            f"JWT lifetime should be {settings.ACCESS_TOKEN_EXPIRE_MINUTES} min (server config), got {token_lifetime_minutes:.0f} min"
+            f"JWT lifetime should be {settings.ACCESS_TOKEN_EXPIRE_MINUTES} min (server default), got {token_lifetime_minutes:.0f} min"
 
-        # session_timeout_minutes should still be in the response for frontend inactivity timer
-        data = response.json()
-        assert data["session_timeout_minutes"] == 15
+        assert response.json()["session_timeout_minutes"] == 15
+
+    def test_jwt_lifetime_extends_when_user_timeout_exceeds_server_default(self, client: TestClient, db_session: Session):
+        """JWT lifetime = max(ACCESS_TOKEN_EXPIRE_MINUTES, user timeout). When user timeout > server default, JWT extends to match."""
+        import base64
+        import json
+        from app.core.config import settings
+
+        user_data = create_random_user(db_session)
+
+        from app.crud.user_preferences import user_preferences
+        from app.schemas.user_preferences import UserPreferencesUpdate
+        db_user = user_crud.get_by_username(db_session, username=user_data["username"])
+        user_preferences.get_or_create_by_user_id(db_session, user_id=db_user.id)
+        user_timeout = settings.ACCESS_TOKEN_EXPIRE_MINUTES + 120  # e.g. 600 min
+        user_preferences.update_by_user_id(
+            db_session,
+            user_id=db_user.id,
+            obj_in=UserPreferencesUpdate(session_timeout_minutes=user_timeout)
+        )
+
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]}
+        )
+
+        assert response.status_code == 200
+        token = response.json()["access_token"]
+
+        payload_b64 = token.split(".")[1]
+        padding_len = (-len(payload_b64)) % 4
+        if padding_len:
+            payload_b64 += "=" * padding_len
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64))
+
+        token_lifetime_minutes = (payload["exp"] - payload["iat"]) / 60
+        assert token_lifetime_minutes == pytest.approx(user_timeout, abs=1), \
+            f"JWT lifetime should extend to {user_timeout} min (user timeout), got {token_lifetime_minutes:.0f} min"
+
+        assert response.json()["session_timeout_minutes"] == user_timeout

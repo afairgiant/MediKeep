@@ -251,13 +251,17 @@ export function AuthProvider({ children }) {
     cacheKeys.forEach(key => localStorage.removeItem(key));
   };
 
-  // Update user data in context
+  // Update user data in context -- preserve existing session state
   const updateUser = updatedUserData => {
     const updatedUser = { ...state.user, ...updatedUserData };
 
     dispatch({
       type: AUTH_ACTIONS.LOGIN_SUCCESS,
-      payload: { user: updatedUser },
+      payload: {
+        user: updatedUser,
+        sessionTimeoutMinutes: state.sessionTimeoutMinutes,
+        mustChangePassword: state.mustChangePassword,
+      },
     });
 
     return updatedUser;

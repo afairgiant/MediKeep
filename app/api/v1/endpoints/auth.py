@@ -365,9 +365,9 @@ def login(
         request,
         db_user.id,
         "token_created",
-        message=f"JWT token created with {settings.ACCESS_TOKEN_EXPIRE_MINUTES} minute expiration",
+        message=f"JWT token created with {jwt_lifetime} minute expiration",
         username=form_data.username,
-        jwt_expiry_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+        jwt_expiry_minutes=jwt_lifetime,
         inactivity_timeout_minutes=session_timeout_minutes,
     )
 
