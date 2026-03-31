@@ -268,16 +268,6 @@ const Settings = () => {
         papra_api_token: localPreferences.papra_api_token || '',
       };
 
-      // Debug what we're setting in local preferences
-      if (fieldsToUpdate.session_timeout_minutes) {
-        frontendLogger.debug('settings_local_preferences_update', 'Setting local preferences with timeout', {
-          originalResponse: updatedPreferences.session_timeout_minutes,
-          withCredentials: updatedPreferencesWithLocalCredentials.session_timeout_minutes,
-          localPrefs: localPreferences.session_timeout_minutes,
-          component: 'Settings'
-        });
-      }
-
       updateLocalPreferences(updatedPreferencesWithLocalCredentials);
 
       // Update session timeout in AuthContext if it was changed

@@ -6,7 +6,7 @@
 import logger from '../logger';
 import { env } from '../../config/env';
 import { isAdminRole } from '../../utils/authUtils';
-import { secureStorage, legacyMigration } from '../../utils/secureStorage';
+
 
 class SimpleAuthService {
   constructor() {
@@ -47,7 +47,7 @@ class SimpleAuthService {
           setTimeout(() => reject(new Error('Request timeout')), timeout);
         });
 
-        const fetchPromise = fetch(url, options);
+        const fetchPromise = fetch(url, { ...options, credentials: 'include' });
         const response = await Promise.race([fetchPromise, timeoutPromise]);
 
         logger.info(`Response received from ${url}`, {
@@ -85,23 +85,7 @@ class SimpleAuthService {
     );
   }
 
-  // Get stored token
-  async getToken() {
-    // Migrate legacy data first
-    await legacyMigration.migrateFromLocalStorage();
-    return await secureStorage.getItem(this.tokenKey);
-  }
-
-  // Set token
-  async setToken(token) {
-    if (token) {
-      await secureStorage.setItem(this.tokenKey, token);
-    } else {
-      secureStorage.removeItem(this.tokenKey);
-    }
-  }
-
-  // Parse JWT payload
+  // Parse JWT payload (used to extract user info from login response body)
   parseJWT(token) {
     try {
       if (!token || token.split('.').length !== 3) return null;
@@ -123,21 +107,6 @@ class SimpleAuthService {
       });
       return null;
     }
-  }
-
-  // Check if token is valid (not expired)
-  async isTokenValid(token = null) {
-    const targetToken = token || await this.getToken();
-    if (!targetToken) return false;
-
-    const payload = this.parseJWT(targetToken);
-    if (!payload || !payload.exp) return false;
-
-    const currentTime = Math.floor(Date.now() / 1000);
-    const parsed = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
-    const clockOffset = Number.isFinite(parsed) ? parsed : 0;
-    const serverTime = currentTime + clockOffset;
-    return payload.exp > serverTime;
   }
   // Login user
   async login(credentials) {
@@ -192,10 +161,7 @@ class SimpleAuthService {
         };
       }
 
-      // Store token
-      this.setToken(data.access_token);
-
-      // Extract user info from token
+      // Extract user info from the JWT in the response body (token itself is in HttpOnly cookie)
       const payload = this.parseJWT(data.access_token);
       logger.info('Token payload extracted from access token', {
         userId: payload?.user_id,
@@ -213,22 +179,12 @@ class SimpleAuthService {
         isAdmin: isAdminRole(payload.role),
       };
 
-      // Store user
-      secureStorage.setJSON(this.userKey, user);
-
-      // Store clock offset for client-side expiry checks (handles clock skew between server and client)
-      const issuedAt = Number(payload.iat);
-      if (Number.isFinite(issuedAt)) {
-        const clockOffset = Math.round(issuedAt - Date.now() / 1000);
-        localStorage.setItem('medapp_clockOffset', clockOffset.toString());
-      }
-
       return {
         success: true,
         user,
-        token: data.access_token,
-        tokenExpiry: payload.exp * 1000, // Convert to milliseconds
-        sessionTimeoutMinutes: data.session_timeout_minutes || 30, // Get user's timeout preference
+        token: null,
+        tokenExpiry: null,
+        sessionTimeoutMinutes: data.session_timeout_minutes || 120,
         mustChangePassword: data.must_change_password || false,
       };
     } catch (error) {
@@ -310,47 +266,25 @@ class SimpleAuthService {
     }
   }
 
-  // Get current user from the backend so must_change_password is always fresh.
-  // Falls back to the cached value if the network call fails.
   async getCurrentUser() {
     try {
-      const token = await this.getToken();
-      if (!token || !(await this.isTokenValid(token))) {
-        return null;
-      }
-
       const response = await this.makeRequest('/users/me', {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.ok) {
-        const user = await response.json();
-        // Keep the cached copy up-to-date
-        secureStorage.setJSON(this.userKey, user);
-        return user;
+        return await response.json();
       }
 
-      // Non-2xx means the token is invalid or the user was deleted
+      // Non-2xx means the cookie/session is invalid or the user was deleted
       return null;
     } catch (error) {
-      logger.error('Error fetching current user from backend, falling back to cache', {
+      logger.error('Error fetching current user from backend', {
         error: error.message,
         errorType: error.constructor.name,
         category: 'auth_user_fetch_error'
       });
-      // Network error — use the cached value so offline/flaky scenarios still work
-      try {
-        const storedUser = await secureStorage.getItem(this.userKey);
-        if (storedUser && await this.isTokenValid()) {
-          return JSON.parse(storedUser);
-        }
-      } catch (_) {
-        // ignore secondary errors
-      }
       return null;
     }
   }
@@ -363,34 +297,21 @@ class SimpleAuthService {
     return { success: false, error: 'Token refresh not supported' };
   }
 
-  // Logout user
   async logout() {
     try {
-      logger.info('Logging out user', {
-        hadToken: !!(await this.getToken()),
-        category: 'auth_logout'
-      });
-      
-      // Call backend logout endpoint to invalidate token
-      const token = await this.getToken();
-      if (token) {
-        try {
-          await this.makeRequest('/auth/logout', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          });
-        } catch (error) {
-          logger.warn('Backend logout failed, continuing with client logout', {
-            error: error.message,
-            category: 'auth_logout'
-          });
-        }
+      logger.info('Logging out user', { category: 'auth_logout' });
+
+      try {
+        await this.makeRequest('/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        logger.warn('Backend logout request failed', {
+          error: error.message,
+          category: 'auth_logout'
+        });
       }
-      
-      this.clearTokens();
     } catch (error) {
       logger.error('Error during logout process', {
         error: error.message,
@@ -400,30 +321,8 @@ class SimpleAuthService {
     }
   }
 
-  // Clear all auth data from both secure storage and legacy localStorage
-  async clearTokens() {
-    // Clear from secure storage (new system)
-    secureStorage.removeItem(this.tokenKey);
-    secureStorage.removeItem(this.userKey);
-    secureStorage.removeItem('tokenExpiry');
-    
-    // CRITICAL: Also clear from legacy localStorage (old system)
-    // This is essential because auth initialization checks both locations
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
-    localStorage.removeItem('tokenExpiry');
-  }
-
-  // Get auth headers for API requests
-  async getAuthHeaders() {
-    const token = await this.getToken();
-    const headers = { 'Content-Type': 'application/json' };
-
-    if (token && await this.isTokenValid(token)) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    return headers;
+  getAuthHeaders() {
+    return { 'Content-Type': 'application/json' };
   }
 
   // Check if user registration is enabled
@@ -604,34 +503,20 @@ class SimpleAuthService {
         category: 'sso_callback'
       });
 
-      // Store token and user (same as regular login)
-      if (data.access_token) {
-        // Create enriched user object with isAdmin property
-        const enrichedUser = {
-          id: data.user.id,
-          username: data.user.username,
-          email: data.user.email,
-          fullName: data.user.full_name,
-          role: data.user.role,
-          authMethod: data.user.auth_method,
-          isAdmin: isAdminRole(data.user.role),
-        };
-        
-        this.setToken(data.access_token);
-        secureStorage.setJSON(this.userKey, enrichedUser);
-        
-        return {
-          success: true,
-          user: enrichedUser,  // Return enriched user with isAdmin property
-          token: data.access_token,
-          isNewUser: data.is_new_user,
-        };
-      }
+      const enrichedUser = data.user ? {
+        id: data.user.id,
+        username: data.user.username,
+        email: data.user.email,
+        fullName: data.user.full_name,
+        role: data.user.role,
+        authMethod: data.user.auth_method,
+        isAdmin: isAdminRole(data.user.role),
+      } : null;
 
       return {
         success: true,
-        user: data.user,
-        token: data.access_token,
+        user: enrichedUser,
+        token: null,
         isNewUser: data.is_new_user,
       };
     } catch (error) {

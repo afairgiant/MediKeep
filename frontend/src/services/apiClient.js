@@ -24,8 +24,6 @@ class APIClient {
     this.activityTracker = null;
     this.safeActivityTracker = null;
 
-    // Add default auth interceptor
-    this.addRequestInterceptor(this.authInterceptor.bind(this));
     this.addResponseInterceptor(this.errorInterceptor.bind(this));
   }
 
@@ -70,67 +68,28 @@ class APIClient {
     this.responseInterceptors.push(interceptor);
   }
 
-  // Auth interceptor - adds token to requests
-  async authInterceptor(config) {
-    const token = await authService.getToken();
-
-    if (token && await authService.isTokenValid(token)) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-      };
-    }
-    return config;
-  }
-
   // Error interceptor - handles auth errors
   async errorInterceptor(error, originalConfig) {
     if (error.status === 401 && !originalConfig._retry) {
       originalConfig._retry = true;
 
-      try {
-        // Try to refresh token
-        const refreshResult = await authService.refreshToken();
-        if (refreshResult.success) {
-          // Update config with new token
-          originalConfig.headers['Authorization'] =
-            `Bearer ${refreshResult.token}`;
-
-          // Retry original request
-          return this.request(originalConfig);
-        }
-      } catch (refreshError) {
-        logger.error('Token refresh failed', {
-          category: 'api_client_error',
-          error: refreshError.message,
-          status: refreshError.status,
-          endpoint: originalConfig.url
-        });
-      }
-
-      // Clear auth data but let components handle the error gracefully
-      // Only redirect if this is a critical auth endpoint
-      authService.clearTokens();
-      
       // Check if this is a critical endpoint that requires immediate redirect
       const criticalEndpoints = ['/auth/', '/login', '/users/me'];
-      const isCriticalEndpoint = criticalEndpoints.some(endpoint => 
+      const isCriticalEndpoint = criticalEndpoints.some(endpoint =>
         originalConfig.url.includes(endpoint)
       );
-      
+
       if (isCriticalEndpoint) {
         notifyError('notifications:toasts.auth.sessionExpiredLogin');
         window.location.href = '/login';
       } else {
-        // For non-critical endpoints, just add a header to indicate auth failure
-        // This allows components to handle the error appropriately
         logger.warn('Authentication failed for non-critical endpoint', {
           category: 'api_client_warning',
           endpoint: originalConfig.url,
-          message: 'Authentication failed but not redirecting to preserve user experience'
+          message: 'Session expired or invalid (401)'
         });
       }
-      
+
       throw error;
     }
 

@@ -134,15 +134,10 @@ class Logger {
 
   async sendToBackend(logEntry) {
     try {
-      const token = localStorage.getItem('token');
-      const headers = { 'Content-Type': 'application/json' };
-
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       await fetch(`${this.baseURL}/frontend-logs/log`, {
         method: 'POST',
-        headers,
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(logEntry),
       });
     } catch (error) {

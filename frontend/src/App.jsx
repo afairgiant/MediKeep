@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, Suspense } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -95,7 +95,7 @@ import { timezoneService } from './services/timezoneService';
 import { ENTITY_TYPES } from './utils/entityRelationships';
 import { useActivityTracker, useNavigationActivityTracker, useApiActivityTracker } from './hooks/useActivityTracker';
 import { apiClient } from './services/apiClient';
-import { useAuth } from './contexts/AuthContext';
+
 import { useReleaseNotes } from './hooks/useReleaseNotes';
 import WhatsNewModal from './components/settings/WhatsNewModal';
 import './App.css';
@@ -224,47 +224,15 @@ function ThemedToastContainer() {
 // Component to initialize global activity tracking with enhanced error handling
 function ActivityTracker() {
   const { isTracking, isEnabled, getStats } = useActivityTracker({
-    // Re-enable basic tracking but avoid clicks to prevent navigation interference
-    trackMouseMove: false, // Keep disabled
-    trackKeyboard: true,   // Safe for session management
-    trackClicks: false,    // Keep disabled to avoid navigation interference
-    trackTouch: true,      // Safe for mobile
+    trackMouseMove: false,
+    trackKeyboard: true,
+    trackClicks: true,
+    trackTouch: true,
     enabled: true,
-
   });
   
-  // Create a working API activity tracker that heavily throttles updateActivity calls
-  const { updateActivity } = useAuth();
-  const trackApiActivity = useCallback((apiInfo = {}) => {
-    // Increase throttle to 2 minutes and add form interaction protection
-    const now = Date.now();
-    const lastUpdate = window._lastActivityUpdate || 0;
-    if (now - lastUpdate > 120000) { // 2 minute throttle
-      window._lastActivityUpdate = now;
-      // Call updateActivity asynchronously to avoid blocking form interactions
-      setTimeout(() => {
-        try {
-          // Don't update activity if user is actively interacting with forms
-          const activeElement = document.activeElement;
-          const isFormInteraction = activeElement && (
-            activeElement.tagName === 'INPUT' ||
-            activeElement.tagName === 'SELECT' ||
-            activeElement.tagName === 'TEXTAREA' ||
-            activeElement.contentEditable === 'true' ||
-            // Check for modal or date input interaction with combined selector for efficiency
-            activeElement.closest('[role="dialog"], .mantine-Modal-root, .mantine-DateInput-input')
-          );
-          
-          if (!isFormInteraction) {
-            updateActivity();
-          }
-        } catch (error) {
-          // Activity update failed - this is expected during logout/navigation
-          // No need to log as it's normal behavior
-        }
-      }, 100); // Small delay to allow form interactions to complete
-    }
-  }, [updateActivity]);
+  // API calls (background polling, etc.) should NOT reset the inactivity timer.
+  // Only real user interactions (mouse, keyboard, touch, scroll) count as activity.
   const getApiStats = () => ({});
 
   // Log activity tracking status changes
@@ -280,29 +248,10 @@ function ActivityTracker() {
     }
   }, [isTracking, getStats]);
 
-  // Set up API activity tracking with proper error handling  
+  // Clean up API activity tracker (no longer used for inactivity tracking)
   useEffect(() => {
-    try {
-      // Set the simplified activity tracker on the API client
-      apiClient.setActivityTracker(trackApiActivity);
-      
-      logger.debug('API activity tracking configured with simplified tracker', {
-        category: 'activity_tracking',
-        component: 'ActivityTracker',
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error) {
-      logger.error('Failed to configure API activity tracking', {
-        category: 'activity_tracking_error',
-        component: 'ActivityTracker',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
     return () => {
       try {
-        // Clean up API activity tracking
         apiClient.setActivityTracker(null);
       } catch (error) {
         logger.error('Failed to cleanup API activity tracking', {
@@ -313,7 +262,7 @@ function ActivityTracker() {
         });
       }
     };
-  }, [trackApiActivity]);
+  }, []);
 
   // Performance monitoring for activity tracking
   useEffect(() => {

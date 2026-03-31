@@ -1,7 +1,6 @@
 import logger from '../logger';
 
 import BaseApiService from './baseApi';
-import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 
 class AdminApiService extends BaseApiService {
   constructor() {
@@ -17,7 +16,7 @@ class AdminApiService extends BaseApiService {
     const queryString = searchParams.toString();
     const url = `${this.baseURL}${this.basePath}${endpoint}${queryString ? `?${queryString}` : ''}`;
     const headers = await this.getAuthHeaders();
-    const response = await fetch(url, { headers });
+    const response = await fetch(url, { credentials: 'include', headers });
     if (!response.ok) {
       throw new Error(`Export failed with status ${response.status}`);
     }
@@ -71,14 +70,9 @@ class AdminApiService extends BaseApiService {
   }
 
   async getFrontendLogHealth() {
-    // Note: This endpoint is not under /admin, so we use the direct path
-    // Migrate legacy data first
-    legacyMigration.migrateFromLocalStorage();
-    const token = secureStorage.getItem('token');
     const response = await fetch('/api/v1/frontend-logs/health', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -87,14 +81,9 @@ class AdminApiService extends BaseApiService {
   }
 
   async getSSOConfig() {
-    // Note: This endpoint is not under /admin, so we use the direct path
-    // Migrate legacy data first
-    legacyMigration.migrateFromLocalStorage();
-    const token = secureStorage.getItem('token');
     const response = await fetch('/api/v1/auth/sso/config', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -312,13 +301,7 @@ class AdminApiService extends BaseApiService {
       `${this.baseURL}${this.basePath}/restore/upload`,
       {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${(() => {
-            legacyMigration.migrateFromLocalStorage();
-            return secureStorage.getItem('token');
-          })()}`,
-          // Don't set Content-Type - let browser set it with boundary for FormData
-        },
+        credentials: 'include',
         body: formData,
       }
     );

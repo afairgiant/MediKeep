@@ -1,6 +1,5 @@
 // Base API service with common functionality
 import logger from '../logger';
-import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import { getApiUrl } from '../../config/env';
 import { extractErrorMessage } from '../../utils/errorUtils.js';
 
@@ -12,63 +11,13 @@ class BaseApiService {
     this.basePath = basePath;
     this.requestQueue = [];
     this.isProcessingQueue = false;
-    this.maxConcurrentRequests = 3; // Limit concurrent requests
+    this.maxConcurrentRequests = 3;
     this.activeRequests = 0;
-    this.tokenRefreshPromise = null;
   }
 
-  // Helper method to get auth headers with validation
-  async getAuthHeaders() {
-    // Migrate legacy data first
-    await legacyMigration.migrateFromLocalStorage();
-    const token = await secureStorage.getItem('token');
-
-    // Validate token before using it
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Date.now() / 1000;
-        // Adjust for clock skew between server and client PCs
-        const parsedOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
-        const clockOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
-        const serverTime = currentTime + clockOffset;
-
-        // Check if token expires soon (within 5 minutes)
-        if (payload.exp - serverTime < 300) {
-          logger.warn('api_token_warning', {
-            message: 'Token expires soon, consider refresh',
-            expiresIn: payload.exp - serverTime,
-            serverTime,
-            clockOffset
-          });
-        }
-
-        // Check if token is already expired
-        if (payload.exp < serverTime) {
-          logger.error('api_token_error', {
-            message: 'Token expired, removing',
-            tokenExpired: payload.exp,
-            serverTime,
-            clockOffset
-          });
-          secureStorage.removeItem('token');
-          return { 'Content-Type': 'application/json' };
-        }
-      } catch (e) {
-        logger.error('api_token_error', {
-          message: 'Invalid token, removing',
-          error: e.message,
-          action: 'token_removed'
-        });
-        secureStorage.removeItem('token');
-        return { 'Content-Type': 'application/json' };
-      }
-    }
-
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
+  // No Authorization header needed; credentials: 'include' sends the session cookie.
+  getAuthHeaders() {
+    return { 'Content-Type': 'application/json' };
   }
 
   // Queue management for preventing concurrent request issues
@@ -114,115 +63,33 @@ class BaseApiService {
     if (this.requestQueue.length > 0) {
       setTimeout(() => this.processQueue(), 100);
     }
-  } // Enhanced authentication error handling
-  handleAuthError(response) {
-    const timestamp = new Date().toISOString();
-    logger.info('api_auth_handler', {
-      message: 'Auth error handler called',
-      timestamp,
-      status: response.status,
-      url: response.url,
-      activeRequests: this.activeRequests
-    });
+  }
 
+  // Handle authentication errors. Cookie is HttpOnly so we cannot inspect it;
+  // a 401 means the session cookie is invalid/expired.
+  handleAuthError(response) {
     if (response.status === 401) {
       const url = response.url;
 
-      // For admin endpoints, be more lenient due to concurrent request issues
+      // For admin endpoints, allow retry logic to handle transient issues
       if (url && url.includes('/admin/')) {
         logger.warn('api_admin_access_denied', {
-          message: 'Admin access denied - checking token validity',
+          message: 'Admin access denied (401)',
           url,
-          activeRequests: this.activeRequests
-        });
-
-        try {
-          const token = secureStorage.getItem('token');
-          if (!token) {
-            logger.error('api_auth_error', {
-              message: 'No token found for admin request',
-              url,
-              action: 'redirect_to_login'
-            });
-            secureStorage.removeItem('token');
-            window.location.href = '/login';
-            return true;
-          }
-
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          const currentTime = Date.now() / 1000;
-          const clockOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
-          const serverTime = currentTime + clockOffset;
-
-          if (payload.exp < serverTime) {
-            logger.error('api_auth_error', {
-              message: 'Token expired for admin request',
-              tokenExpired: payload.exp,
-              serverTime,
-              clockOffset,
-              url,
-              action: 'redirect_to_login'
-            });
-            secureStorage.removeItem('token');
-            window.location.href = '/login';
-            return true;
-          }
-
-          // Token is valid but got 401 - likely concurrent request issue
-          logger.warn('api_admin_access_denied', {
-            message: 'Valid token but 401 on admin endpoint - concurrent request issue',
-            url,
-            tokenValid: true,
-            activeRequests: this.activeRequests,
-            action: 'retry_will_handle'
-          });
-          return false; // Don't redirect, let retry logic handle it
-        } catch (e) {
-          logger.error('api_auth_error', {
-            message: 'Token decode error',
-            error: e.message,
-            url,
-            action: 'redirect_to_login'
-          });
-          secureStorage.removeItem('token');
-          window.location.href = '/login';
-          return true;
-        }
-      }
-
-      // For non-admin endpoints, handle normally
-      try {
-        const token = secureStorage.getItem('token');
-        if (!token) {
-          secureStorage.removeItem('token');
-          window.location.href = '/login';
-          return true;
-        }
-
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Date.now() / 1000;
-        const parsedOffset = parseFloat(localStorage.getItem('medapp_clockOffset') || '0');
-        const clockOffset = Number.isFinite(parsedOffset) ? parsedOffset : 0;
-        const serverTime = currentTime + clockOffset;
-        if (payload.exp < serverTime) {
-          secureStorage.removeItem('token');
-          window.location.href = '/login';
-          return true;
-        }
-
-        logger.warn('api_auth_error', {
-          message: '401 error but token seems valid, not redirecting',
-          status: response.status,
-          url: response.url,
-          tokenValid: true,
-          action: 'no_redirect'
+          activeRequests: this.activeRequests,
+          action: 'retry_will_handle'
         });
         return false;
-      } catch (e) {
-        secureStorage.removeItem('token');
-        window.location.href = '/login';
-        return true;
       }
+
+      // For non-admin endpoints, redirect to login
+      logger.warn('api_auth_error', {
+        message: 'Session expired or invalid (401)',
+        url: response.url,
+        action: 'redirect_to_login'
+      });
+      window.location.href = '/login';
+      return true;
     }
 
     if (response.status === 429) {
@@ -321,7 +188,8 @@ class BaseApiService {
       });
 
       const response = await fetch(url, {
-        headers: await this.getAuthHeaders(),
+        credentials: 'include',
+        headers: this.getAuthHeaders(),
         signal,
       });
 
@@ -343,7 +211,8 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'POST',
-          headers: await this.getAuthHeaders(),
+          credentials: 'include',
+          headers: this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );
@@ -358,7 +227,8 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'PUT',
-          headers: await this.getAuthHeaders(),
+          credentials: 'include',
+          headers: this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );
@@ -373,7 +243,8 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'PATCH',
-          headers: await this.getAuthHeaders(),
+          credentials: 'include',
+          headers: this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );
@@ -388,7 +259,8 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'DELETE',
-          headers: await this.getAuthHeaders(),
+          credentials: 'include',
+          headers: this.getAuthHeaders(),
         }
       );
       return this.handleResponse(response, errorMessage);
@@ -402,7 +274,8 @@ class BaseApiService {
         `${this.baseURL}${this.basePath}${endpoint}`,
         {
           method: 'DELETE',
-          headers: await this.getAuthHeaders(),
+          credentials: 'include',
+          headers: this.getAuthHeaders(),
           body: JSON.stringify(data),
         }
       );

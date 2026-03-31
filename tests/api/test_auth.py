@@ -400,6 +400,111 @@ class TestAuthEndpoints:
         assert re_login_response.status_code == 200
         assert re_login_response.json()["must_change_password"] is False
 
+    # ------------------------------------------------------------------
+    # HttpOnly cookie authentication tests (Option C - Phase 1)
+    # ------------------------------------------------------------------
+
+    def test_login_sets_httponly_cookie(self, client: TestClient, db_session: Session):
+        """Test that login sets an HttpOnly session cookie alongside the JSON body token."""
+        user_data = create_random_user(db_session)
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]}
+        )
+
+        assert response.status_code == 200
+        # JSON body still contains token (backward compat)
+        assert "access_token" in response.json()
+        # Cookie is set
+        assert "medapp_session" in response.cookies
+
+    def test_cookie_auth_accepted(self, client: TestClient, db_session: Session):
+        """Test that cookie-based auth works for protected endpoints."""
+        user_data = create_random_user(db_session)
+        # Login -- TestClient automatically stores cookies
+        login_response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]}
+        )
+        assert login_response.status_code == 200
+
+        # Request /users/me with NO Authorization header -- cookie should authenticate
+        me_response = client.get("/api/v1/users/me")
+        assert me_response.status_code == 200
+        assert me_response.json()["username"] == user_data["username"]
+
+    def test_logout_clears_cookie(self, client: TestClient, db_session: Session):
+        """Test that logout clears the session cookie."""
+        user_data = create_random_user(db_session)
+        login_response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]}
+        )
+        assert login_response.status_code == 200
+        token = login_response.json()["access_token"]
+
+        # Logout (use header auth to authenticate the logout request)
+        logout_response = client.post(
+            "/api/v1/auth/logout",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert logout_response.status_code == 200
+
+        # After logout, cookie-only request should fail
+        # Clear the Authorization header to test cookie-only
+        client.headers.pop("Authorization", None)
+        me_response = client.get("/api/v1/users/me")
+        assert me_response.status_code == 401
+
+    def test_header_auth_still_works(self, client: TestClient, db_session: Session):
+        """Test that Authorization header auth continues to work."""
+        user_data = create_random_user(db_session)
+        login_response = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_data["username"], "password": user_data["password"]}
+        )
+        assert login_response.status_code == 200
+        token = login_response.json()["access_token"]
+
+        # Clear cookies so only header is used
+        client.cookies.clear()
+
+        me_response = client.get(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert me_response.status_code == 200
+        assert me_response.json()["username"] == user_data["username"]
+
+    def test_header_takes_precedence_over_cookie(self, client: TestClient, db_session: Session):
+        """Test that when both header and cookie are present, the header token is used."""
+        # Create two users
+        user_a = create_random_user(db_session)
+        user_b = create_random_user(db_session)
+
+        # Login as user A to set cookie
+        login_a = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_a["username"], "password": user_a["password"]}
+        )
+        assert login_a.status_code == 200
+        # Cookie is now set for user A
+
+        # Login as user B to get a header token (don't overwrite cookies)
+        login_b = client.post(
+            "/api/v1/auth/login",
+            data={"username": user_b["username"], "password": user_b["password"]}
+        )
+        token_b = login_b.json()["access_token"]
+
+        # Request with user B's header -- should identify as user B despite user A's cookie
+        me_response = client.get(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {token_b}"}
+        )
+        assert me_response.status_code == 200
+        assert me_response.json()["username"] == user_b["username"]
+
     def test_login_token_uses_server_expiry_not_user_preference(self, client: TestClient, db_session: Session):
         """Test that JWT expiry uses ACCESS_TOKEN_EXPIRE_MINUTES, not user's session_timeout_minutes."""
         import base64

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database.database import get_db
+from app.core.utils.cookie_auth import get_token_from_cookie
 from app.core.logging.config import get_logger, log_security_event
 from app.core.http.error_handling import (
     MedicalRecordsAPIException,
@@ -183,15 +184,23 @@ def get_current_user(
     client_ip = get_client_ip(request)
     user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
 
-    # Check if credentials were provided
-    if not credentials or not credentials.credentials:
+    # Check credentials: Authorization header first, then HttpOnly cookie
+    jwt_token = None
+    auth_method = "header"
+
+    if credentials and credentials.credentials:
+        jwt_token = credentials.credentials
+    elif cookie_token := get_token_from_cookie(request):
+        jwt_token = cookie_token
+        auth_method = "cookie"
+    else:
         security_logger.info("No authentication credentials provided")
         log_security_event(
             security_logger,
             event="no_credentials",
             ip_address=client_ip,
             user_agent=user_agent,
-            message="No authentication credentials provided",
+            message="No authentication credentials provided (header or cookie)",
         )
         raise UnauthorizedException(
             message="Authentication required",
@@ -201,9 +210,9 @@ def get_current_user(
 
     # Validate and decode token using shared logic
     result = _validate_and_decode_token(
-        credentials.credentials,
+        jwt_token,
         request,
-        auth_method="header"
+        auth_method=auth_method
     )
 
     # Get user from database
@@ -315,26 +324,29 @@ def get_current_user_flexible_auth(
     client_ip = get_client_ip(request)
     user_agent = sanitize_log_input(request.headers.get("user-agent", "unknown"))
 
-    # Try to get token from Authorization header first, then query parameter
+    # Try to get token: Authorization header > HttpOnly cookie > query parameter
     jwt_token = None
     auth_method = None
 
     if credentials and credentials.credentials:
         jwt_token = credentials.credentials
         auth_method = "header"
+    elif cookie_token := get_token_from_cookie(request):
+        jwt_token = cookie_token
+        auth_method = "cookie"
     elif token:
         jwt_token = token
         auth_method = "query_param"
         # Log query parameter usage for security monitoring
         security_logger.info("Authentication via query parameter token (for file viewing)")
     else:
-        security_logger.warning("No authentication token provided (header or query param)")
+        security_logger.warning("No authentication token provided (header, cookie, or query param)")
         log_security_event(
             security_logger,
             event="auth_no_token_provided",
             ip_address=client_ip,
             user_agent=user_agent,
-            message="No JWT token provided in header or query parameter",
+            message="No JWT token provided in header, cookie, or query parameter",
         )
         raise UnauthorizedException(
             message="Token validation failed",
