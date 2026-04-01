@@ -54,7 +54,7 @@ def validate_text_field(
         raise ValueError(f"{field_name} must be at least {min_length} characters")
 
     if len(stripped) > max_length:
-        raise ValueError(f"{field_name} must be less than {max_length} characters")
+        raise ValueError(f"{field_name} must be {max_length} characters or fewer")
 
     return stripped
 
@@ -91,7 +91,7 @@ def validate_required_text(
         raise ValueError(f"{field_name} must be at least {min_length} characters")
 
     if len(stripped) > max_length:
-        raise ValueError(f"{field_name} must be less than {max_length} characters")
+        raise ValueError(f"{field_name} must be {max_length} characters or fewer")
 
     if normalize_case == "title":
         return stripped.title()

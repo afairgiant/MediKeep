@@ -49,10 +49,10 @@ class MedicalEquipmentBase(TaggedEntityMixin):
     prescribed_date: Optional[date] = None
     last_service_date: Optional[date] = None
     next_service_date: Optional[date] = None
-    usage_instructions: Optional[str] = Field(None, max_length=1000)
+    usage_instructions: Optional[str] = Field(None, max_length=5000)
     status: Optional[str] = Field("active", max_length=50)
     supplier: Optional[str] = Field(None, max_length=200)
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the prescribing practitioner"
@@ -102,10 +102,10 @@ class MedicalEquipmentUpdate(BaseModel):
     prescribed_date: Optional[date] = None
     last_service_date: Optional[date] = None
     next_service_date: Optional[date] = None
-    usage_instructions: Optional[str] = Field(None, max_length=1000)
+    usage_instructions: Optional[str] = Field(None, max_length=5000)
     status: Optional[str] = Field(None, max_length=50)
     supplier: Optional[str] = Field(None, max_length=200)
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
     practitioner_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None
 

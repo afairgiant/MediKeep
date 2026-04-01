@@ -17,7 +17,7 @@ class AllergyBase(TaggedEntityMixin):
         None, description="Date when the allergy was first identified"
     )
     notes: Optional[str] = Field(
-        None, max_length=1000, description="Additional notes about the allergy"
+        None, max_length=5000, description="Additional notes about the allergy"
     )
     status: str = Field(default="active", description="Status of the allergy")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
@@ -56,7 +56,7 @@ class AllergyUpdate(BaseModel):
     reaction: Optional[str] = Field(None, max_length=500)
     severity: Optional[str] = None
     onset_date: Optional[date] = None
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
     status: Optional[str] = None
     medication_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None

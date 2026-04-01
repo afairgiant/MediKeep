@@ -77,10 +77,10 @@ class ProcedureBase(TaggedEntityMixin):
         None, max_length=50, description="Code for the procedure (e.g., CPT code)"
     )
     description: Optional[str] = Field(
-        None, max_length=1000, description="Detailed description of the procedure"
+        None, max_length=5000, description="Detailed description of the procedure"
     )
     date: DateType = Field(..., description="Date when the procedure was performed")
-    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
+    notes: Optional[str] = Field(None, max_length=5000, description="Additional notes")
     status: str = Field(..., description="Status of the procedure")
     outcome: Optional[str] = Field(
         None, max_length=50, description="Outcome of the procedure"
@@ -109,10 +109,10 @@ class ProcedureBase(TaggedEntityMixin):
         None, gt=0, description="ID of the condition this procedure addresses"
     )
     anesthesia_type: Optional[str] = Field(
-        None, max_length=100, description="Type of Anethesia used during the procedure"
+        None, max_length=100, description="Type of Anesthesia used during the procedure"
     )
     anesthesia_notes: Optional[str] = Field(
-        None, max_length=1000, description="Additional notes about the anesthesia"
+        None, max_length=5000, description="Additional notes about the anesthesia"
     )
 
     @model_validator(mode="before")
@@ -141,9 +141,9 @@ class ProcedureUpdate(BaseModel):
     procedure_name: Optional[str] = Field(None, min_length=2, max_length=300)
     procedure_type: Optional[str] = Field(None, max_length=50)
     procedure_code: Optional[str] = Field(None, max_length=50)
-    description: Optional[str] = Field(None, max_length=1000)
+    description: Optional[str] = Field(None, max_length=5000)
     date: Optional[DateType] = None
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
     status: Optional[str] = None
     outcome: Optional[str] = Field(None, max_length=50)
     facility: Optional[str] = Field(None, max_length=300)
@@ -152,7 +152,7 @@ class ProcedureUpdate(BaseModel):
     procedure_duration: Optional[int] = Field(None, gt=0)
     practitioner_id: Optional[int] = Field(None, gt=0)
     anesthesia_type: Optional[str] = Field(None, max_length=100)
-    anesthesia_notes: Optional[str] = Field(None, max_length=1000)
+    anesthesia_notes: Optional[str] = Field(None, max_length=5000)
     tags: Optional[List[str]] = None
 
     @model_validator(mode="before")

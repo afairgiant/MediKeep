@@ -23,7 +23,7 @@ class FamilyMemberBase(BaseModel):
     )
     is_deceased: bool = Field(False, description="Whether family member is deceased")
     notes: Optional[str] = Field(
-        None, max_length=1000, description="Additional notes about family member"
+        None, max_length=5000, description="Additional notes about family member"
     )
     patient_id: int = Field(..., gt=0, description="ID of the patient")
 
@@ -84,7 +84,7 @@ class FamilyMemberUpdate(BaseModel):
     birth_year: Optional[int] = Field(None, ge=1900, le=2030)
     death_year: Optional[int] = Field(None, ge=1900, le=2030)
     is_deceased: Optional[bool] = None
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
 
     @field_validator("relationship")
     @classmethod

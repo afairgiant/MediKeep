@@ -430,10 +430,10 @@ const VitalsForm = ({
         rows: 3,
         validation: {
           maxLength: {
-            value: 1000,
+            value: 5000,
             message: t(
               'vitals.form.validation.notesMaxLength',
-              'Notes cannot exceed 1000 characters'
+              'Notes cannot exceed 5000 characters'
             ),
           },
         },

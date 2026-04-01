@@ -175,8 +175,8 @@ class VitalsBase(BaseModel):
     @classmethod
     def validate_notes(cls, v):
         """Validate notes"""
-        if v and len(v.strip()) > 1000:
-            raise ValueError("Notes must be less than 1000 characters")
+        if v and len(v.strip()) > 5000:
+            raise ValueError("Notes must be 5000 characters or fewer")
         return v.strip() if v else None
 
     @field_validator("location")

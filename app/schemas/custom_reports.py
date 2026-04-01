@@ -104,7 +104,7 @@ class CustomReportRequest(BaseModel):
 class ReportTemplate(BaseModel):
     """Model for saving and managing report templates"""
     name: str = Field(..., max_length=255, description="Template name")
-    description: Optional[str] = Field(None, max_length=1000, description="Template description")
+    description: Optional[str] = Field(None, max_length=5000, description="Template description")
     selected_records: List[SelectiveRecordRequest] = Field(
         default_factory=list,
         description="Saved record selections"

@@ -48,7 +48,7 @@ class ConditionBase(TaggedEntityMixin):
         ..., min_length=2, max_length=500, description="Medical diagnosis"
     )
     notes: Optional[str] = Field(
-        None, max_length=1000, description="Additional notes about the condition"
+        None, max_length=5000, description="Additional notes about the condition"
     )
     onset_date: Optional[date] = Field(
         None, description="Date when the condition was first diagnosed"
@@ -108,7 +108,7 @@ class ConditionCreate(ConditionBase):
 class ConditionUpdate(BaseModel):
     condition_name: Optional[str] = Field(None, max_length=500)
     diagnosis: Optional[str] = Field(None, min_length=2, max_length=500)
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
     onset_date: Optional[date] = None
     end_date: Optional[date] = None
     status: Optional[str] = None
