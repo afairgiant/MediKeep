@@ -22,7 +22,7 @@ jobs:
       (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main') ||
       github.event_name == 'workflow_dispatch'
     steps:
-      - uses: release-drafter/release-drafter@v6
+      - uses: release-drafter/release-drafter@v7
         with:
           config-name: release-drafter.yml
         env:
