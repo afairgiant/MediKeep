@@ -109,7 +109,7 @@ class ProcedureBase(TaggedEntityMixin):
         None, gt=0, description="ID of the condition this procedure addresses"
     )
     anesthesia_type: Optional[str] = Field(
-        None, max_length=100, description="Type of Anethesia used during the procedure"
+        None, max_length=100, description="Type of Anesthesia used during the procedure"
     )
     anesthesia_notes: Optional[str] = Field(
         None, max_length=5000, description="Additional notes about the anesthesia"
