@@ -16,10 +16,11 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [registrationEnabled, setRegistrationEnabled] = useState(true);
+  const [registrationEnabled, setRegistrationEnabled] = useState(false);
   const [registrationMessage, setRegistrationMessage] = useState('');
   const [ssoConfig, setSSOConfig] = useState({ enabled: false });
   const [ssoLoading, setSSOLoading] = useState(false);
+  const [configLoaded, setConfigLoaded] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,19 +37,18 @@ const Login = () => {
 
   // Check registration status and SSO config on mount
   useEffect(() => {
-    const checkRegistration = async () => {
-      const status = await authService.checkRegistrationEnabled();
+    const loadConfig = async () => {
+      const [status, config] = await Promise.all([
+        authService.checkRegistrationEnabled(),
+        authService.getSSOConfig(),
+      ]);
       setRegistrationEnabled(status.registration_enabled);
       setRegistrationMessage(status.message || '');
-    };
-
-    const checkSSO = async () => {
-      const config = await authService.getSSOConfig();
       setSSOConfig(config);
+      setConfigLoaded(true);
     };
 
-    checkRegistration();
-    checkSSO();
+    loadConfig();
   }, []);
 
   const handleChange = e => {
@@ -199,8 +199,8 @@ const Login = () => {
           </button>
         </form>
 
-        {/* SSO Login Option */}
-        {ssoConfig.enabled && (
+        {/* SSO Login Option - only shown after server config is loaded */}
+        {configLoaded && ssoConfig.enabled && (
           <div className={styles.ssoSection}>
             <div className={styles.divider}>
               <span>{t('auth.login.or')}</span>
@@ -216,22 +216,24 @@ const Login = () => {
           </div>
         )}
 
-        <div className={styles.loginActions}>
-          {registrationEnabled ? (
-            <button
-              type="button"
-              className={styles.createUserBtn}
-              onClick={handleCreateUserNavigation}
-              disabled={isLoading}
-            >
-              {t('auth.login.createAccount')}
-            </button>
-          ) : (
-            <div className={styles.registrationDisabledMessage}>
-              {registrationMessage || t('auth.login.registrationDisabled')}
-            </div>
-          )}
-        </div>
+        {configLoaded && (
+          <div className={styles.loginActions}>
+            {registrationEnabled ? (
+              <button
+                type="button"
+                className={styles.createUserBtn}
+                onClick={handleCreateUserNavigation}
+                disabled={isLoading}
+              >
+                {t('auth.login.createAccount')}
+              </button>
+            ) : (
+              <div className={styles.registrationDisabledMessage}>
+                {registrationMessage || t('auth.login.registrationDisabled')}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
     </div>

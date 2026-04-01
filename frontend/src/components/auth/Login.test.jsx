@@ -23,6 +23,14 @@ vi.mock('react-toastify', () => ({
   },
 }));
 
+// Spy on authService config endpoints (keeps prototype methods intact)
+import { authService } from '../../services/auth/simpleAuthService';
+
+vi.spyOn(authService, 'checkRegistrationEnabled').mockResolvedValue({
+  registration_enabled: true,
+});
+vi.spyOn(authService, 'getSSOConfig').mockResolvedValue({ enabled: false });
+
 describe('Login Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,11 +45,28 @@ describe('Login Component', () => {
       expect(document.querySelector('button[type="submit"]')).toBeInTheDocument();
     });
 
-    test('renders create account button', () => {
+    test('hides registration UI until config loads, then shows create account button', async () => {
+      // Use deferred promises to control when config resolves
+      let resolveRegistration;
+      let resolveSSO;
+      authService.checkRegistrationEnabled.mockImplementation(
+        () => new Promise(r => { resolveRegistration = r; })
+      );
+      authService.getSSOConfig.mockImplementation(
+        () => new Promise(r => { resolveSSO = r; })
+      );
+
       render(<Login />);
 
-      // Mock t() returns the key; createAccount button text comes from t('auth.login.createAccount')
-      expect(screen.getByText('auth.login.createAccount')).toBeInTheDocument();
+      // Before config loads: button must NOT be in the document
+      expect(screen.queryByText('auth.login.createAccount')).not.toBeInTheDocument();
+
+      // Resolve both config fetches
+      resolveRegistration({ registration_enabled: true });
+      resolveSSO({ enabled: false });
+
+      // After config loads: button appears
+      expect(await screen.findByText('auth.login.createAccount')).toBeInTheDocument();
     });
 
     test('renders with MediKeep title', () => {

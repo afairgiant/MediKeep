@@ -230,6 +230,9 @@ export function AuthProvider({ children }) {
           sessionTimeoutMinutes: sessionTimeoutRef.current || 120,
         });
         notifyInfo('notifications:toasts.auth.sessionExpired');
+        // Attempt to clear the HttpOnly cookie server-side.
+        // May fail if the JWT is already expired -- that's OK.
+        authService.logout().catch(() => {});
         clearAuthData();
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
