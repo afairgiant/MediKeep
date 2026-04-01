@@ -338,8 +338,8 @@ class SimpleAuthService {
           status: response.status,
           category: 'auth_registration_check'
         });
-        // Default to enabled if check fails
-        return { registration_enabled: true };
+        // Default to disabled if check fails (safe default -- don't expose registration UI on error)
+        return { registration_enabled: false };
       }
 
       const data = await response.json();
@@ -353,8 +353,8 @@ class SimpleAuthService {
         error: error.message,
         category: 'auth_registration_check'
       });
-      // Default to enabled if check fails to avoid blocking users
-      return { registration_enabled: true };
+      // Default to disabled if check fails (safe default -- don't expose registration UI on error)
+      return { registration_enabled: false };
     }
   }
 

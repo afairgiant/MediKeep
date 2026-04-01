@@ -23,6 +23,19 @@ vi.mock('react-toastify', () => ({
   },
 }));
 
+// Mock authService config endpoints
+vi.mock('../../services/auth/simpleAuthService', async () => {
+  const actual = await vi.importActual('../../services/auth/simpleAuthService');
+  return {
+    ...actual,
+    authService: {
+      ...actual.authService,
+      checkRegistrationEnabled: vi.fn().mockResolvedValue({ registration_enabled: true }),
+      getSSOConfig: vi.fn().mockResolvedValue({ enabled: false }),
+    },
+  };
+});
+
 describe('Login Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,11 +50,11 @@ describe('Login Component', () => {
       expect(document.querySelector('button[type="submit"]')).toBeInTheDocument();
     });
 
-    test('renders create account button', () => {
+    test('renders create account button after config loads', async () => {
       render(<Login />);
 
-      // Mock t() returns the key; createAccount button text comes from t('auth.login.createAccount')
-      expect(screen.getByText('auth.login.createAccount')).toBeInTheDocument();
+      // Button appears after async config fetch resolves (gated behind configLoaded)
+      expect(await screen.findByText('auth.login.createAccount')).toBeInTheDocument();
     });
 
     test('renders with MediKeep title', () => {
