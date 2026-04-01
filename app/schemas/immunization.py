@@ -42,7 +42,7 @@ class ImmunizationBase(TaggedEntityMixin):
         max_length=200,
         description="Where vaccine was administered (clinic, hospital, pharmacy, etc.)",
     )
-    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
+    notes: Optional[str] = Field(None, max_length=5000, description="Additional notes")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the administering practitioner"
@@ -112,7 +112,7 @@ class ImmunizationUpdate(BaseModel):
     route: Optional[str] = Field(None, max_length=50)
     expiration_date: Optional[date] = None
     location: Optional[str] = Field(None, max_length=200)
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
     practitioner_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None
 

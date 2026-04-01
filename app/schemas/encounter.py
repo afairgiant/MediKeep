@@ -39,7 +39,7 @@ class EncounterBase(TaggedEntityMixin):
     @classmethod
     def validate_notes(cls, v):
         """Validate notes field"""
-        return validate_text_field(v, max_length=1000, field_name="Notes")
+        return validate_text_field(v, max_length=5000, field_name="Notes")
 
     @field_validator("date")
     @classmethod
@@ -63,19 +63,19 @@ class EncounterBase(TaggedEntityMixin):
     @classmethod
     def validate_diagnosis(cls, v):
         """Validate diagnosis"""
-        return validate_text_field(v, max_length=1000, field_name="Diagnosis")
+        return validate_text_field(v, max_length=5000, field_name="Diagnosis")
 
     @field_validator("treatment_plan")
     @classmethod
     def validate_treatment_plan(cls, v):
         """Validate treatment plan"""
-        return validate_text_field(v, max_length=2000, field_name="Treatment plan")
+        return validate_text_field(v, max_length=5000, field_name="Treatment plan")
 
     @field_validator("follow_up_instructions")
     @classmethod
     def validate_follow_up_instructions(cls, v):
         """Validate follow-up instructions"""
-        return validate_text_field(v, max_length=1000, field_name="Follow-up instructions")
+        return validate_text_field(v, max_length=5000, field_name="Follow-up instructions")
 
     @field_validator("duration_minutes")
     @classmethod
@@ -160,7 +160,7 @@ class EncounterUpdate(BaseModel):
     @classmethod
     def validate_notes(cls, v):
         """Validate notes if provided"""
-        return validate_text_field(v, max_length=1000, field_name="Notes")
+        return validate_text_field(v, max_length=5000, field_name="Notes")
 
     @field_validator("date")
     @classmethod
@@ -190,19 +190,19 @@ class EncounterUpdate(BaseModel):
     @classmethod
     def validate_diagnosis(cls, v):
         """Validate diagnosis if provided"""
-        return validate_text_field(v, max_length=1000, field_name="Diagnosis")
+        return validate_text_field(v, max_length=5000, field_name="Diagnosis")
 
     @field_validator("treatment_plan")
     @classmethod
     def validate_treatment_plan(cls, v):
         """Validate treatment plan if provided"""
-        return validate_text_field(v, max_length=2000, field_name="Treatment plan")
+        return validate_text_field(v, max_length=5000, field_name="Treatment plan")
 
     @field_validator("follow_up_instructions")
     @classmethod
     def validate_follow_up_instructions(cls, v):
         """Validate follow-up instructions if provided"""
-        return validate_text_field(v, max_length=1000, field_name="Follow-up instructions")
+        return validate_text_field(v, max_length=5000, field_name="Follow-up instructions")
 
     @field_validator("duration_minutes")
     @classmethod

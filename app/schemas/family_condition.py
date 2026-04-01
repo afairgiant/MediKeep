@@ -18,7 +18,7 @@ class FamilyConditionBase(BaseModel):
     status: Optional[str] = Field(None, description="Status of the condition")
     condition_type: Optional[str] = Field(None, description="Type/category of condition")
     notes: Optional[str] = Field(
-        None, max_length=1000, description="Additional notes about the condition"
+        None, max_length=5000, description="Additional notes about the condition"
     )
     icd10_code: Optional[str] = Field(
         None, max_length=10, description="ICD-10 diagnosis code"
@@ -66,7 +66,7 @@ class FamilyConditionUpdate(BaseModel):
     severity: Optional[str] = None
     status: Optional[str] = None
     condition_type: Optional[str] = None
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
     icd10_code: Optional[str] = Field(None, max_length=10)
 
     @field_validator("severity")

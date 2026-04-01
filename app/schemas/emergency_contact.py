@@ -32,7 +32,7 @@ class EmergencyContactBase(BaseModel):
         None, max_length=500, description="Contact's address"
     )
     notes: Optional[str] = Field(
-        None, max_length=1000, description="Additional notes about the contact"
+        None, max_length=5000, description="Additional notes about the contact"
     )
 
     @field_validator("relationship")
@@ -101,7 +101,7 @@ class EmergencyContactUpdate(BaseModel):
     is_primary: Optional[bool] = None
     is_active: Optional[bool] = None
     address: Optional[str] = Field(None, max_length=500)
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
 
     @field_validator("relationship")
     @classmethod

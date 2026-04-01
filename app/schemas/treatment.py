@@ -27,7 +27,7 @@ class TreatmentBase(TaggedEntityMixin):
         None, max_length=300, description="Category of treatment (optional)"
     )
     description: Optional[str] = Field(
-        None, max_length=1000, description="Detailed description of the treatment"
+        None, max_length=5000, description="Detailed description of the treatment"
     )
     start_date: Optional[date] = Field(None, description="Start date of the treatment (optional)")
     end_date: Optional[date] = Field(None, description="End date of the treatment")
@@ -51,7 +51,7 @@ class TreatmentBase(TaggedEntityMixin):
     mode: str = Field(
         "simple", description="Treatment mode: 'simple' or 'advanced'"
     )
-    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
+    notes: Optional[str] = Field(None, max_length=5000, description="Additional notes")
     status: Optional[str] = Field("active", description="Status of the treatment")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
@@ -152,7 +152,7 @@ class TreatmentCreate(TreatmentBase):
 class TreatmentUpdate(BaseModel):
     treatment_name: Optional[str] = Field(None, min_length=2, max_length=300)
     treatment_type: Optional[str] = Field(None, max_length=300)  # No min_length - optional field
-    description: Optional[str] = Field(None, max_length=1000)
+    description: Optional[str] = Field(None, max_length=5000)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     frequency: Optional[str] = Field(None, max_length=100)
@@ -161,7 +161,7 @@ class TreatmentUpdate(BaseModel):
     location: Optional[str] = Field(None, max_length=200)
     dosage: Optional[str] = Field(None, max_length=200)
     mode: Optional[str] = None
-    notes: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=5000)
     status: Optional[str] = None
     practitioner_id: Optional[int] = Field(None, gt=0)
     condition_id: Optional[int] = Field(None, gt=0)

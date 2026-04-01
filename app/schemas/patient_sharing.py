@@ -15,7 +15,7 @@ class PatientShareInvitationRequest(BaseModel):
     permission_level: str = Field(default='view', description="Permission level: view, edit, or full")
     expires_at: Optional[datetime] = Field(None, description="Optional share expiration date")
     custom_permissions: Optional[Dict] = Field(None, description="Optional custom permissions")
-    message: Optional[str] = Field(None, max_length=1000, description="Optional message to recipient")
+    message: Optional[str] = Field(None, max_length=5000, description="Optional message to recipient")
     expires_hours: Optional[int] = Field(168, ge=1, le=8760, description="Hours until invitation expires (1 hour to 1 year)")
 
     @field_validator('patient_id')
@@ -51,7 +51,7 @@ class PatientShareBulkInvitationRequest(BaseModel):
     permission_level: str = Field(default='view', description="Permission level: view, edit, or full")
     expires_at: Optional[datetime] = Field(None, description="Optional share expiration date")
     custom_permissions: Optional[Dict] = Field(None, description="Optional custom permissions")
-    message: Optional[str] = Field(None, max_length=1000, description="Optional message to recipient")
+    message: Optional[str] = Field(None, max_length=5000, description="Optional message to recipient")
     expires_hours: Optional[int] = Field(168, ge=1, le=8760, description="Hours until invitation expires (1 hour to 1 year)")
 
     @field_validator('patient_ids')
