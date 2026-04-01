@@ -130,7 +130,7 @@
       "saving": "Sauvegarde du médicament...",
       "updateMedication": "Mettre à jour le médicament",
       "addMedication": "Ajouter un médicament",
-"attachedDocuments": "Pièces jointes"
+      "attachedDocuments": "Pièces jointes"
     },
     "medicationName": {
       "label": "Nom du médicament",
@@ -139,8 +139,8 @@
     },
     "alternativeName": {
       "label": "Nom alternatif",
-      "placeholder": "ex. nom de marque ou nom générique",
-      "description": "Nom alternatif ou de marque facultatif (2-100 caractères)"
+      "placeholder": "ex : nom de marque ou nom générique",
+      "description": "Nom alternatif ou de marque optionnel (2 à 100 caractères)"
     },
     "medicationType": {
       "label": "Type de médicament",
@@ -191,7 +191,7 @@
     },
     "sideEffects": {
       "label": "Effets secondaires",
-      "placeholder": "Listez les effets secondaires connus ou ressentis...",
+      "placeholder": "Listez tout effet secondaire connu ou ressenti...",
       "description": "Effets secondaires connus ou ressentis de ce médicament"
     }
   },
@@ -211,12 +211,12 @@
       "chemistry": "Chimie",
       "hematology": "Hématologie",
       "hepatology": "Hépatologie",
-      "immunology": "Immunologie",
+	  "immunology": "Immunologie",
       "genetics": "Génétique",
       "cardiology": "Cardiologie",
       "pulmonology": "Pulmonologie",
-      "hearing": "Ouïe",
-      "stomatology": "Stomatologie",
+	  "hearing": "Ouïe",
+	  "stomatology": "Stomatologie",
       "other": "Autre"
     },
     "testType": {
@@ -245,13 +245,13 @@
       "relatedConditions": "Conditions concernées",
       "linkConditionsTitle": "Connecter des conditions médicales",
       "linkConditionsDescription": "Associez ces résultats d'analyse aux conditions médicales concernées pour améliorer le suivi et l'organisation.",
-      "testComponents": "Composants d'analyse (optionnel)",
+	  "testComponents": "Composants d'analyse (optionnel)",
       "testComponentsDescription": "Ajoutez optionnellement des valeurs d'analyse individuelles. Vous pouvez également en ajouter plus ultérieurement.",
       "addTestComponent": "Ajouter des composants d'analyse",
       "hideTestComponents": "Cacher les composants d'analyse",
       "addAnotherTest": "Ajouter un autre résultat d'analyse",
       "componentCreationWarning": "Résultat d'analyse sauvegardé, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page d'aperçu.",
-      "relationshipCreationWarning": "Résultat enregistré mais certaines relations n'ont pas pu être créées. Vous pouvez les ajouter depuis la page de modification."
+      "relationshipCreationWarning": "Résultat d'analyse sauvegardé, mais certaines connexions n'ont pas pu être créées. Vous pouvez les ajouter depuis la page d'édition."
     },
     "testName": {
       "label": "Nom de l'analyse",
@@ -331,19 +331,19 @@
       }
     },
     "tabs": {
-      "basicInfo": "Info de Base",
-      "resultsStatus": "Résultats et Statut",
-      "testComponents": "Composants de Test",
+      "basicInfo": "Informations basiques",
+      "resultsStatus": "Résultats & Statut",
+      "testComponents": "Composants d'analyse",
       "documents": "Documents",
-      "addFiles": "Ajouter des Fichiers",
-      "relationships": "Relations",
+      "addFiles": "Ajouter des pièces jointes",
+      "relationships": "Connexions",
       "notes": "Notes"
     },
     "messages": {
-      "saving": "Enregistrement du résultat...",
-      "testComponentsEditInfo": "Les composants de test peuvent être gérés depuis la page de visualisation.",
-      "relationshipsCreateInfo": "Les relations peuvent être ajoutées après l'enregistrement.",
-      "relationshipsSaveFirst": "Enregistrez d'abord le résultat pour créer des liens de relation."
+      "saving": "Sauvegarde du résultat d'analyse...",
+      "testComponentsEditInfo": "Les composants d'analyse peuvent être géréss depuis la page d'aperçu après la sauvegarde.",
+      "relationshipsCreateInfo": "Les connexions peuvent être ajoutées après la sauvegarde du résulatt d'analyse.",
+      "relationshipsSaveFirst": "Sauvegardez d'abord le résultat d'analyse pour créer les liens de connexions."
     }
   },
   "immunizations": {
@@ -1076,14 +1076,14 @@
       }
     },
     "tabs": {
-      "basicInfo": "Info de Base",
+      "basicInfo": "Informations basiques",
       "details": "Détails",
       "documents": "Documents",
-      "addFiles": "Ajouter des Fichiers",
+      "addFiles": "Ajouter des pièces jointes",
       "notes": "Notes"
     },
     "messages": {
-      "saving": "Enregistrement du symptôme..."
+      "saving": "Sauvegarde du symptôme..."
     }
   },
   "familyHistory": {
@@ -1267,19 +1267,19 @@
       }
     },
     "name": {
-      "label": "Nom complet",
-      "placeholder": "Dr. Jeanne Dupont",
-      "description": "Nom complet du docteur, dont son titre"
+        "label": "Nom complet",
+        "placeholder": "Dr. Jeanne Dupont",
+        "description": "Nom complet du docteur, dont son titre"
     },
     "specialty": {
-      "label": "Spécialité médicale",
-      "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
-      "description": "Sélectionnez dans la liste ou saisissez une spécialité"
+        "label": "Spécialité médicale",
+        "placeholder": "Cherchez parmi les spécialités ou créez-en une...",
+        "description": "Sélectionnez dans la liste ou saisissez une spécialité"
     },
     "practice": {
-      "label": "Etablissement/Clinique",
-      "placeholder": "Cherchez ou créez un établissement...",
-      "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
+        "label": "Etablissement/Clinique",
+        "placeholder": "Cherchez ou créez un établissement...",
+        "description": "Sélectionnez un établissement existant ou commencez à saisir pour en créer un"
     },
     "rating": {
       "label": "Avis",
@@ -1416,9 +1416,9 @@
       "description": "Nom spécifique ou identification de l'emplacement"
     },
     "streetAddress": {
-      "label": "Adresse physique",
-      "placeholder": "123 Grand-rue",
-      "description": "Adresse physique"
+        "label": "Adresse physique",
+        "placeholder": "123 Grand-rue",
+        "description": "Adresse physique"
     },
     "city": {
       "label": "Cité",
@@ -1433,12 +1433,12 @@
   },
   "emergencyContacts": {
     "tabs": {
-      "contactInfo": "Coordonnées",
+      "contactInfo": "Informations de contact",
       "details": "Détails",
       "notes": "Notes"
     },
     "messages": {
-      "saving": "Enregistrement du contact d'urgence..."
+      "saving": "Sauvegarde du contact d'urgence..."
     },
     "title": "Contacts d'urgence",
     "form": {
@@ -1994,7 +1994,7 @@
   "form": {
     "invalidPhoneDigits": "Un numéro de téléphone ne peut contenir que des chiffres, des espaces, des tirets, des parenthèses, des points, et des +",
     "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide"
-  },
+	},
   "componentCatalog": {
     "searchPlaceholder": "Rechercher dans les résultats d'analyse...",
     "filterCategory": "Catégorie",
@@ -2030,9 +2030,9 @@
   },
   "equipment": {
     "tabs": {
-      "basicInfo": "Info de Base",
-      "deviceDetails": "Détails de l'Appareil",
-      "serviceDates": "Service et Dates",
+      "basicInfo": "Informations basiques",
+      "deviceDetails": "Détails de l'appareil",
+      "serviceDates": "Service & Dates",
       "notes": "Notes"
     }
   }
