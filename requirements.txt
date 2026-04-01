@@ -1,16 +1,16 @@
 aiofiles==23.2.1
 aiohappyeyeballs==2.6.1
-aiohttp==3.13.3
+aiohttp==3.13.5
 aiosignal==1.4.0
 aiosqlite==0.22.1
 alembic==1.18.4
 annotated-types==0.7.0
-anyio==4.12.1
+anyio==4.13.0
 attrs==25.4.0
 bcrypt==5.0.0
 certifi==2025.4.26
 cffi==2.0.0
-charset-normalizer==3.4.4
+charset-normalizer==3.4.6
 click==8.3.1
 colorama==0.4.6
 cryptography==46.0.6
@@ -18,7 +18,7 @@ databases==0.9.0
 dnspython==2.8.0
 ecdsa==0.19.2
 email_validator==2.3.0
-fastapi==0.132.0
+fastapi==0.135.3
 frozenlist==1.8.0
 greenlet==3.3.2
 h11==0.16.0
@@ -32,7 +32,7 @@ Mako==1.3.10
 MarkupSafe==3.0.3
 multidict==6.7.1
 packaging==25.0
-pillow==12.1.1
+pillow==12.2.0
 pluggy==1.6.0
 propcache==0.4.1
 psutil==7.2.2
@@ -45,7 +45,7 @@ pytest==9.0.2
 pytest-asyncio==1.3.0
 pytest-html==4.2.0
 python-dateutil>=2.8.2
-python-dotenv==1.2.1
+python-dotenv==1.2.2
 python-jose==3.5.0
 python-json-logger==2.0.7
 python-multipart==0.0.22
@@ -53,19 +53,19 @@ tzdata>=2024.1
 PyYAML==6.0.3
 reportlab==4.4.10
 matplotlib>=3.8.0
-requests==2.33.0
+requests==2.33.1
 rsa==4.9.1
 six==1.17.0
 sniffio==1.3.1
-SQLAlchemy==2.0.46
+SQLAlchemy==2.0.48
 starlette==0.52.1
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 urllib3==2.6.3
-uvicorn==0.41.0
+uvicorn==0.42.0
 watchfiles==1.1.1
 websockets==15.0.1
-yarl==1.22.0
+yarl==1.23.0
 
 # Notification framework
 apprise>=1.9.0           # Multi-channel notification library
