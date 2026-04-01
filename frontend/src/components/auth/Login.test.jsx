@@ -23,18 +23,13 @@ vi.mock('react-toastify', () => ({
   },
 }));
 
-// Mock authService config endpoints
-vi.mock('../../services/auth/simpleAuthService', async () => {
-  const actual = await vi.importActual('../../services/auth/simpleAuthService');
-  return {
-    ...actual,
-    authService: {
-      ...actual.authService,
-      checkRegistrationEnabled: vi.fn().mockResolvedValue({ registration_enabled: true }),
-      getSSOConfig: vi.fn().mockResolvedValue({ enabled: false }),
-    },
-  };
+// Spy on authService config endpoints (keeps prototype methods intact)
+import { authService } from '../../services/auth/simpleAuthService';
+
+vi.spyOn(authService, 'checkRegistrationEnabled').mockResolvedValue({
+  registration_enabled: true,
 });
+vi.spyOn(authService, 'getSSOConfig').mockResolvedValue({ enabled: false });
 
 describe('Login Component', () => {
   beforeEach(() => {
@@ -50,10 +45,27 @@ describe('Login Component', () => {
       expect(document.querySelector('button[type="submit"]')).toBeInTheDocument();
     });
 
-    test('renders create account button after config loads', async () => {
+    test('hides registration UI until config loads, then shows create account button', async () => {
+      // Use deferred promises to control when config resolves
+      let resolveRegistration;
+      let resolveSSO;
+      authService.checkRegistrationEnabled.mockImplementation(
+        () => new Promise(r => { resolveRegistration = r; })
+      );
+      authService.getSSOConfig.mockImplementation(
+        () => new Promise(r => { resolveSSO = r; })
+      );
+
       render(<Login />);
 
-      // Button appears after async config fetch resolves (gated behind configLoaded)
+      // Before config loads: button must NOT be in the document
+      expect(screen.queryByText('auth.login.createAccount')).not.toBeInTheDocument();
+
+      // Resolve both config fetches
+      resolveRegistration({ registration_enabled: true });
+      resolveSSO({ enabled: false });
+
+      // After config loads: button appears
       expect(await screen.findByText('auth.login.createAccount')).toBeInTheDocument();
     });
 
