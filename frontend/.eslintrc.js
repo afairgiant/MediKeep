@@ -10,6 +10,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:react/jsx-runtime', // For new JSX transform (no need to import React)
   ],
+  plugins: ['i18next'],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
@@ -27,6 +28,37 @@ module.exports = {
     'no-unused-vars': 'warn',
     'no-console': 'error', // Prevent all console statements - use logger instead
     'react/prop-types': 'warn', // Warn on missing prop types
+    'i18next/no-literal-string': ['warn', {
+      markupOnly: true,
+      ignoreCallee: [
+        'console.*',
+        'logger.*',
+        'require',
+        'import',
+      ],
+      ignoreAttribute: [
+        'data-testid',
+        'className',
+        'styleName',
+        'type',
+        'name',
+        'id',
+        'to',
+        'href',
+        'target',
+        'rel',
+        'key',
+        'icon',
+        'variant',
+        'size',
+        'color',
+        'radius',
+        'position',
+        'component',
+        'leftSection',
+        'rightSection',
+      ],
+    }],
   },
   overrides: [
     {
@@ -42,6 +74,9 @@ module.exports = {
         beforeAll: 'readonly',
         afterAll: 'readonly',
         vi: 'readonly',
+      },
+      rules: {
+        'i18next/no-literal-string': 'off',
       },
     },
     {

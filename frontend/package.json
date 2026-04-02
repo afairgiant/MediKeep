@@ -50,7 +50,9 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "i18n:check": "node scripts/check-translations.js",
-    "i18n:fix": "node scripts/check-translations.js --fix"
+    "i18n:fix": "node scripts/check-translations.js --fix",
+    "i18n:extract": "npx i18next-parser",
+    "i18n:unused": "node scripts/check-exposed-keys.js --unused"
   },
   "browserslist": {
     "production": [
@@ -79,10 +81,12 @@
     "concurrently": "^9.1.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-i18next": "^6.1.3",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "html-webpack-plugin": "^5.6.6",
+    "i18next-parser": "^9.0.2",
     "jsdom": "^28.1.0",
     "msw": "^1.3.5",
     "prettier": "^3.8.1",
