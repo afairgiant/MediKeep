@@ -164,14 +164,14 @@ describe('useReleaseNotes', () => {
       expect(result.current.unseenReleases[0].tag_name).toBe('v0.58.0');
     });
 
-    it('shows the latest release when no release matches current version exactly', async () => {
+    it('shows the closest release at or below currentVersion when no exact match', async () => {
       mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
 
-      const latestRelease = makeRelease({ tag_name: 'v0.57.0', name: 'Latest' });
+      const olderRelease = makeRelease({ tag_name: 'v0.57.0', name: 'Closest' });
 
       mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
       mockGetReleaseNotes.mockResolvedValue({
-        releases: [latestRelease],
+        releases: [olderRelease],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
       const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
@@ -180,7 +180,28 @@ describe('useReleaseNotes', () => {
 
       expect(result.current.showModal).toBe(true);
       expect(result.current.unseenReleases).toHaveLength(1);
-      expect(result.current.unseenReleases[0].name).toBe('Latest');
+      expect(result.current.unseenReleases[0].name).toBe('Closest');
+    });
+
+    it('does not show releases newer than currentVersion for first-time user', async () => {
+      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+
+      const newerRelease = makeRelease({ tag_name: 'v0.60.0', name: 'Future' });
+      const currentRelease = makeRelease({ tag_name: 'v0.58.0', name: 'Current' });
+
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetReleaseNotes.mockResolvedValue({
+        releases: [newerRelease, currentRelease],
+      } as Awaited<ReturnType<typeof getReleaseNotes>>);
+
+      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.showModal).toBe(true);
+      expect(result.current.unseenReleases).toHaveLength(1);
+      // Should show v0.58.0 (current), not v0.60.0 (future)
+      expect(result.current.unseenReleases[0].tag_name).toBe('v0.58.0');
     });
 
     it('does not show modal when releases array is empty', async () => {
@@ -221,7 +242,7 @@ describe('useReleaseNotes', () => {
       expect(result.current.unseenReleases).toHaveLength(0);
     });
 
-    it('shows modal with all releases newer than last-seen version', async () => {
+    it('shows releases between lastSeen and currentVersion after upgrade', async () => {
       const userId = 7;
       mockLocalStorageGetItem(storageKey(userId), 'v0.56.0');
 
@@ -241,11 +262,65 @@ describe('useReleaseNotes', () => {
       await waitFor(() => expect(result.current.loading).toBe(false));
 
       expect(result.current.showModal).toBe(true);
-      // v0.57.0 and v0.58.0 are both newer than v0.56.0
+      // v0.57.0 and v0.58.0 are both newer than v0.56.0 and at or below currentVersion
       expect(result.current.unseenReleases).toHaveLength(2);
       // Hook sorts newest first
       expect(result.current.unseenReleases[0].tag_name).toBe('v0.58.0');
       expect(result.current.unseenReleases[1].tag_name).toBe('v0.57.0');
+    });
+
+    it('excludes releases newer than currentVersion (not yet upgraded to)', async () => {
+      const userId = 13;
+      mockLocalStorageGetItem(storageKey(userId), 'v0.50.0');
+
+      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+
+      // GitHub has releases newer than what user is running
+      const v55 = makeRelease({ tag_name: 'v0.55.0', name: 'v0.55.0' });
+      const v54 = makeRelease({ tag_name: 'v0.54.0', name: 'v0.54.0' });
+      const v53 = makeRelease({ tag_name: 'v0.53.0', name: 'v0.53.0' });
+      const v51 = makeRelease({ tag_name: 'v0.51.0', name: 'v0.51.0' });
+      const v50 = makeRelease({ tag_name: 'v0.50.0', name: 'v0.50.0' });
+
+      // User upgraded to v0.53.0, but GitHub already has v0.54.0 and v0.55.0
+      mockGetVersionInfo.mockResolvedValue({ version: '0.53.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetReleaseNotes.mockResolvedValue({
+        releases: [v55, v54, v53, v51, v50],
+      } as Awaited<ReturnType<typeof getReleaseNotes>>);
+
+      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.showModal).toBe(true);
+      // Only v0.51.0 and v0.53.0 should show (between v0.50.0 and v0.53.0)
+      expect(result.current.unseenReleases).toHaveLength(2);
+      expect(result.current.unseenReleases[0].tag_name).toBe('v0.53.0');
+      expect(result.current.unseenReleases[1].tag_name).toBe('v0.51.0');
+    });
+
+    it('does not show modal when user has not upgraded (lastSeen equals currentVersion)', async () => {
+      const userId = 14;
+      mockLocalStorageGetItem(storageKey(userId), 'v0.50.0');
+
+      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+
+      const v55 = makeRelease({ tag_name: 'v0.55.0', name: 'v0.55.0' });
+      const v50 = makeRelease({ tag_name: 'v0.50.0', name: 'v0.50.0' });
+
+      // User is still on v0.50.0 - no upgrade happened
+      mockGetVersionInfo.mockResolvedValue({ version: '0.50.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetReleaseNotes.mockResolvedValue({
+        releases: [v55, v50],
+      } as Awaited<ReturnType<typeof getReleaseNotes>>);
+
+      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      // No releases between v0.50.0 (lastSeen) and v0.50.0 (currentVersion)
+      expect(result.current.showModal).toBe(false);
+      expect(result.current.unseenReleases).toHaveLength(0);
     });
 
     it('does not show modal when stored version (without v-prefix) equals current version', async () => {

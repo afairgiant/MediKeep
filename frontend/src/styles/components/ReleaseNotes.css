@@ -1,0 +1,25 @@
+/* Release Notes Body (used in WhatsNewModal and ReleaseNotesHistory) */
+.release-notes-body {
+  font-size: var(--font-size-sm, 0.875rem);
+  line-height: 1.6;
+  padding-left: 4px;
+}
+
+.release-notes-body ul {
+  padding-left: 1.25rem;
+  margin: 0.25rem 0;
+}
+
+.release-notes-body li {
+  margin-bottom: 0.25rem;
+}
+
+.release-notes-body h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.release-notes-body p {
+  margin: 0.25rem 0;
+}

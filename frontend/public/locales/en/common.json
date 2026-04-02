@@ -2612,7 +2612,7 @@
       "empty": "No release notes available",
       "publishedOn": "Released {{date}}",
       "noChanges": "No changes listed for this release",
-      "showAll": "Show all releases",
+      "showAll": "Show more releases",
       "showLess": "Show less"
     },
     "preferences": {

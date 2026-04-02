@@ -82,14 +82,18 @@ export function useReleaseNotes(): UseReleaseNotesReturn {
           unseen = allReleases.filter(
             (r) => compareVersions(r.tag_name, version) === 0
           );
-          // If no exact match for current version, show the latest release
           if (unseen.length === 0 && allReleases.length > 0) {
-            unseen = [allReleases[0]];
+            const atOrBelow = allReleases
+              .filter((r) => compareVersions(r.tag_name, version) <= 0)
+              .sort((a, b) => compareVersions(b.tag_name, a.tag_name));
+            unseen = atOrBelow.length > 0 ? [atOrBelow[0]] : [];
           }
         } else {
-          // Returning user: show all releases newer than lastSeen
+          // Returning user: show releases between lastSeen and currentVersion
           unseen = allReleases.filter(
-            (r) => compareVersions(r.tag_name, lastSeen) > 0
+            (r) =>
+              compareVersions(r.tag_name, lastSeen) > 0 &&
+              compareVersions(r.tag_name, version) <= 0
           );
         }
 

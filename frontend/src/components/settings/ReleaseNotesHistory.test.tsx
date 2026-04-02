@@ -176,7 +176,7 @@ describe('ReleaseNotesHistory', () => {
       expect(screen.queryByText('Release 0.57.0')).not.toBeInTheDocument();
     });
 
-    it('renders all releases after clicking "Show all releases"', async () => {
+    it('renders all releases after clicking "Show more releases"', async () => {
       const releases = [
         makeRelease({ tag_name: 'v0.58.0', name: 'Release 0.58.0' }),
         makeRelease({ tag_name: 'v0.57.0', name: 'Release 0.57.0' }),
@@ -191,7 +191,7 @@ describe('ReleaseNotesHistory', () => {
         expect(screen.getByText('Release 0.58.0')).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getByText('Show all releases'));
+      fireEvent.click(screen.getByText('Show more releases'));
 
       expect(screen.getByText('Release 0.57.0')).toBeInTheDocument();
     });
@@ -243,7 +243,7 @@ describe('ReleaseNotesHistory', () => {
       });
 
       // Expand to see all
-      fireEvent.click(screen.getByText('Show all releases'));
+      fireEvent.click(screen.getByText('Show more releases'));
       expect(screen.getAllByText('View on GitHub')).toHaveLength(2);
     });
 

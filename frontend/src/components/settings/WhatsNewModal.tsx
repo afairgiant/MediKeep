@@ -1,12 +1,23 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollArea, Badge, Group, Text, Stack, Divider, Anchor } from '@mantine/core';
+import {
+  ScrollArea,
+  Badge,
+  Group,
+  Text,
+  Stack,
+  Anchor,
+  Paper,
+} from '@mantine/core';
 
 import { ResponsiveModal } from '../adapters/ResponsiveModal';
 import { Button } from '../ui';
 import type { Release } from '../../types/releaseNotes';
 import { formatReleaseDate, isCurrentRelease } from '../../utils/releaseNoteHelpers';
 import { renderReleaseMarkdown } from '../../utils/markdownRenderer';
+import '../../styles/components/ReleaseNotes.css';
+
+const modalStyles = { content: { maxWidth: 680 } };
 
 interface WhatsNewModalProps {
   opened: boolean;
@@ -28,8 +39,10 @@ function WhatsNewModal({
       opened={opened}
       onClose={onClose}
       title={t('settings.releaseNotes.whatsNewTitle', "What's New")}
-      size="lg"
+      size="auto"
       centered
+      withScrollArea={false}
+      styles={modalStyles}
     >
       <Stack gap="md">
         <Text c="dimmed" size="sm">
@@ -44,22 +57,32 @@ function WhatsNewModal({
             {t('settings.releaseNotes.empty', 'No release notes available')}
           </Text>
         ) : (
-          <ScrollArea.Autosize mah={400} type="auto">
-            <Stack gap="lg">
+          <ScrollArea.Autosize
+            mah={450}
+            type="scroll"
+            offsetScrollbars
+            scrollbarSize={6}
+          >
+            <Stack gap="sm">
               {releases.map((release) => (
-                <div key={release.tag_name}>
-                  <Group justify="space-between" mb="xs">
+                <Paper
+                  key={release.tag_name}
+                  p="md"
+                  radius="sm"
+                  withBorder
+                >
+                  <Group justify="space-between" mb="xs" wrap="nowrap">
                     <Group gap="xs">
-                      <Text fw={600} size="lg">
+                      <Text fw={600} size="md">
                         {release.name || release.tag_name}
                       </Text>
                       {isCurrentRelease(release.tag_name, currentVersion) && (
-                        <Badge color="blue" size="sm" variant="filled">
+                        <Badge color="blue" size="sm" variant="light">
                           {t('settings.releaseNotes.currentVersion', 'Current')}
                         </Badge>
                       )}
                     </Group>
-                    <Text c="dimmed" size="xs">
+                    <Text c="dimmed" size="xs" style={{ flexShrink: 0 }}>
                       {t('settings.releaseNotes.publishedOn', {
                         date: formatReleaseDate(release.published_at),
                         defaultValue: 'Released {{date}}',
@@ -89,18 +112,17 @@ function WhatsNewModal({
                     rel="noopener noreferrer"
                     size="xs"
                     mt="xs"
+                    display="inline-block"
                   >
                     {t('settings.releaseNotes.viewOnGithub', 'View on GitHub')}
                   </Anchor>
-
-                  <Divider mt="md" />
-                </div>
+                </Paper>
               ))}
             </Stack>
           </ScrollArea.Autosize>
         )}
 
-        <Group justify="flex-end" mt="md">
+        <Group justify="flex-end" mt="xs">
           <Button onClick={onClose}>
             {t('settings.releaseNotes.dismiss', 'Got it')}
           </Button>
