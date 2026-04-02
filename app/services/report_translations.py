@@ -14,6 +14,7 @@ Supports 9 languages: en, fr, de, es, it, pt, ru, sv, nl
 
 import json
 import re
+import sys
 from datetime import date, datetime
 from functools import lru_cache
 from pathlib import Path
@@ -25,8 +26,29 @@ logger = get_logger(__name__, "app")
 
 SUPPORTED_LANGUAGES = ("en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl")
 
-# Resolve path to frontend locale files relative to this module
-_LOCALES_DIR = Path(__file__).resolve().parents[2] / "frontend" / "public" / "locales"
+
+def _resolve_locales_dir() -> Path:
+    """Resolve the locales directory, handling PyInstaller EXE bundles."""
+    candidates = []
+
+    # PyInstaller EXE: files bundled under _MEIPASS/frontend/build/
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        candidates.append(Path(sys._MEIPASS) / "frontend" / "build" / "locales")
+
+    project_root = Path(__file__).resolve().parents[2]
+    # Production build
+    candidates.append(project_root / "frontend" / "build" / "locales")
+    # Dev mode
+    candidates.append(project_root / "frontend" / "public" / "locales")
+
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+
+    return candidates[-1]
+
+
+_LOCALES_DIR = _resolve_locales_dir()
 
 # In-memory cache: language -> parsed JSON dict
 _cache: Dict[str, Dict[str, Any]] = {}

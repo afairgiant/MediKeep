@@ -2321,12 +2321,6 @@ class CustomReportPDFGenerator:
 
             block_elements = []
 
-            # Subsection title
-            block_elements.append(
-                Paragraph(title, self.styles['SubsectionHeader'])
-            )
-            block_elements.append(Spacer(1, 0.05 * inch))
-
             # Chart image from PNG bytes
             try:
                 img_buffer = io.BytesIO(png_bytes)
@@ -2407,7 +2401,7 @@ class CustomReportPDFGenerator:
             if not sys_stats and not dia_stats:
                 return None
             count = sys_stats.get("count", dia_stats.get("count", "-"))
-            headers = ["", self.translator.text("statistics"), self.translator.text("mean"), self.translator.text("min") + " - " + self.translator.text("max"), self.translator.text("data_points")]
+            headers = ["", self.translator.text("latest"), self.translator.text("average"), self.translator.text("range"), self.translator.text("count")]
             sys_row = [
                 "Systolic",
                 f"{sys_stats.get('latest', '-')} {unit}",
@@ -2429,7 +2423,7 @@ class CustomReportPDFGenerator:
             return None
 
         unit_suffix = f" {unit}" if unit else ""
-        headers = [self.translator.text("statistics"), self.translator.text("mean"), self.translator.text("min") + " - " + self.translator.text("max"), self.translator.text("data_points")]
+        headers = [self.translator.text("latest"), self.translator.text("average"), self.translator.text("range"), self.translator.text("count")]
         row = [
             f"{statistics.get('latest', '-')}{unit_suffix}",
             f"{statistics.get('average', '-')}{unit_suffix}",
