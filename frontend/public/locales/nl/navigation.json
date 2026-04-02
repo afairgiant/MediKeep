@@ -1,172 +1,175 @@
 {
-  "menu": {
-    "dashboard": "Dashboard",
-    "backToDashboard": "Terug naar dashboard",
-    "patients": "Patiënten",
-    "medicalRecords": "Medische dossiers",
-    "settings": "Instellingen",
-    "reports": "Rapporten",
-    "administration": "Administratie",
-    "logout": "Uitloggen",
-    "profile": "Profiel",
-    "help": "Help"
+  "activity": {
+    "actions": {
+      "added": "Toegevoegd",
+      "cancelled": "Geannuleerd",
+      "completed": "Voltooid",
+      "created": "Aangemaakt",
+      "deleted": "Verwijderd",
+      "modified": "Gewijzigd",
+      "removed": "Verwijderd",
+      "scheduled": "Gepland",
+      "updated": "Bijgewerkt",
+      "viewed": "Bekeken"
+    }
   },
-  "pages": {
-    "dashboard": "Dashboard",
-    "patientList": "Patiëntenlijst",
-    "patientDetails": "Patiëntgegevens",
-    "medicalHistory": "Medische geschiedenis",
-    "settings": "Instellingen",
-    "userProfile": "Gebruikersprofiel",
-    "preferences": "Voorkeuren",
-    "reports": "Rapporten",
-    "help": "Help & ondersteuning"
+  "dashboard": {
+    "activity": {
+      "lastUpdated": "Laatst bijgewerkt",
+      "noActivity": "Geen recente activiteit",
+      "noActivityDescription": "Uw medische dossieractiviteiten verschijnen hier"
+    },
+    "hello": "Hallo",
+    "loading": "Uw medisch dashboard wordt geladen...",
+    "modules": {
+      "adminDashboard": "Beheerderspaneel",
+      "allergies": "Allergieën",
+      "conditions": "Aandoeningen",
+      "emergencyContacts": "Noodcontacten",
+      "exportRecords": "Dossiers exporteren",
+      "familyHistory": "Familiegeschiedenis",
+      "immunizations": "Vaccinaties",
+      "injuries": "Verwondingen",
+      "insurance": "Verzekering",
+      "labResults": "Laboratoriumuitslagen",
+      "medicalEquipment": "Medische apparatuur",
+      "medications": "Medicatie",
+      "patientInfo": "Patiëntinformatie",
+      "pharmacies": "Apotheken",
+      "practitioners": "Zorgverleners",
+      "procedures": "Ingrepen",
+      "symptoms": "Symptomen",
+      "treatments": "Behandelingen",
+      "visitHistory": "Bezoekgeschiedenis",
+      "vitalSigns": "Vitale functies"
+    },
+    "search": {
+      "advancedSearch": "Advanced Search",
+      "placeholder": "Zoeken in medische dossiers..."
+    },
+    "sections": {
+      "additionalResources": "Aanvullende informatie",
+      "coreMedical": "Kerninformatie medisch",
+      "healthMonitoring": "Gezondheidsmonitoring",
+      "prevention": "Preventie & geschiedenis",
+      "recentActivity": "Recente activiteit",
+      "treatments": "Behandelingen en ingrepen"
+    },
+    "stats": {
+      "activeMedications": "Actieve medicatie",
+      "labResults": "Laboratoriumuitslagen",
+      "procedures": "Ingrepen",
+      "totalRecords": "Totaal dossiers"
+    },
+    "subtitle": "Beheer uw gezondheidsinformatie veilig",
+    "title": "MediKeep dashboard"
   },
-  "sections": {
-    "overview": "Overzicht",
-    "personalInfo": "Persoonlijke informatie",
-    "medicalInfo": "Medische informatie",
-    "documents": "Documenten",
-    "timeline": "Tijdlijn",
-    "familyHistory": "Familiegeschiedenis",
-    "emergencyContacts": "Noodcontacten",
-    "insurance": "Verzekering",
-    "preferences": "Voorkeuren"
+  "invitations": {
+    "acceptButton": "Uitnodiging accepteren",
+    "confirmDescription": "Door te accepteren krijgt u toegang om de gedeelde medische informatie te bekijken.",
+    "confirmQuestion": "Weet u zeker dat u deze uitnodiging wilt accepteren?",
+    "confirmTitle": "Bevestig acceptatie uitnodiging",
+    "from": "Van",
+    "lastUpdated": "Laatst bijgewerkt",
+    "manageAll": "Alle uitnodigingen beheren",
+    "noPending": "Geen openstaande uitnodigingen",
+    "noPendingDescription": "Nieuwe deeluitnodigingen verschijnen hier",
+    "sharePatient": "Patiënt delen",
+    "title": "Uitnodigingen",
+    "types": {
+      "familyHistory": "Familiegeschiedenis",
+      "patientRecord": "Patiëntdossier"
+    },
+    "viewAll": "Bekijk alle {{count}} uitnodigingen",
+    "viewAll_one": "View all {{count}} invitations",
+    "viewAll_other": "View all {{count}} invitations"
   },
   "medicalRecords": {
     "allergies": "Allergieën",
     "conditions": "Aandoeningen",
-    "medications": "Medicatie",
-    "labResults": "Laboratoriumuitslagen",
     "immunizations": "Vaccinaties",
-    "procedures": "Ingrepen",
-    "visits": "Bezoeken",
-    "treatments": "Behandelingen",
-    "symptoms": "Symptomen",
     "injuries": "Verwondingen",
-    "practitioners": "Zorgverleners",
+    "labResults": "Laboratoriumuitslagen",
+    "medicalEquipment": "Medische apparatuur",
+    "medications": "Medicatie",
     "pharmacies": "Apotheken",
-    "medicalEquipment": "Medische apparatuur"
+    "practitioners": "Zorgverleners",
+    "procedures": "Ingrepen",
+    "symptoms": "Symptomen",
+    "treatments": "Behandelingen",
+    "visits": "Bezoeken"
   },
-  "dashboard": {
-    "title": "MediKeep dashboard",
-    "subtitle": "Beheer uw gezondheidsinformatie veilig",
-    "hello": "Hallo",
-    "loading": "Uw medisch dashboard wordt geladen...",
-    "sections": {
-      "coreMedical": "Kerninformatie medisch",
-      "treatments": "Behandelingen en ingrepen",
-      "healthMonitoring": "Gezondheidsmonitoring",
-      "prevention": "Preventie & geschiedenis",
-      "additionalResources": "Aanvullende informatie",
-      "recentActivity": "Recente activiteit"
-    },
-    "stats": {
-      "totalRecords": "Totaal dossiers",
-      "activeMedications": "Actieve medicatie",
-      "labResults": "Laboratoriumuitslagen",
-      "procedures": "Ingrepen"
-    },
-    "modules": {
-      "patientInfo": "Patiëntinformatie",
-      "medications": "Medicatie",
-      "labResults": "Laboratoriumuitslagen",
-      "treatments": "Behandelingen",
-      "procedures": "Ingrepen",
-      "vitalSigns": "Vitale functies",
-      "symptoms": "Symptomen",
-      "conditions": "Aandoeningen",
-      "allergies": "Allergieën",
-      "injuries": "Verwondingen",
-      "immunizations": "Vaccinaties",
-      "visitHistory": "Bezoekgeschiedenis",
-      "familyHistory": "Familiegeschiedenis",
-      "insurance": "Verzekering",
-      "emergencyContacts": "Noodcontacten",
-      "exportRecords": "Dossiers exporteren",
-      "practitioners": "Zorgverleners",
-      "pharmacies": "Apotheken",
-      "medicalEquipment": "Medische apparatuur",
-      "adminDashboard": "Beheerderspaneel"
-    },
-    "activity": {
-      "noActivity": "Geen recente activiteit",
-      "noActivityDescription": "Uw medische dossieractiviteiten verschijnen hier",
-      "lastUpdated": "Laatst bijgewerkt"
-    },
-    "search": {
-      "placeholder": "Zoeken in medische dossiers..."
-    }
+  "menu": {
+    "administration": "Administratie",
+    "backToDashboard": "Terug naar dashboard",
+    "dashboard": "Dashboard",
+    "help": "Help",
+    "logout": "Uitloggen",
+    "medicalRecords": "Medische dossiers",
+    "patients": "Patiënten",
+    "profile": "Profiel",
+    "reports": "Rapporten",
+    "settings": "Instellingen"
   },
-  "invitations": {
-    "title": "Uitnodigingen",
-    "lastUpdated": "Laatst bijgewerkt",
-    "from": "Van",
-    "viewAll": "Bekijk alle {{count}} uitnodigingen",
-    "noPending": "Geen openstaande uitnodigingen",
-    "noPendingDescription": "Nieuwe deeluitnodigingen verschijnen hier",
-    "manageAll": "Alle uitnodigingen beheren",
-    "sharePatient": "Patiënt delen",
-    "confirmTitle": "Bevestig acceptatie uitnodiging",
-    "confirmQuestion": "Weet u zeker dat u deze uitnodiging wilt accepteren?",
-    "confirmDescription": "Door te accepteren krijgt u toegang om de gedeelde medische informatie te bekijken.",
-    "acceptButton": "Uitnodiging accepteren",
-    "types": {
-      "familyHistory": "Familiegeschiedenis",
-      "patientRecord": "Patiëntdossier"
-    }
+  "pages": {
+    "dashboard": "Dashboard",
+    "help": "Help & ondersteuning",
+    "medicalHistory": "Medische geschiedenis",
+    "patientDetails": "Patiëntgegevens",
+    "patientList": "Patiëntenlijst",
+    "preferences": "Voorkeuren",
+    "reports": "Rapporten",
+    "settings": "Instellingen",
+    "userProfile": "Gebruikersprofiel"
   },
-  "activity": {
-    "actions": {
-      "created": "Aangemaakt",
-      "updated": "Bijgewerkt",
-      "deleted": "Verwijderd",
-      "added": "Toegevoegd",
-      "modified": "Gewijzigd",
-      "removed": "Verwijderd",
-      "completed": "Voltooid",
-      "cancelled": "Geannuleerd",
-      "scheduled": "Gepland",
-      "viewed": "Bekeken"
-    }
+  "sections": {
+    "documents": "Documenten",
+    "emergencyContacts": "Noodcontacten",
+    "familyHistory": "Familiegeschiedenis",
+    "insurance": "Verzekering",
+    "medicalInfo": "Medische informatie",
+    "overview": "Overzicht",
+    "personalInfo": "Persoonlijke informatie",
+    "preferences": "Voorkeuren",
+    "timeline": "Tijdlijn"
   },
   "sidebarNav": {
-    "sections": {
-      "medicalRecords": "Medische dossiers",
-      "careAndTreatment": "Zorg & behandeling",
-      "misc": "Overig",
-      "tools": "Hulpmiddelen",
-      "administration": "Administratie"
-    },
     "items": {
-      "patientInfo": "Patiëntinfo",
-      "medications": "Medicatie",
-      "labResults": "Laboratoriumuitslagen",
-      "conditions": "Aandoeningen",
-      "allergies": "Allergieën",
-      "vitalSigns": "Vitale functies",
-      "symptoms": "Symptomen",
-      "injuries": "Verwondingen",
-      "treatments": "Behandelingen",
-      "procedures": "Ingrepen",
-      "immunizations": "Vaccinaties",
-      "visitHistory": "Bezoekgeschiedenis",
-      "familyHistory": "Familiegeschiedenis",
-      "practitioners": "Zorgverleners",
-      "pharmacies": "Apotheken",
-      "insurance": "Verzekering",
-      "medicalEquipment": "Medische apparatuur",
-      "emergencyContacts": "Noodcontacten",
-      "tagManagement": "Tagbeheer",
-      "customReports": "Aangepaste rapporten",
-      "exportRecords": "Dossiers exporteren",
-      "settings": "Instellingen",
       "adminDashboard": "Beheerderspaneel",
-      "dataModels": "Datamodellen",
+      "allergies": "Allergieën",
       "backupManagement": "Back-upbeheer",
-      "systemHealth": "Systeemstatus",
+      "conditions": "Aandoeningen",
+      "customReports": "Aangepaste rapporten",
+      "dataModels": "Datamodellen",
+      "emergencyContacts": "Noodcontacten",
+      "exportRecords": "Dossiers exporteren",
+      "familyHistory": "Familiegeschiedenis",
+      "immunizations": "Vaccinaties",
+      "injuries": "Verwondingen",
+      "insurance": "Verzekering",
+      "labResults": "Laboratoriumuitslagen",
       "language": "Taal",
-      "theme": "Thema"
+      "medicalEquipment": "Medische apparatuur",
+      "medications": "Medicatie",
+      "patientInfo": "Patiëntinfo",
+      "pharmacies": "Apotheken",
+      "practitioners": "Zorgverleners",
+      "procedures": "Ingrepen",
+      "settings": "Instellingen",
+      "symptoms": "Symptomen",
+      "systemHealth": "Systeemstatus",
+      "tagManagement": "Tagbeheer",
+      "theme": "Thema",
+      "treatments": "Behandelingen",
+      "visitHistory": "Bezoekgeschiedenis",
+      "vitalSigns": "Vitale functies"
+    },
+    "sections": {
+      "administration": "Administratie",
+      "careAndTreatment": "Zorg & behandeling",
+      "medicalRecords": "Medische dossiers",
+      "misc": "Overig",
+      "tools": "Hulpmiddelen"
     }
   }
 }

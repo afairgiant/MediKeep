@@ -1,90 +1,93 @@
 {
-  "upload": {
-    "failed": "Bestand uploaden mislukt. Probeer het opnieuw.",
-    "connectionError": "Verbindingsfout. Controleer uw netwerk en probeer het opnieuw.",
-    "fileTooLarge": "Bestandsgrootte overschrijdt de maximale limiet.",
-    "invalidFileType": "Bestandstype wordt niet ondersteund.",
-    "fileProcessingFailed": "Bestand verwerken mislukt. Probeer een ander bestand.",
-    "duplicateFile": "Dit bestand is al geüpload.",
-    "batchUploadFailed": "Sommige bestanden zijn niet geüpload. Controleer de individuele bestandsfouten.",
-    "partialUploadSuccess": "Upload voltooid met enkele fouten. Controleer de mislukte bestanden.",
-    "allUploadsFailed": "Alle uploads zijn mislukt. Controleer uw verbinding en probeer het opnieuw."
-  },
-  "paperless": {
-    "unavailable": "Documentbeheerservice is momenteel niet beschikbaar.",
-    "notEnabled": "Paperless-integratie is niet ingeschakeld. Schakel deze in bij Instellingen.",
-    "configIncomplete": "Paperless-configuratie is onvolledig. Controleer uw instellingen.",
-    "uploadFailed": "Uploaden naar Paperless-documentbeheersysteem mislukt.",
-    "connectionFailed": "Kan geen verbinding maken met Paperless-service. Controleer de configuratie.",
-    "authFailed": "Authenticatie met Paperless-service mislukt. Controleer de inloggegevens.",
-    "duplicateDocument": "Dit document bestaat al in Paperless. Identieke documenten kunnen niet tweemaal worden geüpload.",
-    "taskFailed": "Document uploaden naar Paperless mislukt. Probeer het opnieuw of neem contact op met ondersteuning.",
-    "taskTimeout": "Documentverwerking is verlopen. Het document wordt mogelijk nog verwerkt in Paperless."
+  "file": {
+    "deleteFailed": "Bestand verwijderen mislukt. Probeer het opnieuw.",
+    "downloadFailed": "Bestand downloaden mislukt. Probeer het opnieuw.",
+    "notFound": "Bestand niet gevonden.",
+    "viewFailed": "Bestand openen voor weergave mislukt. Probeer het opnieuw."
   },
   "form": {
-    "submissionFailed": "Formulier opslaan mislukt. Controleer uw invoer en probeer het opnieuw.",
-    "requiredFieldMissing": "Vul alle verplichte velden in.",
+    "conditionNotSelected": "Selecteer een aandoening",
+    "entityNotFound": "Het gevraagde item kon niet worden gevonden.",
+    "equipmentFieldsRequired": "Equipment name and type are required",
+    "equipmentNotSelected": "Please select at least one equipment",
     "invalidDate": "Voer een geldige datum in.",
     "invalidEmail": "Voer een geldig e-mailadres in.",
     "invalidPhone": "Voer een geldig telefoonnummer in.",
     "invalidPhoneDigits": "Voer een geldig telefoonnummer in",
     "invalidWebsiteUrl": "Voer een geldige website-URL in",
-    "patientNotSelected": "Selecteer een patiënt.",
-    "entityNotFound": "Het gevraagde item kon niet worden gevonden.",
     "medicationNotSelected": "Selecteer een medicatie",
-    "conditionNotSelected": "Selecteer een aandoening",
-    "mustBeValidNumber": "Moet een geldig getal zijn"
+    "mustBeValidNumber": "Moet een geldig getal zijn",
+    "patientNotSelected": "Selecteer een patiënt.",
+    "requiredFieldMissing": "Vul alle verplichte velden in.",
+    "submissionFailed": "Formulier opslaan mislukt. Controleer uw invoer en probeer het opnieuw."
+  },
+  "general": {
+    "maintenanceMode": "Het systeem is momenteel in onderhoud. Probeer het later opnieuw.",
+    "permissionDenied": "U heeft geen toestemming om deze actie uit te voeren.",
+    "rateLimitExceeded": "Te veel verzoeken. Wacht even en probeer het opnieuw.",
+    "sessionExpired": "Uw sessie is verlopen. Log opnieuw in.",
+    "storageFull": "Opslaglimiet bereikt. Maak ruimte vrij en probeer het opnieuw.",
+    "unknownError": "Er is een onverwachte fout opgetreden. Probeer het opnieuw.",
+    "validationError": "Controleer uw invoer en probeer het opnieuw."
+  },
+  "network": {
+    "connectionError": "Verbindingsfout. Controleer uw netwerk en probeer het opnieuw.",
+    "serverError": "Serverfout opgetreden. Probeer het later opnieuw.",
+    "timeout": "Verzoek verlopen. Probeer het opnieuw.",
+    "unavailable": "Netwerk niet beschikbaar. Controleer uw verbinding."
+  },
+  "paperless": {
+    "authFailed": "Authenticatie met Paperless-service mislukt. Controleer de inloggegevens.",
+    "configIncomplete": "Paperless-configuratie is onvolledig. Controleer uw instellingen.",
+    "connectionFailed": "Kan geen verbinding maken met Paperless-service. Controleer de configuratie.",
+    "duplicateDocument": "Dit document bestaat al in Paperless. Identieke documenten kunnen niet tweemaal worden geüpload.",
+    "notEnabled": "Paperless-integratie is niet ingeschakeld. Schakel deze in bij Instellingen.",
+    "taskFailed": "Document uploaden naar Paperless mislukt. Probeer het opnieuw of neem contact op met ondersteuning.",
+    "taskTimeout": "Documentverwerking is verlopen. Het document wordt mogelijk nog verwerkt in Paperless.",
+    "unavailable": "Documentbeheerservice is momenteel niet beschikbaar.",
+    "uploadFailed": "Uploaden naar Paperless-documentbeheersysteem mislukt."
   },
   "patientForm": {
+    "birthDateFuture": "Geboortedatum kan niet in de toekomst liggen",
+    "birthDateRequired": "Geboortedatum is verplicht",
+    "createFailed": "Aanmaken mislukt: {{message}}",
     "error": "Fout",
     "firstNameRequired": "Voornaam is verplicht",
     "lastNameRequired": "Achternaam is verplicht",
-    "birthDateRequired": "Geboortedatum is verplicht",
-    "birthDateFuture": "Geboortedatum kan niet in de toekomst liggen",
-    "createFailed": "Aanmaken mislukt: {{message}}",
     "updateFailed": "Bijwerken mislukt: {{message}}"
   },
-  "file": {
-    "deleteFailed": "Bestand verwijderen mislukt. Probeer het opnieuw.",
-    "downloadFailed": "Bestand downloaden mislukt. Probeer het opnieuw.",
-    "viewFailed": "Bestand openen voor weergave mislukt. Probeer het opnieuw.",
-    "notFound": "Bestand niet gevonden."
-  },
-  "network": {
-    "unavailable": "Netwerk niet beschikbaar. Controleer uw verbinding.",
-    "timeout": "Verzoek verlopen. Probeer het opnieuw.",
-    "serverError": "Serverfout opgetreden. Probeer het later opnieuw.",
-    "connectionError": "Verbindingsfout. Controleer uw netwerk en probeer het opnieuw."
-  },
-  "general": {
-    "unknownError": "Er is een onverwachte fout opgetreden. Probeer het opnieuw.",
-    "permissionDenied": "U heeft geen toestemming om deze actie uit te voeren.",
-    "sessionExpired": "Uw sessie is verlopen. Log opnieuw in.",
-    "rateLimitExceeded": "Te veel verzoeken. Wacht even en probeer het opnieuw.",
-    "maintenanceMode": "Het systeem is momenteel in onderhoud. Probeer het later opnieuw.",
-    "storageFull": "Opslaglimiet bereikt. Maak ruimte vrij en probeer het opnieuw.",
-    "validationError": "Controleer uw invoer en probeer het opnieuw."
-  },
-  "success": {
-    "uploadSuccess": "Bestand succesvol geüpload!",
-    "uploadMultipleSuccess": "Alle bestanden succesvol geüpload!",
-    "formSaved": "Formulier succesvol opgeslagen!",
-    "fileDeleted": "Bestand succesvol verwijderd.",
-    "paperlessSyncSuccess": "Succesvol gesynchroniseerd met Paperless-documentbeheer.",
-    "batchUploadSuccess": "Alle bestanden succesvol geüpload!"
-  },
-  "warnings": {
-    "partialSuccess": "Bewerking voltooid met enkele waarschuwingen.",
-    "slowConnection": "Upload duurt langer dan gebruikelijk vanwege een trage verbinding.",
-    "largeFileWarning": "Groot bestand gedetecteerd. Upload kan enkele minuten duren.",
-    "duplicateWarning": "Dit bestand lijkt een duplicaat te zijn."
-  },
+  "patientNotAvailable": "Patient information not available",
   "relationships": {
     "addConditionFailed": "Aandoeningrelatie toevoegen mislukt",
-    "addMedicationFailed": "Medicatierelatie toevoegen mislukt",
     "addFailed": "Relatie toevoegen mislukt",
-    "updateFailed": "Relatie bijwerken mislukt",
+    "addMedicationFailed": "Medicatierelatie toevoegen mislukt",
     "deleteFailed": "Relatie verwijderen mislukt",
-    "fetchFailed": "Relaties laden mislukt"
+    "fetchFailed": "Relaties laden mislukt",
+    "updateFailed": "Relatie bijwerken mislukt"
+  },
+  "success": {
+    "batchUploadSuccess": "Alle bestanden succesvol geüpload!",
+    "fileDeleted": "Bestand succesvol verwijderd.",
+    "formSaved": "Formulier succesvol opgeslagen!",
+    "paperlessSyncSuccess": "Succesvol gesynchroniseerd met Paperless-documentbeheer.",
+    "uploadMultipleSuccess": "Alle bestanden succesvol geüpload!",
+    "uploadSuccess": "Bestand succesvol geüpload!"
+  },
+  "upload": {
+    "allUploadsFailed": "Alle uploads zijn mislukt. Controleer uw verbinding en probeer het opnieuw.",
+    "batchUploadFailed": "Sommige bestanden zijn niet geüpload. Controleer de individuele bestandsfouten.",
+    "connectionError": "Verbindingsfout. Controleer uw netwerk en probeer het opnieuw.",
+    "duplicateFile": "Dit bestand is al geüpload.",
+    "failed": "Bestand uploaden mislukt. Probeer het opnieuw.",
+    "fileProcessingFailed": "Bestand verwerken mislukt. Probeer een ander bestand.",
+    "fileTooLarge": "Bestandsgrootte overschrijdt de maximale limiet.",
+    "invalidFileType": "Bestandstype wordt niet ondersteund.",
+    "partialUploadSuccess": "Upload voltooid met enkele fouten. Controleer de mislukte bestanden."
+  },
+  "warnings": {
+    "duplicateWarning": "Dit bestand lijkt een duplicaat te zijn.",
+    "largeFileWarning": "Groot bestand gedetecteerd. Upload kan enkele minuten duren.",
+    "partialSuccess": "Bewerking voltooid met enkele waarschuwingen.",
+    "slowConnection": "Upload duurt langer dan gebruikelijk vanwege een trage verbinding."
   }
 }

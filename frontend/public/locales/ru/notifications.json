@@ -1,322 +1,388 @@
 {
-  "title": "Настройки уведомлений",
-  "description": "Настройте способы получения уведомлений о важных событиях",
-  "loading": "Загрузка настроек уведомлений...",
-  "error": "Не удалось загрузить настройки уведомлений",
-
   "channels": {
-    "title": "Каналы уведомлений",
-    "description": "Добавляйте каналы доставки уведомлений и управляйте ими",
     "add": "Добавить канал",
-    "edit": "Редактировать канал",
+    "configTitle": "{{type}} Configuration",
+    "confirmDelete": "Вы уверены, что хотите удалить этот канал?",
+    "createError": "Failed to create channel",
+    "createFailed": "Не удалось создать канал",
+    "createSuccess": "Канал успешно создан",
     "delete": "Удалить канал",
-    "test": "Тест",
-    "testing": "Тестирование...",
-    "testSuccess": "Тестовое уведомление успешно отправлено!",
-    "testFailed": "Не удалось отправить тестовое уведомление",
+    "deleteConfirm": "Are you sure you want to delete this channel?",
+    "deleteError": "Failed to delete channel",
+    "deleteFailed": "Не удалось удалить канал",
+    "deleteSuccess": "Канал успешно удалён",
+    "description": "Добавляйте каналы доставки уведомлений и управляйте ими",
+    "disabled": "Отключён",
+    "discord": {
+      "avatarUrl": {
+        "description": "Пользовательский аватар для бота уведомлений",
+        "label": "URL аватара (необязательно)",
+        "placeholder": "https://example.com/avatar.png"
+      },
+      "username": {
+        "description": "Пользовательское имя для бота уведомлений",
+        "label": "Имя бота (необязательно)",
+        "placeholder": "MediKeep"
+      },
+      "webhookUrl": {
+        "description": "Создайте webhook в настройках вашего сервера Discord",
+        "label": "URL Webhook",
+        "placeholder": "https://discord.com/api/webhooks/..."
+      }
+    },
+    "edit": "Редактировать канал",
+    "email": {
+      "fromEmail": {
+        "description": "Адрес электронной почты отправителя",
+        "label": "Email отправителя",
+        "placeholder": "notifications@example.com"
+      },
+      "smtpHost": {
+        "description": "SMTP-сервер вашего почтового провайдера",
+        "label": "Сервер SMTP",
+        "placeholder": "smtp.gmail.com"
+      },
+      "smtpPassword": {
+        "description": "Для Gmail используйте пароль приложения",
+        "label": "Пароль SMTP",
+        "placeholder": "Пароль приложения или пароль электронной почты"
+      },
+      "smtpPort": {
+        "description": "Обычно 587 (TLS) или 465 (SSL)",
+        "label": "Порт SMTP",
+        "placeholder": "587"
+      },
+      "smtpUser": {
+        "description": "Ваш адрес электронной почты или имя пользователя",
+        "label": "Имя пользователя SMTP",
+        "placeholder": "your-email@gmail.com"
+      },
+      "toEmail": {
+        "description": "Куда отправлять уведомления",
+        "label": "Email получателя",
+        "placeholder": "your-email@example.com"
+      },
+      "useTls": {
+        "description": "Включить шифрование TLS (рекомендуется)",
+        "label": "Использовать TLS"
+      }
+    },
+    "empty": "No notification channels configured.",
+    "emptyHint": "Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.",
+    "enabled": "Включён",
+    "errors": {
+      "fieldRequired": "{{field}} is required",
+      "nameRequired": "Channel name is required"
+    },
+    "fields": {
+      "enabled": "Enable this channel",
+      "name": "Channel Name",
+      "namePlaceholder": "My Discord Server",
+      "type": "Channel Type"
+    },
+    "form": {
+      "configSection": "Настройка канала",
+      "enabled": {
+        "description": "Получать уведомления через этот канал",
+        "label": "Включить канал"
+      },
+      "name": {
+        "description": "Понятное название для идентификации канала",
+        "label": "Название канала",
+        "placeholder": "напр., Мой сервер Discord"
+      },
+      "title": "Данные канала",
+      "type": {
+        "description": "Сервис для отправки уведомлений",
+        "label": "Тип канала",
+        "placeholder": "Выберите тип канала"
+      }
+    },
+    "gotify": {
+      "appToken": {
+        "description": "Создайте приложение в Gotify для получения токена",
+        "label": "Токен приложения",
+        "placeholder": "Токен приложения из Gotify"
+      },
+      "priority": {
+        "description": "Приоритет сообщения (1-10, по умолчанию 5)",
+        "label": "Приоритет",
+        "placeholder": "5"
+      },
+      "serverUrl": {
+        "description": "URL вашего сервера Gotify",
+        "label": "URL сервера",
+        "placeholder": "https://gotify.example.com"
+      }
+    },
+    "lastUsed": "Последнее использование",
+    "loadError": "Failed to load channel details",
     "noChannels": "Каналы уведомлений не настроены",
     "noChannelsHint": "Добавьте канал, чтобы начать получать уведомления",
-    "verified": "Подтверждён",
-    "enabled": "Включён",
-    "disabled": "Отключён",
-    "lastUsed": "Последнее использование",
     "notificationsSent": "{{count}} уведомлений отправлено",
-    "confirmDelete": "Вы уверены, что хотите удалить этот канал?",
-    "deleteSuccess": "Канал успешно удалён",
-    "deleteFailed": "Не удалось удалить канал",
-    "createSuccess": "Канал успешно создан",
-    "createFailed": "Не удалось создать канал",
-    "updateSuccess": "Канал успешно обновлён",
-    "updateFailed": "Не удалось обновить канал",
+    "sentCount_one": "{{count}} sent",
+    "sentCount_few": "{{count}} sent",
+    "sentCount_many": "{{count}} sent",
+    "sentCount_other": "{{count}} sent",
+    "test": "Тест",
+    "testError": "Failed to send test notification",
+    "testFailed": "Не удалось отправить тестовое уведомление",
+    "testing": "Тестирование...",
+    "testSuccess": "Тестовое уведомление успешно отправлено!",
+    "title": "Каналы уведомлений",
     "types": {
       "discord": "Discord",
       "email": "Электронная почта",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
-    "form": {
-      "title": "Данные канала",
-      "name": {
-        "label": "Название канала",
-        "placeholder": "напр., Мой сервер Discord",
-        "description": "Понятное название для идентификации канала"
-      },
-      "type": {
-        "label": "Тип канала",
-        "placeholder": "Выберите тип канала",
-        "description": "Сервис для отправки уведомлений"
-      },
-      "enabled": {
-        "label": "Включить канал",
-        "description": "Получать уведомления через этот канал"
-      },
-      "configSection": "Настройка канала"
-    },
-    "discord": {
-      "webhookUrl": {
-        "label": "URL Webhook",
-        "placeholder": "https://discord.com/api/webhooks/...",
-        "description": "Создайте webhook в настройках вашего сервера Discord"
-      },
-      "username": {
-        "label": "Имя бота (необязательно)",
-        "placeholder": "MediKeep",
-        "description": "Пользовательское имя для бота уведомлений"
-      },
-      "avatarUrl": {
-        "label": "URL аватара (необязательно)",
-        "placeholder": "https://example.com/avatar.png",
-        "description": "Пользовательский аватар для бота уведомлений"
-      }
-    },
-    "email": {
-      "smtpHost": {
-        "label": "Сервер SMTP",
-        "placeholder": "smtp.gmail.com",
-        "description": "SMTP-сервер вашего почтового провайдера"
-      },
-      "smtpPort": {
-        "label": "Порт SMTP",
-        "placeholder": "587",
-        "description": "Обычно 587 (TLS) или 465 (SSL)"
-      },
-      "smtpUser": {
-        "label": "Имя пользователя SMTP",
-        "placeholder": "your-email@gmail.com",
-        "description": "Ваш адрес электронной почты или имя пользователя"
-      },
-      "smtpPassword": {
-        "label": "Пароль SMTP",
-        "placeholder": "Пароль приложения или пароль электронной почты",
-        "description": "Для Gmail используйте пароль приложения"
-      },
-      "fromEmail": {
-        "label": "Email отправителя",
-        "placeholder": "notifications@example.com",
-        "description": "Адрес электронной почты отправителя"
-      },
-      "toEmail": {
-        "label": "Email получателя",
-        "placeholder": "your-email@example.com",
-        "description": "Куда отправлять уведомления"
-      },
-      "useTls": {
-        "label": "Использовать TLS",
-        "description": "Включить шифрование TLS (рекомендуется)"
-      }
-    },
-    "gotify": {
-      "serverUrl": {
-        "label": "URL сервера",
-        "placeholder": "https://gotify.example.com",
-        "description": "URL вашего сервера Gotify"
-      },
-      "appToken": {
-        "label": "Токен приложения",
-        "placeholder": "Токен приложения из Gotify",
-        "description": "Создайте приложение в Gotify для получения токена"
-      },
-      "priority": {
-        "label": "Приоритет",
-        "placeholder": "5",
-        "description": "Приоритет сообщения (1-10, по умолчанию 5)"
-      }
-    },
+    "updateError": "Failed to update channel",
+    "updateFailed": "Не удалось обновить канал",
+    "updateSuccess": "Канал успешно обновлён",
+    "verified": "Подтверждён",
     "webhook": {
-      "url": {
-        "label": "URL Webhook",
-        "placeholder": "https://api.example.com/webhook",
-        "description": "URL для получения уведомлений"
-      },
-      "method": {
-        "label": "HTTP-метод",
-        "description": "HTTP-метод для запроса webhook"
+      "authToken": {
+        "description": "Токен авторизации для webhook",
+        "label": "Токен авторизации (необязательно)",
+        "placeholder": "Bearer-токен или API-ключ"
       },
       "headers": {
+        "description": "JSON-объект с пользовательскими заголовками",
         "label": "Пользовательские заголовки (необязательно)",
-        "placeholder": "{\"Authorization\": \"Bearer token\"}",
-        "description": "JSON-объект с пользовательскими заголовками"
+        "placeholder": "{\"Authorization\": \"Bearer token\"}"
       },
-      "authToken": {
-        "label": "Токен авторизации (необязательно)",
-        "placeholder": "Bearer-токен или API-ключ",
-        "description": "Токен авторизации для webhook"
+      "method": {
+        "description": "HTTP-метод для запроса webhook",
+        "label": "HTTP-метод"
+      },
+      "url": {
+        "description": "URL для получения уведомлений",
+        "label": "URL Webhook",
+        "placeholder": "https://api.example.com/webhook"
       }
     }
   },
-
-  "preferences": {
-    "title": "Уведомления о событиях",
-    "description": "Выберите, какие события вызывают уведомления на каждом канале",
-    "loading": "Загрузка настроек...",
-    "noChannels": "Сначала добавьте канал уведомлений, чтобы настроить события",
-    "saveSuccess": "Настройка сохранена",
-    "saveFailed": "Не удалось сохранить настройку",
-    "eventHeader": "Событие",
-    "comingSoon": "Скоро",
-    "categories": {
-      "system": "Системные события",
-      "medical": "Медицинские события",
-      "collaboration": "Совместный доступ и сотрудничество",
-      "sharing": "Совместный доступ и приглашения",
-      "security": "Оповещения безопасности",
-      "other": "Другие события"
-    }
-  },
-
+  "description": "Настройте способы получения уведомлений о важных событиях",
+  "error": "Не удалось загрузить настройки уведомлений",
   "events": {
-    "test_notification": {
-      "name": "Тестовое уведомление",
-      "description": "Ручное тестовое уведомление"
-    },
     "backup_completed": {
-      "name": "Резервная копия создана",
-      "description": "Когда резервное копирование завершено успешно"
+      "description": "Когда резервное копирование завершено успешно",
+      "name": "Резервная копия создана"
     },
     "backup_failed": {
-      "name": "Ошибка резервного копирования",
-      "description": "Когда резервное копирование завершилось с ошибкой"
-    },
-    "lab_result_available": {
-      "name": "Результаты анализов доступны",
-      "description": "Когда добавлены новые результаты анализов"
-    },
-    "lab_result_abnormal": {
-      "name": "Отклонения в результатах анализов",
-      "description": "Когда результаты анализов выходят за пределы нормы"
+      "description": "Когда резервное копирование завершилось с ошибкой",
+      "name": "Ошибка резервного копирования"
     },
     "immunization_due": {
-      "name": "Предстоящая прививка",
-      "description": "Когда приближается срок прививки"
+      "description": "Когда приближается срок прививки",
+      "name": "Предстоящая прививка"
     },
     "immunization_overdue": {
-      "name": "Просроченная прививка",
-      "description": "Когда срок прививки истёк"
-    },
-    "invitation_received": {
-      "name": "Приглашение получено",
-      "description": "Когда кто-то делится с вами записями"
+      "description": "Когда срок прививки истёк",
+      "name": "Просроченная прививка"
     },
     "invitation_accepted": {
-      "name": "Приглашение принято",
-      "description": "Когда ваше приглашение к совместному доступу принято"
+      "description": "Когда ваше приглашение к совместному доступу принято",
+      "name": "Приглашение принято"
     },
-    "share_revoked": {
-      "name": "Доступ отозван",
-      "description": "Когда доступ к общим записям отозван"
+    "invitation_received": {
+      "description": "Когда кто-то делится с вами записями",
+      "name": "Приглашение получено"
+    },
+    "lab_result_abnormal": {
+      "description": "Когда результаты анализов выходят за пределы нормы",
+      "name": "Отклонения в результатах анализов"
+    },
+    "lab_result_available": {
+      "description": "Когда добавлены новые результаты анализов",
+      "name": "Результаты анализов доступны"
     },
     "login_from_new_device": {
-      "name": "Вход с нового устройства",
-      "description": "Когда к вашей учётной записи получен доступ с нового устройства"
+      "description": "Когда к вашей учётной записи получен доступ с нового устройства",
+      "name": "Вход с нового устройства"
     },
     "password_changed": {
-      "name": "Пароль изменён",
-      "description": "Когда ваш пароль изменён"
+      "description": "Когда ваш пароль изменён",
+      "name": "Пароль изменён"
+    },
+    "share_revoked": {
+      "description": "Когда доступ к общим записям отозван",
+      "name": "Доступ отозван"
+    },
+    "test_notification": {
+      "description": "Ручное тестовое уведомление",
+      "name": "Тестовое уведомление"
     }
   },
-
   "history": {
-    "title": "История уведомлений",
     "description": "Последние уведомления, отправленные через ваши каналы",
+    "fields": {
+      "channel": "Канал",
+      "error": "Ошибка",
+      "event": "Событие",
+      "status": "Статус",
+      "time": "Время"
+    },
     "loading": "Загрузка истории...",
     "noHistory": "Уведомления ещё не отправлялись",
     "noHistoryHint": "Уведомления появятся здесь после отправки",
-    "showMore": "Показать ещё",
-    "showLess": "Свернуть",
     "page": "Страница {{current}} из {{total}}",
+    "showLess": "Свернуть",
+    "showMore": "Показать ещё",
     "status": {
-      "sent": "Отправлено",
       "failed": "Ошибка",
-      "pending": "Ожидание"
+      "pending": "Ожидание",
+      "sent": "Отправлено"
     },
-    "fields": {
-      "event": "Событие",
-      "channel": "Канал",
-      "time": "Время",
-      "status": "Статус",
-      "error": "Ошибка"
-    }
+    "title": "История уведомлений"
   },
-
-  "validation": {
-    "nameRequired": "Название канала обязательно",
-    "nameTooLong": "Название не может превышать 100 символов",
-    "typeRequired": "Тип канала обязателен",
-    "webhookUrlRequired": "URL Webhook обязателен",
-    "webhookUrlInvalid": "Неверный формат URL Webhook",
-    "smtpHostRequired": "Сервер SMTP обязателен",
-    "smtpPortRequired": "Порт SMTP обязателен",
-    "smtpPortInvalid": "Порт должен быть от 1 до 65535",
-    "smtpUserRequired": "Имя пользователя SMTP обязательно",
-    "smtpPasswordRequired": "Пароль SMTP обязателен",
-    "fromEmailRequired": "Email отправителя обязателен",
-    "fromEmailInvalid": "Неверный формат электронной почты",
-    "toEmailRequired": "Email получателя обязателен",
-    "toEmailInvalid": "Неверный формат электронной почты",
-    "serverUrlRequired": "URL сервера обязателен",
-    "serverUrlInvalid": "Неверный формат URL",
-    "appTokenRequired": "Токен приложения обязателен",
-    "urlRequired": "URL Webhook обязателен",
-    "urlInvalid": "Неверный формат URL",
-    "headersInvalid": "Заголовки должны быть в формате JSON"
+  "loading": "Загрузка настроек уведомлений...",
+  "preferences": {
+    "categories": {
+      "collaboration": "Совместный доступ и сотрудничество",
+      "medical": "Медицинские события",
+      "other": "Другие события",
+      "security": "Оповещения безопасности",
+      "sharing": "Совместный доступ и приглашения",
+      "system": "Системные события"
+    },
+    "comingSoon": "Скоро",
+    "description": "Выберите, какие события вызывают уведомления на каждом канале",
+    "event": "Event",
+    "eventHeader": "Событие",
+    "loading": "Загрузка настроек...",
+    "noChannels": "Сначала добавьте канал уведомлений, чтобы настроить события",
+    "saveFailed": "Не удалось сохранить настройку",
+    "saveSuccess": "Настройка сохранена",
+    "title": "Уведомления о событиях",
+    "updateError": "Failed to update preference"
   },
-
+  "title": "Настройки уведомлений",
   "toasts": {
     "auth": {
-      "sessionExpired": "Сеанс истёк из-за неактивности",
-      "sessionExpiredLogin": "Сеанс истёк. Пожалуйста, войдите снова.",
-      "loginSuccess": "Вход выполнен успешно!",
-      "loginFailed": "Ошибка входа",
-      "logoutSuccess": "Выход выполнен успешно",
-      "ssoFailed": "Не удалось начать вход через SSO",
       "accessDeniedAdmin": "Доступ запрещён: требуются права администратора",
       "accessDeniedRole": "Доступ запрещён: требуется роль {{role}}",
       "accessDeniedRoles": "Доступ запрещён: требуется одна из ролей: {{roles}}",
+      "accountCreatedSuccess": "Учётная запись успешно создана! Выполняется вход...",
+      "loginFailed": "Ошибка входа",
       "loginRequired": "Пожалуйста, войдите в систему для доступа к этой странице",
+      "loginSuccess": "Вход выполнен успешно!",
+      "logoutSuccess": "Выход выполнен успешно",
+      "sessionExpired": "Сеанс истёк из-за неактивности",
+      "sessionExpiredLogin": "Сеанс истёк. Пожалуйста, войдите снова.",
+      "ssoFailed": "Не удалось начать вход через SSO",
       "userCreatedSuccess": "Учётная запись пользователя успешно создана!",
-      "userCreatedWithLinkSuccess": "Пользователь создан и успешно привязан к существующему пациенту!",
-      "accountCreatedSuccess": "Учётная запись успешно создана! Выполняется вход..."
+      "userCreatedWithLinkSuccess": "Пользователь создан и успешно привязан к существующему пациенту!"
     },
-    "patient": {
-      "nowViewing": "Просмотр: {{name}}",
-      "switchFailed": "Ошибка переключения: {{message}}",
-      "deleteOwnOnly": "Вы можете удалять только собственных пациентов",
-      "deletedSwitched": "{{name}} успешно удалён. Переключено на {{fallbackName}}.",
-      "deletedNoOthers": "{{name}} успешно удалён. Другие пациенты отсутствуют.",
-      "deletedSuccess": "{{name}} успешно удалён",
-      "deleteFailed": "Ошибка удаления: {{message}}",
-      "removeOwnOnly": "Вы не можете отозвать доступ к собственным пациентам",
-      "removedAccess": "Доступ к {{name}} отозван",
-      "removeAccessFailed": "Ошибка отзыва доступа: {{message}}",
-      "updatedSuccess": "{{name}} успешно обновлён",
-      "createdSuccess": "{{name}} успешно создан"
+    "documents": {
+      "deleteFailed": "Ошибка удаления",
+      "linkFailed": "Не удалось привязать документ",
+      "linkSuccess": "Документ успешно привязан",
+      "unlinkFailed": "Не удалось отвязать документ",
+      "unlinkSuccess": "Документ успешно отвязан",
+      "uploadFailed": "Ошибка загрузки"
     },
-    "sharing": {
-      "invalidJson": "Неверный формат JSON в {{fieldName}}. Пожалуйста, проверьте синтаксис.",
-      "invitationCancelled": "Приглашение успешно отменено",
-      "cancelFailed": "Не удалось отменить приглашение: {{message}}",
-      "invitationSent": "Приглашение успешно отправлено {{recipient}}",
-      "invitationFailed": "Ошибка приглашения: {{message}}",
-      "shareUpdated": "Совместный доступ к пациенту успешно обновлён",
-      "updateFailed": "Ошибка обновления: {{message}}",
-      "accessRevoked": "Доступ отозван для пользователя {{userId}}",
-      "revokeFailed": "Ошибка отзыва: {{message}}"
-    },
-    "vitals": {
-      "formErrors": "Пожалуйста, исправьте ошибки в форме",
-      "savedSuccess": "Жизненные показатели успешно сохранены ({{action}})!",
-      "saveFailed": "Не удалось сохранить жизненные показатели ({{action}})",
-      "deleteSuccess": "Запись жизненных показателей успешно удалена",
-      "deleteFailed": "Не удалось удалить запись жизненных показателей"
-    },
-    "settings": {
-      "sessionTimeoutUpdated": "Время ожидания сеанса обновлено до {{minutes}} минут. Ваш сеанс обновлён.",
-      "cleanupComplete": "Очистка завершена: {{cleaned}} файлов очищено, {{deleted}} файлов удалено",
-      "noOutOfSync": "Рассинхронизированные файлы не найдены",
-      "cleanupFailed": "Не удалось очистить файлы. Пожалуйста, попробуйте позже."
+    "familySharing": {
+      "accessRevoked": "Доступ отозван",
+      "invitationFailed": "Не удалось отправить приглашение",
+      "invitationSent": "Приглашение успешно отправлено!",
+      "loadFailed": "Не удалось загрузить информацию о совместном доступе",
+      "revokeFailed": "Не удалось отозвать доступ"
     },
     "files": {
       "downloadFailed": "Ошибка загрузки файла"
+    },
+    "generic": {
+      "allOperationsFailed": "Все операции ({{operation}}) завершились с ошибками. Попробуйте снова.",
+      "allOperationsSuccess": "Все {{total}} операций ({{operation}}) выполнены успешно!",
+      "deleteFailed": "Ошибка удаления",
+      "downloadFailed": "Ошибка загрузки",
+      "error": "Ошибка",
+      "operationFailed": "Ошибка операции",
+      "operationFailedTitle": "Ошибка: {{operation}}",
+      "operationPartial": "{{success}}/{{total}} операций ({{operation}}) выполнены успешно. {{failed}} с ошибками.",
+      "operationPartialTitle": "{{operation}} завершена с ошибками",
+      "operationSuccess": "{{operation}} выполнена успешно!",
+      "saveFailed": "Ошибка сохранения",
+      "success": "Успешно!",
+      "warning": "Предупреждение"
+    },
+    "invitations": {
+      "accessRevoked": "Доступ отозван",
+      "accessRevokedMessage": "Доступ был отозван.",
+      "alreadyRevoked": "Уже отозвано",
+      "alreadyRevokedMessage": "Это приглашение уже было отозвано.",
+      "cancelFailed": "Не удалось отменить приглашение",
+      "cancelled": "Приглашение отменено",
+      "cancelledMessage": "Приглашение было отменено.",
+      "respondFailed": "Не удалось ответить на приглашение",
+      "revokeFailed": "Не удалось отозвать доступ"
+    },
+    "labResults": {
+      "addedMessage": "Добавлено {{count}} компонентов к результату анализа.",
+      "addedSuccess": "Успешно!",
+      "addFailed": "Не удалось добавить компоненты",
+      "deletedMessage": "{{name}} удалён",
+      "deletedSuccess": "Компонент удалён",
+      "noTextMessage": "Пожалуйста, вставьте текст результатов анализов в поле ввода.",
+      "noTextToParse": "Нет текста для разбора",
+      "parsedCount": "Найдено {{count}} компонентов. Проверьте их на вкладке предпросмотра.",
+      "parseWarning": "Некоторые строки не удалось разобрать",
+      "templateApplied": "Шаблон применён",
+      "templateAppliedMessage": "Добавлено {{count}} компонентов из шаблона «{{name}}».",
+      "textParsed": "Текст разобран",
+      "trendExportFailed": "Не удалось экспортировать график",
+      "trendExportSuccess": "График успешно экспортирован",
+      "updateFailed": "Не удалось обновить компонент"
+    },
+    "patient": {
+      "createdSuccess": "{{name}} успешно создан",
+      "deletedNoOthers": "{{name}} успешно удалён. Другие пациенты отсутствуют.",
+      "deletedSuccess": "{{name}} успешно удалён",
+      "deletedSwitched": "{{name}} успешно удалён. Переключено на {{fallbackName}}.",
+      "deleteFailed": "Ошибка удаления: {{message}}",
+      "deleteOwnOnly": "Вы можете удалять только собственных пациентов",
+      "nowViewing": "Просмотр: {{name}}",
+      "removeAccessFailed": "Ошибка отзыва доступа: {{message}}",
+      "removedAccess": "Доступ к {{name}} отозван",
+      "removeOwnOnly": "Вы не можете отозвать доступ к собственным пациентам",
+      "switchFailed": "Ошибка переключения: {{message}}",
+      "updatedSuccess": "{{name}} успешно обновлён"
+    },
+    "photo": {
+      "deleteFailed": "Ошибка удаления",
+      "photoBeingUploaded": "Фото загружается. Пожалуйста, дождитесь завершения.",
+      "pleaseWait": "Пожалуйста, подождите",
+      "uploadFailed": "Ошибка загрузки",
+      "uploadSuccess": "Фото успешно загружено"
+    },
+    "reports": {
+      "noRecordsMessage": "Пожалуйста, выберите хотя бы одну запись из категорий ниже для формирования отчёта.",
+      "noRecordsSelected": "Записи не выбраны",
+      "templateDeleted": "Шаблон успешно удалён",
+      "templateDeleteFailed": "Не удалось удалить шаблон",
+      "templateLoaded": "Шаблон «{{name}}» загружен",
+      "templateNameRequired": "Название шаблона обязательно",
+      "templateSaved": "Шаблон успешно сохранён",
+      "templateSaveFailed": "Не удалось сохранить шаблон",
+      "validationError": "Ошибка валидации"
+    },
+    "settings": {
+      "cleanupComplete": "Очистка завершена: {{cleaned}} файлов очищено, {{deleted}} файлов удалено",
+      "cleanupFailed": "Не удалось очистить файлы. Пожалуйста, попробуйте позже.",
+      "noOutOfSync": "Рассинхронизированные файлы не найдены",
+      "sessionTimeoutUpdated": "Время ожидания сеанса обновлено до {{minutes}} минут. Ваш сеанс обновлён."
+    },
+    "sharing": {
+      "accessRevoked": "Доступ отозван для пользователя {{userId}}",
+      "cancelFailed": "Не удалось отменить приглашение: {{message}}",
+      "invalidJson": "Неверный формат JSON в {{fieldName}}. Пожалуйста, проверьте синтаксис.",
+      "invitationCancelled": "Приглашение успешно отменено",
+      "invitationFailed": "Ошибка приглашения: {{message}}",
+      "invitationSent": "Приглашение успешно отправлено {{recipient}}",
+      "revokeFailed": "Ошибка отзыва: {{message}}",
+      "shareUpdated": "Совместный доступ к пациенту успешно обновлён",
+      "updateFailed": "Ошибка обновления: {{message}}"
     },
     "tagSearch": {
       "loadFailed": "Не удалось загрузить популярные теги",
@@ -324,92 +390,45 @@
       "noTagsSelectedTitle": "Теги не выбраны",
       "searchFailed": "Не удалось выполнить поиск записей по тегам"
     },
-    "invitations": {
-      "respondFailed": "Не удалось ответить на приглашение",
-      "cancelled": "Приглашение отменено",
-      "cancelledMessage": "Приглашение было отменено.",
-      "cancelFailed": "Не удалось отменить приглашение",
-      "accessRevoked": "Доступ отозван",
-      "accessRevokedMessage": "Доступ был отозван.",
-      "revokeFailed": "Не удалось отозвать доступ",
-      "alreadyRevoked": "Уже отозвано",
-      "alreadyRevokedMessage": "Это приглашение уже было отозвано."
-    },
-    "photo": {
-      "pleaseWait": "Пожалуйста, подождите",
-      "photoBeingUploaded": "Фото загружается. Пожалуйста, дождитесь завершения.",
-      "uploadSuccess": "Фото успешно загружено",
-      "uploadFailed": "Ошибка загрузки",
-      "deleteFailed": "Ошибка удаления"
-    },
-    "reports": {
-      "noRecordsSelected": "Записи не выбраны",
-      "noRecordsMessage": "Пожалуйста, выберите хотя бы одну запись из категорий ниже для формирования отчёта.",
-      "validationError": "Ошибка валидации",
-      "templateNameRequired": "Название шаблона обязательно",
-      "templateSaved": "Шаблон успешно сохранён",
-      "templateSaveFailed": "Не удалось сохранить шаблон",
-      "templateDeleted": "Шаблон успешно удалён",
-      "templateDeleteFailed": "Не удалось удалить шаблон",
-      "templateLoaded": "Шаблон «{{name}}» загружен"
-    },
-    "labResults": {
-      "parseWarning": "Некоторые строки не удалось разобрать",
-      "noTextToParse": "Нет текста для разбора",
-      "noTextMessage": "Пожалуйста, вставьте текст результатов анализов в поле ввода.",
-      "textParsed": "Текст разобран",
-      "parsedCount": "Найдено {{count}} компонентов. Проверьте их на вкладке предпросмотра.",
-      "addedSuccess": "Успешно!",
-      "addedMessage": "Добавлено {{count}} компонентов к результату анализа.",
-      "addFailed": "Не удалось добавить компоненты",
-      "deletedSuccess": "Компонент удалён",
-      "deletedMessage": "{{name}} удалён",
-      "updateFailed": "Не удалось обновить компонент",
-      "templateApplied": "Шаблон применён",
-      "templateAppliedMessage": "Добавлено {{count}} компонентов из шаблона «{{name}}».",
-      "trendExportSuccess": "График успешно экспортирован",
-      "trendExportFailed": "Не удалось экспортировать график"
-    },
-    "documents": {
-      "uploadFailed": "Ошибка загрузки",
-      "deleteFailed": "Ошибка удаления",
-      "linkSuccess": "Документ успешно привязан",
-      "linkFailed": "Не удалось привязать документ",
-      "unlinkSuccess": "Документ успешно отвязан",
-      "unlinkFailed": "Не удалось отвязать документ"
-    },
-    "familySharing": {
-      "loadFailed": "Не удалось загрузить информацию о совместном доступе",
-      "invitationSent": "Приглашение успешно отправлено!",
-      "invitationFailed": "Не удалось отправить приглашение",
-      "accessRevoked": "Доступ отозван",
-      "revokeFailed": "Не удалось отозвать доступ"
-    },
     "upload": {
-      "failed": "Ошибка загрузки",
-      "completedWithErrors": "Загрузка завершена с ошибками",
-      "partialSuccess": "{{completed}}/{{total}} файлов загружено успешно. {{failed}} с ошибками.",
-      "documentAdded": "Документ добавлен в Paperless",
-      "fileUploadedSuccess": "«{{fileName}}» успешно загружен в Paperless!",
       "backgroundProcessing": "«{{fileName}}» обрабатывается в фоновом режиме. Вы получите уведомление по завершении.",
+      "completedWithErrors": "Загрузка завершена с ошибками",
+      "documentAdded": "Документ добавлен в Paperless",
       "duplicateDocument": "Дублирующийся документ",
+      "failed": "Ошибка загрузки",
+      "fileUploadedSuccess": "«{{fileName}}» успешно загружен в Paperless!",
+      "fileUploadFailed": "Ошибка загрузки файла",
       "paperlessUploadFailed": "Ошибка загрузки в Paperless",
-      "fileUploadFailed": "Ошибка загрузки файла"
+      "partialSuccess": "{{completed}}/{{total}} файлов загружено успешно. {{failed}} с ошибками."
     },
-    "generic": {
-      "operationFailed": "Ошибка операции",
-      "saveFailed": "Ошибка сохранения",
-      "deleteFailed": "Ошибка удаления",
-      "downloadFailed": "Ошибка загрузки",
-      "success": "Успешно!",
-      "warning": "Предупреждение",
-      "error": "Ошибка",
-      "operationSuccess": "{{operation}} выполнена успешно!",
-      "allOperationsSuccess": "Все {{total}} операций ({{operation}}) выполнены успешно!",
-      "operationPartial": "{{success}}/{{total}} операций ({{operation}}) выполнены успешно. {{failed}} с ошибками.",
-      "operationPartialTitle": "{{operation}} завершена с ошибками",
-      "allOperationsFailed": "Все операции ({{operation}}) завершились с ошибками. Попробуйте снова.",
-      "operationFailedTitle": "Ошибка: {{operation}}"
+    "vitals": {
+      "deleteFailed": "Не удалось удалить запись жизненных показателей",
+      "deleteSuccess": "Запись жизненных показателей успешно удалена",
+      "formErrors": "Пожалуйста, исправьте ошибки в форме",
+      "savedSuccess": "Жизненные показатели успешно сохранены ({{action}})!",
+      "saveFailed": "Не удалось сохранить жизненные показатели ({{action}})"
     }
+  },
+  "validation": {
+    "appTokenRequired": "Токен приложения обязателен",
+    "fromEmailInvalid": "Неверный формат электронной почты",
+    "fromEmailRequired": "Email отправителя обязателен",
+    "headersInvalid": "Заголовки должны быть в формате JSON",
+    "nameRequired": "Название канала обязательно",
+    "nameTooLong": "Название не может превышать 100 символов",
+    "serverUrlInvalid": "Неверный формат URL",
+    "serverUrlRequired": "URL сервера обязателен",
+    "smtpHostRequired": "Сервер SMTP обязателен",
+    "smtpPasswordRequired": "Пароль SMTP обязателен",
+    "smtpPortInvalid": "Порт должен быть от 1 до 65535",
+    "smtpPortRequired": "Порт SMTP обязателен",
+    "smtpUserRequired": "Имя пользователя SMTP обязательно",
+    "toEmailInvalid": "Неверный формат электронной почты",
+    "toEmailRequired": "Email получателя обязателен",
+    "typeRequired": "Тип канала обязателен",
+    "urlInvalid": "Неверный формат URL",
+    "urlRequired": "URL Webhook обязателен",
+    "webhookUrlInvalid": "Неверный формат URL Webhook",
+    "webhookUrlRequired": "URL Webhook обязателен"
   }
 }

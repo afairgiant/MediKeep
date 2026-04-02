@@ -1,172 +1,175 @@
 {
-  "menu": {
-    "dashboard": "Dashboard",
-    "backToDashboard": "Zurück zum Dashboard",
-    "patients": "Patienten",
-    "medicalRecords": "Krankenakten",
-    "settings": "Einstellungen",
-    "reports": "Berichte",
-    "administration": "Verwaltung",
-    "logout": "Abmelden",
-    "profile": "Profil",
-    "help": "Hilfe"
+  "activity": {
+    "actions": {
+      "added": "Hinzugefügt",
+      "cancelled": "Abgebrochen",
+      "completed": "Abgeschlossen",
+      "created": "Erstellt",
+      "deleted": "Gelöscht",
+      "modified": "Geändert",
+      "removed": "Entfernt",
+      "scheduled": "Geplant",
+      "updated": "Aktualisiert",
+      "viewed": "Angesehen"
+    }
   },
-  "pages": {
-    "dashboard": "Dashboard",
-    "patientList": "Patientenliste",
-    "patientDetails": "Patientendetails",
-    "medicalHistory": "Krankengeschichte",
-    "settings": "Einstellungen",
-    "userProfile": "Benutzerprofil",
-    "preferences": "Einstellungen",
-    "reports": "Berichte",
-    "help": "Hilfe & Support"
+  "dashboard": {
+    "activity": {
+      "lastUpdated": "Zuletzt aktualisiert",
+      "noActivity": "Keine aktuellen Aktivitäten",
+      "noActivityDescription": "Ihre Krankenaktenaktivitäten werden hier angezeigt"
+    },
+    "hello": "Hallo",
+    "loading": "Ihr medizinisches Dashboard wird geladen...",
+    "modules": {
+      "adminDashboard": "Admin-Dashboard",
+      "allergies": "Allergien",
+      "conditions": "Erkrankungen",
+      "emergencyContacts": "Notfallkontakte",
+      "exportRecords": "Daten exportieren",
+      "familyHistory": "Familiengeschichte",
+      "immunizations": "Impfungen",
+      "injuries": "Verletzungen",
+      "insurance": "Versicherung",
+      "labResults": "Laborergebnisse",
+      "medicalEquipment": "Medizinische Geräte",
+      "medications": "Medikamente",
+      "patientInfo": "Patienteninformationen",
+      "pharmacies": "Apotheken",
+      "practitioners": "Ärzte",
+      "procedures": "Eingriffe",
+      "symptoms": "Symptome",
+      "treatments": "Behandlungen",
+      "visitHistory": "Besuchsverlauf",
+      "vitalSigns": "Vitalzeichen"
+    },
+    "search": {
+      "advancedSearch": "Advanced Search",
+      "placeholder": "Krankenakten durchsuchen..."
+    },
+    "sections": {
+      "additionalResources": "Zusätzliche Ressourcen",
+      "coreMedical": "Kern-Medizininformationen",
+      "healthMonitoring": "Gesundheitsüberwachung",
+      "prevention": "Prävention & Historie",
+      "recentActivity": "Letzte Aktivitäten",
+      "treatments": "Behandlungen und Eingriffe"
+    },
+    "stats": {
+      "activeMedications": "Aktive Medikamente",
+      "labResults": "Laborergebnisse",
+      "procedures": "Eingriffe",
+      "totalRecords": "Gesamtanzahl Einträge"
+    },
+    "subtitle": "Verwalten Sie Ihre Gesundheitsinformationen sicher",
+    "title": "MediKeep Dashboard"
   },
-  "sections": {
-    "overview": "Übersicht",
-    "personalInfo": "Persönliche Informationen",
-    "medicalInfo": "Medizinische Informationen",
-    "documents": "Dokumente",
-    "timeline": "Zeitachse",
-    "familyHistory": "Familien Historie",
-    "emergencyContacts": "Notfallkontakte",
-    "insurance": "Versicherung",
-    "preferences": "Einstellungen"
+  "invitations": {
+    "acceptButton": "Einladung annehmen",
+    "confirmDescription": "Durch die Annahme erhalten Sie Zugriff auf die freigegebenen medizinischen Informationen.",
+    "confirmQuestion": "Möchten Sie diese Einladung wirklich annehmen?",
+    "confirmTitle": "Einladungsannahme bestätigen",
+    "from": "Von",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "manageAll": "Alle Einladungen verwalten",
+    "noPending": "Keine ausstehenden Einladungen",
+    "noPendingDescription": "Neue Freigabeeinladungen werden hier angezeigt",
+    "sharePatient": "Patient teilen",
+    "title": "Einladungen",
+    "types": {
+      "familyHistory": "Familiengeschichte",
+      "patientRecord": "Patientenakte"
+    },
+    "viewAll": "Alle {{count}} Einladungen anzeigen",
+    "viewAll_one": "View all {{count}} invitations",
+    "viewAll_other": "View all {{count}} invitations"
   },
   "medicalRecords": {
     "allergies": "Allergien",
     "conditions": "Erkrankungen",
-    "medications": "Medikamente",
-    "labResults": "Laborergebnisse",
     "immunizations": "Impfungen",
-    "procedures": "Eingriffe",
-    "visits": "Besuche",
-    "treatments": "Behandlungen",
-    "symptoms": "Symptome",
-    "practitioners": "Ärzte",
-    "pharmacies": "Apotheken",
     "injuries": "Verletzungen",
-    "medicalEquipment": "Medizinische Geräte"
+    "labResults": "Laborergebnisse",
+    "medicalEquipment": "Medizinische Geräte",
+    "medications": "Medikamente",
+    "pharmacies": "Apotheken",
+    "practitioners": "Ärzte",
+    "procedures": "Eingriffe",
+    "symptoms": "Symptome",
+    "treatments": "Behandlungen",
+    "visits": "Besuche"
   },
-  "dashboard": {
-    "title": "MediKeep Dashboard",
-    "subtitle": "Verwalten Sie Ihre Gesundheitsinformationen sicher",
-    "hello": "Hallo",
-    "loading": "Ihr medizinisches Dashboard wird geladen...",
-    "sections": {
-      "coreMedical": "Kern-Medizininformationen",
-      "treatments": "Behandlungen und Eingriffe",
-      "healthMonitoring": "Gesundheitsüberwachung",
-      "prevention": "Prävention & Historie",
-      "additionalResources": "Zusätzliche Ressourcen",
-      "recentActivity": "Letzte Aktivitäten"
-    },
-    "stats": {
-      "totalRecords": "Gesamtanzahl Einträge",
-      "activeMedications": "Aktive Medikamente",
-      "labResults": "Laborergebnisse",
-      "procedures": "Eingriffe"
-    },
-    "modules": {
-      "patientInfo": "Patienteninformationen",
-      "medications": "Medikamente",
-      "labResults": "Laborergebnisse",
-      "treatments": "Behandlungen",
-      "procedures": "Eingriffe",
-      "vitalSigns": "Vitalzeichen",
-      "symptoms": "Symptome",
-      "conditions": "Erkrankungen",
-      "allergies": "Allergien",
-      "immunizations": "Impfungen",
-      "visitHistory": "Besuchsverlauf",
-      "familyHistory": "Familiengeschichte",
-      "insurance": "Versicherung",
-      "emergencyContacts": "Notfallkontakte",
-      "exportRecords": "Daten exportieren",
-      "practitioners": "Ärzte",
-      "pharmacies": "Apotheken",
-      "adminDashboard": "Admin-Dashboard",
-      "injuries": "Verletzungen",
-      "medicalEquipment": "Medizinische Geräte"
-    },
-    "activity": {
-      "noActivity": "Keine aktuellen Aktivitäten",
-      "noActivityDescription": "Ihre Krankenaktenaktivitäten werden hier angezeigt",
-      "lastUpdated": "Zuletzt aktualisiert"
-    },
-    "search": {
-      "placeholder": "Krankenakten durchsuchen..."
-    }
+  "menu": {
+    "administration": "Verwaltung",
+    "backToDashboard": "Zurück zum Dashboard",
+    "dashboard": "Dashboard",
+    "help": "Hilfe",
+    "logout": "Abmelden",
+    "medicalRecords": "Krankenakten",
+    "patients": "Patienten",
+    "profile": "Profil",
+    "reports": "Berichte",
+    "settings": "Einstellungen"
   },
-  "invitations": {
-    "title": "Einladungen",
-    "lastUpdated": "Zuletzt aktualisiert",
-    "from": "Von",
-    "viewAll": "Alle {{count}} Einladungen anzeigen",
-    "noPending": "Keine ausstehenden Einladungen",
-    "noPendingDescription": "Neue Freigabeeinladungen werden hier angezeigt",
-    "manageAll": "Alle Einladungen verwalten",
-    "sharePatient": "Patient teilen",
-    "confirmTitle": "Einladungsannahme bestätigen",
-    "confirmQuestion": "Möchten Sie diese Einladung wirklich annehmen?",
-    "confirmDescription": "Durch die Annahme erhalten Sie Zugriff auf die freigegebenen medizinischen Informationen.",
-    "acceptButton": "Einladung annehmen",
-    "types": {
-      "familyHistory": "Familiengeschichte",
-      "patientRecord": "Patientenakte"
-    }
+  "pages": {
+    "dashboard": "Dashboard",
+    "help": "Hilfe & Support",
+    "medicalHistory": "Krankengeschichte",
+    "patientDetails": "Patientendetails",
+    "patientList": "Patientenliste",
+    "preferences": "Einstellungen",
+    "reports": "Berichte",
+    "settings": "Einstellungen",
+    "userProfile": "Benutzerprofil"
   },
-  "activity": {
-    "actions": {
-      "created": "Erstellt",
-      "updated": "Aktualisiert",
-      "deleted": "Gelöscht",
-      "added": "Hinzugefügt",
-      "modified": "Geändert",
-      "removed": "Entfernt",
-      "completed": "Abgeschlossen",
-      "cancelled": "Abgebrochen",
-      "scheduled": "Geplant",
-      "viewed": "Angesehen"
-    }
+  "sections": {
+    "documents": "Dokumente",
+    "emergencyContacts": "Notfallkontakte",
+    "familyHistory": "Familien Historie",
+    "insurance": "Versicherung",
+    "medicalInfo": "Medizinische Informationen",
+    "overview": "Übersicht",
+    "personalInfo": "Persönliche Informationen",
+    "preferences": "Einstellungen",
+    "timeline": "Zeitachse"
   },
   "sidebarNav": {
-    "sections": {
-      "medicalRecords": "Krankenakten",
-      "careAndTreatment": "Pflege & Behandlung",
-      "misc": "Sonstiges",
-      "tools": "Werkzeuge",
-      "administration": "Verwaltung"
-    },
     "items": {
-      "patientInfo": "Patienteninformationen",
-      "medications": "Medikamente",
-      "labResults": "Laborergebnisse",
-      "conditions": "Erkrankungen",
-      "allergies": "Allergien",
-      "vitalSigns": "Vitalzeichen",
-      "symptoms": "Symptome",
-      "treatments": "Behandlungen",
-      "procedures": "Eingriffe",
-      "immunizations": "Impfungen",
-      "visitHistory": "Besuchsverlauf",
-      "familyHistory": "Familiengeschichte",
-      "practitioners": "Ärzte",
-      "pharmacies": "Apotheken",
-      "insurance": "Versicherung",
-      "emergencyContacts": "Notfallkontakte",
-      "tagManagement": "Tag-Verwaltung",
-      "customReports": "Benutzerdefinierte Berichte",
-      "exportRecords": "Daten exportieren",
-      "settings": "Einstellungen",
       "adminDashboard": "Admin-Dashboard",
-      "dataModels": "Datenmodelle",
+      "allergies": "Allergien",
       "backupManagement": "Backup-Verwaltung",
-      "systemHealth": "Systemzustand",
-      "language": "Sprache",
-      "theme": "Design",
+      "conditions": "Erkrankungen",
+      "customReports": "Benutzerdefinierte Berichte",
+      "dataModels": "Datenmodelle",
+      "emergencyContacts": "Notfallkontakte",
+      "exportRecords": "Daten exportieren",
+      "familyHistory": "Familiengeschichte",
+      "immunizations": "Impfungen",
       "injuries": "Verletzungen",
-      "medicalEquipment": "Medizinische Geräte"
+      "insurance": "Versicherung",
+      "labResults": "Laborergebnisse",
+      "language": "Sprache",
+      "medicalEquipment": "Medizinische Geräte",
+      "medications": "Medikamente",
+      "patientInfo": "Patienteninformationen",
+      "pharmacies": "Apotheken",
+      "practitioners": "Ärzte",
+      "procedures": "Eingriffe",
+      "settings": "Einstellungen",
+      "symptoms": "Symptome",
+      "systemHealth": "Systemzustand",
+      "tagManagement": "Tag-Verwaltung",
+      "theme": "Design",
+      "treatments": "Behandlungen",
+      "visitHistory": "Besuchsverlauf",
+      "vitalSigns": "Vitalzeichen"
+    },
+    "sections": {
+      "administration": "Verwaltung",
+      "careAndTreatment": "Pflege & Behandlung",
+      "medicalRecords": "Krankenakten",
+      "misc": "Sonstiges",
+      "tools": "Werkzeuge"
     }
   }
 }

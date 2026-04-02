@@ -1,322 +1,386 @@
 {
-  "title": "Notification Settings",
-  "description": "Configure how you receive notifications for important events",
-  "loading": "Loading notification settings...",
-  "error": "Failed to load notification settings",
-
   "channels": {
-    "title": "Notification Channels",
-    "description": "Add and manage your notification delivery channels",
     "add": "Add Channel",
-    "edit": "Edit Channel",
+    "configTitle": "{{type}} Configuration",
+    "confirmDelete": "Are you sure you want to delete this channel?",
+    "createError": "Failed to create channel",
+    "createFailed": "Failed to create channel",
+    "createSuccess": "Channel created successfully",
     "delete": "Delete Channel",
-    "test": "Test",
-    "testing": "Testing...",
-    "testSuccess": "Test notification sent successfully!",
-    "testFailed": "Test notification failed",
+    "deleteConfirm": "Are you sure you want to delete this channel?",
+    "deleteError": "Failed to delete channel",
+    "deleteFailed": "Failed to delete channel",
+    "deleteSuccess": "Channel deleted successfully",
+    "description": "Add and manage your notification delivery channels",
+    "disabled": "Disabled",
+    "discord": {
+      "avatarUrl": {
+        "description": "Custom avatar for the notification bot",
+        "label": "Avatar URL (Optional)",
+        "placeholder": "https://example.com/avatar.png"
+      },
+      "username": {
+        "description": "Custom name for the notification bot",
+        "label": "Bot Username (Optional)",
+        "placeholder": "MediKeep"
+      },
+      "webhookUrl": {
+        "description": "Create a webhook in your Discord server settings",
+        "label": "Webhook URL",
+        "placeholder": "https://discord.com/api/webhooks/..."
+      }
+    },
+    "edit": "Edit Channel",
+    "email": {
+      "fromEmail": {
+        "description": "The sender email address",
+        "label": "From Email",
+        "placeholder": "notifications@example.com"
+      },
+      "smtpHost": {
+        "description": "Your email provider's SMTP server",
+        "label": "SMTP Server",
+        "placeholder": "smtp.gmail.com"
+      },
+      "smtpPassword": {
+        "description": "For Gmail, use an App Password",
+        "label": "SMTP Password",
+        "placeholder": "App password or email password"
+      },
+      "smtpPort": {
+        "description": "Usually 587 (TLS) or 465 (SSL)",
+        "label": "SMTP Port",
+        "placeholder": "587"
+      },
+      "smtpUser": {
+        "description": "Your email address or username",
+        "label": "SMTP Username",
+        "placeholder": "your-email@gmail.com"
+      },
+      "toEmail": {
+        "description": "Where to send notifications",
+        "label": "To Email",
+        "placeholder": "your-email@example.com"
+      },
+      "useTls": {
+        "description": "Enable TLS encryption (recommended)",
+        "label": "Use TLS"
+      }
+    },
+    "empty": "No notification channels configured.",
+    "emptyHint": "Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.",
+    "enabled": "Enabled",
+    "errors": {
+      "fieldRequired": "{{field}} is required",
+      "nameRequired": "Channel name is required"
+    },
+    "fields": {
+      "enabled": "Enable this channel",
+      "name": "Channel Name",
+      "namePlaceholder": "My Discord Server",
+      "type": "Channel Type"
+    },
+    "form": {
+      "configSection": "Channel Configuration",
+      "enabled": {
+        "description": "Receive notifications through this channel",
+        "label": "Enable Channel"
+      },
+      "name": {
+        "description": "A friendly name to identify this channel",
+        "label": "Channel Name",
+        "placeholder": "e.g., My Discord Server"
+      },
+      "title": "Channel Details",
+      "type": {
+        "description": "The service to send notifications through",
+        "label": "Channel Type",
+        "placeholder": "Select channel type"
+      }
+    },
+    "gotify": {
+      "appToken": {
+        "description": "Create an application in Gotify to get a token",
+        "label": "App Token",
+        "placeholder": "Application token from Gotify"
+      },
+      "priority": {
+        "description": "Message priority (1-10, default 5)",
+        "label": "Priority",
+        "placeholder": "5"
+      },
+      "serverUrl": {
+        "description": "Your Gotify server URL",
+        "label": "Server URL",
+        "placeholder": "https://gotify.example.com"
+      }
+    },
+    "lastUsed": "Last used",
+    "loadError": "Failed to load channel details",
     "noChannels": "No notification channels configured",
     "noChannelsHint": "Add a channel to start receiving notifications",
-    "verified": "Verified",
-    "enabled": "Enabled",
-    "disabled": "Disabled",
-    "lastUsed": "Last used",
     "notificationsSent": "{{count}} notifications sent",
-    "confirmDelete": "Are you sure you want to delete this channel?",
-    "deleteSuccess": "Channel deleted successfully",
-    "deleteFailed": "Failed to delete channel",
-    "createSuccess": "Channel created successfully",
-    "createFailed": "Failed to create channel",
-    "updateSuccess": "Channel updated successfully",
-    "updateFailed": "Failed to update channel",
+    "sentCount_one": "{{count}} sent",
+    "sentCount_other": "{{count}} sent",
+    "test": "Test",
+    "testError": "Failed to send test notification",
+    "testFailed": "Test notification failed",
+    "testing": "Testing...",
+    "testSuccess": "Test notification sent successfully!",
+    "title": "Notification Channels",
     "types": {
       "discord": "Discord",
       "email": "Email",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
-    "form": {
-      "title": "Channel Details",
-      "name": {
-        "label": "Channel Name",
-        "placeholder": "e.g., My Discord Server",
-        "description": "A friendly name to identify this channel"
-      },
-      "type": {
-        "label": "Channel Type",
-        "placeholder": "Select channel type",
-        "description": "The service to send notifications through"
-      },
-      "enabled": {
-        "label": "Enable Channel",
-        "description": "Receive notifications through this channel"
-      },
-      "configSection": "Channel Configuration"
-    },
-    "discord": {
-      "webhookUrl": {
-        "label": "Webhook URL",
-        "placeholder": "https://discord.com/api/webhooks/...",
-        "description": "Create a webhook in your Discord server settings"
-      },
-      "username": {
-        "label": "Bot Username (Optional)",
-        "placeholder": "MediKeep",
-        "description": "Custom name for the notification bot"
-      },
-      "avatarUrl": {
-        "label": "Avatar URL (Optional)",
-        "placeholder": "https://example.com/avatar.png",
-        "description": "Custom avatar for the notification bot"
-      }
-    },
-    "email": {
-      "smtpHost": {
-        "label": "SMTP Server",
-        "placeholder": "smtp.gmail.com",
-        "description": "Your email provider's SMTP server"
-      },
-      "smtpPort": {
-        "label": "SMTP Port",
-        "placeholder": "587",
-        "description": "Usually 587 (TLS) or 465 (SSL)"
-      },
-      "smtpUser": {
-        "label": "SMTP Username",
-        "placeholder": "your-email@gmail.com",
-        "description": "Your email address or username"
-      },
-      "smtpPassword": {
-        "label": "SMTP Password",
-        "placeholder": "App password or email password",
-        "description": "For Gmail, use an App Password"
-      },
-      "fromEmail": {
-        "label": "From Email",
-        "placeholder": "notifications@example.com",
-        "description": "The sender email address"
-      },
-      "toEmail": {
-        "label": "To Email",
-        "placeholder": "your-email@example.com",
-        "description": "Where to send notifications"
-      },
-      "useTls": {
-        "label": "Use TLS",
-        "description": "Enable TLS encryption (recommended)"
-      }
-    },
-    "gotify": {
-      "serverUrl": {
-        "label": "Server URL",
-        "placeholder": "https://gotify.example.com",
-        "description": "Your Gotify server URL"
-      },
-      "appToken": {
-        "label": "App Token",
-        "placeholder": "Application token from Gotify",
-        "description": "Create an application in Gotify to get a token"
-      },
-      "priority": {
-        "label": "Priority",
-        "placeholder": "5",
-        "description": "Message priority (1-10, default 5)"
-      }
-    },
+    "updateError": "Failed to update channel",
+    "updateFailed": "Failed to update channel",
+    "updateSuccess": "Channel updated successfully",
+    "verified": "Verified",
     "webhook": {
-      "url": {
-        "label": "Webhook URL",
-        "placeholder": "https://api.example.com/webhook",
-        "description": "URL to receive notification payloads"
-      },
-      "method": {
-        "label": "HTTP Method",
-        "description": "HTTP method for the webhook request"
+      "authToken": {
+        "description": "Authorization token for the webhook",
+        "label": "Auth Token (Optional)",
+        "placeholder": "Bearer token or API key"
       },
       "headers": {
+        "description": "JSON object with custom headers",
         "label": "Custom Headers (Optional)",
-        "placeholder": "{\"Authorization\": \"Bearer token\"}",
-        "description": "JSON object with custom headers"
+        "placeholder": "{\"Authorization\": \"Bearer token\"}"
       },
-      "authToken": {
-        "label": "Auth Token (Optional)",
-        "placeholder": "Bearer token or API key",
-        "description": "Authorization token for the webhook"
+      "method": {
+        "description": "HTTP method for the webhook request",
+        "label": "HTTP Method"
+      },
+      "url": {
+        "description": "URL to receive notification payloads",
+        "label": "Webhook URL",
+        "placeholder": "https://api.example.com/webhook"
       }
     }
   },
-
-  "preferences": {
-    "title": "Event Notifications",
-    "description": "Choose which events trigger notifications on each channel",
-    "loading": "Loading preferences...",
-    "noChannels": "Add a notification channel first to configure event preferences",
-    "saveSuccess": "Preference saved",
-    "saveFailed": "Failed to save preference",
-    "eventHeader": "Event",
-    "comingSoon": "Coming Soon",
-    "categories": {
-      "system": "System Events",
-      "medical": "Medical Events",
-      "collaboration": "Sharing & Collaboration",
-      "sharing": "Sharing & Invitations",
-      "security": "Security Alerts",
-      "other": "Other Events"
-    }
-  },
-
+  "description": "Configure how you receive notifications for important events",
+  "error": "Failed to load notification settings",
   "events": {
-    "test_notification": {
-      "name": "Test Notification",
-      "description": "Manual test notification"
-    },
     "backup_completed": {
-      "name": "Backup Completed",
-      "description": "When a backup completes successfully"
+      "description": "When a backup completes successfully",
+      "name": "Backup Completed"
     },
     "backup_failed": {
-      "name": "Backup Failed",
-      "description": "When a backup fails"
-    },
-    "lab_result_available": {
-      "name": "Lab Results Available",
-      "description": "When new lab results are added"
-    },
-    "lab_result_abnormal": {
-      "name": "Abnormal Lab Results",
-      "description": "When lab results are outside normal range"
+      "description": "When a backup fails",
+      "name": "Backup Failed"
     },
     "immunization_due": {
-      "name": "Immunization Due",
-      "description": "When an immunization is coming due"
+      "description": "When an immunization is coming due",
+      "name": "Immunization Due"
     },
     "immunization_overdue": {
-      "name": "Immunization Overdue",
-      "description": "When an immunization is past due"
-    },
-    "invitation_received": {
-      "name": "Invitation Received",
-      "description": "When someone shares records with you"
+      "description": "When an immunization is past due",
+      "name": "Immunization Overdue"
     },
     "invitation_accepted": {
-      "name": "Invitation Accepted",
-      "description": "When your sharing invitation is accepted"
+      "description": "When your sharing invitation is accepted",
+      "name": "Invitation Accepted"
     },
-    "share_revoked": {
-      "name": "Share Revoked",
-      "description": "When access to shared records is revoked"
+    "invitation_received": {
+      "description": "When someone shares records with you",
+      "name": "Invitation Received"
+    },
+    "lab_result_abnormal": {
+      "description": "When lab results are outside normal range",
+      "name": "Abnormal Lab Results"
+    },
+    "lab_result_available": {
+      "description": "When new lab results are added",
+      "name": "Lab Results Available"
     },
     "login_from_new_device": {
-      "name": "New Device Login",
-      "description": "When your account is accessed from a new device"
+      "description": "When your account is accessed from a new device",
+      "name": "New Device Login"
     },
     "password_changed": {
-      "name": "Password Changed",
-      "description": "When your password is changed"
+      "description": "When your password is changed",
+      "name": "Password Changed"
+    },
+    "share_revoked": {
+      "description": "When access to shared records is revoked",
+      "name": "Share Revoked"
+    },
+    "test_notification": {
+      "description": "Manual test notification",
+      "name": "Test Notification"
     }
   },
-
   "history": {
-    "title": "Notification History",
     "description": "Recent notifications sent through your channels",
+    "fields": {
+      "channel": "Channel",
+      "error": "Error",
+      "event": "Event",
+      "status": "Status",
+      "time": "Time"
+    },
     "loading": "Loading history...",
     "noHistory": "No notifications sent yet",
     "noHistoryHint": "Notifications will appear here once sent",
-    "showMore": "Show More",
-    "showLess": "Show Less",
     "page": "Page {{current}} of {{total}}",
+    "showLess": "Show Less",
+    "showMore": "Show More",
     "status": {
-      "sent": "Sent",
       "failed": "Failed",
-      "pending": "Pending"
+      "pending": "Pending",
+      "sent": "Sent"
     },
-    "fields": {
-      "event": "Event",
-      "channel": "Channel",
-      "time": "Time",
-      "status": "Status",
-      "error": "Error"
-    }
+    "title": "Notification History"
   },
-
-  "validation": {
-    "nameRequired": "Channel name is required",
-    "nameTooLong": "Name cannot exceed 100 characters",
-    "typeRequired": "Channel type is required",
-    "webhookUrlRequired": "Webhook URL is required",
-    "webhookUrlInvalid": "Invalid webhook URL format",
-    "smtpHostRequired": "SMTP server is required",
-    "smtpPortRequired": "SMTP port is required",
-    "smtpPortInvalid": "Port must be between 1 and 65535",
-    "smtpUserRequired": "SMTP username is required",
-    "smtpPasswordRequired": "SMTP password is required",
-    "fromEmailRequired": "From email is required",
-    "fromEmailInvalid": "Invalid email format",
-    "toEmailRequired": "To email is required",
-    "toEmailInvalid": "Invalid email format",
-    "serverUrlRequired": "Server URL is required",
-    "serverUrlInvalid": "Invalid URL format",
-    "appTokenRequired": "App token is required",
-    "urlRequired": "Webhook URL is required",
-    "urlInvalid": "Invalid URL format",
-    "headersInvalid": "Headers must be valid JSON"
+  "loading": "Loading notification settings...",
+  "preferences": {
+    "categories": {
+      "collaboration": "Sharing & Collaboration",
+      "medical": "Medical Events",
+      "other": "Other Events",
+      "security": "Security Alerts",
+      "sharing": "Sharing & Invitations",
+      "system": "System Events"
+    },
+    "comingSoon": "Coming Soon",
+    "description": "Choose which events trigger notifications on each channel",
+    "event": "Event",
+    "eventHeader": "Event",
+    "loading": "Loading preferences...",
+    "noChannels": "Add a notification channel first to configure event preferences",
+    "saveFailed": "Failed to save preference",
+    "saveSuccess": "Preference saved",
+    "title": "Event Notifications",
+    "updateError": "Failed to update preference"
   },
-
+  "title": "Notification Settings",
   "toasts": {
     "auth": {
-      "sessionExpired": "Session expired due to inactivity",
-      "sessionExpiredLogin": "Session expired. Please log in again.",
-      "loginSuccess": "Login successful!",
-      "loginFailed": "Login failed",
-      "logoutSuccess": "Logged out successfully",
-      "ssoFailed": "Failed to start SSO login",
       "accessDeniedAdmin": "Access denied: Administrator privileges required",
       "accessDeniedRole": "Access denied: {{role}} role required",
       "accessDeniedRoles": "Access denied: One of these roles required: {{roles}}",
+      "accountCreatedSuccess": "Account created successfully! Logging you in...",
+      "loginFailed": "Login failed",
       "loginRequired": "Please log in to access this page",
+      "loginSuccess": "Login successful!",
+      "logoutSuccess": "Logged out successfully",
+      "sessionExpired": "Session expired due to inactivity",
+      "sessionExpiredLogin": "Session expired. Please log in again.",
+      "ssoFailed": "Failed to start SSO login",
       "userCreatedSuccess": "User account created successfully!",
-      "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!",
-      "accountCreatedSuccess": "Account created successfully! Logging you in..."
+      "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!"
     },
-    "patient": {
-      "nowViewing": "Now viewing {{name}}",
-      "switchFailed": "Switch Failed: {{message}}",
-      "deleteOwnOnly": "You can only delete patients that you own",
-      "deletedSwitched": "Deleted {{name}} successfully. Switched to {{fallbackName}}.",
-      "deletedNoOthers": "Deleted {{name}} successfully. No other patients available.",
-      "deletedSuccess": "Deleted {{name}} successfully",
-      "deleteFailed": "Delete Failed: {{message}}",
-      "removeOwnOnly": "You cannot remove access to patients that you own",
-      "removedAccess": "Removed access to {{name}}",
-      "removeAccessFailed": "Remove Access Failed: {{message}}",
-      "updatedSuccess": "Updated {{name}} successfully",
-      "createdSuccess": "Created {{name}} successfully"
+    "documents": {
+      "deleteFailed": "Delete Failed",
+      "linkFailed": "Failed to link document",
+      "linkSuccess": "Document linked successfully",
+      "unlinkFailed": "Failed to unlink document",
+      "unlinkSuccess": "Document unlinked successfully",
+      "uploadFailed": "Upload Failed"
     },
-    "sharing": {
-      "invalidJson": "Invalid JSON format in {{fieldName}}. Please check your syntax.",
-      "invitationCancelled": "Invitation cancelled successfully",
-      "cancelFailed": "Failed to cancel invitation: {{message}}",
-      "invitationSent": "Invitation sent successfully to {{recipient}}",
-      "invitationFailed": "Invitation Failed: {{message}}",
-      "shareUpdated": "Patient share updated successfully",
-      "updateFailed": "Update Failed: {{message}}",
-      "accessRevoked": "Access revoked for user {{userId}}",
-      "revokeFailed": "Revoke Failed: {{message}}"
-    },
-    "vitals": {
-      "formErrors": "Please correct the form errors",
-      "savedSuccess": "Vitals {{action}} successfully!",
-      "saveFailed": "Failed to {{action}} vitals",
-      "deleteSuccess": "Vitals record deleted successfully",
-      "deleteFailed": "Failed to delete vitals record"
-    },
-    "settings": {
-      "sessionTimeoutUpdated": "Session timeout updated to {{minutes}} minutes. Your session has been refreshed.",
-      "cleanupComplete": "Cleanup completed: {{cleaned}} files cleaned, {{deleted}} files deleted",
-      "noOutOfSync": "No out-of-sync files found to clean up",
-      "cleanupFailed": "Failed to cleanup files. Please try again later."
+    "familySharing": {
+      "accessRevoked": "Access revoked",
+      "invitationFailed": "Failed to send invitation",
+      "invitationSent": "Invitation sent successfully!",
+      "loadFailed": "Failed to load sharing information",
+      "revokeFailed": "Failed to revoke access"
     },
     "files": {
       "downloadFailed": "File download failed"
+    },
+    "generic": {
+      "allOperationsFailed": "All {{operation}}s failed. Please try again.",
+      "allOperationsSuccess": "All {{total}} {{operation}}s completed successfully!",
+      "deleteFailed": "Delete Failed",
+      "downloadFailed": "Download Failed",
+      "error": "Error",
+      "operationFailed": "Operation Failed",
+      "operationFailedTitle": "{{operation}} Failed",
+      "operationPartial": "{{success}}/{{total}} {{operation}}s completed successfully. {{failed}} failed.",
+      "operationPartialTitle": "{{operation}} Completed with Errors",
+      "operationSuccess": "{{operation}} completed successfully!",
+      "saveFailed": "Save Failed",
+      "success": "Success!",
+      "warning": "Warning"
+    },
+    "invitations": {
+      "accessRevoked": "Access Revoked",
+      "accessRevokedMessage": "Access has been revoked.",
+      "alreadyRevoked": "Already Revoked",
+      "alreadyRevokedMessage": "This invitation has already been revoked.",
+      "cancelFailed": "Failed to cancel invitation",
+      "cancelled": "Invitation Cancelled",
+      "cancelledMessage": "The invitation has been cancelled.",
+      "respondFailed": "Failed to respond to invitation",
+      "revokeFailed": "Failed to revoke access"
+    },
+    "labResults": {
+      "addedMessage": "Added {{count}} test components to the lab result.",
+      "addedSuccess": "Success!",
+      "addFailed": "Failed to add test components",
+      "deletedMessage": "{{name}} has been deleted",
+      "deletedSuccess": "Component deleted",
+      "noTextMessage": "Please paste lab results text in the input area.",
+      "noTextToParse": "No Text to Parse",
+      "parsedCount": "Found {{count}} test components. Review them in the Preview tab.",
+      "parseWarning": "Some Lines Could Not Be Parsed",
+      "templateApplied": "Template Applied",
+      "templateAppliedMessage": "Added {{count}} components from \"{{name}}\" template.",
+      "textParsed": "Text Parsed",
+      "trendExportFailed": "Failed to export chart",
+      "trendExportSuccess": "Chart exported successfully",
+      "updateFailed": "Failed to update component"
+    },
+    "patient": {
+      "createdSuccess": "Created {{name}} successfully",
+      "deletedNoOthers": "Deleted {{name}} successfully. No other patients available.",
+      "deletedSuccess": "Deleted {{name}} successfully",
+      "deletedSwitched": "Deleted {{name}} successfully. Switched to {{fallbackName}}.",
+      "deleteFailed": "Delete Failed: {{message}}",
+      "deleteOwnOnly": "You can only delete patients that you own",
+      "nowViewing": "Now viewing {{name}}",
+      "removeAccessFailed": "Remove Access Failed: {{message}}",
+      "removedAccess": "Removed access to {{name}}",
+      "removeOwnOnly": "You cannot remove access to patients that you own",
+      "switchFailed": "Switch Failed: {{message}}",
+      "updatedSuccess": "Updated {{name}} successfully"
+    },
+    "photo": {
+      "deleteFailed": "Delete Failed",
+      "photoBeingUploaded": "A photo is currently being uploaded. Please wait for it to complete.",
+      "pleaseWait": "Please Wait",
+      "uploadFailed": "Upload Failed",
+      "uploadSuccess": "Photo uploaded successfully"
+    },
+    "reports": {
+      "noRecordsMessage": "Please select at least one record from the categories below to generate a report.",
+      "noRecordsSelected": "No Records Selected",
+      "templateDeleted": "Template deleted successfully",
+      "templateDeleteFailed": "Failed to delete template",
+      "templateLoaded": "Template \"{{name}}\" loaded",
+      "templateNameRequired": "Template name is required",
+      "templateSaved": "Template saved successfully",
+      "templateSaveFailed": "Failed to save template",
+      "validationError": "Validation Error"
+    },
+    "settings": {
+      "cleanupComplete": "Cleanup completed: {{cleaned}} files cleaned, {{deleted}} files deleted",
+      "cleanupFailed": "Failed to cleanup files. Please try again later.",
+      "noOutOfSync": "No out-of-sync files found to clean up",
+      "sessionTimeoutUpdated": "Session timeout updated to {{minutes}} minutes. Your session has been refreshed."
+    },
+    "sharing": {
+      "accessRevoked": "Access revoked for user {{userId}}",
+      "cancelFailed": "Failed to cancel invitation: {{message}}",
+      "invalidJson": "Invalid JSON format in {{fieldName}}. Please check your syntax.",
+      "invitationCancelled": "Invitation cancelled successfully",
+      "invitationFailed": "Invitation Failed: {{message}}",
+      "invitationSent": "Invitation sent successfully to {{recipient}}",
+      "revokeFailed": "Revoke Failed: {{message}}",
+      "shareUpdated": "Patient share updated successfully",
+      "updateFailed": "Update Failed: {{message}}"
     },
     "tagSearch": {
       "loadFailed": "Failed to load popular tags",
@@ -324,92 +388,45 @@
       "noTagsSelectedTitle": "No tags selected",
       "searchFailed": "Failed to search records by tags"
     },
-    "invitations": {
-      "respondFailed": "Failed to respond to invitation",
-      "cancelled": "Invitation Cancelled",
-      "cancelledMessage": "The invitation has been cancelled.",
-      "cancelFailed": "Failed to cancel invitation",
-      "accessRevoked": "Access Revoked",
-      "accessRevokedMessage": "Access has been revoked.",
-      "revokeFailed": "Failed to revoke access",
-      "alreadyRevoked": "Already Revoked",
-      "alreadyRevokedMessage": "This invitation has already been revoked."
-    },
-    "photo": {
-      "pleaseWait": "Please Wait",
-      "photoBeingUploaded": "A photo is currently being uploaded. Please wait for it to complete.",
-      "uploadSuccess": "Photo uploaded successfully",
-      "uploadFailed": "Upload Failed",
-      "deleteFailed": "Delete Failed"
-    },
-    "reports": {
-      "noRecordsSelected": "No Records Selected",
-      "noRecordsMessage": "Please select at least one record from the categories below to generate a report.",
-      "validationError": "Validation Error",
-      "templateNameRequired": "Template name is required",
-      "templateSaved": "Template saved successfully",
-      "templateSaveFailed": "Failed to save template",
-      "templateDeleted": "Template deleted successfully",
-      "templateDeleteFailed": "Failed to delete template",
-      "templateLoaded": "Template \"{{name}}\" loaded"
-    },
-    "labResults": {
-      "parseWarning": "Some Lines Could Not Be Parsed",
-      "noTextToParse": "No Text to Parse",
-      "noTextMessage": "Please paste lab results text in the input area.",
-      "textParsed": "Text Parsed",
-      "parsedCount": "Found {{count}} test components. Review them in the Preview tab.",
-      "addedSuccess": "Success!",
-      "addedMessage": "Added {{count}} test components to the lab result.",
-      "addFailed": "Failed to add test components",
-      "deletedSuccess": "Component deleted",
-      "deletedMessage": "{{name}} has been deleted",
-      "updateFailed": "Failed to update component",
-      "templateApplied": "Template Applied",
-      "templateAppliedMessage": "Added {{count}} components from \"{{name}}\" template.",
-      "trendExportSuccess": "Chart exported successfully",
-      "trendExportFailed": "Failed to export chart"
-    },
-    "documents": {
-      "uploadFailed": "Upload Failed",
-      "deleteFailed": "Delete Failed",
-      "linkSuccess": "Document linked successfully",
-      "linkFailed": "Failed to link document",
-      "unlinkSuccess": "Document unlinked successfully",
-      "unlinkFailed": "Failed to unlink document"
-    },
-    "familySharing": {
-      "loadFailed": "Failed to load sharing information",
-      "invitationSent": "Invitation sent successfully!",
-      "invitationFailed": "Failed to send invitation",
-      "accessRevoked": "Access revoked",
-      "revokeFailed": "Failed to revoke access"
-    },
     "upload": {
-      "failed": "Upload Failed",
-      "completedWithErrors": "Upload Completed with Errors",
-      "partialSuccess": "{{completed}}/{{total}} files uploaded successfully. {{failed}} failed.",
-      "documentAdded": "Document Added to Paperless",
-      "fileUploadedSuccess": "\"{{fileName}}\" uploaded to Paperless successfully!",
       "backgroundProcessing": "\"{{fileName}}\" is being processed in the background. You will be notified when complete.",
+      "completedWithErrors": "Upload Completed with Errors",
+      "documentAdded": "Document Added to Paperless",
       "duplicateDocument": "Duplicate Document",
+      "failed": "Upload Failed",
+      "fileUploadedSuccess": "\"{{fileName}}\" uploaded to Paperless successfully!",
+      "fileUploadFailed": "File Upload Failed",
       "paperlessUploadFailed": "Paperless Upload Failed",
-      "fileUploadFailed": "File Upload Failed"
+      "partialSuccess": "{{completed}}/{{total}} files uploaded successfully. {{failed}} failed."
     },
-    "generic": {
-      "operationFailed": "Operation Failed",
-      "saveFailed": "Save Failed",
-      "deleteFailed": "Delete Failed",
-      "downloadFailed": "Download Failed",
-      "success": "Success!",
-      "warning": "Warning",
-      "error": "Error",
-      "operationSuccess": "{{operation}} completed successfully!",
-      "allOperationsSuccess": "All {{total}} {{operation}}s completed successfully!",
-      "operationPartial": "{{success}}/{{total}} {{operation}}s completed successfully. {{failed}} failed.",
-      "operationPartialTitle": "{{operation}} Completed with Errors",
-      "allOperationsFailed": "All {{operation}}s failed. Please try again.",
-      "operationFailedTitle": "{{operation}} Failed"
+    "vitals": {
+      "deleteFailed": "Failed to delete vitals record",
+      "deleteSuccess": "Vitals record deleted successfully",
+      "formErrors": "Please correct the form errors",
+      "savedSuccess": "Vitals {{action}} successfully!",
+      "saveFailed": "Failed to {{action}} vitals"
     }
+  },
+  "validation": {
+    "appTokenRequired": "App token is required",
+    "fromEmailInvalid": "Invalid email format",
+    "fromEmailRequired": "From email is required",
+    "headersInvalid": "Headers must be valid JSON",
+    "nameRequired": "Channel name is required",
+    "nameTooLong": "Name cannot exceed 100 characters",
+    "serverUrlInvalid": "Invalid URL format",
+    "serverUrlRequired": "Server URL is required",
+    "smtpHostRequired": "SMTP server is required",
+    "smtpPasswordRequired": "SMTP password is required",
+    "smtpPortInvalid": "Port must be between 1 and 65535",
+    "smtpPortRequired": "SMTP port is required",
+    "smtpUserRequired": "SMTP username is required",
+    "toEmailInvalid": "Invalid email format",
+    "toEmailRequired": "To email is required",
+    "typeRequired": "Channel type is required",
+    "urlInvalid": "Invalid URL format",
+    "urlRequired": "Webhook URL is required",
+    "webhookUrlInvalid": "Invalid webhook URL format",
+    "webhookUrlRequired": "Webhook URL is required"
   }
 }
