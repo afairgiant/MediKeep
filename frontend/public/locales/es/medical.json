@@ -184,8 +184,12 @@
     "form": {
       "addMedication": "Añadir medicamento",
       "attachedDocuments": "Documentos adjuntos",
-"saving": "Guardando medicamento...",
-      "updateMedication": "Actualizar medicamento"
+      "saving": "Guardando medicamento...",
+      "updateMedication": "Actualizar medicamento",
+      "linkConditionsDescription": "Vincular opcionalmente este medicamento a condiciones existentes",
+      "noConditionsFound": "No se encontraron condiciones",
+      "conditionLinkPartialFailure": "{{count}} vínculo(s) de condición fallaron",
+      "conditionLinkFailed": "El medicamento se guardó, pero algunas condiciones no pudieron vincularse. Puede vincularlas más tarde editando el medicamento."
     },
     "tabs": {
       "basicInfo": "Información básica",

@@ -130,7 +130,11 @@
       "saving": "Zapisywanie leku...",
       "updateMedication": "Aktualizuj lek",
       "addMedication": "Dodaj lek",
-      "attachedDocuments": "Załączone dokumenty"
+      "attachedDocuments": "Załączone dokumenty",
+      "linkConditionsDescription": "Opcjonalnie powiąż ten lek z istniejącymi schorzeniami",
+      "noConditionsFound": "Nie znaleziono schorzeń",
+      "conditionLinkPartialFailure": "{{count}} powiązanie/a schorzeń nie powiodło się",
+      "conditionLinkFailed": "Lek został zapisany, ale niektóre schorzenia nie mogły zostać powiązane. Możesz je powiązać później, edytując lek."
     },
     "medicationName": {
       "label": "Nazwa leku",

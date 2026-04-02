@@ -130,7 +130,11 @@
       "saving": "Saving medication...",
       "updateMedication": "Update Medication",
       "addMedication": "Add Medication",
-"attachedDocuments": "Attached Documents"
+      "attachedDocuments": "Attached Documents",
+      "linkConditionsDescription": "Optionally link this medication to existing conditions",
+      "noConditionsFound": "No conditions found",
+      "conditionLinkPartialFailure": "{{count}} condition link(s) failed",
+      "conditionLinkFailed": "Medication was saved, but some conditions could not be linked. You can link them later by editing the medication."
     },
     "medicationName": {
       "label": "Medication Name",

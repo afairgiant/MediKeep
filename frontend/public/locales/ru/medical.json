@@ -130,7 +130,11 @@
       "saving": "Сохранение лекарства...",
       "updateMedication": "Обновить лекарство",
       "addMedication": "Добавить лекарство",
-"attachedDocuments": "Прикреплённые документы"
+      "attachedDocuments": "Прикреплённые документы",
+      "linkConditionsDescription": "При желании свяжите это лекарство с существующими заболеваниями",
+      "noConditionsFound": "Заболевания не найдены",
+      "conditionLinkPartialFailure": "Не удалось связать {{count}} заболевание(й)",
+      "conditionLinkFailed": "Лекарство сохранено, но некоторые заболевания не удалось связать. Вы можете связать их позже, отредактировав лекарство."
     },
     "medicationName": {
       "label": "Название лекарства",

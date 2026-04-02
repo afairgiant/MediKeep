@@ -130,7 +130,11 @@
       "saving": "Sparar läkemedel...",
       "updateMedication": "Uppdatera läkemedel",
       "addMedication": "Lägg till läkemedel",
-"attachedDocuments": "Bifogade dokument"
+      "attachedDocuments": "Bifogade dokument",
+      "linkConditionsDescription": "Länka valfritt detta läkemedel till befintliga tillstånd",
+      "noConditionsFound": "Inga tillstånd hittades",
+      "conditionLinkPartialFailure": "{{count}} tillståndslänk(ar) misslyckades",
+      "conditionLinkFailed": "Läkemedlet sparades, men vissa tillstånd kunde inte länkas. Du kan länka dem senare genom att redigera läkemedlet."
     },
     "medicationName": {
       "label": "Läkemedelsnamn",
