@@ -18,6 +18,7 @@ import {
   isCurrentRelease,
 } from '../../utils/releaseNoteHelpers';
 import { renderReleaseMarkdown } from '../../utils/markdownRenderer';
+import '../../styles/components/ReleaseNotes.css';
 
 interface ReleaseItemProps {
   release: Release;

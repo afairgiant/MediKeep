@@ -15,7 +15,7 @@ import { Button } from '../ui';
 import type { Release } from '../../types/releaseNotes';
 import { formatReleaseDate, isCurrentRelease } from '../../utils/releaseNoteHelpers';
 import { renderReleaseMarkdown } from '../../utils/markdownRenderer';
-import '../../styles/pages/Settings.css';
+import '../../styles/components/ReleaseNotes.css';
 
 const modalStyles = { content: { maxWidth: 680 } };
 
