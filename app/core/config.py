@@ -109,7 +109,7 @@ def _derive_salt(purpose: str) -> str:
 
 class Settings:  # App Info
     APP_NAME: str = "MediKeep"
-    VERSION: str = "0.60.2"
+    VERSION: str = "0.61.0"
 
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
 
@@ -165,7 +165,9 @@ class Settings:  # App Info
     AUTH_COOKIE_NAME: str = "medapp_session"
     AUTH_COOKIE_HTTPONLY: bool = True
     AUTH_COOKIE_SAMESITE: str = "lax"
-    AUTH_COOKIE_SECURE: bool = os.getenv("AUTH_COOKIE_SECURE", "False").lower() == "true"
+    AUTH_COOKIE_SECURE: bool = (
+        os.getenv("AUTH_COOKIE_SECURE", "False").lower() == "true"
+    )
     AUTH_COOKIE_PATH: str = "/"
     AUTH_COOKIE_DOMAIN: str | None = os.getenv("AUTH_COOKIE_DOMAIN", None) or None
 
