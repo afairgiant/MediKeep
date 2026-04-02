@@ -60,7 +60,7 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 import logger from '../../services/logger';
 
 const Medication = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'medical']);
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -190,6 +190,7 @@ const Medication = () => {
     pharmacy_id: null,
     notes: '',
     side_effects: '',
+    condition_ids: [],
   });
 
   const {
@@ -258,6 +259,7 @@ const Medication = () => {
       notes: '',
       side_effects: '',
       tags: [],
+      condition_ids: [],
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -384,6 +386,29 @@ const Medication = () => {
         completeFormSubmission(success, resultId);
 
         if (success && resultId) {
+          if (!editingMedication && formData.condition_ids.length > 0) {
+            const linkResults = await Promise.allSettled(
+              formData.condition_ids.map(conditionId => {
+                const id = parseInt(conditionId, 10);
+                return apiService.createConditionMedication(id, {
+                  medication_id: resultId,
+                });
+              })
+            );
+            const failures = linkResults.filter(r => r.status === 'rejected');
+            if (failures.length > 0) {
+              logger.warn('medications_condition_link_partial_failure', {
+                message: `Failed to link ${failures.length} of ${formData.condition_ids.length} conditions`,
+                medicationId: resultId,
+                failedCount: failures.length,
+                component: 'Medication',
+              });
+              setError(
+                t('medical:medications.form.conditionLinkPartialFailure', { count: failures.length })
+              );
+            }
+          }
+
           const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
 
           if (hasPendingFiles) {

@@ -10,6 +10,7 @@ import {
   TextInput,
   Textarea,
   Select,
+  MultiSelect,
   Text,
   Title,
 } from '@mantine/core';
@@ -118,6 +119,11 @@ const MantineMedicationForm = ({
   const pharmacyOptions = pharmacies.map(pharmacy => ({
     value: String(pharmacy.id),
     label: pharmacy.name || pharmacy.brand || 'Pharmacy',
+  }));
+
+  const conditionOptions = conditions.map(c => ({
+    value: String(c.id),
+    label: `${c.diagnosis || `Condition #${c.id}`}${c.severity ? ` (${c.severity})` : ''}${c.status ? ` - ${c.status}` : ''}`,
   }));
 
   // Handle form submission
@@ -293,11 +299,9 @@ const MantineMedicationForm = ({
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
                 {t('medications.tabs.details')}
               </Tabs.Tab>
-              {editingMedication && (
-                <Tabs.Tab value="conditions" leftSection={<IconStethoscope size={16} />}>
-                  {t('medications.tabs.conditions')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="conditions" leftSection={<IconStethoscope size={16} />}>
+                {t('medications.tabs.conditions')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('medications.tabs.notes')}
               </Tabs.Tab>
@@ -335,9 +339,9 @@ const MantineMedicationForm = ({
             </Tabs.Panel>
 
             {/* Conditions Tab */}
-            {editingMedication && (
-              <Tabs.Panel value="conditions">
-                <Box mt="md">
+            <Tabs.Panel value="conditions">
+              <Box mt="md">
+                {editingMedication ? (
                   <MedicationRelationships
                     direction="medication"
                     medicationId={editingMedication.id}
@@ -345,9 +349,24 @@ const MantineMedicationForm = ({
                     navigate={navigate}
                     isViewMode={false}
                   />
-                </Box>
-              </Tabs.Panel>
-            )}
+                ) : (
+                  <MultiSelect
+                    label={t('common:modals.linkConditions')}
+                    description={t('medications.form.linkConditionsDescription')}
+                    placeholder={t('common:modals.chooseConditionsToLink')}
+                    data={conditionOptions}
+                    value={formData.condition_ids || []}
+                    onChange={(values) => {
+                      onInputChange({ target: { name: 'condition_ids', value: values } });
+                    }}
+                    searchable
+                    clearable
+                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    nothingFoundMessage={t('medications.form.noConditionsFound')}
+                  />
+                )}
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
