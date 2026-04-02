@@ -133,8 +133,8 @@
       "attachedDocuments": "Attached Documents",
       "linkConditionsDescription": "Optionally link this medication to existing conditions",
       "noConditionsFound": "No conditions found",
-      "conditionLinkPartialFailure": "Medication saved, but {{count}} condition link(s) failed. You can link them later from the Conditions tab.",
-      "conditionLinkFailed": "Medication saved, but condition linking failed. You can link them later from the Conditions tab."
+      "conditionLinkPartialFailure": "{{count}} condition link(s) failed",
+      "conditionLinkFailed": "Medication was saved, but some conditions could not be linked. You can link them later by editing the medication."
     },
     "medicationName": {
       "label": "Medication Name",

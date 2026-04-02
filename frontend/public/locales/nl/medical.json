@@ -130,7 +130,11 @@
       "saving": "Medicatie opslaan...",
       "updateMedication": "Medicatie bijwerken",
       "addMedication": "Medicatie toevoegen",
-"attachedDocuments": "Bijgevoegde documenten"
+      "attachedDocuments": "Bijgevoegde documenten",
+      "linkConditionsDescription": "Koppel deze medicatie optioneel aan bestaande aandoeningen",
+      "noConditionsFound": "Geen aandoeningen gevonden",
+      "conditionLinkPartialFailure": "{{count}} aandoeningkoppeling(en) mislukt",
+      "conditionLinkFailed": "De medicatie is opgeslagen, maar sommige aandoeningen konden niet worden gekoppeld. U kunt ze later koppelen door de medicatie te bewerken."
     },
     "medicationName": {
       "label": "Naam medicatie",

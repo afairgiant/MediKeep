@@ -130,7 +130,11 @@
       "saving": "Medikament wird gespeichert...",
       "updateMedication": "Medikament aktualisieren",
       "addMedication": "Medikament hinzufügen",
-"attachedDocuments": "Angehängte Dokumente"
+      "attachedDocuments": "Angehängte Dokumente",
+      "linkConditionsDescription": "Optional dieses Medikament mit bestehenden Erkrankungen verknüpfen",
+      "noConditionsFound": "Keine Erkrankungen gefunden",
+      "conditionLinkPartialFailure": "{{count}} Erkrankungsverknüpfung(en) fehlgeschlagen",
+      "conditionLinkFailed": "Das Medikament wurde gespeichert, aber einige Erkrankungen konnten nicht verknüpft werden. Sie können diese später beim Bearbeiten des Medikaments verknüpfen."
     },
     "medicationName": {
       "label": "Medikamentenname",

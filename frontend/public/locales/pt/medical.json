@@ -130,7 +130,11 @@
       "saving": "Salvando medicação...",
       "updateMedication": "Atualizar Medicação",
       "addMedication": "Adicionar Medicação",
-"attachedDocuments": "Documentos Anexados"
+      "attachedDocuments": "Documentos Anexados",
+      "linkConditionsDescription": "Vincular opcionalmente esta medicação a condições existentes",
+      "noConditionsFound": "Nenhuma condição encontrada",
+      "conditionLinkPartialFailure": "{{count}} vínculo(s) de condição falharam",
+      "conditionLinkFailed": "A medicação foi salva, mas algumas condições não puderam ser vinculadas. Você pode vinculá-las depois editando a medicação."
     },
     "medicationName": {
       "label": "Nome da Medicação",

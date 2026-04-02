@@ -351,7 +351,7 @@ const MantineMedicationForm = ({
                   />
                 ) : (
                   <MultiSelect
-                    label={t('common:modals.linkConditions')}
+                    label={t('common:buttons.linkConditions')}
                     description={t('medications.form.linkConditionsDescription')}
                     placeholder={t('common:modals.chooseConditionsToLink')}
                     data={conditionOptions}

@@ -8,6 +8,7 @@ import React, {
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { notifications } from '@mantine/notifications';
 import {
   Button,
   Stack,
@@ -403,9 +404,11 @@ const Medication = () => {
                 failedCount: failures.length,
                 component: 'Medication',
               });
-              setError(
-                t('medical:medications.form.conditionLinkPartialFailure', { count: failures.length })
-              );
+              notifications.show({
+                title: t('medical:medications.form.conditionLinkPartialFailure', { count: failures.length }),
+                message: t('medical:medications.form.conditionLinkFailed'),
+                color: 'yellow',
+              });
             }
           }
 
@@ -467,6 +470,7 @@ const Medication = () => {
       handleSubmissionFailure,
       documentManagerMethods,
       needsRefreshAfterSubmissionRef,
+      t,
     ]
   );
 

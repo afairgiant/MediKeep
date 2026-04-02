@@ -63,6 +63,7 @@ vi.mock('../../../services/api', () => ({
     updateMedication: vi.fn(() => Promise.resolve({})),
     deleteMedication: vi.fn(() => Promise.resolve()),
     getConditionsDropdown: vi.fn(() => Promise.resolve([])),
+    createConditionMedication: vi.fn(() => Promise.resolve({})),
   },
 }));
 vi.mock('../../../services/logger', () => ({
@@ -231,12 +232,21 @@ vi.mock('../../../components/medical/medications', () => ({
           <label htmlFor="med-notes">Notes</label>
           <textarea id="med-notes" name="notes" value={formData.notes || ''} onChange={onInputChange} />
 
+          <button type="button" data-testid="select-conditions" onClick={() => {
+            onInputChange({ target: { name: 'condition_ids', value: ['1', '2'] } });
+          }}>Select Conditions</button>
+
           <button type="submit">Submit</button>
           <button type="button" onClick={onClose}>Cancel</button>
         </form>
       </div>
     );
   },
+}));
+
+// --- Notifications mock ---
+vi.mock('@mantine/notifications', () => ({
+  notifications: { show: vi.fn() },
 }));
 
 // --- Framer motion mock ---
@@ -821,6 +831,106 @@ describe('Medication Page Integration Tests', () => {
       await waitFor(() => {
         expect(screen.getByTestId('view-modal-conditions-count')).toHaveTextContent('1');
       });
+    });
+
+    test('links selected conditions after creating a new medication', async () => {
+      const mockCreateItem = vi.fn().mockResolvedValue({ id: 10 });
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        createItem: mockCreateItem,
+      });
+
+      const { apiService } = await import('../../../services/api');
+      apiService.createConditionMedication.mockResolvedValue({});
+
+      renderWithPatient(<Medication />);
+
+      const addButton = screen.getByTestId('add-button');
+      await userEvent.click(addButton);
+
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), {
+        target: { value: 'Aspirin', name: 'medication_name' },
+      });
+
+      // Select conditions via mock button
+      await userEvent.click(within(form).getByTestId('select-conditions'));
+
+      fireEvent.click(within(form).getByText('Submit'));
+
+      await waitFor(() => {
+        expect(mockCreateItem).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(apiService.createConditionMedication).toHaveBeenCalledTimes(2);
+        expect(apiService.createConditionMedication).toHaveBeenCalledWith(1, { medication_id: 10 });
+        expect(apiService.createConditionMedication).toHaveBeenCalledWith(2, { medication_id: 10 });
+      });
+    });
+
+    test('shows warning notification when condition linking partially fails', async () => {
+      const mockCreateItem = vi.fn().mockResolvedValue({ id: 10 });
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        createItem: mockCreateItem,
+      });
+
+      const { apiService } = await import('../../../services/api');
+      apiService.createConditionMedication
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error('Link failed'));
+
+      const { notifications } = await import('@mantine/notifications');
+
+      renderWithPatient(<Medication />);
+
+      const addButton = screen.getByTestId('add-button');
+      await userEvent.click(addButton);
+
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), {
+        target: { value: 'Aspirin', name: 'medication_name' },
+      });
+
+      await userEvent.click(within(form).getByTestId('select-conditions'));
+      fireEvent.click(within(form).getByText('Submit'));
+
+      await waitFor(() => {
+        expect(notifications.show).toHaveBeenCalledWith(
+          expect.objectContaining({ color: 'yellow' })
+        );
+      });
+    });
+
+    test('does not call condition linking API when no conditions selected', async () => {
+      const mockCreateItem = vi.fn().mockResolvedValue({ id: 10 });
+      useMedicalData.mockReturnValue({
+        ...defaultMedicalData,
+        createItem: mockCreateItem,
+      });
+
+      const { apiService } = await import('../../../services/api');
+
+      renderWithPatient(<Medication />);
+
+      const addButton = screen.getByTestId('add-button');
+      await userEvent.click(addButton);
+
+      const form = screen.getByTestId('form-modal');
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), {
+        target: { value: 'Aspirin', name: 'medication_name' },
+      });
+
+      // Submit without selecting conditions
+      fireEvent.click(within(form).getByText('Submit'));
+
+      await waitFor(() => {
+        expect(mockCreateItem).toHaveBeenCalled();
+      });
+
+      // Condition linking should not be called
+      expect(apiService.createConditionMedication).not.toHaveBeenCalled();
     });
   });
 });

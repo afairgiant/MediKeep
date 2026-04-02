@@ -130,7 +130,11 @@
       "saving": "Sauvegarde du médicament...",
       "updateMedication": "Mettre à jour le médicament",
       "addMedication": "Ajouter un médicament",
-      "attachedDocuments": "Pièces jointes"
+      "attachedDocuments": "Pièces jointes",
+      "linkConditionsDescription": "Associer optionnellement ce médicament à des pathologies existantes",
+      "noConditionsFound": "Aucune pathologie trouvée",
+      "conditionLinkPartialFailure": "{{count}} association(s) de pathologie ont échoué",
+      "conditionLinkFailed": "Le médicament a été enregistré, mais certaines pathologies n'ont pas pu être associées. Vous pouvez les associer plus tard en modifiant le médicament."
     },
     "medicationName": {
       "label": "Nom du médicament",

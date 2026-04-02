@@ -130,7 +130,11 @@
       "saving": "Salvataggio farmaco...",
       "updateMedication": "Aggiorna farmaco",
       "addMedication": "Aggiungi farmaco",
-"attachedDocuments": "Documenti allegati"
+      "attachedDocuments": "Documenti allegati",
+      "linkConditionsDescription": "Collega facoltativamente questo farmaco a condizioni esistenti",
+      "noConditionsFound": "Nessuna condizione trovata",
+      "conditionLinkPartialFailure": "{{count}} collegamento/i di condizione non riuscito/i",
+      "conditionLinkFailed": "Il farmaco è stato salvato, ma alcune condizioni non sono state collegate. Puoi collegarle successivamente modificando il farmaco."
     },
     "medicationName": {
       "label": "Nome del farmaco",
