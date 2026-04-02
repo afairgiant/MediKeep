@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Accordion, Badge, Group, Text, Anchor, Skeleton, Stack } from '@mantine/core';
+import {
+  Accordion,
+  Badge,
+  Group,
+  Text,
+  Anchor,
+  Skeleton,
+  Stack,
+} from '@mantine/core';
 
 import { Button } from '../ui';
 import { getReleaseNotes, getVersionInfo } from '../../services/systemService';
 import type { Release } from '../../types/releaseNotes';
-import { formatReleaseDate, isCurrentRelease } from '../../utils/releaseNoteHelpers';
+import {
+  formatReleaseDate,
+  isCurrentRelease,
+} from '../../utils/releaseNoteHelpers';
 import { renderReleaseMarkdown } from '../../utils/markdownRenderer';
 
 interface ReleaseItemProps {
@@ -13,7 +24,10 @@ interface ReleaseItemProps {
   currentVersion: string;
 }
 
-function ReleaseItem({ release, currentVersion }: ReleaseItemProps): React.ReactElement {
+function ReleaseItem({
+  release,
+  currentVersion,
+}: ReleaseItemProps): React.ReactElement {
   const { t } = useTranslation('common');
 
   return (
@@ -131,7 +145,7 @@ function ReleaseNotesHistory(): React.ReactElement {
   return (
     <Stack gap="sm">
       <Accordion variant="separated">
-        {visibleReleases.map((release) => (
+        {visibleReleases.map(release => (
           <ReleaseItem
             key={release.tag_name}
             release={release}
@@ -143,12 +157,12 @@ function ReleaseNotesHistory(): React.ReactElement {
         <Button
           variant="secondary"
           size="xs"
-          onClick={() => setExpanded((prev) => !prev)}
+          onClick={() => setExpanded(prev => !prev)}
           style={{ alignSelf: 'center' }}
         >
           {expanded
             ? t('settings.releaseNotes.showLess', 'Show less')
-            : t('settings.releaseNotes.showAll', 'Show all releases')}
+            : t('settings.releaseNotes.showAll', 'Show more releases')}
         </Button>
       )}
     </Stack>
