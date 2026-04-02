@@ -1,0 +1,172 @@
+{
+  "menu": {
+    "dashboard": "แดชบอร์ด",
+    "backToDashboard": "กลับไปแดชบอร์ด",
+    "patients": "ผู้ป่วย",
+    "medicalRecords": "บันทึกการแพทย์",
+    "settings": "การตั้งค่า",
+    "reports": "รายงาน",
+    "administration": "การจัดการ",
+    "logout": "ออกจากระบบ",
+    "profile": "โปรไฟล์",
+    "help": "ช่วยเหลือ"
+  },
+  "pages": {
+    "dashboard": "แดชบอร์ด",
+    "patientList": "รายชื่อผู้ป่วย",
+    "patientDetails": "รายละเอียดผู้ป่วย",
+    "medicalHistory": "ประวัติการรักษา",
+    "settings": "การตั้งค่า",
+    "userProfile": "โปรไฟล์ผู้ใช้",
+    "preferences": "ความชอบ",
+    "reports": "รายงาน",
+    "help": "ความช่วยเหลือ"
+  },
+  "sections": {
+    "overview": "ภาพรวม",
+    "personalInfo": "ข้อมูลส่วนตัว",
+    "medicalInfo": "ข้อมูลการแพทย์",
+    "documents": "เอกสาร",
+    "timeline": "ไทม์ไลน์",
+    "familyHistory": "ประวัติครอบครัว",
+    "emergencyContacts": "ผู้ติดต่อฉุกเฉิน",
+    "insurance": "ประกัน",
+    "preferences": "ความชอบ"
+  },
+  "medicalRecords": {
+    "allergies": "การแพ้",
+    "conditions": "โรค",
+    "medications": "ยา",
+    "labResults": "ผลตรวจ",
+    "immunizations": "วัคซีน",
+    "procedures": "หัตถการ",
+    "visits": "การเยี่ยม",
+    "treatments": "การรักษา",
+    "symptoms": "อาการ",
+    "injuries": "การบาดเจ็บ",
+    "practitioners": "แพทย์ผู้เชี่ยวชาญ",
+    "pharmacies": "ร้านขายยา",
+    "medicalEquipment": "เครื่องมือแพทย์"
+  },
+  "dashboard": {
+    "title": "แดชบอร์ด MediKeep",
+    "subtitle": "จัดการข้อมูลสุขภาพของคุณอย่างปลอดภัย",
+    "hello": "สวัสดี",
+    "loading": "กำลังโหลดแดชบอร์ดการแพทย์ของคุณ...",
+    "sections": {
+      "coreMedical": "ข้อมูลการแพทย์หลัก",
+      "treatments": "การรักษาและหัตถการ",
+      "healthMonitoring": "การติดตามสุขภาพ",
+      "prevention": "การป้องกันและประวัติ",
+      "additionalResources": "ทรัพยากรเพิ่มเติม",
+      "recentActivity": "กิจกรรมล่าสุด"
+    },
+    "stats": {
+      "totalRecords": "บันทึกทั้งหมด",
+      "activeMedications": "ยาที่ใช้อยู่",
+      "labResults": "ผลตรวจ",
+      "procedures": "หัตถการ"
+    },
+    "modules": {
+      "patientInfo": "ข้อมูลผู้ป่วย",
+      "medications": "ยา",
+      "labResults": "ผลตรวจ",
+      "treatments": "การรักษา",
+      "procedures": "หัตถการ",
+      "vitalSigns": "สัญญาณชีพ",
+      "symptoms": "อาการ",
+      "conditions": "โรค",
+      "allergies": "การแพ้",
+      "injuries": "การบาดเจ็บ",
+      "immunizations": "วัคซีน",
+      "visitHistory": "ประวัติการเยี่ยม",
+      "familyHistory": "ประวัติครอบครัว",
+      "insurance": "ประกัน",
+      "emergencyContacts": "ผู้ติดต่อฉุกเฉิน",
+      "exportRecords": "ส่งออกบันทึก",
+      "practitioners": "แพทย์ผู้เชี่ยวชาญ",
+      "pharmacies": "ร้านขายยา",
+      "medicalEquipment": "เครื่องมือแพทย์",
+      "adminDashboard": "แดชบอร์ดผู้ดูแล"
+    },
+    "activity": {
+      "noActivity": "ไม่มีกิจกรรมล่าสุด",
+      "noActivityDescription": "กิจกรรมที่เกี่ยวกับบันทึกการแพทย์ของคุณจะปรากฏที่นี่",
+      "lastUpdated": "อัปเดตล่าสุด"
+    },
+    "search": {
+      "placeholder": "ค้นหาบันทึกการแพทย์..."
+    }
+  },
+  "invitations": {
+    "title": "คำเชิญ",
+    "lastUpdated": "อัปเดตล่าสุด",
+    "from": "จาก",
+    "viewAll": "ดูคำเชิญทั้งหมด {{count}} รายการ",
+    "noPending": "ไม่มีคำเชิญที่รอดำเนินการ",
+    "noPendingDescription": "คำเชิญการแชร์ใหม่จะปรากฏที่นี่",
+    "manageAll": "จัดการคำเชิญทั้งหมด",
+    "sharePatient": "แชร์ผู้ป่วย",
+    "confirmTitle": "ยืนยันการรับคำเชิญ",
+    "confirmQuestion": "คุณแน่ใจหรือไม่ที่จะรับคำเชิญนี้?",
+    "confirmDescription": "เมื่อรับคำเชิญ คุณจะสามารถเข้าถึงข้อมูลการแพทย์ที่ถูกแชร์ได้",
+    "acceptButton": "รับคำเชิญ",
+    "types": {
+      "familyHistory": "ประวัติครอบครัว",
+      "patientRecord": "บันทึกผู้ป่วย"
+    }
+  },
+  "activity": {
+    "actions": {
+      "created": "สร้าง",
+      "updated": "อัปเดต",
+      "deleted": "ลบ",
+      "added": "เพิ่ม",
+      "modified": "แก้ไข",
+      "removed": "ลบออก",
+      "completed": "เสร็จสมบูรณ์",
+      "cancelled": "ยกเลิก",
+      "scheduled": "นัดหมาย",
+      "viewed": "ดู"
+    }
+  },
+  "sidebarNav": {
+    "sections": {
+      "medicalRecords": "บันทึกการแพทย์",
+      "careAndTreatment": "การดูแลและรักษา",
+      "misc": "อื่นๆ",
+      "tools": "เครื่องมือ",
+      "administration": "การจัดการ"
+    },
+    "items": {
+      "patientInfo": "ข้อมูลผู้ป่วย",
+      "medications": "ยา",
+      "labResults": "ผลตรวจ",
+      "conditions": "โรค",
+      "allergies": "การแพ้",
+      "vitalSigns": "สัญญาณชีพ",
+      "symptoms": "อาการ",
+      "injuries": "การบาดเจ็บ",
+      "treatments": "การรักษา",
+      "procedures": "หัตถการ",
+      "immunizations": "วัคซีน",
+      "visitHistory": "ประวัติการเยี่ยม",
+      "familyHistory": "ประวัติครอบครัว",
+      "practitioners": "แพทย์ผู้เชี่ยวชาญ",
+      "pharmacies": "ร้านขายยา",
+      "insurance": "ประกัน",
+      "medicalEquipment": "เครื่องมือแพทย์",
+      "emergencyContacts": "ผู้ติดต่อฉุกเฉิน",
+      "tagManagement": "การจัดการแท็ก",
+      "customReports": "รายงานที่กำหนดเอง",
+      "exportRecords": "ส่งออกบันทึก",
+      "settings": "การตั้งค่า",
+      "adminDashboard": "แดชบอร์ดผู้ดูแล",
+      "dataModels": "โมเดลข้อมูล",
+      "backupManagement": "การจัดการสำรองข้อมูล",
+      "systemHealth": "สถานะระบบ",
+      "language": "ภาษา",
+      "theme": "ธีม"
+    }
+  }
+}
