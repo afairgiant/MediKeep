@@ -50,7 +50,9 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "i18n:check": "node scripts/check-translations.js",
-    "i18n:fix": "node scripts/check-translations.js --fix"
+    "i18n:fix": "node scripts/check-translations.js --fix",
+    "i18n:extract": "npx i18next-parser",
+    "i18n:unused": "node scripts/check-exposed-keys.js --unused"
   },
   "browserslist": {
     "production": [
