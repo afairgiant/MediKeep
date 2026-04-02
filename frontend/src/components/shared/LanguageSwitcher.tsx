@@ -28,6 +28,7 @@ const LANGUAGES: Language[] = [
   { value: 'sv', label: 'Svenska', shortLabel: 'SV' },
   { value: 'nl', label: 'Nederlands', shortLabel: 'NL' },
   { value: 'pl', label: 'Polski', shortLabel: 'PL' },
+  { value: 'th', label: 'ไทย', shortLabel: 'TH' },
 ];
 
 const SUPPORTED_LANGUAGE_CODES = LANGUAGES.map(l => l.value);

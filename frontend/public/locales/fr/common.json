@@ -1874,7 +1874,7 @@
     "groupByPractice": "Regrouper par établissement",
     "ungroupedTitle": "Médecins indépendants",
     "editPracticeError": "Echec du chargement de l'établissement pour l'éditer",
-    "createPracticeError": "Echec de la création de l'établissement. Veuillez réessayer."
+    "createPracticeError": "Echec de la création de l'établissement. Veuillez réessayer.",
     "tabs": {
       "practitioners": "Médecins",
       "practices": "Etablissements"

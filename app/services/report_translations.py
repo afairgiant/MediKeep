@@ -9,7 +9,7 @@ The module reads from: frontend/public/locales/{lang}/reportPdf.json
 Translation keys use camelCase to match the frontend i18next convention.
 Interpolation uses {{variable}} syntax matching i18next.
 
-Supports 9 languages: en, fr, de, es, it, pt, ru, sv, nl
+Supports 11 languages: en, fr, de, es, it, pt, ru, sv, nl, pl, th
 """
 
 import json
@@ -24,7 +24,7 @@ from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 
-SUPPORTED_LANGUAGES = ("en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl")
+SUPPORTED_LANGUAGES = ("en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl", "pl", "th")
 
 
 def _resolve_locales_dir() -> Path:

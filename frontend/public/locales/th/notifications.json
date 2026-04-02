@@ -1,0 +1,270 @@
+{
+  "title": "การตั้งค่าการแจ้งเตือน",
+  "description": "ตั้งค่าวิธีที่คุณรับการแจ้งเตือนสำหรับเหตุการณ์สำคัญ",
+  "loading": "กำลังโหลดการตั้งค่าการแจ้งเตือน...",
+  "error": "โหลดการตั้งค่าการแจ้งเตือนไม่สำเร็จ",
+  "channels": {
+    "title": "ช่องทางการแจ้งเตือน",
+    "description": "เพิ่มและจัดการช่องทางสำหรับรับการแจ้งเตือน",
+    "add": "เพิ่มช่องทาง",
+    "edit": "แก้ไขช่องทาง",
+    "delete": "ลบช่องทาง",
+    "test": "ทดสอบ",
+    "testing": "กำลังทดสอบ...",
+    "testSuccess": "ส่งการแจ้งเตือนทดสอบสำเร็จ!",
+    "testFailed": "การแจ้งเตือนทดสอบล้มเหลว",
+    "noChannels": "ยังไม่ได้ตั้งค่าช่องทางการแจ้งเตือน",
+    "noChannelsHint": "เพิ่มช่องทางเพื่อเริ่มรับการแจ้งเตือน",
+    "verified": "ยืนยันแล้ว",
+    "enabled": "เปิดใช้งาน",
+    "disabled": "ปิดใช้งาน",
+    "lastUsed": "ใช้งานล่าสุด",
+    "notificationsSent": "ส่งแล้ว {{count}} ครั้ง",
+    "confirmDelete": "คุณแน่ใจหรือไม่ที่จะลบช่องทางนี้?",
+    "deleteSuccess": "ลบช่องทางสำเร็จแล้ว",
+    "deleteFailed": "ลบช่องทางไม่สำเร็จ",
+    "createSuccess": "สร้างช่องทางสำเร็จแล้ว",
+    "createFailed": "สร้างช่องทางไม่สำเร็จ",
+    "updateSuccess": "อัปเดตช่องทางสำเร็จแล้ว",
+    "updateFailed": "อัปเดตช่องทางไม่สำเร็จ",
+    "types": {
+      "discord": "Discord",
+      "email": "อีเมล",
+      "gotify": "Gotify",
+      "webhook": "Webhook"
+    },
+    "form": {
+      "title": "รายละเอียดช่องทาง",
+      "name": {
+        "label": "ชื่อช่องทาง",
+        "placeholder": "เช่น Discord Server ของฉัน",
+        "description": "ชื่อที่ใช้ระบุช่องทางนี้"
+      },
+      "type": {
+        "label": "ประเภทช่องทาง",
+        "placeholder": "เลือกประเภทช่องทาง",
+        "description": "บริการสำหรับส่งการแจ้งเตือน"
+      },
+      "enabled": {
+        "label": "เปิดใช้งานช่องทาง",
+        "description": "รับการแจ้งเตือนผ่านช่องทางนี้"
+      },
+      "configSection": "การตั้งค่าช่องทาง"
+    },
+    "discord": {
+      "webhookUrl": {
+        "label": "Webhook URL",
+        "placeholder": "https://discord.com/api/webhooks/...",
+        "description": "สร้าง webhook ในการตั้งค่า Discord Server ของคุณ"
+      },
+      "username": {
+        "label": "ชื่อบอท (ไม่บังคับ)",
+        "placeholder": "MediKeep",
+        "description": "ชื่อที่กำหนดเองสำหรับบอทแจ้งเตือน"
+      },
+      "avatarUrl": {
+        "label": "URL รูปโปรไฟล์บอท (ไม่บังคับ)",
+        "placeholder": "https://example.com/avatar.png",
+        "description": "รูปโปรไฟล์ที่กำหนดเองสำหรับบอทแจ้งเตือน"
+      }
+    },
+    "email": {
+      "smtpHost": {
+        "label": "เซิร์ฟเวอร์ SMTP",
+        "placeholder": "smtp.gmail.com",
+        "description": "เซิร์ฟเวอร์ SMTP ของผู้ให้บริการอีเมลของคุณ"
+      },
+      "smtpPort": {
+        "label": "พอร์ต SMTP",
+        "placeholder": "587",
+        "description": "โดยทั่วไปคือ 587 (TLS) หรือ 465 (SSL)"
+      },
+      "smtpUser": {
+        "label": "ชื่อผู้ใช้ SMTP",
+        "placeholder": "your-email@gmail.com",
+        "description": "ที่อยู่อีเมลหรือชื่อผู้ใช้ของคุณ"
+      },
+      "smtpPassword": {
+        "label": "รหัสผ่าน SMTP",
+        "placeholder": "รหัสผ่านแอปหรือรหัสผ่านอีเมล",
+        "description": "สำหรับ Gmail ให้ใช้ App Password"
+      },
+      "fromEmail": {
+        "label": "อีเมลผู้ส่ง",
+        "placeholder": "notifications@example.com",
+        "description": "ที่อยู่อีเมลผู้ส่ง"
+      },
+      "toEmail": {
+        "label": "อีเมลผู้รับ",
+        "placeholder": "your-email@example.com",
+        "description": "ส่งการแจ้งเตือนไปที่"
+      },
+      "useTls": {
+        "label": "ใช้ TLS",
+        "description": "เปิดใช้งานการเข้ารหัส TLS (แนะนำ)"
+      }
+    },
+    "gotify": {
+      "serverUrl": {
+        "label": "URL เซิร์ฟเวอร์",
+        "placeholder": "https://gotify.example.com",
+        "description": "URL ของเซิร์ฟเวอร์ Gotify ของคุณ"
+      },
+      "appToken": {
+        "label": "App Token",
+        "placeholder": "Application token จาก Gotify",
+        "description": "สร้างแอปใน Gotify เพื่อรับ token"
+      },
+      "priority": {
+        "label": "ลำดับความสำคัญ",
+        "placeholder": "5",
+        "description": "ลำดับความสำคัญของข้อความ (1-10, ค่าเริ่มต้น 5)"
+      }
+    },
+    "webhook": {
+      "url": {
+        "label": "Webhook URL",
+        "placeholder": "https://api.example.com/webhook",
+        "description": "URL สำหรับรับข้อมูลการแจ้งเตือน"
+      },
+      "method": {
+        "label": "HTTP Method",
+        "description": "วิธี HTTP สำหรับคำขอ webhook"
+      },
+      "headers": {
+        "label": "Headers ที่กำหนดเอง (ไม่บังคับ)",
+        "placeholder": "{\"Authorization\": \"Bearer token\"}",
+        "description": "JSON object ที่มี custom headers"
+      },
+      "authToken": {
+        "label": "Auth Token (ไม่บังคับ)",
+        "placeholder": "Bearer token หรือ API key",
+        "description": "Token สำหรับ authorization ของ webhook"
+      }
+    }
+  },
+  "preferences": {
+    "title": "การแจ้งเตือนเหตุการณ์",
+    "description": "เลือกว่าเหตุการณ์ใดที่ทำให้เกิดการแจ้งเตือนในแต่ละช่องทาง",
+    "loading": "กำลังโหลดความชอบ...",
+    "noChannels": "เพิ่มช่องทางการแจ้งเตือนก่อนเพื่อตั้งค่าความชอบของเหตุการณ์",
+    "saveSuccess": "บันทึกความชอบสำเร็จ",
+    "saveFailed": "บันทึกความชอบไม่สำเร็จ",
+    "eventHeader": "เหตุการณ์",
+    "comingSoon": "เร็วๆ นี้",
+    "categories": {
+      "system": "เหตุการณ์ระบบ",
+      "medical": "เหตุการณ์การแพทย์",
+      "collaboration": "การแชร์และการทำงานร่วมกัน",
+      "sharing": "การแชร์และคำเชิญ",
+      "security": "การแจ้งเตือนความปลอดภัย",
+      "other": "เหตุการณ์อื่นๆ"
+    }
+  },
+  "events": {
+    "test_notification": {
+      "name": "การแจ้งเตือนทดสอบ",
+      "description": "การแจ้งเตือนทดสอบด้วยตนเอง"
+    },
+    "backup_completed": {
+      "name": "สำรองข้อมูลเสร็จสมบูรณ์",
+      "description": "เมื่อการสำรองข้อมูลเสร็จสมบูรณ์"
+    },
+    "backup_failed": {
+      "name": "สำรองข้อมูลล้มเหลว",
+      "description": "เมื่อการสำรองข้อมูลล้มเหลว"
+    },
+    "lab_result_available": {
+      "name": "ผลตรวจพร้อม",
+      "description": "เมื่อมีผลตรวจใหม่"
+    },
+    "lab_result_abnormal": {
+      "name": "ผลตรวจผิดปกติ",
+      "description": "เมื่อผลตรวจอยู่นอกค่าปกติ"
+    },
+    "immunization_due": {
+      "name": "วัคซีนถึงกำหนด",
+      "description": "เมื่อวัคซีนใกล้ถึงกำหนด"
+    },
+    "immunization_overdue": {
+      "name": "วัคซีนเลยกำหนด",
+      "description": "เมื่อวัคซีนเลยกำหนด"
+    },
+    "invitation_received": {
+      "name": "ได้รับคำเชิญ",
+      "description": "เมื่อมีคนแชร์บันทึกกับคุณ"
+    },
+    "invitation_accepted": {
+      "name": "คำเชิญถูกรับ",
+      "description": "เมื่อคำเชิญแชร์ของคุณถูกรับ"
+    },
+    "share_revoked": {
+      "name": "การแชร์ถูกเพิกถอน",
+      "description": "เมื่อสิทธิ์เข้าถึงบันทึกที่แชร์ถูกเพิกถอน"
+    },
+    "login_from_new_device": {
+      "name": "เข้าสู่ระบบจากอุปกรณ์ใหม่",
+      "description": "เมื่อบัญชีของคุณถูกเข้าถึงจากอุปกรณ์ใหม่"
+    },
+    "password_changed": {
+      "name": "รหัสผ่านถูกเปลี่ยน",
+      "description": "เมื่อรหัสผ่านของคุณถูกเปลี่ยน"
+    }
+  },
+  "history": {
+    "title": "ประวัติการแจ้งเตือน",
+    "description": "การแจ้งเตือนล่าสุดที่ส่งผ่านช่องทางของคุณ",
+    "loading": "กำลังโหลดประวัติ...",
+    "noHistory": "ยังไม่มีการแจ้งเตือนที่ส่ง",
+    "noHistoryHint": "การแจ้งเตือนจะปรากฏที่นี่เมื่อส่งแล้ว",
+    "showMore": "แสดงเพิ่มเติม",
+    "showLess": "แสดงน้อยลง",
+    "page": "หน้า {{current}} จาก {{total}}",
+    "status": {
+      "sent": "ส่งแล้ว",
+      "failed": "ล้มเหลว",
+      "pending": "รอดำเนินการ"
+    },
+    "fields": {
+      "event": "เหตุการณ์",
+      "channel": "ช่องทาง",
+      "time": "เวลา",
+      "status": "สถานะ",
+      "error": "ข้อผิดพลาด"
+    }
+  },
+  "validation": {
+    "nameRequired": "ต้องระบุชื่อช่องทาง",
+    "nameTooLong": "ชื่อต้องไม่เกิน 100 ตัวอักษร",
+    "typeRequired": "ต้องระบุประเภทช่องทาง",
+    "webhookUrlRequired": "ต้องระบุ Webhook URL",
+    "webhookUrlInvalid": "รูปแบบ Webhook URL ไม่ถูกต้อง",
+    "smtpHostRequired": "ต้องระบุเซิร์ฟเวอร์ SMTP",
+    "smtpPortRequired": "ต้องระบุพอร์ต SMTP",
+    "smtpPortInvalid": "พอร์ตต้องอยู่ระหว่าง 1 และ 65535",
+    "smtpUserRequired": "ต้องระบุชื่อผู้ใช้ SMTP",
+    "smtpPasswordRequired": "ต้องระบุรหัสผ่าน SMTP",
+    "fromEmailRequired": "ต้องระบุอีเมลผู้ส่ง",
+    "fromEmailInvalid": "รูปแบบอีเมลไม่ถูกต้อง",
+    "toEmailRequired": "ต้องระบุอีเมลผู้รับ",
+    "toEmailInvalid": "รูปแบบอีเมลไม่ถูกต้อง",
+    "serverUrlRequired": "ต้องระบุ URL เซิร์ฟเวอร์",
+    "serverUrlInvalid": "รูปแบบ URL ไม่ถูกต้อง",
+    "appTokenRequired": "ต้องระบุ App Token",
+    "urlRequired": "ต้องระบุ Webhook URL",
+    "urlInvalid": "รูปแบบ URL ไม่ถูกต้อง",
+    "headersInvalid": "Headers ต้องเป็น JSON ที่ถูกต้อง"
+  },
+  "toasts": {
+    "auth": {
+      "sessionExpired": "เซสชันหมดอายุเนื่องจากไม่มีการใช้งาน",
+      "sessionExpiredLogin": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง",
+      "loginSuccess": "เข้าสู่ระบบสำเร็จ!",
+      "loginFailed": "เข้าสู่ระบบไม่สำเร็จ",
+      "logoutSuccess": "ออกจากระบบสำเร็จแล้ว",
+      "ssoFailed": "เริ่มการเข้าสู่ระบบ SSO ไม่สำเร็จ",
+      "accessDeniedAdmin": "ปฏิเสธการเข้าถึง: ต้องมีสิทธิ์ผู้ดูแลระบบ",
+      "accessDeniedRole": "ปฏิเสธการเข้าถึง: ต้องมีบทบาท {{role}}"
+    }
+  }
+}

@@ -1,0 +1,419 @@
+{
+  "allergies": {
+    "title": "การแพ้",
+    "addNew": "เพิ่มการแพ้ใหม่",
+    "addTitle": "เพิ่มการแพ้ใหม่",
+    "editTitle": "แก้ไขการแพ้",
+    "tabs": {
+      "basicInfo": "ข้อมูลพื้นฐาน",
+      "reactionDetails": "รายละเอียดปฏิกิริยา",
+      "documents": "เอกสาร",
+      "notes": "บันทึก"
+    },
+    "messages": {
+      "loading": "กำลังโหลดการแพ้...",
+      "saving": "กำลังบันทึกการแพ้..."
+    },
+    "emptyState": {
+      "title": "ไม่พบการแพ้",
+      "noData": "คลิก \"เพิ่มการแพ้ใหม่\" เพื่อเริ่มต้น",
+      "filtered": "ลองปรับการค้นหาหรือเงื่อนไขการกรอง"
+    },
+    "allergen": {
+      "label": "สารก่อภูมิแพ้",
+      "placeholder": "กรอกชื่อสารก่อภูมิแพ้",
+      "description": "ชื่อของสารก่อภูมิแพ้"
+    },
+    "allergyType": {
+      "label": "ประเภทการแพ้",
+      "placeholder": "เลือกประเภทการแพ้",
+      "description": "หมวดหมู่ของการแพ้",
+      "options": {
+        "food": "อาหาร",
+        "medication": "ยา",
+        "environmental": "สิ่งแวดล้อม",
+        "insect": "แมลง",
+        "other": "อื่นๆ"
+      }
+    },
+    "severity": {
+      "description": "ความรุนแรงของปฏิกิริยาแพ้",
+      "placeholder": "เลือกระดับความรุนแรง"
+    },
+    "status": {
+      "description": "สถานะการแพ้ปัจจุบัน"
+    },
+    "onsetDate": {
+      "label": "วันที่เริ่มมีอาการ",
+      "placeholder": "เลือกวันที่เริ่ม",
+      "description": "เมื่อใดที่พบการแพ้ครั้งแรก"
+    },
+    "relatedMedication": {
+      "label": "ยาที่เกี่ยวข้อง",
+      "placeholder": "เลือกยา",
+      "description": "ยาที่ทำให้เกิดการแพ้นี้"
+    },
+    "reactionType": {
+      "label": "ประเภทปฏิกิริยา",
+      "placeholder": "เลือกประเภทปฏิกิริยา",
+      "description": "ประเภทของปฏิกิริยาแพ้",
+      "options": {
+        "skin": "ปฏิกิริยาผิวหนัง",
+        "respiratory": "ทางเดินหายใจ",
+        "gastrointestinal": "ทางเดินอาหาร",
+        "anaphylaxis": "ภูมิแพ้รุนแรง",
+        "other": "อื่นๆ"
+      }
+    },
+    "reaction": {
+      "label": "รายละเอียดปฏิกิริยา",
+      "placeholder": "อธิบายปฏิกิริยาแพ้",
+      "description": "อาการและรายละเอียดของปฏิกิริยา"
+    }
+  },
+  "conditions": {
+    "title": "โรค",
+    "diagnosis": {
+      "label": "การวินิจฉัย",
+      "placeholder": "เช่น ความดันโลหิตสูง, เบาหวานชนิดที่ 2, โรคหอบหืด",
+      "description": "ชื่อสภาพหรือการวินิจฉัยทางการแพทย์"
+    },
+    "relatedMedication": {
+      "label": "ยาที่เกี่ยวข้อง",
+      "placeholder": "เลือกยา (ไม่บังคับ)",
+      "description": "เชื่อมโยงโรคนี้กับยาเฉพาะ"
+    },
+    "icd10Code": {
+      "label": "รหัส ICD-10",
+      "placeholder": "เช่น I10, E11.9",
+      "description": "รหัสการจำแนกโรคสากล"
+    },
+    "snomedCode": {
+      "label": "รหัส SNOMED",
+      "placeholder": "เช่น 38341003",
+      "description": "รหัสคำศัพท์คลินิก SNOMED CT"
+    },
+    "codeDescription": {
+      "label": "คำอธิบายรหัส",
+      "placeholder": "คำอธิบายรหัสทางการแพทย์",
+      "description": "คำอธิบายที่มนุษย์อ่านได้ของรหัส"
+    },
+    "status": {
+      "description": "สถานะปัจจุบันของโรคนี้"
+    },
+    "severity": {
+      "placeholder": "เลือกระดับความรุนแรง",
+      "description": "โรคนี้รุนแรงเพียงใด"
+    },
+    "onsetDate": {
+      "placeholder": "เลือกวันที่เริ่ม",
+      "description": "เมื่อใดที่โรคปรากฏครั้งแรก"
+    },
+    "endDate": {
+      "placeholder": "เลือกวันที่สิ้นสุด",
+      "description": "เมื่อใดที่โรคหาย (ถ้ามี)"
+    },
+    "notes": {
+      "description": "รายละเอียดเพิ่มเติมเกี่ยวกับโรค, ประวัติการรักษา, หรือการสังเกต"
+    }
+  },
+  "medications": {
+    "title": "ยา",
+    "tabs": {
+      "basicInfo": "ข้อมูลพื้นฐาน",
+      "details": "รายละเอียด",
+      "documents": "เอกสาร",
+      "notes": "บันทึก",
+      "conditions": "โรค"
+    },
+    "form": {
+      "saving": "กำลังบันทึกยา...",
+      "updateMedication": "อัปเดตยา",
+      "addMedication": "เพิ่มยา",
+      "attachedDocuments": "เอกสารแนบ"
+    },
+    "medicationName": {
+      "label": "ชื่อยา",
+      "placeholder": "เช่น Lisinopril, Metformin",
+      "description": "ชื่อสามัญหรือชื่อการค้าของยา (อย่างน้อย 2 ตัวอักษร)"
+    },
+    "alternativeName": {
+      "label": "ชื่อทางเลือก",
+      "placeholder": "เช่น ชื่อการค้าหรือชื่อสามัญ",
+      "description": "ชื่อทางเลือกหรือชื่อการค้า (2-100 ตัวอักษร)"
+    },
+    "medicationType": {
+      "label": "ประเภทยา",
+      "placeholder": "เลือกประเภท",
+      "description": "หมวดหมู่ของยา"
+    },
+    "dosage": {
+      "label": "ขนาดยา",
+      "placeholder": "เช่น 10mg, 1 เม็ด",
+      "description": "ความแรงและปริมาณต่อครั้ง"
+    },
+    "frequency": {
+      "label": "ความถี่",
+      "placeholder": "เช่น วันละครั้ง, วันละสองครั้ง",
+      "description": "ความถี่ในการรับประทานยา"
+    },
+    "route": {
+      "label": "วิธีการใช้",
+      "placeholder": "เลือกวิธี",
+      "description": "วิธีการรับยา",
+      "options": {
+        "oral": "รับประทาน",
+        "injection": "ฉีด",
+        "topical": "ทาภายนอก",
+        "intravenous": "เข้าเส้นเลือด",
+        "intramuscular": "เข้ากล้ามเนื้อ",
+        "subcutaneous": "เข้าใต้ผิวหนัง",
+        "inhalation": "สูด",
+        "nasal": "ทางจมูก",
+        "rectal": "ทางทวารหนัก",
+        "sublingual": "วางใต้ลิ้น"
+      }
+    },
+    "indication": {
+      "label": "ข้อบ่งใช้",
+      "placeholder": "เช่น ความดันโลหิตสูง, กินเมื่อเจ็บ, ควบคุมเบาหวาน",
+      "description": "ยานี้ใช้เพื่ออะไร? อธิบายเหตุผลหรือโรคที่รักษา"
+    },
+    "prescribingProvider": {
+      "label": "แพทย์ผู้สั่งยา",
+      "placeholder": "เลือกแพทย์",
+      "description": "แพทย์ที่สั่งยานี้"
+    },
+    "pharmacy": {
+      "label": "ร้านขายยา",
+      "placeholder": "เลือกร้านขายยา",
+      "description": "ร้านที่รับยา"
+    },
+    "sideEffects": {
+      "label": "ผลข้างเคียง",
+      "placeholder": "รายการผลข้างเคียงที่ทราบหรือพบ...",
+      "description": "ผลข้างเคียงที่ทราบหรือพบของยานี้"
+    }
+  },
+  "labResults": {
+    "title": "ผลตรวจ",
+    "status": {
+      "ordered": "สั่งตรวจ - มีการขอตรวจ",
+      "inProgress": "กำลังดำเนินการ - กำลังประมวลผลตัวอย่าง",
+      "completed": "เสร็จสมบูรณ์ - ผลพร้อม",
+      "cancelled": "ยกเลิก - การตรวจถูกยกเลิก"
+    },
+    "category": {
+      "bloodWork": "การตรวจเลือด",
+      "imaging": "การถ่ายภาพ (X-ray, MRI, CT)",
+      "pathology": "พยาธิวิทยา",
+      "microbiology": "จุลชีววิทยา",
+      "chemistry": "เคมี",
+      "hematology": "โลหิตวิทยา",
+      "hepatology": "ตับวิทยา",
+      "immunology": "ภูมิคุ้มกันวิทยา",
+      "genetics": "พันธุกรรม",
+      "cardiology": "หัวใจวิทยา",
+      "pulmonology": "ปอดวิทยา",
+      "hearing": "การได้ยิน",
+      "stomatology": "ทันตกรรม",
+      "other": "อื่นๆ"
+    },
+    "testType": {
+      "routine": "ปกติ - การประมวลผลมาตรฐาน",
+      "urgent": "ด่วน - การประมวลผลเร่งด่วน",
+      "emergency": "ฉุกเฉิน - ลำดับความสำคัญสูงสุด",
+      "followUp": "ติดตามผล - ตรวจซ้ำ",
+      "screening": "คัดกรอง - การป้องกัน",
+      "label": "ประเภทการตรวจ",
+      "placeholder": "เลือกระดับความเร่งด่วน",
+      "description": "ลำดับความสำคัญของการตรวจ"
+    },
+    "result": {
+      "normal": "ปกติ - อยู่ในค่าอ้างอิง",
+      "abnormal": "ผิดปกติ - นอกค่าอ้างอิง",
+      "critical": "วิกฤต - ต้องดำเนินการทันที",
+      "high": "สูง - สูงกว่าค่าปกติ",
+      "low": "ต่ำ - ต่ำกว่าค่าปกติ",
+      "borderline": "เกณฑ์ต่ำ - ใกล้ค่าขีดเริ่ม",
+      "inconclusive": "ไม่สรุปได้ - ต้องตรวจซ้ำ"
+    },
+    "form": {
+      "testDetails": "รายละเอียดการตรวจ",
+      "statusIndicator": "ตัวบ่งชี้สถานะ:",
+      "resultIndicator": "ตัวบ่งชี้ผล:",
+      "relatedConditions": "โรคที่เกี่ยวข้อง",
+      "linkConditionsTitle": "เชื่อมโยงสภาพทางการแพทย์",
+      "linkConditionsDescription": "เชื่อมโยงผลตรวจนี้กับสภาพทางการแพทย์ที่เกี่ยวข้องเพื่อการติดตามและจัดระเบียบที่ดีขึ้น",
+      "testComponents": "ส่วนประกอบการตรวจ (ไม่บังคับ)",
+      "testComponentsDescription": "เพิ่มค่าการตรวจแต่ละรายการ (ไม่บังคับ) คุณสามารถเพิ่มได้ภายหลัง",
+      "addTestComponent": "เพิ่มส่วนประกอบการตรวจ",
+      "hideTestComponents": "ซ่อนส่วนประกอบการตรวจ",
+      "addAnotherTest": "เพิ่มการตรวจอื่น",
+      "componentCreationWarning": "บันทึกผลตรวจแล้วแต่ไม่สามารถเพิ่มส่วนประกอบการตรวจ คุณสามารถเพิ่มได้จากหน้าดู",
+      "relationshipCreationWarning": "บันทึกผลตรวจแล้วแต่ไม่สามารถสร้างความสัมพันธ์บางส่วน คุณสามารถเพิ่มได้จากหน้าแก้ไข"
+    },
+    "testName": {
+      "label": "ชื่อการตรวจ",
+      "placeholder": "เช่น Complete Blood Count (CBC)",
+      "description": "ชื่อหรือคำอธิบายของการตรวจทางห้องปฏิบัติการ"
+    },
+    "testCode": {
+      "label": "รหัสการตรวจ",
+      "placeholder": "เช่น CBC, 85025",
+      "description": "รหัสห้องปฏิบัติการหรือ LOINC"
+    },
+    "testCategory": {
+      "label": "หมวดหมู่การตรวจ",
+      "placeholder": "เลือกหมวดหมู่",
+      "description": "ประเภทของการตรวจทางห้องปฏิบัติการ"
+    },
+    "testingFacility": {
+      "label": "สถานที่ตรวจ",
+      "placeholder": "เช่น ห้องปฏิบัติการโรงพยาบาลหลัก",
+      "description": "สถานที่ที่ทำการตรวจ"
+    },
+    "orderingPractitioner": {
+      "label": "แพทย์ผู้สั่งตรวจ",
+      "placeholder": "เลือกแพทย์",
+      "description": "แพทย์ที่สั่งตรวจ"
+    },
+    "testStatus": {
+      "label": "สถานะการตรวจ",
+      "placeholder": "เลือกสถานะ",
+      "description": "สถานะปัจจุบันของการตรวจ"
+    },
+    "labResult": {
+      "label": "ผลตรวจ",
+      "placeholder": "เลือกผล (ถ้ามี)",
+      "description": "การจำแนกผลการตรวจ"
+    },
+    "orderedDate": {
+      "label": "วันที่สั่งตรวจ",
+      "placeholder": "วันที่สั่งตรวจ",
+      "description": "วันที่ทำการร้องขอการตรวจ"
+    },
+    "completedDate": {
+      "label": "วันที่เสร็จสมบูรณ์",
+      "placeholder": "วันที่ผลพร้อม",
+      "description": "วันที่ผลได้รับการยืนยัน"
+    },
+    "additionalNotes": {
+      "label": "บันทึกเพิ่มเติม",
+      "placeholder": "ข้อมูลเพิ่มเติมเกี่ยวกับการตรวจ, คำแนะนำพิเศษ, หรือการสังเกต...",
+      "description": "บันทึกทางคลินิกหรือคำแนะนำพิเศษ"
+    },
+    "qualitative": {
+      "resultType": "ประเภทผล",
+      "quantitative": "เชิงปริมาณ",
+      "qualitativeLabel": "เชิงคุณภาพ",
+      "values": {
+        "positive": "บวก",
+        "negative": "ลบ",
+        "detected": "พบ",
+        "undetected": "ไม่พบ"
+      },
+      "expectedResult": "ผลที่คาดหวัง",
+      "selectResult": "เลือกผล",
+      "templates": {
+        "infectiousDisease": "แผงตรวจโรคติดเชื้อ",
+        "autoimmune": "แผงภูมิแพ้ตนเอง",
+        "viralSerology": "แผงซีรั่มวิทยาไวรัส"
+      },
+      "trends": {
+        "worsening": "แย่ลง",
+        "improving": "ดีขึ้น"
+      }
+    },
+    "tabs": {
+      "basicInfo": "ข้อมูลพื้นฐาน",
+      "resultsStatus": "ผลและสถานะ",
+      "testComponents": "ส่วนประกอบการตรวจ",
+      "documents": "เอกสาร",
+      "addFiles": "เพิ่มไฟล์",
+      "relationships": "ความสัมพันธ์",
+      "notes": "บันทึก"
+    },
+    "messages": {
+      "saving": "กำลังบันทึกผลตรวจ...",
+      "testComponentsEditInfo": "ส่วนประกอบการตรวจสามารถจัดการได้จากหน้าดูหลังบันทึก",
+      "relationshipsCreateInfo": "ความสัมพันธ์สามารถเพิ่มได้หลังบันทึกผลตรวจ",
+      "relationshipsSaveFirst": "บันทึกผลตรวจก่อนเพื่อสร้างความสัมพันธ์"
+    }
+  },
+  "immunizations": {
+    "title": "วัคซีน",
+    "vaccineName": {
+      "label": "ชื่อวัคซีน",
+      "placeholder": "เช่น COVID-19 mRNA, ไข้หวัดใหญ่, MMR",
+      "description": "ชื่อวัคซีนที่ได้รับ"
+    },
+    "dateAdministered": {
+      "label": "วันที่ได้รับ",
+      "placeholder": "เลือกวันที่ได้รับ",
+      "description": "วันที่วัคซีนถูกฉีด"
+    },
+    "doseNumber": {
+      "label": "เข็มที่",
+      "placeholder": "1, 2, 3...",
+      "description": "เข็มที่เท่าไหร่ในชุด"
+    },
+    "lotNumber": {
+      "label": "เลขล็อต",
+      "placeholder": "เลขล็อต/ชุดวัคซีน",
+      "description": "ตัวระบุสำหรับการติดตาม"
+    },
+    "ndcNumber": {
+      "label": "รหัส NDC",
+      "placeholder": "เช่น 12345-6789-01",
+      "description": "รหัสยาสำหรับวัคซีน"
+    },
+    "manufacturer": {
+      "label": "ผู้ผลิต",
+      "placeholder": "เลือกผู้ผลิต",
+      "description": "ผู้ผลิตวัคซีน"
+    },
+    "site": {
+      "label": "ตำแหน่งที่ฉีด",
+      "placeholder": "เลือกตำแหน่ง",
+      "description": "ตำแหน่งที่วัคซีนถูกฉีด"
+    },
+    "route": {
+      "label": "วิธีการฉีด",
+      "placeholder": "เลือกวิธี",
+      "description": "วิธีการฉีด"
+    },
+    "expirationDate": {
+      "label": "วันหมดอายุวัคซีน",
+      "placeholder": "เลือกวันหมดอายุ",
+      "description": "วันหมดอายุของขวด/เข็มวัคซีนที่ใช้"
+    },
+    "location": {
+      "label": "สถานที่",
+      "placeholder": "เช่น ร้านขายยา CVS, โรงพยาบาล, คลินิก, สถานีอนามัย",
+      "description": "สถานที่ที่ได้รับวัคซีน"
+    },
+    "additionalNotes": {
+      "label": "บันทึกเพิ่มเติม",
+      "placeholder": "ปฏิกิริยา, ผลข้างเคียง, หรือการสังเกต...",
+      "description": "บันทึกปฏิกิริยาแพ้หรือหมายเหตุสำคัญ"
+    },
+    "siteOptions": {
+      "leftArm": "แขนซ้าย",
+      "rightArm": "แขนขวา",
+      "leftDeltoid": "กล้ามเนื้อไหล่ซ้าย",
+      "rightDeltoid": "กล้ามเนื้อไหล่ขวา",
+      "leftThigh": "ต้นขาซ้าย",
+      "rightThigh": "ต้นขาขวา",
+      "leftGluteal": "ก้นซ้าย",
+      "rightGluteal": "ก้นขวา",
+      "abdomen": "หน้าท้อง",
+      "other": "อื่นๆ"
+    },
+    "routeOptions": {
+      "intramuscular": "เข้ากล้ามเนื้อ (IM)",
+      "subcutaneous": "เข้าใต้ผิวหนัง (SC)",
+      "intradermal": "เข้าชั้นผิวหนัง (ID)"
+    }
+  }
+}
