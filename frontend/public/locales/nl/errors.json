@@ -8,8 +8,8 @@
   "form": {
     "conditionNotSelected": "Selecteer een aandoening",
     "entityNotFound": "Het gevraagde item kon niet worden gevonden.",
-    "equipmentFieldsRequired": "Equipment name and type are required",
-    "equipmentNotSelected": "Please select at least one equipment",
+    "equipmentFieldsRequired": "Naam en type van het apparaat zijn verplicht",
+    "equipmentNotSelected": "Selecteer minimaal één apparaat",
     "invalidDate": "Voer een geldige datum in.",
     "invalidEmail": "Voer een geldig e-mailadres in.",
     "invalidPhone": "Voer een geldig telefoonnummer in.",
@@ -56,7 +56,7 @@
     "lastNameRequired": "Achternaam is verplicht",
     "updateFailed": "Bijwerken mislukt: {{message}}"
   },
-  "patientNotAvailable": "Patient information not available",
+  "patientNotAvailable": "Patiëntinformatie niet beschikbaar",
   "relationships": {
     "addConditionFailed": "Aandoeningrelatie toevoegen mislukt",
     "addFailed": "Relatie toevoegen mislukt",

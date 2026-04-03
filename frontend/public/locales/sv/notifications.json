@@ -1,14 +1,14 @@
 {
   "channels": {
     "add": "Lägg till kanal",
-    "configTitle": "{{type}} Configuration",
+    "configTitle": "{{type}}-konfiguration",
     "confirmDelete": "Är du säker på att du vill ta bort denna kanal?",
-    "createError": "Failed to create channel",
+    "createError": "Det gick inte att skapa kanalen",
     "createFailed": "Kunde inte skapa kanalen",
     "createSuccess": "Kanalen har skapats",
     "delete": "Ta bort kanal",
-    "deleteConfirm": "Are you sure you want to delete this channel?",
-    "deleteError": "Failed to delete channel",
+    "deleteConfirm": "Är du säker på att du vill ta bort den här kanalen?",
+    "deleteError": "Det gick inte att ta bort kanalen",
     "deleteFailed": "Kunde inte ta bort kanalen",
     "deleteSuccess": "Kanalen har tagits bort",
     "description": "Lägg till och hantera dina aviseringskanaler",
@@ -67,18 +67,18 @@
         "label": "Använd TLS"
       }
     },
-    "empty": "No notification channels configured.",
-    "emptyHint": "Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.",
+    "empty": "Inga aviseringskanaler har konfigurerats.",
+    "emptyHint": "Lägg till en kanal för att börja ta emot aviseringar via Discord, e-post, Gotify eller Webhook.",
     "enabled": "Aktiverad",
     "errors": {
-      "fieldRequired": "{{field}} is required",
-      "nameRequired": "Channel name is required"
+      "fieldRequired": "{{field}} krävs",
+      "nameRequired": "Kanalnamn krävs"
     },
     "fields": {
-      "enabled": "Enable this channel",
-      "name": "Channel Name",
+      "enabled": "Aktivera den här kanalen",
+      "name": "Kanalnamn",
       "namePlaceholder": "My Discord Server",
-      "type": "Channel Type"
+      "type": "Kanaltyp"
     },
     "form": {
       "configSection": "Kanalkonfiguration",
@@ -116,14 +116,14 @@
       }
     },
     "lastUsed": "Senast använd",
-    "loadError": "Failed to load channel details",
+    "loadError": "Det gick inte att läsa in kanalinformation",
     "noChannels": "Inga aviseringskanaler konfigurerade",
     "noChannelsHint": "Lägg till en kanal för att börja ta emot aviseringar",
     "notificationsSent": "{{count}} aviseringar skickade",
-    "sentCount_one": "{{count}} sent",
-    "sentCount_other": "{{count}} sent",
+    "sentCount_one": "{{count}} skickade",
+    "sentCount_other": "{{count}} skickade",
     "test": "Testa",
-    "testError": "Failed to send test notification",
+    "testError": "Det gick inte att skicka testnotifiering",
     "testFailed": "Testavisering misslyckades",
     "testing": "Testar...",
     "testSuccess": "Testavisering skickad!",
@@ -134,7 +134,7 @@
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
-    "updateError": "Failed to update channel",
+    "updateError": "Det gick inte att uppdatera kanalen",
     "updateFailed": "Kunde inte uppdatera kanalen",
     "updateSuccess": "Kanalen har uppdaterats",
     "verified": "Verifierad",
@@ -246,14 +246,14 @@
     },
     "comingSoon": "Kommer snart",
     "description": "Välj vilka händelser som utlöser aviseringar på varje kanal",
-    "event": "Event",
+    "event": "Händelse",
     "eventHeader": "Händelse",
     "loading": "Laddar inställningar...",
     "noChannels": "Lägg till en aviseringskanal först för att konfigurera händelseinställningar",
     "saveFailed": "Kunde inte spara inställningen",
     "saveSuccess": "Inställningen har sparats",
     "title": "Händelseaviseringar",
-    "updateError": "Failed to update preference"
+    "updateError": "Det gick inte att uppdatera inställningen"
   },
   "title": "Aviseringsinställningar",
   "toasts": {

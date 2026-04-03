@@ -1,14 +1,14 @@
 {
   "channels": {
     "add": "Kanaal toevoegen",
-    "configTitle": "{{type}} Configuration",
+    "configTitle": "{{type}}-configuratie",
     "confirmDelete": "Weet u zeker dat u dit kanaal wilt verwijderen?",
-    "createError": "Failed to create channel",
+    "createError": "Kanaal aanmaken mislukt",
     "createFailed": "Kanaal aanmaken mislukt",
     "createSuccess": "Kanaal succesvol aangemaakt",
     "delete": "Kanaal verwijderen",
-    "deleteConfirm": "Are you sure you want to delete this channel?",
-    "deleteError": "Failed to delete channel",
+    "deleteConfirm": "Weet u zeker dat u dit kanaal wilt verwijderen?",
+    "deleteError": "Kanaal verwijderen mislukt",
     "deleteFailed": "Kanaal verwijderen mislukt",
     "deleteSuccess": "Kanaal succesvol verwijderd",
     "description": "Voeg meldingskanalen toe en beheer ze",
@@ -26,7 +26,7 @@
       },
       "webhookUrl": {
         "description": "Maak een webhook aan in uw Discord serverinstellingen",
-        "label": "Webhook URL",
+        "label": "Webhook-URL",
         "placeholder": "https://discord.com/api/webhooks/..."
       }
     },
@@ -67,18 +67,18 @@
         "label": "TLS gebruiken"
       }
     },
-    "empty": "No notification channels configured.",
-    "emptyHint": "Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.",
+    "empty": "Geen meldingskanalen geconfigureerd.",
+    "emptyHint": "Voeg een kanaal toe om meldingen te ontvangen via Discord, e-mail, Gotify of Webhook.",
     "enabled": "Ingeschakeld",
     "errors": {
-      "fieldRequired": "{{field}} is required",
-      "nameRequired": "Channel name is required"
+      "fieldRequired": "{{field}} is verplicht",
+      "nameRequired": "Kanaalnaam is verplicht"
     },
     "fields": {
-      "enabled": "Enable this channel",
-      "name": "Channel Name",
+      "enabled": "Dit kanaal inschakelen",
+      "name": "Kanaalnaam",
       "namePlaceholder": "My Discord Server",
-      "type": "Channel Type"
+      "type": "Kanaaltype"
     },
     "form": {
       "configSection": "Kanaalconfiguratie",
@@ -111,19 +111,19 @@
       },
       "serverUrl": {
         "description": "Uw Gotify server URL",
-        "label": "Server URL",
+        "label": "Server-URL",
         "placeholder": "https://gotify.voorbeeld.nl"
       }
     },
     "lastUsed": "Laatst gebruikt",
-    "loadError": "Failed to load channel details",
+    "loadError": "Kanaalgegevens laden mislukt",
     "noChannels": "Geen meldingskanalen geconfigureerd",
     "noChannelsHint": "Voeg een kanaal toe om meldingen te ontvangen",
     "notificationsSent": "{{count}} meldingen verzonden",
-    "sentCount_one": "{{count}} sent",
-    "sentCount_other": "{{count}} sent",
+    "sentCount_one": "{{count}} verzonden",
+    "sentCount_other": "{{count}} verzonden",
     "test": "Testen",
-    "testError": "Failed to send test notification",
+    "testError": "Testmelding verzenden mislukt",
     "testFailed": "Testmelding mislukt",
     "testing": "Testen...",
     "testSuccess": "Testmelding succesvol verzonden!",
@@ -134,7 +134,7 @@
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
-    "updateError": "Failed to update channel",
+    "updateError": "Kanaal bijwerken mislukt",
     "updateFailed": "Kanaal bijwerken mislukt",
     "updateSuccess": "Kanaal succesvol bijgewerkt",
     "verified": "Geverifieerd",
@@ -155,7 +155,7 @@
       },
       "url": {
         "description": "URL om meldingsgegevens te ontvangen",
-        "label": "Webhook URL",
+        "label": "Webhook-URL",
         "placeholder": "https://api.voorbeeld.nl/webhook"
       }
     }
@@ -246,14 +246,14 @@
     },
     "comingSoon": "Binnenkort beschikbaar",
     "description": "Kies welke gebeurtenissen meldingen activeren op elk kanaal",
-    "event": "Event",
+    "event": "Gebeurtenis",
     "eventHeader": "Gebeurtenis",
     "loading": "Voorkeuren laden...",
     "noChannels": "Voeg eerst een meldingskanaal toe om gebeurtenisvoorkeuren te configureren",
     "saveFailed": "Voorkeur opslaan mislukt",
     "saveSuccess": "Voorkeur opgeslagen",
     "title": "Gebeurtenismeldingen",
-    "updateError": "Failed to update preference"
+    "updateError": "Voorkeur bijwerken mislukt"
   },
   "title": "Meldingsinstellingen",
   "toasts": {

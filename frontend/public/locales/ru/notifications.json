@@ -1,14 +1,14 @@
 {
   "channels": {
     "add": "Добавить канал",
-    "configTitle": "{{type}} Configuration",
+    "configTitle": "Настройка {{type}}",
     "confirmDelete": "Вы уверены, что хотите удалить этот канал?",
-    "createError": "Failed to create channel",
+    "createError": "Не удалось создать канал",
     "createFailed": "Не удалось создать канал",
     "createSuccess": "Канал успешно создан",
     "delete": "Удалить канал",
-    "deleteConfirm": "Are you sure you want to delete this channel?",
-    "deleteError": "Failed to delete channel",
+    "deleteConfirm": "Вы уверены, что хотите удалить этот канал?",
+    "deleteError": "Не удалось удалить канал",
     "deleteFailed": "Не удалось удалить канал",
     "deleteSuccess": "Канал успешно удалён",
     "description": "Добавляйте каналы доставки уведомлений и управляйте ими",
@@ -67,18 +67,18 @@
         "label": "Использовать TLS"
       }
     },
-    "empty": "No notification channels configured.",
-    "emptyHint": "Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.",
+    "empty": "Каналы уведомлений не настроены.",
+    "emptyHint": "Добавьте канал, чтобы начать получать уведомления через Discord, электронную почту, Gotify или вебхук.",
     "enabled": "Включён",
     "errors": {
-      "fieldRequired": "{{field}} is required",
-      "nameRequired": "Channel name is required"
+      "fieldRequired": "Поле «{{field}}» обязательно для заполнения",
+      "nameRequired": "Название канала обязательно"
     },
     "fields": {
-      "enabled": "Enable this channel",
-      "name": "Channel Name",
+      "enabled": "Включить этот канал",
+      "name": "Название канала",
       "namePlaceholder": "My Discord Server",
-      "type": "Channel Type"
+      "type": "Тип канала"
     },
     "form": {
       "configSection": "Настройка канала",
@@ -116,16 +116,16 @@
       }
     },
     "lastUsed": "Последнее использование",
-    "loadError": "Failed to load channel details",
+    "loadError": "Не удалось загрузить данные канала",
     "noChannels": "Каналы уведомлений не настроены",
     "noChannelsHint": "Добавьте канал, чтобы начать получать уведомления",
     "notificationsSent": "{{count}} уведомлений отправлено",
-    "sentCount_one": "{{count}} sent",
+    "sentCount_one": "{{count}} отправлено",
     "sentCount_few": "{{count}} sent",
     "sentCount_many": "{{count}} sent",
-    "sentCount_other": "{{count}} sent",
+    "sentCount_other": "{{count}} отправлено",
     "test": "Тест",
-    "testError": "Failed to send test notification",
+    "testError": "Не удалось отправить тестовое уведомление",
     "testFailed": "Не удалось отправить тестовое уведомление",
     "testing": "Тестирование...",
     "testSuccess": "Тестовое уведомление успешно отправлено!",
@@ -136,7 +136,7 @@
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
-    "updateError": "Failed to update channel",
+    "updateError": "Не удалось обновить канал",
     "updateFailed": "Не удалось обновить канал",
     "updateSuccess": "Канал успешно обновлён",
     "verified": "Подтверждён",
@@ -248,14 +248,14 @@
     },
     "comingSoon": "Скоро",
     "description": "Выберите, какие события вызывают уведомления на каждом канале",
-    "event": "Event",
+    "event": "Событие",
     "eventHeader": "Событие",
     "loading": "Загрузка настроек...",
     "noChannels": "Сначала добавьте канал уведомлений, чтобы настроить события",
     "saveFailed": "Не удалось сохранить настройку",
     "saveSuccess": "Настройка сохранена",
     "title": "Уведомления о событиях",
-    "updateError": "Failed to update preference"
+    "updateError": "Не удалось обновить настройку"
   },
   "title": "Настройки уведомлений",
   "toasts": {

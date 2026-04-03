@@ -8,8 +8,8 @@
   "form": {
     "conditionNotSelected": "Пожалуйста, выберите заболевание",
     "entityNotFound": "Запрашиваемый элемент не найден.",
-    "equipmentFieldsRequired": "Equipment name and type are required",
-    "equipmentNotSelected": "Please select at least one equipment",
+    "equipmentFieldsRequired": "Необходимо указать название и тип оборудования",
+    "equipmentNotSelected": "Пожалуйста, выберите хотя бы одно оборудование",
     "invalidDate": "Пожалуйста, введите корректную дату.",
     "invalidEmail": "Пожалуйста, введите корректный адрес электронной почты.",
     "invalidPhone": "Пожалуйста, введите корректный номер телефона.",
@@ -56,7 +56,7 @@
     "lastNameRequired": "Фамилия обязательна для заполнения",
     "updateFailed": "Ошибка обновления: {{message}}"
   },
-  "patientNotAvailable": "Patient information not available",
+  "patientNotAvailable": "Информация о пациенте недоступна",
   "relationships": {
     "addConditionFailed": "Не удалось добавить связь с заболеванием",
     "addFailed": "Не удалось добавить связь",

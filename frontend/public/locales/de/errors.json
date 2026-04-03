@@ -8,8 +8,8 @@
   "form": {
     "conditionNotSelected": "Bitte wählen Sie eine Erkrankung aus",
     "entityNotFound": "Der angeforderte Eintrag konnte nicht gefunden werden.",
-    "equipmentFieldsRequired": "Equipment name and type are required",
-    "equipmentNotSelected": "Please select at least one equipment",
+    "equipmentFieldsRequired": "Gerätename und -typ sind erforderlich",
+    "equipmentNotSelected": "Bitte wählen Sie mindestens ein Gerät aus",
     "invalidDate": "Bitte geben Sie ein gültiges Datum ein.",
     "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
     "invalidPhone": "Bitte geben Sie eine gültige Telefonnummer ein.",
@@ -56,7 +56,7 @@
     "lastNameRequired": "Nachname ist erforderlich",
     "updateFailed": "Aktualisierung fehlgeschlagen: {{message}}"
   },
-  "patientNotAvailable": "Patient information not available",
+  "patientNotAvailable": "Patienteninformationen nicht verfügbar",
   "relationships": {
     "addConditionFailed": "Fehler beim Hinzufügen der Erkrankungsverknüpfung",
     "addFailed": "Fehler beim Hinzufügen der Verknüpfung",

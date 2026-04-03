@@ -44,7 +44,7 @@
       "vitalSigns": "Vitalzeichen"
     },
     "search": {
-      "advancedSearch": "Advanced Search",
+      "advancedSearch": "Erweiterte Suche",
       "placeholder": "Krankenakten durchsuchen..."
     },
     "sections": {
@@ -81,8 +81,8 @@
       "patientRecord": "Patientenakte"
     },
     "viewAll": "Alle {{count}} Einladungen anzeigen",
-    "viewAll_one": "View all {{count}} invitations",
-    "viewAll_other": "View all {{count}} invitations"
+    "viewAll_one": "Alle {{count}} Einladungen anzeigen",
+    "viewAll_other": "Alle {{count}} Einladungen anzeigen"
   },
   "medicalRecords": {
     "allergies": "Allergien",

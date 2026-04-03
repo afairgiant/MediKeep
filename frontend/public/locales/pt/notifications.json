@@ -1,14 +1,14 @@
 {
   "channels": {
     "add": "Adicionar Canal",
-    "configTitle": "{{type}} Configuration",
+    "configTitle": "Configuração de {{type}}",
     "confirmDelete": "Tem certeza de que deseja excluir este canal?",
-    "createError": "Failed to create channel",
+    "createError": "Falha ao criar canal",
     "createFailed": "Falha ao criar canal",
     "createSuccess": "Canal criado com sucesso",
     "delete": "Excluir Canal",
-    "deleteConfirm": "Are you sure you want to delete this channel?",
-    "deleteError": "Failed to delete channel",
+    "deleteConfirm": "Tem certeza de que deseja excluir este canal?",
+    "deleteError": "Falha ao excluir canal",
     "deleteFailed": "Falha ao excluir canal",
     "deleteSuccess": "Canal excluído com sucesso",
     "description": "Adicione e gerencie seus canais de entrega de notificações",
@@ -67,18 +67,18 @@
         "label": "Usar TLS"
       }
     },
-    "empty": "No notification channels configured.",
-    "emptyHint": "Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.",
+    "empty": "Nenhum canal de notificação configurado.",
+    "emptyHint": "Adicione um canal para começar a receber notificações via Discord, E-mail, Gotify ou Webhook.",
     "enabled": "Ativado",
     "errors": {
-      "fieldRequired": "{{field}} is required",
-      "nameRequired": "Channel name is required"
+      "fieldRequired": "{{field}} é obrigatório",
+      "nameRequired": "O nome do canal é obrigatório"
     },
     "fields": {
-      "enabled": "Enable this channel",
-      "name": "Channel Name",
+      "enabled": "Ativar este canal",
+      "name": "Nome do Canal",
       "namePlaceholder": "My Discord Server",
-      "type": "Channel Type"
+      "type": "Tipo de Canal"
     },
     "form": {
       "configSection": "Configuração do Canal",
@@ -116,15 +116,15 @@
       }
     },
     "lastUsed": "Último uso",
-    "loadError": "Failed to load channel details",
+    "loadError": "Falha ao carregar detalhes do canal",
     "noChannels": "Nenhum canal de notificação configurado",
     "noChannelsHint": "Adicione um canal para começar a receber notificações",
     "notificationsSent": "{{count}} notificações enviadas",
-    "sentCount_one": "{{count}} sent",
+    "sentCount_one": "{{count}} enviados",
     "sentCount_many": "{{count}} sent",
-    "sentCount_other": "{{count}} sent",
+    "sentCount_other": "{{count}} enviados",
     "test": "Testar",
-    "testError": "Failed to send test notification",
+    "testError": "Falha ao enviar notificação de teste",
     "testFailed": "Falha na notificação de teste",
     "testing": "Testando...",
     "testSuccess": "Notificação de teste enviada com sucesso!",
@@ -135,7 +135,7 @@
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
-    "updateError": "Failed to update channel",
+    "updateError": "Falha ao atualizar canal",
     "updateFailed": "Falha ao atualizar canal",
     "updateSuccess": "Canal atualizado com sucesso",
     "verified": "Verificado",
@@ -219,7 +219,7 @@
       "channel": "Canal",
       "error": "Erro",
       "event": "Evento",
-      "status": "Status",
+      "status": "Estado",
       "time": "Hora"
     },
     "loading": "Carregando histórico...",
@@ -247,14 +247,14 @@
     },
     "comingSoon": "Em Breve",
     "description": "Escolha quais eventos acionam notificações em cada canal",
-    "event": "Event",
+    "event": "Evento",
     "eventHeader": "Evento",
     "loading": "Carregando preferências...",
     "noChannels": "Adicione um canal de notificação primeiro para configurar as preferências de eventos",
     "saveFailed": "Falha ao salvar preferência",
     "saveSuccess": "Preferência salva",
     "title": "Notificações de Eventos",
-    "updateError": "Failed to update preference"
+    "updateError": "Falha ao atualizar preferência"
   },
   "title": "Configurações de Notificação",
   "toasts": {

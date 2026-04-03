@@ -44,7 +44,7 @@
       "vitalSigns": "Жизненные показатели"
     },
     "search": {
-      "advancedSearch": "Advanced Search",
+      "advancedSearch": "Расширенный поиск",
       "placeholder": "Поиск по медицинским записям..."
     },
     "sections": {
@@ -81,10 +81,10 @@
       "patientRecord": "Запись пациента"
     },
     "viewAll": "Показать все {{count}} приглашений",
-    "viewAll_one": "View all {{count}} invitations",
+    "viewAll_one": "Просмотреть все приглашения ({{count}})",
     "viewAll_few": "View all {{count}} invitations",
     "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "View all {{count}} invitations"
+    "viewAll_other": "Просмотреть все приглашения ({{count}})"
   },
   "medicalRecords": {
     "allergies": "Аллергии",

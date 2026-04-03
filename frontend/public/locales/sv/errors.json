@@ -8,8 +8,8 @@
   "form": {
     "conditionNotSelected": "Välj ett tillstånd",
     "entityNotFound": "Det begärda objektet kunde inte hittas.",
-    "equipmentFieldsRequired": "Equipment name and type are required",
-    "equipmentNotSelected": "Please select at least one equipment",
+    "equipmentFieldsRequired": "Utrustningsnamn och typ krävs",
+    "equipmentNotSelected": "Välj minst en utrustning",
     "invalidDate": "Ange ett giltigt datum.",
     "invalidEmail": "Ange en giltig e-postadress.",
     "invalidPhone": "Ange ett giltigt telefonnummer.",
@@ -56,7 +56,7 @@
     "lastNameRequired": "Efternamn krävs",
     "updateFailed": "Uppdateringen misslyckades: {{message}}"
   },
-  "patientNotAvailable": "Patient information not available",
+  "patientNotAvailable": "Patientinformation är inte tillgänglig",
   "relationships": {
     "addConditionFailed": "Det gick inte att lägga till tillståndsrelationen",
     "addFailed": "Det gick inte att lägga till relationen",

@@ -44,7 +44,7 @@
       "vitalSigns": "Vitalparametrar"
     },
     "search": {
-      "advancedSearch": "Advanced Search",
+      "advancedSearch": "Avancerad sökning",
       "placeholder": "Sök i journaler..."
     },
     "sections": {
@@ -81,8 +81,8 @@
       "patientRecord": "Patientjournal"
     },
     "viewAll": "Visa alla {{count}} inbjudningar",
-    "viewAll_one": "View all {{count}} invitations",
-    "viewAll_other": "View all {{count}} invitations"
+    "viewAll_one": "Visa alla {{count}} inbjudningar",
+    "viewAll_other": "Visa alla {{count}} inbjudningar"
   },
   "medicalRecords": {
     "allergies": "Allergier",

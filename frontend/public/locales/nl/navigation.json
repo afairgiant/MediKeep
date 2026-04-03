@@ -44,7 +44,7 @@
       "vitalSigns": "Vitale functies"
     },
     "search": {
-      "advancedSearch": "Advanced Search",
+      "advancedSearch": "Geavanceerd zoeken",
       "placeholder": "Zoeken in medische dossiers..."
     },
     "sections": {
@@ -81,8 +81,8 @@
       "patientRecord": "Patiëntdossier"
     },
     "viewAll": "Bekijk alle {{count}} uitnodigingen",
-    "viewAll_one": "View all {{count}} invitations",
-    "viewAll_other": "View all {{count}} invitations"
+    "viewAll_one": "Bekijk alle {{count}} uitnodigingen",
+    "viewAll_other": "Bekijk alle {{count}} uitnodigingen"
   },
   "medicalRecords": {
     "allergies": "Allergieën",

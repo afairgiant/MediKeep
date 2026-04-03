@@ -44,7 +44,7 @@
       "vitalSigns": "Segni vitali"
     },
     "search": {
-      "advancedSearch": "Advanced Search",
+      "advancedSearch": "Ricerca avanzata",
       "placeholder": "Cerca nei registri medici..."
     },
     "sections": {
@@ -81,9 +81,9 @@
       "patientRecord": "Cartella del paziente"
     },
     "viewAll": "Visualizza tutti i {{count}} inviti",
-    "viewAll_one": "View all {{count}} invitations",
+    "viewAll_one": "Visualizza tutti i {{count}} inviti",
     "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "View all {{count}} invitations"
+    "viewAll_other": "Visualizza tutti i {{count}} inviti"
   },
   "medicalRecords": {
     "allergies": "Allergie",

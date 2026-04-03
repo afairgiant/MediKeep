@@ -44,7 +44,7 @@
       "vitalSigns": "Sinais Vitais"
     },
     "search": {
-      "advancedSearch": "Advanced Search",
+      "advancedSearch": "Pesquisa Avançada",
       "placeholder": "Pesquisar registros médicos..."
     },
     "sections": {
@@ -81,9 +81,9 @@
       "patientRecord": "Prontuário do Paciente"
     },
     "viewAll": "Ver todos os {{count}} convites",
-    "viewAll_one": "View all {{count}} invitations",
+    "viewAll_one": "Ver todos os {{count}} convites",
     "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "View all {{count}} invitations"
+    "viewAll_other": "Ver todos os {{count}} convites"
   },
   "medicalRecords": {
     "allergies": "Alergias",

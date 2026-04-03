@@ -8,8 +8,8 @@
   "form": {
     "conditionNotSelected": "Selecione uma condição",
     "entityNotFound": "O item solicitado não foi encontrado.",
-    "equipmentFieldsRequired": "Equipment name and type are required",
-    "equipmentNotSelected": "Please select at least one equipment",
+    "equipmentFieldsRequired": "Nome e tipo do equipamento são obrigatórios",
+    "equipmentNotSelected": "Por favor, selecione pelo menos um equipamento",
     "invalidDate": "Informe uma data válida.",
     "invalidEmail": "Informe um endereço de e-mail válido.",
     "invalidPhone": "Informe um número de telefone válido.",
@@ -56,7 +56,7 @@
     "lastNameRequired": "Sobrenome é obrigatório",
     "updateFailed": "Falha na atualização: {{message}}"
   },
-  "patientNotAvailable": "Patient information not available",
+  "patientNotAvailable": "Informações do paciente não disponíveis",
   "relationships": {
     "addConditionFailed": "Falha ao adicionar relacionamento de condição",
     "addFailed": "Falha ao adicionar relacionamento",

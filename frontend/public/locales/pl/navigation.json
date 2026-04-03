@@ -44,7 +44,7 @@
       "vitalSigns": "Parametry życiowe"
     },
     "search": {
-      "advancedSearch": "Advanced Search",
+      "advancedSearch": "Wyszukiwanie zaawansowane",
       "placeholder": "Szukaj wśród rejestrów medycznych..."
     },
     "sections": {
@@ -62,7 +62,7 @@
       "totalRecords": "Całkowita liczba rekordów"
     },
     "subtitle": "Bezpiecznie zarządzaj swoimi informacjami zdrowotnymi",
-    "title": "MediKeep Dashboard"
+    "title": "Panel główny MediKeep"
   },
   "invitations": {
     "acceptButton": "Zaakceptuj zaproszenie",
@@ -81,10 +81,10 @@
       "patientRecord": "Rekord pacjenta"
     },
     "viewAll": "Wyświetl wszystkie {{count}} zaproszenia",
-    "viewAll_one": "View all {{count}} invitations",
+    "viewAll_one": "Wyświetl wszystkie {{count}} zaproszenia",
     "viewAll_few": "View all {{count}} invitations",
     "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "View all {{count}} invitations"
+    "viewAll_other": "Wyświetl wszystkie {{count}} zaproszenia"
   },
   "medicalRecords": {
     "allergies": "Alergie",
@@ -139,10 +139,10 @@
     "items": {
       "adminDashboard": "Pulpit administratora",
       "allergies": "Alergie",
-      "backupManagement": "Backup Management",
+      "backupManagement": "Zarządzanie kopiami zapasowymi",
       "conditions": "Schorzenia",
-      "customReports": "Custom Reports",
-      "dataModels": "Data Models",
+      "customReports": "Raporty niestandardowe",
+      "dataModels": "Modele danych",
       "emergencyContacts": "Kontakty alarmowe",
       "exportRecords": "Eksportuj rejestry",
       "familyHistory": "Historia rodzinna",
@@ -150,7 +150,7 @@
       "injuries": "Urazy",
       "insurance": "Ubezpieczenie",
       "labResults": "Wyniki laboratoryjne",
-      "language": "Language",
+      "language": "Język",
       "medicalEquipment": "Sprzęt medyczny",
       "medications": "Leki",
       "patientInfo": "Informacje pacjenta",
@@ -159,9 +159,9 @@
       "procedures": "Procedury",
       "settings": "Ustawienia",
       "symptoms": "Objawy",
-      "systemHealth": "System Health",
-      "tagManagement": "Tag Management",
-      "theme": "Theme",
+      "systemHealth": "Stan systemu",
+      "tagManagement": "Zarządzanie tagami",
+      "theme": "Motyw",
       "treatments": "Zabiegi",
       "visitHistory": "Historia wizyt",
       "vitalSigns": "Parametry życiowe"
