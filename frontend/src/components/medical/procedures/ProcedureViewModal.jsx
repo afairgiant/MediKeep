@@ -38,7 +38,7 @@ const ProcedureViewModal = ({
   onFileUploadComplete,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
@@ -134,16 +134,16 @@ const ProcedureViewModal = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              {t('procedures.viewModal.tabs.overview', 'Overview')}
+              {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
               {t('procedures.viewModal.tabs.clinical', 'Clinical Details')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('procedures.viewModal.tabs.notes', 'Notes')}
+              {t('shared:tabs.notes', 'Notes')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              {t('procedures.viewModal.tabs.documents', 'Documents')}
+              {t('shared:tabs.documents', 'Documents')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -178,7 +178,7 @@ const ProcedureViewModal = ({
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.status', 'Status')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
                       <StatusBadge status={procedure.status} />
                     </Stack>
                     <Stack gap="xs">
@@ -212,7 +212,7 @@ const ProcedureViewModal = ({
 
                 {/* Practitioner Information */}
                 <div>
-                  <Title order={4} mb="sm">{t('procedures.viewModal.practitioner', 'Practitioner')}</Title>
+                  <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.doctor', 'Doctor')}</Text>
@@ -242,7 +242,7 @@ const ProcedureViewModal = ({
 
                 {/* Description */}
                 <div>
-                  <Title order={4} mb="sm">{t('procedures.viewModal.description', 'Description')}</Title>
+                  <Title order={4} mb="sm">{t('shared:labels.description', 'Description')}</Title>
                   <Text size="sm" c={procedure.description ? 'inherit' : 'dimmed'}>
                     {procedure.description || t('procedures.viewModal.noDescription', 'No description available')}
                   </Text>
@@ -251,7 +251,7 @@ const ProcedureViewModal = ({
                 {/* Tags Section */}
                 {procedure.tags && procedure.tags.length > 0 && (
                   <div>
-                    <Title order={4} mb="sm">{t('procedures.viewModal.tags', 'Tags')}</Title>
+                    <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
                     <Group gap="xs">
                       {procedure.tags.map((tag, index) => (
                         <ClickableTagBadge

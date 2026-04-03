@@ -46,7 +46,7 @@ const VisitViewModal = ({
   encounterLabResults,
   fetchEncounterLabResults,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
 
@@ -205,14 +205,14 @@ const VisitViewModal = ({
               </Tabs.Tab>
               {fetchEncounterLabResults && (
                 <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
-                  {t('visits.viewModal.tabs.labResults', 'Lab Results')}
+                  {t('shared:categories.lab_results', 'Lab Results')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('visits.viewModal.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                {t('visits.viewModal.tabs.documents', 'Documents')}
+                {t('shared:tabs.documents', 'Documents')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -265,7 +265,7 @@ const VisitViewModal = ({
                   {/* Tags Section */}
                   {visit.tags && visit.tags.length > 0 && (
                     <div>
-                      <Title order={4} mb="sm">{t('labels.tags', 'Tags')}</Title>
+                      <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
                       <Group gap="xs">
                         {visit.tags.map((tag, index) => (
                           <ClickableTagBadge
@@ -286,7 +286,7 @@ const VisitViewModal = ({
               <Box mt="md">
                 <Stack gap="lg">
                   <div>
-                    <Title order={4} mb="sm">{t('labels.practitioner', 'Practitioner')}</Title>
+                    <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.doctor', 'Doctor')}</Text>

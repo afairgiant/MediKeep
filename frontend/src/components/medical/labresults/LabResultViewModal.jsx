@@ -52,7 +52,7 @@ const LabResultViewModal = ({
   labResultEncounters,
   fetchLabResultEncounters,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
 
@@ -145,7 +145,7 @@ const LabResultViewModal = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-                {t('labResults.modal.tabs.overview', 'Overview')}
+                {t('shared:tabs.overview', 'Overview')}
               </Tabs.Tab>
               <Tabs.Tab value="test-components" leftSection={<IconFlask size={16} />}>
                 {t('labResults.modal.tabs.testComponents', 'Test Components')}
@@ -162,19 +162,19 @@ const LabResultViewModal = ({
               )}
               {labResult.notes && (
                 <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                  {t('labResults.modal.tabs.notes', 'Notes')}
+                  {t('shared:tabs.notes', 'Notes')}
                 </Tabs.Tab>
               )}
               {labResult.tags && labResult.tags.length > 0 && (
                 <Tabs.Tab value="tags" leftSection={<IconTags size={16} />}>
-                  {t('labResults.modal.tabs.tags', 'Tags')}
+                  {t('shared:labels.tags', 'Tags')}
                   <Badge size="sm" color="blue" style={{ marginLeft: 8 }}>
                     {labResult.tags.length}
                   </Badge>
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="files" leftSection={<IconFileText size={16} />}>
-                {t('labResults.modal.tabs.files', 'Documents')}
+                {t('shared:tabs.documents', 'Documents')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -214,7 +214,7 @@ const LabResultViewModal = ({
                     <Title order={4} mb="sm">{t('labResults.modal.sections.testResults', 'Test Results')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={600} size="sm" c="dimmed">{t('labels.status', 'Status')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
                         <StatusBadge status={labResult.status} />
                       </Stack>
                       <Stack gap="xs">
@@ -317,7 +317,7 @@ const LabResultViewModal = ({
               <Tabs.Panel value="notes">
                 <Box mt="md">
                   <Stack gap="md">
-                    <Title order={4}>{t('labResults.modal.sections.notes', 'Notes')}</Title>
+                    <Title order={4}>{t('shared:tabs.notes', 'Notes')}</Title>
                     <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                       <ScrollArea.Autosize mah={400}>
                         <Text style={{ whiteSpace: 'pre-wrap' }}>
@@ -335,7 +335,7 @@ const LabResultViewModal = ({
               <Tabs.Panel value="tags">
                 <Box mt="md">
                   <Stack gap="md">
-                    <Title order={4}>{t('labResults.modal.sections.tags', 'Tags')}</Title>
+                    <Title order={4}>{t('shared:labels.tags', 'Tags')}</Title>
                     <Group gap="xs">
                       {labResult.tags.map((tag, index) => (
                         <ClickableTagBadge

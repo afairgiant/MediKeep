@@ -36,7 +36,7 @@ const ImmunizationViewModal = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
@@ -111,16 +111,16 @@ const ImmunizationViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-            {t('immunizations.viewModal.tabs.overview', 'Overview')}
+            {t('shared:tabs.overview', 'Overview')}
           </Tabs.Tab>
           <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
             {t('immunizations.viewModal.tabs.administration', 'Administration')}
           </Tabs.Tab>
           <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-            {t('immunizations.viewModal.tabs.notes', 'Notes')}
+            {t('shared:tabs.notes', 'Notes')}
           </Tabs.Tab>
           <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-            {t('immunizations.viewModal.tabs.documents', 'Documents')}
+            {t('shared:tabs.documents', 'Documents')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -182,7 +182,7 @@ const ImmunizationViewModal = ({
               {/* Tags Section */}
               {immunization.tags && immunization.tags.length > 0 && (
                 <div>
-                  <Title order={4} mb="sm">{t('labels.tags', 'Tags')}</Title>
+                  <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
                   <Group gap="xs">
                     {immunization.tags.map((tag, index) => (
                       <ClickableTagBadge
@@ -230,7 +230,7 @@ const ImmunizationViewModal = ({
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('labels.practitioner', 'Practitioner')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.practitioner', 'Practitioner')}</Text>
                     {immunization.practitioner_id ? (
                       <Text
                         size="sm"

@@ -1,0 +1,27 @@
+{
+  "tabs": {
+    "notes": "Notes",
+    "documents": "Documents",
+    "overview": "Overview",
+    "addFiles": "Add Files",
+    "basicInfo": "Basic Info"
+  },
+  "fields": {
+    "status": "Status",
+    "other": "Other",
+    "practitioner": "Practitioner"
+  },
+  "labels": {
+    "tags": "Tags",
+    "website": "Website",
+    "description": "Description"
+  },
+  "emptyStates": {
+    "adjustSearch": "Try adjusting your search or filter criteria."
+  },
+  "categories": {
+    "lab_results": "Lab Results",
+    "medications": "Medications",
+    "procedures": "Procedures"
+  }
+}

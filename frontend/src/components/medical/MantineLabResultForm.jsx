@@ -26,7 +26,7 @@ const MantineLabResultForm = ({
   fetchLabResultEncounters,
   navigate,
 }) => {
-  const { t } = useTranslation('medical');
+  const { t } = useTranslation(['medical', 'shared']);
 
   // Status options with visual indicators
   const statusOptions = [
@@ -51,7 +51,7 @@ const MantineLabResultForm = ({
     { value: 'pulmonology', label: t('labResults.category.pulmonology') },
     { value: 'hearing', label: t('labResults.category.hearing') },
     { value: 'stomatology', label: t('labResults.category.stomatology') },
-    { value: 'other', label: t('labResults.category.other') },
+    { value: 'other', label: t('shared:fields.other') },
   ];
 
   // Test type options with urgency levels

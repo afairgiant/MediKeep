@@ -41,7 +41,7 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 
 const Allergies = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('medical');
+  const { t } = useTranslation(['medical', 'shared']);
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('allergies');
@@ -389,7 +389,7 @@ const Allergies = () => {
               icon={IconAlertTriangle}
               title={t('allergies.emptyState.title', 'No allergies found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('allergies.emptyState.filtered', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
             />
           ) : viewMode === 'cards' ? (
@@ -421,8 +421,8 @@ const Allergies = () => {
                   { header: t('common:fields.severity.label'), accessor: 'severity', priority: 'high', width: 100 },
                   { header: t('allergies.onsetDate.label'), accessor: 'onset_date', priority: 'medium', width: 120 },
                   { header: t('allergies.relatedMedication.label'), accessor: 'medication_name', priority: 'low', width: 150 },
-                  { header: t('common:fields.status.label'), accessor: 'status', priority: 'medium', width: 100 },
-                  { header: t('common:fields.notes.label'), accessor: 'notes', priority: 'low', width: 200 },
+                  { header: t('shared:fields.status'), accessor: 'status', priority: 'medium', width: 100 },
+                  { header: t('shared:tabs.notes'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
                 tableName={t('allergies.title')}

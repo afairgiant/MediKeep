@@ -14,8 +14,7 @@
         "environmental": "Miljö",
         "food": "Livsmedel",
         "insect": "Insekt",
-        "medication": "Läkemedel",
-        "other": "Övrigt"
+        "medication": "Läkemedel"
       },
       "placeholder": "Välj allergityp"
     },
@@ -23,15 +22,8 @@
     "clinicalNotes": "Clinical Notes",
     "editTitle": "Redigera allergi",
     "emptyState": {
-      "filtered": "Försök justera din sökning eller dina filterkriterier.",
       "noData": "Klicka på \"Lägg till ny allergi\" för att börja.",
       "title": "Inga allergier hittades"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "messages": {
       "loading": "Laddar allergier...",
@@ -59,7 +51,6 @@
       "options": {
         "anaphylaxis": "Anafylaxi",
         "gastrointestinal": "Gastrointestinal",
-        "other": "Övrigt",
         "respiratory": "Respiratorisk",
         "skin": "Hudreaktion"
       },
@@ -78,10 +69,6 @@
       "description": "Aktuell allergistatus"
     },
     "tabs": {
-      "basicInfo": "Grundinfo",
-      "documents": "Dokument",
-      "notes": "Anteckningar",
-      "overview": "Overview",
       "reactionDetails": "Reaktionsdetaljer"
     },
     "title": "Allergier",
@@ -93,7 +80,6 @@
   "componentCatalog": {
     "fetchError": "Kunde inte ladda testkatalogen",
     "filterCategory": "Kategori",
-    "filterStatus": "Status",
     "noData": "Lägg till labbresultat med testkomponenter för att se dem har.",
     "noResults": "Inga testkomponenter hittades",
     "readingCount": "{{count}} matchningar",
@@ -123,8 +109,7 @@
       "increasing": "Ökande",
       "stable": "Stabilt",
       "worsening": "Försämring"
-    },
-    "tryAdjusting": "Försök justera din sökning eller dina filterkriterier."
+    }
   },
   "conditions": {
     "codeDescription": {
@@ -221,16 +206,13 @@
     },
     "tabs": {
       "contactInfo": "Kontaktuppgifter",
-      "details": "Detaljer",
-      "notes": "Anteckningar"
+      "details": "Detaljer"
     },
     "title": "Kontaktpersoner vid nödfall"
   },
   "equipment": {
     "tabs": {
-      "basicInfo": "Grundinfo",
       "deviceDetails": "Enhetsdetaljer",
-      "notes": "Anteckningar",
       "serviceDates": "Service och datum"
     }
   },
@@ -274,8 +256,8 @@
         },
         "status": {
           "description": "Aktuell status för tillståndet",
-          "label": "Status",
-          "placeholder": "Välj status"
+          "placeholder": "Välj status",
+          "label": "Status"
         },
         "statusOptions": {
           "active": "Aktivt - Pagaende tillstånd",
@@ -342,11 +324,11 @@
           "maternalGrandfather": "Morfar",
           "maternalGrandmother": "Mormor",
           "mother": "Mor",
-          "other": "Övrigt",
           "paternalGrandfather": "Farfar",
           "paternalGrandmother": "Farmor",
           "sister": "Syster",
-          "uncle": "Farbror/Morbror"
+          "uncle": "Farbror/Morbror",
+          "other": "Övrigt"
         }
       }
     }
@@ -392,7 +374,6 @@
       "johnsonJohnson": "Johnson & Johnson",
       "merck": "Merck",
       "moderna": "Moderna",
-      "other": "Övrigt",
       "pfizerBioNTech": "Pfizer-BioNTech",
       "sanofi": "Sanofi"
     },
@@ -403,7 +384,6 @@
     },
     "notes": {
       "description": "Relevanta detaljer om vaccinationen",
-      "label": "Anteckningar",
       "placeholder": "Ytterligare anteckningar om denna vaccination..."
     },
     "route": {
@@ -459,15 +439,8 @@
     },
     "editTitle": "Redigera skada",
     "emptyState": {
-      "filtered": "Försök justera din sökning eller dina filterkriterier.",
       "noData": "Klicka på \"Lägg till ny skada\" för att börja.",
       "title": "Inga skador hittades"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "injuryDate": {
       "description": "När skadan inträffade",
@@ -530,7 +503,6 @@
     },
     "status": {
       "description": "Aktuell status för denna skada",
-      "label": "Status",
       "options": {
         "active": "Aktiv - Under behandling",
         "chronic": "Kronisk - Långsiktiga effekter",
@@ -539,10 +511,6 @@
       }
     },
     "tabs": {
-      "basicInfo": "Grundinfo",
-      "documents": "Dokument",
-      "notes": "Anteckningar",
-      "overview": "Översikt",
       "treatment": "Behandling"
     },
     "title": "Skador",
@@ -754,9 +722,9 @@
           "hdhp": "HDHP (High Deductible Health Plan)",
           "hmo": "HMO (Health Maintenance Organization)",
           "indemnity": "Skadeförsäkring",
-          "other": "Övrigt",
           "pos": "POS (Point of Service)",
-          "ppo": "PPO (Preferred Provider Organization)"
+          "ppo": "PPO (Preferred Provider Organization)",
+          "other": "Övrigt"
         },
         "placeholder": "Välj plantyp"
       },
@@ -800,9 +768,9 @@
         "options": {
           "child": "Barn",
           "dependent": "Forsorjningsberoende",
-          "other": "Övrigt",
           "self": "Egen",
-          "spouse": "Make/Maka"
+          "spouse": "Make/Maka",
+          "other": "Övrigt"
         },
         "placeholder": "Välj relation"
       },
@@ -823,13 +791,9 @@
         "placeholder": "Välj status"
       },
       "tabs": {
-        "addFiles": "Add Files",
-        "basicInfo": "Basic Info",
         "contact": "Contact",
         "coverage": "Coverage",
-        "documents": "Documents",
-        "member": "Member",
-        "notes": "Notes"
+        "member": "Member"
       },
       "updateInsurance": "Update Insurance",
       "visionPlanType": {
@@ -870,7 +834,6 @@
       "imaging": "Bilddiagnostik (rontgen, MR, DT)",
       "immunology": "Immunologi",
       "microbiology": "Mikrobiologi",
-      "other": "Övrigt",
       "pathology": "Patologi",
       "pulmonology": "Pulmonologi",
       "stomatology": "Stomatologi"
@@ -892,7 +855,6 @@
       "linkConditionsTitle": "Koppla medicinska diagnoser",
       "max": "Max",
       "min": "Min",
-      "notes": "Notes",
       "notesOptional": "Notes (optional)",
       "refMax": "Ref Max",
       "refMin": "Ref Min",
@@ -904,7 +866,6 @@
       "searchTests": "Type to search tests...",
       "selectCategory": "Select category",
       "selectResult": "Select result",
-      "status": "Status",
       "statusIndicator": "Statusindikator:",
       "testCode": "Test Code",
       "testCodePlaceholder": "e.g., 718-7",
@@ -951,10 +912,6 @@
       "ordered": "Bestald - Provet har begärts"
     },
     "tabs": {
-      "addFiles": "Lägg till filer",
-      "basicInfo": "Grundinfo",
-      "documents": "Dokument",
-      "notes": "Anteckningar",
       "relationships": "Relationer",
       "resultsStatus": "Resultat och status"
     },
@@ -994,8 +951,7 @@
       "description": "Prioritet eller bradskandegrad för provet",
       "label": "Provtyp",
       "placeholder": "Välj prioritetsnivå"
-    },
-    "title": "Labbresultat"
+    }
   },
   "medications": {
     "alternativeName": {
@@ -1073,12 +1029,8 @@
       "placeholder": "Lista kända eller upplevda biverkningar..."
     },
     "tabs": {
-      "addFiles": "Add Files",
-      "basicInfo": "Grundinfo",
       "conditions": "Diagnoser",
-      "details": "Detaljer",
-      "documents": "Dokument",
-      "notes": "Anteckningar"
+      "details": "Detaljer"
     }
   },
   "pharmacies": {
@@ -1098,14 +1050,14 @@
           "krogerPharmacy": "Kroger Pharmacy",
           "meijerPharmacy": "Meijer Pharmacy",
           "onlinePharmacy": "Internetapotek",
-          "other": "Övrigt",
           "publixPharmacy": "Publix Pharmacy",
           "riteAid": "Rite Aid",
           "safewayPharmacy": "Safeway Pharmacy",
           "specialtyPharmacy": "Specialistapotek",
           "targetPharmacy": "Target Pharmacy",
           "walgreens": "Walgreens",
-          "walmartPharmacy": "Walmart Pharmacy"
+          "walmartPharmacy": "Walmart Pharmacy",
+          "other": "Övrigt"
         },
         "placeholder": "Välj apotekskedja eller typ"
       },
@@ -1174,7 +1126,6 @@
       },
       "notes": {
         "description": "Eventuell ytterligare information om mottagningen",
-        "label": "Anteckningar",
         "placeholder": "Ytterligare anteckningar om denna mottagning..."
       },
       "patientPortal": {
@@ -1227,7 +1178,6 @@
       },
       "website": {
         "description": "Professionell webbplats eller mottagningssida",
-        "label": "Webbplats",
         "placeholder": "https://www.exempel.se"
       }
     }
@@ -1257,7 +1207,6 @@
     },
     "description": {
       "description": "Detaljerad beskrivning av vad ingreppet innebar",
-      "label": "Beskrivning",
       "placeholder": "Beskriv ingreppet i detalj..."
     },
     "facility": {
@@ -1267,7 +1216,6 @@
     },
     "notes": {
       "description": "Relevanta observationer, pre-/postoperativa instruktioner eller detaljer",
-      "label": "Anteckningar",
       "placeholder": "Ytterligare anteckningar om ingreppet..."
     },
     "outcome": {
@@ -1458,11 +1406,7 @@
       }
     },
     "tabs": {
-      "addFiles": "Lägg till filer",
-      "basicInfo": "Grundinfo",
-      "details": "Detaljer",
-      "documents": "Dokument",
-      "notes": "Anteckningar"
+      "details": "Detaljer"
     },
     "title": "Symtom"
   },
@@ -1510,7 +1454,6 @@
     },
     "practitioner": {
       "description": "Tilldela en behandlare till denna behandling",
-      "label": "Behandlare",
       "placeholder": "Välj behandlare (valfritt)"
     },
     "relatedCondition": {

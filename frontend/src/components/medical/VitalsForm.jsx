@@ -70,7 +70,7 @@ const VitalsForm = ({
   error,
   clearError,
 }) => {
-  const { t } = useTranslation(['common', 'errors']);
+  const { t } = useTranslation(['common', 'errors', 'shared']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
   const lockedFields = vitals?._lockedFields || [];
   const { getCurrentTime } = useTimezone();
@@ -398,7 +398,7 @@ const VitalsForm = ({
             value: 'ambulatory',
             label: t('vitals.form.locations.ambulatory', 'Ambulatory Care'),
           },
-          { value: 'other', label: t('vitals.form.locations.other', 'Other') },
+          { value: 'other', label: t('shared:fields.other', 'Other') },
         ],
       },
       device_used: {
@@ -420,7 +420,7 @@ const VitalsForm = ({
         },
       },
       notes: {
-        label: t('common.fields.notes.label', 'Notes'),
+        label: t('shared:tabs.notes', 'Notes'),
         type: 'textarea',
         placeholder: t(
           'vitals.form.notesPlaceholder',
@@ -1025,7 +1025,7 @@ const VitalsForm = ({
                 {t('vitals.tabs.context', 'Context')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('vitals.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 

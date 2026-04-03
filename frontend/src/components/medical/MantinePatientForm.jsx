@@ -129,7 +129,7 @@ const MantinePatientForm = ({
     label: `${practitioner.name} - ${practitioner.specialty}`,
   }));
 
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   const {
     handleTextInputChange,
@@ -249,7 +249,7 @@ const MantinePatientForm = ({
                 data={[
                   { value: 'M', label: t('patients.form.gender.options.male') },
                   { value: 'F', label: t('patients.form.gender.options.female') },
-                  { value: 'OTHER', label: t('patients.form.gender.options.other') },
+                  { value: 'OTHER', label: t('shared:fields.other') },
                 ]}
                 clearable
                 radius="md"

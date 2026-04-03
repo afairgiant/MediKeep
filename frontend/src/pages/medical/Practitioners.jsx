@@ -50,7 +50,7 @@ import PracticeEditModal from '../../components/medical/practitioners/PracticeEd
 import PracticesList from '../../components/medical/practitioners/PracticesList';
 
 const Practitioners = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('practitioners');
   const navigate = useNavigate();
@@ -368,7 +368,7 @@ const Practitioners = () => {
                   icon={IconShieldCheck}
                   title={t('practitioners.empty.title', 'No healthcare practitioners found')}
                   hasActiveFilters={dataManagement.hasActiveFilters}
-                  filteredMessage={t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')}
+                  filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
                   noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
                 />
               ) : groupByPractice && groupedPractitioners ? (

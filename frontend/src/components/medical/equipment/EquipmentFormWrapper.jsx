@@ -40,7 +40,7 @@ const EquipmentFormWrapper = ({
   isLoading = false,
   statusMessage,
 }) => {
-  const { t } = useTranslation(['common', 'medical']);
+  const { t } = useTranslation(['common', 'medical', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('basic');
@@ -102,7 +102,7 @@ const EquipmentFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('medical:equipment.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="device" leftSection={<IconTool size={16} />}>
                 {t('medical:equipment.tabs.deviceDetails', 'Device Details')}
@@ -111,7 +111,7 @@ const EquipmentFormWrapper = ({
                 {t('medical:equipment.tabs.serviceDates', 'Service & Dates')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('medical:equipment.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -144,7 +144,7 @@ const EquipmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('equipment.form.status', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       value={formData.status || 'active'}
                       data={EQUIPMENT_STATUS_OPTIONS}
                       onChange={(value) => {
@@ -283,7 +283,7 @@ const EquipmentFormWrapper = ({
                 <Grid>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('equipment.form.notes', 'Notes')}
+                      label={t('shared:tabs.notes', 'Notes')}
                       value={formData.notes || ''}
                       onChange={handleTextInputChange('notes')}
                       placeholder={t('equipment.form.notesPlaceholder', 'Additional notes about this equipment')}
@@ -298,7 +298,7 @@ const EquipmentFormWrapper = ({
                       onChange={(tags) => {
                         onInputChange({ target: { name: 'tags', value: tags } });
                       }}
-                      label={t('equipment.form.tags', 'Tags')}
+                      label={t('shared:labels.tags', 'Tags')}
                       placeholder={t('equipment.form.tagsPlaceholder', 'Add tags...')}
                     />
                   </Grid.Col>

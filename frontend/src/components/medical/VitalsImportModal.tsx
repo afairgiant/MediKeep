@@ -84,7 +84,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
   patientId,
   onImportComplete,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDateTime, formatDate } = useDateFormat();
 
   // State
@@ -321,7 +321,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
             <Table.Tr>
               <Table.Th>{t('vitals.table.date', 'Date')}</Table.Th>
               <Table.Th>{t('vitals.modal.bloodGlucose', 'Glucose')} (mg/dL)</Table.Th>
-              <Table.Th>{t('labels.status', 'Status')}</Table.Th>
+              <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>

@@ -52,10 +52,10 @@ interface EntityConfig {
 
 /** Entity config for tag search results (keyed by singular backend response keys). */
 export const TAG_ENTITY_CONFIG: Record<string, EntityConfig> = {
-  lab_result: { icon: IconFlask, color: 'indigo', labelKey: 'search.types.labResults', route: '/lab-results' },
-  medication: { icon: IconPill, color: 'green', labelKey: 'search.types.medications', route: '/medications' },
+  lab_result: { icon: IconFlask, color: 'indigo', labelKey: 'shared:categories.lab_results', route: '/lab-results' },
+  medication: { icon: IconPill, color: 'green', labelKey: 'shared:categories.medications', route: '/medications' },
   condition: { icon: IconStethoscope, color: 'blue', labelKey: 'search.types.conditions', route: '/conditions' },
-  procedure: { icon: IconMedicalCross, color: 'violet', labelKey: 'search.types.procedures', route: '/procedures' },
+  procedure: { icon: IconMedicalCross, color: 'violet', labelKey: 'shared:categories.procedures', route: '/procedures' },
   immunization: { icon: IconVaccine, color: 'orange', labelKey: 'search.types.immunizations', route: '/immunizations' },
   treatment: { icon: IconHeartbeat, color: 'pink', labelKey: 'search.types.treatments', route: '/treatments' },
   encounter: { icon: IconCalendarEvent, color: 'teal', labelKey: 'search.types.encounters', route: '/encounters' },
@@ -92,10 +92,10 @@ export const FALLBACK_ICON = IconSearch;
 
 /** Mapping from singular type key to i18n translation key. */
 export const TYPE_LABEL_KEY_MAP: Record<string, string> = {
-  medication: 'search.types.medications',
+  medication: 'shared:categories.medications',
   condition: 'search.types.conditions',
-  lab_result: 'search.types.labResults',
-  procedure: 'search.types.procedures',
+  lab_result: 'shared:categories.lab_results',
+  procedure: 'shared:categories.procedures',
   immunization: 'search.types.immunizations',
   treatment: 'search.types.treatments',
   encounter: 'search.types.encounters',

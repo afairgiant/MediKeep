@@ -70,7 +70,7 @@ const PatientForm = ({
   onCancel,
   isModal = true,
 }) => {
-  const { t } = useTranslation(['common', 'errors']);
+  const { t } = useTranslation(['common', 'errors', 'shared']);
   const { unitSystem, dateFormat } = useUserPreferences();
   const labels = unitLabels[unitSystem];
   const ranges = validationRanges[unitSystem];
@@ -240,7 +240,7 @@ const PatientForm = ({
     { value: '', label: t('patients.form.gender.options.select') },
     { value: 'Male', label: t('patients.form.gender.options.male') },
     { value: 'Female', label: t('patients.form.gender.options.female') },
-    { value: 'Other', label: t('patients.form.gender.options.other') },
+    { value: 'Other', label: t('shared:fields.other') },
     { value: 'Prefer not to say', label: t('patients.form.gender.options.preferNotToSay') },
   ];
 
@@ -262,7 +262,7 @@ const PatientForm = ({
     { value: 'grandchild', label: t('patients.form.relationship.options.grandchild') },
     { value: 'other_family', label: t('patients.form.relationship.options.otherFamily') },
     { value: 'friend', label: t('patients.form.relationship.options.friend') },
-    { value: 'other', label: t('patients.form.relationship.options.other') },
+    { value: 'other', label: t('shared:fields.other') },
   ];
 
   return (

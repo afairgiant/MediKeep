@@ -62,7 +62,7 @@ const SearchResults = () => {
   const { patient: currentPatient } = useCurrentPatient();
   const { formatDate } = useDateFormat();
   const { getTagColor, tagEntries, isLoading: isLoadingTags } = useTagColors();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const initialLoadDone = useRef(false);
   const initialTagSearchDone = useRef(false);
   const [viewMode, setViewMode] = usePersistedViewMode('search', 'table');
@@ -748,7 +748,7 @@ const SearchResults = () => {
                         </Group>
                       </Table.Th>
                       <Table.Th style={{ width: 200 }}>
-                        <Text size="sm" fw={500}>{t('search.tags')}</Text>
+                        <Text size="sm" fw={500}>{t('shared:labels.tags')}</Text>
                       </Table.Th>
                     </Table.Tr>
                   </Table.Thead>

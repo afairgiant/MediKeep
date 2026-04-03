@@ -68,11 +68,6 @@
     "buttons": {
       "close": "Close"
     },
-    "fields": {
-      "notes": {
-        "label": "Notes"
-      }
-    },
     "labels": {
       "notSpecified": "Not specified"
     }
@@ -107,11 +102,8 @@
         "endDate": "Slutdatum",
         "icd10Code": "ICD-10-kod",
         "onsetDate": "Debutdatum",
-        "practitioner": "Vårdgivare",
         "severity": "Allvarlighetsgrad",
-        "snomedCode": "SNOMED-kod",
-        "status": "Status",
-        "tags": "Taggar"
+        "snomedCode": "SNOMED-kod"
       },
       "medicationsDescription": "Link medications used to treat or manage this condition.",
       "placeholders": {
@@ -140,12 +132,8 @@
         "resolved": "Löst"
       },
       "tabs": {
-        "addFiles": "Add Files",
         "basicInfo": "Grundläggande information",
-        "clinical": "Kliniska detaljer",
-        "documents": "Dokument",
-        "medications": "Medications",
-        "notes": "Anteckningar"
+        "clinical": "Kliniska detaljer"
       },
       "updateCondition": "Uppdatera tillstånd"
     },
@@ -169,15 +157,10 @@
         "basicInfo": "Grundläggande information",
         "clinicalNotes": "Kliniska anteckningar",
         "medicalCodes": "Medicinska koder",
-        "practitioner": "Practitioner",
-        "tags": "Taggar",
         "timeline": "Tidslinje"
       },
       "tabs": {
-        "clinical": "Kliniska detaljer",
-        "documents": "Dokument",
-        "notes": "Anteckningar",
-        "overview": "Översikt"
+        "clinical": "Kliniska detaljer"
       },
       "title": "Tillståndsdetaljer"
     },
@@ -190,13 +173,10 @@
       "condition": "Tillstånd",
       "endDate": "Slutdatum",
       "icd10": "ICD-10",
-      "notes": "Anteckningar",
       "onsetDate": "Debutdatum",
-      "severity": "Allvarlighetsgrad",
-      "status": "Status"
+      "severity": "Allvarlighetsgrad"
     },
-    "title": "Medicinska tillstånd",
-    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier."
+    "title": "Medicinska tillstånd"
   },
   "emergencyContacts": {
     "actions": {
@@ -218,7 +198,6 @@
       "editTitle": "Redigera nödkontakt"
     },
     "page": {
-      "filterDescription": "Försök justera din sökning eller filterkriterier.",
       "loading": "Laddar nödkontakter...",
       "noContacts": "Inga nödkontakter hittades",
       "noContactsDescription": "Det är viktigt att ha nödkontakter tillgängliga vid medicinska nödsituationer.",
@@ -229,8 +208,7 @@
       "name": "Namn",
       "phone": "Telefon",
       "primary": "Primär",
-      "relationship": "Relation",
-      "status": "Status"
+      "relationship": "Relation"
     },
     "viewModal": {
       "address": "Adress",
@@ -267,7 +245,6 @@
       "name": "Equipment Name",
       "namePlaceholder": "e.g., ResMed AirSense 11",
       "nextService": "Next Service Date",
-      "notes": "Notes",
       "notesPlaceholder": "Additional notes about this equipment",
       "practitioner": "Prescribed By",
       "practitionerPlaceholder": "Select practitioner",
@@ -275,10 +252,8 @@
       "saving": "Saving equipment...",
       "serialNumber": "Serial Number",
       "serialPlaceholder": "Equipment serial number",
-      "status": "Status",
       "supplier": "Supplier",
       "supplierPlaceholder": "Equipment supplier",
-      "tags": "Tags",
       "tagsPlaceholder": "Add tags...",
       "type": "Equipment Type",
       "typePlaceholder": "Select type",
@@ -291,7 +266,6 @@
     "noEquipmentFound": "No Equipment Found",
     "startAdding": "Start by adding your first piece of medical equipment.",
     "title": "Medical Equipment",
-    "tryAdjustingFilters": "Try adjusting your search or filter criteria.",
     "viewModal": {
       "basicInfo": "Basic Information",
       "dates": "Important Dates",
@@ -301,13 +275,10 @@
       "modelNumber": "Model Number",
       "name": "Equipment Name",
       "nextService": "Next Service",
-      "notes": "Notes",
       "prescribedBy": "Prescribed By",
       "prescribedDate": "Prescribed Date",
       "serialNumber": "Serial Number",
-      "status": "Status",
       "supplier": "Supplier",
-      "tags": "Tags",
       "title": "Equipment Details",
       "type": "Equipment Type",
       "usageInstructions": "Usage Instructions"
@@ -414,11 +385,8 @@
       "immunizations": "Vaccinationer",
       "injuries": "Skador",
       "insurance": "Försäkring",
-      "lab_results": "Labbresultat",
-      "medications": "Mediciner",
       "pharmacies": "Apotek",
       "practitioners": "Vårdgivare",
-      "procedures": "Ingrepp",
       "symptoms": "Symtom",
       "treatments": "Behandlingar",
       "vitals": "Vitalparametrar"
@@ -543,7 +511,6 @@
     },
     "notes": {
       "description": "Eventuella ytterligare detaljer eller anteckningar",
-      "label": "Anteckningar",
       "placeholder": "Ytterligare information..."
     },
     "onsetDate": {
@@ -560,12 +527,10 @@
     },
     "status": {
       "description": "Aktuell status",
-      "label": "Status",
       "placeholder": "Välj status"
     },
     "tags": {
       "description": "Lägg till taggar för att organisera och söka efter denna post senare",
-      "label": "Taggar",
       "placeholder": "Lägg till taggar för att organisera och hitta denna post"
     }
   },
@@ -618,7 +583,6 @@
       "ndcNumber": "NDC-nummer",
       "ndcNumberDesc": "National Drug Code",
       "ndcNumberPlaceholder": "t.ex. 12345-6789-01",
-      "practitioner": "Utövare",
       "practitionerDesc": "Vårdgivare som administrerade vaccinet",
       "practitionerPlaceholder": "Välj administrerande utövare",
       "routeID": "Intradermal (ID)",
@@ -637,13 +601,8 @@
       "siteRightDeltoid": "Höger deltoideus",
       "siteRightThigh": "Höger lår",
       "tabs": {
-        "addFiles": "Add Files",
-        "administration": "Administrering",
-        "basicInfo": "Grundinfo",
-        "documents": "Dokument",
-        "notes": "Anteckningar"
+        "administration": "Administrering"
       },
-      "tags": "Taggar",
       "tagsDesc": "Lägg till taggar för att kategorisera och organisera vaccinationer",
       "tagsPlaceholder": "Lägg till taggar...",
       "tradeName": "Formellt/Handelsnamn",
@@ -662,13 +621,11 @@
       "expirationDate": "Utgångsdatum",
       "lotNumber": "Batchnummer",
       "manufacturer": "Tillverkare",
-      "notes": "Anteckningar",
       "route": "Administreringsväg",
       "site": "Injektionsställe",
       "vaccineName": "Vaccinnamn"
     },
     "title": "Vaccinationer",
-    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
     "viewModal": {
       "adminDetails": "Administreringsdetaljer",
       "adminSite": "Administreringsställe",
@@ -684,10 +641,7 @@
       "practitionerId": "Utövare-ID: {{id}}",
       "route": "Administreringsväg",
       "tabs": {
-        "administration": "Administrering",
-        "documents": "Dokument",
-        "notes": "Anteckningar",
-        "overview": "Översikt"
+        "administration": "Administrering"
       },
       "title": "Vaccinationsdetaljer",
       "tradeName": "Handelsnamn",
@@ -723,7 +677,6 @@
     "description": "Hantera din försäkringsinformation och digitala kort",
     "empty": {
       "addFirst": "Add Your First Insurance",
-      "filtered": "Try adjusting your search or filter criteria.",
       "noData": "Start by adding your first insurance.",
       "title": "No Insurance Found"
     },
@@ -753,7 +706,6 @@
       "memberInfo": "Medlemsinformation",
       "memberName": "Medlemsnamn",
       "mentalHealthCoverage": "Psykisk hälsotäckning",
-      "notes": "Anteckningar",
       "ongoing": "Pågående",
       "outOfPocketMax": "Max egenavgift",
       "pharmacyNetworkInfo": "Apoteksnätverksinformation",
@@ -765,13 +717,10 @@
       "self": "Själv",
       "tabs": {
         "contact": "Kontakt",
-        "coverage": "Täckning",
-        "documents": "Dokument",
-        "overview": "Översikt"
+        "coverage": "Täckning"
       },
       "title": "Försäkringsdetaljer",
-      "visionCoverage": "Syntäckning",
-      "website": "Webbplats"
+      "visionCoverage": "Syntäckning"
     }
   },
   "key": "Default {{var}}",
@@ -780,7 +729,6 @@
     "addCustom": "+ Lägg till \"{{value}}\"",
     "clinicalNotes": "Clinical Notes",
     "date": "Datum",
-    "description": "Beskrivning",
     "duration": "Varaktighet",
     "endDate": "Slutdatum",
     "error": "Fel",
@@ -802,24 +750,19 @@
     "noRating": "Inget betyg",
     "notAvailable": "N/A",
     "notCompleted": "Ej slutfört",
-    "notes": "Anteckningar",
     "notSpecified": "Ej angivet",
     "noVisitsLinked": "No visits linked to this lab result",
     "onsetDate": "Debutdatum",
     "ordered": "Ordered",
-    "other": "Annat",
     "pending": "Väntande",
     "phoneNumber": "Telefonnummer",
-    "practitioner": "Vårdgivare",
     "ratingStars": "{{count}}/5 stjärnor",
     "ratingStars_one": "",
     "ratingStars_other": "",
     "selectPurpose": "Select purpose",
     "severity": "Allvarlighetsgrad",
     "startDate": "Startdatum",
-    "status": "Status",
     "success": "Lyckades",
-    "tags": "Taggar",
     "unknown": "Okänt",
     "value": "Value",
     "viewDetails": "",
@@ -827,7 +770,6 @@
     "viewPractitionerDetails": "Visa vårdgivarinformation",
     "visitDate": "Visit date",
     "visitWebsite": "Besök webbplats ↗",
-    "website": "Webbplats",
     "yes": "Ja"
   },
   "labResults": {
@@ -869,18 +811,12 @@
       },
       "sections": {
         "associatedFiles": "Tillhörande dokument",
-        "notes": "Anteckningar",
         "orderingPractitioner": "Beställande vårdgivare",
-        "tags": "Taggar",
         "testInfo": "Testinformation",
         "testResults": "Testresultat"
       },
       "tabs": {
-        "files": "Dokument",
-        "notes": "Notes",
-        "overview": "Översikt",
         "relatedConditions": "Relaterade tillstånd",
-        "tags": "Taggar",
         "testComponents": "Testkomponenter",
         "visits": "Besök"
       },
@@ -902,7 +838,6 @@
       "category": "Kategori",
       "completedDate": "Slutfört datum",
       "facility": "Anläggning",
-      "files": "Dokument",
       "orderedDate": "Beställningsdatum",
       "orderingPractitioner": "Beställande vårdgivare",
       "testName": "Testnamn",
@@ -913,7 +848,6 @@
     "testNameTooLong": "Testnamnet kan inte överstiga {{maxLength}} tecken",
     "testNameTooShort": "Testnamnet måste vara minst {{minLength}} tecken",
     "timeoutError": "Förfrågan tog för lång tid. Försök igen.",
-    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
     "unsavedDataMessage_one": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
     "unsavedDataMessage_other": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data."
   },
@@ -954,20 +888,15 @@
         "prescriberPharmacy": "Förskrivare och apotek",
         "relatedConditions": "Relaterade tillstånd",
         "sideEffects": "Biverkningar",
-        "tags": "Taggar",
         "timeline": "Tidslinje",
         "usedInTreatments": "Used in Treatments"
       },
       "tabs": {
-        "documents": "Dokument",
-        "dosageRefills": "Dosering och påfyllning",
-        "notes": "Anteckningar",
-        "overview": "Översikt"
+        "dosageRefills": "Dosering och påfyllning"
       }
     },
     "noMedications": "Inga läkemedel eller kosttillskott hittades",
     "quickFilter": "Snabbfilter",
-    "title": "Läkemedel",
     "treatments": {
       "empty": "This medication is not used in any treatments.",
       "loadError": "Failed to load treatments",
@@ -976,7 +905,6 @@
       "overrideFrequency": "Freq",
       "treatmentPlan": "Behandlingsplan"
     },
-    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
     "types": {
       "herbal": "Växtbaserat/Naturläkemedel",
       "otc": "Receptfritt",
@@ -1095,7 +1023,6 @@
         "options": {
           "female": "Kvinna",
           "male": "Man",
-          "other": "Annat",
           "preferNotToSay": "Vill inte ange",
           "select": "Välj kön"
         },
@@ -1129,7 +1056,6 @@
           "grandchild": "Barnbarn",
           "grandparent": "Mor-/farförälder",
           "mother": "Mor",
-          "other": "Annat",
           "otherFamily": "Övrig familj",
           "parent": "Förälder",
           "partner": "Partner",
@@ -1218,11 +1144,9 @@
       "postalCode": "Postnummer",
       "specialtyServices": "Specialiteter",
       "stateProvince": "Län / Region",
-      "storeNumber": "Butiksnummer",
-      "website": "Webbplats"
+      "storeNumber": "Butiksnummer"
     },
     "empty": {
-      "filtered": "Försök justera din sökning eller filterkriterier.",
       "noData": "Klicka på \"Lägg till nytt apotek\" för att komma igång.",
       "title": "Inga apotek hittades"
     },
@@ -1247,8 +1171,7 @@
       "specialtyServices": "Specialiteter",
       "stateProvince": "Län / Region",
       "storeNumber": "Butik #",
-      "title": "Apoteksdetaljer",
-      "website": "Webbplats"
+      "title": "Apoteksdetaljer"
     }
   },
   "practitioners": {
@@ -1260,13 +1183,11 @@
       "phone": "Telefon",
       "practice": "Mottagning",
       "rating": "Betyg",
-      "subtitle": "Vårdgivare",
-      "website": "Webbplats"
+      "subtitle": "Vårdgivare"
     },
     "createPracticeError": "Kunde inte skapa mottagning. Försök igen.",
     "editPracticeError": "Kunde inte ladda mottagningen för redigering",
     "empty": {
-      "filtered": "Försök justera din sökning eller filterkriterier.",
       "noData": "Klicka på \"Lägg till ny vårdgivare\" för att komma igång.",
       "title": "Inga vårdgivare hittades"
     },
@@ -1295,8 +1216,7 @@
         "actions": "Åtgärder",
         "name": "Namn",
         "phone": "Telefon",
-        "practitioners": "Vårdgivare",
-        "website": "Webbplats"
+        "practitioners": "Vårdgivare"
       },
       "totalCount": "{{count}} mottagningar totalt",
       "totalCount_one": "",
@@ -1329,18 +1249,15 @@
       "practiceFax": "Fax",
       "practiceLoadError": "Kunde inte ladda mottagningsdetaljer",
       "practiceLocations": "Platser",
-      "practiceNotes": "Anteckningar",
       "practicePhone": "Telefon",
       "practicePortal": "Patientportal",
       "practiceUpdateError": "Kunde inte uppdatera mottagningen",
       "practiceUpdateSuccess": "Mottagningen uppdaterades",
-      "practiceWebsite": "Webbplats",
       "practitionerContact": "VÅRDGIVARKONTAKT",
       "rating": "Betyg",
       "savePractice": "Spara mottagning",
       "specialty": "Specialitet",
-      "title": "Vårdgivardetaljer",
-      "website": "Webbplats"
+      "title": "Vårdgivardetaljer"
     }
   },
   "procedures": {
@@ -1368,7 +1285,6 @@
       "complicationsDesc": "Eventuella problem eller komplikationer som uppstod",
       "complicationsPlaceholder": "Dokumentera eventuella komplikationer",
       "createProcedure": "Skapa ingrepp",
-      "description": "Beskrivning",
       "descriptionDesc": "Kort beskrivning av ingreppet",
       "descriptionPlaceholder": "Beskriv ingreppet",
       "duration": "Varaktighet (minuter)",
@@ -1385,7 +1301,6 @@
       "outcomePending": "Väntande",
       "outcomePlaceholder": "Välj resultat",
       "outcomeSuccessful": "Lyckat",
-      "practitioner": "Utövare",
       "practitionerDesc": "Vårdgivare som utför ingreppet",
       "practitionerPlaceholder": "Välj utövare",
       "procedureCode": "Ingreppskod",
@@ -1403,7 +1318,6 @@
       "setting": "Vårdmiljö",
       "settingDesc": "Var ingreppet utfördes",
       "settingPlaceholder": "t.ex. Slutenvård, Öppenvård",
-      "status": "Status",
       "statusCancelled": "Inställt",
       "statusCompleted": "Slutfört",
       "statusDesc": "Aktuell status för ingreppet",
@@ -1412,13 +1326,8 @@
       "statusPostponed": "Uppskjutet",
       "statusScheduled": "Planerat",
       "tabs": {
-        "addFiles": "Add Files",
-        "basicInfo": "Grundinfo",
-        "clinical": "Kliniska detaljer",
-        "documents": "Dokument",
-        "notes": "Anteckningar"
+        "clinical": "Kliniska detaljer"
       },
-      "tags": "Taggar",
       "tagsDesc": "Lägg till taggar för att kategorisera och organisera ingrepp",
       "tagsPlaceholder": "Lägg till taggar...",
       "updateProcedure": "Uppdatera ingrepp"
@@ -1431,16 +1340,11 @@
     "table": {
       "code": "Kod",
       "date": "Datum",
-      "description": "Beskrivning",
       "facility": "Vårdinrättning",
-      "practitioner": "Utövare",
       "procedureName": "Ingreppets namn",
       "setting": "Vårdmiljö",
-      "status": "Status",
       "type": "Typ"
     },
-    "title": "Ingrepp",
-    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
     "viewModal": {
       "anesthesiaInfo": "Anestesiinformation",
       "anesthesiaNotes": "Anestesianteckningar",
@@ -1450,7 +1354,6 @@
       "close": "Stäng",
       "complications": "Komplikationer",
       "date": "Datum",
-      "description": "Beskrivning",
       "doctor": "Läkare",
       "duration": "Varaktighet",
       "durationMinutes": "{{minutes}} minuter",
@@ -1462,21 +1365,15 @@
       "noDescription": "Ingen beskrivning tillgänglig",
       "notSpecified": "Ej angivet",
       "outcome": "Resultat",
-      "practitioner": "Utövare",
       "practitionerId": "Utövare-ID: {{id}}",
       "procedureCode": "Ingreppskod",
       "procedureName": "Ingreppets namn",
       "procedureType": "Typ av ingrepp",
       "setting": "Vårdmiljö",
       "specialty": "Specialitet",
-      "status": "Status",
       "tabs": {
-        "clinical": "Kliniska detaljer",
-        "documents": "Dokument",
-        "notes": "Anteckningar",
-        "overview": "Översikt"
+        "clinical": "Kliniska detaljer"
       },
-      "tags": "Taggar",
       "title": "Ingreppsinformation",
       "viewPractitioner": "Visa utövardetaljer"
     }
@@ -1502,11 +1399,8 @@
       "immunizations": "Vaccinationer",
       "injuries": "Skador",
       "insurance": "Försäkring",
-      "lab_results": "Labbresultat",
-      "medications": "Mediciner",
       "pharmacies": "Apotek",
       "practitioners": "Vårdgivare",
-      "procedures": "Ingrepp",
       "symptoms": "Symtom",
       "treatments": "Behandlingar",
       "vitals": "Vitalparametrar"
@@ -1653,7 +1547,6 @@
       "result": "Resultat: {{value}}"
     },
     "tagResultCount_other": "{{count}} taggresultat",
-    "tags": "Taggar",
     "tagSearchFailed": "Taggsökningen misslyckades. Försök igen.",
     "textResultCount_other": "{{count}} textresultat",
     "title": "Sökresultat",
@@ -1662,9 +1555,6 @@
       "conditions": "Tillstånd",
       "encounters": "Besök",
       "immunizations": "Vaccinationer",
-      "labResults": "Labbresultat",
-      "medications": "Mediciner",
-      "procedures": "Ingrepp",
       "treatments": "Behandlingar",
       "vitals": "Vitalparametrar"
     },
@@ -1933,12 +1823,9 @@
       "relief": "Lindring",
       "symptomName": "Symtomnamn",
       "tabs": {
-        "documents": "Dokument",
         "episodes": "Episoder ({{count}})",
         "episodes_one": "Episodes ({{count}})",
-        "episodes_other": "Episodes ({{count}})",
-        "notes": "Anteckningar",
-        "overview": "Översikt"
+        "episodes_other": "Episodes ({{count}})"
       },
       "time": "Tid",
       "timeline": "Tidslinje",
@@ -2119,7 +2006,6 @@
       "createTreatment": "Skapa behandling",
       "createWithLinks": "",
       "creatingWithLinks": "Creating treatment and linking items...",
-      "description": "Beskrivning",
       "descriptionDesc": "Kort beskrivning av behandlingen",
       "descriptionPlaceholder": "Beskriv behandlingen",
       "dosageAmount": "Dosering/Mängd",
@@ -2134,7 +2020,6 @@
       "linkingPartialFailure": "Some items could not be linked",
       "notesDesc": "Ytterligare information om denna behandling",
       "notesPlaceholder": "Ange behandlingsanteckningar, observationer eller ytterligare detaljer",
-      "practitioner": "Vårdgivare",
       "practitionerDesc": "Vårdgivare som administrerar behandlingen",
       "relatedCondition": "Relaterat tillstånd",
       "relatedConditionDesc": "Länka denna behandling till ett tillstånd",
@@ -2144,7 +2029,6 @@
       "selectStatus": "Välj status",
       "startDate": "Startdatum",
       "startDateDesc": "När behandlingen börjar",
-      "status": "Status",
       "statusActive": "Aktiv",
       "statusCancelled": "Avbokad",
       "statusCompleted": "Slutförd",
@@ -2152,13 +2036,8 @@
       "statusOnHold": "Pausad",
       "statusPlanned": "Planerad",
       "tabs": {
-        "addFiles": "Add Files",
-        "basicInfo": "Grundläggande info",
-        "documents": "Dokument",
-        "notes": "Anteckningar",
         "scheduleDosage": "Schema och dosering"
       },
-      "tags": "Taggar",
       "tagsDesc": "Lägg till taggar för att kategorisera och organisera behandlingar",
       "tagsPlaceholder": "Lägg till taggar...",
       "treatmentName": "Behandlingsnamn",
@@ -2195,14 +2074,12 @@
     "noTreatmentsFound": "Inga behandlingar hittades",
     "startAdding": "Börja med att lägga till din första behandling.",
     "title": "Behandlingar",
-    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
     "viewModal": {
       "amountDosage": "Mängd/Dosering",
       "basicInformation": "Grundläggande information",
       "close": "Stäng",
       "conditionId": "Tillstånd #{{id}}",
       "conditionStatus": "Tillståndsstatus",
-      "description": "Beskrivning",
       "diagnosis": "Diagnos",
       "doctor": "Läkare",
       "dosageFrequency": "Dosering och frekvens",
@@ -2214,25 +2091,18 @@
       "notSpecified": "Ej angivet",
       "ongoing": "Ongoing",
       "practice": "Mottagning",
-      "practitioner": "Vårdgivare",
       "practitionerId": "Vårdgivare #{{id}}",
       "relatedCondition": "Relaterat tillstånd",
       "schedule": "Schema",
       "severity": "Allvarlighetsgrad",
       "specialty": "Specialitet",
       "startDate": "Startdatum",
-      "status": "Status",
       "tabs": {
-        "documents": "Dokument",
         "equipment": "Equipment",
         "labs": "Labs",
-        "medications": "Medications",
-        "notes": "Anteckningar",
-        "overview": "Översikt",
         "schedule": "Schema och dosering",
         "visits": "Visits"
       },
-      "tags": "Taggar",
       "title": "Behandlingsdetaljer",
       "treatmentName": "Behandlingsnamn",
       "treatmentNotes": "Behandlingsanteckningar",
@@ -2262,11 +2132,7 @@
       "addVisit": "Lägg till besök",
       "savingVisit": "Sparar besök...",
       "tabs": {
-        "addFiles": "Lägg till filer",
         "clinical": "Kliniskt",
-        "documents": "Dokument",
-        "labResults": "Labbresultat",
-        "notes": "Anteckningar",
         "visitInfo": "Besöksinformation"
       },
       "updateVisit": "Uppdatera besök"
@@ -2281,7 +2147,6 @@
       "visitDate": "Besöksdatum"
     },
     "title": "Medicinska besök",
-    "tryAdjustingFilters": "Försök justera din sökning eller filterkriterier.",
     "viewModal": {
       "additionalNotes": "Ytterligare anteckningar",
       "attachedDocuments": "Bifogade dokument",
@@ -2300,9 +2165,6 @@
       "specialty": "Specialitet",
       "tabs": {
         "clinical": "Kliniskt",
-        "documents": "Dokument",
-        "labResults": "Labbresultat",
-        "notes": "Anteckningar",
         "visitInfo": "Besöksinformation"
       },
       "title": "Besök - {{date}}",
@@ -2340,7 +2202,6 @@
         "clinic": "Mottagning",
         "home": "Hemma",
         "hospital": "Sjukhus",
-        "other": "Övrigt",
         "pharmacy": "Apotek",
         "urgentCare": "Akutmottagning"
       },
@@ -2432,7 +2293,6 @@
       "glucoseContext": "Mättyp",
       "glucoseContextPlaceholder": "Valfritt",
       "height": "Längd",
-      "notes": "Anteckningar",
       "painScale": "Smärtskala",
       "physicalMeasurements": "Fysiska mätningar",
       "practitionerId": "Vårdgivar-ID",
@@ -2486,7 +2346,6 @@
     "tabs": {
       "context": "Kontext",
       "dateTime": "Datum och tid",
-      "notes": "Anteckningar",
       "vitalSigns": "Vitalparametrar"
     },
     "title": "Vitalparametrar",

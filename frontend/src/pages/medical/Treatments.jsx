@@ -41,7 +41,7 @@ import {
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 
 const Treatments = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -445,7 +445,7 @@ const Treatments = () => {
               emoji="🩹"
               title={t('treatments.noTreatmentsFound', 'No Treatments Found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('treatments.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('treatments.startAdding', 'Start by adding your first treatment.')}
               actionButton={
                 <Button variant="filled" onClick={handleAddTreatment}>

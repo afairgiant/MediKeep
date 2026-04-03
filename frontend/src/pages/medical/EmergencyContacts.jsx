@@ -44,7 +44,7 @@ import { phoneTelHref } from '../../utils/phoneUtils';
 import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [viewMode, setViewMode] = usePersistedViewMode('emergency-contacts');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
   const navigate = useNavigate();
@@ -302,7 +302,7 @@ const EmergencyContacts = () => {
                     <Title order={3}>{t('emergencyContacts.page.noContacts')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? t('emergencyContacts.page.filterDescription')
+                        ? t('shared:emptyStates.adjustSearch')
                         : t('emergencyContacts.page.noContactsDescription')}
                     </Text>
                   </Stack>
@@ -492,7 +492,7 @@ const EmergencyContacts = () => {
                   { header: t('emergencyContacts.table.phone'), accessor: 'phone_number', priority: 'low', width: 150 },
                   { header: t('emergencyContacts.table.email'), accessor: 'email', priority: 'medium', width: 150 },
                   { header: t('emergencyContacts.table.primary'), accessor: 'is_primary', priority: 'high', width: 150 },
-                  { header: t('emergencyContacts.table.status'), accessor: 'is_active', priority: 'low', width: 150 }
+                  { header: t('shared:fields.status'), accessor: 'is_active', priority: 'low', width: 150 }
                 ]}
                 patientData={currentPatient}
                 tableName={t('emergencyContacts.page.tableName')}

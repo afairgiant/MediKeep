@@ -22,7 +22,7 @@ const emptyForm = {
 };
 
 const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
-  const { t } = useTranslation(['common', 'medical']);
+  const { t } = useTranslation(['common', 'medical', 'shared']);
   const isEditing = Boolean(practiceData);
   const [formData, setFormData] = useState(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -143,7 +143,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
           onChange={handleChange('patient_portal_url')}
         />
         <Textarea
-          label={t('medical:practices.form.notes.label')}
+          label={t('shared:tabs.notes')}
           placeholder={t('medical:practices.form.notes.placeholder')}
           description={t('medical:practices.form.notes.description')}
           value={formData.notes}

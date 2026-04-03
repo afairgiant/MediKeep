@@ -87,7 +87,7 @@ const getStatusColor = (status) => ({
 }[status] || 'gray');
 
 const BackupManagement = () => {
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'shared']);
   const { formatDateTime } = useDateFormat();
   const [creating, setCreating] = useState({});
   const [restoring, setRestoring] = useState({});
@@ -893,7 +893,7 @@ const BackupManagement = () => {
                           <Table.Th>{t('backup.existingBackups.tableHeaders.type', 'Type')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.filename', 'Filename')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.size', 'Size')}</Table.Th>
-                          <Table.Th>{t('backup.existingBackups.tableHeaders.status', 'Status')}</Table.Th>
+                          <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.created', 'Created')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.fileExists', 'File Exists')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.actions', 'Actions')}</Table.Th>
@@ -1334,7 +1334,7 @@ const BackupManagement = () => {
                   </div>
                   {previewData.backup_description && (
                     <div>
-                      <Text size="xs" c="dimmed">{t('backup.preview.description', 'Description')}</Text>
+                      <Text size="xs" c="dimmed">{t('shared:labels.description', 'Description')}</Text>
                       <Text size="sm">{previewData.backup_description}</Text>
                     </div>
                   )}
@@ -1382,7 +1382,7 @@ const BackupManagement = () => {
 
 // Inline sub-component for restore preview affected data display
 const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
 
   if (!affectedData || affectedData.error) {
     return (

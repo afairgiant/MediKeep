@@ -81,7 +81,7 @@ function getEntityLink(entry) {
 
 const AuditLog = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'shared']);
   const { formatDateTime } = useDateFormat();
 
   // Pagination
@@ -369,7 +369,7 @@ const AuditLog = () => {
                     <Table.Th>{t('auditLog.tableHeaders.user', 'User')}</Table.Th>
                     <Table.Th>{t('auditLog.tableHeaders.action', 'Action')}</Table.Th>
                     <Table.Th>{t('auditLog.tableHeaders.entityType', 'Entity Type')}</Table.Th>
-                    <Table.Th>{t('auditLog.tableHeaders.description', 'Description')}</Table.Th>
+                    <Table.Th>{t('shared:labels.description', 'Description')}</Table.Th>
                     <Table.Th>{t('auditLog.tableHeaders.recordId', 'Record ID')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>

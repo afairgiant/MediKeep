@@ -31,10 +31,7 @@
     "breakdownByType": "Aufschlüsselung nach Typ",
     "chartLabels": {
       "allergies": "Allergien",
-      "labResults": "Laborergebnisse",
-      "medications": "Medikamente",
       "patients": "Patienten",
-      "procedures": "Eingriffe",
       "userActivity": "Benutzeraktivität",
       "vitals": "Vitalzeichen"
     },
@@ -77,7 +74,6 @@
     "system": "System",
     "tableHeaders": {
       "action": "Aktion",
-      "description": "Beschreibung",
       "entityType": "Entitätstyp",
       "recordId": "Datensatz-ID",
       "timestamp": "Zeitstempel",
@@ -103,7 +99,6 @@
         "fileExists": "Datei vorhanden",
         "filename": "Dateiname",
         "size": "Größe",
-        "status": "Status",
         "type": "Typ"
       },
       "title": "Vorhandene Sicherungen",
@@ -169,7 +164,6 @@
       "createdAt": "Erstellt: {{date}}",
       "currentDatabase": "Aktuelle Datenbank",
       "currentFiles": "Aktuelle Dateien",
-      "description": "Beschreibung",
       "filesCount": "{{count}} Dateien ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
@@ -351,8 +345,6 @@
       "activePrescriptions": "{{count}} aktive Verordnungen",
       "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Laborergebnisse",
-      "medications": "Medikamente",
       "recentRegistrations": "+{{count}} diese Woche",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
@@ -379,7 +371,6 @@
       "fileManagement": "Dateiverwaltung",
       "healthcareDirectory": "Gesundheitsverzeichnis",
       "medicalRecords": "Medizinische Akten",
-      "other": "Sonstiges",
       "patientSupport": "Patientenunterstützung",
       "sharingAccess": "Freigabe & Zugriff",
       "system": "System"
@@ -599,7 +590,9 @@
     "usernameUpdated": "Benutzername aktualisiert",
     "usernameUpdatedMessage": "Ihr Benutzername wurde geändert. Bitte melden Sie sich mit Ihrem neuen Benutzernamen an: \"{{username}}\"",
     "viewRecord": "{{modelName}} anzeigen",
-    "visibleColumns": "Sichtbare Spalten"
+    "visibleColumns": "Sichtbare Spalten",
+    "searchResult": "{{count}} Ergebnisse für \"{{query}}\"",
+    "bulkDeleteWarning": "Sie sind dabei, {{count}} {{modelName}}-Datensätze dauerhaft zu löschen."
   },
   "settings": {
     "dataRetention": {
@@ -645,7 +638,6 @@
       "backupManagement": "Sicherungsverwaltung",
       "dataModels": "Datenmodelle",
       "maintenance": "Wartung",
-      "overview": "Übersicht",
       "settings": "Einstellungen",
       "systemHealth": "Systemzustand",
       "trash": "Papierkorb",
@@ -823,7 +815,6 @@
       "fullName": "Vollständiger Name",
       "lastLogin": "Letzte Anmeldung",
       "role": "Rolle",
-      "status": "Status",
       "user": "Benutzer"
     },
     "title": "Benutzerverwaltung",
@@ -836,6 +827,7 @@
       "deactivateTitle": "Benutzer deaktivieren"
     },
     "userCount_one": "{{count}} Benutzer",
-    "userCount_other": "{{count}} Benutzer"
+    "userCount_other": "{{count}} Benutzer",
+    "userCount": "{{count}} Benutzer"
   }
 }

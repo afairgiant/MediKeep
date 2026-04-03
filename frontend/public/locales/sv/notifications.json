@@ -218,7 +218,6 @@
       "channel": "Kanal",
       "error": "Fel",
       "event": "Händelse",
-      "status": "Status",
       "time": "Tid"
     },
     "loading": "Laddar historik...",

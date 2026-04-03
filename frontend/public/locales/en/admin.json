@@ -31,10 +31,7 @@
     "breakdownByType": "Breakdown by type",
     "chartLabels": {
       "allergies": "Allergies",
-      "labResults": "Lab Results",
-      "medications": "Medications",
       "patients": "Patients",
-      "procedures": "Procedures",
       "userActivity": "User Activity",
       "vitals": "Vitals"
     },
@@ -77,7 +74,6 @@
     "system": "System",
     "tableHeaders": {
       "action": "Action",
-      "description": "Description",
       "entityType": "Entity Type",
       "recordId": "Record ID",
       "timestamp": "Timestamp",
@@ -103,7 +99,6 @@
         "fileExists": "File Exists",
         "filename": "Filename",
         "size": "Size",
-        "status": "Status",
         "type": "Type"
       },
       "title": "Existing Backups",
@@ -169,7 +164,6 @@
       "createdAt": "Created: {{date}}",
       "currentDatabase": "Current Database",
       "currentFiles": "Current Files",
-      "description": "Description",
       "filesCount": "{{count}} files ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
@@ -351,8 +345,6 @@
       "activePrescriptions": "{{count}} active prescriptions",
       "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Lab Results",
-      "medications": "Medications",
       "recentRegistrations": "+{{count}} this week",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
@@ -379,7 +371,6 @@
       "fileManagement": "File Management",
       "healthcareDirectory": "Healthcare Directory",
       "medicalRecords": "Medical Records",
-      "other": "Other",
       "patientSupport": "Patient Support",
       "sharingAccess": "Sharing & Access",
       "system": "System"
@@ -599,7 +590,9 @@
     "usernameUpdated": "Username updated",
     "usernameUpdatedMessage": "Your username has been changed. Please log in with your new username: \"{{username}}\"",
     "viewRecord": "View {{modelName}}",
-    "visibleColumns": "Visible columns"
+    "visibleColumns": "Visible columns",
+    "searchResult": "{{count}} results for \"{{query}}\"",
+    "bulkDeleteWarning": "You are about to permanently delete {{count}} {{modelName}} records."
   },
   "settings": {
     "dataRetention": {
@@ -645,7 +638,6 @@
       "backupManagement": "Backup Management",
       "dataModels": "Data Models",
       "maintenance": "Maintenance",
-      "overview": "Overview",
       "settings": "Settings",
       "systemHealth": "System Health",
       "trash": "Trash",
@@ -823,7 +815,6 @@
       "fullName": "Full Name",
       "lastLogin": "Last Login",
       "role": "Role",
-      "status": "Status",
       "user": "User"
     },
     "title": "User Management",
@@ -836,6 +827,7 @@
       "deactivateTitle": "Deactivate User"
     },
     "userCount_one": "{{count}} user",
-    "userCount_other": "{{count}} users"
+    "userCount_other": "{{count}} users",
+    "userCount": "{{count}} users"
   }
 }

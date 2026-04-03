@@ -154,7 +154,7 @@ export const visitFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:visits.form.fields.additionalNotes.placeholder',
     descriptionKey: 'medical:visits.form.fields.additionalNotes.description',
     gridColumn: 12,

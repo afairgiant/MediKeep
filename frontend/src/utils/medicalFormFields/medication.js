@@ -106,7 +106,7 @@ export const medicationFormFields = [
     name: 'status',
     section: 'details',
     type: 'select',
-    labelKey: 'common:fields.status.label',
+    labelKey: 'shared:fields.status',
     descriptionKey: 'common:fields.status.description',
     gridColumn: 4,
     options: [
@@ -164,7 +164,7 @@ export const medicationFormFields = [
     name: 'notes',
     section: 'notes',
     type: 'textarea',
-    labelKey: 'common:fields.notes.label',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'common:fields.notes.placeholder',
     descriptionKey: 'common:fields.notes.description',
     gridColumn: 12,

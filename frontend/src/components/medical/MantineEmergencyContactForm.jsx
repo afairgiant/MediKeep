@@ -35,7 +35,7 @@ const MantineEmergencyContactForm = ({
   isLoading = false,
   statusMessage,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -149,7 +149,7 @@ const MantineEmergencyContactForm = ({
                 {t('medical:emergencyContacts.tabs.details')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('medical:emergencyContacts.tabs.notes')}
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -255,7 +255,7 @@ const MantineEmergencyContactForm = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('common:fields.notes.label')}
+                  label={t('shared:tabs.notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('medical:emergencyContacts.form.notes.placeholder')}

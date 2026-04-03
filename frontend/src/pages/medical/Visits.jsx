@@ -41,7 +41,7 @@ import VisitViewModal from '../../components/medical/visits/VisitViewModal';
 import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
 
 const Visits = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('visits');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
@@ -519,7 +519,7 @@ const Visits = () => {
               icon={IconShieldCheck}
               title={t('visits.noVisitsFound', 'No medical visits found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('visits.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('visits.clickToGetStarted', 'Click "Add New Visit" to get started.')}
             />
           ) : viewMode === 'cards' ? (
@@ -551,10 +551,10 @@ const Visits = () => {
                   { header: t('visits.table.reason', 'Reason'), accessor: 'reason', priority: 'high', width: 150 },
                   { header: t('visits.table.visitType', 'Visit Type'), accessor: 'visit_type', priority: 'medium', width: 120 },
                   { header: t('visits.table.facility', 'Facility'), accessor: 'location', priority: 'medium', width: 150 },
-                  { header: t('labels.practitioner', 'Practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 200 },
+                  { header: t('shared:fields.practitioner', 'Practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 200 },
                   { header: t('visits.table.relatedCondition', 'Related Condition'), accessor: 'condition_name', priority: 'low', width: 200 },
                   { header: t('visits.table.diagnosis', 'Diagnosis'), accessor: 'diagnosis', priority: 'medium', width: 150 },
-                  { header: t('labels.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 }
+                  { header: t('shared:tabs.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 }
                 ]}
                 patientData={currentPatient}
                 tableName="Visit History"

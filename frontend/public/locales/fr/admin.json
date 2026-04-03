@@ -31,10 +31,7 @@
     "breakdownByType": "Répartition par type",
     "chartLabels": {
       "allergies": "Allergies",
-      "labResults": "Résultats d'analyse",
-      "medications": "Médicaments",
       "patients": "Patients",
-      "procedures": "Procédures",
       "userActivity": "Activité des utilisateurs",
       "vitals": "Signes vitaux"
     },
@@ -79,7 +76,6 @@
     "system": "Système",
     "tableHeaders": {
       "action": "Action",
-      "description": "Description",
       "entityType": "Type d'entité",
       "recordId": "ID de l'entrée",
       "timestamp": "Horodatage",
@@ -106,7 +102,6 @@
         "fileExists": "Fichier existant",
         "filename": "Nom de fichier",
         "size": "Taille",
-        "status": "Statut",
         "type": "Type"
       },
       "title": "Backups existants",
@@ -173,7 +168,6 @@
       "createdAt": "Créé le : {{date}}",
       "currentDatabase": "Base de données actuelle",
       "currentFiles": "Fichiers actuels",
-      "description": "Description",
       "filesCount": "{{count}} fichier(s) ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
@@ -363,8 +357,6 @@
       "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_many": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Résultats d'analyse",
-      "medications": "Médications",
       "recentRegistrations": "+{{count}} cette semaine",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
@@ -392,7 +384,6 @@
       "fileManagement": "Gestion des fichiers",
       "healthcareDirectory": "Répertoire de santé",
       "medicalRecords": "Données médicales",
-      "other": "Autre",
       "patientSupport": "Support patient",
       "sharingAccess": "Partage & Accès",
       "system": "Système"
@@ -545,9 +536,9 @@
     "backToModel": "Retour à {{modelName}}",
     "bulkDeleteAssociated": "Toutes les données associées (y compris {{types}}) seront également supprimées.",
     "bulkDeleteFailed": "Echec de la suppression de masse",
-    "bulkDeleteWarning_one": "Vous êtes sur le point de supprimer définitivement {{count}} entrée de type {{modelName}}.",
+    "bulkDeleteWarning_one": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrement {{modelName}}.",
     "bulkDeleteWarning_many": "",
-    "bulkDeleteWarning_other": "Vous êtes sur le point de supprimer définitivement {{count}} entrées de type {{modelName}}.",
+    "bulkDeleteWarning_other": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrements {{modelName}}.",
     "changeRole": "Changer le rôle",
     "changesSaved": "Changements sauvegardés",
     "changeUsername": "Changer le nom d'utilisateur",
@@ -620,7 +611,9 @@
     "usernameUpdated": "Nom d'utilisateur mis à jour",
     "usernameUpdatedMessage": "Votre nom d'utilisateur a été modifié. Veuillez vous connecter avec votre nouveau nom : \"{{username}}\"",
     "viewRecord": "Afficher {{modelName}}",
-    "visibleColumns": "Colonnes visibles"
+    "visibleColumns": "Colonnes visibles",
+    "searchResult": "{{count}} résultats pour \"{{query}}\"",
+    "bulkDeleteWarning": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrements {{modelName}}."
   },
   "settings": {
     "dataRetention": {
@@ -666,7 +659,6 @@
       "backupManagement": "Gestion des backups",
       "dataModels": "Modèles de données",
       "maintenance": "Maintenance",
-      "overview": "Aperçu",
       "settings": "Paramètres",
       "systemHealth": "Santé système",
       "trash": "Corbeille",
@@ -854,7 +846,6 @@
       "fullName": "Nom complet",
       "lastLogin": "Dernière connexion",
       "role": "Rôle",
-      "status": "Statut",
       "user": "Utilisateur"
     },
     "title": "Gestion des utilisateurs",
@@ -868,6 +859,7 @@
     },
     "userCount_one": "{{count}} utilisateur",
     "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} utilisateurs"
+    "userCount_other": "{{count}} utilisateurs",
+    "userCount": "{{count}} utilisateurs"
   }
 }

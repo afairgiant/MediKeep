@@ -12,7 +12,7 @@ const PharmacyCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   const handleError = (error) => {
     logger.error('pharmacy_card_error', {
@@ -65,7 +65,7 @@ const PharmacyCard = ({
         value: pharmacy.phone_number,
       },
       {
-        label: t('pharmacies.card.website'),
+        label: t('shared:labels.website'),
         value: pharmacy.website,
         render: (value) => {
           if (!value) return <Text size="sm" c="dimmed">{t('labels.notSpecified')}</Text>;

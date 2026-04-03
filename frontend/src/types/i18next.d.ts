@@ -7,6 +7,7 @@ import errors from '../../public/locales/en/errors.json';
 import navigation from '../../public/locales/en/navigation.json';
 import notifications from '../../public/locales/en/notifications.json';
 import reportPdf from '../../public/locales/en/reportPdf.json';
+import shared from '../../public/locales/en/shared.json';
 
 declare module 'i18next' {
   interface CustomTypeOptions {
@@ -19,6 +20,7 @@ declare module 'i18next' {
       navigation: typeof navigation;
       notifications: typeof notifications;
       reportPdf: typeof reportPdf;
+      shared: typeof shared;
     };
   }
 }

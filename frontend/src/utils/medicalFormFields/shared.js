@@ -9,7 +9,7 @@ export const tagsFieldConfig = {
   name: 'tags',
   type: 'custom',
   component: 'TagInput',
-  labelKey: 'common:labels.tags',
+  labelKey: 'shared:labels.tags',
   placeholderKey: 'common:fields.tags.placeholder',
   descriptionKey: 'common:fields.tags.description',
   gridColumn: 12,

@@ -53,7 +53,7 @@ const PendingRelationshipsPicker = ({
   onAddEncounter,
   onRemoveEncounter,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const [selectedCondition, setSelectedCondition] = useState('');
   const [conditionNote, setConditionNote] = useState('');
   const [selectedEncounter, setSelectedEncounter] = useState('');
@@ -315,7 +315,7 @@ const LabResultFormWrapper = ({
     { value: 'pulmonology', label: t('labResults.category.pulmonology') },
     { value: 'hearing', label: t('labResults.category.hearing') },
     { value: 'stomatology', label: t('labResults.category.stomatology') },
-    { value: 'other', label: t('labResults.category.other') },
+    { value: 'other', label: t('shared:fields.other') },
   ];
 
   const testTypeOptions = [
@@ -468,19 +468,19 @@ const LabResultFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('labResults.tabs.basicInfo')}
+                {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="results" leftSection={<IconChartBar size={16} />}>
                 {t('labResults.tabs.resultsStatus')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                {editingItem ? t('labResults.tabs.documents') : t('labResults.tabs.addFiles')}
+                {editingItem ? t('shared:tabs.documents') : t('shared:tabs.addFiles')}
               </Tabs.Tab>
               <Tabs.Tab value="relationships" leftSection={<IconLink size={16} />}>
                 {t('labResults.tabs.relationships')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('labResults.tabs.notes')}
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -563,7 +563,7 @@ const LabResultFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('common:fields.tags.label')}
+                        {t('shared:labels.tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('common:fields.tags.description')}
@@ -798,7 +798,7 @@ const LabResultFormWrapper = ({
               loading={isLoading || isSubmitting}
               disabled={!formData.test_name?.trim()}
             >
-              {editingItem ? t('common:buttons.update') : t('common:buttons.create')} {t('labResults.title')}
+              {editingItem ? t('common:buttons.update') : t('common:buttons.create')} {t('shared:categories.lab_results')}
             </SubmitButton>
           </Group>
         </Stack>

@@ -87,7 +87,7 @@ export const procedureFormFields = [
   {
     name: 'description',
     type: 'textarea',
-    labelKey: 'medical:procedures.description.label',
+    labelKey: 'shared:labels.description',
     placeholderKey: 'medical:procedures.description.placeholder',
     descriptionKey: 'medical:procedures.description.description',
     gridColumn: 12,
@@ -106,7 +106,7 @@ export const procedureFormFields = [
   {
     name: 'status',
     type: 'select',
-    labelKey: 'common:labels.status',
+    labelKey: 'shared:fields.status',
     descriptionKey: 'medical:procedures.status.description',
     gridColumn: 4,
     dynamicOptions: 'statuses',
@@ -152,7 +152,7 @@ export const procedureFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'medical:procedures.notes.label',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:procedures.notes.placeholder',
     descriptionKey: 'medical:procedures.notes.description',
     gridColumn: 12,

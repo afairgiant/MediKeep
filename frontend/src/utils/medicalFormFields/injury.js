@@ -87,7 +87,7 @@ export const injuryFormFields = [
   {
     name: 'status',
     type: 'select',
-    labelKey: 'common:labels.status',
+    labelKey: 'shared:fields.status',
     descriptionKey: 'medical:injuries.status.description',
     gridColumn: 6,
     required: true,
@@ -132,7 +132,7 @@ export const injuryFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:injuries.notes.placeholder',
     descriptionKey: 'medical:injuries.notes.description',
     gridColumn: 12,

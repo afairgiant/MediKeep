@@ -31,10 +31,7 @@
     "breakdownByType": "Podział według typu",
     "chartLabels": {
       "allergies": "Alergie",
-      "labResults": "Wyniki laboratoryjne",
-      "medications": "Leki",
       "patients": "Pacjenci",
-      "procedures": "Procedury",
       "userActivity": "Aktywność użytkownika",
       "vitals": "Znaki życiowe"
     },
@@ -81,7 +78,6 @@
     "system": "System",
     "tableHeaders": {
       "action": "Działanie",
-      "description": "Opis",
       "entityType": "Typ encji",
       "recordId": "ID rekordu",
       "timestamp": "Sygnatura czasowa",
@@ -109,7 +105,6 @@
         "fileExists": "Plik istnieje",
         "filename": "Nazwa pliku",
         "size": "Rozmiar",
-        "status": "Status",
         "type": "Typ"
       },
       "title": "Istniejące kopie zapasowe",
@@ -177,7 +172,6 @@
       "createdAt": "Utworzono: {{date}}",
       "currentDatabase": "Bieżąca baza danych",
       "currentFiles": "Bieżące pliki",
-      "description": "Opis",
       "filesCount": "{{count}} plików ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_few": "{{count}} files ({{size}})",
@@ -375,8 +369,6 @@
       "activePrescriptions_few": "{{count}} active prescriptions",
       "activePrescriptions_many": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Wyniki laboratoryjne",
-      "medications": "Leki",
       "recentRegistrations": "+{{count}} w tym tygodniu",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_few": "+{{count}} this week",
@@ -405,7 +397,6 @@
       "fileManagement": "Zarządzanie plikami",
       "healthcareDirectory": "Katalog opieki zdrowotnej",
       "medicalRecords": "Akta medyczne",
-      "other": "Inne",
       "patientSupport": "Wsparcie pacjentów",
       "sharingAccess": "Udostępnianie i dostęp",
       "system": "System"
@@ -559,10 +550,10 @@
     "backToModel": "Powrót do {{modelName}}",
     "bulkDeleteAssociated": "Wszystkie powiązane dane (w tym {{types}}) również zostaną usunięte.",
     "bulkDeleteFailed": "Usunięcie zbiorcze nie powiodło się",
-    "bulkDeleteWarning_one": "Masz zamiar trwale usunąć {{count}} rekordu {{modelName}}.",
+    "bulkDeleteWarning_one": "Zamierzasz trwale usunąć {{count}} rekord {{modelName}}.",
     "bulkDeleteWarning_few": "",
     "bulkDeleteWarning_many": "",
-    "bulkDeleteWarning_other": "Masz zamiar trwale usunąć {{count}} rekordów {{modelName}}.",
+    "bulkDeleteWarning_other": "Zamierzasz trwale usunąć {{count}} rekordów {{modelName}}.",
     "changeRole": "Zmień rolę",
     "changesSaved": "Zmiany zapisane",
     "changeUsername": "Zmień nazwę użytkownika",
@@ -641,7 +632,9 @@
     "usernameUpdated": "Nazwa użytkownika zaktualizowana",
     "usernameUpdatedMessage": "Twoja nazwa użytkownika została zmieniona. Zaloguj się przy użyciu nowej nazwy użytkownika: \"{{username}}\"",
     "viewRecord": "Wyświetl {{modelName}}",
-    "visibleColumns": "Widoczne kolumny"
+    "visibleColumns": "Widoczne kolumny",
+    "searchResult": "{{count}} wyników dla \"{{query}}\"",
+    "bulkDeleteWarning": "Zamierzasz trwale usunąć {{count}} rekordów {{modelName}}."
   },
   "settings": {
     "dataRetention": {
@@ -687,7 +680,6 @@
       "backupManagement": "Zarządzanie kopiami zapasowymi",
       "dataModels": "Modele danych",
       "maintenance": "Konserwacja",
-      "overview": "Przegląd",
       "settings": "Ustawienia",
       "systemHealth": "Stan systemu",
       "trash": "Kosz",
@@ -885,7 +877,6 @@
       "fullName": "Pełna nazwa",
       "lastLogin": "Ostatnie logowanie",
       "role": "Rola",
-      "status": "Status",
       "user": "Użytkownik"
     },
     "title": "Zarządzanie użytkownikami",
@@ -900,6 +891,7 @@
     "userCount_one": "{{count}} użytkownik",
     "userCount_few": "{{count}} users",
     "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} użytkowników"
+    "userCount_other": "{{count}} użytkowników",
+    "userCount": "{{count}} użytkowników"
   }
 }

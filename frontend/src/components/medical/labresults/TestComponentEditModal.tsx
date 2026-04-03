@@ -38,7 +38,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
   onClose,
   onSubmit
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [formData, setFormData] = useState<Partial<LabTestComponent>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -461,7 +461,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
 
           {/* Notes */}
           <Textarea
-            label={t('labels.notes', 'Notes')}
+            label={t('shared:tabs.notes', 'Notes')}
             placeholder={t('testComponents.editModal.placeholders.notes', 'Additional notes about this test result')}
             rows={3}
             value={formData.notes || ''}

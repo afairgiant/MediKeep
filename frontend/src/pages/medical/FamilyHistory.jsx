@@ -60,7 +60,7 @@ import { useTranslation } from 'react-i18next';
 // Removed style constants - now handled in extracted components
 
 const FamilyHistory = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -1099,7 +1099,7 @@ const FamilyHistory = () => {
                   { header: t('familyHistory.table.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
                   { header: t('labels.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
                   { header: t('familyHistory.table.diagnosisAge', 'Diagnosis Age'), accessor: 'diagnosis_age', priority: 'low', width: 120 },
-                  { header: t('labels.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
+                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
                 ]}
                 patientData={currentPatient}
                 tableName={t('familyHistory.title', 'Family History')}
@@ -1218,7 +1218,7 @@ const FamilyHistory = () => {
                   { header: t('familyHistory.table.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
                   { header: t('labels.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
                   { header: t('familyHistory.table.diagnosisAge', 'Diagnosis Age'), accessor: 'diagnosis_age', priority: 'low', width: 120 },
-                  { header: t('labels.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
+                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
                   { header: t('familyHistory.table.sharedBy', 'Shared By'), accessor: 'shared_by', priority: 'medium', width: 150 },
                 ]}
                 patientData={currentPatient}

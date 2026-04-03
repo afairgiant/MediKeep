@@ -18,7 +18,7 @@ const TreatmentCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -114,7 +114,7 @@ const TreatmentCard = ({
         render: (value) => value || t('common:labels.notSpecified')
       },
       {
-        label: t('common:labels.description'),
+        label: t('shared:labels.description'),
         value: treatment.description,
         render: (value) => value || t('common:labels.notSpecified'),
         style: { flex: 1 }

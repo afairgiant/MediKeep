@@ -74,7 +74,7 @@ export const treatmentFormFields = [
   {
     name: 'practitioner_id',
     type: 'select',
-    labelKey: 'medical:treatments.practitioner.label',
+    labelKey: 'shared:fields.practitioner',
     placeholderKey: 'medical:treatments.practitioner.placeholder',
     descriptionKey: 'medical:treatments.practitioner.description',
     gridColumn: 6,

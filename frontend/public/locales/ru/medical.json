@@ -14,8 +14,7 @@
         "environmental": "Экологическая",
         "food": "Пищевая",
         "insect": "На насекомых",
-        "medication": "Лекарственная",
-        "other": "Другое"
+        "medication": "Лекарственная"
       },
       "placeholder": "Выберите тип аллергии"
     },
@@ -23,15 +22,8 @@
     "clinicalNotes": "Clinical Notes",
     "editTitle": "Редактировать аллергию",
     "emptyState": {
-      "filtered": "Попробуйте изменить параметры поиска или фильтрации.",
       "noData": "Нажмите \"Добавить аллергию\", чтобы начать.",
       "title": "Аллергии не найдены"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "messages": {
       "loading": "Загрузка аллергий...",
@@ -59,7 +51,6 @@
       "options": {
         "anaphylaxis": "Анафилаксия",
         "gastrointestinal": "Желудочно-кишечная",
-        "other": "Другое",
         "respiratory": "Респираторная",
         "skin": "Кожная реакция"
       },
@@ -78,10 +69,6 @@
       "description": "Текущий статус аллергии"
     },
     "tabs": {
-      "basicInfo": "Основная информация",
-      "documents": "Документы",
-      "notes": "Заметки",
-      "overview": "Overview",
       "reactionDetails": "Детали реакции"
     },
     "title": "Аллергии",
@@ -93,7 +80,6 @@
   "componentCatalog": {
     "fetchError": "Не удалось загрузить каталог анализов",
     "filterCategory": "Категория",
-    "filterStatus": "Статус",
     "noData": "Добавьте результаты анализов с компонентами, чтобы увидеть их здесь.",
     "noResults": "Компоненты анализов не найдены",
     "readingCount": "{{count}} измерений",
@@ -127,8 +113,7 @@
       "increasing": "Повышение",
       "stable": "Стабильно",
       "worsening": "Ухудшение"
-    },
-    "tryAdjusting": "Попробуйте изменить параметры поиска или фильтрации."
+    }
   },
   "conditions": {
     "codeDescription": {
@@ -225,16 +210,13 @@
     },
     "tabs": {
       "contactInfo": "Контактная информация",
-      "details": "Подробности",
-      "notes": "Заметки"
+      "details": "Подробности"
     },
     "title": "Экстренные контакты"
   },
   "equipment": {
     "tabs": {
-      "basicInfo": "Основная информация",
       "deviceDetails": "Детали устройства",
-      "notes": "Заметки",
       "serviceDates": "Обслуживание и даты"
     }
   },
@@ -278,8 +260,8 @@
         },
         "status": {
           "description": "Текущий статус заболевания",
-          "label": "Статус",
-          "placeholder": "Выберите статус"
+          "placeholder": "Выберите статус",
+          "label": "Статус"
         },
         "statusOptions": {
           "active": "Активный — Текущее заболевание",
@@ -322,7 +304,7 @@
         "genderOptions": {
           "female": "Женский",
           "male": "Мужской",
-          "other": "Другой"
+          "other": "Другое"
         },
         "name": {
           "description": "Полное имя члена семьи",
@@ -346,11 +328,11 @@
           "maternalGrandfather": "Дедушка по матери",
           "maternalGrandmother": "Бабушка по матери",
           "mother": "Мать",
-          "other": "Другое",
           "paternalGrandfather": "Дедушка по отцу",
           "paternalGrandmother": "Бабушка по отцу",
           "sister": "Сестра",
-          "uncle": "Дядя"
+          "uncle": "Дядя",
+          "other": "Другое"
         }
       }
     }
@@ -396,7 +378,6 @@
       "johnsonJohnson": "Johnson & Johnson",
       "merck": "Merck",
       "moderna": "Moderna",
-      "other": "Другое",
       "pfizerBioNTech": "Pfizer-BioNTech",
       "sanofi": "Sanofi"
     },
@@ -407,7 +388,6 @@
     },
     "notes": {
       "description": "Любые существенные сведения о прививке",
-      "label": "Заметки",
       "placeholder": "Дополнительные заметки об этой прививке..."
     },
     "route": {
@@ -463,15 +443,8 @@
     },
     "editTitle": "Редактировать травму",
     "emptyState": {
-      "filtered": "Попробуйте изменить параметры поиска или фильтрации.",
       "noData": "Нажмите \"Добавить травму\", чтобы начать.",
       "title": "Травмы не найдены"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "injuryDate": {
       "description": "Когда произошла травма",
@@ -534,7 +507,6 @@
     },
     "status": {
       "description": "Текущий статус этой травмы",
-      "label": "Статус",
       "options": {
         "active": "Активный — В процессе лечения",
         "chronic": "Хроническая — Долгосрочные последствия",
@@ -543,10 +515,6 @@
       }
     },
     "tabs": {
-      "basicInfo": "Основная информация",
-      "documents": "Документы",
-      "notes": "Заметки",
-      "overview": "Обзор",
       "treatment": "Лечение"
     },
     "title": "Травмы",
@@ -758,9 +726,9 @@
           "hdhp": "HDHP (High Deductible Health Plan)",
           "hmo": "HMO (Health Maintenance Organization)",
           "indemnity": "Индемнити (Fee-for-Service)",
-          "other": "Другое",
           "pos": "POS (Point of Service)",
-          "ppo": "PPO (Preferred Provider Organization)"
+          "ppo": "PPO (Preferred Provider Organization)",
+          "other": "Другое"
         },
         "placeholder": "Выберите тип плана"
       },
@@ -804,9 +772,9 @@
         "options": {
           "child": "Ребёнок",
           "dependent": "Иждивенец",
-          "other": "Другое",
           "self": "Сам",
-          "spouse": "Супруг/супруга"
+          "spouse": "Супруг/супруга",
+          "other": "Другое"
         },
         "placeholder": "Выберите отношение"
       },
@@ -827,13 +795,9 @@
         "placeholder": "Выберите статус"
       },
       "tabs": {
-        "addFiles": "Add Files",
-        "basicInfo": "Basic Info",
         "contact": "Contact",
         "coverage": "Coverage",
-        "documents": "Documents",
-        "member": "Member",
-        "notes": "Notes"
+        "member": "Member"
       },
       "updateInsurance": "Update Insurance",
       "visionPlanType": {
@@ -874,7 +838,6 @@
       "imaging": "Визуализация (рентген, МРТ, КТ)",
       "immunology": "Иммунология",
       "microbiology": "Микробиология",
-      "other": "Другое",
       "pathology": "Патология",
       "pulmonology": "Пульмонология",
       "stomatology": "Стоматология"
@@ -896,7 +859,6 @@
       "linkConditionsTitle": "Связать с заболеваниями",
       "max": "Max",
       "min": "Min",
-      "notes": "Notes",
       "notesOptional": "Notes (optional)",
       "refMax": "Ref Max",
       "refMin": "Ref Min",
@@ -908,7 +870,6 @@
       "searchTests": "Type to search tests...",
       "selectCategory": "Select category",
       "selectResult": "Select result",
-      "status": "Status",
       "statusIndicator": "Индикатор статуса:",
       "testCode": "Test Code",
       "testCodePlaceholder": "e.g., 718-7",
@@ -955,10 +916,6 @@
       "ordered": "Назначен — Анализ запрошен"
     },
     "tabs": {
-      "addFiles": "Добавить файлы",
-      "basicInfo": "Основная информация",
-      "documents": "Документы",
-      "notes": "Заметки",
       "relationships": "Связи",
       "resultsStatus": "Результаты и статус"
     },
@@ -998,8 +955,7 @@
       "description": "Приоритет или срочность анализа",
       "label": "Тип анализа",
       "placeholder": "Выберите уровень срочности"
-    },
-    "title": "Результаты анализов"
+    }
   },
   "medications": {
     "alternativeName": {
@@ -1079,12 +1035,8 @@
       "placeholder": "Перечислите известные или испытанные побочные эффекты..."
     },
     "tabs": {
-      "addFiles": "Add Files",
-      "basicInfo": "Основная информация",
       "conditions": "Заболевания",
-      "details": "Подробности",
-      "documents": "Документы",
-      "notes": "Заметки"
+      "details": "Подробности"
     }
   },
   "pharmacies": {
@@ -1104,14 +1056,14 @@
           "krogerPharmacy": "Kroger Pharmacy",
           "meijerPharmacy": "Meijer Pharmacy",
           "onlinePharmacy": "Онлайн-аптека",
-          "other": "Другое",
           "publixPharmacy": "Publix Pharmacy",
           "riteAid": "Rite Aid",
           "safewayPharmacy": "Safeway Pharmacy",
           "specialtyPharmacy": "Специализированная аптека",
           "targetPharmacy": "Target Pharmacy",
           "walgreens": "Walgreens",
-          "walmartPharmacy": "Walmart Pharmacy"
+          "walmartPharmacy": "Walmart Pharmacy",
+          "other": "Другое"
         },
         "placeholder": "Выберите аптечную сеть или тип"
       },
@@ -1180,7 +1132,6 @@
       },
       "notes": {
         "description": "Любая дополнительная информация о клинике",
-        "label": "Заметки",
         "placeholder": "Дополнительные заметки об этой клинике..."
       },
       "patientPortal": {
@@ -1233,7 +1184,6 @@
       },
       "website": {
         "description": "Профессиональный веб-сайт или страница клиники",
-        "label": "Веб-сайт",
         "placeholder": "https://www.example.com"
       }
     }
@@ -1263,7 +1213,6 @@
     },
     "description": {
       "description": "Подробное описание того, что включает процедура",
-      "label": "Описание",
       "placeholder": "Подробно опишите процедуру..."
     },
     "facility": {
@@ -1273,7 +1222,6 @@
     },
     "notes": {
       "description": "Любые существенные наблюдения, пред-/послеоперационные инструкции или подробности",
-      "label": "Заметки",
       "placeholder": "Дополнительные заметки о процедуре..."
     },
     "outcome": {
@@ -1464,11 +1412,7 @@
       }
     },
     "tabs": {
-      "addFiles": "Добавить файлы",
-      "basicInfo": "Основная информация",
-      "details": "Подробности",
-      "documents": "Документы",
-      "notes": "Заметки"
+      "details": "Подробности"
     },
     "title": "Симптомы"
   },
@@ -1516,7 +1460,6 @@
     },
     "practitioner": {
       "description": "Назначить врача на это лечение",
-      "label": "Лечащий врач",
       "placeholder": "Выберите врача (необязательно)"
     },
     "relatedCondition": {

@@ -31,10 +31,7 @@
     "breakdownByType": "Desglose por tipo",
     "chartLabels": {
       "allergies": "Alergias",
-      "labResults": "Resultados de laboratorio",
-      "medications": "Medicamentos",
       "patients": "Pacientes",
-      "procedures": "Procedimientos",
       "userActivity": "Actividad de usuario",
       "vitals": "Signos vitales"
     },
@@ -79,7 +76,6 @@
     "system": "Sistema",
     "tableHeaders": {
       "action": "Accion",
-      "description": "Descripcion",
       "entityType": "Tipo de entidad",
       "recordId": "ID del registro",
       "timestamp": "Fecha y hora",
@@ -106,7 +102,6 @@
         "fileExists": "Archivo existente",
         "filename": "Nombre del archivo",
         "size": "Tamano",
-        "status": "Estado",
         "type": "Tipo"
       },
       "title": "Copias de seguridad existentes",
@@ -173,7 +168,6 @@
       "createdAt": "Creado: {{date}}",
       "currentDatabase": "Base de datos actual",
       "currentFiles": "Archivos actuales",
-      "description": "Descripcion",
       "filesCount": "{{count}} archivos ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
@@ -363,8 +357,6 @@
       "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_many": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Resultados de laboratorio",
-      "medications": "Medicamentos",
       "recentRegistrations": "+{{count}} esta semana",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
@@ -392,7 +384,6 @@
       "fileManagement": "Gestion de archivos",
       "healthcareDirectory": "Directorio de salud",
       "medicalRecords": "Registros medicos",
-      "other": "Otros",
       "patientSupport": "Soporte al paciente",
       "sharingAccess": "Compartir y acceso",
       "system": "Sistema"
@@ -545,9 +536,9 @@
     "backToModel": "Volver a {{modelName}}",
     "bulkDeleteAssociated": "Todos los datos asociados (incluyendo {{types}}) tambien seran eliminados.",
     "bulkDeleteFailed": "Error en la eliminacion masiva",
-    "bulkDeleteWarning_one": "Esta a punto de eliminar permanentemente {{count}} registro de {{modelName}}.",
+    "bulkDeleteWarning_one": "Está a punto de eliminar permanentemente {{count}} registro de {{modelName}}.",
     "bulkDeleteWarning_many": "",
-    "bulkDeleteWarning_other": "Esta a punto de eliminar permanentemente {{count}} registros de {{modelName}}.",
+    "bulkDeleteWarning_other": "Está a punto de eliminar permanentemente {{count}} registros de {{modelName}}.",
     "changeRole": "Cambiar rol",
     "changesSaved": "Cambios guardados",
     "changeUsername": "Cambiar nombre de usuario",
@@ -620,7 +611,9 @@
     "usernameUpdated": "Nombre de usuario actualizado",
     "usernameUpdatedMessage": "Su nombre de usuario ha sido cambiado. Inicie sesion con su nuevo nombre de usuario: \"{{username}}\"",
     "viewRecord": "Ver {{modelName}}",
-    "visibleColumns": "Columnas visibles"
+    "visibleColumns": "Columnas visibles",
+    "searchResult": "{{count}} resultados para \"{{query}}\"",
+    "bulkDeleteWarning": "Está a punto de eliminar permanentemente {{count}} registros de {{modelName}}."
   },
   "settings": {
     "dataRetention": {
@@ -666,7 +659,6 @@
       "backupManagement": "Gestion de copias de seguridad",
       "dataModels": "Modelos de datos",
       "maintenance": "Mantenimiento",
-      "overview": "Vista general",
       "settings": "Configuracion",
       "systemHealth": "Estado del sistema",
       "trash": "Papelera",
@@ -854,7 +846,6 @@
       "fullName": "Nombre completo",
       "lastLogin": "Ultimo inicio de sesion",
       "role": "Rol",
-      "status": "Estado",
       "user": "Usuario"
     },
     "title": "Gestion de usuarios",
@@ -868,6 +859,7 @@
     },
     "userCount_one": "{{count}} usuario",
     "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} usuarios"
+    "userCount_other": "{{count}} usuarios",
+    "userCount": "{{count}} usuarios"
   }
 }

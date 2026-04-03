@@ -68,7 +68,7 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['navigation', 'common']);
+  const { t } = useTranslation(['navigation', 'common', 'shared']);
   const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const { isMobile } = useViewport();
@@ -298,12 +298,12 @@ const Dashboard = () => {
       color: 'green',
     },
     {
-      label: t('dashboard.stats.labResults', 'Lab Results'),
+      label: t('shared:categories.lab_results', 'Lab Results'),
       value: dashboardStats?.total_lab_results?.toString() || '0',
       color: 'orange',
     },
     {
-      label: t('dashboard.stats.procedures', 'Procedures'),
+      label: t('shared:categories.procedures', 'Procedures'),
       value: dashboardStats?.total_procedures?.toString() || '0',
       color: 'violet',
     },
@@ -318,13 +318,13 @@ const Dashboard = () => {
       link: '/patients/me',
     },
     {
-      title: t('dashboard.modules.medications', 'Medications'),
+      title: t('shared:categories.medications', 'Medications'),
       icon: IconPill,
       color: 'green',
       link: '/medications',
     },
     {
-      title: t('dashboard.modules.labResults', 'Lab Results'),
+      title: t('shared:categories.lab_results', 'Lab Results'),
       icon: IconFlask,
       color: 'teal',
       link: '/lab-results',
@@ -339,7 +339,7 @@ const Dashboard = () => {
       link: '/treatments',
     },
     {
-      title: t('dashboard.modules.procedures', 'Procedures'),
+      title: t('shared:categories.procedures', 'Procedures'),
       icon: IconMedicalCross,
       color: 'indigo',
       link: '/procedures',

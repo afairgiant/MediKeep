@@ -45,7 +45,7 @@ const ProcedureFormWrapper = ({
   onFileUploadComplete,
   onError,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -149,18 +149,18 @@ const ProcedureFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('procedures.form.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
                 {t('procedures.form.tabs.clinical', 'Clinical Details')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('procedures.form.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingItem
-                  ? t('procedures.form.tabs.documents', 'Documents')
-                  : t('procedures.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -214,7 +214,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('procedures.form.status', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       value={formData.status || null}
                       data={[
                         { value: 'scheduled', label: t('procedures.form.statusScheduled', 'Scheduled') },
@@ -254,7 +254,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('procedures.form.practitioner', 'Practitioner')}
+                      label={t('shared:fields.practitioner', 'Practitioner')}
                       value={formData.practitioner_id || null}
                       data={practitioners.map(prac => ({
                         value: prac.id.toString(),
@@ -302,7 +302,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('procedures.form.description', 'Description')}
+                      label={t('shared:labels.description', 'Description')}
                       value={formData.description || ''}
                       onChange={handleTextInputChange('description')}
                       placeholder={t('procedures.form.descriptionPlaceholder', 'Describe the procedure')}
@@ -315,7 +315,7 @@ const ProcedureFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('procedures.form.tags', 'Tags')}
+                        {t('shared:labels.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('procedures.form.tagsDesc', 'Add tags to categorize and organize procedures')}

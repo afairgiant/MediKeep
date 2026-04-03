@@ -24,7 +24,7 @@ const PharmacyViewModal = ({
   onEdit,
   navigate,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   const handleError = (error) => {
     logger.error('pharmacy_view_modal_error', {
@@ -182,7 +182,7 @@ const PharmacyViewModal = ({
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={120}>
-                    {t('pharmacies.viewModal.website', 'Website')}:
+                    {t('shared:labels.website', 'Website')}:
                   </Text>
                   <Text size="sm" c={pharmacy.website ? 'inherit' : 'dimmed'}>
                     {pharmacy.website ? (

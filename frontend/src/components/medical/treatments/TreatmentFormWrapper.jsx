@@ -66,7 +66,7 @@ const TreatmentFormWrapper = ({
   onFileUploadComplete,
   onError,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -299,7 +299,7 @@ const TreatmentFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('treatments.form.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               {formData.mode !== 'advanced' && (
                 <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
@@ -356,11 +356,11 @@ const TreatmentFormWrapper = ({
               )}
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingTreatment
-                  ? t('treatments.form.tabs.documents', 'Documents')
-                  : t('treatments.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('treatments.form.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -456,7 +456,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('treatments.form.status', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       value={formData.status || null}
                       data={[
                         { value: 'planned', label: t('treatments.form.statusPlanned', 'Planned') },
@@ -495,7 +495,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('treatments.form.practitioner', 'Practitioner')}
+                      label={t('shared:fields.practitioner', 'Practitioner')}
                       value={formData.practitioner_id || null}
                       data={practitionersOptions.map(prac => ({
                         value: prac.id.toString(),
@@ -547,7 +547,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('treatments.form.description', 'Description')}
+                      label={t('shared:labels.description', 'Description')}
                       value={formData.description || ''}
                       onChange={handleTextInputChange('description')}
                       placeholder={t('treatments.form.descriptionPlaceholder', 'Describe the treatment')}
@@ -560,7 +560,7 @@ const TreatmentFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('treatments.form.tags', 'Tags')}
+                        {t('shared:labels.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('treatments.form.tagsDesc', 'Add tags to categorize and organize treatments')}

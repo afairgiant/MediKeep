@@ -31,10 +31,7 @@
     "breakdownByType": "Uppdelning per typ",
     "chartLabels": {
       "allergies": "Allergier",
-      "labResults": "Labbresultat",
-      "medications": "Mediciner",
       "patients": "Patienter",
-      "procedures": "Ingrepp",
       "userActivity": "Användaraktivitet",
       "vitals": "Vitalparametrar"
     },
@@ -77,7 +74,6 @@
     "system": "System",
     "tableHeaders": {
       "action": "Åtgärd",
-      "description": "Beskrivning",
       "entityType": "Enhetstyp",
       "recordId": "Post-ID",
       "timestamp": "Tidsstämpel",
@@ -103,7 +99,6 @@
         "fileExists": "Fil finns",
         "filename": "Filnamn",
         "size": "Storlek",
-        "status": "Status",
         "type": "Typ"
       },
       "title": "Befintliga säkerhetskopior",
@@ -169,7 +164,6 @@
       "createdAt": "Skapad: {{date}}",
       "currentDatabase": "Aktuell databas",
       "currentFiles": "Aktuella filer",
-      "description": "Beskrivning",
       "filesCount": "{{count}} filer ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
@@ -351,8 +345,6 @@
       "activePrescriptions": "{{count}} aktiva recept",
       "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Labbresultat",
-      "medications": "Mediciner",
       "recentRegistrations": "+{{count}} denna vecka",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
@@ -379,7 +371,6 @@
       "fileManagement": "Filhantering",
       "healthcareDirectory": "Vårdkatalog",
       "medicalRecords": "Medicinska journaler",
-      "other": "Övrigt",
       "patientSupport": "Patientstöd",
       "sharingAccess": "Delning och åtkomst",
       "system": "System"
@@ -531,8 +522,8 @@
     "backToModel": "Tillbaka till {{modelName}}",
     "bulkDeleteAssociated": "All tillhörande data (inklusive {{types}}) kommer också att raderas.",
     "bulkDeleteFailed": "Massradering misslyckades",
-    "bulkDeleteWarning_one": "Du är på väg att permanent radera {{count}} {{modelName}}-post.",
-    "bulkDeleteWarning_other": "Du är på väg att permanent radera {{count}} {{modelName}}-poster.",
+    "bulkDeleteWarning_one": "Du håller på att permanent radera {{count}} {{modelName}}-post.",
+    "bulkDeleteWarning_other": "Du håller på att permanent radera {{count}} {{modelName}}-poster.",
     "changeRole": "Ändra roll",
     "changesSaved": "Ändringar sparade",
     "changeUsername": "Ändra användarnamn",
@@ -599,7 +590,9 @@
     "usernameUpdated": "Användarnamn uppdaterat",
     "usernameUpdatedMessage": "Ditt användarnamn har ändrats. Logga in med ditt nya användarnamn: \"{{username}}\"",
     "viewRecord": "Visa {{modelName}}",
-    "visibleColumns": "Synliga kolumner"
+    "visibleColumns": "Synliga kolumner",
+    "searchResult": "{{count}} resultat för \"{{query}}\"",
+    "bulkDeleteWarning": "Du håller på att permanent radera {{count}} {{modelName}}-poster."
   },
   "settings": {
     "dataRetention": {
@@ -645,7 +638,6 @@
       "backupManagement": "Säkerhetskopieringshantering",
       "dataModels": "Datamodeller",
       "maintenance": "Underhåll",
-      "overview": "Översikt",
       "settings": "Inställningar",
       "systemHealth": "Systemhälsa",
       "trash": "Papperskorg",
@@ -823,7 +815,6 @@
       "fullName": "Fullständigt namn",
       "lastLogin": "Senaste inloggning",
       "role": "Roll",
-      "status": "Status",
       "user": "Användare"
     },
     "title": "Användarhantering",
@@ -836,6 +827,7 @@
       "deactivateTitle": "Inaktivera användare"
     },
     "userCount_one": "{{count}} användare",
-    "userCount_other": "{{count}} användare"
+    "userCount_other": "{{count}} användare",
+    "userCount": "{{count}} användare"
   }
 }

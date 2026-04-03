@@ -31,10 +31,7 @@
     "breakdownByType": "Suddivisione per tipo",
     "chartLabels": {
       "allergies": "Allergie",
-      "labResults": "Risultati di laboratorio",
-      "medications": "Farmaci",
       "patients": "Pazienti",
-      "procedures": "Procedure",
       "userActivity": "Attività utente",
       "vitals": "Parametri vitali"
     },
@@ -79,7 +76,6 @@
     "system": "Sistema",
     "tableHeaders": {
       "action": "Azione",
-      "description": "Descrizione",
       "entityType": "Tipo di entità",
       "recordId": "ID record",
       "timestamp": "Data e ora",
@@ -106,7 +102,6 @@
         "fileExists": "File presente",
         "filename": "Nome file",
         "size": "Dimensione",
-        "status": "Stato",
         "type": "Tipo"
       },
       "title": "Backup esistenti",
@@ -173,7 +168,6 @@
       "createdAt": "Creato: {{date}}",
       "currentDatabase": "Database attuale",
       "currentFiles": "File attuali",
-      "description": "Descrizione",
       "filesCount": "{{count}} file ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
@@ -363,8 +357,6 @@
       "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_many": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Risultati di laboratorio",
-      "medications": "Farmaci",
       "recentRegistrations": "+{{count}} questa settimana",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
@@ -392,7 +384,6 @@
       "fileManagement": "Gestione file",
       "healthcareDirectory": "Rubrica sanitaria",
       "medicalRecords": "Cartelle cliniche",
-      "other": "Altro",
       "patientSupport": "Supporto paziente",
       "sharingAccess": "Condivisione e accesso",
       "system": "Sistema"
@@ -545,9 +536,9 @@
     "backToModel": "Torna a {{modelName}}",
     "bulkDeleteAssociated": "Anche tutti i dati associati (inclusi {{types}}) verranno eliminati.",
     "bulkDeleteFailed": "Eliminazione multipla fallita",
-    "bulkDeleteWarning_one": "Stai per eliminare permanentemente {{count}} record {{modelName}}.",
+    "bulkDeleteWarning_one": "Stai per eliminare definitivamente {{count}} record di {{modelName}}.",
     "bulkDeleteWarning_many": "",
-    "bulkDeleteWarning_other": "Stai per eliminare permanentemente {{count}} record {{modelName}}.",
+    "bulkDeleteWarning_other": "Stai per eliminare definitivamente {{count}} record di {{modelName}}.",
     "changeRole": "Modifica ruolo",
     "changesSaved": "Modifiche salvate",
     "changeUsername": "Modifica nome utente",
@@ -620,7 +611,9 @@
     "usernameUpdated": "Nome utente aggiornato",
     "usernameUpdatedMessage": "Il tuo nome utente è stato modificato. Effettua l'accesso con il nuovo nome utente: \"{{username}}\"",
     "viewRecord": "Visualizza {{modelName}}",
-    "visibleColumns": "Colonne visibili"
+    "visibleColumns": "Colonne visibili",
+    "searchResult": "{{count}} risultati per \"{{query}}\"",
+    "bulkDeleteWarning": "Stai per eliminare definitivamente {{count}} record di {{modelName}}."
   },
   "settings": {
     "dataRetention": {
@@ -666,7 +659,6 @@
       "backupManagement": "Gestione backup",
       "dataModels": "Modelli dati",
       "maintenance": "Manutenzione",
-      "overview": "Panoramica",
       "settings": "Impostazioni",
       "systemHealth": "Stato del sistema",
       "trash": "Cestino",
@@ -854,7 +846,6 @@
       "fullName": "Nome completo",
       "lastLogin": "Ultimo accesso",
       "role": "Ruolo",
-      "status": "Stato",
       "user": "Utente"
     },
     "title": "Gestione utenti",
@@ -868,6 +859,7 @@
     },
     "userCount_one": "{{count}} utente",
     "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} utenti"
+    "userCount_other": "{{count}} utenti",
+    "userCount": "{{count}} utenti"
   }
 }

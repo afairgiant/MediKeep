@@ -45,7 +45,7 @@ const ImmunizationFormWrapper = ({
   onFileUploadComplete,
   onError,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   const handleDocumentManagerRef = (methods) => {
@@ -154,18 +154,18 @@ const ImmunizationFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('immunizations.form.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
                 {t('immunizations.form.tabs.administration', 'Administration')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('immunizations.form.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingImmunization
-                  ? t('immunizations.form.tabs.documents', 'Documents')
-                  : t('immunizations.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -251,7 +251,7 @@ const ImmunizationFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('immunizations.form.tags', 'Tags')}
+                        {t('shared:labels.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('immunizations.form.tagsDesc', 'Add tags to categorize and organize immunizations')}
@@ -348,7 +348,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('immunizations.form.practitioner', 'Practitioner')}
+                      label={t('shared:fields.practitioner', 'Practitioner')}
                       value={formData.practitioner_id ? formData.practitioner_id.toString() : null}
                       data={practitionerOptions}
                       onChange={(value) => {

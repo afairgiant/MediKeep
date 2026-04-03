@@ -53,7 +53,7 @@ const MantineMedicationForm = ({
   onError,
 }) => {
   // Translation
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -294,7 +294,7 @@ const MantineMedicationForm = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('medications.tabs.basicInfo')}
+                {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
                 {t('medications.tabs.details')}
@@ -303,12 +303,12 @@ const MantineMedicationForm = ({
                 {t('medications.tabs.conditions')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('medications.tabs.notes')}
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingMedication
-                  ? t('medications.tabs.documents')
-                  : t('medications.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
             </Tabs.List>
 

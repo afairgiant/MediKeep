@@ -34,7 +34,7 @@ const InjuryViewModal = ({
   injuryTypes = [],
   navigate,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -159,16 +159,16 @@ const InjuryViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              {t('injuries.tabs.overview', 'Overview')}
+              {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
               {t('injuries.tabs.treatment', 'Treatment')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              {t('injuries.tabs.documents', 'Documents')}
+              {t('shared:tabs.documents', 'Documents')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('injuries.tabs.notes', 'Notes')}
+              {t('shared:tabs.notes', 'Notes')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -233,7 +233,7 @@ const InjuryViewModal = ({
                     {injury.tags && injury.tags.length > 0 && (
                       <Box mt="sm">
                         <Text size="xs" c="dimmed" mb={4}>
-                          {t('common:fields.tags.label', 'Tags')}
+                          {t('shared:labels.tags', 'Tags')}
                         </Text>
                         <Group gap="xs">
                           {injury.tags.map((tag, index) => (

@@ -1,0 +1,27 @@
+{
+  "tabs": {
+    "notes": "Notes",
+    "documents": "Files",
+    "overview": "Aperçu",
+    "addFiles": "Ajouter des pièces jointes",
+    "basicInfo": "Informations basiques"
+  },
+  "fields": {
+    "status": "Statut",
+    "other": "Autre",
+    "practitioner": "Médecin"
+  },
+  "labels": {
+    "tags": "Etiquettes",
+    "website": "Site web",
+    "description": "Description"
+  },
+  "emptyStates": {
+    "adjustSearch": "Essayez d'ajuster vos critères de recherche ou de tri."
+  },
+  "categories": {
+    "lab_results": "Résultats d'analyse",
+    "medications": "Médicaments",
+    "procedures": "Procédures"
+  }
+}

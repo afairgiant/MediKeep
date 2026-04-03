@@ -34,7 +34,7 @@ const InsuranceViewModal = ({
   onSetPrimary,
   onFileUploadComplete
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
 
   // Tab state management
@@ -122,7 +122,7 @@ const InsuranceViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              {t('insurance.viewModal.tabs.overview', 'Overview')}
+              {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="coverage" leftSection={<IconShield size={16} />}>
               {t('insurance.viewModal.tabs.coverage', 'Coverage')}
@@ -131,7 +131,7 @@ const InsuranceViewModal = ({
               {t('insurance.viewModal.tabs.contact', 'Contact')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              {t('insurance.viewModal.tabs.documents', 'Documents')}
+              {t('shared:tabs.documents', 'Documents')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -202,7 +202,7 @@ const InsuranceViewModal = ({
                 {/* Notes Section */}
                 {insurance.notes && (
                   <div>
-                    <Title order={4} mb="sm">{t('insurance.viewModal.notes', 'Notes')}</Title>
+                    <Title order={4} mb="sm">{t('shared:tabs.notes', 'Notes')}</Title>
                     <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                       <Text style={{ whiteSpace: 'pre-wrap' }}>
                         {insurance.notes}
@@ -301,7 +301,7 @@ const InsuranceViewModal = ({
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.website', 'Website')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.website', 'Website')}</Text>
                       <Text size="sm" c={contactInfo.website_url ? 'inherit' : 'dimmed'} style={{ wordBreak: 'break-all' }}>
                         {contactInfo.website_url || t('common.labels.notSpecified', 'Not specified')}
                       </Text>

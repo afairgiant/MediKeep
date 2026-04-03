@@ -50,7 +50,7 @@ function InlineTestComponentEntry({
   onRef,
   disabled = false,
 }: InlineTestComponentEntryProps): React.ReactElement {
-  const { t } = useTranslation('medical');
+  const { t } = useTranslation(['medical', 'shared']);
   const [expanded, setExpanded] = useState(false);
   const [components, setComponents] = useState<ComponentRowData[]>([createEmptyRow(1)]);
   const justSelectedRef = useRef<{ index: number; value: string } | null>(null);
@@ -270,7 +270,7 @@ function InlineTestComponentEntry({
 
                   <Grid.Col span={4}>
                     <TextInput
-                      label={t('labResults.form.status', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       placeholder={t('labResults.form.autoCalculated', 'Auto-calculated')}
                       size="xs"
                       value={capitalizeStatus(component.status)}
@@ -330,7 +330,7 @@ function InlineTestComponentEntry({
 
                   <Grid.Col span={6}>
                     <TextInput
-                      label={t('labResults.form.notes', 'Notes')}
+                      label={t('shared:tabs.notes', 'Notes')}
                       placeholder={t('labResults.form.notesOptional', 'Notes (optional)')}
                       size="xs"
                       value={component.notes || ''}

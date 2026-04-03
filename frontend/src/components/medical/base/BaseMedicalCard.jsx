@@ -28,7 +28,7 @@ const BaseMedicalCard = ({
   disableCardClick = false,
   getTagColor: getTagColorProp
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [notesExpanded, setNotesExpanded] = useState(false);
   const { getTagColor: getTagColorHook } = useTagColors();
   const getTagColor = getTagColorProp || getTagColorHook;
@@ -150,7 +150,7 @@ const BaseMedicalCard = ({
           {notes && (
             <Stack gap="xs">
               <Divider />
-              <Text size="sm" fw={500} c="dimmed">{t('labels.notes', 'Notes')}</Text>
+              <Text size="sm" fw={500} c="dimmed">{t('shared:tabs.notes', 'Notes')}</Text>
               <Text size="sm" lineClamp={notesExpanded ? undefined : 2}>{notes}</Text>
               {notes.length > 120 && (
                 <Button

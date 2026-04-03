@@ -218,7 +218,6 @@
       "channel": "Channel",
       "error": "Error",
       "event": "Event",
-      "status": "Status",
       "time": "Time"
     },
     "loading": "Loading history...",

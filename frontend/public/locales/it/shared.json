@@ -1,0 +1,27 @@
+{
+  "tabs": {
+    "notes": "Note",
+    "documents": "Documenti",
+    "overview": "Panoramica",
+    "addFiles": "Aggiungi File",
+    "basicInfo": "Informazioni di base"
+  },
+  "fields": {
+    "status": "Stato",
+    "other": "Altro",
+    "practitioner": "Professionista"
+  },
+  "labels": {
+    "tags": "Tag",
+    "website": "Sito web",
+    "description": "Descrizione"
+  },
+  "emptyStates": {
+    "adjustSearch": "Prova a modificare i criteri di ricerca o filtro."
+  },
+  "categories": {
+    "lab_results": "Risultati di laboratorio",
+    "medications": "Farmaci",
+    "procedures": "Procedure"
+  }
+}

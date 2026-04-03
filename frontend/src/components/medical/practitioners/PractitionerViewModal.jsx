@@ -27,7 +27,7 @@ const PractitionerViewModal = ({
   onEdit,
   navigate
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [practiceDetails, setPracticeDetails] = useState(null);
   const [isLoadingPractice, setIsLoadingPractice] = useState(false);
   const [showPracticeEditModal, setShowPracticeEditModal] = useState(false);
@@ -206,7 +206,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.website', 'Website')}:
+                    {t('shared:labels.website', 'Website')}:
                   </Text>
                   <Text
                     size="sm"
@@ -325,7 +325,7 @@ const PractitionerViewModal = ({
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <Group>
                         <Text size="sm" fw={500} w={100}>
-                          {t('practitioners.viewModal.practiceWebsite', 'Website')}:
+                          {t('shared:labels.website', 'Website')}:
                         </Text>
                         <Text size="sm" c={practiceDetails.website ? 'inherit' : 'dimmed'}>
                           {practiceDetails.website ? (
@@ -367,7 +367,7 @@ const PractitionerViewModal = ({
                   {/* Notes */}
                   <Group>
                     <Text size="sm" fw={500} w={100}>
-                      {t('practitioners.viewModal.practiceNotes', 'Notes')}:
+                      {t('shared:tabs.notes', 'Notes')}:
                     </Text>
                     <Text size="sm" c={practiceDetails.notes ? 'inherit' : 'dimmed'} style={{ whiteSpace: 'pre-wrap' }}>
                       {practiceDetails.notes || notSpecified}

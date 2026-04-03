@@ -49,7 +49,7 @@ const VitalViewModal = ({
   practitioners = [],
   navigate,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate, formatDateTime } = useDateFormat();
   const { unitSystem } = useUserPreferences();
 
@@ -296,7 +296,7 @@ const VitalViewModal = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconNotes size={18} />
               </ActionIcon>
-              <Title order={4}>{t('vitals.modal.notes', 'Notes')}</Title>
+              <Title order={4}>{t('shared:tabs.notes', 'Notes')}</Title>
             </Group>
             <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
               {vital.notes}

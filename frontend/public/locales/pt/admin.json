@@ -31,10 +31,7 @@
     "breakdownByType": "Detalhamento por tipo",
     "chartLabels": {
       "allergies": "Alergias",
-      "labResults": "Resultados Laboratoriais",
-      "medications": "Medicamentos",
       "patients": "Pacientes",
-      "procedures": "Procedimentos",
       "userActivity": "Atividade do Usuário",
       "vitals": "Sinais Vitais"
     },
@@ -79,7 +76,6 @@
     "system": "Sistema",
     "tableHeaders": {
       "action": "Ação",
-      "description": "Descrição",
       "entityType": "Tipo de Entidade",
       "recordId": "ID do Registro",
       "timestamp": "Data/Hora",
@@ -106,7 +102,6 @@
         "fileExists": "Arquivo Existe",
         "filename": "Nome do Arquivo",
         "size": "Tamanho",
-        "status": "Status",
         "type": "Tipo"
       },
       "title": "Backups Existentes",
@@ -173,7 +168,6 @@
       "createdAt": "Criado em: {{date}}",
       "currentDatabase": "Banco de Dados Atual",
       "currentFiles": "Arquivos Atuais",
-      "description": "Descrição",
       "filesCount": "{{count}} arquivos ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
@@ -363,8 +357,6 @@
       "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_many": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Resultados Laboratoriais",
-      "medications": "Medicamentos",
       "recentRegistrations": "+{{count}} esta semana",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
@@ -392,7 +384,6 @@
       "fileManagement": "Gestão de Arquivos",
       "healthcareDirectory": "Diretório de Saúde",
       "medicalRecords": "Prontuários Médicos",
-      "other": "Outros",
       "patientSupport": "Suporte ao Paciente",
       "sharingAccess": "Compartilhamento e Acesso",
       "system": "Sistema"
@@ -620,7 +611,9 @@
     "usernameUpdated": "Nome de usuário atualizado",
     "usernameUpdatedMessage": "Seu nome de usuário foi alterado. Faça login com seu novo nome de usuário: \"{{username}}\"",
     "viewRecord": "Visualizar {{modelName}}",
-    "visibleColumns": "Colunas visíveis"
+    "visibleColumns": "Colunas visíveis",
+    "searchResult": "{{count}} resultados para \"{{query}}\"",
+    "bulkDeleteWarning": "Você está prestes a excluir permanentemente {{count}} registros de {{modelName}}."
   },
   "settings": {
     "dataRetention": {
@@ -666,7 +659,6 @@
       "backupManagement": "Gestão de Backups",
       "dataModels": "Modelos de Dados",
       "maintenance": "Manutenção",
-      "overview": "Visão Geral",
       "settings": "Configurações",
       "systemHealth": "Saúde do Sistema",
       "trash": "Lixeira",
@@ -854,7 +846,6 @@
       "fullName": "Nome Completo",
       "lastLogin": "Último Login",
       "role": "Função",
-      "status": "Status",
       "user": "Usuário"
     },
     "title": "Gestão de Usuários",
@@ -868,6 +859,7 @@
     },
     "userCount_one": "{{count}} usuário",
     "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} usuários"
+    "userCount_other": "{{count}} usuários",
+    "userCount": "{{count}} usuários"
   }
 }

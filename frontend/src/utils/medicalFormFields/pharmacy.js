@@ -110,7 +110,7 @@ export const pharmacyFormFields = [
   {
     name: 'website',
     type: 'text',
-    labelKey: 'common:labels.website',
+    labelKey: 'shared:labels.website',
     placeholderKey: 'medical:pharmacies.form.website.placeholder',
     descriptionKey: 'medical:pharmacies.form.website.description',
     gridColumn: 12,

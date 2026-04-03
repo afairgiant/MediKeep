@@ -48,7 +48,7 @@ const TreatmentViewModal = ({
   onEquipmentClick,
   onError,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
@@ -145,7 +145,7 @@ const TreatmentViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-            {t('treatments.viewModal.tabs.overview', 'Overview')}
+            {t('shared:tabs.overview', 'Overview')}
           </Tabs.Tab>
           {treatment.mode !== 'advanced' && (
             <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
@@ -155,7 +155,7 @@ const TreatmentViewModal = ({
           {treatment.mode === 'advanced' && (
             <>
               <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
-                {t('treatments.viewModal.tabs.medications', 'Medications')}
+                {t('shared:categories.medications', 'Medications')}
               </Tabs.Tab>
               <Tabs.Tab value="visits" leftSection={<IconStethoscope size={16} />}>
                 {t('treatments.viewModal.tabs.visits', 'Visits')}
@@ -169,10 +169,10 @@ const TreatmentViewModal = ({
             </>
           )}
           <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-            {t('treatments.viewModal.tabs.documents', 'Documents')}
+            {t('shared:tabs.documents', 'Documents')}
           </Tabs.Tab>
           <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-            {t('treatments.viewModal.tabs.notes', 'Notes')}
+            {t('shared:tabs.notes', 'Notes')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -195,7 +195,7 @@ const TreatmentViewModal = ({
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.status', 'Status')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
                     <StatusBadge status={treatment.status} />
                   </Stack>
                   <Stack gap="xs">
@@ -211,7 +211,7 @@ const TreatmentViewModal = ({
                     </Text>
                   </Stack>
                   <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.description', 'Description')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.description', 'Description')}</Text>
                     <Text size="sm" c={treatment.description ? 'inherit' : 'dimmed'}>
                       {treatment.description || t('treatments.viewModal.notSpecified', 'Not specified')}
                     </Text>
@@ -221,7 +221,7 @@ const TreatmentViewModal = ({
 
               {/* Practitioner Information */}
               <div>
-                <Title order={4} mb="sm">{t('treatments.viewModal.practitioner', 'Practitioner')}</Title>
+                <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.doctor', 'Doctor')}</Text>
@@ -306,7 +306,7 @@ const TreatmentViewModal = ({
               {/* Tags Section */}
               {treatment.tags && treatment.tags.length > 0 && (
                 <div>
-                  <Title order={4} mb="sm">{t('treatments.viewModal.tags', 'Tags')}</Title>
+                  <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
                   <Group gap="xs">
                     {treatment.tags.map((tag, index) => (
                       <ClickableTagBadge

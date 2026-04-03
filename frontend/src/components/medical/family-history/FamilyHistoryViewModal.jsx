@@ -49,7 +49,7 @@ const FamilyHistoryViewModal = ({
   onDeleteCondition,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
   const { formatDate } = useDateFormat();
 
@@ -269,7 +269,7 @@ const FamilyHistoryViewModal = ({
               )}
               {member.notes && (
                 <Text size="sm">
-                  <strong>{t('labels.notes', 'Notes')}:</strong> {member.notes}
+                  <strong>{t('shared:tabs.notes', 'Notes')}:</strong> {member.notes}
                 </Text>
               )}
             </Stack>

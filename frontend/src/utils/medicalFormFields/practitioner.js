@@ -55,7 +55,7 @@ export const practitionerFormFields = [
   {
     name: 'website',
     type: 'text',
-    labelKey: 'medical:practitioners.form.website.label',
+    labelKey: 'shared:labels.website',
     placeholderKey: 'medical:practitioners.form.website.placeholder',
     descriptionKey: 'medical:practitioners.form.website.description',
     gridColumn: 6,

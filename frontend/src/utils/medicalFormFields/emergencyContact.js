@@ -74,7 +74,7 @@ export const emergencyContactFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:emergencyContacts.form.notes.placeholder',
     descriptionKey: 'medical:emergencyContacts.form.notes.description',
     gridColumn: 12,

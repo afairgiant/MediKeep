@@ -91,7 +91,7 @@ const getCategories = (t) => [
   t('dataModels.categories.familyHistory', 'Family History'),
   t('dataModels.categories.fileManagement', 'File Management'),
   t('dataModels.categories.sharingAccess', 'Sharing & Access'),
-  t('dataModels.categories.other', 'Other'),
+  t('shared:fields.other', 'Other'),
 ];
 
 const getDisplayNames = (t) => ({
@@ -126,7 +126,7 @@ const getDisplayNames = (t) => ({
 
 const DataModels = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const [searchParams] = useSearchParams();
   const urlQuery = searchParams.get('q') || '';
   const [filterQuery, setFilterQuery] = useState(urlQuery);

@@ -50,7 +50,7 @@ import '../../styles/shared/MedicalPageShared.css';
 import '../../styles/pages/PatientInfo.css';
 
 const PatientInfo = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const navigate = useNavigate();
   const location = useLocation();
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -352,7 +352,7 @@ const PatientInfo = () => {
       case 'F':
         return t('patientInfo.gender.female', 'Female');
       case 'OTHER':
-        return t('labels.other', 'Other');
+        return t('shared:fields.other', 'Other');
       default:
         return t('patientInfo.notSpecified', 'Not specified');
     }

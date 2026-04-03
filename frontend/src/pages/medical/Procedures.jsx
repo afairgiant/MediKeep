@@ -65,7 +65,7 @@ const INITIAL_FORM_DATA = {
 };
 
 const Procedures = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -369,7 +369,7 @@ const Procedures = () => {
   return (
     <>
       <Container size="xl" py="sm">
-        <PageHeader title={t('procedures.title', 'Procedures')} icon="🔬" />
+        <PageHeader title={t('shared:categories.procedures', 'Procedures')} icon="🔬" />
 
         <Stack gap="sm" mt="md">
           <MedicalPageAlerts
@@ -398,7 +398,7 @@ const Procedures = () => {
               emoji="🔬"
               title={t('procedures.noProceduresFound', 'No Procedures Found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('procedures.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('procedures.startAdding', 'Start by adding your first procedure.')}
               actionButton={
                 <Button variant="filled" onClick={handleAddProcedure}>
@@ -434,11 +434,11 @@ const Procedures = () => {
                   { header: t('procedures.table.type'), accessor: 'procedure_type', priority: 'medium', width: 120 },
                   { header: t('procedures.table.code'), accessor: 'procedure_code', priority: 'low', width: 100 },
                   { header: t('procedures.table.date'), accessor: 'date', priority: 'high', width: 120 },
-                  { header: t('procedures.table.status'), accessor: 'status', priority: 'high', width: 100 },
+                  { header: t('shared:fields.status'), accessor: 'status', priority: 'high', width: 100 },
                   { header: t('procedures.table.setting'), accessor: 'procedure_setting', priority: 'low', width: 120 },
                   { header: t('procedures.table.facility'), accessor: 'facility', priority: 'medium', width: 150 },
-                  { header: t('procedures.table.practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 150 },
-                  { header: t('procedures.table.description'), accessor: 'description', priority: 'low', width: 200 },
+                  { header: t('shared:fields.practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 150 },
+                  { header: t('shared:labels.description'), accessor: 'description', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
                 tableName="Procedures"

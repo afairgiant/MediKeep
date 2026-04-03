@@ -99,7 +99,7 @@ export const immunizationFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'medical:immunizations.notes.label',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:immunizations.notes.placeholder',
     descriptionKey: 'medical:immunizations.notes.description',
     gridColumn: 12,

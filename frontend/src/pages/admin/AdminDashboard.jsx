@@ -51,7 +51,7 @@ const DASHBOARD_CONFIG = {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Dashboard Stats (no auto-refresh - manual refresh only)
@@ -184,14 +184,14 @@ const AdminDashboard = () => {
           <StatCard
             icon={IconFlask}
             value={stats?.total_lab_results || 0}
-            label={t('dashboard.stats.labResults', 'Lab Results')}
+            label={t('shared:categories.lab_results', 'Lab Results')}
             color="orange"
             href="/admin/models/lab_result"
           />
           <StatCard
             icon={IconPill}
             value={stats?.total_medications || 0}
-            label={t('dashboard.stats.medications', 'Medications')}
+            label={t('shared:categories.medications', 'Medications')}
             change={t('dashboard.stats.activePrescriptions', '{{count}} active prescriptions', { count: stats?.active_medications || 0 })}
             color="cyan"
             href="/admin/models/medication"

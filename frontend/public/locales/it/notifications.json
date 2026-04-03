@@ -219,7 +219,6 @@
       "channel": "Canale",
       "error": "Errore",
       "event": "Evento",
-      "status": "Stato",
       "time": "Ora"
     },
     "loading": "Caricamento cronologia...",

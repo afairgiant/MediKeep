@@ -61,7 +61,7 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 import logger from '../../services/logger';
 
 const Medication = () => {
-  const { t } = useTranslation(['common', 'medical']);
+  const { t } = useTranslation(['common', 'medical', 'shared']);
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -501,7 +501,7 @@ const Medication = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('medications.title', 'Medications')} icon="💊" />
+      <PageHeader title={t('shared:categories.medications', 'Medications')} icon="💊" />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -685,7 +685,7 @@ const Medication = () => {
               icon={IconAlertTriangle}
               title={t('medications.noMedications', 'No medications or supplements found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('medications.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('medications.clickToStart', 'Click "Add New Medication" to get started.')}
             />
           ) : viewMode === 'cards' ? (

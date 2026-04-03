@@ -17,7 +17,7 @@ const ImmunizationCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -112,7 +112,7 @@ const ImmunizationCard = ({
         render: (value) => formatLongDate(value)
       },
       immunization.practitioner_id && {
-        label: t('common:labels.practitioner'),
+        label: t('shared:fields.practitioner'),
         value: immunization.practitioner_id,
         render: (value) => {
           if (!value) return t('common:labels.notSpecified');

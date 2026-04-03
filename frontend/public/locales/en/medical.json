@@ -14,8 +14,7 @@
         "environmental": "Environmental",
         "food": "Food",
         "insect": "Insect",
-        "medication": "Medication",
-        "other": "Other"
+        "medication": "Medication"
       },
       "placeholder": "Select allergy type"
     },
@@ -23,15 +22,8 @@
     "clinicalNotes": "Clinical Notes",
     "editTitle": "Edit Allergy",
     "emptyState": {
-      "filtered": "Try adjusting your search or filter criteria.",
       "noData": "Click \"Add New Allergy\" to get started.",
       "title": "No allergies found"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "messages": {
       "loading": "Loading allergies...",
@@ -59,7 +51,6 @@
       "options": {
         "anaphylaxis": "Anaphylaxis",
         "gastrointestinal": "Gastrointestinal",
-        "other": "Other",
         "respiratory": "Respiratory",
         "skin": "Skin Reaction"
       },
@@ -78,10 +69,6 @@
       "description": "Current allergy status"
     },
     "tabs": {
-      "basicInfo": "Basic Info",
-      "documents": "Documents",
-      "notes": "Notes",
-      "overview": "Overview",
       "reactionDetails": "Reaction Details"
     },
     "title": "Allergies",
@@ -93,7 +80,6 @@
   "componentCatalog": {
     "fetchError": "Failed to load test catalog",
     "filterCategory": "Category",
-    "filterStatus": "Status",
     "noData": "Add lab results with test components to see them here.",
     "noResults": "No Test Components Found",
     "readingCount": "{{count}} readings",
@@ -123,8 +109,7 @@
       "increasing": "Increasing",
       "stable": "Stable",
       "worsening": "Worsening"
-    },
-    "tryAdjusting": "Try adjusting your search or filter criteria."
+    }
   },
   "conditions": {
     "codeDescription": {
@@ -221,16 +206,13 @@
     },
     "tabs": {
       "contactInfo": "Contact Info",
-      "details": "Details",
-      "notes": "Notes"
+      "details": "Details"
     },
     "title": "Emergency Contacts"
   },
   "equipment": {
     "tabs": {
-      "basicInfo": "Basic Info",
       "deviceDetails": "Device Details",
-      "notes": "Notes",
       "serviceDates": "Service & Dates"
     }
   },
@@ -274,8 +256,8 @@
         },
         "status": {
           "description": "Current status of the condition",
-          "label": "Status",
-          "placeholder": "Select status"
+          "placeholder": "Select status",
+          "label": "Status"
         },
         "statusOptions": {
           "active": "Active - Ongoing condition",
@@ -342,11 +324,11 @@
           "maternalGrandfather": "Maternal Grandfather",
           "maternalGrandmother": "Maternal Grandmother",
           "mother": "Mother",
-          "other": "Other",
           "paternalGrandfather": "Paternal Grandfather",
           "paternalGrandmother": "Paternal Grandmother",
           "sister": "Sister",
-          "uncle": "Uncle"
+          "uncle": "Uncle",
+          "other": "Other"
         }
       }
     }
@@ -392,7 +374,6 @@
       "johnsonJohnson": "Johnson & Johnson",
       "merck": "Merck",
       "moderna": "Moderna",
-      "other": "Other",
       "pfizerBioNTech": "Pfizer-BioNTech",
       "sanofi": "Sanofi"
     },
@@ -403,7 +384,6 @@
     },
     "notes": {
       "description": "Any relevant details about the immunization",
-      "label": "Notes",
       "placeholder": "Additional notes about this immunization..."
     },
     "route": {
@@ -459,15 +439,8 @@
     },
     "editTitle": "Edit Injury",
     "emptyState": {
-      "filtered": "Try adjusting your search or filter criteria.",
       "noData": "Click \"Add New Injury\" to get started.",
       "title": "No injuries found"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "injuryDate": {
       "description": "When the injury occurred",
@@ -530,7 +503,6 @@
     },
     "status": {
       "description": "Current status of this injury",
-      "label": "Status",
       "options": {
         "active": "Active - Currently being treated",
         "chronic": "Chronic - Long-term effects",
@@ -539,10 +511,6 @@
       }
     },
     "tabs": {
-      "basicInfo": "Basic Info",
-      "documents": "Documents",
-      "notes": "Notes",
-      "overview": "Overview",
       "treatment": "Treatment"
     },
     "title": "Injuries",
@@ -754,9 +722,9 @@
           "hdhp": "HDHP (High Deductible Health Plan)",
           "hmo": "HMO (Health Maintenance Organization)",
           "indemnity": "Indemnity (Fee-for-Service)",
-          "other": "Other",
           "pos": "POS (Point of Service)",
-          "ppo": "PPO (Preferred Provider Organization)"
+          "ppo": "PPO (Preferred Provider Organization)",
+          "other": "Other"
         },
         "placeholder": "Select plan type"
       },
@@ -800,9 +768,9 @@
         "options": {
           "child": "Child",
           "dependent": "Dependent",
-          "other": "Other",
           "self": "Self",
-          "spouse": "Spouse"
+          "spouse": "Spouse",
+          "other": "Other"
         },
         "placeholder": "Select relationship"
       },
@@ -823,13 +791,9 @@
         "placeholder": "Select status"
       },
       "tabs": {
-        "addFiles": "Add Files",
-        "basicInfo": "Basic Info",
         "contact": "Contact",
         "coverage": "Coverage",
-        "documents": "Documents",
-        "member": "Member",
-        "notes": "Notes"
+        "member": "Member"
       },
       "updateInsurance": "Update Insurance",
       "visionPlanType": {
@@ -870,7 +834,6 @@
       "imaging": "Imaging (X-ray, MRI, CT)",
       "immunology": "Immunology",
       "microbiology": "Microbiology",
-      "other": "Other",
       "pathology": "Pathology",
       "pulmonology": "Pulmonology",
       "stomatology": "Stomatology"
@@ -892,7 +855,6 @@
       "linkConditionsTitle": "Link Medical Conditions",
       "max": "Max",
       "min": "Min",
-      "notes": "Notes",
       "notesOptional": "Notes (optional)",
       "refMax": "Ref Max",
       "refMin": "Ref Min",
@@ -904,7 +866,6 @@
       "searchTests": "Type to search tests...",
       "selectCategory": "Select category",
       "selectResult": "Select result",
-      "status": "Status",
       "statusIndicator": "Status Indicator:",
       "testCode": "Test Code",
       "testCodePlaceholder": "e.g., 718-7",
@@ -951,10 +912,6 @@
       "ordered": "Ordered - Test has been requested"
     },
     "tabs": {
-      "addFiles": "Add Files",
-      "basicInfo": "Basic Info",
-      "documents": "Documents",
-      "notes": "Notes",
       "relationships": "Relationships",
       "resultsStatus": "Results & Status"
     },
@@ -994,8 +951,7 @@
       "description": "Priority or urgency of the test",
       "label": "Test Type",
       "placeholder": "Select urgency level"
-    },
-    "title": "Lab Results"
+    }
   },
   "medications": {
     "alternativeName": {
@@ -1073,12 +1029,8 @@
       "placeholder": "List any known or experienced side effects..."
     },
     "tabs": {
-      "addFiles": "Add Files",
-      "basicInfo": "Basic Info",
       "conditions": "Conditions",
-      "details": "Details",
-      "documents": "Documents",
-      "notes": "Notes"
+      "details": "Details"
     }
   },
   "pharmacies": {
@@ -1098,14 +1050,14 @@
           "krogerPharmacy": "Kroger Pharmacy",
           "meijerPharmacy": "Meijer Pharmacy",
           "onlinePharmacy": "Online Pharmacy",
-          "other": "Other",
           "publixPharmacy": "Publix Pharmacy",
           "riteAid": "Rite Aid",
           "safewayPharmacy": "Safeway Pharmacy",
           "specialtyPharmacy": "Specialty Pharmacy",
           "targetPharmacy": "Target Pharmacy",
           "walgreens": "Walgreens",
-          "walmartPharmacy": "Walmart Pharmacy"
+          "walmartPharmacy": "Walmart Pharmacy",
+          "other": "Other"
         },
         "placeholder": "Select pharmacy chain or type"
       },
@@ -1174,7 +1126,6 @@
       },
       "notes": {
         "description": "Any additional information about the practice",
-        "label": "Notes",
         "placeholder": "Additional notes about this practice..."
       },
       "patientPortal": {
@@ -1227,7 +1178,6 @@
       },
       "website": {
         "description": "Professional website or practice page",
-        "label": "Website",
         "placeholder": "https://www.example.com"
       }
     }
@@ -1257,7 +1207,6 @@
     },
     "description": {
       "description": "Detailed description of what the procedure involves",
-      "label": "Description",
       "placeholder": "Describe the procedure in detail..."
     },
     "facility": {
@@ -1267,7 +1216,6 @@
     },
     "notes": {
       "description": "Any relevant observations, pre/post-op instructions, or details",
-      "label": "Notes",
       "placeholder": "Additional notes about the procedure..."
     },
     "outcome": {
@@ -1458,11 +1406,7 @@
       }
     },
     "tabs": {
-      "addFiles": "Add Files",
-      "basicInfo": "Basic Info",
-      "details": "Details",
-      "documents": "Documents",
-      "notes": "Notes"
+      "details": "Details"
     },
     "title": "Symptoms"
   },
@@ -1510,7 +1454,6 @@
     },
     "practitioner": {
       "description": "Assign a practitioner to this treatment",
-      "label": "Practitioner",
       "placeholder": "Select practitioner (optional)"
     },
     "relatedCondition": {

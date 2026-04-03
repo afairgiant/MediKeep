@@ -1,0 +1,27 @@
+{
+  "tabs": {
+    "notes": "Notatki",
+    "documents": "Dokumenty",
+    "overview": "Przegląd",
+    "addFiles": "Dodaj pliki",
+    "basicInfo": "Podstawowe informacje"
+  },
+  "fields": {
+    "status": "Status",
+    "other": "Inne",
+    "practitioner": "Pracownik ochrony zdrowotnej"
+  },
+  "labels": {
+    "tags": "Tagi",
+    "website": "Strona internetowa",
+    "description": "Opis"
+  },
+  "emptyStates": {
+    "adjustSearch": "Spróbuj dostosować kryteria wyszukiwania lub filtrowania."
+  },
+  "categories": {
+    "lab_results": "Wyniki laboratoryjne",
+    "medications": "Leki",
+    "procedures": "Procedury"
+  }
+}

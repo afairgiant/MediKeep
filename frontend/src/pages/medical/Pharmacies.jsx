@@ -28,7 +28,7 @@ import PharmacyViewModal from '../../components/medical/pharmacy/PharmacyViewMod
 import PharmacyFormWrapper from '../../components/medical/pharmacy/PharmacyFormWrapper';
 
 const Pharmacies = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -256,7 +256,7 @@ const Pharmacies = () => {
               icon={IconShieldCheck}
               title={t('pharmacies.empty.title', 'No pharmacies found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('pharmacies.empty.filtered', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
             />
           ) : (

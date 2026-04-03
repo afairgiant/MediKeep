@@ -46,7 +46,7 @@ const AllergyFormWrapper = ({
   onError,
 }) => {
   // Translation hooks
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -150,18 +150,18 @@ const AllergyFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('allergies.tabs.basicInfo')}
+                {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="reaction" leftSection={<IconAlertTriangle size={16} />}>
                 {t('allergies.tabs.reactionDetails')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('allergies.tabs.notes')}
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingAllergy
-                  ? t('allergies.form.tabs.documents', 'Documents')
-                  : t('allergies.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -188,7 +188,7 @@ const AllergyFormWrapper = ({
                         { value: 'medication', label: t('allergies.allergyType.options.medication') },
                         { value: 'environmental', label: t('allergies.allergyType.options.environmental') },
                         { value: 'insect', label: t('allergies.allergyType.options.insect') },
-                        { value: 'other', label: t('allergies.allergyType.options.other') },
+                        { value: 'other', label: t('shared:fields.other') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'allergy_type', value: value || '' } });
@@ -220,7 +220,7 @@ const AllergyFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('common:fields.status.label')}
+                      label={t('shared:fields.status')}
                       value={formData.status || null}
                       data={[
                         { value: 'active', label: t('common:status.active') },
@@ -275,7 +275,7 @@ const AllergyFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('common:fields.tags.label')}
+                        {t('shared:labels.tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('common:fields.tags.description')}
@@ -306,7 +306,7 @@ const AllergyFormWrapper = ({
                         { value: 'respiratory', label: t('allergies.reactionType.options.respiratory') },
                         { value: 'gastrointestinal', label: t('allergies.reactionType.options.gastrointestinal') },
                         { value: 'anaphylaxis', label: t('allergies.reactionType.options.anaphylaxis') },
-                        { value: 'other', label: t('allergies.reactionType.options.other') },
+                        { value: 'other', label: t('shared:fields.other') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'reaction_type', value: value || '' } });
@@ -337,7 +337,7 @@ const AllergyFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('common:fields.notes.label')}
+                  label={t('shared:tabs.notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('common:fields.notes.placeholder')}

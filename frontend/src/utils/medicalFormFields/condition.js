@@ -17,7 +17,7 @@ export const conditionFormFields = [
   {
     name: 'status',
     type: 'select',
-    labelKey: 'common:labels.status',
+    labelKey: 'shared:fields.status',
     descriptionKey: 'medical:conditions.status.description',
     gridColumn: 6,
     dynamicOptions: 'conditionStatus',
@@ -91,7 +91,7 @@ export const conditionFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'common:fields.notes.placeholder',
     descriptionKey: 'medical:conditions.notes.description',
     gridColumn: 12,

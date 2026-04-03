@@ -13,7 +13,7 @@ const PractitionerCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   const handleError = (error) => {
     logger.error('practitioner_card_error', {
@@ -96,7 +96,7 @@ const PractitionerCard = ({
         ) : t('common.labels.notSpecified', 'Not specified')
       },
       {
-        label: t('practitioners.card.website', 'Website'),
+        label: t('shared:labels.website', 'Website'),
         value: practitioner.website,
         render: (value) => value ? (
           <Anchor

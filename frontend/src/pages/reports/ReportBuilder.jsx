@@ -38,7 +38,7 @@ import logger from '../../services/logger';
 import { useTranslation } from 'react-i18next';
 
 const ReportBuilder = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -121,10 +121,10 @@ const ReportBuilder = () => {
 
   // Category display names mapping
   const categoryDisplayNames = {
-    'medications': t('reportBuilder.categories.medications'),
+    'medications': t('shared:categories.medications'),
     'conditions': t('reportBuilder.categories.conditions'),
-    'procedures': t('reportBuilder.categories.procedures'),
-    'lab_results': t('reportBuilder.categories.lab_results'),
+    'procedures': t('shared:categories.procedures'),
+    'lab_results': t('shared:categories.lab_results'),
     'immunizations': t('reportBuilder.categories.immunizations'),
     'allergies': t('reportBuilder.categories.allergies'),
     'treatments': t('reportBuilder.categories.treatments'),

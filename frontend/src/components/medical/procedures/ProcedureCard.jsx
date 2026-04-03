@@ -18,7 +18,7 @@ const ProcedureCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
   const handleError = (error) => {
     logger.error('procedure_card_error', {
@@ -98,7 +98,7 @@ const ProcedureCard = ({
         }
       },
       {
-        label: t('common:labels.description'),
+        label: t('shared:labels.description'),
         value: procedure.description,
         align: 'flex-start',
         style: { flex: 1 }

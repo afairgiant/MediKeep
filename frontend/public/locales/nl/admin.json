@@ -31,10 +31,7 @@
     "breakdownByType": "Verdeling per type",
     "chartLabels": {
       "allergies": "Allergieën",
-      "labResults": "Laboratoriumuitslagen",
-      "medications": "Medicatie",
       "patients": "Patiënten",
-      "procedures": "Ingrepen",
       "userActivity": "Gebruikersactiviteit",
       "vitals": "Vitale functies"
     },
@@ -77,7 +74,6 @@
     "system": "Systeem",
     "tableHeaders": {
       "action": "Actie",
-      "description": "Beschrijving",
       "entityType": "Entiteitstype",
       "recordId": "Dossier-ID",
       "timestamp": "Tijdstempel",
@@ -103,7 +99,6 @@
         "fileExists": "Bestand bestaat",
         "filename": "Bestandsnaam",
         "size": "Grootte",
-        "status": "Status",
         "type": "Type"
       },
       "title": "Bestaande back-ups",
@@ -169,7 +164,6 @@
       "createdAt": "Aangemaakt: {{date}}",
       "currentDatabase": "Huidige database",
       "currentFiles": "Huidige bestanden",
-      "description": "Beschrijving",
       "filesCount": "{{count}} bestanden ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
@@ -351,8 +345,6 @@
       "activePrescriptions": "{{count}} actieve recepten",
       "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Laboratoriumuitslagen",
-      "medications": "Medicatie",
       "recentRegistrations": "+{{count}} deze week",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
@@ -379,7 +371,6 @@
       "fileManagement": "Bestandsbeheer",
       "healthcareDirectory": "Zorgverlenerslijst",
       "medicalRecords": "Medische dossiers",
-      "other": "Overig",
       "patientSupport": "Patiëntondersteuning",
       "sharingAccess": "Delen & toegang",
       "system": "Systeem"
@@ -531,8 +522,8 @@
     "backToModel": "Terug naar {{modelName}}",
     "bulkDeleteAssociated": "Alle bijbehorende gegevens (inclusief {{types}}) worden ook verwijderd.",
     "bulkDeleteFailed": "Bulkverwijdering mislukt",
-    "bulkDeleteWarning_one": "U staat op het punt om {{count}} {{modelName}} dossier permanent te verwijderen.",
-    "bulkDeleteWarning_other": "U staat op het punt om {{count}} {{modelName}} dossiers permanent te verwijderen.",
+    "bulkDeleteWarning_one": "U staat op het punt {{count}} {{modelName}}-record permanent te verwijderen.",
+    "bulkDeleteWarning_other": "U staat op het punt {{count}} {{modelName}}-records permanent te verwijderen.",
     "changeRole": "Rol wijzigen",
     "changesSaved": "Wijzigingen opgeslagen",
     "changeUsername": "Gebruikersnaam wijzigen",
@@ -599,7 +590,9 @@
     "usernameUpdated": "Gebruikersnaam bijgewerkt",
     "usernameUpdatedMessage": "Uw gebruikersnaam is gewijzigd. Log in met uw nieuwe gebruikersnaam: \"{{username}}\"",
     "viewRecord": "{{modelName}} bekijken",
-    "visibleColumns": "Zichtbare kolommen"
+    "visibleColumns": "Zichtbare kolommen",
+    "searchResult": "{{count}} resultaten voor \"{{query}}\"",
+    "bulkDeleteWarning": "U staat op het punt {{count}} {{modelName}}-records permanent te verwijderen."
   },
   "settings": {
     "dataRetention": {
@@ -645,7 +638,6 @@
       "backupManagement": "Back-upbeheer",
       "dataModels": "Datamodellen",
       "maintenance": "Onderhoud",
-      "overview": "Overzicht",
       "settings": "Instellingen",
       "systemHealth": "Systeemstatus",
       "trash": "Prullenbak",
@@ -823,7 +815,6 @@
       "fullName": "Volledige naam",
       "lastLogin": "Laatste login",
       "role": "Rol",
-      "status": "Status",
       "user": "Gebruiker"
     },
     "title": "Gebruikersbeheer",
@@ -836,6 +827,7 @@
       "deactivateTitle": "Gebruiker deactiveren"
     },
     "userCount_one": "{{count}} gebruiker",
-    "userCount_other": "{{count}} gebruikers"
+    "userCount_other": "{{count}} gebruikers",
+    "userCount": "{{count}} gebruikers"
   }
 }

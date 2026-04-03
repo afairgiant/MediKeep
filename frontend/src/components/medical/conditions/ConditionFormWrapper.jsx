@@ -52,7 +52,7 @@ const ConditionFormWrapper = ({
   fetchConditionMedications,
   navigate,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -162,15 +162,15 @@ const ConditionFormWrapper = ({
                 {t('conditions.form.tabs.clinical', 'Clinical Details')}
               </Tabs.Tab>
               <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
-                {t('conditions.form.tabs.medications', 'Medications')}
+                {t('shared:categories.medications', 'Medications')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('conditions.form.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingCondition
-                  ? t('conditions.form.tabs.documents', 'Documents')
-                  : t('conditions.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -215,7 +215,7 @@ const ConditionFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('conditions.form.fields.status', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       value={formData.status || null}
                       data={[
                         { value: 'active', label: t('conditions.form.status.active', 'Active') },
@@ -260,7 +260,7 @@ const ConditionFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('conditions.form.fields.practitioner', 'Practitioner')}
+                      label={t('shared:fields.practitioner', 'Practitioner')}
                       value={formData.practitioner_id || null}
                       data={practitionerOptions}
                       onChange={handleSelectChange('practitioner_id')}
@@ -274,7 +274,7 @@ const ConditionFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('conditions.form.fields.tags', 'Tags')}
+                        {t('shared:labels.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('conditions.form.descriptions.tags', 'Add tags to categorize and organize conditions')}

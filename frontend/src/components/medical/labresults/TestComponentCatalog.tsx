@@ -50,7 +50,7 @@ function getStatusOptions(t: (key: string, fallback: string) => string) {
 type SortMode = 'priority' | 'alphabetical';
 
 const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({ patientId }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const [items, setItems] = useState<ComponentCatalogEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -200,7 +200,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({ patientId }
             style={{ flex: 1, minWidth: 160 }}
           />
           <Select
-            placeholder={t('medical:componentCatalog.filterStatus', 'Status')}
+            placeholder={t('shared:fields.status', 'Status')}
             data={getStatusOptions(t)}
             value={status}
             onChange={setStatus}
@@ -265,7 +265,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({ patientId }
             emoji="\uD83E\uDDEA"
             title={t('medical:componentCatalog.noResults', 'No Test Components Found')}
             hasActiveFilters={hasActiveFilters}
-            filteredMessage={t('medical:componentCatalog.tryAdjusting', 'Try adjusting your search or filter criteria.')}
+            filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
             noDataMessage={t('medical:componentCatalog.noData', 'Add lab results with test components to see them here.')}
           />
         )}

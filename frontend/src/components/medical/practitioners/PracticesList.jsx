@@ -22,7 +22,7 @@ import PracticeEditModal from './PracticeEditModal';
 import frontendLogger from '../../../services/frontendLogger';
 
 const PracticesList = ({ onPracticeSaved }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const responsive = useResponsive();
   const { practices, loading, error, refresh } = usePractices();
 
@@ -145,7 +145,7 @@ const PracticesList = ({ onPracticeSaved }) => {
             columns={[
               { header: t('practitioners.practices.table.name'), accessor: 'name', priority: 'high', width: 200 },
               { header: t('practitioners.practices.table.phone'), accessor: 'phone_number', priority: 'low', width: 130 },
-              { header: t('practitioners.practices.table.website'), accessor: 'website', priority: 'low', width: 160 },
+              { header: t('shared:labels.website'), accessor: 'website', priority: 'low', width: 160 },
               {
                 header: t('practitioners.practices.table.practitioners'),
                 accessor: 'practitioner_count',

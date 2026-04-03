@@ -1,0 +1,27 @@
+{
+  "tabs": {
+    "notes": "Notizen",
+    "documents": "Dokumente",
+    "overview": "Übersicht",
+    "addFiles": "Dateien hinzufügen",
+    "basicInfo": "Grundinformationen"
+  },
+  "fields": {
+    "status": "Status",
+    "other": "Andere",
+    "practitioner": "Praktiker"
+  },
+  "labels": {
+    "tags": "Tags",
+    "website": "Webseite",
+    "description": "Beschreibung"
+  },
+  "emptyStates": {
+    "adjustSearch": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen."
+  },
+  "categories": {
+    "lab_results": "Laborergebnisse",
+    "medications": "Medikamente",
+    "procedures": "Eingriffe"
+  }
+}

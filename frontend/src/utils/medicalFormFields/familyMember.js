@@ -80,7 +80,7 @@ export const familyMemberFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:familyHistory.form.member.notes.placeholder',
     descriptionKey: 'medical:familyHistory.form.member.notes.description',
     gridColumn: 12,

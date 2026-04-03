@@ -28,7 +28,7 @@ const EquipmentViewModal = ({
   onEdit,
   practitioners = [],
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
 
   if (!isOpen || !equipment) return null;
@@ -99,7 +99,7 @@ const EquipmentViewModal = ({
                   </Text>
                 </Stack>
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.status', 'Status')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
                   <StatusBadge status={equipment.status} color={getEquipmentStatusColor(equipment.status)} />
                 </Stack>
                 <Stack gap="xs">
@@ -180,7 +180,7 @@ const EquipmentViewModal = ({
             {/* Notes */}
             {equipment.notes && (
               <div>
-                <Title order={4} mb="sm">{t('equipment.viewModal.notes', 'Notes')}</Title>
+                <Title order={4} mb="sm">{t('shared:tabs.notes', 'Notes')}</Title>
                 <Text size="sm">{equipment.notes}</Text>
               </div>
             )}
@@ -188,7 +188,7 @@ const EquipmentViewModal = ({
             {/* Tags */}
             {equipment.tags && equipment.tags.length > 0 && (
               <div>
-                <Title order={4} mb="sm">{t('equipment.viewModal.tags', 'Tags')}</Title>
+                <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
                 <Group gap="xs">
                   {equipment.tags.map((tag, index) => (
                     <Badge key={index} variant="light" color="blue" size="sm" radius="md">

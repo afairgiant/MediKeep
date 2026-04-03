@@ -33,7 +33,7 @@ const getNavSections = (t) => [
   {
     label: t('sidebar.sections.dashboard', 'Dashboard'),
     items: [
-      { label: t('sidebar.items.overview', 'Overview'), icon: IconChartBar, path: '/admin', exact: true },
+      { label: t('shared:tabs.overview', 'Overview'), icon: IconChartBar, path: '/admin', exact: true },
       { label: t('sidebar.items.analytics', 'Analytics'), icon: IconTrendingUp, path: '/admin/analytics' },
     ],
   },
@@ -68,7 +68,7 @@ const isActive = (currentPath, item) => {
 };
 
 const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const sections = useMemo(() => getNavSections(t), [t]);
 
   const closeSidebar = () => {

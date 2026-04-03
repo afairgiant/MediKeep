@@ -60,7 +60,7 @@ export const allergyFormFields = [
   {
     name: 'status',
     type: 'select',
-    labelKey: 'common:labels.status',
+    labelKey: 'shared:fields.status',
     descriptionKey: 'medical:allergies.status.description',
     gridColumn: 12,
     options: [
@@ -72,7 +72,7 @@ export const allergyFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'common:fields.notes.placeholder',
     descriptionKey: 'common:fields.notes.description',
     gridColumn: 12,

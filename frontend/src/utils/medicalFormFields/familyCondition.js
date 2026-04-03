@@ -94,7 +94,7 @@ export const familyConditionFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:familyHistory.form.condition.notes.placeholder',
     descriptionKey: 'medical:familyHistory.form.condition.notes.description',
     gridColumn: 12,

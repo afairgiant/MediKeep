@@ -1,0 +1,27 @@
+{
+  "tabs": {
+    "notes": "Anteckningar",
+    "documents": "Dokument",
+    "overview": "Översikt",
+    "addFiles": "Lägg till filer",
+    "basicInfo": "Grundinfo"
+  },
+  "fields": {
+    "status": "Status",
+    "other": "Övrigt",
+    "practitioner": "Vårdgivare"
+  },
+  "labels": {
+    "tags": "Taggar",
+    "website": "Webbplats",
+    "description": "Beskrivning"
+  },
+  "emptyStates": {
+    "adjustSearch": "Försök justera din sökning eller filterkriterier."
+  },
+  "categories": {
+    "lab_results": "Labbresultat",
+    "medications": "Mediciner",
+    "procedures": "Ingrepp"
+  }
+}

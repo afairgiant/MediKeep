@@ -1,0 +1,27 @@
+{
+  "tabs": {
+    "notes": "Заметки",
+    "documents": "Документы",
+    "overview": "Обзор",
+    "addFiles": "Добавить файлы",
+    "basicInfo": "Основная информация"
+  },
+  "fields": {
+    "status": "Статус",
+    "other": "Другое",
+    "practitioner": "Лечащий врач"
+  },
+  "labels": {
+    "tags": "Теги",
+    "website": "Веб-сайт",
+    "description": "Описание"
+  },
+  "emptyStates": {
+    "adjustSearch": "Попробуйте изменить параметры поиска или фильтра."
+  },
+  "categories": {
+    "lab_results": "Результаты анализов",
+    "medications": "Лекарства",
+    "procedures": "Процедуры"
+  }
+}

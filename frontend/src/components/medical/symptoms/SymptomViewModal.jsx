@@ -46,7 +46,7 @@ const SymptomViewModal = ({
   onEditOccurrence,
   onRefresh,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
   const [occurrences, setOccurrences] = useState([]);
@@ -178,16 +178,16 @@ const SymptomViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              {t('symptoms.viewModal.tabs.overview', 'Overview')}
+              {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="occurrences" leftSection={<IconClockHour4 size={16} />}>
               {t('symptoms.viewModal.tabs.episodes', 'Episodes ({{count}})', { count: occurrences.length })}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('symptoms.viewModal.tabs.notes', 'Notes')}
+              {t('shared:tabs.notes', 'Notes')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              {t('symptoms.viewModal.tabs.documents', 'Documents')}
+              {t('shared:tabs.documents', 'Documents')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -214,7 +214,7 @@ const SymptomViewModal = ({
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        {t('labels.status', 'Status')}
+                        {t('shared:fields.status', 'Status')}
                       </Text>
                       <div>
                         <Badge
@@ -300,7 +300,7 @@ const SymptomViewModal = ({
                 {symptom.tags && symptom.tags.length > 0 && (
                   <div>
                     <Title order={4} mb="sm">
-                      {t('labels.tags', 'Tags')}
+                      {t('shared:labels.tags', 'Tags')}
                     </Title>
                     <Group gap="xs">
                       {symptom.tags.map((tag, index) => (

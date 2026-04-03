@@ -56,7 +56,7 @@ const MantineVisitForm = ({
   children,
 }) => {
   // Translation hooks - medical for field translations, common for UI elements
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -271,16 +271,16 @@ const MantineVisitForm = ({
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingVisit
-                  ? t('common:visits.form.tabs.documents', 'Documents')
-                  : t('common:visits.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
               {editingVisit && fetchEncounterLabResults && (
                 <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
-                  {t('common:visits.form.tabs.labResults', 'Lab Results')}
+                  {t('shared:categories.lab_results', 'Lab Results')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('common:visits.form.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 

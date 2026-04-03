@@ -145,7 +145,7 @@ export const insuranceFormFields = [
   {
     name: 'status',
     type: 'select',
-    labelKey: 'common:labels.status',
+    labelKey: 'shared:fields.status',
     placeholderKey: 'medical:insurance.form.status.placeholder',
     required: true,
     descriptionKey: 'medical:insurance.form.status.description',
@@ -564,7 +564,7 @@ export const insuranceFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:insurance.form.notes.placeholder',
     descriptionKey: 'medical:insurance.form.notes.description',
     gridColumn: 12,

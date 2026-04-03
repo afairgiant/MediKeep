@@ -40,7 +40,7 @@ const AllergyViewModal = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
@@ -178,16 +178,16 @@ const AllergyViewModal = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              {t('allergies.tabs.overview', 'Overview')}
+              {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="reaction" leftSection={<IconAlertTriangle size={16} />}>
               {t('allergies.tabs.reactionDetails')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('allergies.tabs.notes')}
+              {t('shared:tabs.notes')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              {t('allergies.tabs.documents')}
+              {t('shared:tabs.documents')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -197,7 +197,7 @@ const AllergyViewModal = ({
               <Stack gap="lg">
                 {/* Basic Information */}
                 <div>
-                  <Title order={4} mb="sm">{t('allergies.tabs.basicInfo')}</Title>
+                  <Title order={4} mb="sm">{t('shared:tabs.basicInfo')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('allergies.allergen.label')}</Text>
@@ -221,7 +221,7 @@ const AllergyViewModal = ({
                       </Badge>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('common:fields.status.label')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.status')}</Text>
                       <Badge color={getStatusColor(allergy.status)} variant="light" size="sm">
                         {allergy.status}
                       </Badge>
@@ -255,7 +255,7 @@ const AllergyViewModal = ({
                 {/* Tags Section */}
                 {allergy.tags && allergy.tags.length > 0 && (
                   <div>
-                    <Title order={4} mb="sm">{t('common:fields.tags.label')}</Title>
+                    <Title order={4} mb="sm">{t('shared:labels.tags')}</Title>
                     <Group gap="xs">
                       {allergy.tags.map((tag, index) => (
                         <ClickableTagBadge

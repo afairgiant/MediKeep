@@ -219,7 +219,6 @@
       "channel": "Canal",
       "error": "Error",
       "event": "Evento",
-      "status": "Estado",
       "time": "Hora"
     },
     "loading": "Cargando historial...",

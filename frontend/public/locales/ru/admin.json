@@ -31,10 +31,7 @@
     "breakdownByType": "По типам",
     "chartLabels": {
       "allergies": "Аллергии",
-      "labResults": "Результаты анализов",
-      "medications": "Лекарства",
       "patients": "Пациенты",
-      "procedures": "Процедуры",
       "userActivity": "Активность пользователей",
       "vitals": "Жизненные показатели"
     },
@@ -81,7 +78,6 @@
     "system": "Система",
     "tableHeaders": {
       "action": "Действие",
-      "description": "Описание",
       "entityType": "Тип сущности",
       "recordId": "ID записи",
       "timestamp": "Время",
@@ -109,7 +105,6 @@
         "fileExists": "Файл существует",
         "filename": "Имя файла",
         "size": "Размер",
-        "status": "Статус",
         "type": "Тип"
       },
       "title": "Существующие резервные копии",
@@ -177,7 +172,6 @@
       "createdAt": "Создана: {{date}}",
       "currentDatabase": "Текущая база данных",
       "currentFiles": "Текущие файлы",
-      "description": "Описание",
       "filesCount": "{{count}} файлов ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_few": "{{count}} files ({{size}})",
@@ -375,8 +369,6 @@
       "activePrescriptions_few": "{{count}} active prescriptions",
       "activePrescriptions_many": "{{count}} active prescriptions",
       "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Результаты анализов",
-      "medications": "Лекарства",
       "recentRegistrations": "+{{count}} за эту неделю",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_few": "+{{count}} this week",
@@ -405,7 +397,6 @@
       "fileManagement": "Управление файлами",
       "healthcareDirectory": "Справочник медучреждений",
       "medicalRecords": "Медицинские записи",
-      "other": "Другое",
       "patientSupport": "Поддержка пациентов",
       "sharingAccess": "Совместный доступ",
       "system": "Система"
@@ -619,10 +610,10 @@
     "saveFailed": "Ошибка сохранения",
     "searchPlaceholder": "Поиск {{modelName}}...",
     "searchRecords": "Поиск записей",
-    "searchResult_one": "{{count}} результат для «{{query}}»",
+    "searchResult_one": "{{count}} результат для \"{{query}}\"",
     "searchResult_few": "",
     "searchResult_many": "",
-    "searchResult_other": "{{count}} результатов для «{{query}}»",
+    "searchResult_other": "{{count}} результатов для \"{{query}}\"",
     "selected": "{{count}} выбрано",
     "selected_one": "",
     "selected_few": "",
@@ -641,7 +632,9 @@
     "usernameUpdated": "Имя пользователя обновлено",
     "usernameUpdatedMessage": "Ваше имя пользователя изменено. Пожалуйста, войдите с новым именем пользователя: «{{username}}»",
     "viewRecord": "Просмотр {{modelName}}",
-    "visibleColumns": "Видимые столбцы"
+    "visibleColumns": "Видимые столбцы",
+    "searchResult": "{{count}} результатов для \"{{query}}\"",
+    "bulkDeleteWarning": "Вы собираетесь навсегда удалить {{count}} записей {{modelName}}."
   },
   "settings": {
     "dataRetention": {
@@ -687,7 +680,6 @@
       "backupManagement": "Управление резервными копиями",
       "dataModels": "Модели данных",
       "maintenance": "Обслуживание",
-      "overview": "Обзор",
       "settings": "Настройки",
       "systemHealth": "Состояние системы",
       "trash": "Корзина",
@@ -885,7 +877,6 @@
       "fullName": "Полное имя",
       "lastLogin": "Последний вход",
       "role": "Роль",
-      "status": "Статус",
       "user": "Пользователь"
     },
     "title": "Управление пользователями",
@@ -900,6 +891,7 @@
     "userCount_one": "{{count}} пользователь",
     "userCount_few": "{{count}} users",
     "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} пользователей"
+    "userCount_other": "{{count}} пользователей",
+    "userCount": "{{count}} пользователей"
   }
 }

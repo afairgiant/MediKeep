@@ -59,7 +59,7 @@ const ROLE_COLORS = {
 const PER_PAGE = 20;
 
 const UserManagement = () => {
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'shared']);
   const { user: currentUser } = useAuth();
   const { formatDate } = useDateFormat();
 
@@ -419,7 +419,7 @@ const UserManagement = () => {
               data={STATUS_OPTIONS}
               value={statusFilter}
               onChange={(v) => setStatusFilter(v || '')}
-              placeholder={t('users.tableHeaders.status', 'Status')}
+              placeholder={t('shared:fields.status', 'Status')}
               clearable={false}
               style={{ minWidth: 130 }}
             />
@@ -453,7 +453,7 @@ const UserManagement = () => {
                     <Table.Th>{t('users.tableHeaders.fullName', 'Full Name')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.role', 'Role')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.auth', 'Auth')}</Table.Th>
-                    <Table.Th>{t('users.tableHeaders.status', 'Status')}</Table.Th>
+                    <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.lastLogin', 'Last Login')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.created', 'Created')}</Table.Th>
                     <Table.Th style={{ width: 60 }}>{t('users.tableHeaders.actions', 'Actions')}</Table.Th>
