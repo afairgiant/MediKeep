@@ -173,8 +173,7 @@
     },
     "status": {
       "description": "Текущий статус этого заболевания"
-    },
-    "title": "Заболевания"
+    }
   },
   "emergencyContacts": {
     "form": {
@@ -213,33 +212,6 @@
       "relationship": {
         "description": "Родство с пациентом",
         "label": "Родство",
-        "options": {
-          "aunt": "Тётя",
-          "brother": "Брат",
-          "caregiver": "Опекун",
-          "child": "Ребёнок",
-          "cousin": "Двоюродный брат/сестра",
-          "daughter": "Дочь",
-          "father": "Отец",
-          "friend": "Друг",
-          "grandchild": "Внук/внучка",
-          "granddaughter": "Внучка",
-          "grandfather": "Дедушка",
-          "grandmother": "Бабушка",
-          "grandparent": "Бабушка/дедушка",
-          "grandson": "Внук",
-          "guardian": "Попечитель",
-          "mother": "Мать",
-          "neighbor": "Сосед",
-          "other": "Другое",
-          "parent": "Родитель",
-          "partner": "Партнёр",
-          "sibling": "Брат/сестра",
-          "sister": "Сестра",
-          "son": "Сын",
-          "spouse": "Супруг/супруга",
-          "uncle": "Дядя"
-        },
         "placeholder": "Выберите родство"
       },
       "secondaryPhone": {
@@ -248,27 +220,8 @@
         "placeholder": "напр., +7 495 987-65-43"
       }
     },
-    "isActive": {
-      "description": "Этот контакт сейчас доступен",
-      "label": "Активный контакт"
-    },
-    "isPrimary": {
-      "description": "Этот человек будет оповещён первым в экстренной ситуации",
-      "label": "Основной экстренный контакт"
-    },
     "messages": {
       "saving": "Сохранение экстренного контакта..."
-    },
-    "notesPlaceholder": "Дополнительная информация (напр., «Доступен только в будни», «Говорит по-английски»)",
-    "primaryPhone": {
-      "description": "Основной номер телефона",
-      "label": "Основной телефон",
-      "placeholder": "напр., +7 495 123-45-67"
-    },
-    "secondaryPhone": {
-      "description": "Необязательный дополнительный номер телефона",
-      "label": "Дополнительный телефон",
-      "placeholder": "напр., +7 495 123-45-67"
     },
     "tabs": {
       "contactInfo": "Контактная информация",
@@ -284,31 +237,6 @@
       "notes": "Заметки",
       "serviceDates": "Обслуживание и даты"
     }
-  },
-  "familyConditions": {
-    "conditionName": {
-      "description": "Название медицинского заболевания",
-      "label": "Название заболевания",
-      "placeholder": "напр., Диабет, Болезни сердца, Рак"
-    },
-    "conditionTypeOptions": {
-      "autoimmune": "Аутоиммунные — Нарушения иммунной системы",
-      "cancer": "Рак — Злокачественные заболевания",
-      "cardiovascular": "Сердечно-сосудистые — Сердце и сосуды",
-      "diabetes": "Диабет — Нарушения сахара в крови",
-      "endocrine": "Эндокринные — Гормональные нарушения",
-      "genetic": "Генетические — Наследственные заболевания",
-      "mentalHealth": "Психическое здоровье — Психологические заболевания",
-      "neurological": "Неврологические — Мозг и нервная система",
-      "other": "Другое — Укажите в заметках",
-      "respiratory": "Респираторные — Лёгкие и дыхание"
-    },
-    "diagnosisAge": {
-      "description": "Возраст на момент диагноза",
-      "label": "Возраст постановки диагноза",
-      "placeholder": "напр., 45"
-    },
-    "title": "Семейные заболевания"
   },
   "familyHistory": {
     "form": {
@@ -335,7 +263,6 @@
         },
         "notes": {
           "description": "Подробности лечения, результаты или другая существенная информация",
-          "label": "Заметки",
           "placeholder": "Дополнительные подробности о заболевании..."
         },
         "severity": {
@@ -345,7 +272,6 @@
         },
         "severityOptions": {
           "critical": "Критическая — Угроза жизни",
-          "fatal": "Смертельная — Причина смерти",
           "mild": "Лёгкая — Незначительное влияние",
           "moderate": "Средняя — Заметное влияние",
           "severe": "Тяжёлая — Значительное влияние"
@@ -358,24 +284,16 @@
         "statusOptions": {
           "active": "Активный — Текущее заболевание",
           "chronic": "Хроническое — Длительное заболевание",
-          "fatal": "Летальный — Причина смерти",
-          "managed": "Контролируемое — Под контролем с лечением",
           "resolved": "Вылечено — Больше не присутствует"
         },
         "typeOptions": {
           "autoimmune": "Аутоиммунные — Нарушения иммунной системы",
-          "blood": "Кровь — Гематологические нарушения",
           "cancer": "Рак — Злокачественные заболевания",
           "cardiovascular": "Сердечно-сосудистые — Сердце и сосуды",
           "diabetes": "Диабет — Нарушения сахара в крови",
           "endocrine": "Эндокринные — Гормональные нарушения",
-          "gastrointestinal": "Желудочно-кишечные — Пищеварительная система",
           "genetic": "Генетические — Наследственные заболевания",
-          "kidney": "Почечные — Заболевания почек",
-          "liver": "Печёночные — Заболевания печени",
-          "mental_health": "Психическое здоровье — Психиатрические заболевания",
           "mentalHealth": "Психическое здоровье — Психологические заболевания",
-          "musculoskeletal": "Опорно-двигательные — Кости и мышцы",
           "neurological": "Неврологические — Мозг и нервная система",
           "other": "Другое — Укажите в заметках",
           "respiratory": "Респираторные — Лёгкие и дыхание"
@@ -413,7 +331,6 @@
         },
         "notes": {
           "description": "Любые дополнительные заметки или важная информация",
-          "label": "Заметки",
           "placeholder": "Дополнительная информация о члене семьи..."
         },
         "relationship": {
@@ -423,81 +340,26 @@
         },
         "relationshipOptions": {
           "aunt": "Тётя",
-          "aunt_maternal": "Тётя (по матери)",
-          "aunt_paternal": "Тётя (по отцу)",
           "brother": "Брат",
           "cousin": "Двоюродный брат/сестра",
-          "daughter": "Дочь",
           "father": "Отец",
-          "granddaughter": "Внучка",
-          "grandfather_maternal": "Дедушка (по матери)",
-          "grandfather_paternal": "Дедушка (по отцу)",
-          "grandmother_maternal": "Бабушка (по матери)",
-          "grandmother_paternal": "Бабушка (по отцу)",
-          "grandson": "Внук",
           "maternalGrandfather": "Дедушка по матери",
           "maternalGrandmother": "Бабушка по матери",
           "mother": "Мать",
-          "nephew": "Племянник",
-          "niece": "Племянница",
           "other": "Другое",
           "paternalGrandfather": "Дедушка по отцу",
           "paternalGrandmother": "Бабушка по отцу",
           "sister": "Сестра",
-          "son": "Сын",
-          "uncle": "Дядя",
-          "uncle_maternal": "Дядя (по матери)",
-          "uncle_paternal": "Дядя (по отцу)"
+          "uncle": "Дядя"
         }
       }
     }
-  },
-  "familyMembers": {
-    "birthYear": {
-      "description": "Год рождения члена семьи",
-      "label": "Год рождения",
-      "placeholder": "напр., 1965"
-    },
-    "deathYear": {
-      "description": "Год смерти члена семьи",
-      "label": "Год смерти",
-      "placeholder": "напр., 2020"
-    },
-    "genderOptions": {
-      "female": "Женский",
-      "male": "Мужской",
-      "other": "Другой"
-    },
-    "isDeceased": {
-      "description": "Отметьте, если член семьи умер",
-      "label": "Умер"
-    },
-    "relationshipOptions": {
-      "aunt": "Тётя",
-      "brother": "Брат",
-      "cousin": "Двоюродный брат/сестра",
-      "father": "Отец",
-      "maternalGrandfather": "Дедушка по матери",
-      "maternalGrandmother": "Бабушка по матери",
-      "mother": "Мать",
-      "other": "Другое",
-      "paternalGrandfather": "Дедушка по отцу",
-      "paternalGrandmother": "Бабушка по отцу",
-      "sister": "Сестра",
-      "uncle": "Дядя"
-    },
-    "title": "Члены семьи"
   },
   "form": {
     "invalidPhoneDigits": "Номер телефона может содержать только цифры, пробелы, дефисы, скобки, точки и +",
     "invalidWebsiteUrl": "Пожалуйста, введите корректный URL веб-сайта"
   },
   "immunizations": {
-    "additionalNotes": {
-      "description": "Зафиксируйте любые побочные реакции или важные заметки",
-      "label": "Дополнительные заметки",
-      "placeholder": "Любые реакции, побочные эффекты или дополнительные наблюдения..."
-    },
     "dateAdministered": {
       "description": "Когда была сделана прививка",
       "label": "Дата введения",
@@ -529,17 +391,12 @@
       "placeholder": "Выберите производителя"
     },
     "manufacturerOptions": {
-      "astrazeneca": "AstraZeneca",
       "astraZeneca": "AstraZeneca",
-      "glaxosmithkline": "GlaxoSmithKline",
       "glaxoSmithKline": "GlaxoSmithKline",
-      "jj": "Johnson & Johnson",
       "johnsonJohnson": "Johnson & Johnson",
       "merck": "Merck",
       "moderna": "Moderna",
-      "novartis": "Novartis",
       "other": "Другое",
-      "pfizer": "Pfizer-BioNTech",
       "pfizerBioNTech": "Pfizer-BioNTech",
       "sanofi": "Sanofi"
     },
@@ -563,7 +420,6 @@
       "intramuscular": "Внутримышечно (ВМ)",
       "nasal": "Назально",
       "oral": "Перорально",
-      "other": "Другое",
       "subcutaneous": "Подкожно (ПК)"
     },
     "site": {
@@ -572,18 +428,13 @@
       "placeholder": "Выберите место инъекции"
     },
     "siteOptions": {
-      "abdomen": "Живот",
       "leftArm": "Левая рука",
       "leftDeltoid": "Левый дельтовидный",
-      "leftGluteal": "Левая ягодица",
       "leftThigh": "Левое бедро",
-      "other": "Другое",
       "rightArm": "Правая рука",
       "rightDeltoid": "Правый дельтовидный",
-      "rightGluteal": "Правая ягодица",
       "rightThigh": "Правое бедро"
     },
-    "title": "Прививки",
     "vaccineName": {
       "description": "Название введённой вакцины",
       "label": "Название вакцины",
@@ -599,9 +450,7 @@
       "placeholder": "напр., Левое колено, Правое плечо"
     },
     "bodyPart": {
-      "description": "Затронутая часть тела или область",
-      "label": "Часть тела",
-      "placeholder": "напр., Голеностоп, Запястье, Колено"
+      "label": "Часть тела"
     },
     "cardSubtitle": "Физическая травма",
     "cause": {
@@ -610,9 +459,7 @@
       "placeholder": "Опишите, как произошла травма..."
     },
     "dateOfInjury": {
-      "description": "Дата получения травмы",
-      "label": "Дата травмы",
-      "placeholder": "Когда произошла травма"
+      "label": "Дата травмы"
     },
     "editTitle": "Редактировать травму",
     "emptyState": {
@@ -637,13 +484,10 @@
       "placeholder": "напр., Растяжение правого голеностопа"
     },
     "injuryType": {
-      "createNew": "Создать \"{{name}}\"",
       "description": "Категория травмы (напр., Растяжение, Перелом)",
       "label": "Тип травмы",
       "noResults": "Подходящих типов не найдено",
-      "noTypes": "Типы отсутствуют",
-      "placeholder": "Выберите или создайте тип",
-      "system": "Системный"
+      "placeholder": "Выберите или создайте тип"
     },
     "laterality": {
       "description": "Какая сторона тела затронута",
@@ -657,12 +501,9 @@
       "placeholder": "Выберите сторону"
     },
     "mechanism": {
-      "description": "Опишите, как произошла травма",
-      "label": "Как произошло",
-      "placeholder": "напр., Упал во время похода"
+      "label": "Как произошло"
     },
     "messages": {
-      "createTypeFailed": "Не удалось создать тип травмы",
       "loading": "Загрузка травм...",
       "saving": "Сохранение травмы..."
     },
@@ -685,7 +526,6 @@
       "description": "Насколько тяжёлая эта травма",
       "label": "Тяжесть",
       "options": {
-        "lifeThreatening": "Life-threatening - Emergency care needed",
         "mild": "Mild - Minor discomfort",
         "moderate": "Moderate - Noticeable impact",
         "severe": "Severe - Significant impact"
@@ -707,7 +547,6 @@
       "documents": "Документы",
       "notes": "Заметки",
       "overview": "Обзор",
-      "recovery": "Восстановление",
       "treatment": "Лечение"
     },
     "title": "Травмы",
@@ -717,9 +556,7 @@
       "placeholder": "Опишите полученное лечение..."
     },
     "treatmentReceived": {
-      "description": "Описание полученного лечения",
-      "label": "Полученное лечение",
-      "placeholder": "напр., Протокол PRICE, наложен гипс"
+      "label": "Полученное лечение"
     },
     "viewModal": {
       "additionalInfo": "Дополнительная информация",
@@ -728,29 +565,6 @@
     "viewPractitioner": "Подробности о враче"
   },
   "insurance": {
-    "companyName": {
-      "description": "Название страховой компании",
-      "label": "Страховая компания",
-      "placeholder": "напр., СОГАЗ, РЕСО-Гарантия"
-    },
-    "copayPrimaryCare": {
-      "description": "Доплата за визит к терапевту",
-      "label": "Доплата за приём терапевта",
-      "placeholder": "напр., 25"
-    },
-    "deductibleIndividual": {
-      "description": "Годовая сумма индивидуальной франшизы",
-      "label": "Индивидуальная франшиза",
-      "placeholder": "напр., 1000"
-    },
-    "dividers": {
-      "basic": "Основная информация о страховке",
-      "contact": "Контактная информация страховой",
-      "coverage": "Период и статус покрытия",
-      "coverageDetails": "Детали покрытия",
-      "member": "Информация о застрахованном",
-      "notes": "Дополнительная информация"
-    },
     "form": {
       "addInsurance": "Add Insurance",
       "annualMaximum": {
@@ -1038,41 +852,6 @@
         "placeholder": "напр., https://lk.insurance.ru"
       }
     },
-    "groupNumber": {
-      "description": "Номер группы (если применимо)",
-      "label": "Номер группы",
-      "placeholder": "напр., GRP123"
-    },
-    "insuranceTypeOptions": {
-      "dental": "Стоматологическое страхование",
-      "medical": "Медицинское страхование",
-      "prescription": "Страхование лекарств",
-      "vision": "Страхование зрения"
-    },
-    "isPrimary": {
-      "description": "Отметьте, если это ваша основная страховка (только медицинская)",
-      "label": "Основная страховка"
-    },
-    "memberId": {
-      "description": "Номер на страховой карте",
-      "label": "Номер застрахованного",
-      "placeholder": "напр., ABC123456789"
-    },
-    "planName": {
-      "description": "Конкретное название плана",
-      "label": "Название плана",
-      "placeholder": "напр., ДМС Базовый Плюс"
-    },
-    "planTypeOptions": {
-      "epo": "EPO (Exclusive Provider Organization)",
-      "hdhp": "HDHP (High Deductible Health Plan)",
-      "hmo": "HMO (Health Maintenance Organization)",
-      "indemnity": "Индемнити (Fee for Service)",
-      "other": "Другое",
-      "pos": "POS (Point of Service)",
-      "ppo": "PPO (Preferred Provider Organization)"
-    },
-    "title": "Страхование",
     "viewModal": {
       "attachedDocuments": "Attached Documents",
       "coverageDetails": "Coverage Details"
@@ -1109,12 +888,10 @@
       "abbreviation": "Abbreviation",
       "abbreviationPlaceholder": "e.g., HGB",
       "addAnotherTest": "Добавить ещё один анализ",
-      "addTestComponent": "Добавить компоненты анализа",
       "autoCalculated": "Auto-calculated",
       "cannotRemoveLastRow": "Cannot remove last row",
       "category": "Category",
       "componentCreationWarning": "Результат анализа сохранён, но компоненты не удалось добавить. Вы можете добавить их на странице просмотра.",
-      "hideTestComponents": "Скрыть компоненты анализа",
       "linkConditionsDescription": "Свяжите этот результат анализа с соответствующими заболеваниями для лучшего отслеживания и организации.",
       "linkConditionsTitle": "Связать с заболеваниями",
       "max": "Max",
@@ -1150,7 +927,6 @@
     "messages": {
       "relationshipsCreateInfo": "Связи можно добавить после сохранения результата анализа.",
       "relationshipsSaveFirst": "Сначала сохраните результат анализа, чтобы создать связи.",
-      "saving": "Сохранение результата анализа...",
       "testComponentsEditInfo": "Компонентами анализа можно управлять со страницы просмотра после сохранения."
     },
     "orderedDate": {
@@ -1162,28 +938,6 @@
       "description": "Врач, назначивший анализ",
       "label": "Направивший врач",
       "placeholder": "Выберите врача"
-    },
-    "qualitative": {
-      "expectedResult": "Ожидаемый результат",
-      "qualitativeLabel": "Качественный",
-      "quantitative": "Количественный",
-      "resultType": "Тип результата",
-      "selectResult": "Выберите результат",
-      "templates": {
-        "autoimmune": "Аутоиммунная панель",
-        "infectiousDisease": "Панель инфекционных заболеваний",
-        "viralSerology": "Панель вирусной серологии"
-      },
-      "trends": {
-        "improving": "Улучшение",
-        "worsening": "Ухудшение"
-      },
-      "values": {
-        "detected": "Обнаружен",
-        "negative": "Отрицательный",
-        "positive": "Положительный",
-        "undetected": "Не обнаружен"
-      }
     },
     "result": {
       "abnormal": "Отклонение — Вне референсного диапазона",
@@ -1206,8 +960,7 @@
       "documents": "Документы",
       "notes": "Заметки",
       "relationships": "Связи",
-      "resultsStatus": "Результаты и статус",
-      "testComponents": "Компоненты анализа"
+      "resultsStatus": "Результаты и статус"
     },
     "testCategory": {
       "description": "Тип лабораторного анализа",
@@ -1235,11 +988,8 @@
       "placeholder": "Выберите статус"
     },
     "testType": {
-      "description": "Приоритет или срочность анализа",
       "emergency": "Экстренный — Критический приоритет",
       "followUp": "Контрольный — Повторное исследование",
-      "label": "Тип анализа",
-      "placeholder": "Выберите уровень срочности",
       "routine": "Плановый — Стандартная обработка",
       "screening": "Скрининг — Профилактическое обследование",
       "urgent": "Срочный — Ускоренная обработка"
@@ -1335,15 +1085,9 @@
       "details": "Подробности",
       "documents": "Документы",
       "notes": "Заметки"
-    },
-    "title": "Лекарства"
+    }
   },
   "pharmacies": {
-    "city": {
-      "description": "Расположение аптеки",
-      "label": "Город",
-      "placeholder": "Москва"
-    },
     "form": {
       "brand": {
         "description": "Крупная аптечная сеть или независимый тип",
@@ -1389,7 +1133,6 @@
       },
       "phone": {
         "description": "Основной телефон аптеки",
-        "label": "Номер телефона",
         "placeholder": "+7 495 123-45-67"
       },
       "postalCode": {
@@ -1421,28 +1164,7 @@
         "description": "Веб-сайт аптеки для онлайн-заказов или информации",
         "placeholder": "https://www.example.com"
       }
-    },
-    "pharmacyBrand": {
-      "description": "Основная аптечная сеть или независимый тип",
-      "label": "Сеть аптек",
-      "placeholder": "Выберите аптечную сеть или тип"
-    },
-    "pharmacyName": {
-      "description": "Конкретное название или идентификатор расположения",
-      "label": "Название аптеки",
-      "placeholder": "Аптека — ул. Главная"
-    },
-    "storeNumber": {
-      "description": "Номер филиала или лицензии",
-      "label": "Номер филиала",
-      "placeholder": "напр., 1234"
-    },
-    "streetAddress": {
-      "description": "Физический адрес",
-      "label": "Адрес",
-      "placeholder": "ул. Главная, 123"
-    },
-    "title": "Аптеки"
+    }
   },
   "practices": {
     "form": {
@@ -1450,10 +1172,6 @@
         "description": "Номер факса клиники",
         "label": "Номер факса",
         "placeholder": "+7 495 123-45-68"
-      },
-      "locations": {
-        "description": "Адреса филиалов этой клиники",
-        "label": "Филиалы"
       },
       "name": {
         "description": "Название клиники или медицинского учреждения",
@@ -1480,8 +1198,7 @@
         "label": "Веб-сайт клиники",
         "placeholder": "https://www.clinic.ru"
       }
-    },
-    "title": "Клиники"
+    }
   },
   "practitioners": {
     "form": {
@@ -1519,27 +1236,7 @@
         "label": "Веб-сайт",
         "placeholder": "https://www.example.com"
       }
-    },
-    "name": {
-      "description": "Полное имя врача, включая звание",
-      "label": "Полное имя",
-      "placeholder": "Д-р Иванова Мария Петровна"
-    },
-    "practice": {
-      "description": "Выберите существующую клинику или введите новую",
-      "label": "Клиника",
-      "placeholder": "Найдите или создайте клинику..."
-    },
-    "rating": {
-      "description": "Оцените качество медицинской помощи этого врача",
-      "label": "Оценка"
-    },
-    "specialty": {
-      "description": "Выберите из списка или введите дополнительную специальность",
-      "label": "Медицинская специальность",
-      "placeholder": "Найдите специальность или добавьте..."
-    },
-    "title": "Лечащие врачи"
+    }
   },
   "procedures": {
     "anesthesiaNotes": {
@@ -1558,11 +1255,6 @@
         "sedation": "Седация — Расслабление при сохранении сознания"
       },
       "placeholder": "Выберите тип анестезии"
-    },
-    "clinicalNotes": {
-      "description": "Любые дополнительные клинические заметки или наблюдения",
-      "label": "Клинические заметки",
-      "placeholder": "Дополнительные заметки о процедуре..."
     },
     "complications": {
       "description": "Задокументируйте любые осложнения, нежелательные явления или неожиданные результаты",
@@ -1585,21 +1277,10 @@
       "placeholder": "Дополнительные заметки о процедуре..."
     },
     "outcome": {
-      "description": "Результат или исход процедуры",
-      "label": "Результат",
-      "options": {
-        "abnormal": "Отклонение",
-        "complications": "Осложнения",
-        "inconclusive": "Неопределённый",
-        "pending": "Ожидается",
-        "successful": "Успешный"
-      },
-      "placeholder": "Выберите результат"
+      "label": "Результат"
     },
     "performingPractitioner": {
-      "description": "Врач, выполняющий процедуру",
-      "label": "Выполняющий врач",
-      "placeholder": "Выберите врача"
+      "label": "Выполняющий врач"
     },
     "practitioner": {
       "description": "Врач или специалист, выполняющий процедуру",
@@ -1652,8 +1333,7 @@
     },
     "status": {
       "description": "Текущий статус процедуры"
-    },
-    "title": "Процедуры"
+    }
   },
   "symptoms": {
     "messages": {
@@ -1793,13 +1473,6 @@
     "title": "Симптомы"
   },
   "treatments": {
-    "advancedOverview": {
-      "equipmentCount": "{{count}} оборудование",
-      "labsCount": "{{count}} анализ(ов)",
-      "medicationsCount": "{{count}} лекарство(а)",
-      "title": "Обзор плана лечения",
-      "visitsCount": "{{count}} визит(ов)"
-    },
     "amount": {
       "description": "Количество или интенсивность за сеанс",
       "label": "Количество",
@@ -1807,7 +1480,6 @@
     },
     "endDate": {
       "description": "Ожидаемая или фактическая дата завершения",
-      "label": "Дата окончания",
       "placeholder": "Выберите дату окончания (если известна)"
     },
     "frequency": {
@@ -1828,40 +1500,19 @@
       "weekly": "Еженедельно"
     },
     "medications": {
-      "default": "(из лекарства)",
-      "duration": "Длительность",
-      "effectiveValue": "Действующее",
-      "linkDescription": "Свяжите лекарства, чтобы отслеживать, что назначено в рамках этого плана лечения.",
-      "noMedicationsLinked": "Нет связанных лекарств",
-      "overridden": "Специфичное для лечения",
-      "relevanceNote": "Примечание о значимости",
-      "specificDosage": "Особая дозировка",
       "specificEndDate": "Дата окончания лечения",
-      "specificFrequency": "Особая частота",
-      "specificPharmacy": "Аптека для лечения",
-      "specificPrescriber": "Назначивший врач для лечения",
-      "specificStartDate": "Дата начала лечения",
-      "timingInstructions": "Инструкции по времени приёма"
+      "specificStartDate": "Дата начала лечения"
     },
     "mode": {
-      "advanced": "План лечения",
-      "advancedDescription": "План с акцентом на лекарства с индивидуальными настройками для каждого",
       "advancedOption": "План лечения",
       "description": "Выберите способ отслеживания лечения",
       "label": "Режим лечения",
-      "simple": "Простой",
-      "simpleDescription": "Базовое отслеживание с расписанием и дозировкой",
       "simpleOption": "Простой"
     },
     "notes": {
       "description": "Обновления о прогрессе, наблюдения или важные заметки",
       "label": "Дополнительные заметки",
       "placeholder": "Заметки о прогрессе, побочных эффектах, корректировках, результатах..."
-    },
-    "performingPractitioner": {
-      "description": "Назначить врача на это лечение",
-      "label": "Выполняющий врач",
-      "placeholder": "Выберите врача (необязательно)"
     },
     "practitioner": {
       "description": "Назначить врача на это лечение",
@@ -1875,21 +1526,8 @@
     },
     "startDate": {
       "description": "Когда начинается/началось лечение",
-      "label": "Дата начала",
       "placeholder": "Выберите дату начала"
     },
-    "tabs": {
-      "documents": "Документы",
-      "equipment": "Оборудование",
-      "labs": "Анализы",
-      "medications": "Лекарства",
-      "notes": "Заметки",
-      "overview": "Обзор",
-      "relationships": "Связи",
-      "scheduleAndDosage": "Расписание и дозировка",
-      "visits": "Визиты"
-    },
-    "title": "Лечение",
     "treatmentDescription": {
       "description": "Полные сведения о подходе к лечению",
       "label": "Описание лечения",
@@ -1932,38 +1570,20 @@
     }
   },
   "visits": {
-    "additionalNotes": {
-      "description": "Любые дополнительные наблюдения, заметки или важные подробности",
-      "label": "Дополнительные заметки",
-      "placeholder": "Любые другие важные подробности визита..."
-    },
     "attendingPractitioner": {
-      "description": "Врач, проводивший приём",
-      "label": "Лечащий врач",
-      "placeholder": "Выберите врача (необязательно)"
+      "label": "Лечащий врач"
     },
     "chiefComplaint": {
-      "description": "Основная проблема со здоровьем или симптом, послуживший причиной визита",
-      "label": "Основная жалоба",
-      "placeholder": "Основная жалоба или симптом"
+      "label": "Основная жалоба"
     },
     "diagnosisAssessment": {
-      "description": "Медицинский диагноз или клиническое заключение",
-      "label": "Диагноз/Заключение",
-      "placeholder": "Клиническое заключение или диагноз визита..."
-    },
-    "dividers": {
-      "clinical": "Клиническая информация"
+      "label": "Диагноз/Заключение"
     },
     "durationMinutes": {
-      "description": "Сколько длился визит",
-      "label": "Длительность (минуты)",
-      "placeholder": "Длительность визита"
+      "label": "Длительность (минуты)"
     },
     "followUpInstructions": {
-      "description": "Инструкции по дальнейшему уходу и контрольным визитам",
-      "label": "Инструкции по наблюдению",
-      "placeholder": "Инструкции по дальнейшему наблюдению..."
+      "label": "Инструкции по наблюдению"
     },
     "form": {
       "dividers": {
@@ -2052,48 +1672,14 @@
         "specialistReferral": "Направление к специалисту"
       }
     },
-    "location": {
-      "description": "Где проходил визит",
-      "label": "Место",
-      "placeholder": "Где проходил визит"
-    },
-    "locationOptions": {
-      "clinic": "Поликлиника",
-      "emergencyRoom": "Приёмное отделение",
-      "home": "Визит на дом",
-      "hospital": "Больница",
-      "office": "Кабинет врача",
-      "telehealth": "Телемедицина/Онлайн",
-      "urgentCare": "Неотложная помощь"
-    },
-    "priority": {
-      "description": "Уровень приоритета визита",
-      "label": "Приоритет",
-      "options": {
-        "emergency": "Экстренный",
-        "routine": "Плановый",
-        "urgent": "Срочный"
-      },
-      "placeholder": "Выберите уровень приоритета"
-    },
-    "reason": {
-      "description": "Основная цель этого медицинского визита",
-      "label": "Причина визита",
-      "placeholder": "напр., Ежегодный осмотр, Контрольный визит, Обзор симптомов"
-    },
     "relatedCondition": {
-      "description": "Свяжите визит с конкретным заболеванием, если применимо",
-      "label": "Связанное заболевание (необязательно)",
-      "placeholder": "Выберите заболевание, связанное с этим визитом"
+      "label": "Связанное заболевание (необязательно)"
     },
     "table": {
       "visitType": "Тип визита"
     },
-    "title": "Визиты",
     "treatmentPlan": {
-      "description": "Рекомендации по лечению и назначенные вмешательства",
-      "label": "План лечения",
-      "placeholder": "Рекомендованное лечение или следующие шаги..."
+      "label": "План лечения"
     },
     "viewModal": {
       "chiefComplaint": "Основная жалоба",
@@ -2101,25 +1687,6 @@
       "location": "Место",
       "priority": "Приоритет",
       "treatmentPlan": "План лечения"
-    },
-    "visitDate": {
-      "description": "Когда состоялся визит",
-      "label": "Дата визита",
-      "placeholder": "Выберите дату визита"
-    },
-    "visitType": {
-      "description": "Тип медицинского визита",
-      "label": "Тип визита",
-      "options": {
-        "annualCheckup": "Ежегодный осмотр",
-        "consultation": "Консультация",
-        "emergency": "Экстренный",
-        "followUp": "Контрольный визит",
-        "preventiveCare": "Профилактический",
-        "routineVisit": "Плановый визит",
-        "specialistReferral": "Направление к специалисту"
-      },
-      "placeholder": "Выберите тип визита"
     }
   }
 }

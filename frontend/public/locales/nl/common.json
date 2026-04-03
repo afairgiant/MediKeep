@@ -1,10 +1,4 @@
 {
-  "allergies": {
-    "addNew": "Nieuwe allergie toevoegen",
-    "messages": {
-      "loading": "Allergieën laden..."
-    }
-  },
   "auth": {
     "login": {
       "continueWith": "Doorgaan met {{provider}}",
@@ -32,52 +26,30 @@
         "loggedIn": "U wordt direct ingelogd na het aanmaken van uw account",
         "startManaging": "U kunt direct beginnen met het beheren van uw medische gegevens"
       },
-      "note": "Er wordt automatisch een patiëntdossier aangemaakt voor deze gebruiker met de standaardrol \"gebruiker\".",
       "pageSubtitle": "Meld u vandaag aan bij MediKeep en beheer uw medische dossiers veilig",
       "pageTitle": "Maak uw account aan",
-      "requirements": {
-        "length": "Minimaal 6 tekens",
-        "letter": "Bevat minimaal één letter",
-        "number": "Bevat minimaal één cijfer"
-      },
       "welcomeMessage": "Welkom {{name}}! Uw account is succesvol aangemaakt.",
       "whatHappensNext": "Wat gebeurt er hierna?"
     }
   },
   "buttons": {
-    "add": "Toevoegen",
     "addNew": "Nieuw toevoegen",
-    "apply": "Toepassen",
     "back": "Terug",
-    "cancel": "Annuleren",
     "cancelSelection": "Cancel Selection",
-    "clear": "Wissen",
-    "clearAll": "Alles wissen",
     "close": "Sluiten",
-    "confirm": "Bevestigen",
-    "continue": "Doorgaan",
     "create": "Aanmaken",
     "delete": "Verwijderen",
     "done": "Gereed",
-    "download": "Downloaden",
     "edit": "Bewerken",
-    "export": "Exporteren",
-    "filter": "Filteren",
-    "finish": "Voltooien",
-    "import": "Importeren",
     "link": "Link",
     "linkCondition": "Aandoening koppelen",
     "linkConditions": "Aandoeningen koppelen",
     "linkEquipment": "Link Equipment",
     "linkLabResult": "Link Lab Result",
     "linkMedication": "Medicatie koppelen",
-    "linkMedications": "Medicatie koppelen",
     "linkVisit": "Link Visit",
-    "next": "Volgende",
     "print": "Afdrukken",
     "refresh": "Vernieuwen",
-    "remove": "Verwijderen",
-    "reset": "Herstellen",
     "restore": "Herstellen",
     "retry": "Opnieuw proberen",
     "save": "Opslaan",
@@ -87,12 +59,10 @@
     "share": "Share",
     "showLess": "Show less",
     "showMore": "Show more",
-    "skip": "Overslaan",
-    "submit": "Verzenden",
     "tryAgain": "Try Again",
     "update": "Bijwerken",
-    "upload": "Uploaden",
-    "view": "Bekijken"
+    "view": "Bekijken",
+    "cancel": "Cancel"
   },
   "common": {
     "buttons": {
@@ -111,13 +81,8 @@
     "addNew": "Nieuwe aandoening toevoegen",
     "addTitle": "Nieuwe aandoening toevoegen",
     "card": {
-      "codeDescription": "Codebeschrijving",
-      "duration": "Duur",
       "durationEnded": "{{duration}} (beëindigd)",
-      "durationOngoing": "{{duration}} (doorlopend)",
-      "endDate": "Einde",
-      "onsetDate": "Aanvang",
-      "snomedCode": "SNOMED-code"
+      "durationOngoing": "{{duration}} (doorlopend)"
     },
     "editTitle": "Aandoening bewerken",
     "form": {
@@ -128,7 +93,6 @@
         "diagnosis": "Primaire diagnose of aandoening",
         "endDate": "Wanneer de aandoening eindigde (indien van toepassing)",
         "icd10Code": "Internationale Classificatie van Ziekten-code",
-        "medication": "Koppel deze aandoening aan medicatie",
         "notes": "Aanvullende informatie over deze aandoening",
         "onsetDate": "Wanneer de aandoening begon",
         "practitioner": "Betrokken zorgverlener",
@@ -144,7 +108,6 @@
         "icd10Code": "ICD-10-code",
         "onsetDate": "Aanvangsdatum",
         "practitioner": "Zorgverlener",
-        "relatedMedication": "Gerelateerde medicatie",
         "severity": "Ernst",
         "snomedCode": "SNOMED-code",
         "status": "Status",
@@ -155,11 +118,8 @@
         "codeDescription": "Beschrijving van de medische code",
         "conditionName": "Voer naam aandoening in",
         "diagnosis": "Voer diagnose in",
-        "endDate": "Selecteer einddatum",
         "icd10Code": "bijv. E11.9",
-        "medication": "Selecteer medicatie",
         "notes": "Voer klinische notities, observaties of aanvullende details in",
-        "onsetDate": "Selecteer aanvangsdatum",
         "practitioner": "Selecteer zorgverlener",
         "severity": "Selecteer ernst",
         "snomedCode": "bijv. 44054006",
@@ -200,12 +160,9 @@
         "endDate": "Einde",
         "icd10Code": "ICD-10-code",
         "onsetDate": "Aanvang",
-        "practitioner": "Zorgverlener",
-        "relatedMedication": "Gerelateerde medicatie",
         "severity": "Ernst",
         "snomedCode": "SNOMED-code"
       },
-      "noMedicationLinked": "Geen medicatie gekoppeld",
       "noNotesAvailable": "Geen klinische notities beschikbaar",
       "noPractitionerAssigned": "Geen zorgverlener toegewezen",
       "sections": {
@@ -213,7 +170,6 @@
         "clinicalNotes": "Klinische notities",
         "medicalCodes": "Medische codes",
         "practitioner": "Practitioner",
-        "relatedInfo": "Gerelateerde informatie",
         "tags": "Tags",
         "timeline": "Tijdlijn"
       },
@@ -257,7 +213,6 @@
       "relationship": "Relatie:",
       "secondaryPhone": "Tweede telefoon:"
     },
-    "description": "Beheer noodcontactinformatie",
     "form": {
       "addTitle": "Noodcontact toevoegen",
       "editTitle": "Noodcontact bewerken"
@@ -277,7 +232,6 @@
       "relationship": "Relatie",
       "status": "Status"
     },
-    "title": "Noodcontacten",
     "viewModal": {
       "address": "Adres",
       "contactInfo": "📞 Contactinformatie",
@@ -289,7 +243,8 @@
       "primaryPhone": "Primair telefoonnummer",
       "secondaryPhone": "Tweede telefoonnummer",
       "title": "Noodcontactdetails"
-    }
+    },
+    "title": "Noodcontacten"
   },
   "equipment": {
     "addEquipment": "Add Equipment",
@@ -524,120 +479,8 @@
     "form": {
       "addConditionForMember": "Aandoening toevoegen voor {{name}}",
       "addMemberTitle": "Familielid toevoegen",
-      "condition": {
-        "conditionName": {
-          "description": "Naam van de medische aandoening",
-          "label": "Naam aandoening",
-          "placeholder": "bijv. diabetes, hartziekte, kanker"
-        },
-        "conditionType": {
-          "description": "Categorie van de medische aandoening",
-          "label": "Type aandoening",
-          "placeholder": "Selecteer type aandoening"
-        },
-        "diagnosisAge": {
-          "description": "Leeftijd bij diagnose",
-          "label": "Leeftijd bij diagnose",
-          "placeholder": "bijv. 45"
-        },
-        "icd10Code": {
-          "description": "Medische diagnosecode (indien bekend)",
-          "label": "ICD-10-code",
-          "placeholder": "bijv. E11.9"
-        },
-        "notes": {
-          "description": "Behandeldetails, uitkomsten of andere relevante informatie",
-          "placeholder": "Aanvullende details over de aandoening..."
-        },
-        "severity": {
-          "description": "Hoe ernstig de aandoening was/is",
-          "label": "Ernst",
-          "placeholder": "Selecteer ernstniveau"
-        },
-        "severityOptions": {
-          "critical": "🚨 Kritiek - Levensbedreigend",
-          "mild": "💛 Licht - Geringe impact",
-          "moderate": "⚡ Matig - Merkbare impact",
-          "severe": "⚠️ Ernstig - Significante impact"
-        },
-        "status": {
-          "description": "Huidige status van de aandoening",
-          "label": "Status",
-          "placeholder": "Selecteer status"
-        },
-        "statusOptions": {
-          "active": "Actief - Lopende aandoening",
-          "chronic": "Chronisch - Langdurige aandoening",
-          "resolved": "Opgelost - Niet meer aanwezig"
-        },
-        "typeOptions": {
-          "autoimmune": "Auto-immuun - Afweerstoornissen",
-          "cancer": "Kanker - Kwaadaardige aandoeningen",
-          "cardiovascular": "Cardiovasculair - Hart en bloedvaten",
-          "diabetes": "Diabetes - Bloedsuikerstoornissen",
-          "endocrine": "Endocrien - Hormonale stoornissen",
-          "genetic": "Genetisch - Erfelijke aandoeningen",
-          "mentalHealth": "Geestelijke gezondheid - Psychologische aandoeningen",
-          "neurological": "Neurologisch - Hersenen en zenuwstelsel",
-          "other": "Overig - Specificeer in notities",
-          "respiratory": "Respiratoir - Long- en ademhalingsaandoeningen"
-        }
-      },
       "editConditionForMember": "Aandoening bewerken voor {{name}}",
-      "editMemberTitle": "Familielid bewerken",
-      "member": {
-        "birthYear": {
-          "description": "Geboortejaar van het familielid",
-          "label": "Geboortejaar",
-          "placeholder": "bijv. 1965"
-        },
-        "deathYear": {
-          "description": "Overlijdensjaar van het familielid",
-          "label": "Overlijdensjaar",
-          "placeholder": "bijv. 2020"
-        },
-        "deceased": {
-          "description": "Vink aan als het familielid is overleden",
-          "label": "Overleden"
-        },
-        "gender": {
-          "description": "Geslacht van het familielid",
-          "label": "Geslacht",
-          "placeholder": "Selecteer geslacht"
-        },
-        "genderOptions": {
-          "female": "Vrouw",
-          "male": "Man"
-        },
-        "name": {
-          "description": "Volledige naam van het familielid",
-          "label": "Volledige naam",
-          "placeholder": "Voer naam familielid in"
-        },
-        "notes": {
-          "description": "Eventuele aanvullende notities of belangrijke informatie",
-          "placeholder": "Aanvullende informatie over het familielid..."
-        },
-        "relationship": {
-          "description": "Relatie tot u",
-          "label": "Relatie",
-          "placeholder": "Selecteer relatie"
-        },
-        "relationshipOptions": {
-          "aunt": "Tante",
-          "brother": "Broer",
-          "cousin": "Neef/Nicht",
-          "father": "Vader",
-          "maternalGrandfather": "Opa (moederskant)",
-          "maternalGrandmother": "Oma (moederskant)",
-          "mother": "Moeder",
-          "other": "Overig",
-          "paternalGrandfather": "Opa (vaderskant)",
-          "paternalGrandmother": "Oma (vaderskant)",
-          "sister": "Zus",
-          "uncle": "Oom"
-        }
-      }
+      "editMemberTitle": "Familielid bewerken"
     },
     "loadingFamilyHistory": "Familiegeschiedenis laden...",
     "manageInvitations": "Uitnodigingen beheren",
@@ -688,32 +531,15 @@
       "editMember": "Familielid bewerken",
       "memberDetails": "Member Details",
       "modalTitle": "Family Medical History",
-      "relationship": "Relatie",
       "sharedAt": "Gedeeld op",
-      "sharingNote": "Opmerking bij delen",
-      "title": "{{name}} - Medische familiegeschiedenis"
+      "sharingNote": "Opmerking bij delen"
     }
   },
   "fields": {
-    "address": {
-      "description": "Fysiek adres",
-      "label": "Adres",
-      "placeholder": "Voer adres in"
-    },
-    "email": {
-      "description": "E-mailadres",
-      "label": "E-mailadres",
-      "placeholder": "bijv. naam@email.nl"
-    },
     "endDate": {
       "description": "Wanneer dit eindigde (indien van toepassing)",
       "label": "Einddatum",
       "placeholder": "Selecteer einddatum"
-    },
-    "fullName": {
-      "description": "Volledige naam",
-      "label": "Volledige naam",
-      "placeholder": "Voer volledige naam in"
     },
     "notes": {
       "description": "Eventuele aanvullende details of notities",
@@ -721,17 +547,9 @@
       "placeholder": "Aanvullende informatie..."
     },
     "onsetDate": {
-      "description": "Wanneer dit voor het eerst werd ontdekt",
-      "label": "Aanvangsdatum",
-      "placeholder": "Wanneer trad dit voor het eerst op"
-    },
-    "phoneNumber": {
-      "description": "Primair contactnummer",
-      "label": "Telefoonnummer",
-      "placeholder": "(555) 123-4567"
+      "label": "Aanvangsdatum"
     },
     "severity": {
-      "description": "Ernstniveau",
       "label": "Ernst",
       "placeholder": "Selecteer ernstniveau"
     },
@@ -749,11 +567,6 @@
       "description": "Voeg tags toe om dit dossier later te organiseren en terug te vinden",
       "label": "Tags",
       "placeholder": "Voeg tags toe om dit dossier te organiseren en te vinden"
-    },
-    "website": {
-      "description": "Website-URL",
-      "label": "Website",
-      "placeholder": "https://www.voorbeeld.nl"
     }
   },
   "filters": {
@@ -769,22 +582,12 @@
     "addImmunization": "Nieuwe vaccinatie toevoegen",
     "addNewImmunization": "Nieuwe vaccinatie toevoegen",
     "card": {
-      "dateAdministered": "Toedieningsdatum",
       "dose": "Dosis {{number}}",
-      "expirationDate": "Vervaldatum",
-      "injectionSite": "Injectieplaats",
-      "location": "Locatie",
-      "lotNumber": "Lotnummer",
-      "ndcNumber": "NDC-nummer",
-      "notSpecified": "Niet gespecificeerd",
-      "practitioner": "Zorgverlener",
       "practitionerId": "ID: {{id}}",
-      "route": "Toedieningsweg",
       "viewPractitioner": "Zorgverlenergegevens bekijken"
     },
     "clickToGetStarted": "Klik op \"Nieuwe vaccinatie toevoegen\" om te beginnen.",
     "editImmunization": "Vaccinatie bewerken",
-    "error": "Fout",
     "form": {
       "adminRoute": "Toedieningsweg",
       "adminRouteDesc": "Wijze van toediening",
@@ -792,20 +595,17 @@
       "adminSite": "Toedieningsplaats",
       "adminSiteDesc": "Waar het vaccin is toegediend",
       "adminSitePlaceholder": "Selecteer toedieningsplaats",
-      "cancel": "Annuleren",
       "clinicalNotes": "Klinische notities",
       "clinicalNotesDesc": "Aanvullende informatie over deze vaccinatie",
       "clinicalNotesPlaceholder": "Voer klinische notities, reacties of aanvullende details in",
       "createImmunization": "Vaccinatie aanmaken",
       "dateAdministered": "Toedieningsdatum",
       "dateAdministeredDesc": "Wanneer het vaccin is toegediend",
-      "dateAdministeredPlaceholder": "Selecteer toedieningsdatum",
       "doseNumber": "Dosisnummer",
       "doseNumberDesc": "Welke dosis in de reeks",
       "doseNumberPlaceholder": "Voer dosisnummer in",
       "expirationDate": "Vervaldatum",
       "expirationDateDesc": "Wanneer het vaccin verloopt",
-      "expirationDatePlaceholder": "Selecteer vervaldatum",
       "location": "Locatie/Instelling",
       "locationDesc": "Waar het vaccin is toegediend",
       "locationPlaceholder": "bijv. apotheek, ziekenhuis, kliniek",
@@ -833,7 +633,6 @@
       "siteLeftThigh": "Linkerbovenbeen",
       "siteNasal": "Nasaal",
       "siteOral": "Oraal",
-      "siteOther": "Overig",
       "siteRightArm": "Rechterarm",
       "siteRightDeltoid": "Rechter deltoïdspier",
       "siteRightThigh": "Rechterbovenbeen",
@@ -857,7 +656,6 @@
     },
     "loadingImmunizations": "Vaccinaties laden...",
     "noImmunizationsFound": "Geen vaccinaties gevonden",
-    "success": "Gelukt",
     "table": {
       "dateAdministered": "Toedieningsdatum",
       "doseNumber": "Dosisnummer",
@@ -865,10 +663,8 @@
       "lotNumber": "Lotnummer",
       "manufacturer": "Fabrikant",
       "notes": "Notities",
-      "practitioner": "Zorgverlener",
       "route": "Toedieningsweg",
       "site": "Locatie",
-      "tradeName": "Handelsnaam",
       "vaccineName": "Vaccinnaam"
     },
     "title": "Vaccinaties",
@@ -932,32 +728,18 @@
       "title": "No Insurance Found"
     },
     "form": {
-      "addInsurance": "Verzekering toevoegen",
       "addTitle": "Nieuwe verzekering toevoegen",
-      "coveragePeriodStatus": "Dekkingsperiode en status",
-      "editTitle": "Verzekering bewerken",
-      "saving": "Verzekering opslaan...",
-      "tabs": {
-        "basicInfo": "Basisinfo",
-        "contact": "Contact",
-        "coverage": "Dekking",
-        "documents": "Documenten",
-        "member": "Verzekerde",
-        "notes": "Notities"
-      },
-      "updateInsurance": "Verzekering bijwerken"
+      "editTitle": "Verzekering bewerken"
     },
     "loading": "Loading insurance records...",
     "title": "Verzekeringen",
     "viewModal": {
       "additionalDetails": "Aanvullende dekkingsdetails",
-      "attachedDocuments": "Bijgevoegde documenten",
       "claimsAddress": "Claimsadres",
       "claimsPhone": "Claimstelefoonnummer",
       "coinsurance": "Medeverzekering",
       "contactInfo": "Contactinformatie",
       "copay": "Eigen bijdrage",
-      "coverageDetails": "Dekkingsdetails",
       "coveragePeriod": "Dekkingsperiode",
       "customerServicePhone": "Klantenservicetelefoonnummer",
       "deductible": "Eigen risico",
@@ -992,46 +774,25 @@
       "website": "Website"
     }
   },
-  "invitations": {
-    "from": "From"
-  },
   "key": "Default {{var}}",
   "labels": {
-    "account": "Account",
     "actions": "Acties",
-    "active": "Actief",
     "addCustom": "+ \"{{value}}\" toevoegen",
-    "address": "Adres",
-    "all": "Alles",
     "clinicalNotes": "Clinical Notes",
-    "conditionsAvailableToLink": "{{count}} aandoeningen beschikbaar om te koppelen",
     "date": "Datum",
     "description": "Beschrijving",
-    "details": "Details",
     "duration": "Duur",
-    "email": "E-mailadres",
     "endDate": "Einddatum",
     "error": "Fout",
     "facility": "Instelling",
-    "filter": "Filter",
-    "firstName": "Voornaam",
-    "fullName": "Volledige naam",
-    "help": "Help",
-    "inactive": "Inactief",
-    "lastName": "Achternaam",
     "linkedMedications": "Gekoppelde medicatie",
     "loading": "Laden...",
     "loadingOption": "{{option}} laden...",
     "loadingRelatedConditions": "Gerelateerde aandoeningen laden...",
     "location": "Locatie",
-    "medicalHistory": "Medische voorgeschiedenis",
-    "medicationsAvailableToLink": "{{count}} medicatie beschikbaar om te koppelen",
-    "name": "Naam",
     "new": "New",
     "no": "Nee",
     "noConditionsLinked": "Geen aandoeningen gekoppeld aan dit labresultaat",
-    "noConditionsLinkedToMedication": "Geen aandoeningen gekoppeld aan deze medicatie",
-    "noData": "Geen gegevens beschikbaar",
     "noEncountersLinked": "No visits linked to this treatment",
     "noEquipmentLinked": "No equipment linked to this treatment",
     "noLabResultsLinked": "No lab results linked to this visit",
@@ -1039,40 +800,26 @@
     "none": "Geen",
     "noNotesAvailable": "No notes available",
     "noRating": "Geen beoordeling",
-    "noResults": "Geen resultaten gevonden",
     "notAvailable": "N/A",
     "notCompleted": "Niet voltooid",
-    "note": "Notitie",
     "notes": "Notities",
     "notSpecified": "Niet gespecificeerd",
     "noVisitsLinked": "No visits linked to this lab result",
     "onsetDate": "Aanvangsdatum",
-    "optional": "Optioneel",
     "ordered": "Ordered",
     "other": "Overig",
-    "patientRecord": "Patiëntdossier",
     "pending": "In behandeling",
     "phoneNumber": "Telefoonnummer",
     "practitioner": "Zorgverlener",
-    "preferences": "Voorkeuren",
-    "profile": "Profiel",
     "ratingStars": "{{count}}/5 sterren",
     "ratingStars_one": "",
     "ratingStars_other": "",
-    "relationship": "Relatie",
-    "required": "Verplicht",
-    "role": "Rol",
-    "search": "Zoeken",
     "selectPurpose": "Select purpose",
-    "settings": "Instellingen",
     "severity": "Ernst",
-    "sort": "Sorteren",
     "startDate": "Startdatum",
     "status": "Status",
     "success": "Gelukt",
-    "support": "Ondersteuning",
     "tags": "Tags",
-    "time": "Tijd",
     "unknown": "Onbekend",
     "value": "Value",
     "viewDetails": "",
@@ -1087,19 +834,6 @@
     "addFirst": "Voeg uw eerste labresultaat toe",
     "addNew": "+ Nieuw labresultaat toevoegen",
     "addTitle": "Nieuw labresultaat toevoegen",
-    "card": {
-      "completed": "Voltooid",
-      "doctor": "Arts",
-      "facility": "Instelling",
-      "notCompleted": "Niet voltooid",
-      "notSpecified": "Niet gespecificeerd",
-      "ordered": "Aangevraagd",
-      "pending": "In behandeling",
-      "result": "Resultaat",
-      "testCode": "Testcode",
-      "type": "Type",
-      "viewPractitioner": "Zorgverlenergegevens bekijken"
-    },
     "continueEditing": "Doorgaan met bewerken",
     "createAndContinue": "Aanmaken en PDF uploaden",
     "createFailed": "Labresultaat kon niet worden aangemaakt",
@@ -1109,19 +843,14 @@
     "deleteFailed": "Labresultaat kon niet worden verwijderd",
     "discardParsedData": "Verwerkte gegevens weggooien",
     "editTitle": "Labresultaat bewerken",
-    "emptyLabResultMessage": "U heeft een labresultaat aangemaakt maar geen testcomponenten toegevoegd. Wilt u dit labresultaat verwijderen?",
-    "emptyLabResultWarning": "Labresultaat aangemaakt maar leeg",
     "error": "Fout",
     "errorOccurred": "Er is een fout opgetreden",
     "form": {
-      "addFilesOptional": "Bestanden toevoegen",
       "linkedVisits": "Gekoppelde consulten",
       "linkVisitsDescription": "Koppel dit labresultaat aan consulten waar het is aangevraagd of beoordeeld.",
-      "linkVisitsTitle": "Koppelen aan consulten",
-      "manageFiles": "Bestanden beheren"
+      "linkVisitsTitle": "Koppelen aan consulten"
     },
     "keepEmptyLabResult": "Labresultaat behouden",
-    "labResultCreated": "Labresultaat \"{{testName}}\" is aangemaakt. U kunt nu uw PDF uploaden en verwerken.",
     "labResultDeleted": "Labresultaat verwijderd",
     "loading": "Labresultaten laden...",
     "loadingHint": "Als dit te lang duurt, herlaad dan de pagina",
@@ -1138,7 +867,6 @@
         "testCode": "Testcode",
         "testType": "Testtype"
       },
-      "noNotes": "Geen notities beschikbaar",
       "sections": {
         "associatedFiles": "Bijbehorende documenten",
         "notes": "Notities",
@@ -1161,9 +889,6 @@
     "networkError": "Netwerkfout. Controleer uw verbinding en probeer het opnieuw.",
     "noResults": "Geen labresultaten gevonden",
     "patientIdRequired": "Patiënt-ID is verplicht. Selecteer eerst een patiënt.",
-    "quickFormInstructions": "Voer een naam in voor dit labresultaat, daarna kunt u uw PDF uploaden en verwerken.",
-    "quickImportModalTitle": "Snelle PDF-import - Stap {{step}} van 2",
-    "quickImportSuccess": "Labresultaat en testcomponenten succesvol geïmporteerd",
     "quickPdfImport": "Snelle PDF-import",
     "startAdding": "Begin met het toevoegen van uw eerste labresultaat.",
     "stepperLabels": {
@@ -1183,52 +908,27 @@
       "testName": "Testnaam",
       "type": "Type"
     },
-    "testNameDescription": "Dit is het enige verplichte veld - u kunt later meer details toevoegen",
     "testNameLabel": "Naam labtest",
-    "testNamePlaceholder": "bijv. endocrien bloedonderzoek enz.",
     "testNameRequired": "Testnaam is verplicht",
     "testNameTooLong": "Testnaam mag niet langer zijn dan {{maxLength}} tekens",
     "testNameTooShort": "Testnaam moet minimaal {{minLength}} tekens bevatten",
     "timeoutError": "Verzoek verlopen. Probeer het opnieuw.",
-    "title": "Labresultaten",
     "tryAdjustingFilters": "Probeer uw zoekopdracht of filtercriteria aan te passen.",
-    "unsavedDataInstructions": "Klik op \"Componenten toevoegen\" in het tabblad Voorbeeld om uw verwerkte gegevens op te slaan voordat u sluit.",
-    "unsavedDataMessage": "U heeft {{count}} verwerkte testcomponent(en) die nog niet zijn toegevoegd. Als u nu sluit, gaan deze verwerkte gegevens verloren.",
     "unsavedDataMessage_one": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
-    "unsavedDataMessage_other": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
-    "unsavedDataWarning": "Niet-opgeslagen verwerkte gegevens"
+    "unsavedDataMessage_other": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data."
   },
   "medications": {
     "addNew": "Nieuwe medicatie toevoegen",
     "allTypes": "Alle types",
     "clickToStart": "Klik op \"Nieuwe medicatie toevoegen\" om te beginnen.",
-    "conditions": {
-      "availableToLink": "{{count}} aandoening beschikbaar om te koppelen",
-      "availableToLink_plural": "{{count}} aandoeningen beschikbaar om te koppelen",
-      "confirmRemove": "Deze aandoeningskoppeling verwijderen?",
-      "failedToAdd": "Aandoeningsrelatie kon niet worden toegevoegd",
-      "failedToRemove": "Aandoeningsrelatie kon niet worden verwijderd",
-      "linkToMedication": "Aandoening koppelen aan medicatie",
-      "loading": "Gerelateerde aandoeningen laden...",
-      "noLinked": "Geen aandoeningen gekoppeld aan deze medicatie",
-      "orphanedTitle": "Deze aandoening is verwijderd maar de relatie bestaat nog",
-      "removeLink": "Aandoeningskoppeling verwijderen",
-      "selectCondition": "Selecteer aandoening",
-      "selectConditionPlaceholder": "Kies een aandoening om te koppelen",
-      "viewDetails": "Klik om aandoeningsdetails te bekijken"
-    },
-    "error": "Fout",
     "fields": {
       "endDate": "Einddatum",
       "frequency": "Frequentie",
       "noIndication": "Geen indicatie gespecificeerd",
       "pharmacy": "Apotheek",
       "prescriber": "Voorschrijver",
-      "purpose": "Doel",
       "route": "Toedieningsweg",
-      "startDate": "Startdatum",
-      "viewPharmacy": "Apotheekgegevens bekijken",
-      "viewPractitioner": "Zorgverlenergegevens bekijken"
+      "startDate": "Startdatum"
     },
     "loading": "Medicatie laden...",
     "modal": {
@@ -1267,7 +967,6 @@
     },
     "noMedications": "Geen medicatie of supplementen gevonden",
     "quickFilter": "Snelfilter",
-    "success": "Gelukt",
     "title": "Medicatie",
     "treatments": {
       "empty": "This medication is not used in any treatments.",
@@ -1286,30 +985,20 @@
     }
   },
   "messages": {
-    "confirmDelete": "Weet u zeker dat u dit item wilt verwijderen?",
-    "confirmDeleteMultiple": "Weet u zeker dat u deze {{count}} items wilt verwijderen?",
     "confirmRemoveConditionRelationship": "Weet u zeker dat u deze aandoeningsrelatie wilt verwijderen?",
     "confirmRemoveEquipmentRelationship": "Are you sure you want to remove this equipment link?",
     "confirmRemoveLabResultLink": "Remove this lab result link?",
-    "confirmRemoveMedicationRelationship": "Weet u zeker dat u deze medicatierelatie wilt verwijderen?",
     "confirmRemoveVisitLink": "Remove this visit link?",
-    "createSuccess": "Succesvol aangemaakt",
-    "deleteSuccess": "Succesvol verwijderd",
     "displayError": "Unable to display this item. Please try refreshing the page.",
     "failedToLinkLabResult": "Failed to link lab result",
     "failedToLinkVisit": "Failed to link visit",
     "failedToUnlinkLabResult": "Failed to unlink lab result",
     "failedToUnlinkVisit": "Failed to unlink visit",
     "failedToUpdateRelationship": "Failed to update relationship",
-    "operationFailed": "Bewerking mislukt. Probeer het opnieuw.",
-    "operationSuccess": "Bewerking succesvol voltooid",
-    "pleaseWait": "Even geduld...",
     "processing": "Verwerken...",
-    "saveSuccess": "Succesvol opgeslagen",
     "selectLabResult": "Please select a lab result",
     "selectVisit": "Please select a visit",
     "success": "Success",
-    "unsavedChanges": "U heeft niet-opgeslagen wijzigingen. Weet u zeker dat u wilt vertrekken?",
     "updateSuccess": "Succesvol bijgewerkt"
   },
   "modals": {
@@ -1319,42 +1008,28 @@
     "chooseMedicationToLink": "Kies medicatie om te koppelen",
     "chooseVisitToLink": "Choose a visit to link",
     "describeConditionRelevance": "Beschrijf hoe deze aandoening verband houdt met het labresultaat (optioneel)",
-    "describeConditionRelevanceMedication": "Beschrijf hoe deze aandoeningen verband houden met deze medicatie (optioneel)",
     "describeLabResultRelevance": "Describe how this lab result relates to this visit",
-    "describeMedicationRelevance": "Beschrijf hoe deze medicatie verband houdt met de aandoening (optioneel)",
     "describeVisitRelevance": "Describe how this visit relates to this lab result",
-    "linkConditionsToMedication": "Aandoeningen koppelen aan medicatie",
     "linkConditionToLabResult": "Aandoening koppelen aan labresultaat",
     "linkLabResultToVisit": "Link Lab Result to Visit",
-    "linkMedicationsToCondition": "Medicatie koppelen aan aandoening",
-    "linkMedicationToCondition": "Medicatie koppelen aan aandoening",
     "linkVisitToLabResult": "Link Visit to Lab Result",
     "noRelevanceNoteProvided": "Geen relevantieopmerking opgegeven",
     "purpose": "Purpose",
     "relevanceNote": "Relevantieopmerking",
     "relevanceNoteOptional": "Relevantieopmerking (optioneel)",
     "selectCondition": "Selecteer aandoening",
-    "selectConditions": "Selecteer aandoeningen",
     "selectLabResult": "Select Lab Result",
-    "selectMedication": "Selecteer medicatie",
     "selectMedications": "Selecteer medicatie",
     "selectPurpose": "Select purpose",
     "selectVisit": "Select Visit"
   },
   "noResults": "No practitioners found",
   "pagination": {
-    "first": "Eerste",
     "itemsPerPage": "Items per pagina",
-    "last": "Laatste",
     "next": "Volgende",
-    "of": "van",
-    "page": "Pagina",
     "pageOf": "Page {{page}} of {{total}}",
     "previous": "Vorige",
-    "results": "resultaten",
-    "showing": "Toont",
-    "showingRange": "{{start}} tot {{end}} van {{total}} resultaten",
-    "to": "tot"
+    "showingRange": "{{start}} tot {{end}} van {{total}} resultaten"
   },
   "patientInfo": {
     "createProfile": "Profiel aanmaken",
@@ -1373,7 +1048,6 @@
       "lastName": "Achternaam",
       "patientId": "Patiënt-ID",
       "physician": "Huisarts",
-      "relationship": "Relatie tot u",
       "weight": "Gewicht"
     },
     "gender": {
@@ -1396,17 +1070,13 @@
   "patients": {
     "form": {
       "address": {
-        "description": "Volledig adres voor medische dossiers (optioneel)",
         "label": "Adres",
         "placeholder": "Voer adres in"
       },
       "birthDate": {
-        "description": "Geboortedatum van de patiënt",
-        "label": "Geboortedatum",
-        "placeholder": "Selecteer geboortedatum"
+        "label": "Geboortedatum"
       },
       "bloodType": {
-        "description": "Belangrijk voor noodgevallen",
         "label": "Bloedgroep",
         "placeholder": "Selecteer bloedgroep"
       },
@@ -1414,18 +1084,13 @@
         "cancel": "Annuleren",
         "createPatient": "Patiënt aanmaken",
         "saveChanges": "Wijzigingen opslaan",
-        "saving": "Opslaan...",
-        "updatePatient": "Patiënt bijwerken"
+        "saving": "Opslaan..."
       },
-      "createTitle": "Nieuwe patiënt aanmaken",
-      "editTitle": "Patiënt bewerken",
       "firstName": {
-        "description": "Voornaam van de patiënt",
         "label": "Voornaam",
         "placeholder": "Voer voornaam in"
       },
       "gender": {
-        "description": "Geslacht van de patiënt",
         "label": "Geslacht",
         "options": {
           "female": "Vrouw",
@@ -1437,15 +1102,9 @@
         "placeholder": "Selecteer geslacht"
       },
       "height": {
-        "description": "Lengte in {{unit}}",
-        "label": "Lengte",
-        "placeholder": {
-          "imperial": "Voer lengte in inches in",
-          "metric": "Voer lengte in centimeters in"
-        }
+        "label": "Lengte"
       },
       "lastName": {
-        "description": "Achternaam van de patiënt",
         "label": "Achternaam",
         "placeholder": "Voer achternaam in"
       },
@@ -1455,7 +1114,6 @@
         "updateSuccess": "{{firstName}} {{lastName}} succesvol bijgewerkt"
       },
       "physician": {
-        "description": "Uw huisarts voor doorlopende zorg",
         "label": "Huisarts",
         "placeholder": "Selecteer huisarts (optioneel)"
       },
@@ -1495,12 +1153,7 @@
         "label": "Dit is mijn eigen medisch dossier"
       },
       "weight": {
-        "description": "Gewicht in {{unit}}",
-        "label": "Gewicht",
-        "placeholder": {
-          "imperial": "Voer gewicht in ponden in",
-          "metric": "Voer gewicht in kilogrammen in"
-        }
+        "label": "Gewicht"
       }
     }
   },
@@ -1594,7 +1247,6 @@
       "specialtyServices": "Specialismen",
       "stateProvince": "Provincie",
       "storeNumber": "Filiaal #",
-      "subtitle": "Apotheek",
       "title": "Apotheekdetails",
       "website": "Website"
     }
@@ -1609,7 +1261,6 @@
       "practice": "Praktijk",
       "rating": "Beoordeling",
       "subtitle": "Zorgverlener",
-      "visitWebsite": "Website bezoeken",
       "website": "Website"
     },
     "createPracticeError": "Praktijk kon niet worden aangemaakt. Probeer het opnieuw.",
@@ -1672,7 +1323,6 @@
       "editButton": "Zorgverlener bewerken",
       "editPractice": "Praktijk bewerken",
       "email": "E-mail",
-      "noPractice": "Geen praktijk gekoppeld",
       "phone": "Telefoon",
       "practice": "Praktijk",
       "practiceDetails": "PRAKTIJKGEGEVENS",
@@ -1689,9 +1339,7 @@
       "rating": "Beoordeling",
       "savePractice": "Praktijk opslaan",
       "specialty": "Specialisme",
-      "subtitle": "Zorgverlener",
       "title": "Zorgverlenerdetails",
-      "visitWebsite": "Website bezoeken",
       "website": "Website"
     }
   },
@@ -1700,21 +1348,11 @@
     "addNewProcedure": "Nieuwe procedure toevoegen",
     "addProcedure": "+ Procedure toevoegen",
     "card": {
-      "code": "Code",
-      "complications": "Complicaties",
-      "description": "Beschrijving",
-      "doctor": "Arts",
-      "duration": "Duur",
       "durationMinutes": "{{minutes}} minuten",
-      "facility": "Instelling",
-      "notSpecified": "Niet gespecificeerd",
       "practitionerId": "Zorgverlener-ID: {{id}}",
-      "procedureDate": "Proceduredatum",
-      "setting": "Setting",
       "viewPractitioner": "Zorgverlenergegevens bekijken"
     },
     "editProcedure": "Procedure bewerken",
-    "error": "Fout",
     "form": {
       "anesthesiaNotes": "Anesthesienotities",
       "anesthesiaNotesDesc": "Aanvullende anesthesie-informatie",
@@ -1755,7 +1393,6 @@
       "procedureCodePlaceholder": "bijv. CPT-code",
       "procedureDate": "Proceduredatum",
       "procedureDateDesc": "Wanneer de procedure is uitgevoerd",
-      "procedureDatePlaceholder": "Selecteer proceduredatum",
       "procedureName": "Procedurenaam",
       "procedureNameDesc": "Naam van de procedure",
       "procedureNamePlaceholder": "Voer procedurenaam in",
@@ -1791,7 +1428,6 @@
     "noProceduresFound": "Geen procedures gevonden",
     "processing": "Verwerken...",
     "startAdding": "Begin met het toevoegen van uw eerste procedure.",
-    "success": "Gelukt",
     "table": {
       "code": "Code",
       "date": "Datum",
@@ -1918,7 +1554,6 @@
     "trendCharts": {
       "dateFrom": "Van",
       "dateTo": "Tot",
-      "description": "Selecteer vitale functies en labtesten om als trendgrafieken in uw rapport op te nemen",
       "emptyState": "Geen trendgegevens beschikbaar. Voeg vitale functies of labresultaten toe om trendgrafieken mogelijk te maken.",
       "labTestCharts": {
         "description": "Zoek en selecteer labtesten voor grafieken",
@@ -1950,16 +1585,11 @@
     "allTime": "Altijd",
     "anyTag": "Elke tag",
     "clearFilters": "Filters wissen",
-    "clearHistory": "Alles wissen",
     "collapseFilters": "Filters inklappen",
     "columnDate": "Datum",
     "columnDetails": "Details",
-    "columnDetailsTip": "Belangrijke datum voor het dossier (bijv. wanneer gediagnosticeerd, gestart of uitgevoerd)",
     "columnName": "Naam",
-    "columnNameTip": "De naam of titel van het dossier",
-    "columnTagsTip": "Tags toegewezen aan dit dossier",
     "columnType": "Dossiertype",
-    "columnTypeTip": "De categorie van het medisch dossier",
     "dateLabels": {
       "diagnosed": "Gediagnosticeerd",
       "given": "Toegediend",
@@ -1988,8 +1618,6 @@
     "filterByTag": "Filteren op tag: {{tag}}",
     "filtered": "(gefilterd)",
     "filters": "Filters",
-    "initialMessage": "Voer een zoekterm in of selecteer tags in de zijbalk om dossiers te vinden.",
-    "initialTitle": "Zoek in uw medische dossiers",
     "last30Days": "Laatste 30 dagen",
     "last6Months": "Laatste 6 maanden",
     "last7Days": "Laatste 7 dagen",
@@ -1998,7 +1626,6 @@
     "matchAll": "Alles matchen",
     "noPatientMessage": "Selecteer een patiënt vanuit het dashboard om medische dossiers te doorzoeken.",
     "noPatientTitle": "Geen patiënt geselecteerd",
-    "noRecentSearches": "Geen recente zoekopdrachten",
     "noResults": "Geen resultaten gevonden",
     "noResultsFiltered": "Probeer uw filters, tags of zoektermen aan te passen",
     "noResultsGeneral": "Probeer andere zoektermen of controleer de spelling",
@@ -2008,38 +1635,27 @@
     "placeholder": "Zoek in medische dossiers...",
     "popularTags": "Populaire tags",
     "previewRecord": "Dossiervoorbeeld",
-    "recentSearches": "Recente zoekopdrachten",
     "recordTypes": "Dossiertypen",
     "removeTypeFilter": "{{type}}-filter verwijderen",
-    "resultCount_one": "{{count}} dossier",
-    "resultCount_other": "{{count}} dossiers",
-    "resultsFor": "Zoekresultaten voor \"{{query}}\"",
+    "resultCount_one": "{{count}} resultaat",
+    "resultCount_other": "{{count}} resultaten",
     "searchFailed": "Zoekopdracht mislukt. Probeer het opnieuw.",
     "searching": "Zoeken...",
     "selectTags": "Selecteer tags...",
-    "showAll": "Alle {{count}} resultaten tonen",
-    "showLess": "Minder tonen",
     "sortBy": "Sorteren op",
-    "sortDate": "Datum (Nieuwste)",
     "sortDateNewest": "Datum (Nieuwste eerst)",
     "sortDateOldest": "Datum (Oudste eerst)",
     "sortRelevance": "Relevantie",
     "sortTitle": "Titel",
-    "sortType": "Type",
     "subtitle": "Zoek in alle medische dossiers",
     "subtitles": {
       "dose": "Dosis {{number}}",
       "result": "Resultaat: {{value}}"
     },
-    "taggedWith": "Dossiers getagd met: {{tags}}",
-    "tagResultCount": "{{count}} tagresultaat",
     "tagResultCount_other": "{{count}} tagresultaten",
-    "tagResults": "Tagresultaten",
     "tags": "Tags",
     "tagSearchFailed": "Tagzoekopdracht mislukt. Probeer het opnieuw.",
-    "textResultCount": "{{count}} tekstresultaat",
     "textResultCount_other": "{{count}} tekstresultaten",
-    "textResults": "Tekstzoekresultaten",
     "title": "Zoekresultaten",
     "types": {
       "allergies": "Allergieën",
@@ -2053,7 +1669,8 @@
       "vitals": "Vitale functies"
     },
     "viewCards": "Kaartenweergave",
-    "viewTable": "Tabelweergave"
+    "viewTable": "Tabelweergave",
+    "resultCount": "{{count}} resultaten"
   },
   "searchPlaceholders": {
     "allergies": "Zoek allergieën, reacties, tags...",
@@ -2095,7 +1712,6 @@
         "description": "Ruim niet-gesynchroniseerde bestanden op en los inconsistenties in documentopslag op. Dit herstelt mislukte uploads, wist loze taken en lost databasesynchronisatieproblemen op.",
         "title": "Bestandsopschoning"
       },
-      "description": "Configureer hoe uw medische documenten worden opgeslagen en beheerd",
       "paperlessDescription": "Configure Paperless-ngx document management integration"
     },
     "help": {
@@ -2109,22 +1725,13 @@
       }
     },
     "papra": {
-      "apiToken": "API-token",
       "apiTokenPlaceholder": "Voer uw Papra API-token in",
       "connectionFailed": "Verbinding mislukt",
       "connectionSuccess": "Verbinding geslaagd",
       "description": "Verbind met uw Papra-instantie voor documentbeheer",
-      "enabled": "Papra inschakelen",
-      "fetchingOrgs": "Organisaties ophalen...",
-      "noOrganizations": "Geen organisaties gevonden",
       "organization": "Organisatie",
       "organizationPlaceholder": "Selecteer een organisatie",
-      "testConnection": "Verbinding testen",
-      "title": "Papra-integratie",
-      "tokenRequired": "API-token is verplicht",
-      "url": "Papra-URL",
-      "urlPlaceholder": "https://uw-papra-instantie.nl",
-      "urlRequired": "Papra-URL is verplicht"
+      "urlPlaceholder": "https://uw-papra-instantie.nl"
     },
     "preferences": {
       "dateFormat": {
@@ -2151,19 +1758,15 @@
       "dismiss": "Begrepen",
       "empty": "Geen releaseopmerkingen beschikbaar",
       "error": "Releaseopmerkingen konden niet worden geladen",
-      "loading": "Releaseopmerkingen laden...",
-      "noChanges": "Geen wijzigingen vermeld voor deze release",
       "publishedOn": "Uitgebracht op {{date}}",
       "retry": "Opnieuw proberen",
       "showAll": "Alle releases tonen",
       "showLess": "Minder tonen",
       "viewOnGithub": "Bekijken op GitHub",
-      "whatsNewSubtitle": "Dit is er veranderd sinds uw laatste update",
       "whatsNewTitle": "Wat is er nieuw"
     },
     "sections": {
       "accountManagement": "Accountbeheer",
-      "documentStorage": "Documentopslag",
       "gettingHelp": "Hulp verkrijgen",
       "preferences": "Applicatievoorkeuren",
       "releaseNotes": "Releaseopmerkingen",
@@ -2200,7 +1803,6 @@
       "button": "Sponsoren op GitHub",
       "description": "MediKeep is gratis en open source. Als u het nuttig vindt, overweeg dan het project te sponsoren om de ontwikkeling te financieren en het voort te zetten."
     },
-    "subtitle": "Beheer uw applicatievoorkeuren en instellingen",
     "system": {
       "timezone": {
         "title": "Timezone"
@@ -2212,12 +1814,6 @@
         "unknownApp": "Onbekende app",
         "unknownVersion": "Onbekende versie"
       }
-    },
-    "tabs": {
-      "about": "Over",
-      "documents": "Documenten",
-      "general": "Algemeen",
-      "notifications": "Meldingen"
     },
     "title": "Instellingen"
   },
@@ -2268,7 +1864,6 @@
       "pain": "Pijn",
       "resolved": "Opgelost",
       "time": "Tijd",
-      "timeOfDay": "Tijdstip van de dag",
       "title": "Symptoomkalender",
       "viewSymptom": "Symptoom bekijken",
       "weekDays": {
@@ -2285,7 +1880,6 @@
     "chronic": "Chronisch",
     "commonTriggers": "Veelvoorkomende triggers",
     "confirmDeleteSymptom": "Weet u zeker dat u dit symptoom en alle bijbehorende voorvallen wilt verwijderen?",
-    "editEpisode": "Episode bewerken",
     "editEpisodeTitle": "Episode bewerken",
     "editSymptomTitle": "Symptoom bewerken",
     "episode": "episode",
@@ -2301,13 +1895,6 @@
     "noPatientSelected": "Geen patiënt geselecteerd",
     "noRecords": "Nog geen symptomen geregistreerd",
     "noRecordsPrompt": "Klik op \"Symptoom toevoegen\" om een nieuw symptoom bij te houden",
-    "occurrence": {
-      "additionalNotes": {
-        "description": "Eventuele andere relevante informatie over dit voorval",
-        "label": "Aanvullende notities",
-        "placeholder": "Aanvullende details over deze episode..."
-      }
-    },
     "resolved": "Resolved",
     "selectPatientPrompt": "Selecteer of maak een patiënt aan om symptomen bij te houden.",
     "tabs": {
@@ -2327,7 +1914,6 @@
       "recorded": "geregistreerd",
       "title": "Symptoomtijdlijn"
     },
-    "title": "Symptomen",
     "viewModal": {
       "acute": "Acuut",
       "attachedDocuments": "Bijgevoegde documenten",
@@ -2394,7 +1980,6 @@
       "deleteFailed": "Tag kon niet worden verwijderd",
       "editFailed": "Tag kon niet worden bijgewerkt",
       "loadFailed": "Tags konden niet worden geladen",
-      "renameFailed": "Tag kon niet worden hernoemd",
       "replaceFailed": "Tag kon niet worden vervangen"
     },
     "icon": "🏷️",
@@ -2402,9 +1987,7 @@
     "menu": {
       "delete": "Tag verwijderen",
       "edit": "Bewerken",
-      "rename": "Tag hernoemen",
-      "replace": "Vervangen door...",
-      "search": "Dossiers zoeken"
+      "replace": "Vervangen door..."
     },
     "noTags": "Geen tags gevonden",
     "noTagsDescription": "Begin tags te gebruiken in uw medische dossiers om ze hier te zien.",
@@ -2442,7 +2025,6 @@
       "chemistry": "Chemie - Elektrolyten en mineralen",
       "endocrinology": "Endocrinologie - Hormonen en diabetes",
       "genetics": "Genetica - Genetisch onderzoek",
-      "hearing": "Gehoor - Audiometrie en vestibulaire testen",
       "hematology": "Hematologie - Bloedbeeld en ijzer",
       "hepatology": "Hepatologie - Leverenzymen en -functie",
       "immunology": "Immunologie - Afweersysteem en antilichamen",
@@ -2451,7 +2033,6 @@
       "molecular": "Moleculair - DNA-testen",
       "other": "Overige testen",
       "pathology": "Pathologie - Weefsel- en biopsie-analyse",
-      "stomatology": "Stomatologie - Speeksel- en orale diagnostiek",
       "toxicology": "Toxicologie - Drug- en toxinescreening"
     },
     "editModal": {
@@ -2512,46 +2093,24 @@
     "testCount": "{{count}} test",
     "testCount_one": "{{count}} test",
     "testCount_other": "{{count}} test",
-    "testCount_plural": "{{count}} testen",
     "title": "Testcomponenten"
   },
   "time": {
-    "afternoon": "Middag",
-    "custom": "Aangepast",
     "day": "dag",
     "days": "dagen",
     "ended": "beëindigd",
-    "evening": "Avond",
-    "lastMonth": "Vorige maand",
-    "lastWeek": "Vorige week",
-    "lastYear": "Vorig jaar",
     "month": "maand",
     "months": "maanden",
-    "morning": "Ochtend",
-    "night": "Nacht",
     "ongoing": "doorlopend",
-    "thisMonth": "Deze maand",
-    "thisWeek": "Deze week",
-    "thisYear": "Dit jaar",
-    "today": "Vandaag",
-    "tomorrow": "Morgen",
     "year": "jaar",
-    "years": "jaar",
-    "yesterday": "Gisteren"
+    "years": "jaar"
   },
   "treatments": {
     "addFirstTreatment": "Voeg uw eerste behandeling toe",
     "addTreatment": "+ Behandeling toevoegen",
     "card": {
-      "amount": "Hoeveelheid",
       "conditionId": "Aandoening #{{id}}",
-      "description": "Beschrijving",
-      "endDate": "Einddatum",
-      "frequency": "Frequentie",
-      "notSpecified": "Niet gespecificeerd",
       "relatedCondition": "Gerelateerde aandoening",
-      "startDate": "Startdatum",
-      "subtitle": "Medische behandeling",
       "viewConditionDetails": "Aandoeningsdetails bekijken"
     },
     "conditionsLoadingError": "Fout bij laden van aandoeningen",
@@ -2573,7 +2132,6 @@
       "frequencyDesc": "Hoe vaak de behandeling wordt uitgevoerd",
       "frequencyPlaceholder": "bijv. dagelijks, tweemaal per week",
       "linkingPartialFailure": "Some items could not be linked",
-      "linkingPartialFailureMessage": "",
       "notesDesc": "Aanvullende informatie over deze behandeling",
       "notesPlaceholder": "Voer behandelnotities, observaties of aanvullende details in",
       "practitioner": "Zorgverlener",
@@ -2582,9 +2140,7 @@
       "relatedConditionDesc": "Koppel deze behandeling aan een aandoening",
       "savingTreatment": "Behandeling opslaan...",
       "selectCondition": "Selecteer aandoening",
-      "selectEndDate": "Selecteer einddatum",
       "selectPractitioner": "Selecteer zorgverlener",
-      "selectStartDate": "Selecteer startdatum",
       "selectStatus": "Selecteer status",
       "startDate": "Startdatum",
       "startDateDesc": "Wanneer de behandeling begint",
@@ -2633,7 +2189,6 @@
     "mode": {
       "advanced": "Treatment Plan",
       "advancedDescription": "Medication-centric plan with per-medication overrides",
-      "label": "Treatment Mode",
       "simple": "Simple",
       "simpleDescription": "Basic tracking with schedule and dosage"
     },
@@ -2694,100 +2249,17 @@
     "addNewVisit": "Nieuw consult toevoegen",
     "addVisit": "Nieuw consult toevoegen",
     "card": {
-      "chiefComplaint": "Hoofdklacht",
-      "diagnosisAssessment": "Diagnose/Beoordeling",
-      "duration": "Duur",
       "durationMinutes": "{{minutes}} minuten",
-      "followUpInstructions": "Vervolginstructies",
       "generalVisit": "Algemeen consult",
-      "location": "Locatie",
       "noPractitionerAssigned": "Geen zorgverlener toegewezen",
       "practitionerId": "Zorgverlener-ID: {{id}}",
-      "relatedCondition": "Gerelateerde aandoening",
-      "treatmentPlan": "Behandelplan",
       "viewCondition": "Aandoeningsdetails bekijken",
       "viewPractitioner": "Zorgverlenergegevens bekijken"
     },
     "clickToGetStarted": "Klik op \"Nieuw consult toevoegen\" om te beginnen.",
     "editVisit": "Consult bewerken",
-    "error": "Fout",
     "form": {
       "addVisit": "Consult toevoegen",
-      "fields": {
-        "additionalNotes": {
-          "description": "Eventuele aanvullende observaties, notities of belangrijke details",
-          "label": "Aanvullende notities",
-          "placeholder": "Andere belangrijke details over het consult..."
-        },
-        "attendingPractitioner": {
-          "description": "Arts die het consult heeft uitgevoerd",
-          "label": "Behandelend zorgverlener",
-          "placeholder": "Selecteer zorgverlener (optioneel)"
-        },
-        "chiefComplaint": {
-          "description": "Belangrijkste gezondheidsklacht of symptoom dat aanleiding gaf tot het consult",
-          "placeholder": "Primaire klacht of gerapporteerd symptoom"
-        },
-        "diagnosisAssessment": {
-          "description": "Medische diagnose of klinische beoordeling",
-          "label": "Diagnose/Beoordeling",
-          "placeholder": "Klinische beoordeling of diagnose van het consult..."
-        },
-        "durationMinutes": {
-          "description": "Hoe lang het consult duurde",
-          "label": "Duur (minuten)",
-          "placeholder": "Consultduur"
-        },
-        "followUpInstructions": {
-          "description": "Instructies voor doorlopende zorg en vervolgafspraken",
-          "placeholder": "Instructies voor vervolgzorg..."
-        },
-        "location": {
-          "description": "Waar het consult plaatsvond",
-          "placeholder": "Waar het consult plaatsvond"
-        },
-        "priority": {
-          "description": "Prioriteitsniveau van het consult",
-          "placeholder": "Selecteer prioriteitsniveau"
-        },
-        "reason": {
-          "description": "Primair doel van dit medisch consult",
-          "label": "Reden van consult",
-          "placeholder": "bijv. jaarlijkse controle, vervolg, symptoombespreking"
-        },
-        "relatedCondition": {
-          "description": "Koppel dit consult aan een specifieke aandoening indien van toepassing",
-          "label": "Gerelateerde aandoening (optioneel)",
-          "placeholder": "Selecteer een aandoening die gerelateerd is aan dit consult"
-        },
-        "treatmentPlan": {
-          "description": "Behandelaanbevelingen en voorgeschreven interventies",
-          "placeholder": "Aanbevolen behandeling of vervolgstappen..."
-        },
-        "visitDate": {
-          "description": "Wanneer het consult plaatsvond",
-          "label": "Consultdatum",
-          "placeholder": "Selecteer consultdatum"
-        },
-        "visitType": {
-          "description": "Type medisch consult",
-          "placeholder": "Selecteer consulttype"
-        }
-      },
-      "locationOptions": {
-        "clinic": "Kliniek",
-        "doctorsOffice": "Huisartsenpraktijk",
-        "emergencyRoom": "Eerste hulp",
-        "homeVisit": "Huisbezoek",
-        "hospital": "Ziekenhuis",
-        "telehealth": "Teleconsult/Digitaal",
-        "urgentCare": "Spoedeisende hulp"
-      },
-      "priorityOptions": {
-        "emergency": "Spoedeisend",
-        "routine": "Routine",
-        "urgent": "Urgent"
-      },
       "savingVisit": "Consult opslaan...",
       "tabs": {
         "addFiles": "Bestanden toevoegen",
@@ -2797,47 +2269,32 @@
         "notes": "Notities",
         "visitInfo": "Consultinfo"
       },
-      "updateVisit": "Consult bijwerken",
-      "visitTypeOptions": {
-        "annualCheckup": "Jaarlijkse controle",
-        "consultation": "Consult",
-        "emergency": "Spoedeisend",
-        "followUp": "Vervolg",
-        "preventiveCare": "Preventieve zorg",
-        "routineVisit": "Routinebezoek",
-        "specialistReferral": "Verwijzing naar specialist"
-      }
+      "updateVisit": "Consult bijwerken"
     },
     "loadingVisits": "Consulten laden...",
     "noVisitsFound": "Geen medische consulten gevonden",
-    "success": "Gelukt",
     "table": {
       "diagnosis": "Diagnose",
       "facility": "Instelling",
       "reason": "Reden",
       "relatedCondition": "Gerelateerde aandoening",
-      "visitDate": "Consultdatum",
-      "visitType": "Consulttype"
+      "visitDate": "Consultdatum"
     },
     "title": "Medische consulten",
     "tryAdjustingFilters": "Probeer uw zoekopdracht of filtercriteria aan te passen.",
     "viewModal": {
       "additionalNotes": "Aanvullende notities",
       "attachedDocuments": "Bijgevoegde documenten",
-      "chiefComplaint": "Hoofdklacht",
       "clinicalInformation": "Klinische informatie",
       "diagnosis": "Diagnose",
       "doctor": "Arts",
       "duration": "Duur",
       "durationMinutes": "{{minutes}} minuten",
       "editVisit": "Consult bewerken",
-      "followUpInstructions": "Vervolginstructies",
       "generalVisit": "Algemeen consult",
-      "location": "Locatie",
       "noNotesAvailable": "Geen notities beschikbaar",
       "noPractitionerAssigned": "Geen zorgverlener toegewezen",
       "practitionerId": "Zorgverlener-ID: {{id}}",
-      "priority": "Prioriteit",
       "reason": "Reden",
       "relatedCondition": "Gerelateerde aandoening",
       "specialty": "Specialisme",
@@ -2849,7 +2306,6 @@
         "visitInfo": "Consultinfo"
       },
       "title": "Consult - {{date}}",
-      "treatmentPlan": "Behandelplan",
       "viewCondition": "Aandoeningsdetails bekijken",
       "visitInformation": "Consultinformatie",
       "visitType": "Consulttype"
@@ -2873,24 +2329,12 @@
       "normal": "Normaal",
       "prediabetes": "Prediabetes"
     },
-    "clearFilter": "Filter wissen",
     "diastolic": "Diastolic",
     "editTitle": "Vitale functies bewerken",
-    "filteredBy": "Gefilterd op",
     "form": {
-      "additionalMeasurementsDesc": "Aanvullende gezondheidsindicatoren",
-      "bloodPressureDesc": "Gemeten in mmHg",
-      "calculatedValues": "Berekende waarden",
-      "contextDesc": "Context over de metingen",
-      "dateTimePlaceholder": "bijv. 29/07/2015 23:58",
-      "dateTimePlaceholder_dmy": "bijv. 29/07/2015 23:58",
-      "dateTimePlaceholder_ymd": "bijv. 2015-07-29 23:58",
-      "devicePlaceholder": "bijv. digitale bloeddrukmeter, thermometermodel...",
       "deviceUsed": "Gebruikt apparaat/hulpmiddel",
       "diastolicBP": "Diastolische bloeddruk",
       "healthAlerts": "Gezondheidswaarschuwingen",
-      "heightNotSet": "Lengte niet ingesteld in patiëntprofiel - BMI-berekening niet beschikbaar",
-      "locationPlaceholder": "Waar zijn deze metingen verricht?",
       "locations": {
         "ambulatory": "Ambulante zorg",
         "clinic": "Kliniek",
@@ -2900,31 +2344,14 @@
         "pharmacy": "Apotheek",
         "urgentCare": "Spoedeisende hulp"
       },
-      "lockedByImport": "Beheerd door gemiddelde van apparaatimport",
       "measurementLocation": "Meetlocatie",
-      "missingPatientInfo": "Ontbrekende patiëntinformatie",
-      "notesPlaceholder": "Aanvullende notities over de meting van vitale functies...",
       "openCalendar": "Kalender openen",
       "painScaleUnit": "(0-10)",
-      "pasteDateTime": "Plak of typ datum/tijd",
-      "pasteDateTimeDescription": "Typ of plak datum/tijd, of klik op de kalender om te selecteren",
-      "pasteDateTimePlaceholder": "bijv. 29/07/2015 23:58:21",
-      "patientHeight": "Lengte patiënt: {{height}} inch (uit profiel)",
       "patientInfo": "Patiëntinformatie",
       "recordedDateTime": "Meetdatum en -tijd",
       "saveVitals": "Vitale functies opslaan",
-      "sections": {
-        "additionalInfo": "Aanvullende informatie",
-        "basicInfo": "Basisinformatie",
-        "physicalMeasurements": "Lichamelijke metingen",
-        "recordingInfo": "Registratie-informatie"
-      },
-      "selectDate": "Selecteer datum",
-      "selectDateTime": "Selecteer datum en tijd",
       "selectTime": "Tijd",
       "systolicBP": "Systolische bloeddruk",
-      "timesShownIn": "Tijden weergegeven in {{timezone}}",
-      "timezoneInfo": "Tijdzone-informatie",
       "updateVitals": "Vitale functies bijwerken",
       "validation": {
         "a1cMax": "A1C mag niet hoger zijn dan 20%",
@@ -2957,9 +2384,7 @@
         "usernameLength": "Gebruikersnaam moet minimaal 3 tekens bevatten",
         "weightMax": "Gewicht mag niet hoger zijn dan {{max}} {{unit}}",
         "weightMin": "Gewicht moet minimaal {{min}} {{unit}} zijn"
-      },
-      "vitalSignsDesc": "Kernfysiologische metingen",
-      "weightDesc": "Gewicht in {{unit}}"
+      }
     },
     "glucoseContext": {
       "after_meal": "Na de maaltijd",
@@ -2976,10 +2401,8 @@
       "duplicateWarning": "{{count}} metingen bestaan al in dit datumbereik. Vink het vakje hierboven aan om ze over te slaan.",
       "duplicateWarning_one": "{{count}} readings already exist in this date range. Check the box above to skip them.",
       "duplicateWarning_other": "{{count}} readings already exist in this date range. Check the box above to skip them.",
-      "fileTooLarge": "Bestand overschrijdt de limiet van 10 MB",
       "importButton": "Importeren",
       "importing": "Vitale functies importeren...",
-      "invalidFileType": "Alleen CSV-bestanden worden ondersteund",
       "newReadings": "Nieuwe metingen",
       "noDevice": "Selecteer een apparaat",
       "noFile": "Selecteer een CSV-bestand",
@@ -3041,15 +2464,11 @@
     "statsLoadError": "Kan gezondheidsstatistieken niet laden",
     "summary": {
       "avgGlucose": "Gem.",
-      "collapseDetails": "Metingen verbergen",
       "confirmDeleteDay": "Alle {{count}} geïmporteerde metingen voor deze dag verwijderen?",
       "confirmDeleteDay_one": "Delete all {{count}} imported readings for this day?",
       "confirmDeleteDay_other": "Delete all {{count}} imported readings for this day?",
-      "dailySummary": "Dagelijks overzicht",
       "deleteDay": "Dag verwijderen",
-      "expandDetails": "Metingen tonen",
       "glucoseTrend": "Glucosetrend",
-      "importedFrom": "Geïmporteerd van {{source}}",
       "maxGlucose": "Max",
       "minGlucose": "Min",
       "readings": "{{count}} metingen",
@@ -3065,11 +2484,8 @@
       "oxygenSat": "O2-sat."
     },
     "tabs": {
-      "addFiles": "Bestanden toevoegen",
-      "additional": "Aanvullend",
       "context": "Context",
       "dateTime": "Datum en tijd",
-      "documents": "Documenten",
       "notes": "Notities",
       "vitalSigns": "Vitale functies"
     },
@@ -3119,5 +2535,16 @@
       "perMin": "/min"
     }
   },
-  "warning": "Warning"
+  "warning": "Warning",
+  "allergies": {
+    "addNew": "Nieuwe allergie toevoegen",
+    "messages": {
+      "loading": "Allergieën laden..."
+    }
+  },
+  "trash": {
+    "fileCount_one": "{{count}} bestand",
+    "fileCount_other": "{{count}} bestanden",
+    "fileCount": "{{count}} bestanden"
+  }
 }
