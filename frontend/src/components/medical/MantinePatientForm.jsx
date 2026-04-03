@@ -241,7 +241,7 @@ const MantinePatientForm = ({
             </Grid.Col>
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <Select
-                label={t('patients.form.gender.label')}
+                label={t('shared:fields.gender')}
                 placeholder={t('patients.form.gender.placeholder')}
                 value={formData.gender}
                 onChange={handleSelectChange('gender')}
@@ -274,7 +274,7 @@ const MantinePatientForm = ({
       {/* Address Section */}
       <Box>
         <SectionHeader icon={IconHome} color="teal">
-          {t('patients.form.address.label', 'Address')}
+          {t('shared:labels.address', 'Address')}
         </SectionHeader>
 
         <Textarea
@@ -395,7 +395,7 @@ const MantinePatientForm = ({
           leftSection={<IconX size={16} />}
           radius="md"
         >
-          {t('buttons.cancel')}
+          {t('shared:fields.cancel')}
         </Button>
         <Button
           variant="filled"

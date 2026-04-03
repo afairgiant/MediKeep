@@ -164,7 +164,7 @@ function InlineTestComponentEntry({
                 <Grid gutter="xs">
                   <Grid.Col span={12}>
                     <Autocomplete
-                      label={t('labResults.form.testName', 'Test Name')}
+                      label={t('shared:fields.testName', 'Test Name')}
                       placeholder={t('labResults.form.searchTests', 'Type to search tests...')}
                       size="xs"
                       value={component.test_name}
@@ -315,7 +315,7 @@ function InlineTestComponentEntry({
 
                   <Grid.Col span={6}>
                     <Select
-                      label={t('labResults.form.category', 'Category')}
+                      label={t('shared:labels.category', 'Category')}
                       placeholder={t('labResults.form.selectCategory', 'Select category')}
                       size="xs"
                       clearable

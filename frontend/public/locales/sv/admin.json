@@ -1,7 +1,6 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
       "firstName": "First Name",
       "lastName": "Last Name",
       "linkPatient": {
@@ -25,12 +24,10 @@
     "activityTrend": "Aktivitetstrend",
     "analyticsDateRange": "Analysdatumintervall",
     "axisLabels": {
-      "activities": "Aktiviteter",
-      "date": "Datum"
+      "activities": "Aktiviteter"
     },
     "breakdownByType": "Uppdelning per typ",
     "chartLabels": {
-      "allergies": "Allergier",
       "patients": "Patienter",
       "userActivity": "Användaraktivitet",
       "vitals": "Vitalparametrar"
@@ -76,11 +73,9 @@
       "action": "Åtgärd",
       "entityType": "Enhetstyp",
       "recordId": "Post-ID",
-      "timestamp": "Tidsstämpel",
-      "user": "Användare"
+      "timestamp": "Tidsstämpel"
     },
     "title": "Granskningslogg",
-    "userFilter": "Användare",
     "viewRecord": "Visa {{type}}-post",
     "viewRecordAriaLabel": "Visa {{type}} #{{id}}"
   },
@@ -94,15 +89,12 @@
       "previewRestore": "Förhandsgranska återställning",
       "restore": "Återställ",
       "tableHeaders": {
-        "actions": "Åtgärder",
         "created": "Skapad",
         "fileExists": "Fil finns",
         "filename": "Filnamn",
-        "size": "Storlek",
-        "type": "Typ"
+        "size": "Storlek"
       },
       "title": "Befintliga säkerhetskopior",
-      "unknown": "Okänd",
       "verify": "Verifiera"
     },
     "loading": "Laddar säkerhetskopieringshantering...",
@@ -167,9 +159,6 @@
       "filesCount": "{{count}} filer ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} filer",
-      "filesOnly_one": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Manifest",
       "noAffectedData": "Ingen information om påverkad data tillgänglig",
       "noStatistics": "Ingen statistik tillgänglig",
@@ -178,10 +167,6 @@
       "sqlStatements": "{{count}} SQL-satser",
       "sqlStatements_one": "{{count}} SQL statements",
       "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} poster totalt",
-      "totalRecords_one": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Typ",
       "unknownType": "Okänd typ av säkerhetskopia",
       "warnings": "Varningar"
     },
@@ -206,7 +191,6 @@
       "title": "Inställningar för lagringstid"
     },
     "schedule": {
-      "active": "Aktiv",
       "completedSuccessfully": "Slutfördes framgångsrikt",
       "dayOfWeek": "Veckodag",
       "dayOfWeekDesc": "Vilken dag ska den veckovisa säkerhetskopieringen köras?",
@@ -219,7 +203,6 @@
         "tue": "Tisdag",
         "wed": "Onsdag"
       },
-      "disabled": "Inaktiverad",
       "failed": "Misslyckades: {{error}}",
       "frequency": "Säkerhetskopieringsfrekvens",
       "frequencyDesc": "Schemalägg automatiska fullständiga säkerhetskopior (databas + filer)",
@@ -227,7 +210,6 @@
       "nextScheduledRun": "Nästa schemalagda körning",
       "presets": {
         "daily": "Dagligen",
-        "disabled": "Inaktiverad",
         "every12Hours": "Var 12:e timme",
         "every6Hours": "Var 6:e timme",
         "weekly": "Veckovis"
@@ -240,8 +222,7 @@
     },
     "subtitle": "Skapa och hantera systemsäkerhetskopior",
     "tabs": {
-      "backups": "Säkerhetskopior",
-      "settings": "Inställningar"
+      "backups": "Säkerhetskopior"
     },
     "title": "Säkerhetskopieringshantering",
     "unsavedBadge": "Osparat"
@@ -257,7 +238,6 @@
     "autoFeaturesTitle": "Autogenererade funktioner",
     "cardSubtitle": "Fyll i formuläret nedan för att skapa ett nytt användarkonto",
     "cardTitle": "Användarkontodetaljer",
-    "email": "E-post",
     "emailPlaceholder": "Ange e-postadress",
     "errors": {
       "accountCreateFailed": "Kunde inte skapa konto",
@@ -294,7 +274,6 @@
     },
     "role": "Roll",
     "roleAdmin": "Admin",
-    "roleUser": "Användare",
     "submitButton": "Skapa konto",
     "successRedirect": "Användare \"{{username}}\" skapades framgångsrikt!",
     "username": "Användarnamn",
@@ -320,7 +299,6 @@
       "dataModelsDesc": "Visa och hantera databastabeller",
       "manageUsers": "Hantera användare",
       "manageUsersDesc": "Visa och hantera användarkonton",
-      "settings": "Inställningar",
       "settingsDesc": "Systemkonfiguration",
       "subtitle": "Vanliga administrativa uppgifter",
       "systemHealth": "Systemhälsa",
@@ -348,8 +326,7 @@
       "recentRegistrations": "+{{count}} denna vecka",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Totalt antal användare",
-      "vitalSigns": "Vitalparametrar"
+      "totalUsers": "Totalt antal användare"
     },
     "subtitle": "Omfattande systemöversikt och hantering",
     "systemHealth": {
@@ -367,10 +344,8 @@
   "dataModels": {
     "categories": {
       "coreMedical": "Medicinsk kärna",
-      "familyHistory": "Familjehistorik",
       "fileManagement": "Filhantering",
       "healthcareDirectory": "Vårdkatalog",
-      "medicalRecords": "Medicinska journaler",
       "patientSupport": "Patientstöd",
       "sharingAccess": "Delning och åtkomst",
       "system": "System"
@@ -413,7 +388,6 @@
     "title": "Datamodeller"
   },
   "directoryCard": {
-    "error": "Fel",
     "files": "filer",
     "mb": "MB",
     "ok": "OK"
@@ -455,7 +429,6 @@
       "connectionTest": "Anslutningstest",
       "databaseSize": "Databasstorlek",
       "failed": "Misslyckades",
-      "medicalRecords": "Medicinska journaler",
       "passed": "Godkänd",
       "patientRecords": "Patientposter",
       "title": "Databashälsa"
@@ -495,7 +468,6 @@
     "sso": {
       "allowed": "Tillåten",
       "blocked": "Blockerad",
-      "disabled": "Inaktiverad",
       "enabled": "Aktiverad",
       "passwordOnlyInfo": "Användare kan bara logga in med användarnamn/lösenord",
       "provider": "Leverantör",
@@ -580,9 +552,6 @@
     "selected_one": "",
     "selected_other": "",
     "toggleColumnVisibility": "Växla kolumnsynlighet",
-    "totalRecords": "{{count}} poster totalt",
-    "totalRecords_one": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Skriv <strong>DELETE</strong> för att bekräfta",
     "usernameChangeLogout": "Detta loggar ut dig omedelbart och du måste logga in igen med det nya användarnamnet.",
     "usernameChangeText": "Du är på väg att ändra ditt eget användarnamn från <strong>\"{{oldUsername}}\"</strong> till <strong>\"{{newUsername}}\"</strong>.",
@@ -622,12 +591,10 @@
   },
   "shared": {
     "dark": "mörkt",
-    "disabled": "Inaktiverad",
     "enabled": "Aktiverad",
     "healthy": "frisk",
     "info": "Info",
-    "light": "ljust",
-    "unknown": "Okänd"
+    "light": "ljust"
   },
   "sidebar": {
     "adminNavigation": "Adminnavigering",
@@ -638,7 +605,6 @@
       "backupManagement": "Säkerhetskopieringshantering",
       "dataModels": "Datamodeller",
       "maintenance": "Underhåll",
-      "settings": "Inställningar",
       "systemHealth": "Systemhälsa",
       "trash": "Papperskorg",
       "userManagement": "Användarhantering"
@@ -689,7 +655,6 @@
     "deleteWarning": "Denna åtgärd kan inte ångras. Filen kommer att tas bort permanent från systemet.",
     "errorLoading": "Fel vid laddning av papperskorgen",
     "fileCount_one": "{{count}} fil",
-    "fileCount_other": "{{count}} filer",
     "fileDeleted": "Fil raderad",
     "fileDeletedMessage": "{{filename}} permanent raderad",
     "fileRestored": "Fil återställd",
@@ -726,7 +691,6 @@
     "showingFiltered": "Visar {{shown}} av {{total}} {{files}}",
     "subtitle": "Hantera raderade uppladdade filer. Återställ filer till deras ursprungliga plats eller ta bort dem permanent för att frigöra lagringsutrymme.",
     "tableHeaders": {
-      "actions": "Åtgärder",
       "deleted": "Raderad",
       "filename": "Filnamn",
       "originalLocation": "Ursprunglig plats",
@@ -767,7 +731,6 @@
     "loginHistory": "Inloggningshistorik",
     "loginHistoryModal": {
       "dateTime": "Datum och tid",
-      "details": "Detaljer",
       "ipAddress": "IP-adress",
       "noHistory": "Ingen inloggningshistorik hittades",
       "notAvailable": "Ej tillgänglig",
@@ -791,8 +754,7 @@
     "resetPassword": "Återställ lösenord",
     "roleFilter": {
       "admin": "Admin",
-      "all": "Alla roller",
-      "user": "Användare"
+      "all": "Alla roller"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Kan inte ta bort den sista administratörsrollen.",
@@ -804,18 +766,13 @@
     },
     "searchPlaceholder": "Sök användare...",
     "statusFilter": {
-      "active": "Aktiv",
-      "all": "Alla statusar",
-      "inactive": "Inaktiv"
+      "all": "Alla statusar"
     },
     "tableHeaders": {
-      "actions": "Åtgärder",
       "auth": "Autentisering",
       "created": "Skapad",
-      "fullName": "Fullständigt namn",
       "lastLogin": "Senaste inloggning",
-      "role": "Roll",
-      "user": "Användare"
+      "role": "Roll"
     },
     "title": "Användarhantering",
     "toggleActiveModal": {

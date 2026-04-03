@@ -164,7 +164,7 @@ const EquipmentFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
-                      placeholder={t('equipment.form.practitionerPlaceholder', 'Select practitioner')}
+                      placeholder={t('shared:fields.selectPractitioner', 'Select practitioner')}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -181,7 +181,7 @@ const EquipmentFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('equipment.form.manufacturer', 'Manufacturer')}
+                      label={t('shared:fields.manufacturer', 'Manufacturer')}
                       value={formData.manufacturer || ''}
                       onChange={handleTextInputChange('manufacturer')}
                       placeholder={t('equipment.form.manufacturerPlaceholder', 'e.g., ResMed, Philips')}
@@ -299,7 +299,7 @@ const EquipmentFormWrapper = ({
                         onInputChange({ target: { name: 'tags', value: tags } });
                       }}
                       label={t('shared:labels.tags', 'Tags')}
-                      placeholder={t('equipment.form.tagsPlaceholder', 'Add tags...')}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
                     />
                   </Grid.Col>
                 </Grid>
@@ -314,7 +314,7 @@ const EquipmentFormWrapper = ({
               onClick={onClose}
               disabled={isLoading || isSubmitting}
             >
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}

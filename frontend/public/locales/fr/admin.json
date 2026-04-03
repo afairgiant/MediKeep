@@ -1,7 +1,6 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
       "firstName": "First Name",
       "lastName": "Last Name",
       "linkPatient": {
@@ -25,12 +24,10 @@
     "activityTrend": "Tendances d'activité",
     "analyticsDateRange": "Plage temporelle des analyses de données",
     "axisLabels": {
-      "activities": "Activités",
-      "date": "Date"
+      "activities": "Activités"
     },
     "breakdownByType": "Répartition par type",
     "chartLabels": {
-      "allergies": "Allergies",
       "patients": "Patients",
       "userActivity": "Activité des utilisateurs",
       "vitals": "Signes vitaux"
@@ -78,11 +75,9 @@
       "action": "Action",
       "entityType": "Type d'entité",
       "recordId": "ID de l'entrée",
-      "timestamp": "Horodatage",
-      "user": "Utilisateur"
+      "timestamp": "Horodatage"
     },
     "title": "Journal d'audit",
-    "userFilter": "Utilisateur",
     "viewRecord": "Afficher les entrées de type : {{type}}",
     "viewRecordAriaLabel": "Afficher le n°{{id}} de type : {{type}}"
   },
@@ -97,15 +92,12 @@
       "previewRestore": "Aperçu de la restauration",
       "restore": "Restaurer",
       "tableHeaders": {
-        "actions": "Actions",
         "created": "Créé le",
         "fileExists": "Fichier existant",
         "filename": "Nom de fichier",
-        "size": "Taille",
-        "type": "Type"
+        "size": "Taille"
       },
       "title": "Backups existants",
-      "unknown": "Inconnu",
       "verify": "Vérifier"
     },
     "loading": "Chargement de la gestion des backups...",
@@ -172,10 +164,7 @@
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} fichier(s)",
-      "filesOnly_one": "{{count}} files",
       "filesOnly_many": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Manifeste",
       "noAffectedData": "Aucune information disponible sur les données affectées",
       "noStatistics": "Aucune statistique disponible",
@@ -185,11 +174,7 @@
       "sqlStatements_one": "{{count}} SQL statements",
       "sqlStatements_many": "{{count}} SQL statements",
       "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} entrées totales",
-      "totalRecords_one": "{{count}} total records",
       "totalRecords_many": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Type",
       "unknownType": "Type de backup inconnu",
       "warnings": "Avertissements"
     },
@@ -216,7 +201,6 @@
       "title": "Paramètres de rétention des backups"
     },
     "schedule": {
-      "active": "Active",
       "completedSuccessfully": "Complété avec succès",
       "dayOfWeek": "Jour de la semaine",
       "dayOfWeekDesc": "Quel jour doit avoir lieu le backup hebdomadaire ?",
@@ -229,7 +213,6 @@
         "tue": "Mardi",
         "wed": "Mercredi"
       },
-      "disabled": "Désactivée",
       "failed": "Echec : {{error}}",
       "frequency": "Fréquence des backups",
       "frequencyDesc": "Programmer des backups complets automatiques (base de données + fichiers)",
@@ -237,7 +220,6 @@
       "nextScheduledRun": "Prochain backup prévu",
       "presets": {
         "daily": "Quotidien",
-        "disabled": "Désactivé",
         "every12Hours": "Toutes les 12 heures",
         "every6Hours": "Toutes les 6 heures",
         "weekly": "Hebdomadaire"
@@ -250,8 +232,7 @@
     },
     "subtitle": "Créez et gérez les backups systèmes",
     "tabs": {
-      "backups": "Backups",
-      "settings": "Paramètres"
+      "backups": "Backups"
     },
     "title": "Gestion des backups",
     "unsavedBadge": "Non sauvegardé"
@@ -267,7 +248,6 @@
     "autoFeaturesTitle": "Fonctionnalités auto-générées",
     "cardSubtitle": "Remplissez le formulaire ci-dessous pour créer un nouveau compte utilisateur",
     "cardTitle": "Détails du compte utilisateur",
-    "email": "Email",
     "emailPlaceholder": "Saisissez l'adresse email",
     "errors": {
       "accountCreateFailed": "Echec de la création du compte",
@@ -304,7 +284,6 @@
     },
     "role": "Rôle",
     "roleAdmin": "Administrateur",
-    "roleUser": "Utiliateur",
     "submitButton": "Créer le compte",
     "successRedirect": "L'utilisateur \"{{username}}\" a été créé avec succès !",
     "username": "Nom d'utilisateur",
@@ -330,7 +309,6 @@
       "dataModelsDesc": "Voir et gérer les tables de la base de données",
       "manageUsers": "Gérer les utilisateurs",
       "manageUsersDesc": "Voir et gérer les comptes utilisateurs",
-      "settings": "Paramètres",
       "settingsDesc": "Configuration système",
       "subtitle": "Tâches administratives communes",
       "systemHealth": "Santé système",
@@ -361,8 +339,7 @@
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Utilisateurs totaux",
-      "vitalSigns": "Signes vitaux"
+      "totalUsers": "Utilisateurs totaux"
     },
     "subtitle": "Aperçu et gestion exhaustives du système",
     "systemHealth": {
@@ -380,10 +357,8 @@
   "dataModels": {
     "categories": {
       "coreMedical": "Coeur médical",
-      "familyHistory": "Antécédents familiaux",
       "fileManagement": "Gestion des fichiers",
       "healthcareDirectory": "Répertoire de santé",
-      "medicalRecords": "Données médicales",
       "patientSupport": "Support patient",
       "sharingAccess": "Partage & Accès",
       "system": "Système"
@@ -426,7 +401,6 @@
     "title": "Modèles de données"
   },
   "directoryCard": {
-    "error": "Erreur",
     "files": "fichiers",
     "mb": "MB",
     "ok": "OK"
@@ -468,7 +442,6 @@
       "connectionTest": "Test de connexion",
       "databaseSize": "Taille de la base de données",
       "failed": "Echec",
-      "medicalRecords": "Dossiers médicaux",
       "passed": "Succès",
       "patientRecords": "Dossiers de patients",
       "title": "Santé de la base de données"
@@ -508,7 +481,6 @@
     "sso": {
       "allowed": "Permis",
       "blocked": "Bloqué",
-      "disabled": "Désactivé",
       "enabled": "Activé",
       "passwordOnlyInfo": "Les utilisateurs peuvent uniquement se connecter avec un nom d'utilisateur et un mot de passe",
       "provider": "Fournisseur",
@@ -600,10 +572,7 @@
     "selected_many": "",
     "selected_other": "",
     "toggleColumnVisibility": "(Dés)activer la visibilité des colonnes",
-    "totalRecords": "{{count}} entrées totales",
-    "totalRecords_one": "{{count}} total records",
     "totalRecords_many": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Saisissez <strong>DELETE</strong> pour confirmer",
     "usernameChangeLogout": "Ceci vous déconnectera immédiatement et vous devrez vous reconnecter avec le nouveau nom d'utilisateur.",
     "usernameChangeText": "Vous êtes sur le point de changer votre propre nom d'utilisateur de <strong>\"{{oldUsername}}\"</strong> vers <strong>\"{{newUsername}}\"</strong>.",
@@ -643,12 +612,10 @@
   },
   "shared": {
     "dark": "sombre",
-    "disabled": "Désactivé(e)",
     "enabled": "Activé(e)",
     "healthy": "en bonne santé",
     "info": "Info",
-    "light": "clair",
-    "unknown": "Inconnu"
+    "light": "clair"
   },
   "sidebar": {
     "adminNavigation": "Administration - Navigation",
@@ -659,7 +626,6 @@
       "backupManagement": "Gestion des backups",
       "dataModels": "Modèles de données",
       "maintenance": "Maintenance",
-      "settings": "Paramètres",
       "systemHealth": "Santé système",
       "trash": "Corbeille",
       "userManagement": "Gestion des utilisateurs"
@@ -714,7 +680,6 @@
     "errorLoading": "Erreur lors du chargement de la corbeille",
     "fileCount_one": "{{count}} fichier",
     "fileCount_many": "{{count}} files",
-    "fileCount_other": "{{count}} fichiers",
     "fileDeleted": "Fichier supprimé",
     "fileDeletedMessage": "{{filename}} supprimé définitivement",
     "fileRestored": "Fichier restauré",
@@ -754,7 +719,6 @@
     "showingFiltered": "Affichage de {{shown}} sur {{total}} {{files}}",
     "subtitle": "Gérez les fichiers téléversés supprimés. Restaurez les fichiers à leur emplacement d'origine ou supprimez-les définitivement pour libérer de l'espace de stockage.",
     "tableHeaders": {
-      "actions": "Actions",
       "deleted": "Supprimé",
       "filename": "Nom du fichier",
       "originalLocation": "Emplacement d'origine",
@@ -797,7 +761,6 @@
     "loginHistory": "Historique de connexion",
     "loginHistoryModal": {
       "dateTime": "Date & Heure",
-      "details": "Détails",
       "ipAddress": "Adresse IP",
       "noHistory": "Aucun historique de connexion trouvé",
       "notAvailable": "N/A",
@@ -822,8 +785,7 @@
     "resetPassword": "Réinitialiser le mot de passe",
     "roleFilter": {
       "admin": "Admininstrateur",
-      "all": "Tous les rôles",
-      "user": "Utilisateur"
+      "all": "Tous les rôles"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Impossible de supprimer le dernier rôle administrateur.",
@@ -835,18 +797,13 @@
     },
     "searchPlaceholder": "Rechercher dans les utilisateurs...",
     "statusFilter": {
-      "active": "Actif",
-      "all": "Tous les statuts",
-      "inactive": "Inactif"
+      "all": "Tous les statuts"
     },
     "tableHeaders": {
-      "actions": "Actions",
       "auth": "Auth",
       "created": "Créé le",
-      "fullName": "Nom complet",
       "lastLogin": "Dernière connexion",
-      "role": "Rôle",
-      "user": "Utilisateur"
+      "role": "Rôle"
     },
     "title": "Gestion des utilisateurs",
     "toggleActiveModal": {

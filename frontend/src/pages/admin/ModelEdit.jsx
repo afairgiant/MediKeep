@@ -30,7 +30,7 @@ import './ModelEdit.css';
 const ModelEdit = () => {
   const { modelName, recordId } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const { logout } = useAuth();
 
   const [record, setRecord] = useState(null);
@@ -266,7 +266,7 @@ const ModelEdit = () => {
               onClick={handleCancel}
               disabled={saving}
             >
-              {t('common:buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleSave}
@@ -357,7 +357,7 @@ const ModelEdit = () => {
           </Alert>
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={() => dismissWarning(closeUsernameWarning)}>
-              {t('common:buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button color="yellow" onClick={() => confirmPendingUpdate(closeUsernameWarning)}>
               {t('models.changeUsername', 'Change Username')}
@@ -389,7 +389,7 @@ const ModelEdit = () => {
           </Alert>
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={() => dismissWarning(closeRoleWarning)}>
-              {t('common:buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button color="yellow" onClick={() => confirmPendingUpdate(closeRoleWarning)}>
               {t('models.changeRole', 'Change Role')}

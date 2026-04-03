@@ -16,7 +16,7 @@ const DIR_CONFIG = {
 };
 
 const DirectoryCard = ({ name, info }) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const config = DIR_CONFIG[name] || { icon: IconFolderOpen, color: 'gray' };
   const DirIcon = config.icon;
   const isHealthy = info.write_permission && info.exists;
@@ -38,7 +38,7 @@ const DirectoryCard = ({ name, info }) => {
             color={isHealthy ? 'green' : 'red'}
             size="sm"
           >
-            {isHealthy ? t('directoryCard.ok', 'OK') : t('directoryCard.error', 'Error')}
+            {isHealthy ? t('directoryCard.ok', 'OK') : t('shared:labels.error', 'Error')}
           </Badge>
         </Group>
 

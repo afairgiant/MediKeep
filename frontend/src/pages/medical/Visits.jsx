@@ -550,10 +550,10 @@ const Visits = () => {
                   { header: t('visits.table.visitDate', 'Visit Date'), accessor: 'date', priority: 'high', width: 120 },
                   { header: t('visits.table.reason', 'Reason'), accessor: 'reason', priority: 'high', width: 150 },
                   { header: t('visits.table.visitType', 'Visit Type'), accessor: 'visit_type', priority: 'medium', width: 120 },
-                  { header: t('visits.table.facility', 'Facility'), accessor: 'location', priority: 'medium', width: 150 },
+                  { header: t('shared:labels.facility', 'Facility'), accessor: 'location', priority: 'medium', width: 150 },
                   { header: t('shared:fields.practitioner', 'Practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 200 },
-                  { header: t('visits.table.relatedCondition', 'Related Condition'), accessor: 'condition_name', priority: 'low', width: 200 },
-                  { header: t('visits.table.diagnosis', 'Diagnosis'), accessor: 'diagnosis', priority: 'medium', width: 150 },
+                  { header: t('shared:labels.relatedCondition', 'Related Condition'), accessor: 'condition_name', priority: 'low', width: 200 },
+                  { header: t('shared:labels.diagnosis', 'Diagnosis'), accessor: 'diagnosis', priority: 'medium', width: 150 },
                   { header: t('shared:tabs.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 }
                 ]}
                 patientData={currentPatient}

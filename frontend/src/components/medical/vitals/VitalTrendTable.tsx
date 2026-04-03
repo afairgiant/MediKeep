@@ -66,7 +66,7 @@ function Th({ children, sorted, reversed, onSort }: ThProps) {
 }
 
 const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatLongDate } = useDateFormat();
   const isBloodGlucose = trendData.vital_type === 'blood_glucose';
   const [sortField, setSortField] = useState<SortField>('date');
@@ -156,7 +156,7 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
                 reversed={sortDirection === 'asc'}
                 onSort={() => handleSort('date')}
               >
-                {t('labels.date', 'Date')}
+                {t('shared:labels.date', 'Date')}
               </Th>
               <Th
                 sorted={sortField === 'value'}

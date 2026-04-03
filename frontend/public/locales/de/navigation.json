@@ -23,22 +23,9 @@
     "loading": "Ihr medizinisches Dashboard wird geladen...",
     "modules": {
       "adminDashboard": "Admin-Dashboard",
-      "allergies": "Allergien",
-      "conditions": "Erkrankungen",
-      "emergencyContacts": "Notfallkontakte",
       "exportRecords": "Daten exportieren",
-      "familyHistory": "Familiengeschichte",
-      "immunizations": "Impfungen",
-      "injuries": "Verletzungen",
-      "insurance": "Versicherung",
-      "medicalEquipment": "Medizinische Geräte",
       "patientInfo": "Patienteninformationen",
-      "pharmacies": "Apotheken",
-      "practitioners": "Ärzte",
-      "symptoms": "Symptome",
-      "treatments": "Behandlungen",
-      "visitHistory": "Besuchsverlauf",
-      "vitalSigns": "Vitalzeichen"
+      "visitHistory": "Besuchsverlauf"
     },
     "search": {
       "advancedSearch": "Erweiterte Suche",
@@ -72,24 +59,11 @@
     "sharePatient": "Patient teilen",
     "title": "Einladungen",
     "types": {
-      "familyHistory": "Familiengeschichte",
       "patientRecord": "Patientenakte"
     },
     "viewAll": "Alle {{count}} Einladungen anzeigen",
     "viewAll_one": "Alle {{count}} Einladungen anzeigen",
     "viewAll_other": "Alle {{count}} Einladungen anzeigen"
-  },
-  "medicalRecords": {
-    "allergies": "Allergien",
-    "conditions": "Erkrankungen",
-    "immunizations": "Impfungen",
-    "injuries": "Verletzungen",
-    "medicalEquipment": "Medizinische Geräte",
-    "pharmacies": "Apotheken",
-    "practitioners": "Ärzte",
-    "symptoms": "Symptome",
-    "treatments": "Behandlungen",
-    "visits": "Besuche"
   },
   "menu": {
     "administration": "Verwaltung",
@@ -97,11 +71,9 @@
     "dashboard": "Dashboard",
     "help": "Hilfe",
     "logout": "Abmelden",
-    "medicalRecords": "Krankenakten",
     "patients": "Patienten",
     "profile": "Profil",
-    "reports": "Berichte",
-    "settings": "Einstellungen"
+    "reports": "Berichte"
   },
   "pages": {
     "dashboard": "Dashboard",
@@ -111,50 +83,30 @@
     "patientList": "Patientenliste",
     "preferences": "Einstellungen",
     "reports": "Berichte",
-    "settings": "Einstellungen",
     "userProfile": "Benutzerprofil"
   },
   "sections": {
-    "emergencyContacts": "Notfallkontakte",
-    "familyHistory": "Familien Historie",
-    "insurance": "Versicherung",
     "medicalInfo": "Medizinische Informationen",
     "personalInfo": "Persönliche Informationen",
-    "preferences": "Einstellungen",
-    "timeline": "Zeitachse"
+    "preferences": "Einstellungen"
   },
   "sidebarNav": {
     "items": {
       "adminDashboard": "Admin-Dashboard",
-      "allergies": "Allergien",
       "backupManagement": "Backup-Verwaltung",
-      "conditions": "Erkrankungen",
       "customReports": "Benutzerdefinierte Berichte",
       "dataModels": "Datenmodelle",
-      "emergencyContacts": "Notfallkontakte",
       "exportRecords": "Daten exportieren",
-      "familyHistory": "Familiengeschichte",
-      "immunizations": "Impfungen",
-      "injuries": "Verletzungen",
-      "insurance": "Versicherung",
       "language": "Sprache",
-      "medicalEquipment": "Medizinische Geräte",
       "patientInfo": "Patienteninformationen",
-      "pharmacies": "Apotheken",
-      "practitioners": "Ärzte",
-      "settings": "Einstellungen",
-      "symptoms": "Symptome",
       "systemHealth": "Systemzustand",
       "tagManagement": "Tag-Verwaltung",
       "theme": "Design",
-      "treatments": "Behandlungen",
-      "visitHistory": "Besuchsverlauf",
-      "vitalSigns": "Vitalzeichen"
+      "visitHistory": "Besuchsverlauf"
     },
     "sections": {
       "administration": "Verwaltung",
       "careAndTreatment": "Pflege & Behandlung",
-      "medicalRecords": "Krankenakten",
       "misc": "Sonstiges",
       "tools": "Werkzeuge"
     }

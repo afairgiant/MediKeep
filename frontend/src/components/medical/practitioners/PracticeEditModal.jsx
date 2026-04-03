@@ -78,7 +78,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
       onClose();
     } catch {
       notifications.show({
-        title: t('common:labels.error', 'Error'),
+        title: t('shared:labels.error', 'Error'),
         message: t('common:practitioners.viewModal.practiceUpdateError', 'Failed to update practice'),
         color: 'red',
       });
@@ -152,7 +152,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
         />
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('common:buttons.cancel')}
+            {t('shared:fields.cancel')}
           </Button>
           <Button
             onClick={handleSubmit}

@@ -12,7 +12,6 @@
     "deleteFailed": "Kanaal verwijderen mislukt",
     "deleteSuccess": "Kanaal succesvol verwijderd",
     "description": "Voeg meldingskanalen toe en beheer ze",
-    "disabled": "Uitgeschakeld",
     "discord": {
       "avatarUrl": {
         "description": "Aangepaste avatar voor de meldingsbot",
@@ -130,7 +129,6 @@
     "title": "Meldingskanalen",
     "types": {
       "discord": "Discord",
-      "email": "E-mail",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -216,9 +214,7 @@
     "description": "Recent verzonden meldingen via uw kanalen",
     "fields": {
       "channel": "Kanaal",
-      "error": "Fout",
-      "event": "Gebeurtenis",
-      "time": "Tijd"
+      "event": "Gebeurtenis"
     },
     "loading": "Geschiedenis laden...",
     "noHistory": "Nog geen meldingen verzonden",
@@ -228,7 +224,6 @@
     "showMore": "Meer tonen",
     "status": {
       "failed": "Mislukt",
-      "pending": "In behandeling",
       "sent": "Verzonden"
     },
     "title": "Meldingsgeschiedenis"
@@ -294,7 +289,6 @@
       "allOperationsSuccess": "Alle {{total}} {{operation}}s succesvol voltooid!",
       "deleteFailed": "Verwijderen mislukt",
       "downloadFailed": "Downloaden mislukt",
-      "error": "Fout",
       "operationFailed": "Bewerking mislukt",
       "operationFailedTitle": "{{operation}} mislukt",
       "operationPartial": "{{success}}/{{total}} {{operation}}s succesvol voltooid. {{failed}} mislukt.",

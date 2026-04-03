@@ -27,7 +27,7 @@ export const symptomOccurrenceFormFields = [
   {
     name: 'severity',
     type: 'select',
-    labelKey: 'common:labels.severity',
+    labelKey: 'shared:fields.severity',
     placeholderKey: 'medical:symptoms.occurrence.severity.placeholder',
     required: true,
     descriptionKey: 'medical:symptoms.occurrence.severity.description',

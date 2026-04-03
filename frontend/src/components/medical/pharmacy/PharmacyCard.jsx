@@ -37,7 +37,7 @@ const PharmacyCard = ({
     // Generate dynamic fields for pharmacy information
     const fields = [
       {
-        label: t('pharmacies.card.address'),
+        label: t('shared:labels.address'),
         value: pharmacy.street_address,
       },
       {
@@ -61,14 +61,14 @@ const PharmacyCard = ({
         value: pharmacy.store_number,
       },
       {
-        label: t('pharmacies.card.phone'),
+        label: t('shared:labels.phone'),
         value: pharmacy.phone_number,
       },
       {
         label: t('shared:labels.website'),
         value: pharmacy.website,
         render: (value) => {
-          if (!value) return <Text size="sm" c="dimmed">{t('labels.notSpecified')}</Text>;
+          if (!value) return <Text size="sm" c="dimmed">{t('shared:labels.notSpecified')}</Text>;
           return (
             <Anchor
               href={value.startsWith('http') ? value : `https://${value}`}

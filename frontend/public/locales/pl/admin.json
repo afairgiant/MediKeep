@@ -1,7 +1,6 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
       "firstName": "First Name",
       "lastName": "Last Name",
       "linkPatient": {
@@ -25,12 +24,10 @@
     "activityTrend": "Trend aktywności",
     "analyticsDateRange": "Zakres dat analityki",
     "axisLabels": {
-      "activities": "Działania",
-      "date": "Data"
+      "activities": "Działania"
     },
     "breakdownByType": "Podział według typu",
     "chartLabels": {
-      "allergies": "Alergie",
       "patients": "Pacjenci",
       "userActivity": "Aktywność użytkownika",
       "vitals": "Znaki życiowe"
@@ -80,11 +77,9 @@
       "action": "Działanie",
       "entityType": "Typ encji",
       "recordId": "ID rekordu",
-      "timestamp": "Sygnatura czasowa",
-      "user": "Użytkownik"
+      "timestamp": "Sygnatura czasowa"
     },
     "title": "Dziennik audytu",
-    "userFilter": "Użytkownik",
     "viewRecord": "Wyświetl rekord {{type}}",
     "viewRecordAriaLabel": "Wyświetl {{type}} #{{id}}"
   },
@@ -100,15 +95,12 @@
       "previewRestore": "Podgląd przywrócenia",
       "restore": "Przywróć",
       "tableHeaders": {
-        "actions": "Działania",
         "created": "Utworzono",
         "fileExists": "Plik istnieje",
         "filename": "Nazwa pliku",
-        "size": "Rozmiar",
-        "type": "Typ"
+        "size": "Rozmiar"
       },
       "title": "Istniejące kopie zapasowe",
-      "unknown": "Nieznany",
       "verify": "Zweryfikuj"
     },
     "loading": "Ładowanie zarządzania kopiami zapasowymi...",
@@ -177,11 +169,8 @@
       "filesCount_few": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} plików",
-      "filesOnly_one": "{{count}} files",
       "filesOnly_few": "{{count}} files",
       "filesOnly_many": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Manifest",
       "noAffectedData": "Brak informacji o dotknięciu danych",
       "noStatistics": "Brak dostępnych statystyk",
@@ -192,12 +181,8 @@
       "sqlStatements_few": "{{count}} SQL statements",
       "sqlStatements_many": "{{count}} SQL statements",
       "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} rekordów razem",
-      "totalRecords_one": "{{count}} total records",
       "totalRecords_few": "{{count}} total records",
       "totalRecords_many": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Typ",
       "unknownType": "Nieznany typ kopii zapasowej",
       "warnings": "Ostrzeżenia"
     },
@@ -226,7 +211,6 @@
       "title": "Ustawienia przechowywania kopii zapasowych"
     },
     "schedule": {
-      "active": "Aktywny",
       "completedSuccessfully": "Zakończono pomyślnie",
       "dayOfWeek": "Dzień tygodnia",
       "dayOfWeekDesc": "W który dzień powinna się wykonać tygodniowa kopia zapasowa?",
@@ -239,7 +223,6 @@
         "tue": "Wtorek",
         "wed": "Środa"
       },
-      "disabled": "Wyłączony",
       "failed": "Nie powiodło się: {{error}}",
       "frequency": "Częstotliwość kopii zapasowych",
       "frequencyDesc": "Zaplanuj automatyczne pełne kopie zapasowe (baza danych + pliki)",
@@ -247,7 +230,6 @@
       "nextScheduledRun": "Następne zaplanowane uruchomienie",
       "presets": {
         "daily": "Codziennie",
-        "disabled": "Wyłączony",
         "every12Hours": "Co 12 godzin",
         "every6Hours": "Co 6 godzin",
         "weekly": "Co tydzień"
@@ -260,8 +242,7 @@
     },
     "subtitle": "Twórz i zarządzaj kopiami zapasowymi systemu",
     "tabs": {
-      "backups": "Kopie zapasowe",
-      "settings": "Ustawienia"
+      "backups": "Kopie zapasowe"
     },
     "title": "Zarządzanie kopiami zapasowymi",
     "unsavedBadge": "Niezapisane"
@@ -277,7 +258,6 @@
     "autoFeaturesTitle": "Automatycznie generowane funkcje",
     "cardSubtitle": "Wypełnij poniższy formularz, aby utworzyć nowe konto użytkownika",
     "cardTitle": "Szczegóły konta użytkownika",
-    "email": "E-mail",
     "emailPlaceholder": "Wpisz adres e-mail",
     "errors": {
       "accountCreateFailed": "Nie udało się utworzyć konta",
@@ -314,7 +294,6 @@
     },
     "role": "Rola",
     "roleAdmin": "Admin",
-    "roleUser": "Użytkownik",
     "submitButton": "Utwórz konto",
     "successRedirect": "Użytkownik \"{{username}}\" pomyślnie utworzony!",
     "username": "Nazwa użytkownika",
@@ -340,7 +319,6 @@
       "dataModelsDesc": "Wyświetl i zarządzaj tabelami bazy danych",
       "manageUsers": "Zarządzaj użytkownikami",
       "manageUsersDesc": "Wyświetl i zarządzaj kontami użytkowników",
-      "settings": "Ustawienia",
       "settingsDesc": "Konfiguracja systemu",
       "subtitle": "Typowe zadania administracyjne",
       "systemHealth": "Stan systemu",
@@ -374,8 +352,7 @@
       "recentRegistrations_few": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Razem użytkowników",
-      "vitalSigns": "Znaki życiowe"
+      "totalUsers": "Razem użytkowników"
     },
     "subtitle": "Kompleksowy przegląd i zarządzanie systemem",
     "systemHealth": {
@@ -393,10 +370,8 @@
   "dataModels": {
     "categories": {
       "coreMedical": "Medycyna jądrowa",
-      "familyHistory": "Historia rodzinna",
       "fileManagement": "Zarządzanie plikami",
       "healthcareDirectory": "Katalog opieki zdrowotnej",
-      "medicalRecords": "Akta medyczne",
       "patientSupport": "Wsparcie pacjentów",
       "sharingAccess": "Udostępnianie i dostęp",
       "system": "System"
@@ -439,7 +414,6 @@
     "title": "Modele danych"
   },
   "directoryCard": {
-    "error": "Błąd",
     "files": "pliki",
     "mb": "MB",
     "ok": "OK"
@@ -481,7 +455,6 @@
       "connectionTest": "Test połączenia",
       "databaseSize": "Rozmiar bazy danych",
       "failed": "Nie powiodło się",
-      "medicalRecords": "Akta medyczne",
       "passed": "Zaliczone",
       "patientRecords": "Rekordy pacjentów",
       "title": "Stan bazy danych"
@@ -521,7 +494,6 @@
     "sso": {
       "allowed": "Dozwolone",
       "blocked": "Zablokowane",
-      "disabled": "Wyłączony",
       "enabled": "Włączony",
       "passwordOnlyInfo": "Użytkownicy mogą logować się tylko przy użyciu nazwy użytkownika/hasła",
       "provider": "Dostawca",
@@ -620,11 +592,8 @@
     "selected_many": "",
     "selected_other": "",
     "toggleColumnVisibility": "Przełącz widoczność kolumny",
-    "totalRecords": "{{count}} rekordów razem",
-    "totalRecords_one": "{{count}} total records",
     "totalRecords_few": "{{count}} total records",
     "totalRecords_many": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Wpisz <strong>DELETE</strong> aby potwierdzić",
     "usernameChangeLogout": "Spowoduje to natychmiastowe wylogowanie i będziesz musiał zalogować się ponownie przy użyciu nowej nazwy użytkownika.",
     "usernameChangeText": "Masz zamiar zmienić własną nazwę użytkownika z <strong>\"{{oldUsername}}\"</strong> na <strong>\"{{newUsername}}\"</strong>.",
@@ -664,12 +633,10 @@
   },
   "shared": {
     "dark": "ciemny",
-    "disabled": "Wyłączony",
     "enabled": "Włączony",
     "healthy": "zdrowy",
     "info": "Informacja",
-    "light": "jasny",
-    "unknown": "Nieznany"
+    "light": "jasny"
   },
   "sidebar": {
     "adminNavigation": "Nawigacja administracyjna",
@@ -680,7 +647,6 @@
       "backupManagement": "Zarządzanie kopiami zapasowymi",
       "dataModels": "Modele danych",
       "maintenance": "Konserwacja",
-      "settings": "Ustawienia",
       "systemHealth": "Stan systemu",
       "trash": "Kosz",
       "userManagement": "Zarządzanie użytkownikami"
@@ -739,7 +705,6 @@
     "fileCount_one": "{{count}} plik",
     "fileCount_few": "{{count}} files",
     "fileCount_many": "{{count}} files",
-    "fileCount_other": "{{count}} plików",
     "fileDeleted": "Plik usunięty",
     "fileDeletedMessage": "{{filename}} trwale usunięty",
     "fileRestored": "Plik przywrócony",
@@ -782,7 +747,6 @@
     "showingFiltered": "Wyświetlanie {{shown}} z {{total}} {{files}}",
     "subtitle": "Zarządzaj usuniętymi przesłanymi plikami. Przywróć pliki do ich oryginalnej lokalizacji lub usuń je na stałe, aby zwolnić miejsce.",
     "tableHeaders": {
-      "actions": "Działania",
       "deleted": "Usunięto",
       "filename": "Nazwa pliku",
       "originalLocation": "Oryginalna lokalizacja",
@@ -827,7 +791,6 @@
     "loginHistory": "Historia logowań",
     "loginHistoryModal": {
       "dateTime": "Data i godzina",
-      "details": "Szczegóły",
       "ipAddress": "Adres IP",
       "noHistory": "Nie znaleziono historii logowań",
       "notAvailable": "N/A",
@@ -853,8 +816,7 @@
     "resetPassword": "Zresetuj hasło",
     "roleFilter": {
       "admin": "Admin",
-      "all": "Wszystkie role",
-      "user": "Użytkownik"
+      "all": "Wszystkie role"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Nie można usunąć ostatniej roli administratora.",
@@ -866,18 +828,13 @@
     },
     "searchPlaceholder": "Szukaj użytkowników...",
     "statusFilter": {
-      "active": "Aktywny",
-      "all": "Wszystkie statusy",
-      "inactive": "Nieaktywny"
+      "all": "Wszystkie statusy"
     },
     "tableHeaders": {
-      "actions": "Działania",
       "auth": "Autentykacja",
       "created": "Utworzono",
-      "fullName": "Pełna nazwa",
       "lastLogin": "Ostatnie logowanie",
-      "role": "Rola",
-      "user": "Użytkownik"
+      "role": "Rola"
     },
     "title": "Zarządzanie użytkownikami",
     "toggleActiveModal": {

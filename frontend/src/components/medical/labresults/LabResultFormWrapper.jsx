@@ -490,7 +490,7 @@ const LabResultFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 8 }}>
                     <TextInput
-                      label={t('labResults.testName.label')}
+                      label={t('shared:fields.testName')}
                       value={formData.test_name || ''}
                       onChange={handleTextInputChange('test_name')}
                       placeholder={t('labResults.testName.placeholder')}
@@ -553,7 +553,7 @@ const LabResultFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
-                      placeholder={t('labResults.orderingPractitioner.placeholder')}
+                      placeholder={t('shared:fields.selectPractitioner')}
                       description={t('labResults.orderingPractitioner.description')}
                       searchable
                       clearable
@@ -593,7 +593,7 @@ const LabResultFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder={t('labResults.testStatus.placeholder')}
+                      placeholder={t('shared:fields.selectStatus')}
                       description={t('labResults.testStatus.description')}
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
@@ -771,7 +771,7 @@ const LabResultFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('labResults.additionalNotes.label')}
+                  label={t('shared:fields.additionalNotes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('labResults.additionalNotes.placeholder')}
@@ -792,7 +792,7 @@ const LabResultFormWrapper = ({
               onClick={onClose}
               disabled={isLoading || isSubmitting}
             >
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}

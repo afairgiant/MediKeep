@@ -57,7 +57,7 @@ const getNavSections = (t) => [
     items: [
       { label: t('sidebar.items.backupManagement', 'Backup Management'), icon: IconDeviceFloppy, path: '/admin/backup' },
       { label: t('sidebar.items.maintenance', 'Maintenance'), icon: IconTool, path: '/admin/tools' },
-      { label: t('sidebar.items.settings', 'Settings'), icon: IconSettings, path: '/admin/settings' },
+      { label: t('shared:labels.settings', 'Settings'), icon: IconSettings, path: '/admin/settings' },
     ],
   },
 ];

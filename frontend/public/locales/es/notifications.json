@@ -12,7 +12,6 @@
     "deleteFailed": "Error al eliminar el canal",
     "deleteSuccess": "Canal eliminado con éxito",
     "description": "Añada y gestione sus canales de entrega de notificaciones",
-    "disabled": "Desactivado",
     "discord": {
       "avatarUrl": {
         "description": "Avatar personalizado para el bot de notificaciones",
@@ -131,7 +130,6 @@
     "title": "Canales de notificación",
     "types": {
       "discord": "Discord",
-      "email": "Correo electrónico",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -217,9 +215,7 @@
     "description": "Notificaciones recientes enviadas a través de sus canales",
     "fields": {
       "channel": "Canal",
-      "error": "Error",
-      "event": "Evento",
-      "time": "Hora"
+      "event": "Evento"
     },
     "loading": "Cargando historial...",
     "noHistory": "Aún no se han enviado notificaciones",
@@ -229,7 +225,6 @@
     "showMore": "Mostrar más",
     "status": {
       "failed": "Fallido",
-      "pending": "Pendiente",
       "sent": "Enviado"
     },
     "title": "Historial de notificaciones"
@@ -295,7 +290,6 @@
       "allOperationsSuccess": "Las {{total}} {{operation}} se completaron con éxito",
       "deleteFailed": "Error al eliminar",
       "downloadFailed": "Error en la descarga",
-      "error": "Error",
       "operationFailed": "Error en la operación",
       "operationFailedTitle": "{{operation}} fallida",
       "operationPartial": "{{success}}/{{total}} {{operation}} completadas con éxito. {{failed}} fallaron.",

@@ -192,7 +192,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({ patientId }
             style={{ flex: 2, minWidth: 200 }}
           />
           <Select
-            placeholder={t('medical:componentCatalog.filterCategory', 'Category')}
+            placeholder={t('shared:labels.category', 'Category')}
             data={CATEGORY_SELECT_OPTIONS}
             value={category}
             onChange={setCategory}

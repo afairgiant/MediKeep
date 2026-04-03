@@ -164,28 +164,28 @@ const ConditionViewModal = ({
             <Stack gap="lg">
               {/* Basic Information */}
               <div>
-                <Title order={4} mb="sm">{t('conditions.modal.sections.basicInfo', 'Basic Information')}</Title>
+                <Title order={4} mb="sm">{t('shared:labels.basicInformation', 'Basic Information')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.diagnosis', 'Diagnosis')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.diagnosis', 'Diagnosis')}</Text>
                     <Text size="sm" c={condition.diagnosis ? 'inherit' : 'dimmed'}>
-                      {condition.diagnosis || t('labels.notSpecified', 'Not specified')}
+                      {condition.diagnosis || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.conditionName', 'Condition Name')}</Text>
                     <Text size="sm" c={condition.condition_name ? 'inherit' : 'dimmed'}>
-                      {condition.condition_name || t('labels.notSpecified', 'Not specified')}
+                      {condition.condition_name || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.severity', 'Severity')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.severity', 'Severity')}</Text>
                     <Badge
                       color={condition.severity ? getSeverityColor(condition.severity) : 'gray'}
                       variant={condition.severity ? 'filled' : 'light'}
                       size="sm"
                     >
-                      {condition.severity || t('labels.notSpecified', 'Not specified')}
+                      {condition.severity || t('shared:labels.notSpecified', 'Not specified')}
                     </Badge>
                   </Stack>
                   <Stack gap="xs">
@@ -197,23 +197,23 @@ const ConditionViewModal = ({
 
               {/* Timeline */}
               <div>
-                <Title order={4} mb="sm">{t('conditions.modal.sections.timeline', 'Timeline')}</Title>
+                <Title order={4} mb="sm">{t('shared:labels.timeline', 'Timeline')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.onsetDate', 'Onset Date')}</Text>
                     <Text size="sm" c={condition.onset_date ? 'inherit' : 'dimmed'}>
-                      {condition.onset_date ? formatDate(condition.onset_date) : t('labels.notSpecified', 'Not specified')}
+                      {condition.onset_date ? formatDate(condition.onset_date) : t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.endDate', 'End Date')}</Text>
                     <Text size="sm" c={condition.end_date ? 'inherit' : 'dimmed'}>
-                      {condition.end_date ? formatDate(condition.end_date) : t('labels.notSpecified', 'Not specified')}
+                      {condition.end_date ? formatDate(condition.end_date) : t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   {condition.onset_date && (
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.duration', 'Duration')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.duration', 'Duration')}</Text>
                       <Text size="sm">{getConditionDuration(condition.onset_date, condition.end_date, condition.status)}</Text>
                     </Stack>
                   )}
@@ -288,19 +288,19 @@ const ConditionViewModal = ({
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.icd10Code', 'ICD-10 Code')}</Text>
                     <Text size="sm" c={condition.icd10_code ? 'inherit' : 'dimmed'}>
-                      {condition.icd10_code || t('labels.notSpecified', 'Not specified')}
+                      {condition.icd10_code || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.snomedCode', 'SNOMED Code')}</Text>
                     <Text size="sm" c={condition.snomed_code ? 'inherit' : 'dimmed'}>
-                      {condition.snomed_code || t('labels.notSpecified', 'Not specified')}
+                      {condition.snomed_code || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
                     <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.codeDescription', 'Code Description')}</Text>
                     <Text size="sm" c={condition.code_description ? 'inherit' : 'dimmed'}>
-                      {condition.code_description || t('labels.notSpecified', 'Not specified')}
+                      {condition.code_description || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                 </SimpleGrid>
@@ -315,7 +315,7 @@ const ConditionViewModal = ({
             <Stack gap="lg">
               {/* Clinical Notes */}
               <div>
-                <Title order={4} mb="sm">{t('conditions.modal.sections.clinicalNotes', 'Clinical Notes')}</Title>
+                <Title order={4} mb="sm">{t('shared:labels.clinicalNotes', 'Clinical Notes')}</Title>
                 <Text size="sm" c={condition.notes ? 'inherit' : 'dimmed'}>
                   {condition.notes || t('conditions.modal.noNotesAvailable', 'No clinical notes available')}
                 </Text>

@@ -23,22 +23,9 @@
     "loading": "Laddar din medicinska instrumentpanel...",
     "modules": {
       "adminDashboard": "Adminpanel",
-      "allergies": "Allergier",
-      "conditions": "Tillstånd",
-      "emergencyContacts": "Nödkontakter",
       "exportRecords": "Exportera journaler",
-      "familyHistory": "Familjehistorik",
-      "immunizations": "Vaccinationer",
-      "injuries": "Skador",
-      "insurance": "Försäkring",
-      "medicalEquipment": "Medicinsk utrustning",
       "patientInfo": "Patientinformation",
-      "pharmacies": "Apotek",
-      "practitioners": "Vårdgivare",
-      "symptoms": "Symtom",
-      "treatments": "Behandlingar",
-      "visitHistory": "Besökshistorik",
-      "vitalSigns": "Vitalparametrar"
+      "visitHistory": "Besökshistorik"
     },
     "search": {
       "advancedSearch": "Avancerad sökning",
@@ -72,24 +59,11 @@
     "sharePatient": "Dela patient",
     "title": "Inbjudningar",
     "types": {
-      "familyHistory": "Familjehistorik",
       "patientRecord": "Patientjournal"
     },
     "viewAll": "Visa alla {{count}} inbjudningar",
     "viewAll_one": "Visa alla {{count}} inbjudningar",
     "viewAll_other": "Visa alla {{count}} inbjudningar"
-  },
-  "medicalRecords": {
-    "allergies": "Allergier",
-    "conditions": "Tillstånd",
-    "immunizations": "Vaccinationer",
-    "injuries": "Skador",
-    "medicalEquipment": "Medicinsk utrustning",
-    "pharmacies": "Apotek",
-    "practitioners": "Vårdgivare",
-    "symptoms": "Symtom",
-    "treatments": "Behandlingar",
-    "visits": "Besök"
   },
   "menu": {
     "administration": "Administration",
@@ -97,11 +71,9 @@
     "dashboard": "Instrumentpanel",
     "help": "Hjälp",
     "logout": "Logga ut",
-    "medicalRecords": "Journaler",
     "patients": "Patienter",
     "profile": "Profil",
-    "reports": "Rapporter",
-    "settings": "Inställningar"
+    "reports": "Rapporter"
   },
   "pages": {
     "dashboard": "Instrumentpanel",
@@ -111,50 +83,30 @@
     "patientList": "Patientlista",
     "preferences": "Preferenser",
     "reports": "Rapporter",
-    "settings": "Inställningar",
     "userProfile": "Användarprofil"
   },
   "sections": {
-    "emergencyContacts": "Nödkontakter",
-    "familyHistory": "Familjehistorik",
-    "insurance": "Försäkring",
     "medicalInfo": "Medicinsk information",
     "personalInfo": "Personlig information",
-    "preferences": "Preferenser",
-    "timeline": "Tidslinje"
+    "preferences": "Preferenser"
   },
   "sidebarNav": {
     "items": {
       "adminDashboard": "Adminpanel",
-      "allergies": "Allergier",
       "backupManagement": "Säkerhetskopiering",
-      "conditions": "Tillstånd",
       "customReports": "Anpassade rapporter",
       "dataModels": "Datamodeller",
-      "emergencyContacts": "Nödkontakter",
       "exportRecords": "Exportera journaler",
-      "familyHistory": "Familjehistorik",
-      "immunizations": "Vaccinationer",
-      "injuries": "Skador",
-      "insurance": "Försäkring",
       "language": "Språk",
-      "medicalEquipment": "Medicinsk utrustning",
       "patientInfo": "Patientinfo",
-      "pharmacies": "Apotek",
-      "practitioners": "Vårdgivare",
-      "settings": "Inställningar",
-      "symptoms": "Symtom",
       "systemHealth": "Systemhälsa",
       "tagManagement": "Tagghantering",
       "theme": "Tema",
-      "treatments": "Behandlingar",
-      "visitHistory": "Besökshistorik",
-      "vitalSigns": "Vitalparametrar"
+      "visitHistory": "Besökshistorik"
     },
     "sections": {
       "administration": "Administration",
       "careAndTreatment": "Vård och behandling",
-      "medicalRecords": "Journaler",
       "misc": "Övrigt",
       "tools": "Verktyg"
     }

@@ -51,7 +51,6 @@
     "birthDateFuture": "Дата рождения не может быть в будущем",
     "birthDateRequired": "Дата рождения обязательна для заполнения",
     "createFailed": "Ошибка создания: {{message}}",
-    "error": "Ошибка",
     "firstNameRequired": "Имя обязательно для заполнения",
     "lastNameRequired": "Фамилия обязательна для заполнения",
     "updateFailed": "Ошибка обновления: {{message}}"

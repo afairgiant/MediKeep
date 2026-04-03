@@ -12,7 +12,6 @@
     "deleteFailed": "Kanal konnte nicht gelöscht werden",
     "deleteSuccess": "Kanal erfolgreich gelöscht",
     "description": "Benachrichtigungskanäle hinzufügen und verwalten",
-    "disabled": "Deaktiviert",
     "discord": {
       "avatarUrl": {
         "description": "Benutzerdefinierter Avatar für den Benachrichtigungs-Bot",
@@ -130,7 +129,6 @@
     "title": "Benachrichtigungskanäle",
     "types": {
       "discord": "Discord",
-      "email": "E-Mail",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -216,9 +214,7 @@
     "description": "Kürzlich über Ihre Kanäle gesendete Benachrichtigungen",
     "fields": {
       "channel": "Kanal",
-      "error": "Fehler",
-      "event": "Ereignis",
-      "time": "Uhrzeit"
+      "event": "Ereignis"
     },
     "loading": "Verlauf wird geladen...",
     "noHistory": "Noch keine Benachrichtigungen gesendet",
@@ -228,7 +224,6 @@
     "showMore": "Mehr anzeigen",
     "status": {
       "failed": "Fehlgeschlagen",
-      "pending": "Ausstehend",
       "sent": "Gesendet"
     },
     "title": "Benachrichtigungsverlauf"
@@ -294,7 +289,6 @@
       "allOperationsSuccess": "Alle {{total}} {{operation}} erfolgreich abgeschlossen!",
       "deleteFailed": "Löschen fehlgeschlagen",
       "downloadFailed": "Download fehlgeschlagen",
-      "error": "Fehler",
       "operationFailed": "Vorgang fehlgeschlagen",
       "operationFailedTitle": "{{operation}} fehlgeschlagen",
       "operationPartial": "{{success}}/{{total}} {{operation}} erfolgreich abgeschlossen. {{failed}} fehlgeschlagen.",

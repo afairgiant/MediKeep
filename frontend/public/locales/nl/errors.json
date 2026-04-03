@@ -51,7 +51,6 @@
     "birthDateFuture": "Geboortedatum kan niet in de toekomst liggen",
     "birthDateRequired": "Geboortedatum is verplicht",
     "createFailed": "Aanmaken mislukt: {{message}}",
-    "error": "Fout",
     "firstNameRequired": "Voornaam is verplicht",
     "lastNameRequired": "Achternaam is verplicht",
     "updateFailed": "Bijwerken mislukt: {{message}}"

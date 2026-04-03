@@ -82,7 +82,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   patientId,
   patientHeight
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
   const { formatDate: formatDateWithPref } = useDateFormat();
   // Store raw data in imperial units - conversion happens in useMemo
@@ -301,7 +301,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       });
 
       notifications.show({
-        title: t('labels.error', 'Error'),
+        title: t('shared:labels.error', 'Error'),
         message: errorMessage,
         color: 'red',
         autoClose: 5000
@@ -516,7 +516,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       });
 
       notifications.show({
-        title: t('labels.error', 'Error'),
+        title: t('shared:labels.error', 'Error'),
         message: t('vitals.trends.exportError', 'Failed to export data. Please try again.'),
         color: 'red',
         autoClose: 5000
@@ -551,7 +551,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         {error && (
           <Alert
             icon={<IconAlertCircle size={16} />}
-            title={t('labels.error', 'Error')}
+            title={t('shared:labels.error', 'Error')}
             color="red"
             withCloseButton
             onClose={() => setError(null)}

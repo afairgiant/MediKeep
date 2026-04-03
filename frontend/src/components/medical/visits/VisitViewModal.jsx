@@ -101,7 +101,7 @@ const VisitViewModal = ({
     if (practitioner) {
       return `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
     }
-    return t('visits.viewModal.practitionerId', 'Practitioner ID: {{id}}', { id: practitionerId });
+    return t('shared:labels.practitionerIdId', 'Practitioner ID: {{id}}', { id: practitionerId });
   };
 
   const getConditionDetails = (conditionId) => {
@@ -224,39 +224,39 @@ const VisitViewModal = ({
                     <Title order={4} mb="sm">{t('visits.viewModal.visitInformation', 'Visit Information')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('labels.date', 'Date')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.date', 'Date')}</Text>
                         <Text>{formatDate(visit.date)}</Text>
                       </Stack>
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.reason', 'Reason')}</Text>
                         <Text c={visit.reason ? 'inherit' : 'dimmed'}>
-                          {visit.reason || t('labels.notSpecified', 'Not specified')}
+                          {visit.reason || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.visitType', 'Visit Type')}</Text>
                         <Text c={visit.visit_type ? 'inherit' : 'dimmed'}>
-                          {visit.visit_type || t('labels.notSpecified', 'Not specified')}
+                          {visit.visit_type || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.priority', 'Priority')}</Text>
                         <Text c={visit.priority ? 'inherit' : 'dimmed'}>
-                          {visit.priority || t('labels.notSpecified', 'Not specified')}
+                          {visit.priority || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.location', 'Location')}</Text>
                         <Text c={visit.location ? 'inherit' : 'dimmed'}>
-                          {visit.location || t('labels.notSpecified', 'Not specified')}
+                          {visit.location || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.duration', 'Duration')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.duration', 'Duration')}</Text>
                         <Text c={visit.duration_minutes ? 'inherit' : 'dimmed'}>
                           {visit.duration_minutes
                             ? t('visits.viewModal.durationMinutes', '{{minutes}} minutes', { minutes: visit.duration_minutes })
-                            : t('labels.notSpecified', 'Not specified')}
+                            : t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                     </SimpleGrid>
@@ -293,12 +293,12 @@ const VisitViewModal = ({
                         <Text c={visit.practitioner_id ? 'inherit' : 'dimmed'}>
                           {visit.practitioner_id
                             ? getPractitionerDisplay(visit.practitioner_id)
-                            : t('labels.notSpecified', 'Not specified')}
+                            : t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       {practitioner?.specialty && (
                         <Stack gap="xs">
-                          <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.specialty', 'Specialty')}</Text>
+                          <Text fw={500} size="sm" c="dimmed">{t('shared:labels.specialty', 'Specialty')}</Text>
                           <Text>{practitioner.specialty}</Text>
                         </Stack>
                       )}
@@ -307,7 +307,7 @@ const VisitViewModal = ({
 
                   {condition && (
                     <div>
-                      <Title order={4} mb="sm">{t('visits.viewModal.relatedCondition', 'Related Condition')}</Title>
+                      <Title order={4} mb="sm">{t('shared:labels.relatedCondition', 'Related Condition')}</Title>
                       <Text
                         c="blue"
                         style={{ cursor: 'pointer', textDecoration: 'underline' }}
@@ -325,13 +325,13 @@ const VisitViewModal = ({
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.chiefComplaint', 'Chief Complaint')}</Text>
                         <Text c={visit.chief_complaint ? 'inherit' : 'dimmed'}>
-                          {visit.chief_complaint || t('labels.notSpecified', 'Not specified')}
+                          {visit.chief_complaint || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.diagnosis', 'Diagnosis')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.diagnosis', 'Diagnosis')}</Text>
                         <Text c={visit.diagnosis ? 'inherit' : 'dimmed'}>
-                          {visit.diagnosis || t('labels.notSpecified', 'Not specified')}
+                          {visit.diagnosis || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                     </SimpleGrid>
@@ -386,13 +386,13 @@ const VisitViewModal = ({
 
                   {/* Additional Notes */}
                   <div>
-                    <Title order={4} mb="sm">{t('visits.viewModal.additionalNotes', 'Additional Notes')}</Title>
+                    <Title order={4} mb="sm">{t('shared:fields.additionalNotes', 'Additional Notes')}</Title>
                     <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                       <Text
                         style={{ whiteSpace: 'pre-wrap' }}
                         c={visit.notes ? 'inherit' : 'dimmed'}
                       >
-                        {visit.notes || t('visits.viewModal.noNotesAvailable', 'No notes available')}
+                        {visit.notes || t('shared:labels.noNotesAvailable', 'No notes available')}
                       </Text>
                     </Paper>
                   </div>
@@ -404,7 +404,7 @@ const VisitViewModal = ({
             <Tabs.Panel value="documents">
               <Box mt="md">
                 <Stack gap="md">
-                  <Title order={4}>{t('visits.viewModal.attachedDocuments', 'Attached Documents')}</Title>
+                  <Title order={4}>{t('shared:labels.attachedDocuments', 'Attached Documents')}</Title>
                   <DocumentManagerWithProgress
                     entityType="visit"
                     entityId={visit.id}

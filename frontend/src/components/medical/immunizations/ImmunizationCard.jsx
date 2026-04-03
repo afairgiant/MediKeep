@@ -79,10 +79,10 @@ const ImmunizationCard = ({
       {
         label: t('immunizations.dateAdministered.label'),
         value: immunization.date_administered,
-        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
       immunization.lot_number && {
-        label: t('immunizations.lotNumber.label'),
+        label: t('shared:fields.lotNumber'),
         value: immunization.lot_number,
         render: (value) => value
       },
@@ -102,7 +102,7 @@ const ImmunizationCard = ({
         render: (value) => value
       },
       immunization.location && {
-        label: t('immunizations.location.label'),
+        label: t('shared:labels.location'),
         value: immunization.location,
         render: (value) => value
       },
@@ -115,7 +115,7 @@ const ImmunizationCard = ({
         label: t('shared:fields.practitioner'),
         value: immunization.practitioner_id,
         render: (value) => {
-          if (!value) return t('common:labels.notSpecified');
+          if (!value) return t('shared:labels.notSpecified');
           const practitioner = practitioners.find(p => p.id === value);
           return (
             <Text
@@ -123,7 +123,7 @@ const ImmunizationCard = ({
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={t('common:immunizations.card.viewPractitioner', 'View practitioner details')}
+              title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
             >
               {practitioner?.name || t('common:immunizations.card.practitionerId', 'ID: {{id}}', { id: value })}
             </Text>

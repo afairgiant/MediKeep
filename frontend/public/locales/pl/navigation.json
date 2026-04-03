@@ -23,22 +23,9 @@
     "loading": "Ładowanie Twojego pulpitu medycznego...",
     "modules": {
       "adminDashboard": "Pulpit administratora",
-      "allergies": "Alergie",
-      "conditions": "Schorzenia",
-      "emergencyContacts": "Kontakty alarmowe",
       "exportRecords": "Eksportuj rejestry",
-      "familyHistory": "Historia rodzinna",
-      "immunizations": "Szczepienia",
-      "injuries": "Urazy",
-      "insurance": "Ubezpieczenie",
-      "medicalEquipment": "Sprzęt medyczny",
       "patientInfo": "Informacje o pacjencie",
-      "pharmacies": "Apteki",
-      "practitioners": "Lekarze",
-      "symptoms": "Objawy",
-      "treatments": "Zabiegi",
-      "visitHistory": "Historia wizyt",
-      "vitalSigns": "Parametry życiowe"
+      "visitHistory": "Historia wizyt"
     },
     "search": {
       "advancedSearch": "Wyszukiwanie zaawansowane",
@@ -72,7 +59,6 @@
     "sharePatient": "Udostępnij pacjenta",
     "title": "Zaproszenia",
     "types": {
-      "familyHistory": "Historia rodzinna",
       "patientRecord": "Rekord pacjenta"
     },
     "viewAll": "Wyświetl wszystkie {{count}} zaproszenia",
@@ -81,29 +67,15 @@
     "viewAll_many": "View all {{count}} invitations",
     "viewAll_other": "Wyświetl wszystkie {{count}} zaproszenia"
   },
-  "medicalRecords": {
-    "allergies": "Alergie",
-    "conditions": "Schorzenia",
-    "immunizations": "Szczepienia",
-    "injuries": "Urazy",
-    "medicalEquipment": "Sprzęt medyczny",
-    "pharmacies": "Apteki",
-    "practitioners": "Lekarze",
-    "symptoms": "Objawy",
-    "treatments": "Zabiegi",
-    "visits": "Wizyty"
-  },
   "menu": {
     "administration": "Administracja",
     "backToDashboard": "Powrót do pulpitu",
     "dashboard": "Pulpit nawigacyjny",
     "help": "Pomoc",
     "logout": "Wyloguj",
-    "medicalRecords": "Rejestry medyczne",
     "patients": "Pacjenci",
     "profile": "Profil",
-    "reports": "Raporty",
-    "settings": "Ustawienia"
+    "reports": "Raporty"
   },
   "pages": {
     "dashboard": "Pulpit nawigacyjny",
@@ -113,50 +85,30 @@
     "patientList": "Lista pacjentów",
     "preferences": "Preferencje",
     "reports": "Raporty",
-    "settings": "Ustawienia",
     "userProfile": "Profil użytkownika"
   },
   "sections": {
-    "emergencyContacts": "Kontakty alarmowe",
-    "familyHistory": "Historia rodzinna",
-    "insurance": "Ubezpieczenie",
     "medicalInfo": "Informacje medyczne",
     "personalInfo": "Informacje osobiste",
-    "preferences": "Preferencje",
-    "timeline": "Oś czasu"
+    "preferences": "Preferencje"
   },
   "sidebarNav": {
     "items": {
       "adminDashboard": "Pulpit administratora",
-      "allergies": "Alergie",
       "backupManagement": "Zarządzanie kopiami zapasowymi",
-      "conditions": "Schorzenia",
       "customReports": "Raporty niestandardowe",
       "dataModels": "Modele danych",
-      "emergencyContacts": "Kontakty alarmowe",
       "exportRecords": "Eksportuj rejestry",
-      "familyHistory": "Historia rodzinna",
-      "immunizations": "Szczepienia",
-      "injuries": "Urazy",
-      "insurance": "Ubezpieczenie",
       "language": "Język",
-      "medicalEquipment": "Sprzęt medyczny",
       "patientInfo": "Informacje pacjenta",
-      "pharmacies": "Apteki",
-      "practitioners": "Lekarze",
-      "settings": "Ustawienia",
-      "symptoms": "Objawy",
       "systemHealth": "Stan systemu",
       "tagManagement": "Zarządzanie tagami",
       "theme": "Motyw",
-      "treatments": "Zabiegi",
-      "visitHistory": "Historia wizyt",
-      "vitalSigns": "Parametry życiowe"
+      "visitHistory": "Historia wizyt"
     },
     "sections": {
       "administration": "Administracja",
       "careAndTreatment": "Opieka i leczenie",
-      "medicalRecords": "Rejestry medyczne",
       "misc": "Różne",
       "tools": "Narzędzia"
     }

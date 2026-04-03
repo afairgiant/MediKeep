@@ -267,7 +267,7 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('injuries.severity.label', 'Severity')}
+                      label={t('shared:fields.severity', 'Severity')}
                       value={formData.severity || null}
                       data={[
                         {
@@ -350,7 +350,7 @@ const InjuryFormWrapper = ({
                         });
                       }}
                       placeholder={t(
-                        'injuries.practitioner.placeholder',
+                        'shared:fields.selectPractitioner',
                         'Select practitioner'
                       )}
                       clearable
@@ -447,7 +447,7 @@ const InjuryFormWrapper = ({
                 <Grid>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('injuries.notes.label', 'Additional Notes')}
+                      label={t('shared:fields.additionalNotes', 'Additional Notes')}
                       value={formData.notes || ''}
                       onChange={handleTextInputChange('notes')}
                       placeholder={t(
@@ -490,7 +490,7 @@ const InjuryFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" mt="xl">
             <Button variant="subtle" onClick={onClose} disabled={isSubmitting}>
-              {t('common:buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton isLoading={isSubmitting}>
               {editingInjury

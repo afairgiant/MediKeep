@@ -48,7 +48,7 @@ const PracticesList = ({ onPracticeSaved }) => {
       setShowPracticeEditModal(true);
     } catch (err) {
       notifications.show({
-        title: t('labels.error'),
+        title: t('shared:labels.error'),
         message: t('practitioners.editPracticeError'),
         color: 'red',
       });
@@ -80,7 +80,7 @@ const PracticesList = ({ onPracticeSaved }) => {
       if (onPracticeSaved) onPracticeSaved();
     } catch (err) {
       notifications.show({
-        title: t('labels.error'),
+        title: t('shared:labels.error'),
         message: t('practitioners.practices.deleteError'),
         color: 'red',
       });
@@ -143,17 +143,17 @@ const PracticesList = ({ onPracticeSaved }) => {
             size="sm"
             sortable={false}
             columns={[
-              { header: t('practitioners.practices.table.name'), accessor: 'name', priority: 'high', width: 200 },
-              { header: t('practitioners.practices.table.phone'), accessor: 'phone_number', priority: 'low', width: 130 },
+              { header: t('shared:labels.name'), accessor: 'name', priority: 'high', width: 200 },
+              { header: t('shared:labels.phone'), accessor: 'phone_number', priority: 'low', width: 130 },
               { header: t('shared:labels.website'), accessor: 'website', priority: 'low', width: 160 },
               {
-                header: t('practitioners.practices.table.practitioners'),
+                header: t('shared:categories.practitioners'),
                 accessor: 'practitioner_count',
                 priority: 'high',
                 width: 60,
               },
               {
-                header: t('practitioners.practices.table.actions'),
+                header: t('shared:labels.actions'),
                 accessor: 'id',
                 priority: 'high',
                 width: 140,

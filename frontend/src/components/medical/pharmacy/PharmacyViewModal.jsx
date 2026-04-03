@@ -106,13 +106,13 @@ const PharmacyViewModal = ({
                 <Divider />
                 <Group>
                   <Text size="sm" fw={500} w={120}>
-                    {t('pharmacies.viewModal.address', 'Address')}:
+                    {t('shared:labels.address', 'Address')}:
                   </Text>
                   <Text
                     size="sm"
                     c={pharmacy.street_address ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.street_address || t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.street_address || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -120,7 +120,7 @@ const PharmacyViewModal = ({
                     {t('pharmacies.viewModal.city', 'City')}:
                   </Text>
                   <Text size="sm" c={pharmacy.city ? 'inherit' : 'dimmed'}>
-                    {pharmacy.city || t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.city || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -128,7 +128,7 @@ const PharmacyViewModal = ({
                     {t('pharmacies.viewModal.stateProvince', 'State / Province')}:
                   </Text>
                   <Text size="sm" c={pharmacy.state ? 'inherit' : 'dimmed'}>
-                    {pharmacy.state || t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.state || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -136,7 +136,7 @@ const PharmacyViewModal = ({
                     {t('pharmacies.viewModal.postalCode', 'Postal Code')}:
                   </Text>
                   <Text size="sm" c={pharmacy.zip_code ? 'inherit' : 'dimmed'}>
-                    {pharmacy.zip_code || t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.zip_code || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -144,7 +144,7 @@ const PharmacyViewModal = ({
                     {t('pharmacies.viewModal.country', 'Country')}:
                   </Text>
                   <Text size="sm" c={pharmacy.country ? 'inherit' : 'dimmed'}>
-                    {pharmacy.country || t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.country || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -155,7 +155,7 @@ const PharmacyViewModal = ({
                     size="sm"
                     c={pharmacy.store_number ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.store_number || t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.store_number || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
               </Stack>
@@ -171,13 +171,13 @@ const PharmacyViewModal = ({
                 <Divider />
                 <Group>
                   <Text size="sm" fw={500} w={120}>
-                    {t('pharmacies.viewModal.phone', 'Phone')}:
+                    {t('shared:labels.phone', 'Phone')}:
                   </Text>
                   <Text
                     size="sm"
                     c={pharmacy.phone_number ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.phone_number || t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.phone_number || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -200,7 +200,7 @@ const PharmacyViewModal = ({
                         {pharmacy.website}
                       </Anchor>
                     ) : (
-                      t('common.labels.notSpecified', 'Not specified')
+                      t('shared:labels.notSpecified', 'Not specified')
                     )}
                   </Text>
                 </Group>
@@ -209,7 +209,7 @@ const PharmacyViewModal = ({
                     {t('pharmacies.viewModal.specialtyServices', 'Specialties')}:
                   </Text>
                   <Text size="sm" c={pharmacy.specialty_services ? 'inherit' : 'dimmed'}>
-                    {pharmacy.specialty_services || t('common.labels.notSpecified', 'Not specified')}
+                    {pharmacy.specialty_services || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
               </Stack>

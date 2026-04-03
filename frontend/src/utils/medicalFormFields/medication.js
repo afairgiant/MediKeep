@@ -110,7 +110,7 @@ export const medicationFormFields = [
     descriptionKey: 'common:fields.status.description',
     gridColumn: 4,
     options: [
-      { value: 'active', labelKey: 'common:status.active' },
+      { value: 'active', labelKey: 'shared:labels.active' },
       { value: 'stopped', labelKey: 'common:status.stopped' },
       { value: 'on-hold', labelKey: 'common:status.onHold' },
       { value: 'completed', labelKey: 'common:status.completed' },

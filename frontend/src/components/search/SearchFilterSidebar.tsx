@@ -48,13 +48,13 @@ import { ClickableTagBadge } from '../common/ClickableTagBadge';
 
 export const RECORD_TYPES = [
   { value: 'medications', labelKey: 'shared:categories.medications', icon: IconPill, color: 'green' },
-  { value: 'conditions', labelKey: 'search.types.conditions', icon: IconStethoscope, color: 'blue' },
+  { value: 'conditions', labelKey: 'shared:categories.conditions', icon: IconStethoscope, color: 'blue' },
   { value: 'lab_results', labelKey: 'shared:categories.lab_results', icon: IconFlask, color: 'indigo' },
   { value: 'procedures', labelKey: 'shared:categories.procedures', icon: IconMedicalCross, color: 'violet' },
-  { value: 'immunizations', labelKey: 'search.types.immunizations', icon: IconVaccine, color: 'orange' },
-  { value: 'treatments', labelKey: 'search.types.treatments', icon: IconHeartbeat, color: 'pink' },
+  { value: 'immunizations', labelKey: 'shared:categories.immunizations', icon: IconVaccine, color: 'orange' },
+  { value: 'treatments', labelKey: 'shared:categories.treatments', icon: IconHeartbeat, color: 'pink' },
   { value: 'encounters', labelKey: 'search.types.encounters', icon: IconCalendarEvent, color: 'teal' },
-  { value: 'allergies', labelKey: 'search.types.allergies', icon: IconAlertTriangle, color: 'red' },
+  { value: 'allergies', labelKey: 'shared:categories.allergies', icon: IconAlertTriangle, color: 'red' },
   { value: 'vitals', labelKey: 'search.types.vitals', icon: IconHeartbeat, color: 'cyan' },
 ] as const;
 

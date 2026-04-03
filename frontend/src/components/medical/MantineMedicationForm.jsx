@@ -297,10 +297,10 @@ const MantineMedicationForm = ({
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
-                {t('medications.tabs.details')}
+                {t('shared:tabs.details')}
               </Tabs.Tab>
               <Tabs.Tab value="conditions" leftSection={<IconStethoscope size={16} />}>
-                {t('medications.tabs.conditions')}
+                {t('shared:categories.conditions')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes')}
@@ -386,7 +386,7 @@ const MantineMedicationForm = ({
               <Box mt="md">
                 <Stack gap="md">
                   {editingMedication && (
-                    <Title order={4}>{t('medications.form.attachedDocuments')}</Title>
+                    <Title order={4}>{t('shared:labels.attachedDocuments')}</Title>
                   )}
                   <DocumentManagerWithProgress
                     entityType="medication"
@@ -408,7 +408,7 @@ const MantineMedicationForm = ({
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting || isLoading}>
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting || isLoading}>
               {editingMedication ? t('medications.form.updateMedication') : t('medications.form.addMedication')}

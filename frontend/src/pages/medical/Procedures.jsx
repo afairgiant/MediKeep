@@ -430,13 +430,13 @@ const Procedures = () => {
                 data={paginatedProcedures}
                 pagination={false}
                 columns={[
-                  { header: t('procedures.table.procedureName'), accessor: 'procedure_name', priority: 'high', width: 200 },
-                  { header: t('procedures.table.type'), accessor: 'procedure_type', priority: 'medium', width: 120 },
+                  { header: t('shared:fields.procedureName'), accessor: 'procedure_name', priority: 'high', width: 200 },
+                  { header: t('shared:labels.type'), accessor: 'procedure_type', priority: 'medium', width: 120 },
                   { header: t('procedures.table.code'), accessor: 'procedure_code', priority: 'low', width: 100 },
-                  { header: t('procedures.table.date'), accessor: 'date', priority: 'high', width: 120 },
+                  { header: t('shared:labels.date'), accessor: 'date', priority: 'high', width: 120 },
                   { header: t('shared:fields.status'), accessor: 'status', priority: 'high', width: 100 },
                   { header: t('procedures.table.setting'), accessor: 'procedure_setting', priority: 'low', width: 120 },
-                  { header: t('procedures.table.facility'), accessor: 'facility', priority: 'medium', width: 150 },
+                  { header: t('shared:labels.facility'), accessor: 'facility', priority: 'medium', width: 150 },
                   { header: t('shared:fields.practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 150 },
                   { header: t('shared:labels.description'), accessor: 'description', priority: 'low', width: 200 },
                 ]}

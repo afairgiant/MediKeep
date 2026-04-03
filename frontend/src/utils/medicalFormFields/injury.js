@@ -62,7 +62,7 @@ export const injuryFormFields = [
   {
     name: 'severity',
     type: 'select',
-    labelKey: 'common:labels.severity',
+    labelKey: 'shared:fields.severity',
     placeholderKey: 'medical:injuries.severity.placeholder',
     descriptionKey: 'medical:injuries.severity.description',
     gridColumn: 6,
@@ -92,9 +92,9 @@ export const injuryFormFields = [
     gridColumn: 6,
     required: true,
     options: [
-      { value: 'active', labelKey: 'common:status.active' },
+      { value: 'active', labelKey: 'shared:labels.active' },
       { value: 'healing', labelKey: 'medical:injuries.status.options.healing' },
-      { value: 'resolved', labelKey: 'common:status.resolved' },
+      { value: 'resolved', labelKey: 'shared:labels.resolved' },
       { value: 'chronic', labelKey: 'medical:injuries.status.options.chronic' },
     ],
   },

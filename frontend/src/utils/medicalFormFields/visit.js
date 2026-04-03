@@ -99,7 +99,7 @@ export const visitFormFields = [
   {
     name: 'location',
     type: 'select',
-    labelKey: 'medical:visits.viewModal.location',
+    labelKey: 'shared:labels.location',
     placeholderKey: 'medical:visits.form.fields.location.placeholder',
     descriptionKey: 'medical:visits.form.fields.location.description',
     gridColumn: 6,
@@ -134,7 +134,7 @@ export const visitFormFields = [
   {
     name: 'treatment_plan',
     type: 'textarea',
-    labelKey: 'medical:visits.viewModal.treatmentPlan',
+    labelKey: 'shared:labels.treatmentPlan',
     placeholderKey: 'medical:visits.form.fields.treatmentPlan.placeholder',
     descriptionKey: 'medical:visits.form.fields.treatmentPlan.description',
     gridColumn: 12,

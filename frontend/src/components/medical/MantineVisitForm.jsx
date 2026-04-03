@@ -350,7 +350,7 @@ const MantineVisitForm = ({
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting || isLoading}>
-              {t('common:buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting || isLoading}>
               {editingVisit ? t('common:visits.form.updateVisit', 'Update Visit') : t('common:visits.form.addVisit', 'Add Visit')}

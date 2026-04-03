@@ -48,7 +48,7 @@ const ProcedureCard = ({
       {
         label: t('procedures.procedureDate.label'),
         value: procedure.date,
-        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
       {
         label: t('procedures.procedureCode.label'),
@@ -57,7 +57,7 @@ const ProcedureCard = ({
       {
         label: t('procedures.outcome.label', 'Outcome'),
         value: procedure.outcome,
-        render: (value) => value ? <StatusBadge status={value} size="sm" /> : t('common:labels.notSpecified')
+        render: (value) => value ? <StatusBadge status={value} size="sm" /> : t('shared:labels.notSpecified')
       },
       {
         label: t('procedures.procedureSetting.label'),
@@ -66,31 +66,31 @@ const ProcedureCard = ({
           <Badge variant="light" color="cyan" size="sm">
             {value}
           </Badge>
-        ) : t('common:labels.notSpecified')
+        ) : t('shared:labels.notSpecified')
       },
       {
         label: t('procedures.procedureDuration.label'),
         value: procedure.procedure_duration,
-        render: (value) => value ? t('common:procedures.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : t('common:labels.notSpecified')
+        render: (value) => value ? t('common:procedures.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : t('shared:labels.notSpecified')
       },
       {
-        label: t('common:labels.facility'),
+        label: t('shared:labels.facility'),
         value: procedure.facility
       },
       {
         label: t('procedures.performingPractitioner.label'),
         value: procedure.practitioner_id,
         render: (value) => {
-          if (!value) return t('common:labels.notSpecified');
+          if (!value) return t('shared:labels.notSpecified');
 
-          const practitionerName = practitioner?.name || t('common:procedures.card.practitionerId', 'Practitioner ID: {{id}}', { id: value });
+          const practitionerName = practitioner?.name || t('shared:labels.practitionerIdId', 'Practitioner ID: {{id}}', { id: value });
           return (
             <Text
               size="sm"
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={t('common:procedures.card.viewPractitioner', 'View practitioner details')}
+              title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
             >
               {practitionerName}
             </Text>
@@ -108,7 +108,7 @@ const ProcedureCard = ({
     // Add complications field if it exists
     if (procedure.procedure_complications) {
       fields.push({
-        label: t('procedures.complications.label'),
+        label: t('shared:fields.complications'),
         value: procedure.procedure_complications,
         align: 'flex-start',
         style: { flex: 1, color: '#d63384' }

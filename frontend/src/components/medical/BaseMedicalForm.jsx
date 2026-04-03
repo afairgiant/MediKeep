@@ -96,7 +96,7 @@ const BaseMedicalForm = ({
   const responsiveState = responsive || responsiveFromHook;
 
   // Translation hooks
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
 
   const { dateInputFormat } = useDateFormat();
 
@@ -722,7 +722,7 @@ const BaseMedicalForm = ({
                 justifyContent: 'center',
               }}
             >
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <Button
               type="submit"

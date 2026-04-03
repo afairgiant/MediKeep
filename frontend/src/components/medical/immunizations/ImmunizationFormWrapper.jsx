@@ -175,7 +175,7 @@ const ImmunizationFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('immunizations.form.vaccineName', 'Vaccine Name')}
+                      label={t('shared:fields.vaccineName', 'Vaccine Name')}
                       value={formData.vaccine_name || ''}
                       onChange={handleTextInputChange('vaccine_name')}
                       placeholder={t('immunizations.form.vaccineNamePlaceholder', 'e.g., Flu Shot, COVID-19, Tdap')}
@@ -194,7 +194,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('immunizations.form.manufacturer', 'Manufacturer')}
+                      label={t('shared:fields.manufacturer', 'Manufacturer')}
                       value={formData.manufacturer || ''}
                       onChange={handleTextInputChange('manufacturer')}
                       placeholder={t('immunizations.form.manufacturerPlaceholder', 'Enter manufacturer')}
@@ -203,7 +203,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <NumberInput
-                      label={t('immunizations.form.doseNumber', 'Dose Number')}
+                      label={t('shared:fields.doseNumber', 'Dose Number')}
                       value={formData.dose_number || ''}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'dose_number', value: value || '' } });
@@ -216,7 +216,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('immunizations.form.lotNumber', 'Lot Number')}
+                      label={t('shared:fields.lotNumber', 'Lot Number')}
                       value={formData.lot_number || ''}
                       onChange={handleTextInputChange('lot_number')}
                       placeholder={t('immunizations.form.lotNumberPlaceholder', 'Enter lot number')}
@@ -234,7 +234,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('immunizations.form.expirationDate', 'Expiration Date')}
+                      label={t('shared:fields.expirationDate', 'Expiration Date')}
                       value={parseDateInput(formData.expiration_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -261,7 +261,7 @@ const ImmunizationFormWrapper = ({
                         onChange={(tags) => {
                           onInputChange({ target: { name: 'tags', value: tags } });
                         }}
-                        placeholder={t('immunizations.form.tagsPlaceholder', 'Add tags...')}
+                        placeholder={t('shared:fields.addTags', 'Add tags...')}
                       />
                     </Box>
                   </Grid.Col>
@@ -369,7 +369,7 @@ const ImmunizationFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('immunizations.form.clinicalNotes', 'Clinical Notes')}
+                  label={t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('immunizations.form.clinicalNotesPlaceholder', 'Enter clinical notes, reactions, or additional details')}
@@ -400,7 +400,7 @@ const ImmunizationFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}

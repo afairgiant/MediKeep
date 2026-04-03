@@ -91,7 +91,7 @@ export const immunizationFormFields = [
   {
     name: 'location',
     type: 'text',
-    labelKey: 'common:labels.location',
+    labelKey: 'shared:labels.location',
     placeholderKey: 'medical:immunizations.location.placeholder',
     descriptionKey: 'medical:immunizations.location.description',
     gridColumn: 12,

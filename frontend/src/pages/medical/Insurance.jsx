@@ -457,7 +457,7 @@ const Insurance = () => {
   return (
     <Container size="xl" py="sm">
       <PageHeader
-        title={t('insurance.title', 'Insurance')}
+        title={t('shared:categories.insurance', 'Insurance')}
         description={t('insurance.description', 'Manage your insurance information and digital cards')}
       />
 

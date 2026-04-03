@@ -199,7 +199,7 @@ const AdminDashboard = () => {
           <StatCard
             icon={IconHeart}
             value={stats?.total_vitals || 0}
-            label={t('dashboard.stats.vitalSigns', 'Vital Signs')}
+            label={t('shared:categories.vital_signs', 'Vital Signs')}
             color="red"
             href="/admin/models/vitals"
           />
@@ -325,7 +325,7 @@ const SystemHealthCard = ({
         color={systemHealth?.database_status === 'healthy' ? 'green' : 'orange'}
         variant="light"
       >
-        {systemHealth?.database_status || t('shared.unknown', 'Unknown')}
+        {systemHealth?.database_status || t('shared:labels.unknown', 'Unknown')}
       </Badge>
     </Group>
 
@@ -346,7 +346,7 @@ const SystemHealthCard = ({
         <HealthMetric
           icon={IconDatabase}
           label={t('dashboard.systemHealth.databaseStatus', 'Database Status')}
-          value={systemHealth?.database_status || t('shared.unknown', 'Unknown')}
+          value={systemHealth?.database_status || t('shared:labels.unknown', 'Unknown')}
           color="blue"
         />
         <HealthMetric
@@ -358,7 +358,7 @@ const SystemHealthCard = ({
         <HealthMetric
           icon={IconClock}
           label={t('dashboard.systemHealth.uptime', 'Uptime')}
-          value={systemHealth?.system_uptime || t('shared.unknown', 'Unknown')}
+          value={systemHealth?.system_uptime || t('shared:labels.unknown', 'Unknown')}
           color="orange"
         />
         <HealthMetric
@@ -562,7 +562,7 @@ const QuickActionsCard = () => {
         <ActionButton
           href="/admin/settings"
           icon={IconSettings}
-          title={t('dashboard.quickActions.settings', 'Settings')}
+          title={t('shared:labels.settings', 'Settings')}
           desc={t('dashboard.quickActions.settingsDesc', 'System configuration')}
           color="gray"
         />

@@ -12,7 +12,6 @@
     "deleteFailed": "Failed to delete channel",
     "deleteSuccess": "Channel deleted successfully",
     "description": "Add and manage your notification delivery channels",
-    "disabled": "Disabled",
     "discord": {
       "avatarUrl": {
         "description": "Custom avatar for the notification bot",
@@ -130,7 +129,6 @@
     "title": "Notification Channels",
     "types": {
       "discord": "Discord",
-      "email": "Email",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -216,9 +214,7 @@
     "description": "Recent notifications sent through your channels",
     "fields": {
       "channel": "Channel",
-      "error": "Error",
-      "event": "Event",
-      "time": "Time"
+      "event": "Event"
     },
     "loading": "Loading history...",
     "noHistory": "No notifications sent yet",
@@ -228,7 +224,6 @@
     "showMore": "Show More",
     "status": {
       "failed": "Failed",
-      "pending": "Pending",
       "sent": "Sent"
     },
     "title": "Notification History"
@@ -294,7 +289,6 @@
       "allOperationsSuccess": "All {{total}} {{operation}}s completed successfully!",
       "deleteFailed": "Delete Failed",
       "downloadFailed": "Download Failed",
-      "error": "Error",
       "operationFailed": "Operation Failed",
       "operationFailedTitle": "{{operation}} Failed",
       "operationPartial": "{{success}}/{{total}} {{operation}}s completed successfully. {{failed}} failed.",

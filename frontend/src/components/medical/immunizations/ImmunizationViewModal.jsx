@@ -133,47 +133,47 @@ const ImmunizationViewModal = ({
                 <Title order={4} mb="sm">{t('immunizations.viewModal.vaccineInfo', 'Vaccine Information')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.vaccineName', 'Vaccine Name')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.vaccineName', 'Vaccine Name')}</Text>
                     <Text size="sm">{immunization.vaccine_name}</Text>
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.tradeName', 'Trade Name')}</Text>
                     <Text size="sm" c={immunization.vaccine_trade_name ? 'inherit' : 'dimmed'}>
-                      {immunization.vaccine_trade_name || t('labels.notSpecified', 'Not specified')}
+                      {immunization.vaccine_trade_name || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.manufacturer', 'Manufacturer')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.manufacturer', 'Manufacturer')}</Text>
                     <Text size="sm" c={immunization.manufacturer ? 'inherit' : 'dimmed'}>
-                      {immunization.manufacturer || t('labels.notSpecified', 'Not specified')}
+                      {immunization.manufacturer || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.doseNumber', 'Dose Number')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.doseNumber', 'Dose Number')}</Text>
                     <Badge
                       color={getDoseColor(immunization.dose_number)}
                       variant="filled"
                       size="sm"
                     >
-                      {immunization.dose_number ? t('immunizations.viewModal.doseHash', 'Dose #{{number}}', { number: immunization.dose_number }) : t('labels.notSpecified', 'Not specified')}
+                      {immunization.dose_number ? t('immunizations.viewModal.doseHash', 'Dose #{{number}}', { number: immunization.dose_number }) : t('shared:labels.notSpecified', 'Not specified')}
                     </Badge>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.lotNumber', 'Lot Number')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.lotNumber', 'Lot Number')}</Text>
                     <Text size="sm" c={immunization.lot_number ? 'inherit' : 'dimmed'}>
-                      {immunization.lot_number || t('labels.notSpecified', 'Not specified')}
+                      {immunization.lot_number || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.ndcNumber', 'NDC Number')}</Text>
                     <Text size="sm" c={immunization.ndc_number ? 'inherit' : 'dimmed'}>
-                      {immunization.ndc_number || t('labels.notSpecified', 'Not specified')}
+                      {immunization.ndc_number || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.expirationDate', 'Expiration Date')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.expirationDate', 'Expiration Date')}</Text>
                     <Text size="sm" c={immunization.expiration_date ? 'inherit' : 'dimmed'}>
-                      {immunization.expiration_date ? formatDate(immunization.expiration_date) : t('labels.notSpecified', 'Not specified')}
+                      {immunization.expiration_date ? formatDate(immunization.expiration_date) : t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                 </SimpleGrid>
@@ -208,25 +208,25 @@ const ImmunizationViewModal = ({
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.dateAdministered', 'Date Administered')}</Text>
                     <Text size="sm" c={immunization.date_administered ? 'inherit' : 'dimmed'}>
-                      {immunization.date_administered ? formatDate(immunization.date_administered) : t('labels.notSpecified', 'Not specified')}
+                      {immunization.date_administered ? formatDate(immunization.date_administered) : t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.adminSite', 'Administration Site')}</Text>
                     <Text size="sm" c={immunization.site ? 'inherit' : 'dimmed'}>
-                      {immunization.site || t('labels.notSpecified', 'Not specified')}
+                      {immunization.site || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.route', 'Route')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.route', 'Route')}</Text>
                     <Text size="sm" c={immunization.route ? 'inherit' : 'dimmed'}>
-                      {immunization.route || t('labels.notSpecified', 'Not specified')}
+                      {immunization.route || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
                     <Text fw={500} size="sm" c="dimmed">{t('immunizations.viewModal.locationFacility', 'Location/Facility')}</Text>
                     <Text size="sm" c={immunization.location ? 'inherit' : 'dimmed'}>
-                      {immunization.location || t('labels.notSpecified', 'Not specified')}
+                      {immunization.location || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
@@ -238,12 +238,12 @@ const ImmunizationViewModal = ({
                         c="blue"
                         style={{ cursor: 'pointer', textDecoration: 'underline' }}
                         onClick={() => navigateToEntity('practitioner', immunization.practitioner_id, navigate)}
-                        title={t('immunizations.viewModal.viewPractitioner', 'View practitioner details')}
+                        title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
                       >
-                        {practitioner?.name || t('immunizations.viewModal.practitionerId', 'Practitioner ID: {{id}}', { id: immunization.practitioner_id })}
+                        {practitioner?.name || t('shared:labels.practitionerIdId', 'Practitioner ID: {{id}}', { id: immunization.practitioner_id })}
                       </Text>
                     ) : (
-                      <Text size="sm" c="dimmed">{t('labels.notSpecified', 'Not specified')}</Text>
+                      <Text size="sm" c="dimmed">{t('shared:labels.notSpecified', 'Not specified')}</Text>
                     )}
                   </Stack>
                 </SimpleGrid>
@@ -257,9 +257,9 @@ const ImmunizationViewModal = ({
           <Box mt="md">
             <Stack gap="lg">
               <div>
-                <Title order={4} mb="sm">{t('labels.clinicalNotes', 'Clinical Notes')}</Title>
+                <Title order={4} mb="sm">{t('shared:labels.clinicalNotes', 'Clinical Notes')}</Title>
                 <Text size="sm" c={immunization.notes ? 'inherit' : 'dimmed'}>
-                  {immunization.notes || t('labels.noNotesAvailable', 'No notes available')}
+                  {immunization.notes || t('shared:labels.noNotesAvailable', 'No notes available')}
                 </Text>
               </div>
             </Stack>

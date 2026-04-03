@@ -23,22 +23,9 @@
     "loading": "Loading your medical dashboard...",
     "modules": {
       "adminDashboard": "Admin Dashboard",
-      "allergies": "Allergies",
-      "conditions": "Conditions",
-      "emergencyContacts": "Emergency Contacts",
       "exportRecords": "Export Records",
-      "familyHistory": "Family History",
-      "immunizations": "Immunizations",
-      "injuries": "Injuries",
-      "insurance": "Insurance",
-      "medicalEquipment": "Medical Equipment",
       "patientInfo": "Patient Information",
-      "pharmacies": "Pharmacies",
-      "practitioners": "Practitioners",
-      "symptoms": "Symptoms",
-      "treatments": "Treatments",
-      "visitHistory": "Visit History",
-      "vitalSigns": "Vital Signs"
+      "visitHistory": "Visit History"
     },
     "search": {
       "advancedSearch": "Advanced Search",
@@ -72,24 +59,11 @@
     "sharePatient": "Share Patient",
     "title": "Invitations",
     "types": {
-      "familyHistory": "Family History",
       "patientRecord": "Patient Record"
     },
     "viewAll": "View all {{count}} invitations",
     "viewAll_one": "View all {{count}} invitations",
     "viewAll_other": "View all {{count}} invitations"
-  },
-  "medicalRecords": {
-    "allergies": "Allergies",
-    "conditions": "Conditions",
-    "immunizations": "Immunizations",
-    "injuries": "Injuries",
-    "medicalEquipment": "Medical Equipment",
-    "pharmacies": "Pharmacies",
-    "practitioners": "Practitioners",
-    "symptoms": "Symptoms",
-    "treatments": "Treatments",
-    "visits": "Visits"
   },
   "menu": {
     "administration": "Administration",
@@ -97,11 +71,9 @@
     "dashboard": "Dashboard",
     "help": "Help",
     "logout": "Logout",
-    "medicalRecords": "Medical Records",
     "patients": "Patients",
     "profile": "Profile",
-    "reports": "Reports",
-    "settings": "Settings"
+    "reports": "Reports"
   },
   "pages": {
     "dashboard": "Dashboard",
@@ -111,50 +83,30 @@
     "patientList": "Patient List",
     "preferences": "Preferences",
     "reports": "Reports",
-    "settings": "Settings",
     "userProfile": "User Profile"
   },
   "sections": {
-    "emergencyContacts": "Emergency Contacts",
-    "familyHistory": "Family History",
-    "insurance": "Insurance",
     "medicalInfo": "Medical Information",
     "personalInfo": "Personal Information",
-    "preferences": "Preferences",
-    "timeline": "Timeline"
+    "preferences": "Preferences"
   },
   "sidebarNav": {
     "items": {
       "adminDashboard": "Admin Dashboard",
-      "allergies": "Allergies",
       "backupManagement": "Backup Management",
-      "conditions": "Conditions",
       "customReports": "Custom Reports",
       "dataModels": "Data Models",
-      "emergencyContacts": "Emergency Contacts",
       "exportRecords": "Export Records",
-      "familyHistory": "Family History",
-      "immunizations": "Immunizations",
-      "injuries": "Injuries",
-      "insurance": "Insurance",
       "language": "Language",
-      "medicalEquipment": "Medical Equipment",
       "patientInfo": "Patient Info",
-      "pharmacies": "Pharmacies",
-      "practitioners": "Practitioners",
-      "settings": "Settings",
-      "symptoms": "Symptoms",
       "systemHealth": "System Health",
       "tagManagement": "Tag Management",
       "theme": "Theme",
-      "treatments": "Treatments",
-      "visitHistory": "Visit History",
-      "vitalSigns": "Vital Signs"
+      "visitHistory": "Visit History"
     },
     "sections": {
       "administration": "Administration",
       "careAndTreatment": "Care & Treatment",
-      "medicalRecords": "Medical Records",
       "misc": "Misc.",
       "tools": "Tools"
     }

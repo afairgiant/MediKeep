@@ -153,7 +153,7 @@ const Analytics = () => {
         t('shared:categories.lab_results', 'Lab Results'),
         t('shared:categories.medications', 'Medications'),
         t('shared:categories.procedures', 'Procedures'),
-        t('analytics.chartLabels.allergies', 'Allergies'),
+        t('shared:categories.allergies', 'Allergies'),
         t('analytics.chartLabels.vitals', 'Vitals'),
       ],
       datasets: [
@@ -197,7 +197,7 @@ const Analytics = () => {
         grid: { color: themeColors.borderLight },
       },
       x: {
-        title: { display: true, text: t('analytics.axisLabels.date', 'Date'), color: themeColors.textPrimary },
+        title: { display: true, text: t('shared:labels.date', 'Date'), color: themeColors.textPrimary },
         ticks: { color: themeColors.textPrimary },
         grid: { color: themeColors.borderLight },
       },

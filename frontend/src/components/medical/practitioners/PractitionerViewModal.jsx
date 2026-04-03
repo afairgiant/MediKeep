@@ -86,7 +86,7 @@ const PractitionerViewModal = ({
     return specialtyColors[specialty] || 'gray';
   };
 
-  const notSpecified = t('common.labels.notSpecified', 'Not specified');
+  const notSpecified = t('shared:labels.notSpecified', 'Not specified');
 
   return (
     <Modal
@@ -144,7 +144,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.practice', 'Practice')}:
+                    {t('shared:labels.practice', 'Practice')}:
                   </Text>
                   <Text
                     size="sm"
@@ -157,7 +157,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.specialty', 'Specialty')}:
+                    {t('shared:labels.specialty', 'Specialty')}:
                   </Text>
                   <Text
                     size="sm"
@@ -170,7 +170,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.phone', 'Phone')}:
+                    {t('shared:labels.phone', 'Phone')}:
                   </Text>
                   <Text
                     size="sm"
@@ -183,7 +183,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.email', 'Email')}:
+                    {t('shared:labels.email', 'Email')}:
                   </Text>
                   <Text
                     size="sm"
@@ -301,7 +301,7 @@ const PractitionerViewModal = ({
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <Group>
                         <Text size="sm" fw={500} w={100}>
-                          {t('practitioners.viewModal.practicePhone', 'Phone')}:
+                          {t('shared:labels.phone', 'Phone')}:
                         </Text>
                         <Text size="sm" c={practiceDetails.phone_number ? 'inherit' : 'dimmed'}>
                           {practiceDetails.phone_number || notSpecified}

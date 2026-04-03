@@ -98,7 +98,7 @@ const InsuranceViewModal = ({
                   color={typeColor}
                   style={{ textTransform: 'capitalize' }}
                 >
-                  {insurance.insurance_type} {t('insurance.viewModal.insuranceLabel', 'Insurance')}
+                  {insurance.insurance_type} {t('shared:categories.insurance', 'Insurance')}
                 </Badge>
               </Group>
               <Group gap="xs">
@@ -161,7 +161,7 @@ const InsuranceViewModal = ({
                     </Stack>
                     {insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name && (
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.relationship', 'Relationship')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.relationship', 'Relationship')}</Text>
                         <Text style={{ textTransform: 'capitalize' }}>
                           {insurance.relationship_to_holder || t('insurance.viewModal.self', 'Self')}
                         </Text>
@@ -191,9 +191,9 @@ const InsuranceViewModal = ({
                       <Text>{formatDate(insurance.effective_date)}</Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.expirationDate', 'Expiration Date')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.expirationDate', 'Expiration Date')}</Text>
                       <Text c={insurance.expiration_date ? 'inherit' : 'dimmed'}>
-                        {insurance.expiration_date ? formatDate(insurance.expiration_date) : t('insurance.viewModal.ongoing', 'Ongoing')}
+                        {insurance.expiration_date ? formatDate(insurance.expiration_date) : t('shared:labels.ongoing', 'Ongoing')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -224,55 +224,55 @@ const InsuranceViewModal = ({
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.deductible', 'Deductible')}</Text>
                       <Text size="sm" c={coverageDetails.deductible ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.deductible || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.deductible || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.outOfPocketMax', 'Out of Pocket Max')}</Text>
                       <Text size="sm" c={coverageDetails.out_of_pocket_max ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.out_of_pocket_max || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.out_of_pocket_max || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.copay', 'Copay')}</Text>
                       <Text size="sm" c={coverageDetails.copay ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.copay || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.copay || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.coinsurance', 'Coinsurance')}</Text>
                       <Text size="sm" c={coverageDetails.coinsurance ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.coinsurance || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.coinsurance || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.prescriptionCoverage', 'Prescription Coverage')}</Text>
                       <Text size="sm" c={coverageDetails.prescription_coverage ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.prescription_coverage || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.prescription_coverage || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.visionCoverage', 'Vision Coverage')}</Text>
                       <Text size="sm" c={coverageDetails.vision_coverage ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.vision_coverage || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.vision_coverage || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.dentalCoverage', 'Dental Coverage')}</Text>
                       <Text size="sm" c={coverageDetails.dental_coverage ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.dental_coverage || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.dental_coverage || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.mentalHealthCoverage', 'Mental Health Coverage')}</Text>
                       <Text size="sm" c={coverageDetails.mental_health_coverage ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.mental_health_coverage || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.mental_health_coverage || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.additionalDetails', 'Additional Coverage Details')}</Text>
                       <Text size="sm" c={coverageDetails.additional_details ? 'inherit' : 'dimmed'}>
-                        {coverageDetails.additional_details || t('common.labels.notSpecified', 'Not specified')}
+                        {coverageDetails.additional_details || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -291,37 +291,37 @@ const InsuranceViewModal = ({
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.customerServicePhone', 'Customer Service Phone')}</Text>
                       <Text size="sm" c={contactInfo.customer_service_phone ? 'inherit' : 'dimmed'}>
-                        {contactInfo.customer_service_phone || t('common.labels.notSpecified', 'Not specified')}
+                        {contactInfo.customer_service_phone || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.claimsPhone', 'Claims Phone')}</Text>
                       <Text size="sm" c={contactInfo.claims_phone ? 'inherit' : 'dimmed'}>
-                        {contactInfo.claims_phone || t('common.labels.notSpecified', 'Not specified')}
+                        {contactInfo.claims_phone || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('shared:labels.website', 'Website')}</Text>
                       <Text size="sm" c={contactInfo.website_url ? 'inherit' : 'dimmed'} style={{ wordBreak: 'break-all' }}>
-                        {contactInfo.website_url || t('common.labels.notSpecified', 'Not specified')}
+                        {contactInfo.website_url || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.email', 'Email')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.email', 'Email')}</Text>
                       <Text size="sm" c={contactInfo.email ? 'inherit' : 'dimmed'}>
-                        {contactInfo.email || t('common.labels.notSpecified', 'Not specified')}
+                        {contactInfo.email || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.claimsAddress', 'Claims Address')}</Text>
                       <Text size="sm" c={contactInfo.claims_address ? 'inherit' : 'dimmed'}>
-                        {contactInfo.claims_address || t('common.labels.notSpecified', 'Not specified')}
+                        {contactInfo.claims_address || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.pharmacyNetworkInfo', 'Pharmacy Network Info')}</Text>
                       <Text size="sm" c={contactInfo.pharmacy_network_info ? 'inherit' : 'dimmed'}>
-                        {contactInfo.pharmacy_network_info || t('common.labels.notSpecified', 'Not specified')}
+                        {contactInfo.pharmacy_network_info || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>

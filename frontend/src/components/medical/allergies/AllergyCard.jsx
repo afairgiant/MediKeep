@@ -24,7 +24,7 @@ const AllergyCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -97,12 +97,12 @@ const AllergyCard = ({
       {
         label: t('allergies.reaction.label'),
         value: allergy.reaction,
-        render: (value) => value || t('common:labels.unknown', 'Not specified')
+        render: (value) => value || t('shared:labels.unknown', 'Not specified')
       },
       {
-        label: t('allergies.onsetDate.label'),
+        label: t('shared:fields.onsetDate'),
         value: allergy.onset_date,
-        render: (value) => value ? formatLongDate(value) : t('common:labels.unknown', 'Not specified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.unknown', 'Not specified')
       }
     ].filter(field => field.value); // Only show fields with values
 

@@ -221,7 +221,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
 
       <Group justify="flex-end">
         <Button variant="default" onClick={onClose}>
-          {t('buttons.cancel', 'Cancel')}
+          {t('shared:fields.cancel', 'Cancel')}
         </Button>
         <Button
           onClick={handlePreview}
@@ -319,7 +319,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
         <Table striped highlightOnHover withTableBorder>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>{t('vitals.table.date', 'Date')}</Table.Th>
+              <Table.Th>{t('shared:labels.date', 'Date')}</Table.Th>
               <Table.Th>{t('vitals.modal.bloodGlucose', 'Glucose')} (mg/dL)</Table.Th>
               <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
             </Table.Tr>

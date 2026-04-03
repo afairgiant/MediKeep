@@ -640,7 +640,7 @@ const BackupManagement = () => {
   };
 
   const schedulePresetData = useMemo(() => [
-    { value: 'disabled', label: t('backup.schedule.presets.disabled', 'Disabled') },
+    { value: 'disabled', label: t('shared:labels.disabled', 'Disabled') },
     { value: 'every_6_hours', label: t('backup.schedule.presets.every6Hours', 'Every 6 hours') },
     { value: 'every_12_hours', label: t('backup.schedule.presets.every12Hours', 'Every 12 hours') },
     { value: 'daily', label: t('backup.schedule.presets.daily', 'Daily') },
@@ -675,7 +675,7 @@ const BackupManagement = () => {
       <AdminLayout>
         <Center style={{ minHeight: 'calc(100vh - 140px)' }}>
           <Stack align="center" gap="md">
-            <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title={t('common:labels.error', 'Error')}>
+            <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title={t('shared:labels.error', 'Error')}>
               {error}
             </Alert>
             <Button onClick={() => refreshData()}>{t('common:buttons.retry', 'Retry')}</Button>
@@ -726,7 +726,7 @@ const BackupManagement = () => {
                   : null
               }
             >
-              {t('backup.tabs.settings', 'Settings')}
+              {t('shared:labels.settings', 'Settings')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -890,13 +890,13 @@ const BackupManagement = () => {
                     <Table striped highlightOnHover>
                       <Table.Thead>
                         <Table.Tr>
-                          <Table.Th>{t('backup.existingBackups.tableHeaders.type', 'Type')}</Table.Th>
+                          <Table.Th>{t('shared:labels.type', 'Type')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.filename', 'Filename')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.size', 'Size')}</Table.Th>
                           <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.created', 'Created')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.fileExists', 'File Exists')}</Table.Th>
-                          <Table.Th>{t('backup.existingBackups.tableHeaders.actions', 'Actions')}</Table.Th>
+                          <Table.Th>{t('shared:labels.actions', 'Actions')}</Table.Th>
                         </Table.Tr>
                       </Table.Thead>
                       <Table.Tbody>
@@ -913,7 +913,7 @@ const BackupManagement = () => {
                               </Text>
                             </Table.Td>
                             <Table.Td>
-                              <Text size="sm">{backup.size_bytes ? formatFileSize(backup.size_bytes) : t('backup.existingBackups.unknown', 'Unknown')}</Text>
+                              <Text size="sm">{backup.size_bytes ? formatFileSize(backup.size_bytes) : t('shared:labels.unknown', 'Unknown')}</Text>
                             </Table.Td>
                             <Table.Td>
                               <Badge variant="light" color={getStatusColor(backup.status)}>
@@ -1015,7 +1015,7 @@ const BackupManagement = () => {
                     variant="light"
                     color={scheduleSettings.enabled ? 'green' : 'gray'}
                   >
-                    {scheduleSettings.enabled ? t('backup.schedule.active', 'Active') : t('backup.schedule.disabled', 'Disabled')}
+                    {scheduleSettings.enabled ? t('shared:labels.active', 'Active') : t('shared:labels.disabled', 'Disabled')}
                   </Badge>
                 </Group>
 
@@ -1195,7 +1195,7 @@ const BackupManagement = () => {
             </Alert>
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeDelete(); setBackupToDelete(null); }}>
-                {t('common:buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button color="red" onClick={handleConfirmDelete}>
                 {t('common:buttons.delete', 'Delete')}
@@ -1235,7 +1235,7 @@ const BackupManagement = () => {
             />
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeCleanup(); setCleanupConfirmText(''); }}>
-                {t('common:buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button
                 color="red"
@@ -1271,7 +1271,7 @@ const BackupManagement = () => {
             </Alert>
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeRestore(); setBackupToRestore(null); }}>
-                {t('common:buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button
                 color="red"
@@ -1319,7 +1319,7 @@ const BackupManagement = () => {
                 <Text fw={500} mb="sm">{t('backup.preview.backupDetails', 'Backup Details')}</Text>
                 <Group gap="lg" wrap="wrap">
                   <div>
-                    <Text size="xs" c="dimmed">{t('backup.preview.type', 'Type')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.type', 'Type')}</Text>
                     <Badge variant="light" color={getTypeColor(previewData.backup_type)}>
                       {previewData.backup_type}
                     </Badge>
@@ -1406,7 +1406,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.currentDatabase', 'Current Database')}</Text>
             <Text size="sm">
               {affectedData.current_database.total_records != null
-                ? t('backup.preview.totalRecords', '{{count}} total records', { count: affectedData.current_database.total_records })
+                ? t('shared:labels.countTotalRecords', '{{count}} total records', { count: affectedData.current_database.total_records })
                 : t('backup.preview.noStatistics', 'No statistics available')}
             </Text>
           </div>
@@ -1455,7 +1455,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
         {affectedData.current_files && (
           <div>
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.currentFiles', 'Current Files')}</Text>
-            <Text size="sm">{t('backup.preview.filesOnly', '{{count}} files', { count: affectedData.current_files.total_files })}</Text>
+            <Text size="sm">{t('shared:labels.countFiles', '{{count}} files', { count: affectedData.current_files.total_files })}</Text>
           </div>
         )}
       </Stack>
@@ -1502,7 +1502,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.currentDatabase', 'Current Database')}</Text>
             <Text size="sm">
               {affectedData.current_database.total_records != null
-                ? t('backup.preview.totalRecords', '{{count}} total records', { count: affectedData.current_database.total_records })
+                ? t('shared:labels.countTotalRecords', '{{count}} total records', { count: affectedData.current_database.total_records })
                 : t('backup.preview.noStatistics', 'No statistics available')}
             </Text>
           </div>
@@ -1510,7 +1510,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
         {affectedData.current_files_count != null && (
           <div>
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.currentFiles', 'Current Files')}</Text>
-            <Text size="sm">{t('backup.preview.filesOnly', '{{count}} files', { count: affectedData.current_files_count })}</Text>
+            <Text size="sm">{t('shared:labels.countFiles', '{{count}} files', { count: affectedData.current_files_count })}</Text>
           </div>
         )}
       </Stack>

@@ -38,7 +38,7 @@ import { capitalizeFirst } from '../../utils/dateFormatUtils';
 import './AdminSettings.css';
 
 const AdminSettings = () => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const [settings, setSettings] = useState({
     trash_retention_days: 30,
     allow_user_registration: true,
@@ -289,7 +289,7 @@ const AdminSettings = () => {
                 variant="light"
                 color={settings.allow_user_registration ? 'green' : 'red'}
               >
-                {settings.allow_user_registration ? t('shared.enabled', 'Enabled') : t('shared.disabled', 'Disabled')}
+                {settings.allow_user_registration ? t('shared.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
               </Badge>
             </Group>
           </Group>
@@ -308,7 +308,7 @@ const AdminSettings = () => {
               variant="light"
               color={ssoConfig.enabled ? 'green' : 'gray'}
             >
-              {ssoConfig.enabled ? t('shared.enabled', 'Enabled') : t('shared.disabled', 'Disabled')}
+              {ssoConfig.enabled ? t('shared.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
             </Badge>
           </Group>
 
@@ -318,7 +318,7 @@ const AdminSettings = () => {
                 <Group justify="space-between">
                   <Text fw={500}>{t('settings.sso.provider', 'Provider')}</Text>
                   <Text c="dimmed">
-                    {capitalizeFirst(ssoConfig.provider_type) || t('shared.unknown', 'Unknown')}
+                    {capitalizeFirst(ssoConfig.provider_type) || t('shared:labels.unknown', 'Unknown')}
                   </Text>
                 </Group>
 

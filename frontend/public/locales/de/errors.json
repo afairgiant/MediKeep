@@ -51,7 +51,6 @@
     "birthDateFuture": "Geburtsdatum darf nicht in der Zukunft liegen",
     "birthDateRequired": "Geburtsdatum ist erforderlich",
     "createFailed": "Erstellung fehlgeschlagen: {{message}}",
-    "error": "Fehler",
     "firstNameRequired": "Vorname ist erforderlich",
     "lastNameRequired": "Nachname ist erforderlich",
     "updateFailed": "Aktualisierung fehlgeschlagen: {{message}}"

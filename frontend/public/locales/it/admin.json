@@ -1,7 +1,6 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
       "firstName": "First Name",
       "lastName": "Last Name",
       "linkPatient": {
@@ -25,12 +24,10 @@
     "activityTrend": "Tendenza attività",
     "analyticsDateRange": "Intervallo di date per l'analisi",
     "axisLabels": {
-      "activities": "Attività",
-      "date": "Data"
+      "activities": "Attività"
     },
     "breakdownByType": "Suddivisione per tipo",
     "chartLabels": {
-      "allergies": "Allergie",
       "patients": "Pazienti",
       "userActivity": "Attività utente",
       "vitals": "Parametri vitali"
@@ -78,11 +75,9 @@
       "action": "Azione",
       "entityType": "Tipo di entità",
       "recordId": "ID record",
-      "timestamp": "Data e ora",
-      "user": "Utente"
+      "timestamp": "Data e ora"
     },
     "title": "Registro attività",
-    "userFilter": "Utente",
     "viewRecord": "Visualizza record {{type}}",
     "viewRecordAriaLabel": "Visualizza {{type}} #{{id}}"
   },
@@ -97,15 +92,12 @@
       "previewRestore": "Anteprima ripristino",
       "restore": "Ripristina",
       "tableHeaders": {
-        "actions": "Azioni",
         "created": "Creato",
         "fileExists": "File presente",
         "filename": "Nome file",
-        "size": "Dimensione",
-        "type": "Tipo"
+        "size": "Dimensione"
       },
       "title": "Backup esistenti",
-      "unknown": "Sconosciuto",
       "verify": "Verifica"
     },
     "loading": "Caricamento gestione backup...",
@@ -172,10 +164,7 @@
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} file",
-      "filesOnly_one": "{{count}} files",
       "filesOnly_many": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Manifesto",
       "noAffectedData": "Nessuna informazione sui dati interessati disponibile",
       "noStatistics": "Nessuna statistica disponibile",
@@ -185,11 +174,7 @@
       "sqlStatements_one": "{{count}} SQL statements",
       "sqlStatements_many": "{{count}} SQL statements",
       "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} record totali",
-      "totalRecords_one": "{{count}} total records",
       "totalRecords_many": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Tipo",
       "unknownType": "Tipo di backup sconosciuto",
       "warnings": "Avvisi"
     },
@@ -216,7 +201,6 @@
       "title": "Impostazioni conservazione backup"
     },
     "schedule": {
-      "active": "Attivo",
       "completedSuccessfully": "Completato con successo",
       "dayOfWeek": "Giorno della settimana",
       "dayOfWeekDesc": "In quale giorno deve essere eseguito il backup settimanale?",
@@ -229,7 +213,6 @@
         "tue": "Martedì",
         "wed": "Mercoledì"
       },
-      "disabled": "Disabilitato",
       "failed": "Fallito: {{error}}",
       "frequency": "Frequenza backup",
       "frequencyDesc": "Pianifica backup completi automatici (database + file)",
@@ -237,7 +220,6 @@
       "nextScheduledRun": "Prossima esecuzione pianificata",
       "presets": {
         "daily": "Giornaliero",
-        "disabled": "Disabilitato",
         "every12Hours": "Ogni 12 ore",
         "every6Hours": "Ogni 6 ore",
         "weekly": "Settimanale"
@@ -250,8 +232,7 @@
     },
     "subtitle": "Crea e gestisci i backup di sistema",
     "tabs": {
-      "backups": "Backup",
-      "settings": "Impostazioni"
+      "backups": "Backup"
     },
     "title": "Gestione backup",
     "unsavedBadge": "Non salvato"
@@ -267,7 +248,6 @@
     "autoFeaturesTitle": "Funzionalità auto-generate",
     "cardSubtitle": "Compila il modulo sottostante per creare un nuovo account utente",
     "cardTitle": "Dettagli account utente",
-    "email": "Email",
     "emailPlaceholder": "Inserisci l'indirizzo email",
     "errors": {
       "accountCreateFailed": "Impossibile creare l'account",
@@ -304,7 +284,6 @@
     },
     "role": "Ruolo",
     "roleAdmin": "Amministratore",
-    "roleUser": "Utente",
     "submitButton": "Crea account",
     "successRedirect": "Utente \"{{username}}\" creato con successo!",
     "username": "Nome utente",
@@ -330,7 +309,6 @@
       "dataModelsDesc": "Visualizza e gestisci le tabelle del database",
       "manageUsers": "Gestisci utenti",
       "manageUsersDesc": "Visualizza e gestisci gli account utente",
-      "settings": "Impostazioni",
       "settingsDesc": "Configurazione del sistema",
       "subtitle": "Operazioni amministrative comuni",
       "systemHealth": "Stato del sistema",
@@ -361,8 +339,7 @@
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Utenti totali",
-      "vitalSigns": "Parametri vitali"
+      "totalUsers": "Utenti totali"
     },
     "subtitle": "Panoramica completa del sistema e gestione",
     "systemHealth": {
@@ -380,10 +357,8 @@
   "dataModels": {
     "categories": {
       "coreMedical": "Dati clinici principali",
-      "familyHistory": "Anamnesi familiare",
       "fileManagement": "Gestione file",
       "healthcareDirectory": "Rubrica sanitaria",
-      "medicalRecords": "Cartelle cliniche",
       "patientSupport": "Supporto paziente",
       "sharingAccess": "Condivisione e accesso",
       "system": "Sistema"
@@ -426,7 +401,6 @@
     "title": "Modelli dati"
   },
   "directoryCard": {
-    "error": "Errore",
     "files": "file",
     "mb": "MB",
     "ok": "OK"
@@ -468,7 +442,6 @@
       "connectionTest": "Test di connessione",
       "databaseSize": "Dimensione del database",
       "failed": "Fallito",
-      "medicalRecords": "Cartelle cliniche",
       "passed": "Superato",
       "patientRecords": "Record pazienti",
       "title": "Stato del database"
@@ -508,7 +481,6 @@
     "sso": {
       "allowed": "Consentita",
       "blocked": "Bloccata",
-      "disabled": "Disabilitato",
       "enabled": "Abilitato",
       "passwordOnlyInfo": "Gli utenti possono accedere solo con nome utente/password",
       "provider": "Provider",
@@ -600,10 +572,7 @@
     "selected_many": "",
     "selected_other": "",
     "toggleColumnVisibility": "Attiva/disattiva visibilità colonne",
-    "totalRecords": "{{count}} record totali",
-    "totalRecords_one": "{{count}} total records",
     "totalRecords_many": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Digita <strong>DELETE</strong> per confermare",
     "usernameChangeLogout": "Verrai disconnesso immediatamente e dovrai accedere nuovamente con il nuovo nome utente.",
     "usernameChangeText": "Stai per modificare il tuo nome utente da <strong>\"{{oldUsername}}\"</strong> a <strong>\"{{newUsername}}\"</strong>.",
@@ -643,12 +612,10 @@
   },
   "shared": {
     "dark": "scuro",
-    "disabled": "Disabilitato",
     "enabled": "Abilitato",
     "healthy": "funzionante",
     "info": "Info",
-    "light": "chiaro",
-    "unknown": "Sconosciuto"
+    "light": "chiaro"
   },
   "sidebar": {
     "adminNavigation": "Navigazione amministratore",
@@ -659,7 +626,6 @@
       "backupManagement": "Gestione backup",
       "dataModels": "Modelli dati",
       "maintenance": "Manutenzione",
-      "settings": "Impostazioni",
       "systemHealth": "Stato del sistema",
       "trash": "Cestino",
       "userManagement": "Gestione utenti"
@@ -714,7 +680,6 @@
     "errorLoading": "Errore durante il caricamento del cestino",
     "fileCount_one": "{{count}} file",
     "fileCount_many": "{{count}} files",
-    "fileCount_other": "{{count}} file",
     "fileDeleted": "File eliminato",
     "fileDeletedMessage": "{{filename}} eliminato definitivamente",
     "fileRestored": "File ripristinato",
@@ -754,7 +719,6 @@
     "showingFiltered": "Visualizzazione di {{shown}} su {{total}} {{files}}",
     "subtitle": "Gestisci i file caricati eliminati. Ripristina i file nella posizione originale o rimuovili definitivamente per liberare spazio di archiviazione.",
     "tableHeaders": {
-      "actions": "Azioni",
       "deleted": "Eliminato",
       "filename": "Nome file",
       "originalLocation": "Posizione originale",
@@ -797,7 +761,6 @@
     "loginHistory": "Cronologia accessi",
     "loginHistoryModal": {
       "dateTime": "Data e ora",
-      "details": "Dettagli",
       "ipAddress": "Indirizzo IP",
       "noHistory": "Nessuna cronologia accessi trovata",
       "notAvailable": "N/D",
@@ -822,8 +785,7 @@
     "resetPassword": "Reimposta password",
     "roleFilter": {
       "admin": "Amministratore",
-      "all": "Tutti i ruoli",
-      "user": "Utente"
+      "all": "Tutti i ruoli"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Impossibile rimuovere l'ultimo ruolo di amministratore.",
@@ -835,18 +797,13 @@
     },
     "searchPlaceholder": "Cerca utenti...",
     "statusFilter": {
-      "active": "Attivo",
-      "all": "Tutti gli stati",
-      "inactive": "Inattivo"
+      "all": "Tutti gli stati"
     },
     "tableHeaders": {
-      "actions": "Azioni",
       "auth": "Autenticazione",
       "created": "Creato",
-      "fullName": "Nome completo",
       "lastLogin": "Ultimo accesso",
-      "role": "Ruolo",
-      "user": "Utente"
+      "role": "Ruolo"
     },
     "title": "Gestione utenti",
     "toggleActiveModal": {

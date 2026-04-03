@@ -17,7 +17,7 @@ export const allergyFormFields = [
   {
     name: 'severity',
     type: 'select',
-    labelKey: 'common:labels.severity',
+    labelKey: 'shared:fields.severity',
     placeholderKey: 'medical:allergies.severity.placeholder',
     descriptionKey: 'medical:allergies.severity.description',
     required: true,
@@ -40,7 +40,7 @@ export const allergyFormFields = [
   {
     name: 'onset_date',
     type: 'date',
-    labelKey: 'common:labels.onsetDate',
+    labelKey: 'shared:fields.onsetDate',
     placeholderKey: 'medical:allergies.onsetDate.placeholder',
     descriptionKey: 'medical:allergies.onsetDate.description',
     gridColumn: 6,
@@ -64,9 +64,9 @@ export const allergyFormFields = [
     descriptionKey: 'medical:allergies.status.description',
     gridColumn: 12,
     options: [
-      { value: 'active', labelKey: 'common:status.active' },
-      { value: 'inactive', labelKey: 'common:status.inactive' },
-      { value: 'resolved', labelKey: 'common:status.resolved' },
+      { value: 'active', labelKey: 'shared:labels.active' },
+      { value: 'inactive', labelKey: 'shared:labels.inactive' },
+      { value: 'resolved', labelKey: 'shared:labels.resolved' },
     ],
   },
   {

@@ -54,12 +54,12 @@ interface EntityConfig {
 export const TAG_ENTITY_CONFIG: Record<string, EntityConfig> = {
   lab_result: { icon: IconFlask, color: 'indigo', labelKey: 'shared:categories.lab_results', route: '/lab-results' },
   medication: { icon: IconPill, color: 'green', labelKey: 'shared:categories.medications', route: '/medications' },
-  condition: { icon: IconStethoscope, color: 'blue', labelKey: 'search.types.conditions', route: '/conditions' },
+  condition: { icon: IconStethoscope, color: 'blue', labelKey: 'shared:categories.conditions', route: '/conditions' },
   procedure: { icon: IconMedicalCross, color: 'violet', labelKey: 'shared:categories.procedures', route: '/procedures' },
-  immunization: { icon: IconVaccine, color: 'orange', labelKey: 'search.types.immunizations', route: '/immunizations' },
-  treatment: { icon: IconHeartbeat, color: 'pink', labelKey: 'search.types.treatments', route: '/treatments' },
+  immunization: { icon: IconVaccine, color: 'orange', labelKey: 'shared:categories.immunizations', route: '/immunizations' },
+  treatment: { icon: IconHeartbeat, color: 'pink', labelKey: 'shared:categories.treatments', route: '/treatments' },
   encounter: { icon: IconCalendarEvent, color: 'teal', labelKey: 'search.types.encounters', route: '/encounters' },
-  allergy: { icon: IconAlertTriangle, color: 'red', labelKey: 'search.types.allergies', route: '/allergies' },
+  allergy: { icon: IconAlertTriangle, color: 'red', labelKey: 'shared:categories.allergies', route: '/allergies' },
 };
 
 /** Map sidebar record type values (plural) to tag entity keys (singular). */

@@ -269,7 +269,7 @@ const MedicalEquipment = () => {
   return (
     <>
       <Container size="xl" py="sm">
-        <PageHeader title={t('equipment.title', 'Medical Equipment')} icon="🩺" />
+        <PageHeader title={t('shared:categories.medical_equipment', 'Medical Equipment')} icon="🩺" />
 
         <Stack gap="sm" mt="md">
           <MedicalPageAlerts

@@ -23,22 +23,9 @@
     "loading": "Uw medisch dashboard wordt geladen...",
     "modules": {
       "adminDashboard": "Beheerderspaneel",
-      "allergies": "Allergieën",
-      "conditions": "Aandoeningen",
-      "emergencyContacts": "Noodcontacten",
       "exportRecords": "Dossiers exporteren",
-      "familyHistory": "Familiegeschiedenis",
-      "immunizations": "Vaccinaties",
-      "injuries": "Verwondingen",
-      "insurance": "Verzekering",
-      "medicalEquipment": "Medische apparatuur",
       "patientInfo": "Patiëntinformatie",
-      "pharmacies": "Apotheken",
-      "practitioners": "Zorgverleners",
-      "symptoms": "Symptomen",
-      "treatments": "Behandelingen",
-      "visitHistory": "Bezoekgeschiedenis",
-      "vitalSigns": "Vitale functies"
+      "visitHistory": "Bezoekgeschiedenis"
     },
     "search": {
       "advancedSearch": "Geavanceerd zoeken",
@@ -72,24 +59,11 @@
     "sharePatient": "Patiënt delen",
     "title": "Uitnodigingen",
     "types": {
-      "familyHistory": "Familiegeschiedenis",
       "patientRecord": "Patiëntdossier"
     },
     "viewAll": "Bekijk alle {{count}} uitnodigingen",
     "viewAll_one": "Bekijk alle {{count}} uitnodigingen",
     "viewAll_other": "Bekijk alle {{count}} uitnodigingen"
-  },
-  "medicalRecords": {
-    "allergies": "Allergieën",
-    "conditions": "Aandoeningen",
-    "immunizations": "Vaccinaties",
-    "injuries": "Verwondingen",
-    "medicalEquipment": "Medische apparatuur",
-    "pharmacies": "Apotheken",
-    "practitioners": "Zorgverleners",
-    "symptoms": "Symptomen",
-    "treatments": "Behandelingen",
-    "visits": "Bezoeken"
   },
   "menu": {
     "administration": "Administratie",
@@ -97,11 +71,9 @@
     "dashboard": "Dashboard",
     "help": "Help",
     "logout": "Uitloggen",
-    "medicalRecords": "Medische dossiers",
     "patients": "Patiënten",
     "profile": "Profiel",
-    "reports": "Rapporten",
-    "settings": "Instellingen"
+    "reports": "Rapporten"
   },
   "pages": {
     "dashboard": "Dashboard",
@@ -111,50 +83,30 @@
     "patientList": "Patiëntenlijst",
     "preferences": "Voorkeuren",
     "reports": "Rapporten",
-    "settings": "Instellingen",
     "userProfile": "Gebruikersprofiel"
   },
   "sections": {
-    "emergencyContacts": "Noodcontacten",
-    "familyHistory": "Familiegeschiedenis",
-    "insurance": "Verzekering",
     "medicalInfo": "Medische informatie",
     "personalInfo": "Persoonlijke informatie",
-    "preferences": "Voorkeuren",
-    "timeline": "Tijdlijn"
+    "preferences": "Voorkeuren"
   },
   "sidebarNav": {
     "items": {
       "adminDashboard": "Beheerderspaneel",
-      "allergies": "Allergieën",
       "backupManagement": "Back-upbeheer",
-      "conditions": "Aandoeningen",
       "customReports": "Aangepaste rapporten",
       "dataModels": "Datamodellen",
-      "emergencyContacts": "Noodcontacten",
       "exportRecords": "Dossiers exporteren",
-      "familyHistory": "Familiegeschiedenis",
-      "immunizations": "Vaccinaties",
-      "injuries": "Verwondingen",
-      "insurance": "Verzekering",
       "language": "Taal",
-      "medicalEquipment": "Medische apparatuur",
       "patientInfo": "Patiëntinfo",
-      "pharmacies": "Apotheken",
-      "practitioners": "Zorgverleners",
-      "settings": "Instellingen",
-      "symptoms": "Symptomen",
       "systemHealth": "Systeemstatus",
       "tagManagement": "Tagbeheer",
       "theme": "Thema",
-      "treatments": "Behandelingen",
-      "visitHistory": "Bezoekgeschiedenis",
-      "vitalSigns": "Vitale functies"
+      "visitHistory": "Bezoekgeschiedenis"
     },
     "sections": {
       "administration": "Administratie",
       "careAndTreatment": "Zorg & behandeling",
-      "medicalRecords": "Medische dossiers",
       "misc": "Overig",
       "tools": "Hulpmiddelen"
     }

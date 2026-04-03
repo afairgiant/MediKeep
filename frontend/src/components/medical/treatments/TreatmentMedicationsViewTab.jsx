@@ -16,7 +16,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import logger from '../../../services/logger';
 
 const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const [medications, setMedications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -166,7 +166,7 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                 {rel.effective_dosage && (
                   <Stack gap={2}>
                     <Text size="xs" c="dimmed" fw={500}>
-                      {t('treatments.medications.dosage', 'Dosage')}
+                      {t('shared:labels.dosage', 'Dosage')}
                     </Text>
                     {renderValue(rel.specific_dosage, med?.dosage)}
                   </Stack>
@@ -174,7 +174,7 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                 {rel.effective_frequency && (
                   <Stack gap={2}>
                     <Text size="xs" c="dimmed" fw={500}>
-                      {t('treatments.medications.frequency', 'Frequency')}
+                      {t('shared:fields.frequency', 'Frequency')}
                     </Text>
                     {renderValue(rel.specific_frequency, med?.frequency)}
                   </Stack>
@@ -182,7 +182,7 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                 {rel.specific_duration && (
                   <Stack gap={2}>
                     <Text size="xs" c="dimmed" fw={500}>
-                      {t('treatments.medications.duration', 'Duration')}
+                      {t('shared:labels.duration', 'Duration')}
                     </Text>
                     <Text size="sm">{rel.specific_duration}</Text>
                   </Stack>
@@ -193,7 +193,7 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                 {rel.effective_start_date && (
                   <Stack gap={2}>
                     <Text size="xs" c="dimmed" fw={500}>
-                      {t('treatments.medications.startDate', 'Start Date')}
+                      {t('shared:labels.startDate', 'Start Date')}
                     </Text>
                     {renderDateValue(rel.specific_start_date, rel.effective_start_date)}
                   </Stack>
@@ -201,11 +201,11 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                 {(rel.effective_end_date || rel.effective_start_date) && (
                   <Stack gap={2}>
                     <Text size="xs" c="dimmed" fw={500}>
-                      {t('treatments.medications.endDate', 'End Date')}
+                      {t('shared:labels.endDate', 'End Date')}
                     </Text>
                     {renderDateValue(rel.specific_end_date, rel.effective_end_date) || (
                       <Text size="sm" c="dimmed" fs="italic">
-                        {t('treatments.medications.ongoing', 'Ongoing')}
+                        {t('shared:labels.ongoing', 'Ongoing')}
                       </Text>
                     )}
                   </Stack>
@@ -224,7 +224,7 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                 {rel.effective_pharmacy && (
                   <Stack gap={2}>
                     <Text size="xs" c="dimmed" fw={500}>
-                      {t('treatments.medications.pharmacy', 'Pharmacy')}
+                      {t('shared:fields.pharmacy', 'Pharmacy')}
                     </Text>
                     {renderNameValue(rel.specific_pharmacy, rel.effective_pharmacy)}
                   </Stack>

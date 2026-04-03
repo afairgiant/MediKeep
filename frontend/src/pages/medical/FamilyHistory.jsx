@@ -927,7 +927,7 @@ const FamilyHistory = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('familyHistory.title', 'Family History')} icon="👨‍👩‍👧‍👦" />
+      <PageHeader title={t('shared:categories.family_history', 'Family History')} icon="👨‍👩‍👧‍👦" />
 
       <Stack gap="sm" mt="md">
 
@@ -1094,15 +1094,15 @@ const FamilyHistory = () => {
                 data={flattenedConditions}
                 columns={[
                   { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
-                  { header: t('familyHistory.table.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
+                  { header: t('shared:labels.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
                   { header: t('familyHistory.table.condition', 'Condition'), accessor: 'condition_name', priority: 'high', width: 200 },
-                  { header: t('familyHistory.table.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
-                  { header: t('labels.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
+                  { header: t('shared:labels.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
+                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
                   { header: t('familyHistory.table.diagnosisAge', 'Diagnosis Age'), accessor: 'diagnosis_age', priority: 'low', width: 120 },
                   { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
                 ]}
                 patientData={currentPatient}
-                tableName={t('familyHistory.title', 'Family History')}
+                tableName={t('shared:categories.family_history', 'Family History')}
                 onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
                 onEdit={row => {
                   if (row.is_shared) {
@@ -1213,10 +1213,10 @@ const FamilyHistory = () => {
                 data={flattenedSharedConditions}
                 columns={[
                   { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
-                  { header: t('familyHistory.table.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
+                  { header: t('shared:labels.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
                   { header: t('familyHistory.table.condition', 'Condition'), accessor: 'condition_name', priority: 'high', width: 200 },
-                  { header: t('familyHistory.table.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
-                  { header: t('labels.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
+                  { header: t('shared:labels.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
+                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
                   { header: t('familyHistory.table.diagnosisAge', 'Diagnosis Age'), accessor: 'diagnosis_age', priority: 'low', width: 120 },
                   { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
                   { header: t('familyHistory.table.sharedBy', 'Shared By'), accessor: 'shared_by', priority: 'medium', width: 150 },
@@ -1247,7 +1247,7 @@ const FamilyHistory = () => {
                   severity: value => value || '-',
                   diagnosis_age: value => (value ? t('familyHistory.table.yearsOld', '{{age}} years', { age: value }) : '-'),
                   status: value => value || '-',
-                  shared_by: (value, row) => row.shared_by?.name || t('familyHistory.table.unknown', 'Unknown'),
+                  shared_by: (value, row) => row.shared_by?.name || t('shared:labels.unknown', 'Unknown'),
                 }}
                 dataType="medical"
                 responsive={responsive}

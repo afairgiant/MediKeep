@@ -128,7 +128,7 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
           {/* Title */}
           <Box>
             <Text size="xs" c="dimmed" fw={500} mb={4}>
-              {t('search.columnName', 'Name')}
+              {t('shared:labels.name', 'Name')}
             </Text>
             {hasQuery ? (
               <Highlight
@@ -154,7 +154,7 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
           {item.subtitle && (
             <Box>
               <Text size="xs" c="dimmed" fw={500} mb={4}>
-                {t('search.columnDetails', 'Details')}
+                {t('shared:tabs.details', 'Details')}
               </Text>
               <Text size="sm">{item.subtitle}</Text>
             </Box>

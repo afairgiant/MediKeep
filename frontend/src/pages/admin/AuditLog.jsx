@@ -289,7 +289,7 @@ const AuditLog = () => {
                 aria-label={t('auditLog.filterByEntityType', 'Filter by entity type')}
               />
               <Select
-                placeholder={t('auditLog.userFilter', 'User')}
+                placeholder={t('shared:labels.user', 'User')}
                 data={userOptions}
                 value={userFilter}
                 onChange={setUserFilter}
@@ -366,7 +366,7 @@ const AuditLog = () => {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{t('auditLog.tableHeaders.timestamp', 'Timestamp')}</Table.Th>
-                    <Table.Th>{t('auditLog.tableHeaders.user', 'User')}</Table.Th>
+                    <Table.Th>{t('shared:labels.user', 'User')}</Table.Th>
                     <Table.Th>{t('auditLog.tableHeaders.action', 'Action')}</Table.Th>
                     <Table.Th>{t('auditLog.tableHeaders.entityType', 'Entity Type')}</Table.Th>
                     <Table.Th>{t('shared:labels.description', 'Description')}</Table.Th>

@@ -8,7 +8,7 @@ import { Button, Checkbox, Select } from '../ui';
 import styles from './UserRegistrationForm.module.css';
 
 const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) => {
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'shared']);
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -287,7 +287,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="email">{t('admin.createUser.email', 'Email')} *</label>
+        <label htmlFor="email">{t('shared:labels.email', 'Email')} *</label>
         <input
           type="email"
           id="email"
@@ -311,7 +311,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
             required
             disabled={isCreating}
           >
-            <option value="user">{t('createUser.roleUser', 'User')}</option>
+            <option value="user">{t('shared:labels.user', 'User')}</option>
             <option value="admin">{t('createUser.roleAdmin', 'Admin')}</option>
           </select>
         </div>
@@ -413,7 +413,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
             onClick={onCancel}
             disabled={isCreating}
           >
-            {t('common:buttons.cancel', 'Cancel')}
+            {t('shared:fields.cancel', 'Cancel')}
           </Button>
         )}
         <Button

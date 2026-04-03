@@ -238,7 +238,7 @@ const FamilyHistoryViewModal = ({
             <Stack gap="xs">
               {member.gender && (
                 <Text size="sm">
-                  <strong>{t('familyHistory.card.gender', 'Gender')}:</strong> {member.gender}
+                  <strong>{t('shared:fields.gender', 'Gender')}:</strong> {member.gender}
                 </Text>
               )}
               {member.birth_year && (
@@ -254,7 +254,7 @@ const FamilyHistoryViewModal = ({
               )}
               {member.is_shared && member.shared_by && (
                 <Text size="sm">
-                  <strong>{t('familyHistory.card.sharedBy', 'Shared By')}:</strong> {member.shared_by.name || t('familyHistory.table.unknown', 'Unknown')}
+                  <strong>{t('familyHistory.card.sharedBy', 'Shared By')}:</strong> {member.shared_by.name || t('shared:labels.unknown', 'Unknown')}
                 </Text>
               )}
               {member.is_shared && member.shared_at && (
@@ -279,7 +279,7 @@ const FamilyHistoryViewModal = ({
           <Card withBorder p="md">
             <Group justify="space-between" mb="md">
               <Text fw={500} size="lg">
-                {t('familyHistory.card.medicalConditions', 'Medical Conditions')}
+                {t('shared:labels.medicalConditions', 'Medical Conditions')}
               </Text>
               <Button
                 size="xs"

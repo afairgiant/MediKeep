@@ -156,7 +156,7 @@ const ConditionFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('conditions.form.tabs.basicInfo', 'Basic Info')}
+                {t('shared:labels.basicInformation', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
                 {t('conditions.form.tabs.clinical', 'Clinical Details')}
@@ -180,7 +180,7 @@ const ConditionFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('conditions.form.fields.diagnosis', 'Diagnosis')}
+                      label={t('shared:labels.diagnosis', 'Diagnosis')}
                       value={formData.diagnosis || ''}
                       onChange={handleTextInputChange('diagnosis')}
                       placeholder={t('conditions.form.placeholders.diagnosis', 'Enter diagnosis')}
@@ -199,7 +199,7 @@ const ConditionFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('conditions.form.fields.severity', 'Severity')}
+                      label={t('shared:fields.severity', 'Severity')}
                       value={formData.severity || null}
                       data={[
                         { value: 'mild', label: t('conditions.form.severity.mild', 'Mild') },
@@ -218,20 +218,20 @@ const ConditionFormWrapper = ({
                       label={t('shared:fields.status', 'Status')}
                       value={formData.status || null}
                       data={[
-                        { value: 'active', label: t('conditions.form.status.active', 'Active') },
-                        { value: 'inactive', label: t('conditions.form.status.inactive', 'Inactive') },
-                        { value: 'resolved', label: t('conditions.form.status.resolved', 'Resolved') },
+                        { value: 'active', label: t('shared:labels.active', 'Active') },
+                        { value: 'inactive', label: t('shared:labels.inactive', 'Inactive') },
+                        { value: 'resolved', label: t('shared:labels.resolved', 'Resolved') },
                         { value: 'chronic', label: t('conditions.form.status.chronic', 'Chronic') },
                       ]}
                       onChange={handleSelectChange('status')}
-                      placeholder={t('conditions.form.placeholders.status', 'Select status')}
+                      placeholder={t('shared:fields.selectStatus', 'Select status')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('conditions.form.fields.onsetDate', 'Onset Date')}
+                      label={t('shared:fields.onsetDate', 'Onset Date')}
                       value={parseDateInput(formData.onset_date)}
                       onChange={handleDateChange('onset_date')}
                       placeholder={dateInputFormat}
@@ -245,7 +245,7 @@ const ConditionFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('conditions.form.fields.endDate', 'End Date')}
+                      label={t('shared:labels.endDate', 'End Date')}
                       value={parseDateInput(formData.end_date)}
                       onChange={handleDateChange('end_date')}
                       placeholder={dateInputFormat}
@@ -264,7 +264,7 @@ const ConditionFormWrapper = ({
                       value={formData.practitioner_id || null}
                       data={practitionerOptions}
                       onChange={handleSelectChange('practitioner_id')}
-                      placeholder={t('conditions.form.placeholders.practitioner', 'Select practitioner')}
+                      placeholder={t('shared:fields.selectPractitioner', 'Select practitioner')}
                       description={t('conditions.form.descriptions.practitioner', 'Associated healthcare provider')}
                       searchable
                       clearable
@@ -284,7 +284,7 @@ const ConditionFormWrapper = ({
                         onChange={(tags) => {
                           onInputChange({ target: { name: 'tags', value: tags } });
                         }}
-                        placeholder={t('conditions.form.placeholders.tags', 'Add tags...')}
+                        placeholder={t('shared:fields.addTags', 'Add tags...')}
                       />
                     </Box>
                   </Grid.Col>
@@ -366,7 +366,7 @@ const ConditionFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('conditions.form.fields.clinicalNotes', 'Clinical Notes')}
+                  label={t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('conditions.form.placeholders.notes', 'Enter clinical notes, observations, or additional details')}
@@ -397,7 +397,7 @@ const ConditionFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}

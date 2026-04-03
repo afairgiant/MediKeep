@@ -12,7 +12,6 @@
     "deleteFailed": "Не удалось удалить канал",
     "deleteSuccess": "Канал успешно удалён",
     "description": "Добавляйте каналы доставки уведомлений и управляйте ими",
-    "disabled": "Отключён",
     "discord": {
       "avatarUrl": {
         "description": "Пользовательский аватар для бота уведомлений",
@@ -132,7 +131,6 @@
     "title": "Каналы уведомлений",
     "types": {
       "discord": "Discord",
-      "email": "Электронная почта",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -218,9 +216,7 @@
     "description": "Последние уведомления, отправленные через ваши каналы",
     "fields": {
       "channel": "Канал",
-      "error": "Ошибка",
-      "event": "Событие",
-      "time": "Время"
+      "event": "Событие"
     },
     "loading": "Загрузка истории...",
     "noHistory": "Уведомления ещё не отправлялись",
@@ -230,7 +226,6 @@
     "showMore": "Показать ещё",
     "status": {
       "failed": "Ошибка",
-      "pending": "Ожидание",
       "sent": "Отправлено"
     },
     "title": "История уведомлений"
@@ -296,7 +291,6 @@
       "allOperationsSuccess": "Все {{total}} операций ({{operation}}) выполнены успешно!",
       "deleteFailed": "Ошибка удаления",
       "downloadFailed": "Ошибка загрузки",
-      "error": "Ошибка",
       "operationFailed": "Ошибка операции",
       "operationFailedTitle": "Ошибка: {{operation}}",
       "operationPartial": "{{success}}/{{total}} операций ({{operation}}) выполнены успешно. {{failed}} с ошибками.",

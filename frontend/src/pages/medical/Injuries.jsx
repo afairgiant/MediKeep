@@ -364,7 +364,7 @@ const Injuries = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('injuries.title', 'Injuries')} icon={<IconBandage size={24} />} />
+      <PageHeader title={t('shared:categories.injuries', 'Injuries')} icon={<IconBandage size={24} />} />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -455,12 +455,12 @@ const Injuries = () => {
                   { header: t('injuries.bodyPart.label', 'Body Part'), accessor: 'body_part', priority: 'high', width: 120 },
                   { header: t('injuries.dateOfInjury.label', 'Date'), accessor: 'date_of_injury', priority: 'high', width: 110 },
                   { header: t('injuries.injuryType.label', 'Type'), accessor: 'injury_type_name', priority: 'medium', width: 100 },
-                  { header: t('common:fields.severity.label', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
+                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
                   { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'medium', width: 100 },
                   { header: t('injuries.practitioner.label', 'Practitioner'), accessor: 'practitioner_name', priority: 'low', width: 150 },
                 ]}
                 patientData={currentPatient}
-                tableName={t('injuries.title', 'Injuries')}
+                tableName={t('shared:categories.injuries', 'Injuries')}
                 onView={handleViewInjury}
                 onEdit={handleEditInjury}
                 onDelete={handleDeleteInjury}

@@ -23,22 +23,9 @@
     "loading": "Carregando seu painel médico...",
     "modules": {
       "adminDashboard": "Painel Administrativo",
-      "allergies": "Alergias",
-      "conditions": "Condições",
-      "emergencyContacts": "Contatos de Emergência",
       "exportRecords": "Exportar Registros",
-      "familyHistory": "Histórico Familiar",
-      "immunizations": "Imunizações",
-      "injuries": "Lesões",
-      "insurance": "Plano de saúde",
-      "medicalEquipment": "Equipamentos Médicos",
       "patientInfo": "Informações do Paciente",
-      "pharmacies": "Farmácias",
-      "practitioners": "Profissionais de Saúde",
-      "symptoms": "Sintomas",
-      "treatments": "Tratamentos",
-      "visitHistory": "Histórico de Consultas",
-      "vitalSigns": "Sinais Vitais"
+      "visitHistory": "Histórico de Consultas"
     },
     "search": {
       "advancedSearch": "Pesquisa Avançada",
@@ -72,7 +59,6 @@
     "sharePatient": "Compartilhar Paciente",
     "title": "Convites",
     "types": {
-      "familyHistory": "Histórico Familiar",
       "patientRecord": "Prontuário do Paciente"
     },
     "viewAll": "Ver todos os {{count}} convites",
@@ -80,29 +66,15 @@
     "viewAll_many": "View all {{count}} invitations",
     "viewAll_other": "Ver todos os {{count}} convites"
   },
-  "medicalRecords": {
-    "allergies": "Alergias",
-    "conditions": "Condições",
-    "immunizations": "Imunizações",
-    "injuries": "Lesões",
-    "medicalEquipment": "Equipamentos Médicos",
-    "pharmacies": "Farmácias",
-    "practitioners": "Profissionais de Saúde",
-    "symptoms": "Sintomas",
-    "treatments": "Tratamentos",
-    "visits": "Consultas"
-  },
   "menu": {
     "administration": "Administração",
     "backToDashboard": "Voltar ao painel",
     "dashboard": "Painel",
     "help": "Ajuda",
     "logout": "Sair",
-    "medicalRecords": "Registros Médicos",
     "patients": "Pacientes",
     "profile": "Perfil",
-    "reports": "Relatórios",
-    "settings": "Configurações"
+    "reports": "Relatórios"
   },
   "pages": {
     "dashboard": "Painel",
@@ -112,50 +84,30 @@
     "patientList": "Lista de Pacientes",
     "preferences": "Preferências",
     "reports": "Relatórios",
-    "settings": "Configurações",
     "userProfile": "Perfil do Usuário"
   },
   "sections": {
-    "emergencyContacts": "Contatos de Emergência",
-    "familyHistory": "Histórico Familiar",
-    "insurance": "Seguro",
     "medicalInfo": "Informações Médicas",
     "personalInfo": "Informações Pessoais",
-    "preferences": "Preferências",
-    "timeline": "Linha do Tempo"
+    "preferences": "Preferências"
   },
   "sidebarNav": {
     "items": {
       "adminDashboard": "Painel Administrativo",
-      "allergies": "Alergias",
       "backupManagement": "Gerenciamento de Backup",
-      "conditions": "Condições",
       "customReports": "Relatórios Personalizados",
       "dataModels": "Modelos de Dados",
-      "emergencyContacts": "Contatos de Emergência",
       "exportRecords": "Exportar Registros",
-      "familyHistory": "Histórico Familiar",
-      "immunizations": "Imunizações",
-      "injuries": "Lesões",
-      "insurance": "Seguro",
       "language": "Idioma",
-      "medicalEquipment": "Equipamentos Médicos",
       "patientInfo": "Informações do Paciente",
-      "pharmacies": "Farmácias",
-      "practitioners": "Profissionais de Saúde",
-      "settings": "Configurações",
-      "symptoms": "Sintomas",
       "systemHealth": "Saúde do Sistema",
       "tagManagement": "Gerenciamento de Tags",
       "theme": "Tema",
-      "treatments": "Tratamentos",
-      "visitHistory": "Histórico de Consultas",
-      "vitalSigns": "Sinais Vitais"
+      "visitHistory": "Histórico de Consultas"
     },
     "sections": {
       "administration": "Administração",
       "careAndTreatment": "Cuidados e Tratamento",
-      "medicalRecords": "Registros Médicos",
       "misc": "Diversos",
       "tools": "Ferramentas"
     }

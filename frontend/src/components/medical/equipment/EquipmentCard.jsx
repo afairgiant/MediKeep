@@ -20,7 +20,7 @@ const EquipmentCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -58,27 +58,27 @@ const EquipmentCard = ({
       {
         label: t('equipment.fields.modelNumber', 'Model'),
         value: equipment.model_number,
-        render: (value) => value || t('labels.notSpecified', 'Not specified')
+        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
       },
       {
         label: t('equipment.fields.serialNumber', 'Serial #'),
         value: equipment.serial_number,
-        render: (value) => value || t('labels.notSpecified', 'Not specified')
+        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
       },
       {
         label: t('equipment.fields.prescribedDate', 'Prescribed'),
         value: equipment.prescribed_date,
-        render: (value) => value ? formatLongDate(value) : t('labels.notSpecified', 'Not specified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified', 'Not specified')
       },
       {
         label: t('equipment.fields.nextService', 'Next Service'),
         value: equipment.next_service_date,
-        render: (value) => value ? formatLongDate(value) : t('labels.notSpecified', 'Not specified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified', 'Not specified')
       },
       {
         label: t('equipment.fields.supplier', 'Supplier'),
         value: equipment.supplier,
-        render: (value) => value || t('labels.notSpecified', 'Not specified')
+        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
       },
     ].filter(field => field.value);
 

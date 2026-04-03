@@ -354,7 +354,7 @@ const PatientInfo = () => {
       case 'OTHER':
         return t('shared:fields.other', 'Other');
       default:
-        return t('patientInfo.notSpecified', 'Not specified');
+        return t('shared:labels.notSpecified', 'Not specified');
     }
   };
 
@@ -391,7 +391,7 @@ const PatientInfo = () => {
             <Alert
               variant="light"
               color="red"
-              title={t('patientInfo.error', 'Error')}
+              title={t('shared:labels.error', 'Error')}
               withCloseButton
               onClose={() => setError('')}
               style={{ whiteSpace: 'pre-line' }}
@@ -472,12 +472,12 @@ const PatientInfo = () => {
                           <span>{formatLongDate(patientData.birth_date, true)}</span>
                         </div>
                         <div className="detail-group">
-                          <label>{t('patientInfo.fields.gender', 'Gender')}:</label>
+                          <label>{t('shared:fields.gender', 'Gender')}:</label>
                           <span>{getGenderDisplay(patientData.gender)}</span>
                         </div>
                       </SimpleGrid>
                       <div className="detail-group full-width" style={{ marginTop: 16 }}>
-                        <label>{t('patientInfo.fields.address', 'Address')}:</label>
+                        <label>{t('shared:labels.address', 'Address')}:</label>
                         <span>{patientData.address || t('patientInfo.notProvided', 'Not provided')}</span>
                       </div>
                     </div>

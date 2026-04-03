@@ -170,7 +170,7 @@ const ProcedureFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('procedures.form.procedureName', 'Procedure Name')}
+                      label={t('shared:fields.procedureName', 'Procedure Name')}
                       value={formData.procedure_name || ''}
                       onChange={handleTextInputChange('procedure_name')}
                       placeholder={t('procedures.form.procedureNamePlaceholder', 'Enter procedure name')}
@@ -226,7 +226,7 @@ const ProcedureFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder={t('procedures.form.statusPlaceholder', 'Select status')}
+                      placeholder={t('shared:fields.selectStatus', 'Select status')}
                       description={t('procedures.form.statusDesc', 'Current procedure status')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -239,9 +239,9 @@ const ProcedureFormWrapper = ({
                       data={[
                         { value: 'successful', label: t('procedures.form.outcomeSuccessful', 'Successful') },
                         { value: 'abnormal', label: t('procedures.form.outcomeAbnormal', 'Abnormal') },
-                        { value: 'complications', label: t('procedures.form.outcomeComplications', 'Complications') },
+                        { value: 'complications', label: t('shared:fields.complications', 'Complications') },
                         { value: 'inconclusive', label: t('procedures.form.outcomeInconclusive', 'Inconclusive') },
-                        { value: 'pending', label: t('procedures.form.outcomePending', 'Pending') },
+                        { value: 'pending', label: t('shared:fields.pending', 'Pending') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'outcome', value: value || '' } });
@@ -263,7 +263,7 @@ const ProcedureFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
-                      placeholder={t('procedures.form.practitionerPlaceholder', 'Select practitioner')}
+                      placeholder={t('shared:fields.selectPractitioner', 'Select practitioner')}
                       description={t('procedures.form.practitionerDesc', 'Healthcare provider performing procedure')}
                       searchable
                       clearable
@@ -281,7 +281,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('procedures.form.facility', 'Facility')}
+                      label={t('shared:labels.facility', 'Facility')}
                       value={formData.facility || ''}
                       onChange={handleTextInputChange('facility')}
                       placeholder={t('procedures.form.facilityPlaceholder', 'e.g., Hospital name')}
@@ -325,7 +325,7 @@ const ProcedureFormWrapper = ({
                         onChange={(tags) => {
                           onInputChange({ target: { name: 'tags', value: tags } });
                         }}
-                        placeholder={t('procedures.form.tagsPlaceholder', 'Add tags...')}
+                        placeholder={t('shared:fields.addTags', 'Add tags...')}
                       />
                     </Box>
                   </Grid.Col>
@@ -360,7 +360,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('procedures.form.complications', 'Complications')}
+                      label={t('shared:fields.complications', 'Complications')}
                       value={formData.procedure_complications || ''}
                       onChange={handleTextInputChange('procedure_complications')}
                       placeholder={t('procedures.form.complicationsPlaceholder', 'Document any complications')}
@@ -378,7 +378,7 @@ const ProcedureFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('procedures.form.clinicalNotes', 'Clinical Notes')}
+                  label={t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('procedures.form.clinicalNotesPlaceholder', 'Enter clinical notes, observations, or additional details')}
@@ -409,7 +409,7 @@ const ProcedureFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('procedures.form.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}

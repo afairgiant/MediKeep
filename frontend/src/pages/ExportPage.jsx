@@ -42,7 +42,7 @@ import { exportService } from '../services/exportService';
 
 const ExportPage = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
 
   // State management
@@ -254,7 +254,7 @@ const ExportPage = () => {
         {error && (
           <Alert
             icon={<IconAlertTriangle size={16} />}
-            title={t('labels.error', 'Error')}
+            title={t('shared:labels.error', 'Error')}
             color="red"
             variant="light"
             onClose={clearAlerts}

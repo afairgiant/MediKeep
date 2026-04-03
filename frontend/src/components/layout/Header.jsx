@@ -18,7 +18,7 @@ const Header = ({
   showLanguageSwitcher = true,
 }) => {
   const navigate = useNavigate();
-  const { t } = useTranslation('navigation');
+  const { t } = useTranslation(['navigation', 'shared']);
 
   const handleBack = () => {
     navigate(backPath);
@@ -45,7 +45,7 @@ const Header = ({
           className="settings-button"
           onClick={() => navigate('/settings')}
           type="button"
-          title={t('menu.settings')}
+          title={t('shared:labels.settings')}
         >
           ⚙️
         </button>

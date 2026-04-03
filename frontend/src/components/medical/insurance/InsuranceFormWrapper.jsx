@@ -651,7 +651,7 @@ const InsuranceFormWrapper = ({
               <Box mt="md">
                 <Stack gap="md">
                   {editingItem && (
-                    <Title order={4}>{t('insurance.viewModal.attachedDocuments', 'Attached Documents')}</Title>
+                    <Title order={4}>{t('shared:labels.attachedDocuments', 'Attached Documents')}</Title>
                   )}
                   <DocumentManagerWithProgress
                     entityType="insurance"
@@ -680,7 +680,7 @@ const InsuranceFormWrapper = ({
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {editingItem ? t('insurance.form.updateInsurance', 'Update Insurance') : t('insurance.form.addInsurance', 'Add Insurance')}

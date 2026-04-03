@@ -31,7 +31,7 @@ export const pharmacyFormFields = [
       { value: 'Specialty Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.specialtyPharmacy' },
       { value: 'Compounding Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.compoundingPharmacy' },
       { value: 'Online Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.onlinePharmacy' },
-      { value: 'Other', labelKey: 'medical:pharmacies.form.brand.options.other' },
+      { value: 'Other', labelKey: 'shared:fields.other' },
     ],
   },
   {

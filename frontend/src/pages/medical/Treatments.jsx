@@ -407,7 +407,7 @@ const Treatments = () => {
   return (
     <>
       <Container size="xl" py="sm">
-        <PageHeader title={t('treatments.title', 'Treatments')} icon="🩹" />
+        <PageHeader title={t('shared:categories.treatments', 'Treatments')} icon="🩹" />
 
         <Stack gap="sm" mt="md">
           <MedicalPageAlerts

@@ -19,7 +19,7 @@ import './ModelEdit.css'; // Reuse the same styles as ModelEdit
 const ModelCreate = () => {
   const { modelName } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
 
   const [metadata, setMetadata] = useState(null);
   const [formData, setFormData] = useState({});
@@ -188,7 +188,7 @@ const ModelCreate = () => {
               onClick={handleCancel}
               disabled={saving}
             >
-              {t('common:buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button
               variant="primary"

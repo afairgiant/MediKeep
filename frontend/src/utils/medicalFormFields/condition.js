@@ -25,7 +25,7 @@ export const conditionFormFields = [
   {
     name: 'severity',
     type: 'select',
-    labelKey: 'common:labels.severity',
+    labelKey: 'shared:fields.severity',
     placeholderKey: 'medical:conditions.severity.placeholder',
     descriptionKey: 'medical:conditions.severity.description',
     gridColumn: 6,
@@ -46,7 +46,7 @@ export const conditionFormFields = [
   {
     name: 'onset_date',
     type: 'date',
-    labelKey: 'common:labels.onsetDate',
+    labelKey: 'shared:fields.onsetDate',
     placeholderKey: 'medical:conditions.onsetDate.placeholder',
     descriptionKey: 'medical:conditions.onsetDate.description',
     gridColumn: 6,
@@ -55,7 +55,7 @@ export const conditionFormFields = [
   {
     name: 'end_date',
     type: 'date',
-    labelKey: 'common:labels.endDate',
+    labelKey: 'shared:labels.endDate',
     placeholderKey: 'medical:conditions.endDate.placeholder',
     descriptionKey: 'medical:conditions.endDate.description',
     gridColumn: 6,

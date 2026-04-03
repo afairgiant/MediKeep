@@ -66,7 +66,7 @@ const UserManagement = () => {
   const ROLE_OPTIONS = useMemo(() => [
     { value: '', label: t('users.roleFilter.all', 'All Roles') },
     { value: 'admin', label: t('users.roleFilter.admin', 'Admin') },
-    { value: 'user', label: t('users.roleFilter.user', 'User') },
+    { value: 'user', label: t('shared:labels.user', 'User') },
   ], [t]);
 
   const AUTH_METHOD_OPTIONS = useMemo(() => [
@@ -78,13 +78,13 @@ const UserManagement = () => {
 
   const STATUS_OPTIONS = useMemo(() => [
     { value: '', label: t('users.statusFilter.all', 'All Statuses') },
-    { value: 'active', label: t('users.statusFilter.active', 'Active') },
-    { value: 'inactive', label: t('users.statusFilter.inactive', 'Inactive') },
+    { value: 'active', label: t('shared:labels.active', 'Active') },
+    { value: 'inactive', label: t('shared:labels.inactive', 'Inactive') },
   ], [t]);
 
   const ASSIGNABLE_ROLES = useMemo(() => [
     { value: 'admin', label: t('users.roleFilter.admin', 'Admin') },
-    { value: 'user', label: t('users.roleFilter.user', 'User') },
+    { value: 'user', label: t('shared:labels.user', 'User') },
   ], [t]);
 
   // Data state
@@ -449,14 +449,14 @@ const UserManagement = () => {
               <Table striped highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{t('users.tableHeaders.user', 'User')}</Table.Th>
-                    <Table.Th>{t('users.tableHeaders.fullName', 'Full Name')}</Table.Th>
+                    <Table.Th>{t('shared:labels.user', 'User')}</Table.Th>
+                    <Table.Th>{t('shared:fields.fullName', 'Full Name')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.role', 'Role')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.auth', 'Auth')}</Table.Th>
                     <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.lastLogin', 'Last Login')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.created', 'Created')}</Table.Th>
-                    <Table.Th style={{ width: 60 }}>{t('users.tableHeaders.actions', 'Actions')}</Table.Th>
+                    <Table.Th style={{ width: 60 }}>{t('shared:labels.actions', 'Actions')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -491,7 +491,7 @@ const UserManagement = () => {
                           variant="light"
                           size="sm"
                         >
-                          {u.is_active === false ? t('users.statusFilter.inactive', 'Inactive') : t('users.statusFilter.active', 'Active')}
+                          {u.is_active === false ? t('shared:labels.inactive', 'Inactive') : t('shared:labels.active', 'Active')}
                         </Badge>
                       </Table.Td>
                       <Table.Td>
@@ -583,7 +583,7 @@ const UserManagement = () => {
               </Alert>
             )}
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeRoleModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closeRoleModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button
                 onClick={handleChangeRole}
                 loading={actionLoading}
@@ -618,7 +618,7 @@ const UserManagement = () => {
               onChange={(e) => setForceChange(e.currentTarget.checked)}
             />
             <Group justify="flex-end">
-              <Button variant="default" onClick={closePasswordModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closePasswordModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button
                 onClick={handleResetPassword}
                 loading={actionLoading}
@@ -658,7 +658,7 @@ const UserManagement = () => {
               </Alert>
             )}
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeToggleActiveModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closeToggleActiveModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button
                 color={selectedUser.is_active === false ? 'green' : 'red'}
                 onClick={handleToggleActive}
@@ -691,7 +691,7 @@ const UserManagement = () => {
                   <Table.Tr>
                     <Table.Th>{t('users.loginHistoryModal.dateTime', 'Date & Time')}</Table.Th>
                     <Table.Th>{t('users.loginHistoryModal.ipAddress', 'IP Address')}</Table.Th>
-                    <Table.Th>{t('users.loginHistoryModal.details', 'Details')}</Table.Th>
+                    <Table.Th>{t('shared:tabs.details', 'Details')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -733,7 +733,7 @@ const UserManagement = () => {
               disabled={isSelf(selectedUser) || isLastAdmin(selectedUser)}
             />
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeDeleteModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closeDeleteModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button
                 color="red"
                 onClick={handleDeleteUser}

@@ -1,7 +1,6 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
       "firstName": "First Name",
       "lastName": "Last Name",
       "linkPatient": {
@@ -25,12 +24,10 @@
     "activityTrend": "Activity Trend",
     "analyticsDateRange": "Analytics date range",
     "axisLabels": {
-      "activities": "Activities",
-      "date": "Date"
+      "activities": "Activities"
     },
     "breakdownByType": "Breakdown by type",
     "chartLabels": {
-      "allergies": "Allergies",
       "patients": "Patients",
       "userActivity": "User Activity",
       "vitals": "Vitals"
@@ -76,11 +73,9 @@
       "action": "Action",
       "entityType": "Entity Type",
       "recordId": "Record ID",
-      "timestamp": "Timestamp",
-      "user": "User"
+      "timestamp": "Timestamp"
     },
     "title": "Audit Log",
-    "userFilter": "User",
     "viewRecord": "View {{type}} record",
     "viewRecordAriaLabel": "View {{type}} #{{id}}"
   },
@@ -94,15 +89,12 @@
       "previewRestore": "Preview restore",
       "restore": "Restore",
       "tableHeaders": {
-        "actions": "Actions",
         "created": "Created",
         "fileExists": "File Exists",
         "filename": "Filename",
-        "size": "Size",
-        "type": "Type"
+        "size": "Size"
       },
       "title": "Existing Backups",
-      "unknown": "Unknown",
       "verify": "Verify"
     },
     "loading": "Loading backup management...",
@@ -167,9 +159,6 @@
       "filesCount": "{{count}} files ({{size}})",
       "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} files",
-      "filesOnly_one": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Manifest",
       "noAffectedData": "No affected data information available",
       "noStatistics": "No statistics available",
@@ -178,10 +167,6 @@
       "sqlStatements": "{{count}} SQL statements",
       "sqlStatements_one": "{{count}} SQL statements",
       "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} total records",
-      "totalRecords_one": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Type",
       "unknownType": "Unknown backup type",
       "warnings": "Warnings"
     },
@@ -206,7 +191,6 @@
       "title": "Backup Retention Settings"
     },
     "schedule": {
-      "active": "Active",
       "completedSuccessfully": "Completed successfully",
       "dayOfWeek": "Day of Week",
       "dayOfWeekDesc": "Which day should the weekly backup run?",
@@ -219,7 +203,6 @@
         "tue": "Tuesday",
         "wed": "Wednesday"
       },
-      "disabled": "Disabled",
       "failed": "Failed: {{error}}",
       "frequency": "Backup Frequency",
       "frequencyDesc": "Schedule automatic full backups (database + files)",
@@ -227,7 +210,6 @@
       "nextScheduledRun": "Next Scheduled Run",
       "presets": {
         "daily": "Daily",
-        "disabled": "Disabled",
         "every12Hours": "Every 12 hours",
         "every6Hours": "Every 6 hours",
         "weekly": "Weekly"
@@ -240,8 +222,7 @@
     },
     "subtitle": "Create and manage system backups",
     "tabs": {
-      "backups": "Backups",
-      "settings": "Settings"
+      "backups": "Backups"
     },
     "title": "Backup Management",
     "unsavedBadge": "Unsaved"
@@ -257,7 +238,6 @@
     "autoFeaturesTitle": "Auto-Generated Features",
     "cardSubtitle": "Fill out the form below to create a new user account",
     "cardTitle": "User Account Details",
-    "email": "Email",
     "emailPlaceholder": "Enter email address",
     "errors": {
       "accountCreateFailed": "Failed to create account",
@@ -294,7 +274,6 @@
     },
     "role": "Role",
     "roleAdmin": "Admin",
-    "roleUser": "User",
     "submitButton": "Create Account",
     "successRedirect": "User \"{{username}}\" created successfully!",
     "username": "Username",
@@ -320,7 +299,6 @@
       "dataModelsDesc": "View and manage database tables",
       "manageUsers": "Manage Users",
       "manageUsersDesc": "View and manage user accounts",
-      "settings": "Settings",
       "settingsDesc": "System configuration",
       "subtitle": "Common administrative tasks",
       "systemHealth": "System Health",
@@ -348,8 +326,7 @@
       "recentRegistrations": "+{{count}} this week",
       "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Total Users",
-      "vitalSigns": "Vital Signs"
+      "totalUsers": "Total Users"
     },
     "subtitle": "Comprehensive system overview and management",
     "systemHealth": {
@@ -367,10 +344,8 @@
   "dataModels": {
     "categories": {
       "coreMedical": "Core Medical",
-      "familyHistory": "Family History",
       "fileManagement": "File Management",
       "healthcareDirectory": "Healthcare Directory",
-      "medicalRecords": "Medical Records",
       "patientSupport": "Patient Support",
       "sharingAccess": "Sharing & Access",
       "system": "System"
@@ -413,7 +388,6 @@
     "title": "Data Models"
   },
   "directoryCard": {
-    "error": "Error",
     "files": "files",
     "mb": "MB",
     "ok": "OK"
@@ -455,7 +429,6 @@
       "connectionTest": "Connection Test",
       "databaseSize": "Database Size",
       "failed": "Failed",
-      "medicalRecords": "Medical Records",
       "passed": "Passed",
       "patientRecords": "Patient Records",
       "title": "Database Health"
@@ -495,7 +468,6 @@
     "sso": {
       "allowed": "Allowed",
       "blocked": "Blocked",
-      "disabled": "Disabled",
       "enabled": "Enabled",
       "passwordOnlyInfo": "Users can only log in with username/password",
       "provider": "Provider",
@@ -580,9 +552,6 @@
     "selected_one": "",
     "selected_other": "",
     "toggleColumnVisibility": "Toggle column visibility",
-    "totalRecords": "{{count}} total records",
-    "totalRecords_one": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Type <strong>DELETE</strong> to confirm",
     "usernameChangeLogout": "This will log you out immediately and you will need to log back in with the new username.",
     "usernameChangeText": "You are about to change your own username from <strong>\"{{oldUsername}}\"</strong> to <strong>\"{{newUsername}}\"</strong>.",
@@ -622,12 +591,10 @@
   },
   "shared": {
     "dark": "dark",
-    "disabled": "Disabled",
     "enabled": "Enabled",
     "healthy": "healthy",
     "info": "Info",
-    "light": "light",
-    "unknown": "Unknown"
+    "light": "light"
   },
   "sidebar": {
     "adminNavigation": "Admin navigation",
@@ -638,7 +605,6 @@
       "backupManagement": "Backup Management",
       "dataModels": "Data Models",
       "maintenance": "Maintenance",
-      "settings": "Settings",
       "systemHealth": "System Health",
       "trash": "Trash",
       "userManagement": "User Management"
@@ -689,7 +655,6 @@
     "deleteWarning": "This action cannot be undone. The file will be permanently removed from the system.",
     "errorLoading": "Error loading trash",
     "fileCount_one": "{{count}} file",
-    "fileCount_other": "{{count}} files",
     "fileDeleted": "File deleted",
     "fileDeletedMessage": "{{filename}} permanently deleted",
     "fileRestored": "File restored",
@@ -726,7 +691,6 @@
     "showingFiltered": "Showing {{shown}} of {{total}} {{files}}",
     "subtitle": "Manage deleted uploaded files. Restore files to their original location or permanently remove them to free up storage.",
     "tableHeaders": {
-      "actions": "Actions",
       "deleted": "Deleted",
       "filename": "Filename",
       "originalLocation": "Original Location",
@@ -767,7 +731,6 @@
     "loginHistory": "Login History",
     "loginHistoryModal": {
       "dateTime": "Date & Time",
-      "details": "Details",
       "ipAddress": "IP Address",
       "noHistory": "No login history found",
       "notAvailable": "N/A",
@@ -791,8 +754,7 @@
     "resetPassword": "Reset Password",
     "roleFilter": {
       "admin": "Admin",
-      "all": "All Roles",
-      "user": "User"
+      "all": "All Roles"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Cannot remove the last administrator role.",
@@ -804,18 +766,13 @@
     },
     "searchPlaceholder": "Search users...",
     "statusFilter": {
-      "active": "Active",
-      "all": "All Statuses",
-      "inactive": "Inactive"
+      "all": "All Statuses"
     },
     "tableHeaders": {
-      "actions": "Actions",
       "auth": "Auth",
       "created": "Created",
-      "fullName": "Full Name",
       "lastLogin": "Last Login",
-      "role": "Role",
-      "user": "User"
+      "role": "Role"
     },
     "title": "User Management",
     "toggleActiveModal": {

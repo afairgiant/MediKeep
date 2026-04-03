@@ -12,7 +12,6 @@
     "deleteFailed": "Nie udało się usunąć kanału",
     "deleteSuccess": "Kanał usunięty pomyślnie",
     "description": "Dodaj i zarządzaj kanałami dostarczania powiadomień",
-    "disabled": "Wyłączony",
     "discord": {
       "avatarUrl": {
         "description": "Niestandardowy awatar dla bota powiadomień",
@@ -132,7 +131,6 @@
     "title": "Kanały powiadomień",
     "types": {
       "discord": "Discord",
-      "email": "E-mail",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -218,9 +216,7 @@
     "description": "Ostatnie powiadomienia wysłane przez Twoje kanały",
     "fields": {
       "channel": "Kanał",
-      "error": "Błąd",
-      "event": "Zdarzenie",
-      "time": "Czas"
+      "event": "Zdarzenie"
     },
     "loading": "Ładowanie historii...",
     "noHistory": "Brak wysłanych powiadomień",
@@ -230,7 +226,6 @@
     "showMore": "Pokaż więcej",
     "status": {
       "failed": "Nieudane",
-      "pending": "Oczekujące",
       "sent": "Wysłane"
     },
     "title": "Historia powiadomień"
@@ -296,7 +291,6 @@
       "allOperationsSuccess": "Wszystkie {{total}} {{operation}} ukończone pomyślnie!",
       "deleteFailed": "Usunięcie nieudane",
       "downloadFailed": "Pobieranie nieudane",
-      "error": "Błąd",
       "operationFailed": "Operacja nieudana",
       "operationFailedTitle": "{{operation}} nieudane",
       "operationPartial": "{{success}}/{{total}} {{operation}} ukończone pomyślnie. {{failed}} nieudanych.",

@@ -333,7 +333,7 @@ const Dashboard = () => {
 
   const treatmentModules = [
     {
-      title: t('dashboard.modules.treatments', 'Treatments'),
+      title: t('shared:categories.treatments', 'Treatments'),
       icon: IconClipboardList,
       color: 'cyan',
       link: '/treatments',
@@ -348,31 +348,31 @@ const Dashboard = () => {
 
   const monitoringModules = [
     {
-      title: t('dashboard.modules.vitalSigns', 'Vital Signs'),
+      title: t('shared:categories.vital_signs', 'Vital Signs'),
       icon: IconHeartbeat,
       color: 'red',
       link: '/vitals',
     },
     {
-      title: t('dashboard.modules.symptoms', 'Symptoms'),
+      title: t('shared:categories.symptoms', 'Symptoms'),
       icon: IconStethoscope,
       color: 'blue',
       link: '/symptoms',
     },
     {
-      title: t('dashboard.modules.conditions', 'Conditions'),
+      title: t('shared:categories.conditions', 'Conditions'),
       icon: IconBrain,
       color: 'pink',
       link: '/conditions',
     },
     {
-      title: t('dashboard.modules.allergies', 'Allergies'),
+      title: t('shared:categories.allergies', 'Allergies'),
       icon: IconAlertTriangle,
       color: 'orange',
       link: '/allergies',
     },
     {
-      title: t('dashboard.modules.injuries', 'Injuries'),
+      title: t('shared:categories.injuries', 'Injuries'),
       icon: IconBandage,
       color: 'red',
       link: '/injuries',
@@ -381,7 +381,7 @@ const Dashboard = () => {
 
   const preventionModules = [
     {
-      title: t('dashboard.modules.immunizations', 'Immunizations'),
+      title: t('shared:categories.immunizations', 'Immunizations'),
       icon: IconVaccine,
       color: 'violet',
       link: '/immunizations',
@@ -393,7 +393,7 @@ const Dashboard = () => {
       link: '/visits',
     },
     {
-      title: t('dashboard.modules.familyHistory', 'Family History'),
+      title: t('shared:categories.family_history', 'Family History'),
       icon: IconUsers,
       color: 'grape',
       link: '/family-history',
@@ -403,13 +403,13 @@ const Dashboard = () => {
   // Additional resources
   const additionalModules = [
     {
-      title: t('dashboard.modules.insurance', 'Insurance'),
+      title: t('shared:categories.insurance', 'Insurance'),
       icon: IconShield,
       color: 'violet',
       link: '/insurance',
     },
     {
-      title: t('dashboard.modules.emergencyContacts', 'Emergency Contacts'),
+      title: t('shared:categories.emergency_contacts', 'Emergency Contacts'),
       icon: IconPhoneCall,
       color: 'red',
       link: '/emergency-contacts',
@@ -421,19 +421,19 @@ const Dashboard = () => {
       link: '/export',
     },
     {
-      title: t('dashboard.modules.practitioners', 'Practitioners'),
+      title: t('shared:categories.practitioners', 'Practitioners'),
       icon: IconUser,
       color: 'blue',
       link: '/practitioners',
     },
     {
-      title: t('dashboard.modules.pharmacies', 'Pharmacies'),
+      title: t('shared:categories.pharmacies', 'Pharmacies'),
       icon: IconBuilding,
       color: 'green',
       link: '/pharmacies',
     },
     {
-      title: t('dashboard.modules.medicalEquipment', 'Medical Equipment'),
+      title: t('shared:categories.medical_equipment', 'Medical Equipment'),
       icon: IconDeviceDesktop,
       color: 'orange',
       link: '/medical-equipment',

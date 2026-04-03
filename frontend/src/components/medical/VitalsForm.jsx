@@ -392,7 +392,7 @@ const VitalsForm = ({
           },
           {
             value: 'pharmacy',
-            label: t('vitals.form.locations.pharmacy', 'Pharmacy'),
+            label: t('shared:fields.pharmacy', 'Pharmacy'),
           },
           {
             value: 'ambulatory',
@@ -890,7 +890,7 @@ const VitalsForm = ({
                 maxDate={maxDateStr}
               />
               <TimeInput
-                label={t('vitals.form.selectTime', 'Time')}
+                label={t('shared:labels.time', 'Time')}
                 value={timeValue}
                 onChange={handleTimeChange}
               />
@@ -1019,7 +1019,7 @@ const VitalsForm = ({
                 {t('vitals.tabs.dateTime', 'Date & Time')}
               </Tabs.Tab>
               <Tabs.Tab value="vitals" leftSection={<IconActivity size={16} />}>
-                {t('vitals.tabs.vitalSigns', 'Vital Signs')}
+                {t('shared:categories.vital_signs', 'Vital Signs')}
               </Tabs.Tab>
               <Tabs.Tab value="context" leftSection={<IconMapPin size={16} />}>
                 {t('vitals.tabs.context', 'Context')}
@@ -1146,7 +1146,7 @@ const VitalsForm = ({
               onClick={onCancel}
               disabled={isLoading}
             >
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
 
             <Button

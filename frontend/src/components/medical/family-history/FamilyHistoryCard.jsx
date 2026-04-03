@@ -60,7 +60,7 @@ const FamilyHistoryCard = ({
   onBulkToggle,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
 
   const handleError = (error, action) => {
@@ -280,7 +280,7 @@ const FamilyHistoryCard = ({
 
     if (member.gender) {
       fields.push({
-        label: t('familyHistory.card.gender', 'Gender'),
+        label: t('shared:fields.gender', 'Gender'),
         value: member.gender
       });
     }
@@ -302,7 +302,7 @@ const FamilyHistoryCard = ({
     if (member.is_shared && member.shared_by) {
       fields.push({
         label: t('familyHistory.card.sharedBy', 'Shared By'),
-        value: member.shared_by.name || t('familyHistory.table.unknown', 'Unknown')
+        value: member.shared_by.name || t('shared:labels.unknown', 'Unknown')
       });
     }
 
@@ -327,7 +327,7 @@ const FamilyHistoryCard = ({
         <Collapse in={isExpanded}>
           <Divider mb="md" />
           <Group justify="space-between" mb="md">
-            <Text fw={500}>{t('familyHistory.card.medicalConditions', 'Medical Conditions')}</Text>
+            <Text fw={500}>{t('shared:labels.medicalConditions', 'Medical Conditions')}</Text>
             {!member.is_shared && (
               <Button
                 size="xs"

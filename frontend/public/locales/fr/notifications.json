@@ -12,7 +12,6 @@
     "deleteFailed": "Echec de la suppression du canal",
     "deleteSuccess": "Canal supprimé avec succès",
     "description": "Ajoutez et gérez vos canaux de notification",
-    "disabled": "Désactivé",
     "discord": {
       "avatarUrl": {
         "description": "Avatar personnalisé pour le bot de notification",
@@ -131,7 +130,6 @@
     "title": "Canaux de notification",
     "types": {
       "discord": "Discord",
-      "email": "Email",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -217,9 +215,7 @@
     "description": "Notifications récentes envoyées dans vos canaux",
     "fields": {
       "channel": "Canal",
-      "error": "Erreur",
-      "event": "Evénement",
-      "time": "Heure"
+      "event": "Evénement"
     },
     "loading": "Chargement de l'historique...",
     "noHistory": "Aucune notification envoyée pour l'instant",
@@ -229,7 +225,6 @@
     "showMore": "Afficher plus",
     "status": {
       "failed": "Echec",
-      "pending": "En cours",
       "sent": "Envoyée"
     },
     "title": "Historique des notifications"
@@ -295,7 +290,6 @@
       "allOperationsSuccess": "{{total}} {{operation}}s : toutes complété(e)s avec succès !",
       "deleteFailed": "Echec de la suppression",
       "downloadFailed": "Echec du téléchargement",
-      "error": "Erreur",
       "operationFailed": "Echec de l'opération",
       "operationFailedTitle": "Echec : {{operation}}",
       "operationPartial": "{{success}}/{{total}} {{operation}}s complété(e)s avec succès. {{failed}} en échec.",

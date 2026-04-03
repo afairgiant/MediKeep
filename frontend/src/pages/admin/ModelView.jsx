@@ -38,7 +38,7 @@ import logger from '../../services/logger';
 const ModelView = () => {
   const { modelName, recordId } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const { formatDateTime } = useDateFormat();
 
   const [record, setRecord] = useState(null);
@@ -268,7 +268,7 @@ const ModelView = () => {
               </Text>
             )}
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={closeDeleteModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closeDeleteModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button color="red" onClick={handleConfirmDelete} loading={deleting}>
                 {t('common:buttons.delete', 'Delete')}
               </Button>

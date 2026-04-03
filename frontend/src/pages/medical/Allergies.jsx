@@ -332,7 +332,7 @@ const Allergies = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('allergies.title')} icon="⚠️" />
+      <PageHeader title={t('shared:categories.allergies')} icon="⚠️" />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -418,14 +418,14 @@ const Allergies = () => {
                 columns={[
                   { header: t('allergies.allergen.label'), accessor: 'allergen', priority: 'high', width: 150 },
                   { header: t('allergies.reaction.label'), accessor: 'reaction', priority: 'high', width: 180 },
-                  { header: t('common:fields.severity.label'), accessor: 'severity', priority: 'high', width: 100 },
-                  { header: t('allergies.onsetDate.label'), accessor: 'onset_date', priority: 'medium', width: 120 },
+                  { header: t('shared:fields.severity'), accessor: 'severity', priority: 'high', width: 100 },
+                  { header: t('shared:fields.onsetDate'), accessor: 'onset_date', priority: 'medium', width: 120 },
                   { header: t('allergies.relatedMedication.label'), accessor: 'medication_name', priority: 'low', width: 150 },
                   { header: t('shared:fields.status'), accessor: 'status', priority: 'medium', width: 100 },
                   { header: t('shared:tabs.notes'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
-                tableName={t('allergies.title')}
+                tableName={t('shared:categories.allergies')}
                 onView={handleViewAllergy}
                 onEdit={handleEditAllergy}
                 onDelete={handleDeleteAllergy}

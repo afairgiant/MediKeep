@@ -115,7 +115,7 @@ const InjuryViewModal = ({
       </Text>
       {children || (
         <Text size="sm" fw={500}>
-          {value || t('common:labels.notSpecified', 'Not specified')}
+          {value || t('shared:labels.notSpecified', 'Not specified')}
         </Text>
       )}
     </Box>
@@ -195,7 +195,7 @@ const InjuryViewModal = ({
                         <Text size="sm" fw={500}>
                           {injury.date_of_injury
                             ? formatLongDate(injury.date_of_injury)
-                            : t('common:labels.notSpecified', 'Not specified')}
+                            : t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Group>
                     </FieldDisplay>
@@ -225,7 +225,7 @@ const InjuryViewModal = ({
                         </Text>
                       ) : (
                         <Text size="sm" fw={500}>
-                          {t('common:labels.notSpecified', 'Not specified')}
+                          {t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       )}
                     </FieldDisplay>
@@ -288,7 +288,7 @@ const InjuryViewModal = ({
             <Box mt="md">
               <Paper p="md" withBorder>
                 <FieldDisplay
-                  label={t('injuries.notes.label', 'Additional Notes')}
+                  label={t('shared:fields.additionalNotes', 'Additional Notes')}
                   value={injury.notes}
                 />
               </Paper>

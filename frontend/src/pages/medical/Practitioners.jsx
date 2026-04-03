@@ -246,7 +246,7 @@ const Practitioners = () => {
       setShowPracticeEditModal(true);
     } catch {
       notifications.show({
-        title: t('labels.error'),
+        title: t('shared:labels.error'),
         message: t('practitioners.editPracticeError', 'Failed to load practice for editing'),
         color: 'red',
       });
@@ -327,7 +327,7 @@ const Practitioners = () => {
       <Tabs defaultValue="practitioners" mt="md">
         <Tabs.List mb="sm" className="no-print">
           <Tabs.Tab value="practitioners">
-            {t('practitioners.tabs.practitioners', 'Practitioners')}
+            {t('shared:categories.practitioners', 'Practitioners')}
           </Tabs.Tab>
           <Tabs.Tab value="practices" leftSection={<IconBuilding size={16} />}>
             {t('practitioners.tabs.practices', 'Practices')}
@@ -421,10 +421,10 @@ const Practitioners = () => {
                               persistKey={`practitioners-group-${group.id}`}
                               data={group.practitioners}
                               columns={[
-                                { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                                { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                                { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                                { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                                { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                                { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                                { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                                { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
                                 { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                               ]}
                               tableName={group.name}
@@ -484,10 +484,10 @@ const Practitioners = () => {
                               persistKey="practitioners-ungrouped"
                               data={groupedPractitioners.ungrouped}
                               columns={[
-                                { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                                { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                                { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                                { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                                { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                                { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                                { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                                { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
                                 { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                               ]}
                               tableName={t('practitioners.ungroupedTitle', 'Independent Practitioners')}
@@ -538,11 +538,11 @@ const Practitioners = () => {
                     persistKey="practitioners"
                     data={filteredPractitioners}
                     columns={[
-                      { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                      { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                      { header: t('practitioners.table.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
-                      { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                      { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                      { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                      { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                      { header: t('shared:labels.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
+                      { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                      { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
                       { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                     ]}
                     tableName={t('practitioners.title', 'Healthcare Practitioners')}

@@ -17,7 +17,7 @@ const VitalCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
   const { formatLongDate } = useDateFormat();
 
@@ -57,7 +57,7 @@ const VitalCard = ({
       {
         label: t('vitals.card.recordedDate', 'Recorded Date'),
         value: vital.recorded_date,
-        render: (value) => value ? formatLongDate(value) : t('labels.notSpecified', 'Not specified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified', 'Not specified')
       },
       {
         label: t('vitals.stats.bloodPressure', 'Blood Pressure'),
@@ -103,7 +103,7 @@ const VitalCard = ({
         label: t('vitals.card.recordedBy', 'Recorded By'),
         value: vital.practitioner_id,
         render: (value) => {
-          if (!value) return t('labels.notSpecified', 'Not specified');
+          if (!value) return t('shared:labels.notSpecified', 'Not specified');
           return (
             <Text
               size="sm"
@@ -120,13 +120,13 @@ const VitalCard = ({
 
     // Generate a display title
     const title = vital.recorded_date
-      ? `${t('vitals.title', 'Vitals')} - ${formatLongDate(vital.recorded_date)}`
+      ? `${t('shared:categories.vital_signs', 'Vitals')} - ${formatLongDate(vital.recorded_date)}`
       : t('vitals.card.title', 'Vital Signs Record');
 
     return (
       <BaseMedicalCard
         title={title}
-        subtitle={vital.location ? `${t('vitals.card.location', 'Location')}: ${vital.location}` : null}
+        subtitle={vital.location ? `${t('shared:labels.location', 'Location')}: ${vital.location}` : null}
         badges={badges}
         fields={fields}
         notes={vital.notes}

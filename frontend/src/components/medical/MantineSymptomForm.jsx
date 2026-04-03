@@ -159,7 +159,7 @@ const MantineSymptomForm = ({
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="details" leftSection={<IconClipboard size={16} />}>
-                {t('symptoms.tabs.details')}
+                {t('shared:tabs.details')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingSymptom
@@ -188,7 +188,7 @@ const MantineSymptomForm = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 4 }}>
                     <TextInput
-                      label={t('symptoms.parent.category.label')}
+                      label={t('shared:labels.category')}
                       value={formData.category || ''}
                       onChange={handleTextInputChange('category')}
                       placeholder={t('symptoms.parent.category.placeholder')}
@@ -225,7 +225,7 @@ const MantineSymptomForm = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder={t('symptoms.parent.status.placeholder')}
+                      placeholder={t('shared:fields.selectStatus')}
                       required
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
@@ -339,14 +339,14 @@ const MantineSymptomForm = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.symptom_name?.trim()}
             >
               {editingSymptom ? t('common:buttons.update') : t('common:buttons.create')}{' '}
-              {t('symptoms.title')}
+              {t('shared:categories.symptoms')}
             </SubmitButton>
           </Group>
         </Stack>

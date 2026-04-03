@@ -100,7 +100,7 @@ const VitalsList = ({
   showActions = true,
   limit = 10,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
   const { formatDate, formatDateTime } = useDateFormat();
   // Use passed data if available, otherwise load internally
@@ -1032,7 +1032,7 @@ const VitalsList = ({
                 <Table striped highlightOnHover size="xs">
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>{t('vitals.summary.time', 'Time')}</Table.Th>
+                      <Table.Th>{t('shared:labels.time', 'Time')}</Table.Th>
                       <Table.Th>{t('vitals.modal.bloodGlucose', 'Glucose')} (mg/dL)</Table.Th>
                       {showActions && <Table.Th />}
                     </Table.Tr>
@@ -1206,7 +1206,7 @@ const VitalsList = ({
                     sorted="recorded_date"
                     onSort={() => handleSort('recorded_date')}
                   >
-                    {t('vitals.table.date', 'Date')}
+                    {t('shared:labels.date', 'Date')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -1270,7 +1270,7 @@ const VitalsList = ({
                 {showActions && (
                   <Table.Th>
                     <Text fw={500} size="sm">
-                      {t('labels.actions', 'Actions')}
+                      {t('shared:labels.actions', 'Actions')}
                     </Text>
                   </Table.Th>
                 )}

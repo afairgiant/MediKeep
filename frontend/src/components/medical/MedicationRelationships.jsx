@@ -103,7 +103,7 @@ const MedicationRelationships = ({
   medicationId,
   conditions = [],
 }) => {
-  const { t } = useTranslation(['common', 'errors']);
+  const { t } = useTranslation(['common', 'errors', 'shared']);
   const isMedicationDirection = direction === 'medication';
   const config = DIRECTION_CONFIG[direction];
 
@@ -578,7 +578,7 @@ const MedicationRelationships = ({
 
           <Group justify="flex-end" gap="sm">
             <Button variant="light" onClick={resetAndCloseModal}>
-              {t('buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <Button
               onClick={handleAddRelationship}

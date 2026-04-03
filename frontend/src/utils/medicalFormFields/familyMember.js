@@ -33,7 +33,7 @@ export const familyMemberFormFields = [
       { value: 'uncle', labelKey: 'medical:familyHistory.form.member.relationshipOptions.uncle' },
       { value: 'aunt', labelKey: 'medical:familyHistory.form.member.relationshipOptions.aunt' },
       { value: 'cousin', labelKey: 'medical:familyHistory.form.member.relationshipOptions.cousin' },
-      { value: 'other', labelKey: 'medical:familyHistory.form.member.relationshipOptions.other' },
+      { value: 'other', labelKey: 'shared:fields.other' },
     ],
   },
   {
@@ -47,7 +47,7 @@ export const familyMemberFormFields = [
     options: [
       { value: 'male', labelKey: 'medical:familyHistory.form.member.genderOptions.male' },
       { value: 'female', labelKey: 'medical:familyHistory.form.member.genderOptions.female' },
-      { value: 'other', labelKey: 'medical:familyHistory.form.member.genderOptions.other' },
+      { value: 'other', labelKey: 'shared:fields.other' },
     ],
   },
   {

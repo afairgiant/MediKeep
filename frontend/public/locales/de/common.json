@@ -61,15 +61,11 @@
     "showMore": "Show more",
     "tryAgain": "Try Again",
     "update": "Aktualisieren",
-    "view": "Ansehen",
-    "cancel": "Cancel"
+    "view": "Ansehen"
   },
   "common": {
     "buttons": {
       "close": "Close"
-    },
-    "labels": {
-      "notSpecified": "Not specified"
     }
   },
   "conditions": {
@@ -95,14 +91,9 @@
         "tags": "Tags hinzufügen, um Erkrankungen zu kategorisieren und zu organisieren"
       },
       "fields": {
-        "clinicalNotes": "Klinische Notizen",
         "codeDescription": "Code-Beschreibung",
         "conditionName": "Erkrankungsname",
-        "diagnosis": "Diagnose",
-        "endDate": "Ende",
         "icd10Code": "ICD-10-Code",
-        "onsetDate": "Beginn",
-        "severity": "Schweregrad",
         "snomedCode": "SNOMED-Code"
       },
       "medicationsDescription": "Link medications used to treat or manage this condition.",
@@ -112,11 +103,8 @@
         "diagnosis": "Diagnose eingeben",
         "icd10Code": "z.B. E11.9",
         "notes": "Klinische Notizen, Beobachtungen oder zusätzliche Details eingeben",
-        "practitioner": "Behandler auswählen",
         "severity": "Schweregrad auswählen",
-        "snomedCode": "z.B. 44054006",
-        "status": "Status auswählen",
-        "tags": "Tags hinzufügen..."
+        "snomedCode": "z.B. 44054006"
       },
       "saving": "Erkrankung wird gespeichert...",
       "severity": {
@@ -126,13 +114,9 @@
         "severe": "Schwer"
       },
       "status": {
-        "active": "Aktiv",
-        "chronic": "Chronisch",
-        "inactive": "Inaktiv",
-        "resolved": "Geheilt"
+        "chronic": "Chronisch"
       },
       "tabs": {
-        "basicInfo": "Grundinformationen",
         "clinical": "Klinische Details"
       },
       "updateCondition": "Erkrankung aktualisieren"
@@ -143,21 +127,15 @@
       "labels": {
         "codeDescription": "Code-Beschreibung",
         "conditionName": "Erkrankungsname",
-        "diagnosis": "Diagnose",
-        "duration": "Dauer",
         "endDate": "Ende",
         "icd10Code": "ICD-10-Code",
         "onsetDate": "Beginn",
-        "severity": "Schweregrad",
         "snomedCode": "SNOMED-Code"
       },
       "noNotesAvailable": "Keine klinischen Notizen verfügbar",
       "noPractitionerAssigned": "Kein Behandler zugewiesen",
       "sections": {
-        "basicInfo": "Grundinformationen",
-        "clinicalNotes": "Klinische Notizen",
-        "medicalCodes": "Medizinische Codes",
-        "timeline": "Zeitverlauf"
+        "medicalCodes": "Medizinische Codes"
       },
       "tabs": {
         "clinical": "Klinische Details"
@@ -171,22 +149,16 @@
     },
     "table": {
       "condition": "Erkrankung",
-      "endDate": "Ende",
-      "icd10": "ICD-10",
-      "onsetDate": "Beginn",
-      "severity": "Schweregrad"
-    },
-    "title": "Medizinische Erkrankungen"
+      "icd10": "ICD-10"
+    }
   },
   "emergencyContacts": {
     "actions": {
       "addNew": "Notfallkontakt hinzufügen"
     },
     "card": {
-      "active": "Aktiv",
       "address": "Adresse:",
       "email": "E-Mail:",
-      "inactive": "Inaktiv",
       "notes": "📝 Notizen",
       "phone": "Telefon:",
       "primary": "PRIMÄR",
@@ -200,29 +172,21 @@
     "page": {
       "loading": "Notfallkontakte werden geladen...",
       "noContacts": "Keine Notfallkontakte gefunden",
-      "noContactsDescription": "Es ist wichtig, Notfallkontakte für medizinische Notfälle verfügbar zu haben.",
-      "tableName": "Notfallkontakte"
+      "noContactsDescription": "Es ist wichtig, Notfallkontakte für medizinische Notfälle verfügbar zu haben."
     },
     "table": {
-      "email": "E-Mail",
-      "name": "Name",
-      "phone": "Telefon",
-      "primary": "Primär",
-      "relationship": "Beziehung"
+      "primary": "Primär"
     },
     "viewModal": {
-      "address": "Adresse",
       "contactInfo": "📞 Kontaktinformationen",
       "editContact": "Kontakt bearbeiten",
       "emailAddress": "E-Mail-Adresse",
       "icon": "🚨",
-      "noNotes": "Keine Notizen verfügbar",
       "notes": "📝 Notizen",
       "primaryPhone": "Haupttelefon",
       "secondaryPhone": "Zweites Telefon",
       "title": "Notfallkontakt Details"
-    },
-    "title": "Notfallkontakte"
+    }
   },
   "equipment": {
     "addEquipment": "Add Equipment",
@@ -238,7 +202,6 @@
     "form": {
       "create": "Create Equipment",
       "lastService": "Last Service Date",
-      "manufacturer": "Manufacturer",
       "manufacturerPlaceholder": "e.g., ResMed, Philips",
       "modelNumber": "Model Number",
       "modelPlaceholder": "e.g., AirSense 11",
@@ -247,14 +210,12 @@
       "nextService": "Next Service Date",
       "notesPlaceholder": "Additional notes about this equipment",
       "practitioner": "Prescribed By",
-      "practitionerPlaceholder": "Select practitioner",
       "prescribedDate": "Prescribed Date",
       "saving": "Saving equipment...",
       "serialNumber": "Serial Number",
       "serialPlaceholder": "Equipment serial number",
       "supplier": "Supplier",
       "supplierPlaceholder": "Equipment supplier",
-      "tagsPlaceholder": "Add tags...",
       "type": "Equipment Type",
       "typePlaceholder": "Select type",
       "update": "Update Equipment",
@@ -265,12 +226,9 @@
     "loadingHint": "If this takes too long, please refresh the page",
     "noEquipmentFound": "No Equipment Found",
     "startAdding": "Start by adding your first piece of medical equipment.",
-    "title": "Medical Equipment",
     "viewModal": {
-      "basicInfo": "Basic Information",
       "dates": "Important Dates",
       "lastService": "Last Service",
-      "manufacturer": "Manufacturer",
       "manufacturerDetails": "Manufacturer Details",
       "modelNumber": "Model Number",
       "name": "Equipment Name",
@@ -377,19 +335,8 @@
     "loading": "Exportoptionen werden geladen...",
     "scopes": {
       "all": "Alle Aufzeichnungen",
-      "allergies": "Allergien",
-      "conditions": "Medizinische Erkrankungen",
-      "emergency_contacts": "Notfallkontakte",
       "encounters": "Begegnungen",
-      "family_history": "Familiengeschichte",
-      "immunizations": "Impfungen",
-      "injuries": "Verletzungen",
-      "insurance": "Versicherung",
-      "pharmacies": "Apotheken",
-      "practitioners": "Gesundheitsdienstleister",
-      "symptoms": "Symptome",
-      "treatments": "Behandlungen",
-      "vitals": "Vitalzeichen"
+      "practitioners": "Gesundheitsdienstleister"
     },
     "success": {
       "bulkExportComplete": "Massenexport erfolgreich abgeschlossen! Ihre ZIP-Datei mit {{count}} Datentypen wurde heruntergeladen.",
@@ -413,8 +360,6 @@
       "deathYear": "Todesjahr",
       "deceased": "Verstorben",
       "diagnosedAtAge": "Diagnostiziert im Alter von {{age}}",
-      "gender": "Geschlecht",
-      "medicalConditions": "Erkrankungen",
       "noConditionsRecorded": "Keine Erkrankungen erfasst",
       "notSelectable": "Nicht auswählbar",
       "selected": "Ausgewählt",
@@ -476,17 +421,13 @@
       "diagnosisAge": "Diagnosealter",
       "familyMember": "Familienmitglied",
       "noConditions": "Keine Erkrankungen",
-      "relationship": "Verwandtschaft",
       "sharedBy": "Geteilt von",
-      "type": "Typ",
-      "unknown": "Unbekannt",
       "yearsOld": "{{age}} Jahre"
     },
     "tabs": {
       "myFamily": "Meine Familie",
       "sharedWithMe": "Mit mir geteilt"
     },
-    "title": "Familiengeschichte",
     "viewModal": {
       "addCondition": "Erkrankung hinzufügen",
       "cannotAddConditionsShared": "Erkrankungen können nicht zu geteiltem Familienmitglied hinzugefügt werden",
@@ -506,28 +447,20 @@
   "fields": {
     "endDate": {
       "description": "Wann dies geendet hat (falls zutreffend)",
-      "label": "Enddatum",
-      "placeholder": "Wähle das Enddatum"
+      "placeholder": "Wähle das Enddatum",
+      "label": "Enddatum"
     },
     "notes": {
       "description": "Weitere Details oder Notizen",
       "placeholder": "Zusätzliche Informationen..."
     },
-    "onsetDate": {
-      "label": "Beginnsdatum"
-    },
-    "severity": {
-      "label": "Schweregrad",
-      "placeholder": "Wähle den Schweregrad"
-    },
     "startDate": {
       "description": "Wann dies begonnen hat",
-      "label": "Anfangsdatum",
-      "placeholder": "Wähle das Anfangsdatum"
+      "placeholder": "Wähle das Anfangsdatum",
+      "label": "Anfangsdatum"
     },
     "status": {
-      "description": "Aktueller Status",
-      "placeholder": "Status auswählen"
+      "description": "Aktueller Status"
     },
     "tags": {
       "description": "Tags hinzufügen, um diesen Eintrag später zu finden",
@@ -535,7 +468,6 @@
     }
   },
   "filters": {
-    "active": "Aktiv",
     "clear": "Löschen",
     "itemCount": "{{filtered}} von {{total}} Einträgen",
     "moreFilters": "{{count}} weitere Filter",
@@ -548,8 +480,7 @@
     "addNewImmunization": "Neue Impfung hinzufügen",
     "card": {
       "dose": "Dosis {{number}}",
-      "practitionerId": "ID: {{id}}",
-      "viewPractitioner": "Praktikerdetails anzeigen"
+      "practitionerId": "ID: {{id}}"
     },
     "clickToGetStarted": "Klicken Sie auf \"Neue Impfung Hinzufügen\", um zu beginnen.",
     "editImmunization": "Impfung bearbeiten",
@@ -560,24 +491,19 @@
       "adminSite": "Verabreichungsort",
       "adminSiteDesc": "Körperstelle, an der die Impfung verabreicht wurde",
       "adminSitePlaceholder": "Verabreichungsort auswählen",
-      "clinicalNotes": "Klinische Notizen",
       "clinicalNotesDesc": "Zusätzliche Informationen zu dieser Impfung",
       "clinicalNotesPlaceholder": "Notizen, Reaktionen oder zusätzliche Details eingeben",
       "createImmunization": "Impfung Erstellen",
       "dateAdministered": "Verabreichungsdatum",
       "dateAdministeredDesc": "Wann der Impfstoff verabreicht wurde",
-      "doseNumber": "Dosisnummer",
       "doseNumberDesc": "Welche Dosis in der Serie (z.B. 1, 2, 3)",
       "doseNumberPlaceholder": "Dosisnummer eingeben",
-      "expirationDate": "Ablaufdatum",
       "expirationDateDesc": "Ablaufdatum des Impfstoffs",
       "location": "Standort/Einrichtung",
       "locationDesc": "Wo der Impfstoff verabreicht wurde",
       "locationPlaceholder": "z.B. Klinik, Apotheke, Krankenhaus",
-      "lotNumber": "Chargennummer",
       "lotNumberDesc": "Chargen-/Losnummer zur Nachverfolgung",
       "lotNumberPlaceholder": "Chargennummer eingeben",
-      "manufacturer": "Hersteller",
       "manufacturerDesc": "Impfstoffhersteller",
       "manufacturerPlaceholder": "z.B. Pfizer, Moderna, GSK",
       "ndcNumber": "NDC-Nummer",
@@ -604,12 +530,10 @@
         "administration": "Verabreichung"
       },
       "tagsDesc": "Tags hinzufügen, um Impfungen zu kategorisieren und zu organisieren",
-      "tagsPlaceholder": "Tags hinzufügen...",
       "tradeName": "Handelsname",
       "tradeNameDesc": "Marken- oder Handelsname (falls bekannt)",
       "tradeNamePlaceholder": "z.B. Pfizer-BioNTech, Moderna",
       "updateImmunization": "Impfung Aktualisieren",
-      "vaccineName": "Impfstoffname",
       "vaccineNameDesc": "Allgemeiner Name des Impfstoffs",
       "vaccineNamePlaceholder": "z.B. Grippeimpfung, COVID-19, Tdap"
     },
@@ -617,37 +541,22 @@
     "noImmunizationsFound": "Keine Impfungen Gefunden",
     "table": {
       "dateAdministered": "Verabreichungsdatum",
-      "doseNumber": "Dosisnummer",
-      "expirationDate": "Ablaufdatum",
-      "lotNumber": "Chargennummer",
-      "manufacturer": "Hersteller",
-      "route": "Verabreichungsweg",
-      "site": "Verabreichungsort",
-      "vaccineName": "Impfstoffname"
+      "site": "Verabreichungsort"
     },
-    "title": "Impfungen",
     "viewModal": {
       "adminDetails": "Verabreichungsdetails",
       "adminSite": "Verabreichungsort",
       "dateAdministered": "Verabreichungsdatum",
       "dose": "Dosis {{number}}",
       "doseHash": "Dosis #{{number}}",
-      "doseNumber": "Dosisnummer",
-      "expirationDate": "Ablaufdatum",
       "locationFacility": "Standort/Einrichtung",
-      "lotNumber": "Chargennummer",
-      "manufacturer": "Hersteller",
       "ndcNumber": "NDC-Nummer",
-      "practitionerId": "Praktiker-ID: {{id}}",
-      "route": "Verabreichungsweg",
       "tabs": {
         "administration": "Verabreichung"
       },
       "title": "Impfungsdetails",
       "tradeName": "Handelsname",
-      "vaccineInfo": "Impfstoffinformationen",
-      "vaccineName": "Impfstoffname",
-      "viewPractitioner": "Praktikerdetails anzeigen"
+      "vaccineInfo": "Impfstoffinformationen"
     }
   },
   "insurance": {
@@ -685,7 +594,6 @@
       "editTitle": "Versicherung bearbeiten"
     },
     "loading": "Loading insurance records...",
-    "title": "Versicherung",
     "viewModal": {
       "additionalDetails": "Zusätzliche Leistungsdetails",
       "claimsAddress": "Schadensmeldungsadresse",
@@ -698,21 +606,16 @@
       "deductible": "Selbstbehalt",
       "dentalCoverage": "Zahnversicherung",
       "effectiveDate": "Gültig ab",
-      "email": "E-Mail",
       "employerGroup": "Arbeitgeber/Gruppensponsor",
-      "expirationDate": "Ablaufdatum",
       "groupNumber": "Gruppennummer",
-      "insuranceLabel": "Versicherung",
       "memberInfo": "Mitgliedsinformationen",
       "memberName": "Mitgliedsname",
       "mentalHealthCoverage": "Psychische Gesundheitsabdeckung",
-      "ongoing": "Laufend",
       "outOfPocketMax": "Maximale Eigenleistung",
       "pharmacyNetworkInfo": "Apothekennetzwerkinformationen",
       "policyHolder": "Versicherungsnehmer",
       "prescriptionCoverage": "Rezeptabdeckung",
       "printCard": "Karte Drucken",
-      "relationship": "Beziehung",
       "sameAsMember": "Gleich wie Mitglied",
       "self": "Selbst",
       "tabs": {
@@ -725,19 +628,11 @@
   },
   "key": "Default {{var}}",
   "labels": {
-    "actions": "Aktionen",
     "addCustom": "+ \"{{value}}\" hinzufügen",
-    "clinicalNotes": "Clinical Notes",
-    "date": "Datum",
-    "duration": "Dauer",
-    "endDate": "Enddatum",
-    "error": "Fehler",
-    "facility": "Einrichtung",
     "linkedMedications": "Verknüpfte Medikamente",
     "loading": "Lädt...",
     "loadingOption": "{{option}} wird geladen...",
     "loadingRelatedConditions": "Verknüpfte Erkrankungen werden geladen...",
-    "location": "Standort",
     "new": "New",
     "no": "Nein",
     "noConditionsLinked": "Keine Erkrankungen mit diesem Laborergebnis verknüpft",
@@ -746,28 +641,20 @@
     "noLabResultsLinked": "No lab results linked to this visit",
     "noMedicationsLinked": "Keine Medikamente mit dieser Erkrankung verknüpft",
     "none": "Keine",
-    "noNotesAvailable": "No notes available",
     "noRating": "Keine Bewertung",
     "notAvailable": "N/A",
     "notCompleted": "Nicht abgeschlossen",
-    "notSpecified": "Nicht angegeben",
     "noVisitsLinked": "No visits linked to this lab result",
-    "onsetDate": "Beginnsdatum",
     "ordered": "Ordered",
-    "pending": "Ausstehend",
     "phoneNumber": "Telefonnummer",
     "ratingStars": "{{count}}/5 Sterne",
     "ratingStars_one": "",
     "ratingStars_other": "",
     "selectPurpose": "Select purpose",
-    "severity": "Schweregrad",
-    "startDate": "Startdatum",
     "success": "Erfolg",
-    "unknown": "Unbekannt",
     "value": "Value",
     "viewDetails": "",
     "viewPharmacyDetails": "Apothekendetails anzeigen",
-    "viewPractitionerDetails": "Arztdetails anzeigen",
     "visitDate": "Visit date",
     "visitWebsite": "Website besuchen ↗",
     "yes": "Ja"
@@ -785,7 +672,6 @@
     "deleteFailed": "Laborergebnis konnte nicht gelöscht werden",
     "discardParsedData": "Analysierte Daten verwerfen",
     "editTitle": "Laborergebnis bearbeiten",
-    "error": "Fehler",
     "errorOccurred": "Ein Fehler ist aufgetreten",
     "form": {
       "linkedVisits": "Verknüpfte Besuche",
@@ -799,13 +685,10 @@
     "modal": {
       "editLabResult": "Laborergebnis bearbeiten",
       "labels": {
-        "category": "Kategorie",
         "completedDate": "Abschlussdatum",
         "doctor": "Arzt",
-        "facility": "Einrichtung",
         "labResult": "Laborergebnis",
         "orderedDate": "Anordnungsdatum",
-        "specialty": "Fachgebiet",
         "testCode": "Testcode",
         "testType": "Testtyp"
       },
@@ -817,8 +700,7 @@
       },
       "tabs": {
         "relatedConditions": "Verbundene Erkrankungen",
-        "testComponents": "Testkomponenten",
-        "visits": "Besuche"
+        "testComponents": "Testkomponenten"
       },
       "title": "Laborergebnis-Details"
     },
@@ -835,13 +717,9 @@
     },
     "success": "Erfolg",
     "table": {
-      "category": "Kategorie",
       "completedDate": "Abschlussdatum",
-      "facility": "Einrichtung",
       "orderedDate": "Anordnungsdatum",
-      "orderingPractitioner": "Anordnender Arzt",
-      "testName": "Testname",
-      "type": "Typ"
+      "orderingPractitioner": "Anordnender Arzt"
     },
     "testNameLabel": "Name des Labortests",
     "testNameRequired": "Testname ist erforderlich",
@@ -856,39 +734,25 @@
     "allTypes": "Alle Typen",
     "clickToStart": "Klicken Sie auf \"Neues Medikament hinzufügen\", um zu beginnen.",
     "fields": {
-      "endDate": "Enddatum",
-      "frequency": "Häufigkeit",
       "noIndication": "Keine Indikation angegeben",
-      "pharmacy": "Apotheke",
-      "prescriber": "Verschreibender Arzt",
-      "route": "Verabreichungsweg",
-      "startDate": "Startdatum"
+      "prescriber": "Verschreibender Arzt"
     },
     "loading": "Medikamente werden geladen...",
     "modal": {
-      "details": "Details",
       "editMedication": "Medikament bearbeiten",
       "labels": {
         "alternativeName": "Alternative Name",
-        "dosage": "Dosierung",
         "form": "Darreichungsform",
         "medicationName": "Medikamentenname",
         "medicationType": "Medikamententyp",
         "purposeIndication": "Zweck/Indikation"
       },
-      "noNotes": "Keine Notizen verfügbar",
       "noSideEffects": "Keine Nebenwirkungen gemeldet",
-      "notSpecified": "Nicht spezifiziert",
-      "ongoing": "Laufend",
       "sections": {
-        "additionalNotes": "Zusätzliche Notizen",
-        "attachedDocuments": "Angehängte Dokumente",
-        "basicInfo": "Grundinformationen",
         "dosageInfo": "Dosierungsinformationen",
         "prescriberPharmacy": "Verschreibender Arzt & Apotheke",
         "relatedConditions": "Verwandte Erkrankungen",
         "sideEffects": "Nebenwirkungen",
-        "timeline": "Zeitplan",
         "usedInTreatments": "Used in Treatments"
       },
       "tabs": {
@@ -901,9 +765,7 @@
       "empty": "This medication is not used in any treatments.",
       "loadError": "Failed to load treatments",
       "loading": "Loading treatments...",
-      "overrideDosage": "Dosage",
-      "overrideFrequency": "Freq",
-      "treatmentPlan": "Behandlungsplan"
+      "overrideFrequency": "Freq"
     },
     "types": {
       "herbal": "Pflanzlich/Natürlich",
@@ -965,13 +827,10 @@
     "createTitle": "Patientenprofil erstellen",
     "editProfile": "Profil bearbeiten",
     "editTitle": "Patienteninformationen bearbeiten",
-    "error": "Fehler",
     "fields": {
-      "address": "Adresse",
       "birthDate": "Geburtsdatum",
       "bloodType": "Blutgruppe",
       "firstName": "Vorname",
-      "gender": "Geschlecht",
       "height": "Größe",
       "lastName": "Nachname",
       "patientId": "Patienten-ID",
@@ -987,7 +846,6 @@
     "noProfile": "Kein Patientenprofil gefunden",
     "notAssigned": "Nicht zugewiesen",
     "notProvided": "Nicht angegeben",
-    "notSpecified": "Nicht spezifiziert",
     "personalInfo": "Persönliche Informationen",
     "title": "Patienteninformationen",
     "welcome": {
@@ -998,7 +856,6 @@
   "patients": {
     "form": {
       "address": {
-        "label": "Adresse",
         "placeholder": "Adresse eingeben"
       },
       "birthDate": {
@@ -1009,7 +866,6 @@
         "placeholder": "Blutgruppe auswählen"
       },
       "buttons": {
-        "cancel": "Abbrechen",
         "createPatient": "Patient erstellen",
         "saveChanges": "Änderungen speichern",
         "saving": "Speichern..."
@@ -1019,7 +875,6 @@
         "placeholder": "Vorname eingeben"
       },
       "gender": {
-        "label": "Geschlecht",
         "options": {
           "female": "Weiblich",
           "male": "Männlich",
@@ -1070,7 +925,6 @@
       },
       "saveFirstMessage": "Speichern Sie zuerst die Patienteninformationen, dann können Sie ein Foto hinzufügen",
       "sections": {
-        "basicInformation": "Grundinformationen",
         "contactInformation": "Kontaktinformationen",
         "medicalInformation": "Medizinische Informationen"
       },
@@ -1137,10 +991,8 @@
       "addNew": "Neue Apotheke hinzufügen"
     },
     "card": {
-      "address": "Adresse",
       "city": "Stadt",
       "country": "Land",
-      "phone": "Telefon",
       "postalCode": "Postleitzahl",
       "specialtyServices": "Fachgebiete",
       "stateProvince": "Bundesland / Provinz",
@@ -1158,15 +1010,12 @@
       "editTitle": "Apotheke bearbeiten"
     },
     "loading": "Lade Apotheken...",
-    "title": "Apotheken",
     "viewModal": {
-      "address": "Adresse",
       "city": "Stadt",
       "contact": "KONTAKTINFORMATIONEN",
       "country": "Land",
       "editButton": "Apotheke bearbeiten",
       "location": "STANDORT",
-      "phone": "Telefon",
       "postalCode": "Postleitzahl",
       "specialtyServices": "Fachgebiete",
       "stateProvince": "Bundesland / Provinz",
@@ -1179,9 +1028,6 @@
       "addNew": "Neue medizinische Fachkraft hinzufügen"
     },
     "card": {
-      "email": "Email",
-      "phone": "Telefon",
-      "practice": "Praxis",
       "rating": "Bewertung",
       "subtitle": "Medizinische Fachkraft"
     },
@@ -1212,12 +1058,6 @@
       "emptyNoData": "Klicken Sie auf \"Praxis hinzufügen\" oder Praxen werden automatisch beim Hinzufügen von Behandlern erstellt.",
       "emptyTitle": "Keine Praxen gefunden",
       "searchPlaceholder": "Praxen suchen...",
-      "table": {
-        "actions": "Aktionen",
-        "name": "Name",
-        "phone": "Telefon",
-        "practitioners": "Behandler"
-      },
       "totalCount": "{{count}} Praxen insgesamt",
       "totalCount_one": "",
       "totalCount_other": "",
@@ -1226,37 +1066,26 @@
       "unusedCount_other": ""
     },
     "table": {
-      "email": "Email",
-      "name": "Name",
-      "phone": "Telefon",
-      "practice": "Praxis",
-      "rating": "Bewertung",
-      "specialty": "Fachgebiet"
+      "rating": "Bewertung"
     },
     "tabs": {
-      "practices": "Praxen",
-      "practitioners": "Behandler"
+      "practices": "Praxen"
     },
     "title": "Medizinische Fachkräfte",
     "ungroupedTitle": "Unabhaengige Aerzte",
     "viewModal": {
       "editButton": "Medizinische Fachkraft bearbeiten",
       "editPractice": "Praxis bearbeiten",
-      "email": "Email",
-      "phone": "Telefon",
-      "practice": "Praxis",
       "practiceDetails": "PRAXISDETAILS",
       "practiceFax": "Fax",
       "practiceLoadError": "Fehler beim Laden der Praxisdetails",
       "practiceLocations": "Standorte",
-      "practicePhone": "Telefon",
       "practicePortal": "Patientenportal",
       "practiceUpdateError": "Fehler beim Aktualisieren der Praxis",
       "practiceUpdateSuccess": "Praxis erfolgreich aktualisiert",
       "practitionerContact": "ARZTKONTAKT",
       "rating": "Bewertung",
       "savePractice": "Praxis speichern",
-      "specialty": "Fachgebiet",
       "title": "Details der medizinischen Fachkraft"
     }
   },
@@ -1265,9 +1094,7 @@
     "addNewProcedure": "Neues Verfahren Hinzufügen",
     "addProcedure": "+ Verfahren Hinzufügen",
     "card": {
-      "durationMinutes": "{{minutes}} Minuten",
-      "practitionerId": "Praktiker-ID: {{id}}",
-      "viewPractitioner": "Praktikerdetails anzeigen"
+      "durationMinutes": "{{minutes}} Minuten"
     },
     "editProcedure": "Verfahren Bearbeiten",
     "form": {
@@ -1277,11 +1104,8 @@
       "anesthesiaType": "Anästhesietyp",
       "anesthesiaTypeDesc": "Art der verwendeten Anästhesie",
       "anesthesiaTypePlaceholder": "z.B. Allgemein, Lokal, Regional",
-      "cancel": "Abbrechen",
-      "clinicalNotes": "Klinische Notizen",
       "clinicalNotesDesc": "Zusätzliche Informationen zu diesem Verfahren",
       "clinicalNotesPlaceholder": "Klinische Notizen, Beobachtungen oder zusätzliche Details eingeben",
-      "complications": "Komplikationen",
       "complicationsDesc": "Aufgetretene Probleme oder Komplikationen",
       "complicationsPlaceholder": "Dokumentieren Sie alle Komplikationen",
       "createProcedure": "Verfahren Erstellen",
@@ -1290,25 +1114,20 @@
       "duration": "Dauer (Minuten)",
       "durationDesc": "Wie lange das Verfahren gedauert hat",
       "durationPlaceholder": "Dauer eingeben",
-      "facility": "Einrichtung",
       "facilityDesc": "Medizinische Einrichtung",
       "facilityPlaceholder": "z.B. Krankenhausname",
       "outcome": "Ergebnis",
       "outcomeAbnormal": "Auffällig",
-      "outcomeComplications": "Mit Komplikationen",
       "outcomeDesc": "Resultat oder Ausgang des Verfahrens",
       "outcomeInconclusive": "Nicht schlüssig",
-      "outcomePending": "Ausstehend",
       "outcomePlaceholder": "Ergebnis auswählen",
       "outcomeSuccessful": "Erfolgreich",
       "practitionerDesc": "Gesundheitsdienstleister, der das Verfahren durchführt",
-      "practitionerPlaceholder": "Praktiker auswählen",
       "procedureCode": "Verfahrenscode",
       "procedureCodeDesc": "Medizinischer Abrechnungscode",
       "procedureCodePlaceholder": "z.B. CPT-Code",
       "procedureDate": "Verfahrensdatum",
       "procedureDateDesc": "Wann das Verfahren durchgeführt wurde",
-      "procedureName": "Verfahrensname",
       "procedureNameDesc": "Name des Verfahrens",
       "procedureNamePlaceholder": "Verfahrensname eingeben",
       "procedureType": "Verfahrenstyp",
@@ -1322,14 +1141,12 @@
       "statusCompleted": "Abgeschlossen",
       "statusDesc": "Aktueller Verfahrensstatus",
       "statusInProgress": "In Bearbeitung",
-      "statusPlaceholder": "Status auswählen",
       "statusPostponed": "Verschoben",
       "statusScheduled": "Geplant",
       "tabs": {
         "clinical": "Klinische Details"
       },
       "tagsDesc": "Fügen Sie Tags hinzu, um Verfahren zu kategorisieren und zu organisieren",
-      "tagsPlaceholder": "Tags hinzufügen...",
       "updateProcedure": "Verfahren Aktualisieren"
     },
     "loadingProcedures": "Verfahren werden geladen...",
@@ -1339,43 +1156,28 @@
     "startAdding": "Beginnen Sie mit dem Hinzufügen Ihres ersten Verfahrens.",
     "table": {
       "code": "Code",
-      "date": "Datum",
-      "facility": "Einrichtung",
-      "procedureName": "Verfahrensname",
-      "setting": "Einstellung",
-      "type": "Typ"
+      "setting": "Einstellung"
     },
     "viewModal": {
       "anesthesiaInfo": "Anästhesie-Informationen",
       "anesthesiaNotes": "Anästhesie-Notizen",
       "anesthesiaType": "Anästhesietyp",
-      "basicInfo": "Grundinformationen",
-      "clinicalNotes": "Klinische Notizen",
       "close": "Schließen",
-      "complications": "Komplikationen",
-      "date": "Datum",
       "doctor": "Arzt",
-      "duration": "Dauer",
       "durationMinutes": "{{minutes}} Minuten",
       "edit": "Bearbeiten",
-      "facility": "Einrichtung",
       "noAnesthesiaNotes": "Keine Anästhesie-Notizen verfügbar",
       "noClinicalNotes": "Keine klinischen Notizen verfügbar",
       "noComplications": "Keine Komplikationen gemeldet",
       "noDescription": "Keine Beschreibung verfügbar",
-      "notSpecified": "Nicht angegeben",
       "outcome": "Ergebnis",
-      "practitionerId": "Praktiker-ID: {{id}}",
       "procedureCode": "Verfahrenscode",
-      "procedureName": "Verfahrensname",
       "procedureType": "Verfahrenstyp",
       "setting": "Einstellung",
-      "specialty": "Fachgebiet",
       "tabs": {
         "clinical": "Klinische Details"
       },
-      "title": "Verfahrensdetails",
-      "viewPractitioner": "Praktikerdetails anzeigen"
+      "title": "Verfahrensdetails"
     }
   },
   "reportBuilder": {
@@ -1387,22 +1189,9 @@
       "generateReport_other": "",
       "generateReportChartsOnly": "Bericht Generieren ({{chartCount}} Diagramme)",
       "generateReportWithCharts": "Bericht Generieren ({{recordCount}} Datensätze, {{chartCount}} Diagramme)",
-      "selectAll": "Alle Datensätze Auswählen",
-      "settings": "Einstellungen"
+      "selectAll": "Alle Datensätze Auswählen"
     },
     "categories": {
-      "allergies": "Allergien",
-      "conditions": "Erkrankungen",
-      "emergency_contacts": "Notfallkontakte",
-      "encounters": "Besuche",
-      "family_history": "Familiengeschichte",
-      "immunizations": "Impfungen",
-      "injuries": "Verletzungen",
-      "insurance": "Versicherung",
-      "pharmacies": "Apotheken",
-      "practitioners": "Ärzte",
-      "symptoms": "Symptome",
-      "treatments": "Behandlungen",
       "vitals": "Vitalwerte"
     },
     "configuration": {
@@ -1423,7 +1212,6 @@
       "recordsSelected": "Ausgewählte Datensätze"
     },
     "segmentControl": {
-      "records": "Medizinische Aufzeichnungen",
       "trendCharts": "Trenddiagramme"
     },
     "settingsModal": {
@@ -1480,9 +1268,6 @@
     "anyTag": "Any tag",
     "clearFilters": "Clear Filters",
     "collapseFilters": "Collapse filters",
-    "columnDate": "Date",
-    "columnDetails": "Details",
-    "columnName": "Name",
     "columnType": "Record Type",
     "dateLabels": {
       "diagnosed": "Diagnosed",
@@ -1551,12 +1336,8 @@
     "textResultCount_other": "{{count}} text results",
     "title": "Search Results",
     "types": {
-      "allergies": "Allergies",
-      "conditions": "Conditions",
-      "encounters": "Visits",
-      "immunizations": "Immunizations",
-      "treatments": "Treatments",
-      "vitals": "Vitals"
+      "vitals": "Vitals",
+      "encounters": "Visits"
     },
     "viewCards": "Card view",
     "viewTable": "Table view",
@@ -1704,8 +1485,7 @@
         "unknownApp": "Unbekannte App",
         "unknownVersion": "Unbekannte Version"
       }
-    },
-    "title": "Einstellungen"
+    }
   },
   "severity": {
     "critical": "Kritisch - Lebensbedrohlich",
@@ -1718,15 +1498,11 @@
     "severeImpact": "Schwer - Bedeutende Beeinträchtigung"
   },
   "status": {
-    "active": "Aktiv",
     "cancelled": "Abgesagt",
     "completed": "Abgeschlossen",
     "expired": "Abgelaufen",
-    "inactive": "Inaktiv",
     "onHold": "Pausiert",
-    "pending": "Ausstehend",
     "planned": "Geplant",
-    "resolved": "Behoben",
     "stopped": "Beendet"
   },
   "statusDescriptions": {
@@ -1744,16 +1520,11 @@
     "addSymptom": "Symptom Hinzufügen",
     "addSymptomTitle": "Neues Symptom hinzufügen",
     "calendar": {
-      "duration": "Dauer",
       "episodesOn": "Symptom-Episoden am {{date}}",
-      "location": "Ort",
       "noEpisodes": "Diesen Monat wurden keine Symptom-Episoden aufgezeichnet",
       "noOccurrences": "Für dieses Datum wurden keine Vorkommnisse gefunden",
       "occurrenceId": "Vorkommnis-ID",
-      "ongoing": "Andauernd",
       "pain": "Schmerz",
-      "resolved": "Aufgelöst",
-      "time": "Uhrzeit",
       "title": "Symptomkalender",
       "viewSymptom": "Symptom Ansehen",
       "weekDays": {
@@ -1766,7 +1537,6 @@
         "wed": "Mi"
       }
     },
-    "category": "Kategorie",
     "chronic": "Chronisch",
     "commonTriggers": "Häufige Auslöser",
     "confirmDeleteSymptom": "Möchten Sie dieses Symptom und alle seine Vorkommen wirklich löschen?",
@@ -1785,12 +1555,10 @@
     "noPatientSelected": "Kein Patient Ausgewählt",
     "noRecords": "Noch keine Symptome aufgezeichnet",
     "noRecordsPrompt": "Klicken Sie auf \"Symptom Hinzufügen\", um ein neues Symptom zu verfolgen",
-    "resolved": "Resolved",
     "selectPatientPrompt": "Bitte wählen Sie einen Patienten aus oder erstellen Sie einen, um Symptome zu verfolgen.",
     "tabs": {
       "calendar": "Kalender",
-      "list": "Liste",
-      "timeline": "Zeitachse"
+      "list": "Liste"
     },
     "timeline": {
       "filters": {
@@ -1806,8 +1574,6 @@
     },
     "viewModal": {
       "acute": "Akut",
-      "attachedDocuments": "Angehängte Dokumente",
-      "basicInfo": "Grundlegende Informationen",
       "confirmDeleteEpisode": "Sind Sie sicher, dass Sie diese Episode löschen möchten?",
       "deleteSymptom": "Symptom Löschen",
       "editSymptom": "Symptom Bearbeiten",
@@ -1819,7 +1585,6 @@
       "noEpisodesLogged": "Keine Episoden protokolliert",
       "noEpisodesYet": "Noch keine Episoden protokolliert",
       "noNotesProvided": "Keine Notizen vorhanden",
-      "notSpecified": "Nicht angegeben",
       "relief": "Linderung",
       "symptomName": "Symptomname",
       "tabs": {
@@ -1827,12 +1592,9 @@
         "episodes_one": "Episodes ({{count}})",
         "episodes_other": "Episodes ({{count}})"
       },
-      "time": "Zeit",
-      "timeline": "Zeitverlauf",
       "title": "{{name}} - Details",
       "totalEpisodes": "Gesamte Episoden",
-      "triggers": "Auslöser",
-      "type": "Typ"
+      "triggers": "Auslöser"
     }
   },
   "tagManagement": {
@@ -1897,7 +1659,6 @@
       "updated": "Successfully updated tag \"{{tag}}\""
     },
     "table": {
-      "actions": "Aktionen",
       "tagName": "Tag-Name",
       "usageCount": "Verwendungsanzahl",
       "usedIn": "Verwendet In"
@@ -1929,7 +1690,6 @@
       "editing": "Bearbeiten",
       "fields": {
         "abbreviation": "Abkürzung",
-        "category": "Kategorie",
         "linkedTest": "Link to Standard Test",
         "maximum": "Maximum",
         "minimum": "Minimum",
@@ -1938,7 +1698,6 @@
         "result": "Result",
         "status": "Status (Automatisch berechnet)",
         "testCode": "Testcode",
-        "testName": "Testname",
         "unit": "Einheit",
         "value": "Wert"
       },
@@ -1997,12 +1756,10 @@
     "addTreatment": "+ Behandlung Hinzufügen",
     "card": {
       "conditionId": "Erkrankung #{{id}}",
-      "relatedCondition": "Zugehörige Erkrankung",
       "viewConditionDetails": "Erkrankungsdetails anzeigen"
     },
     "conditionsLoadingError": "Fehler beim Laden der Erkrankungen",
     "form": {
-      "cancel": "Abbrechen",
       "createTreatment": "Behandlung Erstellen",
       "createWithLinks": "",
       "creatingWithLinks": "Creating treatment and linking items...",
@@ -2011,25 +1768,18 @@
       "dosageAmount": "Dosierung/Menge",
       "dosageDesc": "Menge oder Dosierung pro Behandlung",
       "dosagePlaceholder": "z.B. 10mg, 1 Sitzung",
-      "endDate": "Enddatum",
       "endDateDesc": "Wann die Behandlung endet (falls zutreffend)",
       "enterTreatmentName": "Behandlungsname eingeben",
-      "frequency": "Häufigkeit",
       "frequencyDesc": "Wie oft die Behandlung verabreicht wird",
       "frequencyPlaceholder": "z.B. Täglich, Zweimal wöchentlich",
       "linkingPartialFailure": "Some items could not be linked",
       "notesDesc": "Zusätzliche Informationen zu dieser Behandlung",
       "notesPlaceholder": "Behandlungsnotizen, Beobachtungen oder zusätzliche Details eingeben",
       "practitionerDesc": "Gesundheitsdienstleister, der die Behandlung durchführt",
-      "relatedCondition": "Zugehörige Erkrankung",
       "relatedConditionDesc": "Diese Behandlung mit einer Erkrankung verknüpfen",
       "savingTreatment": "Behandlung wird gespeichert...",
       "selectCondition": "Erkrankung auswählen",
-      "selectPractitioner": "Praktiker auswählen",
-      "selectStatus": "Status auswählen",
-      "startDate": "Startdatum",
       "startDateDesc": "Wann die Behandlung beginnt",
-      "statusActive": "Aktiv",
       "statusCancelled": "Abgebrochen",
       "statusCompleted": "Abgeschlossen",
       "statusDesc": "Aktueller Behandlungsstatus",
@@ -2039,7 +1789,6 @@
         "scheduleDosage": "Zeitplan & Dosierung"
       },
       "tagsDesc": "Tags hinzufügen, um Behandlungen zu kategorisieren und organisieren",
-      "tagsPlaceholder": "Tags hinzufügen...",
       "treatmentName": "Behandlungsname",
       "treatmentNameDesc": "Name der Behandlung",
       "treatmentNotes": "Behandlungsnotizen",
@@ -2052,56 +1801,34 @@
     "loadingTreatments": "Behandlungen werden geladen...",
     "medications": {
       "default": "(from medication)",
-      "dosage": "Dosage",
-      "duration": "Duration",
       "empty": "No medications linked to this treatment plan.",
-      "endDate": "End Date",
-      "frequency": "Frequency",
       "loadError": "Failed to load medications",
       "loading": "Loading medications...",
-      "ongoing": "Ongoing",
-      "pharmacy": "Pharmacy",
       "prescriber": "Prescriber",
-      "startDate": "Start Date",
       "timing": "Timing"
     },
     "mode": {
-      "advanced": "Treatment Plan",
       "advancedDescription": "Medication-centric plan with per-medication overrides",
       "simple": "Simple",
       "simpleDescription": "Basic tracking with schedule and dosage"
     },
     "noTreatmentsFound": "Keine Behandlungen Gefunden",
     "startAdding": "Beginnen Sie mit dem Hinzufügen Ihrer ersten Behandlung.",
-    "title": "Behandlungen",
     "viewModal": {
       "amountDosage": "Menge/Dosierung",
-      "basicInformation": "Grundinformationen",
       "close": "Schließen",
       "conditionId": "Erkrankung #{{id}}",
       "conditionStatus": "Erkrankungsstatus",
-      "diagnosis": "Diagnose",
       "doctor": "Arzt",
       "dosageFrequency": "Dosierung & Häufigkeit",
       "edit": "Bearbeiten",
-      "endDate": "Enddatum",
-      "frequency": "Häufigkeit",
       "noConditionLinked": "Keine Erkrankung verknüpft",
-      "noNotesAvailable": "Keine Notizen verfügbar",
-      "notSpecified": "Nicht angegeben",
-      "ongoing": "Ongoing",
-      "practice": "Praxis",
       "practitionerId": "Praktiker #{{id}}",
-      "relatedCondition": "Zugehörige Erkrankung",
       "schedule": "Zeitplan",
-      "severity": "Schweregrad",
-      "specialty": "Fachgebiet",
-      "startDate": "Startdatum",
       "tabs": {
         "equipment": "Equipment",
         "labs": "Labs",
-        "schedule": "Zeitplan & Dosierung",
-        "visits": "Visits"
+        "schedule": "Zeitplan & Dosierung"
       },
       "title": "Behandlungsdetails",
       "treatmentName": "Behandlungsname",
@@ -2122,9 +1849,7 @@
       "durationMinutes": "{{minutes}} Minuten",
       "generalVisit": "Allgemeiner Besuch",
       "noPractitionerAssigned": "Kein Arzt zugewiesen",
-      "practitionerId": "Praktiker-ID: {{id}}",
-      "viewCondition": "Erkrankungsdetails anzeigen",
-      "viewPractitioner": "Arztdetails anzeigen"
+      "viewCondition": "Erkrankungsdetails anzeigen"
     },
     "clickToGetStarted": "Klicken Sie auf \"Neuen Besuch Hinzufügen\", um zu beginnen.",
     "editVisit": "Besuch Bearbeiten",
@@ -2140,29 +1865,18 @@
     "loadingVisits": "Arztbesuche werden geladen...",
     "noVisitsFound": "Keine Arztbesuche Gefunden",
     "table": {
-      "diagnosis": "Diagnose",
-      "facility": "Einrichtung",
       "reason": "Grund",
-      "relatedCondition": "Zugehörige Erkrankung",
       "visitDate": "Besuchsdatum"
     },
     "title": "Arztbesuche",
     "viewModal": {
-      "additionalNotes": "Zusätzliche Notizen",
-      "attachedDocuments": "Angehängte Dokumente",
       "clinicalInformation": "Klinische Informationen",
-      "diagnosis": "Diagnose",
       "doctor": "Arzt",
-      "duration": "Dauer",
       "durationMinutes": "{{minutes}} Minuten",
       "editVisit": "Besuch Bearbeiten",
       "generalVisit": "Allgemeiner Besuch",
-      "noNotesAvailable": "Keine Notizen verfügbar",
       "noPractitionerAssigned": "Kein Arzt zugewiesen",
-      "practitionerId": "Praktiker-ID: {{id}}",
       "reason": "Grund",
-      "relatedCondition": "Zugehörige Erkrankung",
-      "specialty": "Fachgebiet",
       "tabs": {
         "clinical": "Klinisch",
         "visitInfo": "Besuchsinfo"
@@ -2177,7 +1891,6 @@
     "addNew": "Neue Vitalzeichen Hinzufügen",
     "addTitle": "Vitalzeichen Hinzufügen",
     "card": {
-      "location": "Standort",
       "notRecorded": "Nicht aufgezeichnet",
       "oxygenSaturation": "Sauerstoffsättigung",
       "recordedBy": "Aufgezeichnet Von",
@@ -2202,7 +1915,6 @@
         "clinic": "Klinik",
         "home": "Zuhause",
         "hospital": "Krankenhaus",
-        "pharmacy": "Apotheke",
         "urgentCare": "Notfallversorgung"
       },
       "measurementLocation": "Messort",
@@ -2211,7 +1923,6 @@
       "patientInfo": "Patienteninformationen",
       "recordedDateTime": "Messdatum & -zeit",
       "saveVitals": "Vitalzeichen Speichern",
-      "selectTime": "Uhrzeit",
       "systolicBP": "Systolischer BD",
       "updateVitals": "Vitalzeichen Aktualisieren",
       "validation": {
@@ -2287,7 +1998,6 @@
     "modal": {
       "a1c": "A1C",
       "additionalMeasurements": "Zusätzliche Messungen",
-      "basicInfo": "Grundinformationen",
       "bloodGlucose": "Blutzucker",
       "deviceUsed": "Verwendetes Gerät",
       "glucoseContext": "Messungstyp",
@@ -2299,8 +2009,7 @@
       "recordedBy": "Aufgezeichnet Von",
       "recordedDate": "Aufzeichnungsdatum",
       "respiratoryRate": "Atemfrequenz",
-      "title": "Vitalzeichen-Details",
-      "vitalSigns": "Vitalzeichen"
+      "title": "Vitalzeichen-Details"
     },
     "noDataAvailable": "Keine Vitalzeichendaten verfügbar",
     "noPatientSelected": "Kein Patient Ausgewählt",
@@ -2331,13 +2040,11 @@
       "glucoseTrend": "Glukosetrend",
       "maxGlucose": "Max",
       "minGlucose": "Min",
-      "readings": "{{count}} Messungen",
-      "time": "Uhrzeit"
+      "readings": "{{count}} Messungen"
     },
     "summaryDescription": "Neueste Messwerte und Durchschnittswerte • Klicken Sie auf eine Karte, um die Tabelle unten zu filtern",
     "systolic": "Systolic",
     "table": {
-      "date": "Datum",
       "errorLoading": "Fehler beim Laden der Vitalzeichen",
       "noRecords": "Keine Vitalzeichen-Datensätze gefunden",
       "noRecordsDesc": "Vitalzeichen werden hier angezeigt, sobald sie aufgezeichnet wurden",
@@ -2345,10 +2052,8 @@
     },
     "tabs": {
       "context": "Kontext",
-      "dateTime": "Datum und Uhrzeit",
-      "vitalSigns": "Vitalzeichen"
+      "dateTime": "Datum und Uhrzeit"
     },
-    "title": "Vitalzeichen",
     "trends": {
       "allContexts": "Alle Typen",
       "allDates": "All Dates",
@@ -2402,8 +2107,6 @@
     }
   },
   "trash": {
-    "fileCount_one": "{{count}} Datei",
-    "fileCount_other": "{{count}} Dateien",
-    "fileCount": "{{count}} Dateien"
+    "fileCount_one": "{{count}} Datei"
   }
 }

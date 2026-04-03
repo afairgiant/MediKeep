@@ -18,7 +18,7 @@ const MobileNavigation = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation('navigation');
+  const { t } = useTranslation(['navigation', 'shared']);
   const { viewport } = useViewport();
   
   const navigationSections = getNavigationSections(viewport, isAdmin);
@@ -70,7 +70,7 @@ const MobileNavigation = ({
           <div className="mobile-nav-section">
             <h4 className="mobile-section-title">{t('menu.profile', 'Account')}</h4>
             <button className="mobile-nav-item" onClick={() => handleNavigation('/settings')}>
-              ⚙️ {t('menu.settings', 'Settings')}
+              ⚙️ {t('shared:labels.settings', 'Settings')}
             </button>
             <div className="mobile-theme-toggle">
               <span>{t('sidebarNav.items.theme', 'Theme')}</span>

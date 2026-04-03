@@ -272,7 +272,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
 
           {/* Test Name */}
           <TextInput
-            label={t('testComponents.editModal.fields.testName', 'Test Name')}
+            label={t('shared:fields.testName', 'Test Name')}
             placeholder={t('testComponents.editModal.placeholders.testName', 'e.g., Hemoglobin')}
             required
             value={formData.test_name || ''}
@@ -400,7 +400,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               }}
             />
             <Select
-              label={t('testComponents.editModal.fields.category', 'Category')}
+              label={t('shared:labels.category', 'Category')}
               placeholder={t('testComponents.editModal.placeholders.category', 'Select category')}
               clearable
               searchable
@@ -475,7 +475,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleSubmit}

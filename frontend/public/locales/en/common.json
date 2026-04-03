@@ -61,15 +61,11 @@
     "showMore": "Show more",
     "tryAgain": "Try Again",
     "update": "Update",
-    "view": "View",
-    "cancel": "Cancel"
+    "view": "View"
   },
   "common": {
     "buttons": {
       "close": "Close"
-    },
-    "labels": {
-      "notSpecified": "Not specified"
     }
   },
   "conditions": {
@@ -95,14 +91,9 @@
         "tags": "Add tags to categorize and organize conditions"
       },
       "fields": {
-        "clinicalNotes": "Clinical Notes",
         "codeDescription": "Code Description",
         "conditionName": "Condition Name",
-        "diagnosis": "Diagnosis",
-        "endDate": "End Date",
         "icd10Code": "ICD-10 Code",
-        "onsetDate": "Onset Date",
-        "severity": "Severity",
         "snomedCode": "SNOMED Code"
       },
       "medicationsDescription": "Link medications used to treat or manage this condition.",
@@ -112,11 +103,8 @@
         "diagnosis": "Enter diagnosis",
         "icd10Code": "e.g., E11.9",
         "notes": "Enter clinical notes, observations, or additional details",
-        "practitioner": "Select practitioner",
         "severity": "Select severity",
-        "snomedCode": "e.g., 44054006",
-        "status": "Select status",
-        "tags": "Add tags..."
+        "snomedCode": "e.g., 44054006"
       },
       "saving": "Saving condition...",
       "severity": {
@@ -126,13 +114,9 @@
         "severe": "Severe"
       },
       "status": {
-        "active": "Active",
-        "chronic": "Chronic",
-        "inactive": "Inactive",
-        "resolved": "Resolved"
+        "chronic": "Chronic"
       },
       "tabs": {
-        "basicInfo": "Basic Information",
         "clinical": "Clinical Details"
       },
       "updateCondition": "Update Condition"
@@ -143,21 +127,15 @@
       "labels": {
         "codeDescription": "Code Description",
         "conditionName": "Condition Name",
-        "diagnosis": "Diagnosis",
-        "duration": "Duration",
         "endDate": "End",
         "icd10Code": "ICD-10 Code",
         "onsetDate": "Onset",
-        "severity": "Severity",
         "snomedCode": "SNOMED Code"
       },
       "noNotesAvailable": "No clinical notes available",
       "noPractitionerAssigned": "No practitioner assigned",
       "sections": {
-        "basicInfo": "Basic Information",
-        "clinicalNotes": "Clinical Notes",
-        "medicalCodes": "Medical Codes",
-        "timeline": "Timeline"
+        "medicalCodes": "Medical Codes"
       },
       "tabs": {
         "clinical": "Clinical Details"
@@ -171,22 +149,16 @@
     },
     "table": {
       "condition": "Condition",
-      "endDate": "End Date",
-      "icd10": "ICD-10",
-      "onsetDate": "Onset Date",
-      "severity": "Severity"
-    },
-    "title": "Medical Conditions"
+      "icd10": "ICD-10"
+    }
   },
   "emergencyContacts": {
     "actions": {
       "addNew": "Add Emergency Contact"
     },
     "card": {
-      "active": "Active",
       "address": "Address:",
       "email": "Email:",
-      "inactive": "Inactive",
       "notes": "📝 Notes",
       "phone": "Phone:",
       "primary": "PRIMARY",
@@ -200,29 +172,21 @@
     "page": {
       "loading": "Loading emergency contacts...",
       "noContacts": "No emergency contacts found",
-      "noContactsDescription": "It's important to have emergency contacts available in case of medical emergencies.",
-      "tableName": "Emergency Contacts"
+      "noContactsDescription": "It's important to have emergency contacts available in case of medical emergencies."
     },
     "table": {
-      "email": "Email",
-      "name": "Name",
-      "phone": "Phone",
-      "primary": "Primary",
-      "relationship": "Relationship"
+      "primary": "Primary"
     },
     "viewModal": {
-      "address": "Address",
       "contactInfo": "📞 Contact Information",
       "editContact": "Edit Contact",
       "emailAddress": "Email Address",
       "icon": "🚨",
-      "noNotes": "No notes available",
       "notes": "📝 Notes",
       "primaryPhone": "Primary Phone",
       "secondaryPhone": "Secondary Phone",
       "title": "Emergency Contact Details"
-    },
-    "title": "Emergency Contacts"
+    }
   },
   "equipment": {
     "addEquipment": "Add Equipment",
@@ -238,7 +202,6 @@
     "form": {
       "create": "Create Equipment",
       "lastService": "Last Service Date",
-      "manufacturer": "Manufacturer",
       "manufacturerPlaceholder": "e.g., ResMed, Philips",
       "modelNumber": "Model Number",
       "modelPlaceholder": "e.g., AirSense 11",
@@ -247,14 +210,12 @@
       "nextService": "Next Service Date",
       "notesPlaceholder": "Additional notes about this equipment",
       "practitioner": "Prescribed By",
-      "practitionerPlaceholder": "Select practitioner",
       "prescribedDate": "Prescribed Date",
       "saving": "Saving equipment...",
       "serialNumber": "Serial Number",
       "serialPlaceholder": "Equipment serial number",
       "supplier": "Supplier",
       "supplierPlaceholder": "Equipment supplier",
-      "tagsPlaceholder": "Add tags...",
       "type": "Equipment Type",
       "typePlaceholder": "Select type",
       "update": "Update Equipment",
@@ -265,12 +226,9 @@
     "loadingHint": "If this takes too long, please refresh the page",
     "noEquipmentFound": "No Equipment Found",
     "startAdding": "Start by adding your first piece of medical equipment.",
-    "title": "Medical Equipment",
     "viewModal": {
-      "basicInfo": "Basic Information",
       "dates": "Important Dates",
       "lastService": "Last Service",
-      "manufacturer": "Manufacturer",
       "manufacturerDetails": "Manufacturer Details",
       "modelNumber": "Model Number",
       "name": "Equipment Name",
@@ -377,19 +335,8 @@
     "loading": "Loading export options...",
     "scopes": {
       "all": "All Records",
-      "allergies": "Allergies",
-      "conditions": "Medical Conditions",
-      "emergency_contacts": "Emergency Contacts",
       "encounters": "Encounters",
-      "family_history": "Family History",
-      "immunizations": "Immunizations",
-      "injuries": "Injuries",
-      "insurance": "Insurance",
-      "pharmacies": "Pharmacies",
-      "practitioners": "Healthcare Practitioners",
-      "symptoms": "Symptoms",
-      "treatments": "Treatments",
-      "vitals": "Vital Signs"
+      "practitioners": "Healthcare Practitioners"
     },
     "success": {
       "bulkExportComplete": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded.",
@@ -413,8 +360,6 @@
       "deathYear": "Death Year",
       "deceased": "Deceased",
       "diagnosedAtAge": "Diagnosed at age {{age}}",
-      "gender": "Gender",
-      "medicalConditions": "Medical Conditions",
       "noConditionsRecorded": "No medical conditions recorded",
       "notSelectable": "Not Selectable",
       "selected": "Selected",
@@ -476,17 +421,13 @@
       "diagnosisAge": "Diagnosis Age",
       "familyMember": "Family Member",
       "noConditions": "No conditions",
-      "relationship": "Relationship",
       "sharedBy": "Shared By",
-      "type": "Type",
-      "unknown": "Unknown",
       "yearsOld": "{{age}} years"
     },
     "tabs": {
       "myFamily": "My Family",
       "sharedWithMe": "Shared With Me"
     },
-    "title": "Family History",
     "viewModal": {
       "addCondition": "Add medical condition",
       "cannotAddConditionsShared": "Cannot add conditions to shared family member",
@@ -506,28 +447,20 @@
   "fields": {
     "endDate": {
       "description": "When this ended (if applicable)",
-      "label": "End Date",
-      "placeholder": "Select end date"
+      "placeholder": "Select end date",
+      "label": "End Date"
     },
     "notes": {
       "description": "Any additional details or notes",
       "placeholder": "Additional information..."
     },
-    "onsetDate": {
-      "label": "Onset Date"
-    },
-    "severity": {
-      "label": "Severity",
-      "placeholder": "Select severity level"
-    },
     "startDate": {
       "description": "When this started",
-      "label": "Start Date",
-      "placeholder": "Select start date"
+      "placeholder": "Select start date",
+      "label": "Start Date"
     },
     "status": {
-      "description": "Current status",
-      "placeholder": "Select status"
+      "description": "Current status"
     },
     "tags": {
       "description": "Add tags to help organize and search for this record later",
@@ -535,7 +468,6 @@
     }
   },
   "filters": {
-    "active": "Active",
     "clear": "Clear",
     "itemCount": "{{filtered}} of {{total}} items",
     "moreFilters": "{{count}} more filters",
@@ -548,8 +480,7 @@
     "addNewImmunization": "Add New Immunization",
     "card": {
       "dose": "Dose {{number}}",
-      "practitionerId": "ID: {{id}}",
-      "viewPractitioner": "View practitioner details"
+      "practitionerId": "ID: {{id}}"
     },
     "clickToGetStarted": "Click \"Add New Immunization\" to get started.",
     "editImmunization": "Edit Immunization",
@@ -560,24 +491,19 @@
       "adminSite": "Administration Site",
       "adminSiteDesc": "Where vaccine was administered",
       "adminSitePlaceholder": "Select administration site",
-      "clinicalNotes": "Clinical Notes",
       "clinicalNotesDesc": "Additional information about this immunization",
       "clinicalNotesPlaceholder": "Enter clinical notes, reactions, or additional details",
       "createImmunization": "Create Immunization",
       "dateAdministered": "Date Administered",
       "dateAdministeredDesc": "When the vaccine was administered",
-      "doseNumber": "Dose Number",
       "doseNumberDesc": "Which dose in the series",
       "doseNumberPlaceholder": "Enter dose number",
-      "expirationDate": "Expiration Date",
       "expirationDateDesc": "When the vaccine expires",
       "location": "Location/Facility",
       "locationDesc": "Where vaccine was administered",
       "locationPlaceholder": "e.g., CVS Pharmacy, Hospital, Clinic",
-      "lotNumber": "Lot Number",
       "lotNumberDesc": "Vaccine lot number",
       "lotNumberPlaceholder": "Enter lot number",
-      "manufacturer": "Manufacturer",
       "manufacturerDesc": "Vaccine manufacturer",
       "manufacturerPlaceholder": "Enter manufacturer",
       "ndcNumber": "NDC Number",
@@ -604,12 +530,10 @@
         "administration": "Administration"
       },
       "tagsDesc": "Add tags to categorize and organize immunizations",
-      "tagsPlaceholder": "Add tags...",
       "tradeName": "Formal/Trade Name",
       "tradeNameDesc": "Complete formal name from vaccine documentation",
       "tradeNamePlaceholder": "e.g., Flublok TRIV 2025-2026 PFS",
       "updateImmunization": "Update Immunization",
-      "vaccineName": "Vaccine Name",
       "vaccineNameDesc": "Common name for the vaccine",
       "vaccineNamePlaceholder": "e.g., Flu Shot, COVID-19, Tdap"
     },
@@ -617,37 +541,22 @@
     "noImmunizationsFound": "No immunizations found",
     "table": {
       "dateAdministered": "Date Administered",
-      "doseNumber": "Dose Number",
-      "expirationDate": "Expiration Date",
-      "lotNumber": "Lot Number",
-      "manufacturer": "Manufacturer",
-      "route": "Route",
-      "site": "Site",
-      "vaccineName": "Vaccine Name"
+      "site": "Site"
     },
-    "title": "Immunizations",
     "viewModal": {
       "adminDetails": "Administration Details",
       "adminSite": "Administration Site",
       "dateAdministered": "Date Administered",
       "dose": "Dose {{number}}",
       "doseHash": "Dose #{{number}}",
-      "doseNumber": "Dose Number",
-      "expirationDate": "Expiration Date",
       "locationFacility": "Location/Facility",
-      "lotNumber": "Lot Number",
-      "manufacturer": "Manufacturer",
       "ndcNumber": "NDC Number",
-      "practitionerId": "Practitioner ID: {{id}}",
-      "route": "Route",
       "tabs": {
         "administration": "Administration"
       },
       "title": "Immunization Details",
       "tradeName": "Trade Name",
-      "vaccineInfo": "Vaccine Information",
-      "vaccineName": "Vaccine Name",
-      "viewPractitioner": "View practitioner details"
+      "vaccineInfo": "Vaccine Information"
     }
   },
   "insurance": {
@@ -685,7 +594,6 @@
       "editTitle": "Edit Insurance"
     },
     "loading": "Loading insurance records...",
-    "title": "Insurance",
     "viewModal": {
       "additionalDetails": "Additional Coverage Details",
       "claimsAddress": "Claims Address",
@@ -698,21 +606,16 @@
       "deductible": "Deductible",
       "dentalCoverage": "Dental Coverage",
       "effectiveDate": "Effective Date",
-      "email": "Email",
       "employerGroup": "Employer/Group Sponsor",
-      "expirationDate": "Expiration Date",
       "groupNumber": "Group Number",
-      "insuranceLabel": "Insurance",
       "memberInfo": "Member Information",
       "memberName": "Member Name",
       "mentalHealthCoverage": "Mental Health Coverage",
-      "ongoing": "Ongoing",
       "outOfPocketMax": "Out of Pocket Max",
       "pharmacyNetworkInfo": "Pharmacy Network Info",
       "policyHolder": "Policy Holder",
       "prescriptionCoverage": "Prescription Coverage",
       "printCard": "Print Card",
-      "relationship": "Relationship",
       "sameAsMember": "Same as member",
       "self": "Self",
       "tabs": {
@@ -725,19 +628,11 @@
   },
   "key": "Default {{var}}",
   "labels": {
-    "actions": "Actions",
     "addCustom": "+ Add \"{{value}}\"",
-    "clinicalNotes": "Clinical Notes",
-    "date": "Date",
-    "duration": "Duration",
-    "endDate": "End Date",
-    "error": "Error",
-    "facility": "Facility",
     "linkedMedications": "Linked Medications",
     "loading": "Loading...",
     "loadingOption": "Loading {{option}}...",
     "loadingRelatedConditions": "Loading related conditions...",
-    "location": "Location",
     "new": "New",
     "no": "No",
     "noConditionsLinked": "No conditions linked to this lab result",
@@ -746,28 +641,20 @@
     "noLabResultsLinked": "No lab results linked to this visit",
     "noMedicationsLinked": "No medications linked to this condition",
     "none": "None",
-    "noNotesAvailable": "No notes available",
     "noRating": "No rating",
     "notAvailable": "N/A",
     "notCompleted": "Not completed",
-    "notSpecified": "Not specified",
     "noVisitsLinked": "No visits linked to this lab result",
-    "onsetDate": "Onset Date",
     "ordered": "Ordered",
-    "pending": "Pending",
     "phoneNumber": "Phone Number",
     "ratingStars": "{{count}}/5 stars",
     "ratingStars_one": "",
     "ratingStars_other": "",
     "selectPurpose": "Select purpose",
-    "severity": "Severity",
-    "startDate": "Start Date",
     "success": "Success",
-    "unknown": "Unknown",
     "value": "Value",
     "viewDetails": "",
     "viewPharmacyDetails": "View pharmacy details",
-    "viewPractitionerDetails": "View practitioner details",
     "visitDate": "Visit date",
     "visitWebsite": "Visit Website ↗",
     "yes": "Yes"
@@ -785,7 +672,6 @@
     "deleteFailed": "Failed to delete lab result",
     "discardParsedData": "Discard Parsed Data",
     "editTitle": "Edit Lab Result",
-    "error": "Error",
     "errorOccurred": "An error occurred",
     "form": {
       "linkedVisits": "Linked Visits",
@@ -799,13 +685,10 @@
     "modal": {
       "editLabResult": "Edit Lab Result",
       "labels": {
-        "category": "Category",
         "completedDate": "Completed Date",
         "doctor": "Doctor",
-        "facility": "Facility",
         "labResult": "Lab Result",
         "orderedDate": "Ordered Date",
-        "specialty": "Specialty",
         "testCode": "Test Code",
         "testType": "Test Type"
       },
@@ -817,8 +700,7 @@
       },
       "tabs": {
         "relatedConditions": "Related Conditions",
-        "testComponents": "Test Components",
-        "visits": "Visits"
+        "testComponents": "Test Components"
       },
       "title": "Lab Result Details"
     },
@@ -835,13 +717,9 @@
     },
     "success": "Success",
     "table": {
-      "category": "Category",
       "completedDate": "Completed Date",
-      "facility": "Facility",
       "orderedDate": "Ordered Date",
-      "orderingPractitioner": "Ordering Practitioner",
-      "testName": "Test Name",
-      "type": "Type"
+      "orderingPractitioner": "Ordering Practitioner"
     },
     "testNameLabel": "Lab Test Name",
     "testNameRequired": "Test name is required",
@@ -856,39 +734,25 @@
     "allTypes": "All Types",
     "clickToStart": "Click \"Add New Medication\" to get started.",
     "fields": {
-      "endDate": "End Date",
-      "frequency": "Frequency",
       "noIndication": "No indication specified",
-      "pharmacy": "Pharmacy",
-      "prescriber": "Prescriber",
-      "route": "Route",
-      "startDate": "Start Date"
+      "prescriber": "Prescriber"
     },
     "loading": "Loading medications...",
     "modal": {
-      "details": "Details",
       "editMedication": "Edit Medication",
       "labels": {
         "alternativeName": "Alternative Name",
-        "dosage": "Dosage",
         "form": "Form",
         "medicationName": "Medication Name",
         "medicationType": "Medication Type",
         "purposeIndication": "Purpose/Indication"
       },
-      "noNotes": "No notes available",
       "noSideEffects": "No side effects reported",
-      "notSpecified": "Not specified",
-      "ongoing": "Ongoing",
       "sections": {
-        "additionalNotes": "Additional Notes",
-        "attachedDocuments": "Attached Documents",
-        "basicInfo": "Basic Information",
         "dosageInfo": "Dosage Information",
         "prescriberPharmacy": "Prescriber & Pharmacy",
         "relatedConditions": "Related Conditions",
         "sideEffects": "Side Effects",
-        "timeline": "Timeline",
         "usedInTreatments": "Used in Treatments"
       },
       "tabs": {
@@ -901,9 +765,7 @@
       "empty": "This medication is not used in any treatments.",
       "loadError": "Failed to load treatments",
       "loading": "Loading treatments...",
-      "overrideDosage": "Dosage",
-      "overrideFrequency": "Freq",
-      "treatmentPlan": "Treatment Plan"
+      "overrideFrequency": "Freq"
     },
     "types": {
       "herbal": "Herbal/Natural",
@@ -965,13 +827,10 @@
     "createTitle": "Create Patient Profile",
     "editProfile": "Edit Profile",
     "editTitle": "Edit Patient Information",
-    "error": "Error",
     "fields": {
-      "address": "Address",
       "birthDate": "Birth Date",
       "bloodType": "Blood Type",
       "firstName": "First Name",
-      "gender": "Gender",
       "height": "Height",
       "lastName": "Last Name",
       "patientId": "Patient ID",
@@ -987,7 +846,6 @@
     "noProfile": "No patient profile found",
     "notAssigned": "Not assigned",
     "notProvided": "Not provided",
-    "notSpecified": "Not specified",
     "personalInfo": "Personal Information",
     "title": "Patient Information",
     "welcome": {
@@ -998,7 +856,6 @@
   "patients": {
     "form": {
       "address": {
-        "label": "Address",
         "placeholder": "Enter address"
       },
       "birthDate": {
@@ -1009,7 +866,6 @@
         "placeholder": "Select blood type"
       },
       "buttons": {
-        "cancel": "Cancel",
         "createPatient": "Create Patient",
         "saveChanges": "Save Changes",
         "saving": "Saving..."
@@ -1019,7 +875,6 @@
         "placeholder": "Enter first name"
       },
       "gender": {
-        "label": "Gender",
         "options": {
           "female": "Female",
           "male": "Male",
@@ -1070,7 +925,6 @@
       },
       "saveFirstMessage": "Save patient information first, then you can add a photo",
       "sections": {
-        "basicInformation": "Basic Information",
         "contactInformation": "Contact Information",
         "medicalInformation": "Medical Information"
       },
@@ -1137,10 +991,8 @@
       "addNew": "Add New Pharmacy"
     },
     "card": {
-      "address": "Address",
       "city": "City",
       "country": "Country",
-      "phone": "Phone",
       "postalCode": "Postal Code",
       "specialtyServices": "Specialties",
       "stateProvince": "State / Province",
@@ -1158,15 +1010,12 @@
       "editTitle": "Edit Pharmacy"
     },
     "loading": "Loading pharmacies...",
-    "title": "Pharmacies",
     "viewModal": {
-      "address": "Address",
       "city": "City",
       "contact": "CONTACT INFORMATION",
       "country": "Country",
       "editButton": "Edit Pharmacy",
       "location": "LOCATION",
-      "phone": "Phone",
       "postalCode": "Postal Code",
       "specialtyServices": "Specialties",
       "stateProvince": "State / Province",
@@ -1179,9 +1028,6 @@
       "addNew": "Add New Practitioner"
     },
     "card": {
-      "email": "Email",
-      "phone": "Phone",
-      "practice": "Practice",
       "rating": "Rating",
       "subtitle": "Healthcare Practitioner"
     },
@@ -1212,12 +1058,6 @@
       "emptyNoData": "Click \"Add Practice\" to create one, or they are created automatically when adding practitioners.",
       "emptyTitle": "No practices found",
       "searchPlaceholder": "Search practices...",
-      "table": {
-        "actions": "Actions",
-        "name": "Name",
-        "phone": "Phone",
-        "practitioners": "Practitioners"
-      },
       "totalCount": "{{count}} practices total",
       "totalCount_one": "",
       "totalCount_other": "",
@@ -1226,37 +1066,26 @@
       "unusedCount_other": ""
     },
     "table": {
-      "email": "Email",
-      "name": "Name",
-      "phone": "Phone",
-      "practice": "Practice",
-      "rating": "Rating",
-      "specialty": "Specialty"
+      "rating": "Rating"
     },
     "tabs": {
-      "practices": "Practices",
-      "practitioners": "Practitioners"
+      "practices": "Practices"
     },
     "title": "Healthcare Practitioners",
     "ungroupedTitle": "Independent Practitioners",
     "viewModal": {
       "editButton": "Edit Practitioner",
       "editPractice": "Edit Practice",
-      "email": "Email",
-      "phone": "Phone",
-      "practice": "Practice",
       "practiceDetails": "PRACTICE DETAILS",
       "practiceFax": "Fax",
       "practiceLoadError": "Failed to load practice details",
       "practiceLocations": "Locations",
-      "practicePhone": "Phone",
       "practicePortal": "Patient Portal",
       "practiceUpdateError": "Failed to update practice",
       "practiceUpdateSuccess": "Practice updated successfully",
       "practitionerContact": "PRACTITIONER CONTACT",
       "rating": "Rating",
       "savePractice": "Save Practice",
-      "specialty": "Specialty",
       "title": "Practitioner Details"
     }
   },
@@ -1265,9 +1094,7 @@
     "addNewProcedure": "Add New Procedure",
     "addProcedure": "+ Add Procedure",
     "card": {
-      "durationMinutes": "{{minutes}} minutes",
-      "practitionerId": "Practitioner ID: {{id}}",
-      "viewPractitioner": "View practitioner details"
+      "durationMinutes": "{{minutes}} minutes"
     },
     "editProcedure": "Edit Procedure",
     "form": {
@@ -1277,11 +1104,8 @@
       "anesthesiaType": "Anesthesia Type",
       "anesthesiaTypeDesc": "Type of anesthesia used",
       "anesthesiaTypePlaceholder": "e.g., General, Local, Regional",
-      "cancel": "Cancel",
-      "clinicalNotes": "Clinical Notes",
       "clinicalNotesDesc": "Additional information about this procedure",
       "clinicalNotesPlaceholder": "Enter clinical notes, observations, or additional details",
-      "complications": "Complications",
       "complicationsDesc": "Any issues or complications that occurred",
       "complicationsPlaceholder": "Document any complications",
       "createProcedure": "Create Procedure",
@@ -1290,25 +1114,20 @@
       "duration": "Duration (minutes)",
       "durationDesc": "How long the procedure took",
       "durationPlaceholder": "Enter duration",
-      "facility": "Facility",
       "facilityDesc": "Medical facility",
       "facilityPlaceholder": "e.g., Hospital name",
       "outcome": "Outcome",
       "outcomeAbnormal": "Abnormal",
-      "outcomeComplications": "Complications",
       "outcomeDesc": "Result or outcome of the procedure",
       "outcomeInconclusive": "Inconclusive",
-      "outcomePending": "Pending",
       "outcomePlaceholder": "Select outcome",
       "outcomeSuccessful": "Successful",
       "practitionerDesc": "Healthcare provider performing procedure",
-      "practitionerPlaceholder": "Select practitioner",
       "procedureCode": "Procedure Code",
       "procedureCodeDesc": "Medical billing code",
       "procedureCodePlaceholder": "e.g., CPT code",
       "procedureDate": "Procedure Date",
       "procedureDateDesc": "When the procedure was performed",
-      "procedureName": "Procedure Name",
       "procedureNameDesc": "Name of the procedure",
       "procedureNamePlaceholder": "Enter procedure name",
       "procedureType": "Procedure Type",
@@ -1322,14 +1141,12 @@
       "statusCompleted": "Completed",
       "statusDesc": "Current procedure status",
       "statusInProgress": "In Progress",
-      "statusPlaceholder": "Select status",
       "statusPostponed": "Postponed",
       "statusScheduled": "Scheduled",
       "tabs": {
         "clinical": "Clinical Details"
       },
       "tagsDesc": "Add tags to categorize and organize procedures",
-      "tagsPlaceholder": "Add tags...",
       "updateProcedure": "Update Procedure"
     },
     "loadingProcedures": "Loading procedures...",
@@ -1339,43 +1156,28 @@
     "startAdding": "Start by adding your first procedure.",
     "table": {
       "code": "Code",
-      "date": "Date",
-      "facility": "Facility",
-      "procedureName": "Procedure Name",
-      "setting": "Setting",
-      "type": "Type"
+      "setting": "Setting"
     },
     "viewModal": {
       "anesthesiaInfo": "Anesthesia Information",
       "anesthesiaNotes": "Anesthesia Notes",
       "anesthesiaType": "Anesthesia Type",
-      "basicInfo": "Basic Information",
-      "clinicalNotes": "Clinical Notes",
       "close": "Close",
-      "complications": "Complications",
-      "date": "Date",
       "doctor": "Doctor",
-      "duration": "Duration",
       "durationMinutes": "{{minutes}} minutes",
       "edit": "Edit",
-      "facility": "Facility",
       "noAnesthesiaNotes": "No anesthesia notes available",
       "noClinicalNotes": "No clinical notes available",
       "noComplications": "No complications reported",
       "noDescription": "No description available",
-      "notSpecified": "Not specified",
       "outcome": "Outcome",
-      "practitionerId": "Practitioner ID: {{id}}",
       "procedureCode": "Procedure Code",
-      "procedureName": "Procedure Name",
       "procedureType": "Procedure Type",
       "setting": "Setting",
-      "specialty": "Specialty",
       "tabs": {
         "clinical": "Clinical Details"
       },
-      "title": "Procedure Details",
-      "viewPractitioner": "View practitioner details"
+      "title": "Procedure Details"
     }
   },
   "reportBuilder": {
@@ -1387,22 +1189,9 @@
       "generateReport_other": "",
       "generateReportChartsOnly": "Generate Report ({{chartCount}} charts)",
       "generateReportWithCharts": "Generate Report ({{recordCount}} records, {{chartCount}} charts)",
-      "selectAll": "Select All Records",
-      "settings": "Settings"
+      "selectAll": "Select All Records"
     },
     "categories": {
-      "allergies": "Allergies",
-      "conditions": "Conditions",
-      "emergency_contacts": "Emergency Contacts",
-      "encounters": "Visits",
-      "family_history": "Family History",
-      "immunizations": "Immunizations",
-      "injuries": "Injuries",
-      "insurance": "Insurance",
-      "pharmacies": "Pharmacies",
-      "practitioners": "Practitioners",
-      "symptoms": "Symptoms",
-      "treatments": "Treatments",
       "vitals": "Vitals"
     },
     "configuration": {
@@ -1423,7 +1212,6 @@
       "recordsSelected": "Records Selected"
     },
     "segmentControl": {
-      "records": "Medical Records",
       "trendCharts": "Trend Charts"
     },
     "settingsModal": {
@@ -1480,9 +1268,6 @@
     "anyTag": "Any tag",
     "clearFilters": "Clear Filters",
     "collapseFilters": "Collapse filters",
-    "columnDate": "Date",
-    "columnDetails": "Details",
-    "columnName": "Name",
     "columnType": "Record Type",
     "dateLabels": {
       "diagnosed": "Diagnosed",
@@ -1551,12 +1336,8 @@
     "textResultCount_other": "{{count}} text results",
     "title": "Search Results",
     "types": {
-      "allergies": "Allergies",
-      "conditions": "Conditions",
-      "encounters": "Visits",
-      "immunizations": "Immunizations",
-      "treatments": "Treatments",
-      "vitals": "Vitals"
+      "vitals": "Vitals",
+      "encounters": "Visits"
     },
     "viewCards": "Card view",
     "viewTable": "Table view",
@@ -1704,8 +1485,7 @@
         "unknownApp": "Unknown App",
         "unknownVersion": "Unknown Version"
       }
-    },
-    "title": "Settings"
+    }
   },
   "severity": {
     "critical": "Critical - Life-threatening",
@@ -1718,15 +1498,11 @@
     "severeImpact": "Severe - Significant impact"
   },
   "status": {
-    "active": "Active",
     "cancelled": "Cancelled",
     "completed": "Completed",
     "expired": "Expired",
-    "inactive": "Inactive",
     "onHold": "On Hold",
-    "pending": "Pending",
     "planned": "Planned",
-    "resolved": "Resolved",
     "stopped": "Stopped"
   },
   "statusDescriptions": {
@@ -1744,16 +1520,11 @@
     "addSymptom": "Add Symptom",
     "addSymptomTitle": "Add New Symptom",
     "calendar": {
-      "duration": "Duration",
       "episodesOn": "Symptom Episodes on {{date}}",
-      "location": "Location",
       "noEpisodes": "No symptom episodes recorded this month",
       "noOccurrences": "No occurrences found for this date",
       "occurrenceId": "Occurrence ID",
-      "ongoing": "Ongoing",
       "pain": "Pain",
-      "resolved": "Resolved",
-      "time": "Time",
       "title": "Symptom Calendar",
       "viewSymptom": "View Symptom",
       "weekDays": {
@@ -1766,7 +1537,6 @@
         "wed": "Wed"
       }
     },
-    "category": "Category",
     "chronic": "Chronic",
     "commonTriggers": "Common Triggers",
     "confirmDeleteSymptom": "Are you sure you want to delete this symptom and all its occurrences?",
@@ -1785,12 +1555,10 @@
     "noPatientSelected": "No Patient Selected",
     "noRecords": "No symptoms recorded yet",
     "noRecordsPrompt": "Click \"Add Symptom\" to start tracking a new symptom",
-    "resolved": "Resolved",
     "selectPatientPrompt": "Please select or create a patient to track symptoms.",
     "tabs": {
       "calendar": "Calendar",
-      "list": "List",
-      "timeline": "Timeline"
+      "list": "List"
     },
     "timeline": {
       "filters": {
@@ -1806,8 +1574,6 @@
     },
     "viewModal": {
       "acute": "Acute",
-      "attachedDocuments": "Attached Documents",
-      "basicInfo": "Basic Information",
       "confirmDeleteEpisode": "Are you sure you want to delete this episode?",
       "deleteSymptom": "Delete Symptom",
       "editSymptom": "Edit Symptom",
@@ -1819,7 +1585,6 @@
       "noEpisodesLogged": "No episodes logged",
       "noEpisodesYet": "No episodes logged yet",
       "noNotesProvided": "No notes provided",
-      "notSpecified": "Not specified",
       "relief": "Relief",
       "symptomName": "Symptom Name",
       "tabs": {
@@ -1827,12 +1592,9 @@
         "episodes_one": "Episodes ({{count}})",
         "episodes_other": "Episodes ({{count}})"
       },
-      "time": "Time",
-      "timeline": "Timeline",
       "title": "{{name}} - Details",
       "totalEpisodes": "Total Episodes",
-      "triggers": "Triggers",
-      "type": "Type"
+      "triggers": "Triggers"
     }
   },
   "tagManagement": {
@@ -1897,7 +1659,6 @@
       "updated": "Successfully updated tag \"{{tag}}\""
     },
     "table": {
-      "actions": "Actions",
       "tagName": "Tag Name",
       "usageCount": "Usage Count",
       "usedIn": "Used In"
@@ -1929,7 +1690,6 @@
       "editing": "Editing",
       "fields": {
         "abbreviation": "Abbreviation",
-        "category": "Category",
         "linkedTest": "Link to Standard Test",
         "maximum": "Maximum",
         "minimum": "Minimum",
@@ -1938,7 +1698,6 @@
         "result": "Result",
         "status": "Status (Auto-calculated)",
         "testCode": "Test Code",
-        "testName": "Test Name",
         "unit": "Unit",
         "value": "Value"
       },
@@ -1997,12 +1756,10 @@
     "addTreatment": "+ Add Treatment",
     "card": {
       "conditionId": "Condition #{{id}}",
-      "relatedCondition": "Related Condition",
       "viewConditionDetails": "View condition details"
     },
     "conditionsLoadingError": "Conditions Loading Error",
     "form": {
-      "cancel": "Cancel",
       "createTreatment": "Create Treatment",
       "createWithLinks": "",
       "creatingWithLinks": "Creating treatment and linking items...",
@@ -2011,25 +1768,18 @@
       "dosageAmount": "Dosage/Amount",
       "dosageDesc": "Amount or dosage per treatment",
       "dosagePlaceholder": "e.g., 10mg, 1 session",
-      "endDate": "End Date",
       "endDateDesc": "When treatment ends (if applicable)",
       "enterTreatmentName": "Enter treatment name",
-      "frequency": "Frequency",
       "frequencyDesc": "How often treatment is administered",
       "frequencyPlaceholder": "e.g., Daily, Twice weekly",
       "linkingPartialFailure": "Some items could not be linked",
       "notesDesc": "Additional information about this treatment",
       "notesPlaceholder": "Enter treatment notes, observations, or additional details",
       "practitionerDesc": "Healthcare provider administering treatment",
-      "relatedCondition": "Related Condition",
       "relatedConditionDesc": "Link this treatment to a condition",
       "savingTreatment": "Saving treatment...",
       "selectCondition": "Select condition",
-      "selectPractitioner": "Select practitioner",
-      "selectStatus": "Select status",
-      "startDate": "Start Date",
       "startDateDesc": "When treatment begins",
-      "statusActive": "Active",
       "statusCancelled": "Cancelled",
       "statusCompleted": "Completed",
       "statusDesc": "Current treatment status",
@@ -2039,7 +1789,6 @@
         "scheduleDosage": "Schedule & Dosage"
       },
       "tagsDesc": "Add tags to categorize and organize treatments",
-      "tagsPlaceholder": "Add tags...",
       "treatmentName": "Treatment Name",
       "treatmentNameDesc": "Name of the treatment",
       "treatmentNotes": "Treatment Notes",
@@ -2052,56 +1801,34 @@
     "loadingTreatments": "Loading treatments...",
     "medications": {
       "default": "(from medication)",
-      "dosage": "Dosage",
-      "duration": "Duration",
       "empty": "No medications linked to this treatment plan.",
-      "endDate": "End Date",
-      "frequency": "Frequency",
       "loadError": "Failed to load medications",
       "loading": "Loading medications...",
-      "ongoing": "Ongoing",
-      "pharmacy": "Pharmacy",
       "prescriber": "Prescriber",
-      "startDate": "Start Date",
       "timing": "Timing"
     },
     "mode": {
-      "advanced": "Treatment Plan",
       "advancedDescription": "Medication-centric plan with per-medication overrides",
       "simple": "Simple",
       "simpleDescription": "Basic tracking with schedule and dosage"
     },
     "noTreatmentsFound": "No Treatments Found",
     "startAdding": "Start by adding your first treatment.",
-    "title": "Treatments",
     "viewModal": {
       "amountDosage": "Amount/Dosage",
-      "basicInformation": "Basic Information",
       "close": "Close",
       "conditionId": "Condition #{{id}}",
       "conditionStatus": "Condition Status",
-      "diagnosis": "Diagnosis",
       "doctor": "Doctor",
       "dosageFrequency": "Dosage & Frequency",
       "edit": "Edit",
-      "endDate": "End Date",
-      "frequency": "Frequency",
       "noConditionLinked": "No condition linked",
-      "noNotesAvailable": "No notes available",
-      "notSpecified": "Not specified",
-      "ongoing": "Ongoing",
-      "practice": "Practice",
       "practitionerId": "Practitioner #{{id}}",
-      "relatedCondition": "Related Condition",
       "schedule": "Schedule",
-      "severity": "Severity",
-      "specialty": "Specialty",
-      "startDate": "Start Date",
       "tabs": {
         "equipment": "Equipment",
         "labs": "Labs",
-        "schedule": "Schedule & Dosage",
-        "visits": "Visits"
+        "schedule": "Schedule & Dosage"
       },
       "title": "Treatment Details",
       "treatmentName": "Treatment Name",
@@ -2122,9 +1849,7 @@
       "durationMinutes": "{{minutes}} minutes",
       "generalVisit": "General Visit",
       "noPractitionerAssigned": "No practitioner assigned",
-      "practitionerId": "Practitioner ID: {{id}}",
-      "viewCondition": "View condition details",
-      "viewPractitioner": "View practitioner details"
+      "viewCondition": "View condition details"
     },
     "clickToGetStarted": "Click \"Add New Visit\" to get started.",
     "editVisit": "Edit Visit",
@@ -2140,29 +1865,18 @@
     "loadingVisits": "Loading visits...",
     "noVisitsFound": "No medical visits found",
     "table": {
-      "diagnosis": "Diagnosis",
-      "facility": "Facility",
       "reason": "Reason",
-      "relatedCondition": "Related Condition",
       "visitDate": "Visit Date"
     },
     "title": "Medical Visits",
     "viewModal": {
-      "additionalNotes": "Additional Notes",
-      "attachedDocuments": "Attached Documents",
       "clinicalInformation": "Clinical Information",
-      "diagnosis": "Diagnosis",
       "doctor": "Doctor",
-      "duration": "Duration",
       "durationMinutes": "{{minutes}} minutes",
       "editVisit": "Edit Visit",
       "generalVisit": "General Visit",
-      "noNotesAvailable": "No notes available",
       "noPractitionerAssigned": "No practitioner assigned",
-      "practitionerId": "Practitioner ID: {{id}}",
       "reason": "Reason",
-      "relatedCondition": "Related Condition",
-      "specialty": "Specialty",
       "tabs": {
         "clinical": "Clinical",
         "visitInfo": "Visit Info"
@@ -2177,7 +1891,6 @@
     "addNew": "Add New Vital Signs",
     "addTitle": "Add Vital Signs",
     "card": {
-      "location": "Location",
       "notRecorded": "Not recorded",
       "oxygenSaturation": "Oxygen Saturation",
       "recordedBy": "Recorded By",
@@ -2202,7 +1915,6 @@
         "clinic": "Clinic",
         "home": "Home",
         "hospital": "Hospital",
-        "pharmacy": "Pharmacy",
         "urgentCare": "Urgent Care"
       },
       "measurementLocation": "Measurement Location",
@@ -2211,7 +1923,6 @@
       "patientInfo": "Patient Information",
       "recordedDateTime": "Measurement Date & Time",
       "saveVitals": "Save Vitals",
-      "selectTime": "Time",
       "systolicBP": "Systolic BP",
       "updateVitals": "Update Vitals",
       "validation": {
@@ -2287,7 +1998,6 @@
     "modal": {
       "a1c": "A1C",
       "additionalMeasurements": "Additional Measurements",
-      "basicInfo": "Basic Information",
       "bloodGlucose": "Blood Glucose",
       "deviceUsed": "Device Used",
       "glucoseContext": "Measurement Type",
@@ -2299,8 +2009,7 @@
       "recordedBy": "Recorded By",
       "recordedDate": "Recorded Date",
       "respiratoryRate": "Respiratory Rate",
-      "title": "Vital Signs Details",
-      "vitalSigns": "Vital Signs"
+      "title": "Vital Signs Details"
     },
     "noDataAvailable": "No vital signs data available",
     "noPatientSelected": "No Patient Selected",
@@ -2331,13 +2040,11 @@
       "glucoseTrend": "Glucose Trend",
       "maxGlucose": "Max",
       "minGlucose": "Min",
-      "readings": "{{count}} readings",
-      "time": "Time"
+      "readings": "{{count}} readings"
     },
     "summaryDescription": "Latest readings and averages - Click a card to filter the table below",
     "systolic": "Systolic",
     "table": {
-      "date": "Date",
       "errorLoading": "Error loading vital signs",
       "noRecords": "No vital signs records found",
       "noRecordsDesc": "Vital signs will appear here once they have been recorded",
@@ -2345,10 +2052,8 @@
     },
     "tabs": {
       "context": "Context",
-      "dateTime": "Date & Time",
-      "vitalSigns": "Vital Signs"
+      "dateTime": "Date & Time"
     },
-    "title": "Vital Signs",
     "trends": {
       "allContexts": "All Types",
       "allDates": "All Dates",
@@ -2402,8 +2107,6 @@
     }
   },
   "trash": {
-    "fileCount_one": "{{count}} file",
-    "fileCount_other": "{{count}} files",
-    "fileCount": "{{count}} files"
+    "fileCount_one": "{{count}} file"
   }
 }

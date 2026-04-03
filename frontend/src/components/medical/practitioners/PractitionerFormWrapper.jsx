@@ -22,7 +22,7 @@ const PractitionerFormWrapper = ({
   isLoading,
   statusMessage,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
 
   // State for dynamic specialties
   const [specialtyOptions, setSpecialtyOptions] = useState([]);
@@ -93,7 +93,7 @@ const PractitionerFormWrapper = ({
       setShowPracticeEdit(true);
     } catch {
       notifications.show({
-        title: t('common:labels.error'),
+        title: t('shared:labels.error'),
         message: t('common:practitioners.editPracticeError', 'Failed to load practice for editing'),
         color: 'red',
       });
@@ -182,7 +182,7 @@ const PractitionerFormWrapper = ({
         // Revert practice_id to empty so it doesn't store a raw text string
         onInputChange({ target: { name: 'practice_id', value: '' } });
         notifications.show({
-          title: t('common:labels.error'),
+          title: t('shared:labels.error'),
           message: t('common:practitioners.createPracticeError', 'Failed to create practice. Please try again.'),
           color: 'red',
         });

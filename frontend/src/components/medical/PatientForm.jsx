@@ -280,7 +280,7 @@ const PatientForm = ({
         {error && (
           <Alert
             icon={<IconAlertCircle size="1rem" />}
-            title={t('errors:patientForm.error')}
+            title={t('shared:labels.error')}
             color="red"
             variant="light"
             style={{ whiteSpace: 'pre-line' }}
@@ -309,7 +309,7 @@ const PatientForm = ({
         {/* Basic Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            {t('patients.form.sections.basicInformation')}
+            {t('shared:labels.basicInformation')}
           </Text>
           <Stack gap="sm">
             <Group grow>
@@ -351,7 +351,7 @@ const PatientForm = ({
                 popoverProps={{ withinPortal: true, zIndex: 3000 }}
               />
               <Select
-                label={t('patients.form.gender.label')}
+                label={t('shared:fields.gender')}
                 placeholder={t('patients.form.gender.placeholder')}
                 data={genderOptions}
                 value={formData.gender}
@@ -437,7 +437,7 @@ const PatientForm = ({
             {t('patients.form.sections.contactInformation')}
           </Text>
           <Textarea
-            label={t('patients.form.address.label')}
+            label={t('shared:labels.address')}
             placeholder={t('patients.form.address.placeholder')}
             leftSection={<IconMapPin size="1rem" />}
             value={formData.address}
@@ -461,7 +461,7 @@ const PatientForm = ({
               onClick={onCancel}
               disabled={loading}
             >
-              {t('patients.form.buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
           )}
           <Button

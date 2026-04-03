@@ -103,7 +103,7 @@ function SaveResetBar({ visible, saving, onSave, onReset, t }) {
 }
 
 const Settings = () => {
-  const { t } = useTranslation(['common', 'notifications']);
+  const { t } = useTranslation(['common', 'notifications', 'shared']);
   const { user, updateSessionTimeout } = useAuth();
   const {
     preferences: userPreferences,
@@ -409,14 +409,14 @@ const Settings = () => {
   if (!user) {
     return (
       <Container size="xl" py="md">
-        <PageHeader title={t('settings.title', 'Settings')} />
+        <PageHeader title={t('shared:labels.settings', 'Settings')} />
       </Container>
     );
   }
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title={t('settings.title', 'Settings')} />
+      <PageHeader title={t('shared:labels.settings', 'Settings')} />
 
       <div className="settings-tabs" role="tablist">
         {SETTINGS_TABS.map(tab => (

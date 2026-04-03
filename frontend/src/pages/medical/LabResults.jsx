@@ -687,10 +687,10 @@ const LabResults = () => {
           data={paginatedLabResults}
           pagination={false}
           columns={[
-            { header: t('labResults.table.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
-            { header: t('labResults.table.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
-            { header: t('labResults.table.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
-            { header: t('labResults.table.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
+            { header: t('shared:fields.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
+            { header: t('shared:labels.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
+            { header: t('shared:labels.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
+            { header: t('shared:labels.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
             { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'high', width: 120 },
             { header: t('labResults.table.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
             { header: t('labResults.table.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },

@@ -43,7 +43,7 @@ import { usePagination } from '../../hooks/usePagination';
 import PaginationControls from '../../components/shared/PaginationControls';
 
 const Symptoms = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
@@ -494,7 +494,7 @@ const Symptoms = () => {
             {t('symptoms.tabs.list', 'List')}
           </Tabs.Tab>
           <Tabs.Tab value="timeline" leftSection={<IconTimeline size={16} />}>
-            {t('symptoms.tabs.timeline', 'Timeline')}
+            {t('shared:labels.timeline', 'Timeline')}
           </Tabs.Tab>
           <Tabs.Tab value="calendar" leftSection={<IconCalendar size={16} />}>
             {t('symptoms.tabs.calendar', 'Calendar')}
@@ -546,7 +546,7 @@ const Symptoms = () => {
 
                       {symptom.category && (
                         <Text size="sm" c="dimmed">
-                          {t('symptoms.category', 'Category')}: {symptom.category}
+                          {t('shared:labels.category', 'Category')}: {symptom.category}
                         </Text>
                       )}
 
@@ -561,7 +561,7 @@ const Symptoms = () => {
                         )}
                         {symptom.resolved_date && (
                           <Text size="sm" c="green">
-                            {t('symptoms.resolved', 'Resolved')}: {formatDate(symptom.resolved_date)}
+                            {t('shared:labels.resolved', 'Resolved')}: {formatDate(symptom.resolved_date)}
                           </Text>
                         )}
                         <Text size="sm" fw={500} c="blue">

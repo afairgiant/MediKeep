@@ -78,7 +78,7 @@ const VitalViewModal = ({
   // Vital sections configuration from VitalsList
   const vitalSections = [
     {
-      title: t('vitals.modal.basicInfo', 'Basic Information'),
+      title: t('shared:labels.basicInformation', 'Basic Information'),
       icon: IconCalendar,
       items: [
         {
@@ -87,19 +87,19 @@ const VitalViewModal = ({
           icon: IconCalendar,
         },
         {
-          label: t('vitals.card.location', 'Location'),
-          value: vital.location || t('labels.notSpecified', 'Not specified'),
+          label: t('shared:labels.location', 'Location'),
+          value: vital.location || t('shared:labels.notSpecified', 'Not specified'),
           icon: IconMapPin,
         },
         {
           label: t('vitals.modal.deviceUsed', 'Device Used'),
-          value: vital.device_used || t('labels.notSpecified', 'Not specified'),
+          value: vital.device_used || t('shared:labels.notSpecified', 'Not specified'),
           icon: IconDevices,
         },
       ],
     },
     {
-      title: t('vitals.modal.vitalSigns', 'Vital Signs'),
+      title: t('shared:categories.vital_signs', 'Vital Signs'),
       icon: IconHeart,
       items: [
         {
@@ -180,7 +180,7 @@ const VitalViewModal = ({
           label: t('vitals.modal.glucoseContext', 'Measurement Type'),
           value: vital.glucose_context
             ? t(`vitals.glucoseContext.${vital.glucose_context}`, vital.glucose_context)
-            : t('labels.notSpecified', 'Not specified'),
+            : t('shared:labels.notSpecified', 'Not specified'),
           icon: IconDroplet,
         }] : []),
         {
@@ -218,7 +218,7 @@ const VitalViewModal = ({
         <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3} mb="xs">{t('vitals.modal.vitalSigns', 'Vital Signs')}</Title>
+              <Title order={3} mb="xs">{t('shared:categories.vital_signs', 'Vital Signs')}</Title>
               <Group gap="xs">
                 {vital.recorded_date && (
                   <Badge variant="light" color="blue" size="sm">

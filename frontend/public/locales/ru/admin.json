@@ -1,7 +1,6 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
       "firstName": "First Name",
       "lastName": "Last Name",
       "linkPatient": {
@@ -25,12 +24,10 @@
     "activityTrend": "Тенденция активности",
     "analyticsDateRange": "Диапазон дат аналитики",
     "axisLabels": {
-      "activities": "Действия",
-      "date": "Дата"
+      "activities": "Действия"
     },
     "breakdownByType": "По типам",
     "chartLabels": {
-      "allergies": "Аллергии",
       "patients": "Пациенты",
       "userActivity": "Активность пользователей",
       "vitals": "Жизненные показатели"
@@ -80,11 +77,9 @@
       "action": "Действие",
       "entityType": "Тип сущности",
       "recordId": "ID записи",
-      "timestamp": "Время",
-      "user": "Пользователь"
+      "timestamp": "Время"
     },
     "title": "Журнал аудита",
-    "userFilter": "Пользователь",
     "viewRecord": "Просмотр записи {{type}}",
     "viewRecordAriaLabel": "Просмотр {{type}} #{{id}}"
   },
@@ -100,15 +95,12 @@
       "previewRestore": "Предпросмотр восстановления",
       "restore": "Восстановить",
       "tableHeaders": {
-        "actions": "Действия",
         "created": "Создана",
         "fileExists": "Файл существует",
         "filename": "Имя файла",
-        "size": "Размер",
-        "type": "Тип"
+        "size": "Размер"
       },
       "title": "Существующие резервные копии",
-      "unknown": "Неизвестно",
       "verify": "Проверить"
     },
     "loading": "Загрузка управления резервными копиями...",
@@ -177,11 +169,8 @@
       "filesCount_few": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
       "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} файлов",
-      "filesOnly_one": "{{count}} files",
       "filesOnly_few": "{{count}} files",
       "filesOnly_many": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Манифест",
       "noAffectedData": "Информация о затронутых данных недоступна",
       "noStatistics": "Статистика недоступна",
@@ -192,12 +181,8 @@
       "sqlStatements_few": "{{count}} SQL statements",
       "sqlStatements_many": "{{count}} SQL statements",
       "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} записей всего",
-      "totalRecords_one": "{{count}} total records",
       "totalRecords_few": "{{count}} total records",
       "totalRecords_many": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Тип",
       "unknownType": "Неизвестный тип резервной копии",
       "warnings": "Предупреждения"
     },
@@ -226,7 +211,6 @@
       "title": "Настройки хранения резервных копий"
     },
     "schedule": {
-      "active": "Активно",
       "completedSuccessfully": "Завершено успешно",
       "dayOfWeek": "День недели",
       "dayOfWeekDesc": "В какой день выполнять еженедельное копирование?",
@@ -239,7 +223,6 @@
         "tue": "Вторник",
         "wed": "Среда"
       },
-      "disabled": "Отключено",
       "failed": "Ошибка: {{error}}",
       "frequency": "Частота резервного копирования",
       "frequencyDesc": "Настройте автоматическое полное копирование (база данных + файлы)",
@@ -247,7 +230,6 @@
       "nextScheduledRun": "Следующий запуск по расписанию",
       "presets": {
         "daily": "Ежедневно",
-        "disabled": "Отключено",
         "every12Hours": "Каждые 12 часов",
         "every6Hours": "Каждые 6 часов",
         "weekly": "Еженедельно"
@@ -260,8 +242,7 @@
     },
     "subtitle": "Создание и управление системными резервными копиями",
     "tabs": {
-      "backups": "Резервные копии",
-      "settings": "Настройки"
+      "backups": "Резервные копии"
     },
     "title": "Управление резервными копиями",
     "unsavedBadge": "Не сохранено"
@@ -277,7 +258,6 @@
     "autoFeaturesTitle": "Автоматические функции",
     "cardSubtitle": "Заполните форму ниже для создания новой учётной записи",
     "cardTitle": "Данные учётной записи",
-    "email": "Электронная почта",
     "emailPlaceholder": "Введите адрес электронной почты",
     "errors": {
       "accountCreateFailed": "Не удалось создать учётную запись",
@@ -314,7 +294,6 @@
     },
     "role": "Роль",
     "roleAdmin": "Администратор",
-    "roleUser": "Пользователь",
     "submitButton": "Создать учётную запись",
     "successRedirect": "Пользователь «{{username}}» успешно создан!",
     "username": "Имя пользователя",
@@ -340,7 +319,6 @@
       "dataModelsDesc": "Просмотр и управление таблицами базы данных",
       "manageUsers": "Управление пользователями",
       "manageUsersDesc": "Просмотр и управление учётными записями",
-      "settings": "Настройки",
       "settingsDesc": "Конфигурация системы",
       "subtitle": "Основные административные задачи",
       "systemHealth": "Состояние системы",
@@ -374,8 +352,7 @@
       "recentRegistrations_few": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
       "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Всего пользователей",
-      "vitalSigns": "Жизненные показатели"
+      "totalUsers": "Всего пользователей"
     },
     "subtitle": "Комплексный обзор системы и управление",
     "systemHealth": {
@@ -393,10 +370,8 @@
   "dataModels": {
     "categories": {
       "coreMedical": "Основные медицинские",
-      "familyHistory": "Семейный анамнез",
       "fileManagement": "Управление файлами",
       "healthcareDirectory": "Справочник медучреждений",
-      "medicalRecords": "Медицинские записи",
       "patientSupport": "Поддержка пациентов",
       "sharingAccess": "Совместный доступ",
       "system": "Система"
@@ -439,7 +414,6 @@
     "title": "Модели данных"
   },
   "directoryCard": {
-    "error": "Ошибка",
     "files": "файлов",
     "mb": "МБ",
     "ok": "ОК"
@@ -481,7 +455,6 @@
       "connectionTest": "Тест подключения",
       "databaseSize": "Размер базы данных",
       "failed": "Ошибка",
-      "medicalRecords": "Медицинские записи",
       "passed": "Пройден",
       "patientRecords": "Записи пациентов",
       "title": "Состояние базы данных"
@@ -521,7 +494,6 @@
     "sso": {
       "allowed": "Разрешена",
       "blocked": "Заблокирована",
-      "disabled": "Отключён",
       "enabled": "Включён",
       "passwordOnlyInfo": "Пользователи могут входить только с помощью имени пользователя и пароля",
       "provider": "Провайдер",
@@ -620,11 +592,8 @@
     "selected_many": "",
     "selected_other": "",
     "toggleColumnVisibility": "Переключить видимость столбцов",
-    "totalRecords": "{{count}} записей всего",
-    "totalRecords_one": "{{count}} total records",
     "totalRecords_few": "{{count}} total records",
     "totalRecords_many": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Введите <strong>DELETE</strong> для подтверждения",
     "usernameChangeLogout": "Это действие приведёт к немедленному выходу из системы, и вам нужно будет войти с новым именем пользователя.",
     "usernameChangeText": "Вы собираетесь изменить имя пользователя с <strong>«{{oldUsername}}»</strong> на <strong>«{{newUsername}}»</strong>.",
@@ -664,12 +633,10 @@
   },
   "shared": {
     "dark": "тёмный",
-    "disabled": "Отключено",
     "enabled": "Включено",
     "healthy": "исправна",
     "info": "Информация",
-    "light": "светлый",
-    "unknown": "Неизвестно"
+    "light": "светлый"
   },
   "sidebar": {
     "adminNavigation": "Навигация администратора",
@@ -680,7 +647,6 @@
       "backupManagement": "Управление резервными копиями",
       "dataModels": "Модели данных",
       "maintenance": "Обслуживание",
-      "settings": "Настройки",
       "systemHealth": "Состояние системы",
       "trash": "Корзина",
       "userManagement": "Управление пользователями"
@@ -739,7 +705,6 @@
     "fileCount_one": "{{count}} файл",
     "fileCount_few": "{{count}} files",
     "fileCount_many": "{{count}} files",
-    "fileCount_other": "{{count}} файлов",
     "fileDeleted": "Файл удалён",
     "fileDeletedMessage": "{{filename}} окончательно удалён",
     "fileRestored": "Файл восстановлен",
@@ -782,7 +747,6 @@
     "showingFiltered": "Показано {{shown}} из {{total}} {{files}}",
     "subtitle": "Управление удалёнными файлами. Восстановите файлы в исходное расположение или окончательно удалите их для освобождения хранилища.",
     "tableHeaders": {
-      "actions": "Действия",
       "deleted": "Удалён",
       "filename": "Имя файла",
       "originalLocation": "Исходное расположение",
@@ -827,7 +791,6 @@
     "loginHistory": "История входов",
     "loginHistoryModal": {
       "dateTime": "Дата и время",
-      "details": "Подробности",
       "ipAddress": "IP-адрес",
       "noHistory": "История входов не найдена",
       "notAvailable": "Н/Д",
@@ -853,8 +816,7 @@
     "resetPassword": "Сбросить пароль",
     "roleFilter": {
       "admin": "Администратор",
-      "all": "Все роли",
-      "user": "Пользователь"
+      "all": "Все роли"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Невозможно удалить последнюю роль администратора.",
@@ -866,18 +828,13 @@
     },
     "searchPlaceholder": "Поиск пользователей...",
     "statusFilter": {
-      "active": "Активные",
-      "all": "Все статусы",
-      "inactive": "Неактивные"
+      "all": "Все статусы"
     },
     "tableHeaders": {
-      "actions": "Действия",
       "auth": "Аутентификация",
       "created": "Создан",
-      "fullName": "Полное имя",
       "lastLogin": "Последний вход",
-      "role": "Роль",
-      "user": "Пользователь"
+      "role": "Роль"
     },
     "title": "Управление пользователями",
     "toggleActiveModal": {

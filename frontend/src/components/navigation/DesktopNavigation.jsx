@@ -12,7 +12,7 @@ import './DesktopNavigation.css';
 const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation('navigation');
+  const { t } = useTranslation(['navigation', 'shared']);
   const { viewport, width } = useViewport();
   
   // Get navigation sections based on viewport (desktop or laptop)
@@ -131,7 +131,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
             <Menu.Item
               onClick={() => navigate('/settings')}
             >
-              {t('menu.settings', 'Settings')}
+              {t('shared:labels.settings', 'Settings')}
             </Menu.Item>
 
             <Menu.Item closeMenuOnClick={false}>

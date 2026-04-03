@@ -51,7 +51,6 @@
     "birthDateFuture": "Birth date cannot be in the future",
     "birthDateRequired": "Birth date is required",
     "createFailed": "Creation Failed: {{message}}",
-    "error": "Error",
     "firstNameRequired": "First name is required",
     "lastNameRequired": "Last name is required",
     "updateFailed": "Update Failed: {{message}}"

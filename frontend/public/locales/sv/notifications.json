@@ -12,7 +12,6 @@
     "deleteFailed": "Kunde inte ta bort kanalen",
     "deleteSuccess": "Kanalen har tagits bort",
     "description": "Lägg till och hantera dina aviseringskanaler",
-    "disabled": "Inaktiverad",
     "discord": {
       "avatarUrl": {
         "description": "Anpassad avatar för aviseringsboten",
@@ -130,7 +129,6 @@
     "title": "Aviseringskanaler",
     "types": {
       "discord": "Discord",
-      "email": "E-post",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -216,9 +214,7 @@
     "description": "Senaste aviseringar skickade genom dina kanaler",
     "fields": {
       "channel": "Kanal",
-      "error": "Fel",
-      "event": "Händelse",
-      "time": "Tid"
+      "event": "Händelse"
     },
     "loading": "Laddar historik...",
     "noHistory": "Inga aviseringar skickade ännu",
@@ -228,7 +224,6 @@
     "showMore": "Visa mer",
     "status": {
       "failed": "Misslyckad",
-      "pending": "Väntande",
       "sent": "Skickad"
     },
     "title": "Aviseringshistorik"
@@ -294,7 +289,6 @@
       "allOperationsSuccess": "Alla {{total}} {{operation}} har slutförts!",
       "deleteFailed": "Borttagning misslyckades",
       "downloadFailed": "Nedladdning misslyckades",
-      "error": "Fel",
       "operationFailed": "Åtgärden misslyckades",
       "operationFailedTitle": "{{operation}} misslyckades",
       "operationPartial": "{{success}}/{{total}} {{operation}} slutfördes. {{failed}} misslyckades.",
