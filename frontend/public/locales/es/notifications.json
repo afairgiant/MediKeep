@@ -1,10 +1,14 @@
 {
   "channels": {
     "add": "Añadir canal",
+    "configTitle": "Configuración de {{type}}",
     "confirmDelete": "¿Está seguro de que desea eliminar este canal?",
+    "createError": "Error al crear el canal",
     "createFailed": "Error al crear el canal",
     "createSuccess": "Canal creado con éxito",
     "delete": "Eliminar canal",
+    "deleteConfirm": "¿Está seguro de que desea eliminar este canal?",
+    "deleteError": "Error al eliminar el canal",
     "deleteFailed": "Error al eliminar el canal",
     "deleteSuccess": "Canal eliminado con éxito",
     "description": "Añada y gestione sus canales de entrega de notificaciones",
@@ -63,7 +67,19 @@
         "label": "Usar TLS"
       }
     },
+    "empty": "No hay canales de notificación configurados.",
+    "emptyHint": "Agregue un canal para comenzar a recibir notificaciones por Discord, correo electrónico, Gotify o Webhook.",
     "enabled": "Activado",
+    "errors": {
+      "fieldRequired": "{{field}} es obligatorio",
+      "nameRequired": "El nombre del canal es obligatorio"
+    },
+    "fields": {
+      "enabled": "Habilitar este canal",
+      "name": "Nombre del canal",
+      "namePlaceholder": "My Discord Server",
+      "type": "Tipo de canal"
+    },
     "form": {
       "configSection": "Configuración del canal",
       "enabled": {
@@ -100,20 +116,26 @@
       }
     },
     "lastUsed": "Último uso",
+    "loadError": "Error al cargar los detalles del canal",
     "noChannels": "No hay canales de notificación configurados",
     "noChannelsHint": "Añada un canal para empezar a recibir notificaciones",
     "notificationsSent": "{{count}} notificaciones enviadas",
+    "sentCount_one": "{{count}} enviados",
+    "sentCount_many": "{{count}} sent",
+    "sentCount_other": "{{count}} enviados",
     "test": "Probar",
+    "testError": "Error al enviar la notificación de prueba",
     "testFailed": "Error en la notificación de prueba",
-    "testSuccess": "Notificación de prueba enviada con éxito",
     "testing": "Probando...",
+    "testSuccess": "Notificación de prueba enviada con éxito",
     "title": "Canales de notificación",
     "types": {
       "discord": "Discord",
-      "email": "Email",
+      "email": "Correo electrónico",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
+    "updateError": "Error al actualizar el canal",
     "updateFailed": "Error al actualizar el canal",
     "updateSuccess": "Canal actualizado con éxito",
     "verified": "Verificado",
@@ -225,12 +247,14 @@
     },
     "comingSoon": "Próximamente",
     "description": "Elija qué eventos activan notificaciones en cada canal",
+    "event": "Evento",
     "eventHeader": "Evento",
     "loading": "Cargando preferencias...",
     "noChannels": "Primero añada un canal de notificación para configurar las preferencias de eventos",
     "saveFailed": "Error al guardar la preferencia",
     "saveSuccess": "Preferencia guardada",
-    "title": "Notificaciones de eventos"
+    "title": "Notificaciones de eventos",
+    "updateError": "Error al actualizar la preferencia"
   },
   "title": "Configuración de notificaciones",
   "toasts": {
@@ -294,15 +318,15 @@
       "revokeFailed": "Error al revocar el acceso"
     },
     "labResults": {
-      "addFailed": "Error al añadir los componentes del análisis",
       "addedMessage": "Se añadieron {{count}} componentes al resultado de laboratorio.",
       "addedSuccess": "Éxito",
+      "addFailed": "Error al añadir los componentes del análisis",
       "deletedMessage": "{{name}} ha sido eliminado",
       "deletedSuccess": "Componente eliminado",
       "noTextMessage": "Por favor, pegue el texto de los resultados de laboratorio en el área de entrada.",
       "noTextToParse": "Sin texto para analizar",
-      "parseWarning": "Algunas líneas no pudieron ser analizadas",
       "parsedCount": "Se encontraron {{count}} componentes de análisis. Revíselos en la pestaña de vista previa.",
+      "parseWarning": "Algunas líneas no pudieron ser analizadas",
       "templateApplied": "Plantilla aplicada",
       "templateAppliedMessage": "Se añadieron {{count}} componentes de la plantilla \"{{name}}\".",
       "textParsed": "Texto analizado",
@@ -312,15 +336,15 @@
     },
     "patient": {
       "createdSuccess": "{{name}} creado con éxito",
-      "deleteFailed": "Error al eliminar: {{message}}",
-      "deleteOwnOnly": "Solo puede eliminar pacientes que sean de su propiedad",
       "deletedNoOthers": "{{name}} eliminado con éxito. No hay otros pacientes disponibles.",
       "deletedSuccess": "{{name}} eliminado con éxito",
       "deletedSwitched": "{{name}} eliminado con éxito. Se cambió a {{fallbackName}}.",
+      "deleteFailed": "Error al eliminar: {{message}}",
+      "deleteOwnOnly": "Solo puede eliminar pacientes que sean de su propiedad",
       "nowViewing": "Viendo ahora a {{name}}",
       "removeAccessFailed": "Error al retirar el acceso: {{message}}",
-      "removeOwnOnly": "No puede retirar el acceso a pacientes que sean de su propiedad",
       "removedAccess": "Acceso retirado a {{name}}",
+      "removeOwnOnly": "No puede retirar el acceso a pacientes que sean de su propiedad",
       "switchFailed": "Error al cambiar: {{message}}",
       "updatedSuccess": "{{name}} actualizado con éxito"
     },
@@ -334,12 +358,12 @@
     "reports": {
       "noRecordsMessage": "Por favor, seleccione al menos un registro de las categorías a continuación para generar un informe.",
       "noRecordsSelected": "Ningún registro seleccionado",
-      "templateDeleteFailed": "Error al eliminar la plantilla",
       "templateDeleted": "Plantilla eliminada con éxito",
+      "templateDeleteFailed": "Error al eliminar la plantilla",
       "templateLoaded": "Plantilla \"{{name}}\" cargada",
       "templateNameRequired": "El nombre de la plantilla es obligatorio",
-      "templateSaveFailed": "Error al guardar la plantilla",
       "templateSaved": "Plantilla guardada con éxito",
+      "templateSaveFailed": "Error al guardar la plantilla",
       "validationError": "Error de validación"
     },
     "settings": {
@@ -371,8 +395,8 @@
       "documentAdded": "Documento añadido a Paperless",
       "duplicateDocument": "Documento duplicado",
       "failed": "Error en la carga",
-      "fileUploadFailed": "Error en la carga del archivo",
       "fileUploadedSuccess": "\"{{fileName}}\" subido a Paperless con éxito",
+      "fileUploadFailed": "Error en la carga del archivo",
       "paperlessUploadFailed": "Error en la carga a Paperless",
       "partialSuccess": "{{completed}}/{{total}} archivos subidos con éxito. {{failed}} fallaron."
     },
@@ -380,8 +404,8 @@
       "deleteFailed": "Error al eliminar el registro de signos vitales",
       "deleteSuccess": "Registro de signos vitales eliminado con éxito",
       "formErrors": "Por favor, corrija los errores del formulario",
-      "saveFailed": "Error al {{action}} los signos vitales",
-      "savedSuccess": "Signos vitales {{action}} con éxito"
+      "savedSuccess": "Signos vitales {{action}} con éxito",
+      "saveFailed": "Error al {{action}} los signos vitales"
     }
   },
   "validation": {

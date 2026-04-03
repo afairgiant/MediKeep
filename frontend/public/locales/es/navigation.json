@@ -1,53 +1,4 @@
 {
-  "menu": {
-    "dashboard": "Tableau de bord",
-    "patients": "Pacientes",
-    "medicalRecords": "Dossiers médicaux",
-    "settings": "Configuraciones",
-    "reports": "Informes",
-    "administration": "Administración",
-    "logout": "Cerrar sesión",
-    "profile": "Perfil",
-    "help": "Ayuda",
-    "backToDashboard": "Volver al tablero"
-  },
-  "pages": {
-    "dashboard": "Tablero Principal",
-    "patientList": "Lista de pacientes",
-    "patientDetails": "Detalles del paciente",
-    "medicalHistory": "Historial médico",
-    "settings": "Configuraciones",
-    "userProfile": "Perfil de usuario",
-    "preferences": "Preferencias",
-    "reports": "Informes",
-    "help": "Ayuda"
-  },
-  "sections": {
-    "overview": "Resumen",
-    "personalInfo": "Información personal",
-    "medicalInfo": "Información médica",
-    "documents": "Documentos",
-    "timeline": "Cronología",
-    "familyHistory": "Historial familiar",
-    "emergencyContacts": "Contactos de emergencia",
-    "insurance": "Seguro",
-    "preferences": "Preferencias"
-  },
-  "medicalRecords": {
-    "allergies": "Alergias",
-    "conditions": "Condiciones",
-    "medications": "Medicamentos",
-    "labResults": "Resultados de laboratorio",
-    "immunizations": "Vacunaciones",
-    "procedures": "Procedimientos",
-    "visits": "Visitas",
-    "treatments": "Tratamientos",
-    "symptoms": "Síntomas",
-    "practitioners": "Profesionales",
-    "pharmacies": "Farmacias",
-    "injuries": "Lesiones",
-    "medicalEquipment": "Equipo médico"
-  },
   "activity": {
     "actions": {
       "added": "Añadido",
@@ -93,6 +44,7 @@
       "vitalSigns": "Signos vitales"
     },
     "search": {
+      "advancedSearch": "Búsqueda avanzada",
       "placeholder": "Buscar registros médicos..."
     },
     "sections": {
@@ -128,7 +80,59 @@
       "familyHistory": "Historial familiar",
       "patientRecord": "Historial del paciente"
     },
-    "viewAll": "Ver las {{count}} invitaciones"
+    "viewAll": "Ver las {{count}} invitaciones",
+    "viewAll_one": "Ver todas las {{count}} invitaciones",
+    "viewAll_many": "View all {{count}} invitations",
+    "viewAll_other": "Ver todas las {{count}} invitaciones"
+  },
+  "medicalRecords": {
+    "allergies": "Alergias",
+    "conditions": "Condiciones",
+    "immunizations": "Vacunaciones",
+    "injuries": "Lesiones",
+    "labResults": "Resultados de laboratorio",
+    "medicalEquipment": "Equipo médico",
+    "medications": "Medicamentos",
+    "pharmacies": "Farmacias",
+    "practitioners": "Profesionales",
+    "procedures": "Procedimientos",
+    "symptoms": "Síntomas",
+    "treatments": "Tratamientos",
+    "visits": "Visitas"
+  },
+  "menu": {
+    "administration": "Administración",
+    "backToDashboard": "Volver al tablero",
+    "dashboard": "Tableau de bord",
+    "help": "Ayuda",
+    "logout": "Cerrar sesión",
+    "medicalRecords": "Dossiers médicaux",
+    "patients": "Pacientes",
+    "profile": "Perfil",
+    "reports": "Informes",
+    "settings": "Configuraciones"
+  },
+  "pages": {
+    "dashboard": "Tablero Principal",
+    "help": "Ayuda",
+    "medicalHistory": "Historial médico",
+    "patientDetails": "Detalles del paciente",
+    "patientList": "Lista de pacientes",
+    "preferences": "Preferencias",
+    "reports": "Informes",
+    "settings": "Configuraciones",
+    "userProfile": "Perfil de usuario"
+  },
+  "sections": {
+    "documents": "Documentos",
+    "emergencyContacts": "Contactos de emergencia",
+    "familyHistory": "Historial familiar",
+    "insurance": "Seguro",
+    "medicalInfo": "Información médica",
+    "overview": "Resumen",
+    "personalInfo": "Información personal",
+    "preferences": "Preferencias",
+    "timeline": "Cronología"
   },
   "sidebarNav": {
     "items": {

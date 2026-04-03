@@ -1,172 +1,176 @@
 {
-  "menu": {
-    "dashboard": "Tableau de bord",
-    "backToDashboard": "Retour au tableau de bord",
-    "patients": "Patients",
-    "medicalRecords": "Dossiers médicaux",
-    "settings": "Paramètres",
-    "reports": "Rapports",
-    "administration": "Administration",
-    "logout": "Déconnexion",
-    "profile": "Profil",
-    "help": "Aide"
+  "activity": {
+    "actions": {
+      "added": "Ajouté",
+      "cancelled": "Annulé",
+      "completed": "Complété",
+      "created": "Créé",
+      "deleted": "Supprimé",
+      "modified": "Modifié",
+      "removed": "Retiré",
+      "scheduled": "Prévu",
+      "updated": "Mis à jour",
+      "viewed": "Visionné"
+    }
   },
-  "pages": {
-    "dashboard": "Tableau de bord",
-    "patientList": "Liste des patients",
-    "patientDetails": "Détails du patient",
-    "medicalHistory": "Antécédents médicaux",
-    "settings": "Paramètres",
-    "userProfile": "Profil utilisateur",
-    "preferences": "Préférences",
-    "reports": "Rapports",
-    "help": "Aide & Support"
+  "dashboard": {
+    "activity": {
+      "lastUpdated": "Dernière mise à jour",
+      "noActivity": "Aucune activité récente",
+      "noActivityDescription": "L'activité de vos données médicales apparaîtra ici."
+    },
+    "hello": "Bonjour",
+    "loading": "Chargement de votre tableau de bord médical...",
+    "modules": {
+      "adminDashboard": "Tableau de bord administrateur",
+      "allergies": "Allergies",
+      "conditions": "Conditions",
+      "emergencyContacts": "Contacts d'urgence",
+      "exportRecords": "Exporter les données",
+      "familyHistory": "Antécédents familiaux",
+      "immunizations": "Immunisations",
+      "injuries": "Blessures",
+      "insurance": "Assurances",
+      "labResults": "Résultats d'analyse",
+      "medicalEquipment": "Equipement médical",
+      "medications": "Médicaments",
+      "patientInfo": "Informations du patient",
+      "pharmacies": "Pharmacies",
+      "practitioners": "Médecins",
+      "procedures": "Procédures",
+      "symptoms": "Symptômes",
+      "treatments": "Traitements",
+      "visitHistory": "Historique des visites",
+      "vitalSigns": "Signes vitaux"
+    },
+    "search": {
+      "advancedSearch": "Recherche avancée",
+      "placeholder": "Rechercher dans les données médicales..."
+    },
+    "sections": {
+      "additionalResources": "Ressources supplémentaires",
+      "coreMedical": "Informations médicales principales",
+      "healthMonitoring": "Surveillance de la santé",
+      "prevention": "Prévention & Historique",
+      "recentActivity": "Activité récente",
+      "treatments": "Traitements et procédures"
+    },
+    "stats": {
+      "activeMedications": "Médicaments actifs",
+      "labResults": "Résultats d'analyse",
+      "procedures": "Procédures",
+      "totalRecords": "Entrées totales"
+    },
+    "subtitle": "Gérez vos données de santé en toute sécurité",
+    "title": "Tableau de bord de MediKeep"
   },
-  "sections": {
-    "overview": "Vue d'ensemble",
-    "personalInfo": "Informations personnelles",
-    "medicalInfo": "Informations médicales",
-    "documents": "Documents",
-    "timeline": "Chronologie",
-    "familyHistory": "Antécédents familiaux",
-    "emergencyContacts": "Contacts d'urgence",
-    "insurance": "Assurances",
-    "preferences": "Préférences"
+  "invitations": {
+    "acceptButton": "Accepter l'invitation",
+    "confirmDescription": "En acceptant ceci, vous obtiendrez l'accès aux informations médicales partagées.",
+    "confirmQuestion": "Souhaitez-vous vraiment accepter cette invitation ?",
+    "confirmTitle": "Confirmer l'acceptation de l'invitation",
+    "from": "De",
+    "lastUpdated": "Dernière mise à jour",
+    "manageAll": "Gérer toutes les invitations",
+    "noPending": "Aucune invitation en attente",
+    "noPendingDescription": "Les nouvelles invitations de partage apparaîtront ici",
+    "sharePatient": "Partager un patient",
+    "title": "Invitations",
+    "types": {
+      "familyHistory": "Antécédents familiaux",
+      "patientRecord": "Données du patient"
+    },
+    "viewAll": "Voir toutes les invitations ({{count}})",
+    "viewAll_one": "Voir toutes les {{count}} invitations",
+    "viewAll_many": "View all {{count}} invitations",
+    "viewAll_other": "Voir toutes les {{count}} invitations"
   },
   "medicalRecords": {
     "allergies": "Allergies",
     "conditions": "Conditions",
-    "medications": "Médicaments",
-    "labResults": "Résultats d'analyse",
     "immunizations": "Immunisations",
-    "procedures": "Procédures",
-    "visits": "Visites",
-    "treatments": "Traitements",
-    "symptoms": "Symptômes",
     "injuries": "Blessures",
-    "practitioners": "Médecins",
+    "labResults": "Résultats d'analyse",
+    "medicalEquipment": "Equipement médical",
+    "medications": "Médicaments",
     "pharmacies": "Pharmacies",
-    "medicalEquipment": "Equipement médical"
+    "practitioners": "Médecins",
+    "procedures": "Procédures",
+    "symptoms": "Symptômes",
+    "treatments": "Traitements",
+    "visits": "Visites"
   },
-  "dashboard": {
-    "title": "Tableau de bord de MediKeep",
-    "subtitle": "Gérez vos données de santé en toute sécurité",
-    "hello": "Bonjour",
-    "loading": "Chargement de votre tableau de bord médical...",
-    "sections": {
-      "coreMedical": "Informations médicales principales",
-      "treatments": "Traitements et procédures",
-      "healthMonitoring": "Surveillance de la santé",
-      "prevention": "Prévention & Historique",
-      "additionalResources": "Ressources supplémentaires",
-      "recentActivity": "Activité récente"
-    },
-    "stats": {
-      "totalRecords": "Entrées totales",
-      "activeMedications": "Médicaments actifs",
-      "labResults": "Résultats d'analyse",
-      "procedures": "Procédures"
-    },
-    "modules": {
-      "patientInfo": "Informations du patient",
-      "medications": "Médicaments",
-      "labResults": "Résultats d'analyse",
-      "treatments": "Traitements",
-      "procedures": "Procédures",
-      "vitalSigns": "Signes vitaux",
-      "symptoms": "Symptômes",
-      "conditions": "Conditions",
-      "allergies": "Allergies",
-      "injuries": "Blessures",
-      "immunizations": "Immunisations",
-      "visitHistory": "Historique des visites",
-      "familyHistory": "Antécédents familiaux",
-      "insurance": "Assurances",
-      "emergencyContacts": "Contacts d'urgence",
-      "exportRecords": "Exporter les données",
-      "practitioners": "Médecins",
-      "pharmacies": "Pharmacies",
-      "medicalEquipment": "Equipement médical",
-      "adminDashboard": "Tableau de bord administrateur"
-    },
-    "activity": {
-      "noActivity": "Aucune activité récente",
-      "noActivityDescription": "L'activité de vos données médicales apparaîtra ici.",
-      "lastUpdated": "Dernière mise à jour"
-    },
-    "search": {
-      "placeholder": "Rechercher dans les données médicales..."
-    }
+  "menu": {
+    "administration": "Administration",
+    "backToDashboard": "Retour au tableau de bord",
+    "dashboard": "Tableau de bord",
+    "help": "Aide",
+    "logout": "Déconnexion",
+    "medicalRecords": "Dossiers médicaux",
+    "patients": "Patients",
+    "profile": "Profil",
+    "reports": "Rapports",
+    "settings": "Paramètres"
   },
-  "invitations": {
-    "title": "Invitations",
-    "lastUpdated": "Dernière mise à jour",
-    "from": "De",
-    "viewAll": "Voir toutes les invitations ({{count}})",
-    "noPending": "Aucune invitation en attente",
-    "noPendingDescription": "Les nouvelles invitations de partage apparaîtront ici",
-    "manageAll": "Gérer toutes les invitations",
-    "sharePatient": "Partager un patient",
-    "confirmTitle": "Confirmer l'acceptation de l'invitation",
-    "confirmQuestion": "Souhaitez-vous vraiment accepter cette invitation ?",
-    "confirmDescription": "En acceptant ceci, vous obtiendrez l'accès aux informations médicales partagées.",
-    "acceptButton": "Accepter l'invitation",
-    "types": {
-      "familyHistory": "Antécédents familiaux",
-      "patientRecord": "Données du patient"
-    }
+  "pages": {
+    "dashboard": "Tableau de bord",
+    "help": "Aide & Support",
+    "medicalHistory": "Antécédents médicaux",
+    "patientDetails": "Détails du patient",
+    "patientList": "Liste des patients",
+    "preferences": "Préférences",
+    "reports": "Rapports",
+    "settings": "Paramètres",
+    "userProfile": "Profil utilisateur"
   },
-  "activity": {
-    "actions": {
-      "created": "Créé",
-      "updated": "Mis à jour",
-      "deleted": "Supprimé",
-      "added": "Ajouté",
-      "modified": "Modifié",
-      "removed": "Retiré",
-      "completed": "Complété",
-      "cancelled": "Annulé",
-      "scheduled": "Prévu",
-      "viewed": "Visionné"
-    }
+  "sections": {
+    "documents": "Documents",
+    "emergencyContacts": "Contacts d'urgence",
+    "familyHistory": "Antécédents familiaux",
+    "insurance": "Assurances",
+    "medicalInfo": "Informations médicales",
+    "overview": "Vue d'ensemble",
+    "personalInfo": "Informations personnelles",
+    "preferences": "Préférences",
+    "timeline": "Chronologie"
   },
   "sidebarNav": {
-    "sections": {
-      "medicalRecords": "Données médicales",
-      "careAndTreatment": "Soins & Traitement",
-      "misc": "Divers",
-      "tools": "Outils",
-      "administration": "Administration"
-    },
     "items": {
-      "patientInfo": "Informations du patient",
-      "medications": "Médicaments",
-      "labResults": "Résultats d'analyse",
-      "conditions": "Conditions",
-      "allergies": "Allergies",
-      "vitalSigns": "Signes vitaux",
-      "symptoms": "Symptômes",
-      "injuries": "Blessures",
-      "treatments": "Traitements",
-      "procedures": "Procédures",
-      "immunizations": "Immunisations",
-      "visitHistory": "Historique des visites",
-      "familyHistory": "Antécédents familiaux",
-      "practitioners": "Médecins",
-      "pharmacies": "Pharmacies",
-      "medicalEquipment": "Equipement médical",
-      "insurance": "Assurances",
-      "emergencyContacts": "Contacts d'urgence",
-      "tagManagement": "Gestion des étiquettes",
-      "customReports": "Rapports personnalisés",
-      "exportRecords": "Exporter des données",
-      "settings": "Paramètres",
       "adminDashboard": "Tableau de bord administrateur",
-      "dataModels": "Modèles de données",
+      "allergies": "Allergies",
       "backupManagement": "Gestion des backups",
-      "systemHealth": "Santé du système",
+      "conditions": "Conditions",
+      "customReports": "Rapports personnalisés",
+      "dataModels": "Modèles de données",
+      "emergencyContacts": "Contacts d'urgence",
+      "exportRecords": "Exporter des données",
+      "familyHistory": "Antécédents familiaux",
+      "immunizations": "Immunisations",
+      "injuries": "Blessures",
+      "insurance": "Assurances",
+      "labResults": "Résultats d'analyse",
       "language": "Langue",
-      "theme": "Thème"
+      "medicalEquipment": "Equipement médical",
+      "medications": "Médicaments",
+      "patientInfo": "Informations du patient",
+      "pharmacies": "Pharmacies",
+      "practitioners": "Médecins",
+      "procedures": "Procédures",
+      "settings": "Paramètres",
+      "symptoms": "Symptômes",
+      "systemHealth": "Santé du système",
+      "tagManagement": "Gestion des étiquettes",
+      "theme": "Thème",
+      "treatments": "Traitements",
+      "visitHistory": "Historique des visites",
+      "vitalSigns": "Signes vitaux"
+    },
+    "sections": {
+      "administration": "Administration",
+      "careAndTreatment": "Soins & Traitement",
+      "medicalRecords": "Données médicales",
+      "misc": "Divers",
+      "tools": "Outils"
     }
   }
 }

@@ -1,10 +1,14 @@
 {
   "channels": {
     "add": "Adicionar Canal",
+    "configTitle": "Configuração de {{type}}",
     "confirmDelete": "Tem certeza de que deseja excluir este canal?",
+    "createError": "Falha ao criar canal",
     "createFailed": "Falha ao criar canal",
     "createSuccess": "Canal criado com sucesso",
     "delete": "Excluir Canal",
+    "deleteConfirm": "Tem certeza de que deseja excluir este canal?",
+    "deleteError": "Falha ao excluir canal",
     "deleteFailed": "Falha ao excluir canal",
     "deleteSuccess": "Canal excluído com sucesso",
     "description": "Adicione e gerencie seus canais de entrega de notificações",
@@ -63,7 +67,19 @@
         "label": "Usar TLS"
       }
     },
+    "empty": "Nenhum canal de notificação configurado.",
+    "emptyHint": "Adicione um canal para começar a receber notificações via Discord, E-mail, Gotify ou Webhook.",
     "enabled": "Ativado",
+    "errors": {
+      "fieldRequired": "{{field}} é obrigatório",
+      "nameRequired": "O nome do canal é obrigatório"
+    },
+    "fields": {
+      "enabled": "Ativar este canal",
+      "name": "Nome do Canal",
+      "namePlaceholder": "My Discord Server",
+      "type": "Tipo de Canal"
+    },
     "form": {
       "configSection": "Configuração do Canal",
       "enabled": {
@@ -100,13 +116,18 @@
       }
     },
     "lastUsed": "Último uso",
+    "loadError": "Falha ao carregar detalhes do canal",
     "noChannels": "Nenhum canal de notificação configurado",
     "noChannelsHint": "Adicione um canal para começar a receber notificações",
     "notificationsSent": "{{count}} notificações enviadas",
+    "sentCount_one": "{{count}} enviados",
+    "sentCount_many": "{{count}} sent",
+    "sentCount_other": "{{count}} enviados",
     "test": "Testar",
+    "testError": "Falha ao enviar notificação de teste",
     "testFailed": "Falha na notificação de teste",
-    "testSuccess": "Notificação de teste enviada com sucesso!",
     "testing": "Testando...",
+    "testSuccess": "Notificação de teste enviada com sucesso!",
     "title": "Canais de Notificação",
     "types": {
       "discord": "Discord",
@@ -114,6 +135,7 @@
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
+    "updateError": "Falha ao atualizar canal",
     "updateFailed": "Falha ao atualizar canal",
     "updateSuccess": "Canal atualizado com sucesso",
     "verified": "Verificado",
@@ -197,7 +219,7 @@
       "channel": "Canal",
       "error": "Erro",
       "event": "Evento",
-      "status": "Status",
+      "status": "Estado",
       "time": "Hora"
     },
     "loading": "Carregando histórico...",
@@ -225,12 +247,14 @@
     },
     "comingSoon": "Em Breve",
     "description": "Escolha quais eventos acionam notificações em cada canal",
+    "event": "Evento",
     "eventHeader": "Evento",
     "loading": "Carregando preferências...",
     "noChannels": "Adicione um canal de notificação primeiro para configurar as preferências de eventos",
     "saveFailed": "Falha ao salvar preferência",
     "saveSuccess": "Preferência salva",
-    "title": "Notificações de Eventos"
+    "title": "Notificações de Eventos",
+    "updateError": "Falha ao atualizar preferência"
   },
   "title": "Configurações de Notificação",
   "toasts": {
@@ -294,15 +318,15 @@
       "revokeFailed": "Falha ao revogar acesso"
     },
     "labResults": {
-      "addFailed": "Falha ao adicionar componentes de teste",
       "addedMessage": "{{count}} componentes de teste adicionados ao resultado de laboratório.",
       "addedSuccess": "Sucesso!",
+      "addFailed": "Falha ao adicionar componentes de teste",
       "deletedMessage": "{{name}} foi excluído",
       "deletedSuccess": "Componente excluído",
       "noTextMessage": "Por favor, cole o texto dos resultados de exames na área de entrada.",
       "noTextToParse": "Nenhum Texto para Analisar",
-      "parseWarning": "Algumas Linhas Não Puderam Ser Analisadas",
       "parsedCount": "Encontrados {{count}} componentes de teste. Revise-os na aba de Visualização.",
+      "parseWarning": "Algumas Linhas Não Puderam Ser Analisadas",
       "templateApplied": "Template Aplicado",
       "templateAppliedMessage": "{{count}} componentes adicionados do template \"{{name}}\".",
       "textParsed": "Texto Analisado",
@@ -312,15 +336,15 @@
     },
     "patient": {
       "createdSuccess": "{{name}} criado com sucesso",
-      "deleteFailed": "Falha na Exclusão: {{message}}",
-      "deleteOwnOnly": "Você só pode excluir pacientes que são seus",
       "deletedNoOthers": "{{name}} excluído com sucesso. Nenhum outro paciente disponível.",
       "deletedSuccess": "{{name}} excluído com sucesso",
       "deletedSwitched": "{{name}} excluído com sucesso. Alternado para {{fallbackName}}.",
+      "deleteFailed": "Falha na Exclusão: {{message}}",
+      "deleteOwnOnly": "Você só pode excluir pacientes que são seus",
       "nowViewing": "Visualizando {{name}}",
       "removeAccessFailed": "Falha na Remoção de Acesso: {{message}}",
-      "removeOwnOnly": "Você não pode remover o acesso a pacientes que são seus",
       "removedAccess": "Acesso a {{name}} removido",
+      "removeOwnOnly": "Você não pode remover o acesso a pacientes que são seus",
       "switchFailed": "Falha na Troca: {{message}}",
       "updatedSuccess": "{{name}} atualizado com sucesso"
     },
@@ -334,12 +358,12 @@
     "reports": {
       "noRecordsMessage": "Por favor, selecione pelo menos um registro das categorias abaixo para gerar um relatório.",
       "noRecordsSelected": "Nenhum Registro Selecionado",
-      "templateDeleteFailed": "Falha ao excluir template",
       "templateDeleted": "Template excluído com sucesso",
+      "templateDeleteFailed": "Falha ao excluir template",
       "templateLoaded": "Template \"{{name}}\" carregado",
       "templateNameRequired": "O nome do template é obrigatório",
-      "templateSaveFailed": "Falha ao salvar template",
       "templateSaved": "Template salvo com sucesso",
+      "templateSaveFailed": "Falha ao salvar template",
       "validationError": "Erro de Validação"
     },
     "settings": {
@@ -371,8 +395,8 @@
       "documentAdded": "Documento Adicionado ao Paperless",
       "duplicateDocument": "Documento Duplicado",
       "failed": "Falha no Envio",
-      "fileUploadFailed": "Falha no Envio do Arquivo",
       "fileUploadedSuccess": "\"{{fileName}}\" enviado ao Paperless com sucesso!",
+      "fileUploadFailed": "Falha no Envio do Arquivo",
       "paperlessUploadFailed": "Falha no Envio ao Paperless",
       "partialSuccess": "{{completed}}/{{total}} arquivos enviados com sucesso. {{failed}} falharam."
     },
@@ -380,8 +404,8 @@
       "deleteFailed": "Falha ao excluir registro de sinais vitais",
       "deleteSuccess": "Registro de sinais vitais excluído com sucesso",
       "formErrors": "Por favor, corrija os erros do formulário",
-      "saveFailed": "Falha ao {{action}} sinais vitais",
-      "savedSuccess": "Sinais vitais {{action}} com sucesso!"
+      "savedSuccess": "Sinais vitais {{action}} com sucesso!",
+      "saveFailed": "Falha ao {{action}} sinais vitais"
     }
   },
   "validation": {

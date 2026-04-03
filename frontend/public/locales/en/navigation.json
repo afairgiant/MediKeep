@@ -1,172 +1,175 @@
 {
-  "menu": {
-    "dashboard": "Dashboard",
-    "backToDashboard": "Back to Dashboard",
-    "patients": "Patients",
-    "medicalRecords": "Medical Records",
-    "settings": "Settings",
-    "reports": "Reports",
-    "administration": "Administration",
-    "logout": "Logout",
-    "profile": "Profile",
-    "help": "Help"
+  "activity": {
+    "actions": {
+      "added": "Added",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "created": "Created",
+      "deleted": "Deleted",
+      "modified": "Modified",
+      "removed": "Removed",
+      "scheduled": "Scheduled",
+      "updated": "Updated",
+      "viewed": "Viewed"
+    }
   },
-  "pages": {
-    "dashboard": "Dashboard",
-    "patientList": "Patient List",
-    "patientDetails": "Patient Details",
-    "medicalHistory": "Medical History",
-    "settings": "Settings",
-    "userProfile": "User Profile",
-    "preferences": "Preferences",
-    "reports": "Reports",
-    "help": "Help & Support"
+  "dashboard": {
+    "activity": {
+      "lastUpdated": "Last updated",
+      "noActivity": "No recent activity",
+      "noActivityDescription": "Your medical record activities will appear here"
+    },
+    "hello": "Hello",
+    "loading": "Loading your medical dashboard...",
+    "modules": {
+      "adminDashboard": "Admin Dashboard",
+      "allergies": "Allergies",
+      "conditions": "Conditions",
+      "emergencyContacts": "Emergency Contacts",
+      "exportRecords": "Export Records",
+      "familyHistory": "Family History",
+      "immunizations": "Immunizations",
+      "injuries": "Injuries",
+      "insurance": "Insurance",
+      "labResults": "Lab Results",
+      "medicalEquipment": "Medical Equipment",
+      "medications": "Medications",
+      "patientInfo": "Patient Information",
+      "pharmacies": "Pharmacies",
+      "practitioners": "Practitioners",
+      "procedures": "Procedures",
+      "symptoms": "Symptoms",
+      "treatments": "Treatments",
+      "visitHistory": "Visit History",
+      "vitalSigns": "Vital Signs"
+    },
+    "search": {
+      "advancedSearch": "Advanced Search",
+      "placeholder": "Search medical records..."
+    },
+    "sections": {
+      "additionalResources": "Additional Resources",
+      "coreMedical": "Core Medical Information",
+      "healthMonitoring": "Health Monitoring",
+      "prevention": "Prevention & History",
+      "recentActivity": "Recent Activity",
+      "treatments": "Treatments and Procedures"
+    },
+    "stats": {
+      "activeMedications": "Active Medications",
+      "labResults": "Lab Results",
+      "procedures": "Procedures",
+      "totalRecords": "Total Records"
+    },
+    "subtitle": "Manage your health information securely",
+    "title": "MediKeep Dashboard"
   },
-  "sections": {
-    "overview": "Overview",
-    "personalInfo": "Personal Information",
-    "medicalInfo": "Medical Information",
-    "documents": "Documents",
-    "timeline": "Timeline",
-    "familyHistory": "Family History",
-    "emergencyContacts": "Emergency Contacts",
-    "insurance": "Insurance",
-    "preferences": "Preferences"
+  "invitations": {
+    "acceptButton": "Accept Invitation",
+    "confirmDescription": "By accepting, you will gain access to view the shared medical information.",
+    "confirmQuestion": "Are you sure you want to accept this invitation?",
+    "confirmTitle": "Confirm Invitation Acceptance",
+    "from": "From",
+    "lastUpdated": "Last updated",
+    "manageAll": "Manage All Invitations",
+    "noPending": "No pending invitations",
+    "noPendingDescription": "New sharing invitations will appear here",
+    "sharePatient": "Share Patient",
+    "title": "Invitations",
+    "types": {
+      "familyHistory": "Family History",
+      "patientRecord": "Patient Record"
+    },
+    "viewAll": "View all {{count}} invitations",
+    "viewAll_one": "View all {{count}} invitations",
+    "viewAll_other": "View all {{count}} invitations"
   },
   "medicalRecords": {
     "allergies": "Allergies",
     "conditions": "Conditions",
-    "medications": "Medications",
-    "labResults": "Lab Results",
     "immunizations": "Immunizations",
-    "procedures": "Procedures",
-    "visits": "Visits",
-    "treatments": "Treatments",
-    "symptoms": "Symptoms",
     "injuries": "Injuries",
-    "practitioners": "Practitioners",
+    "labResults": "Lab Results",
+    "medicalEquipment": "Medical Equipment",
+    "medications": "Medications",
     "pharmacies": "Pharmacies",
-    "medicalEquipment": "Medical Equipment"
+    "practitioners": "Practitioners",
+    "procedures": "Procedures",
+    "symptoms": "Symptoms",
+    "treatments": "Treatments",
+    "visits": "Visits"
   },
-  "dashboard": {
-    "title": "MediKeep Dashboard",
-    "subtitle": "Manage your health information securely",
-    "hello": "Hello",
-    "loading": "Loading your medical dashboard...",
-    "sections": {
-      "coreMedical": "Core Medical Information",
-      "treatments": "Treatments and Procedures",
-      "healthMonitoring": "Health Monitoring",
-      "prevention": "Prevention & History",
-      "additionalResources": "Additional Resources",
-      "recentActivity": "Recent Activity"
-    },
-    "stats": {
-      "totalRecords": "Total Records",
-      "activeMedications": "Active Medications",
-      "labResults": "Lab Results",
-      "procedures": "Procedures"
-    },
-    "modules": {
-      "patientInfo": "Patient Information",
-      "medications": "Medications",
-      "labResults": "Lab Results",
-      "treatments": "Treatments",
-      "procedures": "Procedures",
-      "vitalSigns": "Vital Signs",
-      "symptoms": "Symptoms",
-      "conditions": "Conditions",
-      "allergies": "Allergies",
-      "injuries": "Injuries",
-      "immunizations": "Immunizations",
-      "visitHistory": "Visit History",
-      "familyHistory": "Family History",
-      "insurance": "Insurance",
-      "emergencyContacts": "Emergency Contacts",
-      "exportRecords": "Export Records",
-      "practitioners": "Practitioners",
-      "pharmacies": "Pharmacies",
-      "medicalEquipment": "Medical Equipment",
-      "adminDashboard": "Admin Dashboard"
-    },
-    "activity": {
-      "noActivity": "No recent activity",
-      "noActivityDescription": "Your medical record activities will appear here",
-      "lastUpdated": "Last updated"
-    },
-    "search": {
-      "placeholder": "Search medical records..."
-    }
+  "menu": {
+    "administration": "Administration",
+    "backToDashboard": "Back to Dashboard",
+    "dashboard": "Dashboard",
+    "help": "Help",
+    "logout": "Logout",
+    "medicalRecords": "Medical Records",
+    "patients": "Patients",
+    "profile": "Profile",
+    "reports": "Reports",
+    "settings": "Settings"
   },
-  "invitations": {
-    "title": "Invitations",
-    "lastUpdated": "Last updated",
-    "from": "From",
-    "viewAll": "View all {{count}} invitations",
-    "noPending": "No pending invitations",
-    "noPendingDescription": "New sharing invitations will appear here",
-    "manageAll": "Manage All Invitations",
-    "sharePatient": "Share Patient",
-    "confirmTitle": "Confirm Invitation Acceptance",
-    "confirmQuestion": "Are you sure you want to accept this invitation?",
-    "confirmDescription": "By accepting, you will gain access to view the shared medical information.",
-    "acceptButton": "Accept Invitation",
-    "types": {
-      "familyHistory": "Family History",
-      "patientRecord": "Patient Record"
-    }
+  "pages": {
+    "dashboard": "Dashboard",
+    "help": "Help & Support",
+    "medicalHistory": "Medical History",
+    "patientDetails": "Patient Details",
+    "patientList": "Patient List",
+    "preferences": "Preferences",
+    "reports": "Reports",
+    "settings": "Settings",
+    "userProfile": "User Profile"
   },
-  "activity": {
-    "actions": {
-      "created": "Created",
-      "updated": "Updated",
-      "deleted": "Deleted",
-      "added": "Added",
-      "modified": "Modified",
-      "removed": "Removed",
-      "completed": "Completed",
-      "cancelled": "Cancelled",
-      "scheduled": "Scheduled",
-      "viewed": "Viewed"
-    }
+  "sections": {
+    "documents": "Documents",
+    "emergencyContacts": "Emergency Contacts",
+    "familyHistory": "Family History",
+    "insurance": "Insurance",
+    "medicalInfo": "Medical Information",
+    "overview": "Overview",
+    "personalInfo": "Personal Information",
+    "preferences": "Preferences",
+    "timeline": "Timeline"
   },
   "sidebarNav": {
-    "sections": {
-      "medicalRecords": "Medical Records",
-      "careAndTreatment": "Care & Treatment",
-      "misc": "Misc.",
-      "tools": "Tools",
-      "administration": "Administration"
-    },
     "items": {
-      "patientInfo": "Patient Info",
-      "medications": "Medications",
-      "labResults": "Lab Results",
-      "conditions": "Conditions",
-      "allergies": "Allergies",
-      "vitalSigns": "Vital Signs",
-      "symptoms": "Symptoms",
-      "injuries": "Injuries",
-      "treatments": "Treatments",
-      "procedures": "Procedures",
-      "immunizations": "Immunizations",
-      "visitHistory": "Visit History",
-      "familyHistory": "Family History",
-      "practitioners": "Practitioners",
-      "pharmacies": "Pharmacies",
-      "insurance": "Insurance",
-      "medicalEquipment": "Medical Equipment",
-      "emergencyContacts": "Emergency Contacts",
-      "tagManagement": "Tag Management",
-      "customReports": "Custom Reports",
-      "exportRecords": "Export Records",
-      "settings": "Settings",
       "adminDashboard": "Admin Dashboard",
-      "dataModels": "Data Models",
+      "allergies": "Allergies",
       "backupManagement": "Backup Management",
-      "systemHealth": "System Health",
+      "conditions": "Conditions",
+      "customReports": "Custom Reports",
+      "dataModels": "Data Models",
+      "emergencyContacts": "Emergency Contacts",
+      "exportRecords": "Export Records",
+      "familyHistory": "Family History",
+      "immunizations": "Immunizations",
+      "injuries": "Injuries",
+      "insurance": "Insurance",
+      "labResults": "Lab Results",
       "language": "Language",
-      "theme": "Theme"
+      "medicalEquipment": "Medical Equipment",
+      "medications": "Medications",
+      "patientInfo": "Patient Info",
+      "pharmacies": "Pharmacies",
+      "practitioners": "Practitioners",
+      "procedures": "Procedures",
+      "settings": "Settings",
+      "symptoms": "Symptoms",
+      "systemHealth": "System Health",
+      "tagManagement": "Tag Management",
+      "theme": "Theme",
+      "treatments": "Treatments",
+      "visitHistory": "Visit History",
+      "vitalSigns": "Vital Signs"
+    },
+    "sections": {
+      "administration": "Administration",
+      "careAndTreatment": "Care & Treatment",
+      "medicalRecords": "Medical Records",
+      "misc": "Misc.",
+      "tools": "Tools"
     }
   }
 }

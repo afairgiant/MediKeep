@@ -1,322 +1,386 @@
 {
-  "title": "Aviseringsinställningar",
-  "description": "Konfigurera hur du tar emot aviseringar för viktiga händelser",
-  "loading": "Laddar aviseringsinställningar...",
-  "error": "Kunde inte ladda aviseringsinställningar",
-
   "channels": {
-    "title": "Aviseringskanaler",
-    "description": "Lägg till och hantera dina aviseringskanaler",
     "add": "Lägg till kanal",
-    "edit": "Redigera kanal",
+    "configTitle": "{{type}}-konfiguration",
+    "confirmDelete": "Är du säker på att du vill ta bort denna kanal?",
+    "createError": "Det gick inte att skapa kanalen",
+    "createFailed": "Kunde inte skapa kanalen",
+    "createSuccess": "Kanalen har skapats",
     "delete": "Ta bort kanal",
-    "test": "Testa",
-    "testing": "Testar...",
-    "testSuccess": "Testavisering skickad!",
-    "testFailed": "Testavisering misslyckades",
+    "deleteConfirm": "Är du säker på att du vill ta bort den här kanalen?",
+    "deleteError": "Det gick inte att ta bort kanalen",
+    "deleteFailed": "Kunde inte ta bort kanalen",
+    "deleteSuccess": "Kanalen har tagits bort",
+    "description": "Lägg till och hantera dina aviseringskanaler",
+    "disabled": "Inaktiverad",
+    "discord": {
+      "avatarUrl": {
+        "description": "Anpassad avatar för aviseringsboten",
+        "label": "Avatar-URL (valfritt)",
+        "placeholder": "https://example.com/avatar.png"
+      },
+      "username": {
+        "description": "Anpassat namn för aviseringsboten",
+        "label": "Botanvändarnamn (valfritt)",
+        "placeholder": "MediKeep"
+      },
+      "webhookUrl": {
+        "description": "Skapa en webhook i dina Discord-serverinställningar",
+        "label": "Webhook-URL",
+        "placeholder": "https://discord.com/api/webhooks/..."
+      }
+    },
+    "edit": "Redigera kanal",
+    "email": {
+      "fromEmail": {
+        "description": "E-postadressen som avsändare",
+        "label": "Avsändaradress",
+        "placeholder": "aviseringar@example.com"
+      },
+      "smtpHost": {
+        "description": "Din e-postleverantörs SMTP-server",
+        "label": "SMTP-server",
+        "placeholder": "smtp.gmail.com"
+      },
+      "smtpPassword": {
+        "description": "För Gmail, använd ett applösenord",
+        "label": "SMTP-lösenord",
+        "placeholder": "Applösenord eller e-postlösenord"
+      },
+      "smtpPort": {
+        "description": "Vanligtvis 587 (TLS) eller 465 (SSL)",
+        "label": "SMTP-port",
+        "placeholder": "587"
+      },
+      "smtpUser": {
+        "description": "Din e-postadress eller ditt användarnamn",
+        "label": "SMTP-användarnamn",
+        "placeholder": "din-epost@gmail.com"
+      },
+      "toEmail": {
+        "description": "Vart aviseringar ska skickas",
+        "label": "Mottagaradress",
+        "placeholder": "din-epost@example.com"
+      },
+      "useTls": {
+        "description": "Aktivera TLS-kryptering (rekommenderas)",
+        "label": "Använd TLS"
+      }
+    },
+    "empty": "Inga aviseringskanaler har konfigurerats.",
+    "emptyHint": "Lägg till en kanal för att börja ta emot aviseringar via Discord, e-post, Gotify eller Webhook.",
+    "enabled": "Aktiverad",
+    "errors": {
+      "fieldRequired": "{{field}} krävs",
+      "nameRequired": "Kanalnamn krävs"
+    },
+    "fields": {
+      "enabled": "Aktivera den här kanalen",
+      "name": "Kanalnamn",
+      "namePlaceholder": "My Discord Server",
+      "type": "Kanaltyp"
+    },
+    "form": {
+      "configSection": "Kanalkonfiguration",
+      "enabled": {
+        "description": "Ta emot aviseringar genom denna kanal",
+        "label": "Aktivera kanal"
+      },
+      "name": {
+        "description": "Ett beskrivande namn för att identifiera denna kanal",
+        "label": "Kanalnamn",
+        "placeholder": "t.ex. Min Discord-server"
+      },
+      "title": "Kanaldetaljer",
+      "type": {
+        "description": "Tjänsten som aviseringar skickas genom",
+        "label": "Kanaltyp",
+        "placeholder": "Välj kanaltyp"
+      }
+    },
+    "gotify": {
+      "appToken": {
+        "description": "Skapa en applikation i Gotify för att få en token",
+        "label": "Apptoken",
+        "placeholder": "Applikationstoken från Gotify"
+      },
+      "priority": {
+        "description": "Meddelandeprioritet (1-10, standard 5)",
+        "label": "Prioritet",
+        "placeholder": "5"
+      },
+      "serverUrl": {
+        "description": "Din Gotify-server-URL",
+        "label": "Server-URL",
+        "placeholder": "https://gotify.example.com"
+      }
+    },
+    "lastUsed": "Senast använd",
+    "loadError": "Det gick inte att läsa in kanalinformation",
     "noChannels": "Inga aviseringskanaler konfigurerade",
     "noChannelsHint": "Lägg till en kanal för att börja ta emot aviseringar",
-    "verified": "Verifierad",
-    "enabled": "Aktiverad",
-    "disabled": "Inaktiverad",
-    "lastUsed": "Senast använd",
     "notificationsSent": "{{count}} aviseringar skickade",
-    "confirmDelete": "Är du säker på att du vill ta bort denna kanal?",
-    "deleteSuccess": "Kanalen har tagits bort",
-    "deleteFailed": "Kunde inte ta bort kanalen",
-    "createSuccess": "Kanalen har skapats",
-    "createFailed": "Kunde inte skapa kanalen",
-    "updateSuccess": "Kanalen har uppdaterats",
-    "updateFailed": "Kunde inte uppdatera kanalen",
+    "sentCount_one": "{{count}} skickade",
+    "sentCount_other": "{{count}} skickade",
+    "test": "Testa",
+    "testError": "Det gick inte att skicka testnotifiering",
+    "testFailed": "Testavisering misslyckades",
+    "testing": "Testar...",
+    "testSuccess": "Testavisering skickad!",
+    "title": "Aviseringskanaler",
     "types": {
       "discord": "Discord",
       "email": "E-post",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
-    "form": {
-      "title": "Kanaldetaljer",
-      "name": {
-        "label": "Kanalnamn",
-        "placeholder": "t.ex. Min Discord-server",
-        "description": "Ett beskrivande namn för att identifiera denna kanal"
-      },
-      "type": {
-        "label": "Kanaltyp",
-        "placeholder": "Välj kanaltyp",
-        "description": "Tjänsten som aviseringar skickas genom"
-      },
-      "enabled": {
-        "label": "Aktivera kanal",
-        "description": "Ta emot aviseringar genom denna kanal"
-      },
-      "configSection": "Kanalkonfiguration"
-    },
-    "discord": {
-      "webhookUrl": {
-        "label": "Webhook-URL",
-        "placeholder": "https://discord.com/api/webhooks/...",
-        "description": "Skapa en webhook i dina Discord-serverinställningar"
-      },
-      "username": {
-        "label": "Botanvändarnamn (valfritt)",
-        "placeholder": "MediKeep",
-        "description": "Anpassat namn för aviseringsboten"
-      },
-      "avatarUrl": {
-        "label": "Avatar-URL (valfritt)",
-        "placeholder": "https://example.com/avatar.png",
-        "description": "Anpassad avatar för aviseringsboten"
-      }
-    },
-    "email": {
-      "smtpHost": {
-        "label": "SMTP-server",
-        "placeholder": "smtp.gmail.com",
-        "description": "Din e-postleverantörs SMTP-server"
-      },
-      "smtpPort": {
-        "label": "SMTP-port",
-        "placeholder": "587",
-        "description": "Vanligtvis 587 (TLS) eller 465 (SSL)"
-      },
-      "smtpUser": {
-        "label": "SMTP-användarnamn",
-        "placeholder": "din-epost@gmail.com",
-        "description": "Din e-postadress eller ditt användarnamn"
-      },
-      "smtpPassword": {
-        "label": "SMTP-lösenord",
-        "placeholder": "Applösenord eller e-postlösenord",
-        "description": "För Gmail, använd ett applösenord"
-      },
-      "fromEmail": {
-        "label": "Avsändaradress",
-        "placeholder": "aviseringar@example.com",
-        "description": "E-postadressen som avsändare"
-      },
-      "toEmail": {
-        "label": "Mottagaradress",
-        "placeholder": "din-epost@example.com",
-        "description": "Vart aviseringar ska skickas"
-      },
-      "useTls": {
-        "label": "Använd TLS",
-        "description": "Aktivera TLS-kryptering (rekommenderas)"
-      }
-    },
-    "gotify": {
-      "serverUrl": {
-        "label": "Server-URL",
-        "placeholder": "https://gotify.example.com",
-        "description": "Din Gotify-server-URL"
-      },
-      "appToken": {
-        "label": "Apptoken",
-        "placeholder": "Applikationstoken från Gotify",
-        "description": "Skapa en applikation i Gotify för att få en token"
-      },
-      "priority": {
-        "label": "Prioritet",
-        "placeholder": "5",
-        "description": "Meddelandeprioritet (1-10, standard 5)"
-      }
-    },
+    "updateError": "Det gick inte att uppdatera kanalen",
+    "updateFailed": "Kunde inte uppdatera kanalen",
+    "updateSuccess": "Kanalen har uppdaterats",
+    "verified": "Verifierad",
     "webhook": {
-      "url": {
-        "label": "Webhook-URL",
-        "placeholder": "https://api.example.com/webhook",
-        "description": "URL för att ta emot aviseringsdata"
-      },
-      "method": {
-        "label": "HTTP-metod",
-        "description": "HTTP-metod för webhook-begäran"
+      "authToken": {
+        "description": "Autentiseringstoken för webhooken",
+        "label": "Autentiseringstoken (valfritt)",
+        "placeholder": "Bearer-token eller API-nyckel"
       },
       "headers": {
+        "description": "JSON-objekt med anpassade rubriker",
         "label": "Anpassade rubriker (valfritt)",
-        "placeholder": "{\"Authorization\": \"Bearer token\"}",
-        "description": "JSON-objekt med anpassade rubriker"
+        "placeholder": "{\"Authorization\": \"Bearer token\"}"
       },
-      "authToken": {
-        "label": "Autentiseringstoken (valfritt)",
-        "placeholder": "Bearer-token eller API-nyckel",
-        "description": "Autentiseringstoken för webhooken"
+      "method": {
+        "description": "HTTP-metod för webhook-begäran",
+        "label": "HTTP-metod"
+      },
+      "url": {
+        "description": "URL för att ta emot aviseringsdata",
+        "label": "Webhook-URL",
+        "placeholder": "https://api.example.com/webhook"
       }
     }
   },
-
-  "preferences": {
-    "title": "Händelseaviseringar",
-    "description": "Välj vilka händelser som utlöser aviseringar på varje kanal",
-    "loading": "Laddar inställningar...",
-    "noChannels": "Lägg till en aviseringskanal först för att konfigurera händelseinställningar",
-    "saveSuccess": "Inställningen har sparats",
-    "saveFailed": "Kunde inte spara inställningen",
-    "eventHeader": "Händelse",
-    "comingSoon": "Kommer snart",
-    "categories": {
-      "system": "Systemhändelser",
-      "medical": "Medicinska händelser",
-      "collaboration": "Delning och samarbete",
-      "sharing": "Delning och inbjudningar",
-      "security": "Säkerhetsvarningar",
-      "other": "Övriga händelser"
-    }
-  },
-
+  "description": "Konfigurera hur du tar emot aviseringar för viktiga händelser",
+  "error": "Kunde inte ladda aviseringsinställningar",
   "events": {
-    "test_notification": {
-      "name": "Testavisering",
-      "description": "Manuell testavisering"
-    },
     "backup_completed": {
-      "name": "Säkerhetskopiering slutförd",
-      "description": "När en säkerhetskopiering slutförs"
+      "description": "När en säkerhetskopiering slutförs",
+      "name": "Säkerhetskopiering slutförd"
     },
     "backup_failed": {
-      "name": "Säkerhetskopiering misslyckades",
-      "description": "När en säkerhetskopiering misslyckas"
-    },
-    "lab_result_available": {
-      "name": "Labbresultat tillgängliga",
-      "description": "När nya labbresultat har lagts till"
-    },
-    "lab_result_abnormal": {
-      "name": "Avvikande labbresultat",
-      "description": "När labbresultat ligger utanför normalintervallet"
+      "description": "När en säkerhetskopiering misslyckas",
+      "name": "Säkerhetskopiering misslyckades"
     },
     "immunization_due": {
-      "name": "Vaccination aktuell",
-      "description": "När en vaccination snart ska ges"
+      "description": "När en vaccination snart ska ges",
+      "name": "Vaccination aktuell"
     },
     "immunization_overdue": {
-      "name": "Försenad vaccination",
-      "description": "När en vaccination är försenad"
-    },
-    "invitation_received": {
-      "name": "Inbjudan mottagen",
-      "description": "När någon delar journaler med dig"
+      "description": "När en vaccination är försenad",
+      "name": "Försenad vaccination"
     },
     "invitation_accepted": {
-      "name": "Inbjudan accepterad",
-      "description": "När din delningsinbjudan accepteras"
+      "description": "När din delningsinbjudan accepteras",
+      "name": "Inbjudan accepterad"
     },
-    "share_revoked": {
-      "name": "Delning återkallad",
-      "description": "När åtkomst till delade journaler återkallas"
+    "invitation_received": {
+      "description": "När någon delar journaler med dig",
+      "name": "Inbjudan mottagen"
+    },
+    "lab_result_abnormal": {
+      "description": "När labbresultat ligger utanför normalintervallet",
+      "name": "Avvikande labbresultat"
+    },
+    "lab_result_available": {
+      "description": "När nya labbresultat har lagts till",
+      "name": "Labbresultat tillgängliga"
     },
     "login_from_new_device": {
-      "name": "Inloggning från ny enhet",
-      "description": "När ditt konto används från en ny enhet"
+      "description": "När ditt konto används från en ny enhet",
+      "name": "Inloggning från ny enhet"
     },
     "password_changed": {
-      "name": "Lösenord ändrat",
-      "description": "När ditt lösenord ändras"
+      "description": "När ditt lösenord ändras",
+      "name": "Lösenord ändrat"
+    },
+    "share_revoked": {
+      "description": "När åtkomst till delade journaler återkallas",
+      "name": "Delning återkallad"
+    },
+    "test_notification": {
+      "description": "Manuell testavisering",
+      "name": "Testavisering"
     }
   },
-
   "history": {
-    "title": "Aviseringshistorik",
     "description": "Senaste aviseringar skickade genom dina kanaler",
+    "fields": {
+      "channel": "Kanal",
+      "error": "Fel",
+      "event": "Händelse",
+      "status": "Status",
+      "time": "Tid"
+    },
     "loading": "Laddar historik...",
     "noHistory": "Inga aviseringar skickade ännu",
     "noHistoryHint": "Aviseringar visas här när de har skickats",
-    "showMore": "Visa mer",
-    "showLess": "Visa mindre",
     "page": "Sida {{current}} av {{total}}",
+    "showLess": "Visa mindre",
+    "showMore": "Visa mer",
     "status": {
-      "sent": "Skickad",
       "failed": "Misslyckad",
-      "pending": "Väntande"
+      "pending": "Väntande",
+      "sent": "Skickad"
     },
-    "fields": {
-      "event": "Händelse",
-      "channel": "Kanal",
-      "time": "Tid",
-      "status": "Status",
-      "error": "Fel"
-    }
+    "title": "Aviseringshistorik"
   },
-
-  "validation": {
-    "nameRequired": "Kanalnamn krävs",
-    "nameTooLong": "Namnet får inte överstiga 100 tecken",
-    "typeRequired": "Kanaltyp krävs",
-    "webhookUrlRequired": "Webhook-URL krävs",
-    "webhookUrlInvalid": "Ogiltigt webhook-URL-format",
-    "smtpHostRequired": "SMTP-server krävs",
-    "smtpPortRequired": "SMTP-port krävs",
-    "smtpPortInvalid": "Porten måste vara mellan 1 och 65535",
-    "smtpUserRequired": "SMTP-användarnamn krävs",
-    "smtpPasswordRequired": "SMTP-lösenord krävs",
-    "fromEmailRequired": "Avsändaradress krävs",
-    "fromEmailInvalid": "Ogiltigt e-postformat",
-    "toEmailRequired": "Mottagaradress krävs",
-    "toEmailInvalid": "Ogiltigt e-postformat",
-    "serverUrlRequired": "Server-URL krävs",
-    "serverUrlInvalid": "Ogiltigt URL-format",
-    "appTokenRequired": "Apptoken krävs",
-    "urlRequired": "Webhook-URL krävs",
-    "urlInvalid": "Ogiltigt URL-format",
-    "headersInvalid": "Rubriker måste vara giltig JSON"
+  "loading": "Laddar aviseringsinställningar...",
+  "preferences": {
+    "categories": {
+      "collaboration": "Delning och samarbete",
+      "medical": "Medicinska händelser",
+      "other": "Övriga händelser",
+      "security": "Säkerhetsvarningar",
+      "sharing": "Delning och inbjudningar",
+      "system": "Systemhändelser"
+    },
+    "comingSoon": "Kommer snart",
+    "description": "Välj vilka händelser som utlöser aviseringar på varje kanal",
+    "event": "Händelse",
+    "eventHeader": "Händelse",
+    "loading": "Laddar inställningar...",
+    "noChannels": "Lägg till en aviseringskanal först för att konfigurera händelseinställningar",
+    "saveFailed": "Kunde inte spara inställningen",
+    "saveSuccess": "Inställningen har sparats",
+    "title": "Händelseaviseringar",
+    "updateError": "Det gick inte att uppdatera inställningen"
   },
-
+  "title": "Aviseringsinställningar",
   "toasts": {
     "auth": {
-      "sessionExpired": "Sessionen har löpt ut på grund av inaktivitet",
-      "sessionExpiredLogin": "Sessionen har löpt ut. Vänligen logga in igen.",
-      "loginSuccess": "Inloggning lyckades!",
-      "loginFailed": "Inloggning misslyckades",
-      "logoutSuccess": "Utloggning lyckades",
-      "ssoFailed": "Kunde inte starta SSO-inloggning",
       "accessDeniedAdmin": "Åtkomst nekad: Administratörsbehörighet krävs",
       "accessDeniedRole": "Åtkomst nekad: Rollen {{role}} krävs",
       "accessDeniedRoles": "Åtkomst nekad: En av dessa roller krävs: {{roles}}",
+      "accountCreatedSuccess": "Kontot har skapats! Loggar in dig...",
+      "loginFailed": "Inloggning misslyckades",
       "loginRequired": "Vänligen logga in för att komma åt denna sida",
+      "loginSuccess": "Inloggning lyckades!",
+      "logoutSuccess": "Utloggning lyckades",
+      "sessionExpired": "Sessionen har löpt ut på grund av inaktivitet",
+      "sessionExpiredLogin": "Sessionen har löpt ut. Vänligen logga in igen.",
+      "ssoFailed": "Kunde inte starta SSO-inloggning",
       "userCreatedSuccess": "Användarkontot har skapats!",
-      "userCreatedWithLinkSuccess": "Användare skapad och kopplad till befintlig patient!",
-      "accountCreatedSuccess": "Kontot har skapats! Loggar in dig..."
+      "userCreatedWithLinkSuccess": "Användare skapad och kopplad till befintlig patient!"
     },
-    "patient": {
-      "nowViewing": "Visar nu {{name}}",
-      "switchFailed": "Byte misslyckades: {{message}}",
-      "deleteOwnOnly": "Du kan bara ta bort patienter som du äger",
-      "deletedSwitched": "{{name}} har tagits bort. Bytte till {{fallbackName}}.",
-      "deletedNoOthers": "{{name}} har tagits bort. Inga andra patienter tillgängliga.",
-      "deletedSuccess": "{{name}} har tagits bort",
-      "deleteFailed": "Borttagning misslyckades: {{message}}",
-      "removeOwnOnly": "Du kan inte ta bort åtkomst till patienter som du äger",
-      "removedAccess": "Åtkomst till {{name}} har tagits bort",
-      "removeAccessFailed": "Borttagning av åtkomst misslyckades: {{message}}",
-      "updatedSuccess": "{{name}} har uppdaterats",
-      "createdSuccess": "{{name}} har skapats"
+    "documents": {
+      "deleteFailed": "Borttagning misslyckades",
+      "linkFailed": "Kunde inte länka dokumentet",
+      "linkSuccess": "Dokumentet har länkats",
+      "unlinkFailed": "Kunde inte avlänka dokumentet",
+      "unlinkSuccess": "Dokumentet har avlänkats",
+      "uploadFailed": "Uppladdning misslyckades"
     },
-    "sharing": {
-      "invalidJson": "Ogiltigt JSON-format i {{fieldName}}. Vänligen kontrollera syntaxen.",
-      "invitationCancelled": "Inbjudan har avbrutits",
-      "cancelFailed": "Kunde inte avbryta inbjudan: {{message}}",
-      "invitationSent": "Inbjudan har skickats till {{recipient}}",
-      "invitationFailed": "Inbjudan misslyckades: {{message}}",
-      "shareUpdated": "Patientdelning har uppdaterats",
-      "updateFailed": "Uppdatering misslyckades: {{message}}",
-      "accessRevoked": "Åtkomst återkallad för användare {{userId}}",
-      "revokeFailed": "Återkallning misslyckades: {{message}}"
-    },
-    "vitals": {
-      "formErrors": "Vänligen rätta till formulärfelen",
-      "savedSuccess": "Vitalparametrar har {{action}}!",
-      "saveFailed": "Kunde inte {{action}} vitalparametrar",
-      "deleteSuccess": "Vitalparametrar har tagits bort",
-      "deleteFailed": "Kunde inte ta bort vitalparametrar"
-    },
-    "settings": {
-      "sessionTimeoutUpdated": "Sessionstimeout uppdaterad till {{minutes}} minuter. Din session har uppdaterats.",
-      "cleanupComplete": "Rensning slutförd: {{cleaned}} filer rensade, {{deleted}} filer borttagna",
-      "noOutOfSync": "Inga osynkroniserade filer hittades att rensa",
-      "cleanupFailed": "Kunde inte rensa filer. Vänligen försök igen senare."
+    "familySharing": {
+      "accessRevoked": "Åtkomst återkallad",
+      "invitationFailed": "Kunde inte skicka inbjudan",
+      "invitationSent": "Inbjudan har skickats!",
+      "loadFailed": "Kunde inte ladda delningsinformation",
+      "revokeFailed": "Kunde inte återkalla åtkomst"
     },
     "files": {
       "downloadFailed": "Filnedladdning misslyckades"
+    },
+    "generic": {
+      "allOperationsFailed": "Alla {{operation}} misslyckades. Vänligen försök igen.",
+      "allOperationsSuccess": "Alla {{total}} {{operation}} har slutförts!",
+      "deleteFailed": "Borttagning misslyckades",
+      "downloadFailed": "Nedladdning misslyckades",
+      "error": "Fel",
+      "operationFailed": "Åtgärden misslyckades",
+      "operationFailedTitle": "{{operation}} misslyckades",
+      "operationPartial": "{{success}}/{{total}} {{operation}} slutfördes. {{failed}} misslyckades.",
+      "operationPartialTitle": "{{operation}} slutförd med fel",
+      "operationSuccess": "{{operation}} har slutförts!",
+      "saveFailed": "Sparning misslyckades",
+      "success": "Klart!",
+      "warning": "Varning"
+    },
+    "invitations": {
+      "accessRevoked": "Åtkomst återkallad",
+      "accessRevokedMessage": "Åtkomsten har återkallats.",
+      "alreadyRevoked": "Redan återkallad",
+      "alreadyRevokedMessage": "Denna inbjudan har redan återkallats.",
+      "cancelFailed": "Kunde inte avbryta inbjudan",
+      "cancelled": "Inbjudan avbruten",
+      "cancelledMessage": "Inbjudan har avbrutits.",
+      "respondFailed": "Kunde inte svara på inbjudan",
+      "revokeFailed": "Kunde inte återkalla åtkomst"
+    },
+    "labResults": {
+      "addedMessage": "Lade till {{count}} testkomponenter i labbresultatet.",
+      "addedSuccess": "Klart!",
+      "addFailed": "Kunde inte lägga till testkomponenter",
+      "deletedMessage": "{{name}} har tagits bort",
+      "deletedSuccess": "Komponent borttagen",
+      "noTextMessage": "Vänligen klistra in labbresultattext i inmatningsfältet.",
+      "noTextToParse": "Ingen text att tolka",
+      "parsedCount": "Hittade {{count}} testkomponenter. Granska dem i fliken Förhandsgranskning.",
+      "parseWarning": "Vissa rader kunde inte tolkas",
+      "templateApplied": "Mall tillämpad",
+      "templateAppliedMessage": "Lade till {{count}} komponenter från mallen \"{{name}}\".",
+      "textParsed": "Text tolkad",
+      "trendExportFailed": "Kunde inte exportera diagrammet",
+      "trendExportSuccess": "Diagrammet har exporterats",
+      "updateFailed": "Kunde inte uppdatera komponent"
+    },
+    "patient": {
+      "createdSuccess": "{{name}} har skapats",
+      "deletedNoOthers": "{{name}} har tagits bort. Inga andra patienter tillgängliga.",
+      "deletedSuccess": "{{name}} har tagits bort",
+      "deletedSwitched": "{{name}} har tagits bort. Bytte till {{fallbackName}}.",
+      "deleteFailed": "Borttagning misslyckades: {{message}}",
+      "deleteOwnOnly": "Du kan bara ta bort patienter som du äger",
+      "nowViewing": "Visar nu {{name}}",
+      "removeAccessFailed": "Borttagning av åtkomst misslyckades: {{message}}",
+      "removedAccess": "Åtkomst till {{name}} har tagits bort",
+      "removeOwnOnly": "Du kan inte ta bort åtkomst till patienter som du äger",
+      "switchFailed": "Byte misslyckades: {{message}}",
+      "updatedSuccess": "{{name}} har uppdaterats"
+    },
+    "photo": {
+      "deleteFailed": "Borttagning misslyckades",
+      "photoBeingUploaded": "Ett foto laddas upp just nu. Vänligen vänta tills det är klart.",
+      "pleaseWait": "Vänligen vänta",
+      "uploadFailed": "Uppladdning misslyckades",
+      "uploadSuccess": "Fotot har laddats upp"
+    },
+    "reports": {
+      "noRecordsMessage": "Vänligen välj minst en post från kategorierna nedan för att generera en rapport.",
+      "noRecordsSelected": "Inga poster valda",
+      "templateDeleted": "Mallen har tagits bort",
+      "templateDeleteFailed": "Kunde inte ta bort mallen",
+      "templateLoaded": "Mallen \"{{name}}\" har laddats",
+      "templateNameRequired": "Mallnamn krävs",
+      "templateSaved": "Mallen har sparats",
+      "templateSaveFailed": "Kunde inte spara mallen",
+      "validationError": "Valideringsfel"
+    },
+    "settings": {
+      "cleanupComplete": "Rensning slutförd: {{cleaned}} filer rensade, {{deleted}} filer borttagna",
+      "cleanupFailed": "Kunde inte rensa filer. Vänligen försök igen senare.",
+      "noOutOfSync": "Inga osynkroniserade filer hittades att rensa",
+      "sessionTimeoutUpdated": "Sessionstimeout uppdaterad till {{minutes}} minuter. Din session har uppdaterats."
+    },
+    "sharing": {
+      "accessRevoked": "Åtkomst återkallad för användare {{userId}}",
+      "cancelFailed": "Kunde inte avbryta inbjudan: {{message}}",
+      "invalidJson": "Ogiltigt JSON-format i {{fieldName}}. Vänligen kontrollera syntaxen.",
+      "invitationCancelled": "Inbjudan har avbrutits",
+      "invitationFailed": "Inbjudan misslyckades: {{message}}",
+      "invitationSent": "Inbjudan har skickats till {{recipient}}",
+      "revokeFailed": "Återkallning misslyckades: {{message}}",
+      "shareUpdated": "Patientdelning har uppdaterats",
+      "updateFailed": "Uppdatering misslyckades: {{message}}"
     },
     "tagSearch": {
       "loadFailed": "Kunde inte ladda populära taggar",
@@ -324,92 +388,45 @@
       "noTagsSelectedTitle": "Inga taggar valda",
       "searchFailed": "Kunde inte söka poster efter taggar"
     },
-    "invitations": {
-      "respondFailed": "Kunde inte svara på inbjudan",
-      "cancelled": "Inbjudan avbruten",
-      "cancelledMessage": "Inbjudan har avbrutits.",
-      "cancelFailed": "Kunde inte avbryta inbjudan",
-      "accessRevoked": "Åtkomst återkallad",
-      "accessRevokedMessage": "Åtkomsten har återkallats.",
-      "revokeFailed": "Kunde inte återkalla åtkomst",
-      "alreadyRevoked": "Redan återkallad",
-      "alreadyRevokedMessage": "Denna inbjudan har redan återkallats."
-    },
-    "photo": {
-      "pleaseWait": "Vänligen vänta",
-      "photoBeingUploaded": "Ett foto laddas upp just nu. Vänligen vänta tills det är klart.",
-      "uploadSuccess": "Fotot har laddats upp",
-      "uploadFailed": "Uppladdning misslyckades",
-      "deleteFailed": "Borttagning misslyckades"
-    },
-    "reports": {
-      "noRecordsSelected": "Inga poster valda",
-      "noRecordsMessage": "Vänligen välj minst en post från kategorierna nedan för att generera en rapport.",
-      "validationError": "Valideringsfel",
-      "templateNameRequired": "Mallnamn krävs",
-      "templateSaved": "Mallen har sparats",
-      "templateSaveFailed": "Kunde inte spara mallen",
-      "templateDeleted": "Mallen har tagits bort",
-      "templateDeleteFailed": "Kunde inte ta bort mallen",
-      "templateLoaded": "Mallen \"{{name}}\" har laddats"
-    },
-    "labResults": {
-      "parseWarning": "Vissa rader kunde inte tolkas",
-      "noTextToParse": "Ingen text att tolka",
-      "noTextMessage": "Vänligen klistra in labbresultattext i inmatningsfältet.",
-      "textParsed": "Text tolkad",
-      "parsedCount": "Hittade {{count}} testkomponenter. Granska dem i fliken Förhandsgranskning.",
-      "addedSuccess": "Klart!",
-      "addedMessage": "Lade till {{count}} testkomponenter i labbresultatet.",
-      "addFailed": "Kunde inte lägga till testkomponenter",
-      "deletedSuccess": "Komponent borttagen",
-      "deletedMessage": "{{name}} har tagits bort",
-      "updateFailed": "Kunde inte uppdatera komponent",
-      "templateApplied": "Mall tillämpad",
-      "templateAppliedMessage": "Lade till {{count}} komponenter från mallen \"{{name}}\".",
-      "trendExportSuccess": "Diagrammet har exporterats",
-      "trendExportFailed": "Kunde inte exportera diagrammet"
-    },
-    "documents": {
-      "uploadFailed": "Uppladdning misslyckades",
-      "deleteFailed": "Borttagning misslyckades",
-      "linkSuccess": "Dokumentet har länkats",
-      "linkFailed": "Kunde inte länka dokumentet",
-      "unlinkSuccess": "Dokumentet har avlänkats",
-      "unlinkFailed": "Kunde inte avlänka dokumentet"
-    },
-    "familySharing": {
-      "loadFailed": "Kunde inte ladda delningsinformation",
-      "invitationSent": "Inbjudan har skickats!",
-      "invitationFailed": "Kunde inte skicka inbjudan",
-      "accessRevoked": "Åtkomst återkallad",
-      "revokeFailed": "Kunde inte återkalla åtkomst"
-    },
     "upload": {
-      "failed": "Uppladdning misslyckades",
-      "completedWithErrors": "Uppladdning slutförd med fel",
-      "partialSuccess": "{{completed}}/{{total}} filer uppladdade. {{failed}} misslyckades.",
-      "documentAdded": "Dokument tillagt i Paperless",
-      "fileUploadedSuccess": "\"{{fileName}}\" har laddats upp till Paperless!",
       "backgroundProcessing": "\"{{fileName}}\" bearbetas i bakgrunden. Du meddelas när det är klart.",
+      "completedWithErrors": "Uppladdning slutförd med fel",
+      "documentAdded": "Dokument tillagt i Paperless",
       "duplicateDocument": "Duplicerat dokument",
+      "failed": "Uppladdning misslyckades",
+      "fileUploadedSuccess": "\"{{fileName}}\" har laddats upp till Paperless!",
+      "fileUploadFailed": "Filuppladdning misslyckades",
       "paperlessUploadFailed": "Paperless-uppladdning misslyckades",
-      "fileUploadFailed": "Filuppladdning misslyckades"
+      "partialSuccess": "{{completed}}/{{total}} filer uppladdade. {{failed}} misslyckades."
     },
-    "generic": {
-      "operationFailed": "Åtgärden misslyckades",
-      "saveFailed": "Sparning misslyckades",
-      "deleteFailed": "Borttagning misslyckades",
-      "downloadFailed": "Nedladdning misslyckades",
-      "success": "Klart!",
-      "warning": "Varning",
-      "error": "Fel",
-      "operationSuccess": "{{operation}} har slutförts!",
-      "allOperationsSuccess": "Alla {{total}} {{operation}} har slutförts!",
-      "operationPartial": "{{success}}/{{total}} {{operation}} slutfördes. {{failed}} misslyckades.",
-      "operationPartialTitle": "{{operation}} slutförd med fel",
-      "allOperationsFailed": "Alla {{operation}} misslyckades. Vänligen försök igen.",
-      "operationFailedTitle": "{{operation}} misslyckades"
+    "vitals": {
+      "deleteFailed": "Kunde inte ta bort vitalparametrar",
+      "deleteSuccess": "Vitalparametrar har tagits bort",
+      "formErrors": "Vänligen rätta till formulärfelen",
+      "savedSuccess": "Vitalparametrar har {{action}}!",
+      "saveFailed": "Kunde inte {{action}} vitalparametrar"
     }
+  },
+  "validation": {
+    "appTokenRequired": "Apptoken krävs",
+    "fromEmailInvalid": "Ogiltigt e-postformat",
+    "fromEmailRequired": "Avsändaradress krävs",
+    "headersInvalid": "Rubriker måste vara giltig JSON",
+    "nameRequired": "Kanalnamn krävs",
+    "nameTooLong": "Namnet får inte överstiga 100 tecken",
+    "serverUrlInvalid": "Ogiltigt URL-format",
+    "serverUrlRequired": "Server-URL krävs",
+    "smtpHostRequired": "SMTP-server krävs",
+    "smtpPasswordRequired": "SMTP-lösenord krävs",
+    "smtpPortInvalid": "Porten måste vara mellan 1 och 65535",
+    "smtpPortRequired": "SMTP-port krävs",
+    "smtpUserRequired": "SMTP-användarnamn krävs",
+    "toEmailInvalid": "Ogiltigt e-postformat",
+    "toEmailRequired": "Mottagaradress krävs",
+    "typeRequired": "Kanaltyp krävs",
+    "urlInvalid": "Ogiltigt URL-format",
+    "urlRequired": "Webhook-URL krävs",
+    "webhookUrlInvalid": "Ogiltigt webhook-URL-format",
+    "webhookUrlRequired": "Webhook-URL krävs"
   }
 }

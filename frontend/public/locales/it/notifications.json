@@ -1,10 +1,14 @@
 {
   "channels": {
     "add": "Aggiungi canale",
+    "configTitle": "Configurazione {{type}}",
     "confirmDelete": "Conferma l'eliminazione di questo canale?",
+    "createError": "Creazione del canale non riuscita",
     "createFailed": "Impossibile creare il canale",
     "createSuccess": "Canale creato con successo",
     "delete": "Elimina canale",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo canale?",
+    "deleteError": "Eliminazione del canale non riuscita",
     "deleteFailed": "Impossibile eliminare il canale",
     "deleteSuccess": "Canale eliminato con successo",
     "description": "Aggiungi e gestisci i canali di consegna delle notifiche",
@@ -63,7 +67,19 @@
         "label": "Usa TLS"
       }
     },
+    "empty": "Nessun canale di notifica configurato.",
+    "emptyHint": "Aggiungi un canale per iniziare a ricevere notifiche tramite Discord, Email, Gotify o Webhook.",
     "enabled": "Abilitato",
+    "errors": {
+      "fieldRequired": "{{field}} è obbligatorio",
+      "nameRequired": "Il nome del canale è obbligatorio"
+    },
+    "fields": {
+      "enabled": "Abilita questo canale",
+      "name": "Nome canale",
+      "namePlaceholder": "My Discord Server",
+      "type": "Tipo di canale"
+    },
     "form": {
       "configSection": "Configurazione del canale",
       "enabled": {
@@ -100,13 +116,18 @@
       }
     },
     "lastUsed": "Ultimo utilizzo",
+    "loadError": "Caricamento dei dettagli del canale non riuscito",
     "noChannels": "Nessun canale di notifica configurato",
     "noChannelsHint": "Aggiungi un canale per iniziare a ricevere notifiche",
     "notificationsSent": "{{count}} notifiche inviate",
+    "sentCount_one": "{{count}} inviati",
+    "sentCount_many": "{{count}} sent",
+    "sentCount_other": "{{count}} inviati",
     "test": "Testa",
+    "testError": "Invio della notifica di test non riuscito",
     "testFailed": "Notifica di test non riuscita",
-    "testSuccess": "Notifica di test inviata con successo!",
     "testing": "Test in corso...",
+    "testSuccess": "Notifica di test inviata con successo!",
     "title": "Canali di notifica",
     "types": {
       "discord": "Discord",
@@ -114,6 +135,7 @@
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
+    "updateError": "Aggiornamento del canale non riuscito",
     "updateFailed": "Impossibile aggiornare il canale",
     "updateSuccess": "Canale aggiornato con successo",
     "verified": "Verificato",
@@ -225,12 +247,14 @@
     },
     "comingSoon": "In arrivo",
     "description": "Scegli quali eventi attivano le notifiche su ciascun canale",
+    "event": "Evento",
     "eventHeader": "Evento",
     "loading": "Caricamento preferenze...",
     "noChannels": "Aggiungi prima un canale di notifica per configurare le preferenze degli eventi",
     "saveFailed": "Impossibile salvare la preferenza",
     "saveSuccess": "Preferenza salvata",
-    "title": "Notifiche eventi"
+    "title": "Notifiche eventi",
+    "updateError": "Aggiornamento della preferenza non riuscito"
   },
   "title": "Impostazioni notifiche",
   "toasts": {
@@ -294,15 +318,15 @@
       "revokeFailed": "Impossibile revocare l'accesso"
     },
     "labResults": {
-      "addFailed": "Impossibile aggiungere i componenti del test",
       "addedMessage": "Aggiunti {{count}} componenti del test al risultato di laboratorio.",
       "addedSuccess": "Operazione riuscita!",
+      "addFailed": "Impossibile aggiungere i componenti del test",
       "deletedMessage": "{{name}} e stato eliminato",
       "deletedSuccess": "Componente eliminato",
       "noTextMessage": "Incolla il testo dei risultati di laboratorio nell'area di inserimento.",
       "noTextToParse": "Nessun testo da analizzare",
-      "parseWarning": "Alcune righe non sono state analizzate",
       "parsedCount": "Trovati {{count}} componenti del test. Li revisioni nella scheda Anteprima.",
+      "parseWarning": "Alcune righe non sono state analizzate",
       "templateApplied": "Modello applicato",
       "templateAppliedMessage": "Aggiunti {{count}} componenti dal modello \"{{name}}\".",
       "textParsed": "Testo analizzato",
@@ -312,15 +336,15 @@
     },
     "patient": {
       "createdSuccess": "{{name}} creato con successo",
-      "deleteFailed": "Eliminazione non riuscita: {{message}}",
-      "deleteOwnOnly": "E possibile eliminare solo i pazienti di cui si e proprietari",
       "deletedNoOthers": "{{name}} eliminato con successo. Nessun altro paziente disponibile.",
       "deletedSuccess": "{{name}} eliminato con successo",
       "deletedSwitched": "{{name}} eliminato con successo. Passaggio a {{fallbackName}}.",
+      "deleteFailed": "Eliminazione non riuscita: {{message}}",
+      "deleteOwnOnly": "E possibile eliminare solo i pazienti di cui si e proprietari",
       "nowViewing": "Visualizzazione di {{name}}",
       "removeAccessFailed": "Rimozione accesso non riuscita: {{message}}",
-      "removeOwnOnly": "Non e possibile rimuovere l'accesso ai pazienti di cui si e proprietari",
       "removedAccess": "Accesso a {{name}} rimosso",
+      "removeOwnOnly": "Non e possibile rimuovere l'accesso ai pazienti di cui si e proprietari",
       "switchFailed": "Cambio non riuscito: {{message}}",
       "updatedSuccess": "{{name}} aggiornato con successo"
     },
@@ -334,12 +358,12 @@
     "reports": {
       "noRecordsMessage": "Selezioni almeno una registrazione dalle categorie sottostanti per generare un report.",
       "noRecordsSelected": "Nessuna registrazione selezionata",
-      "templateDeleteFailed": "Impossibile eliminare il modello",
       "templateDeleted": "Modello eliminato con successo",
+      "templateDeleteFailed": "Impossibile eliminare il modello",
       "templateLoaded": "Modello \"{{name}}\" caricato",
       "templateNameRequired": "Il nome del modello e obbligatorio",
-      "templateSaveFailed": "Impossibile salvare il modello",
       "templateSaved": "Modello salvato con successo",
+      "templateSaveFailed": "Impossibile salvare il modello",
       "validationError": "Errore di validazione"
     },
     "settings": {
@@ -371,8 +395,8 @@
       "documentAdded": "Documento aggiunto a Paperless",
       "duplicateDocument": "Documento duplicato",
       "failed": "Caricamento non riuscito",
-      "fileUploadFailed": "Caricamento file non riuscito",
       "fileUploadedSuccess": "\"{{fileName}}\" caricato su Paperless con successo!",
+      "fileUploadFailed": "Caricamento file non riuscito",
       "paperlessUploadFailed": "Caricamento su Paperless non riuscito",
       "partialSuccess": "{{completed}}/{{total}} file caricati con successo. {{failed}} non riusciti."
     },
@@ -380,8 +404,8 @@
       "deleteFailed": "Impossibile eliminare la registrazione dei parametri vitali",
       "deleteSuccess": "Registrazione parametri vitali eliminata con successo",
       "formErrors": "Corregga gli errori nel modulo",
-      "saveFailed": "Impossibile {{action}} i parametri vitali",
-      "savedSuccess": "Parametri vitali {{action}} con successo!"
+      "savedSuccess": "Parametri vitali {{action}} con successo!",
+      "saveFailed": "Impossibile {{action}} i parametri vitali"
     }
   },
   "validation": {

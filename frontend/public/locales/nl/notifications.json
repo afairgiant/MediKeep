@@ -1,322 +1,386 @@
 {
-  "title": "Meldingsinstellingen",
-  "description": "Configureer hoe u meldingen ontvangt voor belangrijke gebeurtenissen",
-  "loading": "Meldingsinstellingen laden...",
-  "error": "Meldingsinstellingen laden mislukt",
-
   "channels": {
-    "title": "Meldingskanalen",
-    "description": "Voeg meldingskanalen toe en beheer ze",
     "add": "Kanaal toevoegen",
-    "edit": "Kanaal bewerken",
+    "configTitle": "{{type}}-configuratie",
+    "confirmDelete": "Weet u zeker dat u dit kanaal wilt verwijderen?",
+    "createError": "Kanaal aanmaken mislukt",
+    "createFailed": "Kanaal aanmaken mislukt",
+    "createSuccess": "Kanaal succesvol aangemaakt",
     "delete": "Kanaal verwijderen",
-    "test": "Testen",
-    "testing": "Testen...",
-    "testSuccess": "Testmelding succesvol verzonden!",
-    "testFailed": "Testmelding mislukt",
+    "deleteConfirm": "Weet u zeker dat u dit kanaal wilt verwijderen?",
+    "deleteError": "Kanaal verwijderen mislukt",
+    "deleteFailed": "Kanaal verwijderen mislukt",
+    "deleteSuccess": "Kanaal succesvol verwijderd",
+    "description": "Voeg meldingskanalen toe en beheer ze",
+    "disabled": "Uitgeschakeld",
+    "discord": {
+      "avatarUrl": {
+        "description": "Aangepaste avatar voor de meldingsbot",
+        "label": "Avatar URL (optioneel)",
+        "placeholder": "https://example.com/avatar.png"
+      },
+      "username": {
+        "description": "Aangepaste naam voor de meldingsbot",
+        "label": "Bot gebruikersnaam (optioneel)",
+        "placeholder": "MediKeep"
+      },
+      "webhookUrl": {
+        "description": "Maak een webhook aan in uw Discord serverinstellingen",
+        "label": "Webhook-URL",
+        "placeholder": "https://discord.com/api/webhooks/..."
+      }
+    },
+    "edit": "Kanaal bewerken",
+    "email": {
+      "fromEmail": {
+        "description": "Het e-mailadres van de afzender",
+        "label": "Afzender e-mail",
+        "placeholder": "meldingen@voorbeeld.nl"
+      },
+      "smtpHost": {
+        "description": "De SMTP-server van uw e-mailprovider",
+        "label": "SMTP server",
+        "placeholder": "smtp.gmail.com"
+      },
+      "smtpPassword": {
+        "description": "Gebruik voor Gmail een App-wachtwoord",
+        "label": "SMTP wachtwoord",
+        "placeholder": "App-wachtwoord of e-mailwachtwoord"
+      },
+      "smtpPort": {
+        "description": "Meestal 587 (TLS) of 465 (SSL)",
+        "label": "SMTP poort",
+        "placeholder": "587"
+      },
+      "smtpUser": {
+        "description": "Uw e-mailadres of gebruikersnaam",
+        "label": "SMTP gebruikersnaam",
+        "placeholder": "uw-email@gmail.com"
+      },
+      "toEmail": {
+        "description": "Waar meldingen naartoe gestuurd worden",
+        "label": "Ontvanger e-mail",
+        "placeholder": "uw-email@voorbeeld.nl"
+      },
+      "useTls": {
+        "description": "TLS-versleuteling inschakelen (aanbevolen)",
+        "label": "TLS gebruiken"
+      }
+    },
+    "empty": "Geen meldingskanalen geconfigureerd.",
+    "emptyHint": "Voeg een kanaal toe om meldingen te ontvangen via Discord, e-mail, Gotify of Webhook.",
+    "enabled": "Ingeschakeld",
+    "errors": {
+      "fieldRequired": "{{field}} is verplicht",
+      "nameRequired": "Kanaalnaam is verplicht"
+    },
+    "fields": {
+      "enabled": "Dit kanaal inschakelen",
+      "name": "Kanaalnaam",
+      "namePlaceholder": "My Discord Server",
+      "type": "Kanaaltype"
+    },
+    "form": {
+      "configSection": "Kanaalconfiguratie",
+      "enabled": {
+        "description": "Ontvang meldingen via dit kanaal",
+        "label": "Kanaal inschakelen"
+      },
+      "name": {
+        "description": "Een herkenbare naam om dit kanaal te identificeren",
+        "label": "Kanaalnaam",
+        "placeholder": "bijv. Mijn Discord server"
+      },
+      "title": "Kanaalgegevens",
+      "type": {
+        "description": "De service om meldingen door te sturen",
+        "label": "Kanaaltype",
+        "placeholder": "Selecteer kanaaltype"
+      }
+    },
+    "gotify": {
+      "appToken": {
+        "description": "Maak een applicatie aan in Gotify om een token te verkrijgen",
+        "label": "App token",
+        "placeholder": "Applicatietoken van Gotify"
+      },
+      "priority": {
+        "description": "Berichtprioriteit (1-10, standaard 5)",
+        "label": "Prioriteit",
+        "placeholder": "5"
+      },
+      "serverUrl": {
+        "description": "Uw Gotify server URL",
+        "label": "Server-URL",
+        "placeholder": "https://gotify.voorbeeld.nl"
+      }
+    },
+    "lastUsed": "Laatst gebruikt",
+    "loadError": "Kanaalgegevens laden mislukt",
     "noChannels": "Geen meldingskanalen geconfigureerd",
     "noChannelsHint": "Voeg een kanaal toe om meldingen te ontvangen",
-    "verified": "Geverifieerd",
-    "enabled": "Ingeschakeld",
-    "disabled": "Uitgeschakeld",
-    "lastUsed": "Laatst gebruikt",
     "notificationsSent": "{{count}} meldingen verzonden",
-    "confirmDelete": "Weet u zeker dat u dit kanaal wilt verwijderen?",
-    "deleteSuccess": "Kanaal succesvol verwijderd",
-    "deleteFailed": "Kanaal verwijderen mislukt",
-    "createSuccess": "Kanaal succesvol aangemaakt",
-    "createFailed": "Kanaal aanmaken mislukt",
-    "updateSuccess": "Kanaal succesvol bijgewerkt",
-    "updateFailed": "Kanaal bijwerken mislukt",
+    "sentCount_one": "{{count}} verzonden",
+    "sentCount_other": "{{count}} verzonden",
+    "test": "Testen",
+    "testError": "Testmelding verzenden mislukt",
+    "testFailed": "Testmelding mislukt",
+    "testing": "Testen...",
+    "testSuccess": "Testmelding succesvol verzonden!",
+    "title": "Meldingskanalen",
     "types": {
       "discord": "Discord",
       "email": "E-mail",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
-    "form": {
-      "title": "Kanaalgegevens",
-      "name": {
-        "label": "Kanaalnaam",
-        "placeholder": "bijv. Mijn Discord server",
-        "description": "Een herkenbare naam om dit kanaal te identificeren"
-      },
-      "type": {
-        "label": "Kanaaltype",
-        "placeholder": "Selecteer kanaaltype",
-        "description": "De service om meldingen door te sturen"
-      },
-      "enabled": {
-        "label": "Kanaal inschakelen",
-        "description": "Ontvang meldingen via dit kanaal"
-      },
-      "configSection": "Kanaalconfiguratie"
-    },
-    "discord": {
-      "webhookUrl": {
-        "label": "Webhook URL",
-        "placeholder": "https://discord.com/api/webhooks/...",
-        "description": "Maak een webhook aan in uw Discord serverinstellingen"
-      },
-      "username": {
-        "label": "Bot gebruikersnaam (optioneel)",
-        "placeholder": "MediKeep",
-        "description": "Aangepaste naam voor de meldingsbot"
-      },
-      "avatarUrl": {
-        "label": "Avatar URL (optioneel)",
-        "placeholder": "https://example.com/avatar.png",
-        "description": "Aangepaste avatar voor de meldingsbot"
-      }
-    },
-    "email": {
-      "smtpHost": {
-        "label": "SMTP server",
-        "placeholder": "smtp.gmail.com",
-        "description": "De SMTP-server van uw e-mailprovider"
-      },
-      "smtpPort": {
-        "label": "SMTP poort",
-        "placeholder": "587",
-        "description": "Meestal 587 (TLS) of 465 (SSL)"
-      },
-      "smtpUser": {
-        "label": "SMTP gebruikersnaam",
-        "placeholder": "uw-email@gmail.com",
-        "description": "Uw e-mailadres of gebruikersnaam"
-      },
-      "smtpPassword": {
-        "label": "SMTP wachtwoord",
-        "placeholder": "App-wachtwoord of e-mailwachtwoord",
-        "description": "Gebruik voor Gmail een App-wachtwoord"
-      },
-      "fromEmail": {
-        "label": "Afzender e-mail",
-        "placeholder": "meldingen@voorbeeld.nl",
-        "description": "Het e-mailadres van de afzender"
-      },
-      "toEmail": {
-        "label": "Ontvanger e-mail",
-        "placeholder": "uw-email@voorbeeld.nl",
-        "description": "Waar meldingen naartoe gestuurd worden"
-      },
-      "useTls": {
-        "label": "TLS gebruiken",
-        "description": "TLS-versleuteling inschakelen (aanbevolen)"
-      }
-    },
-    "gotify": {
-      "serverUrl": {
-        "label": "Server URL",
-        "placeholder": "https://gotify.voorbeeld.nl",
-        "description": "Uw Gotify server URL"
-      },
-      "appToken": {
-        "label": "App token",
-        "placeholder": "Applicatietoken van Gotify",
-        "description": "Maak een applicatie aan in Gotify om een token te verkrijgen"
-      },
-      "priority": {
-        "label": "Prioriteit",
-        "placeholder": "5",
-        "description": "Berichtprioriteit (1-10, standaard 5)"
-      }
-    },
+    "updateError": "Kanaal bijwerken mislukt",
+    "updateFailed": "Kanaal bijwerken mislukt",
+    "updateSuccess": "Kanaal succesvol bijgewerkt",
+    "verified": "Geverifieerd",
     "webhook": {
-      "url": {
-        "label": "Webhook URL",
-        "placeholder": "https://api.voorbeeld.nl/webhook",
-        "description": "URL om meldingsgegevens te ontvangen"
-      },
-      "method": {
-        "label": "HTTP methode",
-        "description": "HTTP-methode voor het webhook-verzoek"
+      "authToken": {
+        "description": "Autorisatietoken voor de webhook",
+        "label": "Auth token (optioneel)",
+        "placeholder": "Bearer token of API-sleutel"
       },
       "headers": {
+        "description": "JSON-object met aangepaste headers",
         "label": "Aangepaste headers (optioneel)",
-        "placeholder": "{\"Authorization\": \"Bearer token\"}",
-        "description": "JSON-object met aangepaste headers"
+        "placeholder": "{\"Authorization\": \"Bearer token\"}"
       },
-      "authToken": {
-        "label": "Auth token (optioneel)",
-        "placeholder": "Bearer token of API-sleutel",
-        "description": "Autorisatietoken voor de webhook"
+      "method": {
+        "description": "HTTP-methode voor het webhook-verzoek",
+        "label": "HTTP methode"
+      },
+      "url": {
+        "description": "URL om meldingsgegevens te ontvangen",
+        "label": "Webhook-URL",
+        "placeholder": "https://api.voorbeeld.nl/webhook"
       }
     }
   },
-
-  "preferences": {
-    "title": "Gebeurtenismeldingen",
-    "description": "Kies welke gebeurtenissen meldingen activeren op elk kanaal",
-    "loading": "Voorkeuren laden...",
-    "noChannels": "Voeg eerst een meldingskanaal toe om gebeurtenisvoorkeuren te configureren",
-    "saveSuccess": "Voorkeur opgeslagen",
-    "saveFailed": "Voorkeur opslaan mislukt",
-    "eventHeader": "Gebeurtenis",
-    "comingSoon": "Binnenkort beschikbaar",
-    "categories": {
-      "system": "Systeemgebeurtenissen",
-      "medical": "Medische gebeurtenissen",
-      "collaboration": "Delen & samenwerking",
-      "sharing": "Delen & uitnodigingen",
-      "security": "Beveiligingswaarschuwingen",
-      "other": "Overige gebeurtenissen"
-    }
-  },
-
+  "description": "Configureer hoe u meldingen ontvangt voor belangrijke gebeurtenissen",
+  "error": "Meldingsinstellingen laden mislukt",
   "events": {
-    "test_notification": {
-      "name": "Testmelding",
-      "description": "Handmatige testmelding"
-    },
     "backup_completed": {
-      "name": "Back-up voltooid",
-      "description": "Wanneer een back-up succesvol is voltooid"
+      "description": "Wanneer een back-up succesvol is voltooid",
+      "name": "Back-up voltooid"
     },
     "backup_failed": {
-      "name": "Back-up mislukt",
-      "description": "Wanneer een back-up mislukt"
-    },
-    "lab_result_available": {
-      "name": "Laboratoriumuitslagen beschikbaar",
-      "description": "Wanneer nieuwe laboratoriumuitslagen zijn toegevoegd"
-    },
-    "lab_result_abnormal": {
-      "name": "Afwijkende laboratoriumuitslagen",
-      "description": "Wanneer laboratoriumuitslagen buiten het normale bereik vallen"
+      "description": "Wanneer een back-up mislukt",
+      "name": "Back-up mislukt"
     },
     "immunization_due": {
-      "name": "Vaccinatie gepland",
-      "description": "Wanneer een vaccinatie binnenkort moet plaatsvinden"
+      "description": "Wanneer een vaccinatie binnenkort moet plaatsvinden",
+      "name": "Vaccinatie gepland"
     },
     "immunization_overdue": {
-      "name": "Vaccinatie achterstallig",
-      "description": "Wanneer een vaccinatie over de datum is"
-    },
-    "invitation_received": {
-      "name": "Uitnodiging ontvangen",
-      "description": "Wanneer iemand dossiers met u deelt"
+      "description": "Wanneer een vaccinatie over de datum is",
+      "name": "Vaccinatie achterstallig"
     },
     "invitation_accepted": {
-      "name": "Uitnodiging geaccepteerd",
-      "description": "Wanneer uw deeluitnodiging is geaccepteerd"
+      "description": "Wanneer uw deeluitnodiging is geaccepteerd",
+      "name": "Uitnodiging geaccepteerd"
     },
-    "share_revoked": {
-      "name": "Deling ingetrokken",
-      "description": "Wanneer toegang tot gedeelde dossiers is ingetrokken"
+    "invitation_received": {
+      "description": "Wanneer iemand dossiers met u deelt",
+      "name": "Uitnodiging ontvangen"
+    },
+    "lab_result_abnormal": {
+      "description": "Wanneer laboratoriumuitslagen buiten het normale bereik vallen",
+      "name": "Afwijkende laboratoriumuitslagen"
+    },
+    "lab_result_available": {
+      "description": "Wanneer nieuwe laboratoriumuitslagen zijn toegevoegd",
+      "name": "Laboratoriumuitslagen beschikbaar"
     },
     "login_from_new_device": {
-      "name": "Inloggen vanaf nieuw apparaat",
-      "description": "Wanneer er op uw account is ingelogd vanaf een nieuw apparaat"
+      "description": "Wanneer er op uw account is ingelogd vanaf een nieuw apparaat",
+      "name": "Inloggen vanaf nieuw apparaat"
     },
     "password_changed": {
-      "name": "Wachtwoord gewijzigd",
-      "description": "Wanneer uw wachtwoord is gewijzigd"
+      "description": "Wanneer uw wachtwoord is gewijzigd",
+      "name": "Wachtwoord gewijzigd"
+    },
+    "share_revoked": {
+      "description": "Wanneer toegang tot gedeelde dossiers is ingetrokken",
+      "name": "Deling ingetrokken"
+    },
+    "test_notification": {
+      "description": "Handmatige testmelding",
+      "name": "Testmelding"
     }
   },
-
   "history": {
-    "title": "Meldingsgeschiedenis",
     "description": "Recent verzonden meldingen via uw kanalen",
+    "fields": {
+      "channel": "Kanaal",
+      "error": "Fout",
+      "event": "Gebeurtenis",
+      "status": "Status",
+      "time": "Tijd"
+    },
     "loading": "Geschiedenis laden...",
     "noHistory": "Nog geen meldingen verzonden",
     "noHistoryHint": "Meldingen verschijnen hier zodra ze zijn verzonden",
-    "showMore": "Meer tonen",
-    "showLess": "Minder tonen",
     "page": "Pagina {{current}} van {{total}}",
+    "showLess": "Minder tonen",
+    "showMore": "Meer tonen",
     "status": {
-      "sent": "Verzonden",
       "failed": "Mislukt",
-      "pending": "In behandeling"
+      "pending": "In behandeling",
+      "sent": "Verzonden"
     },
-    "fields": {
-      "event": "Gebeurtenis",
-      "channel": "Kanaal",
-      "time": "Tijd",
-      "status": "Status",
-      "error": "Fout"
-    }
+    "title": "Meldingsgeschiedenis"
   },
-
-  "validation": {
-    "nameRequired": "Kanaalnaam is verplicht",
-    "nameTooLong": "Naam mag niet meer dan 100 tekens bevatten",
-    "typeRequired": "Kanaaltype is verplicht",
-    "webhookUrlRequired": "Webhook URL is verplicht",
-    "webhookUrlInvalid": "Ongeldig webhook URL-formaat",
-    "smtpHostRequired": "SMTP-server is verplicht",
-    "smtpPortRequired": "SMTP-poort is verplicht",
-    "smtpPortInvalid": "Poort moet tussen 1 en 65535 liggen",
-    "smtpUserRequired": "SMTP-gebruikersnaam is verplicht",
-    "smtpPasswordRequired": "SMTP-wachtwoord is verplicht",
-    "fromEmailRequired": "Afzender e-mail is verplicht",
-    "fromEmailInvalid": "Ongeldig e-mailformaat",
-    "toEmailRequired": "Ontvanger e-mail is verplicht",
-    "toEmailInvalid": "Ongeldig e-mailformaat",
-    "serverUrlRequired": "Server URL is verplicht",
-    "serverUrlInvalid": "Ongeldig URL-formaat",
-    "appTokenRequired": "App token is verplicht",
-    "urlRequired": "Webhook URL is verplicht",
-    "urlInvalid": "Ongeldig URL-formaat",
-    "headersInvalid": "Headers moeten geldige JSON zijn"
+  "loading": "Meldingsinstellingen laden...",
+  "preferences": {
+    "categories": {
+      "collaboration": "Delen & samenwerking",
+      "medical": "Medische gebeurtenissen",
+      "other": "Overige gebeurtenissen",
+      "security": "Beveiligingswaarschuwingen",
+      "sharing": "Delen & uitnodigingen",
+      "system": "Systeemgebeurtenissen"
+    },
+    "comingSoon": "Binnenkort beschikbaar",
+    "description": "Kies welke gebeurtenissen meldingen activeren op elk kanaal",
+    "event": "Gebeurtenis",
+    "eventHeader": "Gebeurtenis",
+    "loading": "Voorkeuren laden...",
+    "noChannels": "Voeg eerst een meldingskanaal toe om gebeurtenisvoorkeuren te configureren",
+    "saveFailed": "Voorkeur opslaan mislukt",
+    "saveSuccess": "Voorkeur opgeslagen",
+    "title": "Gebeurtenismeldingen",
+    "updateError": "Voorkeur bijwerken mislukt"
   },
-
+  "title": "Meldingsinstellingen",
   "toasts": {
     "auth": {
-      "sessionExpired": "Sessie verlopen door inactiviteit",
-      "sessionExpiredLogin": "Sessie verlopen. Log opnieuw in.",
-      "loginSuccess": "Succesvol ingelogd!",
-      "loginFailed": "Inloggen mislukt",
-      "logoutSuccess": "Succesvol uitgelogd",
-      "ssoFailed": "SSO-login starten mislukt",
       "accessDeniedAdmin": "Toegang geweigerd: beheerdersrechten vereist",
       "accessDeniedRole": "Toegang geweigerd: {{role}} rol vereist",
       "accessDeniedRoles": "Toegang geweigerd: een van deze rollen is vereist: {{roles}}",
+      "accountCreatedSuccess": "Account succesvol aangemaakt! U wordt ingelogd...",
+      "loginFailed": "Inloggen mislukt",
       "loginRequired": "Log in om deze pagina te openen",
+      "loginSuccess": "Succesvol ingelogd!",
+      "logoutSuccess": "Succesvol uitgelogd",
+      "sessionExpired": "Sessie verlopen door inactiviteit",
+      "sessionExpiredLogin": "Sessie verlopen. Log opnieuw in.",
+      "ssoFailed": "SSO-login starten mislukt",
       "userCreatedSuccess": "Gebruikersaccount succesvol aangemaakt!",
-      "userCreatedWithLinkSuccess": "Gebruiker aangemaakt en succesvol gekoppeld aan bestaande patiënt!",
-      "accountCreatedSuccess": "Account succesvol aangemaakt! U wordt ingelogd..."
+      "userCreatedWithLinkSuccess": "Gebruiker aangemaakt en succesvol gekoppeld aan bestaande patiënt!"
     },
-    "patient": {
-      "nowViewing": "U bekijkt nu {{name}}",
-      "switchFailed": "Wisselen mislukt: {{message}}",
-      "deleteOwnOnly": "U kunt alleen patiënten verwijderen waarvan u eigenaar bent",
-      "deletedSwitched": "{{name}} succesvol verwijderd. Gewisseld naar {{fallbackName}}.",
-      "deletedNoOthers": "{{name}} succesvol verwijderd. Geen andere patiënten beschikbaar.",
-      "deletedSuccess": "{{name}} succesvol verwijderd",
-      "deleteFailed": "Verwijderen mislukt: {{message}}",
-      "removeOwnOnly": "U kunt de toegang tot patiënten waarvan u eigenaar bent niet verwijderen",
-      "removedAccess": "Toegang tot {{name}} verwijderd",
-      "removeAccessFailed": "Toegang verwijderen mislukt: {{message}}",
-      "updatedSuccess": "{{name}} succesvol bijgewerkt",
-      "createdSuccess": "{{name}} succesvol aangemaakt"
+    "documents": {
+      "deleteFailed": "Verwijderen mislukt",
+      "linkFailed": "Document koppelen mislukt",
+      "linkSuccess": "Document succesvol gekoppeld",
+      "unlinkFailed": "Document ontkoppelen mislukt",
+      "unlinkSuccess": "Document succesvol ontkoppeld",
+      "uploadFailed": "Upload mislukt"
     },
-    "sharing": {
-      "invalidJson": "Ongeldig JSON-formaat in {{fieldName}}. Controleer uw syntax.",
-      "invitationCancelled": "Uitnodiging succesvol geannuleerd",
-      "cancelFailed": "Uitnodiging annuleren mislukt: {{message}}",
-      "invitationSent": "Uitnodiging succesvol verzonden naar {{recipient}}",
-      "invitationFailed": "Uitnodiging mislukt: {{message}}",
-      "shareUpdated": "Patiëntdeling succesvol bijgewerkt",
-      "updateFailed": "Bijwerken mislukt: {{message}}",
-      "accessRevoked": "Toegang ingetrokken voor gebruiker {{userId}}",
-      "revokeFailed": "Intrekken mislukt: {{message}}"
-    },
-    "vitals": {
-      "formErrors": "Corrigeer de formulierfouten",
-      "savedSuccess": "Vitale functies succesvol {{action}}!",
-      "saveFailed": "Vitale functies {{action}} mislukt",
-      "deleteSuccess": "Vitale functies record succesvol verwijderd",
-      "deleteFailed": "Vitale functies record verwijderen mislukt"
-    },
-    "settings": {
-      "sessionTimeoutUpdated": "Sessietime-out bijgewerkt naar {{minutes}} minuten. Uw sessie is vernieuwd.",
-      "cleanupComplete": "Opschoning voltooid: {{cleaned}} bestanden opgeschoond, {{deleted}} bestanden verwijderd",
-      "noOutOfSync": "Geen niet-gesynchroniseerde bestanden gevonden om op te schonen",
-      "cleanupFailed": "Bestanden opschonen mislukt. Probeer het later opnieuw."
+    "familySharing": {
+      "accessRevoked": "Toegang ingetrokken",
+      "invitationFailed": "Uitnodiging verzenden mislukt",
+      "invitationSent": "Uitnodiging succesvol verzonden!",
+      "loadFailed": "Deelinformatie laden mislukt",
+      "revokeFailed": "Toegang intrekken mislukt"
     },
     "files": {
       "downloadFailed": "Bestand downloaden mislukt"
+    },
+    "generic": {
+      "allOperationsFailed": "Alle {{operation}}s mislukt. Probeer het opnieuw.",
+      "allOperationsSuccess": "Alle {{total}} {{operation}}s succesvol voltooid!",
+      "deleteFailed": "Verwijderen mislukt",
+      "downloadFailed": "Downloaden mislukt",
+      "error": "Fout",
+      "operationFailed": "Bewerking mislukt",
+      "operationFailedTitle": "{{operation}} mislukt",
+      "operationPartial": "{{success}}/{{total}} {{operation}}s succesvol voltooid. {{failed}} mislukt.",
+      "operationPartialTitle": "{{operation}} voltooid met fouten",
+      "operationSuccess": "{{operation}} succesvol voltooid!",
+      "saveFailed": "Opslaan mislukt",
+      "success": "Gelukt!",
+      "warning": "Waarschuwing"
+    },
+    "invitations": {
+      "accessRevoked": "Toegang ingetrokken",
+      "accessRevokedMessage": "De toegang is ingetrokken.",
+      "alreadyRevoked": "Reeds ingetrokken",
+      "alreadyRevokedMessage": "Deze uitnodiging is al ingetrokken.",
+      "cancelFailed": "Uitnodiging annuleren mislukt",
+      "cancelled": "Uitnodiging geannuleerd",
+      "cancelledMessage": "De uitnodiging is geannuleerd.",
+      "respondFailed": "Reageren op uitnodiging mislukt",
+      "revokeFailed": "Toegang intrekken mislukt"
+    },
+    "labResults": {
+      "addedMessage": "{{count}} testcomponenten toegevoegd aan het laboratoriumresultaat.",
+      "addedSuccess": "Gelukt!",
+      "addFailed": "Testcomponenten toevoegen mislukt",
+      "deletedMessage": "{{name}} is verwijderd",
+      "deletedSuccess": "Component verwijderd",
+      "noTextMessage": "Plak laboratoriumuitslagen in het invoerveld.",
+      "noTextToParse": "Geen tekst om te verwerken",
+      "parsedCount": "{{count}} testcomponenten gevonden. Bekijk ze in het Voorbeeldtabblad.",
+      "parseWarning": "Sommige regels konden niet worden verwerkt",
+      "templateApplied": "Sjabloon toegepast",
+      "templateAppliedMessage": "{{count}} componenten toegevoegd vanuit sjabloon \"{{name}}\".",
+      "textParsed": "Tekst verwerkt",
+      "trendExportFailed": "Grafiek exporteren mislukt",
+      "trendExportSuccess": "Grafiek succesvol geëxporteerd",
+      "updateFailed": "Component bijwerken mislukt"
+    },
+    "patient": {
+      "createdSuccess": "{{name}} succesvol aangemaakt",
+      "deletedNoOthers": "{{name}} succesvol verwijderd. Geen andere patiënten beschikbaar.",
+      "deletedSuccess": "{{name}} succesvol verwijderd",
+      "deletedSwitched": "{{name}} succesvol verwijderd. Gewisseld naar {{fallbackName}}.",
+      "deleteFailed": "Verwijderen mislukt: {{message}}",
+      "deleteOwnOnly": "U kunt alleen patiënten verwijderen waarvan u eigenaar bent",
+      "nowViewing": "U bekijkt nu {{name}}",
+      "removeAccessFailed": "Toegang verwijderen mislukt: {{message}}",
+      "removedAccess": "Toegang tot {{name}} verwijderd",
+      "removeOwnOnly": "U kunt de toegang tot patiënten waarvan u eigenaar bent niet verwijderen",
+      "switchFailed": "Wisselen mislukt: {{message}}",
+      "updatedSuccess": "{{name}} succesvol bijgewerkt"
+    },
+    "photo": {
+      "deleteFailed": "Verwijderen mislukt",
+      "photoBeingUploaded": "Er wordt momenteel een foto geüpload. Wacht tot dit is voltooid.",
+      "pleaseWait": "Even geduld",
+      "uploadFailed": "Upload mislukt",
+      "uploadSuccess": "Foto succesvol geüpload"
+    },
+    "reports": {
+      "noRecordsMessage": "Selecteer ten minste één dossier uit de onderstaande categorieën om een rapport te genereren.",
+      "noRecordsSelected": "Geen dossiers geselecteerd",
+      "templateDeleted": "Sjabloon succesvol verwijderd",
+      "templateDeleteFailed": "Sjabloon verwijderen mislukt",
+      "templateLoaded": "Sjabloon \"{{name}}\" geladen",
+      "templateNameRequired": "Sjabloonnaam is verplicht",
+      "templateSaved": "Sjabloon succesvol opgeslagen",
+      "templateSaveFailed": "Sjabloon opslaan mislukt",
+      "validationError": "Validatiefout"
+    },
+    "settings": {
+      "cleanupComplete": "Opschoning voltooid: {{cleaned}} bestanden opgeschoond, {{deleted}} bestanden verwijderd",
+      "cleanupFailed": "Bestanden opschonen mislukt. Probeer het later opnieuw.",
+      "noOutOfSync": "Geen niet-gesynchroniseerde bestanden gevonden om op te schonen",
+      "sessionTimeoutUpdated": "Sessietime-out bijgewerkt naar {{minutes}} minuten. Uw sessie is vernieuwd."
+    },
+    "sharing": {
+      "accessRevoked": "Toegang ingetrokken voor gebruiker {{userId}}",
+      "cancelFailed": "Uitnodiging annuleren mislukt: {{message}}",
+      "invalidJson": "Ongeldig JSON-formaat in {{fieldName}}. Controleer uw syntax.",
+      "invitationCancelled": "Uitnodiging succesvol geannuleerd",
+      "invitationFailed": "Uitnodiging mislukt: {{message}}",
+      "invitationSent": "Uitnodiging succesvol verzonden naar {{recipient}}",
+      "revokeFailed": "Intrekken mislukt: {{message}}",
+      "shareUpdated": "Patiëntdeling succesvol bijgewerkt",
+      "updateFailed": "Bijwerken mislukt: {{message}}"
     },
     "tagSearch": {
       "loadFailed": "Populaire tags laden mislukt",
@@ -324,92 +388,45 @@
       "noTagsSelectedTitle": "Geen tags geselecteerd",
       "searchFailed": "Zoeken op tags mislukt"
     },
-    "invitations": {
-      "respondFailed": "Reageren op uitnodiging mislukt",
-      "cancelled": "Uitnodiging geannuleerd",
-      "cancelledMessage": "De uitnodiging is geannuleerd.",
-      "cancelFailed": "Uitnodiging annuleren mislukt",
-      "accessRevoked": "Toegang ingetrokken",
-      "accessRevokedMessage": "De toegang is ingetrokken.",
-      "revokeFailed": "Toegang intrekken mislukt",
-      "alreadyRevoked": "Reeds ingetrokken",
-      "alreadyRevokedMessage": "Deze uitnodiging is al ingetrokken."
-    },
-    "photo": {
-      "pleaseWait": "Even geduld",
-      "photoBeingUploaded": "Er wordt momenteel een foto geüpload. Wacht tot dit is voltooid.",
-      "uploadSuccess": "Foto succesvol geüpload",
-      "uploadFailed": "Upload mislukt",
-      "deleteFailed": "Verwijderen mislukt"
-    },
-    "reports": {
-      "noRecordsSelected": "Geen dossiers geselecteerd",
-      "noRecordsMessage": "Selecteer ten minste één dossier uit de onderstaande categorieën om een rapport te genereren.",
-      "validationError": "Validatiefout",
-      "templateNameRequired": "Sjabloonnaam is verplicht",
-      "templateSaved": "Sjabloon succesvol opgeslagen",
-      "templateSaveFailed": "Sjabloon opslaan mislukt",
-      "templateDeleted": "Sjabloon succesvol verwijderd",
-      "templateDeleteFailed": "Sjabloon verwijderen mislukt",
-      "templateLoaded": "Sjabloon \"{{name}}\" geladen"
-    },
-    "labResults": {
-      "parseWarning": "Sommige regels konden niet worden verwerkt",
-      "noTextToParse": "Geen tekst om te verwerken",
-      "noTextMessage": "Plak laboratoriumuitslagen in het invoerveld.",
-      "textParsed": "Tekst verwerkt",
-      "parsedCount": "{{count}} testcomponenten gevonden. Bekijk ze in het Voorbeeldtabblad.",
-      "addedSuccess": "Gelukt!",
-      "addedMessage": "{{count}} testcomponenten toegevoegd aan het laboratoriumresultaat.",
-      "addFailed": "Testcomponenten toevoegen mislukt",
-      "deletedSuccess": "Component verwijderd",
-      "deletedMessage": "{{name}} is verwijderd",
-      "updateFailed": "Component bijwerken mislukt",
-      "templateApplied": "Sjabloon toegepast",
-      "templateAppliedMessage": "{{count}} componenten toegevoegd vanuit sjabloon \"{{name}}\".",
-      "trendExportSuccess": "Grafiek succesvol geëxporteerd",
-      "trendExportFailed": "Grafiek exporteren mislukt"
-    },
-    "documents": {
-      "uploadFailed": "Upload mislukt",
-      "deleteFailed": "Verwijderen mislukt",
-      "linkSuccess": "Document succesvol gekoppeld",
-      "linkFailed": "Document koppelen mislukt",
-      "unlinkSuccess": "Document succesvol ontkoppeld",
-      "unlinkFailed": "Document ontkoppelen mislukt"
-    },
-    "familySharing": {
-      "loadFailed": "Deelinformatie laden mislukt",
-      "invitationSent": "Uitnodiging succesvol verzonden!",
-      "invitationFailed": "Uitnodiging verzenden mislukt",
-      "accessRevoked": "Toegang ingetrokken",
-      "revokeFailed": "Toegang intrekken mislukt"
-    },
     "upload": {
-      "failed": "Upload mislukt",
-      "completedWithErrors": "Upload voltooid met fouten",
-      "partialSuccess": "{{completed}}/{{total}} bestanden succesvol geüpload. {{failed}} mislukt.",
-      "documentAdded": "Document toegevoegd aan Paperless",
-      "fileUploadedSuccess": "\"{{fileName}}\" succesvol geüpload naar Paperless!",
       "backgroundProcessing": "\"{{fileName}}\" wordt op de achtergrond verwerkt. U ontvangt een melding wanneer dit is voltooid.",
+      "completedWithErrors": "Upload voltooid met fouten",
+      "documentAdded": "Document toegevoegd aan Paperless",
       "duplicateDocument": "Dubbel document",
+      "failed": "Upload mislukt",
+      "fileUploadedSuccess": "\"{{fileName}}\" succesvol geüpload naar Paperless!",
+      "fileUploadFailed": "Bestandsupload mislukt",
       "paperlessUploadFailed": "Paperless upload mislukt",
-      "fileUploadFailed": "Bestandsupload mislukt"
+      "partialSuccess": "{{completed}}/{{total}} bestanden succesvol geüpload. {{failed}} mislukt."
     },
-    "generic": {
-      "operationFailed": "Bewerking mislukt",
-      "saveFailed": "Opslaan mislukt",
-      "deleteFailed": "Verwijderen mislukt",
-      "downloadFailed": "Downloaden mislukt",
-      "success": "Gelukt!",
-      "warning": "Waarschuwing",
-      "error": "Fout",
-      "operationSuccess": "{{operation}} succesvol voltooid!",
-      "allOperationsSuccess": "Alle {{total}} {{operation}}s succesvol voltooid!",
-      "operationPartial": "{{success}}/{{total}} {{operation}}s succesvol voltooid. {{failed}} mislukt.",
-      "operationPartialTitle": "{{operation}} voltooid met fouten",
-      "allOperationsFailed": "Alle {{operation}}s mislukt. Probeer het opnieuw.",
-      "operationFailedTitle": "{{operation}} mislukt"
+    "vitals": {
+      "deleteFailed": "Vitale functies record verwijderen mislukt",
+      "deleteSuccess": "Vitale functies record succesvol verwijderd",
+      "formErrors": "Corrigeer de formulierfouten",
+      "savedSuccess": "Vitale functies succesvol {{action}}!",
+      "saveFailed": "Vitale functies {{action}} mislukt"
     }
+  },
+  "validation": {
+    "appTokenRequired": "App token is verplicht",
+    "fromEmailInvalid": "Ongeldig e-mailformaat",
+    "fromEmailRequired": "Afzender e-mail is verplicht",
+    "headersInvalid": "Headers moeten geldige JSON zijn",
+    "nameRequired": "Kanaalnaam is verplicht",
+    "nameTooLong": "Naam mag niet meer dan 100 tekens bevatten",
+    "serverUrlInvalid": "Ongeldig URL-formaat",
+    "serverUrlRequired": "Server URL is verplicht",
+    "smtpHostRequired": "SMTP-server is verplicht",
+    "smtpPasswordRequired": "SMTP-wachtwoord is verplicht",
+    "smtpPortInvalid": "Poort moet tussen 1 en 65535 liggen",
+    "smtpPortRequired": "SMTP-poort is verplicht",
+    "smtpUserRequired": "SMTP-gebruikersnaam is verplicht",
+    "toEmailInvalid": "Ongeldig e-mailformaat",
+    "toEmailRequired": "Ontvanger e-mail is verplicht",
+    "typeRequired": "Kanaaltype is verplicht",
+    "urlInvalid": "Ongeldig URL-formaat",
+    "urlRequired": "Webhook URL is verplicht",
+    "webhookUrlInvalid": "Ongeldig webhook URL-formaat",
+    "webhookUrlRequired": "Webhook URL is verplicht"
   }
 }

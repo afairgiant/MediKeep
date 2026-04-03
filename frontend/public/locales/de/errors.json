@@ -1,90 +1,93 @@
 {
-  "upload": {
-    "failed": "Datei konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.",
-    "connectionError": "Verbindungsfehler. Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.",
-    "fileTooLarge": "Dateigröße überschreitet das maximale Limit.",
-    "invalidFileType": "Dateityp wird nicht unterstützt.",
-    "fileProcessingFailed": "Datei konnte nicht verarbeitet werden. Bitte versuchen Sie eine andere Datei.",
-    "duplicateFile": "Diese Datei wurde bereits hochgeladen.",
-    "batchUploadFailed": "Einige Dateien konnten nicht hochgeladen werden. Bitte überprüfen Sie die einzelnen Dateifehler.",
-    "partialUploadSuccess": "Upload mit einigen Fehlern abgeschlossen. Bitte überprüfen Sie die fehlgeschlagenen Dateien.",
-    "allUploadsFailed": "Alle Datei-Uploads sind fehlgeschlagen. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut."
-  },
-  "paperless": {
-    "unavailable": "Dokumentenverwaltungsdienst ist derzeit nicht verfügbar.",
-    "notEnabled": "Paperless-Integration ist nicht aktiviert. Bitte aktivieren Sie sie in den Einstellungen.",
-    "configIncomplete": "Paperless-Konfiguration ist unvollständig. Bitte überprüfen Sie Ihre Einstellungen.",
-    "uploadFailed": "Fehler beim Hochladen in das Paperless-Dokumentenverwaltungssystem.",
-    "connectionFailed": "Verbindung zum Paperless-Dienst nicht möglich. Bitte überprüfen Sie die Konfiguration.",
-    "authFailed": "Authentifizierung beim Paperless-Dienst fehlgeschlagen. Bitte überprüfen Sie die Zugangsdaten.",
-    "duplicateDocument": "Dieses Dokument existiert bereits in Paperless. Identische Dokumente können nicht zweimal hochgeladen werden.",
-    "taskFailed": "Dokument-Upload zu Paperless fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.",
-    "taskTimeout": "Dokumentenverarbeitung hat das Zeitlimit überschritten. Das Dokument wird möglicherweise noch in Paperless verarbeitet."
+  "file": {
+    "deleteFailed": "Datei konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
+    "downloadFailed": "Datei konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut.",
+    "notFound": "Datei nicht gefunden.",
+    "viewFailed": "Datei konnte nicht zum Anzeigen geöffnet werden. Bitte versuchen Sie es erneut."
   },
   "form": {
-    "submissionFailed": "Formular konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut.",
-    "requiredFieldMissing": "Bitte füllen Sie alle erforderlichen Felder aus.",
+    "conditionNotSelected": "Bitte wählen Sie eine Erkrankung aus",
+    "entityNotFound": "Der angeforderte Eintrag konnte nicht gefunden werden.",
+    "equipmentFieldsRequired": "Gerätename und -typ sind erforderlich",
+    "equipmentNotSelected": "Bitte wählen Sie mindestens ein Gerät aus",
     "invalidDate": "Bitte geben Sie ein gültiges Datum ein.",
     "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
     "invalidPhone": "Bitte geben Sie eine gültige Telefonnummer ein.",
     "invalidPhoneDigits": "Bitte geben Sie eine gültige Telefonnummer ein",
     "invalidWebsiteUrl": "Bitte geben Sie eine gültige Website-URL ein",
-    "patientNotSelected": "Bitte wählen Sie einen Patienten aus.",
-    "entityNotFound": "Der angeforderte Eintrag konnte nicht gefunden werden.",
     "medicationNotSelected": "Bitte wählen Sie ein Medikament aus",
-    "conditionNotSelected": "Bitte wählen Sie eine Erkrankung aus",
-    "mustBeValidNumber": "Muss eine gültige Zahl sein"
+    "mustBeValidNumber": "Muss eine gültige Zahl sein",
+    "patientNotSelected": "Bitte wählen Sie einen Patienten aus.",
+    "requiredFieldMissing": "Bitte füllen Sie alle erforderlichen Felder aus.",
+    "submissionFailed": "Formular konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut."
+  },
+  "general": {
+    "maintenanceMode": "Das System befindet sich derzeit in Wartung. Bitte versuchen Sie es später erneut.",
+    "permissionDenied": "Sie haben keine Berechtigung, diese Aktion auszuführen.",
+    "rateLimitExceeded": "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
+    "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+    "storageFull": "Speicherlimit erreicht. Bitte schaffen Sie Speicherplatz und versuchen Sie es erneut.",
+    "unknownError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "validationError": "Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut."
+  },
+  "network": {
+    "connectionError": "Verbindungsfehler. Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.",
+    "serverError": "Serverfehler aufgetreten. Bitte versuchen Sie es später erneut.",
+    "timeout": "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
+    "unavailable": "Netzwerk nicht verfügbar. Bitte überprüfen Sie Ihre Verbindung."
+  },
+  "paperless": {
+    "authFailed": "Authentifizierung beim Paperless-Dienst fehlgeschlagen. Bitte überprüfen Sie die Zugangsdaten.",
+    "configIncomplete": "Paperless-Konfiguration ist unvollständig. Bitte überprüfen Sie Ihre Einstellungen.",
+    "connectionFailed": "Verbindung zum Paperless-Dienst nicht möglich. Bitte überprüfen Sie die Konfiguration.",
+    "duplicateDocument": "Dieses Dokument existiert bereits in Paperless. Identische Dokumente können nicht zweimal hochgeladen werden.",
+    "notEnabled": "Paperless-Integration ist nicht aktiviert. Bitte aktivieren Sie sie in den Einstellungen.",
+    "taskFailed": "Dokument-Upload zu Paperless fehlgeschlagen. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.",
+    "taskTimeout": "Dokumentenverarbeitung hat das Zeitlimit überschritten. Das Dokument wird möglicherweise noch in Paperless verarbeitet.",
+    "unavailable": "Dokumentenverwaltungsdienst ist derzeit nicht verfügbar.",
+    "uploadFailed": "Fehler beim Hochladen in das Paperless-Dokumentenverwaltungssystem."
   },
   "patientForm": {
+    "birthDateFuture": "Geburtsdatum darf nicht in der Zukunft liegen",
+    "birthDateRequired": "Geburtsdatum ist erforderlich",
+    "createFailed": "Erstellung fehlgeschlagen: {{message}}",
     "error": "Fehler",
     "firstNameRequired": "Vorname ist erforderlich",
     "lastNameRequired": "Nachname ist erforderlich",
-    "birthDateRequired": "Geburtsdatum ist erforderlich",
-    "birthDateFuture": "Geburtsdatum darf nicht in der Zukunft liegen",
-    "createFailed": "Erstellung fehlgeschlagen: {{message}}",
     "updateFailed": "Aktualisierung fehlgeschlagen: {{message}}"
   },
-  "file": {
-    "deleteFailed": "Datei konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
-    "downloadFailed": "Datei konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut.",
-    "viewFailed": "Datei konnte nicht zum Anzeigen geöffnet werden. Bitte versuchen Sie es erneut.",
-    "notFound": "Datei nicht gefunden."
-  },
-  "network": {
-    "unavailable": "Netzwerk nicht verfügbar. Bitte überprüfen Sie Ihre Verbindung.",
-    "timeout": "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
-    "serverError": "Serverfehler aufgetreten. Bitte versuchen Sie es später erneut.",
-    "connectionError": "Verbindungsfehler. Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut."
-  },
-  "general": {
-    "unknownError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-    "permissionDenied": "Sie haben keine Berechtigung, diese Aktion auszuführen.",
-    "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
-    "rateLimitExceeded": "Zu viele Anfragen. Bitte warten Sie einen Moment und versuchen Sie es erneut.",
-    "maintenanceMode": "Das System befindet sich derzeit in Wartung. Bitte versuchen Sie es später erneut.",
-    "storageFull": "Speicherlimit erreicht. Bitte schaffen Sie Speicherplatz und versuchen Sie es erneut.",
-    "validationError": "Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut."
-  },
-  "success": {
-    "uploadSuccess": "Datei erfolgreich hochgeladen!",
-    "uploadMultipleSuccess": "Alle Dateien erfolgreich hochgeladen!",
-    "formSaved": "Formular erfolgreich gespeichert!",
-    "fileDeleted": "Datei erfolgreich gelöscht.",
-    "paperlessSyncSuccess": "Erfolgreich mit Paperless-Dokumentenverwaltung synchronisiert.",
-    "batchUploadSuccess": "Alle Dateien erfolgreich hochgeladen!"
-  },
-  "warnings": {
-    "partialSuccess": "Vorgang mit einigen Warnungen abgeschlossen.",
-    "slowConnection": "Upload dauert länger als üblich aufgrund langsamer Verbindung.",
-    "largeFileWarning": "Große Datei erkannt. Upload kann mehrere Minuten dauern.",
-    "duplicateWarning": "Diese Datei scheint ein Duplikat zu sein."
-  },
+  "patientNotAvailable": "Patienteninformationen nicht verfügbar",
   "relationships": {
     "addConditionFailed": "Fehler beim Hinzufügen der Erkrankungsverknüpfung",
-    "addMedicationFailed": "Fehler beim Hinzufügen der Medikamentenverknüpfung",
     "addFailed": "Fehler beim Hinzufügen der Verknüpfung",
-    "updateFailed": "Fehler beim Aktualisieren der Verknüpfung",
+    "addMedicationFailed": "Fehler beim Hinzufügen der Medikamentenverknüpfung",
     "deleteFailed": "Fehler beim Löschen der Verknüpfung",
-    "fetchFailed": "Fehler beim Laden der Verknüpfungen"
+    "fetchFailed": "Fehler beim Laden der Verknüpfungen",
+    "updateFailed": "Fehler beim Aktualisieren der Verknüpfung"
+  },
+  "success": {
+    "batchUploadSuccess": "Alle Dateien erfolgreich hochgeladen!",
+    "fileDeleted": "Datei erfolgreich gelöscht.",
+    "formSaved": "Formular erfolgreich gespeichert!",
+    "paperlessSyncSuccess": "Erfolgreich mit Paperless-Dokumentenverwaltung synchronisiert.",
+    "uploadMultipleSuccess": "Alle Dateien erfolgreich hochgeladen!",
+    "uploadSuccess": "Datei erfolgreich hochgeladen!"
+  },
+  "upload": {
+    "allUploadsFailed": "Alle Datei-Uploads sind fehlgeschlagen. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "batchUploadFailed": "Einige Dateien konnten nicht hochgeladen werden. Bitte überprüfen Sie die einzelnen Dateifehler.",
+    "connectionError": "Verbindungsfehler. Bitte überprüfen Sie Ihre Netzwerkverbindung und versuchen Sie es erneut.",
+    "duplicateFile": "Diese Datei wurde bereits hochgeladen.",
+    "failed": "Datei konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.",
+    "fileProcessingFailed": "Datei konnte nicht verarbeitet werden. Bitte versuchen Sie eine andere Datei.",
+    "fileTooLarge": "Dateigröße überschreitet das maximale Limit.",
+    "invalidFileType": "Dateityp wird nicht unterstützt.",
+    "partialUploadSuccess": "Upload mit einigen Fehlern abgeschlossen. Bitte überprüfen Sie die fehlgeschlagenen Dateien."
+  },
+  "warnings": {
+    "duplicateWarning": "Diese Datei scheint ein Duplikat zu sein.",
+    "largeFileWarning": "Große Datei erkannt. Upload kann mehrere Minuten dauern.",
+    "partialSuccess": "Vorgang mit einigen Warnungen abgeschlossen.",
+    "slowConnection": "Upload dauert länger als üblich aufgrund langsamer Verbindung."
   }
 }

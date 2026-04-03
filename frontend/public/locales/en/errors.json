@@ -1,90 +1,93 @@
 {
-  "upload": {
-    "failed": "Failed to upload file. Please try again.",
-    "connectionError": "Connection error. Please check your network and try again.",
-    "fileTooLarge": "File size exceeds the maximum limit.",
-    "invalidFileType": "File type not supported.",
-    "fileProcessingFailed": "Failed to process file. Please try a different file.",
-    "duplicateFile": "This file has already been uploaded.",
-    "batchUploadFailed": "Some files failed to upload. Please check individual file errors.",
-    "partialUploadSuccess": "Upload completed with some errors. Please review failed files.",
-    "allUploadsFailed": "All file uploads failed. Please check your connection and try again."
-  },
-  "paperless": {
-    "unavailable": "Document management service is currently unavailable.",
-    "notEnabled": "Paperless integration is not enabled. Please enable it in Settings.",
-    "configIncomplete": "Paperless configuration is incomplete. Please check your settings.",
-    "uploadFailed": "Failed to upload to Paperless document management system.",
-    "connectionFailed": "Unable to connect to Paperless service. Please check configuration.",
-    "authFailed": "Authentication failed with Paperless service. Please check credentials.",
-    "duplicateDocument": "This document already exists in Paperless. Identical documents cannot be uploaded twice.",
-    "taskFailed": "Document upload to Paperless failed. Please try again or contact support.",
-    "taskTimeout": "Document processing timed out. The document may still be processing in Paperless."
+  "file": {
+    "deleteFailed": "Failed to delete file. Please try again.",
+    "downloadFailed": "Failed to download file. Please try again.",
+    "notFound": "File not found.",
+    "viewFailed": "Failed to open file for viewing. Please try again."
   },
   "form": {
-    "submissionFailed": "Failed to save form. Please check your input and try again.",
-    "requiredFieldMissing": "Please fill in all required fields.",
+    "conditionNotSelected": "Please select a condition",
+    "entityNotFound": "The requested item could not be found.",
+    "equipmentFieldsRequired": "Equipment name and type are required",
+    "equipmentNotSelected": "Please select at least one equipment",
     "invalidDate": "Please enter a valid date.",
     "invalidEmail": "Please enter a valid email address.",
     "invalidPhone": "Please enter a valid phone number.",
     "invalidPhoneDigits": "Please enter a valid phone number",
     "invalidWebsiteUrl": "Please enter a valid website URL",
-    "patientNotSelected": "Please select a patient.",
-    "entityNotFound": "The requested item could not be found.",
     "medicationNotSelected": "Please select a medication",
-    "conditionNotSelected": "Please select a condition",
-    "mustBeValidNumber": "Must be a valid number"
+    "mustBeValidNumber": "Must be a valid number",
+    "patientNotSelected": "Please select a patient.",
+    "requiredFieldMissing": "Please fill in all required fields.",
+    "submissionFailed": "Failed to save form. Please check your input and try again."
+  },
+  "general": {
+    "maintenanceMode": "The system is currently under maintenance. Please try again later.",
+    "permissionDenied": "You do not have permission to perform this action.",
+    "rateLimitExceeded": "Too many requests. Please wait a moment and try again.",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "storageFull": "Storage limit reached. Please free up space and try again.",
+    "unknownError": "An unexpected error occurred. Please try again.",
+    "validationError": "Please check your input and try again."
+  },
+  "network": {
+    "connectionError": "Connection error. Please check your network and try again.",
+    "serverError": "Server error occurred. Please try again later.",
+    "timeout": "Request timed out. Please try again.",
+    "unavailable": "Network unavailable. Please check your connection."
+  },
+  "paperless": {
+    "authFailed": "Authentication failed with Paperless service. Please check credentials.",
+    "configIncomplete": "Paperless configuration is incomplete. Please check your settings.",
+    "connectionFailed": "Unable to connect to Paperless service. Please check configuration.",
+    "duplicateDocument": "This document already exists in Paperless. Identical documents cannot be uploaded twice.",
+    "notEnabled": "Paperless integration is not enabled. Please enable it in Settings.",
+    "taskFailed": "Document upload to Paperless failed. Please try again or contact support.",
+    "taskTimeout": "Document processing timed out. The document may still be processing in Paperless.",
+    "unavailable": "Document management service is currently unavailable.",
+    "uploadFailed": "Failed to upload to Paperless document management system."
   },
   "patientForm": {
+    "birthDateFuture": "Birth date cannot be in the future",
+    "birthDateRequired": "Birth date is required",
+    "createFailed": "Creation Failed: {{message}}",
     "error": "Error",
     "firstNameRequired": "First name is required",
     "lastNameRequired": "Last name is required",
-    "birthDateRequired": "Birth date is required",
-    "birthDateFuture": "Birth date cannot be in the future",
-    "createFailed": "Creation Failed: {{message}}",
     "updateFailed": "Update Failed: {{message}}"
   },
-  "file": {
-    "deleteFailed": "Failed to delete file. Please try again.",
-    "downloadFailed": "Failed to download file. Please try again.",
-    "viewFailed": "Failed to open file for viewing. Please try again.",
-    "notFound": "File not found."
-  },
-  "network": {
-    "unavailable": "Network unavailable. Please check your connection.",
-    "timeout": "Request timed out. Please try again.",
-    "serverError": "Server error occurred. Please try again later.",
-    "connectionError": "Connection error. Please check your network and try again."
-  },
-  "general": {
-    "unknownError": "An unexpected error occurred. Please try again.",
-    "permissionDenied": "You do not have permission to perform this action.",
-    "sessionExpired": "Your session has expired. Please log in again.",
-    "rateLimitExceeded": "Too many requests. Please wait a moment and try again.",
-    "maintenanceMode": "The system is currently under maintenance. Please try again later.",
-    "storageFull": "Storage limit reached. Please free up space and try again.",
-    "validationError": "Please check your input and try again."
-  },
-  "success": {
-    "uploadSuccess": "File uploaded successfully!",
-    "uploadMultipleSuccess": "All files uploaded successfully!",
-    "formSaved": "Form saved successfully!",
-    "fileDeleted": "File deleted successfully.",
-    "paperlessSyncSuccess": "Successfully synced with Paperless document management.",
-    "batchUploadSuccess": "All files uploaded successfully!"
-  },
-  "warnings": {
-    "partialSuccess": "Operation completed with some warnings.",
-    "slowConnection": "Upload is taking longer than usual due to slow connection.",
-    "largeFileWarning": "Large file detected. Upload may take several minutes.",
-    "duplicateWarning": "This file appears to be a duplicate."
-  },
+  "patientNotAvailable": "Patient information not available",
   "relationships": {
     "addConditionFailed": "Failed to add condition relationship",
-    "addMedicationFailed": "Failed to add medication relationship",
     "addFailed": "Failed to add relationship",
-    "updateFailed": "Failed to update relationship",
+    "addMedicationFailed": "Failed to add medication relationship",
     "deleteFailed": "Failed to delete relationship",
-    "fetchFailed": "Failed to load relationships"
+    "fetchFailed": "Failed to load relationships",
+    "updateFailed": "Failed to update relationship"
+  },
+  "success": {
+    "batchUploadSuccess": "All files uploaded successfully!",
+    "fileDeleted": "File deleted successfully.",
+    "formSaved": "Form saved successfully!",
+    "paperlessSyncSuccess": "Successfully synced with Paperless document management.",
+    "uploadMultipleSuccess": "All files uploaded successfully!",
+    "uploadSuccess": "File uploaded successfully!"
+  },
+  "upload": {
+    "allUploadsFailed": "All file uploads failed. Please check your connection and try again.",
+    "batchUploadFailed": "Some files failed to upload. Please check individual file errors.",
+    "connectionError": "Connection error. Please check your network and try again.",
+    "duplicateFile": "This file has already been uploaded.",
+    "failed": "Failed to upload file. Please try again.",
+    "fileProcessingFailed": "Failed to process file. Please try a different file.",
+    "fileTooLarge": "File size exceeds the maximum limit.",
+    "invalidFileType": "File type not supported.",
+    "partialUploadSuccess": "Upload completed with some errors. Please review failed files."
+  },
+  "warnings": {
+    "duplicateWarning": "This file appears to be a duplicate.",
+    "largeFileWarning": "Large file detected. Upload may take several minutes.",
+    "partialSuccess": "Operation completed with some warnings.",
+    "slowConnection": "Upload is taking longer than usual due to slow connection."
   }
 }
