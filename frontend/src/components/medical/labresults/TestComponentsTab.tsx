@@ -64,7 +64,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   onError,
   onLabResultUpdated
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [activeTab, setActiveTab] = useState<string>('display');
   const [components, setComponents] = useState<LabTestComponent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -311,7 +311,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           <Title order={4}>{t('testComponents.title', 'Test Components')}</Title>
           {components.length > 0 && (
             <Badge variant="light" color="blue">
-              {t('testComponents.testCount', '{{count}} test', { count: components.length })}
+              {t('shared:labels.countTest', '{{count}} test', { count: components.length })}
             </Badge>
           )}
         </Group>

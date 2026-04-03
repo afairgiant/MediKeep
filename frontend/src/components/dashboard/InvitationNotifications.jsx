@@ -289,7 +289,7 @@ const InvitationNotifications = () => {
                 onClick={openInvitationManager}
                 rightSection={<IconChevronRight size="0.8rem" />}
               >
-                {t('invitations.viewAll', 'View all {{count}} invitations', { count: pendingInvitations.length })}
+                {t('shared:labels.viewAllCountInvitations', 'View all {{count}} invitations', { count: pendingInvitations.length })}
               </Button>
             )}
           </Stack>

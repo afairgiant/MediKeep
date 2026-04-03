@@ -187,7 +187,7 @@ const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({ ent
         {/* Footer: reading count + date */}
         <Group justify="space-between" mt={4}>
           <Text size="xs" c="dimmed">
-            {t('medical:componentCatalog.readingCount', '{{count}} readings', { count: entry.reading_count })}
+            {t('shared:labels.countReadings', '{{count}} readings', { count: entry.reading_count })}
           </Text>
           {entry.latest_date && (
             <Text size="xs" c="dimmed">

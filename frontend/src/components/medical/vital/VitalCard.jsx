@@ -55,7 +55,7 @@ const VitalCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('vitals.card.recordedDate', 'Recorded Date'),
+        label: t('shared:labels.recordedDate', 'Recorded Date'),
         value: vital.recorded_date,
         render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified', 'Not specified')
       },
@@ -100,7 +100,7 @@ const VitalCard = ({
     if (vital.practitioner_id) {
       const practitioner = practitioners.find(p => p.id === vital.practitioner_id);
       fields.push({
-        label: t('vitals.card.recordedBy', 'Recorded By'),
+        label: t('shared:labels.recordedBy', 'Recorded By'),
         value: vital.practitioner_id,
         render: (value) => {
           if (!value) return t('shared:labels.notSpecified', 'Not specified');

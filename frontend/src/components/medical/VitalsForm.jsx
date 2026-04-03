@@ -1079,7 +1079,7 @@ const VitalsForm = ({
                     variant="light"
                     color="green"
                     icon={<IconUser size={16} />}
-                    title={t('vitals.form.patientInfo', 'Patient Information')}
+                    title={t('shared:labels.patientInformation', 'Patient Information')}
                     mt="md"
                   >
                     {t(

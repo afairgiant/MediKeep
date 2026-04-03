@@ -48,7 +48,7 @@ const LabResultCard = React.memo(({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('labResults.testCode.label'),
+        label: t('shared:fields.testCode'),
         value: labResult.test_code
       },
       {
@@ -65,24 +65,24 @@ const LabResultCard = React.memo(({
         value: labResult.facility
       },
       {
-        label: t('labResults.orderedDate.label'),
+        label: t('shared:labels.orderedDate'),
         value: labResult.ordered_date,
         render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
       {
-        label: t('labResults.completedDate.label'),
+        label: t('shared:labels.completedDate'),
         value: labResult.completed_date,
         render: (value) => value ? formatLongDate(value) : t('common:labels.notCompleted', 'Not completed')
       },
       {
-        label: t('labResults.labResult.label'),
+        label: t('shared:labels.labResult'),
         value: labResult.labs_result,
         render: (value) => value ? (
           <StatusBadge status={value} />
         ) : t('shared:fields.pending', 'Pending')
       },
       {
-        label: t('labResults.orderingPractitioner.label'),
+        label: t('shared:labels.orderingPractitioner'),
         value: labResult.practitioner_id,
         render: (value) => {
           if (!value) return t('shared:labels.notSpecified');

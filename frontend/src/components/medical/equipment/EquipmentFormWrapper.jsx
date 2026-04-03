@@ -121,7 +121,7 @@ const EquipmentFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('equipment.form.name', 'Equipment Name')}
+                      label={t('shared:labels.equipmentName', 'Equipment Name')}
                       value={formData.equipment_name || ''}
                       onChange={handleTextInputChange('equipment_name')}
                       placeholder={t('equipment.form.namePlaceholder', 'e.g., ResMed AirSense 11')}
@@ -136,7 +136,7 @@ const EquipmentFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'equipment_type', value: value || '' } });
                       }}
-                      placeholder={t('equipment.form.typePlaceholder', 'Select type')}
+                      placeholder={t('shared:labels.selectType', 'Select type')}
                       searchable
                       required
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -197,7 +197,7 @@ const EquipmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('equipment.form.serialNumber', 'Serial Number')}
+                      label={t('shared:labels.serialNumber', 'Serial Number')}
                       value={formData.serial_number || ''}
                       onChange={handleTextInputChange('serial_number')}
                       placeholder={t('equipment.form.serialPlaceholder', 'Equipment serial number')}
@@ -205,7 +205,7 @@ const EquipmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('equipment.form.supplier', 'Supplier')}
+                      label={t('shared:labels.supplier', 'Supplier')}
                       value={formData.supplier || ''}
                       onChange={handleTextInputChange('supplier')}
                       placeholder={t('equipment.form.supplierPlaceholder', 'Equipment supplier')}

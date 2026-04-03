@@ -41,19 +41,19 @@ const PharmacyCard = ({
         value: pharmacy.street_address,
       },
       {
-        label: t('pharmacies.card.city'),
+        label: t('shared:labels.city'),
         value: pharmacy.city,
       },
       pharmacy.state && {
-        label: t('pharmacies.card.stateProvince'),
+        label: t('shared:labels.stateProvince'),
         value: pharmacy.state,
       },
       pharmacy.zip_code && {
-        label: t('pharmacies.card.postalCode'),
+        label: t('shared:labels.postalCode'),
         value: pharmacy.zip_code,
       },
       pharmacy.country && {
-        label: t('pharmacies.card.country'),
+        label: t('shared:labels.country'),
         value: pharmacy.country,
       },
       {
@@ -83,7 +83,7 @@ const PharmacyCard = ({
         }
       },
       pharmacy.specialty_services && {
-        label: t('pharmacies.card.specialtyServices'),
+        label: t('shared:labels.specialties'),
         value: pharmacy.specialty_services,
       },
     ].filter(Boolean);

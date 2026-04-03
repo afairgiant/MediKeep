@@ -27,7 +27,7 @@ const InsuranceCard = ({
   fileCount = 0,
   fileCountLoading = false
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   // Get type-specific styling
@@ -255,7 +255,7 @@ const InsuranceCard = ({
             size="xs"
             onClick={() => onEdit(insurance)}
           >
-            {t('buttons.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
           <Button
             variant="filled"

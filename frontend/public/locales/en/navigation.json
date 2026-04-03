@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Added",
-      "cancelled": "Cancelled",
-      "completed": "Completed",
-      "created": "Created",
       "deleted": "Deleted",
       "modified": "Modified",
       "removed": "Removed",
@@ -22,9 +19,7 @@
     "hello": "Hello",
     "loading": "Loading your medical dashboard...",
     "modules": {
-      "adminDashboard": "Admin Dashboard",
       "exportRecords": "Export Records",
-      "patientInfo": "Patient Information",
       "visitHistory": "Visit History"
     },
     "search": {
@@ -40,8 +35,7 @@
       "treatments": "Treatments and Procedures"
     },
     "stats": {
-      "activeMedications": "Active Medications",
-      "totalRecords": "Total Records"
+      "activeMedications": "Active Medications"
     },
     "subtitle": "Manage your health information securely",
     "title": "MediKeep Dashboard"
@@ -60,15 +54,10 @@
     "title": "Invitations",
     "types": {
       "patientRecord": "Patient Record"
-    },
-    "viewAll": "View all {{count}} invitations",
-    "viewAll_one": "View all {{count}} invitations",
-    "viewAll_other": "View all {{count}} invitations"
+    }
   },
   "menu": {
-    "administration": "Administration",
     "backToDashboard": "Back to Dashboard",
-    "dashboard": "Dashboard",
     "help": "Help",
     "logout": "Logout",
     "patients": "Patients",
@@ -76,7 +65,6 @@
     "reports": "Reports"
   },
   "pages": {
-    "dashboard": "Dashboard",
     "help": "Help & Support",
     "medicalHistory": "Medical History",
     "patientDetails": "Patient Details",
@@ -86,26 +74,20 @@
     "userProfile": "User Profile"
   },
   "sections": {
-    "medicalInfo": "Medical Information",
     "personalInfo": "Personal Information",
     "preferences": "Preferences"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Admin Dashboard",
-      "backupManagement": "Backup Management",
       "customReports": "Custom Reports",
-      "dataModels": "Data Models",
       "exportRecords": "Export Records",
       "language": "Language",
       "patientInfo": "Patient Info",
-      "systemHealth": "System Health",
       "tagManagement": "Tag Management",
       "theme": "Theme",
       "visitHistory": "Visit History"
     },
     "sections": {
-      "administration": "Administration",
       "careAndTreatment": "Care & Treatment",
       "misc": "Misc.",
       "tools": "Tools"

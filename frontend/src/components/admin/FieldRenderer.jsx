@@ -25,7 +25,7 @@ const FieldRenderer = ({
   onPasswordReset,
   recordId,
 }) => {
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'shared']);
   // Don't render primary key fields in create mode
   if (field.primary_key && mode === 'create') {
     return (
@@ -105,7 +105,7 @@ const FieldRenderer = ({
                 marginLeft: '1rem',
               }}
             >
-              {t('fieldRenderer.resetPassword', 'Reset Password')}
+              {t('shared:labels.resetPassword', 'Reset Password')}
             </Button>
           </div>
         </div>

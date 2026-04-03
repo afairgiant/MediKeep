@@ -248,7 +248,7 @@ const SystemHealth = () => {
                   <IconChartBar size={16} />
                 </ThemeIcon>
                 <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
-                  {t('health.totalRecords', 'Total Records')}
+                  {t('shared:labels.totalRecords', 'Total Records')}
                 </Text>
               </Group>
               <Text size="xl" fw={700}>
@@ -305,7 +305,7 @@ const SystemHealth = () => {
                         scheduleSettings.preset === 'every_6_hours' ? t('health.schedulePresets.every_6_hours', 'Every 6 hours') :
                         scheduleSettings.preset === 'every_12_hours' ? t('health.schedulePresets.every_12_hours', 'Every 12 hours') :
                         scheduleSettings.preset === 'daily' ? t('health.schedulePresets.daily', 'Daily') :
-                        scheduleSettings.preset === 'weekly' ? t('health.schedulePresets.weekly', 'Weekly') :
+                        scheduleSettings.preset === 'weekly' ? t('shared:labels.weekly', 'Weekly') :
                         scheduleSettings.preset
                     })}
                   </Text>
@@ -358,7 +358,7 @@ const SystemHealth = () => {
                 status={healthData?.database_connection_test ? 'healthy' : 'error'}
               />
               <HealthItem
-                label={t('health.totalRecords', 'Total Records')}
+                label={t('shared:labels.totalRecords', 'Total Records')}
                 value={healthData?.total_records?.toLocaleString() || 0}
               />
               {healthData?.disk_usage && (
@@ -420,7 +420,7 @@ const SystemHealth = () => {
                         {storageHealth.app_storage.total_mb >= 1024
                           ? `${(storageHealth.app_storage.total_mb / 1024).toFixed(2)} GB`
                           : `${storageHealth.app_storage.total_mb.toFixed(2)} MB`}
-                        {' '}{t('health.storage.filesAcross', 'across {{count}} files', { count: storageHealth.app_storage.total_files })}
+                        {' '}{t('shared:labels.acrossCountFiles', 'across {{count}} files', { count: storageHealth.app_storage.total_files })}
                       </Text>
                     </Group>
                   </div>
@@ -533,7 +533,7 @@ const SystemHealth = () => {
               variant="light"
               color={ssoConfig?.enabled ? 'green' : 'blue'}
             >
-              {ssoConfig?.enabled ? t('shared.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
+              {ssoConfig?.enabled ? t('shared:labels.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
             </Badge>
           </Group>
           {ssoError ? (
@@ -544,7 +544,7 @@ const SystemHealth = () => {
             <Stack gap={0}>
               <HealthItem
                 label={t('health.sso.ssoStatus', 'SSO Status')}
-                value={ssoConfig?.enabled ? t('shared.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
+                value={ssoConfig?.enabled ? t('shared:labels.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
                 status={ssoConfig?.enabled ? 'healthy' : 'info'}
               />
               {ssoConfig?.enabled && (
@@ -556,7 +556,7 @@ const SystemHealth = () => {
                   />
                   {SSO_PROVIDER_LABELS[ssoConfig.provider_type] && (
                     <HealthItem
-                      label={t('health.sso.provider', 'Provider')}
+                      label={t('shared:labels.provider', 'Provider')}
                       value={SSO_PROVIDER_LABELS[ssoConfig.provider_type]}
                       status="healthy"
                     />

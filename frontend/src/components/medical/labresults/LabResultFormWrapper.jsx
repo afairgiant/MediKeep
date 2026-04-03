@@ -500,7 +500,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 4 }}>
                     <TextInput
-                      label={t('labResults.testCode.label')}
+                      label={t('shared:fields.testCode')}
                       value={formData.test_code || ''}
                       onChange={handleTextInputChange('test_code')}
                       placeholder={t('labResults.testCode.placeholder')}
@@ -515,7 +515,7 @@ const LabResultFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'test_category', value: value || '' } });
                       }}
-                      placeholder={t('labResults.testCategory.placeholder')}
+                      placeholder={t('shared:labels.selectCategory')}
                       description={t('labResults.testCategory.description')}
                       searchable
                       clearable
@@ -547,7 +547,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('labResults.orderingPractitioner.label')}
+                      label={t('shared:labels.orderingPractitioner')}
                       value={formData.practitioner_id ? String(formData.practitioner_id) : null}
                       data={practitionerOptions}
                       onChange={(value) => {
@@ -600,7 +600,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('labResults.labResult.label')}
+                      label={t('shared:labels.labResult')}
                       value={formData.labs_result || null}
                       data={labResultOptions}
                       onChange={(value) => {
@@ -614,7 +614,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('labResults.orderedDate.label')}
+                      label={t('shared:labels.orderedDate')}
                       value={parseDateInput(formData.ordered_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -630,7 +630,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('labResults.completedDate.label')}
+                      label={t('shared:labels.completedDate')}
                       value={parseDateInput(formData.completed_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);

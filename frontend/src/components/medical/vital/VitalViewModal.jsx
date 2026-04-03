@@ -82,7 +82,7 @@ const VitalViewModal = ({
       icon: IconCalendar,
       items: [
         {
-          label: t('vitals.modal.recordedDate', 'Recorded Date'),
+          label: t('shared:labels.recordedDate', 'Recorded Date'),
           value: formatDateTime(vital.recorded_date),
           icon: IconCalendar,
         },
@@ -149,7 +149,7 @@ const VitalViewModal = ({
           unit: vital.weight ? unitLabels[unitSystem].weight : '',
         },
         {
-          label: t('vitals.modal.height', 'Height'),
+          label: t('shared:labels.height', 'Height'),
           value: vital.height
             ? ((unitSystem === 'imperial'
                 ? convertHeight.inchesToFeetInches(vital.height)
@@ -311,7 +311,7 @@ const VitalViewModal = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconUser size={18} />
               </ActionIcon>
-              <Title order={4}>{t('vitals.modal.recordedBy', 'Recorded By')}</Title>
+              <Title order={4}>{t('shared:labels.recordedBy', 'Recorded By')}</Title>
             </Group>
             <Card shadow="xs" p="sm" radius="md" withBorder>
               {practitioner ? (
@@ -342,10 +342,10 @@ const VitalViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('buttons.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

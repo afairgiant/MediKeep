@@ -62,7 +62,7 @@ const ImmunizationCard = ({
     
     if (immunization.dose_number) {
       badges.push({
-        label: t('common:immunizations.card.dose', 'Dose {{number}}', { number: immunization.dose_number }),
+        label: t('shared:labels.doseNumber', 'Dose {{number}}', { number: immunization.dose_number }),
         color: getDoseColor(immunization.dose_number)
       });
     }
@@ -77,7 +77,7 @@ const ImmunizationCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('immunizations.dateAdministered.label'),
+        label: t('shared:fields.dateAdministered'),
         value: immunization.date_administered,
         render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
@@ -87,7 +87,7 @@ const ImmunizationCard = ({
         render: (value) => value
       },
       immunization.ndc_number && {
-        label: t('immunizations.ndcNumber.label'),
+        label: t('shared:fields.ndcNumber'),
         value: immunization.ndc_number,
         render: (value) => value
       },

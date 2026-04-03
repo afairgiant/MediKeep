@@ -154,7 +154,7 @@ const Analytics = () => {
         t('shared:categories.medications', 'Medications'),
         t('shared:categories.procedures', 'Procedures'),
         t('shared:categories.allergies', 'Allergies'),
-        t('analytics.chartLabels.vitals', 'Vitals'),
+        t('shared:categories.vitals', 'Vitals'),
       ],
       datasets: [
         {
@@ -305,7 +305,7 @@ const Analytics = () => {
                     {t('analytics.period', 'Period')}
                   </Text>
                   <Text size="lg" fw={700}>
-                    {t('analytics.days', '{{count}} days', { count: analyticsData?.date_range?.days || 0 })}
+                    {t('shared:labels.countDays', '{{count}} days', { count: analyticsData?.date_range?.days || 0 })}
                   </Text>
                   {comparisonData.previous_period && (
                     <Text size="xs" c="dimmed" mt={4}>
@@ -332,7 +332,7 @@ const Analytics = () => {
                       </Text>
                     </div>
                     <Badge variant="light" color="blue">
-                      {t('analytics.total', '{{count}} total', { count: analyticsData?.weekly_activity?.total || 0 })}
+                      {t('shared:labels.countTotal', '{{count}} total', { count: analyticsData?.weekly_activity?.total || 0 })}
                     </Badge>
                   </Group>
 

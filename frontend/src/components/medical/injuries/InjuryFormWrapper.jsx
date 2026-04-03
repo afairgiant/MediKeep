@@ -162,7 +162,7 @@ const InjuryFormWrapper = ({
                 {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
-                {t('injuries.tabs.treatment', 'Treatment')}
+                {t('shared:labels.treatment', 'Treatment')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingInjury
@@ -390,7 +390,7 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('injuries.treatmentReceived.label', 'Treatment Received')}
+                      label={t('shared:fields.treatmentReceived', 'Treatment Received')}
                       value={formData.treatment_received || ''}
                       onChange={handleTextInputChange('treatment_received')}
                       placeholder={t(

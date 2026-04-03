@@ -55,7 +55,7 @@ export const RECORD_TYPES = [
   { value: 'treatments', labelKey: 'shared:categories.treatments', icon: IconHeartbeat, color: 'pink' },
   { value: 'encounters', labelKey: 'search.types.encounters', icon: IconCalendarEvent, color: 'teal' },
   { value: 'allergies', labelKey: 'shared:categories.allergies', icon: IconAlertTriangle, color: 'red' },
-  { value: 'vitals', labelKey: 'search.types.vitals', icon: IconHeartbeat, color: 'cyan' },
+  { value: 'vitals', labelKey: 'shared:categories.vitals', icon: IconHeartbeat, color: 'cyan' },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -483,7 +483,7 @@ export function SearchFilterSidebar({
         disabled={!hasActiveFilters && !query}
         onClick={onClearFilters}
       >
-        {t('search.clearFilters')}
+        {t('shared:labels.clearFilters')}
       </Button>
     </Paper>
   );

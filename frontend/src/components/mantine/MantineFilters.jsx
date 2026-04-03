@@ -221,7 +221,7 @@ const MantineFilters = ({
                   total: totalCount,
                 })}
                 {filterCount > 0
-                  ? ` • ${t('filters.moreFilters', '{{count}} more filters', { count: filterCount })}`
+                  ? ` • ${t('shared:labels.countMoreFilters', '{{count}} more filters', { count: filterCount })}`
                   : ''}
               </Text>
             </div>

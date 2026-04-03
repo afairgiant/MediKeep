@@ -26,7 +26,7 @@ export const conditionFormFields = [
     name: 'severity',
     type: 'select',
     labelKey: 'shared:fields.severity',
-    placeholderKey: 'medical:conditions.severity.placeholder',
+    placeholderKey: 'shared:labels.selectSeverityLevel',
     descriptionKey: 'medical:conditions.severity.description',
     gridColumn: 6,
     clearable: true,
@@ -64,7 +64,7 @@ export const conditionFormFields = [
   {
     name: 'icd10_code',
     type: 'text',
-    labelKey: 'medical:conditions.icd10Code.label',
+    labelKey: 'shared:fields.icd10Code',
     placeholderKey: 'medical:conditions.icd10Code.placeholder',
     descriptionKey: 'medical:conditions.icd10Code.description',
     gridColumn: 4,
@@ -73,7 +73,7 @@ export const conditionFormFields = [
   {
     name: 'snomed_code',
     type: 'text',
-    labelKey: 'medical:conditions.snomedCode.label',
+    labelKey: 'shared:fields.snomedCode',
     placeholderKey: 'medical:conditions.snomedCode.placeholder',
     descriptionKey: 'medical:conditions.snomedCode.description',
     gridColumn: 4,
@@ -82,7 +82,7 @@ export const conditionFormFields = [
   {
     name: 'code_description',
     type: 'text',
-    labelKey: 'medical:conditions.codeDescription.label',
+    labelKey: 'shared:fields.codeDescription',
     placeholderKey: 'medical:conditions.codeDescription.placeholder',
     descriptionKey: 'medical:conditions.codeDescription.description',
     gridColumn: 4,

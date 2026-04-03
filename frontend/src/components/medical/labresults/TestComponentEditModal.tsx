@@ -288,7 +288,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               onChange={(e) => setFormData(prev => ({ ...prev, abbreviation: e.target.value }))}
             />
             <TextInput
-              label={t('testComponents.editModal.fields.testCode', 'Test Code')}
+              label={t('shared:fields.testCode', 'Test Code')}
               placeholder={t('testComponents.editModal.placeholders.testCode', 'e.g., 718-7')}
               value={formData.test_code || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, test_code: e.target.value }))}
@@ -318,7 +318,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               {/* Value and Unit */}
               <Group grow>
                 <NumberInput
-                  label={t('testComponents.editModal.fields.value', 'Value')}
+                  label={t('shared:labels.value', 'Value')}
                   placeholder={t('testComponents.editModal.placeholders.value', 'Enter test value')}
                   required
                   value={formData.value}
@@ -401,7 +401,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
             />
             <Select
               label={t('shared:labels.category', 'Category')}
-              placeholder={t('testComponents.editModal.placeholders.category', 'Select category')}
+              placeholder={t('shared:labels.selectCategory', 'Select category')}
               clearable
               searchable
               comboboxProps={{ zIndex: 3001 }}

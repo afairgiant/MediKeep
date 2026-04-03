@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Добавлено",
-      "cancelled": "Отменено",
-      "completed": "Завершено",
-      "created": "Создано",
       "deleted": "Удалено",
       "modified": "Изменено",
       "removed": "Удалено",
@@ -22,9 +19,7 @@
     "hello": "Здравствуйте",
     "loading": "Загрузка медицинской панели управления...",
     "modules": {
-      "adminDashboard": "Панель администратора",
       "exportRecords": "Экспорт записей",
-      "patientInfo": "Информация о пациенте",
       "visitHistory": "История визитов"
     },
     "search": {
@@ -40,8 +35,7 @@
       "treatments": "Лечение и процедуры"
     },
     "stats": {
-      "activeMedications": "Активные лекарства",
-      "totalRecords": "Всего записей"
+      "activeMedications": "Активные лекарства"
     },
     "subtitle": "Безопасное управление вашей медицинской информацией",
     "title": "Панель управления MediKeep"
@@ -61,16 +55,11 @@
     "types": {
       "patientRecord": "Запись пациента"
     },
-    "viewAll": "Показать все {{count}} приглашений",
-    "viewAll_one": "Просмотреть все приглашения ({{count}})",
     "viewAll_few": "View all {{count}} invitations",
-    "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "Просмотреть все приглашения ({{count}})"
+    "viewAll_many": "View all {{count}} invitations"
   },
   "menu": {
-    "administration": "Администрирование",
     "backToDashboard": "Вернуться к панели управления",
-    "dashboard": "Панель управления",
     "help": "Помощь",
     "logout": "Выйти",
     "patients": "Пациенты",
@@ -78,7 +67,6 @@
     "reports": "Отчёты"
   },
   "pages": {
-    "dashboard": "Панель управления",
     "help": "Помощь и поддержка",
     "medicalHistory": "История болезни",
     "patientDetails": "Данные пациента",
@@ -88,26 +76,20 @@
     "userProfile": "Профиль пользователя"
   },
   "sections": {
-    "medicalInfo": "Медицинская информация",
     "personalInfo": "Личная информация",
     "preferences": "Предпочтения"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Панель администратора",
-      "backupManagement": "Управление резервными копиями",
       "customReports": "Пользовательские отчёты",
-      "dataModels": "Модели данных",
       "exportRecords": "Экспорт записей",
       "language": "Язык",
       "patientInfo": "Информация о пациенте",
-      "systemHealth": "Состояние системы",
       "tagManagement": "Управление тегами",
       "theme": "Тема",
       "visitHistory": "История визитов"
     },
     "sections": {
-      "administration": "Администрирование",
       "careAndTreatment": "Уход и лечение",
       "misc": "Прочее",
       "tools": "Инструменты"

@@ -17,7 +17,7 @@ export const immunizationFormFields = [
   {
     name: 'date_administered',
     type: 'date',
-    labelKey: 'medical:immunizations.dateAdministered.label',
+    labelKey: 'shared:fields.dateAdministered',
     placeholderKey: 'medical:immunizations.dateAdministered.placeholder',
     required: true,
     descriptionKey: 'medical:immunizations.dateAdministered.description',
@@ -44,7 +44,7 @@ export const immunizationFormFields = [
   {
     name: 'ndc_number',
     type: 'text',
-    labelKey: 'medical:immunizations.ndcNumber.label',
+    labelKey: 'shared:fields.ndcNumber',
     placeholderKey: 'medical:immunizations.ndcNumber.placeholder',
     descriptionKey: 'medical:immunizations.ndcNumber.description',
     gridColumn: 6,

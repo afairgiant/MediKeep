@@ -68,7 +68,6 @@
     },
     "empty": "Inga aviseringskanaler har konfigurerats.",
     "emptyHint": "Lägg till en kanal för att börja ta emot aviseringar via Discord, e-post, Gotify eller Webhook.",
-    "enabled": "Aktiverad",
     "errors": {
       "fieldRequired": "{{field}} krävs",
       "nameRequired": "Kanalnamn krävs"
@@ -76,7 +75,7 @@
     "fields": {
       "enabled": "Aktivera den här kanalen",
       "name": "Kanalnamn",
-      "namePlaceholder": "My Discord Server",
+      "namePlaceholder": "Min Discord-server",
       "type": "Kanaltyp"
     },
     "form": {
@@ -105,7 +104,6 @@
       },
       "priority": {
         "description": "Meddelandeprioritet (1-10, standard 5)",
-        "label": "Prioritet",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -213,8 +211,7 @@
   "history": {
     "description": "Senaste aviseringar skickade genom dina kanaler",
     "fields": {
-      "channel": "Kanal",
-      "event": "Händelse"
+      "channel": "Kanal"
     },
     "loading": "Laddar historik...",
     "noHistory": "Inga aviseringar skickade ännu",
@@ -240,8 +237,6 @@
     },
     "comingSoon": "Kommer snart",
     "description": "Välj vilka händelser som utlöser aviseringar på varje kanal",
-    "event": "Händelse",
-    "eventHeader": "Händelse",
     "loading": "Laddar inställningar...",
     "noChannels": "Lägg till en aviseringskanal först för att konfigurera händelseinställningar",
     "saveFailed": "Kunde inte spara inställningen",
@@ -267,12 +262,10 @@
       "userCreatedWithLinkSuccess": "Användare skapad och kopplad till befintlig patient!"
     },
     "documents": {
-      "deleteFailed": "Borttagning misslyckades",
       "linkFailed": "Kunde inte länka dokumentet",
       "linkSuccess": "Dokumentet har länkats",
       "unlinkFailed": "Kunde inte avlänka dokumentet",
-      "unlinkSuccess": "Dokumentet har avlänkats",
-      "uploadFailed": "Uppladdning misslyckades"
+      "unlinkSuccess": "Dokumentet har avlänkats"
     },
     "familySharing": {
       "accessRevoked": "Åtkomst återkallad",
@@ -287,7 +280,6 @@
     "generic": {
       "allOperationsFailed": "Alla {{operation}} misslyckades. Vänligen försök igen.",
       "allOperationsSuccess": "Alla {{total}} {{operation}} har slutförts!",
-      "deleteFailed": "Borttagning misslyckades",
       "downloadFailed": "Nedladdning misslyckades",
       "operationFailed": "Åtgärden misslyckades",
       "operationFailedTitle": "{{operation}} misslyckades",
@@ -341,10 +333,8 @@
       "updatedSuccess": "{{name}} har uppdaterats"
     },
     "photo": {
-      "deleteFailed": "Borttagning misslyckades",
       "photoBeingUploaded": "Ett foto laddas upp just nu. Vänligen vänta tills det är klart.",
       "pleaseWait": "Vänligen vänta",
-      "uploadFailed": "Uppladdning misslyckades",
       "uploadSuccess": "Fotot har laddats upp"
     },
     "reports": {
@@ -386,7 +376,6 @@
       "completedWithErrors": "Uppladdning slutförd med fel",
       "documentAdded": "Dokument tillagt i Paperless",
       "duplicateDocument": "Duplicerat dokument",
-      "failed": "Uppladdning misslyckades",
       "fileUploadedSuccess": "\"{{fileName}}\" har laddats upp till Paperless!",
       "fileUploadFailed": "Filuppladdning misslyckades",
       "paperlessUploadFailed": "Paperless-uppladdning misslyckades",

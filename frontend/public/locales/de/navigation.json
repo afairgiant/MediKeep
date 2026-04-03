@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Hinzugefügt",
-      "cancelled": "Abgebrochen",
-      "completed": "Abgeschlossen",
-      "created": "Erstellt",
       "deleted": "Gelöscht",
       "modified": "Geändert",
       "removed": "Entfernt",
@@ -22,9 +19,7 @@
     "hello": "Hallo",
     "loading": "Ihr medizinisches Dashboard wird geladen...",
     "modules": {
-      "adminDashboard": "Admin-Dashboard",
       "exportRecords": "Daten exportieren",
-      "patientInfo": "Patienteninformationen",
       "visitHistory": "Besuchsverlauf"
     },
     "search": {
@@ -40,11 +35,10 @@
       "treatments": "Behandlungen und Eingriffe"
     },
     "stats": {
-      "activeMedications": "Aktive Medikamente",
-      "totalRecords": "Gesamtanzahl Einträge"
+      "activeMedications": "Aktive Medikamente"
     },
     "subtitle": "Verwalten Sie Ihre Gesundheitsinformationen sicher",
-    "title": "MediKeep Dashboard"
+    "title": "MediKeep-Dashboard"
   },
   "invitations": {
     "acceptButton": "Einladung annehmen",
@@ -60,15 +54,10 @@
     "title": "Einladungen",
     "types": {
       "patientRecord": "Patientenakte"
-    },
-    "viewAll": "Alle {{count}} Einladungen anzeigen",
-    "viewAll_one": "Alle {{count}} Einladungen anzeigen",
-    "viewAll_other": "Alle {{count}} Einladungen anzeigen"
+    }
   },
   "menu": {
-    "administration": "Verwaltung",
     "backToDashboard": "Zurück zum Dashboard",
-    "dashboard": "Dashboard",
     "help": "Hilfe",
     "logout": "Abmelden",
     "patients": "Patienten",
@@ -76,7 +65,6 @@
     "reports": "Berichte"
   },
   "pages": {
-    "dashboard": "Dashboard",
     "help": "Hilfe & Support",
     "medicalHistory": "Krankengeschichte",
     "patientDetails": "Patientendetails",
@@ -86,26 +74,20 @@
     "userProfile": "Benutzerprofil"
   },
   "sections": {
-    "medicalInfo": "Medizinische Informationen",
     "personalInfo": "Persönliche Informationen",
     "preferences": "Einstellungen"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Admin-Dashboard",
-      "backupManagement": "Backup-Verwaltung",
       "customReports": "Benutzerdefinierte Berichte",
-      "dataModels": "Datenmodelle",
       "exportRecords": "Daten exportieren",
       "language": "Sprache",
       "patientInfo": "Patienteninformationen",
-      "systemHealth": "Systemzustand",
       "tagManagement": "Tag-Verwaltung",
       "theme": "Design",
       "visitHistory": "Besuchsverlauf"
     },
     "sections": {
-      "administration": "Verwaltung",
       "careAndTreatment": "Pflege & Behandlung",
       "misc": "Sonstiges",
       "tools": "Werkzeuge"

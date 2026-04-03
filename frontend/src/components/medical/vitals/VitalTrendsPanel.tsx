@@ -501,7 +501,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       });
 
       notifications.show({
-        title: t('labels.success', 'Success'),
+        title: t('shared:labels.success', 'Success'),
         message: t('vitals.trends.exportSuccess', `Exported ${trendData.data_points.length} data points to CSV`),
         color: 'green',
         autoClose: 3000

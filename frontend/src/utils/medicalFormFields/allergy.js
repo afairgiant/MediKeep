@@ -18,7 +18,7 @@ export const allergyFormFields = [
     name: 'severity',
     type: 'select',
     labelKey: 'shared:fields.severity',
-    placeholderKey: 'medical:allergies.severity.placeholder',
+    placeholderKey: 'shared:labels.selectSeverityLevel',
     descriptionKey: 'medical:allergies.severity.description',
     required: true,
     gridColumn: 6,

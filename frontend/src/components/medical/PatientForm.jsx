@@ -237,16 +237,16 @@ const PatientForm = ({
   ];
 
   const genderOptions = [
-    { value: '', label: t('patients.form.gender.options.select') },
-    { value: 'Male', label: t('patients.form.gender.options.male') },
-    { value: 'Female', label: t('patients.form.gender.options.female') },
+    { value: '', label: t('shared:fields.selectGender') },
+    { value: 'Male', label: t('shared:fields.male') },
+    { value: 'Female', label: t('shared:fields.female') },
     { value: 'Other', label: t('shared:fields.other') },
     { value: 'Prefer not to say', label: t('patients.form.gender.options.preferNotToSay') },
   ];
 
   const relationshipOptions = [
     { value: '', label: t('patients.form.relationship.options.select') },
-    { value: 'self', label: t('patients.form.relationship.options.self') },
+    { value: 'self', label: t('shared:fields.self') },
     { value: 'spouse', label: t('patients.form.relationship.options.spouse') },
     { value: 'partner', label: t('patients.form.relationship.options.partner') },
     { value: 'child', label: t('patients.form.relationship.options.child') },
@@ -314,7 +314,7 @@ const PatientForm = ({
           <Stack gap="sm">
             <Group grow>
               <TextInput
-                label={t('patients.form.firstName.label')}
+                label={t('shared:labels.firstName')}
                 placeholder={t('patients.form.firstName.placeholder')}
                 required
                 value={formData.first_name}
@@ -324,7 +324,7 @@ const PatientForm = ({
                 disabled={loading}
               />
               <TextInput
-                label={t('patients.form.lastName.label')}
+                label={t('shared:labels.lastName')}
                 placeholder={t('patients.form.lastName.placeholder')}
                 required
                 value={formData.last_name}
@@ -352,7 +352,7 @@ const PatientForm = ({
               />
               <Select
                 label={t('shared:fields.gender')}
-                placeholder={t('patients.form.gender.placeholder')}
+                placeholder={t('shared:fields.selectGender')}
                 data={genderOptions}
                 value={formData.gender}
                 onChange={value => setFormData({ ...formData, gender: value })}
@@ -381,11 +381,11 @@ const PatientForm = ({
         {/* Medical Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            {t('patients.form.sections.medicalInformation')}
+            {t('shared:fields.medicalInformation')}
           </Text>
           <Stack gap="sm">
             <Select
-              label={t('patients.form.bloodType.label')}
+              label={t('shared:labels.bloodType')}
               placeholder={t('patients.form.bloodType.placeholder')}
               data={bloodTypeOptions}
               value={formData.blood_type}
@@ -398,7 +398,7 @@ const PatientForm = ({
 
             <Group grow>
               <NumberInput
-                label={`${t('patients.form.height.label')} (${labels.heightLong})`}
+                label={`${t('shared:labels.height')} (${labels.heightLong})`}
                 placeholder={t(
                   unitSystem === 'imperial'
                     ? 'patients.form.height.placeholder.imperial'
@@ -412,7 +412,7 @@ const PatientForm = ({
                 step={unitSystem === 'imperial' ? 0.5 : 1}
               />
               <NumberInput
-                label={`${t('patients.form.weight.label')} (${labels.weightLong})`}
+                label={`${t('shared:labels.weight')} (${labels.weightLong})`}
                 placeholder={t(
                   unitSystem === 'imperial'
                     ? 'patients.form.weight.placeholder.imperial'
@@ -434,7 +434,7 @@ const PatientForm = ({
         {/* Contact Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            {t('patients.form.sections.contactInformation')}
+            {t('shared:fields.contactInformation')}
           </Text>
           <Textarea
             label={t('shared:labels.address')}

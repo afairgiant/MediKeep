@@ -68,7 +68,6 @@
     },
     "empty": "No notification channels configured.",
     "emptyHint": "Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.",
-    "enabled": "Enabled",
     "errors": {
       "fieldRequired": "{{field}} is required",
       "nameRequired": "Channel name is required"
@@ -105,7 +104,6 @@
       },
       "priority": {
         "description": "Message priority (1-10, default 5)",
-        "label": "Priority",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -213,8 +211,7 @@
   "history": {
     "description": "Recent notifications sent through your channels",
     "fields": {
-      "channel": "Channel",
-      "event": "Event"
+      "channel": "Channel"
     },
     "loading": "Loading history...",
     "noHistory": "No notifications sent yet",
@@ -240,8 +237,6 @@
     },
     "comingSoon": "Coming Soon",
     "description": "Choose which events trigger notifications on each channel",
-    "event": "Event",
-    "eventHeader": "Event",
     "loading": "Loading preferences...",
     "noChannels": "Add a notification channel first to configure event preferences",
     "saveFailed": "Failed to save preference",
@@ -267,12 +262,10 @@
       "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!"
     },
     "documents": {
-      "deleteFailed": "Delete Failed",
       "linkFailed": "Failed to link document",
       "linkSuccess": "Document linked successfully",
       "unlinkFailed": "Failed to unlink document",
-      "unlinkSuccess": "Document unlinked successfully",
-      "uploadFailed": "Upload Failed"
+      "unlinkSuccess": "Document unlinked successfully"
     },
     "familySharing": {
       "accessRevoked": "Access revoked",
@@ -287,7 +280,6 @@
     "generic": {
       "allOperationsFailed": "All {{operation}}s failed. Please try again.",
       "allOperationsSuccess": "All {{total}} {{operation}}s completed successfully!",
-      "deleteFailed": "Delete Failed",
       "downloadFailed": "Download Failed",
       "operationFailed": "Operation Failed",
       "operationFailedTitle": "{{operation}} Failed",
@@ -341,10 +333,8 @@
       "updatedSuccess": "Updated {{name}} successfully"
     },
     "photo": {
-      "deleteFailed": "Delete Failed",
       "photoBeingUploaded": "A photo is currently being uploaded. Please wait for it to complete.",
       "pleaseWait": "Please Wait",
-      "uploadFailed": "Upload Failed",
       "uploadSuccess": "Photo uploaded successfully"
     },
     "reports": {
@@ -386,7 +376,6 @@
       "completedWithErrors": "Upload Completed with Errors",
       "documentAdded": "Document Added to Paperless",
       "duplicateDocument": "Duplicate Document",
-      "failed": "Upload Failed",
       "fileUploadedSuccess": "\"{{fileName}}\" uploaded to Paperless successfully!",
       "fileUploadFailed": "File Upload Failed",
       "paperlessUploadFailed": "Paperless Upload Failed",

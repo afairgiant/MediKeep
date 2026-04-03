@@ -406,7 +406,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('treatments.form.treatmentName', 'Treatment Name')}
+                      label={t('shared:fields.treatmentName', 'Treatment Name')}
                       value={formData.treatment_name || ''}
                       onChange={handleTextInputChange('treatment_name')}
                       placeholder={t('treatments.form.enterTreatmentName', 'Enter treatment name')}
@@ -416,7 +416,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('treatments.form.treatmentType', 'Treatment Category')}
+                      label={t('shared:fields.treatmentType', 'Treatment Category')}
                       value={formData.treatment_type || null}
                       data={(() => {
                         const predefinedOptions = [
@@ -462,8 +462,8 @@ const TreatmentFormWrapper = ({
                         { value: 'planned', label: t('treatments.form.statusPlanned', 'Planned') },
                         { value: 'active', label: t('shared:labels.active', 'Active') },
                         { value: 'on-hold', label: t('treatments.form.statusOnHold', 'On Hold') },
-                        { value: 'completed', label: t('treatments.form.statusCompleted', 'Completed') },
-                        { value: 'cancelled', label: t('treatments.form.statusCancelled', 'Cancelled') },
+                        { value: 'completed', label: t('shared:fields.completed', 'Completed') },
+                        { value: 'cancelled', label: t('shared:fields.cancelled', 'Cancelled') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });

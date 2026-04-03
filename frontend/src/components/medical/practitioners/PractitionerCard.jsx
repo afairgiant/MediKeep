@@ -111,7 +111,7 @@ const PractitionerCard = ({
         ) : t('shared:labels.notSpecified', 'Not specified')
       },
       {
-        label: t('practitioners.card.rating', 'Rating'),
+        label: t('shared:labels.rating', 'Rating'),
         value: practitioner.rating,
         render: (value) => {
           if (value !== null && value !== undefined) {

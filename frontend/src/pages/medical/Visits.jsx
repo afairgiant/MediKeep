@@ -548,7 +548,7 @@ const Visits = () => {
                 pagination={false}
                 columns={[
                   { header: t('visits.table.visitDate', 'Visit Date'), accessor: 'date', priority: 'high', width: 120 },
-                  { header: t('visits.table.reason', 'Reason'), accessor: 'reason', priority: 'high', width: 150 },
+                  { header: t('shared:labels.reason', 'Reason'), accessor: 'reason', priority: 'high', width: 150 },
                   { header: t('visits.table.visitType', 'Visit Type'), accessor: 'visit_type', priority: 'medium', width: 120 },
                   { header: t('shared:labels.facility', 'Facility'), accessor: 'location', priority: 'medium', width: 150 },
                   { header: t('shared:fields.practitioner', 'Practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 200 },

@@ -524,7 +524,7 @@ const Conditions = () => {
                 data={paginatedConditions}
                 pagination={false}
                 columns={[
-                  { header: t('conditions.table.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },
+                  { header: t('shared:labels.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },
                   { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'high', width: 120 },
                   { header: t('shared:fields.onsetDate', 'Onset Date'), accessor: 'onset_date', priority: 'medium', width: 130 },
                   { header: t('shared:labels.endDate', 'End Date'), accessor: 'end_date', priority: 'low', width: 130 },

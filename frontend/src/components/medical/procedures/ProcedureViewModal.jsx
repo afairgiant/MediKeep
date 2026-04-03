@@ -137,7 +137,7 @@ const ProcedureViewModal = ({
               {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-              {t('procedures.viewModal.tabs.clinical', 'Clinical Details')}
+              {t('shared:tabs.clinicalDetails', 'Clinical Details')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
               {t('shared:tabs.notes', 'Notes')}
@@ -160,13 +160,13 @@ const ProcedureViewModal = ({
                       <Text size="sm">{procedure.procedure_name}</Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.procedureType', 'Procedure Type')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.procedureType', 'Procedure Type')}</Text>
                       <Text size="sm" c={procedure.procedure_type ? 'inherit' : 'dimmed'}>
                         {procedure.procedure_type || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.procedureCode', 'Procedure Code')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.procedureCode', 'Procedure Code')}</Text>
                       <Text size="sm" c={procedure.procedure_code ? 'inherit' : 'dimmed'}>
                         {procedure.procedure_code || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
@@ -182,7 +182,7 @@ const ProcedureViewModal = ({
                       <StatusBadge status={procedure.status} />
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.outcome', 'Outcome')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.outcome', 'Outcome')}</Text>
                       {procedure.outcome ? (
                         <StatusBadge status={procedure.outcome} />
                       ) : (
@@ -190,7 +190,7 @@ const ProcedureViewModal = ({
                       )}
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.setting', 'Setting')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.setting', 'Setting')}</Text>
                       <Text size="sm" c={procedure.procedure_setting ? 'inherit' : 'dimmed'}>
                         {procedure.procedure_setting || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
@@ -198,7 +198,7 @@ const ProcedureViewModal = ({
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('shared:labels.duration', 'Duration')}</Text>
                       <Text size="sm" c={procedure.procedure_duration ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_duration ? t('procedures.viewModal.durationMinutes', '{{minutes}} minutes', { minutes: procedure.procedure_duration }) : t('shared:labels.notSpecified', 'Not specified')}
+                        {procedure.procedure_duration ? t('shared:labels.minutesMinutes', '{{minutes}} minutes', { minutes: procedure.procedure_duration }) : t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
@@ -215,7 +215,7 @@ const ProcedureViewModal = ({
                   <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.doctor', 'Doctor')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.doctor', 'Doctor')}</Text>
                       {procedure.practitioner_id ? (
                         <Text
                           size="sm"
@@ -276,13 +276,13 @@ const ProcedureViewModal = ({
                   <Title order={4} mb="sm">{t('procedures.viewModal.anesthesiaInfo', 'Anesthesia Information')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.anesthesiaType', 'Anesthesia Type')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.anesthesiaType', 'Anesthesia Type')}</Text>
                       <Text size="sm" c={procedure.anesthesia_type ? 'inherit' : 'dimmed'}>
                         {procedure.anesthesia_type || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                      <Text fw={500} size="sm" c="dimmed">{t('procedures.viewModal.anesthesiaNotes', 'Anesthesia Notes')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.anesthesiaNotes', 'Anesthesia Notes')}</Text>
                       <Text size="sm" c={procedure.anesthesia_notes ? 'inherit' : 'dimmed'}>
                         {procedure.anesthesia_notes || t('procedures.viewModal.noAnesthesiaNotes', 'No anesthesia notes available')}
                       </Text>
@@ -333,10 +333,10 @@ const ProcedureViewModal = ({
           {/* Action Buttons */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose}>
-              {t('procedures.viewModal.close', 'Close')}
+              {t('shared:labels.close', 'Close')}
             </Button>
             <Button variant="filled" onClick={handleEditClick} leftSection={<IconEdit size={16} />}>
-              {t('procedures.viewModal.edit', 'Edit')}
+              {t('shared:labels.edit', 'Edit')}
             </Button>
           </Group>
         </Stack>

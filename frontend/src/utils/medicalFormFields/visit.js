@@ -38,7 +38,7 @@ export const visitFormFields = [
   {
     name: 'visit_type',
     type: 'select',
-    labelKey: 'medical:visits.table.visitType',
+    labelKey: 'shared:labels.visitType',
     placeholderKey: 'medical:visits.form.fields.visitType.placeholder',
     descriptionKey: 'medical:visits.form.fields.visitType.description',
     gridColumn: 6,
@@ -57,7 +57,7 @@ export const visitFormFields = [
   {
     name: 'priority',
     type: 'select',
-    labelKey: 'medical:visits.viewModal.priority',
+    labelKey: 'shared:labels.priority',
     placeholderKey: 'medical:visits.form.fields.priority.placeholder',
     descriptionKey: 'medical:visits.form.fields.priority.description',
     gridColumn: 6,
@@ -81,7 +81,7 @@ export const visitFormFields = [
   {
     name: 'chief_complaint',
     type: 'text',
-    labelKey: 'medical:visits.viewModal.chiefComplaint',
+    labelKey: 'shared:labels.chiefComplaint',
     placeholderKey: 'medical:visits.form.fields.chiefComplaint.placeholder',
     descriptionKey: 'medical:visits.form.fields.chiefComplaint.description',
     gridColumn: 12,
@@ -89,7 +89,7 @@ export const visitFormFields = [
   {
     name: 'duration_minutes',
     type: 'number',
-    labelKey: 'medical:visits.form.fields.durationMinutes.label',
+    labelKey: 'shared:fields.durationMinutes',
     placeholderKey: 'medical:visits.form.fields.durationMinutes.placeholder',
     descriptionKey: 'medical:visits.form.fields.durationMinutes.description',
     gridColumn: 6,

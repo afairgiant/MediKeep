@@ -6,7 +6,7 @@ export const emergencyContactFormFields = [
   {
     name: 'name',
     type: 'text',
-    labelKey: 'medical:emergencyContacts.form.name.label',
+    labelKey: 'shared:fields.fullName',
     placeholderKey: 'medical:emergencyContacts.form.name.placeholder',
     required: true,
     descriptionKey: 'medical:emergencyContacts.form.name.description',
@@ -16,7 +16,7 @@ export const emergencyContactFormFields = [
     name: 'relationship',
     type: 'select',
     labelKey: 'medical:emergencyContacts.form.relationship.label',
-    placeholderKey: 'medical:emergencyContacts.form.relationship.placeholder',
+    placeholderKey: 'shared:fields.selectRelationship',
     descriptionKey: 'medical:emergencyContacts.form.relationship.description',
     required: true,
     gridColumn: 5,
@@ -44,7 +44,7 @@ export const emergencyContactFormFields = [
   {
     name: 'email',
     type: 'email',
-    labelKey: 'medical:emergencyContacts.form.email.label',
+    labelKey: 'shared:fields.emailAddress',
     placeholderKey: 'medical:emergencyContacts.form.email.placeholder',
     descriptionKey: 'medical:emergencyContacts.form.email.description',
     gridColumn: 12,

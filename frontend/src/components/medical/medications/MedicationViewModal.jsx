@@ -150,7 +150,7 @@ const MedicationViewModal = ({
                   <Title order={4} mb="sm">{t('shared:labels.basicInformation', 'Basic Information')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.medicationName', 'Medication Name')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.medicationName', 'Medication Name')}</Text>
                       <Text size="sm">{medication.medication_name}</Text>
                     </Stack>
                     <Stack gap="xs">
@@ -172,7 +172,7 @@ const MedicationViewModal = ({
                       </div>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('medications.modal.labels.medicationType', 'Medication Type')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.medicationType', 'Medication Type')}</Text>
                       <Text size="sm" c={medication.medication_type ? 'inherit' : 'dimmed'}>
                         {medication.medication_type || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
@@ -240,7 +240,7 @@ const MedicationViewModal = ({
 
                 {/* Related Conditions */}
                 <div>
-                  <Title order={4} mb="sm">{t('medications.modal.sections.relatedConditions', 'Related Conditions')}</Title>
+                  <Title order={4} mb="sm">{t('shared:labels.relatedConditions', 'Related Conditions')}</Title>
                   <MedicationRelationships
                     direction="medication"
                     medicationId={medication.id}
@@ -347,7 +347,7 @@ const MedicationViewModal = ({
                 </div>
 
                 <div>
-                  <Title order={4} mb="sm">{t('medications.modal.sections.sideEffects', 'Side Effects')}</Title>
+                  <Title order={4} mb="sm">{t('shared:labels.sideEffects', 'Side Effects')}</Title>
                   <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                     <Text
                       size="sm"
@@ -403,7 +403,7 @@ const MedicationViewModal = ({
             {t('medications.modal.editMedication', 'Edit Medication')}
           </Button>
           <Button variant="filled" onClick={onClose}>
-            {t('buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
         </Group>
       </Stack>

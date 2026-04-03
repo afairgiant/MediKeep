@@ -213,7 +213,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({ patientId }
         {!loading && !error && items.length > 0 && (
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              {t('medical:componentCatalog.showing', 'Showing {{count}} unique tests', { count: total })}
+              {t('shared:labels.showingCountUniqueTests', 'Showing {{count}} unique tests', { count: total })}
             </Text>
             <SegmentedControl
               size="xs"
@@ -225,7 +225,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({ patientId }
                   label: (
                     <Group gap={4}>
                       <IconAlertTriangle size={14} />
-                      <span>{t('medical:componentCatalog.sort.priority', 'Priority')}</span>
+                      <span>{t('shared:labels.priority', 'Priority')}</span>
                     </Group>
                   ),
                 },

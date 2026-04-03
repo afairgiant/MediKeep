@@ -19,7 +19,7 @@ export const treatmentFormFields = [
   {
     name: 'treatment_name',
     type: 'text',
-    labelKey: 'medical:treatments.treatmentName.label',
+    labelKey: 'shared:fields.treatmentName',
     placeholderKey: 'medical:treatments.treatmentName.placeholder',
     required: true,
     descriptionKey: 'medical:treatments.treatmentName.description',
@@ -28,8 +28,8 @@ export const treatmentFormFields = [
   {
     name: 'treatment_type',
     type: 'select',
-    labelKey: 'medical:treatments.treatmentType.label',
-    placeholderKey: 'medical:treatments.treatmentType.placeholder',
+    labelKey: 'shared:fields.treatmentType',
+    placeholderKey: 'shared:labels.selectType',
     descriptionKey: 'medical:treatments.treatmentType.description',
     required: true,
     gridColumn: 5,
@@ -139,7 +139,7 @@ export const treatmentFormFields = [
       { value: 'Twice daily', labelKey: 'medical:treatments.frequencyOptions.twiceDaily' },
       { value: 'Three times daily', labelKey: 'medical:treatments.frequencyOptions.threeTimes' },
       { value: 'Four times daily', labelKey: 'medical:treatments.frequencyOptions.fourTimes' },
-      { value: 'Weekly', labelKey: 'medical:treatments.frequencyOptions.weekly' },
+      { value: 'Weekly', labelKey: 'shared:labels.weekly' },
       { value: 'Bi-weekly', labelKey: 'medical:treatments.frequencyOptions.biWeekly' },
       { value: 'Monthly', labelKey: 'medical:treatments.frequencyOptions.monthly' },
       { value: 'As needed', labelKey: 'medical:treatments.frequencyOptions.asNeeded' },
@@ -160,7 +160,7 @@ export const treatmentFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'medical:treatments.notes.label',
+    labelKey: 'shared:fields.additionalNotes',
     placeholderKey: 'medical:treatments.notes.placeholder',
     descriptionKey: 'medical:treatments.notes.description',
     gridColumn: 12,

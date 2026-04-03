@@ -437,7 +437,7 @@ const Immunization = () => {
                 columns={[
                   { header: t('shared:fields.vaccineName', 'Vaccine Name'), accessor: 'vaccine_name', priority: 'high', width: 200 },
                   {
-                    header: t('immunizations.table.dateAdministered', 'Date Administered'),
+                    header: t('shared:fields.dateAdministered', 'Date Administered'),
                     accessor: 'date_administered',
                     priority: 'high',
                     width: 150

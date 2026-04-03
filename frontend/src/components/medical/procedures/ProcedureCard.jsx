@@ -51,11 +51,11 @@ const ProcedureCard = ({
         render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
       {
-        label: t('procedures.procedureCode.label'),
+        label: t('shared:fields.procedureCode'),
         value: procedure.procedure_code
       },
       {
-        label: t('procedures.outcome.label', 'Outcome'),
+        label: t('shared:fields.outcome', 'Outcome'),
         value: procedure.outcome,
         render: (value) => value ? <StatusBadge status={value} size="sm" /> : t('shared:labels.notSpecified')
       },
@@ -69,16 +69,16 @@ const ProcedureCard = ({
         ) : t('shared:labels.notSpecified')
       },
       {
-        label: t('procedures.procedureDuration.label'),
+        label: t('shared:fields.durationMinutes'),
         value: procedure.procedure_duration,
-        render: (value) => value ? t('common:procedures.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : t('shared:labels.notSpecified')
+        render: (value) => value ? t('shared:labels.minutesMinutes', '{{minutes}} minutes', { minutes: value }) : t('shared:labels.notSpecified')
       },
       {
         label: t('shared:labels.facility'),
         value: procedure.facility
       },
       {
-        label: t('procedures.performingPractitioner.label'),
+        label: t('shared:fields.performingPractitioner'),
         value: procedure.practitioner_id,
         render: (value) => {
           if (!value) return t('shared:labels.notSpecified');

@@ -76,7 +76,7 @@ const EquipmentCard = ({
         render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified', 'Not specified')
       },
       {
-        label: t('equipment.fields.supplier', 'Supplier'),
+        label: t('shared:labels.supplier', 'Supplier'),
         value: equipment.supplier,
         render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
       },

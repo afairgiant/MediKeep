@@ -163,13 +163,13 @@ const InsuranceViewModal = ({
                       <Stack gap="xs">
                         <Text fw={500} size="sm" c="dimmed">{t('shared:labels.relationship', 'Relationship')}</Text>
                         <Text style={{ textTransform: 'capitalize' }}>
-                          {insurance.relationship_to_holder || t('insurance.viewModal.self', 'Self')}
+                          {insurance.relationship_to_holder || t('shared:fields.self', 'Self')}
                         </Text>
                       </Stack>
                     )}
                     {insurance.group_number && (
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.groupNumber', 'Group Number')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.groupNumber', 'Group Number')}</Text>
                         <Text>{insurance.group_number}</Text>
                       </Stack>
                     )}
@@ -286,7 +286,7 @@ const InsuranceViewModal = ({
             <Box mt="md">
               <Stack gap="lg">
                 <div>
-                  <Title order={4} mb="sm">{t('insurance.viewModal.contactInfo', 'Contact Information')}</Title>
+                  <Title order={4} mb="sm">{t('shared:fields.contactInformation', 'Contact Information')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('insurance.viewModal.customerServicePhone', 'Customer Service Phone')}</Text>
@@ -365,7 +365,7 @@ const InsuranceViewModal = ({
           </Button>
           <Group>
             <Button variant="outline" onClick={onClose}>
-              {t('buttons.close', 'Close')}
+              {t('shared:labels.close', 'Close')}
             </Button>
             <Button
               leftSection={<IconEdit size={16} />}
@@ -374,7 +374,7 @@ const InsuranceViewModal = ({
                 onEdit && onEdit(insurance);
               }}
             >
-              {t('buttons.edit', 'Edit')}
+              {t('shared:labels.edit', 'Edit')}
             </Button>
           </Group>
         </Group>

@@ -261,7 +261,7 @@ const MedicalEquipment = () => {
     return (
       <MedicalPageLoading
         message={t('equipment.loading', 'Loading equipment...')}
-        hint={t('equipment.loadingHint', 'If this takes too long, please refresh the page')}
+        hint={t('shared:labels.ifThisTakesTooLongPleaseRefreshThePage', 'If this takes too long, please refresh the page')}
       />
     );
   }

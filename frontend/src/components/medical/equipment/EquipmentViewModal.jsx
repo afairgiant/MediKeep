@@ -89,7 +89,7 @@ const EquipmentViewModal = ({
               <Title order={4} mb="sm">{t('shared:labels.basicInformation', 'Basic Information')}</Title>
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.name', 'Equipment Name')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:labels.equipmentName', 'Equipment Name')}</Text>
                   <Text size="sm">{equipment.equipment_name}</Text>
                 </Stack>
                 <Stack gap="xs">
@@ -130,13 +130,13 @@ const EquipmentViewModal = ({
                   </Text>
                 </Stack>
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.serialNumber', 'Serial Number')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:labels.serialNumber', 'Serial Number')}</Text>
                   <Text size="sm" c={equipment.serial_number ? 'inherit' : 'dimmed'}>
                     {equipment.serial_number || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.supplier', 'Supplier')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:labels.supplier', 'Supplier')}</Text>
                   <Text size="sm" c={equipment.supplier ? 'inherit' : 'dimmed'}>
                     {equipment.supplier || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
@@ -204,10 +204,10 @@ const EquipmentViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('buttons.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

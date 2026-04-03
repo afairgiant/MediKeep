@@ -231,7 +231,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.rating', 'Rating')}:
+                    {t('shared:labels.rating', 'Rating')}:
                   </Text>
                   <Text
                     size="sm"
@@ -405,7 +405,7 @@ const PractitionerViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('common.buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
             {t('practitioners.viewModal.editButton', 'Edit Practitioner')}

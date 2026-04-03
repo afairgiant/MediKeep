@@ -256,7 +256,7 @@ const FamilyHistoryCard = ({
 
     if (member.is_shared) {
       badges.push({
-        label: bulkSelectionMode ? t('familyHistory.card.notSelectable', 'Not Selectable') : t('familyHistory.card.shared', 'Shared'),
+        label: bulkSelectionMode ? t('familyHistory.card.notSelectable', 'Not Selectable') : t('shared:categories.shared', 'Shared'),
         color: bulkSelectionMode ? 'gray' : 'blue'
       });
     }
@@ -315,7 +315,7 @@ const FamilyHistoryCard = ({
             size="sm"
             color={conditionCount > 0 ? 'blue' : 'gray'}
           >
-            {t('familyHistory.card.conditionCount', '{{count}} Condition(s)', { count: conditionCount })}
+            {t('shared:labels.countConditions', '{{count}} Condition(s)', { count: conditionCount })}
           </Badge>
           {isExpanded ? (
             <IconChevronUp size={16} />
@@ -399,7 +399,7 @@ const FamilyHistoryCard = ({
                           variant="filled"
                           onClick={(e) => handleEditConditionClick(e, condition)}
                         >
-                          {t('buttons.edit', 'Edit')}
+                          {t('shared:labels.edit', 'Edit')}
                         </Button>
                         <Button
                           size="xs"

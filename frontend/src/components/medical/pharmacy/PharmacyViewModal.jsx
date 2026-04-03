@@ -117,7 +117,7 @@ const PharmacyViewModal = ({
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={120}>
-                    {t('pharmacies.viewModal.city', 'City')}:
+                    {t('shared:labels.city', 'City')}:
                   </Text>
                   <Text size="sm" c={pharmacy.city ? 'inherit' : 'dimmed'}>
                     {pharmacy.city || t('shared:labels.notSpecified', 'Not specified')}
@@ -125,7 +125,7 @@ const PharmacyViewModal = ({
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={120}>
-                    {t('pharmacies.viewModal.stateProvince', 'State / Province')}:
+                    {t('shared:labels.stateProvince', 'State / Province')}:
                   </Text>
                   <Text size="sm" c={pharmacy.state ? 'inherit' : 'dimmed'}>
                     {pharmacy.state || t('shared:labels.notSpecified', 'Not specified')}
@@ -133,7 +133,7 @@ const PharmacyViewModal = ({
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={120}>
-                    {t('pharmacies.viewModal.postalCode', 'Postal Code')}:
+                    {t('shared:labels.postalCode', 'Postal Code')}:
                   </Text>
                   <Text size="sm" c={pharmacy.zip_code ? 'inherit' : 'dimmed'}>
                     {pharmacy.zip_code || t('shared:labels.notSpecified', 'Not specified')}
@@ -141,7 +141,7 @@ const PharmacyViewModal = ({
                 </Group>
                 <Group>
                   <Text size="sm" fw={500} w={120}>
-                    {t('pharmacies.viewModal.country', 'Country')}:
+                    {t('shared:labels.country', 'Country')}:
                   </Text>
                   <Text size="sm" c={pharmacy.country ? 'inherit' : 'dimmed'}>
                     {pharmacy.country || t('shared:labels.notSpecified', 'Not specified')}
@@ -206,7 +206,7 @@ const PharmacyViewModal = ({
                 </Group>
                 <Group wrap="nowrap" align="flex-start">
                   <Text size="sm" fw={500} w={120} style={{ flexShrink: 0 }}>
-                    {t('pharmacies.viewModal.specialtyServices', 'Specialties')}:
+                    {t('shared:labels.specialties', 'Specialties')}:
                   </Text>
                   <Text size="sm" c={pharmacy.specialty_services ? 'inherit' : 'dimmed'}>
                     {pharmacy.specialty_services || t('shared:labels.notSpecified', 'Not specified')}
@@ -227,7 +227,7 @@ const PharmacyViewModal = ({
             {t('pharmacies.viewModal.editButton', 'Edit Pharmacy')}
           </Button>
           <Button variant="filled" size="xs" onClick={handleClose}>
-            {t('common.buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
         </Group>
       </Stack>

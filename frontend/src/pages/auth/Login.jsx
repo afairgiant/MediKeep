@@ -25,7 +25,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, error, clearError, isAuthenticated } = useAuth();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -137,7 +137,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="username">{t('auth.login.username')}</label>
+            <label htmlFor="username">{t('shared:labels.username')}</label>
             <div className={styles.inputWrapper}>
               <span className={styles.inputIconPrefix}>
                 <IconUser size={18} />
@@ -156,7 +156,7 @@ const Login = () => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="password">{t('auth.login.password')}</label>
+            <label htmlFor="password">{t('shared:labels.password')}</label>
             <div className={styles.inputWrapper}>
               <span className={styles.inputIconPrefix}>
                 <IconLock size={18} />

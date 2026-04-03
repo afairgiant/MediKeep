@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Adicionado",
-      "cancelled": "Cancelado",
-      "completed": "Concluído",
-      "created": "Criado",
       "deleted": "Excluído",
       "modified": "Modificado",
       "removed": "Removido",
@@ -22,9 +19,7 @@
     "hello": "Olá",
     "loading": "Carregando seu painel médico...",
     "modules": {
-      "adminDashboard": "Painel Administrativo",
       "exportRecords": "Exportar Registros",
-      "patientInfo": "Informações do Paciente",
       "visitHistory": "Histórico de Consultas"
     },
     "search": {
@@ -40,8 +35,7 @@
       "treatments": "Tratamentos e Procedimentos"
     },
     "stats": {
-      "activeMedications": "Medicamentos Ativos",
-      "totalRecords": "Total de Registros"
+      "activeMedications": "Medicamentos Ativos"
     },
     "subtitle": "Gerencie suas informações de saúde com segurança",
     "title": "Painel MediKeep"
@@ -61,15 +55,10 @@
     "types": {
       "patientRecord": "Prontuário do Paciente"
     },
-    "viewAll": "Ver todos os {{count}} convites",
-    "viewAll_one": "Ver todos os {{count}} convites",
-    "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "Ver todos os {{count}} convites"
+    "viewAll_many": "View all {{count}} invitations"
   },
   "menu": {
-    "administration": "Administração",
     "backToDashboard": "Voltar ao painel",
-    "dashboard": "Painel",
     "help": "Ajuda",
     "logout": "Sair",
     "patients": "Pacientes",
@@ -77,7 +66,6 @@
     "reports": "Relatórios"
   },
   "pages": {
-    "dashboard": "Painel",
     "help": "Ajuda e Suporte",
     "medicalHistory": "Histórico Médico",
     "patientDetails": "Detalhes do Paciente",
@@ -87,26 +75,20 @@
     "userProfile": "Perfil do Usuário"
   },
   "sections": {
-    "medicalInfo": "Informações Médicas",
     "personalInfo": "Informações Pessoais",
     "preferences": "Preferências"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Painel Administrativo",
-      "backupManagement": "Gerenciamento de Backup",
       "customReports": "Relatórios Personalizados",
-      "dataModels": "Modelos de Dados",
       "exportRecords": "Exportar Registros",
       "language": "Idioma",
       "patientInfo": "Informações do Paciente",
-      "systemHealth": "Saúde do Sistema",
       "tagManagement": "Gerenciamento de Tags",
       "theme": "Tema",
       "visitHistory": "Histórico de Consultas"
     },
     "sections": {
-      "administration": "Administração",
       "careAndTreatment": "Cuidados e Tratamento",
       "misc": "Diversos",
       "tools": "Ferramentas"

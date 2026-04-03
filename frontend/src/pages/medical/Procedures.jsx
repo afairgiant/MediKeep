@@ -361,7 +361,7 @@ const Procedures = () => {
     return (
       <MedicalPageLoading
         message={t('procedures.loadingProcedures', 'Loading procedures...')}
-        hint={t('procedures.loadingRefresh', 'If this takes too long, please refresh the page')}
+        hint={t('shared:labels.ifThisTakesTooLongPleaseRefreshThePage', 'If this takes too long, please refresh the page')}
       />
     );
   }
@@ -435,7 +435,7 @@ const Procedures = () => {
                   { header: t('procedures.table.code'), accessor: 'procedure_code', priority: 'low', width: 100 },
                   { header: t('shared:labels.date'), accessor: 'date', priority: 'high', width: 120 },
                   { header: t('shared:fields.status'), accessor: 'status', priority: 'high', width: 100 },
-                  { header: t('procedures.table.setting'), accessor: 'procedure_setting', priority: 'low', width: 120 },
+                  { header: t('shared:labels.setting'), accessor: 'procedure_setting', priority: 'low', width: 120 },
                   { header: t('shared:labels.facility'), accessor: 'facility', priority: 'medium', width: 150 },
                   { header: t('shared:fields.practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 150 },
                   { header: t('shared:labels.description'), accessor: 'description', priority: 'low', width: 200 },

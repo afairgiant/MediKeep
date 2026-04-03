@@ -152,7 +152,7 @@ const LabResultViewModal = ({
               </Tabs.Tab>
               {fetchLabResultConditions && (
                 <Tabs.Tab value="conditions" leftSection={<IconUsers size={16} />}>
-                  {t('labResults.modal.tabs.relatedConditions', 'Related Conditions')}
+                  {t('shared:labels.relatedConditions', 'Related Conditions')}
                 </Tabs.Tab>
               )}
               {fetchLabResultEncounters && (
@@ -187,7 +187,7 @@ const LabResultViewModal = ({
                     <Title order={4} mb="sm">{t('labResults.modal.sections.testInfo', 'Test Information')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.testCode', 'Test Code')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('shared:fields.testCode', 'Test Code')}</Text>
                         <Text>{labResult.test_code || t('shared:labels.notSpecified', 'Not specified')}</Text>
                       </Stack>
                       <Stack gap="xs">
@@ -218,7 +218,7 @@ const LabResultViewModal = ({
                         <StatusBadge status={labResult.status} />
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.labResult', 'Lab Result')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('shared:labels.labResult', 'Lab Result')}</Text>
                         {labResult.labs_result ? (
                           <StatusBadge status={labResult.labs_result} />
                         ) : (
@@ -226,11 +226,11 @@ const LabResultViewModal = ({
                         )}
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.orderedDate', 'Ordered Date')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('shared:labels.orderedDate', 'Ordered Date')}</Text>
                         <Text>{formatDate(labResult.ordered_date)}</Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.completedDate', 'Completed Date')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('shared:labels.completedDate', 'Completed Date')}</Text>
                         <Text c={labResult.completed_date ? 'inherit' : 'dimmed'}>
                           {labResult.completed_date
                             ? formatDate(labResult.completed_date)
@@ -242,10 +242,10 @@ const LabResultViewModal = ({
 
                   {/* Practitioner Information Section */}
                   <div>
-                    <Title order={4} mb="sm">{t('labResults.modal.sections.orderingPractitioner', 'Ordering Practitioner')}</Title>
+                    <Title order={4} mb="sm">{t('shared:labels.orderingPractitioner', 'Ordering Practitioner')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.doctor', 'Doctor')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('shared:labels.doctor', 'Doctor')}</Text>
                         <Text c={labResult.practitioner_id ? 'inherit' : 'dimmed'}>
                           {labResult.practitioner_id
                             ? practitioner?.name || `Practitioner ID: ${labResult.practitioner_id}`
@@ -371,7 +371,7 @@ const LabResultViewModal = ({
           {/* Action Buttons */}
           <Group justify="space-between" mt="md">
             <Button variant="outline" onClick={onClose}>
-              {t('buttons.close', 'Close')}
+              {t('shared:labels.close', 'Close')}
             </Button>
             <Button
               onClick={() => {

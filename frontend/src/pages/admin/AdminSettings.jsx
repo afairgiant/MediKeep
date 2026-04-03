@@ -264,7 +264,7 @@ const AdminSettings = () => {
               <IconUsers size={20} />
             </ThemeIcon>
             <Text fw={600} size="lg">
-              {t('settings.userManagement.title', 'User Management')}
+              {t('shared:labels.userManagement', 'User Management')}
             </Text>
           </Group>
           <Group justify="space-between" align="flex-start">
@@ -289,7 +289,7 @@ const AdminSettings = () => {
                 variant="light"
                 color={settings.allow_user_registration ? 'green' : 'red'}
               >
-                {settings.allow_user_registration ? t('shared.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
+                {settings.allow_user_registration ? t('shared:labels.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
               </Badge>
             </Group>
           </Group>
@@ -308,7 +308,7 @@ const AdminSettings = () => {
               variant="light"
               color={ssoConfig.enabled ? 'green' : 'gray'}
             >
-              {ssoConfig.enabled ? t('shared.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
+              {ssoConfig.enabled ? t('shared:labels.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
             </Badge>
           </Group>
 
@@ -316,7 +316,7 @@ const AdminSettings = () => {
             {ssoConfig.enabled ? (
               <>
                 <Group justify="space-between">
-                  <Text fw={500}>{t('settings.sso.provider', 'Provider')}</Text>
+                  <Text fw={500}>{t('shared:labels.provider', 'Provider')}</Text>
                   <Text c="dimmed">
                     {capitalizeFirst(ssoConfig.provider_type) || t('shared:labels.unknown', 'Unknown')}
                   </Text>

@@ -247,7 +247,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       <div className={styles.formGroup}>
-        <label htmlFor="username">{t('admin.createUser.username', 'Username')} *</label>
+        <label htmlFor="username">{t('shared:labels.username', 'Username')} *</label>
         <input
           type="text"
           id="username"
@@ -261,7 +261,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="password">{t('admin.createUser.password', 'Password')} *</label>
+        <label htmlFor="password">{t('shared:labels.password', 'Password')} *</label>
         <input
           type="password"
           id="password"
@@ -302,7 +302,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
 
       {isAdminContext && (
         <div className={styles.formGroup}>
-          <label htmlFor="role">{t('admin.createUser.role', 'Role')} *</label>
+          <label htmlFor="role">{t('shared:labels.role', 'Role')} *</label>
           <select
             id="role"
             name="role"
@@ -312,13 +312,13 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
             disabled={isCreating}
           >
             <option value="user">{t('shared:labels.user', 'User')}</option>
-            <option value="admin">{t('createUser.roleAdmin', 'Admin')}</option>
+            <option value="admin">{t('shared:labels.admin', 'Admin')}</option>
           </select>
         </div>
       )}
 
       <div className={styles.formGroup}>
-        <label htmlFor="firstName">{t('admin.createUser.firstName', 'First Name')} *</label>
+        <label htmlFor="firstName">{t('shared:labels.firstName', 'First Name')} *</label>
         <input
           type="text"
           id="firstName"
@@ -332,7 +332,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="lastName">{t('admin.createUser.lastName', 'Last Name')} *</label>
+        <label htmlFor="lastName">{t('shared:labels.lastName', 'Last Name')} *</label>
         <input
           type="text"
           id="lastName"
@@ -395,7 +395,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
                   </div>
                   {selectedPatient.is_self_record && (
                     <div className={styles.selfRecordWarning}>
-                      <strong>{t('admin.createUser.linkPatient.selfRecordWarningTitle', 'Note:')}</strong>{' '}
+                      <strong>{t('shared:labels.note', 'Note:')}</strong>{' '}
                       {t('admin.createUser.linkPatient.selfRecordWarning', 'This is the current owner\'s self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.')}
                     </div>
                   )}
@@ -429,7 +429,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       {!isAdminContext && (
         <div className={styles.createUserInfo}>
           <p>
-            <strong>{t('createUser.noteLabel', 'Note:')}</strong> {t('createUser.noteText', 'A patient record will be automatically created for this user with default role "user".')}
+            <strong>{t('shared:labels.note', 'Note:')}</strong> {t('createUser.noteText', 'A patient record will be automatically created for this user with default role "user".')}
           </p>
         </div>
       )}

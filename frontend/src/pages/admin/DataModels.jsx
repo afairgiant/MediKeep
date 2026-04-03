@@ -285,7 +285,7 @@ const DataModels = () => {
                   aria-hidden="true"
                 />
                 <Text size="xl" fw={700}>
-                  {t('dataModels.title', 'Data Models')}
+                  {t('shared:labels.dataModels', 'Data Models')}
                 </Text>
               </Group>
               <Text c="dimmed" size="md">

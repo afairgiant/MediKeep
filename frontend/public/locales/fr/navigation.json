@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Ajouté",
-      "cancelled": "Annulé",
-      "completed": "Complété",
-      "created": "Créé",
       "deleted": "Supprimé",
       "modified": "Modifié",
       "removed": "Retiré",
@@ -22,9 +19,7 @@
     "hello": "Bonjour",
     "loading": "Chargement de votre tableau de bord médical...",
     "modules": {
-      "adminDashboard": "Tableau de bord administrateur",
       "exportRecords": "Exporter les données",
-      "patientInfo": "Informations du patient",
       "visitHistory": "Historique des visites"
     },
     "search": {
@@ -40,8 +35,7 @@
       "treatments": "Traitements et procédures"
     },
     "stats": {
-      "activeMedications": "Médicaments actifs",
-      "totalRecords": "Entrées totales"
+      "activeMedications": "Médicaments actifs"
     },
     "subtitle": "Gérez vos données de santé en toute sécurité",
     "title": "Tableau de bord de MediKeep"
@@ -61,15 +55,10 @@
     "types": {
       "patientRecord": "Données du patient"
     },
-    "viewAll": "Voir toutes les invitations ({{count}})",
-    "viewAll_one": "Voir toutes les {{count}} invitations",
-    "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "Voir toutes les {{count}} invitations"
+    "viewAll_many": "View all {{count}} invitations"
   },
   "menu": {
-    "administration": "Administration",
     "backToDashboard": "Retour au tableau de bord",
-    "dashboard": "Tableau de bord",
     "help": "Aide",
     "logout": "Déconnexion",
     "patients": "Patients",
@@ -77,7 +66,6 @@
     "reports": "Rapports"
   },
   "pages": {
-    "dashboard": "Tableau de bord",
     "help": "Aide & Support",
     "medicalHistory": "Antécédents médicaux",
     "patientDetails": "Détails du patient",
@@ -87,26 +75,20 @@
     "userProfile": "Profil utilisateur"
   },
   "sections": {
-    "medicalInfo": "Informations médicales",
     "personalInfo": "Informations personnelles",
     "preferences": "Préférences"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Tableau de bord administrateur",
-      "backupManagement": "Gestion des backups",
       "customReports": "Rapports personnalisés",
-      "dataModels": "Modèles de données",
       "exportRecords": "Exporter des données",
       "language": "Langue",
       "patientInfo": "Informations du patient",
-      "systemHealth": "Santé du système",
       "tagManagement": "Gestion des étiquettes",
       "theme": "Thème",
       "visitHistory": "Historique des visites"
     },
     "sections": {
-      "administration": "Administration",
       "careAndTreatment": "Soins & Traitement",
       "misc": "Divers",
       "tools": "Outils"

@@ -337,7 +337,7 @@ const ModelManagement = () => {
             <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title="Error">
               {error}
             </Alert>
-            <Button onClick={() => loadModelData(searchQuery)}>{t('common:buttons.retry', 'Retry')}</Button>
+            <Button onClick={() => loadModelData(searchQuery)}>{t('shared:labels.retry', 'Retry')}</Button>
           </Stack>
         </Center>
       </AdminLayout>
@@ -400,7 +400,7 @@ const ModelManagement = () => {
                   disabled={totalRecords === 0}
                   size="sm"
                 >
-                  {t('models.exportCsv', 'Export CSV')}
+                  {t('shared:labels.exportCsv', 'Export CSV')}
                 </Button>
               </Tooltip>
               <Menu shadow="md" width={220} closeOnItemClick={false}>

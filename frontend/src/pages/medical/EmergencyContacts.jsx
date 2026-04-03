@@ -465,7 +465,7 @@ const EmergencyContacts = () => {
                         size="xs"
                         onClick={() => handleEditContact(contact)}
                       >
-                        {t('buttons.edit')}
+                        {t('shared:labels.edit')}
                       </Button>
                       <Button
                         variant="filled"
@@ -678,7 +678,7 @@ const EmergencyContacts = () => {
                 <Grid.Col span={6}>
                   <Stack gap="xs">
                     <Text size="sm" c="dimmed">
-                      {t('emergencyContacts.viewModal.emailAddress')}
+                      {t('shared:fields.emailAddress')}
                     </Text>
                     {viewingContact.email ? (
                       <Anchor
@@ -734,7 +734,7 @@ const EmergencyContacts = () => {
             {/* Action Buttons */}
             <Group justify="flex-end" gap="md">
               <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
-                {t('buttons.close')}
+                {t('shared:labels.close')}
               </Button>
               <Button
                 variant="filled"

@@ -410,7 +410,7 @@ function TrashManagement(): React.ReactElement {
           <Alert icon={<IconAlertCircle size={16} />} title={t('trash.errorLoading', 'Error loading trash')} color="red">
             {error}
             <Button variant="subtle" size="xs" mt="xs" onClick={fetchTrashContents}>
-              {t('common:buttons.retry', 'Retry')}
+              {t('shared:labels.retry', 'Retry')}
             </Button>
           </Alert>
         )}

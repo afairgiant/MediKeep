@@ -216,7 +216,7 @@ const LabResultQuickImportModal = ({
       });
 
       notifications.show({
-        title: t('labResults.success', 'Success'),
+        title: t('shared:labels.success', 'Success'),
         message: t(
           'labResults.quickImportSuccess',
           'Lab result and test components imported successfully'
@@ -275,7 +275,7 @@ const LabResultQuickImportModal = ({
       });
 
       notifications.show({
-        title: t('labResults.success', 'Success'),
+        title: t('shared:labels.success', 'Success'),
         message: t('labResults.labResultDeleted', 'Lab result deleted'),
         color: 'green',
       });
@@ -389,7 +389,7 @@ const LabResultQuickImportModal = ({
                         onClick={handleCreateLabResult}
                         disabled={!testName.trim() || isCreating}
                       >
-                        {t('buttons.retry', 'Retry')}
+                        {t('shared:labels.retry', 'Retry')}
                       </Button>
                     </Group>
                   </Stack>
@@ -447,7 +447,7 @@ const LabResultQuickImportModal = ({
             <Stack gap="md">
               <Alert
                 icon={<IconCheck size={16} />}
-                title={t('labResults.success', 'Success')}
+                title={t('shared:labels.success', 'Success')}
                 color="green"
                 role="status"
                 aria-live="polite"

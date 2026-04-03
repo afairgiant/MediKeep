@@ -36,7 +36,7 @@ const VisitCard = ({
   };
 
   const getPractitionerDisplay = (practitionerId) => {
-    if (!practitionerId) return t('common:visits.card.noPractitionerAssigned', 'No practitioner assigned');
+    if (!practitionerId) return t('shared:labels.noPractitionerAssigned', 'No practitioner assigned');
 
     const practitioner = practitioners.find(
       p => p.id === parseInt(practitionerId)
@@ -115,7 +115,7 @@ const VisitCard = ({
         label: t('visits.attendingPractitioner.label'),
         value: visit.practitioner_id,
         render: (value) => {
-          if (!value) return t('common:visits.card.noPractitionerAssigned', 'No practitioner assigned');
+          if (!value) return t('shared:labels.noPractitionerAssigned', 'No practitioner assigned');
 
           const practitionerDisplay = getPractitionerDisplay(value);
           if (practitioner) {
@@ -135,7 +135,7 @@ const VisitCard = ({
         }
       },
       {
-        label: t('visits.chiefComplaint.label'),
+        label: t('shared:labels.chiefComplaint'),
         value: visit.chief_complaint
       },
       {
@@ -143,9 +143,9 @@ const VisitCard = ({
         value: visit.location
       },
       {
-        label: t('visits.durationMinutes.label'),
+        label: t('shared:fields.durationMinutes'),
         value: visit.duration_minutes,
-        render: (value) => value ? t('common:visits.card.durationMinutes', '{{minutes}} minutes', { minutes: value }) : t('shared:labels.notSpecified')
+        render: (value) => value ? t('shared:labels.minutesMinutes', '{{minutes}} minutes', { minutes: value }) : t('shared:labels.notSpecified')
       }
     ];
 
@@ -160,7 +160,7 @@ const VisitCard = ({
             c="blue"
             style={{ cursor: 'pointer', textDecoration: 'underline' }}
             onClick={() => navigateToEntity('condition', value, navigate)}
-            title={t('common:visits.card.viewCondition', 'View condition details')}
+            title={t('shared:labels.viewConditionDetails', 'View condition details')}
           >
             {condition.diagnosis}
           </Text>

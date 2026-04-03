@@ -41,7 +41,7 @@ const MobileNavigation = ({
     <div className="mobile-navigation-overlay" onClick={onClose}>
       <nav className="mobile-navigation" onClick={(e) => e.stopPropagation()}>
         <div className="mobile-nav-header">
-          <h3>{t('menu.dashboard', 'Navigation')}</h3>
+          <h3>{t('shared:labels.dashboard', 'Navigation')}</h3>
           <button className="mobile-nav-close" onClick={onClose} aria-label="Close navigation"><IconX size={18} /></button>
         </div>
 

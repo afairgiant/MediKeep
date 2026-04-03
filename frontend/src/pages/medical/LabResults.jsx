@@ -692,9 +692,9 @@ const LabResults = () => {
             { header: t('shared:labels.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
             { header: t('shared:labels.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
             { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'high', width: 120 },
-            { header: t('labResults.table.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
-            { header: t('labResults.table.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },
-            { header: t('labResults.table.completedDate', 'Completed Date'), accessor: 'completed_date', priority: 'low', width: 120 },
+            { header: t('shared:labels.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
+            { header: t('shared:labels.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },
+            { header: t('shared:labels.completedDate', 'Completed Date'), accessor: 'completed_date', priority: 'low', width: 120 },
             { header: t('shared:tabs.documents', 'Files'), accessor: 'files', priority: 'low', width: 150 },
           ]}
           patientData={currentPatient}

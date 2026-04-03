@@ -288,7 +288,7 @@ const Dashboard = () => {
   // Dashboard stats data - using real data from API
   const dashboardStatsCards = [
     {
-      label: t('dashboard.stats.totalRecords', 'Total Records'),
+      label: t('shared:labels.totalRecords', 'Total Records'),
       value: dashboardStats?.total_records?.toString() || '0',
       color: 'blue',
     },
@@ -312,7 +312,7 @@ const Dashboard = () => {
   // Core medical modules - organized in 2x2 grid sections like the schematic
   const coreModules = [
     {
-      title: t('dashboard.modules.patientInfo', 'Patient Information'),
+      title: t('shared:labels.patientInformation', 'Patient Information'),
       icon: IconUser,
       color: 'blue',
       link: '/patients/me',
@@ -443,7 +443,7 @@ const Dashboard = () => {
   // Add admin dashboard if user is admin
   if (isAdmin) {
     additionalModules.unshift({
-      title: t('dashboard.modules.adminDashboard', 'Admin Dashboard'),
+      title: t('shared:categories.admin_dashboard', 'Admin Dashboard'),
       icon: IconSettings,
       color: 'indigo',
       link: '/admin',

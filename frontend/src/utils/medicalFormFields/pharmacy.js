@@ -60,7 +60,7 @@ export const pharmacyFormFields = [
   {
     name: 'city',
     type: 'text',
-    labelKey: 'medical:pharmacies.form.city.label',
+    labelKey: 'shared:labels.city',
     placeholderKey: 'medical:pharmacies.form.city.placeholder',
     descriptionKey: 'medical:pharmacies.form.city.description',
     gridColumn: 12,
@@ -68,7 +68,7 @@ export const pharmacyFormFields = [
   {
     name: 'state',
     type: 'text',
-    labelKey: 'medical:pharmacies.form.stateProvince.label',
+    labelKey: 'shared:labels.stateProvince',
     placeholderKey: 'medical:pharmacies.form.stateProvince.placeholder',
     descriptionKey: 'medical:pharmacies.form.stateProvince.description',
     gridColumn: 4,
@@ -76,7 +76,7 @@ export const pharmacyFormFields = [
   {
     name: 'zip_code',
     type: 'text',
-    labelKey: 'medical:pharmacies.form.postalCode.label',
+    labelKey: 'shared:labels.postalCode',
     placeholderKey: 'medical:pharmacies.form.postalCode.placeholder',
     descriptionKey: 'medical:pharmacies.form.postalCode.description',
     gridColumn: 4,
@@ -84,7 +84,7 @@ export const pharmacyFormFields = [
   {
     name: 'country',
     type: 'text',
-    labelKey: 'medical:pharmacies.form.country.label',
+    labelKey: 'shared:labels.country',
     placeholderKey: 'medical:pharmacies.form.country.placeholder',
     descriptionKey: 'medical:pharmacies.form.country.description',
     gridColumn: 4,
@@ -101,8 +101,8 @@ export const pharmacyFormFields = [
   {
     name: 'phone_number',
     type: 'tel',
-    labelKey: 'common:labels.phoneNumber',
-    placeholderKey: 'medical:pharmacies.form.phone.placeholder',
+    labelKey: 'shared:labels.phoneNumber',
+    placeholderKey: 'shared:fields.15551234567',
     descriptionKey: 'medical:pharmacies.form.phone.description',
     gridColumn: 6,
     maxLength: 20,
@@ -118,7 +118,7 @@ export const pharmacyFormFields = [
   {
     name: 'specialty_services',
     type: 'textarea',
-    labelKey: 'medical:pharmacies.form.specialtyServices.label',
+    labelKey: 'shared:labels.specialties',
     placeholderKey: 'medical:pharmacies.form.specialtyServices.placeholder',
     descriptionKey: 'medical:pharmacies.form.specialtyServices.description',
     gridColumn: 12,

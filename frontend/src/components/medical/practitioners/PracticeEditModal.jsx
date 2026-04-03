@@ -116,7 +116,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
         />
         <TextInput
           label={t('medical:practices.form.phone.label')}
-          placeholder={t('medical:practices.form.phone.placeholder')}
+          placeholder={t('shared:fields.15551234567')}
           description={t('medical:practices.form.phone.description')}
           value={formData.phone_number}
           onChange={handleChange('phone_number')}

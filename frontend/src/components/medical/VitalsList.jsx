@@ -912,7 +912,7 @@ const VitalsList = ({
     const d = new Date(item.date);
     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     if (!window.confirm(
-      t('vitals.summary.confirmDeleteDay', 'Delete all {{count}} imported readings for this day?', { count: item.count })
+      t('shared:labels.deleteAllCountImportedReadingsForThisDay', 'Delete all {{count}} imported readings for this day?', { count: item.count })
     )) {
       return;
     }
@@ -1013,15 +1013,15 @@ const VitalsList = ({
                     <Text size="sm" fw={600}>{item.stats.avg} mg/dL</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('vitals.summary.minGlucose', 'Min')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.min', 'Min')}</Text>
                     <Text size="sm" fw={600}>{item.stats.min} mg/dL</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('vitals.summary.maxGlucose', 'Max')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.max', 'Max')}</Text>
                     <Text size="sm" fw={600}>{item.stats.max} mg/dL</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('vitals.summary.readings', 'Readings')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.countReadings', 'Readings')}</Text>
                     <Text size="sm" fw={600}>{item.count}</Text>
                   </Paper>
                 </Group>

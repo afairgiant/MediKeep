@@ -163,7 +163,7 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
                 reversed={sortDirection === 'asc'}
                 onSort={() => handleSort('value')}
               >
-                {t('labels.value', 'Value')}
+                {t('shared:labels.value', 'Value')}
               </Th>
               {isBloodGlucose && (
                 <Table.Th>

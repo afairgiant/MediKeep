@@ -157,7 +157,7 @@ const ImmunizationFormWrapper = ({
                 {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
-                {t('immunizations.form.tabs.administration', 'Administration')}
+                {t('shared:tabs.administration', 'Administration')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
@@ -225,7 +225,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('immunizations.form.ndcNumber', 'NDC Number')}
+                      label={t('shared:fields.ndcNumber', 'NDC Number')}
                       value={formData.ndc_number || ''}
                       onChange={handleTextInputChange('ndc_number')}
                       placeholder={t('immunizations.form.ndcNumberPlaceholder', 'e.g., 12345-6789-01')}
@@ -275,7 +275,7 @@ const ImmunizationFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('immunizations.form.dateAdministered', 'Date Administered')}
+                      label={t('shared:fields.dateAdministered', 'Date Administered')}
                       value={parseDateInput(formData.date_administered)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -293,7 +293,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('immunizations.form.adminSite', 'Administration Site')}
+                      label={t('shared:labels.administrationSite', 'Administration Site')}
                       value={formData.site || null}
                       data={[
                         { value: 'left_arm', label: t('immunizations.form.siteLeftArm', 'Left Arm') },
@@ -302,8 +302,8 @@ const ImmunizationFormWrapper = ({
                         { value: 'right_thigh', label: t('immunizations.form.siteRightThigh', 'Right Thigh') },
                         { value: 'left_deltoid', label: t('immunizations.form.siteLeftDeltoid', 'Left Deltoid') },
                         { value: 'right_deltoid', label: t('immunizations.form.siteRightDeltoid', 'Right Deltoid') },
-                        { value: 'oral', label: t('immunizations.form.siteOral', 'Oral') },
-                        { value: 'nasal', label: t('immunizations.form.siteNasal', 'Nasal') },
+                        { value: 'oral', label: t('shared:fields.oral', 'Oral') },
+                        { value: 'nasal', label: t('shared:fields.nasal', 'Nasal') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'site', value: value || '' } });
@@ -323,8 +323,8 @@ const ImmunizationFormWrapper = ({
                         { value: 'intramuscular', label: t('immunizations.form.routeIM', 'Intramuscular (IM)') },
                         { value: 'subcutaneous', label: t('immunizations.form.routeSC', 'Subcutaneous (SC)') },
                         { value: 'intradermal', label: t('immunizations.form.routeID', 'Intradermal (ID)') },
-                        { value: 'oral', label: t('immunizations.form.routeOral', 'Oral') },
-                        { value: 'nasal', label: t('immunizations.form.routeNasal', 'Nasal') },
+                        { value: 'oral', label: t('shared:fields.oral', 'Oral') },
+                        { value: 'nasal', label: t('shared:fields.nasal', 'Nasal') },
                         { value: 'intravenous', label: t('immunizations.form.routeIV', 'Intravenous (IV)') },
                       ]}
                       onChange={(value) => {

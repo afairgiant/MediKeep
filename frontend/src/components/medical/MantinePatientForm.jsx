@@ -180,7 +180,7 @@ const MantinePatientForm = ({
           <Grid>
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <TextInput
-                label={t('patients.form.firstName.label')}
+                label={t('shared:labels.firstName')}
                 placeholder={t('patients.form.firstName.placeholder')}
                 value={formData.first_name}
                 onChange={handleTextInputChange('first_name')}
@@ -192,7 +192,7 @@ const MantinePatientForm = ({
             </Grid.Col>
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <TextInput
-                label={t('patients.form.lastName.label')}
+                label={t('shared:labels.lastName')}
                 placeholder={t('patients.form.lastName.placeholder')}
                 value={formData.last_name}
                 onChange={handleTextInputChange('last_name')}
@@ -242,13 +242,13 @@ const MantinePatientForm = ({
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <Select
                 label={t('shared:fields.gender')}
-                placeholder={t('patients.form.gender.placeholder')}
+                placeholder={t('shared:fields.selectGender')}
                 value={formData.gender}
                 onChange={handleSelectChange('gender')}
                 disabled={saving}
                 data={[
-                  { value: 'M', label: t('patients.form.gender.options.male') },
-                  { value: 'F', label: t('patients.form.gender.options.female') },
+                  { value: 'M', label: t('shared:fields.male') },
+                  { value: 'F', label: t('shared:fields.female') },
                   { value: 'OTHER', label: t('shared:fields.other') },
                 ]}
                 clearable
@@ -291,14 +291,14 @@ const MantinePatientForm = ({
       {/* Medical Information Section */}
       <Box>
         <SectionHeader icon={IconStethoscope} color="violet">
-          {t('patients.form.medicalInfoHeading', 'Medical Information')}
+          {t('shared:fields.medicalInformation', 'Medical Information')}
         </SectionHeader>
 
         <Stack gap="sm">
           <Grid>
             <Grid.Col span={{ base: 12, sm: 4 }}>
               <Select
-                label={t('patients.form.bloodType.label')}
+                label={t('shared:labels.bloodType')}
                 placeholder={t('patients.form.bloodType.placeholder')}
                 value={formData.blood_type}
                 onChange={handleSelectChange('blood_type')}
@@ -321,7 +321,7 @@ const MantinePatientForm = ({
             </Grid.Col>
             <Grid.Col span={{ base: 6, sm: 4 }}>
               <NumberInput
-                label={t('patients.form.height.label')}
+                label={t('shared:labels.height')}
                 placeholder={unitSystem === 'imperial' ? 'e.g., 70' : 'e.g., 178'}
                 value={
                   formData.height
@@ -346,7 +346,7 @@ const MantinePatientForm = ({
             </Grid.Col>
             <Grid.Col span={{ base: 6, sm: 4 }}>
               <NumberInput
-                label={t('patients.form.weight.label')}
+                label={t('shared:labels.weight')}
                 placeholder={unitSystem === 'imperial' ? 'e.g., 150' : 'e.g., 68'}
                 value={
                   formData.weight
@@ -406,7 +406,7 @@ const MantinePatientForm = ({
           radius="md"
         >
           {saving
-            ? t('patients.form.buttons.saving')
+            ? t('shared:labels.saving')
             : isCreating
               ? t('patients.form.buttons.createPatient')
               : t('patients.form.buttons.saveChanges')}

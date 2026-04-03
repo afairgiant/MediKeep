@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Dodano",
-      "cancelled": "Anulowano",
-      "completed": "Ukończono",
-      "created": "Utworzono",
       "deleted": "Usunięto",
       "modified": "Zmodyfikowano",
       "removed": "Usunięto",
@@ -22,9 +19,7 @@
     "hello": "Cześć",
     "loading": "Ładowanie Twojego pulpitu medycznego...",
     "modules": {
-      "adminDashboard": "Pulpit administratora",
       "exportRecords": "Eksportuj rejestry",
-      "patientInfo": "Informacje o pacjencie",
       "visitHistory": "Historia wizyt"
     },
     "search": {
@@ -40,8 +35,7 @@
       "treatments": "Zabiegi i procedury"
     },
     "stats": {
-      "activeMedications": "Aktywne leki",
-      "totalRecords": "Całkowita liczba rekordów"
+      "activeMedications": "Aktywne leki"
     },
     "subtitle": "Bezpiecznie zarządzaj swoimi informacjami zdrowotnymi",
     "title": "Panel główny MediKeep"
@@ -61,16 +55,11 @@
     "types": {
       "patientRecord": "Rekord pacjenta"
     },
-    "viewAll": "Wyświetl wszystkie {{count}} zaproszenia",
-    "viewAll_one": "Wyświetl wszystkie {{count}} zaproszenia",
     "viewAll_few": "View all {{count}} invitations",
-    "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "Wyświetl wszystkie {{count}} zaproszenia"
+    "viewAll_many": "View all {{count}} invitations"
   },
   "menu": {
-    "administration": "Administracja",
     "backToDashboard": "Powrót do pulpitu",
-    "dashboard": "Pulpit nawigacyjny",
     "help": "Pomoc",
     "logout": "Wyloguj",
     "patients": "Pacjenci",
@@ -78,7 +67,6 @@
     "reports": "Raporty"
   },
   "pages": {
-    "dashboard": "Pulpit nawigacyjny",
     "help": "Pomoc i wsparcie",
     "medicalHistory": "Historia medyczna",
     "patientDetails": "Szczegóły pacjenta",
@@ -88,26 +76,20 @@
     "userProfile": "Profil użytkownika"
   },
   "sections": {
-    "medicalInfo": "Informacje medyczne",
     "personalInfo": "Informacje osobiste",
     "preferences": "Preferencje"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Pulpit administratora",
-      "backupManagement": "Zarządzanie kopiami zapasowymi",
       "customReports": "Raporty niestandardowe",
-      "dataModels": "Modele danych",
       "exportRecords": "Eksportuj rejestry",
       "language": "Język",
       "patientInfo": "Informacje pacjenta",
-      "systemHealth": "Stan systemu",
       "tagManagement": "Zarządzanie tagami",
       "theme": "Motyw",
       "visitHistory": "Historia wizyt"
     },
     "sections": {
-      "administration": "Administracja",
       "careAndTreatment": "Opieka i leczenie",
       "misc": "Różne",
       "tools": "Narzędzia"

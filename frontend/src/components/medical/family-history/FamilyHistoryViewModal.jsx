@@ -190,7 +190,7 @@ const FamilyHistoryViewModal = ({
                   </Badge>
                   {member.is_shared && (
                     <Badge color="blue" variant="light" size="sm">
-                      {t('familyHistory.card.shared', 'Shared')}
+                      {t('shared:categories.shared', 'Shared')}
                     </Badge>
                   )}
                 </Group>
@@ -370,7 +370,7 @@ const FamilyHistoryViewModal = ({
                               : {}
                           }
                         >
-                          {t('buttons.edit', 'Edit')}
+                          {t('shared:labels.edit', 'Edit')}
                         </Button>
                         <Button
                           size="xs"
@@ -425,7 +425,7 @@ const FamilyHistoryViewModal = ({
           {/* Action Buttons */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose}>
-              {t('buttons.close', 'Close')}
+              {t('shared:labels.close', 'Close')}
             </Button>
             {!member.is_shared && (
               <Button

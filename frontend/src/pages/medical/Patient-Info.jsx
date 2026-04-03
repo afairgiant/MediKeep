@@ -348,9 +348,9 @@ const PatientInfo = () => {
   const getGenderDisplay = gender => {
     switch (gender?.toUpperCase()) {
       case 'M':
-        return t('patientInfo.gender.male', 'Male');
+        return t('shared:fields.male', 'Male');
       case 'F':
-        return t('patientInfo.gender.female', 'Female');
+        return t('shared:fields.female', 'Female');
       case 'OTHER':
         return t('shared:fields.other', 'Other');
       default:
@@ -377,7 +377,7 @@ const PatientInfo = () => {
   return (
     <>
       <Container size="xl" py="md">
-        <PageHeader title={t('patientInfo.title', 'Patient Information')} icon="📋" variant="dashboard" />
+        <PageHeader title={t('shared:labels.patientInformation', 'Patient Information')} icon="📋" variant="dashboard" />
 
         <Stack gap="xl" mt="lg">
           {isNewUser && (
@@ -460,11 +460,11 @@ const PatientInfo = () => {
                       </div>
                       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                         <div className="detail-group">
-                          <label>{t('patientInfo.fields.firstName', 'First Name')}:</label>
+                          <label>{t('shared:labels.firstName', 'First Name')}:</label>
                           <span>{patientData.first_name || t('patientInfo.notProvided', 'Not provided')}</span>
                         </div>
                         <div className="detail-group">
-                          <label>{t('patientInfo.fields.lastName', 'Last Name')}:</label>
+                          <label>{t('shared:labels.lastName', 'Last Name')}:</label>
                           <span>{patientData.last_name || t('patientInfo.notProvided', 'Not provided')}</span>
                         </div>
                         <div className="detail-group">
@@ -489,16 +489,16 @@ const PatientInfo = () => {
                           <IconStethoscope size={14} />
                         </ThemeIcon>
                         <Text size="sm" fw={600} tt="uppercase">
-                          {t('patientInfo.medicalInfo', 'Medical Information')}
+                          {t('shared:fields.medicalInformation', 'Medical Information')}
                         </Text>
                       </div>
                       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
                         <div className="detail-group">
-                          <label>{t('patientInfo.fields.bloodType', 'Blood Type')}:</label>
+                          <label>{t('shared:labels.bloodType', 'Blood Type')}:</label>
                           <span>{patientData.blood_type || t('patientInfo.notProvided', 'Not provided')}</span>
                         </div>
                         <div className="detail-group">
-                          <label>{t('patientInfo.fields.height', 'Height')}:</label>
+                          <label>{t('shared:labels.height', 'Height')}:</label>
                           <span>
                             {patientData.height
                               ? formatMeasurement(
@@ -514,7 +514,7 @@ const PatientInfo = () => {
                           </span>
                         </div>
                         <div className="detail-group">
-                          <label>{t('patientInfo.fields.weight', 'Weight')}:</label>
+                          <label>{t('shared:labels.weight', 'Weight')}:</label>
                           <span>
                             {patientData.weight
                               ? formatMeasurement(

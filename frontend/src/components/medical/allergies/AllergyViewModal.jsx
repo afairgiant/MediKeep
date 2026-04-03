@@ -325,10 +325,10 @@ const AllergyViewModal = ({
           {/* Action Buttons */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose}>
-              {t('common:buttons.close')}
+              {t('shared:labels.close')}
             </Button>
             <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-              {t('common:buttons.edit')}
+              {t('shared:labels.edit')}
             </Button>
           </Group>
         </Stack>

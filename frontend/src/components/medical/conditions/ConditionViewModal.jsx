@@ -148,7 +148,7 @@ const ConditionViewModal = ({
             {t('shared:tabs.overview', 'Overview')}
           </Tabs.Tab>
           <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-            {t('conditions.modal.tabs.clinical', 'Clinical Details')}
+            {t('shared:tabs.clinicalDetails', 'Clinical Details')}
           </Tabs.Tab>
           <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
             {t('shared:tabs.notes', 'Notes')}
@@ -173,7 +173,7 @@ const ConditionViewModal = ({
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.conditionName', 'Condition Name')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.conditionName', 'Condition Name')}</Text>
                     <Text size="sm" c={condition.condition_name ? 'inherit' : 'dimmed'}>
                       {condition.condition_name || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
@@ -240,7 +240,7 @@ const ConditionViewModal = ({
                         `Practitioner #${condition.practitioner_id}`}
                     </Text>
                   ) : (
-                    <Text size="sm" c="dimmed">{t('conditions.modal.noPractitionerAssigned', 'No practitioner assigned')}</Text>
+                    <Text size="sm" c="dimmed">{t('shared:labels.noPractitionerAssigned', 'No practitioner assigned')}</Text>
                   )}
                 </Stack>
               </div>
@@ -286,19 +286,19 @@ const ConditionViewModal = ({
                 <Title order={4} mb="sm">{t('conditions.modal.sections.medicalCodes', 'Medical Codes')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.icd10Code', 'ICD-10 Code')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.icd10Code', 'ICD-10 Code')}</Text>
                     <Text size="sm" c={condition.icd10_code ? 'inherit' : 'dimmed'}>
                       {condition.icd10_code || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.snomedCode', 'SNOMED Code')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.snomedCode', 'SNOMED Code')}</Text>
                     <Text size="sm" c={condition.snomed_code ? 'inherit' : 'dimmed'}>
                       {condition.snomed_code || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.codeDescription', 'Code Description')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.codeDescription', 'Code Description')}</Text>
                     <Text size="sm" c={condition.code_description ? 'inherit' : 'dimmed'}>
                       {condition.code_description || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
@@ -339,10 +339,10 @@ const ConditionViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('buttons.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

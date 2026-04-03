@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Toegevoegd",
-      "cancelled": "Geannuleerd",
-      "completed": "Voltooid",
-      "created": "Aangemaakt",
       "deleted": "Verwijderd",
       "modified": "Gewijzigd",
       "removed": "Verwijderd",
@@ -22,9 +19,7 @@
     "hello": "Hallo",
     "loading": "Uw medisch dashboard wordt geladen...",
     "modules": {
-      "adminDashboard": "Beheerderspaneel",
       "exportRecords": "Dossiers exporteren",
-      "patientInfo": "Patiëntinformatie",
       "visitHistory": "Bezoekgeschiedenis"
     },
     "search": {
@@ -40,8 +35,7 @@
       "treatments": "Behandelingen en ingrepen"
     },
     "stats": {
-      "activeMedications": "Actieve medicatie",
-      "totalRecords": "Totaal dossiers"
+      "activeMedications": "Actieve medicatie"
     },
     "subtitle": "Beheer uw gezondheidsinformatie veilig",
     "title": "MediKeep dashboard"
@@ -60,15 +54,10 @@
     "title": "Uitnodigingen",
     "types": {
       "patientRecord": "Patiëntdossier"
-    },
-    "viewAll": "Bekijk alle {{count}} uitnodigingen",
-    "viewAll_one": "Bekijk alle {{count}} uitnodigingen",
-    "viewAll_other": "Bekijk alle {{count}} uitnodigingen"
+    }
   },
   "menu": {
-    "administration": "Administratie",
     "backToDashboard": "Terug naar dashboard",
-    "dashboard": "Dashboard",
     "help": "Help",
     "logout": "Uitloggen",
     "patients": "Patiënten",
@@ -76,7 +65,6 @@
     "reports": "Rapporten"
   },
   "pages": {
-    "dashboard": "Dashboard",
     "help": "Help & ondersteuning",
     "medicalHistory": "Medische geschiedenis",
     "patientDetails": "Patiëntgegevens",
@@ -86,26 +74,20 @@
     "userProfile": "Gebruikersprofiel"
   },
   "sections": {
-    "medicalInfo": "Medische informatie",
     "personalInfo": "Persoonlijke informatie",
     "preferences": "Voorkeuren"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Beheerderspaneel",
-      "backupManagement": "Back-upbeheer",
       "customReports": "Aangepaste rapporten",
-      "dataModels": "Datamodellen",
       "exportRecords": "Dossiers exporteren",
       "language": "Taal",
       "patientInfo": "Patiëntinfo",
-      "systemHealth": "Systeemstatus",
       "tagManagement": "Tagbeheer",
       "theme": "Thema",
       "visitHistory": "Bezoekgeschiedenis"
     },
     "sections": {
-      "administration": "Administratie",
       "careAndTreatment": "Zorg & behandeling",
       "misc": "Overig",
       "tools": "Hulpmiddelen"

@@ -284,7 +284,7 @@ const TagManagement = () => {
           <Alert
             variant="light"
             color="green"
-            title={t('labels.success', 'Success')}
+            title={t('shared:labels.success', 'Success')}
             icon={<IconCheck size={16} />}
             withCloseButton
             onClose={() => setSuccessMessage(null)}
@@ -340,7 +340,7 @@ const TagManagement = () => {
               <Table highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{t('tagManagement.table.tagName')}</Table.Th>
+                    <Table.Th>{t('shared:fields.tagName')}</Table.Th>
                     <Table.Th>{t('tagManagement.table.usageCount')}</Table.Th>
                     <Table.Th>{t('tagManagement.table.usedIn')}</Table.Th>
                     <Table.Th width="120">{t('shared:labels.actions')}</Table.Th>
@@ -395,7 +395,7 @@ const TagManagement = () => {
                                 openEditModal();
                               }}
                             >
-                              {t('tagManagement.menu.edit')}
+                              {t('shared:labels.edit')}
                             </Menu.Item>
                             <Menu.Item
                               leftSection={<IconReplace size={14} />}
@@ -416,7 +416,7 @@ const TagManagement = () => {
                                 openDeleteModal();
                               }}
                             >
-                              {t('tagManagement.menu.delete')}
+                              {t('shared:labels.deleteTag')}
                             </Menu.Item>
                           </Menu.Dropdown>
                         </Menu>
@@ -438,7 +438,7 @@ const TagManagement = () => {
       >
         <Stack>
           <TextInput
-            label={t('tagManagement.createModal.label')}
+            label={t('shared:fields.tagName')}
             placeholder={t('tagManagement.createModal.placeholder')}
             value={newTagName}
             onChange={(e) => setNewTagName(e.target.value)}
@@ -469,7 +469,7 @@ const TagManagement = () => {
       >
         <Stack>
           <TextInput
-            label={t('tagManagement.editModal.label')}
+            label={t('shared:fields.tagName')}
             placeholder={t('tagManagement.editModal.placeholder')}
             value={editTagName}
             onChange={(e) => setEditTagName(e.target.value)}
@@ -499,7 +499,7 @@ const TagManagement = () => {
       <Modal
         opened={deleteModalOpened}
         onClose={closeDeleteModal}
-        title={t('tagManagement.deleteModal.title')}
+        title={t('shared:labels.deleteTag')}
       >
         <Stack>
           <Text>
@@ -513,7 +513,7 @@ const TagManagement = () => {
               {t('shared:fields.cancel')}
             </Button>
             <Button color="red" onClick={handleDeleteTag}>
-              {t('tagManagement.deleteModal.submit')}
+              {t('shared:labels.deleteTag')}
             </Button>
           </Group>
         </Stack>

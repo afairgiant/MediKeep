@@ -94,7 +94,7 @@ function SaveResetBar({ visible, saving, onSave, onReset, t }) {
             disabled={saving}
             loading={saving}
           >
-            {saving ? t('settings.actions.saving', 'Saving...') : t('settings.actions.save', 'Save All Changes')}
+            {saving ? t('shared:labels.saving', 'Saving...') : t('settings.actions.save', 'Save All Changes')}
           </Button>
         </div>
       </div>
@@ -444,7 +444,7 @@ const Settings = () => {
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.security.password.title', 'Password')}</div>
+                <div className="settings-option-title">{t('shared:labels.password', 'Password')}</div>
                 <div className="settings-option-description">
                   {t('settings.security.password.description', 'Change your account password to keep your account secure')}
                 </div>

@@ -68,7 +68,6 @@
     },
     "empty": "Aucun canal de notification configuré.",
     "emptyHint": "Ajoutez un canal pour commencer à recevoir des notifications via Discord, Email, Gotify ou Webhook.",
-    "enabled": "Activé",
     "errors": {
       "fieldRequired": "{{field}} est requis",
       "nameRequired": "Le nom du canal est requis"
@@ -76,7 +75,7 @@
     "fields": {
       "enabled": "Activer ce canal",
       "name": "Nom du canal",
-      "namePlaceholder": "My Discord Server",
+      "namePlaceholder": "Mon serveur Discord",
       "type": "Type de canal"
     },
     "form": {
@@ -105,7 +104,6 @@
       },
       "priority": {
         "description": "Niveau de priorité des messages(entre 1-10, par défaut : 5)",
-        "label": "Priorité",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -214,8 +212,7 @@
   "history": {
     "description": "Notifications récentes envoyées dans vos canaux",
     "fields": {
-      "channel": "Canal",
-      "event": "Evénement"
+      "channel": "Canal"
     },
     "loading": "Chargement de l'historique...",
     "noHistory": "Aucune notification envoyée pour l'instant",
@@ -241,8 +238,6 @@
     },
     "comingSoon": "A venir",
     "description": "Choisissez quels événements déclenchent des notifications dans chaque canal",
-    "event": "Événement",
-    "eventHeader": "Evénement",
     "loading": "Chargement des préférences...",
     "noChannels": "Ajoutez d'abord un canal de notification pour configurer les préférences d'événements",
     "saveFailed": "Echec de la sauvegarde des préférences",
@@ -268,12 +263,10 @@
       "userCreatedWithLinkSuccess": "Utilisateur créé et connecté à un patient existant avec succès !"
     },
     "documents": {
-      "deleteFailed": "Echec de la suppression",
       "linkFailed": "Echec de la connexion du document",
       "linkSuccess": "Document connecté avec succès",
       "unlinkFailed": "Echec de la déconnexion du document",
-      "unlinkSuccess": "Document déconnecté avec succès",
-      "uploadFailed": "Echec du téléversement"
+      "unlinkSuccess": "Document déconnecté avec succès"
     },
     "familySharing": {
       "accessRevoked": "Accès révoqué",
@@ -288,7 +281,6 @@
     "generic": {
       "allOperationsFailed": "{{operation}}s : toutes ont échoué. Veuillez réessayer.",
       "allOperationsSuccess": "{{total}} {{operation}}s : toutes complété(e)s avec succès !",
-      "deleteFailed": "Echec de la suppression",
       "downloadFailed": "Echec du téléchargement",
       "operationFailed": "Echec de l'opération",
       "operationFailedTitle": "Echec : {{operation}}",
@@ -342,10 +334,8 @@
       "updatedSuccess": "Mise à jour réussie : {{name}}"
     },
     "photo": {
-      "deleteFailed": "Echec de la suppression",
       "photoBeingUploaded": "Une photo est en cours de téléversement. Veuillez attendre la fin de l'opération.",
       "pleaseWait": "Veuillez patienter",
-      "uploadFailed": "Echec du téléversement",
       "uploadSuccess": "Photo téléversée avec succès"
     },
     "reports": {
@@ -387,7 +377,6 @@
       "completedWithErrors": "Téléversement complété avec des erreurs",
       "documentAdded": "Document ajouté à Paperless",
       "duplicateDocument": "Document dupliqué",
-      "failed": "Echec du téléversement",
       "fileUploadedSuccess": "\"{{fileName}}\" téléversé vers Paperless avec succès !",
       "fileUploadFailed": "Echec du téléversement du fichier",
       "paperlessUploadFailed": "Echec du téléversement vers Paperless",

@@ -399,7 +399,7 @@ const Treatments = () => {
     return (
       <MedicalPageLoading
         message={t('treatments.loadingTreatments', 'Loading treatments...')}
-        hint={t('treatments.loadingHint', 'If this takes too long, please refresh the page')}
+        hint={t('shared:labels.ifThisTakesTooLongPleaseRefreshThePage', 'If this takes too long, please refresh the page')}
       />
     );
   }

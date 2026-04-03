@@ -72,7 +72,7 @@ const PracticesList = ({ onPracticeSaved }) => {
     try {
       await apiService.deletePractice(practice.id);
       notifications.show({
-        title: t('messages.success', 'Success'),
+        title: t('shared:labels.success', 'Success'),
         message: t('practitioners.practices.deleteSuccess'),
         color: 'green',
       });
@@ -181,7 +181,7 @@ const PracticesList = ({ onPracticeSaved }) => {
                       leftSection={<IconEdit size={14} />}
                       onClick={() => handleEditPractice(row.id)}
                     >
-                      {t('buttons.edit', 'Edit')}
+                      {t('shared:labels.edit', 'Edit')}
                     </Button>
                     <Tooltip
                       label={t('practitioners.practices.cannotDelete')}

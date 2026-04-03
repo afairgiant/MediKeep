@@ -344,7 +344,7 @@ export const ResponsiveTable = memo(({
             color="yellow"
             size={buttonSize}
             onClick={() => onEdit(row)}
-            aria-label={t('buttons.edit')}
+            aria-label={t('shared:labels.edit')}
           >
             <IconEdit size={iconSize} />
           </ActionIcon>

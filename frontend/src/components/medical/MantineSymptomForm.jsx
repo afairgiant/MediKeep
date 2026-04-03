@@ -177,7 +177,7 @@ const MantineSymptomForm = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 8 }}>
                     <TextInput
-                      label={t('symptoms.parent.symptomName.label')}
+                      label={t('shared:labels.symptomName')}
                       value={formData.symptom_name || ''}
                       onChange={handleTextInputChange('symptom_name')}
                       placeholder={t('symptoms.parent.symptomName.placeholder')}

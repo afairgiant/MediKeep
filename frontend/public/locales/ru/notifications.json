@@ -68,7 +68,6 @@
     },
     "empty": "Каналы уведомлений не настроены.",
     "emptyHint": "Добавьте канал, чтобы начать получать уведомления через Discord, электронную почту, Gotify или вебхук.",
-    "enabled": "Включён",
     "errors": {
       "fieldRequired": "Поле «{{field}}» обязательно для заполнения",
       "nameRequired": "Название канала обязательно"
@@ -76,7 +75,7 @@
     "fields": {
       "enabled": "Включить этот канал",
       "name": "Название канала",
-      "namePlaceholder": "My Discord Server",
+      "namePlaceholder": "Мой сервер Discord",
       "type": "Тип канала"
     },
     "form": {
@@ -105,7 +104,6 @@
       },
       "priority": {
         "description": "Приоритет сообщения (1-10, по умолчанию 5)",
-        "label": "Приоритет",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -215,8 +213,7 @@
   "history": {
     "description": "Последние уведомления, отправленные через ваши каналы",
     "fields": {
-      "channel": "Канал",
-      "event": "Событие"
+      "channel": "Канал"
     },
     "loading": "Загрузка истории...",
     "noHistory": "Уведомления ещё не отправлялись",
@@ -242,8 +239,6 @@
     },
     "comingSoon": "Скоро",
     "description": "Выберите, какие события вызывают уведомления на каждом канале",
-    "event": "Событие",
-    "eventHeader": "Событие",
     "loading": "Загрузка настроек...",
     "noChannels": "Сначала добавьте канал уведомлений, чтобы настроить события",
     "saveFailed": "Не удалось сохранить настройку",
@@ -269,12 +264,10 @@
       "userCreatedWithLinkSuccess": "Пользователь создан и успешно привязан к существующему пациенту!"
     },
     "documents": {
-      "deleteFailed": "Ошибка удаления",
       "linkFailed": "Не удалось привязать документ",
       "linkSuccess": "Документ успешно привязан",
       "unlinkFailed": "Не удалось отвязать документ",
-      "unlinkSuccess": "Документ успешно отвязан",
-      "uploadFailed": "Ошибка загрузки"
+      "unlinkSuccess": "Документ успешно отвязан"
     },
     "familySharing": {
       "accessRevoked": "Доступ отозван",
@@ -289,7 +282,6 @@
     "generic": {
       "allOperationsFailed": "Все операции ({{operation}}) завершились с ошибками. Попробуйте снова.",
       "allOperationsSuccess": "Все {{total}} операций ({{operation}}) выполнены успешно!",
-      "deleteFailed": "Ошибка удаления",
       "downloadFailed": "Ошибка загрузки",
       "operationFailed": "Ошибка операции",
       "operationFailedTitle": "Ошибка: {{operation}}",
@@ -343,10 +335,8 @@
       "updatedSuccess": "{{name}} успешно обновлён"
     },
     "photo": {
-      "deleteFailed": "Ошибка удаления",
       "photoBeingUploaded": "Фото загружается. Пожалуйста, дождитесь завершения.",
       "pleaseWait": "Пожалуйста, подождите",
-      "uploadFailed": "Ошибка загрузки",
       "uploadSuccess": "Фото успешно загружено"
     },
     "reports": {
@@ -388,7 +378,6 @@
       "completedWithErrors": "Загрузка завершена с ошибками",
       "documentAdded": "Документ добавлен в Paperless",
       "duplicateDocument": "Дублирующийся документ",
-      "failed": "Ошибка загрузки",
       "fileUploadedSuccess": "«{{fileName}}» успешно загружен в Paperless!",
       "fileUploadFailed": "Ошибка загрузки файла",
       "paperlessUploadFailed": "Ошибка загрузки в Paperless",

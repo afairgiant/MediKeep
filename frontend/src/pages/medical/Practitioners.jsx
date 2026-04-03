@@ -316,7 +316,7 @@ const Practitioners = () => {
   return (
     <>
     <Container size="xl" py="sm">
-      <PageHeader title={t('practitioners.title', 'Healthcare Practitioners')} icon="👨‍⚕️" />
+      <PageHeader title={t('shared:categories.healthcare_practitioners', 'Healthcare Practitioners')} icon="👨‍⚕️" />
 
       <MedicalPageAlerts
           error={error}
@@ -425,7 +425,7 @@ const Practitioners = () => {
                                 { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
                                 { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
                                 { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                                { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                                { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                               ]}
                               tableName={group.name}
                               onView={handleViewPractitioner}
@@ -488,7 +488,7 @@ const Practitioners = () => {
                                 { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
                                 { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
                                 { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                                { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                                { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                               ]}
                               tableName={t('practitioners.ungroupedTitle', 'Independent Practitioners')}
                               onView={handleViewPractitioner}
@@ -543,9 +543,9 @@ const Practitioners = () => {
                       { header: t('shared:labels.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
                       { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
                       { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                      { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                      { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                     ]}
-                    tableName={t('practitioners.title', 'Healthcare Practitioners')}
+                    tableName={t('shared:categories.healthcare_practitioners', 'Healthcare Practitioners')}
                     onView={handleViewPractitioner}
                     onEdit={handleEditPractitioner}
                     onDelete={handleDeletePractitioner}

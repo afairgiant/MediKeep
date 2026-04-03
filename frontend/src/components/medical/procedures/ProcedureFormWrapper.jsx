@@ -152,7 +152,7 @@ const ProcedureFormWrapper = ({
                 {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-                {t('procedures.form.tabs.clinical', 'Clinical Details')}
+                {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
@@ -180,7 +180,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('procedures.form.procedureType', 'Procedure Type')}
+                      label={t('shared:fields.procedureType', 'Procedure Type')}
                       value={formData.procedure_type || ''}
                       onChange={handleTextInputChange('procedure_type')}
                       placeholder={t('procedures.form.procedureTypePlaceholder', 'e.g., Surgical, Diagnostic')}
@@ -189,7 +189,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('procedures.form.procedureCode', 'Procedure Code')}
+                      label={t('shared:fields.procedureCode', 'Procedure Code')}
                       value={formData.procedure_code || ''}
                       onChange={handleTextInputChange('procedure_code')}
                       placeholder={t('procedures.form.procedureCodePlaceholder', 'e.g., CPT code')}
@@ -219,9 +219,9 @@ const ProcedureFormWrapper = ({
                       data={[
                         { value: 'scheduled', label: t('procedures.form.statusScheduled', 'Scheduled') },
                         { value: 'in_progress', label: t('procedures.form.statusInProgress', 'In Progress') },
-                        { value: 'completed', label: t('procedures.form.statusCompleted', 'Completed') },
+                        { value: 'completed', label: t('shared:fields.completed', 'Completed') },
                         { value: 'postponed', label: t('procedures.form.statusPostponed', 'Postponed') },
-                        { value: 'cancelled', label: t('procedures.form.statusCancelled', 'Cancelled') },
+                        { value: 'cancelled', label: t('shared:fields.cancelled', 'Cancelled') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
@@ -234,7 +234,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('procedures.form.outcome', 'Outcome')}
+                      label={t('shared:fields.outcome', 'Outcome')}
                       value={formData.outcome || null}
                       data={[
                         { value: 'successful', label: t('procedures.form.outcomeSuccessful', 'Successful') },
@@ -272,7 +272,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('procedures.form.setting', 'Setting')}
+                      label={t('shared:labels.setting', 'Setting')}
                       value={formData.procedure_setting || ''}
                       onChange={handleTextInputChange('procedure_setting')}
                       placeholder={t('procedures.form.settingPlaceholder', 'e.g., Inpatient, Outpatient')}
@@ -290,7 +290,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <NumberInput
-                      label={t('procedures.form.duration', 'Duration (minutes)')}
+                      label={t('shared:fields.durationMinutes', 'Duration (minutes)')}
                       value={formData.procedure_duration || ''}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'procedure_duration', value: value || '' } });
@@ -339,7 +339,7 @@ const ProcedureFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('procedures.form.anesthesiaType', 'Anesthesia Type')}
+                      label={t('shared:fields.anesthesiaType', 'Anesthesia Type')}
                       value={formData.anesthesia_type || ''}
                       onChange={handleTextInputChange('anesthesia_type')}
                       placeholder={t('procedures.form.anesthesiaTypePlaceholder', 'e.g., General, Local, Regional')}
@@ -348,7 +348,7 @@ const ProcedureFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('procedures.form.anesthesiaNotes', 'Anesthesia Notes')}
+                      label={t('shared:fields.anesthesiaNotes', 'Anesthesia Notes')}
                       value={formData.anesthesia_notes || ''}
                       onChange={handleTextInputChange('anesthesia_notes')}
                       placeholder={t('procedures.form.anesthesiaNotesPlaceholder', 'Enter anesthesia details and notes')}

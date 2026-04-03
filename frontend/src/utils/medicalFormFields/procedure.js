@@ -17,8 +17,8 @@ export const procedureFormFields = [
   {
     name: 'procedure_type',
     type: 'select',
-    labelKey: 'medical:procedures.procedureType.label',
-    placeholderKey: 'medical:procedures.procedureType.placeholder',
+    labelKey: 'shared:fields.procedureType',
+    placeholderKey: 'shared:labels.selectType',
     descriptionKey: 'medical:procedures.procedureType.description',
     gridColumn: 4,
     clearable: true,
@@ -48,7 +48,7 @@ export const procedureFormFields = [
   {
     name: 'procedure_code',
     type: 'text',
-    labelKey: 'medical:procedures.procedureCode.label',
+    labelKey: 'shared:fields.procedureCode',
     placeholderKey: 'medical:procedures.procedureCode.placeholder',
     descriptionKey: 'medical:procedures.procedureCode.description',
     gridColumn: 6,
@@ -114,7 +114,7 @@ export const procedureFormFields = [
   {
     name: 'procedure_duration',
     type: 'number',
-    labelKey: 'medical:procedures.procedureDuration.label',
+    labelKey: 'shared:fields.durationMinutes',
     placeholderKey: 'medical:procedures.procedureDuration.placeholder',
     descriptionKey: 'medical:procedures.procedureDuration.description',
     gridColumn: 4,
@@ -131,8 +131,8 @@ export const procedureFormFields = [
   {
     name: 'practitioner_id',
     type: 'select',
-    labelKey: 'medical:procedures.practitioner.label',
-    placeholderKey: 'medical:procedures.practitioner.placeholder',
+    labelKey: 'shared:fields.performingPractitioner',
+    placeholderKey: 'shared:labels.selectPractitioner',
     descriptionKey: 'medical:procedures.practitioner.description',
     gridColumn: 6,
     clearable: true,
@@ -162,7 +162,7 @@ export const procedureFormFields = [
   {
     name: 'anesthesia_type',
     type: 'select',
-    labelKey: 'medical:procedures.anesthesiaType.label',
+    labelKey: 'shared:fields.anesthesiaType',
     placeholderKey: 'medical:procedures.anesthesiaType.placeholder',
     descriptionKey: 'medical:procedures.anesthesiaType.description',
     gridColumn: 6,
@@ -193,7 +193,7 @@ export const procedureFormFields = [
   {
     name: 'anesthesia_notes',
     type: 'text',
-    labelKey: 'medical:procedures.anesthesiaNotes.label',
+    labelKey: 'shared:fields.anesthesiaNotes',
     placeholderKey: 'medical:procedures.anesthesiaNotes.placeholder',
     descriptionKey: 'medical:procedures.anesthesiaNotes.description',
     gridColumn: 6,

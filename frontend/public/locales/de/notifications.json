@@ -68,7 +68,6 @@
     },
     "empty": "Keine Benachrichtigungskanäle konfiguriert.",
     "emptyHint": "Fügen Sie einen Kanal hinzu, um Benachrichtigungen über Discord, E-Mail, Gotify oder Webhook zu erhalten.",
-    "enabled": "Aktiviert",
     "errors": {
       "fieldRequired": "{{field}} ist erforderlich",
       "nameRequired": "Kanalname ist erforderlich"
@@ -76,7 +75,7 @@
     "fields": {
       "enabled": "Diesen Kanal aktivieren",
       "name": "Kanalname",
-      "namePlaceholder": "My Discord Server",
+      "namePlaceholder": "Mein Discord-Server",
       "type": "Kanaltyp"
     },
     "form": {
@@ -105,7 +104,6 @@
       },
       "priority": {
         "description": "Nachrichtenpriorität (1-10, Standard 5)",
-        "label": "Priorität",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -213,8 +211,7 @@
   "history": {
     "description": "Kürzlich über Ihre Kanäle gesendete Benachrichtigungen",
     "fields": {
-      "channel": "Kanal",
-      "event": "Ereignis"
+      "channel": "Kanal"
     },
     "loading": "Verlauf wird geladen...",
     "noHistory": "Noch keine Benachrichtigungen gesendet",
@@ -240,8 +237,6 @@
     },
     "comingSoon": "Demnächst verfügbar",
     "description": "Wählen Sie, welche Ereignisse Benachrichtigungen auf jedem Kanal auslösen",
-    "event": "Ereignis",
-    "eventHeader": "Ereignis",
     "loading": "Einstellungen werden geladen...",
     "noChannels": "Fügen Sie zuerst einen Benachrichtigungskanal hinzu, um Ereigniseinstellungen zu konfigurieren",
     "saveFailed": "Einstellung konnte nicht gespeichert werden",
@@ -267,12 +262,10 @@
       "userCreatedWithLinkSuccess": "Benutzerkonto erfolgreich erstellt und mit bestehendem Patienten verknüpft!"
     },
     "documents": {
-      "deleteFailed": "Löschen fehlgeschlagen",
       "linkFailed": "Dokument konnte nicht verknüpft werden",
       "linkSuccess": "Dokument erfolgreich verknüpft",
       "unlinkFailed": "Dokumentverknüpfung konnte nicht aufgehoben werden",
-      "unlinkSuccess": "Dokumentverknüpfung erfolgreich aufgehoben",
-      "uploadFailed": "Hochladen fehlgeschlagen"
+      "unlinkSuccess": "Dokumentverknüpfung erfolgreich aufgehoben"
     },
     "familySharing": {
       "accessRevoked": "Zugriff widerrufen",
@@ -287,7 +280,6 @@
     "generic": {
       "allOperationsFailed": "Alle {{operation}} fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "allOperationsSuccess": "Alle {{total}} {{operation}} erfolgreich abgeschlossen!",
-      "deleteFailed": "Löschen fehlgeschlagen",
       "downloadFailed": "Download fehlgeschlagen",
       "operationFailed": "Vorgang fehlgeschlagen",
       "operationFailedTitle": "{{operation}} fehlgeschlagen",
@@ -341,10 +333,8 @@
       "updatedSuccess": "{{name}} erfolgreich aktualisiert"
     },
     "photo": {
-      "deleteFailed": "Löschen fehlgeschlagen",
       "photoBeingUploaded": "Ein Foto wird gerade hochgeladen. Bitte warten Sie, bis der Vorgang abgeschlossen ist.",
       "pleaseWait": "Bitte warten",
-      "uploadFailed": "Hochladen fehlgeschlagen",
       "uploadSuccess": "Foto erfolgreich hochgeladen"
     },
     "reports": {
@@ -386,7 +376,6 @@
       "completedWithErrors": "Hochladen mit Fehlern abgeschlossen",
       "documentAdded": "Dokument zu Paperless hinzugefügt",
       "duplicateDocument": "Doppeltes Dokument",
-      "failed": "Hochladen fehlgeschlagen",
       "fileUploadedSuccess": "\"{{fileName}}\" erfolgreich nach Paperless hochgeladen!",
       "fileUploadFailed": "Datei-Upload fehlgeschlagen",
       "paperlessUploadFailed": "Paperless-Upload fehlgeschlagen",

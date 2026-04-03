@@ -185,11 +185,11 @@ const TreatmentViewModal = ({
                 <Title order={4} mb="sm">{t('shared:labels.basicInformation', 'Basic Information')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.treatmentName', 'Treatment Name')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.treatmentName', 'Treatment Name')}</Text>
                     <Text size="sm">{treatment.treatment_name}</Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.treatmentType', 'Treatment Category')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.treatmentType', 'Treatment Category')}</Text>
                     <Text size="sm" c={treatment.treatment_type ? 'inherit' : 'dimmed'}>
                       {getTreatmentTypeLabel(treatment.treatment_type) || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
@@ -224,7 +224,7 @@ const TreatmentViewModal = ({
                 <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.doctor', 'Doctor')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.doctor', 'Doctor')}</Text>
                     <Text size="sm" c={treatment.practitioner_id ? 'inherit' : 'dimmed'}>
                       {treatment.practitioner_id
                         ? (treatment.practitioner?.name ||
@@ -443,10 +443,10 @@ const TreatmentViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('treatments.viewModal.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('treatments.viewModal.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

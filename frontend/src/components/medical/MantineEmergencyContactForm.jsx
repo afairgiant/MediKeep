@@ -175,7 +175,7 @@ const MantineEmergencyContactForm = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'relationship', value: value || '' } });
                       }}
-                      placeholder={t('medical:emergencyContacts.form.relationship.placeholder')}
+                      placeholder={t('shared:fields.selectRelationship')}
                       description={t('medical:emergencyContacts.form.relationship.description')}
                       required
                       searchable
@@ -205,7 +205,7 @@ const MantineEmergencyContactForm = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <TextInput
-                      label={t('medical:emergencyContacts.form.email.label')}
+                      label={t('shared:fields.emailAddress')}
                       value={formData.email || ''}
                       onChange={handleTextInputChange('email')}
                       placeholder={t('medical:emergencyContacts.form.email.placeholder')}

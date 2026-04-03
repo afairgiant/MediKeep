@@ -1,7 +1,5 @@
 {
   "allergies": {
-    "addNew": "Ajouter une allergie",
-    "addTitle": "Ajouter une allergie",
     "allergen": {
       "description": "Nom de l'allergène",
       "label": "Allergène",
@@ -18,7 +16,7 @@
       },
       "placeholder": "Sélectionnez le type d'allergie"
     },
-    "cardSubtitle": "Medical Allergy",
+    "cardSubtitle": "Allergie médicale",
     "editTitle": "Editer une allergie",
     "emptyState": {
       "noData": "Cliquez sur \"Ajouter une allergie\" pour commencer.",
@@ -29,9 +27,9 @@
       "saving": "Sauvegarde des allergies..."
     },
     "modal": {
-      "title": "Allergy Details"
+      "title": "Détails de l'allergie"
     },
-    "noMedicationLinked": "No medication linked",
+    "noMedicationLinked": "Aucun médicament lié",
     "onsetDate": {
       "description": "Quand l'allergie a été pour la première fois identifiée",
       "placeholder": "Sélectionnez la date de survenue"
@@ -41,7 +39,7 @@
       "label": "Description de la réaction",
       "placeholder": "Décrivez la réaction allergique"
     },
-    "reactionInformation": "Reaction Information",
+    "reactionInformation": "Informations sur la réaction",
     "reactionType": {
       "description": "Type de réaction allergique",
       "label": "Type de réaction",
@@ -68,25 +66,19 @@
     "tabs": {
       "reactionDetails": "Détails des réactions"
     },
-    "viewMedication": "View medication details"
+    "viewMedication": "Voir les détails du médicament"
   },
   "componentCatalog": {
     "fetchError": "Echec du chargement du catalogue de résultats d'analyse",
     "noData": "Ajoutez des résultats d'analyse avec des composants d'analyse pour les voir ici.",
     "noResults": "Aucun composant d'analyse trouvé",
-    "readingCount": "{{count}} relevés",
     "readingCount_one": "{{count}} relevé",
     "readingCount_many": "{{count}} readings",
-    "readingCount_other": "{{count}} readings",
     "refRange": "Réf",
     "searchPlaceholder": "Rechercher dans les résultats d'analyse...",
-    "showing": "Affichage de {{count}} résultat(s) unique(s)",
-    "showing_one": "Showing {{count}} unique tests",
     "showing_many": "Showing {{count}} unique tests",
-    "showing_other": "Showing {{count}} unique tests",
     "sort": {
-      "alphabetical": "A-Z",
-      "priority": "Priorité"
+      "alphabetical": "A-Z"
     },
     "status": {
       "abnormal": "Anormal",
@@ -107,8 +99,8 @@
   "conditions": {
     "codeDescription": {
       "description": "Description du code lisible par un humain",
-      "label": "Description du code",
-      "placeholder": "Description du code médical"
+      "placeholder": "Description du code médical",
+      "label": "Description du code"
     },
     "diagnosis": {
       "description": "Nom de la condition médicale ou du diagnostic",
@@ -121,8 +113,8 @@
     },
     "icd10Code": {
       "description": "Code de la Classification internationale des maladies",
-      "label": "Code CIM-10",
-      "placeholder": "ex : I10, E11.9"
+      "placeholder": "ex : I10, E11.9",
+      "label": "Code CIM-10"
     },
     "notes": {
       "description": "Détails supplémentaires sur la condition, l'historique des traitements, ou autres observations"
@@ -142,8 +134,8 @@
     },
     "snomedCode": {
       "description": "Code de terminologie clinique SNOMED",
-      "label": "Code SNOMED",
-      "placeholder": "ex : 38341003"
+      "placeholder": "ex : 38341003",
+      "label": "Code SNOMED"
     },
     "status": {
       "description": "Statut actuel de cette condition"
@@ -158,8 +150,8 @@
       },
       "email": {
         "description": "Adresse email optionnelle",
-        "label": "Adresse email",
-        "placeholder": "ex : jean.martin@email.com"
+        "placeholder": "ex : jean.martin@email.com",
+        "label": "Adresse email"
       },
       "isActive": {
         "description": "Ce contact est actuellement disponible",
@@ -185,8 +177,8 @@
       },
       "relationship": {
         "description": "Relation avec le patient",
-        "placeholder": "Sélectionnez la relation",
-        "label": "Relation"
+        "label": "Relation",
+        "placeholder": "Sélectionnez la relation"
       },
       "secondaryPhone": {
         "description": "Numéro de téléphone secondaire optionnel",
@@ -204,7 +196,7 @@
   "equipment": {
     "tabs": {
       "deviceDetails": "Détails de l'appareil",
-      "serviceDates": "Service & Dates"
+      "serviceDates": "Entretien et dates"
     }
   },
   "familyHistory": {
@@ -212,8 +204,8 @@
       "condition": {
         "conditionName": {
           "description": "Nom de la condition médicale",
-          "label": "Nom de la condition",
-          "placeholder": "ex : Diabète, problème cardiaque, cancer"
+          "placeholder": "ex : Diabète, problème cardiaque, cancer",
+          "label": "Nom de la condition"
         },
         "conditionType": {
           "description": "Catégorie de condition médicale",
@@ -227,8 +219,8 @@
         },
         "icd10Code": {
           "description": "Code de diagnostic médical (si connu)",
-          "label": "Code CIM-10",
-          "placeholder": "ex : E11.9"
+          "placeholder": "ex : E11.9",
+          "label": "Code CIM-10"
         },
         "notes": {
           "description": "Détails de traitement, résultats, ou autres informations pertinentes",
@@ -285,12 +277,8 @@
         },
         "gender": {
           "description": "Genre du membre de la famille",
-          "placeholder": "Sélectionnez le genre",
-          "label": "Genre"
-        },
-        "genderOptions": {
-          "female": "Femme",
-          "male": "Homme"
+          "label": "Genre",
+          "placeholder": "Sélectionnez le genre"
         },
         "name": {
           "description": "Nom complet du membre de la famille",
@@ -303,13 +291,13 @@
         },
         "relationship": {
           "description": "Lien de parenté du membre avec vous",
-          "placeholder": "Sélectionnez le lien de parenté",
-          "label": "Lien de parenté"
+          "label": "Lien de parenté",
+          "placeholder": "Sélectionnez le lien de parenté"
         },
         "relationshipOptions": {
           "aunt": "Tante",
           "brother": "Frère",
-          "cousin": "Cousin",
+          "cousin": "Cousin(e)",
           "father": "Père",
           "maternalGrandfather": "Grand-père maternel",
           "maternalGrandmother": "Grand-mère maternelle",
@@ -318,6 +306,10 @@
           "paternalGrandmother": "Grand-mère paternelle",
           "sister": "Soeur",
           "uncle": "Oncle"
+        },
+        "genderOptions": {
+          "male": "Homme",
+          "female": "Femme"
         }
       }
     }
@@ -329,8 +321,8 @@
   "immunizations": {
     "dateAdministered": {
       "description": "Quand le vaccin a été administré",
-      "label": "Date d'administration",
-      "placeholder": "Sélectionnez la date d'administration"
+      "placeholder": "Sélectionnez la date d'administration",
+      "label": "Date d'administration"
     },
     "doseNumber": {
       "description": "Quelle dose dans une série d'injections",
@@ -367,8 +359,8 @@
     },
     "ndcNumber": {
       "description": "Identificateur du National Drug Code américain pour le vaccin",
-      "label": "Numéro NDC",
-      "placeholder": "ex : 12345-6789-01"
+      "placeholder": "ex : 12345-6789-01",
+      "label": "Numéro NDC"
     },
     "notes": {
       "description": "Tout détail pertinent concernant cette immunisation",
@@ -382,8 +374,6 @@
     "routeOptions": {
       "intradermal": "Intradermique (ID)",
       "intramuscular": "Intramusculaire (IM)",
-      "nasal": "Nasale",
-      "oral": "Orale",
       "subcutaneous": "Sous-cutané (SC)"
     },
     "site": {
@@ -481,9 +471,9 @@
     "severity": {
       "description": "Le niveau de sévérité de cette blessure",
       "options": {
-        "mild": "Mild - Minor discomfort",
-        "moderate": "Moderate - Noticeable impact",
-        "severe": "Severe - Significant impact"
+        "mild": "Léger - Gêne mineure",
+        "moderate": "Modéré - Impact notable",
+        "severe": "Grave - Impact significatif"
       },
       "placeholder": "Sélectionnez la sévérité"
     },
@@ -496,15 +486,9 @@
         "resolved": "Résolue - Pleinement guérie"
       }
     },
-    "tabs": {
-      "treatment": "Traitement"
-    },
     "treatment": {
       "description": "Traitement médical fourni pour la blessure",
-      "label": "Traitement reçu",
-      "placeholder": "Décrivez le traitement reçu..."
-    },
-    "treatmentReceived": {
+      "placeholder": "Décrivez le traitement reçu...",
       "label": "Traitement reçu"
     },
     "viewModal": {
@@ -514,7 +498,7 @@
   },
   "insurance": {
     "form": {
-      "addInsurance": "Add Insurance",
+      "addInsurance": "Ajouter une assurance",
       "annualMaximum": {
         "description": "Montant du bénéfice maximum annuel",
         "label": "Bénéfice maximum annuel",
@@ -580,7 +564,7 @@
         "label": "Ticket modérateur pour les soins urgents",
         "placeholder": "ex : 75"
       },
-      "coveragePeriodStatus": "Coverage Period & Status",
+      "coveragePeriodStatus": "Période de couverture et statut",
       "customerServicePhone": {
         "description": "Numéro de téléphone du service client",
         "label": "Téléphone du service client",
@@ -600,19 +584,19 @@
         "description": "Type de formule d'assurance dentaire",
         "label": "Type de formule dentaire",
         "options": {
-          "dhmo": "DHMO (Dental Health Maintenance Organization)",
+          "dhmo": "DHMO (Organisation de maintien de la santé dentaire)",
           "discount": "Formule réduite",
-          "dppo": "DPPO (Dental Preferred Provider Organization)"
+          "dppo": "DPPO (Organisation de prestataires dentaires préférés)"
         },
         "placeholder": "Sélectionnez le type de formule dentaire"
       },
       "dividers": {
         "additionalInfo": "Informations supplémentaires",
         "basicInfo": "Informations de base de l'assurance",
-        "contactInfo": "Informations de contact",
         "coverageDetails": "Détails de couverture",
         "coveragePeriodStatus": "Période de couverture & statut",
-        "memberInfo": "Information de membre"
+        "memberInfo": "Information de membre",
+        "contactInfo": "Informations de contact"
       },
       "effectiveDate": {
         "description": "Date à laquelle débute la couverture",
@@ -641,8 +625,8 @@
       },
       "groupNumber": {
         "description": "Numéro du groupe (si applicable)",
-        "label": "Numéro du groupe",
-        "placeholder": "ex : GRP123"
+        "placeholder": "ex : GRP123",
+        "label": "Numéro du groupe"
       },
       "insuranceType": {
         "description": "Type de couverture de l'assurance",
@@ -702,12 +686,12 @@
         "description": "Type de formule d'assurance médicale",
         "label": "Type de formule",
         "options": {
-          "epo": "EPO (Exclusive Provider Organization)",
-          "hdhp": "HDHP (High Deductible Health Plan)",
-          "hmo": "HMO (Health Maintenance Organization)",
+          "epo": "EPO (Organisation de prestataires exclusifs)",
+          "hdhp": "HDHP (Régime à franchise élevée)",
+          "hmo": "HMO (Organisation de maintien de la santé)",
           "indemnity": "Indemnité (Honoraires pour services)",
-          "pos": "POS (Point of Service)",
-          "ppo": "PPO (Preferred Provider Organization)"
+          "pos": "POS (Point de service)",
+          "ppo": "PPO (Organisation de prestataires préférés)"
         },
         "placeholder": "Sélectionnez le type de formule"
       },
@@ -724,10 +708,10 @@
         "description": "Type de formule de prescription de médicaments",
         "label": "Type de formule de prescription",
         "options": {
-          "formulary": "Formulary-Based Plan",
+          "formulary": "Régime basé sur le formulaire",
           "integrated": "Intégré avec la formule médicale",
-          "medicarePartD": "Medicare Part D",
-          "tieredCopay": "Tiered Copay Plan"
+          "medicarePartD": "Medicare Partie D",
+          "tieredCopay": "Régime à quote-part échelonnée"
         },
         "placeholder": "Sélectionnez le type de formule de prescription"
       },
@@ -751,8 +735,8 @@
         "options": {
           "child": "Enfant",
           "dependent": "Dépendant",
-          "self": "Soi-même",
-          "spouse": "Conjoint"
+          "spouse": "Conjoint",
+          "self": "Soi-même"
         },
         "placeholder": "Sélectionnez la relation"
       },
@@ -761,7 +745,7 @@
         "label": "Groupe RX américain",
         "placeholder": "ex : RXGRP123"
       },
-      "saving": "Saving insurance...",
+      "saving": "Enregistrement de l'assurance...",
       "status": {
         "description": "Statut actuel de l'assurance",
         "options": {
@@ -771,17 +755,17 @@
       },
       "tabs": {
         "contact": "Contact",
-        "coverage": "Coverage",
-        "member": "Member"
+        "coverage": "Couverture",
+        "member": "Assuré"
       },
-      "updateInsurance": "Update Insurance",
+      "updateInsurance": "Mettre à jour l'assurance",
       "visionPlanType": {
         "description": "Type de formule d'assurance vision",
         "label": "Type de formule vision",
         "options": {
           "visionDiscount": "Formule réduite vision",
-          "visionHmo": "Vision HMO",
-          "visionPpo": "Vision PPO"
+          "visionHmo": "HMO Vision",
+          "visionPpo": "PPO Vision"
         },
         "placeholder": "Sélectionnez le type de formule vision"
       },
@@ -792,7 +776,7 @@
       }
     },
     "viewModal": {
-      "coverageDetails": "Coverage Details"
+      "coverageDetails": "Détails de la couverture"
     }
   },
   "labResults": {
@@ -818,44 +802,38 @@
     },
     "completedDate": {
       "description": "Date de finalisation des résultats",
-      "label": "Date de réalisation",
-      "placeholder": "Quand les résultats étaient disponibles"
+      "placeholder": "Quand les résultats étaient disponibles",
+      "label": "Date de réalisation"
     },
     "form": {
-      "abbreviation": "Abbreviation",
+      "abbreviation": "Abréviation",
       "abbreviationPlaceholder": "e.g., HGB",
       "addAnotherTest": "Ajouter un autre résultat d'analyse",
-      "autoCalculated": "Auto-calculated",
-      "cannotRemoveLastRow": "Cannot remove last row",
+      "autoCalculated": "Calculé automatiquement",
+      "cannotRemoveLastRow": "Impossible de supprimer la dernière ligne",
       "componentCreationWarning": "Résultat d'analyse sauvegardé, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page d'aperçu.",
       "linkConditionsDescription": "Associez ces résultats d'analyse aux conditions médicales concernées pour améliorer le suivi et l'organisation.",
       "linkConditionsTitle": "Connecter des conditions médicales",
-      "max": "Max",
-      "min": "Min",
-      "notesOptional": "Notes (optional)",
-      "refMax": "Ref Max",
-      "refMin": "Ref Min",
-      "relatedConditions": "Conditions concernées",
+      "notesOptional": "Notes (facultatif)",
+      "refMax": "Réf. max",
+      "refMin": "Réf. min",
       "relationshipCreationWarning": "Résultat d'analyse sauvegardé, mais certaines connexions n'ont pas pu être créées. Vous pouvez les ajouter depuis la page d'édition.",
-      "removeRow": "Remove row",
-      "result": "Result",
+      "removeRow": "Supprimer la ligne",
+      "result": "Résultat",
       "resultIndicator": "Indicateur de résultat :",
-      "searchTests": "Type to search tests...",
-      "selectCategory": "Select category",
-      "selectResult": "Select result",
+      "searchTests": "Saisir pour rechercher des tests...",
+      "selectResult": "Sélectionner un résultat",
       "statusIndicator": "Indicateur de statut :",
-      "testCode": "Test Code",
       "testCodePlaceholder": "e.g., 718-7",
       "testComponents": "Composants d'analyse (optionnel)",
       "testComponentsDescription": "Ajoutez optionnellement des valeurs d'analyse individuelles. Vous pouvez également en ajouter plus ultérieurement.",
       "testDetails": "Détails de l'analyse",
-      "unit": "Unit",
-      "value": "Value"
+      "unit": "Unité"
     },
     "labResult": {
       "description": "Classification du résultat de l'analyse",
-      "label": "Résultat de l'analyse",
-      "placeholder": "Sélectionnez le résultat (si disponible)"
+      "placeholder": "Sélectionnez le résultat (si disponible)",
+      "label": "Résultat de l'analyse"
     },
     "messages": {
       "relationshipsCreateInfo": "Les connexions peuvent être ajoutées après la sauvegarde du résulatt d'analyse.",
@@ -864,8 +842,8 @@
     },
     "orderedDate": {
       "description": "Date de prescription de l'analyse",
-      "label": "Date de prescription",
-      "placeholder": "Quand l'analyse a été prescrite"
+      "placeholder": "Quand l'analyse a été prescrite",
+      "label": "Date de prescription"
     },
     "orderingPractitioner": {
       "description": "Docteur ayant prescrit l'analyse",
@@ -898,8 +876,8 @@
     },
     "testCode": {
       "description": "Code de l'analyse ou LOINC",
-      "label": "Code de l'analyse",
-      "placeholder": "ex : 85025"
+      "placeholder": "ex : 85025",
+      "label": "Code de l'analyse"
     },
     "testingFacility": {
       "description": "Où l'analyse est / a été réalisée",
@@ -938,15 +916,15 @@
     "dosage": {
       "description": "Masse et quantité par dose",
       "placeholder": "ex : 10mg, 1 tablette",
-      "label": "Dosage"
+      "label": "Posologie"
     },
     "form": {
       "addMedication": "Ajouter un médicament",
       "conditionLinkFailed": "Le médicament a été enregistré, mais certaines pathologies n'ont pas pu être associées. Vous pouvez les associer plus tard en modifiant le médicament.",
       "conditionLinkPartialFailure": "{{count}} association(s) de pathologie ont échoué",
-      "conditionLinkPartialFailure_one": "",
-      "conditionLinkPartialFailure_many": "",
-      "conditionLinkPartialFailure_other": "",
+      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
+      "conditionLinkPartialFailure_many": "{{count}} condition links failed",
+      "conditionLinkPartialFailure_other": "{{count}} condition links failed",
       "linkConditionsDescription": "Associer optionnellement ce médicament à des pathologies existantes",
       "noConditionsFound": "Aucune pathologie trouvée",
       "saving": "Sauvegarde du médicament...",
@@ -964,13 +942,13 @@
     },
     "medicationName": {
       "description": "Nom de marque ou générique du médicament (2 caractères minimum)",
-      "label": "Nom du médicament",
-      "placeholder": "ex : Lisinopril, Metformine"
+      "placeholder": "ex : Lisinopril, Metformine",
+      "label": "Nom du médicament"
     },
     "medicationType": {
       "description": "Catégorie de médicament",
-      "label": "Type de médicament",
-      "placeholder": "Sélectionnez le type"
+      "placeholder": "Sélectionnez le type",
+      "label": "Type de médicament"
     },
     "pharmacy": {
       "description": "Pharmacie où le médicament est procuré",
@@ -989,20 +967,20 @@
         "injection": "Injection",
         "intramuscular": "Intramusculaire",
         "intravenous": "Intraveineuse",
-        "nasal": "Nasale",
-        "oral": "Orale",
         "rectal": "Rectale",
         "subcutaneous": "Sous-cutanée",
         "sublingual": "Sublinguale",
-        "topical": "Locale"
+        "topical": "Locale",
+        "oral": "Orale",
+        "nasal": "Nasale"
       },
       "placeholder": "Sélectionnez la voie",
       "label": "Voie"
     },
     "sideEffects": {
       "description": "Effets secondaires connus ou ressentis de ce médicament",
-      "label": "Effets secondaires",
-      "placeholder": "Listez tout effet secondaire connu ou ressenti..."
+      "placeholder": "Listez tout effet secondaire connu ou ressenti...",
+      "label": "Effets secondaires"
     }
   },
   "pharmacies": {
@@ -1034,13 +1012,13 @@
       },
       "city": {
         "description": "Emplacement de la cité",
-        "label": "Cité",
-        "placeholder": "Paris"
+        "placeholder": "Paris",
+        "label": "Cité"
       },
       "country": {
         "description": "Pays où la pharmacie se situe",
-        "label": "Pays",
-        "placeholder": "ex : France, Canada"
+        "placeholder": "ex : France, Canada",
+        "label": "Pays"
       },
       "locationDivider": "Informations sur le lieu",
       "name": {
@@ -1054,18 +1032,18 @@
       },
       "postalCode": {
         "description": "Code postal ou code ZIP",
-        "label": "Code postal",
-        "placeholder": "ex : 90210, M5V 2T6"
+        "placeholder": "ex : 90210, M5V 2T6",
+        "label": "Code postal"
       },
       "specialtyServices": {
         "description": "Services spéciaux offerts par cette pharmacie",
-        "label": "Spécialités",
-        "placeholder": "ex : Vaccinations, préparations, gestion des thérapies médicamenteuses"
+        "placeholder": "ex : Vaccinations, préparations, gestion des thérapies médicamenteuses",
+        "label": "Spécialités"
       },
       "stateProvince": {
         "description": "Etat, province ou région",
-        "label": "Région / Etat / Province",
-        "placeholder": "ex : Ile-de-France, Québec"
+        "placeholder": "ex : Ile-de-France, Québec",
+        "label": "Région / Etat / Province"
       },
       "storeNumber": {
         "description": "Identificateur interne du magasin",
@@ -1106,8 +1084,7 @@
       },
       "phone": {
         "description": "Numéro de téléphone principal de l'établissement",
-        "label": "Numéro de téléphone de l'établissement",
-        "placeholder": "+33 1 12 34 56 78"
+        "label": "Numéro de téléphone de l'établissement"
       },
       "website": {
         "description": "Site web officiel de l'établissement",
@@ -1120,8 +1097,8 @@
     "form": {
       "email": {
         "description": "Adresse email professionnelle",
-        "label": "Adresse email",
-        "placeholder": "docteur@exemple.com"
+        "placeholder": "docteur@exemple.com",
+        "label": "Adresse email"
       },
       "name": {
         "description": "Nom complet du docteur, dont son titre",
@@ -1156,12 +1133,11 @@
   "procedures": {
     "anesthesiaNotes": {
       "description": "Toute note sur l'administration de l'anesthésie",
-      "label": "Notes sur l'anesthésie",
-      "placeholder": "Notes en rapport avec l'anesthésie..."
+      "placeholder": "Notes en rapport avec l'anesthésie...",
+      "label": "Notes sur l'anesthésie"
     },
     "anesthesiaType": {
       "description": "Type d'anesthésie utilisée",
-      "label": "Type d'anesthésie",
       "options": {
         "general": "Générale - Inconscience complète",
         "local": "Locale - Endormissement d'une zone précise",
@@ -1169,7 +1145,8 @@
         "regional": "Régionale - Endormissement d'une zone plus large",
         "sedation": "Sédation - Patient détendu, mais conscient"
       },
-      "placeholder": "Sélectionnez un type d'anesthésie"
+      "placeholder": "Sélectionnez un type d'anesthésie",
+      "label": "Type d'anesthésie"
     },
     "complications": {
       "description": "Documentez toute complication, effets secondaires, ou conséquences inattendues",
@@ -1189,12 +1166,6 @@
       "description": "Toute observation pertinente, instruction pré-/post-opératoire, ou autres détails",
       "placeholder": "Notes supplémentaires sur la procédure..."
     },
-    "outcome": {
-      "label": "Résultat"
-    },
-    "performingPractitioner": {
-      "label": "Médecin réalisant la procédure"
-    },
     "practitioner": {
       "description": "Docteur ou spécialiste réalisant la procédure",
       "label": "Médecin responsable",
@@ -1202,8 +1173,8 @@
     },
     "procedureCode": {
       "description": "Code médical (CPT, ICD-10-PCS, etc.)",
-      "label": "Code de procédure",
-      "placeholder": "ex : CPT-12345, ICD-10-PCS"
+      "placeholder": "ex : CPT-12345, ICD-10-PCS",
+      "label": "Code de procédure"
     },
     "procedureDate": {
       "description": "Quand la procédure a (eu) lieu",
@@ -1212,8 +1183,8 @@
     },
     "procedureDuration": {
       "description": "Durée de la procédure",
-      "label": "Durée (minutes)",
-      "placeholder": "ex : 30, 120"
+      "placeholder": "ex : 30, 120",
+      "label": "Durée (minutes)"
     },
     "procedureName": {
       "description": "Nom de la procédure médicale",
@@ -1234,7 +1205,6 @@
     },
     "procedureType": {
       "description": "Catégorie de procédure",
-      "label": "Type de procédure",
       "options": {
         "diagnostic": "Diagnostique - Analyse/Imagerie",
         "emergency": "Urgente - Soins urgents",
@@ -1242,6 +1212,7 @@
         "surgical": "Chirurgicale - Procédure invasive",
         "therapeutic": "Thérapeutique - Traitement"
       },
+      "label": "Type de procédure",
       "placeholder": "Sélectionnez le type"
     },
     "status": {
@@ -1367,8 +1338,8 @@
       },
       "symptomName": {
         "description": "Nom du symptôme que vous souhaitez suivre",
-        "label": "Nom du symptôme",
-        "placeholder": "ex : Migraine, douleur du dos chronique"
+        "placeholder": "ex : Migraine, douleur du dos chronique",
+        "label": "Nom du symptôme"
       },
       "typicalTriggers": {
         "description": "Ce qui déclenche typiquement ce symptôme",
@@ -1439,8 +1410,8 @@
     },
     "treatmentName": {
       "description": "Nom spécifique ou description du traitement",
-      "label": "Nom du traitement",
-      "placeholder": "ex : Physiothérapie pour douleur du dos"
+      "placeholder": "ex : Physiothérapie pour douleur du dos",
+      "label": "Nom du traitement"
     },
     "treatmentStatus": {
       "description": "Stade actuel du traitement",
@@ -1456,7 +1427,6 @@
     },
     "treatmentType": {
       "description": "Catégorie de traitement",
-      "label": "Type de traitement",
       "options": {
         "behavioralTherapy": "Thérapie comportementale - Traitement pour la santé mentale",
         "chemotherapy": "Chimiothérapie - Traitement contre le cancer",
@@ -1470,6 +1440,7 @@
         "speechTherapy": "Orthophonie - Amélioration de la communication",
         "surgery": "Chirurgie - Procédure chirurgicale"
       },
+      "label": "Type de traitement",
       "placeholder": "Sélectionnez le type"
     }
   },
@@ -1477,14 +1448,8 @@
     "attendingPractitioner": {
       "label": "Médecin consulté"
     },
-    "chiefComplaint": {
-      "label": "Affection principale"
-    },
     "diagnosisAssessment": {
       "label": "Diagnostic/Evaluation"
-    },
-    "durationMinutes": {
-      "label": "Durée (minutes)"
     },
     "followUpInstructions": {
       "label": "Instructions de suivi"
@@ -1514,8 +1479,8 @@
         },
         "durationMinutes": {
           "description": "Combien de temps a duré la visite",
-          "label": "Durée (minutes)",
-          "placeholder": "Durée de la visite"
+          "placeholder": "Durée de la visite",
+          "label": "Durée (minutes)"
         },
         "followUpInstructions": {
           "description": "Instructions pour les soins à poursuivre et les visites de suivi",
@@ -1579,13 +1544,13 @@
     "relatedCondition": {
       "label": "Condition concernée (optionnel)"
     },
+    "viewModal": {
+      "followUpInstructions": "Instructions de suivi",
+      "priority": "Priorité",
+      "chiefComplaint": "Affection principale"
+    },
     "table": {
       "visitType": "Type de visite"
-    },
-    "viewModal": {
-      "chiefComplaint": "Affection principale",
-      "followUpInstructions": "Instructions de suivi",
-      "priority": "Priorité"
     }
   }
 }

@@ -175,7 +175,7 @@ const ModelView = () => {
                 leftSection={<IconEdit size={16} />}
                 onClick={handleEdit}
               >
-                {t('common:buttons.edit', 'Edit')}
+                {t('shared:labels.edit', 'Edit')}
               </Button>
               <Button
                 color="red"

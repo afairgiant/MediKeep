@@ -162,7 +162,7 @@ const InjuryViewModal = ({
               {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
-              {t('injuries.tabs.treatment', 'Treatment')}
+              {t('shared:labels.treatment', 'Treatment')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
               {t('shared:tabs.documents', 'Documents')}
@@ -260,7 +260,7 @@ const InjuryViewModal = ({
                 />
                 <Divider my="md" />
                 <FieldDisplay
-                  label={t('injuries.treatmentReceived.label', 'Treatment Received')}
+                  label={t('shared:fields.treatmentReceived', 'Treatment Received')}
                   value={injury.treatment_received}
                 />
                 <Divider my="md" />
@@ -300,10 +300,10 @@ const InjuryViewModal = ({
         <Divider />
         <Group justify="flex-end">
           <Button variant="subtle" onClick={onClose}>
-            {t('common:buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button leftSection={<IconEdit size={16} />} onClick={() => onEdit(injury)}>
-            {t('common:buttons.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

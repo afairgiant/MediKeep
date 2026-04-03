@@ -343,7 +343,7 @@ const Allergies = () => {
 
         <MedicalPageActions
           primaryAction={{
-            label: t('allergies.addNew', 'Add New Allergy'),
+            label: t('shared:labels.addNewAllergy', 'Add New Allergy'),
             onClick: handleAddAllergy,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
@@ -361,7 +361,7 @@ const Allergies = () => {
         <AllergyFormWrapper
           isOpen={showAddForm}
           onClose={() => !isBlocking && resetForm()}
-          title={editingAllergy ? t('allergies.editTitle', 'Edit Allergy') : t('allergies.addTitle', 'Add New Allergy')}
+          title={editingAllergy ? t('allergies.editTitle', 'Edit Allergy') : t('shared:labels.addNewAllergy', 'Add New Allergy')}
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}

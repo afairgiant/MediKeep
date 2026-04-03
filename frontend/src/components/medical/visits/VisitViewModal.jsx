@@ -93,7 +93,7 @@ const VisitViewModal = ({
   };
 
   const getPractitionerDisplay = (practitionerId) => {
-    if (!practitionerId) return t('visits.viewModal.noPractitionerAssigned', 'No practitioner assigned');
+    if (!practitionerId) return t('shared:labels.noPractitionerAssigned', 'No practitioner assigned');
 
     const practitioner = practitioners.find(
       p => p.id === parseInt(practitionerId)
@@ -228,13 +228,13 @@ const VisitViewModal = ({
                         <Text>{formatDate(visit.date)}</Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.reason', 'Reason')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.reason', 'Reason')}</Text>
                         <Text c={visit.reason ? 'inherit' : 'dimmed'}>
                           {visit.reason || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.visitType', 'Visit Type')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.visitType', 'Visit Type')}</Text>
                         <Text c={visit.visit_type ? 'inherit' : 'dimmed'}>
                           {visit.visit_type || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
@@ -255,7 +255,7 @@ const VisitViewModal = ({
                         <Text fw={500} size="sm" c="dimmed">{t('shared:labels.duration', 'Duration')}</Text>
                         <Text c={visit.duration_minutes ? 'inherit' : 'dimmed'}>
                           {visit.duration_minutes
-                            ? t('visits.viewModal.durationMinutes', '{{minutes}} minutes', { minutes: visit.duration_minutes })
+                            ? t('shared:labels.minutesMinutes', '{{minutes}} minutes', { minutes: visit.duration_minutes })
                             : t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
@@ -289,7 +289,7 @@ const VisitViewModal = ({
                     <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.doctor', 'Doctor')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.doctor', 'Doctor')}</Text>
                         <Text c={visit.practitioner_id ? 'inherit' : 'dimmed'}>
                           {visit.practitioner_id
                             ? getPractitionerDisplay(visit.practitioner_id)
@@ -312,7 +312,7 @@ const VisitViewModal = ({
                         c="blue"
                         style={{ cursor: 'pointer', textDecoration: 'underline' }}
                         onClick={() => navigateToEntity('condition', condition.id, navigate)}
-                        title={t('visits.viewModal.viewCondition', 'View condition details')}
+                        title={t('shared:labels.viewConditionDetails', 'View condition details')}
                       >
                         {condition.diagnosis}
                       </Text>
@@ -433,7 +433,7 @@ const VisitViewModal = ({
               {t('visits.viewModal.editVisit', 'Edit Visit')}
             </Button>
             <Button variant="filled" onClick={onClose}>
-              {t('buttons.close', 'Close')}
+              {t('shared:labels.close', 'Close')}
             </Button>
           </Group>
         </Stack>

@@ -159,7 +159,7 @@ const ConditionFormWrapper = ({
                 {t('shared:labels.basicInformation', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-                {t('conditions.form.tabs.clinical', 'Clinical Details')}
+                {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
               <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
                 {t('shared:categories.medications', 'Medications')}
@@ -190,7 +190,7 @@ const ConditionFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('conditions.form.fields.conditionName', 'Condition Name')}
+                      label={t('shared:fields.conditionName', 'Condition Name')}
                       value={formData.condition_name || ''}
                       onChange={handleTextInputChange('condition_name')}
                       placeholder={t('conditions.form.placeholders.conditionName', 'Enter condition name')}
@@ -298,7 +298,7 @@ const ConditionFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('conditions.form.fields.icd10Code', 'ICD-10 Code')}
+                      label={t('shared:fields.icd10Code', 'ICD-10 Code')}
                       value={formData.icd10_code || ''}
                       onChange={handleTextInputChange('icd10_code')}
                       placeholder={t('conditions.form.placeholders.icd10Code', 'e.g., E11.9')}
@@ -307,7 +307,7 @@ const ConditionFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('conditions.form.fields.snomedCode', 'SNOMED Code')}
+                      label={t('shared:fields.snomedCode', 'SNOMED Code')}
                       value={formData.snomed_code || ''}
                       onChange={handleTextInputChange('snomed_code')}
                       placeholder={t('conditions.form.placeholders.snomedCode', 'e.g., 44054006')}
@@ -316,7 +316,7 @@ const ConditionFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <TextInput
-                      label={t('conditions.form.fields.codeDescription', 'Code Description')}
+                      label={t('shared:fields.codeDescription', 'Code Description')}
                       value={formData.code_description || ''}
                       onChange={handleTextInputChange('code_description')}
                       placeholder={t('conditions.form.placeholders.codeDescription', 'Description of the medical code')}

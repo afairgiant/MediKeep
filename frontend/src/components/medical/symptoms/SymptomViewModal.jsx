@@ -181,7 +181,7 @@ const SymptomViewModal = ({
               {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="occurrences" leftSection={<IconClockHour4 size={16} />}>
-              {t('symptoms.viewModal.tabs.episodes', 'Episodes ({{count}})', { count: occurrences.length })}
+              {t('shared:tabs.episodesCount', 'Episodes ({{count}})', { count: occurrences.length })}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
               {t('shared:tabs.notes', 'Notes')}
@@ -202,7 +202,7 @@ const SymptomViewModal = ({
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        {t('symptoms.viewModal.symptomName', 'Symptom Name')}
+                        {t('shared:labels.symptomName', 'Symptom Name')}
                       </Text>
                       <Text size="sm">{symptom.symptom_name}</Text>
                     </Stack>
@@ -451,7 +451,7 @@ const SymptomViewModal = ({
                                   setTimeout(() => onEditOccurrence(symptom, occurrence), 100);
                                 }}
                               >
-                                {t('buttons.edit', 'Edit')}
+                                {t('shared:labels.edit', 'Edit')}
                               </Button>
                             )}
                             <Button
@@ -557,7 +557,7 @@ const SymptomViewModal = ({
             </Button>
           )}
           <Button variant="filled" onClick={onClose}>
-            {t('buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
         </Group>
       </Stack>

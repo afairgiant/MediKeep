@@ -143,7 +143,7 @@ const TreatmentCard = ({
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={() => handleConditionClick(treatment.condition_id)}
-          title={t('common:treatments.card.viewConditionDetails', 'View condition details')}
+          title={t('shared:labels.viewConditionDetails', 'View condition details')}
         >
           {treatment.condition?.diagnosis ||
            getConditionName(treatment.condition_id) ||

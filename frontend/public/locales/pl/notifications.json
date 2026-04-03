@@ -68,7 +68,6 @@
     },
     "empty": "Nie skonfigurowano żadnych kanałów powiadomień.",
     "emptyHint": "Dodaj kanał, aby rozpocząć otrzymywanie powiadomień przez Discord, Email, Gotify lub Webhook.",
-    "enabled": "Włączony",
     "errors": {
       "fieldRequired": "{{field}} jest wymagane",
       "nameRequired": "Nazwa kanału jest wymagana"
@@ -76,7 +75,7 @@
     "fields": {
       "enabled": "Włącz ten kanał",
       "name": "Nazwa kanału",
-      "namePlaceholder": "My Discord Server",
+      "namePlaceholder": "Mój serwer Discord",
       "type": "Typ kanału"
     },
     "form": {
@@ -105,7 +104,6 @@
       },
       "priority": {
         "description": "Priorytet wiadomości (1-10, domyślnie 5)",
-        "label": "Priorytet",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -215,8 +213,7 @@
   "history": {
     "description": "Ostatnie powiadomienia wysłane przez Twoje kanały",
     "fields": {
-      "channel": "Kanał",
-      "event": "Zdarzenie"
+      "channel": "Kanał"
     },
     "loading": "Ładowanie historii...",
     "noHistory": "Brak wysłanych powiadomień",
@@ -242,8 +239,6 @@
     },
     "comingSoon": "Już wkrótce",
     "description": "Wybierz, które zdarzenia wyzwalają powiadomienia na każdym kanale",
-    "event": "Zdarzenie",
-    "eventHeader": "Zdarzenie",
     "loading": "Ładowanie preferencji...",
     "noChannels": "Dodaj najpierw kanał powiadomień, aby skonfigurować preferencje zdarzeń",
     "saveFailed": "Nie udało się zapisać preferencji",
@@ -269,12 +264,10 @@
       "userCreatedWithLinkSuccess": "Użytkownik utworzony i powiązany z istniejącym pacjentem pomyślnie!"
     },
     "documents": {
-      "deleteFailed": "Usunięcie nieudane",
       "linkFailed": "Nie udało się powiązać dokumentu",
       "linkSuccess": "Dokument powiązany pomyślnie",
       "unlinkFailed": "Nie udało się rozpowiązać dokumentu",
-      "unlinkSuccess": "Dokument rozpowiązany pomyślnie",
-      "uploadFailed": "Przesyłanie nieudane"
+      "unlinkSuccess": "Dokument rozpowiązany pomyślnie"
     },
     "familySharing": {
       "accessRevoked": "Dostęp odwołany",
@@ -289,7 +282,6 @@
     "generic": {
       "allOperationsFailed": "Wszystkie {{operation}} nie powiodły się. Spróbuj ponownie.",
       "allOperationsSuccess": "Wszystkie {{total}} {{operation}} ukończone pomyślnie!",
-      "deleteFailed": "Usunięcie nieudane",
       "downloadFailed": "Pobieranie nieudane",
       "operationFailed": "Operacja nieudana",
       "operationFailedTitle": "{{operation}} nieudane",
@@ -343,10 +335,8 @@
       "updatedSuccess": "Zaktualizowano {{name}} pomyślnie"
     },
     "photo": {
-      "deleteFailed": "Usunięcie nieudane",
       "photoBeingUploaded": "Zdjęcie jest aktualnie przesyłane. Czekaj na jego ukończenie.",
       "pleaseWait": "Czekaj proszę",
-      "uploadFailed": "Przesyłanie nieudane",
       "uploadSuccess": "Zdjęcie przesłane pomyślnie"
     },
     "reports": {
@@ -388,7 +378,6 @@
       "completedWithErrors": "Przesyłanie zakończone z błędami",
       "documentAdded": "Dokument dodany do Paperless",
       "duplicateDocument": "Zduplikowany dokument",
-      "failed": "Przesyłanie nieudane",
       "fileUploadedSuccess": "\"{{fileName}}\" przesłano do Paperless pomyślnie!",
       "fileUploadFailed": "Przesyłanie pliku nieudane",
       "paperlessUploadFailed": "Przesyłanie do Paperless nieudane",

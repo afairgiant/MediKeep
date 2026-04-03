@@ -68,7 +68,6 @@
     },
     "empty": "No hay canales de notificación configurados.",
     "emptyHint": "Agregue un canal para comenzar a recibir notificaciones por Discord, correo electrónico, Gotify o Webhook.",
-    "enabled": "Activado",
     "errors": {
       "fieldRequired": "{{field}} es obligatorio",
       "nameRequired": "El nombre del canal es obligatorio"
@@ -76,7 +75,7 @@
     "fields": {
       "enabled": "Habilitar este canal",
       "name": "Nombre del canal",
-      "namePlaceholder": "My Discord Server",
+      "namePlaceholder": "Mi servidor de Discord",
       "type": "Tipo de canal"
     },
     "form": {
@@ -105,7 +104,6 @@
       },
       "priority": {
         "description": "Prioridad del mensaje (1-10, por defecto 5)",
-        "label": "Prioridad",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -214,8 +212,7 @@
   "history": {
     "description": "Notificaciones recientes enviadas a través de sus canales",
     "fields": {
-      "channel": "Canal",
-      "event": "Evento"
+      "channel": "Canal"
     },
     "loading": "Cargando historial...",
     "noHistory": "Aún no se han enviado notificaciones",
@@ -241,8 +238,6 @@
     },
     "comingSoon": "Próximamente",
     "description": "Elija qué eventos activan notificaciones en cada canal",
-    "event": "Evento",
-    "eventHeader": "Evento",
     "loading": "Cargando preferencias...",
     "noChannels": "Primero añada un canal de notificación para configurar las preferencias de eventos",
     "saveFailed": "Error al guardar la preferencia",
@@ -268,12 +263,10 @@
       "userCreatedWithLinkSuccess": "Cuenta de usuario creada y vinculada con el paciente existente con éxito"
     },
     "documents": {
-      "deleteFailed": "Error al eliminar",
       "linkFailed": "Error al vincular el documento",
       "linkSuccess": "Documento vinculado con éxito",
       "unlinkFailed": "Error al desvincular el documento",
-      "unlinkSuccess": "Documento desvinculado con éxito",
-      "uploadFailed": "Error en la carga"
+      "unlinkSuccess": "Documento desvinculado con éxito"
     },
     "familySharing": {
       "accessRevoked": "Acceso revocado",
@@ -288,7 +281,6 @@
     "generic": {
       "allOperationsFailed": "Todas las {{operation}} fallaron. Por favor, inténtelo de nuevo.",
       "allOperationsSuccess": "Las {{total}} {{operation}} se completaron con éxito",
-      "deleteFailed": "Error al eliminar",
       "downloadFailed": "Error en la descarga",
       "operationFailed": "Error en la operación",
       "operationFailedTitle": "{{operation}} fallida",
@@ -342,10 +334,8 @@
       "updatedSuccess": "{{name}} actualizado con éxito"
     },
     "photo": {
-      "deleteFailed": "Error al eliminar",
       "photoBeingUploaded": "Se está subiendo una foto. Por favor, espere a que se complete.",
       "pleaseWait": "Por favor, espere",
-      "uploadFailed": "Error en la carga",
       "uploadSuccess": "Foto subida con éxito"
     },
     "reports": {
@@ -387,7 +377,6 @@
       "completedWithErrors": "Carga completada con errores",
       "documentAdded": "Documento añadido a Paperless",
       "duplicateDocument": "Documento duplicado",
-      "failed": "Error en la carga",
       "fileUploadedSuccess": "\"{{fileName}}\" subido a Paperless con éxito",
       "fileUploadFailed": "Error en la carga del archivo",
       "paperlessUploadFailed": "Error en la carga a Paperless",

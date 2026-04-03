@@ -102,7 +102,7 @@ export const injuryFormFields = [
     name: 'practitioner_id',
     type: 'select',
     labelKey: 'medical:injuries.practitioner.label',
-    placeholderKey: 'medical:injuries.practitioner.placeholder',
+    placeholderKey: 'shared:labels.selectPractitioner',
     descriptionKey: 'medical:injuries.practitioner.description',
     gridColumn: 6,
     searchable: true,
@@ -112,7 +112,7 @@ export const injuryFormFields = [
   {
     name: 'treatment_received',
     type: 'textarea',
-    labelKey: 'medical:injuries.treatment.label',
+    labelKey: 'shared:fields.treatmentReceived',
     placeholderKey: 'medical:injuries.treatment.placeholder',
     descriptionKey: 'medical:injuries.treatment.description',
     gridColumn: 12,

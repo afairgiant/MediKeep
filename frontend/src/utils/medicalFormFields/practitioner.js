@@ -6,7 +6,7 @@ export const practitionerFormFields = [
   {
     name: 'name',
     type: 'text',
-    labelKey: 'medical:practitioners.form.name.label',
+    labelKey: 'shared:fields.fullName',
     placeholderKey: 'medical:practitioners.form.name.placeholder',
     required: true,
     descriptionKey: 'medical:practitioners.form.name.description',
@@ -38,8 +38,8 @@ export const practitionerFormFields = [
   {
     name: 'phone_number',
     type: 'tel',
-    labelKey: 'medical:practitioners.form.phone.label',
-    placeholderKey: 'medical:practitioners.form.phone.placeholder',
+    labelKey: 'shared:labels.phoneNumber',
+    placeholderKey: 'shared:fields.15551234567',
     descriptionKey: 'medical:practitioners.form.phone.description',
     gridColumn: 6,
     maxLength: 20,
@@ -47,7 +47,7 @@ export const practitionerFormFields = [
   {
     name: 'email',
     type: 'email',
-    labelKey: 'medical:practitioners.form.email.label',
+    labelKey: 'shared:fields.emailAddress',
     placeholderKey: 'medical:practitioners.form.email.placeholder',
     descriptionKey: 'medical:practitioners.form.email.description',
     gridColumn: 6,
@@ -63,7 +63,7 @@ export const practitionerFormFields = [
   {
     name: 'rating',
     type: 'rating',
-    labelKey: 'medical:practitioners.form.rating.label',
+    labelKey: 'shared:labels.rating',
     descriptionKey: 'medical:practitioners.form.rating.description',
     gridColumn: 12,
   },

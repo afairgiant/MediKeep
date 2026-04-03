@@ -56,7 +56,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
   aggregationPeriod = null,
   glucoseContextFilter
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   // Determine if we're displaying aggregated data
   const isAggregated = aggregationPeriod !== null && aggregatedDataPoints.length > 0;
@@ -293,7 +293,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
               strokeWidth={1}
               strokeDasharray="3 3"
               dot={false}
-              name={t('vitals.trends.rangeMin', 'Min')}
+              name={t('shared:labels.min', 'Min')}
               legendType="none"
             />
           )}

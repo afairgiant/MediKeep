@@ -238,7 +238,7 @@ const MedicationCard = ({
             size="xs"
             onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
           >
-            {t('common:buttons.edit')}
+            {t('shared:labels.edit')}
           </Button>
           <Button
             variant="filled"

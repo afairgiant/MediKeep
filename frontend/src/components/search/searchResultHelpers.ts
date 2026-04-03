@@ -116,12 +116,12 @@ export function getTypeLabel(t: TFunc, typeKey: string): string {
 
 export function getItemTitle(entityType: string, item: Record<string, unknown>, t: TFunc): string {
   switch (entityType) {
-    case 'lab_result': return (item.test_name as string) || t('search.fallbacks.labResult');
+    case 'lab_result': return (item.test_name as string) || t('shared:labels.labResult');
     case 'medication': return (item.medication_name as string) || t('search.fallbacks.medication');
-    case 'condition': return (item.condition_name as string) || (item.diagnosis as string) || t('search.fallbacks.condition');
+    case 'condition': return (item.condition_name as string) || (item.diagnosis as string) || t('shared:labels.condition');
     case 'procedure': return (item.name as string) || (item.procedure_name as string) || t('search.fallbacks.procedure');
     case 'immunization': return (item.vaccine_name as string) || t('search.fallbacks.immunization');
-    case 'treatment': return (item.treatment_name as string) || t('search.fallbacks.treatment');
+    case 'treatment': return (item.treatment_name as string) || t('shared:labels.treatment');
     case 'encounter': return (item.visit_type as string) || (item.encounter_type as string) || (item.reason as string) || t('search.fallbacks.encounter');
     case 'allergy': return (item.allergen as string) || t('search.fallbacks.allergy');
     default: return t('search.fallbacks.record');
@@ -134,7 +134,7 @@ export function getItemSubtitle(entityType: string, item: Record<string, unknown
     case 'medication': return [item.dosage, item.status].filter(Boolean).join(' - ');
     case 'condition': return [item.diagnosis, item.status].filter(Boolean).join(' - ');
     case 'procedure': return (item.description as string) || (item.status as string) || '';
-    case 'immunization': return item.dose_number ? t('search.subtitles.dose', { number: item.dose_number }) : '';
+    case 'immunization': return item.dose_number ? t('shared:labels.doseNumber', { number: item.dose_number }) : '';
     case 'treatment': return [item.treatment_type, item.status].filter(Boolean).join(' - ');
     case 'encounter': return (item.reason as string) || (item.chief_complaint as string) || '';
     case 'allergy': return [item.severity, item.reaction].filter(Boolean).join(' - ');

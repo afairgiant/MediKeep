@@ -129,7 +129,7 @@ const ReportBuilder = () => {
     'allergies': t('shared:categories.allergies'),
     'treatments': t('shared:categories.treatments'),
     'encounters': t('shared:tabs.visits'),
-    'vitals': t('reportBuilder.categories.vitals'),
+    'vitals': t('shared:categories.vitals'),
     'practitioners': t('shared:categories.practitioners'),
     'pharmacies': t('shared:categories.pharmacies'),
     'emergency_contacts': t('shared:categories.emergency_contacts'),
@@ -254,7 +254,7 @@ const ReportBuilder = () => {
                 <Text size="sm" fw={500}>{t('reportBuilder.progress.recordsSelected')}</Text>
                 <Text size="sm" c="dimmed">
                   {selectedCount} {t('shared:labels.medicalRecords', 'records')}
-                  {trendChartCount > 0 && `, ${trendChartCount} ${t('reportBuilder.trendCharts.title', 'charts').toLowerCase()}`}
+                  {trendChartCount > 0 && `, ${trendChartCount} ${t('shared:labels.trendCharts', 'charts').toLowerCase()}`}
                 </Text>
               </Group>
               <Progress
@@ -316,7 +316,7 @@ const ReportBuilder = () => {
               label: (
                 <Group gap={6} wrap="nowrap">
                   <IconChartLine size={16} />
-                  <span>{t('reportBuilder.segmentControl.trendCharts')}</span>
+                  <span>{t('shared:labels.trendCharts')}</span>
                   {trendChartCount > 0 && (
                     <Badge size="xs" variant="filled" color="teal">{trendChartCount}</Badge>
                   )}
@@ -421,7 +421,7 @@ const ReportBuilder = () => {
 
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={closeSettingsModal}>
-              {t('buttons.close')}
+              {t('shared:labels.close')}
             </Button>
           </Group>
         </Stack>

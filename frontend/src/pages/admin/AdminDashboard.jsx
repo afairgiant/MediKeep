@@ -144,7 +144,7 @@ const AdminDashboard = () => {
                   <IconStethoscope size={24} />
                 </ThemeIcon>
                 <Text size="xl" fw={700}>
-                  {t('dashboard.title', 'Admin Dashboard')}
+                  {t('shared:categories.admin_dashboard', 'Admin Dashboard')}
                 </Text>
               </Group>
               <Text c="dimmed" size="md">
@@ -170,7 +170,7 @@ const AdminDashboard = () => {
             icon={IconUsers}
             value={stats?.total_users || 0}
             label={t('dashboard.stats.totalUsers', 'Total Users')}
-            change={t('dashboard.stats.recentRegistrations', '+{{count}} this week', { count: stats?.recent_registrations || 0 })}
+            change={t('shared:categories.count_this_week', '+{{count}} this week', { count: stats?.recent_registrations || 0 })}
             color="blue"
             href="/admin/models/user"
           />
@@ -192,7 +192,7 @@ const AdminDashboard = () => {
             icon={IconPill}
             value={stats?.total_medications || 0}
             label={t('shared:categories.medications', 'Medications')}
-            change={t('dashboard.stats.activePrescriptions', '{{count}} active prescriptions', { count: stats?.active_medications || 0 })}
+            change={t('shared:categories.count_active_prescriptions', '{{count}} active prescriptions', { count: stats?.active_medications || 0 })}
             color="cyan"
             href="/admin/models/medication"
           />
@@ -314,7 +314,7 @@ const SystemHealthCard = ({
         </ThemeIcon>
         <div>
           <Text size="lg" fw={600}>
-            {t('dashboard.systemHealth.title', 'System Health')}
+            {t('shared:labels.systemHealth', 'System Health')}
           </Text>
           <Text size="sm" c="dimmed">
             {t('dashboard.systemHealth.subtitle', 'Current system status')}
@@ -351,7 +351,7 @@ const SystemHealthCard = ({
         />
         <HealthMetric
           icon={IconReportAnalytics}
-          label={t('dashboard.systemHealth.totalRecords', 'Total Records')}
+          label={t('shared:labels.totalRecords', 'Total Records')}
           value={systemHealth?.total_records || 0}
           color="green"
         />
@@ -438,7 +438,7 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
           </div>
         </Group>
         <Badge variant="light" color="green">
-          {t('dashboard.recentActivity.count', '{{count}} activities', { count: activities.length })}
+          {t('shared:labels.countActivities', '{{count}} activities', { count: activities.length })}
         </Badge>
       </Group>
 
@@ -534,7 +534,7 @@ const QuickActionsCard = () => {
         <ActionButton
           href="/admin/data-models"
           icon={IconDatabase}
-          title={t('dashboard.quickActions.dataModels', 'Data Models')}
+          title={t('shared:labels.dataModels', 'Data Models')}
           desc={t('dashboard.quickActions.dataModelsDesc', 'View and manage database tables')}
           color="blue"
         />
@@ -548,7 +548,7 @@ const QuickActionsCard = () => {
         <ActionButton
           href="/admin/system-health"
           icon={IconShieldCheck}
-          title={t('dashboard.quickActions.systemHealth', 'System Health')}
+          title={t('shared:labels.systemHealth', 'System Health')}
           desc={t('dashboard.quickActions.systemHealthDesc', 'Monitor system status')}
           color="orange"
         />
@@ -576,7 +576,7 @@ const QuickActionsCard = () => {
         <ActionButton
           href="/admin/audit-log"
           icon={IconActivity}
-          title={t('dashboard.quickActions.auditLog', 'Audit Log')}
+          title={t('shared:labels.auditLog', 'Audit Log')}
           desc={t('dashboard.quickActions.auditLogDesc', 'View system activity log')}
           color="red"
         />

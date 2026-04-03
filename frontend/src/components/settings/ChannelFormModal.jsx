@@ -312,7 +312,7 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
             {t('shared:fields.cancel', 'Cancel')}
           </Button>
           <Button variant="primary" type="submit" loading={saving} disabled={saving}>
-            {saving ? t('common:buttons.saving', 'Saving...') : isEditing ? t('common:buttons.save', 'Save') : t('common:buttons.create', 'Create')}
+            {saving ? t('shared:labels.saving', 'Saving...') : isEditing ? t('common:buttons.save', 'Save') : t('common:buttons.create', 'Create')}
           </Button>
         </div>
       </form>

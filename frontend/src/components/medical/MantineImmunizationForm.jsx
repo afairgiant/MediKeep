@@ -29,8 +29,8 @@ const MantineImmunizationForm = ({
     { value: 'intramuscular', label: t('immunizations.routeOptions.intramuscular') },
     { value: 'subcutaneous', label: t('immunizations.routeOptions.subcutaneous') },
     { value: 'intradermal', label: t('immunizations.routeOptions.intradermal') },
-    { value: 'oral', label: t('immunizations.routeOptions.oral') },
-    { value: 'nasal', label: t('immunizations.routeOptions.nasal') },
+    { value: 'oral', label: t('shared:fields.oral') },
+    { value: 'nasal', label: t('shared:fields.nasal') },
   ];
 
   // Common vaccine manufacturers

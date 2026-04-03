@@ -587,7 +587,7 @@ const Symptoms = () => {
                           ))}
                           {symptom.typical_triggers.length > 3 && (
                             <Text size="xs" c="dimmed">
-                              {t('symptoms.moreCount', '+{{count}} more', { count: symptom.typical_triggers.length - 3 })}
+                              {t('shared:labels.countMore', '+{{count}} more', { count: symptom.typical_triggers.length - 3 })}
                             </Text>
                           )}
                         </Group>
@@ -628,7 +628,7 @@ const Symptoms = () => {
                         leftSection={<IconEdit size={14} />}
                         onClick={() => handleEditSymptom(symptom)}
                       >
-                        {t('buttons.edit', 'Edit')}
+                        {t('shared:labels.edit', 'Edit')}
                       </Button>
                       <Button
                         size="xs"

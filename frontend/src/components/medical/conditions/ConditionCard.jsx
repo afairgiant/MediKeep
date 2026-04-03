@@ -135,12 +135,12 @@ const ConditionCard = ({
         render: (value) => formatLongDate(value)
       },
       condition.snomed_code && {
-        label: t('conditions.snomedCode.label'),
+        label: t('shared:fields.snomedCode'),
         value: condition.snomed_code,
         render: (value) => value
       },
       condition.code_description && {
-        label: t('conditions.codeDescription.label'),
+        label: t('shared:fields.codeDescription'),
         value: condition.code_description,
         render: (value) => value,
         align: 'flex-start',

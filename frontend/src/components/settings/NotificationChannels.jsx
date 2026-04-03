@@ -187,7 +187,7 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
 
                   <div className="channel-status">
                     {channel.is_enabled ? (
-                      <span className="status-enabled">{t('channels.enabled', 'Enabled')}</span>
+                      <span className="status-enabled">{t('shared:labels.enabled', 'Enabled')}</span>
                     ) : (
                       <span className="status-disabled">{t('shared:labels.disabled', 'Disabled')}</span>
                     )}
@@ -204,7 +204,7 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
                       {t('channels.test', 'Test')}
                     </Button>
                     <Button variant="secondary" size="small" onClick={() => handleEditChannel(channel)}>
-                      {t('common:buttons.edit', 'Edit')}
+                      {t('shared:labels.edit', 'Edit')}
                     </Button>
                     <Button
                       variant="danger"

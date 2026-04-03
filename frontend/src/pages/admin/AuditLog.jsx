@@ -223,7 +223,7 @@ const AuditLog = () => {
                 <ThemeIcon size="xl" variant="light" color="blue" aria-hidden="true">
                   <IconFileText size={24} />
                 </ThemeIcon>
-                <Title order={2}>{t('auditLog.title', 'Audit Log')}</Title>
+                <Title order={2}>{t('shared:labels.auditLog', 'Audit Log')}</Title>
               </Group>
               <Text c="dimmed" size="md">
                 {t('auditLog.subtitle', 'Complete activity trail for compliance and auditing')}
@@ -243,7 +243,7 @@ const AuditLog = () => {
                 onClick={handleExport}
                 loading={exporting}
               >
-                {t('auditLog.exportCsv', 'Export CSV')}
+                {t('shared:labels.exportCsv', 'Export CSV')}
               </Button>
             </Group>
           </Group>
@@ -304,7 +304,7 @@ const AuditLog = () => {
                   leftSection={<IconFilterOff size={16} />}
                   onClick={handleClearFilters}
                 >
-                  {t('auditLog.clearFilters', 'Clear Filters')}
+                  {t('shared:labels.clearFilters', 'Clear Filters')}
                 </Button>
               )}
             </Group>
@@ -328,7 +328,7 @@ const AuditLog = () => {
           >
             {error}
             <Button variant="subtle" size="xs" mt="xs" onClick={fetchData}>
-              {t('common:buttons.retry', 'Retry')}
+              {t('shared:labels.retry', 'Retry')}
             </Button>
           </Alert>
         )}

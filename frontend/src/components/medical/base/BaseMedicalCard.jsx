@@ -176,7 +176,7 @@ const BaseMedicalCard = ({
               {t('buttons.view')}
             </Button>
             <Button variant="filled" size="xs" onClick={safeOnEdit}>
-              {t('buttons.edit')}
+              {t('shared:labels.edit')}
             </Button>
             <Button variant="filled" color="red" size="xs" onClick={safeOnDelete}>
               {t('buttons.delete')}

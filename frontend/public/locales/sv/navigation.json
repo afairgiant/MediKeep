@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Tillagd",
-      "cancelled": "Avbruten",
-      "completed": "Slutförd",
-      "created": "Skapad",
       "deleted": "Borttagen",
       "modified": "Ändrad",
       "removed": "Borttagen",
@@ -22,9 +19,7 @@
     "hello": "Hej",
     "loading": "Laddar din medicinska instrumentpanel...",
     "modules": {
-      "adminDashboard": "Adminpanel",
       "exportRecords": "Exportera journaler",
-      "patientInfo": "Patientinformation",
       "visitHistory": "Besökshistorik"
     },
     "search": {
@@ -40,8 +35,7 @@
       "treatments": "Behandlingar och ingrepp"
     },
     "stats": {
-      "activeMedications": "Aktiva mediciner",
-      "totalRecords": "Totalt antal poster"
+      "activeMedications": "Aktiva mediciner"
     },
     "subtitle": "Hantera din hälsoinformation säkert",
     "title": "MediKeep Instrumentpanel"
@@ -60,15 +54,10 @@
     "title": "Inbjudningar",
     "types": {
       "patientRecord": "Patientjournal"
-    },
-    "viewAll": "Visa alla {{count}} inbjudningar",
-    "viewAll_one": "Visa alla {{count}} inbjudningar",
-    "viewAll_other": "Visa alla {{count}} inbjudningar"
+    }
   },
   "menu": {
-    "administration": "Administration",
     "backToDashboard": "Tillbaka till instrumentpanelen",
-    "dashboard": "Instrumentpanel",
     "help": "Hjälp",
     "logout": "Logga ut",
     "patients": "Patienter",
@@ -76,7 +65,6 @@
     "reports": "Rapporter"
   },
   "pages": {
-    "dashboard": "Instrumentpanel",
     "help": "Hjälp och support",
     "medicalHistory": "Sjukdomshistorik",
     "patientDetails": "Patientdetaljer",
@@ -86,26 +74,20 @@
     "userProfile": "Användarprofil"
   },
   "sections": {
-    "medicalInfo": "Medicinsk information",
     "personalInfo": "Personlig information",
     "preferences": "Preferenser"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Adminpanel",
-      "backupManagement": "Säkerhetskopiering",
       "customReports": "Anpassade rapporter",
-      "dataModels": "Datamodeller",
       "exportRecords": "Exportera journaler",
       "language": "Språk",
       "patientInfo": "Patientinfo",
-      "systemHealth": "Systemhälsa",
       "tagManagement": "Tagghantering",
       "theme": "Tema",
       "visitHistory": "Besökshistorik"
     },
     "sections": {
-      "administration": "Administration",
       "careAndTreatment": "Vård och behandling",
       "misc": "Övrigt",
       "tools": "Verktyg"
