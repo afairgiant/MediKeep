@@ -109,7 +109,7 @@ def _derive_salt(purpose: str) -> str:
 
 class Settings:  # App Info
     APP_NAME: str = "MediKeep"
-    VERSION: str = "0.61.0"
+    VERSION: str = "0.61.1"
 
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
 
