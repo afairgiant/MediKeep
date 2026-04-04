@@ -108,7 +108,6 @@
     "unknown": "Unbekannt",
     "selectSeverityLevel": "Schweregrad auswählen",
     "route": "Verabreichungsweg",
-    "practitionerIdId": "Praktiker-ID: {{id}}",
     "dosage": "Dosierung",
     "attachedDocuments": "Angehängte Dokumente",
     "practice": "Praxis",
@@ -223,7 +222,8 @@
     "viewAllCountInvitations": "Alle {{count}} Einladungen anzeigen",
     "event": "Ereignis",
     "deleteFailed": "Löschen fehlgeschlagen",
-    "uploadFailed": "Hochladen fehlgeschlagen"
+    "uploadFailed": "Hochladen fehlgeschlagen",
+    "practitionerId": "Praktiker-ID: {{id}}"
   },
   "emptyStates": {
     "adjustSearch": "Versuchen Sie, Ihre Such- oder Filterkriterien anzupassen."

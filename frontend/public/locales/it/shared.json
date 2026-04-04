@@ -108,7 +108,6 @@
     "unknown": "Sconosciuto",
     "selectSeverityLevel": "Selezioni il livello di gravità",
     "route": "Via",
-    "practitionerIdId": "ID professionista: {{id}}",
     "dosage": "Dosaggio",
     "attachedDocuments": "Documenti allegati",
     "practice": "Struttura",
@@ -223,7 +222,8 @@
     "viewAllCountInvitations": "Visualizza tutti i {{count}} inviti",
     "event": "Evento",
     "deleteFailed": "Eliminazione non riuscita",
-    "uploadFailed": "Caricamento non riuscito"
+    "uploadFailed": "Caricamento non riuscito",
+    "practitionerId": "ID professionista: {{id}}"
   },
   "emptyStates": {
     "adjustSearch": "Prova a modificare i criteri di ricerca o filtro."

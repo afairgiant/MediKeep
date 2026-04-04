@@ -108,7 +108,6 @@
     "unknown": "Неизвестно",
     "selectSeverityLevel": "Выберите степень тяжести",
     "route": "Способ введения",
-    "practitionerIdId": "ID врача: {{id}}",
     "dosage": "Дозировка",
     "attachedDocuments": "Прикреплённые документы",
     "practice": "Клиника",
@@ -223,7 +222,8 @@
     "viewAllCountInvitations": "Просмотреть все приглашения ({{count}})",
     "event": "Событие",
     "deleteFailed": "Ошибка удаления",
-    "uploadFailed": "Ошибка загрузки"
+    "uploadFailed": "Ошибка загрузки",
+    "practitionerId": "ID врача: {{id}}"
   },
   "emptyStates": {
     "adjustSearch": "Попробуйте изменить параметры поиска или фильтра."

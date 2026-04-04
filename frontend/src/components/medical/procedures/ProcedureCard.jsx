@@ -83,7 +83,7 @@ const ProcedureCard = ({
         render: (value) => {
           if (!value) return t('shared:labels.notSpecified');
 
-          const practitionerName = practitioner?.name || t('shared:labels.practitionerIdId', 'Practitioner ID: {{id}}', { id: value });
+          const practitionerName = practitioner?.name || t('shared:labels.practitionerId', 'Practitioner ID: {{id}}', { id: value });
           return (
             <Text
               size="sm"

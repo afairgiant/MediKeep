@@ -108,7 +108,6 @@
     "unknown": "Nieznany",
     "selectSeverityLevel": "Wybierz poziom nasilenia",
     "route": "Droga podania",
-    "practitionerIdId": "ID pracownika: {{id}}",
     "dosage": "Dawkowanie",
     "attachedDocuments": "Załączone dokumenty",
     "practice": "Praktyka",
@@ -223,7 +222,8 @@
     "viewAllCountInvitations": "Wyświetl wszystkie {{count}} zaproszenia",
     "event": "Zdarzenie",
     "deleteFailed": "Usunięcie nieudane",
-    "uploadFailed": "Przesyłanie nieudane"
+    "uploadFailed": "Przesyłanie nieudane",
+    "practitionerId": "ID pracownika: {{id}}"
   },
   "emptyStates": {
     "adjustSearch": "Spróbuj dostosować kryteria wyszukiwania lub filtrowania."

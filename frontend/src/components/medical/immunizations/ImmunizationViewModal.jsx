@@ -240,7 +240,7 @@ const ImmunizationViewModal = ({
                         onClick={() => navigateToEntity('practitioner', immunization.practitioner_id, navigate)}
                         title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
                       >
-                        {practitioner?.name || t('shared:labels.practitionerIdId', 'Practitioner ID: {{id}}', { id: immunization.practitioner_id })}
+                        {practitioner?.name || t('shared:labels.practitionerId', 'Practitioner ID: {{id}}', { id: immunization.practitioner_id })}
                       </Text>
                     ) : (
                       <Text size="sm" c="dimmed">{t('shared:labels.notSpecified', 'Not specified')}</Text>

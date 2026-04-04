@@ -108,7 +108,6 @@
     "unknown": "Okänd",
     "selectSeverityLevel": "Välj svårighetsgrad",
     "route": "Administreringsväg",
-    "practitionerIdId": "Utövare-ID: {{id}}",
     "dosage": "Dosering",
     "attachedDocuments": "Bifogade dokument",
     "practice": "Mottagning",
@@ -223,7 +222,8 @@
     "viewAllCountInvitations": "Visa alla {{count}} inbjudningar",
     "event": "Händelse",
     "deleteFailed": "Borttagning misslyckades",
-    "uploadFailed": "Uppladdning misslyckades"
+    "uploadFailed": "Uppladdning misslyckades",
+    "practitionerId": "Utövare-ID: {{id}}"
   },
   "emptyStates": {
     "adjustSearch": "Försök justera din sökning eller filterkriterier."

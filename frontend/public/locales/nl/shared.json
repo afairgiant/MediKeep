@@ -108,7 +108,6 @@
     "unknown": "Onbekend",
     "selectSeverityLevel": "Selecteer ernstniveau",
     "route": "Toedieningsweg",
-    "practitionerIdId": "Zorgverlener-ID: {{id}}",
     "dosage": "Dosering",
     "attachedDocuments": "Bijgevoegde documenten",
     "practice": "Praktijk",
@@ -223,7 +222,8 @@
     "viewAllCountInvitations": "Bekijk alle {{count}} uitnodigingen",
     "event": "Gebeurtenis",
     "deleteFailed": "Verwijderen mislukt",
-    "uploadFailed": "Upload mislukt"
+    "uploadFailed": "Upload mislukt",
+    "practitionerId": "Zorgverlener-ID: {{id}}"
   },
   "emptyStates": {
     "adjustSearch": "Probeer uw zoekopdracht of filtercriteria aan te passen."

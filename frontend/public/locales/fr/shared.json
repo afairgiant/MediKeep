@@ -51,7 +51,7 @@
     "cancelled": "Annulé",
     "completed": "Complété",
     "treatmentName": "Nom du traitement",
-    "treatmentType": "Treatment Category",
+    "treatmentType": "Catégorie de traitement",
     "codeDescription": "Description du code",
     "snomedCode": "Code SNOMED",
     "ndcNumber": "Numéro NDC",
@@ -74,7 +74,7 @@
     "description": "Description",
     "endDate": "Date de fin",
     "active": "Actif",
-    "basicInformation": "Basic Info",
+    "basicInformation": "Informations de base",
     "facility": "Etablissement",
     "notSpecified": "Non spécifié(e)",
     "clinicalNotes": "Notes cliniques",
@@ -108,7 +108,6 @@
     "unknown": "Inconnu",
     "selectSeverityLevel": "Sélectionnez le niveau de sévérité",
     "route": "Voie",
-    "practitionerIdId": "ID du praticien : {{id}}",
     "dosage": "Posologie",
     "attachedDocuments": "Pièces jointes",
     "practice": "Etablissement",
@@ -173,7 +172,7 @@
     "postalCode": "Code postal",
     "specialties": "Spécialités",
     "stateProvince": "Région / Etat / Province",
-    "trendCharts": "charts",
+    "trendCharts": "graphiques",
     "clearFilters": "Effacer les filtres",
     "treatment": "Traitement",
     "symptomName": "Nom du symptôme",
@@ -189,7 +188,7 @@
     "warnings": "Avertissements",
     "deleteAllCountImportedReadingsForThisDay": "Supprimer toutes les {{count}} mesures importées pour ce jour ?",
     "max": "Max",
-    "countReadings": "Readings",
+    "countReadings": "{{count}} mesures",
     "addNewAllergy": "Ajouter une allergie",
     "showingCountUniqueTests": "Affichage de {{count}} résultat(s) unique(s)",
     "priority": "Priorité",
@@ -223,7 +222,8 @@
     "viewAllCountInvitations": "Voir toutes les {{count}} invitations",
     "event": "Evénement",
     "deleteFailed": "Echec de la suppression",
-    "uploadFailed": "Echec du téléversement"
+    "uploadFailed": "Echec du téléversement",
+    "practitionerId": "ID du praticien : {{id}}"
   },
   "emptyStates": {
     "adjustSearch": "Essayez d'ajuster vos critères de recherche ou de tri."

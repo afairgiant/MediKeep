@@ -44,7 +44,7 @@ const VisitCard = ({
     if (practitioner) {
       return `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
     }
-    return t('shared:labels.practitionerIdId', 'Practitioner ID: {{id}}', { id: practitionerId });
+    return t('shared:labels.practitionerId', 'Practitioner ID: {{id}}', { id: practitionerId });
   };
 
   const getConditionDetails = (conditionId) => {

@@ -603,7 +603,8 @@
     },
     "title": "Trash Management",
     "totalSize": "{{size}} total",
-    "trashPurged": "Trash purged"
+    "trashPurged": "Trash purged",
+    "fileCount_other": "{{count}} files"
   },
   "users": {
     "actionsFor": "Actions for {{username}}",
