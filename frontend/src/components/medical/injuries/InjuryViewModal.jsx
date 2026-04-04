@@ -34,7 +34,7 @@ const InjuryViewModal = ({
   injuryTypes = [],
   navigate,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -115,7 +115,7 @@ const InjuryViewModal = ({
       </Text>
       {children || (
         <Text size="sm" fw={500}>
-          {value || t('common:labels.notSpecified', 'Not specified')}
+          {value || t('shared:labels.notSpecified', 'Not specified')}
         </Text>
       )}
     </Box>
@@ -159,16 +159,16 @@ const InjuryViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              {t('injuries.tabs.overview', 'Overview')}
+              {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
-              {t('injuries.tabs.treatment', 'Treatment')}
+              {t('shared:labels.treatment', 'Treatment')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              {t('injuries.tabs.documents', 'Documents')}
+              {t('shared:tabs.documents', 'Documents')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('injuries.tabs.notes', 'Notes')}
+              {t('shared:tabs.notes', 'Notes')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -195,7 +195,7 @@ const InjuryViewModal = ({
                         <Text size="sm" fw={500}>
                           {injury.date_of_injury
                             ? formatLongDate(injury.date_of_injury)
-                            : t('common:labels.notSpecified', 'Not specified')}
+                            : t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Group>
                     </FieldDisplay>
@@ -225,7 +225,7 @@ const InjuryViewModal = ({
                         </Text>
                       ) : (
                         <Text size="sm" fw={500}>
-                          {t('common:labels.notSpecified', 'Not specified')}
+                          {t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       )}
                     </FieldDisplay>
@@ -233,7 +233,7 @@ const InjuryViewModal = ({
                     {injury.tags && injury.tags.length > 0 && (
                       <Box mt="sm">
                         <Text size="xs" c="dimmed" mb={4}>
-                          {t('common:fields.tags.label', 'Tags')}
+                          {t('shared:labels.tags', 'Tags')}
                         </Text>
                         <Group gap="xs">
                           {injury.tags.map((tag, index) => (
@@ -260,7 +260,7 @@ const InjuryViewModal = ({
                 />
                 <Divider my="md" />
                 <FieldDisplay
-                  label={t('injuries.treatmentReceived.label', 'Treatment Received')}
+                  label={t('shared:fields.treatmentReceived', 'Treatment Received')}
                   value={injury.treatment_received}
                 />
                 <Divider my="md" />
@@ -288,7 +288,7 @@ const InjuryViewModal = ({
             <Box mt="md">
               <Paper p="md" withBorder>
                 <FieldDisplay
-                  label={t('injuries.notes.label', 'Additional Notes')}
+                  label={t('shared:fields.additionalNotes', 'Additional Notes')}
                   value={injury.notes}
                 />
               </Paper>
@@ -300,10 +300,10 @@ const InjuryViewModal = ({
         <Divider />
         <Group justify="flex-end">
           <Button variant="subtle" onClick={onClose}>
-            {t('common:buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button leftSection={<IconEdit size={16} />} onClick={() => onEdit(injury)}>
-            {t('common:buttons.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

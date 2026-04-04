@@ -37,7 +37,7 @@ import logger from '../../services/logger';
 import { timezoneService } from '../../services/timezoneService';
 
 const InvitationNotifications = () => {
-  const { t } = useTranslation(['navigation', 'common']);
+  const { t } = useTranslation(['navigation', 'common', 'shared']);
   const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const { invalidatePatientList } = useCacheManager();
@@ -137,7 +137,7 @@ const InvitationNotifications = () => {
   const getInvitationTypeDisplay = (type) => {
     switch (type) {
       case 'family_history_share':
-        return t('invitations.types.familyHistory', 'Family History');
+        return t('shared:categories.family_history', 'Family History');
       case 'patient_share':
         return t('invitations.types.patientRecord', 'Patient Record');
       default:
@@ -289,7 +289,7 @@ const InvitationNotifications = () => {
                 onClick={openInvitationManager}
                 rightSection={<IconChevronRight size="0.8rem" />}
               >
-                {t('invitations.viewAll', 'View all {{count}} invitations', { count: pendingInvitations.length })}
+                {t('shared:labels.viewAllCountInvitations', 'View all {{count}} invitations', { count: pendingInvitations.length })}
               </Button>
             )}
           </Stack>
@@ -398,7 +398,7 @@ const InvitationNotifications = () => {
                 setSelectedInvitation(null);
               }}
             >
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <Button
               color="green"

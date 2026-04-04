@@ -37,13 +37,13 @@ const MedicationCard = ({
   fileCountLoading = false,
   onError,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
   const { getTagColor } = useTagColors();
 
   const getMedicationPurpose = (medication) => {
     const indication = medication.indication?.trim();
-    return indication || t('common:labels.notSpecified');
+    return indication || t('shared:labels.notSpecified');
   };
 
   const getMedicationTypeLabel = (type) => {
@@ -139,7 +139,7 @@ const MedicationCard = ({
           {medication.frequency && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.frequency.label')}:
+                {t('shared:fields.frequency')}:
               </Text>
               <Text size="sm">{medication.frequency}</Text>
             </Group>
@@ -147,7 +147,7 @@ const MedicationCard = ({
           {medication.route && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.route.label')}:
+                {t('shared:labels.route')}:
               </Text>
               <Badge variant="light" color="cyan" size="sm">
                 {medication.route}
@@ -175,7 +175,7 @@ const MedicationCard = ({
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={handleEntityClick('practitioner', medication.practitioner.id)}
                 onKeyDown={handleEntityKeyDown('practitioner', medication.practitioner.id)}
-                aria-label={t('common:labels.viewPractitionerDetails')}
+                aria-label={t('shared:labels.viewPractitionerDetails')}
               >
                 {medication.practitioner.name}
               </Text>
@@ -184,7 +184,7 @@ const MedicationCard = ({
           {medication.pharmacy && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('medications.pharmacy.label')}:
+                {t('shared:fields.pharmacy')}:
               </Text>
               <Text
                 size="sm"
@@ -203,7 +203,7 @@ const MedicationCard = ({
           {medication.effective_period_start && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('common:labels.startDate', 'Start Date')}:
+                {t('shared:labels.startDate', 'Start Date')}:
               </Text>
               <Text size="sm">
                 {formatLongDate(medication.effective_period_start)}
@@ -213,7 +213,7 @@ const MedicationCard = ({
           {medication.effective_period_end && (
             <Group>
               <Text size="sm" fw={500} c="dimmed" w={120}>
-                {t('common:labels.endDate', 'End Date')}:
+                {t('shared:labels.endDate', 'End Date')}:
               </Text>
               <Text size="sm">
                 {formatLongDate(medication.effective_period_end)}
@@ -238,7 +238,7 @@ const MedicationCard = ({
             size="xs"
             onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
           >
-            {t('common:buttons.edit')}
+            {t('shared:labels.edit')}
           </Button>
           <Button
             variant="filled"

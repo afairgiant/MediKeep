@@ -76,7 +76,7 @@ const getSeverityColor = (occurrences) => {
  * Uses the new two-level hierarchy API
  */
 const SymptomCalendar = ({ patientId, hidden }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { locale } = useDateFormat();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [occurrences, setOccurrences] = useState([]);
@@ -399,12 +399,12 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                       </Badge>
                       {hasOngoing && (
                         <Badge size="xs" color="blue" variant="dot">
-                          {t('symptoms.calendar.ongoing', 'Ongoing')}
+                          {t('shared:labels.ongoing', 'Ongoing')}
                         </Badge>
                       )}
                       {allResolved && (
                         <Badge size="xs" color="green" variant="light">
-                          {t('symptoms.calendar.resolved', 'Resolved')}
+                          {t('shared:labels.resolved', 'Resolved')}
                         </Badge>
                       )}
                     </Group>

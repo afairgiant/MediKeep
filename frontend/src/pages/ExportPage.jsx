@@ -42,7 +42,7 @@ import { exportService } from '../services/exportService';
 
 const ExportPage = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
 
   // State management
@@ -254,7 +254,7 @@ const ExportPage = () => {
         {error && (
           <Alert
             icon={<IconAlertTriangle size={16} />}
-            title={t('labels.error', 'Error')}
+            title={t('shared:labels.error', 'Error')}
             color="red"
             variant="light"
             onClose={clearAlerts}
@@ -276,7 +276,7 @@ const ExportPage = () => {
                     variant="light"
                     onClick={() => loadInitialData()}
                   >
-                    {t('exportPage.buttons.retry')}
+                    {t('shared:labels.retry')}
                   </Button>
                 </Group>
               )}
@@ -294,7 +294,7 @@ const ExportPage = () => {
                     variant="light"
                     onClick={() => loadInitialData()}
                   >
-                    {t('exportPage.buttons.retry')}
+                    {t('shared:labels.retry')}
                   </Button>
                 </Group>
               )}
@@ -305,7 +305,7 @@ const ExportPage = () => {
         {success && (
           <Alert
             icon={<IconCheck size={16} />}
-            title={t('labels.success', 'Success')}
+            title={t('shared:labels.success', 'Success')}
             color="green"
             variant="light"
             onClose={clearAlerts}
@@ -353,7 +353,7 @@ const ExportPage = () => {
                 ))}
               {!summaryExpanded && formats.scopes?.filter(scope => scope.value !== 'all').length > 3 && (
                 <Text size="xs" c="dimmed">
-                  {t('exportPage.availableData.moreItems', { count: formats.scopes.filter(scope => scope.value !== 'all').length - 3 })}
+                  {t('shared:labels.countMore', { count: formats.scopes.filter(scope => scope.value !== 'all').length - 3 })}
                 </Text>
               )}
             </Group>

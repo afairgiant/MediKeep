@@ -51,7 +51,7 @@ const InjuryFormWrapper = ({
   onError,
 }) => {
   // Translation hooks
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -159,18 +159,18 @@ const InjuryFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('injuries.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
-                {t('injuries.tabs.treatment', 'Treatment')}
+                {t('shared:labels.treatment', 'Treatment')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingInjury
-                  ? t('injuries.form.tabs.documents', 'Documents')
-                  : t('injuries.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('injuries.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -267,7 +267,7 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('injuries.severity.label', 'Severity')}
+                      label={t('shared:fields.severity', 'Severity')}
                       value={formData.severity || null}
                       data={[
                         {
@@ -302,7 +302,7 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('injuries.status.label', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       value={formData.status || 'active'}
                       data={[
                         {
@@ -350,7 +350,7 @@ const InjuryFormWrapper = ({
                         });
                       }}
                       placeholder={t(
-                        'injuries.practitioner.placeholder',
+                        'shared:fields.selectPractitioner',
                         'Select practitioner'
                       )}
                       clearable
@@ -390,7 +390,7 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('injuries.treatmentReceived.label', 'Treatment Received')}
+                      label={t('shared:fields.treatmentReceived', 'Treatment Received')}
                       value={formData.treatment_received || ''}
                       onChange={handleTextInputChange('treatment_received')}
                       placeholder={t(
@@ -447,7 +447,7 @@ const InjuryFormWrapper = ({
                 <Grid>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('injuries.notes.label', 'Additional Notes')}
+                      label={t('shared:fields.additionalNotes', 'Additional Notes')}
                       value={formData.notes || ''}
                       onChange={handleTextInputChange('notes')}
                       placeholder={t(
@@ -464,7 +464,7 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <TagInput
-                      label={t('common:fields.tags.label', 'Tags')}
+                      label={t('shared:labels.tags', 'Tags')}
                       value={formData.tags || []}
                       onChange={(tags) => {
                         onInputChange({
@@ -490,7 +490,7 @@ const InjuryFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" mt="xl">
             <Button variant="subtle" onClick={onClose} disabled={isSubmitting}>
-              {t('common:buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton isLoading={isSubmitting}>
               {editingInjury

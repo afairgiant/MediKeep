@@ -12,7 +12,7 @@ const PharmacyCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   const handleError = (error) => {
     logger.error('pharmacy_card_error', {
@@ -37,23 +37,23 @@ const PharmacyCard = ({
     // Generate dynamic fields for pharmacy information
     const fields = [
       {
-        label: t('pharmacies.card.address'),
+        label: t('shared:labels.address'),
         value: pharmacy.street_address,
       },
       {
-        label: t('pharmacies.card.city'),
+        label: t('shared:labels.city'),
         value: pharmacy.city,
       },
       pharmacy.state && {
-        label: t('pharmacies.card.stateProvince'),
+        label: t('shared:labels.stateProvince'),
         value: pharmacy.state,
       },
       pharmacy.zip_code && {
-        label: t('pharmacies.card.postalCode'),
+        label: t('shared:labels.postalCode'),
         value: pharmacy.zip_code,
       },
       pharmacy.country && {
-        label: t('pharmacies.card.country'),
+        label: t('shared:labels.country'),
         value: pharmacy.country,
       },
       {
@@ -61,14 +61,14 @@ const PharmacyCard = ({
         value: pharmacy.store_number,
       },
       {
-        label: t('pharmacies.card.phone'),
+        label: t('shared:labels.phone'),
         value: pharmacy.phone_number,
       },
       {
-        label: t('pharmacies.card.website'),
+        label: t('shared:labels.website'),
         value: pharmacy.website,
         render: (value) => {
-          if (!value) return <Text size="sm" c="dimmed">{t('labels.notSpecified')}</Text>;
+          if (!value) return <Text size="sm" c="dimmed">{t('shared:labels.notSpecified')}</Text>;
           return (
             <Anchor
               href={value.startsWith('http') ? value : `https://${value}`}
@@ -83,7 +83,7 @@ const PharmacyCard = ({
         }
       },
       pharmacy.specialty_services && {
-        label: t('pharmacies.card.specialtyServices'),
+        label: t('shared:labels.specialties'),
         value: pharmacy.specialty_services,
       },
     ].filter(Boolean);

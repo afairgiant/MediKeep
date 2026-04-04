@@ -28,7 +28,7 @@ const EquipmentViewModal = ({
   onEdit,
   practitioners = [],
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
 
   if (!isOpen || !equipment) return null;
@@ -86,20 +86,20 @@ const EquipmentViewModal = ({
           <Stack gap="lg">
             {/* Basic Information */}
             <div>
-              <Title order={4} mb="sm">{t('equipment.viewModal.basicInfo', 'Basic Information')}</Title>
+              <Title order={4} mb="sm">{t('shared:labels.basicInformation', 'Basic Information')}</Title>
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.name', 'Equipment Name')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:labels.equipmentName', 'Equipment Name')}</Text>
                   <Text size="sm">{equipment.equipment_name}</Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.type', 'Equipment Type')}</Text>
                   <Text size="sm" c={equipment.equipment_type ? 'inherit' : 'dimmed'}>
-                    {getEquipmentTypeLabel(equipment.equipment_type) || t('labels.notSpecified', 'Not specified')}
+                    {getEquipmentTypeLabel(equipment.equipment_type) || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.status', 'Status')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
                   <StatusBadge status={equipment.status} color={getEquipmentStatusColor(equipment.status)} />
                 </Stack>
                 <Stack gap="xs">
@@ -107,7 +107,7 @@ const EquipmentViewModal = ({
                   <Text size="sm" c={equipment.practitioner_id ? 'inherit' : 'dimmed'}>
                     {equipment.practitioner_id
                       ? (equipment.practitioner?.name || getPractitionerName(equipment.practitioner_id) || `Practitioner #${equipment.practitioner_id}`)
-                      : t('labels.notSpecified', 'Not specified')}
+                      : t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
               </SimpleGrid>
@@ -118,27 +118,27 @@ const EquipmentViewModal = ({
               <Title order={4} mb="sm">{t('equipment.viewModal.manufacturerDetails', 'Manufacturer Details')}</Title>
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.manufacturer', 'Manufacturer')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:fields.manufacturer', 'Manufacturer')}</Text>
                   <Text size="sm" c={equipment.manufacturer ? 'inherit' : 'dimmed'}>
-                    {equipment.manufacturer || t('labels.notSpecified', 'Not specified')}
+                    {equipment.manufacturer || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.modelNumber', 'Model Number')}</Text>
                   <Text size="sm" c={equipment.model_number ? 'inherit' : 'dimmed'}>
-                    {equipment.model_number || t('labels.notSpecified', 'Not specified')}
+                    {equipment.model_number || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.serialNumber', 'Serial Number')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:labels.serialNumber', 'Serial Number')}</Text>
                   <Text size="sm" c={equipment.serial_number ? 'inherit' : 'dimmed'}>
-                    {equipment.serial_number || t('labels.notSpecified', 'Not specified')}
+                    {equipment.serial_number || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
-                  <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.supplier', 'Supplier')}</Text>
+                  <Text fw={500} size="sm" c="dimmed">{t('shared:labels.supplier', 'Supplier')}</Text>
                   <Text size="sm" c={equipment.supplier ? 'inherit' : 'dimmed'}>
-                    {equipment.supplier || t('labels.notSpecified', 'Not specified')}
+                    {equipment.supplier || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
               </SimpleGrid>
@@ -151,19 +151,19 @@ const EquipmentViewModal = ({
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.prescribedDate', 'Prescribed Date')}</Text>
                   <Text size="sm" c={equipment.prescribed_date ? 'inherit' : 'dimmed'}>
-                    {equipment.prescribed_date ? formatDate(equipment.prescribed_date) : t('labels.notSpecified', 'Not specified')}
+                    {equipment.prescribed_date ? formatDate(equipment.prescribed_date) : t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.lastService', 'Last Service')}</Text>
                   <Text size="sm" c={equipment.last_service_date ? 'inherit' : 'dimmed'}>
-                    {equipment.last_service_date ? formatDate(equipment.last_service_date) : t('labels.notSpecified', 'Not specified')}
+                    {equipment.last_service_date ? formatDate(equipment.last_service_date) : t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
                 <Stack gap="xs">
                   <Text fw={500} size="sm" c="dimmed">{t('equipment.viewModal.nextService', 'Next Service')}</Text>
                   <Text size="sm" c={equipment.next_service_date ? 'inherit' : 'dimmed'}>
-                    {equipment.next_service_date ? formatDate(equipment.next_service_date) : t('labels.notSpecified', 'Not specified')}
+                    {equipment.next_service_date ? formatDate(equipment.next_service_date) : t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Stack>
               </SimpleGrid>
@@ -180,7 +180,7 @@ const EquipmentViewModal = ({
             {/* Notes */}
             {equipment.notes && (
               <div>
-                <Title order={4} mb="sm">{t('equipment.viewModal.notes', 'Notes')}</Title>
+                <Title order={4} mb="sm">{t('shared:tabs.notes', 'Notes')}</Title>
                 <Text size="sm">{equipment.notes}</Text>
               </div>
             )}
@@ -188,7 +188,7 @@ const EquipmentViewModal = ({
             {/* Tags */}
             {equipment.tags && equipment.tags.length > 0 && (
               <div>
-                <Title order={4} mb="sm">{t('equipment.viewModal.tags', 'Tags')}</Title>
+                <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
                 <Group gap="xs">
                   {equipment.tags.map((tag, index) => (
                     <Badge key={index} variant="light" color="blue" size="sm" radius="md">
@@ -204,10 +204,10 @@ const EquipmentViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('buttons.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

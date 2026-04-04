@@ -62,7 +62,7 @@ export const injuryFormFields = [
   {
     name: 'severity',
     type: 'select',
-    labelKey: 'common:labels.severity',
+    labelKey: 'shared:fields.severity',
     placeholderKey: 'medical:injuries.severity.placeholder',
     descriptionKey: 'medical:injuries.severity.description',
     gridColumn: 6,
@@ -87,14 +87,14 @@ export const injuryFormFields = [
   {
     name: 'status',
     type: 'select',
-    labelKey: 'common:labels.status',
+    labelKey: 'shared:fields.status',
     descriptionKey: 'medical:injuries.status.description',
     gridColumn: 6,
     required: true,
     options: [
-      { value: 'active', labelKey: 'common:status.active' },
+      { value: 'active', labelKey: 'shared:labels.active' },
       { value: 'healing', labelKey: 'medical:injuries.status.options.healing' },
-      { value: 'resolved', labelKey: 'common:status.resolved' },
+      { value: 'resolved', labelKey: 'shared:labels.resolved' },
       { value: 'chronic', labelKey: 'medical:injuries.status.options.chronic' },
     ],
   },
@@ -102,7 +102,7 @@ export const injuryFormFields = [
     name: 'practitioner_id',
     type: 'select',
     labelKey: 'medical:injuries.practitioner.label',
-    placeholderKey: 'medical:injuries.practitioner.placeholder',
+    placeholderKey: 'shared:labels.selectPractitioner',
     descriptionKey: 'medical:injuries.practitioner.description',
     gridColumn: 6,
     searchable: true,
@@ -112,7 +112,7 @@ export const injuryFormFields = [
   {
     name: 'treatment_received',
     type: 'textarea',
-    labelKey: 'medical:injuries.treatment.label',
+    labelKey: 'shared:fields.treatmentReceived',
     placeholderKey: 'medical:injuries.treatment.placeholder',
     descriptionKey: 'medical:injuries.treatment.description',
     gridColumn: 12,
@@ -132,7 +132,7 @@ export const injuryFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:injuries.notes.placeholder',
     descriptionKey: 'medical:injuries.notes.description',
     gridColumn: 12,

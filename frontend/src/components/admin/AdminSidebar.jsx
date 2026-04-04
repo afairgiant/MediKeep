@@ -31,33 +31,33 @@ import './AdminSidebar.css';
 
 const getNavSections = (t) => [
   {
-    label: t('sidebar.sections.dashboard', 'Dashboard'),
+    label: t('shared:labels.dashboard', 'Dashboard'),
     items: [
-      { label: t('sidebar.items.overview', 'Overview'), icon: IconChartBar, path: '/admin', exact: true },
+      { label: t('shared:tabs.overview', 'Overview'), icon: IconChartBar, path: '/admin', exact: true },
       { label: t('sidebar.items.analytics', 'Analytics'), icon: IconTrendingUp, path: '/admin/analytics' },
     ],
   },
   {
     label: t('sidebar.sections.dataManagement', 'Data Management'),
     items: [
-      { label: t('sidebar.items.dataModels', 'Data Models'), icon: IconDatabase, path: '/admin/data-models' },
-      { label: t('sidebar.items.userManagement', 'User Management'), icon: IconUsers, path: '/admin/users' },
+      { label: t('shared:labels.dataModels', 'Data Models'), icon: IconDatabase, path: '/admin/data-models' },
+      { label: t('shared:labels.userManagement', 'User Management'), icon: IconUsers, path: '/admin/users' },
       { label: t('sidebar.items.trash', 'Trash'), icon: IconTrash, path: '/admin/trash' },
     ],
   },
   {
     label: t('sidebar.sections.monitoring', 'Monitoring'),
     items: [
-      { label: t('sidebar.items.auditLog', 'Audit Log'), icon: IconFileText, path: '/admin/audit-log' },
-      { label: t('sidebar.items.systemHealth', 'System Health'), icon: IconHeartRateMonitor, path: '/admin/system-health' },
+      { label: t('shared:labels.auditLog', 'Audit Log'), icon: IconFileText, path: '/admin/audit-log' },
+      { label: t('shared:labels.systemHealth', 'System Health'), icon: IconHeartRateMonitor, path: '/admin/system-health' },
     ],
   },
   {
     label: t('sidebar.sections.tools', 'Tools'),
     items: [
-      { label: t('sidebar.items.backupManagement', 'Backup Management'), icon: IconDeviceFloppy, path: '/admin/backup' },
+      { label: t('shared:labels.backupManagement', 'Backup Management'), icon: IconDeviceFloppy, path: '/admin/backup' },
       { label: t('sidebar.items.maintenance', 'Maintenance'), icon: IconTool, path: '/admin/tools' },
-      { label: t('sidebar.items.settings', 'Settings'), icon: IconSettings, path: '/admin/settings' },
+      { label: t('shared:labels.settings', 'Settings'), icon: IconSettings, path: '/admin/settings' },
     ],
   },
 ];
@@ -68,7 +68,7 @@ const isActive = (currentPath, item) => {
 };
 
 const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const sections = useMemo(() => getNavSections(t), [t]);
 
   const closeSidebar = () => {
@@ -112,7 +112,7 @@ const AdminSidebar = ({ isOpen, onToggle, currentPath }) => {
               <ThemeIcon variant="light" size="md" color="blue">
                 <IconTool size={16} />
               </ThemeIcon>
-              <Text fw={600} size="lg">{t('sidebar.title', 'Admin')}</Text>
+              <Text fw={600} size="lg">{t('shared:labels.admin', 'Admin')}</Text>
             </Group>
           )}
           <ActionIcon

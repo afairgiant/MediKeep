@@ -47,7 +47,7 @@ const MantineFilters = ({
   filteredCount,
   config = {},
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const {
     searchPlaceholder = 'searchPlaceholders.generic',
     title = 'Filters & Search',
@@ -203,7 +203,7 @@ const MantineFilters = ({
                 </Text>
                 {hasActiveFilters && (
                   <Badge color="blue" variant="light" size="sm">
-                    {t('filters.active', 'Active')}
+                    {t('shared:labels.active', 'Active')}
                   </Badge>
                 )}
               </Group>
@@ -221,7 +221,7 @@ const MantineFilters = ({
                   total: totalCount,
                 })}
                 {filterCount > 0
-                  ? ` • ${t('filters.moreFilters', '{{count}} more filters', { count: filterCount })}`
+                  ? ` • ${t('shared:labels.countMoreFilters', '{{count}} more filters', { count: filterCount })}`
                   : ''}
               </Text>
             </div>

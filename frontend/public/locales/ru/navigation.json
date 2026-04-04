@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Добавлено",
-      "cancelled": "Отменено",
-      "completed": "Завершено",
-      "created": "Создано",
       "deleted": "Удалено",
       "modified": "Изменено",
       "removed": "Удалено",
@@ -22,26 +19,8 @@
     "hello": "Здравствуйте",
     "loading": "Загрузка медицинской панели управления...",
     "modules": {
-      "adminDashboard": "Панель администратора",
-      "allergies": "Аллергии",
-      "conditions": "Заболевания",
-      "emergencyContacts": "Экстренные контакты",
       "exportRecords": "Экспорт записей",
-      "familyHistory": "Семейный анамнез",
-      "immunizations": "Прививки",
-      "injuries": "Травмы",
-      "insurance": "Страхование",
-      "labResults": "Результаты анализов",
-      "medicalEquipment": "Медицинское оборудование",
-      "medications": "Лекарства",
-      "patientInfo": "Информация о пациенте",
-      "pharmacies": "Аптеки",
-      "practitioners": "Врачи",
-      "procedures": "Процедуры",
-      "symptoms": "Симптомы",
-      "treatments": "Лечение",
-      "visitHistory": "История визитов",
-      "vitalSigns": "Жизненные показатели"
+      "visitHistory": "История визитов"
     },
     "search": {
       "advancedSearch": "Расширенный поиск",
@@ -56,10 +35,7 @@
       "treatments": "Лечение и процедуры"
     },
     "stats": {
-      "activeMedications": "Активные лекарства",
-      "labResults": "Результаты анализов",
-      "procedures": "Процедуры",
-      "totalRecords": "Всего записей"
+      "activeMedications": "Активные лекарства"
     },
     "subtitle": "Безопасное управление вашей медицинской информацией",
     "title": "Панель управления MediKeep"
@@ -77,99 +53,44 @@
     "sharePatient": "Поделиться пациентом",
     "title": "Приглашения",
     "types": {
-      "familyHistory": "Семейный анамнез",
       "patientRecord": "Запись пациента"
     },
-    "viewAll": "Показать все {{count}} приглашений",
-    "viewAll_one": "Просмотреть все приглашения ({{count}})",
     "viewAll_few": "View all {{count}} invitations",
-    "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "Просмотреть все приглашения ({{count}})"
-  },
-  "medicalRecords": {
-    "allergies": "Аллергии",
-    "conditions": "Заболевания",
-    "immunizations": "Прививки",
-    "injuries": "Травмы",
-    "labResults": "Результаты анализов",
-    "medicalEquipment": "Медицинское оборудование",
-    "medications": "Лекарства",
-    "pharmacies": "Аптеки",
-    "practitioners": "Врачи",
-    "procedures": "Процедуры",
-    "symptoms": "Симптомы",
-    "treatments": "Лечение",
-    "visits": "Визиты"
+    "viewAll_many": "View all {{count}} invitations"
   },
   "menu": {
-    "administration": "Администрирование",
     "backToDashboard": "Вернуться к панели управления",
-    "dashboard": "Панель управления",
     "help": "Помощь",
     "logout": "Выйти",
-    "medicalRecords": "Медицинские записи",
     "patients": "Пациенты",
     "profile": "Профиль",
-    "reports": "Отчёты",
-    "settings": "Настройки"
+    "reports": "Отчёты"
   },
   "pages": {
-    "dashboard": "Панель управления",
     "help": "Помощь и поддержка",
     "medicalHistory": "История болезни",
     "patientDetails": "Данные пациента",
     "patientList": "Список пациентов",
     "preferences": "Предпочтения",
     "reports": "Отчёты",
-    "settings": "Настройки",
     "userProfile": "Профиль пользователя"
   },
   "sections": {
-    "documents": "Документы",
-    "emergencyContacts": "Экстренные контакты",
-    "familyHistory": "Семейный анамнез",
-    "insurance": "Страхование",
-    "medicalInfo": "Медицинская информация",
-    "overview": "Обзор",
     "personalInfo": "Личная информация",
-    "preferences": "Предпочтения",
-    "timeline": "Хронология"
+    "preferences": "Предпочтения"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Панель администратора",
-      "allergies": "Аллергии",
-      "backupManagement": "Управление резервными копиями",
-      "conditions": "Заболевания",
       "customReports": "Пользовательские отчёты",
-      "dataModels": "Модели данных",
-      "emergencyContacts": "Экстренные контакты",
       "exportRecords": "Экспорт записей",
-      "familyHistory": "Семейный анамнез",
-      "immunizations": "Прививки",
-      "injuries": "Травмы",
-      "insurance": "Страхование",
-      "labResults": "Результаты анализов",
       "language": "Язык",
-      "medicalEquipment": "Медицинское оборудование",
-      "medications": "Лекарства",
       "patientInfo": "Информация о пациенте",
-      "pharmacies": "Аптеки",
-      "practitioners": "Врачи",
-      "procedures": "Процедуры",
-      "settings": "Настройки",
-      "symptoms": "Симптомы",
-      "systemHealth": "Состояние системы",
       "tagManagement": "Управление тегами",
       "theme": "Тема",
-      "treatments": "Лечение",
-      "visitHistory": "История визитов",
-      "vitalSigns": "Жизненные показатели"
+      "visitHistory": "История визитов"
     },
     "sections": {
-      "administration": "Администрирование",
       "careAndTreatment": "Уход и лечение",
-      "medicalRecords": "Медицинские записи",
       "misc": "Прочее",
       "tools": "Инструменты"
     }

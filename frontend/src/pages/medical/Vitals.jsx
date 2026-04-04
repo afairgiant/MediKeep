@@ -63,7 +63,7 @@ import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { convertForDisplay, unitLabels } from '../../utils/unitConversion';
 
 const Vitals = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
 
   // Quick stats card configurations with Mantine icons and filter mappings
@@ -507,7 +507,7 @@ const Vitals = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('vitals.title', 'Vital Signs')} icon="❤️" />
+      <PageHeader title={t('shared:categories.vital_signs', 'Vital Signs')} icon="❤️" />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts

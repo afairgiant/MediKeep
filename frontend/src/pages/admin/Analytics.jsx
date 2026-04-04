@@ -62,7 +62,7 @@ const ANALYTICS_CONFIG = {
 };
 
 const Analytics = () => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const themeColors = useThemeColors();
 
   // Date range state
@@ -150,11 +150,11 @@ const Analytics = () => {
     distribution: {
       labels: [
         t('analytics.chartLabels.patients', 'Patients'),
-        t('analytics.chartLabels.labResults', 'Lab Results'),
-        t('analytics.chartLabels.medications', 'Medications'),
-        t('analytics.chartLabels.procedures', 'Procedures'),
-        t('analytics.chartLabels.allergies', 'Allergies'),
-        t('analytics.chartLabels.vitals', 'Vitals'),
+        t('shared:categories.lab_results', 'Lab Results'),
+        t('shared:categories.medications', 'Medications'),
+        t('shared:categories.procedures', 'Procedures'),
+        t('shared:categories.allergies', 'Allergies'),
+        t('shared:categories.vitals', 'Vitals'),
       ],
       datasets: [
         {
@@ -197,7 +197,7 @@ const Analytics = () => {
         grid: { color: themeColors.borderLight },
       },
       x: {
-        title: { display: true, text: t('analytics.axisLabels.date', 'Date'), color: themeColors.textPrimary },
+        title: { display: true, text: t('shared:labels.date', 'Date'), color: themeColors.textPrimary },
         ticks: { color: themeColors.textPrimary },
         grid: { color: themeColors.borderLight },
       },
@@ -305,7 +305,7 @@ const Analytics = () => {
                     {t('analytics.period', 'Period')}
                   </Text>
                   <Text size="lg" fw={700}>
-                    {t('analytics.days', '{{count}} days', { count: analyticsData?.date_range?.days || 0 })}
+                    {t('shared:labels.countDays', '{{count}} days', { count: analyticsData?.date_range?.days || 0 })}
                   </Text>
                   {comparisonData.previous_period && (
                     <Text size="xs" c="dimmed" mt={4}>
@@ -332,7 +332,7 @@ const Analytics = () => {
                       </Text>
                     </div>
                     <Badge variant="light" color="blue">
-                      {t('analytics.total', '{{count}} total', { count: analyticsData?.weekly_activity?.total || 0 })}
+                      {t('shared:labels.countTotal', '{{count}} total', { count: analyticsData?.weekly_activity?.total || 0 })}
                     </Badge>
                   </Group>
 

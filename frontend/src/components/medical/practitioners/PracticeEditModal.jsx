@@ -22,7 +22,7 @@ const emptyForm = {
 };
 
 const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
-  const { t } = useTranslation(['common', 'medical']);
+  const { t } = useTranslation(['common', 'medical', 'shared']);
   const isEditing = Boolean(practiceData);
   const [formData, setFormData] = useState(emptyForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,7 +78,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
       onClose();
     } catch {
       notifications.show({
-        title: t('common:labels.error', 'Error'),
+        title: t('shared:labels.error', 'Error'),
         message: t('common:practitioners.viewModal.practiceUpdateError', 'Failed to update practice'),
         color: 'red',
       });
@@ -116,7 +116,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
         />
         <TextInput
           label={t('medical:practices.form.phone.label')}
-          placeholder={t('medical:practices.form.phone.placeholder')}
+          placeholder={t('shared:fields.15551234567')}
           description={t('medical:practices.form.phone.description')}
           value={formData.phone_number}
           onChange={handleChange('phone_number')}
@@ -143,7 +143,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
           onChange={handleChange('patient_portal_url')}
         />
         <Textarea
-          label={t('medical:practices.form.notes.label')}
+          label={t('shared:tabs.notes')}
           placeholder={t('medical:practices.form.notes.placeholder')}
           description={t('medical:practices.form.notes.description')}
           value={formData.notes}
@@ -152,7 +152,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
         />
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('common:buttons.cancel')}
+            {t('shared:fields.cancel')}
           </Button>
           <Button
             onClick={handleSubmit}

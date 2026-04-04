@@ -18,7 +18,7 @@ const MobileNavigation = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation('navigation');
+  const { t } = useTranslation(['navigation', 'shared']);
   const { viewport } = useViewport();
   
   const navigationSections = getNavigationSections(viewport, isAdmin);
@@ -41,7 +41,7 @@ const MobileNavigation = ({
     <div className="mobile-navigation-overlay" onClick={onClose}>
       <nav className="mobile-navigation" onClick={(e) => e.stopPropagation()}>
         <div className="mobile-nav-header">
-          <h3>{t('menu.dashboard', 'Navigation')}</h3>
+          <h3>{t('shared:labels.dashboard', 'Navigation')}</h3>
           <button className="mobile-nav-close" onClick={onClose} aria-label="Close navigation"><IconX size={18} /></button>
         </div>
 
@@ -70,7 +70,7 @@ const MobileNavigation = ({
           <div className="mobile-nav-section">
             <h4 className="mobile-section-title">{t('menu.profile', 'Account')}</h4>
             <button className="mobile-nav-item" onClick={() => handleNavigation('/settings')}>
-              ⚙️ {t('menu.settings', 'Settings')}
+              ⚙️ {t('shared:labels.settings', 'Settings')}
             </button>
             <div className="mobile-theme-toggle">
               <span>{t('sidebarNav.items.theme', 'Theme')}</span>

@@ -51,7 +51,6 @@
     "birthDateFuture": "Födelsedatum kan inte vara i framtiden",
     "birthDateRequired": "Födelsedatum krävs",
     "createFailed": "Skapandet misslyckades: {{message}}",
-    "error": "Fel",
     "firstNameRequired": "Förnamn krävs",
     "lastNameRequired": "Efternamn krävs",
     "updateFailed": "Uppdateringen misslyckades: {{message}}"

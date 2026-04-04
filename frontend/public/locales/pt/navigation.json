@@ -2,9 +2,6 @@
   "activity": {
     "actions": {
       "added": "Adicionado",
-      "cancelled": "Cancelado",
-      "completed": "Concluído",
-      "created": "Criado",
       "deleted": "Excluído",
       "modified": "Modificado",
       "removed": "Removido",
@@ -22,26 +19,8 @@
     "hello": "Olá",
     "loading": "Carregando seu painel médico...",
     "modules": {
-      "adminDashboard": "Painel Administrativo",
-      "allergies": "Alergias",
-      "conditions": "Condições",
-      "emergencyContacts": "Contatos de Emergência",
       "exportRecords": "Exportar Registros",
-      "familyHistory": "Histórico Familiar",
-      "immunizations": "Imunizações",
-      "injuries": "Lesões",
-      "insurance": "Plano de saúde",
-      "labResults": "Resultados de Exames",
-      "medicalEquipment": "Equipamentos Médicos",
-      "medications": "Medicamentos",
-      "patientInfo": "Informações do Paciente",
-      "pharmacies": "Farmácias",
-      "practitioners": "Profissionais de Saúde",
-      "procedures": "Procedimentos",
-      "symptoms": "Sintomas",
-      "treatments": "Tratamentos",
-      "visitHistory": "Histórico de Consultas",
-      "vitalSigns": "Sinais Vitais"
+      "visitHistory": "Histórico de Consultas"
     },
     "search": {
       "advancedSearch": "Pesquisa Avançada",
@@ -56,10 +35,7 @@
       "treatments": "Tratamentos e Procedimentos"
     },
     "stats": {
-      "activeMedications": "Medicamentos Ativos",
-      "labResults": "Resultados de Exames",
-      "procedures": "Procedimentos",
-      "totalRecords": "Total de Registros"
+      "activeMedications": "Medicamentos Ativos"
     },
     "subtitle": "Gerencie suas informações de saúde com segurança",
     "title": "Painel MediKeep"
@@ -77,98 +53,43 @@
     "sharePatient": "Compartilhar Paciente",
     "title": "Convites",
     "types": {
-      "familyHistory": "Histórico Familiar",
       "patientRecord": "Prontuário do Paciente"
     },
-    "viewAll": "Ver todos os {{count}} convites",
-    "viewAll_one": "Ver todos os {{count}} convites",
-    "viewAll_many": "View all {{count}} invitations",
-    "viewAll_other": "Ver todos os {{count}} convites"
-  },
-  "medicalRecords": {
-    "allergies": "Alergias",
-    "conditions": "Condições",
-    "immunizations": "Imunizações",
-    "injuries": "Lesões",
-    "labResults": "Resultados de Exames",
-    "medicalEquipment": "Equipamentos Médicos",
-    "medications": "Medicamentos",
-    "pharmacies": "Farmácias",
-    "practitioners": "Profissionais de Saúde",
-    "procedures": "Procedimentos",
-    "symptoms": "Sintomas",
-    "treatments": "Tratamentos",
-    "visits": "Consultas"
+    "viewAll_many": "View all {{count}} invitations"
   },
   "menu": {
-    "administration": "Administração",
     "backToDashboard": "Voltar ao painel",
-    "dashboard": "Painel",
     "help": "Ajuda",
     "logout": "Sair",
-    "medicalRecords": "Registros Médicos",
     "patients": "Pacientes",
     "profile": "Perfil",
-    "reports": "Relatórios",
-    "settings": "Configurações"
+    "reports": "Relatórios"
   },
   "pages": {
-    "dashboard": "Painel",
     "help": "Ajuda e Suporte",
     "medicalHistory": "Histórico Médico",
     "patientDetails": "Detalhes do Paciente",
     "patientList": "Lista de Pacientes",
     "preferences": "Preferências",
     "reports": "Relatórios",
-    "settings": "Configurações",
     "userProfile": "Perfil do Usuário"
   },
   "sections": {
-    "documents": "Documentos",
-    "emergencyContacts": "Contatos de Emergência",
-    "familyHistory": "Histórico Familiar",
-    "insurance": "Seguro",
-    "medicalInfo": "Informações Médicas",
-    "overview": "Visão Geral",
     "personalInfo": "Informações Pessoais",
-    "preferences": "Preferências",
-    "timeline": "Linha do Tempo"
+    "preferences": "Preferências"
   },
   "sidebarNav": {
     "items": {
-      "adminDashboard": "Painel Administrativo",
-      "allergies": "Alergias",
-      "backupManagement": "Gerenciamento de Backup",
-      "conditions": "Condições",
       "customReports": "Relatórios Personalizados",
-      "dataModels": "Modelos de Dados",
-      "emergencyContacts": "Contatos de Emergência",
       "exportRecords": "Exportar Registros",
-      "familyHistory": "Histórico Familiar",
-      "immunizations": "Imunizações",
-      "injuries": "Lesões",
-      "insurance": "Seguro",
-      "labResults": "Resultados de Exames",
       "language": "Idioma",
-      "medicalEquipment": "Equipamentos Médicos",
-      "medications": "Medicamentos",
       "patientInfo": "Informações do Paciente",
-      "pharmacies": "Farmácias",
-      "practitioners": "Profissionais de Saúde",
-      "procedures": "Procedimentos",
-      "settings": "Configurações",
-      "symptoms": "Sintomas",
-      "systemHealth": "Saúde do Sistema",
       "tagManagement": "Gerenciamento de Tags",
       "theme": "Tema",
-      "treatments": "Tratamentos",
-      "visitHistory": "Histórico de Consultas",
-      "vitalSigns": "Sinais Vitais"
+      "visitHistory": "Histórico de Consultas"
     },
     "sections": {
-      "administration": "Administração",
       "careAndTreatment": "Cuidados e Tratamento",
-      "medicalRecords": "Registros Médicos",
       "misc": "Diversos",
       "tools": "Ferramentas"
     }

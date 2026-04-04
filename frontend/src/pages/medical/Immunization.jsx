@@ -51,7 +51,7 @@ import {
 } from '../../components/medical/immunizations';
 
 const Immunization = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('immunizations');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
@@ -346,7 +346,7 @@ const Immunization = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('immunizations.title', 'Immunizations')} icon="💉" />
+      <PageHeader title={t('shared:categories.immunizations', 'Immunizations')} icon="💉" />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -409,7 +409,7 @@ const Immunization = () => {
               icon={IconVaccine}
               title={t('immunizations.noImmunizationsFound', 'No immunizations found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('immunizations.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('immunizations.clickToGetStarted', 'Click "Add New Immunization" to get started.')}
             />
           ) : viewMode === 'cards' ? (
@@ -435,23 +435,23 @@ const Immunization = () => {
                 data={paginatedImmunizations}
                 pagination={false}
                 columns={[
-                  { header: t('immunizations.table.vaccineName', 'Vaccine Name'), accessor: 'vaccine_name', priority: 'high', width: 200 },
+                  { header: t('shared:fields.vaccineName', 'Vaccine Name'), accessor: 'vaccine_name', priority: 'high', width: 200 },
                   {
-                    header: t('immunizations.table.dateAdministered', 'Date Administered'),
+                    header: t('shared:fields.dateAdministered', 'Date Administered'),
                     accessor: 'date_administered',
                     priority: 'high',
                     width: 150
                   },
-                  { header: t('immunizations.table.doseNumber', 'Dose Number'), accessor: 'dose_number', priority: 'medium', width: 100 },
-                  { header: t('immunizations.table.manufacturer', 'Manufacturer'), accessor: 'manufacturer', priority: 'medium', width: 150 },
+                  { header: t('shared:fields.doseNumber', 'Dose Number'), accessor: 'dose_number', priority: 'medium', width: 100 },
+                  { header: t('shared:fields.manufacturer', 'Manufacturer'), accessor: 'manufacturer', priority: 'medium', width: 150 },
                   { header: t('immunizations.table.site', 'Site'), accessor: 'site', priority: 'low', width: 100 },
-                  { header: t('immunizations.table.route', 'Route'), accessor: 'route', priority: 'low', width: 100 },
-                  { header: t('immunizations.table.lotNumber', 'Lot Number'), accessor: 'lot_number', priority: 'low', width: 120 },
-                  { header: t('immunizations.table.expirationDate', 'Expiration Date'), accessor: 'expiration_date', priority: 'medium', width: 130 },
-                  { header: t('immunizations.table.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 },
+                  { header: t('shared:labels.route', 'Route'), accessor: 'route', priority: 'low', width: 100 },
+                  { header: t('shared:fields.lotNumber', 'Lot Number'), accessor: 'lot_number', priority: 'low', width: 120 },
+                  { header: t('shared:fields.expirationDate', 'Expiration Date'), accessor: 'expiration_date', priority: 'medium', width: 130 },
+                  { header: t('shared:tabs.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
-                tableName={t('immunizations.title', 'Immunizations')}
+                tableName={t('shared:categories.immunizations', 'Immunizations')}
                 onView={handleViewImmunization}
                 onEdit={handleEditImmunization}
                 onDelete={handleDeleteImmunization}

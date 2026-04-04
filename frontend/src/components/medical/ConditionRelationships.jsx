@@ -35,7 +35,7 @@ const ConditionRelationships = ({
   navigate,
   isViewMode = false, // New prop to distinguish between view and edit modes
 }) => {
-  const { t } = useTranslation(['common', 'errors']);
+  const { t } = useTranslation(['common', 'errors', 'shared']);
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -347,7 +347,7 @@ const ConditionRelationships = ({
                 setError(null);
               }}
             >
-              {t('buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <Button
               onClick={handleAddRelationship}

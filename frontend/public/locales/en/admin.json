@@ -1,23 +1,16 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
-      "firstName": "First Name",
-      "lastName": "Last Name",
       "linkPatient": {
         "hint": "Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).",
         "selfRecordBadge": "Self-Record",
-        "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.",
-        "selfRecordWarningTitle": "Note:"
+        "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient."
       },
-      "password": "Password",
       "passwordReqs": {
         "hasLetter": "Contains at least one letter",
         "hasNumber": "Contains at least one number",
         "minLength": "At least 6 characters"
-      },
-      "role": "Role",
-      "username": "Username"
+      }
     }
   },
   "analytics": {
@@ -25,44 +18,30 @@
     "activityTrend": "Activity Trend",
     "analyticsDateRange": "Analytics date range",
     "axisLabels": {
-      "activities": "Activities",
-      "date": "Date"
+      "activities": "Activities"
     },
     "breakdownByType": "Breakdown by type",
     "chartLabels": {
-      "allergies": "Allergies",
-      "labResults": "Lab Results",
-      "medications": "Medications",
       "patients": "Patients",
-      "procedures": "Procedures",
-      "userActivity": "User Activity",
-      "vitals": "Vitals"
+      "userActivity": "User Activity"
     },
     "customDateRange": "Custom date range",
     "dailyAverage": "Daily Average",
-    "days": "{{count}} days",
-    "days_one": "{{count}} days",
-    "days_other": "{{count}} days",
     "filterByDays": "Filter by last {{days}} days",
     "loading": "Loading analytics...",
     "period": "Period",
     "recordsDistribution": "Records Distribution",
     "subtitle": "Activity trends, comparisons, and record distribution",
     "title": "Analytics",
-    "total": "{{count}} total",
-    "total_one": "{{count}} total",
-    "total_other": "{{count}} total",
     "totalActivities": "Total Activities",
     "userInteractions": "User interactions",
     "vsPreviousPeriod": "vs. previous period"
   },
   "auditLog": {
     "actionFilter": "Action",
-    "clearFilters": "Clear Filters",
     "dateRange": "Date range",
     "entityTypeFilter": "Entity Type",
     "errorLoading": "Error loading audit log",
-    "exportCsv": "Export CSV",
     "filterByAction": "Filter by action",
     "filterByDateRange": "Filter by date range",
     "filterByEntityType": "Filter by entity type",
@@ -77,14 +56,10 @@
     "system": "System",
     "tableHeaders": {
       "action": "Action",
-      "description": "Description",
       "entityType": "Entity Type",
       "recordId": "Record ID",
-      "timestamp": "Timestamp",
-      "user": "User"
+      "timestamp": "Timestamp"
     },
-    "title": "Audit Log",
-    "userFilter": "User",
     "viewRecord": "View {{type}} record",
     "viewRecordAriaLabel": "View {{type}} #{{id}}"
   },
@@ -93,21 +68,14 @@
       "count_one": "{{count}} backup",
       "count_other": "{{count}} backups",
       "download": "Download",
-      "exportCsv": "Export CSV",
       "noBackups": "No backups found",
       "previewRestore": "Preview restore",
       "restore": "Restore",
       "tableHeaders": {
-        "actions": "Actions",
-        "created": "Created",
         "fileExists": "File Exists",
-        "filename": "Filename",
-        "size": "Size",
-        "status": "Status",
-        "type": "Type"
+        "filename": "Filename"
       },
       "title": "Existing Backups",
-      "unknown": "Unknown",
       "verify": "Verify"
     },
     "loading": "Loading backup management...",
@@ -158,44 +126,21 @@
     "preview": {
       "affectedData": "Affected Data",
       "analysisNotAvailable": "Backup analysis not available",
-      "andMore": "...and {{count}} more",
-      "andMore_one": "...and {{count}} more",
-      "andMore_other": "...and {{count}} more",
       "backupContent": "Backup Content",
       "backupDetails": "Backup Details",
       "backupFiles": "Backup Files",
       "components": "Components",
-      "created": "Created",
       "createdAt": "Created: {{date}}",
       "currentDatabase": "Current Database",
       "currentFiles": "Current Files",
-      "description": "Description",
-      "filesCount": "{{count}} files ({{size}})",
-      "filesCount_one": "{{count}} files ({{size}})",
-      "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} files",
-      "filesOnly_one": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Manifest",
       "noAffectedData": "No affected data information available",
       "noStatistics": "No statistics available",
       "restoreMethod": "Restore Method",
-      "size": "Size",
-      "sqlStatements": "{{count}} SQL statements",
-      "sqlStatements_one": "{{count}} SQL statements",
-      "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} total records",
-      "totalRecords_one": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Type",
-      "unknownType": "Unknown backup type",
-      "warnings": "Warnings"
+      "unknownType": "Unknown backup type"
     },
     "retention": {
       "backupsUnit": "backups",
-      "countProtection": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
-      "countProtection_one": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
-      "countProtection_other": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
       "currentStatus_one": "<strong>Current Status:</strong> {{count}} backup stored (max: {{max}})",
       "currentStatus_other": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})",
       "daysUnit": "days",
@@ -212,7 +157,6 @@
       "title": "Backup Retention Settings"
     },
     "schedule": {
-      "active": "Active",
       "completedSuccessfully": "Completed successfully",
       "dayOfWeek": "Day of Week",
       "dayOfWeekDesc": "Which day should the weekly backup run?",
@@ -225,7 +169,6 @@
         "tue": "Tuesday",
         "wed": "Wednesday"
       },
-      "disabled": "Disabled",
       "failed": "Failed: {{error}}",
       "frequency": "Backup Frequency",
       "frequencyDesc": "Schedule automatic full backups (database + files)",
@@ -233,10 +176,8 @@
       "nextScheduledRun": "Next Scheduled Run",
       "presets": {
         "daily": "Daily",
-        "disabled": "Disabled",
         "every12Hours": "Every 12 hours",
-        "every6Hours": "Every 6 hours",
-        "weekly": "Weekly"
+        "every6Hours": "Every 6 hours"
       },
       "saveSchedule": "Save Schedule",
       "timeOfDay": "Time of Day",
@@ -246,10 +187,8 @@
     },
     "subtitle": "Create and manage system backups",
     "tabs": {
-      "backups": "Backups",
-      "settings": "Settings"
+      "backups": "Backups"
     },
-    "title": "Backup Management",
     "unsavedBadge": "Unsaved"
   },
   "createUser": {
@@ -263,16 +202,13 @@
     "autoFeaturesTitle": "Auto-Generated Features",
     "cardSubtitle": "Fill out the form below to create a new user account",
     "cardTitle": "User Account Details",
-    "email": "Email",
     "emailPlaceholder": "Enter email address",
     "errors": {
       "accountCreateFailed": "Failed to create account",
       "createFailed": "Failed to create user",
       "createRetry": "Failed to create user. Please try again."
     },
-    "firstName": "First Name",
     "firstNamePlaceholder": "Enter first name",
-    "lastName": "Last Name",
     "lastNamePlaceholder": "Enter last name",
     "linkPatient": {
       "checkbox": "Link to existing patient record",
@@ -284,26 +220,19 @@
       "patientId": "ID",
       "selectPlaceholder": "Select a patient...",
       "selfRecordBadge": "Self-Record",
-      "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.",
-      "selfRecordWarningTitle": "Note:"
+      "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient."
     },
-    "noteLabel": "Note:",
     "noteText": "A patient record will be automatically created for this user with default role \"user\".",
     "pageSubtitle": "Create a new user account with patient profile",
     "pageTitle": "Create New User",
-    "password": "Password",
     "passwordPlaceholder": "Enter password (min 6 chars, include letter & number)",
     "passwordReqs": {
       "hasLetter": "Contains at least one letter",
       "hasNumber": "Contains at least one number",
       "minLength": "At least 6 characters"
     },
-    "role": "Role",
-    "roleAdmin": "Admin",
-    "roleUser": "User",
     "submitButton": "Create Account",
     "successRedirect": "User \"{{username}}\" created successfully!",
-    "username": "Username",
     "usernamePlaceholder": "Enter username",
     "validation": {
       "firstNameRequired": "Please enter the first name",
@@ -316,29 +245,22 @@
   "dashboard": {
     "loading": "Loading comprehensive dashboard...",
     "quickActions": {
-      "auditLog": "Audit Log",
       "auditLogDesc": "View system activity log",
       "backups": "Backups",
       "backupsDesc": "Backup management",
       "createUser": "Create New User",
       "createUserDesc": "Create user account with patient profile",
-      "dataModels": "Data Models",
       "dataModelsDesc": "View and manage database tables",
       "manageUsers": "Manage Users",
       "manageUsersDesc": "View and manage user accounts",
-      "settings": "Settings",
       "settingsDesc": "System configuration",
       "subtitle": "Common administrative tasks",
-      "systemHealth": "System Health",
       "systemHealthDesc": "Monitor system status",
       "title": "Quick Actions",
       "trash": "Trash",
       "trashDesc": "Recover deleted files"
     },
     "recentActivity": {
-      "count": "{{count}} activities",
-      "count_one": "{{count}} activities",
-      "count_other": "{{count}} activities",
       "errorLoading": "Error loading activity",
       "noActivity": "No recent activity to display",
       "subtitle": "Latest system events",
@@ -348,16 +270,7 @@
     "refreshAll": "Refresh All",
     "stats": {
       "activePatients": "Active Patients",
-      "activePrescriptions": "{{count}} active prescriptions",
-      "activePrescriptions_one": "{{count}} active prescriptions",
-      "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Lab Results",
-      "medications": "Medications",
-      "recentRegistrations": "+{{count}} this week",
-      "recentRegistrations_one": "+{{count}} this week",
-      "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Total Users",
-      "vitalSigns": "Vital Signs"
+      "totalUsers": "Total Users"
     },
     "subtitle": "Comprehensive system overview and management",
     "systemHealth": {
@@ -366,20 +279,14 @@
       "lastBackup": "Last Backup",
       "noBackup": "No backup",
       "subtitle": "Current system status",
-      "title": "System Health",
-      "totalRecords": "Total Records",
       "uptime": "Uptime"
-    },
-    "title": "Admin Dashboard"
+    }
   },
   "dataModels": {
     "categories": {
       "coreMedical": "Core Medical",
-      "familyHistory": "Family History",
       "fileManagement": "File Management",
       "healthcareDirectory": "Healthcare Directory",
-      "medicalRecords": "Medical Records",
-      "other": "Other",
       "patientSupport": "Patient Support",
       "sharingAccess": "Sharing & Access",
       "system": "System"
@@ -418,11 +325,9 @@
     "filterAriaLabel": "Filter data models",
     "filterPlaceholder": "Filter models...",
     "noMatchFilter": "No models match \"{{query}}\"",
-    "subtitle": "Manage and view all database tables and records",
-    "title": "Data Models"
+    "subtitle": "Manage and view all database tables and records"
   },
   "directoryCard": {
-    "error": "Error",
     "files": "files",
     "mb": "MB",
     "ok": "OK"
@@ -440,15 +345,12 @@
     "patientIdLocked": "Patient ID (locked to current user)",
     "primaryKeyAutoGenerated": "Primary key (auto-generated)",
     "primaryKeyReadOnly": "Primary key (read-only)",
-    "resetPassword": "Reset Password",
     "selectDefault": "-- Select --",
     "selectField": "-- Select {{field}} --",
     "systemTimestamp": "System timestamp (auto-generated)"
   },
   "header": {
-    "adminBadge": "Admin",
     "administrator": "Administrator",
-    "dashboard": "Dashboard",
     "logout": "Logout",
     "returnToDashboard": "Return to Dashboard",
     "searchAriaLabel": "Search data models",
@@ -464,7 +366,6 @@
       "connectionTest": "Connection Test",
       "databaseSize": "Database Size",
       "failed": "Failed",
-      "medicalRecords": "Medical Records",
       "passed": "Passed",
       "patientRecords": "Patient Records",
       "title": "Database Health"
@@ -491,8 +392,7 @@
     "schedulePresets": {
       "daily": "Daily",
       "every_12_hours": "Every 12 hours",
-      "every_6_hours": "Every 6 hours",
-      "weekly": "Weekly"
+      "every_6_hours": "Every 6 hours"
     },
     "services": {
       "adminInterface": "Admin Interface",
@@ -504,10 +404,7 @@
     "sso": {
       "allowed": "Allowed",
       "blocked": "Blocked",
-      "disabled": "Disabled",
-      "enabled": "Enabled",
       "passwordOnlyInfo": "Users can only log in with username/password",
-      "provider": "Provider",
       "providerType": "Provider Type",
       "registrationViaSso": "Registration via SSO",
       "ssoStatus": "SSO Status",
@@ -516,15 +413,11 @@
     "storage": {
       "appStorage": "App Storage",
       "diskUsage": "Disk Usage",
-      "filesAcross": "across {{count}} files",
-      "filesAcross_one": "across {{count}} files",
-      "filesAcross_other": "across {{count}} files",
       "freeOf": "{{free}} GB free of {{total}} GB",
       "title": "Storage Health"
     },
     "subtitle": "Real-time system status and performance metrics",
-    "title": "System Health Monitor",
-    "totalRecords": "Total Records"
+    "title": "System Health Monitor"
   },
   "models": {
     "backToDataModels": "Back to Data Models",
@@ -544,12 +437,11 @@
     "createRecord": "Create Record",
     "deleteFailed": "Delete failed",
     "deleteRecords": "Delete {{count}} Records",
-    "deleteRecords_one": "",
-    "deleteRecords_other": "",
+    "deleteRecords_one": "Delete {{count}} Record",
+    "deleteRecords_other": "Delete {{count}} Records",
     "deleteSelected": "Delete Selected",
     "deleteWarning": "This will permanently delete this {{modelName}} record and all associated data:",
     "editRecord": "Edit {{modelName}}",
-    "exportCsv": "Export CSV",
     "exportFailed": "Export failed",
     "exportToCSV": "Export to CSV",
     "failedToBulkDelete": "Failed to delete records",
@@ -565,16 +457,16 @@
     "loadingForm": "Loading model creation form...",
     "noRecordsFound": "No records found",
     "perPage": "{{count}} per page",
-    "perPage_one": "",
-    "perPage_other": "",
+    "perPage_one": "{{count}} per page",
+    "perPage_other": "{{count}} per page",
     "rawDataJson": "Raw Data (JSON)",
     "recordDeleted": "Record deleted",
     "recordDeletedMessage": "Successfully deleted {{modelName}} record #{{id}}",
     "recordId": "Record ID: {{id}}",
     "recordsDeleted": "Records deleted",
     "recordsDeletedMessage": "Successfully deleted {{count}} records",
-    "recordsDeletedMessage_one": "",
-    "recordsDeletedMessage_other": "",
+    "recordsDeletedMessage_one": "Successfully deleted {{count}} record",
+    "recordsDeletedMessage_other": "Successfully deleted {{count}} records",
     "recordUpdated": "Record updated successfully",
     "resetToDefault": "Reset to default",
     "roleChangeLastAdmin": "If this is the last admin user in the system, you may lose admin access.",
@@ -586,12 +478,9 @@
     "searchResult_one": "{{count}} result for \"{{query}}\"",
     "searchResult_other": "{{count}} results for \"{{query}}\"",
     "selected": "{{count}} selected",
-    "selected_one": "",
-    "selected_other": "",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
     "toggleColumnVisibility": "Toggle column visibility",
-    "totalRecords": "{{count}} total records",
-    "totalRecords_one": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Type <strong>DELETE</strong> to confirm",
     "usernameChangeLogout": "This will log you out immediately and you will need to log back in with the new username.",
     "usernameChangeText": "You are about to change your own username from <strong>\"{{oldUsername}}\"</strong> to <strong>\"{{newUsername}}\"</strong>.",
@@ -599,7 +488,9 @@
     "usernameUpdated": "Username updated",
     "usernameUpdatedMessage": "Your username has been changed. Please log in with your new username: \"{{username}}\"",
     "viewRecord": "View {{modelName}}",
-    "visibleColumns": "Visible columns"
+    "visibleColumns": "Visible columns",
+    "searchResult": "{{count}} results for \"{{query}}\"",
+    "bulkDeleteWarning": "You are about to permanently delete {{count}} {{modelName}} records."
   },
   "settings": {
     "dataRetention": {
@@ -611,7 +502,6 @@
     "resetAll": "Reset All",
     "saveAllChanges": "Save All Changes",
     "sso": {
-      "provider": "Provider",
       "ssoDisabledInfo": "SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:",
       "ssoRegistration": "SSO Registration",
       "testConnection": "Test Connection",
@@ -623,61 +513,39 @@
     "title": "Admin Settings",
     "userManagement": {
       "allowRegistration": "Allow New User Registration",
-      "allowRegistrationDesc": "Enable or disable the ability for new users to create accounts from the login page",
-      "title": "User Management"
+      "allowRegistrationDesc": "Enable or disable the ability for new users to create accounts from the login page"
     }
   },
   "shared": {
     "dark": "dark",
-    "disabled": "Disabled",
-    "enabled": "Enabled",
     "healthy": "healthy",
     "info": "Info",
-    "light": "light",
-    "unknown": "Unknown"
+    "light": "light"
   },
   "sidebar": {
     "adminNavigation": "Admin navigation",
     "comingSoon": "{{label}} (Coming Soon)",
     "items": {
       "analytics": "Analytics",
-      "auditLog": "Audit Log",
-      "backupManagement": "Backup Management",
-      "dataModels": "Data Models",
       "maintenance": "Maintenance",
-      "overview": "Overview",
-      "settings": "Settings",
-      "systemHealth": "System Health",
-      "trash": "Trash",
-      "userManagement": "User Management"
+      "trash": "Trash"
     },
     "sections": {
-      "dashboard": "Dashboard",
       "dataManagement": "Data Management",
       "monitoring": "Monitoring",
       "tools": "Tools"
     },
-    "title": "Admin",
     "toggleSidebar": "Toggle sidebar"
   },
   "tools": {
     "subtitle": "Administrative tools for system maintenance and data management",
     "testLibrary": {
       "categories": "Categories",
-      "categoriesUpdated": "Categories Updated: {{count}}",
-      "categoriesUpdated_one": "Categories Updated: {{count}}",
-      "categoriesUpdated_other": "Categories Updated: {{count}}",
       "forceSyncAll": "Force Sync All",
       "forceSyncAllDesc": "<strong>Force Sync All:</strong> Re-matches all components (categories and canonical names)",
       "libraryReloaded": "Library Reloaded",
       "libraryVersion": "Library Version",
-      "namesUpdated": "Names Updated: {{count}}",
-      "namesUpdated_one": "Names Updated: {{count}}",
-      "namesUpdated_other": "Names Updated: {{count}}",
       "operational": "Operational",
-      "processed": "Processed: {{count}}",
-      "processed_one": "Processed: {{count}}",
-      "processed_other": "Processed: {{count}}",
       "reloadDesc": "<strong>Reload Library:</strong> Refreshes the test library from disk (use after updating test_library.json)",
       "reloadLibrary": "Reload Library",
       "syncComplete": "Sync Complete",
@@ -689,7 +557,6 @@
     "title": "Tools & Maintenance"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
     "deleteConfirm": "Are you sure you want to permanently delete <strong>{{filename}}</strong>?",
     "deletedDateRange": "Deleted date range",
     "deleteFailed": "Delete failed",
@@ -697,7 +564,6 @@
     "deleteWarning": "This action cannot be undone. The file will be permanently removed from the system.",
     "errorLoading": "Error loading trash",
     "fileCount_one": "{{count}} file",
-    "fileCount_other": "{{count}} files",
     "fileDeleted": "File deleted",
     "fileDeletedMessage": "{{filename}} permanently deleted",
     "fileRestored": "File restored",
@@ -714,9 +580,6 @@
     "permanentlyDeleteFile": "Permanently Delete File",
     "purgedDirectories_one": "across {{count}} directory",
     "purgedDirectories_other": "across {{count}} directories",
-    "purgeDescription": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} expired file permanently deleted",
     "purgedMessage_other": "{{count}} expired files permanently deleted",
     "purgeExpired": "Purge Expired",
@@ -734,16 +597,14 @@
     "showingFiltered": "Showing {{shown}} of {{total}} {{files}}",
     "subtitle": "Manage deleted uploaded files. Restore files to their original location or permanently remove them to free up storage.",
     "tableHeaders": {
-      "actions": "Actions",
       "deleted": "Deleted",
       "filename": "Filename",
-      "originalLocation": "Original Location",
-      "reason": "Reason",
-      "size": "Size"
+      "originalLocation": "Original Location"
     },
     "title": "Trash Management",
     "totalSize": "{{size}} total",
-    "trashPurged": "Trash purged"
+    "trashPurged": "Trash purged",
+    "fileCount_other": "{{count}} files"
   },
   "users": {
     "actionsFor": "Actions for {{username}}",
@@ -756,9 +617,6 @@
     },
     "changeRole": "Change Role",
     "clear": "Clear",
-    "daysAgo": "{{count}}d ago",
-    "daysAgo_one": "{{count}}d ago",
-    "daysAgo_other": "{{count}}d ago",
     "deactivate": "Deactivate",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Cannot delete the last administrator.",
@@ -768,22 +626,15 @@
       "warning": "This action cannot be undone. All data associated with this user will be permanently deleted."
     },
     "deleteUser": "Delete User",
-    "hoursAgo": "{{count}}h ago",
-    "hoursAgo_one": "{{count}}h ago",
-    "hoursAgo_other": "{{count}}h ago",
     "justNow": "Just now",
     "loginHistory": "Login History",
     "loginHistoryModal": {
       "dateTime": "Date & Time",
-      "details": "Details",
       "ipAddress": "IP Address",
       "noHistory": "No login history found",
       "notAvailable": "N/A",
       "title": "Login History: {{username}}"
     },
-    "minutesAgo": "{{count}}m ago",
-    "minutesAgo_one": "{{count}}m ago",
-    "minutesAgo_other": "{{count}}m ago",
     "never": "Never",
     "noUsersFound": "No users found",
     "noUsersInSystem": "No users in the system.",
@@ -793,40 +644,26 @@
       "newPassword": "New Password",
       "passwordDescription": "Min 6 characters, at least 1 letter and 1 number",
       "resettingFor": "Reset password for <strong>{{username}}</strong>",
-      "ssoWarning": "This user authenticates via SSO ({{provider}}). Setting a local password will allow hybrid authentication.",
-      "title": "Reset Password"
+      "ssoWarning": "This user authenticates via SSO ({{provider}}). Setting a local password will allow hybrid authentication."
     },
-    "resetPassword": "Reset Password",
     "roleFilter": {
-      "admin": "Admin",
-      "all": "All Roles",
-      "user": "User"
+      "all": "All Roles"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Cannot remove the last administrator role.",
       "changingRole": "Changing role for <strong>{{username}}</strong>",
       "grantAdmin": "This will grant full administrator privileges.",
       "revokeAdmin": "This will revoke administrator privileges.",
-      "roleLabel": "Role",
       "title": "Change User Role"
     },
     "searchPlaceholder": "Search users...",
     "statusFilter": {
-      "active": "Active",
-      "all": "All Statuses",
-      "inactive": "Inactive"
+      "all": "All Statuses"
     },
     "tableHeaders": {
-      "actions": "Actions",
       "auth": "Auth",
-      "created": "Created",
-      "fullName": "Full Name",
-      "lastLogin": "Last Login",
-      "role": "Role",
-      "status": "Status",
-      "user": "User"
+      "lastLogin": "Last Login"
     },
-    "title": "User Management",
     "toggleActiveModal": {
       "activateConfirm": "Activate \"{{username}}\"? They will be able to log in again.",
       "activateTitle": "Activate User",
@@ -836,6 +673,7 @@
       "deactivateTitle": "Deactivate User"
     },
     "userCount_one": "{{count}} user",
-    "userCount_other": "{{count}} users"
+    "userCount_other": "{{count}} users",
+    "userCount": "{{count}} users"
   }
 }

@@ -12,7 +12,6 @@
     "deleteFailed": "Kanaal verwijderen mislukt",
     "deleteSuccess": "Kanaal succesvol verwijderd",
     "description": "Voeg meldingskanalen toe en beheer ze",
-    "disabled": "Uitgeschakeld",
     "discord": {
       "avatarUrl": {
         "description": "Aangepaste avatar voor de meldingsbot",
@@ -69,7 +68,6 @@
     },
     "empty": "Geen meldingskanalen geconfigureerd.",
     "emptyHint": "Voeg een kanaal toe om meldingen te ontvangen via Discord, e-mail, Gotify of Webhook.",
-    "enabled": "Ingeschakeld",
     "errors": {
       "fieldRequired": "{{field}} is verplicht",
       "nameRequired": "Kanaalnaam is verplicht"
@@ -77,7 +75,7 @@
     "fields": {
       "enabled": "Dit kanaal inschakelen",
       "name": "Kanaalnaam",
-      "namePlaceholder": "My Discord Server",
+      "namePlaceholder": "Mijn Discord-server",
       "type": "Kanaaltype"
     },
     "form": {
@@ -106,7 +104,6 @@
       },
       "priority": {
         "description": "Berichtprioriteit (1-10, standaard 5)",
-        "label": "Prioriteit",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -130,7 +127,6 @@
     "title": "Meldingskanalen",
     "types": {
       "discord": "Discord",
-      "email": "E-mail",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -215,11 +211,7 @@
   "history": {
     "description": "Recent verzonden meldingen via uw kanalen",
     "fields": {
-      "channel": "Kanaal",
-      "error": "Fout",
-      "event": "Gebeurtenis",
-      "status": "Status",
-      "time": "Tijd"
+      "channel": "Kanaal"
     },
     "loading": "Geschiedenis laden...",
     "noHistory": "Nog geen meldingen verzonden",
@@ -229,7 +221,6 @@
     "showMore": "Meer tonen",
     "status": {
       "failed": "Mislukt",
-      "pending": "In behandeling",
       "sent": "Verzonden"
     },
     "title": "Meldingsgeschiedenis"
@@ -246,8 +237,6 @@
     },
     "comingSoon": "Binnenkort beschikbaar",
     "description": "Kies welke gebeurtenissen meldingen activeren op elk kanaal",
-    "event": "Gebeurtenis",
-    "eventHeader": "Gebeurtenis",
     "loading": "Voorkeuren laden...",
     "noChannels": "Voeg eerst een meldingskanaal toe om gebeurtenisvoorkeuren te configureren",
     "saveFailed": "Voorkeur opslaan mislukt",
@@ -273,12 +262,10 @@
       "userCreatedWithLinkSuccess": "Gebruiker aangemaakt en succesvol gekoppeld aan bestaande patiënt!"
     },
     "documents": {
-      "deleteFailed": "Verwijderen mislukt",
       "linkFailed": "Document koppelen mislukt",
       "linkSuccess": "Document succesvol gekoppeld",
       "unlinkFailed": "Document ontkoppelen mislukt",
-      "unlinkSuccess": "Document succesvol ontkoppeld",
-      "uploadFailed": "Upload mislukt"
+      "unlinkSuccess": "Document succesvol ontkoppeld"
     },
     "familySharing": {
       "accessRevoked": "Toegang ingetrokken",
@@ -293,9 +280,7 @@
     "generic": {
       "allOperationsFailed": "Alle {{operation}}s mislukt. Probeer het opnieuw.",
       "allOperationsSuccess": "Alle {{total}} {{operation}}s succesvol voltooid!",
-      "deleteFailed": "Verwijderen mislukt",
       "downloadFailed": "Downloaden mislukt",
-      "error": "Fout",
       "operationFailed": "Bewerking mislukt",
       "operationFailedTitle": "{{operation}} mislukt",
       "operationPartial": "{{success}}/{{total}} {{operation}}s succesvol voltooid. {{failed}} mislukt.",
@@ -348,10 +333,8 @@
       "updatedSuccess": "{{name}} succesvol bijgewerkt"
     },
     "photo": {
-      "deleteFailed": "Verwijderen mislukt",
       "photoBeingUploaded": "Er wordt momenteel een foto geüpload. Wacht tot dit is voltooid.",
       "pleaseWait": "Even geduld",
-      "uploadFailed": "Upload mislukt",
       "uploadSuccess": "Foto succesvol geüpload"
     },
     "reports": {
@@ -393,7 +376,6 @@
       "completedWithErrors": "Upload voltooid met fouten",
       "documentAdded": "Document toegevoegd aan Paperless",
       "duplicateDocument": "Dubbel document",
-      "failed": "Upload mislukt",
       "fileUploadedSuccess": "\"{{fileName}}\" succesvol geüpload naar Paperless!",
       "fileUploadFailed": "Bestandsupload mislukt",
       "paperlessUploadFailed": "Paperless upload mislukt",

@@ -39,7 +39,7 @@ import logger from '../../services/logger';
 
 const Injuries = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('medical');
+  const { t } = useTranslation(['medical', 'shared']);
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('injuries');
@@ -364,7 +364,7 @@ const Injuries = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('injuries.title', 'Injuries')} icon={<IconBandage size={24} />} />
+      <PageHeader title={t('shared:categories.injuries', 'Injuries')} icon={<IconBandage size={24} />} />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -423,7 +423,7 @@ const Injuries = () => {
               icon={IconBandage}
               title={t('injuries.emptyState.title', 'No injuries found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('injuries.emptyState.filtered', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('injuries.emptyState.noData', 'Click "Add New Injury" to get started.')}
             />
           ) : viewMode === 'cards' ? (
@@ -455,12 +455,12 @@ const Injuries = () => {
                   { header: t('injuries.bodyPart.label', 'Body Part'), accessor: 'body_part', priority: 'high', width: 120 },
                   { header: t('injuries.dateOfInjury.label', 'Date'), accessor: 'date_of_injury', priority: 'high', width: 110 },
                   { header: t('injuries.injuryType.label', 'Type'), accessor: 'injury_type_name', priority: 'medium', width: 100 },
-                  { header: t('common:fields.severity.label', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
-                  { header: t('common:fields.status.label', 'Status'), accessor: 'status', priority: 'medium', width: 100 },
+                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
+                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'medium', width: 100 },
                   { header: t('injuries.practitioner.label', 'Practitioner'), accessor: 'practitioner_name', priority: 'low', width: 150 },
                 ]}
                 patientData={currentPatient}
-                tableName={t('injuries.title', 'Injuries')}
+                tableName={t('shared:categories.injuries', 'Injuries')}
                 onView={handleViewInjury}
                 onEdit={handleEditInjury}
                 onDelete={handleDeleteInjury}

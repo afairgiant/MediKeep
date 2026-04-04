@@ -50,7 +50,7 @@ function InlineTestComponentEntry({
   onRef,
   disabled = false,
 }: InlineTestComponentEntryProps): React.ReactElement {
-  const { t } = useTranslation('medical');
+  const { t } = useTranslation(['medical', 'shared']);
   const [expanded, setExpanded] = useState(false);
   const [components, setComponents] = useState<ComponentRowData[]>([createEmptyRow(1)]);
   const justSelectedRef = useRef<{ index: number; value: string } | null>(null);
@@ -164,7 +164,7 @@ function InlineTestComponentEntry({
                 <Grid gutter="xs">
                   <Grid.Col span={12}>
                     <Autocomplete
-                      label={t('labResults.form.testName', 'Test Name')}
+                      label={t('shared:fields.testName', 'Test Name')}
                       placeholder={t('labResults.form.searchTests', 'Type to search tests...')}
                       size="xs"
                       value={component.test_name}
@@ -216,7 +216,7 @@ function InlineTestComponentEntry({
                   </Grid.Col>
                   <Grid.Col span={6}>
                     <TextInput
-                      label={t('labResults.form.testCode', 'Test Code')}
+                      label={t('shared:fields.testCode', 'Test Code')}
                       placeholder={t('labResults.form.testCodePlaceholder', 'e.g., 718-7')}
                       size="xs"
                       value={component.test_code || ''}
@@ -257,8 +257,8 @@ function InlineTestComponentEntry({
                       />
                     ) : (
                       <NumberInput
-                        label={t('labResults.form.value', 'Value')}
-                        placeholder={t('labResults.form.value', 'Value')}
+                        label={t('shared:labels.value', 'Value')}
+                        placeholder={t('shared:labels.value', 'Value')}
                         size="xs"
                         value={component.value}
                         onChange={(value) => updateComponent(index, 'value', value)}
@@ -270,7 +270,7 @@ function InlineTestComponentEntry({
 
                   <Grid.Col span={4}>
                     <TextInput
-                      label={t('labResults.form.status', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       placeholder={t('labResults.form.autoCalculated', 'Auto-calculated')}
                       size="xs"
                       value={capitalizeStatus(component.status)}
@@ -291,7 +291,7 @@ function InlineTestComponentEntry({
                       <Grid.Col span={6}>
                         <NumberInput
                           label={t('labResults.form.refMin', 'Ref Min')}
-                          placeholder={t('labResults.form.min', 'Min')}
+                          placeholder={t('shared:labels.min', 'Min')}
                           size="xs"
                           value={component.ref_range_min}
                           onChange={(value) => updateComponent(index, 'ref_range_min', value)}
@@ -302,7 +302,7 @@ function InlineTestComponentEntry({
                       <Grid.Col span={6}>
                         <NumberInput
                           label={t('labResults.form.refMax', 'Ref Max')}
-                          placeholder={t('labResults.form.max', 'Max')}
+                          placeholder={t('shared:labels.max', 'Max')}
                           size="xs"
                           value={component.ref_range_max}
                           onChange={(value) => updateComponent(index, 'ref_range_max', value)}
@@ -315,8 +315,8 @@ function InlineTestComponentEntry({
 
                   <Grid.Col span={6}>
                     <Select
-                      label={t('labResults.form.category', 'Category')}
-                      placeholder={t('labResults.form.selectCategory', 'Select category')}
+                      label={t('shared:labels.category', 'Category')}
+                      placeholder={t('shared:labels.selectCategory', 'Select category')}
                       size="xs"
                       clearable
                       searchable
@@ -330,7 +330,7 @@ function InlineTestComponentEntry({
 
                   <Grid.Col span={6}>
                     <TextInput
-                      label={t('labResults.form.notes', 'Notes')}
+                      label={t('shared:tabs.notes', 'Notes')}
                       placeholder={t('labResults.form.notesOptional', 'Notes (optional)')}
                       size="xs"
                       value={component.notes || ''}

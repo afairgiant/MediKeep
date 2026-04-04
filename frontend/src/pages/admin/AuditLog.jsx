@@ -81,7 +81,7 @@ function getEntityLink(entry) {
 
 const AuditLog = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'shared']);
   const { formatDateTime } = useDateFormat();
 
   // Pagination
@@ -223,7 +223,7 @@ const AuditLog = () => {
                 <ThemeIcon size="xl" variant="light" color="blue" aria-hidden="true">
                   <IconFileText size={24} />
                 </ThemeIcon>
-                <Title order={2}>{t('auditLog.title', 'Audit Log')}</Title>
+                <Title order={2}>{t('shared:labels.auditLog', 'Audit Log')}</Title>
               </Group>
               <Text c="dimmed" size="md">
                 {t('auditLog.subtitle', 'Complete activity trail for compliance and auditing')}
@@ -243,7 +243,7 @@ const AuditLog = () => {
                 onClick={handleExport}
                 loading={exporting}
               >
-                {t('auditLog.exportCsv', 'Export CSV')}
+                {t('shared:labels.exportCsv', 'Export CSV')}
               </Button>
             </Group>
           </Group>
@@ -289,7 +289,7 @@ const AuditLog = () => {
                 aria-label={t('auditLog.filterByEntityType', 'Filter by entity type')}
               />
               <Select
-                placeholder={t('auditLog.userFilter', 'User')}
+                placeholder={t('shared:labels.user', 'User')}
                 data={userOptions}
                 value={userFilter}
                 onChange={setUserFilter}
@@ -304,7 +304,7 @@ const AuditLog = () => {
                   leftSection={<IconFilterOff size={16} />}
                   onClick={handleClearFilters}
                 >
-                  {t('auditLog.clearFilters', 'Clear Filters')}
+                  {t('shared:labels.clearFilters', 'Clear Filters')}
                 </Button>
               )}
             </Group>
@@ -328,7 +328,7 @@ const AuditLog = () => {
           >
             {error}
             <Button variant="subtle" size="xs" mt="xs" onClick={fetchData}>
-              {t('common:buttons.retry', 'Retry')}
+              {t('shared:labels.retry', 'Retry')}
             </Button>
           </Alert>
         )}
@@ -366,10 +366,10 @@ const AuditLog = () => {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{t('auditLog.tableHeaders.timestamp', 'Timestamp')}</Table.Th>
-                    <Table.Th>{t('auditLog.tableHeaders.user', 'User')}</Table.Th>
+                    <Table.Th>{t('shared:labels.user', 'User')}</Table.Th>
                     <Table.Th>{t('auditLog.tableHeaders.action', 'Action')}</Table.Th>
                     <Table.Th>{t('auditLog.tableHeaders.entityType', 'Entity Type')}</Table.Th>
-                    <Table.Th>{t('auditLog.tableHeaders.description', 'Description')}</Table.Th>
+                    <Table.Th>{t('shared:labels.description', 'Description')}</Table.Th>
                     <Table.Th>{t('auditLog.tableHeaders.recordId', 'Record ID')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>

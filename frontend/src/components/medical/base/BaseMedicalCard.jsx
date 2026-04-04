@@ -28,7 +28,7 @@ const BaseMedicalCard = ({
   disableCardClick = false,
   getTagColor: getTagColorProp
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [notesExpanded, setNotesExpanded] = useState(false);
   const { getTagColor: getTagColorHook } = useTagColors();
   const getTagColor = getTagColorProp || getTagColorHook;
@@ -137,7 +137,7 @@ const BaseMedicalCard = ({
                 </Text>
                 {field.render ? field.render(field.value) : (
                   <Text size="sm" style={field.style || {}}>
-                    {field.value || t('labels.notSpecified', 'Not specified')}
+                    {field.value || t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 )}
               </Group>
@@ -150,7 +150,7 @@ const BaseMedicalCard = ({
           {notes && (
             <Stack gap="xs">
               <Divider />
-              <Text size="sm" fw={500} c="dimmed">{t('labels.notes', 'Notes')}</Text>
+              <Text size="sm" fw={500} c="dimmed">{t('shared:tabs.notes', 'Notes')}</Text>
               <Text size="sm" lineClamp={notesExpanded ? undefined : 2}>{notes}</Text>
               {notes.length > 120 && (
                 <Button
@@ -176,7 +176,7 @@ const BaseMedicalCard = ({
               {t('buttons.view')}
             </Button>
             <Button variant="filled" size="xs" onClick={safeOnEdit}>
-              {t('buttons.edit')}
+              {t('shared:labels.edit')}
             </Button>
             <Button variant="filled" color="red" size="xs" onClick={safeOnDelete}>
               {t('buttons.delete')}

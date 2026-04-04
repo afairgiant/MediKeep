@@ -51,7 +51,6 @@
     "birthDateFuture": "Data urodzenia nie może być w przyszłości",
     "birthDateRequired": "Data urodzenia jest wymagana",
     "createFailed": "Tworzenie nie powiodło się: {{message}}",
-    "error": "Błąd",
     "firstNameRequired": "Imię jest wymagane",
     "lastNameRequired": "Nazwisko jest wymagane",
     "updateFailed": "Aktualizacja nie powiodła się: {{message}}"

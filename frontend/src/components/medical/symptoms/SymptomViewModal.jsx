@@ -46,7 +46,7 @@ const SymptomViewModal = ({
   onEditOccurrence,
   onRefresh,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const [activeTab, setActiveTab] = useState('overview');
   const [occurrences, setOccurrences] = useState([]);
@@ -178,16 +178,16 @@ const SymptomViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              {t('symptoms.viewModal.tabs.overview', 'Overview')}
+              {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="occurrences" leftSection={<IconClockHour4 size={16} />}>
-              {t('symptoms.viewModal.tabs.episodes', 'Episodes ({{count}})', { count: occurrences.length })}
+              {t('shared:tabs.episodesCount', 'Episodes ({{count}})', { count: occurrences.length })}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('symptoms.viewModal.tabs.notes', 'Notes')}
+              {t('shared:tabs.notes', 'Notes')}
             </Tabs.Tab>
             <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              {t('symptoms.viewModal.tabs.documents', 'Documents')}
+              {t('shared:tabs.documents', 'Documents')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -197,24 +197,24 @@ const SymptomViewModal = ({
               <Stack gap="lg">
                 <div>
                   <Title order={4} mb="sm">
-                    {t('symptoms.viewModal.basicInfo', 'Basic Information')}
+                    {t('shared:labels.basicInformation', 'Basic Information')}
                   </Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        {t('symptoms.viewModal.symptomName', 'Symptom Name')}
+                        {t('shared:labels.symptomName', 'Symptom Name')}
                       </Text>
                       <Text size="sm">{symptom.symptom_name}</Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        {t('symptoms.category', 'Category')}
+                        {t('shared:labels.category', 'Category')}
                       </Text>
-                      <Text size="sm">{symptom.category || t('symptoms.viewModal.notSpecified', 'Not specified')}</Text>
+                      <Text size="sm">{symptom.category || t('shared:labels.notSpecified', 'Not specified')}</Text>
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        {t('labels.status', 'Status')}
+                        {t('shared:fields.status', 'Status')}
                       </Text>
                       <div>
                         <Badge
@@ -228,7 +228,7 @@ const SymptomViewModal = ({
                     </Stack>
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">
-                        {t('symptoms.viewModal.type', 'Type')}
+                        {t('shared:labels.type', 'Type')}
                       </Text>
                       <div>
                         <Badge
@@ -246,7 +246,7 @@ const SymptomViewModal = ({
                 {/* Timeline Section */}
                 <div>
                   <Title order={4} mb="sm">
-                    {t('symptoms.viewModal.timeline', 'Timeline')}
+                    {t('shared:labels.timeline', 'Timeline')}
                   </Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
@@ -300,7 +300,7 @@ const SymptomViewModal = ({
                 {symptom.tags && symptom.tags.length > 0 && (
                   <div>
                     <Title order={4} mb="sm">
-                      {t('labels.tags', 'Tags')}
+                      {t('shared:labels.tags', 'Tags')}
                     </Title>
                     <Group gap="xs">
                       {symptom.tags.map((tag, index) => (
@@ -385,19 +385,19 @@ const SymptomViewModal = ({
 
                             {occurrence.occurrence_time && (
                               <Text size="xs" c="dimmed">
-                                {t('symptoms.viewModal.time', 'Time')}: {formatTimeToAmPm(occurrence.occurrence_time)}
+                                {t('shared:labels.time', 'Time')}: {formatTimeToAmPm(occurrence.occurrence_time)}
                               </Text>
                             )}
 
                             {occurrence.duration && (
                               <Text size="xs" c="dimmed">
-                                {t('symptoms.calendar.duration', 'Duration')}: {occurrence.duration}
+                                {t('shared:labels.duration', 'Duration')}: {occurrence.duration}
                               </Text>
                             )}
 
                             {occurrence.location && (
                               <Text size="xs" c="dimmed">
-                                {t('symptoms.calendar.location', 'Location')}: {occurrence.location}
+                                {t('shared:labels.location', 'Location')}: {occurrence.location}
                               </Text>
                             )}
 
@@ -451,7 +451,7 @@ const SymptomViewModal = ({
                                   setTimeout(() => onEditOccurrence(symptom, occurrence), 100);
                                 }}
                               >
-                                {t('buttons.edit', 'Edit')}
+                                {t('shared:labels.edit', 'Edit')}
                               </Button>
                             )}
                             <Button
@@ -499,7 +499,7 @@ const SymptomViewModal = ({
           <Tabs.Panel value="documents">
             <Box mt="md">
               <Stack gap="md">
-                <Title order={4}>{t('symptoms.viewModal.attachedDocuments', 'Attached Documents')}</Title>
+                <Title order={4}>{t('shared:labels.attachedDocuments', 'Attached Documents')}</Title>
                 <DocumentManagerWithProgress
                   entityType="symptom"
                   entityId={symptom.id}
@@ -557,7 +557,7 @@ const SymptomViewModal = ({
             </Button>
           )}
           <Button variant="filled" onClick={onClose}>
-            {t('buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
         </Group>
       </Stack>

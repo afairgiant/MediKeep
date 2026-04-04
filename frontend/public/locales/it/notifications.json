@@ -12,7 +12,6 @@
     "deleteFailed": "Impossibile eliminare il canale",
     "deleteSuccess": "Canale eliminato con successo",
     "description": "Aggiungi e gestisci i canali di consegna delle notifiche",
-    "disabled": "Disabilitato",
     "discord": {
       "avatarUrl": {
         "description": "Avatar personalizzato per il bot di notifica",
@@ -69,7 +68,6 @@
     },
     "empty": "Nessun canale di notifica configurato.",
     "emptyHint": "Aggiungi un canale per iniziare a ricevere notifiche tramite Discord, Email, Gotify o Webhook.",
-    "enabled": "Abilitato",
     "errors": {
       "fieldRequired": "{{field}} è obbligatorio",
       "nameRequired": "Il nome del canale è obbligatorio"
@@ -77,7 +75,7 @@
     "fields": {
       "enabled": "Abilita questo canale",
       "name": "Nome canale",
-      "namePlaceholder": "My Discord Server",
+      "namePlaceholder": "Il mio server Discord",
       "type": "Tipo di canale"
     },
     "form": {
@@ -106,7 +104,6 @@
       },
       "priority": {
         "description": "Priorita del messaggio (1-10, predefinito 5)",
-        "label": "Priorita",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -131,7 +128,6 @@
     "title": "Canali di notifica",
     "types": {
       "discord": "Discord",
-      "email": "Email",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -216,11 +212,7 @@
   "history": {
     "description": "Notifiche recenti inviate attraverso i Suoi canali",
     "fields": {
-      "channel": "Canale",
-      "error": "Errore",
-      "event": "Evento",
-      "status": "Stato",
-      "time": "Ora"
+      "channel": "Canale"
     },
     "loading": "Caricamento cronologia...",
     "noHistory": "Nessuna notifica inviata",
@@ -230,7 +222,6 @@
     "showMore": "Mostra di piu",
     "status": {
       "failed": "Non riuscita",
-      "pending": "In attesa",
       "sent": "Inviata"
     },
     "title": "Cronologia notifiche"
@@ -247,8 +238,6 @@
     },
     "comingSoon": "In arrivo",
     "description": "Scegli quali eventi attivano le notifiche su ciascun canale",
-    "event": "Evento",
-    "eventHeader": "Evento",
     "loading": "Caricamento preferenze...",
     "noChannels": "Aggiungi prima un canale di notifica per configurare le preferenze degli eventi",
     "saveFailed": "Impossibile salvare la preferenza",
@@ -274,12 +263,10 @@
       "userCreatedWithLinkSuccess": "Account utente creato e collegato con successo al paziente esistente!"
     },
     "documents": {
-      "deleteFailed": "Eliminazione non riuscita",
       "linkFailed": "Impossibile collegare il documento",
       "linkSuccess": "Documento collegato con successo",
       "unlinkFailed": "Impossibile scollegare il documento",
-      "unlinkSuccess": "Documento scollegato con successo",
-      "uploadFailed": "Caricamento non riuscito"
+      "unlinkSuccess": "Documento scollegato con successo"
     },
     "familySharing": {
       "accessRevoked": "Accesso revocato",
@@ -294,9 +281,7 @@
     "generic": {
       "allOperationsFailed": "Tutte le {{operation}} non riuscite. Riprovi.",
       "allOperationsSuccess": "Tutte le {{total}} {{operation}} completate con successo!",
-      "deleteFailed": "Eliminazione non riuscita",
       "downloadFailed": "Download non riuscito",
-      "error": "Errore",
       "operationFailed": "Operazione non riuscita",
       "operationFailedTitle": "{{operation}} non riuscita",
       "operationPartial": "{{success}}/{{total}} {{operation}} completate con successo. {{failed}} non riuscite.",
@@ -349,10 +334,8 @@
       "updatedSuccess": "{{name}} aggiornato con successo"
     },
     "photo": {
-      "deleteFailed": "Eliminazione non riuscita",
       "photoBeingUploaded": "Una foto e attualmente in fase di caricamento. Attenda il completamento.",
       "pleaseWait": "Attendere",
-      "uploadFailed": "Caricamento non riuscito",
       "uploadSuccess": "Foto caricata con successo"
     },
     "reports": {
@@ -394,7 +377,6 @@
       "completedWithErrors": "Caricamento completato con errori",
       "documentAdded": "Documento aggiunto a Paperless",
       "duplicateDocument": "Documento duplicato",
-      "failed": "Caricamento non riuscito",
       "fileUploadedSuccess": "\"{{fileName}}\" caricato su Paperless con successo!",
       "fileUploadFailed": "Caricamento file non riuscito",
       "paperlessUploadFailed": "Caricamento su Paperless non riuscito",

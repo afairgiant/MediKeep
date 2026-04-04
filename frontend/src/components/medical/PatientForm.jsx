@@ -70,7 +70,7 @@ const PatientForm = ({
   onCancel,
   isModal = true,
 }) => {
-  const { t } = useTranslation(['common', 'errors']);
+  const { t } = useTranslation(['common', 'errors', 'shared']);
   const { unitSystem, dateFormat } = useUserPreferences();
   const labels = unitLabels[unitSystem];
   const ranges = validationRanges[unitSystem];
@@ -237,16 +237,16 @@ const PatientForm = ({
   ];
 
   const genderOptions = [
-    { value: '', label: t('patients.form.gender.options.select') },
-    { value: 'Male', label: t('patients.form.gender.options.male') },
-    { value: 'Female', label: t('patients.form.gender.options.female') },
-    { value: 'Other', label: t('patients.form.gender.options.other') },
+    { value: '', label: t('shared:fields.selectGender') },
+    { value: 'Male', label: t('shared:fields.male') },
+    { value: 'Female', label: t('shared:fields.female') },
+    { value: 'Other', label: t('shared:fields.other') },
     { value: 'Prefer not to say', label: t('patients.form.gender.options.preferNotToSay') },
   ];
 
   const relationshipOptions = [
     { value: '', label: t('patients.form.relationship.options.select') },
-    { value: 'self', label: t('patients.form.relationship.options.self') },
+    { value: 'self', label: t('shared:fields.self') },
     { value: 'spouse', label: t('patients.form.relationship.options.spouse') },
     { value: 'partner', label: t('patients.form.relationship.options.partner') },
     { value: 'child', label: t('patients.form.relationship.options.child') },
@@ -262,7 +262,7 @@ const PatientForm = ({
     { value: 'grandchild', label: t('patients.form.relationship.options.grandchild') },
     { value: 'other_family', label: t('patients.form.relationship.options.otherFamily') },
     { value: 'friend', label: t('patients.form.relationship.options.friend') },
-    { value: 'other', label: t('patients.form.relationship.options.other') },
+    { value: 'other', label: t('shared:fields.other') },
   ];
 
   return (
@@ -280,7 +280,7 @@ const PatientForm = ({
         {error && (
           <Alert
             icon={<IconAlertCircle size="1rem" />}
-            title={t('errors:patientForm.error')}
+            title={t('shared:labels.error')}
             color="red"
             variant="light"
             style={{ whiteSpace: 'pre-line' }}
@@ -309,12 +309,12 @@ const PatientForm = ({
         {/* Basic Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            {t('patients.form.sections.basicInformation')}
+            {t('shared:labels.basicInformation')}
           </Text>
           <Stack gap="sm">
             <Group grow>
               <TextInput
-                label={t('patients.form.firstName.label')}
+                label={t('shared:labels.firstName')}
                 placeholder={t('patients.form.firstName.placeholder')}
                 required
                 value={formData.first_name}
@@ -324,7 +324,7 @@ const PatientForm = ({
                 disabled={loading}
               />
               <TextInput
-                label={t('patients.form.lastName.label')}
+                label={t('shared:labels.lastName')}
                 placeholder={t('patients.form.lastName.placeholder')}
                 required
                 value={formData.last_name}
@@ -351,8 +351,8 @@ const PatientForm = ({
                 popoverProps={{ withinPortal: true, zIndex: 3000 }}
               />
               <Select
-                label={t('patients.form.gender.label')}
-                placeholder={t('patients.form.gender.placeholder')}
+                label={t('shared:fields.gender')}
+                placeholder={t('shared:fields.selectGender')}
                 data={genderOptions}
                 value={formData.gender}
                 onChange={value => setFormData({ ...formData, gender: value })}
@@ -381,11 +381,11 @@ const PatientForm = ({
         {/* Medical Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            {t('patients.form.sections.medicalInformation')}
+            {t('shared:fields.medicalInformation')}
           </Text>
           <Stack gap="sm">
             <Select
-              label={t('patients.form.bloodType.label')}
+              label={t('shared:labels.bloodType')}
               placeholder={t('patients.form.bloodType.placeholder')}
               data={bloodTypeOptions}
               value={formData.blood_type}
@@ -398,7 +398,7 @@ const PatientForm = ({
 
             <Group grow>
               <NumberInput
-                label={`${t('patients.form.height.label')} (${labels.heightLong})`}
+                label={`${t('shared:labels.height')} (${labels.heightLong})`}
                 placeholder={t(
                   unitSystem === 'imperial'
                     ? 'patients.form.height.placeholder.imperial'
@@ -412,7 +412,7 @@ const PatientForm = ({
                 step={unitSystem === 'imperial' ? 0.5 : 1}
               />
               <NumberInput
-                label={`${t('patients.form.weight.label')} (${labels.weightLong})`}
+                label={`${t('shared:labels.weight')} (${labels.weightLong})`}
                 placeholder={t(
                   unitSystem === 'imperial'
                     ? 'patients.form.weight.placeholder.imperial'
@@ -434,10 +434,10 @@ const PatientForm = ({
         {/* Contact Information */}
         <div>
           <Text size="sm" fw={500} mb="xs">
-            {t('patients.form.sections.contactInformation')}
+            {t('shared:fields.contactInformation')}
           </Text>
           <Textarea
-            label={t('patients.form.address.label')}
+            label={t('shared:labels.address')}
             placeholder={t('patients.form.address.placeholder')}
             leftSection={<IconMapPin size="1rem" />}
             value={formData.address}
@@ -461,7 +461,7 @@ const PatientForm = ({
               onClick={onCancel}
               disabled={loading}
             >
-              {t('patients.form.buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
           )}
           <Button

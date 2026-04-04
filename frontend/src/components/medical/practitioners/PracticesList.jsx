@@ -22,7 +22,7 @@ import PracticeEditModal from './PracticeEditModal';
 import frontendLogger from '../../../services/frontendLogger';
 
 const PracticesList = ({ onPracticeSaved }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const responsive = useResponsive();
   const { practices, loading, error, refresh } = usePractices();
 
@@ -48,7 +48,7 @@ const PracticesList = ({ onPracticeSaved }) => {
       setShowPracticeEditModal(true);
     } catch (err) {
       notifications.show({
-        title: t('labels.error'),
+        title: t('shared:labels.error'),
         message: t('practitioners.editPracticeError'),
         color: 'red',
       });
@@ -72,7 +72,7 @@ const PracticesList = ({ onPracticeSaved }) => {
     try {
       await apiService.deletePractice(practice.id);
       notifications.show({
-        title: t('messages.success', 'Success'),
+        title: t('shared:labels.success', 'Success'),
         message: t('practitioners.practices.deleteSuccess'),
         color: 'green',
       });
@@ -80,7 +80,7 @@ const PracticesList = ({ onPracticeSaved }) => {
       if (onPracticeSaved) onPracticeSaved();
     } catch (err) {
       notifications.show({
-        title: t('labels.error'),
+        title: t('shared:labels.error'),
         message: t('practitioners.practices.deleteError'),
         color: 'red',
       });
@@ -143,17 +143,17 @@ const PracticesList = ({ onPracticeSaved }) => {
             size="sm"
             sortable={false}
             columns={[
-              { header: t('practitioners.practices.table.name'), accessor: 'name', priority: 'high', width: 200 },
-              { header: t('practitioners.practices.table.phone'), accessor: 'phone_number', priority: 'low', width: 130 },
-              { header: t('practitioners.practices.table.website'), accessor: 'website', priority: 'low', width: 160 },
+              { header: t('shared:labels.name'), accessor: 'name', priority: 'high', width: 200 },
+              { header: t('shared:labels.phone'), accessor: 'phone_number', priority: 'low', width: 130 },
+              { header: t('shared:labels.website'), accessor: 'website', priority: 'low', width: 160 },
               {
-                header: t('practitioners.practices.table.practitioners'),
+                header: t('shared:categories.practitioners'),
                 accessor: 'practitioner_count',
                 priority: 'high',
                 width: 60,
               },
               {
-                header: t('practitioners.practices.table.actions'),
+                header: t('shared:labels.actions'),
                 accessor: 'id',
                 priority: 'high',
                 width: 140,
@@ -181,7 +181,7 @@ const PracticesList = ({ onPracticeSaved }) => {
                       leftSection={<IconEdit size={14} />}
                       onClick={() => handleEditPractice(row.id)}
                     >
-                      {t('buttons.edit', 'Edit')}
+                      {t('shared:labels.edit', 'Edit')}
                     </Button>
                     <Tooltip
                       label={t('practitioners.practices.cannotDelete')}

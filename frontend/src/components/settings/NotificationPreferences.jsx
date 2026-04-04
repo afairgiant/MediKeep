@@ -21,7 +21,7 @@ const CATEGORY_LABELS = {
  * Displays and manages the preference matrix (events x channels) with collapsible categories
  */
 const NotificationPreferences = ({ channels, eventTypes }) => {
-  const { t } = useTranslation(['notifications', 'common']);
+  const { t } = useTranslation(['notifications', 'common', 'shared']);
   const [preferences, setPreferences] = useState({});
   const [loading, setLoading] = useState(true);
   const [savingCell, setSavingCell] = useState(null);
@@ -135,7 +135,7 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
           <table className="preferences-matrix">
             <thead>
               <tr>
-                <th className="event-header">{t('preferences.event', 'Event')}</th>
+                <th className="event-header">{t('shared:labels.event', 'Event')}</th>
                 {channels.map(channel => (
                   <th key={channel.id} className="channel-header">
                     <span className="channel-name">{channel.name}</span>

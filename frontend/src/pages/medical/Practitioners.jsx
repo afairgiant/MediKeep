@@ -50,7 +50,7 @@ import PracticeEditModal from '../../components/medical/practitioners/PracticeEd
 import PracticesList from '../../components/medical/practitioners/PracticesList';
 
 const Practitioners = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('practitioners');
   const navigate = useNavigate();
@@ -246,7 +246,7 @@ const Practitioners = () => {
       setShowPracticeEditModal(true);
     } catch {
       notifications.show({
-        title: t('labels.error'),
+        title: t('shared:labels.error'),
         message: t('practitioners.editPracticeError', 'Failed to load practice for editing'),
         color: 'red',
       });
@@ -316,7 +316,7 @@ const Practitioners = () => {
   return (
     <>
     <Container size="xl" py="sm">
-      <PageHeader title={t('practitioners.title', 'Healthcare Practitioners')} icon="👨‍⚕️" />
+      <PageHeader title={t('shared:categories.healthcare_practitioners', 'Healthcare Practitioners')} icon="👨‍⚕️" />
 
       <MedicalPageAlerts
           error={error}
@@ -327,7 +327,7 @@ const Practitioners = () => {
       <Tabs defaultValue="practitioners" mt="md">
         <Tabs.List mb="sm" className="no-print">
           <Tabs.Tab value="practitioners">
-            {t('practitioners.tabs.practitioners', 'Practitioners')}
+            {t('shared:categories.practitioners', 'Practitioners')}
           </Tabs.Tab>
           <Tabs.Tab value="practices" leftSection={<IconBuilding size={16} />}>
             {t('practitioners.tabs.practices', 'Practices')}
@@ -368,7 +368,7 @@ const Practitioners = () => {
                   icon={IconShieldCheck}
                   title={t('practitioners.empty.title', 'No healthcare practitioners found')}
                   hasActiveFilters={dataManagement.hasActiveFilters}
-                  filteredMessage={t('practitioners.empty.filtered', 'Try adjusting your search or filter criteria.')}
+                  filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
                   noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
                 />
               ) : groupByPractice && groupedPractitioners ? (
@@ -421,11 +421,11 @@ const Practitioners = () => {
                               persistKey={`practitioners-group-${group.id}`}
                               data={group.practitioners}
                               columns={[
-                                { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                                { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                                { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                                { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                                { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                                { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                                { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                                { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                                { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                                { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                               ]}
                               tableName={group.name}
                               onView={handleViewPractitioner}
@@ -484,11 +484,11 @@ const Practitioners = () => {
                               persistKey="practitioners-ungrouped"
                               data={groupedPractitioners.ungrouped}
                               columns={[
-                                { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                                { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                                { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                                { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                                { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                                { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                                { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                                { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                                { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                                { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                               ]}
                               tableName={t('practitioners.ungroupedTitle', 'Independent Practitioners')}
                               onView={handleViewPractitioner}
@@ -538,14 +538,14 @@ const Practitioners = () => {
                     persistKey="practitioners"
                     data={filteredPractitioners}
                     columns={[
-                      { header: t('practitioners.table.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                      { header: t('practitioners.table.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                      { header: t('practitioners.table.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
-                      { header: t('practitioners.table.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                      { header: t('practitioners.table.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                      { header: t('practitioners.table.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                      { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
+                      { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
+                      { header: t('shared:labels.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
+                      { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                      { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
+                      { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
                     ]}
-                    tableName={t('practitioners.title', 'Healthcare Practitioners')}
+                    tableName={t('shared:categories.healthcare_practitioners', 'Healthcare Practitioners')}
                     onView={handleViewPractitioner}
                     onEdit={handleEditPractitioner}
                     onDelete={handleDeletePractitioner}

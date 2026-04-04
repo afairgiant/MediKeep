@@ -13,7 +13,7 @@ const PractitionerCard = ({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   const handleError = (error) => {
     logger.error('practitioner_card_error', {
@@ -73,17 +73,17 @@ const PractitionerCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('practitioners.card.practice', 'Practice'),
+        label: t('shared:labels.practice', 'Practice'),
         value: practitioner.practice_name || practitioner.practice,
-        render: (value) => value || t('common.labels.notSpecified', 'Not specified')
+        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
       },
       {
-        label: t('practitioners.card.phone', 'Phone'),
+        label: t('shared:labels.phone', 'Phone'),
         value: practitioner.phone_number,
-        render: (value) => value || t('common.labels.notSpecified', 'Not specified')
+        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
       },
       {
-        label: t('practitioners.card.email', 'Email'),
+        label: t('shared:labels.email', 'Email'),
         value: practitioner.email,
         render: (value) => value ? (
           <Anchor
@@ -93,10 +93,10 @@ const PractitionerCard = ({
           >
             {value}
           </Anchor>
-        ) : t('common.labels.notSpecified', 'Not specified')
+        ) : t('shared:labels.notSpecified', 'Not specified')
       },
       {
-        label: t('practitioners.card.website', 'Website'),
+        label: t('shared:labels.website', 'Website'),
         value: practitioner.website,
         render: (value) => value ? (
           <Anchor
@@ -108,10 +108,10 @@ const PractitionerCard = ({
           >
             {value.replace(/^https?:\/\//, '')}
           </Anchor>
-        ) : t('common.labels.notSpecified', 'Not specified')
+        ) : t('shared:labels.notSpecified', 'Not specified')
       },
       {
-        label: t('practitioners.card.rating', 'Rating'),
+        label: t('shared:labels.rating', 'Rating'),
         value: practitioner.rating,
         render: (value) => {
           if (value !== null && value !== undefined) {
@@ -128,7 +128,7 @@ const PractitionerCard = ({
               </Group>
             );
           }
-          return t('common.labels.notSpecified', 'Not specified');
+          return t('shared:labels.notSpecified', 'Not specified');
         }
       }
     ];

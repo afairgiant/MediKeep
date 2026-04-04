@@ -43,7 +43,7 @@ import { usePagination } from '../../hooks/usePagination';
 import PaginationControls from '../../components/shared/PaginationControls';
 
 const Symptoms = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
@@ -494,7 +494,7 @@ const Symptoms = () => {
             {t('symptoms.tabs.list', 'List')}
           </Tabs.Tab>
           <Tabs.Tab value="timeline" leftSection={<IconTimeline size={16} />}>
-            {t('symptoms.tabs.timeline', 'Timeline')}
+            {t('shared:labels.timeline', 'Timeline')}
           </Tabs.Tab>
           <Tabs.Tab value="calendar" leftSection={<IconCalendar size={16} />}>
             {t('symptoms.tabs.calendar', 'Calendar')}
@@ -546,7 +546,7 @@ const Symptoms = () => {
 
                       {symptom.category && (
                         <Text size="sm" c="dimmed">
-                          {t('symptoms.category', 'Category')}: {symptom.category}
+                          {t('shared:labels.category', 'Category')}: {symptom.category}
                         </Text>
                       )}
 
@@ -561,7 +561,7 @@ const Symptoms = () => {
                         )}
                         {symptom.resolved_date && (
                           <Text size="sm" c="green">
-                            {t('symptoms.resolved', 'Resolved')}: {formatDate(symptom.resolved_date)}
+                            {t('shared:labels.resolved', 'Resolved')}: {formatDate(symptom.resolved_date)}
                           </Text>
                         )}
                         <Text size="sm" fw={500} c="blue">
@@ -587,7 +587,7 @@ const Symptoms = () => {
                           ))}
                           {symptom.typical_triggers.length > 3 && (
                             <Text size="xs" c="dimmed">
-                              {t('symptoms.moreCount', '+{{count}} more', { count: symptom.typical_triggers.length - 3 })}
+                              {t('shared:labels.countMore', '+{{count}} more', { count: symptom.typical_triggers.length - 3 })}
                             </Text>
                           )}
                         </Group>
@@ -628,7 +628,7 @@ const Symptoms = () => {
                         leftSection={<IconEdit size={14} />}
                         onClick={() => handleEditSymptom(symptom)}
                       >
-                        {t('buttons.edit', 'Edit')}
+                        {t('shared:labels.edit', 'Edit')}
                       </Button>
                       <Button
                         size="xs"

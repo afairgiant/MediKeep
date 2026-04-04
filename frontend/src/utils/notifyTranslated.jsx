@@ -81,7 +81,7 @@ export const notifyError = (messageKey, options = {}) => {
     ...rest
   } = options;
   notifications.show({
-    title: resolve(title || 'common:labels.error', interpolation),
+    title: resolve(title || 'shared:labels.error', interpolation),
     message: resolve(messageKey, interpolation),
     color: 'red',
     icon: <IconX size={16} />,

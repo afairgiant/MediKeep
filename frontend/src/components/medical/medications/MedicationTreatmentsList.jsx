@@ -17,7 +17,7 @@ import StatusBadge from '../StatusBadge';
 import logger from '../../../services/logger';
 
 const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const [treatments, setTreatments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -115,7 +115,7 @@ const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
                   )}
                   {trt.mode === 'advanced' && (
                     <Badge variant="light" color="grape" size="xs">
-                      {t('medications.treatments.treatmentPlan', 'Treatment Plan')}
+                      {t('shared:labels.treatmentPlan', 'Treatment Plan')}
                     </Badge>
                   )}
                 </Group>
@@ -139,7 +139,7 @@ const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
               <Group gap="xs" mt="xs">
                 {rel.specific_dosage && (
                   <Badge variant="outline" size="xs">
-                    {t('medications.treatments.overrideDosage', 'Dosage')}: {rel.specific_dosage}
+                    {t('shared:labels.dosage', 'Dosage')}: {rel.specific_dosage}
                   </Badge>
                 )}
                 {rel.specific_frequency && (

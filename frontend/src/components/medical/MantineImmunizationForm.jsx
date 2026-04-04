@@ -12,7 +12,7 @@ const MantineImmunizationForm = ({
   onSubmit,
   editingImmunization = null,
 }) => {
-  const { t } = useTranslation('medical');
+  const { t } = useTranslation(['medical', 'shared']);
 
   // Injection site options with descriptions
   const siteOptions = [
@@ -29,8 +29,8 @@ const MantineImmunizationForm = ({
     { value: 'intramuscular', label: t('immunizations.routeOptions.intramuscular') },
     { value: 'subcutaneous', label: t('immunizations.routeOptions.subcutaneous') },
     { value: 'intradermal', label: t('immunizations.routeOptions.intradermal') },
-    { value: 'oral', label: t('immunizations.routeOptions.oral') },
-    { value: 'nasal', label: t('immunizations.routeOptions.nasal') },
+    { value: 'oral', label: t('shared:fields.oral') },
+    { value: 'nasal', label: t('shared:fields.nasal') },
   ];
 
   // Common vaccine manufacturers
@@ -42,7 +42,7 @@ const MantineImmunizationForm = ({
     { value: 'Merck', label: t('immunizations.manufacturerOptions.merck') },
     { value: 'GlaxoSmithKline', label: t('immunizations.manufacturerOptions.glaxoSmithKline') },
     { value: 'Sanofi', label: t('immunizations.manufacturerOptions.sanofi') },
-    { value: 'Other', label: t('immunizations.manufacturerOptions.other') },
+    { value: 'Other', label: t('shared:fields.other') },
   ];
 
   const dynamicOptions = {

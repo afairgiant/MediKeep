@@ -6,7 +6,7 @@ export const familyConditionFormFields = [
   {
     name: 'condition_name',
     type: 'text',
-    labelKey: 'medical:familyHistory.form.condition.conditionName.label',
+    labelKey: 'shared:fields.conditionName',
     placeholderKey: 'medical:familyHistory.form.condition.conditionName.placeholder',
     required: true,
     descriptionKey: 'medical:familyHistory.form.condition.conditionName.description',
@@ -47,7 +47,7 @@ export const familyConditionFormFields = [
     name: 'severity',
     type: 'select',
     labelKey: 'medical:familyHistory.form.condition.severity.label',
-    placeholderKey: 'medical:familyHistory.form.condition.severity.placeholder',
+    placeholderKey: 'shared:labels.selectSeverityLevel',
     descriptionKey: 'medical:familyHistory.form.condition.severity.description',
     gridColumn: 4,
     clearable: true,
@@ -85,7 +85,7 @@ export const familyConditionFormFields = [
   {
     name: 'icd10_code',
     type: 'text',
-    labelKey: 'medical:familyHistory.form.condition.icd10Code.label',
+    labelKey: 'shared:fields.icd10Code',
     placeholderKey: 'medical:familyHistory.form.condition.icd10Code.placeholder',
     descriptionKey: 'medical:familyHistory.form.condition.icd10Code.description',
     gridColumn: 6,
@@ -94,7 +94,7 @@ export const familyConditionFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:familyHistory.form.condition.notes.placeholder',
     descriptionKey: 'medical:familyHistory.form.condition.notes.description',
     gridColumn: 12,

@@ -45,7 +45,7 @@ import {
 } from '../../components/medical/conditions';
 
 const Conditions = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -439,7 +439,7 @@ const Conditions = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('conditions.title', 'Medical Conditions')} icon="🩺" />
+      <PageHeader title={t('shared:labels.medicalConditions', 'Medical Conditions')} icon="🩺" />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -499,7 +499,7 @@ const Conditions = () => {
               icon={IconShieldCheck}
               title={t('conditions.noResults', 'No medical conditions found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('conditions.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('conditions.getStarted', 'Click "Add New Condition" to get started.')}
             />
           ) : viewMode === 'cards' ? (
@@ -524,16 +524,16 @@ const Conditions = () => {
                 data={paginatedConditions}
                 pagination={false}
                 columns={[
-                  { header: t('conditions.table.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },
-                  { header: t('conditions.table.severity', 'Severity'), accessor: 'severity', priority: 'high', width: 120 },
-                  { header: t('conditions.table.onsetDate', 'Onset Date'), accessor: 'onset_date', priority: 'medium', width: 130 },
-                  { header: t('conditions.table.endDate', 'End Date'), accessor: 'end_date', priority: 'low', width: 130 },
-                  { header: t('conditions.table.status', 'Status'), accessor: 'status', priority: 'high', width: 100 },
+                  { header: t('shared:labels.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },
+                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'high', width: 120 },
+                  { header: t('shared:fields.onsetDate', 'Onset Date'), accessor: 'onset_date', priority: 'medium', width: 130 },
+                  { header: t('shared:labels.endDate', 'End Date'), accessor: 'end_date', priority: 'low', width: 130 },
+                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'high', width: 100 },
                   { header: t('conditions.table.icd10', 'ICD-10'), accessor: 'icd10_code', priority: 'low', width: 100 },
-                  { header: t('conditions.table.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 },
+                  { header: t('shared:tabs.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
-                tableName={t('conditions.title', 'Conditions')}
+                tableName={t('shared:labels.medicalConditions', 'Conditions')}
                 onView={handleViewCondition}
                 onEdit={handleEditCondition}
                 onDelete={handleDeleteCondition}

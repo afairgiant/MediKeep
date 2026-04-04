@@ -1,23 +1,16 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
-      "firstName": "First Name",
-      "lastName": "Last Name",
       "linkPatient": {
-        "hint": "Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).",
-        "selfRecordBadge": "Self-Record",
-        "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.",
-        "selfRecordWarningTitle": "Note:"
+        "hint": "Zamiast tworzyć nowy rekord pacjenta, połącz nowego użytkownika z istniejącym pacjentem (np. dziecko, które teraz potrzebuje własnego loginu).",
+        "selfRecordBadge": "Własny rekord",
+        "selfRecordWarning": "To jest własny rekord bieżącego właściciela. Dla pierwotnego właściciela zostanie utworzony nowy własny rekord z skopiowanymi danymi demograficznymi. Pierwotny właściciel otrzyma uprawnienia do edycji tego pacjenta."
       },
-      "password": "Password",
       "passwordReqs": {
-        "hasLetter": "Contains at least one letter",
-        "hasNumber": "Contains at least one number",
-        "minLength": "At least 6 characters"
-      },
-      "role": "Role",
-      "username": "Username"
+        "hasLetter": "Zawiera co najmniej jedną literę",
+        "hasNumber": "Zawiera co najmniej jedną cyfrę",
+        "minLength": "Co najmniej 6 znaków"
+      }
     }
   },
   "analytics": {
@@ -25,48 +18,34 @@
     "activityTrend": "Trend aktywności",
     "analyticsDateRange": "Zakres dat analityki",
     "axisLabels": {
-      "activities": "Działania",
-      "date": "Data"
+      "activities": "Działania"
     },
     "breakdownByType": "Podział według typu",
     "chartLabels": {
-      "allergies": "Alergie",
-      "labResults": "Wyniki laboratoryjne",
-      "medications": "Leki",
       "patients": "Pacjenci",
-      "procedures": "Procedury",
-      "userActivity": "Aktywność użytkownika",
-      "vitals": "Znaki życiowe"
+      "userActivity": "Aktywność użytkownika"
     },
     "customDateRange": "Niestandardowy zakres dat",
     "dailyAverage": "Średnia dzienna",
-    "days": "{{count}} dni",
-    "days_one": "{{count}} days",
     "days_few": "{{count}} days",
     "days_many": "{{count}} days",
-    "days_other": "{{count}} days",
     "filterByDays": "Filtruj ostatnie {{days}} dni",
     "loading": "Ładowanie analityki...",
     "period": "Okres",
     "recordsDistribution": "Dystrybucja rekordów",
     "subtitle": "Trendy aktywności, porównania i dystrybucja rekordów",
     "title": "Analityka",
-    "total": "{{count}} razem",
-    "total_one": "{{count}} total",
     "total_few": "{{count}} total",
     "total_many": "{{count}} total",
-    "total_other": "{{count}} total",
     "totalActivities": "Razem działań",
     "userInteractions": "Interakcje użytkowników",
     "vsPreviousPeriod": "w porównaniu do poprzedniego okresu"
   },
   "auditLog": {
     "actionFilter": "Działanie",
-    "clearFilters": "Wyczyść filtry",
     "dateRange": "Zakres dat",
     "entityTypeFilter": "Typ encji",
     "errorLoading": "Błąd podczas ładowania dziennika audytu",
-    "exportCsv": "Eksportuj CSV",
     "filterByAction": "Filtruj według działania",
     "filterByDateRange": "Filtruj według zakresu dat",
     "filterByEntityType": "Filtruj według typu encji",
@@ -81,14 +60,10 @@
     "system": "System",
     "tableHeaders": {
       "action": "Działanie",
-      "description": "Opis",
       "entityType": "Typ encji",
       "recordId": "ID rekordu",
-      "timestamp": "Sygnatura czasowa",
-      "user": "Użytkownik"
+      "timestamp": "Sygnatura czasowa"
     },
-    "title": "Dziennik audytu",
-    "userFilter": "Użytkownik",
     "viewRecord": "Wyświetl rekord {{type}}",
     "viewRecordAriaLabel": "Wyświetl {{type}} #{{id}}"
   },
@@ -99,21 +74,14 @@
       "count_many": "{{count}} backups",
       "count_other": "{{count}} kopii zapasowych",
       "download": "Pobierz",
-      "exportCsv": "Eksportuj CSV",
       "noBackups": "Nie znaleziono kopii zapasowych",
       "previewRestore": "Podgląd przywrócenia",
       "restore": "Przywróć",
       "tableHeaders": {
-        "actions": "Działania",
-        "created": "Utworzono",
         "fileExists": "Plik istnieje",
-        "filename": "Nazwa pliku",
-        "size": "Rozmiar",
-        "status": "Status",
-        "type": "Typ"
+        "filename": "Nazwa pliku"
       },
       "title": "Istniejące kopie zapasowe",
-      "unknown": "Nieznany",
       "verify": "Zweryfikuj"
     },
     "loading": "Ładowanie zarządzania kopiami zapasowymi...",
@@ -164,56 +132,33 @@
     "preview": {
       "affectedData": "Dotknięte dane",
       "analysisNotAvailable": "Analiza kopii zapasowej niedostępna",
-      "andMore": "...i {{count}} więcej",
-      "andMore_one": "...and {{count}} more",
       "andMore_few": "...and {{count}} more",
       "andMore_many": "...and {{count}} more",
-      "andMore_other": "...and {{count}} more",
       "backupContent": "Zawartość kopii zapasowej",
       "backupDetails": "Szczegóły kopii zapasowej",
       "backupFiles": "Pliki kopii zapasowej",
       "components": "Komponenty",
-      "created": "Utworzono",
       "createdAt": "Utworzono: {{date}}",
       "currentDatabase": "Bieżąca baza danych",
       "currentFiles": "Bieżące pliki",
-      "description": "Opis",
-      "filesCount": "{{count}} plików ({{size}})",
-      "filesCount_one": "{{count}} files ({{size}})",
       "filesCount_few": "{{count}} files ({{size}})",
       "filesCount_many": "{{count}} files ({{size}})",
-      "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} plików",
-      "filesOnly_one": "{{count}} files",
       "filesOnly_few": "{{count}} files",
       "filesOnly_many": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Manifest",
       "noAffectedData": "Brak informacji o dotknięciu danych",
       "noStatistics": "Brak dostępnych statystyk",
       "restoreMethod": "Metoda przywracania",
-      "size": "Rozmiar",
-      "sqlStatements": "{{count}} instrukcji SQL",
-      "sqlStatements_one": "{{count}} SQL statements",
       "sqlStatements_few": "{{count}} SQL statements",
       "sqlStatements_many": "{{count}} SQL statements",
-      "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} rekordów razem",
-      "totalRecords_one": "{{count}} total records",
       "totalRecords_few": "{{count}} total records",
       "totalRecords_many": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Typ",
-      "unknownType": "Nieznany typ kopii zapasowej",
-      "warnings": "Ostrzeżenia"
+      "unknownType": "Nieznany typ kopii zapasowej"
     },
     "retention": {
       "backupsUnit": "kopie zapasowe",
-      "countProtection": "<strong>Ochrona liczby:</strong> Zawsze przechowuj {{count}} najnowszych kopii zapasowych",
-      "countProtection_one": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
       "countProtection_few": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
       "countProtection_many": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
-      "countProtection_other": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
       "currentStatus_one": "<strong>Bieżący status:</strong> {{count}} kopia zapasowa przechowywana (maks: {{max}})",
       "currentStatus_few": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})",
       "currentStatus_many": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})",
@@ -232,7 +177,6 @@
       "title": "Ustawienia przechowywania kopii zapasowych"
     },
     "schedule": {
-      "active": "Aktywny",
       "completedSuccessfully": "Zakończono pomyślnie",
       "dayOfWeek": "Dzień tygodnia",
       "dayOfWeekDesc": "W który dzień powinna się wykonać tygodniowa kopia zapasowa?",
@@ -245,7 +189,6 @@
         "tue": "Wtorek",
         "wed": "Środa"
       },
-      "disabled": "Wyłączony",
       "failed": "Nie powiodło się: {{error}}",
       "frequency": "Częstotliwość kopii zapasowych",
       "frequencyDesc": "Zaplanuj automatyczne pełne kopie zapasowe (baza danych + pliki)",
@@ -253,10 +196,8 @@
       "nextScheduledRun": "Następne zaplanowane uruchomienie",
       "presets": {
         "daily": "Codziennie",
-        "disabled": "Wyłączony",
         "every12Hours": "Co 12 godzin",
-        "every6Hours": "Co 6 godzin",
-        "weekly": "Co tydzień"
+        "every6Hours": "Co 6 godzin"
       },
       "saveSchedule": "Zapisz harmonogram",
       "timeOfDay": "Godzina dnia",
@@ -266,10 +207,8 @@
     },
     "subtitle": "Twórz i zarządzaj kopiami zapasowymi systemu",
     "tabs": {
-      "backups": "Kopie zapasowe",
-      "settings": "Ustawienia"
+      "backups": "Kopie zapasowe"
     },
-    "title": "Zarządzanie kopiami zapasowymi",
     "unsavedBadge": "Niezapisane"
   },
   "createUser": {
@@ -283,16 +222,13 @@
     "autoFeaturesTitle": "Automatycznie generowane funkcje",
     "cardSubtitle": "Wypełnij poniższy formularz, aby utworzyć nowe konto użytkownika",
     "cardTitle": "Szczegóły konta użytkownika",
-    "email": "E-mail",
     "emailPlaceholder": "Wpisz adres e-mail",
     "errors": {
       "accountCreateFailed": "Nie udało się utworzyć konta",
       "createFailed": "Nie udało się utworzyć użytkownika",
       "createRetry": "Nie udało się utworzyć użytkownika. Proszę spróbować ponownie."
     },
-    "firstName": "Imię",
     "firstNamePlaceholder": "Wpisz imię",
-    "lastName": "Nazwisko",
     "lastNamePlaceholder": "Wpisz nazwisko",
     "linkPatient": {
       "checkbox": "Połącz z istniejącym rekordem pacjenta",
@@ -304,26 +240,19 @@
       "patientId": "ID",
       "selectPlaceholder": "Wybierz pacjenta...",
       "selfRecordBadge": "Rekord własny",
-      "selfRecordWarning": "To jest rekord własny bieżącego właściciela. Nowy rekord własny zostanie utworzony dla oryginalnego właściciela ze skopiowanymi danymi demograficznymi. Pierwotny właściciel otrzyma dostęp do edycji tego pacjenta.",
-      "selfRecordWarningTitle": "Notatka:"
+      "selfRecordWarning": "To jest rekord własny bieżącego właściciela. Nowy rekord własny zostanie utworzony dla oryginalnego właściciela ze skopiowanymi danymi demograficznymi. Pierwotny właściciel otrzyma dostęp do edycji tego pacjenta."
     },
-    "noteLabel": "Notatka:",
     "noteText": "Rekord pacjenta zostanie automatycznie utworzony dla tego użytkownika z rolą domyślną \"użytkownik\".",
     "pageSubtitle": "Utwórz nowe konto użytkownika z profilem pacjenta",
     "pageTitle": "Utwórz nowego użytkownika",
-    "password": "Hasło",
     "passwordPlaceholder": "Wpisz hasło (min 6 znaków, zawierające literę i cyfrę)",
     "passwordReqs": {
       "hasLetter": "Zawiera co najmniej jedną literę",
       "hasNumber": "Zawiera co najmniej jedną cyfrę",
       "minLength": "Co najmniej 6 znaków"
     },
-    "role": "Rola",
-    "roleAdmin": "Admin",
-    "roleUser": "Użytkownik",
     "submitButton": "Utwórz konto",
     "successRedirect": "Użytkownik \"{{username}}\" pomyślnie utworzony!",
-    "username": "Nazwa użytkownika",
     "usernamePlaceholder": "Wpisz nazwę użytkownika",
     "validation": {
       "firstNameRequired": "Proszę wpisać imię",
@@ -336,31 +265,24 @@
   "dashboard": {
     "loading": "Ładowanie kompleksowego pulpitu...",
     "quickActions": {
-      "auditLog": "Dziennik audytu",
       "auditLogDesc": "Wyświetl dziennik aktywności systemu",
       "backups": "Kopie zapasowe",
       "backupsDesc": "Zarządzanie kopiami zapasowymi",
       "createUser": "Utwórz nowego użytkownika",
       "createUserDesc": "Utwórz konto użytkownika z profilem pacjenta",
-      "dataModels": "Modele danych",
       "dataModelsDesc": "Wyświetl i zarządzaj tabelami bazy danych",
       "manageUsers": "Zarządzaj użytkownikami",
       "manageUsersDesc": "Wyświetl i zarządzaj kontami użytkowników",
-      "settings": "Ustawienia",
       "settingsDesc": "Konfiguracja systemu",
       "subtitle": "Typowe zadania administracyjne",
-      "systemHealth": "Stan systemu",
       "systemHealthDesc": "Monitoruj status systemu",
       "title": "Szybkie akcje",
       "trash": "Kosz",
       "trashDesc": "Przywróć usunięte pliki"
     },
     "recentActivity": {
-      "count": "{{count}} działań",
-      "count_one": "{{count}} activities",
       "count_few": "{{count}} activities",
       "count_many": "{{count}} activities",
-      "count_other": "{{count}} activities",
       "errorLoading": "Błąd podczas ładowania aktywności",
       "noActivity": "Brak ostatniej aktywności do wyświetlenia",
       "subtitle": "Ostatnie zdarzenia systemowe",
@@ -370,20 +292,11 @@
     "refreshAll": "Odśwież wszystko",
     "stats": {
       "activePatients": "Aktywni pacjenci",
-      "activePrescriptions": "{{count}} aktywnych recepty",
-      "activePrescriptions_one": "{{count}} active prescriptions",
       "activePrescriptions_few": "{{count}} active prescriptions",
       "activePrescriptions_many": "{{count}} active prescriptions",
-      "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Wyniki laboratoryjne",
-      "medications": "Leki",
-      "recentRegistrations": "+{{count}} w tym tygodniu",
-      "recentRegistrations_one": "+{{count}} this week",
       "recentRegistrations_few": "+{{count}} this week",
       "recentRegistrations_many": "+{{count}} this week",
-      "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Razem użytkowników",
-      "vitalSigns": "Znaki życiowe"
+      "totalUsers": "Razem użytkowników"
     },
     "subtitle": "Kompleksowy przegląd i zarządzanie systemem",
     "systemHealth": {
@@ -392,20 +305,14 @@
       "lastBackup": "Ostatnia kopia zapasowa",
       "noBackup": "Brak kopii zapasowej",
       "subtitle": "Bieżący status systemu",
-      "title": "Stan systemu",
-      "totalRecords": "Razem rekordów",
       "uptime": "Czas działania"
-    },
-    "title": "Pulpit administracyjny"
+    }
   },
   "dataModels": {
     "categories": {
       "coreMedical": "Medycyna jądrowa",
-      "familyHistory": "Historia rodzinna",
       "fileManagement": "Zarządzanie plikami",
       "healthcareDirectory": "Katalog opieki zdrowotnej",
-      "medicalRecords": "Akta medyczne",
-      "other": "Inne",
       "patientSupport": "Wsparcie pacjentów",
       "sharingAccess": "Udostępnianie i dostęp",
       "system": "System"
@@ -444,11 +351,9 @@
     "filterAriaLabel": "Filtruj modele danych",
     "filterPlaceholder": "Filtruj modele...",
     "noMatchFilter": "Żaden model nie pasuje do \"{{query}}\"",
-    "subtitle": "Zarządzaj i wyświetlaj wszystkie tabele i rekordy bazy danych",
-    "title": "Modele danych"
+    "subtitle": "Zarządzaj i wyświetlaj wszystkie tabele i rekordy bazy danych"
   },
   "directoryCard": {
-    "error": "Błąd",
     "files": "pliki",
     "mb": "MB",
     "ok": "OK"
@@ -466,15 +371,12 @@
     "patientIdLocked": "ID pacjenta (zablokowane na bieżącego użytkownika)",
     "primaryKeyAutoGenerated": "Klucz główny (automatycznie generowany)",
     "primaryKeyReadOnly": "Klucz główny (tylko do odczytu)",
-    "resetPassword": "Zresetuj hasło",
     "selectDefault": "-- Wybierz --",
     "selectField": "-- Wybierz {{field}} --",
     "systemTimestamp": "Sygnatura czasowa systemu (automatycznie generowana)"
   },
   "header": {
-    "adminBadge": "Admin",
     "administrator": "Administrator",
-    "dashboard": "Pulpit",
     "logout": "Wyloguj",
     "returnToDashboard": "Wróć do pulpitu",
     "searchAriaLabel": "Szukaj modeli danych",
@@ -490,7 +392,6 @@
       "connectionTest": "Test połączenia",
       "databaseSize": "Rozmiar bazy danych",
       "failed": "Nie powiodło się",
-      "medicalRecords": "Akta medyczne",
       "passed": "Zaliczone",
       "patientRecords": "Rekordy pacjentów",
       "title": "Stan bazy danych"
@@ -517,8 +418,7 @@
     "schedulePresets": {
       "daily": "Codziennie",
       "every_12_hours": "Co 12 godzin",
-      "every_6_hours": "Co 6 godzin",
-      "weekly": "Co tydzień"
+      "every_6_hours": "Co 6 godzin"
     },
     "services": {
       "adminInterface": "Interfejs administracyjny",
@@ -530,10 +430,7 @@
     "sso": {
       "allowed": "Dozwolone",
       "blocked": "Zablokowane",
-      "disabled": "Wyłączony",
-      "enabled": "Włączony",
       "passwordOnlyInfo": "Użytkownicy mogą logować się tylko przy użyciu nazwy użytkownika/hasła",
-      "provider": "Dostawca",
       "providerType": "Typ dostawcy",
       "registrationViaSso": "Rejestracja za pośrednictwem SSO",
       "ssoStatus": "Status SSO",
@@ -542,27 +439,23 @@
     "storage": {
       "appStorage": "Magazyn aplikacji",
       "diskUsage": "Użycie dysku",
-      "filesAcross": "w {{count}} plikach",
-      "filesAcross_one": "across {{count}} files",
       "filesAcross_few": "across {{count}} files",
       "filesAcross_many": "across {{count}} files",
-      "filesAcross_other": "across {{count}} files",
       "freeOf": "{{free}} GB wolnych z {{total}} GB",
       "title": "Stan magazynu"
     },
     "subtitle": "Stan systemu w czasie rzeczywistym i metryki wydajności",
-    "title": "Monitor stanu systemu",
-    "totalRecords": "Razem rekordów"
+    "title": "Monitor stanu systemu"
   },
   "models": {
     "backToDataModels": "Powrót do modeli danych",
     "backToModel": "Powrót do {{modelName}}",
     "bulkDeleteAssociated": "Wszystkie powiązane dane (w tym {{types}}) również zostaną usunięte.",
     "bulkDeleteFailed": "Usunięcie zbiorcze nie powiodło się",
-    "bulkDeleteWarning_one": "Masz zamiar trwale usunąć {{count}} rekordu {{modelName}}.",
-    "bulkDeleteWarning_few": "",
-    "bulkDeleteWarning_many": "",
-    "bulkDeleteWarning_other": "Masz zamiar trwale usunąć {{count}} rekordów {{modelName}}.",
+    "bulkDeleteWarning_one": "Zamierzasz trwale usunąć {{count}} rekord {{modelName}}.",
+    "bulkDeleteWarning_few": "Zamierzasz trwale usunąć {{count}} rekordy {{modelName}}.",
+    "bulkDeleteWarning_many": "Zamierzasz trwale usunąć {{count}} rekordów {{modelName}}.",
+    "bulkDeleteWarning_other": "Zamierzasz trwale usunąć {{count}} rekordów {{modelName}}.",
     "changeRole": "Zmień rolę",
     "changesSaved": "Zmiany zapisane",
     "changeUsername": "Zmień nazwę użytkownika",
@@ -574,14 +467,13 @@
     "createRecord": "Utwórz rekord",
     "deleteFailed": "Usunięcie nie powiodło się",
     "deleteRecords": "Usuń {{count}} rekordów",
-    "deleteRecords_one": "",
-    "deleteRecords_few": "",
-    "deleteRecords_many": "",
-    "deleteRecords_other": "",
+    "deleteRecords_one": "Usuń {{count}} rekord",
+    "deleteRecords_few": "Usuń {{count}} rekordy",
+    "deleteRecords_many": "Usuń {{count}} rekordów",
+    "deleteRecords_other": "Usuń {{count}} rekordów",
     "deleteSelected": "Usuń zaznaczone",
     "deleteWarning": "Spowoduje to trwałe usunięcie tego rekordu {{modelName}} i wszystkich powiązanych danych:",
     "editRecord": "Edytuj {{modelName}}",
-    "exportCsv": "Eksportuj CSV",
     "exportFailed": "Eksport nie powiódł się",
     "exportToCSV": "Eksportuj do CSV",
     "failedToBulkDelete": "Nie udało się usunąć rekordów",
@@ -597,20 +489,20 @@
     "loadingForm": "Ładowanie formularza tworzenia modelu...",
     "noRecordsFound": "Nie znaleziono rekordów",
     "perPage": "{{count}} na stronę",
-    "perPage_one": "",
-    "perPage_few": "",
-    "perPage_many": "",
-    "perPage_other": "",
+    "perPage_one": "{{count}} na stronę",
+    "perPage_few": "{{count}} na stronę",
+    "perPage_many": "{{count}} na stronę",
+    "perPage_other": "{{count}} na stronę",
     "rawDataJson": "Surowe dane (JSON)",
     "recordDeleted": "Rekord usunięty",
     "recordDeletedMessage": "Pomyślnie usunięty rekord {{modelName}} #{{id}}",
     "recordId": "ID rekordu: {{id}}",
     "recordsDeleted": "Rekordy usunięte",
     "recordsDeletedMessage": "Pomyślnie usunięto {{count}} rekordów",
-    "recordsDeletedMessage_one": "",
-    "recordsDeletedMessage_few": "",
-    "recordsDeletedMessage_many": "",
-    "recordsDeletedMessage_other": "",
+    "recordsDeletedMessage_one": "Pomyślnie usunięto {{count}} rekord",
+    "recordsDeletedMessage_few": "Pomyślnie usunięto {{count}} rekordy",
+    "recordsDeletedMessage_many": "Pomyślnie usunięto {{count}} rekordów",
+    "recordsDeletedMessage_other": "Pomyślnie usunięto {{count}} rekordów",
     "recordUpdated": "Rekord zaktualizowany pomyślnie",
     "resetToDefault": "Zresetuj do domyślnego",
     "roleChangeLastAdmin": "Jeśli jest to ostatni użytkownik z uprawnieniami administratora w systemie, możesz stracić dostęp do administracji.",
@@ -620,20 +512,17 @@
     "searchPlaceholder": "Szukaj {{modelName}}...",
     "searchRecords": "Szukaj rekordów",
     "searchResult_one": "{{count}} wynik dla \"{{query}}\"",
-    "searchResult_few": "",
-    "searchResult_many": "",
+    "searchResult_few": "{{count}} wyniki dla \"{{query}}\"",
+    "searchResult_many": "{{count}} wyników dla \"{{query}}\"",
     "searchResult_other": "{{count}} wyników dla \"{{query}}\"",
     "selected": "{{count}} zaznaczono",
-    "selected_one": "",
-    "selected_few": "",
-    "selected_many": "",
-    "selected_other": "",
+    "selected_one": "{{count}} zaznaczony",
+    "selected_few": "{{count}} zaznaczone",
+    "selected_many": "{{count}} zaznaczono",
+    "selected_other": "{{count}} zaznaczonych",
     "toggleColumnVisibility": "Przełącz widoczność kolumny",
-    "totalRecords": "{{count}} rekordów razem",
-    "totalRecords_one": "{{count}} total records",
     "totalRecords_few": "{{count}} total records",
     "totalRecords_many": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Wpisz <strong>DELETE</strong> aby potwierdzić",
     "usernameChangeLogout": "Spowoduje to natychmiastowe wylogowanie i będziesz musiał zalogować się ponownie przy użyciu nowej nazwy użytkownika.",
     "usernameChangeText": "Masz zamiar zmienić własną nazwę użytkownika z <strong>\"{{oldUsername}}\"</strong> na <strong>\"{{newUsername}}\"</strong>.",
@@ -641,7 +530,9 @@
     "usernameUpdated": "Nazwa użytkownika zaktualizowana",
     "usernameUpdatedMessage": "Twoja nazwa użytkownika została zmieniona. Zaloguj się przy użyciu nowej nazwy użytkownika: \"{{username}}\"",
     "viewRecord": "Wyświetl {{modelName}}",
-    "visibleColumns": "Widoczne kolumny"
+    "visibleColumns": "Widoczne kolumny",
+    "searchResult": "{{count}} wyników dla \"{{query}}\"",
+    "bulkDeleteWarning": "Zamierzasz trwale usunąć {{count}} rekordów {{modelName}}."
   },
   "settings": {
     "dataRetention": {
@@ -653,7 +544,6 @@
     "resetAll": "Zresetuj wszystko",
     "saveAllChanges": "Zapisz wszystkie zmiany",
     "sso": {
-      "provider": "Dostawca",
       "ssoDisabledInfo": "SSO jest obecnie wyłączony. Aby włączyć SSO, skonfiguruj następujące zmienne środowiskowe i uruchom ponownie aplikację:",
       "ssoRegistration": "Rejestracja SSO",
       "testConnection": "Test połączenia",
@@ -665,67 +555,45 @@
     "title": "Ustawienia administracyjne",
     "userManagement": {
       "allowRegistration": "Zezwól na rejestrację nowych użytkowników",
-      "allowRegistrationDesc": "Włącz lub wyłącz możliwość tworzenia nowych kont przez użytkowników na stronie logowania",
-      "title": "Zarządzanie użytkownikami"
+      "allowRegistrationDesc": "Włącz lub wyłącz możliwość tworzenia nowych kont przez użytkowników na stronie logowania"
     }
   },
   "shared": {
     "dark": "ciemny",
-    "disabled": "Wyłączony",
-    "enabled": "Włączony",
     "healthy": "zdrowy",
     "info": "Informacja",
-    "light": "jasny",
-    "unknown": "Nieznany"
+    "light": "jasny"
   },
   "sidebar": {
     "adminNavigation": "Nawigacja administracyjna",
     "comingSoon": "{{label}} (Już wkrótce)",
     "items": {
       "analytics": "Analityka",
-      "auditLog": "Dziennik audytu",
-      "backupManagement": "Zarządzanie kopiami zapasowymi",
-      "dataModels": "Modele danych",
       "maintenance": "Konserwacja",
-      "overview": "Przegląd",
-      "settings": "Ustawienia",
-      "systemHealth": "Stan systemu",
-      "trash": "Kosz",
-      "userManagement": "Zarządzanie użytkownikami"
+      "trash": "Kosz"
     },
     "sections": {
-      "dashboard": "Pulpit",
       "dataManagement": "Zarządzanie danymi",
       "monitoring": "Monitorowanie",
       "tools": "Narzędzia"
     },
-    "title": "Admin",
     "toggleSidebar": "Przełącz pasek boczny"
   },
   "tools": {
     "subtitle": "Narzędzia administracyjne do konserwacji systemu i zarządzania danymi",
     "testLibrary": {
       "categories": "Kategorie",
-      "categoriesUpdated": "Kategorie zaktualizowane: {{count}}",
-      "categoriesUpdated_one": "Categories Updated: {{count}}",
       "categoriesUpdated_few": "Categories Updated: {{count}}",
       "categoriesUpdated_many": "Categories Updated: {{count}}",
-      "categoriesUpdated_other": "Categories Updated: {{count}}",
       "forceSyncAll": "Wymuś synchronizację wszystkiego",
       "forceSyncAllDesc": "<strong>Wymuś synchronizację wszystkiego:</strong> Dopasowuje ponownie wszystkie komponenty (kategorie i nazwy kanoniczne)",
       "libraryReloaded": "Biblioteka ponownie załadowana",
       "libraryVersion": "Wersja biblioteki",
-      "namesUpdated": "Nazwy zaktualizowane: {{count}}",
-      "namesUpdated_one": "Names Updated: {{count}}",
       "namesUpdated_few": "Names Updated: {{count}}",
       "namesUpdated_many": "Names Updated: {{count}}",
-      "namesUpdated_other": "Names Updated: {{count}}",
       "operational": "Operacyjny",
-      "processed": "Przetworzono: {{count}}",
-      "processed_one": "Processed: {{count}}",
       "processed_few": "Processed: {{count}}",
       "processed_many": "Processed: {{count}}",
-      "processed_other": "Processed: {{count}}",
       "reloadDesc": "<strong>Załaduj bibliotekę ponownie:</strong> Odświeża bibliotekę testów z dysku (użyj po zaktualizowaniu test_library.json)",
       "reloadLibrary": "Załaduj bibliotekę ponownie",
       "syncComplete": "Synchronizacja zakończona",
@@ -737,7 +605,6 @@
     "title": "Narzędzia i konserwacja"
   },
   "trash": {
-    "clearFilters": "Wyczyść filtry",
     "deleteConfirm": "Czy na pewno chcesz trwale usunąć <strong>{{filename}}</strong>?",
     "deletedDateRange": "Zakres dat usunięcia",
     "deleteFailed": "Usunięcie nie powiodło się",
@@ -747,7 +614,6 @@
     "fileCount_one": "{{count}} plik",
     "fileCount_few": "{{count}} files",
     "fileCount_many": "{{count}} files",
-    "fileCount_other": "{{count}} plików",
     "fileDeleted": "Plik usunięty",
     "fileDeletedMessage": "{{filename}} trwale usunięty",
     "fileRestored": "Plik przywrócony",
@@ -766,11 +632,8 @@
     "purgedDirectories_few": "across {{count}} directories",
     "purgedDirectories_many": "across {{count}} directories",
     "purgedDirectories_other": "w {{count}} katalogach",
-    "purgeDescription": "Pliki, które przekroczyły okres przechowywania, zostaną usunięte. Obecnie w koszu znajduje się <strong>{{count}} {{files}}</strong> o łącznym rozmiarze <strong>{{size}}</strong>.",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgeDescription_few": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgeDescription_many": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} wygasły plik został trwale usunięty",
     "purgedMessage_few": "{{count}} expired files permanently deleted",
     "purgedMessage_many": "{{count}} expired files permanently deleted",
@@ -790,16 +653,14 @@
     "showingFiltered": "Wyświetlanie {{shown}} z {{total}} {{files}}",
     "subtitle": "Zarządzaj usuniętymi przesłanymi plikami. Przywróć pliki do ich oryginalnej lokalizacji lub usuń je na stałe, aby zwolnić miejsce.",
     "tableHeaders": {
-      "actions": "Działania",
       "deleted": "Usunięto",
       "filename": "Nazwa pliku",
-      "originalLocation": "Oryginalna lokalizacja",
-      "reason": "Powód",
-      "size": "Rozmiar"
+      "originalLocation": "Oryginalna lokalizacja"
     },
     "title": "Zarządzanie koszem",
     "totalSize": "{{size}} razem",
-    "trashPurged": "Kosz wyczyszczony"
+    "trashPurged": "Kosz wyczyszczony",
+    "fileCount_other": "{{count}} plików"
   },
   "users": {
     "actionsFor": "Działania dla {{username}}",
@@ -812,11 +673,8 @@
     },
     "changeRole": "Zmień rolę",
     "clear": "Wyczyść",
-    "daysAgo": "{{count}}d temu",
-    "daysAgo_one": "{{count}}d ago",
     "daysAgo_few": "{{count}}d ago",
     "daysAgo_many": "{{count}}d ago",
-    "daysAgo_other": "{{count}}d ago",
     "deactivate": "Deaktywuj",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Nie można usunąć ostatniego administratora.",
@@ -826,26 +684,19 @@
       "warning": "Tej czynności nie można cofnąć. Wszystkie dane powiązane z tym użytkownikiem zostaną trwale usunięte."
     },
     "deleteUser": "Usuń użytkownika",
-    "hoursAgo": "{{count}}h temu",
-    "hoursAgo_one": "{{count}}h ago",
     "hoursAgo_few": "{{count}}h ago",
     "hoursAgo_many": "{{count}}h ago",
-    "hoursAgo_other": "{{count}}h ago",
     "justNow": "Właśnie teraz",
     "loginHistory": "Historia logowań",
     "loginHistoryModal": {
       "dateTime": "Data i godzina",
-      "details": "Szczegóły",
       "ipAddress": "Adres IP",
       "noHistory": "Nie znaleziono historii logowań",
-      "notAvailable": "N/A",
+      "notAvailable": "N/D",
       "title": "Historia logowań: {{username}}"
     },
-    "minutesAgo": "{{count}}m temu",
-    "minutesAgo_one": "{{count}}m ago",
     "minutesAgo_few": "{{count}}m ago",
     "minutesAgo_many": "{{count}}m ago",
-    "minutesAgo_other": "{{count}}m ago",
     "never": "Nigdy",
     "noUsersFound": "Nie znaleziono użytkowników",
     "noUsersInSystem": "Brak użytkowników w systemie.",
@@ -855,40 +706,26 @@
       "newPassword": "Nowe hasło",
       "passwordDescription": "Min 6 znaków, co najmniej 1 litera i 1 cyfra",
       "resettingFor": "Resetowanie hasła dla <strong>{{username}}</strong>",
-      "ssoWarning": "Ten użytkownik uwierzytelnia się za pośrednictwem SSO ({{provider}}). Ustawienie hasła lokalnego umożliwi uwierzytelnianie hybrydowe.",
-      "title": "Zresetuj hasło"
+      "ssoWarning": "Ten użytkownik uwierzytelnia się za pośrednictwem SSO ({{provider}}). Ustawienie hasła lokalnego umożliwi uwierzytelnianie hybrydowe."
     },
-    "resetPassword": "Zresetuj hasło",
     "roleFilter": {
-      "admin": "Admin",
-      "all": "Wszystkie role",
-      "user": "Użytkownik"
+      "all": "Wszystkie role"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Nie można usunąć ostatniej roli administratora.",
       "changingRole": "Zmiana roli dla <strong>{{username}}</strong>",
       "grantAdmin": "Spowoduje to przyznanie pełnych uprawnień administracyjnych.",
       "revokeAdmin": "Spowoduje to odwołanie uprawnień administracyjnych.",
-      "roleLabel": "Rola",
       "title": "Zmień rolę użytkownika"
     },
     "searchPlaceholder": "Szukaj użytkowników...",
     "statusFilter": {
-      "active": "Aktywny",
-      "all": "Wszystkie statusy",
-      "inactive": "Nieaktywny"
+      "all": "Wszystkie statusy"
     },
     "tableHeaders": {
-      "actions": "Działania",
       "auth": "Autentykacja",
-      "created": "Utworzono",
-      "fullName": "Pełna nazwa",
-      "lastLogin": "Ostatnie logowanie",
-      "role": "Rola",
-      "status": "Status",
-      "user": "Użytkownik"
+      "lastLogin": "Ostatnie logowanie"
     },
-    "title": "Zarządzanie użytkownikami",
     "toggleActiveModal": {
       "activateConfirm": "Aktywuj \"{{username}}\"? Będą mogli logować się ponownie.",
       "activateTitle": "Aktywuj użytkownika",
@@ -900,6 +737,7 @@
     "userCount_one": "{{count}} użytkownik",
     "userCount_few": "{{count}} users",
     "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} użytkowników"
+    "userCount_other": "{{count}} użytkowników",
+    "userCount": "{{count}} użytkowników"
   }
 }

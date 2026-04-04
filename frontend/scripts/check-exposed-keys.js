@@ -32,7 +32,7 @@ const __dirname = path.dirname(__filename);
 const SRC_DIR = path.join(__dirname, '..', 'src');
 const LOCALES_DIR = path.join(__dirname, '..', 'public', 'locales');
 const ALL_LOCALES = ['en', 'de', 'es', 'fr', 'it', 'nl', 'pt', 'ru', 'sv', 'pl'];
-const ALL_NAMESPACES = ['common', 'medical', 'errors', 'navigation', 'notifications'];
+const ALL_NAMESPACES = ['common', 'medical', 'errors', 'navigation', 'notifications', 'admin', 'shared'];
 const DEFAULT_NS = 'common';
 
 // ─── Argument Parsing ────────────────────────────────────────────────

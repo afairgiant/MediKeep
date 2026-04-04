@@ -51,7 +51,7 @@ const InsuranceFormWrapper = ({
   onFileUploadComplete,
   onError,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Get insurance form fields
@@ -550,7 +550,7 @@ const InsuranceFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('insurance.form.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="member" leftSection={<IconUser size={16} />}>
                 {t('insurance.form.tabs.member', 'Member')}
@@ -565,11 +565,11 @@ const InsuranceFormWrapper = ({
               )}
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingItem
-                  ? t('insurance.form.tabs.documents', 'Documents')
-                  : t('insurance.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconFileText size={16} />}>
-                {t('insurance.form.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -651,7 +651,7 @@ const InsuranceFormWrapper = ({
               <Box mt="md">
                 <Stack gap="md">
                   {editingItem && (
-                    <Title order={4}>{t('insurance.viewModal.attachedDocuments', 'Attached Documents')}</Title>
+                    <Title order={4}>{t('shared:labels.attachedDocuments', 'Attached Documents')}</Title>
                   )}
                   <DocumentManagerWithProgress
                     entityType="insurance"
@@ -680,7 +680,7 @@ const InsuranceFormWrapper = ({
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {editingItem ? t('insurance.form.updateInsurance', 'Update Insurance') : t('insurance.form.addInsurance', 'Add Insurance')}

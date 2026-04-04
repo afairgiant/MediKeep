@@ -30,7 +30,7 @@ import { capitalizeFirst } from '../../utils/dateFormatUtils';
  * Uses the new two-level hierarchy API
  */
 const SymptomTimeline = ({ patientId, hidden }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { locale } = useDateFormat();
 
   const [timelineData, setTimelineData] = useState([]);
@@ -250,7 +250,7 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                         variant={isResolved ? 'light' : 'dot'}
                         color={isResolved ? 'green' : undefined}
                       >
-                        {occ.symptom_name}{isResolved ? ` (${t('symptoms.calendar.resolved', 'Resolved')})` : ''}
+                        {occ.symptom_name}{isResolved ? ` (${t('shared:labels.resolved', 'Resolved')})` : ''}
                       </Badge>
                     );
                   })}

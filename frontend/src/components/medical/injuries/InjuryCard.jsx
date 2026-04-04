@@ -25,7 +25,7 @@ const InjuryCard = ({
   fileCountLoading = false,
   onError,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -150,13 +150,13 @@ const InjuryCard = ({
       {
         label: t('injuries.bodyPart.label', 'Body Part'),
         value: injury.body_part,
-        render: (value) => value || t('common:labels.unknown', 'Not specified'),
+        render: (value) => value || t('shared:labels.unknown', 'Not specified'),
       },
       {
         label: t('injuries.dateOfInjury.label', 'Date of Injury'),
         value: injury.date_of_injury,
         render: (value) =>
-          value ? formatLongDate(value) : t('common:labels.unknown', 'Not specified'),
+          value ? formatLongDate(value) : t('shared:labels.unknown', 'Not specified'),
       },
     ].filter((field) => field.value); // Only show fields with values
 
@@ -190,7 +190,7 @@ const InjuryCard = ({
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={() => navigateToEntity('practitioner', practitioner.id, navigate)}
-          title={t('injuries.viewPractitioner', 'View practitioner details')}
+          title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
         >
           {practitioner.name}
         </Text>

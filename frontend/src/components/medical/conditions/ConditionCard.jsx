@@ -16,7 +16,7 @@ const ConditionCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -118,29 +118,29 @@ const ConditionCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('common:fields.onsetDate.label'),
+        label: t('shared:fields.onsetDate'),
         value: condition.onset_date,
-        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
       {
-        label: t('common:labels.duration'),
+        label: t('shared:labels.duration'),
         value: condition.onset_date,
         render: () => condition.onset_date
           ? getConditionDuration(condition.onset_date, condition.end_date, condition.status)
-          : t('common:labels.notSpecified')
+          : t('shared:labels.notSpecified')
       },
       condition.end_date && {
-        label: t('common:fields.endDate.label'),
+        label: t('shared:labels.endDate'),
         value: condition.end_date,
         render: (value) => formatLongDate(value)
       },
       condition.snomed_code && {
-        label: t('conditions.snomedCode.label'),
+        label: t('shared:fields.snomedCode'),
         value: condition.snomed_code,
         render: (value) => value
       },
       condition.code_description && {
-        label: t('conditions.codeDescription.label'),
+        label: t('shared:fields.codeDescription'),
         value: condition.code_description,
         render: (value) => value,
         align: 'flex-start',

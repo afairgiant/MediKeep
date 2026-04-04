@@ -51,7 +51,6 @@
     "birthDateFuture": "La fecha de nacimiento no puede ser en el futuro",
     "birthDateRequired": "La fecha de nacimiento es obligatoria",
     "createFailed": "Error en la creación: {{message}}",
-    "error": "Error",
     "firstNameRequired": "El nombre es obligatorio",
     "lastNameRequired": "El apellido es obligatorio",
     "updateFailed": "Error en la actualización: {{message}}"

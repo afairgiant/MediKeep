@@ -46,7 +46,7 @@ const AllergyFormWrapper = ({
   onError,
 }) => {
   // Translation hooks
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -150,18 +150,18 @@ const AllergyFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('allergies.tabs.basicInfo')}
+                {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="reaction" leftSection={<IconAlertTriangle size={16} />}>
                 {t('allergies.tabs.reactionDetails')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('allergies.tabs.notes')}
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingAllergy
-                  ? t('allergies.form.tabs.documents', 'Documents')
-                  : t('allergies.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -188,7 +188,7 @@ const AllergyFormWrapper = ({
                         { value: 'medication', label: t('allergies.allergyType.options.medication') },
                         { value: 'environmental', label: t('allergies.allergyType.options.environmental') },
                         { value: 'insect', label: t('allergies.allergyType.options.insect') },
-                        { value: 'other', label: t('allergies.allergyType.options.other') },
+                        { value: 'other', label: t('shared:fields.other') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'allergy_type', value: value || '' } });
@@ -201,7 +201,7 @@ const AllergyFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('common:fields.severity.label')}
+                      label={t('shared:fields.severity')}
                       value={formData.severity || null}
                       data={[
                         { value: 'mild', label: t('common:severity.mild') },
@@ -212,7 +212,7 @@ const AllergyFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'severity', value: value || '' } });
                       }}
-                      placeholder={t('common:fields.severity.placeholder')}
+                      placeholder={t('shared:labels.selectSeverityLevel')}
                       description={t('allergies.severity.description')}
                       withAsterisk
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -220,17 +220,17 @@ const AllergyFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('common:fields.status.label')}
+                      label={t('shared:fields.status')}
                       value={formData.status || null}
                       data={[
-                        { value: 'active', label: t('common:status.active') },
-                        { value: 'inactive', label: t('common:status.inactive') },
-                        { value: 'resolved', label: t('common:status.resolved') },
+                        { value: 'active', label: t('shared:labels.active') },
+                        { value: 'inactive', label: t('shared:labels.inactive') },
+                        { value: 'resolved', label: t('shared:labels.resolved') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder={t('common:fields.status.placeholder')}
+                      placeholder={t('shared:fields.selectStatus')}
                       description={t('allergies.status.description')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -238,7 +238,7 @@ const AllergyFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('allergies.onsetDate.label')}
+                      label={t('shared:fields.onsetDate')}
                       value={parseDateInput(formData.onset_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -275,7 +275,7 @@ const AllergyFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('common:fields.tags.label')}
+                        {t('shared:labels.tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('common:fields.tags.description')}
@@ -306,7 +306,7 @@ const AllergyFormWrapper = ({
                         { value: 'respiratory', label: t('allergies.reactionType.options.respiratory') },
                         { value: 'gastrointestinal', label: t('allergies.reactionType.options.gastrointestinal') },
                         { value: 'anaphylaxis', label: t('allergies.reactionType.options.anaphylaxis') },
-                        { value: 'other', label: t('allergies.reactionType.options.other') },
+                        { value: 'other', label: t('shared:fields.other') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'reaction_type', value: value || '' } });
@@ -337,7 +337,7 @@ const AllergyFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('common:fields.notes.label')}
+                  label={t('shared:tabs.notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('common:fields.notes.placeholder')}
@@ -368,13 +368,13 @@ const AllergyFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.allergen?.trim()}
             >
-              {editingAllergy ? t('common:buttons.update') : t('common:buttons.create')} {t('allergies.title')}
+              {editingAllergy ? t('common:buttons.update') : t('common:buttons.create')} {t('shared:categories.allergies')}
             </SubmitButton>
           </Group>
         </Stack>

@@ -25,7 +25,7 @@ import {
 import './AdminHeader.css';
 
 const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,7 +103,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
               title={t('header.returnToDashboard', 'Return to Dashboard')}
               visibleFrom="md"
             >
-              {t('header.dashboard', 'Dashboard')}
+              {t('shared:labels.dashboard', 'Dashboard')}
             </Button>
           </Tooltip>
 
@@ -119,7 +119,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
             }}
           >
             <Badge size="sm" variant="light" color="green">
-              {t('header.adminBadge', 'Admin')}
+              {t('shared:labels.admin', 'Admin')}
             </Badge>
             <Text size="sm" fw={500}>
               {user?.username || t('header.administrator', 'Administrator')}

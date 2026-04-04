@@ -60,7 +60,7 @@ import { useTranslation } from 'react-i18next';
 // Removed style constants - now handled in extracted components
 
 const FamilyHistory = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -927,7 +927,7 @@ const FamilyHistory = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('familyHistory.title', 'Family History')} icon="👨‍👩‍👧‍👦" />
+      <PageHeader title={t('shared:categories.family_history', 'Family History')} icon="👨‍👩‍👧‍👦" />
 
       <Stack gap="sm" mt="md">
 
@@ -958,7 +958,7 @@ const FamilyHistory = () => {
           {activeTab === 'my-family'
             ? viewMode === 'table'
               ? t('familyHistory.conditionCountAcrossMembers', '{{conditionCount}} condition(s) across {{memberCount}} family member(s)', { conditionCount: flattenedConditions.length, memberCount: dataManagement.data.length })
-              : t('familyHistory.memberCountRecorded', '{{count}} family member(s) recorded', { count: dataManagement.data.length })
+              : t('shared:labels.countFamilyMembersRecorded', '{{count}} family member(s) recorded', { count: dataManagement.data.length })
             : viewMode === 'table'
               ? t('familyHistory.sharedConditionCountAcrossMembers', '{{conditionCount}} condition(s) across {{memberCount}} shared family member(s)', { conditionCount: flattenedSharedConditions.length, memberCount: sharedDataManagement.filteredCount })
               : t('familyHistory.sharedMemberCount', '{{filteredCount}} of {{totalCount}} family member(s) shared with you', { filteredCount: sharedDataManagement.filteredCount, totalCount: sharedDataManagement.totalCount })}
@@ -994,7 +994,7 @@ const FamilyHistory = () => {
             },
             {
               key: 'share-selected',
-              label: t('familyHistory.shareSelected', 'Share Selected ({{count}})', { count: selectedMembersForBulkSharing.length }),
+              label: t('shared:labels.shareSelectedCount', 'Share Selected ({{count}})', { count: selectedMembersForBulkSharing.length }),
               onClick: openBulkSharingModal,
               leftSection: <IconSend size={16} />,
               variant: 'filled',
@@ -1019,7 +1019,7 @@ const FamilyHistory = () => {
             <Group justify="space-between">
               <div>
                 <Text size="sm" mb={4}>
-                  {t('familyHistory.clickToSelectForSharing', 'Click on family member cards to select them for sharing. {{count}} selected.', { count: selectedMembersForBulkSharing.length })}
+                  {t('shared:labels.clickOnFamilyMemberCardsToSelectThemForSharingCountSelected', 'Click on family member cards to select them for sharing. {{count}} selected.', { count: selectedMembersForBulkSharing.length })}
                 </Text>
                 <Text size="xs" c="dimmed">
                   {t('familyHistory.sharedMembersCannotBeSelected', 'Shared family members cannot be selected for additional sharing.')}
@@ -1094,15 +1094,15 @@ const FamilyHistory = () => {
                 data={flattenedConditions}
                 columns={[
                   { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
-                  { header: t('familyHistory.table.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
-                  { header: t('familyHistory.table.condition', 'Condition'), accessor: 'condition_name', priority: 'high', width: 200 },
-                  { header: t('familyHistory.table.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
-                  { header: t('labels.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
+                  { header: t('shared:labels.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
+                  { header: t('shared:labels.condition', 'Condition'), accessor: 'condition_name', priority: 'high', width: 200 },
+                  { header: t('shared:labels.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
+                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
                   { header: t('familyHistory.table.diagnosisAge', 'Diagnosis Age'), accessor: 'diagnosis_age', priority: 'low', width: 120 },
-                  { header: t('labels.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
+                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
                 ]}
                 patientData={currentPatient}
-                tableName={t('familyHistory.title', 'Family History')}
+                tableName={t('shared:categories.family_history', 'Family History')}
                 onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
                 onEdit={row => {
                   if (row.is_shared) {
@@ -1213,12 +1213,12 @@ const FamilyHistory = () => {
                 data={flattenedSharedConditions}
                 columns={[
                   { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
-                  { header: t('familyHistory.table.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
-                  { header: t('familyHistory.table.condition', 'Condition'), accessor: 'condition_name', priority: 'high', width: 200 },
-                  { header: t('familyHistory.table.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
-                  { header: t('labels.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
+                  { header: t('shared:labels.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
+                  { header: t('shared:labels.condition', 'Condition'), accessor: 'condition_name', priority: 'high', width: 200 },
+                  { header: t('shared:labels.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
+                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
                   { header: t('familyHistory.table.diagnosisAge', 'Diagnosis Age'), accessor: 'diagnosis_age', priority: 'low', width: 120 },
-                  { header: t('labels.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
+                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
                   { header: t('familyHistory.table.sharedBy', 'Shared By'), accessor: 'shared_by', priority: 'medium', width: 150 },
                 ]}
                 patientData={currentPatient}
@@ -1247,7 +1247,7 @@ const FamilyHistory = () => {
                   severity: value => value || '-',
                   diagnosis_age: value => (value ? t('familyHistory.table.yearsOld', '{{age}} years', { age: value }) : '-'),
                   status: value => value || '-',
-                  shared_by: (value, row) => row.shared_by?.name || t('familyHistory.table.unknown', 'Unknown'),
+                  shared_by: (value, row) => row.shared_by?.name || t('shared:labels.unknown', 'Unknown'),
                 }}
                 dataType="medical"
                 responsive={responsive}

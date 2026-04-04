@@ -62,7 +62,7 @@ const SearchResults = () => {
   const { patient: currentPatient } = useCurrentPatient();
   const { formatDate } = useDateFormat();
   const { getTagColor, tagEntries, isLoading: isLoadingTags } = useTagColors();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const initialLoadDone = useRef(false);
   const initialTagSearchDone = useRef(false);
   const [viewMode, setViewMode] = usePersistedViewMode('search', 'table');
@@ -734,7 +734,7 @@ const SearchResults = () => {
                         style={{ cursor: 'pointer', userSelect: 'none' }}
                       >
                         <Group gap={4} wrap="nowrap">
-                          <Text size="sm" fw={500}>{t('search.columnName', 'Name')}</Text>
+                          <Text size="sm" fw={500}>{t('shared:labels.name', 'Name')}</Text>
                           {getSortIcon('title', 'title_desc')}
                         </Group>
                       </Table.Th>
@@ -743,12 +743,12 @@ const SearchResults = () => {
                         style={{ cursor: 'pointer', userSelect: 'none', width: 180 }}
                       >
                         <Group gap={4} wrap="nowrap">
-                          <Text size="sm" fw={500}>{t('search.columnDate', 'Date')}</Text>
+                          <Text size="sm" fw={500}>{t('shared:labels.date', 'Date')}</Text>
                           {getSortIcon('date_asc', 'date_desc')}
                         </Group>
                       </Table.Th>
                       <Table.Th style={{ width: 200 }}>
-                        <Text size="sm" fw={500}>{t('search.tags')}</Text>
+                        <Text size="sm" fw={500}>{t('shared:labels.tags')}</Text>
                       </Table.Th>
                     </Table.Tr>
                   </Table.Thead>

@@ -47,15 +47,15 @@ import { ClickableTagBadge } from '../common/ClickableTagBadge';
 // ---------------------------------------------------------------------------
 
 export const RECORD_TYPES = [
-  { value: 'medications', labelKey: 'search.types.medications', icon: IconPill, color: 'green' },
-  { value: 'conditions', labelKey: 'search.types.conditions', icon: IconStethoscope, color: 'blue' },
-  { value: 'lab_results', labelKey: 'search.types.labResults', icon: IconFlask, color: 'indigo' },
-  { value: 'procedures', labelKey: 'search.types.procedures', icon: IconMedicalCross, color: 'violet' },
-  { value: 'immunizations', labelKey: 'search.types.immunizations', icon: IconVaccine, color: 'orange' },
-  { value: 'treatments', labelKey: 'search.types.treatments', icon: IconHeartbeat, color: 'pink' },
+  { value: 'medications', labelKey: 'shared:categories.medications', icon: IconPill, color: 'green' },
+  { value: 'conditions', labelKey: 'shared:categories.conditions', icon: IconStethoscope, color: 'blue' },
+  { value: 'lab_results', labelKey: 'shared:categories.lab_results', icon: IconFlask, color: 'indigo' },
+  { value: 'procedures', labelKey: 'shared:categories.procedures', icon: IconMedicalCross, color: 'violet' },
+  { value: 'immunizations', labelKey: 'shared:categories.immunizations', icon: IconVaccine, color: 'orange' },
+  { value: 'treatments', labelKey: 'shared:categories.treatments', icon: IconHeartbeat, color: 'pink' },
   { value: 'encounters', labelKey: 'search.types.encounters', icon: IconCalendarEvent, color: 'teal' },
-  { value: 'allergies', labelKey: 'search.types.allergies', icon: IconAlertTriangle, color: 'red' },
-  { value: 'vitals', labelKey: 'search.types.vitals', icon: IconHeartbeat, color: 'cyan' },
+  { value: 'allergies', labelKey: 'shared:categories.allergies', icon: IconAlertTriangle, color: 'red' },
+  { value: 'vitals', labelKey: 'shared:categories.vitals', icon: IconHeartbeat, color: 'cyan' },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -133,7 +133,7 @@ export function SearchFilterSidebar({
   dateRange,
   onDateRangeChange,
 }: SearchFilterSidebarProps) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [collapsed, setCollapsed] = usePersistedToggle('search_sidebar_collapsed', false);
 
   const activeFilterCount =
@@ -344,7 +344,7 @@ export function SearchFilterSidebar({
         <Group gap="xs">
           <IconTag size="0.9rem" />
           <Text size="sm" fw={500} c="dimmed">
-            {t('search.tags')}
+            {t('shared:labels.tags')}
           </Text>
         </Group>
 
@@ -362,7 +362,7 @@ export function SearchFilterSidebar({
           clearable
           size="xs"
           disabled={isLoadingTags}
-          aria-label={t('search.tags')}
+          aria-label={t('shared:labels.tags')}
         />
 
         {selectedTags.length >= 2 && (
@@ -483,7 +483,7 @@ export function SearchFilterSidebar({
         disabled={!hasActiveFilters && !query}
         onClick={onClearFilters}
       >
-        {t('search.clearFilters')}
+        {t('shared:labels.clearFilters')}
       </Button>
     </Paper>
   );

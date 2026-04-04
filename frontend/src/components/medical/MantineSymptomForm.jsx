@@ -59,7 +59,7 @@ const MantineSymptomForm = ({
   onFileUploadComplete,
   onError,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('basic');
@@ -156,18 +156,18 @@ const MantineSymptomForm = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('symptoms.tabs.basicInfo')}
+                {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="details" leftSection={<IconClipboard size={16} />}>
-                {t('symptoms.tabs.details')}
+                {t('shared:tabs.details')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingSymptom
-                  ? t('symptoms.tabs.documents')
-                  : t('symptoms.tabs.addFiles')}
+                  ? t('shared:tabs.documents')
+                  : t('shared:tabs.addFiles')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('symptoms.tabs.notes')}
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -177,7 +177,7 @@ const MantineSymptomForm = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 8 }}>
                     <TextInput
-                      label={t('symptoms.parent.symptomName.label')}
+                      label={t('shared:labels.symptomName')}
                       value={formData.symptom_name || ''}
                       onChange={handleTextInputChange('symptom_name')}
                       placeholder={t('symptoms.parent.symptomName.placeholder')}
@@ -188,7 +188,7 @@ const MantineSymptomForm = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 4 }}>
                     <TextInput
-                      label={t('symptoms.parent.category.label')}
+                      label={t('shared:labels.category')}
                       value={formData.category || ''}
                       onChange={handleTextInputChange('category')}
                       placeholder={t('symptoms.parent.category.placeholder')}
@@ -225,7 +225,7 @@ const MantineSymptomForm = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder={t('symptoms.parent.status.placeholder')}
+                      placeholder={t('shared:fields.selectStatus')}
                       required
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
@@ -317,7 +317,7 @@ const MantineSymptomForm = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('common:fields.tags.label')}
+                        {t('shared:labels.tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('common:fields.tags.description')}
@@ -339,14 +339,14 @@ const MantineSymptomForm = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.symptom_name?.trim()}
             >
               {editingSymptom ? t('common:buttons.update') : t('common:buttons.create')}{' '}
-              {t('symptoms.title')}
+              {t('shared:categories.symptoms')}
             </SubmitButton>
           </Group>
         </Stack>

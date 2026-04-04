@@ -35,7 +35,7 @@ const MantineEmergencyContactForm = ({
   isLoading = false,
   statusMessage,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -146,10 +146,10 @@ const MantineEmergencyContactForm = ({
                 {t('medical:emergencyContacts.tabs.contactInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="details" leftSection={<IconHome size={16} />}>
-                {t('medical:emergencyContacts.tabs.details')}
+                {t('shared:tabs.details')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('medical:emergencyContacts.tabs.notes')}
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -159,7 +159,7 @@ const MantineEmergencyContactForm = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 7 }}>
                     <TextInput
-                      label={t('medical:emergencyContacts.form.name.label')}
+                      label={t('shared:fields.fullName')}
                       value={formData.name || ''}
                       onChange={handleTextInputChange('name')}
                       placeholder={t('medical:emergencyContacts.form.name.placeholder')}
@@ -169,13 +169,13 @@ const MantineEmergencyContactForm = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 5 }}>
                     <Select
-                      label={t('medical:emergencyContacts.form.relationship.label')}
+                      label={t('shared:labels.relationship')}
                       value={formData.relationship || null}
                       data={relationshipOptions}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'relationship', value: value || '' } });
                       }}
-                      placeholder={t('medical:emergencyContacts.form.relationship.placeholder')}
+                      placeholder={t('shared:fields.selectRelationship')}
                       description={t('medical:emergencyContacts.form.relationship.description')}
                       required
                       searchable
@@ -205,7 +205,7 @@ const MantineEmergencyContactForm = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <TextInput
-                      label={t('medical:emergencyContacts.form.email.label')}
+                      label={t('shared:fields.emailAddress')}
                       value={formData.email || ''}
                       onChange={handleTextInputChange('email')}
                       placeholder={t('medical:emergencyContacts.form.email.placeholder')}
@@ -221,7 +221,7 @@ const MantineEmergencyContactForm = ({
                 <Grid>
                   <Grid.Col span={12}>
                     <TextInput
-                      label={t('medical:emergencyContacts.form.address.label')}
+                      label={t('shared:labels.address')}
                       value={formData.address || ''}
                       onChange={handleTextInputChange('address')}
                       placeholder={t('medical:emergencyContacts.form.address.placeholder')}
@@ -255,7 +255,7 @@ const MantineEmergencyContactForm = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('common:fields.notes.label')}
+                  label={t('shared:tabs.notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('medical:emergencyContacts.form.notes.placeholder')}
@@ -270,14 +270,14 @@ const MantineEmergencyContactForm = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.name?.trim()}
             >
               {editingContact ? t('common:buttons.update') : t('common:buttons.create')}{' '}
-              {t('medical:emergencyContacts.title')}
+              {t('shared:categories.emergency_contacts')}
             </SubmitButton>
           </Group>
         </Stack>

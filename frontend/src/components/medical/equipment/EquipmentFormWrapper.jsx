@@ -40,7 +40,7 @@ const EquipmentFormWrapper = ({
   isLoading = false,
   statusMessage,
 }) => {
-  const { t } = useTranslation(['common', 'medical']);
+  const { t } = useTranslation(['common', 'medical', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('basic');
@@ -102,7 +102,7 @@ const EquipmentFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('medical:equipment.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="device" leftSection={<IconTool size={16} />}>
                 {t('medical:equipment.tabs.deviceDetails', 'Device Details')}
@@ -111,7 +111,7 @@ const EquipmentFormWrapper = ({
                 {t('medical:equipment.tabs.serviceDates', 'Service & Dates')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('medical:equipment.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -121,7 +121,7 @@ const EquipmentFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('equipment.form.name', 'Equipment Name')}
+                      label={t('shared:labels.equipmentName', 'Equipment Name')}
                       value={formData.equipment_name || ''}
                       onChange={handleTextInputChange('equipment_name')}
                       placeholder={t('equipment.form.namePlaceholder', 'e.g., ResMed AirSense 11')}
@@ -136,7 +136,7 @@ const EquipmentFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'equipment_type', value: value || '' } });
                       }}
-                      placeholder={t('equipment.form.typePlaceholder', 'Select type')}
+                      placeholder={t('shared:labels.selectType', 'Select type')}
                       searchable
                       required
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -144,7 +144,7 @@ const EquipmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('equipment.form.status', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       value={formData.status || 'active'}
                       data={EQUIPMENT_STATUS_OPTIONS}
                       onChange={(value) => {
@@ -164,7 +164,7 @@ const EquipmentFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
-                      placeholder={t('equipment.form.practitionerPlaceholder', 'Select practitioner')}
+                      placeholder={t('shared:fields.selectPractitioner', 'Select practitioner')}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -181,7 +181,7 @@ const EquipmentFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('equipment.form.manufacturer', 'Manufacturer')}
+                      label={t('shared:fields.manufacturer', 'Manufacturer')}
                       value={formData.manufacturer || ''}
                       onChange={handleTextInputChange('manufacturer')}
                       placeholder={t('equipment.form.manufacturerPlaceholder', 'e.g., ResMed, Philips')}
@@ -197,7 +197,7 @@ const EquipmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('equipment.form.serialNumber', 'Serial Number')}
+                      label={t('shared:labels.serialNumber', 'Serial Number')}
                       value={formData.serial_number || ''}
                       onChange={handleTextInputChange('serial_number')}
                       placeholder={t('equipment.form.serialPlaceholder', 'Equipment serial number')}
@@ -205,7 +205,7 @@ const EquipmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('equipment.form.supplier', 'Supplier')}
+                      label={t('shared:labels.supplier', 'Supplier')}
                       value={formData.supplier || ''}
                       onChange={handleTextInputChange('supplier')}
                       placeholder={t('equipment.form.supplierPlaceholder', 'Equipment supplier')}
@@ -283,7 +283,7 @@ const EquipmentFormWrapper = ({
                 <Grid>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('equipment.form.notes', 'Notes')}
+                      label={t('shared:tabs.notes', 'Notes')}
                       value={formData.notes || ''}
                       onChange={handleTextInputChange('notes')}
                       placeholder={t('equipment.form.notesPlaceholder', 'Additional notes about this equipment')}
@@ -298,8 +298,8 @@ const EquipmentFormWrapper = ({
                       onChange={(tags) => {
                         onInputChange({ target: { name: 'tags', value: tags } });
                       }}
-                      label={t('equipment.form.tags', 'Tags')}
-                      placeholder={t('equipment.form.tagsPlaceholder', 'Add tags...')}
+                      label={t('shared:labels.tags', 'Tags')}
+                      placeholder={t('shared:fields.addTags', 'Add tags...')}
                     />
                   </Grid.Col>
                 </Grid>
@@ -314,7 +314,7 @@ const EquipmentFormWrapper = ({
               onClick={onClose}
               disabled={isLoading || isSubmitting}
             >
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}

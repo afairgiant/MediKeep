@@ -24,7 +24,7 @@ const CHANNEL_TYPE_INFO = {
  * Manages notification channels - list, add, edit, delete, test
  */
 const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => {
-  const { t } = useTranslation(['notifications', 'common']);
+  const { t } = useTranslation(['notifications', 'common', 'shared']);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingChannel, setEditingChannel] = useState(null);
   const [testingChannelId, setTestingChannelId] = useState(null);
@@ -187,9 +187,9 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
 
                   <div className="channel-status">
                     {channel.is_enabled ? (
-                      <span className="status-enabled">{t('channels.enabled', 'Enabled')}</span>
+                      <span className="status-enabled">{t('shared:labels.enabled', 'Enabled')}</span>
                     ) : (
-                      <span className="status-disabled">{t('channels.disabled', 'Disabled')}</span>
+                      <span className="status-disabled">{t('shared:labels.disabled', 'Disabled')}</span>
                     )}
                   </div>
 
@@ -204,7 +204,7 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
                       {t('channels.test', 'Test')}
                     </Button>
                     <Button variant="secondary" size="small" onClick={() => handleEditChannel(channel)}>
-                      {t('common:buttons.edit', 'Edit')}
+                      {t('shared:labels.edit', 'Edit')}
                     </Button>
                     <Button
                       variant="danger"

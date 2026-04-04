@@ -19,7 +19,7 @@ const LabResultCard = React.memo(({
   navigate,
   onError
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -48,7 +48,7 @@ const LabResultCard = React.memo(({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('labResults.testCode.label'),
+        label: t('shared:fields.testCode'),
         value: labResult.test_code
       },
       {
@@ -58,34 +58,34 @@ const LabResultCard = React.memo(({
           <Badge variant="light" color="cyan" size="sm">
             {value}
           </Badge>
-        ) : t('common:labels.notSpecified')
+        ) : t('shared:labels.notSpecified')
       },
       {
         label: t('labResults.testingFacility.label'),
         value: labResult.facility
       },
       {
-        label: t('labResults.orderedDate.label'),
+        label: t('shared:labels.orderedDate'),
         value: labResult.ordered_date,
-        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
       {
-        label: t('labResults.completedDate.label'),
+        label: t('shared:labels.completedDate'),
         value: labResult.completed_date,
         render: (value) => value ? formatLongDate(value) : t('common:labels.notCompleted', 'Not completed')
       },
       {
-        label: t('labResults.labResult.label'),
+        label: t('shared:labels.labResult'),
         value: labResult.labs_result,
         render: (value) => value ? (
           <StatusBadge status={value} />
-        ) : t('common:labels.pending', 'Pending')
+        ) : t('shared:fields.pending', 'Pending')
       },
       {
-        label: t('labResults.orderingPractitioner.label'),
+        label: t('shared:labels.orderingPractitioner'),
         value: labResult.practitioner_id,
         render: (value) => {
-          if (!value) return t('common:labels.notSpecified');
+          if (!value) return t('shared:labels.notSpecified');
 
           const practitionerName = practitioner?.name || `Practitioner ID: ${value}`;
           return (
@@ -94,7 +94,7 @@ const LabResultCard = React.memo(({
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={t('common:labels.viewPractitionerDetails', 'View practitioner details')}
+              title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
             >
               {practitionerName}
             </Text>

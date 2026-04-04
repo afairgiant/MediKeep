@@ -59,7 +59,7 @@ import {
 } from '@mantine/core';
 
 const Insurance = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -457,7 +457,7 @@ const Insurance = () => {
   return (
     <Container size="xl" py="sm">
       <PageHeader
-        title={t('insurance.title', 'Insurance')}
+        title={t('shared:categories.insurance', 'Insurance')}
         description={t('insurance.description', 'Manage your insurance information and digital cards')}
       />
 
@@ -488,7 +488,7 @@ const Insurance = () => {
           emoji="🏥"
           title={t('insurance.empty.title', 'No Insurance Found')}
           hasActiveFilters={hasActiveFilters}
-          filteredMessage={t('insurance.empty.filtered', 'Try adjusting your search or filter criteria.')}
+          filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
           noDataMessage={t('insurance.empty.noData', 'Start by adding your first insurance.')}
           actionButton={
             <Button variant="filled" onClick={handleAddNew}>

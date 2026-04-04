@@ -87,7 +87,7 @@ const getStatusColor = (status) => ({
 }[status] || 'gray');
 
 const BackupManagement = () => {
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'shared']);
   const { formatDateTime } = useDateFormat();
   const [creating, setCreating] = useState({});
   const [restoring, setRestoring] = useState({});
@@ -640,11 +640,11 @@ const BackupManagement = () => {
   };
 
   const schedulePresetData = useMemo(() => [
-    { value: 'disabled', label: t('backup.schedule.presets.disabled', 'Disabled') },
+    { value: 'disabled', label: t('shared:labels.disabled', 'Disabled') },
     { value: 'every_6_hours', label: t('backup.schedule.presets.every6Hours', 'Every 6 hours') },
     { value: 'every_12_hours', label: t('backup.schedule.presets.every12Hours', 'Every 12 hours') },
     { value: 'daily', label: t('backup.schedule.presets.daily', 'Daily') },
-    { value: 'weekly', label: t('backup.schedule.presets.weekly', 'Weekly') },
+    { value: 'weekly', label: t('shared:labels.weekly', 'Weekly') },
   ], [t]);
 
   const dayOfWeekData = useMemo(() => [
@@ -675,10 +675,10 @@ const BackupManagement = () => {
       <AdminLayout>
         <Center style={{ minHeight: 'calc(100vh - 140px)' }}>
           <Stack align="center" gap="md">
-            <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title={t('common:labels.error', 'Error')}>
+            <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title={t('shared:labels.error', 'Error')}>
               {error}
             </Alert>
-            <Button onClick={() => refreshData()}>{t('common:buttons.retry', 'Retry')}</Button>
+            <Button onClick={() => refreshData()}>{t('shared:labels.retry', 'Retry')}</Button>
           </Stack>
         </Center>
       </AdminLayout>
@@ -696,7 +696,7 @@ const BackupManagement = () => {
                 <IconDeviceFloppy size={24} />
               </ThemeIcon>
               <div>
-                <Title order={2}>{t('backup.title', 'Backup Management')}</Title>
+                <Title order={2}>{t('shared:labels.backupManagement', 'Backup Management')}</Title>
                 <Text c="dimmed" size="sm">{t('backup.subtitle', 'Create and manage system backups')}</Text>
               </div>
             </Group>
@@ -726,7 +726,7 @@ const BackupManagement = () => {
                   : null
               }
             >
-              {t('backup.tabs.settings', 'Settings')}
+              {t('shared:labels.settings', 'Settings')}
             </Tabs.Tab>
           </Tabs.List>
 
@@ -869,7 +869,7 @@ const BackupManagement = () => {
                     loading={exporting}
                     disabled={backups.length === 0}
                   >
-                    {t('backup.existingBackups.exportCsv', 'Export CSV')}
+                    {t('shared:labels.exportCsv', 'Export CSV')}
                   </Button>
                   <Text size="sm" c="dimmed">{t('backup.existingBackups.count', '{{count}} backups', { count: backups.length })}</Text>
                 </Group>
@@ -890,13 +890,13 @@ const BackupManagement = () => {
                     <Table striped highlightOnHover>
                       <Table.Thead>
                         <Table.Tr>
-                          <Table.Th>{t('backup.existingBackups.tableHeaders.type', 'Type')}</Table.Th>
+                          <Table.Th>{t('shared:labels.type', 'Type')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.filename', 'Filename')}</Table.Th>
-                          <Table.Th>{t('backup.existingBackups.tableHeaders.size', 'Size')}</Table.Th>
-                          <Table.Th>{t('backup.existingBackups.tableHeaders.status', 'Status')}</Table.Th>
-                          <Table.Th>{t('backup.existingBackups.tableHeaders.created', 'Created')}</Table.Th>
+                          <Table.Th>{t('shared:labels.size', 'Size')}</Table.Th>
+                          <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
+                          <Table.Th>{t('shared:labels.created', 'Created')}</Table.Th>
                           <Table.Th>{t('backup.existingBackups.tableHeaders.fileExists', 'File Exists')}</Table.Th>
-                          <Table.Th>{t('backup.existingBackups.tableHeaders.actions', 'Actions')}</Table.Th>
+                          <Table.Th>{t('shared:labels.actions', 'Actions')}</Table.Th>
                         </Table.Tr>
                       </Table.Thead>
                       <Table.Tbody>
@@ -913,7 +913,7 @@ const BackupManagement = () => {
                               </Text>
                             </Table.Td>
                             <Table.Td>
-                              <Text size="sm">{backup.size_bytes ? formatFileSize(backup.size_bytes) : t('backup.existingBackups.unknown', 'Unknown')}</Text>
+                              <Text size="sm">{backup.size_bytes ? formatFileSize(backup.size_bytes) : t('shared:labels.unknown', 'Unknown')}</Text>
                             </Table.Td>
                             <Table.Td>
                               <Badge variant="light" color={getStatusColor(backup.status)}>
@@ -1015,7 +1015,7 @@ const BackupManagement = () => {
                     variant="light"
                     color={scheduleSettings.enabled ? 'green' : 'gray'}
                   >
-                    {scheduleSettings.enabled ? t('backup.schedule.active', 'Active') : t('backup.schedule.disabled', 'Disabled')}
+                    {scheduleSettings.enabled ? t('shared:labels.active', 'Active') : t('shared:labels.disabled', 'Disabled')}
                   </Badge>
                 </Group>
 
@@ -1195,7 +1195,7 @@ const BackupManagement = () => {
             </Alert>
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeDelete(); setBackupToDelete(null); }}>
-                {t('common:buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button color="red" onClick={handleConfirmDelete}>
                 {t('common:buttons.delete', 'Delete')}
@@ -1235,7 +1235,7 @@ const BackupManagement = () => {
             />
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeCleanup(); setCleanupConfirmText(''); }}>
-                {t('common:buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button
                 color="red"
@@ -1271,7 +1271,7 @@ const BackupManagement = () => {
             </Alert>
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeRestore(); setBackupToRestore(null); }}>
-                {t('common:buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button
                 color="red"
@@ -1319,22 +1319,22 @@ const BackupManagement = () => {
                 <Text fw={500} mb="sm">{t('backup.preview.backupDetails', 'Backup Details')}</Text>
                 <Group gap="lg" wrap="wrap">
                   <div>
-                    <Text size="xs" c="dimmed">{t('backup.preview.type', 'Type')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.type', 'Type')}</Text>
                     <Badge variant="light" color={getTypeColor(previewData.backup_type)}>
                       {previewData.backup_type}
                     </Badge>
                   </div>
                   <div>
-                    <Text size="xs" c="dimmed">{t('backup.preview.created', 'Created')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.created', 'Created')}</Text>
                     <Text size="sm">{formatDateTime(previewData.backup_created)}</Text>
                   </div>
                   <div>
-                    <Text size="xs" c="dimmed">{t('backup.preview.size', 'Size')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.size', 'Size')}</Text>
                     <Text size="sm">{formatFileSize(previewData.backup_size)}</Text>
                   </div>
                   {previewData.backup_description && (
                     <div>
-                      <Text size="xs" c="dimmed">{t('backup.preview.description', 'Description')}</Text>
+                      <Text size="xs" c="dimmed">{t('shared:labels.description', 'Description')}</Text>
                       <Text size="sm">{previewData.backup_description}</Text>
                     </div>
                   )}
@@ -1344,7 +1344,7 @@ const BackupManagement = () => {
               {/* Warnings */}
               {previewData.warnings?.length > 0 && (
                 <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={16} />}>
-                  <Text fw={500} mb="xs">{t('backup.preview.warnings', 'Warnings')}</Text>
+                  <Text fw={500} mb="xs">{t('shared:labels.warnings', 'Warnings')}</Text>
                   <List size="sm">
                     {previewData.warnings.map((warning, idx) => (
                       <List.Item key={idx}>{warning}</List.Item>
@@ -1366,7 +1366,7 @@ const BackupManagement = () => {
               <Divider />
               <Group justify="flex-end" gap="sm">
                 <Button variant="default" onClick={closePreview}>
-                  {t('common:buttons.close', 'Close')}
+                  {t('shared:labels.close', 'Close')}
                 </Button>
                 <Button color="red" onClick={handlePreviewToRestore}>
                   {t('backup.modals.proceedWithRestore', 'Proceed with Restore')}
@@ -1382,7 +1382,7 @@ const BackupManagement = () => {
 
 // Inline sub-component for restore preview affected data display
 const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
 
   if (!affectedData || affectedData.error) {
     return (
@@ -1406,7 +1406,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.currentDatabase', 'Current Database')}</Text>
             <Text size="sm">
               {affectedData.current_database.total_records != null
-                ? t('backup.preview.totalRecords', '{{count}} total records', { count: affectedData.current_database.total_records })
+                ? t('shared:labels.countTotalRecords', '{{count}} total records', { count: affectedData.current_database.total_records })
                 : t('backup.preview.noStatistics', 'No statistics available')}
             </Text>
           </div>
@@ -1416,7 +1416,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.backupContent', 'Backup Content')}</Text>
             <Text size="sm">
               {affectedData.backup_content.total_statements != null
-                ? t('backup.preview.sqlStatements', '{{count}} SQL statements', { count: affectedData.backup_content.total_statements })
+                ? t('shared:labels.countSqlStatements', '{{count}} SQL statements', { count: affectedData.backup_content.total_statements })
                 : t('backup.preview.analysisNotAvailable', 'Backup analysis not available')}
             </Text>
           </div>
@@ -1438,7 +1438,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
           <div>
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.backupFiles', 'Backup Files')}</Text>
             <Text size="sm">
-              {t('backup.preview.filesCount', '{{count}} files ({{size}})', { count: affectedData.backup_files.total_files, size: formatFileSize(affectedData.backup_files.total_size) })}
+              {t('shared:labels.countFilesSize', '{{count}} files ({{size}})', { count: affectedData.backup_files.total_files, size: formatFileSize(affectedData.backup_files.total_size) })}
             </Text>
             {affectedData.backup_files.sample_files?.length > 0 && (
               <List size="xs" mt="xs">
@@ -1446,7 +1446,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
                   <List.Item key={idx}>{file.filename}</List.Item>
                 ))}
                 {affectedData.backup_files.sample_files.length > 5 && (
-                  <List.Item>{t('backup.preview.andMore', '...and {{count}} more', { count: affectedData.backup_files.total_files - 5 })}</List.Item>
+                  <List.Item>{t('shared:labels.andCountMore', '...and {{count}} more', { count: affectedData.backup_files.total_files - 5 })}</List.Item>
                 )}
               </List>
             )}
@@ -1455,7 +1455,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
         {affectedData.current_files && (
           <div>
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.currentFiles', 'Current Files')}</Text>
-            <Text size="sm">{t('backup.preview.filesOnly', '{{count}} files', { count: affectedData.current_files.total_files })}</Text>
+            <Text size="sm">{t('shared:labels.countFiles', '{{count}} files', { count: affectedData.current_files.total_files })}</Text>
           </div>
         )}
       </Stack>
@@ -1493,7 +1493,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
           <div>
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.backupFiles', 'Backup Files')}</Text>
             <Text size="sm">
-              {t('backup.preview.filesCount', '{{count}} files ({{size}})', { count: affectedData.backup_files_count, size: formatFileSize(affectedData.backup_files_size || 0) })}
+              {t('shared:labels.countFilesSize', '{{count}} files ({{size}})', { count: affectedData.backup_files_count, size: formatFileSize(affectedData.backup_files_size || 0) })}
             </Text>
           </div>
         )}
@@ -1502,7 +1502,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.currentDatabase', 'Current Database')}</Text>
             <Text size="sm">
               {affectedData.current_database.total_records != null
-                ? t('backup.preview.totalRecords', '{{count}} total records', { count: affectedData.current_database.total_records })
+                ? t('shared:labels.countTotalRecords', '{{count}} total records', { count: affectedData.current_database.total_records })
                 : t('backup.preview.noStatistics', 'No statistics available')}
             </Text>
           </div>
@@ -1510,7 +1510,7 @@ const RestorePreviewAffectedData = ({ backupType, affectedData, formatFileSize }
         {affectedData.current_files_count != null && (
           <div>
             <Text size="xs" c="dimmed" fw={500}>{t('backup.preview.currentFiles', 'Current Files')}</Text>
-            <Text size="sm">{t('backup.preview.filesOnly', '{{count}} files', { count: affectedData.current_files_count })}</Text>
+            <Text size="sm">{t('shared:labels.countFiles', '{{count}} files', { count: affectedData.current_files_count })}</Text>
           </div>
         )}
       </Stack>
@@ -1553,7 +1553,7 @@ const RetentionSettings = ({
         <Text fw={500} mb="xs">{t('backup.retention.retentionLogic', 'Retention Logic')}</Text>
         <List size="sm">
           <List.Item>
-            <span dangerouslySetInnerHTML={{ __html: t('backup.retention.countProtection', '<strong>Count Protection:</strong> Always keep the {{count}} most recent backups', { count: settings.backup_min_count }) }} />
+            <span dangerouslySetInnerHTML={{ __html: t('shared:labels.strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups', '<strong>Count Protection:</strong> Always keep the {{count}} most recent backups', { count: settings.backup_min_count }) }} />
           </List.Item>
           <List.Item>
             <span dangerouslySetInnerHTML={{ __html: t('backup.retention.timeBasedCleanup', '<strong>Time-based Cleanup:</strong> Delete backups older than {{days}} days (beyond minimum count)', { days: settings.backup_retention_days }) }} />

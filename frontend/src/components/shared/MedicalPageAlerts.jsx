@@ -42,7 +42,7 @@ function MedicalPageAlerts({
   mb = 'md',
   showSuccessCloseButton = false,
 }) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   if (!error && !successMessage) {
     return null;
@@ -50,8 +50,8 @@ function MedicalPageAlerts({
 
   const resolvedErrorIcon = errorIcon || <IconAlertTriangle size={16} />;
   const resolvedSuccessIcon = successIcon || <IconCheck size={16} />;
-  const resolvedErrorTitle = errorTitle || t('labels.error', 'Error');
-  const resolvedSuccessTitle = successTitle || t('labels.success', 'Success');
+  const resolvedErrorTitle = errorTitle || t('shared:labels.error', 'Error');
+  const resolvedSuccessTitle = successTitle || t('shared:labels.success', 'Success');
 
   // If both alerts are present, wrap them in a Stack
   const hasMultipleAlerts = error && successMessage;

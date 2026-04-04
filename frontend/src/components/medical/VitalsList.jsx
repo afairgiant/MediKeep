@@ -100,7 +100,7 @@ const VitalsList = ({
   showActions = true,
   limit = 10,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
   const { formatDate, formatDateTime } = useDateFormat();
   // Use passed data if available, otherwise load internally
@@ -912,7 +912,7 @@ const VitalsList = ({
     const d = new Date(item.date);
     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     if (!window.confirm(
-      t('vitals.summary.confirmDeleteDay', 'Delete all {{count}} imported readings for this day?', { count: item.count })
+      t('shared:labels.deleteAllCountImportedReadingsForThisDay', 'Delete all {{count}} imported readings for this day?', { count: item.count })
     )) {
       return;
     }
@@ -1013,15 +1013,15 @@ const VitalsList = ({
                     <Text size="sm" fw={600}>{item.stats.avg} mg/dL</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('vitals.summary.minGlucose', 'Min')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.min', 'Min')}</Text>
                     <Text size="sm" fw={600}>{item.stats.min} mg/dL</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('vitals.summary.maxGlucose', 'Max')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.max', 'Max')}</Text>
                     <Text size="sm" fw={600}>{item.stats.max} mg/dL</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('vitals.summary.readings', 'Readings')}</Text>
+                    <Text size="xs" c="dimmed">{t('shared:labels.countReadings', 'Readings')}</Text>
                     <Text size="sm" fw={600}>{item.count}</Text>
                   </Paper>
                 </Group>
@@ -1032,7 +1032,7 @@ const VitalsList = ({
                 <Table striped highlightOnHover size="xs">
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>{t('vitals.summary.time', 'Time')}</Table.Th>
+                      <Table.Th>{t('shared:labels.time', 'Time')}</Table.Th>
                       <Table.Th>{t('vitals.modal.bloodGlucose', 'Glucose')} (mg/dL)</Table.Th>
                       {showActions && <Table.Th />}
                     </Table.Tr>
@@ -1206,7 +1206,7 @@ const VitalsList = ({
                     sorted="recorded_date"
                     onSort={() => handleSort('recorded_date')}
                   >
-                    {t('vitals.table.date', 'Date')}
+                    {t('shared:labels.date', 'Date')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -1270,7 +1270,7 @@ const VitalsList = ({
                 {showActions && (
                   <Table.Th>
                     <Text fw={500} size="sm">
-                      {t('labels.actions', 'Actions')}
+                      {t('shared:labels.actions', 'Actions')}
                     </Text>
                   </Table.Th>
                 )}

@@ -18,7 +18,7 @@ const TreatmentCard = ({
   fileCountLoading = false,
   onError
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
   const handleError = (error) => {
@@ -94,29 +94,29 @@ const TreatmentCard = ({
     // Generate dynamic fields
     const fields = [
       {
-        label: t('common:fields.startDate.label'),
+        label: t('shared:labels.startDate'),
         value: treatment.start_date,
-        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
       {
-        label: t('common:fields.endDate.label'),
+        label: t('shared:labels.endDate'),
         value: treatment.end_date,
-        render: (value) => value ? formatLongDate(value) : t('common:labels.notSpecified')
+        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
       },
       {
         label: t('treatments.amount.label'),
         value: treatment.dosage,
-        render: (value) => value || t('common:labels.notSpecified')
+        render: (value) => value || t('shared:labels.notSpecified')
       },
       {
-        label: t('treatments.frequency.label'),
+        label: t('shared:fields.frequency'),
         value: treatment.frequency,
-        render: (value) => value || t('common:labels.notSpecified')
+        render: (value) => value || t('shared:labels.notSpecified')
       },
       {
-        label: t('common:labels.description'),
+        label: t('shared:labels.description'),
         value: treatment.description,
-        render: (value) => value || t('common:labels.notSpecified'),
+        render: (value) => value || t('shared:labels.notSpecified'),
         style: { flex: 1 }
       }
     ].filter(field => field.value); // Only show fields with values
@@ -135,7 +135,7 @@ const TreatmentCard = ({
     const customContent = treatment.condition_id ? (
       <Group gap="xs" style={{ marginBottom: '8px' }}>
         <Text size="sm" c="dimmed">
-          {t('common:treatments.card.relatedCondition', 'Related Condition')}:
+          {t('shared:labels.relatedCondition', 'Related Condition')}:
         </Text>
         <Text
           size="sm"
@@ -143,7 +143,7 @@ const TreatmentCard = ({
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={() => handleConditionClick(treatment.condition_id)}
-          title={t('common:treatments.card.viewConditionDetails', 'View condition details')}
+          title={t('shared:labels.viewConditionDetails', 'View condition details')}
         >
           {treatment.condition?.diagnosis ||
            getConditionName(treatment.condition_id) ||

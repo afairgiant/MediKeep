@@ -48,7 +48,7 @@ const TreatmentViewModal = ({
   onEquipmentClick,
   onError,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
   const [activeTab, setActiveTab] = useState('overview');
@@ -145,7 +145,7 @@ const TreatmentViewModal = ({
         <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-            {t('treatments.viewModal.tabs.overview', 'Overview')}
+            {t('shared:tabs.overview', 'Overview')}
           </Tabs.Tab>
           {treatment.mode !== 'advanced' && (
             <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
@@ -155,10 +155,10 @@ const TreatmentViewModal = ({
           {treatment.mode === 'advanced' && (
             <>
               <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
-                {t('treatments.viewModal.tabs.medications', 'Medications')}
+                {t('shared:categories.medications', 'Medications')}
               </Tabs.Tab>
               <Tabs.Tab value="visits" leftSection={<IconStethoscope size={16} />}>
-                {t('treatments.viewModal.tabs.visits', 'Visits')}
+                {t('shared:tabs.visits', 'Visits')}
               </Tabs.Tab>
               <Tabs.Tab value="labs" leftSection={<IconTestPipe size={16} />}>
                 {t('treatments.viewModal.tabs.labs', 'Labs')}
@@ -169,10 +169,10 @@ const TreatmentViewModal = ({
             </>
           )}
           <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-            {t('treatments.viewModal.tabs.documents', 'Documents')}
+            {t('shared:tabs.documents', 'Documents')}
           </Tabs.Tab>
           <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-            {t('treatments.viewModal.tabs.notes', 'Notes')}
+            {t('shared:tabs.notes', 'Notes')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -182,38 +182,38 @@ const TreatmentViewModal = ({
             <Stack gap="lg">
               {/* Basic Information */}
               <div>
-                <Title order={4} mb="sm">{t('treatments.viewModal.basicInformation', 'Basic Information')}</Title>
+                <Title order={4} mb="sm">{t('shared:labels.basicInformation', 'Basic Information')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.treatmentName', 'Treatment Name')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.treatmentName', 'Treatment Name')}</Text>
                     <Text size="sm">{treatment.treatment_name}</Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.treatmentType', 'Treatment Category')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.treatmentType', 'Treatment Category')}</Text>
                     <Text size="sm" c={treatment.treatment_type ? 'inherit' : 'dimmed'}>
-                      {getTreatmentTypeLabel(treatment.treatment_type) || t('treatments.viewModal.notSpecified', 'Not specified')}
+                      {getTreatmentTypeLabel(treatment.treatment_type) || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.status', 'Status')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
                     <StatusBadge status={treatment.status} />
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.startDate', 'Start Date')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.startDate', 'Start Date')}</Text>
                     <Text size="sm" c={treatment.start_date ? 'inherit' : 'dimmed'}>
-                      {treatment.start_date ? formatDate(treatment.start_date) : t('treatments.viewModal.notSpecified', 'Not specified')}
+                      {treatment.start_date ? formatDate(treatment.start_date) : t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.endDate', 'End Date')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.endDate', 'End Date')}</Text>
                     <Text size="sm" c={treatment.end_date ? 'inherit' : 'dimmed'}>
-                      {treatment.end_date ? formatDate(treatment.end_date) : t('treatments.viewModal.ongoing', 'Ongoing')}
+                      {treatment.end_date ? formatDate(treatment.end_date) : t('shared:labels.ongoing', 'Ongoing')}
                     </Text>
                   </Stack>
                   <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.description', 'Description')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.description', 'Description')}</Text>
                     <Text size="sm" c={treatment.description ? 'inherit' : 'dimmed'}>
-                      {treatment.description || t('treatments.viewModal.notSpecified', 'Not specified')}
+                      {treatment.description || t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                 </SimpleGrid>
@@ -221,35 +221,35 @@ const TreatmentViewModal = ({
 
               {/* Practitioner Information */}
               <div>
-                <Title order={4} mb="sm">{t('treatments.viewModal.practitioner', 'Practitioner')}</Title>
+                <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.doctor', 'Doctor')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.doctor', 'Doctor')}</Text>
                     <Text size="sm" c={treatment.practitioner_id ? 'inherit' : 'dimmed'}>
                       {treatment.practitioner_id
                         ? (treatment.practitioner?.name ||
                             getPractitionerInfo(treatment.practitioner_id)?.name ||
                             t('treatments.viewModal.practitionerId', 'Practitioner #{{id}}', { id: treatment.practitioner_id }))
-                        : t('treatments.viewModal.notSpecified', 'Not specified')}
+                        : t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.specialty', 'Specialty')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.specialty', 'Specialty')}</Text>
                     {(treatment.practitioner?.specialty || getPractitionerInfo(treatment.practitioner_id)?.specialty) ? (
                       <Badge variant="light" color="green" size="sm">
                         {treatment.practitioner?.specialty ||
                           getPractitionerInfo(treatment.practitioner_id)?.specialty}
                       </Badge>
                     ) : (
-                      <Text size="sm" c="dimmed">{t('treatments.viewModal.notSpecified', 'Not specified')}</Text>
+                      <Text size="sm" c="dimmed">{t('shared:labels.notSpecified', 'Not specified')}</Text>
                     )}
                   </Stack>
                   <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.practice', 'Practice')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.practice', 'Practice')}</Text>
                     <Text size="sm" c={(treatment.practitioner?.practice || getPractitionerInfo(treatment.practitioner_id)?.practice) ? 'inherit' : 'dimmed'}>
                       {treatment.practitioner?.practice ||
                         getPractitionerInfo(treatment.practitioner_id)?.practice ||
-                        t('treatments.viewModal.notSpecified', 'Not specified')}
+                        t('shared:labels.notSpecified', 'Not specified')}
                     </Text>
                   </Stack>
                 </SimpleGrid>
@@ -257,10 +257,10 @@ const TreatmentViewModal = ({
 
               {/* Related Condition */}
               <div>
-                <Title order={4} mb="sm">{t('treatments.viewModal.relatedCondition', 'Related Condition')}</Title>
+                <Title order={4} mb="sm">{t('shared:labels.relatedCondition', 'Related Condition')}</Title>
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.diagnosis', 'Diagnosis')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.diagnosis', 'Diagnosis')}</Text>
                     {treatment.condition_id ? (
                       <Text
                         size="sm"
@@ -281,13 +281,13 @@ const TreatmentViewModal = ({
                     )}
                   </Stack>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.severity', 'Severity')}</Text>
+                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.severity', 'Severity')}</Text>
                     {(treatment.condition?.severity || getConditionById(treatment.condition_id)?.severity) ? (
                       <Badge variant="light" color="orange" size="sm">
                         {treatment.condition?.severity || getConditionById(treatment.condition_id)?.severity}
                       </Badge>
                     ) : (
-                      <Text size="sm" c="dimmed">{t('treatments.viewModal.notSpecified', 'Not specified')}</Text>
+                      <Text size="sm" c="dimmed">{t('shared:labels.notSpecified', 'Not specified')}</Text>
                     )}
                   </Stack>
                   <Stack gap="xs">
@@ -297,7 +297,7 @@ const TreatmentViewModal = ({
                         {treatment.condition?.status || getConditionById(treatment.condition_id)?.status}
                       </Badge>
                     ) : (
-                      <Text size="sm" c="dimmed">{t('treatments.viewModal.notSpecified', 'Not specified')}</Text>
+                      <Text size="sm" c="dimmed">{t('shared:labels.notSpecified', 'Not specified')}</Text>
                     )}
                   </Stack>
                 </SimpleGrid>
@@ -306,7 +306,7 @@ const TreatmentViewModal = ({
               {/* Tags Section */}
               {treatment.tags && treatment.tags.length > 0 && (
                 <div>
-                  <Title order={4} mb="sm">{t('treatments.viewModal.tags', 'Tags')}</Title>
+                  <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
                   <Group gap="xs">
                     {treatment.tags.map((tag, index) => (
                       <ClickableTagBadge
@@ -331,15 +331,15 @@ const TreatmentViewModal = ({
                   <Title order={4} mb="sm">{t('treatments.viewModal.schedule', 'Schedule')}</Title>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.startDate', 'Start Date')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.startDate', 'Start Date')}</Text>
                       <Text size="sm" c={treatment.start_date ? 'inherit' : 'dimmed'}>
-                        {treatment.start_date ? formatDate(treatment.start_date) : t('treatments.viewModal.notSpecified', 'Not specified')}
+                        {treatment.start_date ? formatDate(treatment.start_date) : t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.endDate', 'End Date')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.endDate', 'End Date')}</Text>
                       <Text size="sm" c={treatment.end_date ? 'inherit' : 'dimmed'}>
-                        {treatment.end_date ? formatDate(treatment.end_date) : t('treatments.viewModal.notSpecified', 'Not specified')}
+                        {treatment.end_date ? formatDate(treatment.end_date) : t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -350,13 +350,13 @@ const TreatmentViewModal = ({
                     <Stack gap="xs">
                       <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.amountDosage', 'Amount/Dosage')}</Text>
                       <Text size="sm" c={treatment.dosage ? 'inherit' : 'dimmed'}>
-                        {treatment.dosage || t('treatments.viewModal.notSpecified', 'Not specified')}
+                        {treatment.dosage || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                     <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('treatments.viewModal.frequency', 'Frequency')}</Text>
+                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.frequency', 'Frequency')}</Text>
                       <Text size="sm" c={treatment.frequency ? 'inherit' : 'dimmed'}>
-                        {treatment.frequency || t('treatments.viewModal.notSpecified', 'Not specified')}
+                        {treatment.frequency || t('shared:labels.notSpecified', 'Not specified')}
                       </Text>
                     </Stack>
                   </SimpleGrid>
@@ -420,7 +420,7 @@ const TreatmentViewModal = ({
               <div>
                 <Title order={4} mb="sm">{t('treatments.viewModal.treatmentNotes', 'Treatment Notes')}</Title>
                 <Text size="sm" c={treatment.notes ? 'inherit' : 'dimmed'}>
-                  {treatment.notes || t('treatments.viewModal.noNotesAvailable', 'No notes available')}
+                  {treatment.notes || t('shared:labels.noNotesAvailable', 'No notes available')}
                 </Text>
               </div>
             </Stack>
@@ -443,10 +443,10 @@ const TreatmentViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('treatments.viewModal.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('treatments.viewModal.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

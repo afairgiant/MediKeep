@@ -20,7 +20,7 @@ export const BREAKPOINTS = {
  */
 export const NAVIGATION_SECTIONS = {
   medicalRecords: {
-    titleKey: 'sidebarNav.sections.medicalRecords',
+    titleKey: 'shared:labels.medicalRecords',
     title: 'Medical Records',
     priority: 2,
     items: [

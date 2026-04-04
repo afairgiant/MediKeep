@@ -1,7 +1,5 @@
 {
   "allergies": {
-    "addNew": "Lägg till ny allergi",
-    "addTitle": "Lägg till ny allergi",
     "allergen": {
       "description": "Namn på allergenet",
       "label": "Allergen",
@@ -14,37 +12,26 @@
         "environmental": "Miljö",
         "food": "Livsmedel",
         "insect": "Insekt",
-        "medication": "Läkemedel",
-        "other": "Övrigt"
+        "medication": "Läkemedel"
       },
       "placeholder": "Välj allergityp"
     },
-    "cardSubtitle": "Medical Allergy",
-    "clinicalNotes": "Clinical Notes",
+    "cardSubtitle": "Medicinsk allergi",
     "editTitle": "Redigera allergi",
     "emptyState": {
-      "filtered": "Försök justera din sökning eller dina filterkriterier.",
       "noData": "Klicka på \"Lägg till ny allergi\" för att börja.",
       "title": "Inga allergier hittades"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "messages": {
       "loading": "Laddar allergier...",
       "saving": "Sparar allergi..."
     },
     "modal": {
-      "title": "Allergy Details"
+      "title": "Allergiuppgifter"
     },
-    "noMedicationLinked": "No medication linked",
-    "noNotes": "No notes available",
+    "noMedicationLinked": "Inget läkemedel länkat",
     "onsetDate": {
       "description": "När allergin först identifierades",
-      "label": "Debutdatum",
       "placeholder": "Välj debutdatum"
     },
     "reaction": {
@@ -52,14 +39,13 @@
       "label": "Reaktionsbeskrivning",
       "placeholder": "Beskriv den allergiska reaktionen"
     },
-    "reactionInformation": "Reaction Information",
+    "reactionInformation": "Reaktionsinformation",
     "reactionType": {
       "description": "Typ av allergisk reaktion",
       "label": "Reaktionstyp",
       "options": {
         "anaphylaxis": "Anafylaxi",
         "gastrointestinal": "Gastrointestinal",
-        "other": "Övrigt",
         "respiratory": "Respiratorisk",
         "skin": "Hudreaktion"
       },
@@ -78,35 +64,19 @@
       "description": "Aktuell allergistatus"
     },
     "tabs": {
-      "basicInfo": "Grundinfo",
-      "documents": "Dokument",
-      "notes": "Anteckningar",
-      "overview": "Overview",
       "reactionDetails": "Reaktionsdetaljer"
     },
-    "title": "Allergier",
-    "viewMedication": "View medication details"
-  },
-  "buttons": {
-    "cancel": "Cancel"
+    "viewMedication": "Visa läkemedelsdetaljer"
   },
   "componentCatalog": {
     "fetchError": "Kunde inte ladda testkatalogen",
-    "filterCategory": "Kategori",
-    "filterStatus": "Status",
     "noData": "Lägg till labbresultat med testkomponenter för att se dem har.",
     "noResults": "Inga testkomponenter hittades",
-    "readingCount": "{{count}} matchningar",
     "readingCount_one": "{{count}} matchning",
-    "readingCount_other": "{{count}} readings",
     "refRange": "Ref",
     "searchPlaceholder": "Sök prover...",
-    "showing": "Visar {{count}} unika prover",
-    "showing_one": "Showing {{count}} unique tests",
-    "showing_other": "Showing {{count}} unique tests",
     "sort": {
-      "alphabetical": "A-Ö",
-      "priority": "Prioritet"
+      "alphabetical": "A-Ö"
     },
     "status": {
       "abnormal": "Avvikande",
@@ -114,8 +84,7 @@
       "critical": "Kritiskt",
       "high": "Högt",
       "low": "Lagt",
-      "normal": "Normalt",
-      "unknown": "Okänt"
+      "normal": "Normalt"
     },
     "trend": {
       "decreasing": "Minskande",
@@ -123,19 +92,18 @@
       "increasing": "Ökande",
       "stable": "Stabilt",
       "worsening": "Försämring"
-    },
-    "tryAdjusting": "Försök justera din sökning eller dina filterkriterier."
+    }
   },
   "conditions": {
     "codeDescription": {
       "description": "Läsbar beskrivning av koden",
-      "label": "Kodbeskrivning",
-      "placeholder": "Beskrivning av den medicinska koden"
+      "placeholder": "Beskrivning av den medicinska koden",
+      "label": "Kodbeskrivning"
     },
     "diagnosis": {
       "description": "Medicinskt tillstånd eller diagnosnamn",
-      "label": "Diagnos",
-      "placeholder": "t.ex. Hypertoni, Diabetes typ 2, Astma"
+      "placeholder": "t.ex. Hypertoni, Diabetes typ 2, Astma",
+      "label": "Diagnos"
     },
     "endDate": {
       "description": "När tillståndet blev löst (om tillämpligt)",
@@ -143,8 +111,8 @@
     },
     "icd10Code": {
       "description": "Internationell klassifikation av sjukdomskod",
-      "label": "ICD-10-kod",
-      "placeholder": "t.ex. I10, E11.9"
+      "placeholder": "t.ex. I10, E11.9",
+      "label": "ICD-10-kod"
     },
     "notes": {
       "description": "Ytterligare detaljer om tillståndet, behandlingshistorik eller observationer"
@@ -164,8 +132,8 @@
     },
     "snomedCode": {
       "description": "SNOMED CT klinisk terminologikod",
-      "label": "SNOMED-kod",
-      "placeholder": "t.ex. 38341003"
+      "placeholder": "t.ex. 38341003",
+      "label": "SNOMED-kod"
     },
     "status": {
       "description": "Aktuell status för detta tillstånd"
@@ -175,13 +143,13 @@
     "form": {
       "address": {
         "description": "Kontaktpersonens adress (valfritt)",
-        "label": "Adress",
-        "placeholder": "t.ex. Huvudgatan 123, 111 22 Stockholm"
+        "placeholder": "t.ex. Huvudgatan 123, 111 22 Stockholm",
+        "label": "Adress"
       },
       "email": {
         "description": "Valfri e-postadress",
-        "label": "E-postadress",
-        "placeholder": "t.ex. erik.svensson@epost.se"
+        "placeholder": "t.ex. erik.svensson@epost.se",
+        "label": "E-postadress"
       },
       "isActive": {
         "description": "Denna kontaktperson är för närvarande tillgänglig",
@@ -193,8 +161,8 @@
       },
       "name": {
         "description": "Fullständigt namn på kontaktpersonen vid nödfall",
-        "label": "Fullständigt namn",
-        "placeholder": "t.ex. Erik Svensson"
+        "placeholder": "t.ex. Erik Svensson",
+        "label": "Fullständigt namn"
       },
       "notes": {
         "description": "Eventuella ytterligare anteckningar om denna kontakt",
@@ -220,17 +188,12 @@
       "saving": "Sparar kontaktperson vid nödfall..."
     },
     "tabs": {
-      "contactInfo": "Kontaktuppgifter",
-      "details": "Detaljer",
-      "notes": "Anteckningar"
-    },
-    "title": "Kontaktpersoner vid nödfall"
+      "contactInfo": "Kontaktuppgifter"
+    }
   },
   "equipment": {
     "tabs": {
-      "basicInfo": "Grundinfo",
       "deviceDetails": "Enhetsdetaljer",
-      "notes": "Anteckningar",
       "serviceDates": "Service och datum"
     }
   },
@@ -239,8 +202,8 @@
       "condition": {
         "conditionName": {
           "description": "Namn på det medicinska tillståndet",
-          "label": "Tillståndsnamn",
-          "placeholder": "t.ex. Diabetes, Hjärtsjukdom, Cancer"
+          "placeholder": "t.ex. Diabetes, Hjärtsjukdom, Cancer",
+          "label": "Tillståndsnamn"
         },
         "conditionType": {
           "description": "Kategori av medicinskt tillstånd",
@@ -254,8 +217,8 @@
         },
         "icd10Code": {
           "description": "Medicinsk diagnoskod (om känd)",
-          "label": "ICD-10-kod",
-          "placeholder": "t.ex. E11.9"
+          "placeholder": "t.ex. E11.9",
+          "label": "ICD-10-kod"
         },
         "notes": {
           "description": "Behandlingsdetaljer, resultat eller annan relevant information",
@@ -315,15 +278,10 @@
           "label": "Kon",
           "placeholder": "Välj kon"
         },
-        "genderOptions": {
-          "female": "Kvinna",
-          "male": "Man",
-          "other": "Övrigt"
-        },
         "name": {
           "description": "Fullständigt namn på familjemedlemmen",
-          "label": "Fullständigt namn",
-          "placeholder": "Ange familjemedlemmens namn"
+          "placeholder": "Ange familjemedlemmens namn",
+          "label": "Fullständigt namn"
         },
         "notes": {
           "description": "Eventuella ytterligare anteckningar eller viktig information",
@@ -342,11 +300,14 @@
           "maternalGrandfather": "Morfar",
           "maternalGrandmother": "Mormor",
           "mother": "Mor",
-          "other": "Övrigt",
           "paternalGrandfather": "Farfar",
           "paternalGrandmother": "Farmor",
           "sister": "Syster",
           "uncle": "Farbror/Morbror"
+        },
+        "genderOptions": {
+          "male": "Man",
+          "female": "Kvinna"
         }
       }
     }
@@ -358,13 +319,13 @@
   "immunizations": {
     "dateAdministered": {
       "description": "När vaccinet gavs",
-      "label": "Administreringsdatum",
-      "placeholder": "Välj administreringsdatum"
+      "placeholder": "Välj administreringsdatum",
+      "label": "Administreringsdatum"
     },
     "doseNumber": {
       "description": "Vilken dos i serien",
-      "label": "Dosnummer",
-      "placeholder": "1, 2, 3..."
+      "placeholder": "1, 2, 3...",
+      "label": "Dosnummer"
     },
     "expirationDate": {
       "description": "Utgångsdatum för den använda vaccinflaskan/dosen",
@@ -373,18 +334,17 @@
     },
     "location": {
       "description": "Var vaccinet administrerades",
-      "label": "Plats",
       "placeholder": "t.ex. Apotek, Sjukhus, Vårdcentral, Halsocentral"
     },
     "lotNumber": {
       "description": "Batchidentifierare för spårning",
-      "label": "Satsnummer",
-      "placeholder": "Vaccinets batch-/satsnummer"
+      "placeholder": "Vaccinets batch-/satsnummer",
+      "label": "Satsnummer"
     },
     "manufacturer": {
       "description": "Vaccinets tillverkare",
-      "label": "Tillverkare",
-      "placeholder": "Välj tillverkare"
+      "placeholder": "Välj tillverkare",
+      "label": "Tillverkare"
     },
     "manufacturerOptions": {
       "astraZeneca": "AstraZeneca",
@@ -392,18 +352,16 @@
       "johnsonJohnson": "Johnson & Johnson",
       "merck": "Merck",
       "moderna": "Moderna",
-      "other": "Övrigt",
       "pfizerBioNTech": "Pfizer-BioNTech",
       "sanofi": "Sanofi"
     },
     "ndcNumber": {
       "description": "National Drug Code för vaccinet",
-      "label": "NDC-nummer",
-      "placeholder": "t.ex. 12345-6789-01"
+      "placeholder": "t.ex. 12345-6789-01",
+      "label": "NDC-nummer"
     },
     "notes": {
       "description": "Relevanta detaljer om vaccinationen",
-      "label": "Anteckningar",
       "placeholder": "Ytterligare anteckningar om denna vaccination..."
     },
     "route": {
@@ -414,8 +372,6 @@
     "routeOptions": {
       "intradermal": "Intradermalt (ID)",
       "intramuscular": "Intramuskulart (IM)",
-      "nasal": "Nasalt",
-      "oral": "Oralt",
       "subcutaneous": "Subkutant (SC)"
     },
     "site": {
@@ -433,8 +389,8 @@
     },
     "vaccineName": {
       "description": "Namn på det administrerade vaccinet",
-      "label": "Vaccinnamn",
-      "placeholder": "t.ex. COVID-19 mRNA, Influensa, MPR"
+      "placeholder": "t.ex. COVID-19 mRNA, Influensa, MPR",
+      "label": "Vaccinnamn"
     }
   },
   "injuries": {
@@ -459,15 +415,8 @@
     },
     "editTitle": "Redigera skada",
     "emptyState": {
-      "filtered": "Försök justera din sökning eller dina filterkriterier.",
       "noData": "Klicka på \"Lägg till ny skada\" för att börja.",
       "title": "Inga skador hittades"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "injuryDate": {
       "description": "När skadan inträffade",
@@ -505,7 +454,6 @@
     },
     "notes": {
       "description": "Allmänna anteckningar eller ytterligare detaljer",
-      "label": "Ytterligare anteckningar",
       "placeholder": "Annan relevant information..."
     },
     "practitioner": {
@@ -520,17 +468,15 @@
     },
     "severity": {
       "description": "Hur allvarlig är denna skada",
-      "label": "Svårighetsgrad",
       "options": {
-        "mild": "Mild - Minor discomfort",
-        "moderate": "Moderate - Noticeable impact",
-        "severe": "Severe - Significant impact"
+        "mild": "Mild - Mindre obehag",
+        "moderate": "Måttlig - Märkbar påverkan",
+        "severe": "Allvarlig - Betydande påverkan"
       },
       "placeholder": "Välj svårighetsgrad"
     },
     "status": {
       "description": "Aktuell status för denna skada",
-      "label": "Status",
       "options": {
         "active": "Aktiv - Under behandling",
         "chronic": "Kronisk - Långsiktiga effekter",
@@ -538,31 +484,19 @@
         "resolved": "Löst - Helt läkt"
       }
     },
-    "tabs": {
-      "basicInfo": "Grundinfo",
-      "documents": "Dokument",
-      "notes": "Anteckningar",
-      "overview": "Översikt",
-      "treatment": "Behandling"
-    },
-    "title": "Skador",
     "treatment": {
       "description": "Medicinsk behandling given för skadan",
-      "label": "Mottagen behandling",
-      "placeholder": "Beskriv mottagen behandling..."
-    },
-    "treatmentReceived": {
+      "placeholder": "Beskriv mottagen behandling...",
       "label": "Mottagen behandling"
     },
     "viewModal": {
       "additionalInfo": "Ytterligare information",
       "injuryDetails": "Skadedetaljer"
-    },
-    "viewPractitioner": "Visa vårdgivardetaljer"
+    }
   },
   "insurance": {
     "form": {
-      "addInsurance": "Add Insurance",
+      "addInsurance": "Lägg till försäkring",
       "annualMaximum": {
         "description": "Maximalt årligt försäkringsbelopp",
         "label": "Årligt maxbelopp",
@@ -628,7 +562,7 @@
         "label": "Patientavgift jourvård",
         "placeholder": "t.ex. 300"
       },
-      "coveragePeriodStatus": "Coverage Period & Status",
+      "coveragePeriodStatus": "Täckningsperiod och status",
       "customerServicePhone": {
         "description": "Telefonnummer till kundtjänst",
         "label": "Kundtjänstnummer",
@@ -657,10 +591,10 @@
       "dividers": {
         "additionalInfo": "Ytterligare information",
         "basicInfo": "Grundläggande försäkringsinformation",
-        "contactInfo": "Kontaktuppgifter",
         "coverageDetails": "Täckningsdetaljer",
         "coveragePeriodStatus": "Försäkringsperiod och status",
-        "memberInfo": "Medlemsinformation"
+        "memberInfo": "Medlemsinformation",
+        "contactInfo": "Kontaktuppgifter"
       },
       "effectiveDate": {
         "description": "Datum då försäkringsskyddet börjar galla",
@@ -679,8 +613,8 @@
       },
       "expirationDate": {
         "description": "Datum då försäkringsskyddet upphör (om känt)",
-        "label": "Utgångsdatum",
-        "placeholder": "Välj utgångsdatum"
+        "placeholder": "Välj utgångsdatum",
+        "label": "Utgångsdatum"
       },
       "frameAllowance": {
         "description": "Årligt bidrag för glasögonbågar",
@@ -689,8 +623,8 @@
       },
       "groupNumber": {
         "description": "Gruppnummer (om tillämpligt)",
-        "label": "Gruppnummer",
-        "placeholder": "t.ex. GRP123"
+        "placeholder": "t.ex. GRP123",
+        "label": "Gruppnummer"
       },
       "insuranceType": {
         "description": "Typ av försäkringsskydd",
@@ -732,7 +666,7 @@
         "placeholder": "Ytterligare information om denna försäkring..."
       },
       "pcnNumber": {
-        "description": "Processor Control Number",
+        "description": "Processorkontrollnummer",
         "label": "PCN-nummer",
         "placeholder": "t.ex. ABC123"
       },
@@ -751,10 +685,9 @@
         "label": "Plantyp",
         "options": {
           "epo": "EPO (Exclusive Provider Organization)",
-          "hdhp": "HDHP (High Deductible Health Plan)",
+          "hdhp": "HDHP (Högt avdragsgillt hälsoplan)",
           "hmo": "HMO (Health Maintenance Organization)",
           "indemnity": "Skadeförsäkring",
-          "other": "Övrigt",
           "pos": "POS (Point of Service)",
           "ppo": "PPO (Preferred Provider Organization)"
         },
@@ -775,7 +708,7 @@
         "options": {
           "formulary": "Läkemedelslista-baserad plan",
           "integrated": "Integrerad med sjukförsäkring",
-          "medicarePartD": "Medicare Part D",
+          "medicarePartD": "Medicare del D",
           "tieredCopay": "Stegvis patientavgift"
         },
         "placeholder": "Välj läkemedelsplantyp"
@@ -800,9 +733,8 @@
         "options": {
           "child": "Barn",
           "dependent": "Forsorjningsberoende",
-          "other": "Övrigt",
-          "self": "Egen",
-          "spouse": "Make/Maka"
+          "spouse": "Make/Maka",
+          "self": "Egen"
         },
         "placeholder": "Välj relation"
       },
@@ -811,27 +743,20 @@
         "label": "RX-grupp",
         "placeholder": "t.ex. RXGRP123"
       },
-      "saving": "Saving insurance...",
+      "saving": "Sparar försäkring...",
       "status": {
         "description": "Aktuell status för försäkringen",
         "options": {
-          "active": "Aktiv",
-          "expired": "Utgången",
-          "inactive": "Inaktiv",
-          "pending": "Avvaktar"
+          "expired": "Utgången"
         },
         "placeholder": "Välj status"
       },
       "tabs": {
-        "addFiles": "Add Files",
-        "basicInfo": "Basic Info",
-        "contact": "Contact",
-        "coverage": "Coverage",
-        "documents": "Documents",
-        "member": "Member",
-        "notes": "Notes"
+        "contact": "Kontakt",
+        "coverage": "Täckning",
+        "member": "Medlem"
       },
-      "updateInsurance": "Update Insurance",
+      "updateInsurance": "Uppdatera försäkring",
       "visionPlanType": {
         "description": "Typ av synvårdsförsäkringsplan",
         "label": "Synvårdsplantyp",
@@ -849,15 +774,14 @@
       }
     },
     "viewModal": {
-      "attachedDocuments": "Attached Documents",
-      "coverageDetails": "Coverage Details"
+      "coverageDetails": "Täckningsdetaljer"
     }
   },
   "labResults": {
     "additionalNotes": {
       "description": "Kliniska anteckningar eller specialinstruktioner",
-      "label": "Ytterligare anteckningar",
-      "placeholder": "Eventuell ytterligare information om provet, specialinstruktioner eller observationer..."
+      "placeholder": "Eventuell ytterligare information om provet, specialinstruktioner eller observationer...",
+      "label": "Ytterligare anteckningar"
     },
     "category": {
       "bloodWork": "Blodprov",
@@ -870,55 +794,44 @@
       "imaging": "Bilddiagnostik (rontgen, MR, DT)",
       "immunology": "Immunologi",
       "microbiology": "Mikrobiologi",
-      "other": "Övrigt",
       "pathology": "Patologi",
       "pulmonology": "Pulmonologi",
       "stomatology": "Stomatologi"
     },
     "completedDate": {
       "description": "Datum då resultaten fastställdes",
-      "label": "Slutförandedatum",
-      "placeholder": "När resultaten var tillgängliga"
+      "placeholder": "När resultaten var tillgängliga",
+      "label": "Slutförandedatum"
     },
     "form": {
-      "abbreviation": "Abbreviation",
+      "abbreviation": "Förkortning",
       "abbreviationPlaceholder": "e.g., HGB",
       "addAnotherTest": "Lägg till ytterligare ett prov",
-      "autoCalculated": "Auto-calculated",
-      "cannotRemoveLastRow": "Cannot remove last row",
-      "category": "Category",
+      "autoCalculated": "Automatiskt beräknad",
+      "cannotRemoveLastRow": "Kan inte ta bort sista raden",
       "componentCreationWarning": "Labbresultatet sparades men testkomponenter kunde inte läggas till. Du kan lägga till dem från visningssidan.",
       "linkConditionsDescription": "Koppla detta labbresultat till relevanta medicinska diagnoser för bättre spårning och organisering.",
       "linkConditionsTitle": "Koppla medicinska diagnoser",
-      "max": "Max",
-      "min": "Min",
-      "notes": "Notes",
-      "notesOptional": "Notes (optional)",
-      "refMax": "Ref Max",
-      "refMin": "Ref Min",
-      "relatedConditions": "Relaterade diagnoser",
+      "notesOptional": "Anteckningar (valfritt)",
+      "refMax": "Ref max",
+      "refMin": "Ref min",
       "relationshipCreationWarning": "Labbresultatet sparades men vissa relationer kunde inte skapas. Du kan lägga till dem från redigeringssidan.",
-      "removeRow": "Remove row",
-      "result": "Result",
+      "removeRow": "Ta bort rad",
+      "result": "Resultat",
       "resultIndicator": "Resultatindikator:",
-      "searchTests": "Type to search tests...",
-      "selectCategory": "Select category",
-      "selectResult": "Select result",
-      "status": "Status",
+      "searchTests": "Skriv för att söka tester...",
+      "selectResult": "Välj resultat",
       "statusIndicator": "Statusindikator:",
-      "testCode": "Test Code",
       "testCodePlaceholder": "e.g., 718-7",
       "testComponents": "Testkomponenter (valfritt)",
       "testComponentsDescription": "Lägg valfritt till enskilda testvarden. Du kan aven lägga till fler senare.",
       "testDetails": "Provdetaljer",
-      "testName": "Test Name",
-      "unit": "Unit",
-      "value": "Value"
+      "unit": "Enhet"
     },
     "labResult": {
       "description": "Klassificering av provresultat",
-      "label": "Labbresultat",
-      "placeholder": "Välj resultat (om tillgängligt)"
+      "placeholder": "Välj resultat (om tillgängligt)",
+      "label": "Labbresultat"
     },
     "messages": {
       "relationshipsCreateInfo": "Relationer kan läggas till efter att labbresultatet sparats.",
@@ -927,8 +840,8 @@
     },
     "orderedDate": {
       "description": "Datum då provet begandes",
-      "label": "Bestallningsdatum",
-      "placeholder": "När provet beställdes"
+      "placeholder": "När provet beställdes",
+      "label": "Bestallningsdatum"
     },
     "orderingPractitioner": {
       "description": "Läkare som bestallde provet",
@@ -951,10 +864,6 @@
       "ordered": "Bestald - Provet har begärts"
     },
     "tabs": {
-      "addFiles": "Lägg till filer",
-      "basicInfo": "Grundinfo",
-      "documents": "Dokument",
-      "notes": "Anteckningar",
       "relationships": "Relationer",
       "resultsStatus": "Resultat och status"
     },
@@ -965,8 +874,8 @@
     },
     "testCode": {
       "description": "Labbkod eller LOINC",
-      "label": "Provkod",
-      "placeholder": "t.ex. CBC, 85025"
+      "placeholder": "t.ex. CBC, 85025",
+      "label": "Provkod"
     },
     "testingFacility": {
       "description": "Dar provet utförs/utfördes",
@@ -975,8 +884,8 @@
     },
     "testName": {
       "description": "Namn eller beskrivning av laboratorieprov",
-      "label": "Provnamn",
-      "placeholder": "t.ex. Komplett blodstatus (CBC)"
+      "placeholder": "t.ex. Komplett blodstatus (CBC)",
+      "label": "Provnamn"
     },
     "testStatus": {
       "description": "Aktuell status för labbprovet",
@@ -994,8 +903,7 @@
       "description": "Prioritet eller bradskandegrad för provet",
       "label": "Provtyp",
       "placeholder": "Välj prioritetsnivå"
-    },
-    "title": "Labbresultat"
+    }
   },
   "medications": {
     "alternativeName": {
@@ -1005,16 +913,15 @@
     },
     "dosage": {
       "description": "Styrka och mängd per dos",
-      "label": "Dosering",
-      "placeholder": "t.ex. 10 mg, 1 tablett"
+      "placeholder": "t.ex. 10 mg, 1 tablett",
+      "label": "Dosering"
     },
     "form": {
       "addMedication": "Lägg till läkemedel",
-      "attachedDocuments": "Bifogade dokument",
       "conditionLinkFailed": "Läkemedlet sparades, men vissa tillstånd kunde inte länkas. Du kan länka dem senare genom att redigera läkemedlet.",
       "conditionLinkPartialFailure": "{{count}} tillståndslänk(ar) misslyckades",
-      "conditionLinkPartialFailure_one": "",
-      "conditionLinkPartialFailure_other": "",
+      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
+      "conditionLinkPartialFailure_other": "{{count}} condition links failed",
       "linkConditionsDescription": "Länka valfritt detta läkemedel till befintliga tillstånd",
       "noConditionsFound": "Inga tillstånd hittades",
       "saving": "Sparar läkemedel...",
@@ -1022,8 +929,8 @@
     },
     "frequency": {
       "description": "Hur ofta läkemedlet tas",
-      "label": "Frekvens",
-      "placeholder": "t.ex. En gång dagligen, Tva gånger dagligen"
+      "placeholder": "t.ex. En gång dagligen, Tva gånger dagligen",
+      "label": "Frekvens"
     },
     "indication": {
       "description": "Vad är detta läkemedel for? Beskriv orsaken eller tillståndet som behandlas",
@@ -1032,18 +939,18 @@
     },
     "medicationName": {
       "description": "Generiskt namn eller varumarke för läkemedlet (minst 2 tecken)",
-      "label": "Läkemedelsnamn",
-      "placeholder": "t.ex. Lisinopril, Metformin"
+      "placeholder": "t.ex. Lisinopril, Metformin",
+      "label": "Läkemedelsnamn"
     },
     "medicationType": {
       "description": "Kategori av läkemedel",
-      "label": "Läkemedelstyp",
-      "placeholder": "Välj typ"
+      "placeholder": "Välj typ",
+      "label": "Läkemedelstyp"
     },
     "pharmacy": {
       "description": "Apotek där läkemedlet hämtas",
-      "label": "Apotek",
-      "placeholder": "Välj apotek"
+      "placeholder": "Välj apotek",
+      "label": "Apotek"
     },
     "prescribingProvider": {
       "description": "Läkare som foreskrev detta läkemedel",
@@ -1052,33 +959,25 @@
     },
     "route": {
       "description": "Hur läkemedlet administreras",
-      "label": "Administreringsväg",
       "options": {
         "inhalation": "Inhalation",
         "injection": "Injektion",
         "intramuscular": "Intramuskulart",
         "intravenous": "Intravenost",
-        "nasal": "Nasalt",
-        "oral": "Oralt",
         "rectal": "Rektalt",
         "subcutaneous": "Subkutant",
         "sublingual": "Sublingualt",
-        "topical": "Topikalt"
+        "topical": "Topikalt",
+        "oral": "Oralt",
+        "nasal": "Nasalt"
       },
-      "placeholder": "Välj administreringsväg"
+      "placeholder": "Välj administreringsväg",
+      "label": "Administreringsväg"
     },
     "sideEffects": {
       "description": "Kända eller upplevda biverkningar av detta läkemedel",
-      "label": "Biverkningar",
-      "placeholder": "Lista kända eller upplevda biverkningar..."
-    },
-    "tabs": {
-      "addFiles": "Add Files",
-      "basicInfo": "Grundinfo",
-      "conditions": "Diagnoser",
-      "details": "Detaljer",
-      "documents": "Dokument",
-      "notes": "Anteckningar"
+      "placeholder": "Lista kända eller upplevda biverkningar...",
+      "label": "Biverkningar"
     }
   },
   "pharmacies": {
@@ -1098,7 +997,6 @@
           "krogerPharmacy": "Kroger Pharmacy",
           "meijerPharmacy": "Meijer Pharmacy",
           "onlinePharmacy": "Internetapotek",
-          "other": "Övrigt",
           "publixPharmacy": "Publix Pharmacy",
           "riteAid": "Rite Aid",
           "safewayPharmacy": "Safeway Pharmacy",
@@ -1111,13 +1009,13 @@
       },
       "city": {
         "description": "Stadens plats",
-        "label": "Stad",
-        "placeholder": "Stockholm"
+        "placeholder": "Stockholm",
+        "label": "Stad"
       },
       "country": {
         "description": "Land där apoteket är beläget",
-        "label": "Land",
-        "placeholder": "t.ex. Sverige, Norge"
+        "placeholder": "t.ex. Sverige, Norge",
+        "label": "Land"
       },
       "locationDivider": "Platsinformation",
       "name": {
@@ -1131,18 +1029,18 @@
       },
       "postalCode": {
         "description": "Postnummer",
-        "label": "Postnummer",
-        "placeholder": "t.ex. 111 22"
+        "placeholder": "t.ex. 111 22",
+        "label": "Postnummer"
       },
       "specialtyServices": {
         "description": "Specialtjänster som erbjuds av detta apotek",
-        "label": "Specialtjänster",
-        "placeholder": "t.ex. Vaccinationer, Beredning, Läkemedelsinformation"
+        "placeholder": "t.ex. Vaccinationer, Beredning, Läkemedelsinformation",
+        "label": "Specialtjänster"
       },
       "stateProvince": {
         "description": "Län, region eller landskap",
-        "label": "Län / Region",
-        "placeholder": "t.ex. Stockholms län, Västra Götaland"
+        "placeholder": "t.ex. Stockholms län, Västra Götaland",
+        "label": "Län / Region"
       },
       "storeNumber": {
         "description": "Intern butiksidentifierare",
@@ -1174,7 +1072,6 @@
       },
       "notes": {
         "description": "Eventuell ytterligare information om mottagningen",
-        "label": "Anteckningar",
         "placeholder": "Ytterligare anteckningar om denna mottagning..."
       },
       "patientPortal": {
@@ -1184,8 +1081,7 @@
       },
       "phone": {
         "description": "Huvudtelefonnummer för mottagningen",
-        "label": "Mottagningens telefon",
-        "placeholder": "+46 8 123 45 67"
+        "label": "Mottagningens telefon"
       },
       "website": {
         "description": "Officiell mottagningswebbplats",
@@ -1198,13 +1094,13 @@
     "form": {
       "email": {
         "description": "Professionell e-postadress",
-        "label": "E-postadress",
-        "placeholder": "lakare@exempel.se"
+        "placeholder": "lakare@exempel.se",
+        "label": "E-postadress"
       },
       "name": {
         "description": "Läkarens fullständiga namn inklusive titel",
-        "label": "Fullständigt namn",
-        "placeholder": "Dr. Anna Andersson"
+        "placeholder": "Dr. Anna Andersson",
+        "label": "Fullständigt namn"
       },
       "phone": {
         "description": "Primärt kontaktnummer",
@@ -1227,7 +1123,6 @@
       },
       "website": {
         "description": "Professionell webbplats eller mottagningssida",
-        "label": "Webbplats",
         "placeholder": "https://www.exempel.se"
       }
     }
@@ -1235,12 +1130,11 @@
   "procedures": {
     "anesthesiaNotes": {
       "description": "Anteckningar om anestesigivning",
-      "label": "Anestesianteckningar",
-      "placeholder": "Anestesirelaterade anteckningar..."
+      "placeholder": "Anestesirelaterade anteckningar...",
+      "label": "Anestesianteckningar"
     },
     "anesthesiaType": {
       "description": "Typ av anestesi som användes",
-      "label": "Anestesityp",
       "options": {
         "general": "Generell - Fullständig medvetslöshet",
         "local": "Lokal - Bedömning av specifikt område",
@@ -1248,33 +1142,26 @@
         "regional": "Regional - Bedömning av större område",
         "sedation": "Sedering - Avslappnad men vaken"
       },
-      "placeholder": "Välj anestesityp"
+      "placeholder": "Välj anestesityp",
+      "label": "Anestesityp"
     },
     "complications": {
       "description": "Dokumentera eventuella komplikationer, biverkningar eller ovaentade resultat",
-      "label": "Komplikationer",
-      "placeholder": "Eventuella komplikationer som uppstod under ingreppet..."
+      "placeholder": "Eventuella komplikationer som uppstod under ingreppet...",
+      "label": "Komplikationer"
     },
     "description": {
       "description": "Detaljerad beskrivning av vad ingreppet innebar",
-      "label": "Beskrivning",
       "placeholder": "Beskriv ingreppet i detalj..."
     },
     "facility": {
       "description": "Var ingreppet utfördes eller kommer att utföras",
-      "label": "Anläggning",
-      "placeholder": "t.ex. Centralsjukhuset, Öppenvardsklinik"
+      "placeholder": "t.ex. Centralsjukhuset, Öppenvardsklinik",
+      "label": "Anläggning"
     },
     "notes": {
       "description": "Relevanta observationer, pre-/postoperativa instruktioner eller detaljer",
-      "label": "Anteckningar",
       "placeholder": "Ytterligare anteckningar om ingreppet..."
-    },
-    "outcome": {
-      "label": "Resultat"
-    },
-    "performingPractitioner": {
-      "label": "Utförande läkare"
     },
     "practitioner": {
       "description": "Läkare eller specialist som utför ingreppet",
@@ -1283,8 +1170,8 @@
     },
     "procedureCode": {
       "description": "Medicinsk kodning (CPT, ICD-10-PCS etc.)",
-      "label": "Atgardskod",
-      "placeholder": "t.ex. CPT-12345, ICD-10-PCS"
+      "placeholder": "t.ex. CPT-12345, ICD-10-PCS",
+      "label": "Atgardskod"
     },
     "procedureDate": {
       "description": "När ingreppet utförs/utfördes",
@@ -1293,13 +1180,13 @@
     },
     "procedureDuration": {
       "description": "Hur lång tid ingreppet tog/tar",
-      "label": "Varaktighet (minuter)",
-      "placeholder": "t.ex. 30, 120"
+      "placeholder": "t.ex. 30, 120",
+      "label": "Varaktighet (minuter)"
     },
     "procedureName": {
       "description": "Namn på det medicinska ingreppet",
-      "label": "Ingreppets namn",
-      "placeholder": "t.ex. Appendektomi, MR-undersökning, Koloskopi"
+      "placeholder": "t.ex. Appendektomi, MR-undersökning, Koloskopi",
+      "label": "Ingreppets namn"
     },
     "procedureSetting": {
       "description": "Var ingreppet ager rum",
@@ -1315,7 +1202,6 @@
     },
     "procedureType": {
       "description": "Kategori av ingrepp",
-      "label": "Typ av ingrepp",
       "options": {
         "diagnostic": "Diagnostiskt - Undersökning/Bilddiagnostik",
         "emergency": "Akut - Akutvard",
@@ -1323,6 +1209,7 @@
         "surgical": "Kirurgiskt - Invasivt ingrepp",
         "therapeutic": "Terapeutiskt - Behandling"
       },
+      "label": "Typ av ingrepp",
       "placeholder": "Välj typ"
     },
     "status": {
@@ -1336,8 +1223,8 @@
     "occurrence": {
       "additionalNotes": {
         "description": "Annan relevant information om denna forekomst",
-        "label": "Ytterligare anteckningar",
-        "placeholder": "Ytterligare detaljer om denna episod..."
+        "placeholder": "Ytterligare detaljer om denna episod...",
+        "label": "Ytterligare anteckningar"
       },
       "associatedSymptoms": {
         "description": "Andra symtom som forekom tillsammans med denna episod",
@@ -1346,8 +1233,8 @@
       },
       "duration": {
         "description": "Hur länge varade denna episod",
-        "label": "Varaktighet",
-        "placeholder": "t.ex. 2 timmar, 30 minuter, hela dagen"
+        "placeholder": "t.ex. 2 timmar, 30 minuter, hela dagen",
+        "label": "Varaktighet"
       },
       "impactLevel": {
         "description": "Hur mycket påverkade detta dina dagliga aktiviteter",
@@ -1363,8 +1250,8 @@
       },
       "location": {
         "description": "Var på kroppen kände du detta",
-        "label": "Lokalisering",
-        "placeholder": "t.ex. Vänster tinning, Nedre rygg, Hela kroppen"
+        "placeholder": "t.ex. Vänster tinning, Nedre rygg, Hela kroppen",
+        "label": "Lokalisering"
       },
       "occurrenceDate": {
         "description": "Datum för denna specifika episod",
@@ -1414,8 +1301,8 @@
     "parent": {
       "category": {
         "description": "Valfri kategori för att organisera symtom",
-        "label": "Kategori",
-        "placeholder": "t.ex. Smärta, Matsmältning, Respiratorisk"
+        "placeholder": "t.ex. Smärta, Matsmältning, Respiratorisk",
+        "label": "Kategori"
       },
       "firstOccurrenceDate": {
         "description": "När du först märkte detta symtom",
@@ -1448,23 +1335,15 @@
       },
       "symptomName": {
         "description": "Namn på symtomet du vill följa",
-        "label": "Symtomnamn",
-        "placeholder": "t.ex. Migränhuvudvärk, Kronisk ryggsmärta"
+        "placeholder": "t.ex. Migränhuvudvärk, Kronisk ryggsmärta",
+        "label": "Symtomnamn"
       },
       "typicalTriggers": {
         "description": "Vad utlöser vanligtvis detta symtom",
         "label": "Vanliga utlösare",
         "placeholder": "Lägg till vanliga utlösare (stress, vader, mat etc.)"
       }
-    },
-    "tabs": {
-      "addFiles": "Lägg till filer",
-      "basicInfo": "Grundinfo",
-      "details": "Detaljer",
-      "documents": "Dokument",
-      "notes": "Anteckningar"
-    },
-    "title": "Symtom"
+    }
   },
   "treatments": {
     "amount": {
@@ -1478,8 +1357,8 @@
     },
     "frequency": {
       "description": "Hur ofta behandlingen sker",
-      "label": "Frekvens",
-      "placeholder": "Välj frekvens"
+      "placeholder": "Välj frekvens",
+      "label": "Frekvens"
     },
     "frequencyOptions": {
       "asNeeded": "Vid behov (PRN)",
@@ -1498,25 +1377,24 @@
       "specificStartDate": "Behandlingens startdatum"
     },
     "mode": {
-      "advancedOption": "Behandlingsplan",
       "description": "Välj hur du vill följa denna behandling",
       "label": "Behandlingsläge",
-      "simpleOption": "Enkel"
+      "simpleOption": "Enkel",
+      "advancedOption": "Behandlingsplan"
     },
     "notes": {
       "description": "Framstegsuppdateringar, observationer eller viktiga anteckningar",
-      "label": "Ytterligare anteckningar",
-      "placeholder": "Framstegsanteckningar, biverkningar, justeringar, resultat..."
+      "placeholder": "Framstegsanteckningar, biverkningar, justeringar, resultat...",
+      "label": "Ytterligare anteckningar"
     },
     "practitioner": {
       "description": "Tilldela en behandlare till denna behandling",
-      "label": "Behandlare",
       "placeholder": "Välj behandlare (valfritt)"
     },
     "relatedCondition": {
       "description": "Koppla denna behandling till ett specifikt medicinskt tillstånd",
-      "label": "Relaterat tillstånd",
-      "placeholder": "Välj tillstånd (valfritt)"
+      "placeholder": "Välj tillstånd (valfritt)",
+      "label": "Relaterat tillstånd"
     },
     "startDate": {
       "description": "När behandlingen börjar/började",
@@ -1529,8 +1407,8 @@
     },
     "treatmentName": {
       "description": "Specifikt namn eller beskrivning av behandlingen",
-      "label": "Behandlingsnamn",
-      "placeholder": "t.ex. Sjukgymnastik för landryggssmärta"
+      "placeholder": "t.ex. Sjukgymnastik för landryggssmärta",
+      "label": "Behandlingsnamn"
     },
     "treatmentStatus": {
       "description": "Aktuellt steg i behandlingsprocessen",
@@ -1546,7 +1424,6 @@
     },
     "treatmentType": {
       "description": "Kategori av behandling",
-      "label": "Behandlingstyp",
       "options": {
         "behavioralTherapy": "Beteendeterapi - Psykisk hälsa-behandling",
         "chemotherapy": "Kemoterapi - Cancerbehandling",
@@ -1560,6 +1437,7 @@
         "speechTherapy": "Logopedi - Kommunikationsforbattring",
         "surgery": "Kirurgi - Kirurgiskt ingrepp"
       },
+      "label": "Behandlingstyp",
       "placeholder": "Välj typ"
     }
   },
@@ -1567,14 +1445,8 @@
     "attendingPractitioner": {
       "label": "Behandlande läkare"
     },
-    "chiefComplaint": {
-      "label": "Huvudbesvär"
-    },
     "diagnosisAssessment": {
       "label": "Diagnos/Bedömning"
-    },
-    "durationMinutes": {
-      "label": "Varaktighet (minuter)"
     },
     "followUpInstructions": {
       "label": "Uppföljningsinstruktioner"
@@ -1604,8 +1476,8 @@
         },
         "durationMinutes": {
           "description": "Hur länge besöket varade",
-          "label": "Varaktighet (minuter)",
-          "placeholder": "Besökslängd"
+          "placeholder": "Besökslängd",
+          "label": "Varaktighet (minuter)"
         },
         "followUpInstructions": {
           "description": "Instruktioner för fortsatt vård och uppföljningsbesök",
@@ -1669,18 +1541,13 @@
     "relatedCondition": {
       "label": "Relaterat tillstånd (valfritt)"
     },
+    "viewModal": {
+      "followUpInstructions": "Uppföljningsinstruktioner",
+      "priority": "Prioritet",
+      "chiefComplaint": "Huvudbesvär"
+    },
     "table": {
       "visitType": "Besökstyp"
-    },
-    "treatmentPlan": {
-      "label": "Behandlingsplan"
-    },
-    "viewModal": {
-      "chiefComplaint": "Huvudbesvär",
-      "followUpInstructions": "Uppföljningsinstruktioner",
-      "location": "Plats",
-      "priority": "Prioritet",
-      "treatmentPlan": "Behandlingsplan"
     }
   }
 }

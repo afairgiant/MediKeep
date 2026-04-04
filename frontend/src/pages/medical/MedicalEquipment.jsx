@@ -111,7 +111,7 @@ const useSimpleDataManagement = (data, config) => {
 };
 
 const MedicalEquipment = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [viewMode, setViewMode] = usePersistedViewMode('medical-equipment');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
@@ -261,7 +261,7 @@ const MedicalEquipment = () => {
     return (
       <MedicalPageLoading
         message={t('equipment.loading', 'Loading equipment...')}
-        hint={t('equipment.loadingHint', 'If this takes too long, please refresh the page')}
+        hint={t('shared:labels.ifThisTakesTooLongPleaseRefreshThePage', 'If this takes too long, please refresh the page')}
       />
     );
   }
@@ -269,7 +269,7 @@ const MedicalEquipment = () => {
   return (
     <>
       <Container size="xl" py="sm">
-        <PageHeader title={t('equipment.title', 'Medical Equipment')} icon="🩺" />
+        <PageHeader title={t('shared:categories.medical_equipment', 'Medical Equipment')} icon="🩺" />
 
         <Stack gap="sm" mt="md">
           <MedicalPageAlerts
@@ -298,7 +298,7 @@ const MedicalEquipment = () => {
               emoji="🩺"
               title={t('equipment.noEquipmentFound', 'No Equipment Found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('equipment.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('equipment.startAdding', 'Start by adding your first piece of medical equipment.')}
               actionButton={
                 <Button variant="filled" onClick={handleAddEquipment}>

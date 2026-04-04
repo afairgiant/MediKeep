@@ -49,7 +49,7 @@ const USAGE_STATUS = {
 };
 
 const SystemHealth = () => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const { formatDate, formatDateTime } = useDateFormat();
   const [lastRefresh, setLastRefresh] = useState(null);
 
@@ -248,7 +248,7 @@ const SystemHealth = () => {
                   <IconChartBar size={16} />
                 </ThemeIcon>
                 <Text size="sm" c="dimmed" tt="uppercase" fw={600}>
-                  {t('health.totalRecords', 'Total Records')}
+                  {t('shared:labels.totalRecords', 'Total Records')}
                 </Text>
               </Group>
               <Text size="xl" fw={700}>
@@ -305,7 +305,7 @@ const SystemHealth = () => {
                         scheduleSettings.preset === 'every_6_hours' ? t('health.schedulePresets.every_6_hours', 'Every 6 hours') :
                         scheduleSettings.preset === 'every_12_hours' ? t('health.schedulePresets.every_12_hours', 'Every 12 hours') :
                         scheduleSettings.preset === 'daily' ? t('health.schedulePresets.daily', 'Daily') :
-                        scheduleSettings.preset === 'weekly' ? t('health.schedulePresets.weekly', 'Weekly') :
+                        scheduleSettings.preset === 'weekly' ? t('shared:labels.weekly', 'Weekly') :
                         scheduleSettings.preset
                     })}
                   </Text>
@@ -349,7 +349,7 @@ const SystemHealth = () => {
             <Stack gap={0}>
               <HealthItem
                 label={t('health.database.connectionStatus', 'Connection Status')}
-                value={healthData?.database_status || t('shared.unknown', 'Unknown')}
+                value={healthData?.database_status || t('shared:labels.unknown', 'Unknown')}
                 status={healthData?.database_status}
               />
               <HealthItem
@@ -358,7 +358,7 @@ const SystemHealth = () => {
                 status={healthData?.database_connection_test ? 'healthy' : 'error'}
               />
               <HealthItem
-                label={t('health.totalRecords', 'Total Records')}
+                label={t('shared:labels.totalRecords', 'Total Records')}
                 value={healthData?.total_records?.toLocaleString() || 0}
               />
               {healthData?.disk_usage && (
@@ -375,7 +375,7 @@ const SystemHealth = () => {
                     value={detailedStats.total_patients}
                   />
                   <HealthItem
-                    label={t('health.database.medicalRecords', 'Medical Records')}
+                    label={t('shared:labels.medicalRecords', 'Medical Records')}
                     value={
                       (detailedStats.total_medications || 0) +
                       (detailedStats.total_lab_results || 0) +
@@ -420,7 +420,7 @@ const SystemHealth = () => {
                         {storageHealth.app_storage.total_mb >= 1024
                           ? `${(storageHealth.app_storage.total_mb / 1024).toFixed(2)} GB`
                           : `${storageHealth.app_storage.total_mb.toFixed(2)} MB`}
-                        {' '}{t('health.storage.filesAcross', 'across {{count}} files', { count: storageHealth.app_storage.total_files })}
+                        {' '}{t('shared:labels.acrossCountFiles', 'across {{count}} files', { count: storageHealth.app_storage.total_files })}
                       </Text>
                     </Group>
                   </div>
@@ -483,7 +483,7 @@ const SystemHealth = () => {
             <Stack gap={0}>
               <HealthItem
                 label={t('health.services.apiStatus', 'API Status')}
-                value={`${systemMetrics?.services?.api?.status || t('shared.unknown', 'Unknown')}${
+                value={`${systemMetrics?.services?.api?.status || t('shared:labels.unknown', 'Unknown')}${
                   systemMetrics?.services?.api?.response_time_ms
                     ? ` (${systemMetrics.services.api.response_time_ms}ms)`
                     : ''
@@ -493,7 +493,7 @@ const SystemHealth = () => {
               <HealthItem
                 label={t('health.services.authService', 'Authentication Service')}
                 value={
-                  systemMetrics?.services?.authentication?.status || t('shared.unknown', 'Unknown')
+                  systemMetrics?.services?.authentication?.status || t('shared:labels.unknown', 'Unknown')
                 }
                 status={systemMetrics?.services?.authentication?.status}
               />
@@ -502,7 +502,7 @@ const SystemHealth = () => {
                 value={
                   systemMetrics?.services?.frontend_logging?.status ||
                   frontendLogHealth?.status ||
-                  t('shared.unknown', 'Unknown')
+                  t('shared:labels.unknown', 'Unknown')
                 }
                 status={
                   systemMetrics?.services?.frontend_logging?.status ||
@@ -512,7 +512,7 @@ const SystemHealth = () => {
               <HealthItem
                 label={t('health.services.adminInterface', 'Admin Interface')}
                 value={
-                  systemMetrics?.services?.admin_interface?.status || t('shared.unknown', 'Unknown')
+                  systemMetrics?.services?.admin_interface?.status || t('shared:labels.unknown', 'Unknown')
                 }
                 status={systemMetrics?.services?.admin_interface?.status}
               />
@@ -533,7 +533,7 @@ const SystemHealth = () => {
               variant="light"
               color={ssoConfig?.enabled ? 'green' : 'blue'}
             >
-              {ssoConfig?.enabled ? t('shared.enabled', 'Enabled') : t('shared.disabled', 'Disabled')}
+              {ssoConfig?.enabled ? t('shared:labels.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
             </Badge>
           </Group>
           {ssoError ? (
@@ -544,19 +544,19 @@ const SystemHealth = () => {
             <Stack gap={0}>
               <HealthItem
                 label={t('health.sso.ssoStatus', 'SSO Status')}
-                value={ssoConfig?.enabled ? t('shared.enabled', 'Enabled') : t('shared.disabled', 'Disabled')}
+                value={ssoConfig?.enabled ? t('shared:labels.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
                 status={ssoConfig?.enabled ? 'healthy' : 'info'}
               />
               {ssoConfig?.enabled && (
                 <>
                   <HealthItem
                     label={t('health.sso.providerType', 'Provider Type')}
-                    value={ssoConfig.provider_type?.toUpperCase() || t('shared.unknown', 'Unknown')}
+                    value={ssoConfig.provider_type?.toUpperCase() || t('shared:labels.unknown', 'Unknown')}
                     status="info"
                   />
                   {SSO_PROVIDER_LABELS[ssoConfig.provider_type] && (
                     <HealthItem
-                      label={t('health.sso.provider', 'Provider')}
+                      label={t('shared:labels.provider', 'Provider')}
                       value={SSO_PROVIDER_LABELS[ssoConfig.provider_type]}
                       status="healthy"
                     />

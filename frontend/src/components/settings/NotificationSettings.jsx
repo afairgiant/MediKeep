@@ -17,7 +17,7 @@ import '../../styles/components/NotificationSettings.css';
  * - Notification history
  */
 const NotificationSettings = ({ className = '' }) => {
-  const { t } = useTranslation(['notifications', 'common']);
+  const { t } = useTranslation(['notifications', 'common', 'shared']);
   const [channels, setChannels] = useState([]);
   const [eventTypes, setEventTypes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +77,7 @@ const NotificationSettings = ({ className = '' }) => {
           <div className="notification-settings-error">
             <p>{error}</p>
             <Button onClick={() => window.location.reload()}>
-              {t('common:buttons.retry', 'Retry')}
+              {t('shared:labels.retry', 'Retry')}
             </Button>
           </div>
         </Card>

@@ -9,7 +9,7 @@ export const symptomParentFormFields = [
   {
     name: 'symptom_name',
     type: 'text',
-    labelKey: 'medical:symptoms.parent.symptomName.label',
+    labelKey: 'shared:labels.symptomName',
     placeholderKey: 'medical:symptoms.parent.symptomName.placeholder',
     required: true,
     descriptionKey: 'medical:symptoms.parent.symptomName.description',

@@ -49,7 +49,7 @@ const VitalViewModal = ({
   practitioners = [],
   navigate,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate, formatDateTime } = useDateFormat();
   const { unitSystem } = useUserPreferences();
 
@@ -78,28 +78,28 @@ const VitalViewModal = ({
   // Vital sections configuration from VitalsList
   const vitalSections = [
     {
-      title: t('vitals.modal.basicInfo', 'Basic Information'),
+      title: t('shared:labels.basicInformation', 'Basic Information'),
       icon: IconCalendar,
       items: [
         {
-          label: t('vitals.modal.recordedDate', 'Recorded Date'),
+          label: t('shared:labels.recordedDate', 'Recorded Date'),
           value: formatDateTime(vital.recorded_date),
           icon: IconCalendar,
         },
         {
-          label: t('vitals.card.location', 'Location'),
-          value: vital.location || t('labels.notSpecified', 'Not specified'),
+          label: t('shared:labels.location', 'Location'),
+          value: vital.location || t('shared:labels.notSpecified', 'Not specified'),
           icon: IconMapPin,
         },
         {
           label: t('vitals.modal.deviceUsed', 'Device Used'),
-          value: vital.device_used || t('labels.notSpecified', 'Not specified'),
+          value: vital.device_used || t('shared:labels.notSpecified', 'Not specified'),
           icon: IconDevices,
         },
       ],
     },
     {
-      title: t('vitals.modal.vitalSigns', 'Vital Signs'),
+      title: t('shared:categories.vital_signs', 'Vital Signs'),
       icon: IconHeart,
       items: [
         {
@@ -149,7 +149,7 @@ const VitalViewModal = ({
           unit: vital.weight ? unitLabels[unitSystem].weight : '',
         },
         {
-          label: t('vitals.modal.height', 'Height'),
+          label: t('shared:labels.height', 'Height'),
           value: vital.height
             ? ((unitSystem === 'imperial'
                 ? convertHeight.inchesToFeetInches(vital.height)
@@ -180,7 +180,7 @@ const VitalViewModal = ({
           label: t('vitals.modal.glucoseContext', 'Measurement Type'),
           value: vital.glucose_context
             ? t(`vitals.glucoseContext.${vital.glucose_context}`, vital.glucose_context)
-            : t('labels.notSpecified', 'Not specified'),
+            : t('shared:labels.notSpecified', 'Not specified'),
           icon: IconDroplet,
         }] : []),
         {
@@ -218,7 +218,7 @@ const VitalViewModal = ({
         <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3} mb="xs">{t('vitals.modal.vitalSigns', 'Vital Signs')}</Title>
+              <Title order={3} mb="xs">{t('shared:categories.vital_signs', 'Vital Signs')}</Title>
               <Group gap="xs">
                 {vital.recorded_date && (
                   <Badge variant="light" color="blue" size="sm">
@@ -296,7 +296,7 @@ const VitalViewModal = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconNotes size={18} />
               </ActionIcon>
-              <Title order={4}>{t('vitals.modal.notes', 'Notes')}</Title>
+              <Title order={4}>{t('shared:tabs.notes', 'Notes')}</Title>
             </Group>
             <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
               {vital.notes}
@@ -311,7 +311,7 @@ const VitalViewModal = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconUser size={18} />
               </ActionIcon>
-              <Title order={4}>{t('vitals.modal.recordedBy', 'Recorded By')}</Title>
+              <Title order={4}>{t('shared:labels.recordedBy', 'Recorded By')}</Title>
             </Group>
             <Card shadow="xs" p="sm" radius="md" withBorder>
               {practitioner ? (
@@ -342,10 +342,10 @@ const VitalViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('buttons.edit', 'Edit')}
+            {t('shared:labels.edit', 'Edit')}
           </Button>
         </Group>
       </Stack>

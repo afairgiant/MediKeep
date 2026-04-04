@@ -143,7 +143,7 @@ export const handleUploadCompletion = (
   } else {
     // Complete failure
     showErrorNotification(ERROR_MESSAGES.ALL_UPLOADS_FAILED, 'upload', {
-      title: i18n.t('notifications:toasts.upload.failed'),
+      title: i18n.t('shared:labels.uploadFailed'),
     });
   }
 };

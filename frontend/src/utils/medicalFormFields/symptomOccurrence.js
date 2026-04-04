@@ -27,8 +27,8 @@ export const symptomOccurrenceFormFields = [
   {
     name: 'severity',
     type: 'select',
-    labelKey: 'common:labels.severity',
-    placeholderKey: 'medical:symptoms.occurrence.severity.placeholder',
+    labelKey: 'shared:fields.severity',
+    placeholderKey: 'shared:labels.selectSeverityLevel',
     required: true,
     descriptionKey: 'medical:symptoms.occurrence.severity.description',
     gridColumn: 6,
@@ -151,7 +151,7 @@ export const symptomOccurrenceFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'medical:symptoms.occurrence.additionalNotes.label',
+    labelKey: 'shared:fields.additionalNotes',
     placeholderKey: 'medical:symptoms.occurrence.additionalNotes.placeholder',
     descriptionKey: 'medical:symptoms.occurrence.additionalNotes.description',
     gridColumn: 12,

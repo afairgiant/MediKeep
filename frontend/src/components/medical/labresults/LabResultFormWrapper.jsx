@@ -53,7 +53,7 @@ const PendingRelationshipsPicker = ({
   onAddEncounter,
   onRemoveEncounter,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const [selectedCondition, setSelectedCondition] = useState('');
   const [conditionNote, setConditionNote] = useState('');
   const [selectedEncounter, setSelectedEncounter] = useState('');
@@ -315,7 +315,7 @@ const LabResultFormWrapper = ({
     { value: 'pulmonology', label: t('labResults.category.pulmonology') },
     { value: 'hearing', label: t('labResults.category.hearing') },
     { value: 'stomatology', label: t('labResults.category.stomatology') },
-    { value: 'other', label: t('labResults.category.other') },
+    { value: 'other', label: t('shared:fields.other') },
   ];
 
   const testTypeOptions = [
@@ -468,19 +468,19 @@ const LabResultFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('labResults.tabs.basicInfo')}
+                {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="results" leftSection={<IconChartBar size={16} />}>
                 {t('labResults.tabs.resultsStatus')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                {editingItem ? t('labResults.tabs.documents') : t('labResults.tabs.addFiles')}
+                {editingItem ? t('shared:tabs.documents') : t('shared:tabs.addFiles')}
               </Tabs.Tab>
               <Tabs.Tab value="relationships" leftSection={<IconLink size={16} />}>
                 {t('labResults.tabs.relationships')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('labResults.tabs.notes')}
+                {t('shared:tabs.notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -490,7 +490,7 @@ const LabResultFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 8 }}>
                     <TextInput
-                      label={t('labResults.testName.label')}
+                      label={t('shared:fields.testName')}
                       value={formData.test_name || ''}
                       onChange={handleTextInputChange('test_name')}
                       placeholder={t('labResults.testName.placeholder')}
@@ -500,7 +500,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 4 }}>
                     <TextInput
-                      label={t('labResults.testCode.label')}
+                      label={t('shared:fields.testCode')}
                       value={formData.test_code || ''}
                       onChange={handleTextInputChange('test_code')}
                       placeholder={t('labResults.testCode.placeholder')}
@@ -515,7 +515,7 @@ const LabResultFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'test_category', value: value || '' } });
                       }}
-                      placeholder={t('labResults.testCategory.placeholder')}
+                      placeholder={t('shared:labels.selectCategory')}
                       description={t('labResults.testCategory.description')}
                       searchable
                       clearable
@@ -547,13 +547,13 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('labResults.orderingPractitioner.label')}
+                      label={t('shared:labels.orderingPractitioner')}
                       value={formData.practitioner_id ? String(formData.practitioner_id) : null}
                       data={practitionerOptions}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
-                      placeholder={t('labResults.orderingPractitioner.placeholder')}
+                      placeholder={t('shared:fields.selectPractitioner')}
                       description={t('labResults.orderingPractitioner.description')}
                       searchable
                       clearable
@@ -563,7 +563,7 @@ const LabResultFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('common:fields.tags.label')}
+                        {t('shared:labels.tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('common:fields.tags.description')}
@@ -593,14 +593,14 @@ const LabResultFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder={t('labResults.testStatus.placeholder')}
+                      placeholder={t('shared:fields.selectStatus')}
                       description={t('labResults.testStatus.description')}
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('labResults.labResult.label')}
+                      label={t('shared:labels.labResult')}
                       value={formData.labs_result || null}
                       data={labResultOptions}
                       onChange={(value) => {
@@ -614,7 +614,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('labResults.orderedDate.label')}
+                      label={t('shared:labels.orderedDate')}
                       value={parseDateInput(formData.ordered_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -630,7 +630,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('labResults.completedDate.label')}
+                      label={t('shared:labels.completedDate')}
                       value={parseDateInput(formData.completed_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -771,7 +771,7 @@ const LabResultFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('labResults.additionalNotes.label')}
+                  label={t('shared:fields.additionalNotes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('labResults.additionalNotes.placeholder')}
@@ -792,13 +792,13 @@ const LabResultFormWrapper = ({
               onClick={onClose}
               disabled={isLoading || isSubmitting}
             >
-              {t('common:buttons.cancel')}
+              {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.test_name?.trim()}
             >
-              {editingItem ? t('common:buttons.update') : t('common:buttons.create')} {t('labResults.title')}
+              {editingItem ? t('common:buttons.update') : t('common:buttons.create')} {t('shared:categories.lab_results')}
             </SubmitButton>
           </Group>
         </Stack>

@@ -25,7 +25,7 @@ import HealthItem from '../../components/admin/HealthItem';
 import { adminApiService } from '../../services/api/adminApi';
 
 const ToolsMaintenance = () => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   // Test Library State
   const [testLibraryInfo, setTestLibraryInfo] = useState(null);
   const [testLibraryLoading, setTestLibraryLoading] = useState(false);
@@ -169,13 +169,13 @@ const ToolsMaintenance = () => {
                   {syncResult.type === 'sync' && (
                     <Group gap="lg" mb="xs">
                       <Text size="sm">
-                        {t('tools.testLibrary.processed', 'Processed: {{count}}', { count: syncResult.components_processed })}
+                        {t('shared:labels.processedCount', 'Processed: {{count}}', { count: syncResult.components_processed })}
                       </Text>
                       <Text size="sm">
-                        {t('tools.testLibrary.namesUpdated', 'Names Updated: {{count}}', { count: syncResult.canonical_names_updated })}
+                        {t('shared:labels.namesUpdatedCount', 'Names Updated: {{count}}', { count: syncResult.canonical_names_updated })}
                       </Text>
                       <Text size="sm">
-                        {t('tools.testLibrary.categoriesUpdated', 'Categories Updated: {{count}}', { count: syncResult.categories_updated })}
+                        {t('shared:labels.categoriesUpdatedCount', 'Categories Updated: {{count}}', { count: syncResult.categories_updated })}
                       </Text>
                     </Group>
                   )}

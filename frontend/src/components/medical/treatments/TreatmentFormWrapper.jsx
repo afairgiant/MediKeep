@@ -66,7 +66,7 @@ const TreatmentFormWrapper = ({
   onFileUploadComplete,
   onError,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   // Tab state management
@@ -299,7 +299,7 @@ const TreatmentFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('treatments.form.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               {formData.mode !== 'advanced' && (
                 <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
@@ -356,11 +356,11 @@ const TreatmentFormWrapper = ({
               )}
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingTreatment
-                  ? t('treatments.form.tabs.documents', 'Documents')
-                  : t('treatments.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('treatments.form.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -392,7 +392,7 @@ const TreatmentFormWrapper = ({
                           },
                           {
                             value: 'advanced',
-                            label: t('treatments.mode.advanced', 'Treatment Plan'),
+                            label: t('shared:labels.treatmentPlan', 'Treatment Plan'),
                           },
                         ]}
                         size="sm"
@@ -406,7 +406,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('treatments.form.treatmentName', 'Treatment Name')}
+                      label={t('shared:fields.treatmentName', 'Treatment Name')}
                       value={formData.treatment_name || ''}
                       onChange={handleTextInputChange('treatment_name')}
                       placeholder={t('treatments.form.enterTreatmentName', 'Enter treatment name')}
@@ -416,7 +416,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('treatments.form.treatmentType', 'Treatment Category')}
+                      label={t('shared:fields.treatmentType', 'Treatment Category')}
                       value={formData.treatment_type || null}
                       data={(() => {
                         const predefinedOptions = [
@@ -456,19 +456,19 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('treatments.form.status', 'Status')}
+                      label={t('shared:fields.status', 'Status')}
                       value={formData.status || null}
                       data={[
                         { value: 'planned', label: t('treatments.form.statusPlanned', 'Planned') },
-                        { value: 'active', label: t('treatments.form.statusActive', 'Active') },
+                        { value: 'active', label: t('shared:labels.active', 'Active') },
                         { value: 'on-hold', label: t('treatments.form.statusOnHold', 'On Hold') },
-                        { value: 'completed', label: t('treatments.form.statusCompleted', 'Completed') },
-                        { value: 'cancelled', label: t('treatments.form.statusCancelled', 'Cancelled') },
+                        { value: 'completed', label: t('shared:fields.completed', 'Completed') },
+                        { value: 'cancelled', label: t('shared:fields.cancelled', 'Cancelled') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
-                      placeholder={t('treatments.form.selectStatus', 'Select status')}
+                      placeholder={t('shared:fields.selectStatus', 'Select status')}
                       description={t('treatments.form.statusDesc', 'Current treatment status')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -476,7 +476,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('treatments.form.relatedCondition', 'Related Condition')}
+                      label={t('shared:labels.relatedCondition', 'Related Condition')}
                       value={formData.condition_id || null}
                       data={conditionsOptions.map(condition => ({
                         value: condition.id.toString(),
@@ -495,7 +495,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('treatments.form.practitioner', 'Practitioner')}
+                      label={t('shared:fields.practitioner', 'Practitioner')}
                       value={formData.practitioner_id || null}
                       data={practitionersOptions.map(prac => ({
                         value: prac.id.toString(),
@@ -504,7 +504,7 @@ const TreatmentFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
-                      placeholder={t('treatments.form.selectPractitioner', 'Select practitioner')}
+                      placeholder={t('shared:fields.selectPractitioner', 'Select practitioner')}
                       description={t('treatments.form.practitionerDesc', 'Healthcare provider administering treatment')}
                       searchable
                       clearable
@@ -514,7 +514,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('treatments.form.startDate', 'Start Date')}
+                      label={t('shared:labels.startDate', 'Start Date')}
                       value={parseDateInput(formData.start_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -530,7 +530,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('treatments.form.endDate', 'End Date')}
+                      label={t('shared:labels.endDate', 'End Date')}
                       value={parseDateInput(formData.end_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -547,7 +547,7 @@ const TreatmentFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('treatments.form.description', 'Description')}
+                      label={t('shared:labels.description', 'Description')}
                       value={formData.description || ''}
                       onChange={handleTextInputChange('description')}
                       placeholder={t('treatments.form.descriptionPlaceholder', 'Describe the treatment')}
@@ -560,7 +560,7 @@ const TreatmentFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('treatments.form.tags', 'Tags')}
+                        {t('shared:labels.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('treatments.form.tagsDesc', 'Add tags to categorize and organize treatments')}
@@ -570,7 +570,7 @@ const TreatmentFormWrapper = ({
                         onChange={(tags) => {
                           onInputChange({ target: { name: 'tags', value: tags } });
                         }}
-                        placeholder={t('treatments.form.tagsPlaceholder', 'Add tags...')}
+                        placeholder={t('shared:fields.addTags', 'Add tags...')}
                       />
                     </Box>
                   </Grid.Col>
@@ -620,7 +620,7 @@ const TreatmentFormWrapper = ({
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <TextInput
-                        label={t('treatments.form.frequency', 'Frequency')}
+                        label={t('shared:fields.frequency', 'Frequency')}
                         value={formData.frequency || ''}
                         onChange={handleTextInputChange('frequency')}
                         placeholder={t('treatments.form.frequencyPlaceholder', 'e.g., Daily, Twice weekly')}
@@ -690,7 +690,7 @@ const TreatmentFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('treatments.form.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}

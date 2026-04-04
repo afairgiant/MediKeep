@@ -27,7 +27,7 @@ const PractitionerViewModal = ({
   onEdit,
   navigate
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [practiceDetails, setPracticeDetails] = useState(null);
   const [isLoadingPractice, setIsLoadingPractice] = useState(false);
   const [showPracticeEditModal, setShowPracticeEditModal] = useState(false);
@@ -86,7 +86,7 @@ const PractitionerViewModal = ({
     return specialtyColors[specialty] || 'gray';
   };
 
-  const notSpecified = t('common.labels.notSpecified', 'Not specified');
+  const notSpecified = t('shared:labels.notSpecified', 'Not specified');
 
   return (
     <Modal
@@ -144,7 +144,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.practice', 'Practice')}:
+                    {t('shared:labels.practice', 'Practice')}:
                   </Text>
                   <Text
                     size="sm"
@@ -157,7 +157,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.specialty', 'Specialty')}:
+                    {t('shared:labels.specialty', 'Specialty')}:
                   </Text>
                   <Text
                     size="sm"
@@ -170,7 +170,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.phone', 'Phone')}:
+                    {t('shared:labels.phone', 'Phone')}:
                   </Text>
                   <Text
                     size="sm"
@@ -183,7 +183,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.email', 'Email')}:
+                    {t('shared:labels.email', 'Email')}:
                   </Text>
                   <Text
                     size="sm"
@@ -206,7 +206,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.website', 'Website')}:
+                    {t('shared:labels.website', 'Website')}:
                   </Text>
                   <Text
                     size="sm"
@@ -231,7 +231,7 @@ const PractitionerViewModal = ({
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Group>
                   <Text size="sm" fw={500} w={80}>
-                    {t('practitioners.viewModal.rating', 'Rating')}:
+                    {t('shared:labels.rating', 'Rating')}:
                   </Text>
                   <Text
                     size="sm"
@@ -301,7 +301,7 @@ const PractitionerViewModal = ({
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <Group>
                         <Text size="sm" fw={500} w={100}>
-                          {t('practitioners.viewModal.practicePhone', 'Phone')}:
+                          {t('shared:labels.phone', 'Phone')}:
                         </Text>
                         <Text size="sm" c={practiceDetails.phone_number ? 'inherit' : 'dimmed'}>
                           {practiceDetails.phone_number || notSpecified}
@@ -325,7 +325,7 @@ const PractitionerViewModal = ({
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <Group>
                         <Text size="sm" fw={500} w={100}>
-                          {t('practitioners.viewModal.practiceWebsite', 'Website')}:
+                          {t('shared:labels.website', 'Website')}:
                         </Text>
                         <Text size="sm" c={practiceDetails.website ? 'inherit' : 'dimmed'}>
                           {practiceDetails.website ? (
@@ -367,7 +367,7 @@ const PractitionerViewModal = ({
                   {/* Notes */}
                   <Group>
                     <Text size="sm" fw={500} w={100}>
-                      {t('practitioners.viewModal.practiceNotes', 'Notes')}:
+                      {t('shared:tabs.notes', 'Notes')}:
                     </Text>
                     <Text size="sm" c={practiceDetails.notes ? 'inherit' : 'dimmed'} style={{ whiteSpace: 'pre-wrap' }}>
                       {practiceDetails.notes || notSpecified}
@@ -405,7 +405,7 @@ const PractitionerViewModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
-            {t('common.buttons.close', 'Close')}
+            {t('shared:labels.close', 'Close')}
           </Button>
           <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
             {t('practitioners.viewModal.editButton', 'Edit Practitioner')}

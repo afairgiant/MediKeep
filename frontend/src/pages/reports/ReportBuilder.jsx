@@ -38,7 +38,7 @@ import logger from '../../services/logger';
 import { useTranslation } from 'react-i18next';
 
 const ReportBuilder = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -121,22 +121,22 @@ const ReportBuilder = () => {
 
   // Category display names mapping
   const categoryDisplayNames = {
-    'medications': t('reportBuilder.categories.medications'),
-    'conditions': t('reportBuilder.categories.conditions'),
-    'procedures': t('reportBuilder.categories.procedures'),
-    'lab_results': t('reportBuilder.categories.lab_results'),
-    'immunizations': t('reportBuilder.categories.immunizations'),
-    'allergies': t('reportBuilder.categories.allergies'),
-    'treatments': t('reportBuilder.categories.treatments'),
-    'encounters': t('reportBuilder.categories.encounters'),
-    'vitals': t('reportBuilder.categories.vitals'),
-    'practitioners': t('reportBuilder.categories.practitioners'),
-    'pharmacies': t('reportBuilder.categories.pharmacies'),
-    'emergency_contacts': t('reportBuilder.categories.emergency_contacts'),
-    'family_history': t('reportBuilder.categories.family_history'),
-    'symptoms': t('reportBuilder.categories.symptoms'),
-    'injuries': t('reportBuilder.categories.injuries'),
-    'insurance': t('reportBuilder.categories.insurance'),
+    'medications': t('shared:categories.medications'),
+    'conditions': t('shared:categories.conditions'),
+    'procedures': t('shared:categories.procedures'),
+    'lab_results': t('shared:categories.lab_results'),
+    'immunizations': t('shared:categories.immunizations'),
+    'allergies': t('shared:categories.allergies'),
+    'treatments': t('shared:categories.treatments'),
+    'encounters': t('shared:tabs.visits'),
+    'vitals': t('shared:categories.vitals'),
+    'practitioners': t('shared:categories.practitioners'),
+    'pharmacies': t('shared:categories.pharmacies'),
+    'emergency_contacts': t('shared:categories.emergency_contacts'),
+    'family_history': t('shared:categories.family_history'),
+    'symptoms': t('shared:categories.symptoms'),
+    'injuries': t('shared:categories.injuries'),
+    'insurance': t('shared:categories.insurance'),
   };
 
   // Handle template save
@@ -203,7 +203,7 @@ const ReportBuilder = () => {
           <Alert
             variant="light"
             color="red"
-            title={t('labels.error', 'Error')}
+            title={t('shared:labels.error', 'Error')}
             icon={<IconAlertTriangle size={16} />}
             withCloseButton
             onClose={() => {
@@ -231,7 +231,7 @@ const ReportBuilder = () => {
                 variant="outline"
                 onClick={openSettingsModal}
               >
-                {t('reportBuilder.buttons.settings')}
+                {t('shared:labels.settings')}
               </Button>
 
               {hasSelections && (
@@ -253,8 +253,8 @@ const ReportBuilder = () => {
               <Group justify="space-between" mb={4}>
                 <Text size="sm" fw={500}>{t('reportBuilder.progress.recordsSelected')}</Text>
                 <Text size="sm" c="dimmed">
-                  {selectedCount} {t('reportBuilder.segmentControl.records', 'records')}
-                  {trendChartCount > 0 && `, ${trendChartCount} ${t('reportBuilder.trendCharts.title', 'charts').toLowerCase()}`}
+                  {selectedCount} {t('shared:labels.medicalRecords', 'records')}
+                  {trendChartCount > 0 && `, ${trendChartCount} ${t('shared:labels.trendCharts', 'charts').toLowerCase()}`}
                 </Text>
               </Group>
               <Progress
@@ -304,7 +304,7 @@ const ReportBuilder = () => {
               label: (
                 <Group gap={6} wrap="nowrap">
                   <IconNotes size={16} />
-                  <span>{t('reportBuilder.segmentControl.records')}</span>
+                  <span>{t('shared:labels.medicalRecords')}</span>
                   {selectedCount > 0 && (
                     <Badge size="xs" variant="filled" color="blue">{selectedCount}</Badge>
                   )}
@@ -316,7 +316,7 @@ const ReportBuilder = () => {
               label: (
                 <Group gap={6} wrap="nowrap">
                   <IconChartLine size={16} />
-                  <span>{t('reportBuilder.segmentControl.trendCharts')}</span>
+                  <span>{t('shared:labels.trendCharts')}</span>
                   {trendChartCount > 0 && (
                     <Badge size="xs" variant="filled" color="teal">{trendChartCount}</Badge>
                   )}
@@ -421,7 +421,7 @@ const ReportBuilder = () => {
 
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={closeSettingsModal}>
-              {t('buttons.close')}
+              {t('shared:labels.close')}
             </Button>
           </Group>
         </Stack>

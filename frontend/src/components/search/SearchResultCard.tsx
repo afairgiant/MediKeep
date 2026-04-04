@@ -58,7 +58,7 @@ export function SearchResultCard({
   isSelected = false,
   formatDate,
 }: SearchResultCardProps) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const EntityIcon = row.icon;
   const hasQuery = typeof query === 'string' && query.trim().length > 0;
   const visibleTags = Array.isArray(row.tags) ? row.tags.slice(0, MAX_VISIBLE_TAGS) : [];
@@ -176,7 +176,7 @@ export function SearchResultCard({
               />
             ))}
             {overflowCount > 0 && (
-              <Text size="xs" c="dimmed" aria-label={t('labels.other')}>
+              <Text size="xs" c="dimmed" aria-label={t('shared:fields.other')}>
                 +{overflowCount}
               </Text>
             )}

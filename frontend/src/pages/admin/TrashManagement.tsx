@@ -105,7 +105,7 @@ function ConfirmationModal({
   warning,
   children,
 }: ConfirmationModalProps): React.ReactElement {
-  const { t: tCommon } = useTranslation('common');
+  const { t: tCommon } = useTranslation(['common', 'shared']);
   return (
     <Modal opened={opened} onClose={onClose} title={title} centered>
       <Stack gap="md">
@@ -329,7 +329,7 @@ function TrashManagement(): React.ReactElement {
               </Text>
               <Group mt="sm" gap="xs">
                 <Badge variant="light" color="yellow">
-                  {t('trash.fileCount', { count: trashItems.length, defaultValue: '{{count}} files' })}
+                  {t('shared:labels.countFiles', { count: trashItems.length, defaultValue: '{{count}} files' })}
                 </Badge>
                 <Badge variant="light" color="gray">
                   {t('trash.totalSize', '{{size}} total', { size: totalSize })}
@@ -410,7 +410,7 @@ function TrashManagement(): React.ReactElement {
           <Alert icon={<IconAlertCircle size={16} />} title={t('trash.errorLoading', 'Error loading trash')} color="red">
             {error}
             <Button variant="subtle" size="xs" mt="xs" onClick={fetchTrashContents}>
-              {t('common:buttons.retry', 'Retry')}
+              {t('shared:labels.retry', 'Retry')}
             </Button>
           </Alert>
         )}

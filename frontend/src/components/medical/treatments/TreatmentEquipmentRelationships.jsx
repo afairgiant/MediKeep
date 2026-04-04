@@ -77,7 +77,7 @@ function TreatmentEquipmentRelationships({
   // Ensure equipment is always an array
   const safeEquipment = Array.isArray(equipment) ? equipment : [];
   const safePractitioners = Array.isArray(practitioners) ? practitioners : [];
-  const { t } = useTranslation(['common', 'errors']);
+  const { t } = useTranslation(['common', 'errors', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   const [relationships, setRelationships] = useState([]);
@@ -775,7 +775,7 @@ function TreatmentEquipmentRelationships({
 
             <Group justify="flex-end" gap="sm" mt="md">
               <Button variant="light" onClick={resetAndCloseModal}>
-                {t('buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button
                 onClick={handleAddRelationship}

@@ -60,7 +60,7 @@ const FamilyHistoryCard = ({
   onBulkToggle,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
 
   const handleError = (error, action) => {
@@ -256,7 +256,7 @@ const FamilyHistoryCard = ({
 
     if (member.is_shared) {
       badges.push({
-        label: bulkSelectionMode ? t('familyHistory.card.notSelectable', 'Not Selectable') : t('familyHistory.card.shared', 'Shared'),
+        label: bulkSelectionMode ? t('familyHistory.card.notSelectable', 'Not Selectable') : t('shared:categories.shared', 'Shared'),
         color: bulkSelectionMode ? 'gray' : 'blue'
       });
     }
@@ -280,7 +280,7 @@ const FamilyHistoryCard = ({
 
     if (member.gender) {
       fields.push({
-        label: t('familyHistory.card.gender', 'Gender'),
+        label: t('shared:fields.gender', 'Gender'),
         value: member.gender
       });
     }
@@ -302,7 +302,7 @@ const FamilyHistoryCard = ({
     if (member.is_shared && member.shared_by) {
       fields.push({
         label: t('familyHistory.card.sharedBy', 'Shared By'),
-        value: member.shared_by.name || t('familyHistory.table.unknown', 'Unknown')
+        value: member.shared_by.name || t('shared:labels.unknown', 'Unknown')
       });
     }
 
@@ -315,7 +315,7 @@ const FamilyHistoryCard = ({
             size="sm"
             color={conditionCount > 0 ? 'blue' : 'gray'}
           >
-            {t('familyHistory.card.conditionCount', '{{count}} Condition(s)', { count: conditionCount })}
+            {t('shared:labels.countConditions', '{{count}} Condition(s)', { count: conditionCount })}
           </Badge>
           {isExpanded ? (
             <IconChevronUp size={16} />
@@ -327,7 +327,7 @@ const FamilyHistoryCard = ({
         <Collapse in={isExpanded}>
           <Divider mb="md" />
           <Group justify="space-between" mb="md">
-            <Text fw={500}>{t('familyHistory.card.medicalConditions', 'Medical Conditions')}</Text>
+            <Text fw={500}>{t('shared:labels.medicalConditions', 'Medical Conditions')}</Text>
             {!member.is_shared && (
               <Button
                 size="xs"
@@ -399,7 +399,7 @@ const FamilyHistoryCard = ({
                           variant="filled"
                           onClick={(e) => handleEditConditionClick(e, condition)}
                         >
-                          {t('buttons.edit', 'Edit')}
+                          {t('shared:labels.edit', 'Edit')}
                         </Button>
                         <Button
                           size="xs"

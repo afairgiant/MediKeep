@@ -67,7 +67,7 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
   formatDate,
   onOpenFullRecord,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   const hasQuery = typeof query === 'string' && query.trim().length > 0;
 
@@ -128,7 +128,7 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
           {/* Title */}
           <Box>
             <Text size="xs" c="dimmed" fw={500} mb={4}>
-              {t('search.columnName', 'Name')}
+              {t('shared:labels.name', 'Name')}
             </Text>
             {hasQuery ? (
               <Highlight
@@ -154,7 +154,7 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
           {item.subtitle && (
             <Box>
               <Text size="xs" c="dimmed" fw={500} mb={4}>
-                {t('search.columnDetails', 'Details')}
+                {t('shared:tabs.details', 'Details')}
               </Text>
               <Text size="sm">{item.subtitle}</Text>
             </Box>
@@ -177,7 +177,7 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
           {/* Tags */}
           <Box>
             <Text size="xs" c="dimmed" fw={500} mb={6}>
-              {t('search.tags', 'Tags')}
+              {t('shared:labels.tags', 'Tags')}
             </Text>
             {Array.isArray(item.tags) && item.tags.length > 0 ? (
               <Group gap={6} wrap="wrap">

@@ -47,7 +47,7 @@ function getStatusColor(status: string | null | undefined): string {
 }
 
 function getStatusLabel(status: string | null | undefined, t: (key: string, fallback: string) => string): string {
-  if (!status) return t('medical:componentCatalog.status.unknown', 'Unknown');
+  if (!status) return t('shared:labels.unknown', 'Unknown');
   const key = status.toLowerCase();
   const fallbacks: Record<string, string> = {
     normal: 'Normal',
@@ -89,7 +89,7 @@ function getTrendLabel(direction: string, t: (key: string, fallback: string) => 
 }
 
 const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({ entry, onClick }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatDate } = useDateFormat() as DateFormatHook;
 
   const isQuantitative = (entry.result_type || 'quantitative') === 'quantitative';
@@ -187,7 +187,7 @@ const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({ ent
         {/* Footer: reading count + date */}
         <Group justify="space-between" mt={4}>
           <Text size="xs" c="dimmed">
-            {t('medical:componentCatalog.readingCount', '{{count}} readings', { count: entry.reading_count })}
+            {t('shared:labels.countReadings', '{{count}} readings', { count: entry.reading_count })}
           </Text>
           {entry.latest_date && (
             <Text size="xs" c="dimmed">

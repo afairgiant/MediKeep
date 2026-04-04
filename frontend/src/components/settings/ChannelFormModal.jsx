@@ -60,7 +60,7 @@ const CHANNEL_TYPES = [
  * Modal form for creating/editing notification channels
  */
 const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
-  const { t } = useTranslation(['notifications', 'common']);
+  const { t } = useTranslation(['notifications', 'common', 'shared']);
   const [formData, setFormData] = useState({
     name: '',
     channel_type: 'discord',
@@ -309,10 +309,10 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
 
         <div className="modal-actions">
           <Button variant="secondary" type="button" onClick={onClose} disabled={saving}>
-            {t('common:buttons.cancel', 'Cancel')}
+            {t('shared:fields.cancel', 'Cancel')}
           </Button>
           <Button variant="primary" type="submit" loading={saving} disabled={saving}>
-            {saving ? t('common:buttons.saving', 'Saving...') : isEditing ? t('common:buttons.save', 'Save') : t('common:buttons.create', 'Create')}
+            {saving ? t('shared:labels.saving', 'Saving...') : isEditing ? t('common:buttons.save', 'Save') : t('common:buttons.create', 'Create')}
           </Button>
         </div>
       </form>

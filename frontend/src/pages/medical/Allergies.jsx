@@ -41,7 +41,7 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 
 const Allergies = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('medical');
+  const { t } = useTranslation(['medical', 'shared']);
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('allergies');
@@ -332,7 +332,7 @@ const Allergies = () => {
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('allergies.title')} icon="⚠️" />
+      <PageHeader title={t('shared:categories.allergies')} icon="⚠️" />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -343,7 +343,7 @@ const Allergies = () => {
 
         <MedicalPageActions
           primaryAction={{
-            label: t('allergies.addNew', 'Add New Allergy'),
+            label: t('shared:labels.addNewAllergy', 'Add New Allergy'),
             onClick: handleAddAllergy,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
@@ -361,7 +361,7 @@ const Allergies = () => {
         <AllergyFormWrapper
           isOpen={showAddForm}
           onClose={() => !isBlocking && resetForm()}
-          title={editingAllergy ? t('allergies.editTitle', 'Edit Allergy') : t('allergies.addTitle', 'Add New Allergy')}
+          title={editingAllergy ? t('allergies.editTitle', 'Edit Allergy') : t('shared:labels.addNewAllergy', 'Add New Allergy')}
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
@@ -389,7 +389,7 @@ const Allergies = () => {
               icon={IconAlertTriangle}
               title={t('allergies.emptyState.title', 'No allergies found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('allergies.emptyState.filtered', 'Try adjusting your search or filter criteria.')}
+              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
             />
           ) : viewMode === 'cards' ? (
@@ -418,14 +418,14 @@ const Allergies = () => {
                 columns={[
                   { header: t('allergies.allergen.label'), accessor: 'allergen', priority: 'high', width: 150 },
                   { header: t('allergies.reaction.label'), accessor: 'reaction', priority: 'high', width: 180 },
-                  { header: t('common:fields.severity.label'), accessor: 'severity', priority: 'high', width: 100 },
-                  { header: t('allergies.onsetDate.label'), accessor: 'onset_date', priority: 'medium', width: 120 },
+                  { header: t('shared:fields.severity'), accessor: 'severity', priority: 'high', width: 100 },
+                  { header: t('shared:fields.onsetDate'), accessor: 'onset_date', priority: 'medium', width: 120 },
                   { header: t('allergies.relatedMedication.label'), accessor: 'medication_name', priority: 'low', width: 150 },
-                  { header: t('common:fields.status.label'), accessor: 'status', priority: 'medium', width: 100 },
-                  { header: t('common:fields.notes.label'), accessor: 'notes', priority: 'low', width: 200 },
+                  { header: t('shared:fields.status'), accessor: 'status', priority: 'medium', width: 100 },
+                  { header: t('shared:tabs.notes'), accessor: 'notes', priority: 'low', width: 200 },
                 ]}
                 patientData={currentPatient}
-                tableName={t('allergies.title')}
+                tableName={t('shared:categories.allergies')}
                 onView={handleViewAllergy}
                 onEdit={handleEditAllergy}
                 onDelete={handleDeleteAllergy}

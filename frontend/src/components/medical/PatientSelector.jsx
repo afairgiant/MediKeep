@@ -56,7 +56,7 @@ import PatientSharingModal from './PatientSharingModal';
 import PatientAvatar from '../shared/PatientAvatar';
 
 const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
   const { user: currentUser } = useAuth();
   const { formatDate } = useDateFormat();
@@ -608,7 +608,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       return (
         <Badge size="xs" color="blue" variant="light">
           <IconUserCheck size="0.7rem" style={{ marginRight: 4 }} />
-          {t('patientSelector.badges.self', 'Self')}
+          {t('shared:fields.self', 'Self')}
         </Badge>
       );
     }
@@ -618,7 +618,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       return (
         <Badge size="xs" color="green" variant="light">
           <IconShare size="0.7rem" style={{ marginRight: 4 }} />
-          {t('patientSelector.badges.shared', 'Shared')}
+          {t('shared:categories.shared', 'Shared')}
         </Badge>
       );
     }
@@ -684,7 +684,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           onClick={refreshPatients}
           mt="sm"
         >
-          {t('patientSelector.buttons.retry', 'Retry')}
+          {t('shared:labels.retry', 'Retry')}
         </Button>
       </Alert>
     );
@@ -1017,7 +1017,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               <Group gap="xs">
                 <IconShare size="1rem" />
                 <Text size="sm">
-                  {t('patientSelector.stats.shared', 'Shared')}: <Text span fw={500}>{stats.sharing_stats?.shared_with_me || 0}</Text>
+                  {t('shared:categories.shared', 'Shared')}: <Text span fw={500}>{stats.sharing_stats?.shared_with_me || 0}</Text>
                 </Text>
               </Group>
 

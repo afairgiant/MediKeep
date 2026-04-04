@@ -38,7 +38,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
   onClose,
   onSubmit
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [formData, setFormData] = useState<Partial<LabTestComponent>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -272,7 +272,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
 
           {/* Test Name */}
           <TextInput
-            label={t('testComponents.editModal.fields.testName', 'Test Name')}
+            label={t('shared:fields.testName', 'Test Name')}
             placeholder={t('testComponents.editModal.placeholders.testName', 'e.g., Hemoglobin')}
             required
             value={formData.test_name || ''}
@@ -288,7 +288,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               onChange={(e) => setFormData(prev => ({ ...prev, abbreviation: e.target.value }))}
             />
             <TextInput
-              label={t('testComponents.editModal.fields.testCode', 'Test Code')}
+              label={t('shared:fields.testCode', 'Test Code')}
               placeholder={t('testComponents.editModal.placeholders.testCode', 'e.g., 718-7')}
               value={formData.test_code || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, test_code: e.target.value }))}
@@ -318,7 +318,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               {/* Value and Unit */}
               <Group grow>
                 <NumberInput
-                  label={t('testComponents.editModal.fields.value', 'Value')}
+                  label={t('shared:labels.value', 'Value')}
                   placeholder={t('testComponents.editModal.placeholders.value', 'Enter test value')}
                   required
                   value={formData.value}
@@ -400,8 +400,8 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               }}
             />
             <Select
-              label={t('testComponents.editModal.fields.category', 'Category')}
-              placeholder={t('testComponents.editModal.placeholders.category', 'Select category')}
+              label={t('shared:labels.category', 'Category')}
+              placeholder={t('shared:labels.selectCategory', 'Select category')}
               clearable
               searchable
               comboboxProps={{ zIndex: 3001 }}
@@ -461,7 +461,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
 
           {/* Notes */}
           <Textarea
-            label={t('labels.notes', 'Notes')}
+            label={t('shared:tabs.notes', 'Notes')}
             placeholder={t('testComponents.editModal.placeholders.notes', 'Additional notes about this test result')}
             rows={3}
             value={formData.notes || ''}
@@ -475,7 +475,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleSubmit}

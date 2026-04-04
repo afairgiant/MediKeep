@@ -35,7 +35,7 @@ const EncounterLabResultRelationships = ({
   navigate,
   isViewMode = false,
 }) => {
-  const { t } = useTranslation(['common', 'errors']);
+  const { t } = useTranslation(['common', 'errors', 'shared']);
   const { formatDate } = useDateFormat();
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -373,7 +373,7 @@ const EncounterLabResultRelationships = ({
                 setError(null);
               }}
             >
-              {t('common:buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button
               onClick={handleAddRelationship}

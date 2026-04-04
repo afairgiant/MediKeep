@@ -17,7 +17,7 @@ export const conditionFormFields = [
   {
     name: 'status',
     type: 'select',
-    labelKey: 'common:labels.status',
+    labelKey: 'shared:fields.status',
     descriptionKey: 'medical:conditions.status.description',
     gridColumn: 6,
     dynamicOptions: 'conditionStatus',
@@ -25,8 +25,8 @@ export const conditionFormFields = [
   {
     name: 'severity',
     type: 'select',
-    labelKey: 'common:labels.severity',
-    placeholderKey: 'medical:conditions.severity.placeholder',
+    labelKey: 'shared:fields.severity',
+    placeholderKey: 'shared:labels.selectSeverityLevel',
     descriptionKey: 'medical:conditions.severity.description',
     gridColumn: 6,
     clearable: true,
@@ -46,7 +46,7 @@ export const conditionFormFields = [
   {
     name: 'onset_date',
     type: 'date',
-    labelKey: 'common:labels.onsetDate',
+    labelKey: 'shared:fields.onsetDate',
     placeholderKey: 'medical:conditions.onsetDate.placeholder',
     descriptionKey: 'medical:conditions.onsetDate.description',
     gridColumn: 6,
@@ -55,7 +55,7 @@ export const conditionFormFields = [
   {
     name: 'end_date',
     type: 'date',
-    labelKey: 'common:labels.endDate',
+    labelKey: 'shared:labels.endDate',
     placeholderKey: 'medical:conditions.endDate.placeholder',
     descriptionKey: 'medical:conditions.endDate.description',
     gridColumn: 6,
@@ -64,7 +64,7 @@ export const conditionFormFields = [
   {
     name: 'icd10_code',
     type: 'text',
-    labelKey: 'medical:conditions.icd10Code.label',
+    labelKey: 'shared:fields.icd10Code',
     placeholderKey: 'medical:conditions.icd10Code.placeholder',
     descriptionKey: 'medical:conditions.icd10Code.description',
     gridColumn: 4,
@@ -73,7 +73,7 @@ export const conditionFormFields = [
   {
     name: 'snomed_code',
     type: 'text',
-    labelKey: 'medical:conditions.snomedCode.label',
+    labelKey: 'shared:fields.snomedCode',
     placeholderKey: 'medical:conditions.snomedCode.placeholder',
     descriptionKey: 'medical:conditions.snomedCode.description',
     gridColumn: 4,
@@ -82,7 +82,7 @@ export const conditionFormFields = [
   {
     name: 'code_description',
     type: 'text',
-    labelKey: 'medical:conditions.codeDescription.label',
+    labelKey: 'shared:fields.codeDescription',
     placeholderKey: 'medical:conditions.codeDescription.placeholder',
     descriptionKey: 'medical:conditions.codeDescription.description',
     gridColumn: 4,
@@ -91,7 +91,7 @@ export const conditionFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'common:fields.notes.placeholder',
     descriptionKey: 'medical:conditions.notes.description',
     gridColumn: 12,

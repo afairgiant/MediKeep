@@ -12,7 +12,6 @@
     "deleteFailed": "Failed to delete channel",
     "deleteSuccess": "Channel deleted successfully",
     "description": "Add and manage your notification delivery channels",
-    "disabled": "Disabled",
     "discord": {
       "avatarUrl": {
         "description": "Custom avatar for the notification bot",
@@ -69,7 +68,6 @@
     },
     "empty": "No notification channels configured.",
     "emptyHint": "Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.",
-    "enabled": "Enabled",
     "errors": {
       "fieldRequired": "{{field}} is required",
       "nameRequired": "Channel name is required"
@@ -106,7 +104,6 @@
       },
       "priority": {
         "description": "Message priority (1-10, default 5)",
-        "label": "Priority",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -130,7 +127,6 @@
     "title": "Notification Channels",
     "types": {
       "discord": "Discord",
-      "email": "Email",
       "gotify": "Gotify",
       "webhook": "Webhook"
     },
@@ -215,11 +211,7 @@
   "history": {
     "description": "Recent notifications sent through your channels",
     "fields": {
-      "channel": "Channel",
-      "error": "Error",
-      "event": "Event",
-      "status": "Status",
-      "time": "Time"
+      "channel": "Channel"
     },
     "loading": "Loading history...",
     "noHistory": "No notifications sent yet",
@@ -229,7 +221,6 @@
     "showMore": "Show More",
     "status": {
       "failed": "Failed",
-      "pending": "Pending",
       "sent": "Sent"
     },
     "title": "Notification History"
@@ -246,8 +237,6 @@
     },
     "comingSoon": "Coming Soon",
     "description": "Choose which events trigger notifications on each channel",
-    "event": "Event",
-    "eventHeader": "Event",
     "loading": "Loading preferences...",
     "noChannels": "Add a notification channel first to configure event preferences",
     "saveFailed": "Failed to save preference",
@@ -273,12 +262,10 @@
       "userCreatedWithLinkSuccess": "User created and linked to existing patient successfully!"
     },
     "documents": {
-      "deleteFailed": "Delete Failed",
       "linkFailed": "Failed to link document",
       "linkSuccess": "Document linked successfully",
       "unlinkFailed": "Failed to unlink document",
-      "unlinkSuccess": "Document unlinked successfully",
-      "uploadFailed": "Upload Failed"
+      "unlinkSuccess": "Document unlinked successfully"
     },
     "familySharing": {
       "accessRevoked": "Access revoked",
@@ -293,9 +280,7 @@
     "generic": {
       "allOperationsFailed": "All {{operation}}s failed. Please try again.",
       "allOperationsSuccess": "All {{total}} {{operation}}s completed successfully!",
-      "deleteFailed": "Delete Failed",
       "downloadFailed": "Download Failed",
-      "error": "Error",
       "operationFailed": "Operation Failed",
       "operationFailedTitle": "{{operation}} Failed",
       "operationPartial": "{{success}}/{{total}} {{operation}}s completed successfully. {{failed}} failed.",
@@ -348,10 +333,8 @@
       "updatedSuccess": "Updated {{name}} successfully"
     },
     "photo": {
-      "deleteFailed": "Delete Failed",
       "photoBeingUploaded": "A photo is currently being uploaded. Please wait for it to complete.",
       "pleaseWait": "Please Wait",
-      "uploadFailed": "Upload Failed",
       "uploadSuccess": "Photo uploaded successfully"
     },
     "reports": {
@@ -393,7 +376,6 @@
       "completedWithErrors": "Upload Completed with Errors",
       "documentAdded": "Document Added to Paperless",
       "duplicateDocument": "Duplicate Document",
-      "failed": "Upload Failed",
       "fileUploadedSuccess": "\"{{fileName}}\" uploaded to Paperless successfully!",
       "fileUploadFailed": "File Upload Failed",
       "paperlessUploadFailed": "Paperless Upload Failed",

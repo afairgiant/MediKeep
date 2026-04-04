@@ -45,7 +45,7 @@ const ImmunizationFormWrapper = ({
   onFileUploadComplete,
   onError,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   const handleDocumentManagerRef = (methods) => {
@@ -154,18 +154,18 @@ const ImmunizationFormWrapper = ({
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
-                {t('immunizations.form.tabs.basicInfo', 'Basic Info')}
+                {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               <Tabs.Tab value="administration" leftSection={<IconNeedle size={16} />}>
-                {t('immunizations.form.tabs.administration', 'Administration')}
+                {t('shared:tabs.administration', 'Administration')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('immunizations.form.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingImmunization
-                  ? t('immunizations.form.tabs.documents', 'Documents')
-                  : t('immunizations.form.tabs.addFiles', 'Add Files')}
+                  ? t('shared:tabs.documents', 'Documents')
+                  : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -175,7 +175,7 @@ const ImmunizationFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('immunizations.form.vaccineName', 'Vaccine Name')}
+                      label={t('shared:fields.vaccineName', 'Vaccine Name')}
                       value={formData.vaccine_name || ''}
                       onChange={handleTextInputChange('vaccine_name')}
                       placeholder={t('immunizations.form.vaccineNamePlaceholder', 'e.g., Flu Shot, COVID-19, Tdap')}
@@ -194,7 +194,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('immunizations.form.manufacturer', 'Manufacturer')}
+                      label={t('shared:fields.manufacturer', 'Manufacturer')}
                       value={formData.manufacturer || ''}
                       onChange={handleTextInputChange('manufacturer')}
                       placeholder={t('immunizations.form.manufacturerPlaceholder', 'Enter manufacturer')}
@@ -203,7 +203,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <NumberInput
-                      label={t('immunizations.form.doseNumber', 'Dose Number')}
+                      label={t('shared:fields.doseNumber', 'Dose Number')}
                       value={formData.dose_number || ''}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'dose_number', value: value || '' } });
@@ -216,7 +216,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('immunizations.form.lotNumber', 'Lot Number')}
+                      label={t('shared:fields.lotNumber', 'Lot Number')}
                       value={formData.lot_number || ''}
                       onChange={handleTextInputChange('lot_number')}
                       placeholder={t('immunizations.form.lotNumberPlaceholder', 'Enter lot number')}
@@ -225,7 +225,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('immunizations.form.ndcNumber', 'NDC Number')}
+                      label={t('shared:fields.ndcNumber', 'NDC Number')}
                       value={formData.ndc_number || ''}
                       onChange={handleTextInputChange('ndc_number')}
                       placeholder={t('immunizations.form.ndcNumberPlaceholder', 'e.g., 12345-6789-01')}
@@ -234,7 +234,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('immunizations.form.expirationDate', 'Expiration Date')}
+                      label={t('shared:fields.expirationDate', 'Expiration Date')}
                       value={parseDateInput(formData.expiration_date)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -251,7 +251,7 @@ const ImmunizationFormWrapper = ({
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
-                        {t('immunizations.form.tags', 'Tags')}
+                        {t('shared:labels.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
                         {t('immunizations.form.tagsDesc', 'Add tags to categorize and organize immunizations')}
@@ -261,7 +261,7 @@ const ImmunizationFormWrapper = ({
                         onChange={(tags) => {
                           onInputChange({ target: { name: 'tags', value: tags } });
                         }}
-                        placeholder={t('immunizations.form.tagsPlaceholder', 'Add tags...')}
+                        placeholder={t('shared:fields.addTags', 'Add tags...')}
                       />
                     </Box>
                   </Grid.Col>
@@ -275,7 +275,7 @@ const ImmunizationFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <DateInput
-                      label={t('immunizations.form.dateAdministered', 'Date Administered')}
+                      label={t('shared:fields.dateAdministered', 'Date Administered')}
                       value={parseDateInput(formData.date_administered)}
                       onChange={(date) => {
                         const formattedDate = formatDateInputChange(date);
@@ -293,7 +293,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('immunizations.form.adminSite', 'Administration Site')}
+                      label={t('shared:labels.administrationSite', 'Administration Site')}
                       value={formData.site || null}
                       data={[
                         { value: 'left_arm', label: t('immunizations.form.siteLeftArm', 'Left Arm') },
@@ -302,8 +302,8 @@ const ImmunizationFormWrapper = ({
                         { value: 'right_thigh', label: t('immunizations.form.siteRightThigh', 'Right Thigh') },
                         { value: 'left_deltoid', label: t('immunizations.form.siteLeftDeltoid', 'Left Deltoid') },
                         { value: 'right_deltoid', label: t('immunizations.form.siteRightDeltoid', 'Right Deltoid') },
-                        { value: 'oral', label: t('immunizations.form.siteOral', 'Oral') },
-                        { value: 'nasal', label: t('immunizations.form.siteNasal', 'Nasal') },
+                        { value: 'oral', label: t('shared:fields.oral', 'Oral') },
+                        { value: 'nasal', label: t('shared:fields.nasal', 'Nasal') },
                       ]}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'site', value: value || '' } });
@@ -323,8 +323,8 @@ const ImmunizationFormWrapper = ({
                         { value: 'intramuscular', label: t('immunizations.form.routeIM', 'Intramuscular (IM)') },
                         { value: 'subcutaneous', label: t('immunizations.form.routeSC', 'Subcutaneous (SC)') },
                         { value: 'intradermal', label: t('immunizations.form.routeID', 'Intradermal (ID)') },
-                        { value: 'oral', label: t('immunizations.form.routeOral', 'Oral') },
-                        { value: 'nasal', label: t('immunizations.form.routeNasal', 'Nasal') },
+                        { value: 'oral', label: t('shared:fields.oral', 'Oral') },
+                        { value: 'nasal', label: t('shared:fields.nasal', 'Nasal') },
                         { value: 'intravenous', label: t('immunizations.form.routeIV', 'Intravenous (IV)') },
                       ]}
                       onChange={(value) => {
@@ -348,7 +348,7 @@ const ImmunizationFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('immunizations.form.practitioner', 'Practitioner')}
+                      label={t('shared:fields.practitioner', 'Practitioner')}
                       value={formData.practitioner_id ? formData.practitioner_id.toString() : null}
                       data={practitionerOptions}
                       onChange={(value) => {
@@ -369,7 +369,7 @@ const ImmunizationFormWrapper = ({
             <Tabs.Panel value="notes">
               <Box mt="md">
                 <Textarea
-                  label={t('immunizations.form.clinicalNotes', 'Clinical Notes')}
+                  label={t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
                   placeholder={t('immunizations.form.clinicalNotesPlaceholder', 'Enter clinical notes, reactions, or additional details')}
@@ -400,7 +400,7 @@ const ImmunizationFormWrapper = ({
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}

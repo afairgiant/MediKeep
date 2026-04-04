@@ -12,7 +12,7 @@ import './TabletNavigation.css';
 const TabletNavigation = ({ user, isAdmin, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation('navigation');
+  const { t } = useTranslation(['navigation', 'shared']);
   const { viewport } = useViewport();
   
   const navigationSections = getNavigationSections(viewport, isAdmin);
@@ -86,7 +86,7 @@ const TabletNavigation = ({ user, isAdmin, onLogout }) => {
 
           <Menu.Dropdown>
             <Menu.Item onClick={() => navigate('/settings')}>
-              {t('menu.settings', 'Settings')}
+              {t('shared:labels.settings', 'Settings')}
             </Menu.Item>
             <Menu.Item closeMenuOnClick={false}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>

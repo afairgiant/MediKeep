@@ -105,7 +105,7 @@ export function RelationshipAddFooter({
   onAdd,
   loading,
 }) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const plural = availableCount !== 1;
   const displayName = plural ? (entityNamePlural || `${entityName}s`) : entityName;
 
@@ -249,7 +249,7 @@ export function RelationshipModalFooter({
   return (
     <Group justify="flex-end" gap="sm">
       <Button variant="light" onClick={onCancel}>
-        {t('buttons.cancel', 'Cancel')}
+        {t('shared:fields.cancel', 'Cancel')}
       </Button>
       <Button
         onClick={onSubmit}

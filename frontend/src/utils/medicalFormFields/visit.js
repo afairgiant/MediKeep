@@ -38,7 +38,7 @@ export const visitFormFields = [
   {
     name: 'visit_type',
     type: 'select',
-    labelKey: 'medical:visits.table.visitType',
+    labelKey: 'shared:labels.visitType',
     placeholderKey: 'medical:visits.form.fields.visitType.placeholder',
     descriptionKey: 'medical:visits.form.fields.visitType.description',
     gridColumn: 6,
@@ -57,7 +57,7 @@ export const visitFormFields = [
   {
     name: 'priority',
     type: 'select',
-    labelKey: 'medical:visits.viewModal.priority',
+    labelKey: 'shared:labels.priority',
     placeholderKey: 'medical:visits.form.fields.priority.placeholder',
     descriptionKey: 'medical:visits.form.fields.priority.description',
     gridColumn: 6,
@@ -81,7 +81,7 @@ export const visitFormFields = [
   {
     name: 'chief_complaint',
     type: 'text',
-    labelKey: 'medical:visits.viewModal.chiefComplaint',
+    labelKey: 'shared:labels.chiefComplaint',
     placeholderKey: 'medical:visits.form.fields.chiefComplaint.placeholder',
     descriptionKey: 'medical:visits.form.fields.chiefComplaint.description',
     gridColumn: 12,
@@ -89,7 +89,7 @@ export const visitFormFields = [
   {
     name: 'duration_minutes',
     type: 'number',
-    labelKey: 'medical:visits.form.fields.durationMinutes.label',
+    labelKey: 'shared:fields.durationMinutes',
     placeholderKey: 'medical:visits.form.fields.durationMinutes.placeholder',
     descriptionKey: 'medical:visits.form.fields.durationMinutes.description',
     gridColumn: 6,
@@ -99,7 +99,7 @@ export const visitFormFields = [
   {
     name: 'location',
     type: 'select',
-    labelKey: 'medical:visits.viewModal.location',
+    labelKey: 'shared:labels.location',
     placeholderKey: 'medical:visits.form.fields.location.placeholder',
     descriptionKey: 'medical:visits.form.fields.location.description',
     gridColumn: 6,
@@ -134,7 +134,7 @@ export const visitFormFields = [
   {
     name: 'treatment_plan',
     type: 'textarea',
-    labelKey: 'medical:visits.viewModal.treatmentPlan',
+    labelKey: 'shared:labels.treatmentPlan',
     placeholderKey: 'medical:visits.form.fields.treatmentPlan.placeholder',
     descriptionKey: 'medical:visits.form.fields.treatmentPlan.description',
     gridColumn: 12,
@@ -154,7 +154,7 @@ export const visitFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'common:labels.notes',
+    labelKey: 'shared:tabs.notes',
     placeholderKey: 'medical:visits.form.fields.additionalNotes.placeholder',
     descriptionKey: 'medical:visits.form.fields.additionalNotes.description',
     gridColumn: 12,

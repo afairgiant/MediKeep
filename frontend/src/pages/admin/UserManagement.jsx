@@ -59,14 +59,14 @@ const ROLE_COLORS = {
 const PER_PAGE = 20;
 
 const UserManagement = () => {
-  const { t } = useTranslation(['admin', 'common']);
+  const { t } = useTranslation(['admin', 'common', 'shared']);
   const { user: currentUser } = useAuth();
   const { formatDate } = useDateFormat();
 
   const ROLE_OPTIONS = useMemo(() => [
     { value: '', label: t('users.roleFilter.all', 'All Roles') },
-    { value: 'admin', label: t('users.roleFilter.admin', 'Admin') },
-    { value: 'user', label: t('users.roleFilter.user', 'User') },
+    { value: 'admin', label: t('shared:labels.admin', 'Admin') },
+    { value: 'user', label: t('shared:labels.user', 'User') },
   ], [t]);
 
   const AUTH_METHOD_OPTIONS = useMemo(() => [
@@ -78,13 +78,13 @@ const UserManagement = () => {
 
   const STATUS_OPTIONS = useMemo(() => [
     { value: '', label: t('users.statusFilter.all', 'All Statuses') },
-    { value: 'active', label: t('users.statusFilter.active', 'Active') },
-    { value: 'inactive', label: t('users.statusFilter.inactive', 'Inactive') },
+    { value: 'active', label: t('shared:labels.active', 'Active') },
+    { value: 'inactive', label: t('shared:labels.inactive', 'Inactive') },
   ], [t]);
 
   const ASSIGNABLE_ROLES = useMemo(() => [
-    { value: 'admin', label: t('users.roleFilter.admin', 'Admin') },
-    { value: 'user', label: t('users.roleFilter.user', 'User') },
+    { value: 'admin', label: t('shared:labels.admin', 'Admin') },
+    { value: 'user', label: t('shared:labels.user', 'User') },
   ], [t]);
 
   // Data state
@@ -368,11 +368,11 @@ const UserManagement = () => {
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
       if (diffMins < 1) return t('users.justNow', 'Just now');
-      if (diffMins < 60) return t('users.minutesAgo', '{{count}}m ago', { count: diffMins });
+      if (diffMins < 60) return t('shared:labels.countmAgo', '{{count}}m ago', { count: diffMins });
       const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return t('users.hoursAgo', '{{count}}h ago', { count: diffHours });
+      if (diffHours < 24) return t('shared:labels.counthAgo', '{{count}}h ago', { count: diffHours });
       const diffDays = Math.floor(diffHours / 24);
-      if (diffDays < 30) return t('users.daysAgo', '{{count}}d ago', { count: diffDays });
+      if (diffDays < 30) return t('shared:labels.countdAgo', '{{count}}d ago', { count: diffDays });
       return formatDate(dateStr);
     } catch {
       return formatDate(dateStr) || '-';
@@ -385,7 +385,7 @@ const UserManagement = () => {
     <AdminLayout>
       <Stack gap="lg">
         <Group justify="space-between" align="center">
-          <Title order={2}>{t('users.title', 'User Management')}</Title>
+          <Title order={2}>{t('shared:labels.userManagement', 'User Management')}</Title>
           <Text c="dimmed" size="sm">{t('users.userCount', { count: filteredUsers.length, defaultValue: '{{count}} users' })}</Text>
         </Group>
 
@@ -403,7 +403,7 @@ const UserManagement = () => {
               data={ROLE_OPTIONS}
               value={roleFilter}
               onChange={(v) => setRoleFilter(v || '')}
-              placeholder={t('users.tableHeaders.role', 'Role')}
+              placeholder={t('shared:labels.role', 'Role')}
               clearable={false}
               style={{ minWidth: 130 }}
             />
@@ -419,7 +419,7 @@ const UserManagement = () => {
               data={STATUS_OPTIONS}
               value={statusFilter}
               onChange={(v) => setStatusFilter(v || '')}
-              placeholder={t('users.tableHeaders.status', 'Status')}
+              placeholder={t('shared:fields.status', 'Status')}
               clearable={false}
               style={{ minWidth: 130 }}
             />
@@ -449,14 +449,14 @@ const UserManagement = () => {
               <Table striped highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{t('users.tableHeaders.user', 'User')}</Table.Th>
-                    <Table.Th>{t('users.tableHeaders.fullName', 'Full Name')}</Table.Th>
-                    <Table.Th>{t('users.tableHeaders.role', 'Role')}</Table.Th>
+                    <Table.Th>{t('shared:labels.user', 'User')}</Table.Th>
+                    <Table.Th>{t('shared:fields.fullName', 'Full Name')}</Table.Th>
+                    <Table.Th>{t('shared:labels.role', 'Role')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.auth', 'Auth')}</Table.Th>
-                    <Table.Th>{t('users.tableHeaders.status', 'Status')}</Table.Th>
+                    <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
                     <Table.Th>{t('users.tableHeaders.lastLogin', 'Last Login')}</Table.Th>
-                    <Table.Th>{t('users.tableHeaders.created', 'Created')}</Table.Th>
-                    <Table.Th style={{ width: 60 }}>{t('users.tableHeaders.actions', 'Actions')}</Table.Th>
+                    <Table.Th>{t('shared:labels.created', 'Created')}</Table.Th>
+                    <Table.Th style={{ width: 60 }}>{t('shared:labels.actions', 'Actions')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -491,7 +491,7 @@ const UserManagement = () => {
                           variant="light"
                           size="sm"
                         >
-                          {u.is_active === false ? t('users.statusFilter.inactive', 'Inactive') : t('users.statusFilter.active', 'Active')}
+                          {u.is_active === false ? t('shared:labels.inactive', 'Inactive') : t('shared:labels.active', 'Active')}
                         </Badge>
                       </Table.Td>
                       <Table.Td>
@@ -518,7 +518,7 @@ const UserManagement = () => {
                               leftSection={<IconKey size={14} />}
                               onClick={() => handleOpenPasswordModal(u)}
                             >
-                              {t('users.resetPassword', 'Reset Password')}
+                              {t('shared:labels.resetPassword', 'Reset Password')}
                             </Menu.Item>
                             <Menu.Item
                               leftSection={u.is_active === false ? <IconUserCheck size={14} /> : <IconUserOff size={14} />}
@@ -565,7 +565,7 @@ const UserManagement = () => {
           <Stack>
             <Text>{t('users.roleModal.changingRole', 'Changing role for <strong>{{username}}</strong>', { username: selectedUser.username })}</Text>
             <Select
-              label={t('users.roleModal.roleLabel', 'Role')}
+              label={t('shared:labels.role', 'Role')}
               data={ASSIGNABLE_ROLES}
               value={newRole}
               onChange={(v) => setNewRole(v || '')}
@@ -583,7 +583,7 @@ const UserManagement = () => {
               </Alert>
             )}
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeRoleModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closeRoleModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button
                 onClick={handleChangeRole}
                 loading={actionLoading}
@@ -597,7 +597,7 @@ const UserManagement = () => {
       </Modal>
 
       {/* Reset Password Modal */}
-      <Modal opened={passwordModalOpened} onClose={closePasswordModal} title={t('users.passwordModal.title', 'Reset Password')}>
+      <Modal opened={passwordModalOpened} onClose={closePasswordModal} title={t('shared:labels.resetPassword', 'Reset Password')}>
         {selectedUser && (
           <Stack>
             <Text>{t('users.passwordModal.resettingFor', 'Reset password for <strong>{{username}}</strong>', { username: selectedUser.username })}</Text>
@@ -618,13 +618,13 @@ const UserManagement = () => {
               onChange={(e) => setForceChange(e.currentTarget.checked)}
             />
             <Group justify="flex-end">
-              <Button variant="default" onClick={closePasswordModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closePasswordModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button
                 onClick={handleResetPassword}
                 loading={actionLoading}
                 disabled={newPassword.length < 6}
               >
-                {t('users.resetPassword', 'Reset Password')}
+                {t('shared:labels.resetPassword', 'Reset Password')}
               </Button>
             </Group>
           </Stack>
@@ -658,7 +658,7 @@ const UserManagement = () => {
               </Alert>
             )}
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeToggleActiveModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closeToggleActiveModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button
                 color={selectedUser.is_active === false ? 'green' : 'red'}
                 onClick={handleToggleActive}
@@ -691,7 +691,7 @@ const UserManagement = () => {
                   <Table.Tr>
                     <Table.Th>{t('users.loginHistoryModal.dateTime', 'Date & Time')}</Table.Th>
                     <Table.Th>{t('users.loginHistoryModal.ipAddress', 'IP Address')}</Table.Th>
-                    <Table.Th>{t('users.loginHistoryModal.details', 'Details')}</Table.Th>
+                    <Table.Th>{t('shared:tabs.details', 'Details')}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -733,7 +733,7 @@ const UserManagement = () => {
               disabled={isSelf(selectedUser) || isLastAdmin(selectedUser)}
             />
             <Group justify="flex-end">
-              <Button variant="default" onClick={closeDeleteModal}>{t('common:buttons.cancel', 'Cancel')}</Button>
+              <Button variant="default" onClick={closeDeleteModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
               <Button
                 color="red"
                 onClick={handleDeleteUser}

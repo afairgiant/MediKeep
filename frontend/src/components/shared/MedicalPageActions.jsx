@@ -12,7 +12,7 @@ import ViewToggle from './ViewToggle';
  * // Basic usage with primary action and ViewToggle
  * <MedicalPageActions
  *   primaryAction={{
- *     label: t('allergies.addNew'),
+ *     label: t('shared:labels.addNewAllergy'),
  *     onClick: handleAddAllergy,
  *     leftSection: <IconPlus size={16} />,
  *   }}

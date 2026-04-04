@@ -1,7 +1,5 @@
 {
   "allergies": {
-    "addNew": "Nieuwe allergie toevoegen",
-    "addTitle": "Nieuwe allergie toevoegen",
     "allergen": {
       "description": "Naam van het allergeen",
       "label": "Allergeen",
@@ -14,37 +12,26 @@
         "environmental": "Omgeving",
         "food": "Voedsel",
         "insect": "Insect",
-        "medication": "Medicatie",
-        "other": "Overig"
+        "medication": "Medicatie"
       },
       "placeholder": "Selecteer type allergie"
     },
-    "cardSubtitle": "Medical Allergy",
-    "clinicalNotes": "Clinical Notes",
+    "cardSubtitle": "Medische allergie",
     "editTitle": "Allergie bewerken",
     "emptyState": {
-      "filtered": "Probeer uw zoek- of filtercriteria aan te passen.",
       "noData": "Klik op \"Nieuwe allergie toevoegen\" om te beginnen.",
       "title": "Geen allergieën gevonden"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "messages": {
       "loading": "Allergieën laden...",
       "saving": "Allergie opslaan..."
     },
     "modal": {
-      "title": "Allergy Details"
+      "title": "Allergiedetails"
     },
-    "noMedicationLinked": "No medication linked",
-    "noNotes": "No notes available",
+    "noMedicationLinked": "Geen medicijn gekoppeld",
     "onsetDate": {
       "description": "Wanneer de allergie voor het eerst werd vastgesteld",
-      "label": "Aanvangsdatum",
       "placeholder": "Selecteer aanvangsdatum"
     },
     "reaction": {
@@ -52,14 +39,13 @@
       "label": "Beschrijving van de reactie",
       "placeholder": "Beschrijf de allergische reactie"
     },
-    "reactionInformation": "Reaction Information",
+    "reactionInformation": "Reactie-informatie",
     "reactionType": {
       "description": "Type allergische reactie",
       "label": "Type reactie",
       "options": {
         "anaphylaxis": "Anafylaxie",
         "gastrointestinal": "Maag-darm",
-        "other": "Overig",
         "respiratory": "Luchtwegen",
         "skin": "Huidreactie"
       },
@@ -78,35 +64,19 @@
       "description": "Huidige allergiestatus"
     },
     "tabs": {
-      "basicInfo": "Basisgegevens",
-      "documents": "Documenten",
-      "notes": "Notities",
-      "overview": "Overview",
       "reactionDetails": "Reactiedetails"
     },
-    "title": "Allergieën",
-    "viewMedication": "View medication details"
-  },
-  "buttons": {
-    "cancel": "Cancel"
+    "viewMedication": "Medicijndetails bekijken"
   },
   "componentCatalog": {
     "fetchError": "Laden van testcatalogus mislukt",
-    "filterCategory": "Categorie",
-    "filterStatus": "Status",
     "noData": "Voeg laboratoriumuitslagen met testonderdelen toe om ze hier te zien.",
     "noResults": "Geen testonderdelen gevonden",
-    "readingCount": "{{count}} metingen",
     "readingCount_one": "{{count}} meting",
-    "readingCount_other": "{{count}} readings",
-    "refRange": "Ref",
+    "refRange": "Ref.",
     "searchPlaceholder": "Tests zoeken...",
-    "showing": "{{count}} unieke tests weergegeven",
-    "showing_one": "Showing {{count}} unique tests",
-    "showing_other": "Showing {{count}} unique tests",
     "sort": {
-      "alphabetical": "A-Z",
-      "priority": "Prioriteit"
+      "alphabetical": "A-Z"
     },
     "status": {
       "abnormal": "Afwijkend",
@@ -114,8 +84,7 @@
       "critical": "Kritiek",
       "high": "Hoog",
       "low": "Laag",
-      "normal": "Normaal",
-      "unknown": "Onbekend"
+      "normal": "Normaal"
     },
     "trend": {
       "decreasing": "Dalend",
@@ -123,19 +92,18 @@
       "increasing": "Stijgend",
       "stable": "Stabiel",
       "worsening": "Verslechterend"
-    },
-    "tryAdjusting": "Probeer uw zoek- of filtercriteria aan te passen."
+    }
   },
   "conditions": {
     "codeDescription": {
       "description": "Leesbare beschrijving van de code",
-      "label": "Codebeschrijving",
-      "placeholder": "Beschrijving van de medische code"
+      "placeholder": "Beschrijving van de medische code",
+      "label": "Codebeschrijving"
     },
     "diagnosis": {
       "description": "Naam van de medische aandoening of diagnose",
-      "label": "Diagnose",
-      "placeholder": "bijv. Hypertensie, Diabetes type 2, Astma"
+      "placeholder": "bijv. Hypertensie, Diabetes type 2, Astma",
+      "label": "Diagnose"
     },
     "endDate": {
       "description": "Wanneer de aandoening werd opgelost (indien van toepassing)",
@@ -143,8 +111,8 @@
     },
     "icd10Code": {
       "description": "Internationale Classificatie van Ziekten code",
-      "label": "ICD-10-code",
-      "placeholder": "bijv. I10, E11.9"
+      "placeholder": "bijv. I10, E11.9",
+      "label": "ICD-10-code"
     },
     "notes": {
       "description": "Aanvullende details over de aandoening, behandelgeschiedenis of observaties"
@@ -164,8 +132,8 @@
     },
     "snomedCode": {
       "description": "SNOMED CT klinische terminologiecode",
-      "label": "SNOMED-code",
-      "placeholder": "bijv. 38341003"
+      "placeholder": "bijv. 38341003",
+      "label": "SNOMED-code"
     },
     "status": {
       "description": "Huidige status van deze aandoening"
@@ -175,13 +143,13 @@
     "form": {
       "address": {
         "description": "Adres van het contact (optioneel)",
-        "label": "Adres",
-        "placeholder": "bijv. Hoofdstraat 123, 1012 AB Amsterdam"
+        "placeholder": "bijv. Hoofdstraat 123, 1012 AB Amsterdam",
+        "label": "Adres"
       },
       "email": {
         "description": "Optioneel e-mailadres",
-        "label": "E-mailadres",
-        "placeholder": "bijv. jan.devries@email.nl"
+        "placeholder": "bijv. jan.devries@email.nl",
+        "label": "E-mailadres"
       },
       "isActive": {
         "description": "Dit contact is momenteel beschikbaar",
@@ -193,8 +161,8 @@
       },
       "name": {
         "description": "Volledige naam van het noodcontact",
-        "label": "Volledige naam",
-        "placeholder": "bijv. Jan de Vries"
+        "placeholder": "bijv. Jan de Vries",
+        "label": "Volledige naam"
       },
       "notes": {
         "description": "Eventuele aanvullende notities over dit contact",
@@ -220,17 +188,12 @@
       "saving": "Noodcontact opslaan..."
     },
     "tabs": {
-      "contactInfo": "Contactgegevens",
-      "details": "Details",
-      "notes": "Notities"
-    },
-    "title": "Noodcontacten"
+      "contactInfo": "Contactgegevens"
+    }
   },
   "equipment": {
     "tabs": {
-      "basicInfo": "Basisgegevens",
       "deviceDetails": "Apparaatdetails",
-      "notes": "Notities",
       "serviceDates": "Service & data"
     }
   },
@@ -239,8 +202,8 @@
       "condition": {
         "conditionName": {
           "description": "Naam van de medische aandoening",
-          "label": "Naam aandoening",
-          "placeholder": "bijv. Diabetes, Hartziekte, Kanker"
+          "placeholder": "bijv. Diabetes, Hartziekte, Kanker",
+          "label": "Naam aandoening"
         },
         "conditionType": {
           "description": "Categorie van medische aandoening",
@@ -254,8 +217,8 @@
         },
         "icd10Code": {
           "description": "Medische diagnosecode (indien bekend)",
-          "label": "ICD-10-code",
-          "placeholder": "bijv. E11.9"
+          "placeholder": "bijv. E11.9",
+          "label": "ICD-10-code"
         },
         "notes": {
           "description": "Behandeldetails, uitkomsten of andere relevante informatie",
@@ -315,15 +278,10 @@
           "label": "Geslacht",
           "placeholder": "Selecteer geslacht"
         },
-        "genderOptions": {
-          "female": "Vrouw",
-          "male": "Man",
-          "other": "Overig"
-        },
         "name": {
           "description": "Volledige naam van het familielid",
-          "label": "Volledige naam",
-          "placeholder": "Voer naam van het familielid in"
+          "placeholder": "Voer naam van het familielid in",
+          "label": "Volledige naam"
         },
         "notes": {
           "description": "Eventuele aanvullende notities of belangrijke informatie",
@@ -342,11 +300,14 @@
           "maternalGrandfather": "Grootvader (moederszijde)",
           "maternalGrandmother": "Grootmoeder (moederszijde)",
           "mother": "Moeder",
-          "other": "Overig",
           "paternalGrandfather": "Grootvader (vaderszijde)",
           "paternalGrandmother": "Grootmoeder (vaderszijde)",
           "sister": "Zus",
           "uncle": "Oom"
+        },
+        "genderOptions": {
+          "male": "Man",
+          "female": "Vrouw"
         }
       }
     }
@@ -358,13 +319,13 @@
   "immunizations": {
     "dateAdministered": {
       "description": "Wanneer het vaccin is toegediend",
-      "label": "Toedieningsdatum",
-      "placeholder": "Selecteer toedieningsdatum"
+      "placeholder": "Selecteer toedieningsdatum",
+      "label": "Toedieningsdatum"
     },
     "doseNumber": {
       "description": "Welke dosis in de reeks",
-      "label": "Dosisnummer",
-      "placeholder": "1, 2, 3..."
+      "placeholder": "1, 2, 3...",
+      "label": "Dosisnummer"
     },
     "expirationDate": {
       "description": "Vervaldatum van de gebruikte vaccinflacon/-dosis",
@@ -373,18 +334,17 @@
     },
     "location": {
       "description": "Waar het vaccin is toegediend",
-      "label": "Locatie",
       "placeholder": "bijv. Apotheek, Ziekenhuis, Kliniek, GGD"
     },
     "lotNumber": {
       "description": "Batchnummer voor tracking",
-      "label": "Lotnummer",
-      "placeholder": "Batch-/lotnummer van het vaccin"
+      "placeholder": "Batch-/lotnummer van het vaccin",
+      "label": "Lotnummer"
     },
     "manufacturer": {
       "description": "Vaccinfabrikant",
-      "label": "Fabrikant",
-      "placeholder": "Selecteer fabrikant"
+      "placeholder": "Selecteer fabrikant",
+      "label": "Fabrikant"
     },
     "manufacturerOptions": {
       "astraZeneca": "AstraZeneca",
@@ -392,18 +352,16 @@
       "johnsonJohnson": "Johnson & Johnson",
       "merck": "Merck",
       "moderna": "Moderna",
-      "other": "Overig",
       "pfizerBioNTech": "Pfizer-BioNTech",
       "sanofi": "Sanofi"
     },
     "ndcNumber": {
       "description": "National Drug Code voor het vaccin",
-      "label": "NDC-nummer",
-      "placeholder": "bijv. 12345-6789-01"
+      "placeholder": "bijv. 12345-6789-01",
+      "label": "NDC-nummer"
     },
     "notes": {
       "description": "Relevante details over de vaccinatie",
-      "label": "Notities",
       "placeholder": "Aanvullende notities over deze vaccinatie..."
     },
     "route": {
@@ -414,8 +372,6 @@
     "routeOptions": {
       "intradermal": "Intradermaal (ID)",
       "intramuscular": "Intramusculair (IM)",
-      "nasal": "Nasaal",
-      "oral": "Oraal",
       "subcutaneous": "Subcutaan (SC)"
     },
     "site": {
@@ -433,8 +389,8 @@
     },
     "vaccineName": {
       "description": "Naam van het toegediende vaccin",
-      "label": "Vaccinnaam",
-      "placeholder": "bijv. COVID-19 mRNA, Influenza, BMR"
+      "placeholder": "bijv. COVID-19 mRNA, Influenza, BMR",
+      "label": "Vaccinnaam"
     }
   },
   "injuries": {
@@ -459,15 +415,8 @@
     },
     "editTitle": "Letsel bewerken",
     "emptyState": {
-      "filtered": "Probeer uw zoek- of filtercriteria aan te passen.",
       "noData": "Klik op \"Nieuw letsel toevoegen\" om te beginnen.",
       "title": "Geen letsels gevonden"
-    },
-    "form": {
-      "tabs": {
-        "addFiles": "Add Files",
-        "documents": "Documents"
-      }
     },
     "injuryDate": {
       "description": "Wanneer het letsel is opgelopen",
@@ -505,7 +454,6 @@
     },
     "notes": {
       "description": "Algemene notities of aanvullende details",
-      "label": "Aanvullende notities",
       "placeholder": "Eventuele andere relevante informatie..."
     },
     "practitioner": {
@@ -520,17 +468,15 @@
     },
     "severity": {
       "description": "Hoe ernstig is dit letsel",
-      "label": "Ernst",
       "options": {
-        "mild": "Mild - Minor discomfort",
-        "moderate": "Moderate - Noticeable impact",
-        "severe": "Severe - Significant impact"
+        "mild": "Licht - Kleine ongemakken",
+        "moderate": "Matig - Merkbare impact",
+        "severe": "Ernstig - Aanzienlijke impact"
       },
       "placeholder": "Selecteer ernst"
     },
     "status": {
       "description": "Huidige status van dit letsel",
-      "label": "Status",
       "options": {
         "active": "Actief - Momenteel in behandeling",
         "chronic": "Chronisch - Langdurige gevolgen",
@@ -538,31 +484,19 @@
         "resolved": "Opgelost - Volledig genezen"
       }
     },
-    "tabs": {
-      "basicInfo": "Basisgegevens",
-      "documents": "Documenten",
-      "notes": "Notities",
-      "overview": "Overzicht",
-      "treatment": "Behandeling"
-    },
-    "title": "Letsels",
     "treatment": {
       "description": "Medische behandeling die voor het letsel is verleend",
-      "label": "Ontvangen behandeling",
-      "placeholder": "Beschrijf de ontvangen behandeling..."
-    },
-    "treatmentReceived": {
+      "placeholder": "Beschrijf de ontvangen behandeling...",
       "label": "Ontvangen behandeling"
     },
     "viewModal": {
       "additionalInfo": "Aanvullende informatie",
       "injuryDetails": "Letseldetails"
-    },
-    "viewPractitioner": "Artsdetails bekijken"
+    }
   },
   "insurance": {
     "form": {
-      "addInsurance": "Add Insurance",
+      "addInsurance": "Verzekering toevoegen",
       "annualMaximum": {
         "description": "Maximaal jaarlijks vergoedingsbedrag",
         "label": "Jaarlijks maximumbedrag",
@@ -628,7 +562,7 @@
         "label": "Eigen bijdrage spoedzorg",
         "placeholder": "bijv. 75"
       },
-      "coveragePeriodStatus": "Coverage Period & Status",
+      "coveragePeriodStatus": "Dekkingsperiode en status",
       "customerServicePhone": {
         "description": "Telefoonnummer van de klantenservice",
         "label": "Telefoon klantenservice",
@@ -648,19 +582,19 @@
         "description": "Type tandartsverzekeringspolis",
         "label": "Type tandartspolis",
         "options": {
-          "dhmo": "DHMO (Dental Health Maintenance Organization)",
+          "dhmo": "DHMO (Tandheelkundig gezondheidsonderhoudorganisatie)",
           "discount": "Kortingsplan",
-          "dppo": "DPPO (Dental Preferred Provider Organization)"
+          "dppo": "DPPO (Tandheelkundige voorkeurszorgverlenerorganisatie)"
         },
         "placeholder": "Selecteer type tandartspolis"
       },
       "dividers": {
         "additionalInfo": "Aanvullende informatie",
         "basicInfo": "Basisverzekeringsgegevens",
-        "contactInfo": "Contactgegevens",
         "coverageDetails": "Dekkingsdetails",
         "coveragePeriodStatus": "Dekkingsperiode & status",
-        "memberInfo": "Lidmaatschapsgegevens"
+        "memberInfo": "Lidmaatschapsgegevens",
+        "contactInfo": "Contactgegevens"
       },
       "effectiveDate": {
         "description": "Datum waarop de dekking ingaat",
@@ -679,8 +613,8 @@
       },
       "expirationDate": {
         "description": "Datum waarop de dekking eindigt (indien bekend)",
-        "label": "Vervaldatum",
-        "placeholder": "Selecteer vervaldatum"
+        "placeholder": "Selecteer vervaldatum",
+        "label": "Vervaldatum"
       },
       "frameAllowance": {
         "description": "Jaarlijkse vergoeding voor monturen",
@@ -689,8 +623,8 @@
       },
       "groupNumber": {
         "description": "Groepsnummer (indien van toepassing)",
-        "label": "Groepsnummer",
-        "placeholder": "bijv. GRP123"
+        "placeholder": "bijv. GRP123",
+        "label": "Groepsnummer"
       },
       "insuranceType": {
         "description": "Type verzekeringsdekking",
@@ -732,7 +666,7 @@
         "placeholder": "Aanvullende informatie over deze verzekering..."
       },
       "pcnNumber": {
-        "description": "Processor Control Number",
+        "description": "Verwerkerbeheersnummer",
         "label": "PCN-nummer",
         "placeholder": "bijv. ABC123"
       },
@@ -750,13 +684,12 @@
         "description": "Type medische verzekeringspolis",
         "label": "Type polis",
         "options": {
-          "epo": "EPO (Exclusive Provider Organization)",
-          "hdhp": "HDHP (High Deductible Health Plan)",
-          "hmo": "HMO (Health Maintenance Organization)",
+          "epo": "EPO (Exclusieve zorgverlenerorganisatie)",
+          "hdhp": "HDHP (Zorgverzekering met hoog eigen risico)",
+          "hmo": "HMO (Gezondheidsonderhoudorganisatie)",
           "indemnity": "Indemnity (vergoedingsregeling)",
-          "other": "Overig",
-          "pos": "POS (Point of Service)",
-          "ppo": "PPO (Preferred Provider Organization)"
+          "pos": "POS (Verwijzingsmodel)",
+          "ppo": "PPO (Voorkeurszorgverlenerorganisatie)"
         },
         "placeholder": "Selecteer type polis"
       },
@@ -775,7 +708,7 @@
         "options": {
           "formulary": "Formularium-gebaseerd plan",
           "integrated": "Geïntegreerd met medisch",
-          "medicarePartD": "Medicare Part D",
+          "medicarePartD": "Medicare Deel D",
           "tieredCopay": "Getrapt eigen-bijdrageplan"
         },
         "placeholder": "Selecteer type receptpolis"
@@ -800,9 +733,8 @@
         "options": {
           "child": "Kind",
           "dependent": "Medeverzekerde",
-          "other": "Overig",
-          "self": "Zelf",
-          "spouse": "Echtgeno(o)t(e)"
+          "spouse": "Echtgeno(o)t(e)",
+          "self": "Zelf"
         },
         "placeholder": "Selecteer relatie"
       },
@@ -811,27 +743,20 @@
         "label": "RX-groep",
         "placeholder": "bijv. RXGRP123"
       },
-      "saving": "Saving insurance...",
+      "saving": "Verzekering opslaan...",
       "status": {
         "description": "Huidige status van de verzekering",
         "options": {
-          "active": "Actief",
-          "expired": "Verlopen",
-          "inactive": "Inactief",
-          "pending": "In afwachting"
+          "expired": "Verlopen"
         },
         "placeholder": "Selecteer status"
       },
       "tabs": {
-        "addFiles": "Add Files",
-        "basicInfo": "Basic Info",
         "contact": "Contact",
-        "coverage": "Coverage",
-        "documents": "Documents",
-        "member": "Member",
-        "notes": "Notes"
+        "coverage": "Dekking",
+        "member": "Lid"
       },
-      "updateInsurance": "Update Insurance",
+      "updateInsurance": "Verzekering bijwerken",
       "visionPlanType": {
         "description": "Type oogzorgverzekeringspolis",
         "label": "Type oogzorgpolis",
@@ -844,20 +769,19 @@
       },
       "websiteUrl": {
         "description": "Ledenportaal of website-URL",
-        "label": "Website URL",
+        "label": "Website-URL",
         "placeholder": "bijv. https://mijn.verzekering.nl"
       }
     },
     "viewModal": {
-      "attachedDocuments": "Attached Documents",
-      "coverageDetails": "Coverage Details"
+      "coverageDetails": "Dekkingsdetails"
     }
   },
   "labResults": {
     "additionalNotes": {
       "description": "Klinische notities of speciale instructies",
-      "label": "Aanvullende notities",
-      "placeholder": "Eventuele aanvullende informatie over de test, speciale instructies of observaties..."
+      "placeholder": "Eventuele aanvullende informatie over de test, speciale instructies of observaties...",
+      "label": "Aanvullende notities"
     },
     "category": {
       "bloodWork": "Bloedonderzoek",
@@ -870,55 +794,44 @@
       "imaging": "Beeldvorming (röntgen, MRI, CT)",
       "immunology": "Immunologie",
       "microbiology": "Microbiologie",
-      "other": "Overig",
       "pathology": "Pathologie",
       "pulmonology": "Pulmonologie",
       "stomatology": "Stomatologie"
     },
     "completedDate": {
       "description": "Datum waarop de resultaten zijn vastgesteld",
-      "label": "Voltooiingsdatum",
-      "placeholder": "Wanneer resultaten beschikbaar waren"
+      "placeholder": "Wanneer resultaten beschikbaar waren",
+      "label": "Voltooiingsdatum"
     },
     "form": {
-      "abbreviation": "Abbreviation",
+      "abbreviation": "Afkorting",
       "abbreviationPlaceholder": "e.g., HGB",
       "addAnotherTest": "Nog een test toevoegen",
-      "autoCalculated": "Auto-calculated",
-      "cannotRemoveLastRow": "Cannot remove last row",
-      "category": "Category",
+      "autoCalculated": "Automatisch berekend",
+      "cannotRemoveLastRow": "Laatste rij kan niet worden verwijderd",
       "componentCreationWarning": "Laboratoriumuitslag opgeslagen, maar testonderdelen konden niet worden toegevoegd. U kunt ze toevoegen vanaf de weergavepagina.",
       "linkConditionsDescription": "Koppel dit laboratoriumresultaat aan relevante medische aandoeningen voor betere tracking en organisatie.",
       "linkConditionsTitle": "Medische aandoeningen koppelen",
-      "max": "Max",
-      "min": "Min",
-      "notes": "Notes",
-      "notesOptional": "Notes (optional)",
-      "refMax": "Ref Max",
-      "refMin": "Ref Min",
-      "relatedConditions": "Gerelateerde aandoeningen",
+      "notesOptional": "Notities (optioneel)",
+      "refMax": "Ref. max.",
+      "refMin": "Ref. min.",
       "relationshipCreationWarning": "Laboratoriumuitslag opgeslagen, maar sommige relaties konden niet worden aangemaakt. U kunt ze toevoegen vanaf de bewerkingspagina.",
-      "removeRow": "Remove row",
-      "result": "Result",
+      "removeRow": "Rij verwijderen",
+      "result": "Resultaat",
       "resultIndicator": "Resultaatindicator:",
-      "searchTests": "Type to search tests...",
-      "selectCategory": "Select category",
-      "selectResult": "Select result",
-      "status": "Status",
+      "searchTests": "Typ om tests te zoeken...",
+      "selectResult": "Selecteer resultaat",
       "statusIndicator": "Statusindicator:",
-      "testCode": "Test Code",
       "testCodePlaceholder": "e.g., 718-7",
       "testComponents": "Testonderdelen (optioneel)",
       "testComponentsDescription": "Voeg optioneel individuele testwaarden toe. U kunt later ook meer toevoegen.",
       "testDetails": "Testdetails",
-      "testName": "Test Name",
-      "unit": "Unit",
-      "value": "Value"
+      "unit": "Eenheid"
     },
     "labResult": {
       "description": "Classificatie van het testresultaat",
-      "label": "Laboratoriumuitslag",
-      "placeholder": "Selecteer resultaat (indien beschikbaar)"
+      "placeholder": "Selecteer resultaat (indien beschikbaar)",
+      "label": "Laboratoriumuitslag"
     },
     "messages": {
       "relationshipsCreateInfo": "Relaties kunnen worden toegevoegd na het opslaan van de laboratoriumuitslag.",
@@ -927,8 +840,8 @@
     },
     "orderedDate": {
       "description": "Datum waarop de test is aangevraagd",
-      "label": "Aanvraagdatum",
-      "placeholder": "Wanneer de test is aangevraagd"
+      "placeholder": "Wanneer de test is aangevraagd",
+      "label": "Aanvraagdatum"
     },
     "orderingPractitioner": {
       "description": "Arts die de test heeft aangevraagd",
@@ -951,10 +864,6 @@
       "ordered": "Aangevraagd - Test is aangevraagd"
     },
     "tabs": {
-      "addFiles": "Bestanden toevoegen",
-      "basicInfo": "Basisgegevens",
-      "documents": "Documenten",
-      "notes": "Notities",
       "relationships": "Relaties",
       "resultsStatus": "Resultaten & status"
     },
@@ -965,8 +874,8 @@
     },
     "testCode": {
       "description": "Labcode of LOINC",
-      "label": "Testcode",
-      "placeholder": "bijv. CBC, 85025"
+      "placeholder": "bijv. CBC, 85025",
+      "label": "Testcode"
     },
     "testingFacility": {
       "description": "Waar de test wordt/werd uitgevoerd",
@@ -975,8 +884,8 @@
     },
     "testName": {
       "description": "Naam of beschrijving van de laboratoriumtest",
-      "label": "Testnaam",
-      "placeholder": "bijv. Volledig bloedbeeld (CBC)"
+      "placeholder": "bijv. Volledig bloedbeeld (CBC)",
+      "label": "Testnaam"
     },
     "testStatus": {
       "description": "Huidige status van de laboratoriumtest",
@@ -994,8 +903,7 @@
       "description": "Prioriteit of urgentie van de test",
       "label": "Type test",
       "placeholder": "Selecteer urgentieniveau"
-    },
-    "title": "Laboratoriumuitslagen"
+    }
   },
   "medications": {
     "alternativeName": {
@@ -1005,16 +913,15 @@
     },
     "dosage": {
       "description": "Sterkte en hoeveelheid per dosis",
-      "label": "Dosering",
-      "placeholder": "bijv. 10 mg, 1 tablet"
+      "placeholder": "bijv. 10 mg, 1 tablet",
+      "label": "Dosering"
     },
     "form": {
       "addMedication": "Medicatie toevoegen",
-      "attachedDocuments": "Bijgevoegde documenten",
       "conditionLinkFailed": "De medicatie is opgeslagen, maar sommige aandoeningen konden niet worden gekoppeld. U kunt ze later koppelen door de medicatie te bewerken.",
       "conditionLinkPartialFailure": "{{count}} aandoeningkoppeling(en) mislukt",
-      "conditionLinkPartialFailure_one": "",
-      "conditionLinkPartialFailure_other": "",
+      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
+      "conditionLinkPartialFailure_other": "{{count}} condition links failed",
       "linkConditionsDescription": "Koppel deze medicatie optioneel aan bestaande aandoeningen",
       "noConditionsFound": "Geen aandoeningen gevonden",
       "saving": "Medicatie opslaan...",
@@ -1022,8 +929,8 @@
     },
     "frequency": {
       "description": "Hoe vaak de medicatie wordt ingenomen",
-      "label": "Frequentie",
-      "placeholder": "bijv. Eenmaal daags, Tweemaal daags"
+      "placeholder": "bijv. Eenmaal daags, Tweemaal daags",
+      "label": "Frequentie"
     },
     "indication": {
       "description": "Waarvoor is deze medicatie? Beschrijf de reden of aandoening die wordt behandeld",
@@ -1032,18 +939,18 @@
     },
     "medicationName": {
       "description": "Generieke naam of merknaam van de medicatie (min. 2 tekens)",
-      "label": "Naam medicatie",
-      "placeholder": "bijv. Lisinopril, Metformine"
+      "placeholder": "bijv. Lisinopril, Metformine",
+      "label": "Naam medicatie"
     },
     "medicationType": {
       "description": "Categorie van medicatie",
-      "label": "Type medicatie",
-      "placeholder": "Selecteer type"
+      "placeholder": "Selecteer type",
+      "label": "Type medicatie"
     },
     "pharmacy": {
       "description": "Apotheek waar de medicatie wordt afgehaald",
-      "label": "Apotheek",
-      "placeholder": "Selecteer apotheek"
+      "placeholder": "Selecteer apotheek",
+      "label": "Apotheek"
     },
     "prescribingProvider": {
       "description": "Arts die deze medicatie heeft voorgeschreven",
@@ -1052,33 +959,25 @@
     },
     "route": {
       "description": "Hoe de medicatie wordt toegediend",
-      "label": "Toedieningsweg",
       "options": {
         "inhalation": "Inhalatie",
         "injection": "Injectie",
         "intramuscular": "Intramusculair",
         "intravenous": "Intraveneus",
-        "nasal": "Nasaal",
-        "oral": "Oraal",
         "rectal": "Rectaal",
         "subcutaneous": "Subcutaan",
         "sublingual": "Sublinguaal",
-        "topical": "Uitwendig"
+        "topical": "Uitwendig",
+        "oral": "Oraal",
+        "nasal": "Nasaal"
       },
-      "placeholder": "Selecteer toedieningsweg"
+      "placeholder": "Selecteer toedieningsweg",
+      "label": "Toedieningsweg"
     },
     "sideEffects": {
       "description": "Bekende of ondervonden bijwerkingen van deze medicatie",
-      "label": "Bijwerkingen",
-      "placeholder": "Vermeld bekende of ondervonden bijwerkingen..."
-    },
-    "tabs": {
-      "addFiles": "Add Files",
-      "basicInfo": "Basisgegevens",
-      "conditions": "Aandoeningen",
-      "details": "Details",
-      "documents": "Documenten",
-      "notes": "Notities"
+      "placeholder": "Vermeld bekende of ondervonden bijwerkingen...",
+      "label": "Bijwerkingen"
     }
   },
   "pharmacies": {
@@ -1087,37 +986,36 @@
         "description": "Grote apotheekketen of onafhankelijk type",
         "label": "Apotheekmerk",
         "options": {
-          "amazonPharmacy": "Amazon Pharmacy",
+          "amazonPharmacy": "Amazon Apotheek",
           "compoundingPharmacy": "Bereidingsapotheek",
-          "costcoPharmacy": "Costco Pharmacy",
+          "costcoPharmacy": "Costco Apotheek",
           "cvs": "CVS",
-          "hebPharmacy": "H-E-B Pharmacy",
+          "hebPharmacy": "H-E-B Apotheek",
           "hospitalPharmacy": "Ziekenhuisapotheek",
           "independent": "Onafhankelijk",
           "kaiserPermanente": "Kaiser Permanente",
-          "krogerPharmacy": "Kroger Pharmacy",
-          "meijerPharmacy": "Meijer Pharmacy",
+          "krogerPharmacy": "Kroger Apotheek",
+          "meijerPharmacy": "Meijer Apotheek",
           "onlinePharmacy": "Online apotheek",
-          "other": "Overig",
-          "publixPharmacy": "Publix Pharmacy",
+          "publixPharmacy": "Publix Apotheek",
           "riteAid": "Rite Aid",
-          "safewayPharmacy": "Safeway Pharmacy",
+          "safewayPharmacy": "Safeway Apotheek",
           "specialtyPharmacy": "Gespecialiseerde apotheek",
-          "targetPharmacy": "Target Pharmacy",
+          "targetPharmacy": "Target Apotheek",
           "walgreens": "Walgreens",
-          "walmartPharmacy": "Walmart Pharmacy"
+          "walmartPharmacy": "Walmart Apotheek"
         },
         "placeholder": "Selecteer apotheekketen of type"
       },
       "city": {
         "description": "Stadslocatie",
-        "label": "Stad",
-        "placeholder": "Amsterdam"
+        "placeholder": "Amsterdam",
+        "label": "Stad"
       },
       "country": {
         "description": "Land waar de apotheek is gevestigd",
-        "label": "Land",
-        "placeholder": "bijv. Nederland, België"
+        "placeholder": "bijv. Nederland, België",
+        "label": "Land"
       },
       "locationDivider": "Locatiegegevens",
       "name": {
@@ -1131,18 +1029,18 @@
       },
       "postalCode": {
         "description": "Postcode",
-        "label": "Postcode",
-        "placeholder": "bijv. 1012 AB"
+        "placeholder": "bijv. 1012 AB",
+        "label": "Postcode"
       },
       "specialtyServices": {
         "description": "Speciale diensten die door deze apotheek worden aangeboden",
-        "label": "Specialiteiten",
-        "placeholder": "bijv. Vaccinaties, Bereiding, Medicatiebegeleiding"
+        "placeholder": "bijv. Vaccinaties, Bereiding, Medicatiebegeleiding",
+        "label": "Specialiteiten"
       },
       "stateProvince": {
         "description": "Provincie of regio",
-        "label": "Provincie",
-        "placeholder": "bijv. Noord-Holland, Limburg"
+        "placeholder": "bijv. Noord-Holland, Limburg",
+        "label": "Provincie"
       },
       "storeNumber": {
         "description": "Intern filiaal-identificatienummer",
@@ -1174,7 +1072,6 @@
       },
       "notes": {
         "description": "Eventuele aanvullende informatie over de praktijk",
-        "label": "Notities",
         "placeholder": "Aanvullende notities over deze praktijk..."
       },
       "patientPortal": {
@@ -1184,8 +1081,7 @@
       },
       "phone": {
         "description": "Hoofdtelefoonnummer van de praktijk",
-        "label": "Telefoonnummer praktijk",
-        "placeholder": "+31 20 123 4567"
+        "label": "Telefoonnummer praktijk"
       },
       "website": {
         "description": "Officiële website van de praktijk",
@@ -1198,13 +1094,13 @@
     "form": {
       "email": {
         "description": "Professioneel e-mailadres",
-        "label": "E-mailadres",
-        "placeholder": "arts@voorbeeld.nl"
+        "placeholder": "arts@voorbeeld.nl",
+        "label": "E-mailadres"
       },
       "name": {
         "description": "Volledige naam van de arts inclusief titel",
-        "label": "Volledige naam",
-        "placeholder": "Dr. Jan de Vries"
+        "placeholder": "Dr. Jan de Vries",
+        "label": "Volledige naam"
       },
       "phone": {
         "description": "Primair contactnummer",
@@ -1227,7 +1123,6 @@
       },
       "website": {
         "description": "Professionele website of praktijkpagina",
-        "label": "Website",
         "placeholder": "https://www.voorbeeld.nl"
       }
     }
@@ -1235,12 +1130,11 @@
   "procedures": {
     "anesthesiaNotes": {
       "description": "Notities over de toediening van anesthesie",
-      "label": "Anesthesienotities",
-      "placeholder": "Anesthesiegerelateerde notities..."
+      "placeholder": "Anesthesiegerelateerde notities...",
+      "label": "Anesthesienotities"
     },
     "anesthesiaType": {
       "description": "Type anesthesie dat is gebruikt",
-      "label": "Type anesthesie",
       "options": {
         "general": "Algeheel - Volledige bewusteloosheid",
         "local": "Lokaal - Verdoving van specifiek gebied",
@@ -1248,33 +1142,26 @@
         "regional": "Regionaal - Verdoving van groter gebied",
         "sedation": "Sedatie - Ontspannen maar bij bewustzijn"
       },
-      "placeholder": "Selecteer type anesthesie"
+      "placeholder": "Selecteer type anesthesie",
+      "label": "Type anesthesie"
     },
     "complications": {
       "description": "Documenteer eventuele complicaties, bijwerkingen of onverwachte uitkomsten",
-      "label": "Complicaties",
-      "placeholder": "Eventuele complicaties die optraden tijdens de ingreep..."
+      "placeholder": "Eventuele complicaties die optraden tijdens de ingreep...",
+      "label": "Complicaties"
     },
     "description": {
       "description": "Gedetailleerde beschrijving van wat de ingreep inhoudt",
-      "label": "Beschrijving",
       "placeholder": "Beschrijf de ingreep in detail..."
     },
     "facility": {
       "description": "Waar de ingreep werd of zal worden uitgevoerd",
-      "label": "Faciliteit",
-      "placeholder": "bijv. Algemeen Ziekenhuis, Polikliniek"
+      "placeholder": "bijv. Algemeen Ziekenhuis, Polikliniek",
+      "label": "Faciliteit"
     },
     "notes": {
       "description": "Relevante observaties, pre-/postoperatieve instructies of details",
-      "label": "Notities",
       "placeholder": "Aanvullende notities over de ingreep..."
-    },
-    "outcome": {
-      "label": "Uitkomst"
-    },
-    "performingPractitioner": {
-      "label": "Uitvoerend arts"
     },
     "practitioner": {
       "description": "Arts of specialist die de ingreep uitvoert",
@@ -1283,8 +1170,8 @@
     },
     "procedureCode": {
       "description": "Medische codering (CPT, ICD-10-PCS, enz.)",
-      "label": "Ingreepcode",
-      "placeholder": "bijv. CPT-12345, ICD-10-PCS"
+      "placeholder": "bijv. CPT-12345, ICD-10-PCS",
+      "label": "Ingreepcode"
     },
     "procedureDate": {
       "description": "Wanneer de ingreep wordt/werd uitgevoerd",
@@ -1293,13 +1180,13 @@
     },
     "procedureDuration": {
       "description": "Hoe lang de ingreep duurde/zal duren",
-      "label": "Duur (minuten)",
-      "placeholder": "bijv. 30, 120"
+      "placeholder": "bijv. 30, 120",
+      "label": "Duur (minuten)"
     },
     "procedureName": {
       "description": "Naam van de medische ingreep",
-      "label": "Naam ingreep",
-      "placeholder": "bijv. Appendectomie, MRI-scan, Colonoscopie"
+      "placeholder": "bijv. Appendectomie, MRI-scan, Colonoscopie",
+      "label": "Naam ingreep"
     },
     "procedureSetting": {
       "description": "Waar de ingreep plaatsvindt",
@@ -1315,7 +1202,6 @@
     },
     "procedureType": {
       "description": "Categorie van ingreep",
-      "label": "Type ingreep",
       "options": {
         "diagnostic": "Diagnostisch - Onderzoek/beeldvorming",
         "emergency": "Spoed - Spoedzorg",
@@ -1323,6 +1209,7 @@
         "surgical": "Chirurgisch - Invasieve ingreep",
         "therapeutic": "Therapeutisch - Behandeling"
       },
+      "label": "Type ingreep",
       "placeholder": "Selecteer type"
     },
     "status": {
@@ -1336,8 +1223,8 @@
     "occurrence": {
       "additionalNotes": {
         "description": "Eventuele andere relevante informatie over dit optreden",
-        "label": "Aanvullende notities",
-        "placeholder": "Aanvullende details over deze episode..."
+        "placeholder": "Aanvullende details over deze episode...",
+        "label": "Aanvullende notities"
       },
       "associatedSymptoms": {
         "description": "Andere symptomen die bij deze episode optraden",
@@ -1346,8 +1233,8 @@
       },
       "duration": {
         "description": "Hoe lang duurde deze episode",
-        "label": "Duur",
-        "placeholder": "bijv. 2 uur, 30 minuten, hele dag"
+        "placeholder": "bijv. 2 uur, 30 minuten, hele dag",
+        "label": "Duur"
       },
       "impactLevel": {
         "description": "Hoeveel heeft dit uw dagelijkse activiteiten beïnvloed",
@@ -1363,8 +1250,8 @@
       },
       "location": {
         "description": "Waar op uw lichaam voelde u dit",
-        "label": "Locatie",
-        "placeholder": "bijv. Linkerslaap, Lage rug, Hele lichaam"
+        "placeholder": "bijv. Linkerslaap, Lage rug, Hele lichaam",
+        "label": "Locatie"
       },
       "occurrenceDate": {
         "description": "Datum van deze specifieke episode",
@@ -1414,8 +1301,8 @@
     "parent": {
       "category": {
         "description": "Optionele categorie om symptomen te ordenen",
-        "label": "Categorie",
-        "placeholder": "bijv. Pijn, Spijsvertering, Luchtwegen"
+        "placeholder": "bijv. Pijn, Spijsvertering, Luchtwegen",
+        "label": "Categorie"
       },
       "firstOccurrenceDate": {
         "description": "Wanneer u dit symptoom voor het eerst opmerkte",
@@ -1448,23 +1335,15 @@
       },
       "symptomName": {
         "description": "Naam van het symptoom dat u wilt bijhouden",
-        "label": "Naam symptoom",
-        "placeholder": "bijv. Migraineaanval, Chronische rugpijn"
+        "placeholder": "bijv. Migraineaanval, Chronische rugpijn",
+        "label": "Naam symptoom"
       },
       "typicalTriggers": {
         "description": "Wat dit symptoom doorgaans veroorzaakt",
         "label": "Veelvoorkomende triggers",
         "placeholder": "Voeg veelvoorkomende triggers toe (stress, weer, voeding, enz.)"
       }
-    },
-    "tabs": {
-      "addFiles": "Bestanden toevoegen",
-      "basicInfo": "Basisgegevens",
-      "details": "Details",
-      "documents": "Documenten",
-      "notes": "Notities"
-    },
-    "title": "Symptomen"
+    }
   },
   "treatments": {
     "amount": {
@@ -1478,8 +1357,8 @@
     },
     "frequency": {
       "description": "Hoe vaak de behandeling plaatsvindt",
-      "label": "Frequentie",
-      "placeholder": "Selecteer frequentie"
+      "placeholder": "Selecteer frequentie",
+      "label": "Frequentie"
     },
     "frequencyOptions": {
       "asNeeded": "Naar behoefte (PRN)",
@@ -1498,25 +1377,24 @@
       "specificStartDate": "Behandelingsstartdatum"
     },
     "mode": {
-      "advancedOption": "Behandelplan",
       "description": "Kies hoe u deze behandeling wilt volgen",
       "label": "Behandelmodus",
-      "simpleOption": "Eenvoudig"
+      "simpleOption": "Eenvoudig",
+      "advancedOption": "Behandelplan"
     },
     "notes": {
       "description": "Voortgangsupdates, observaties of belangrijke notities",
-      "label": "Aanvullende notities",
-      "placeholder": "Voortgangsnotities, bijwerkingen, aanpassingen, uitkomsten..."
+      "placeholder": "Voortgangsnotities, bijwerkingen, aanpassingen, uitkomsten...",
+      "label": "Aanvullende notities"
     },
     "practitioner": {
       "description": "Wijs een arts toe aan deze behandeling",
-      "label": "Arts",
       "placeholder": "Selecteer arts (optioneel)"
     },
     "relatedCondition": {
       "description": "Koppel deze behandeling aan een specifieke medische aandoening",
-      "label": "Gerelateerde aandoening",
-      "placeholder": "Selecteer aandoening (optioneel)"
+      "placeholder": "Selecteer aandoening (optioneel)",
+      "label": "Gerelateerde aandoening"
     },
     "startDate": {
       "description": "Wanneer de behandeling begint/begon",
@@ -1529,8 +1407,8 @@
     },
     "treatmentName": {
       "description": "Specifieke naam of beschrijving van de behandeling",
-      "label": "Naam behandeling",
-      "placeholder": "bijv. Fysiotherapie voor lage rugpijn"
+      "placeholder": "bijv. Fysiotherapie voor lage rugpijn",
+      "label": "Naam behandeling"
     },
     "treatmentStatus": {
       "description": "Huidige fase in het behandeltraject",
@@ -1546,7 +1424,6 @@
     },
     "treatmentType": {
       "description": "Categorie van behandeling",
-      "label": "Type behandeling",
       "options": {
         "behavioralTherapy": "Gedragstherapie - Psychische behandeling",
         "chemotherapy": "Chemotherapie - Kankerbehandeling",
@@ -1560,6 +1437,7 @@
         "speechTherapy": "Logopedie - Communicatieverbetering",
         "surgery": "Chirurgie - Chirurgische ingreep"
       },
+      "label": "Type behandeling",
       "placeholder": "Selecteer type"
     }
   },
@@ -1567,14 +1445,8 @@
     "attendingPractitioner": {
       "label": "Behandelend arts"
     },
-    "chiefComplaint": {
-      "label": "Hoofdklacht"
-    },
     "diagnosisAssessment": {
       "label": "Diagnose/beoordeling"
-    },
-    "durationMinutes": {
-      "label": "Duur (minuten)"
     },
     "followUpInstructions": {
       "label": "Vervolginstructies"
@@ -1604,8 +1476,8 @@
         },
         "durationMinutes": {
           "description": "Hoe lang het bezoek duurde",
-          "label": "Duur (minuten)",
-          "placeholder": "Duur van het bezoek"
+          "placeholder": "Duur van het bezoek",
+          "label": "Duur (minuten)"
         },
         "followUpInstructions": {
           "description": "Instructies voor voortdurende zorg en vervolgafspraken",
@@ -1653,7 +1525,7 @@
         "urgentCare": "Spoedzorg"
       },
       "priorityOptions": {
-        "routine": "Routine",
+        "routine": "Routinematig",
         "urgent": "Spoed"
       },
       "visitTypeOptions": {
@@ -1669,18 +1541,13 @@
     "relatedCondition": {
       "label": "Gerelateerde aandoening (optioneel)"
     },
+    "viewModal": {
+      "followUpInstructions": "Vervolginstructies",
+      "priority": "Prioriteit",
+      "chiefComplaint": "Hoofdklacht"
+    },
     "table": {
       "visitType": "Type bezoek"
-    },
-    "treatmentPlan": {
-      "label": "Behandelplan"
-    },
-    "viewModal": {
-      "chiefComplaint": "Hoofdklacht",
-      "followUpInstructions": "Vervolginstructies",
-      "location": "Locatie",
-      "priority": "Prioriteit",
-      "treatmentPlan": "Behandelplan"
     }
   }
 }

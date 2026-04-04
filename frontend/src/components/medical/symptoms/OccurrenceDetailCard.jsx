@@ -25,7 +25,7 @@ function OccurrenceStatusIndicator({ occurrence, t, formatDate }) {
   if (occurrence.resolved_date) {
     return (
       <Text size="sm" c="green">
-        <strong>{t('symptoms.calendar.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
+        <strong>{t('shared:labels.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
       </Text>
     );
   }
@@ -33,14 +33,14 @@ function OccurrenceStatusIndicator({ occurrence, t, formatDate }) {
   if (occurrence.symptom_status === 'resolved') {
     return (
       <Badge size="sm" color="green" variant="light">
-        {t('symptoms.calendar.resolved', 'Resolved')}
+        {t('shared:labels.resolved', 'Resolved')}
       </Badge>
     );
   }
 
   return (
     <Badge size="sm" color="blue" variant="light">
-      {t('symptoms.calendar.ongoing', 'Ongoing')}
+      {t('shared:labels.ongoing', 'Ongoing')}
     </Badge>
   );
 }
@@ -50,7 +50,7 @@ function OccurrenceStatusIndicator({ occurrence, t, formatDate }) {
  * Used by both SymptomCalendar and SymptomTimeline to avoid duplication.
  */
 function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
 
   return (
@@ -87,17 +87,17 @@ function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
 
         {occurrence.duration && (
           <Text size="sm">
-            <strong>{t('symptoms.calendar.duration', 'Duration')}:</strong> {occurrence.duration}
+            <strong>{t('shared:labels.duration', 'Duration')}:</strong> {occurrence.duration}
           </Text>
         )}
         {occurrence.location && (
           <Text size="sm">
-            <strong>{t('symptoms.calendar.location', 'Location')}:</strong> {occurrence.location}
+            <strong>{t('shared:labels.location', 'Location')}:</strong> {occurrence.location}
           </Text>
         )}
         {occurrence.occurrence_time && (
           <Text size="sm">
-            <strong>{t('symptoms.calendar.time', 'Time')}:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
+            <strong>{t('shared:labels.time', 'Time')}:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
           </Text>
         )}
 

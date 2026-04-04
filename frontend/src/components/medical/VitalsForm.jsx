@@ -70,7 +70,7 @@ const VitalsForm = ({
   error,
   clearError,
 }) => {
-  const { t } = useTranslation(['common', 'errors']);
+  const { t } = useTranslation(['common', 'errors', 'shared']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
   const lockedFields = vitals?._lockedFields || [];
   const { getCurrentTime } = useTimezone();
@@ -392,13 +392,13 @@ const VitalsForm = ({
           },
           {
             value: 'pharmacy',
-            label: t('vitals.form.locations.pharmacy', 'Pharmacy'),
+            label: t('shared:fields.pharmacy', 'Pharmacy'),
           },
           {
             value: 'ambulatory',
             label: t('vitals.form.locations.ambulatory', 'Ambulatory Care'),
           },
-          { value: 'other', label: t('vitals.form.locations.other', 'Other') },
+          { value: 'other', label: t('shared:fields.other', 'Other') },
         ],
       },
       device_used: {
@@ -420,7 +420,7 @@ const VitalsForm = ({
         },
       },
       notes: {
-        label: t('common.fields.notes.label', 'Notes'),
+        label: t('shared:tabs.notes', 'Notes'),
         type: 'textarea',
         placeholder: t(
           'vitals.form.notesPlaceholder',
@@ -890,7 +890,7 @@ const VitalsForm = ({
                 maxDate={maxDateStr}
               />
               <TimeInput
-                label={t('vitals.form.selectTime', 'Time')}
+                label={t('shared:labels.time', 'Time')}
                 value={timeValue}
                 onChange={handleTimeChange}
               />
@@ -1019,13 +1019,13 @@ const VitalsForm = ({
                 {t('vitals.tabs.dateTime', 'Date & Time')}
               </Tabs.Tab>
               <Tabs.Tab value="vitals" leftSection={<IconActivity size={16} />}>
-                {t('vitals.tabs.vitalSigns', 'Vital Signs')}
+                {t('shared:categories.vital_signs', 'Vital Signs')}
               </Tabs.Tab>
               <Tabs.Tab value="context" leftSection={<IconMapPin size={16} />}>
                 {t('vitals.tabs.context', 'Context')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('vitals.tabs.notes', 'Notes')}
+                {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -1079,7 +1079,7 @@ const VitalsForm = ({
                     variant="light"
                     color="green"
                     icon={<IconUser size={16} />}
-                    title={t('vitals.form.patientInfo', 'Patient Information')}
+                    title={t('shared:labels.patientInformation', 'Patient Information')}
                     mt="md"
                   >
                     {t(
@@ -1146,7 +1146,7 @@ const VitalsForm = ({
               onClick={onCancel}
               disabled={isLoading}
             >
-              {t('buttons.cancel', 'Cancel')}
+              {t('shared:fields.cancel', 'Cancel')}
             </Button>
 
             <Button

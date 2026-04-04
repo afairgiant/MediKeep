@@ -44,7 +44,7 @@ import { phoneTelHref } from '../../utils/phoneUtils';
 import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const [viewMode, setViewMode] = usePersistedViewMode('emergency-contacts');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
   const navigate = useNavigate();
@@ -263,7 +263,7 @@ const EmergencyContacts = () => {
   return (
     <>
       <Container size="xl" py="sm">
-      <PageHeader title={t('emergencyContacts.title')} icon="📞" />
+      <PageHeader title={t('shared:categories.emergency_contacts')} icon="📞" />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -302,7 +302,7 @@ const EmergencyContacts = () => {
                     <Title order={3}>{t('emergencyContacts.page.noContacts')}</Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
-                        ? t('emergencyContacts.page.filterDescription')
+                        ? t('shared:emptyStates.adjustSearch')
                         : t('emergencyContacts.page.noContactsDescription')}
                     </Text>
                   </Stack>
@@ -356,7 +356,7 @@ const EmergencyContacts = () => {
                           variant="light"
                           size="sm"
                         >
-                          {contact.is_active ? t('emergencyContacts.card.active') : t('emergencyContacts.card.inactive')}
+                          {contact.is_active ? t('shared:labels.active') : t('shared:labels.inactive')}
                         </Badge>
                       </Group>
                     </Group>
@@ -465,7 +465,7 @@ const EmergencyContacts = () => {
                         size="xs"
                         onClick={() => handleEditContact(contact)}
                       >
-                        {t('buttons.edit')}
+                        {t('shared:labels.edit')}
                       </Button>
                       <Button
                         variant="filled"
@@ -487,15 +487,15 @@ const EmergencyContacts = () => {
                 data={paginatedContacts}
                 pagination={false}
                 columns={[
-                  { header: t('emergencyContacts.table.name'), accessor: 'name', priority: 'high', width: 200 },
-                  { header: t('emergencyContacts.table.relationship'), accessor: 'relationship', priority: 'high', width: 150 },
-                  { header: t('emergencyContacts.table.phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                  { header: t('emergencyContacts.table.email'), accessor: 'email', priority: 'medium', width: 150 },
+                  { header: t('shared:labels.name'), accessor: 'name', priority: 'high', width: 200 },
+                  { header: t('shared:labels.relationship'), accessor: 'relationship', priority: 'high', width: 150 },
+                  { header: t('shared:labels.phone'), accessor: 'phone_number', priority: 'low', width: 150 },
+                  { header: t('shared:labels.email'), accessor: 'email', priority: 'medium', width: 150 },
                   { header: t('emergencyContacts.table.primary'), accessor: 'is_primary', priority: 'high', width: 150 },
-                  { header: t('emergencyContacts.table.status'), accessor: 'is_active', priority: 'low', width: 150 }
+                  { header: t('shared:fields.status'), accessor: 'is_active', priority: 'low', width: 150 }
                 ]}
                 patientData={currentPatient}
-                tableName={t('emergencyContacts.page.tableName')}
+                tableName={t('shared:categories.emergency_contacts')}
                 onView={handleViewContact}
                 onEdit={handleEditContact}
                 onDelete={handleDeleteContact}
@@ -547,7 +547,7 @@ const EmergencyContacts = () => {
                       variant="light"
                       size="sm"
                     >
-                      {value ? t('emergencyContacts.card.active') : t('emergencyContacts.card.inactive')}
+                      {value ? t('shared:labels.active') : t('shared:labels.inactive')}
                     </Badge>
                   ),
                 }}
@@ -626,7 +626,7 @@ const EmergencyContacts = () => {
                       variant="light"
                       size="sm"
                     >
-                      {viewingContact.is_active ? t('emergencyContacts.card.active') : t('emergencyContacts.card.inactive')}
+                      {viewingContact.is_active ? t('shared:labels.active') : t('shared:labels.inactive')}
                     </Badge>
                   </Group>
                 </Stack>
@@ -670,7 +670,7 @@ const EmergencyContacts = () => {
                       </Anchor>
                     ) : (
                       <Text size="md" c="dimmed">
-                        {t('labels.notSpecified')}
+                        {t('shared:labels.notSpecified')}
                       </Text>
                     )}
                   </Stack>
@@ -678,7 +678,7 @@ const EmergencyContacts = () => {
                 <Grid.Col span={6}>
                   <Stack gap="xs">
                     <Text size="sm" c="dimmed">
-                      {t('emergencyContacts.viewModal.emailAddress')}
+                      {t('shared:fields.emailAddress')}
                     </Text>
                     {viewingContact.email ? (
                       <Anchor
@@ -691,7 +691,7 @@ const EmergencyContacts = () => {
                       </Anchor>
                     ) : (
                       <Text size="md" c="dimmed">
-                        {t('labels.notSpecified')}
+                        {t('shared:labels.notSpecified')}
                       </Text>
                     )}
                   </Stack>
@@ -699,7 +699,7 @@ const EmergencyContacts = () => {
                 <Grid.Col span={12}>
                   <Stack gap="xs">
                     <Text size="sm" c="dimmed">
-                      {t('emergencyContacts.viewModal.address')}
+                      {t('shared:labels.address')}
                     </Text>
                     {viewingContact.address ? (
                       <Text size="md" fw={500}>
@@ -707,7 +707,7 @@ const EmergencyContacts = () => {
                       </Text>
                     ) : (
                       <Text size="md" c="dimmed">
-                        {t('labels.notSpecified')}
+                        {t('shared:labels.notSpecified')}
                       </Text>
                     )}
                   </Stack>
@@ -726,7 +726,7 @@ const EmergencyContacts = () => {
                 </Text>
               ) : (
                 <Text size="md" c="dimmed">
-                  {t('emergencyContacts.viewModal.noNotes')}
+                  {t('shared:labels.noNotesAvailable')}
                 </Text>
               )}
             </Card>
@@ -734,7 +734,7 @@ const EmergencyContacts = () => {
             {/* Action Buttons */}
             <Group justify="flex-end" gap="md">
               <Button variant="filled" size="xs" onClick={handleCloseViewModal}>
-                {t('buttons.close')}
+                {t('shared:labels.close')}
               </Button>
               <Button
                 variant="filled"

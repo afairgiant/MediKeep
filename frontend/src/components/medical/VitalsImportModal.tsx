@@ -84,7 +84,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
   patientId,
   onImportComplete,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDateTime, formatDate } = useDateFormat();
 
   // State
@@ -221,7 +221,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
 
       <Group justify="flex-end">
         <Button variant="default" onClick={onClose}>
-          {t('buttons.cancel', 'Cancel')}
+          {t('shared:fields.cancel', 'Cancel')}
         </Button>
         <Button
           onClick={handlePreview}
@@ -283,7 +283,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
           <Alert variant="light" color="orange" icon={<IconAlertTriangle size={16} />}>
             <Stack gap="xs">
               <Text size="sm">
-                {t('vitals.import.duplicateWarning', '{{count}} readings already exist in this date range. Check the box above to skip them.', {
+                {t('shared:labels.countReadingsAlreadyExistInThisDateRangeCheckTheBoxAboveToSkipThem', '{{count}} readings already exist in this date range. Check the box above to skip them.', {
                   count: previewData.duplicate_count,
                 })}
               </Text>
@@ -300,7 +300,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
         {previewData.warnings.length > 0 && (
           <Alert variant="light" color="yellow" icon={<IconAlertTriangle size={16} />}>
             <Text size="sm" fw={500} mb="xs">
-              {t('vitals.import.warnings', 'Warnings')} ({previewData.warnings.length})
+              {t('shared:labels.warnings', 'Warnings')} ({previewData.warnings.length})
             </Text>
             {previewData.warnings.slice(0, 5).map((w, i) => (
               <Text key={i} size="xs">
@@ -319,9 +319,9 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
         <Table striped highlightOnHover withTableBorder>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>{t('vitals.table.date', 'Date')}</Table.Th>
+              <Table.Th>{t('shared:labels.date', 'Date')}</Table.Th>
               <Table.Th>{t('vitals.modal.bloodGlucose', 'Glucose')} (mg/dL)</Table.Th>
-              <Table.Th>{t('labels.status', 'Status')}</Table.Th>
+              <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -409,7 +409,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
             imported: importResult.imported_count,
             skipped: importResult.skipped_duplicates,
           })
-        : t('vitals.import.success', 'Successfully imported {{count}} readings', {
+        : t('shared:labels.successfullyImportedCountReadings', 'Successfully imported {{count}} readings', {
             count: importResult.imported_count,
           });
 
@@ -430,7 +430,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
           </Alert>
         )}
 
-        <Button onClick={handleComplete}>{t('buttons.close', 'Close')}</Button>
+        <Button onClick={handleComplete}>{t('shared:labels.close', 'Close')}</Button>
       </Stack>
     );
   };

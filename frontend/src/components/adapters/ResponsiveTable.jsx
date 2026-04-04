@@ -116,7 +116,7 @@ export const ResponsiveTable = memo(({
   ...props
 }) => {
   const { breakpoint, deviceType, isMobile, isTablet, isDesktop } = useResponsive();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const hasActions = Boolean(onView || onEdit || onDelete);
 
   // Coerce null to [] — the default param only fires for undefined, not null,
@@ -344,7 +344,7 @@ export const ResponsiveTable = memo(({
             color="yellow"
             size={buttonSize}
             onClick={() => onEdit(row)}
-            aria-label={t('buttons.edit')}
+            aria-label={t('shared:labels.edit')}
           >
             <IconEdit size={iconSize} />
           </ActionIcon>
@@ -413,7 +413,7 @@ export const ResponsiveTable = memo(({
           {hasActions && (
             <MantineTable.Th className="no-print" style={{ width: 120, textAlign: 'center' }}>
               <Text fw={500} size={size}>
-                {t('labels.actions', 'Actions')}
+                {t('shared:labels.actions', 'Actions')}
               </Text>
             </MantineTable.Th>
           )}

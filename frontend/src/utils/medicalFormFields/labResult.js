@@ -17,7 +17,7 @@ export const labResultFormFields = [
   {
     name: 'test_code',
     type: 'text',
-    labelKey: 'medical:labResults.testCode.label',
+    labelKey: 'shared:fields.testCode',
     placeholderKey: 'medical:labResults.testCode.placeholder',
     descriptionKey: 'medical:labResults.testCode.description',
     gridColumn: 4,
@@ -26,7 +26,7 @@ export const labResultFormFields = [
     name: 'test_category',
     type: 'select',
     labelKey: 'medical:labResults.testCategory.label',
-    placeholderKey: 'medical:labResults.testCategory.placeholder',
+    placeholderKey: 'shared:labels.selectCategory',
     descriptionKey: 'medical:labResults.testCategory.description',
     gridColumn: 6,
     searchable: true,
@@ -54,8 +54,8 @@ export const labResultFormFields = [
   {
     name: 'practitioner_id',
     type: 'select',
-    labelKey: 'medical:labResults.orderingPractitioner.label',
-    placeholderKey: 'medical:labResults.orderingPractitioner.placeholder',
+    labelKey: 'shared:labels.orderingPractitioner',
+    placeholderKey: 'shared:labels.selectPractitioner',
     descriptionKey: 'medical:labResults.orderingPractitioner.description',
     gridColumn: 6,
     searchable: true,
@@ -74,7 +74,7 @@ export const labResultFormFields = [
   {
     name: 'labs_result',
     type: 'select',
-    labelKey: 'medical:labResults.labResult.label',
+    labelKey: 'shared:labels.labResult',
     placeholderKey: 'medical:labResults.labResult.placeholder',
     descriptionKey: 'medical:labResults.labResult.description',
     gridColumn: 6,
@@ -84,7 +84,7 @@ export const labResultFormFields = [
   {
     name: 'ordered_date',
     type: 'date',
-    labelKey: 'medical:labResults.orderedDate.label',
+    labelKey: 'shared:labels.orderedDate',
     placeholderKey: 'medical:labResults.orderedDate.placeholder',
     descriptionKey: 'medical:labResults.orderedDate.description',
     gridColumn: 6,
@@ -92,7 +92,7 @@ export const labResultFormFields = [
   {
     name: 'completed_date',
     type: 'date',
-    labelKey: 'medical:labResults.completedDate.label',
+    labelKey: 'shared:labels.completedDate',
     placeholderKey: 'medical:labResults.completedDate.placeholder',
     descriptionKey: 'medical:labResults.completedDate.description',
     gridColumn: 6,
@@ -100,7 +100,7 @@ export const labResultFormFields = [
   {
     name: 'notes',
     type: 'textarea',
-    labelKey: 'medical:labResults.additionalNotes.label',
+    labelKey: 'shared:fields.additionalNotes',
     placeholderKey: 'medical:labResults.additionalNotes.placeholder',
     descriptionKey: 'medical:labResults.additionalNotes.description',
     gridColumn: 12,

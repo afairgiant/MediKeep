@@ -1,23 +1,16 @@
 {
   "admin": {
     "createUser": {
-      "email": "Email",
-      "firstName": "First Name",
-      "lastName": "Last Name",
       "linkPatient": {
-        "hint": "Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).",
-        "selfRecordBadge": "Self-Record",
-        "selfRecordWarning": "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.",
-        "selfRecordWarningTitle": "Note:"
+        "hint": "Maak in plaats van een nieuw patiëntdossier een koppeling met een bestaande patiënt (bijv. een kind dat nu een eigen login nodig heeft).",
+        "selfRecordBadge": "Eigen dossier",
+        "selfRecordWarning": "Dit is het eigen dossier van de huidige eigenaar. Er wordt een nieuw eigen dossier aangemaakt voor de oorspronkelijke eigenaar met hun demografische gegevens overgenomen. De oorspronkelijke eigenaar krijgt bewerkingstoegang tot deze patiënt."
       },
-      "password": "Password",
       "passwordReqs": {
-        "hasLetter": "Contains at least one letter",
-        "hasNumber": "Contains at least one number",
-        "minLength": "At least 6 characters"
-      },
-      "role": "Role",
-      "username": "Username"
+        "hasLetter": "Bevat minimaal één letter",
+        "hasNumber": "Bevat minimaal één cijfer",
+        "minLength": "Minimaal 6 tekens"
+      }
     }
   },
   "analytics": {
@@ -25,44 +18,30 @@
     "activityTrend": "Activiteitstrend",
     "analyticsDateRange": "Analyse datumbereik",
     "axisLabels": {
-      "activities": "Activiteiten",
-      "date": "Datum"
+      "activities": "Activiteiten"
     },
     "breakdownByType": "Verdeling per type",
     "chartLabels": {
-      "allergies": "Allergieën",
-      "labResults": "Laboratoriumuitslagen",
-      "medications": "Medicatie",
       "patients": "Patiënten",
-      "procedures": "Ingrepen",
-      "userActivity": "Gebruikersactiviteit",
-      "vitals": "Vitale functies"
+      "userActivity": "Gebruikersactiviteit"
     },
     "customDateRange": "Aangepast datumbereik",
     "dailyAverage": "Dagelijks gemiddelde",
-    "days": "{{count}} dagen",
-    "days_one": "{{count}} days",
-    "days_other": "{{count}} days",
     "filterByDays": "Filteren op laatste {{days}} dagen",
     "loading": "Analyse laden...",
     "period": "Periode",
     "recordsDistribution": "Dossierverdeling",
     "subtitle": "Activiteitstrends, vergelijkingen en dossierverdeling",
     "title": "Analyse",
-    "total": "{{count}} totaal",
-    "total_one": "{{count}} total",
-    "total_other": "{{count}} total",
     "totalActivities": "Totaal activiteiten",
     "userInteractions": "Gebruikersinteracties",
     "vsPreviousPeriod": "t.o.v. vorige periode"
   },
   "auditLog": {
     "actionFilter": "Actie",
-    "clearFilters": "Filters wissen",
     "dateRange": "Datumbereik",
     "entityTypeFilter": "Entiteitstype",
     "errorLoading": "Fout bij laden auditlogboek",
-    "exportCsv": "CSV exporteren",
     "filterByAction": "Filteren op actie",
     "filterByDateRange": "Filteren op datumbereik",
     "filterByEntityType": "Filteren op entiteitstype",
@@ -77,14 +56,10 @@
     "system": "Systeem",
     "tableHeaders": {
       "action": "Actie",
-      "description": "Beschrijving",
       "entityType": "Entiteitstype",
       "recordId": "Dossier-ID",
-      "timestamp": "Tijdstempel",
-      "user": "Gebruiker"
+      "timestamp": "Tijdstempel"
     },
-    "title": "Auditlogboek",
-    "userFilter": "Gebruiker",
     "viewRecord": "{{type}} dossier bekijken",
     "viewRecordAriaLabel": "{{type}} #{{id}} bekijken"
   },
@@ -93,21 +68,14 @@
       "count_one": "{{count}} back-up",
       "count_other": "{{count}} back-ups",
       "download": "Downloaden",
-      "exportCsv": "CSV exporteren",
       "noBackups": "Geen back-ups gevonden",
       "previewRestore": "Herstelvoorbeeld",
       "restore": "Herstellen",
       "tableHeaders": {
-        "actions": "Acties",
-        "created": "Aangemaakt",
         "fileExists": "Bestand bestaat",
-        "filename": "Bestandsnaam",
-        "size": "Grootte",
-        "status": "Status",
-        "type": "Type"
+        "filename": "Bestandsnaam"
       },
       "title": "Bestaande back-ups",
-      "unknown": "Onbekend",
       "verify": "Verifiëren"
     },
     "loading": "Back-upbeheer laden...",
@@ -158,44 +126,21 @@
     "preview": {
       "affectedData": "Beïnvloede gegevens",
       "analysisNotAvailable": "Back-upanalyse niet beschikbaar",
-      "andMore": "...en {{count}} meer",
-      "andMore_one": "...and {{count}} more",
-      "andMore_other": "...and {{count}} more",
       "backupContent": "Back-upinhoud",
       "backupDetails": "Back-upgegevens",
       "backupFiles": "Back-upbestanden",
       "components": "Componenten",
-      "created": "Aangemaakt",
       "createdAt": "Aangemaakt: {{date}}",
       "currentDatabase": "Huidige database",
       "currentFiles": "Huidige bestanden",
-      "description": "Beschrijving",
-      "filesCount": "{{count}} bestanden ({{size}})",
-      "filesCount_one": "{{count}} files ({{size}})",
-      "filesCount_other": "{{count}} files ({{size}})",
-      "filesOnly": "{{count}} bestanden",
-      "filesOnly_one": "{{count}} files",
-      "filesOnly_other": "{{count}} files",
       "manifest": "Manifest",
       "noAffectedData": "Geen informatie over beïnvloede gegevens beschikbaar",
       "noStatistics": "Geen statistieken beschikbaar",
       "restoreMethod": "Herstelmethode",
-      "size": "Grootte",
-      "sqlStatements": "{{count}} SQL-opdrachten",
-      "sqlStatements_one": "{{count}} SQL statements",
-      "sqlStatements_other": "{{count}} SQL statements",
-      "totalRecords": "{{count}} dossiers totaal",
-      "totalRecords_one": "{{count}} total records",
-      "totalRecords_other": "{{count}} total records",
-      "type": "Type",
-      "unknownType": "Onbekend back-uptype",
-      "warnings": "Waarschuwingen"
+      "unknownType": "Onbekend back-uptype"
     },
     "retention": {
       "backupsUnit": "back-ups",
-      "countProtection": "<strong>Aantalbeveiliging:</strong> Bewaar altijd de {{count}} meest recente back-ups",
-      "countProtection_one": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
-      "countProtection_other": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
       "currentStatus_one": "<strong>Huidige status:</strong> {{count}} back-up opgeslagen (max: {{max}})",
       "currentStatus_other": "<strong>Huidige status:</strong> {{count}} back-ups opgeslagen (max: {{max}})",
       "daysUnit": "dagen",
@@ -212,7 +157,6 @@
       "title": "Back-up bewaarinstellingen"
     },
     "schedule": {
-      "active": "Actief",
       "completedSuccessfully": "Succesvol voltooid",
       "dayOfWeek": "Dag van de week",
       "dayOfWeekDesc": "Op welke dag moet de wekelijkse back-up worden uitgevoerd?",
@@ -225,7 +169,6 @@
         "tue": "Dinsdag",
         "wed": "Woensdag"
       },
-      "disabled": "Uitgeschakeld",
       "failed": "Mislukt: {{error}}",
       "frequency": "Back-upfrequentie",
       "frequencyDesc": "Plan automatische volledige back-ups (database + bestanden)",
@@ -233,10 +176,8 @@
       "nextScheduledRun": "Volgende geplande uitvoering",
       "presets": {
         "daily": "Dagelijks",
-        "disabled": "Uitgeschakeld",
         "every12Hours": "Elke 12 uur",
-        "every6Hours": "Elke 6 uur",
-        "weekly": "Wekelijks"
+        "every6Hours": "Elke 6 uur"
       },
       "saveSchedule": "Schema opslaan",
       "timeOfDay": "Tijdstip",
@@ -246,10 +187,8 @@
     },
     "subtitle": "Systeemback-ups aanmaken en beheren",
     "tabs": {
-      "backups": "Back-ups",
-      "settings": "Instellingen"
+      "backups": "Back-ups"
     },
-    "title": "Back-upbeheer",
     "unsavedBadge": "Niet opgeslagen"
   },
   "createUser": {
@@ -263,16 +202,13 @@
     "autoFeaturesTitle": "Automatisch gegenereerde functies",
     "cardSubtitle": "Vul het onderstaande formulier in om een nieuw gebruikersaccount aan te maken",
     "cardTitle": "Gebruikersaccountgegevens",
-    "email": "E-mail",
     "emailPlaceholder": "Voer e-mailadres in",
     "errors": {
       "accountCreateFailed": "Account aanmaken mislukt",
       "createFailed": "Gebruiker aanmaken mislukt",
       "createRetry": "Gebruiker aanmaken mislukt. Probeer het opnieuw."
     },
-    "firstName": "Voornaam",
     "firstNamePlaceholder": "Voer voornaam in",
-    "lastName": "Achternaam",
     "lastNamePlaceholder": "Voer achternaam in",
     "linkPatient": {
       "checkbox": "Koppelen aan bestaand patiëntdossier",
@@ -284,26 +220,19 @@
       "patientId": "ID",
       "selectPlaceholder": "Selecteer een patiënt...",
       "selfRecordBadge": "Eigen dossier",
-      "selfRecordWarning": "Dit is het eigen dossier van de huidige eigenaar. Er wordt een nieuw eigen dossier aangemaakt voor de oorspronkelijke eigenaar met overgenomen demografische gegevens. De oorspronkelijke eigenaar krijgt bewerkingstoegang tot deze patiënt.",
-      "selfRecordWarningTitle": "Opmerking:"
+      "selfRecordWarning": "Dit is het eigen dossier van de huidige eigenaar. Er wordt een nieuw eigen dossier aangemaakt voor de oorspronkelijke eigenaar met overgenomen demografische gegevens. De oorspronkelijke eigenaar krijgt bewerkingstoegang tot deze patiënt."
     },
-    "noteLabel": "Opmerking:",
     "noteText": "Er wordt automatisch een patiëntdossier aangemaakt voor deze gebruiker met standaardrol \"gebruiker\".",
     "pageSubtitle": "Maak een nieuw gebruikersaccount met patiëntprofiel aan",
     "pageTitle": "Nieuwe gebruiker aanmaken",
-    "password": "Wachtwoord",
     "passwordPlaceholder": "Voer wachtwoord in (min. 6 tekens, inclusief letter & cijfer)",
     "passwordReqs": {
       "hasLetter": "Bevat ten minste één letter",
       "hasNumber": "Bevat ten minste één cijfer",
       "minLength": "Minimaal 6 tekens"
     },
-    "role": "Rol",
-    "roleAdmin": "Beheerder",
-    "roleUser": "Gebruiker",
     "submitButton": "Account aanmaken",
     "successRedirect": "Gebruiker \"{{username}}\" succesvol aangemaakt!",
-    "username": "Gebruikersnaam",
     "usernamePlaceholder": "Voer gebruikersnaam in",
     "validation": {
       "firstNameRequired": "Voer de voornaam in",
@@ -316,29 +245,22 @@
   "dashboard": {
     "loading": "Uitgebreid dashboard laden...",
     "quickActions": {
-      "auditLog": "Auditlogboek",
       "auditLogDesc": "Systeemactiviteitenlogboek bekijken",
       "backups": "Back-ups",
       "backupsDesc": "Back-upbeheer",
       "createUser": "Nieuwe gebruiker aanmaken",
       "createUserDesc": "Gebruikersaccount met patiëntprofiel aanmaken",
-      "dataModels": "Datamodellen",
       "dataModelsDesc": "Databasetabellen bekijken en beheren",
       "manageUsers": "Gebruikers beheren",
       "manageUsersDesc": "Gebruikersaccounts bekijken en beheren",
-      "settings": "Instellingen",
       "settingsDesc": "Systeemconfiguratie",
       "subtitle": "Veelgebruikte beheertaken",
-      "systemHealth": "Systeemstatus",
       "systemHealthDesc": "Systeemstatus monitoren",
       "title": "Snelle acties",
       "trash": "Prullenbak",
       "trashDesc": "Verwijderde bestanden herstellen"
     },
     "recentActivity": {
-      "count": "{{count}} activiteiten",
-      "count_one": "{{count}} activities",
-      "count_other": "{{count}} activities",
       "errorLoading": "Fout bij laden activiteit",
       "noActivity": "Geen recente activiteit om weer te geven",
       "subtitle": "Laatste systeemgebeurtenissen",
@@ -348,16 +270,7 @@
     "refreshAll": "Alles vernieuwen",
     "stats": {
       "activePatients": "Actieve patiënten",
-      "activePrescriptions": "{{count}} actieve recepten",
-      "activePrescriptions_one": "{{count}} active prescriptions",
-      "activePrescriptions_other": "{{count}} active prescriptions",
-      "labResults": "Laboratoriumuitslagen",
-      "medications": "Medicatie",
-      "recentRegistrations": "+{{count}} deze week",
-      "recentRegistrations_one": "+{{count}} this week",
-      "recentRegistrations_other": "+{{count}} this week",
-      "totalUsers": "Totaal gebruikers",
-      "vitalSigns": "Vitale functies"
+      "totalUsers": "Totaal gebruikers"
     },
     "subtitle": "Uitgebreid systeemoverzicht en -beheer",
     "systemHealth": {
@@ -366,20 +279,14 @@
       "lastBackup": "Laatste back-up",
       "noBackup": "Geen back-up",
       "subtitle": "Huidige systeemstatus",
-      "title": "Systeemstatus",
-      "totalRecords": "Totaal dossiers",
       "uptime": "Uptime"
-    },
-    "title": "Beheerderspaneel"
+    }
   },
   "dataModels": {
     "categories": {
       "coreMedical": "Kern medisch",
-      "familyHistory": "Familiegeschiedenis",
       "fileManagement": "Bestandsbeheer",
       "healthcareDirectory": "Zorgverlenerslijst",
-      "medicalRecords": "Medische dossiers",
-      "other": "Overig",
       "patientSupport": "Patiëntondersteuning",
       "sharingAccess": "Delen & toegang",
       "system": "Systeem"
@@ -418,11 +325,9 @@
     "filterAriaLabel": "Datamodellen filteren",
     "filterPlaceholder": "Modellen filteren...",
     "noMatchFilter": "Geen modellen gevonden voor \"{{query}}\"",
-    "subtitle": "Beheer en bekijk alle databasetabellen en dossiers",
-    "title": "Datamodellen"
+    "subtitle": "Beheer en bekijk alle databasetabellen en dossiers"
   },
   "directoryCard": {
-    "error": "Fout",
     "files": "bestanden",
     "mb": "MB",
     "ok": "OK"
@@ -440,15 +345,12 @@
     "patientIdLocked": "Patiënt-ID (vergrendeld op huidige gebruiker)",
     "primaryKeyAutoGenerated": "Primaire sleutel (automatisch gegenereerd)",
     "primaryKeyReadOnly": "Primaire sleutel (alleen-lezen)",
-    "resetPassword": "Wachtwoord herstellen",
     "selectDefault": "-- Selecteer --",
     "selectField": "-- Selecteer {{field}} --",
     "systemTimestamp": "Systeemtijdstempel (automatisch gegenereerd)"
   },
   "header": {
-    "adminBadge": "Beheerder",
     "administrator": "Beheerder",
-    "dashboard": "Dashboard",
     "logout": "Uitloggen",
     "returnToDashboard": "Terug naar Dashboard",
     "searchAriaLabel": "Zoeken in datamodellen",
@@ -464,7 +366,6 @@
       "connectionTest": "Verbindingstest",
       "databaseSize": "Databasegrootte",
       "failed": "Mislukt",
-      "medicalRecords": "Medische dossiers",
       "passed": "Geslaagd",
       "patientRecords": "Patiëntdossiers",
       "title": "Databasestatus"
@@ -491,8 +392,7 @@
     "schedulePresets": {
       "daily": "Dagelijks",
       "every_12_hours": "Elke 12 uur",
-      "every_6_hours": "Elke 6 uur",
-      "weekly": "Wekelijks"
+      "every_6_hours": "Elke 6 uur"
     },
     "services": {
       "adminInterface": "Beheerinterface",
@@ -504,35 +404,28 @@
     "sso": {
       "allowed": "Toegestaan",
       "blocked": "Geblokkeerd",
-      "disabled": "Uitgeschakeld",
-      "enabled": "Ingeschakeld",
       "passwordOnlyInfo": "Gebruikers kunnen alleen inloggen met gebruikersnaam/wachtwoord",
-      "provider": "Provider",
       "providerType": "Providertype",
       "registrationViaSso": "Registratie via SSO",
       "ssoStatus": "SSO-status",
-      "title": "Single Sign-On (SSO)"
+      "title": "Eenmalige aanmelding (SSO)"
     },
     "storage": {
       "appStorage": "App-opslag",
       "diskUsage": "Schijfgebruik",
-      "filesAcross": "verdeeld over {{count}} bestanden",
-      "filesAcross_one": "across {{count}} files",
-      "filesAcross_other": "across {{count}} files",
       "freeOf": "{{free}} GB vrij van {{total}} GB",
       "title": "Opslagstatus"
     },
     "subtitle": "Realtime systeemstatus en prestatiegegevens",
-    "title": "Systeemstatusmonitor",
-    "totalRecords": "Totaal dossiers"
+    "title": "Systeemstatusmonitor"
   },
   "models": {
     "backToDataModels": "Terug naar Datamodellen",
     "backToModel": "Terug naar {{modelName}}",
     "bulkDeleteAssociated": "Alle bijbehorende gegevens (inclusief {{types}}) worden ook verwijderd.",
     "bulkDeleteFailed": "Bulkverwijdering mislukt",
-    "bulkDeleteWarning_one": "U staat op het punt om {{count}} {{modelName}} dossier permanent te verwijderen.",
-    "bulkDeleteWarning_other": "U staat op het punt om {{count}} {{modelName}} dossiers permanent te verwijderen.",
+    "bulkDeleteWarning_one": "U staat op het punt {{count}} {{modelName}}-record permanent te verwijderen.",
+    "bulkDeleteWarning_other": "U staat op het punt {{count}} {{modelName}}-records permanent te verwijderen.",
     "changeRole": "Rol wijzigen",
     "changesSaved": "Wijzigingen opgeslagen",
     "changeUsername": "Gebruikersnaam wijzigen",
@@ -544,12 +437,11 @@
     "createRecord": "Dossier aanmaken",
     "deleteFailed": "Verwijderen mislukt",
     "deleteRecords": "{{count}} dossiers verwijderen",
-    "deleteRecords_one": "",
-    "deleteRecords_other": "",
+    "deleteRecords_one": "{{count}} record verwijderen",
+    "deleteRecords_other": "{{count}} records verwijderen",
     "deleteSelected": "Selectie verwijderen",
     "deleteWarning": "Dit zal dit {{modelName}} dossier en alle bijbehorende gegevens permanent verwijderen:",
     "editRecord": "{{modelName}} bewerken",
-    "exportCsv": "CSV exporteren",
     "exportFailed": "Export mislukt",
     "exportToCSV": "Exporteren naar CSV",
     "failedToBulkDelete": "Dossiers verwijderen mislukt",
@@ -565,16 +457,16 @@
     "loadingForm": "Modelaanmaakformulier laden...",
     "noRecordsFound": "Geen dossiers gevonden",
     "perPage": "{{count}} per pagina",
-    "perPage_one": "",
-    "perPage_other": "",
+    "perPage_one": "{{count}} per pagina",
+    "perPage_other": "{{count}} per pagina",
     "rawDataJson": "Ruwe data (JSON)",
     "recordDeleted": "Dossier verwijderd",
     "recordDeletedMessage": "{{modelName}} dossier #{{id}} succesvol verwijderd",
     "recordId": "Dossier ID: {{id}}",
     "recordsDeleted": "Dossiers verwijderd",
     "recordsDeletedMessage": "{{count}} dossiers succesvol verwijderd",
-    "recordsDeletedMessage_one": "",
-    "recordsDeletedMessage_other": "",
+    "recordsDeletedMessage_one": "{{count}} record succesvol verwijderd",
+    "recordsDeletedMessage_other": "{{count}} records succesvol verwijderd",
     "recordUpdated": "Dossier succesvol bijgewerkt",
     "resetToDefault": "Standaardinstellingen herstellen",
     "roleChangeLastAdmin": "Als dit de laatste beheerder in het systeem is, verliest u mogelijk beheerderstoegang.",
@@ -586,12 +478,9 @@
     "searchResult_one": "{{count}} resultaat voor \"{{query}}\"",
     "searchResult_other": "{{count}} resultaten voor \"{{query}}\"",
     "selected": "{{count}} geselecteerd",
-    "selected_one": "",
-    "selected_other": "",
+    "selected_one": "{{count}} geselecteerd",
+    "selected_other": "{{count}} geselecteerd",
     "toggleColumnVisibility": "Kolomzichtbaarheid wisselen",
-    "totalRecords": "{{count}} dossiers totaal",
-    "totalRecords_one": "{{count}} total records",
-    "totalRecords_other": "{{count}} total records",
     "typeDeleteToConfirm": "Typ <strong>DELETE</strong> om te bevestigen",
     "usernameChangeLogout": "U wordt onmiddellijk uitgelogd en moet opnieuw inloggen met de nieuwe gebruikersnaam.",
     "usernameChangeText": "U staat op het punt om uw eigen gebruikersnaam te wijzigen van <strong>\"{{oldUsername}}\"</strong> naar <strong>\"{{newUsername}}\"</strong>.",
@@ -599,7 +488,9 @@
     "usernameUpdated": "Gebruikersnaam bijgewerkt",
     "usernameUpdatedMessage": "Uw gebruikersnaam is gewijzigd. Log in met uw nieuwe gebruikersnaam: \"{{username}}\"",
     "viewRecord": "{{modelName}} bekijken",
-    "visibleColumns": "Zichtbare kolommen"
+    "visibleColumns": "Zichtbare kolommen",
+    "searchResult": "{{count}} resultaten voor \"{{query}}\"",
+    "bulkDeleteWarning": "U staat op het punt {{count}} {{modelName}}-records permanent te verwijderen."
   },
   "settings": {
     "dataRetention": {
@@ -611,73 +502,50 @@
     "resetAll": "Alles herstellen",
     "saveAllChanges": "Alle wijzigingen opslaan",
     "sso": {
-      "provider": "Provider",
       "ssoDisabledInfo": "SSO is momenteel uitgeschakeld. Om SSO in te schakelen, configureer de volgende omgevingsvariabelen en herstart de applicatie:",
       "ssoRegistration": "SSO-registratie",
       "testConnection": "Verbinding testen",
       "testConnectionDesc": "Test de SSO-providerverbinding en -configuratie",
       "testSsoConnection": "SSO-verbinding testen",
-      "title": "Single Sign-On (SSO)"
+      "title": "Eenmalige aanmelding (SSO)"
     },
     "subtitle": "Configureer systeembrede instellingen en bewaarbeleid",
     "title": "Beheerinstellingen",
     "userManagement": {
       "allowRegistration": "Nieuwe gebruikersregistratie toestaan",
-      "allowRegistrationDesc": "Schakel de mogelijkheid voor nieuwe gebruikers om accounts aan te maken vanaf de inlogpagina in of uit",
-      "title": "Gebruikersbeheer"
+      "allowRegistrationDesc": "Schakel de mogelijkheid voor nieuwe gebruikers om accounts aan te maken vanaf de inlogpagina in of uit"
     }
   },
   "shared": {
     "dark": "donker",
-    "disabled": "Uitgeschakeld",
-    "enabled": "Ingeschakeld",
     "healthy": "gezond",
     "info": "Info",
-    "light": "licht",
-    "unknown": "Onbekend"
+    "light": "licht"
   },
   "sidebar": {
     "adminNavigation": "Beheernavigatie",
     "comingSoon": "{{label}} (Binnenkort beschikbaar)",
     "items": {
       "analytics": "Analyse",
-      "auditLog": "Auditlogboek",
-      "backupManagement": "Back-upbeheer",
-      "dataModels": "Datamodellen",
       "maintenance": "Onderhoud",
-      "overview": "Overzicht",
-      "settings": "Instellingen",
-      "systemHealth": "Systeemstatus",
-      "trash": "Prullenbak",
-      "userManagement": "Gebruikersbeheer"
+      "trash": "Prullenbak"
     },
     "sections": {
-      "dashboard": "Dashboard",
       "dataManagement": "Gegevensbeheer",
-      "monitoring": "Monitoring",
+      "monitoring": "Bewaking",
       "tools": "Hulpmiddelen"
     },
-    "title": "Beheer",
     "toggleSidebar": "Zijbalk in-/uitklappen"
   },
   "tools": {
     "subtitle": "Beheerhulpmiddelen voor systeemonderhoud en gegevensbeheer",
     "testLibrary": {
       "categories": "Categorieën",
-      "categoriesUpdated": "Categorieën bijgewerkt: {{count}}",
-      "categoriesUpdated_one": "Categories Updated: {{count}}",
-      "categoriesUpdated_other": "Categories Updated: {{count}}",
       "forceSyncAll": "Alles geforceerd synchroniseren",
       "forceSyncAllDesc": "<strong>Alles geforceerd synchroniseren:</strong> Koppelt alle componenten opnieuw (categorieën en canonieke namen)",
       "libraryReloaded": "Bibliotheek herladen",
       "libraryVersion": "Bibliotheekversie",
-      "namesUpdated": "Namen bijgewerkt: {{count}}",
-      "namesUpdated_one": "Names Updated: {{count}}",
-      "namesUpdated_other": "Names Updated: {{count}}",
       "operational": "Operationeel",
-      "processed": "Verwerkt: {{count}}",
-      "processed_one": "Processed: {{count}}",
-      "processed_other": "Processed: {{count}}",
       "reloadDesc": "<strong>Bibliotheek herladen:</strong> Ververst de testbibliotheek van schijf (gebruik na bijwerken van test_library.json)",
       "reloadLibrary": "Bibliotheek herladen",
       "syncComplete": "Synchronisatie voltooid",
@@ -689,7 +557,6 @@
     "title": "Hulpmiddelen & onderhoud"
   },
   "trash": {
-    "clearFilters": "Filters wissen",
     "deleteConfirm": "Weet u zeker dat u <strong>{{filename}}</strong> permanent wilt verwijderen?",
     "deletedDateRange": "Verwijderd datumbereik",
     "deleteFailed": "Verwijderen mislukt",
@@ -697,7 +564,6 @@
     "deleteWarning": "Deze actie kan niet ongedaan worden gemaakt. Het bestand wordt permanent uit het systeem verwijderd.",
     "errorLoading": "Fout bij laden prullenbak",
     "fileCount_one": "{{count}} bestand",
-    "fileCount_other": "{{count}} bestanden",
     "fileDeleted": "Bestand verwijderd",
     "fileDeletedMessage": "{{filename}} permanent verwijderd",
     "fileRestored": "Bestand hersteld",
@@ -714,9 +580,6 @@
     "permanentlyDeleteFile": "Bestand permanent verwijderen",
     "purgedDirectories_one": "in {{count}} map",
     "purgedDirectories_other": "in {{count}} mappen",
-    "purgeDescription": "Bestanden die de bewaartermijn hebben overschreden worden verwijderd. Momenteel {{verb}} er <strong>{{count}} {{files}}</strong> in de prullenbak met een totaal van <strong>{{size}}</strong>.",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} verlopen bestand permanent verwijderd",
     "purgedMessage_other": "{{count}} verlopen bestanden permanent verwijderd",
     "purgeExpired": "Verlopen opschonen",
@@ -734,16 +597,14 @@
     "showingFiltered": "{{shown}} van {{total}} {{files}} weergegeven",
     "subtitle": "Beheer verwijderde geüploade bestanden. Herstel bestanden naar hun oorspronkelijke locatie of verwijder ze permanent om opslagruimte vrij te maken.",
     "tableHeaders": {
-      "actions": "Acties",
       "deleted": "Verwijderd",
       "filename": "Bestandsnaam",
-      "originalLocation": "Oorspronkelijke locatie",
-      "reason": "Reden",
-      "size": "Grootte"
+      "originalLocation": "Oorspronkelijke locatie"
     },
     "title": "Prullenbakbeheer",
     "totalSize": "{{size}} totaal",
-    "trashPurged": "Prullenbak opgeschoond"
+    "trashPurged": "Prullenbak opgeschoond",
+    "fileCount_other": "{{count}} bestanden"
   },
   "users": {
     "actionsFor": "Acties voor {{username}}",
@@ -756,9 +617,6 @@
     },
     "changeRole": "Rol wijzigen",
     "clear": "Wissen",
-    "daysAgo": "{{count}}d geleden",
-    "daysAgo_one": "{{count}}d ago",
-    "daysAgo_other": "{{count}}d ago",
     "deactivate": "Deactiveren",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Kan de laatste beheerder niet verwijderen.",
@@ -768,22 +626,15 @@
       "warning": "Deze actie kan niet ongedaan worden gemaakt. Alle gegevens van deze gebruiker worden permanent verwijderd."
     },
     "deleteUser": "Gebruiker verwijderen",
-    "hoursAgo": "{{count}}u geleden",
-    "hoursAgo_one": "{{count}}h ago",
-    "hoursAgo_other": "{{count}}h ago",
     "justNow": "Zojuist",
     "loginHistory": "Logingeschiedenis",
     "loginHistoryModal": {
       "dateTime": "Datum & tijd",
-      "details": "Details",
       "ipAddress": "IP-adres",
       "noHistory": "Geen logingeschiedenis gevonden",
       "notAvailable": "N.v.t.",
       "title": "Logingeschiedenis: {{username}}"
     },
-    "minutesAgo": "{{count}}m geleden",
-    "minutesAgo_one": "{{count}}m ago",
-    "minutesAgo_other": "{{count}}m ago",
     "never": "Nooit",
     "noUsersFound": "Geen gebruikers gevonden",
     "noUsersInSystem": "Geen gebruikers in het systeem.",
@@ -793,40 +644,26 @@
       "newPassword": "Nieuw wachtwoord",
       "passwordDescription": "Minimaal 6 tekens, ten minste 1 letter en 1 cijfer",
       "resettingFor": "Wachtwoord herstellen voor <strong>{{username}}</strong>",
-      "ssoWarning": "Deze gebruiker authenticeert via SSO ({{provider}}). Het instellen van een lokaal wachtwoord maakt hybride authenticatie mogelijk.",
-      "title": "Wachtwoord herstellen"
+      "ssoWarning": "Deze gebruiker authenticeert via SSO ({{provider}}). Het instellen van een lokaal wachtwoord maakt hybride authenticatie mogelijk."
     },
-    "resetPassword": "Wachtwoord herstellen",
     "roleFilter": {
-      "admin": "Beheerder",
-      "all": "Alle rollen",
-      "user": "Gebruiker"
+      "all": "Alle rollen"
     },
     "roleModal": {
       "cannotRemoveLastAdmin": "Kan de laatste beheerdersrol niet verwijderen.",
       "changingRole": "Rol wijzigen voor <strong>{{username}}</strong>",
       "grantAdmin": "Dit verleent volledige beheerdersrechten.",
       "revokeAdmin": "Dit trekt beheerdersrechten in.",
-      "roleLabel": "Rol",
       "title": "Gebruikersrol wijzigen"
     },
     "searchPlaceholder": "Gebruikers zoeken...",
     "statusFilter": {
-      "active": "Actief",
-      "all": "Alle statussen",
-      "inactive": "Inactief"
+      "all": "Alle statussen"
     },
     "tableHeaders": {
-      "actions": "Acties",
       "auth": "Authenticatie",
-      "created": "Aangemaakt",
-      "fullName": "Volledige naam",
-      "lastLogin": "Laatste login",
-      "role": "Rol",
-      "status": "Status",
-      "user": "Gebruiker"
+      "lastLogin": "Laatste login"
     },
-    "title": "Gebruikersbeheer",
     "toggleActiveModal": {
       "activateConfirm": "\"{{username}}\" activeren? Deze gebruiker kan dan weer inloggen.",
       "activateTitle": "Gebruiker activeren",
@@ -836,6 +673,7 @@
       "deactivateTitle": "Gebruiker deactiveren"
     },
     "userCount_one": "{{count}} gebruiker",
-    "userCount_other": "{{count}} gebruikers"
+    "userCount_other": "{{count}} gebruikers",
+    "userCount": "{{count}} gebruikers"
   }
 }

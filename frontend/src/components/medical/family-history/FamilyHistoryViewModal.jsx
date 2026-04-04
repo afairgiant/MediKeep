@@ -49,7 +49,7 @@ const FamilyHistoryViewModal = ({
   onDeleteCondition,
   onError
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
   const { formatDate } = useDateFormat();
 
@@ -190,7 +190,7 @@ const FamilyHistoryViewModal = ({
                   </Badge>
                   {member.is_shared && (
                     <Badge color="blue" variant="light" size="sm">
-                      {t('familyHistory.card.shared', 'Shared')}
+                      {t('shared:categories.shared', 'Shared')}
                     </Badge>
                   )}
                 </Group>
@@ -238,7 +238,7 @@ const FamilyHistoryViewModal = ({
             <Stack gap="xs">
               {member.gender && (
                 <Text size="sm">
-                  <strong>{t('familyHistory.card.gender', 'Gender')}:</strong> {member.gender}
+                  <strong>{t('shared:fields.gender', 'Gender')}:</strong> {member.gender}
                 </Text>
               )}
               {member.birth_year && (
@@ -254,7 +254,7 @@ const FamilyHistoryViewModal = ({
               )}
               {member.is_shared && member.shared_by && (
                 <Text size="sm">
-                  <strong>{t('familyHistory.card.sharedBy', 'Shared By')}:</strong> {member.shared_by.name || t('familyHistory.table.unknown', 'Unknown')}
+                  <strong>{t('familyHistory.card.sharedBy', 'Shared By')}:</strong> {member.shared_by.name || t('shared:labels.unknown', 'Unknown')}
                 </Text>
               )}
               {member.is_shared && member.shared_at && (
@@ -269,7 +269,7 @@ const FamilyHistoryViewModal = ({
               )}
               {member.notes && (
                 <Text size="sm">
-                  <strong>{t('labels.notes', 'Notes')}:</strong> {member.notes}
+                  <strong>{t('shared:tabs.notes', 'Notes')}:</strong> {member.notes}
                 </Text>
               )}
             </Stack>
@@ -279,7 +279,7 @@ const FamilyHistoryViewModal = ({
           <Card withBorder p="md">
             <Group justify="space-between" mb="md">
               <Text fw={500} size="lg">
-                {t('familyHistory.card.medicalConditions', 'Medical Conditions')}
+                {t('shared:labels.medicalConditions', 'Medical Conditions')}
               </Text>
               <Button
                 size="xs"
@@ -370,7 +370,7 @@ const FamilyHistoryViewModal = ({
                               : {}
                           }
                         >
-                          {t('buttons.edit', 'Edit')}
+                          {t('shared:labels.edit', 'Edit')}
                         </Button>
                         <Button
                           size="xs"
@@ -425,7 +425,7 @@ const FamilyHistoryViewModal = ({
           {/* Action Buttons */}
           <Group justify="flex-end" gap="sm">
             <Button variant="default" onClick={onClose}>
-              {t('buttons.close', 'Close')}
+              {t('shared:labels.close', 'Close')}
             </Button>
             {!member.is_shared && (
               <Button

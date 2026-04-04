@@ -50,7 +50,7 @@ import {
 import { IconFileUpload } from '@tabler/icons-react';
 
 const LabResults = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const location = useLocation();
@@ -648,7 +648,7 @@ const LabResults = () => {
           emoji="🧪"
           title={t('labResults.noResults', 'No Lab Results Found')}
           hasActiveFilters={dataManagement.hasActiveFilters}
-          filteredMessage={t('labResults.tryAdjustingFilters', 'Try adjusting your search or filter criteria.')}
+          filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
           noDataMessage={t('labResults.startAdding', 'Start by adding your first lab result.')}
           actionButton={
             <Button variant="filled" onClick={handleAddLabResult}>
@@ -687,15 +687,15 @@ const LabResults = () => {
           data={paginatedLabResults}
           pagination={false}
           columns={[
-            { header: t('labResults.table.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
-            { header: t('labResults.table.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
-            { header: t('labResults.table.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
-            { header: t('labResults.table.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
-            { header: t('labels.status', 'Status'), accessor: 'status', priority: 'high', width: 120 },
-            { header: t('labResults.table.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
-            { header: t('labResults.table.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },
-            { header: t('labResults.table.completedDate', 'Completed Date'), accessor: 'completed_date', priority: 'low', width: 120 },
-            { header: t('labResults.table.files', 'Files'), accessor: 'files', priority: 'low', width: 150 },
+            { header: t('shared:fields.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
+            { header: t('shared:labels.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
+            { header: t('shared:labels.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
+            { header: t('shared:labels.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
+            { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'high', width: 120 },
+            { header: t('shared:labels.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
+            { header: t('shared:labels.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },
+            { header: t('shared:labels.completedDate', 'Completed Date'), accessor: 'completed_date', priority: 'low', width: 120 },
+            { header: t('shared:tabs.documents', 'Files'), accessor: 'files', priority: 'low', width: 150 },
           ]}
           patientData={currentPatient}
           tableName={t('labResults.title', 'Lab Results')}

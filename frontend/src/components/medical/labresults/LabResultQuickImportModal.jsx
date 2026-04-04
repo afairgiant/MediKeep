@@ -28,7 +28,7 @@ const LabResultQuickImportModal = ({
   onSuccess,
   patientId,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'shared']);
 
   // Stage management
   const [stage, setStage] = useState('form'); // 'form' | 'parsing'
@@ -175,7 +175,7 @@ const LabResultQuickImportModal = ({
       setError(errorMessage || t('labResults.createFailedTryAgain', 'Failed to create lab result. Please try again.'));
 
       notifications.show({
-        title: t('labResults.error', 'Error'),
+        title: t('shared:labels.error', 'Error'),
         message: errorMessage || t('labResults.createFailed', 'Failed to create lab result'),
         color: 'red',
         autoClose: 5000,
@@ -216,7 +216,7 @@ const LabResultQuickImportModal = ({
       });
 
       notifications.show({
-        title: t('labResults.success', 'Success'),
+        title: t('shared:labels.success', 'Success'),
         message: t(
           'labResults.quickImportSuccess',
           'Lab result and test components imported successfully'
@@ -275,7 +275,7 @@ const LabResultQuickImportModal = ({
       });
 
       notifications.show({
-        title: t('labResults.success', 'Success'),
+        title: t('shared:labels.success', 'Success'),
         message: t('labResults.labResultDeleted', 'Lab result deleted'),
         color: 'green',
       });
@@ -288,7 +288,7 @@ const LabResultQuickImportModal = ({
       });
 
       notifications.show({
-        title: t('labResults.error', 'Error'),
+        title: t('shared:labels.error', 'Error'),
         message: t('labResults.deleteFailed', 'Failed to delete lab result'),
         color: 'red',
       });
@@ -373,7 +373,7 @@ const LabResultQuickImportModal = ({
               {error && (
                 <Alert
                   icon={<IconAlertCircle size={16} />}
-                  title={t('labResults.error', 'Error')}
+                  title={t('shared:labels.error', 'Error')}
                   color="red"
                   onClose={() => setError(null)}
                   role="alert"
@@ -389,7 +389,7 @@ const LabResultQuickImportModal = ({
                         onClick={handleCreateLabResult}
                         disabled={!testName.trim() || isCreating}
                       >
-                        {t('buttons.retry', 'Retry')}
+                        {t('shared:labels.retry', 'Retry')}
                       </Button>
                     </Group>
                   </Stack>
@@ -423,7 +423,7 @@ const LabResultQuickImportModal = ({
 
               <Group justify="flex-end" mt="md">
                 <Button variant="subtle" onClick={onClose}>
-                  {t('buttons.cancel', 'Cancel')}
+                  {t('shared:fields.cancel', 'Cancel')}
                 </Button>
                 <Button
                   leftSection={<IconFileUpload size={16} />}
@@ -447,7 +447,7 @@ const LabResultQuickImportModal = ({
             <Stack gap="md">
               <Alert
                 icon={<IconCheck size={16} />}
-                title={t('labResults.success', 'Success')}
+                title={t('shared:labels.success', 'Success')}
                 color="green"
                 role="status"
                 aria-live="polite"
@@ -472,7 +472,7 @@ const LabResultQuickImportModal = ({
                   });
 
                   notifications.show({
-                    title: t('labResults.error', 'Error'),
+                    title: t('shared:labels.error', 'Error'),
                     message: error.message || t('labResults.errorOccurred', 'An error occurred'),
                     color: 'red',
                   });

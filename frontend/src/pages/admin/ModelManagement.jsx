@@ -56,7 +56,7 @@ const PER_PAGE_OPTIONS = ['10', '25', '50', '100'];
 const ModelManagement = () => {
   const { modelName } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation(['admin', 'shared']);
   const { formatDate } = useDateFormat();
 
   const formatFieldValue = (value, fieldType) => {
@@ -337,7 +337,7 @@ const ModelManagement = () => {
             <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title="Error">
               {error}
             </Alert>
-            <Button onClick={() => loadModelData(searchQuery)}>{t('common:buttons.retry', 'Retry')}</Button>
+            <Button onClick={() => loadModelData(searchQuery)}>{t('shared:labels.retry', 'Retry')}</Button>
           </Stack>
         </Center>
       </AdminLayout>
@@ -361,7 +361,7 @@ const ModelManagement = () => {
           <Group justify="space-between" align="flex-end">
             <div>
               <Title order={2}>{metadata?.verbose_name_plural || modelName}</Title>
-              <Text c="dimmed" size="sm">{t('models.totalRecords', { count: totalRecords, defaultValue: '{{count}} total records' })}</Text>
+              <Text c="dimmed" size="sm">{t('shared:labels.countTotalRecords', { count: totalRecords, defaultValue: '{{count}} total records' })}</Text>
             </div>
             <Button
               leftSection={<IconPlus size={16} />}
@@ -400,7 +400,7 @@ const ModelManagement = () => {
                   disabled={totalRecords === 0}
                   size="sm"
                 >
-                  {t('models.exportCsv', 'Export CSV')}
+                  {t('shared:labels.exportCsv', 'Export CSV')}
                 </Button>
               </Tooltip>
               <Menu shadow="md" width={220} closeOnItemClick={false}>
@@ -618,7 +618,7 @@ const ModelManagement = () => {
             )}
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeDeleteModal(); setRecordToDelete(null); }}>
-                {t('common:buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button color="red" onClick={handleConfirmDelete} loading={deleting}>
                 {t('common:buttons.delete', 'Delete')}
@@ -658,7 +658,7 @@ const ModelManagement = () => {
             />
             <Group justify="flex-end" gap="sm">
               <Button variant="default" onClick={() => { closeBulkDeleteModal(); setBulkDeleteConfirmText(''); }}>
-                {t('common:buttons.cancel', 'Cancel')}
+                {t('shared:fields.cancel', 'Cancel')}
               </Button>
               <Button
                 color="red"
