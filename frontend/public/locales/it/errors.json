@@ -1,23 +1,23 @@
 {
   "alert": {
-    "errorCount": "",
-    "errorCount_one": "",
-    "errorCount_other": "",
-    "formError": "",
-    "highPriority": "",
-    "highPriority_one": "",
-    "highPriority_other": "",
-    "suggestions": ""
+    "errorCount": "{{count}} errore",
+    "errorCount_one": "{{count}} errore",
+    "errorCount_other": "{{count}} errori",
+    "formError": "Errore nel modulo",
+    "highPriority": "{{count}} ad alta priorità",
+    "highPriority_one": "{{count}} ad alta priorità",
+    "highPriority_other": "{{count}} ad alta priorità",
+    "suggestions": "Suggerimenti:"
   },
   "boundary": {
-    "componentLabel": "",
-    "errorDetails": "",
-    "errorIdLabel": "",
-    "errorLogged": "",
-    "reloadPage": "",
-    "somethingWentWrong": "",
-    "tryAgain": "",
-    "unexpectedError": ""
+    "componentLabel": "Componente:",
+    "errorDetails": "Dettagli dell'errore",
+    "errorIdLabel": "ID errore:",
+    "errorLogged": "L'errore è stato registrato automaticamente per essere analizzato.",
+    "reloadPage": "Ricarica pagina",
+    "somethingWentWrong": "Qualcosa è andato storto",
+    "tryAgain": "Riprova",
+    "unexpectedError": "Ci scusiamo, ma si è verificato un errore imprevisto nel sistema di cartelle cliniche."
   },
   "file": {
     "deleteFailed": "Eliminazione del file non riuscita. Riprova.",

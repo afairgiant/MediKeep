@@ -557,7 +557,7 @@
     "title": "Strumenti e manutenzione"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
+    "clearFilters": "Cancella filtri",
     "deleteConfirm": "Sei sicuro di voler eliminare definitivamente <strong>{{filename}}</strong>?",
     "deletedDateRange": "Intervallo date di eliminazione",
     "deleteFailed": "Eliminazione fallita",
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Elimina file definitivamente",
     "purgedDirectories_one": "in {{count}} directory",
     "purgedDirectories_other": "in {{count}} directory",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "I file che hanno superato il periodo di conservazione verranno rimossi. Attualmente {{verb}} <strong>{{count}} {{files}}</strong> nel cestino per un totale di <strong>{{size}}</strong>.",
+    "purgeDescription_other": "I file che hanno superato il periodo di conservazione verranno rimossi. Attualmente {{verb}} <strong>{{count}} {{files}}</strong> nel cestino per un totale di <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} file scaduto eliminato definitivamente",
     "purgedMessage_other": "{{count}} file scaduti eliminati definitivamente",
     "purgeExpired": "Elimina scaduti",
@@ -601,12 +601,12 @@
     "showingFiltered": "Visualizzazione di {{shown}} su {{total}} {{files}}",
     "subtitle": "Gestisci i file caricati eliminati. Ripristina i file nella posizione originale o rimuovili definitivamente per liberare spazio di archiviazione.",
     "tableHeaders": {
-      "actions": "Actions",
+      "actions": "Azioni",
       "deleted": "Eliminato",
       "filename": "Nome file",
       "originalLocation": "Posizione originale",
-      "reason": "Reason",
-      "size": "Size"
+      "reason": "Motivo",
+      "size": "Dimensione"
     },
     "title": "Gestione cestino",
     "totalSize": "{{size}} totale",
@@ -646,20 +646,20 @@
     "noUsersInSystem": "Nessun utente nel sistema.",
     "noUsersMatchFilters": "Nessun utente corrisponde ai filtri. Prova a modificare o cancellare i filtri.",
     "passwordModal": {
-      "bothFieldsRequired": "",
-      "confirmPlaceholder": "",
-      "enterNewPassword": "",
+      "bothFieldsRequired": "Entrambi i campi password sono obbligatori",
+      "confirmPlaceholder": "Conferma la nuova password",
+      "enterNewPassword": "Inserisci la nuova password",
       "forceChange": "Forza il cambio password al prossimo accesso",
-      "immediateReset": "",
+      "immediateReset": "Questo reimposterà immediatamente la password dell'utente. Dovrà utilizzare la nuova password per accedere.",
       "newPassword": "Nuova password",
       "passwordDescription": "Minimo 6 caratteri, almeno 1 lettera e 1 numero",
-      "passwordsDoNotMatch": "",
-      "resetFailed": "",
-      "resetSuccess": "",
+      "passwordsDoNotMatch": "Le password non corrispondono",
+      "resetFailed": "Impossibile reimpostare la password. Riprova.",
+      "resetSuccess": "Password reimpostata con successo per {{username}}!",
       "resettingFor": "Reimposta la password per <strong>{{username}}</strong>",
       "ssoWarning": "Questo utente si autentica tramite SSO ({{provider}}). L'impostazione di una password locale consentirà l'autenticazione ibrida.",
-      "title": "",
-      "userInfo": ""
+      "title": "Reimposta password per {{username}}",
+      "userInfo": "Utente: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Tutti i ruoli"
