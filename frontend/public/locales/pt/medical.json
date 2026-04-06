@@ -103,7 +103,7 @@
     "diagnosis": {
       "description": "Nome da condição médica ou diagnóstico",
       "label": "Diagnóstico",
-      "placeholder": "ex.: Hipertensão, Diabetes Tipo 2, Asma"
+      "placeholder": "p. ex., Hipertensão, Diabetes Tipo 2, Asma"
     },
     "endDate": {
       "description": "Quando a condição foi resolvida (se aplicável)",
@@ -112,7 +112,7 @@
     "icd10Code": {
       "description": "Código da Classificação Internacional de Doenças - 10ª Revisão",
       "label": "Código CID-10",
-      "placeholder": "ex.: I10, E11.9"
+      "placeholder": "p. ex., I10, E11.9"
     },
     "notes": {
       "description": "Detalhes adicionais sobre a condição, histórico de tratamento ou observações"
@@ -133,7 +133,7 @@
     "snomedCode": {
       "description": "Código da terminologia clínica SNOMED CT",
       "label": "Código SNOMED",
-      "placeholder": "ex.: 38341003"
+      "placeholder": "p. ex., 38341003"
     },
     "status": {
       "description": "Status atual desta condição"
@@ -144,12 +144,12 @@
       "address": {
         "description": "Endereço do contato (opcional)",
         "label": "Endereço",
-        "placeholder": "ex.: Rua Principal, 123, Cidade, Estado 12345"
+        "placeholder": "p. ex., Rua Principal, 123, Cidade, Estado 12345"
       },
       "email": {
         "description": "Endereço de email opcional",
         "label": "Endereço de Email",
-        "placeholder": "ex.: joao.silva@email.com"
+        "placeholder": "p. ex., joao.silva@email.com"
       },
       "isActive": {
         "description": "Este contato está atualmente disponível",
@@ -162,16 +162,16 @@
       "name": {
         "description": "Nome completo do contato de emergência",
         "label": "Nome Completo",
-        "placeholder": "ex.: João Silva"
+        "placeholder": "p. ex., João Silva"
       },
       "notes": {
         "description": "Quaisquer notas adicionais sobre este contato",
-        "placeholder": "Informações adicionais (ex.: 'Disponível apenas em dias úteis', 'Fala espanhol')"
+        "placeholder": "Informações adicionais (p. ex., 'Disponível apenas em dias úteis', 'Fala espanhol')"
       },
       "primaryPhone": {
         "description": "Número de telefone principal",
         "label": "Telefone Principal",
-        "placeholder": "ex.: +55 11 91234-5678"
+        "placeholder": "p. ex., +55 11 91234-5678"
       },
       "relationship": {
         "description": "Relacionamento com o paciente",
@@ -181,7 +181,7 @@
       "secondaryPhone": {
         "description": "Número de telefone secundário opcional",
         "label": "Telefone Secundário",
-        "placeholder": "ex.: +55 11 99876-5432"
+        "placeholder": "p. ex., +55 11 99876-5432"
       }
     },
     "messages": {
@@ -203,7 +203,7 @@
         "conditionName": {
           "description": "Nome da condição médica",
           "label": "Nome da Condição",
-          "placeholder": "ex.: Diabetes, Doença Cardíaca, Câncer"
+          "placeholder": "p. ex., Diabetes, Doença Cardíaca, Câncer"
         },
         "conditionType": {
           "description": "Categoria da condição médica",
@@ -213,12 +213,12 @@
         "diagnosisAge": {
           "description": "Idade no momento do diagnóstico",
           "label": "Idade no Diagnóstico",
-          "placeholder": "ex.: 45"
+          "placeholder": "p. ex., 45"
         },
         "icd10Code": {
           "description": "Código de diagnóstico médico (se conhecido)",
           "label": "Código CID-10",
-          "placeholder": "ex.: E11.9"
+          "placeholder": "p. ex., E11.9"
         },
         "notes": {
           "description": "Detalhes do tratamento, resultados ou outras informações relevantes",
@@ -262,12 +262,12 @@
         "birthYear": {
           "description": "Ano em que o membro da família nasceu",
           "label": "Ano de Nascimento",
-          "placeholder": "ex.: 1965"
+          "placeholder": "p. ex., 1965"
         },
         "deathYear": {
           "description": "Ano em que o membro da família faleceu",
           "label": "Ano de Falecimento",
-          "placeholder": "ex.: 2020"
+          "placeholder": "p. ex., 2020"
         },
         "deceased": {
           "description": "Marque se o membro da família é falecido",
@@ -334,7 +334,7 @@
     },
     "location": {
       "description": "Onde a vacina foi administrada",
-      "placeholder": "ex.: Farmácia Drogasil, Hospital, Clínica, Secretaria de Saúde"
+      "placeholder": "p. ex., Farmácia Drogasil, Hospital, Clínica, Secretaria de Saúde"
     },
     "lotNumber": {
       "description": "Identificador do lote para rastreamento",
@@ -358,7 +358,7 @@
     "ndcNumber": {
       "description": "Código Nacional de Medicamento para a vacina",
       "label": "Número NDC",
-      "placeholder": "ex.: 12345-6789-01"
+      "placeholder": "p. ex., 12345-6789-01"
     },
     "notes": {
       "description": "Quaisquer detalhes relevantes sobre a imunização",
@@ -390,7 +390,7 @@
     "vaccineName": {
       "description": "Nome da vacina administrada",
       "label": "Nome da Vacina",
-      "placeholder": "ex.: COVID-19 mRNA, Influenza, Tríplice Viral"
+      "placeholder": "p. ex., COVID-19 mRNA, Influenza, Tríplice Viral"
     }
   },
   "injuries": {
@@ -399,12 +399,12 @@
     "bodyLocation": {
       "description": "Parte específica do corpo afetada pela lesão",
       "label": "Localização no Corpo",
-      "placeholder": "ex.: Joelho esquerdo, Ombro direito"
+      "placeholder": "p. ex., Joelho esquerdo, Ombro direito"
     },
     "bodyPart": {
       "description": "A parte do corpo ou área afetada",
       "label": "Parte do Corpo",
-      "placeholder": "ex.: Tornozelo, Punho, Joelho"
+      "placeholder": "p. ex., Tornozelo, Punho, Joelho"
     },
     "cardSubtitle": "Lesão Física",
     "cause": {
@@ -429,10 +429,10 @@
     "injuryName": {
       "description": "Um nome descritivo para esta lesão",
       "label": "Nome da Lesão",
-      "placeholder": "ex.: Entorse no tornozelo direito"
+      "placeholder": "p. ex., Entorse no tornozelo direito"
     },
     "injuryType": {
-      "description": "Categoria da lesão (ex.: Entorse, Fratura)",
+      "description": "Categoria da lesão (p. ex., Entorse, Fratura)",
       "label": "Tipo de Lesão",
       "noResults": "Nenhum tipo correspondente encontrado",
       "placeholder": "Selecione ou crie um tipo"
@@ -451,7 +451,7 @@
     "mechanism": {
       "description": "Descreva como a lesão ocorreu",
       "label": "Como Aconteceu",
-      "placeholder": "ex.: Caiu durante caminhada"
+      "placeholder": "p. ex., Caiu durante caminhada"
     },
     "messages": {
       "loading": "Carregando lesões...",
@@ -497,7 +497,7 @@
     },
     "treatmentReceived": {
       "description": "Descrição do tratamento recebido",
-      "placeholder": "ex.: protocolo RICE, gesso aplicado"
+      "placeholder": "p. ex., protocolo RICE, gesso aplicado"
     },
     "viewModal": {
       "additionalInfo": "Informações Adicionais",
@@ -510,17 +510,17 @@
       "annualMaximum": {
         "description": "Valor máximo anual do benefício",
         "label": "Benefício Máximo Anual",
-        "placeholder": "ex.: 1500"
+        "placeholder": "p. ex., 1500"
       },
       "basicCoverage": {
         "description": "Percentual de cobertura para procedimentos básicos",
         "label": "Cobertura Básica %",
-        "placeholder": "ex.: 80"
+        "placeholder": "p. ex., 80"
       },
       "binNumber": {
         "description": "Número de Identificação Bancária para farmácia",
         "label": "Número BIN",
-        "placeholder": "ex.: 123456"
+        "placeholder": "p. ex., 123456"
       },
       "claimsAddress": {
         "description": "Endereço para envio de solicitações de reembolso",
@@ -530,63 +530,63 @@
       "companyName": {
         "description": "Nome da seguradora",
         "label": "Seguradora",
-        "placeholder": "ex.: Unimed, Bradesco Saúde"
+        "placeholder": "p. ex., Unimed, Bradesco Saúde"
       },
       "contactAllowance": {
         "description": "Subsídio anual para lentes de contato",
         "label": "Subsídio para Lentes de Contato",
-        "placeholder": "ex.: 150"
+        "placeholder": "p. ex., 150"
       },
       "copayBrand": {
         "description": "Valor do copagamento para medicamentos de marca",
         "label": "Copagamento Marca",
-        "placeholder": "ex.: 30"
+        "placeholder": "p. ex., 30"
       },
       "copayEmergencyRoom": {
         "description": "Valor do copagamento para visitas ao pronto-socorro",
         "label": "Copagamento Pronto-Socorro",
-        "placeholder": "ex.: 200"
+        "placeholder": "p. ex., 200"
       },
       "copayGeneric": {
         "description": "Valor do copagamento para medicamentos genéricos",
         "label": "Copagamento Genérico",
-        "placeholder": "ex.: 10"
+        "placeholder": "p. ex., 10"
       },
       "copayPrimaryCare": {
         "description": "Valor do copagamento para consultas de cuidados primários",
         "label": "Copagamento Cuidados Primários",
-        "placeholder": "ex.: 25"
+        "placeholder": "p. ex., 25"
       },
       "copaySpecialist": {
         "description": "Valor do copagamento para consultas com especialistas",
         "label": "Copagamento Especialistas",
-        "placeholder": "ex.: 50"
+        "placeholder": "p. ex., 50"
       },
       "copaySpecialty": {
         "description": "Valor do copagamento para medicamentos especializados",
         "label": "Copagamento Medicamentos Especiais",
-        "placeholder": "ex.: 50"
+        "placeholder": "p. ex., 50"
       },
       "copayUrgentCare": {
         "description": "Valor do copagamento para visitas de pronto atendimento",
         "label": "Copagamento Pronto Atendimento",
-        "placeholder": "ex.: 75"
+        "placeholder": "p. ex., 75"
       },
       "coveragePeriodStatus": "Período de Cobertura e Status",
       "customerServicePhone": {
         "description": "Número de telefone do atendimento ao cliente",
         "label": "Telefone Atendimento ao Cliente",
-        "placeholder": "ex.: 0800-123-4567"
+        "placeholder": "p. ex., 0800-123-4567"
       },
       "deductibleFamily": {
         "description": "Valor anual da franquia para família",
         "label": "Franquia Familiar",
-        "placeholder": "ex.: 2000"
+        "placeholder": "p. ex., 2000"
       },
       "deductibleIndividual": {
         "description": "Valor anual da franquia para indivíduo",
         "label": "Franquia Individual",
-        "placeholder": "ex.: 1000"
+        "placeholder": "p. ex., 1000"
       },
       "dentalPlanType": {
         "description": "Tipo de plano odontológico",
@@ -614,12 +614,12 @@
       "employerGroup": {
         "description": "Empresa ou organização que fornece o seguro (se aplicável)",
         "label": "Empresa/Grupo Patrocinador",
-        "placeholder": "ex.: Empresa ABC, Autônomo"
+        "placeholder": "p. ex., Empresa ABC, Autônomo"
       },
       "examCopay": {
         "description": "Valor do copagamento para exames oftalmológicos",
         "label": "Copagamento Exame",
-        "placeholder": "ex.: 10"
+        "placeholder": "p. ex., 10"
       },
       "expirationDate": {
         "description": "Data de término da cobertura (se conhecida)",
@@ -629,12 +629,12 @@
       "frameAllowance": {
         "description": "Subsídio anual para armações",
         "label": "Subsídio para Armações",
-        "placeholder": "ex.: 150"
+        "placeholder": "p. ex., 150"
       },
       "groupNumber": {
         "description": "Número do grupo (se aplicável)",
         "label": "Número do Grupo",
-        "placeholder": "ex.: GRP123"
+        "placeholder": "p. ex., GRP123"
       },
       "insuranceType": {
         "description": "Tipo de cobertura do seguro",
@@ -654,22 +654,22 @@
       "lensCoverage": {
         "description": "Detalhes da cobertura para lentes",
         "label": "Cobertura para Lentes",
-        "placeholder": "ex.: 100% coberto"
+        "placeholder": "p. ex., 100% coberto"
       },
       "majorCoverage": {
         "description": "Percentual de cobertura para procedimentos maiores",
         "label": "Cobertura Procedimentos Maiores %",
-        "placeholder": "ex.: 50"
+        "placeholder": "p. ex., 50"
       },
       "memberId": {
         "description": "Número de identificação do beneficiário na carteirinha",
         "label": "Número do Beneficiário",
-        "placeholder": "ex.: ABC123456789"
+        "placeholder": "p. ex., ABC123456789"
       },
       "memberName": {
         "description": "Nome como aparece na carteirinha do seguro",
         "label": "Nome do Beneficiário",
-        "placeholder": "ex.: João Silva"
+        "placeholder": "p. ex., João Silva"
       },
       "notes": {
         "description": "Quaisquer detalhes ou notas adicionais",
@@ -678,7 +678,7 @@
       "pcnNumber": {
         "description": "Número de Controle do Processador",
         "label": "Número PCN",
-        "placeholder": "ex.: ABC123"
+        "placeholder": "p. ex., ABC123"
       },
       "pharmacyNetworkInfo": {
         "description": "Informações sobre redes de farmácias conveniadas",
@@ -688,7 +688,7 @@
       "planName": {
         "description": "Nome do plano específico do seguro",
         "label": "Nome do Plano",
-        "placeholder": "ex.: Plano Ouro Premium"
+        "placeholder": "p. ex., Plano Ouro Premium"
       },
       "planType": {
         "description": "Tipo de plano de seguro saúde",
@@ -706,7 +706,7 @@
       "policyHolderName": {
         "description": "Nome do titular da apólice (se diferente do beneficiário)",
         "label": "Nome do Titular da Apólice",
-        "placeholder": "ex.: Maria Silva (deixe em branco se for o mesmo beneficiário)"
+        "placeholder": "p. ex., Maria Silva (deixe em branco se for o mesmo beneficiário)"
       },
       "preauthPhone": {
         "description": "Número de telefone para pré-autorizações",
@@ -726,12 +726,12 @@
       "preventiveCoverage": {
         "description": "Percentual de cobertura para cuidados preventivos",
         "label": "Cobertura Preventiva %",
-        "placeholder": "ex.: 100"
+        "placeholder": "p. ex., 100"
       },
       "primaryCarePhysician": {
         "description": "Nome do seu médico de família",
         "label": "Médico de Família",
-        "placeholder": "ex.: Dr. Silva"
+        "placeholder": "p. ex., Dr. Silva"
       },
       "providerServicesPhone": {
         "description": "Número de telefone para prestadores de serviço",
@@ -751,7 +751,7 @@
       "rxgroup": {
         "description": "Número do grupo de medicamentos",
         "label": "Grupo RX",
-        "placeholder": "ex.: RXGRP123"
+        "placeholder": "p. ex., RXGRP123"
       },
       "saving": "Salvando seguro...",
       "status": {
@@ -780,7 +780,7 @@
       "websiteUrl": {
         "description": "Portal do beneficiário ou URL do website",
         "label": "URL do Website",
-        "placeholder": "ex.: https://beneficiario.seguradora.com.br"
+        "placeholder": "p. ex., https://beneficiario.seguradora.com.br"
       }
     },
     "viewModal": {
@@ -797,17 +797,17 @@
     "alternativeName": {
       "description": "Nome alternativo ou comercial opcional (2-100 caracteres)",
       "label": "Nome Alternativo",
-      "placeholder": "ex.: nome comercial ou nome genérico"
+      "placeholder": "p. ex., nome comercial ou nome genérico"
     },
     "dosage": {
       "description": "Concentração e quantidade por dose",
       "label": "Dosagem",
-      "placeholder": "ex.: 10mg, 1 comprimido"
+      "placeholder": "p. ex., 10mg, 1 comprimido"
     },
     "form": {
       "addMedication": "Adicionar Medicação",
       "conditionLinkFailed": "A medicação foi salva, mas algumas condições não puderam ser vinculadas. Você pode vinculá-las depois editando a medicação.",
-      "conditionLinkPartialFailure": "{{count}} vínculo(s) de condição falharam",
+      "conditionLinkPartialFailure": "{{count}} vínculo de condição falhou",
       "conditionLinkPartialFailure_one": "{{count}} vínculo de condição falhou",
       "conditionLinkPartialFailure_other": "{{count}} vínculos de condição falharam",
       "linkConditionsDescription": "Opcionalmente vincule esta medicação a condições existentes",
@@ -818,17 +818,17 @@
     "frequency": {
       "description": "Com que frequência a medicação é tomada",
       "label": "Frequência",
-      "placeholder": "ex.: Uma vez ao dia, Duas vezes ao dia"
+      "placeholder": "p. ex., Uma vez ao dia, Duas vezes ao dia"
     },
     "indication": {
       "description": "Para que serve esta medicação? Descreva o motivo ou condição sendo tratada",
       "label": "Indicação",
-      "placeholder": "ex.: Pressão alta, Conforme necessário para dor, Controle do diabetes"
+      "placeholder": "p. ex., Pressão alta, Conforme necessário para dor, Controle do diabetes"
     },
     "medicationName": {
       "description": "Nome genérico ou comercial da medicação (mín. 2 caracteres)",
       "label": "Nome da Medicação",
-      "placeholder": "ex.: Losartana, Metformina"
+      "placeholder": "p. ex., Losartana, Metformina"
     },
     "medicationType": {
       "description": "Categoria da medicação",
@@ -874,24 +874,24 @@
         "description": "Principal rede de farmácias ou tipo independente",
         "label": "Rede da Farmácia",
         "options": {
-          "amazonPharmacy": "Amazon Pharmacy",
+          "amazonPharmacy": "Amazon Farmácia",
           "compoundingPharmacy": "Farmácia de Manipulação",
-          "costcoPharmacy": "Costco Pharmacy",
+          "costcoPharmacy": "Farmácia Costco",
           "cvs": "CVS",
-          "hebPharmacy": "H-E-B Pharmacy",
+          "hebPharmacy": "Farmácia H-E-B",
           "hospitalPharmacy": "Farmácia Hospitalar",
           "independent": "Independente",
           "kaiserPermanente": "Kaiser Permanente",
-          "krogerPharmacy": "Kroger Pharmacy",
-          "meijerPharmacy": "Meijer Pharmacy",
+          "krogerPharmacy": "Farmácia Kroger",
+          "meijerPharmacy": "Farmácia Meijer",
           "onlinePharmacy": "Farmácia Online",
-          "publixPharmacy": "Publix Pharmacy",
+          "publixPharmacy": "Farmácia Publix",
           "riteAid": "Rite Aid",
-          "safewayPharmacy": "Safeway Pharmacy",
+          "safewayPharmacy": "Farmácia Safeway",
           "specialtyPharmacy": "Farmácia Especializada",
-          "targetPharmacy": "Target Pharmacy",
+          "targetPharmacy": "Farmácia Target",
           "walgreens": "Walgreens",
-          "walmartPharmacy": "Walmart Pharmacy"
+          "walmartPharmacy": "Farmácia Walmart"
         },
         "placeholder": "Selecione a rede de farmácias ou tipo"
       },
@@ -903,7 +903,7 @@
       "country": {
         "description": "País onde a farmácia está localizada",
         "label": "País",
-        "placeholder": "ex.: Brasil, Canadá"
+        "placeholder": "p. ex., Brasil, Canadá"
       },
       "locationDivider": "Informações de Localização",
       "name": {
@@ -918,22 +918,22 @@
       "postalCode": {
         "description": "CEP ou código postal",
         "label": "CEP",
-        "placeholder": "ex.: 01310-100, M5V 2T6"
+        "placeholder": "p. ex., 01310-100, M5V 2T6"
       },
       "specialtyServices": {
         "description": "Serviços especiais oferecidos por esta farmácia",
         "label": "Serviços Especializados",
-        "placeholder": "ex.: Vacinação, Manipulação, Acompanhamento Farmacoterapêutico"
+        "placeholder": "p. ex., Vacinação, Manipulação, Acompanhamento Farmacoterapêutico"
       },
       "stateProvince": {
         "description": "Estado, província ou região",
         "label": "Estado / Província",
-        "placeholder": "ex.: São Paulo, Ontario"
+        "placeholder": "p. ex., São Paulo, Ontario"
       },
       "storeNumber": {
         "description": "Identificador interno da loja",
         "label": "Número da Loja",
-        "placeholder": "ex.: 1234, #5678, Loja A"
+        "placeholder": "p. ex., 1234, #5678, Loja A"
       },
       "streetAddress": {
         "description": "Endereço físico da rua",
@@ -1045,7 +1045,7 @@
     "facility": {
       "description": "Onde o procedimento foi ou será realizado",
       "label": "Local",
-      "placeholder": "ex.: Hospital Geral, Centro Ambulatorial"
+      "placeholder": "p. ex., Hospital Geral, Centro Ambulatorial"
     },
     "notes": {
       "description": "Quaisquer observações relevantes, instruções pré/pós-operatórias ou detalhes",
@@ -1059,7 +1059,7 @@
     "procedureCode": {
       "description": "Codificação médica (CBHPM, TUSS, etc.)",
       "label": "Código do Procedimento",
-      "placeholder": "ex.: CBHPM-12345, TUSS"
+      "placeholder": "p. ex., CBHPM-12345, TUSS"
     },
     "procedureDate": {
       "description": "Quando o procedimento é/foi realizado",
@@ -1069,12 +1069,12 @@
     "procedureDuration": {
       "description": "Quanto tempo o procedimento levou/levará",
       "label": "Duração (minutos)",
-      "placeholder": "ex.: 30, 120"
+      "placeholder": "p. ex., 30, 120"
     },
     "procedureName": {
       "description": "Nome do procedimento médico",
       "label": "Nome do Procedimento",
-      "placeholder": "ex.: Apendicectomia, Ressonância Magnética, Colonoscopia"
+      "placeholder": "p. ex., Apendicectomia, Ressonância Magnética, Colonoscopia"
     },
     "procedureSetting": {
       "description": "Onde o procedimento acontece",
@@ -1122,7 +1122,7 @@
       "duration": {
         "description": "Quanto tempo durou este episódio",
         "label": "Duração",
-        "placeholder": "ex.: 2 horas, 30 minutos, o dia todo"
+        "placeholder": "p. ex., 2 horas, 30 minutos, o dia todo"
       },
       "impactLevel": {
         "description": "Quanto isso afetou suas atividades diárias",
@@ -1139,7 +1139,7 @@
       "location": {
         "description": "Onde no seu corpo você sentiu isso",
         "label": "Localização",
-        "placeholder": "ex.: Têmpora esquerda, Região lombar, Corpo inteiro"
+        "placeholder": "p. ex., Têmpora esquerda, Região lombar, Corpo inteiro"
       },
       "occurrenceDate": {
         "description": "Data deste episódio específico",
@@ -1190,7 +1190,7 @@
       "category": {
         "description": "Categoria opcional para organizar sintomas",
         "label": "Categoria",
-        "placeholder": "ex.: Dor, Digestivo, Respiratório"
+        "placeholder": "p. ex., Dor, Digestivo, Respiratório"
       },
       "firstOccurrenceDate": {
         "description": "Quando você notou este sintoma pela primeira vez",
@@ -1224,7 +1224,7 @@
       "symptomName": {
         "description": "Nome do sintoma que você deseja acompanhar",
         "label": "Nome do Sintoma",
-        "placeholder": "ex.: Enxaqueca, Dor Crônica nas Costas"
+        "placeholder": "p. ex., Enxaqueca, Dor Crônica nas Costas"
       },
       "typicalTriggers": {
         "description": "O que tipicamente desencadeia este sintoma",
@@ -1248,7 +1248,7 @@
     "amount": {
       "description": "Quantidade ou intensidade por sessão",
       "label": "Quantidade",
-      "placeholder": "ex.: 500mg, 2 comprimidos, 30 minutos"
+      "placeholder": "p. ex., 500mg, 2 comprimidos, 30 minutos"
     },
     "endDate": {
       "description": "Data esperada ou real de conclusão",
@@ -1307,7 +1307,7 @@
     "treatmentName": {
       "description": "Nome específico ou descrição do tratamento",
       "label": "Nome do Tratamento",
-      "placeholder": "ex.: Fisioterapia para Dor Lombar"
+      "placeholder": "p. ex., Fisioterapia para Dor Lombar"
     },
     "treatmentStatus": {
       "description": "Estágio atual no fluxo de trabalho do tratamento",
@@ -1393,7 +1393,7 @@
         "reason": {
           "description": "Propósito principal desta consulta médica",
           "label": "Motivo da Consulta",
-          "placeholder": "ex.: Check-up Anual, Retorno, Revisão de Sintomas"
+          "placeholder": "p. ex., Check-up Anual, Retorno, Revisão de Sintomas"
         },
         "relatedCondition": {
           "description": "Vincule esta consulta a uma condição específica, se aplicável",

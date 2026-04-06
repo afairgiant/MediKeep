@@ -52,7 +52,7 @@
     "parsingComplete": "Verwerking voltooid!",
     "pastePlaceholder": "Plak hier uw labresultaten...",
     "pdfAccepted": "Geaccepteerd: alleen PDF. Maximale grootte: 15MB",
-    "pdfAutoExtract": "Labresultaten worden automatisch geextraheerd en verwerkt",
+    "pdfAutoExtract": "Labresultaten worden automatisch geëxtraheerd en verwerkt",
     "pdfUpload": "PDF uploaden",
     "previewComponents": "{{count}} component bekijken",
     "previewComponents_one": "{{count}} component bekijken",
@@ -65,9 +65,9 @@
     "skipEmptyLinesDesc": "Blanco regels negeren tijdens verwerking",
     "tabularFormat": "Tabelformaat",
     "testDate": "Testdatum",
-    "textExtracted": "Tekst succesvol geextraheerd!",
+    "textExtracted": "Tekst succesvol geëxtraheerd!",
     "textInput": "Tekstinvoer",
-    "tryExamples": "Probeer de volgende voorbeeldformaten te kopieren en plakken:",
+    "tryExamples": "Probeer de volgende voorbeeldformaten te kopiëren en plakken:",
     "tryTextInput": "Probeer het tabblad Tekstinvoer om uw resultaten handmatig te plakken.",
     "useExample": "Voorbeeld gebruiken",
     "validComponents": "{{count}} geldige componenten",
@@ -85,7 +85,7 @@
     "hearing": "Gehoor",
     "hematology": "Hematologie",
     "hepatology": "Hepatologie",
-    "imaging": "Beeldvorming (rontgen, MRI, CT)",
+    "imaging": "Beeldvorming (röntgen, MRI, CT)",
     "immunology": "Immunologie",
     "microbiology": "Microbiologie",
     "pathology": "Pathologie",
@@ -188,10 +188,10 @@
     "label": "Aanvragend arts",
     "placeholder": "Selecteer arts"
   },
-  "patientIdRequired": "Patient-ID is vereist. Selecteer eerst een patient.",
+  "patientIdRequired": "Patiënt-ID is vereist. Selecteer eerst een patiënt.",
   "quickFormInstructions": "Voer een naam in voor dit labresultaat, daarna kunt u uw PDF uploaden en verwerken.",
   "quickImportModalTitle": "Snelle PDF-import - Stap {{step}} van 2",
-  "quickImportSuccess": "Labresultaat en testcomponenten succesvol geimporteerd",
+  "quickImportSuccess": "Labresultaat en testcomponenten succesvol geïmporteerd",
   "quickPdfImport": "Snelle PDF-import",
   "result": {
     "abnormal": "Afwijkend - Buiten referentiebereik",
@@ -209,10 +209,10 @@
     "basedOn": "Gebaseerd op {{count}} test met referentiebereiken",
     "basedOn_one": "Gebaseerd op {{count}} test met referentiebereiken",
     "basedOn_other": "Gebaseerd op {{count}} tests met referentiebereiken",
-    "categories": "Testcategorieen",
-    "categoriesCount": "{{count}} categorieen",
+    "categories": "Testcategorieën",
+    "categoriesCount": "{{count}} categorieën",
     "categoriesCount_one": "{{count}} categorie",
-    "categoriesCount_other": "{{count}} categorieen",
+    "categoriesCount_other": "{{count}} categorieën",
     "coverageDetail": "{{withRanges}} van {{total}} tests ({{percent}}%) hebben referentiebereiken voor juiste evaluatie.",
     "critical": "Kritiek",
     "criticalAction": "<strong>Actie vereist:</strong> {{count}} kritiek resultaat gedetecteerd. Raadpleeg onmiddellijk uw zorgverlener.",
@@ -256,7 +256,7 @@
     "uploadParse": "Uploaden en verwerken"
   },
   "summary": {
-    "categoriesLabel": "Categorieen:",
+    "categoriesLabel": "Categorieën:",
     "healthyPercent": "{{score}}% gezond",
     "moreCategories": "+{{count}} meer",
     "moreCategories_one": "+{{count}} meer",
@@ -368,7 +368,7 @@
       "updating": "Testcomponent wordt bijgewerkt..."
     },
     "emptyState": {
-      "description": "Sjablonen bieden gangbare labpanelen (CBC, CMP, enz.) waar u waarden en bereiken kunt invoeren. Bulkimport stelt u in staat resultaten uit labrapporten te kopieren/plakken voor automatische verwerking."
+      "description": "Sjablonen bieden gangbare labpanelen (CBC, CMP, enz.) waar u waarden en bereiken kunt invoeren. Bulkimport stelt u in staat resultaten uit labrapporten te kopiëren/plakken voor automatische verwerking."
     },
     "errorLoading": "Fout bij laden van testcomponenten",
     "noComponents": "Geen testcomponenten",
@@ -458,7 +458,7 @@
     "noDataPoints": "Geen datapunten om weer te geven"
   },
   "unsavedDataInstructions": "Klik op \"Componenten toevoegen\" in het tabblad Voorbeeld om uw verwerkte gegevens op te slaan voordat u sluit.",
-  "unsavedDataMessage_one": "U heeft {{count}} verwerkt(e) testcomponent(en) die nog niet zijn toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
-  "unsavedDataMessage_other": "U heeft {{count}} verwerkt(e) testcomponent(en) die nog niet zijn toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
+  "unsavedDataMessage_one": "U heeft {{count}} verwerkt testcomponent dat nog niet is toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
+  "unsavedDataMessage_other": "U heeft {{count}} verwerkte testcomponenten die nog niet zijn toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
   "unsavedDataWarning": "Niet-opgeslagen verwerkte gegevens"
 }

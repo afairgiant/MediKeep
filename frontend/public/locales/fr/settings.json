@@ -42,7 +42,7 @@
     "passwordLabel": "Mot de passe",
     "sessionStorage": "Utilisation du stockage de session pour le jeton",
     "title": "Connexion Paperless-ngx",
-    "urlHelp": "L'URL de votre instance Paperless-ngx (p. ex. https://paperless.exemple.com)",
+    "urlHelp": "L'URL de votre instance Paperless-ngx (par ex., https://paperless.exemple.com)",
     "urlLabel": "URL du serveur",
     "usernameHelp": "Votre nom d'utilisateur Paperless-ngx.",
     "usernameLabel": "Nom d'utilisateur",
@@ -61,7 +61,7 @@
     "dateFormat": {
       "description": "Choisissez comment les dates sont affichées dans l'application",
       "dmy": "JJ/MM/AAAA (Européen)",
-      "mdy": "MM/JJ/AAAA (US)",
+      "mdy": "MM/JJ/AAAA (États-Unis)",
       "title": "Format de date",
       "ymd": "AAAA-MM-JJ (ISO)"
     },
@@ -137,8 +137,8 @@
     "connectionRequired": "Connexion requise",
     "defaultLocation": "Emplacement de stockage par défaut",
     "filesCount": "{{count}} fichiers",
-    "filesCount_one": "{{count}} fichier",
-    "filesCount_other": "{{count}} fichiers",
+    "filesCount_one": "",
+    "filesCount_other": "",
     "localDescription": "Les fichiers sont stockés directement sur ce serveur. Idéal pour les configurations simples sans services externes.",
     "localStorage": "Stockage local",
     "noUsageData": "Aucune donnée d'utilisation du stockage disponible",

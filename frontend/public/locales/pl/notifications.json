@@ -351,7 +351,7 @@
     "settings": {
       "cleanupComplete": "Czyszczenie ukończone: wyczyszczono {{cleaned}} plików, usunięto {{deleted}} plików",
       "cleanupFailed": "Nie udało się wyczyścić plików. Spróbuj ponownie później.",
-      "noOutOfSync": "Nie znaleziono niezzsynchronizowanych plików do wyczyszczenia",
+      "noOutOfSync": "Nie znaleziono niezsynchronizowanych plików do wyczyszczenia",
       "sessionTimeoutUpdated": "Limit czasu sesji zaktualizowany na {{minutes}} minut. Twoja sesja została odświeżona."
     },
     "sharing": {

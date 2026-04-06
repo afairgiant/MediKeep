@@ -356,7 +356,7 @@
       "sanofi": "Sanofi"
     },
     "ndcNumber": {
-      "description": "National Drug Code för vaccinet",
+      "description": "Läkemedelskod för vaccinet",
       "label": "NDC-nummer",
       "placeholder": "t.ex. 12345-6789-01"
     },
@@ -771,7 +771,7 @@
         "description": "Typ av synvårdsförsäkringsplan",
         "label": "Synvårdsplantyp",
         "options": {
-          "visionDiscount": "Synvårds rabattplan",
+          "visionDiscount": "Synvårdsrabattplan",
           "visionHmo": "Synvårds-HMO",
           "visionPpo": "Synvårds-PPO"
         },
@@ -1039,7 +1039,7 @@
       "placeholder": "Eventuella komplikationer som uppstod under ingreppet..."
     },
     "description": {
-      "description": "Detaljerad beskrivning av vad ingreppet innebar",
+      "description": "Detaljerad beskrivning av vad ingreppet innebär",
       "placeholder": "Beskriv ingreppet i detalj..."
     },
     "facility": {
@@ -1300,7 +1300,7 @@
       "placeholder": "Välj startdatum"
     },
     "treatmentDescription": {
-      "description": "Uttömmande detaljer om behandlingsuppläggningen",
+      "description": "Omfattande detaljer om behandlingsuppläggningen",
       "label": "Behandlingsbeskrivning",
       "placeholder": "Detaljerad beskrivning av behandlingsplanen..."
     },
@@ -1325,7 +1325,7 @@
       "description": "Kategori av behandling",
       "label": "Behandlingstyp",
       "options": {
-        "behavioralTherapy": "Beteendeterapi - Psykisk hälsa-behandling",
+        "behavioralTherapy": "Beteendeterapi - Psykisk hälsovård",
         "chemotherapy": "Kemoterapi - Cancerbehandling",
         "dialysis": "Dialys - Njurfunktionsstöd",
         "immunotherapy": "Immunterapi - Immunsystembehandling",

@@ -14,7 +14,7 @@
     "uploadErrorDescription": "Uppladdningsförloppsvisaren stötte på ett fel."
   },
   "fileCount": {
-    "attached": "{{count}} bifogad",
+    "attached": "{{count}} bifogade",
     "attached_one": "",
     "attached_other": "",
     "fileCount": "{{count}} fil",
@@ -112,7 +112,7 @@
     "selectBackend": "Välj lagringsbackend"
   },
   "upload": {
-    "completed": "{{count}} slutförd",
+    "completed": "{{count}} slutförda",
     "completed_one": "",
     "completed_other": "",
     "dragOrClick": "Dra filer hit eller klicka för att välja",
@@ -125,7 +125,7 @@
     "percentComplete": "{{percent}}% slutfört",
     "remaining": "{{time}} kvar",
     "retryFailed": "Försök igen med misslyckade",
-    "uploading": "{{count}} laddar upp",
+    "uploading": "{{count}} laddas upp",
     "uploading_one": "",
     "uploading_other": ""
   }

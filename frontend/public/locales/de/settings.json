@@ -14,7 +14,7 @@
   "documents": {
     "cleanup": {
       "button": "Dateien bereinigen",
-      "cleaning": "Bereinigung...",
+      "cleaning": "Bereinigung läuft...",
       "description": "Bereinigen Sie nicht synchronisierte Dateien und beheben Sie Inkonsistenzen im Dokumentenspeicher. Fehlgeschlagene Uploads werden zurückgesetzt, verwaiste Aufgaben entfernt und Datenbank-Synchronisierungsprobleme behoben.",
       "title": "Dateibereinigung"
     },
@@ -42,7 +42,7 @@
     "passwordLabel": "Passwort",
     "sessionStorage": "Sitzungsspeicher wird für Token verwendet",
     "title": "Paperless-ngx-Verbindung",
-    "urlHelp": "Die URL Ihrer Paperless-ngx-Instanz (z.\u00a0B. https://paperless.example.com)",
+    "urlHelp": "Die URL Ihrer Paperless-ngx-Instanz (z. B. https://paperless.example.com)",
     "urlLabel": "Server-URL",
     "usernameHelp": "Ihr Paperless-ngx-Benutzername.",
     "usernameLabel": "Benutzername",
@@ -59,15 +59,15 @@
   },
   "preferences": {
     "dateFormat": {
-      "description": "Wählen Sie, wie Daten in der gesamten Anwendung angezeigt werden",
-      "dmy": "TT/MM/JJJJ (Europäisch)",
+      "description": "Wählen Sie, wie Datumsangaben in der gesamten Anwendung angezeigt werden",
+      "dmy": "TT.MM.JJJJ (Europäisch)",
       "mdy": "MM/TT/JJJJ (US)",
       "title": "Datumsformat",
       "ymd": "JJJJ-MM-TT (ISO)"
     },
     "sessionTimeout": {
       "description": "Legen Sie die Dauer der Inaktivität fest, bevor Ihre Sitzung abläuft (in Minuten)",
-      "range": "Minuten (5–1440)",
+      "range": "Minuten (5-1440)",
       "title": "Sitzungszeitlimit"
     },
     "unitSystem": {
@@ -157,7 +157,7 @@
       "loading": "Versionsinformationen werden geladen...",
       "title": "Anwendungsversion",
       "unavailable": "Versionsinformationen nicht verfügbar",
-      "unknownApp": "Unbekannte App",
+      "unknownApp": "Unbekannte Anwendung",
       "unknownVersion": "Unbekannte Version"
     }
   }

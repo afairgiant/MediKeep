@@ -1,0 +1,694 @@
+{
+  "admin": {
+    "createUser": {
+      "linkPatient": {
+        "hint": "แทนที่จะสร้างเวชระเบียนผู้ป่วยใหม่ ให้เชื่อมโยงผู้ใช้ใหม่กับผู้ป่วยที่มีอยู่แล้ว (เช่น เด็กที่ต้องการบัญชีเข้าสู่ระบบของตัวเอง)",
+        "selfRecordBadge": "เวชระเบียนส่วนตัว",
+        "selfRecordWarning": "นี่คือเวชระเบียนส่วนตัวของเจ้าของปัจจุบัน ระบบจะสร้างเวชระเบียนส่วนตัวใหม่สำหรับเจ้าของเดิมโดยคัดลอกข้อมูลประชากรไป เจ้าของเดิมจะได้รับสิทธิ์แก้ไขผู้ป่วยรายนี้"
+      },
+      "passwordReqs": {
+        "hasLetter": "มีตัวอักษรอย่างน้อย 1 ตัว",
+        "hasNumber": "มีตัวเลขอย่างน้อย 1 ตัว",
+        "minLength": "อย่างน้อย 6 ตัวอักษร"
+      }
+    }
+  },
+  "analytics": {
+    "activityByRecordType": "กิจกรรมตามประเภทเวชระเบียน",
+    "activityTrend": "แนวโน้มกิจกรรม",
+    "analyticsDateRange": "ช่วงวันที่สำหรับการวิเคราะห์",
+    "axisLabels": {
+      "activities": "กิจกรรม"
+    },
+    "breakdownByType": "แยกตามประเภท",
+    "chartLabels": {
+      "patients": "ผู้ป่วย",
+      "userActivity": "กิจกรรมผู้ใช้"
+    },
+    "customDateRange": "ช่วงวันที่กำหนดเอง",
+    "dailyAverage": "ค่าเฉลี่ยรายวัน",
+    "filterByDays": "กรองตาม {{days}} วันที่แล้ว",
+    "loading": "กำลังโหลดการวิเคราะห์...",
+    "period": "ระยะเวลา",
+    "recordsDistribution": "การกระจายเวชระเบียน",
+    "subtitle": "แนวโน้มกิจกรรม การเปรียบเทียบ และการกระจายเวชระเบียน",
+    "title": "การวิเคราะห์",
+    "totalActivities": "กิจกรรมทั้งหมด",
+    "userInteractions": "ปฏิสัมพันธ์ของผู้ใช้",
+    "vsPreviousPeriod": "เทียบกับช่วงก่อนหน้า"
+  },
+  "auditLog": {
+    "actionFilter": "การกระทำ",
+    "dateRange": "ช่วงวันที่",
+    "entityTypeFilter": "ประเภทเอนทิตี",
+    "errorLoading": "เกิดข้อผิดพลาดในการโหลดบันทึกการตรวจสอบ",
+    "filterByAction": "กรองตามการกระทำ",
+    "filterByDateRange": "กรองตามช่วงวันที่",
+    "filterByEntityType": "กรองตามประเภทเอนทิตี",
+    "filterByUser": "กรองตามผู้ใช้",
+    "loading": "กำลังโหลดบันทึกการตรวจสอบ...",
+    "noLogs": "ไม่พบบันทึกกิจกรรม",
+    "pageInfo": "หน้า {{page}} จาก {{totalPages}}",
+    "searchAriaLabel": "ค้นหาบันทึกกิจกรรม",
+    "searchPlaceholder": "ค้นหาคำอธิบาย...",
+    "showingResults": "แสดง {{shown}} จาก {{total}} รายการ",
+    "subtitle": "บันทึกกิจกรรมทั้งหมดสำหรับการปฏิบัติตามข้อกำหนดและการตรวจสอบ",
+    "system": "ระบบ",
+    "tableHeaders": {
+      "action": "การกระทำ",
+      "entityType": "ประเภทเอนทิตี",
+      "recordId": "ID เวชระเบียน",
+      "timestamp": "เวลาประทับ"
+    },
+    "viewRecord": "ดูเวชระเบียน {{type}}",
+    "viewRecordAriaLabel": "ดู {{type}} #{{id}}"
+  },
+  "backup": {
+    "existingBackups": {
+      "count_one": "{{count}} การสำรองข้อมูล",
+      "count_other": "{{count}} การสำรองข้อมูล",
+      "download": "ดาวน์โหลด",
+      "noBackups": "ไม่พบการสำรองข้อมูล",
+      "previewRestore": "ดูตัวอย่างการคืนค่า",
+      "restore": "คืนค่า",
+      "tableHeaders": {
+        "fileExists": "ไฟล์มีอยู่",
+        "filename": "ชื่อไฟล์"
+      },
+      "title": "การสำรองข้อมูลที่มีอยู่",
+      "verify": "ตรวจสอบ"
+    },
+    "loading": "กำลังโหลดการจัดการสำรองข้อมูล...",
+    "modals": {
+      "analyzingBackup": "กำลังวิเคราะห์เนื้อหาการสำรองข้อมูล...",
+      "cannotBeUndone": "การกระทำนี้ไม่สามารถยกเลิกได้",
+      "cleanupItems": {
+        "oldBackups": "ไฟล์สำรองข้อมูลเก่า",
+        "orphanedFiles": "ไฟล์ที่กำพร้า",
+        "trashFiles": "ไฟล์ขยะ"
+      },
+      "cleanupWarning": "จะลบอย่างถาวร:",
+      "completeCleanup": "ทำความสะอาดระบบทั้งหมด",
+      "deleteBackup": "ลบการสำรองข้อมูล",
+      "deleteConfirm": "แน่ใจหรือไม่ว่าต้องการลบการสำรองข้อมูล \"{{filename}}\"?",
+      "discardChanges": "ละทิ้งการเปลี่ยนแปลง",
+      "executeCleanup": "ดำเนินการทำความสะอาด",
+      "proceedWithRestore": "ดำเนินการคืนค่า",
+      "restoreFromBackup": "คืนค่าจากการสำรองข้อมูล",
+      "restoreNow": "คืนค่าเดี๋ยวนี้",
+      "restorePreview": "ตัวอย่างการคืนค่า",
+      "restoreSafetyNote": "จะสร้างการสำรองข้อมูลเพื่อความปลอดภัยโดยอัตโนมัติก่อนเริ่มกระบวนการคืนค่า",
+      "restoreWarning": "จะคืนค่าจากการสำรองข้อมูลและแทนที่ข้อมูลปัจจุบัน!",
+      "stayOnSettings": "อยู่ในหน้าการตั้งค่า",
+      "typeCleanupToConfirm": "พิมพ์ <strong>CLEANUP</strong> เพื่อยืนยัน",
+      "unsavedChanges": "การเปลี่ยนแปลงที่ไม่ได้บันทึก",
+      "unsavedWarning": "คุณมีการเปลี่ยนแปลงที่ไม่ได้บันทึกในการตั้งค่าการเก็บรักษาข้อมูล การออกจากแท็บนี้จะยกเลิกการเปลี่ยนแปลงของคุณ"
+    },
+    "operations": {
+      "advancedOptions": "ตัวเลือกขั้นสูง",
+      "advancedOptionsDesc": "การสำรองข้อมูลและการทำความสะอาดเพิ่มเติม",
+      "chooseFile": "เลือกไฟล์สำรองข้อมูล",
+      "cleanupOld": "ทำความสะอาดการสำรองข้อมูลเก่า",
+      "completeCleanup": "ทำความสะอาดทั้งหมด",
+      "createFullBackup": "สร้างการสำรองข้อมูลเต็มรูปแบบ",
+      "creating": "กำลังสร้าง...",
+      "databaseOnly": "ฐานข้อมูลเท่านั้น",
+      "filesOnly": "ไฟล์เท่านั้น",
+      "fullBackup": "การสำรองข้อมูลระบบเต็มรูปแบบ",
+      "fullBackupDesc": "การสำรองข้อมูลที่สมบูรณ์ (ฐานข้อมูล + ไฟล์)",
+      "invalidFileType": "ประเภทไฟล์ไม่ถูกต้อง",
+      "invalidFileTypeDesc": "กรุณาเลือกไฟล์สำรองข้อมูล .sql หรือ .zip",
+      "moreOptions": "ตัวเลือกเพิ่มเติม",
+      "title": "การดำเนินการสำรองข้อมูล",
+      "uploadBackup": "อัปโหลดการสำรองข้อมูล",
+      "uploadBackupDesc": "อัปโหลดไฟล์สำรองข้อมูลจากภายนอก (.sql หรือ .zip)"
+    },
+    "preview": {
+      "affectedData": "ข้อมูลที่ได้รับผลกระทบ",
+      "analysisNotAvailable": "การวิเคราะห์การสำรองข้อมูลไม่พร้อมใช้งาน",
+      "backupContent": "เนื้อหาการสำรองข้อมูล",
+      "backupDetails": "รายละเอียดการสำรองข้อมูล",
+      "backupFiles": "ไฟล์สำรองข้อมูล",
+      "components": "ส่วนประกอบ",
+      "createdAt": "สร้างเมื่อ: {{date}}",
+      "currentDatabase": "ฐานข้อมูลปัจจุบัน",
+      "currentFiles": "ไฟล์ปัจจุบัน",
+      "manifest": "รายการ",
+      "noAffectedData": "ไม่มีข้อมูลผลกระทบ",
+      "noStatistics": "ไม่มีสถิติ",
+      "restoreMethod": "วิธีการคืนค่า",
+      "unknownType": "ประเภทการสำรองข้อมูลไม่ทราบ"
+    },
+    "retention": {
+      "backupsUnit": "การสำรองข้อมูล",
+      "currentStatus_one": "<strong>สถานะปัจจุบัน:</strong> เก็บ {{count}} การสำรองข้อมูล (สูงสุด: {{max}})",
+      "currentStatus_other": "<strong>สถานะปัจจุบัน:</strong> เก็บ {{count}} การสำรองข้อมูล (สูงสุด: {{max}})",
+      "daysUnit": "วัน",
+      "maximumCount": "จำนวนการสำรองข้อมูลสูงสุด",
+      "maximumCountDesc": "แจ้งเตือนเมื่อจำนวนการสำรองข้อมูลเกินขีดจำกัดนี้ (ไม่บังคับ)",
+      "minimumCount": "จำนวนการสำรองข้อมูลขั้นต่ำ",
+      "minimumCountDesc": "เก็บการสำรองข้อมูลอย่างน้อยจำนวนนี้เสมอ (ไม่ว่าอายุจะเท่าใด)",
+      "priority": "<strong>ลำดับความสำคัญ:</strong> จำนวนขั้นต่ำมีความสำคัญเหนือขีดจำกัดเวลาเสมอ",
+      "retentionDays": "การเก็บรักษาการสำรองข้อมูล (วัน)",
+      "retentionDaysDesc": "ลบการสำรองข้อมูลที่เก่ากว่าจำนวนวันนี้ (เกินจากจำนวนขั้นต่ำ)",
+      "retentionLogic": "ตรรกะการเก็บรักษา",
+      "saveRetention": "บันทึกการตั้งค่าการเก็บรักษา",
+      "timeBasedCleanup": "<strong>การทำความสะอาดตามเวลา:</strong> ลบการสำรองข้อมูลที่เก่ากว่า {{days}} วัน (เกินจากจำนวนขั้นต่ำ)",
+      "title": "การตั้งค่าการเก็บรักษาการสำรองข้อมูล"
+    },
+    "schedule": {
+      "completedSuccessfully": "เสร็จสมบูรณ์",
+      "dayOfWeek": "วันในสัปดาห์",
+      "dayOfWeekDesc": "ควรทำการสำรองข้อมูลรายสัปดาห์ในวันใด?",
+      "days": {
+        "fri": "วันศุกร์",
+        "mon": "วันจันทร์",
+        "sat": "วันเสาร์",
+        "sun": "วันอาทิตย์",
+        "thu": "วันพฤหัสบดี",
+        "tue": "วันอังคาร",
+        "wed": "วันพุธ"
+      },
+      "failed": "ล้มเหลว: {{error}}",
+      "frequency": "ความถี่การสำรองข้อมูล",
+      "frequencyDesc": "กำหนดการสำรองข้อมูลเต็มรูปแบบอัตโนมัติ (ฐานข้อมูล + ไฟล์)",
+      "lastBackup": "การสำรองข้อมูลล่าสุด:",
+      "nextScheduledRun": "การรันตามกำหนดการครั้งถัดไป",
+      "presets": {
+        "daily": "รายวัน",
+        "every12Hours": "ทุก 12 ชั่วโมง",
+        "every6Hours": "ทุก 6 ชั่วโมง"
+      },
+      "saveSchedule": "บันทึกกำหนดการ",
+      "timeOfDay": "เวลาในวัน",
+      "timeOfDayDesc": "ควรทำการสำรองข้อมูลเวลาใด? (รูปแบบ 24 ชั่วโมง)",
+      "title": "กำหนดการสำรองข้อมูลอัตโนมัติ",
+      "unknownError": "ข้อผิดพลาดไม่ทราบสาเหตุ"
+    },
+    "subtitle": "สร้างและจัดการการสำรองข้อมูลระบบ",
+    "tabs": {
+      "backups": "การสำรองข้อมูล"
+    },
+    "unsavedBadge": "ไม่ได้บันทึก"
+  },
+  "createUser": {
+    "autoFeatures": {
+      "editAccess": "เจ้าของเดิมจะเก็บสิทธิ์แก้ไขผู้ป่วยที่เชื่อมโยง",
+      "immediateLogin": "ผู้ใช้สามารถเข้าสู่ระบบได้ทันทีหลังจากสร้างบัญชี",
+      "linkExisting": "ใช้ \"เชื่อมโยงกับผู้ป่วยที่มีอยู่\" เพื่อโอนเวชระเบียนไปให้ผู้ใช้ใหม่",
+      "patientRecord": "จะสร้างเวชระเบียนผู้ป่วยโดยอัตโนมัติ (หรือเชื่อมโยงกับที่มีอยู่)",
+      "timestamps": "ประทับเวลาบัญชีจะถูกตั้งค่าโดยอัตโนมัติ"
+    },
+    "autoFeaturesTitle": "คุณสมบัติที่สร้างอัตโนมัติ",
+    "cardSubtitle": "กรอกแบบฟอร์มด้านล่างเพื่อสร้างบัญชีผู้ใช้ใหม่",
+    "cardTitle": "รายละเอียดบัญชีผู้ใช้",
+    "emailPlaceholder": "ป้อนที่อยู่อีเมล",
+    "errors": {
+      "accountCreateFailed": "ไม่สามารถสร้างบัญชีได้",
+      "createFailed": "ไม่สามารถสร้างผู้ใช้ได้",
+      "createRetry": "ไม่สามารถสร้างผู้ใช้ได้ กรุณาลองอีกครั้ง"
+    },
+    "firstNamePlaceholder": "ป้อนชื่อ",
+    "lastNamePlaceholder": "ป้อนนามสกุล",
+    "linkPatient": {
+      "checkbox": "เชื่อมโยงกับเวชระเบียนผู้ป่วยที่มีอยู่",
+      "currentOwner": "เจ้าของปัจจุบัน",
+      "dob": "วดป.เกิด",
+      "hint": "แทนที่จะสร้างเวชระเบียนผู้ป่วยใหม่ ให้เชื่อมโยงผู้ใช้ใหม่กับผู้ป่วยที่มีอยู่แล้ว (เช่น เด็กที่ต้องการบัญชีเข้าสู่ระบบของตัวเอง)",
+      "loading": "กำลังโหลดผู้ป่วย...",
+      "owner": "เจ้าของ",
+      "patientId": "รหัส",
+      "selectPlaceholder": "เลือกผู้ป่วย...",
+      "selfRecordBadge": "เวชระเบียนส่วนตัว",
+      "selfRecordWarning": "นี่คือเวชระเบียนส่วนตัวของเจ้าของปัจจุบัน ระบบจะสร้างเวชระเบียนส่วนตัวใหม่สำหรับเจ้าของเดิมโดยคัดลอกข้อมูลประชากรไป เจ้าของเดิมจะได้รับสิทธิ์แก้ไขผู้ป่วยรายนี้"
+    },
+    "noteText": "ระบบจะสร้างเวชระเบียนผู้ป่วยให้ผู้ใช้รายนี้โดยอัตโนมัติพร้อมบทบาทเริ่มต้น \"ผู้ใช้\"",
+    "pageSubtitle": "สร้างบัญชีผู้ใช้ใหม่พร้อมโปรไฟล์ผู้ป่วย",
+    "pageTitle": "สร้างผู้ใช้ใหม่",
+    "passwordPlaceholder": "ป้อนรหัสผ่าน (ขั้นต่ำ 6 ตัวอักษร มีตัวอักษรและตัวเลข)",
+    "passwordReqs": {
+      "hasLetter": "มีตัวอักษรอย่างน้อย 1 ตัว",
+      "hasNumber": "มีตัวเลขอย่างน้อย 1 ตัว",
+      "minLength": "อย่างน้อย 6 ตัวอักษร"
+    },
+    "submitButton": "สร้างบัญชี",
+    "successRedirect": "สร้างผู้ใช้ \"{{username}}\" เรียบร้อยแล้ว!",
+    "usernamePlaceholder": "ป้อนชื่อผู้ใช้",
+    "validation": {
+      "firstNameRequired": "กรุณาป้อนชื่อ",
+      "lastNameRequired": "กรุณาป้อนนามสกุล",
+      "passwordMinLength": "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร",
+      "passwordRequirements": "รหัสผ่านต้องมีตัวอักษรและตัวเลขอย่างน้อยอย่างละ 1 ตัว",
+      "usernameMinLength": "ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร"
+    }
+  },
+  "dashboard": {
+    "loading": "กำลังโหลดแดชบอร์ดแบบครบถ้วน...",
+    "quickActions": {
+      "auditLogDesc": "ดูบันทึกกิจกรรมระบบ",
+      "backups": "การสำรองข้อมูล",
+      "backupsDesc": "จัดการการสำรองข้อมูล",
+      "createUser": "สร้างผู้ใช้ใหม่",
+      "createUserDesc": "สร้างบัญชีผู้ใช้พร้อมโปรไฟล์ผู้ป่วย",
+      "dataModelsDesc": "ดูและจัดการตารางฐานข้อมูล",
+      "manageUsers": "จัดการผู้ใช้",
+      "manageUsersDesc": "ดูและจัดการบัญชีผู้ใช้",
+      "settingsDesc": "การกำหนดค่าระบบ",
+      "subtitle": "งานจัดการทั่วไป",
+      "systemHealthDesc": "ตรวจสอบสถานะระบบ",
+      "title": "การกระทำด่วน",
+      "trash": "ถังขยะ",
+      "trashDesc": "กู้คืนไฟล์ที่ลบแล้ว"
+    },
+    "recentActivity": {
+      "errorLoading": "เกิดข้อผิดพลาดในการโหลดกิจกรรม",
+      "noActivity": "ไม่มีกิจกรรมล่าสุดที่จะแสดง",
+      "subtitle": "เหตุการณ์ระบบล่าสุด",
+      "title": "กิจกรรมล่าสุด",
+      "viewAll": "ดูกิจกรรมทั้งหมด"
+    },
+    "refreshAll": "รีเฟรชทั้งหมด",
+    "stats": {
+      "activePatients": "ผู้ป่วยที่ใช้งาน",
+      "totalUsers": "ผู้ใช้ทั้งหมด"
+    },
+    "subtitle": "ภาพรวมและการจัดการระบบแบบครบถ้วน",
+    "systemHealth": {
+      "databaseStatus": "สถานะฐานข้อมูล",
+      "errorLoading": "เกิดข้อผิดพลาดในการโหลดสุขภาพระบบ",
+      "lastBackup": "การสำรองข้อมูลล่าสุด",
+      "noBackup": "ไม่มีการสำรองข้อมูล",
+      "subtitle": "สถานะระบบปัจจุบัน",
+      "uptime": "เวลาใช้งาน"
+    }
+  },
+  "dataModels": {
+    "categories": {
+      "coreMedical": "การแพทย์หลัก",
+      "fileManagement": "การจัดการไฟล์",
+      "healthcareDirectory": "ไดเรกทอรีสุขภาพ",
+      "patientSupport": "ส่นับสนุนผู้ป่วย",
+      "sharingAccess": "การแชร์และเข้าถึง",
+      "system": "ระบบ"
+    },
+    "clearFilter": "ล้างตัวกรอง",
+    "descriptions": {
+      "allergy": "ภูมิแพ้และปฏิกิริยาของผู้ป่วย",
+      "condition": "สภาวะทางการแพทย์และการวินิจฉัย",
+      "emergency_contact": "ข้อมูลติดต่อฉุกเฉินสำหรับผู้ป่วย",
+      "encounter": "การเข้ารับการรักษาและการนัดหมาย",
+      "entity_file": "ไฟล์แนบสำหรับเอนทิตีทุกประเภท",
+      "family_condition": "สภาวะทางการแพทย์ของสมาชิกในครอบครัว",
+      "family_history_share": "ความสัมพันธ์การแชร์ประวัติการแพทย์ครอบครัว",
+      "family_member": "เวชระเบียนสมาชิกครอบครัวสำหรับประวัติการแพทย์",
+      "immunization": "เวชระเบียนการฉีดวัคซีนและตารางเวลา",
+      "injury": "การบาดเจ็บทางร่างกาย หกล้ม กระดูกหัก และแผลไหม้",
+      "injury_type": "นิยามประเภทการบาดเจ็บที่ใช้ซ้ำได้สำหรับดรอปดาวน์",
+      "insurance": "ข้อมูลความคุ้มครองประกันของผู้ป่วย",
+      "invitation": "คำเชิญระบบสำหรับการแชร์และการทำงานร่วมกัน",
+      "lab_result": "ผลการตรวจทางห้องปฏิบัติการและค่าต่างๆ",
+      "lab_result_file": "เอกสารและไฟล์แนบผลแล็บ",
+      "medical_equipment": "อุปกรณ์การแพทย์ที่สั่งให้ผู้ป่วย",
+      "medication": "ยาที่สั่งและปริมาณ",
+      "patient": "ข้อมูลประชากรและการติดต่อของผู้ป่วย",
+      "patient_share": "ความสัมพันธ์การแชร์ข้อมูลผู้ป่วยระหว่างผู้ใช้",
+      "pharmacy": "ที่ตั้งและข้อมูลติดต่อร้านขายยา",
+      "practitioner": "ผู้ให้บริการสุขภาพและแพทย์เชี่ยวชาญ",
+      "procedure": "หัตถการและการผ่าตัดทางการแพทย์",
+      "symptom": "นิยามและการติดตามอาการ",
+      "symptom_occurrence": "เวชระเบียนเหตุการณ์อาการแต่ละครั้ง",
+      "treatment": "แผนการรักษาและการบำบัด",
+      "user": "ผู้ใช้ระบบและผู้บริหาร",
+      "vitals": "ความดันเลือด อัตราการเต้นหัวใจ อุณหภูมิ"
+    },
+    "fallbackWarning": "ไม่สามารถโหลดโมเดลจากเซิร์ฟเวอร์ได้ แสดงรายชื่อโมเดลในตัว",
+    "filterAriaLabel": "กรองโมเดลข้อมูล",
+    "filterPlaceholder": "กรองโมเดล...",
+    "noMatchFilter": "ไม่มีโมเดลที่ตรงกับ \"{{query}}\"",
+    "subtitle": "จัดการและดูตารางฐานข้อมูลและเวชระเบียนทั้งหมด"
+  },
+  "directoryCard": {
+    "files": "ไฟล์",
+    "mb": "MB",
+    "ok": "ตกลง"
+  },
+  "fieldRenderer": {
+    "autoGenerated": "สร้างอัตโนมัติ",
+    "autoPopulated": "เติมอัตโนมัติจากผู้ใช้ปัจจุบัน",
+    "enterField": "ป้อน {{field}}...",
+    "enterPassword": "ป้อนรหัสผ่านสำหรับผู้ใช้ใหม่...",
+    "notApplicable": "ไม่เกี่ยวข้อง",
+    "passwordHash": "แฮชรหัสผ่าน (อ่านอย่างเดียวเพื่อความปลอดภัย)",
+    "passwordNote": "ป้อนรหัสผ่านข้อความธรรมดา (ขั้นต่ำ {{minLength}} ตัวอักษร มีตัวอักษรและตัวเลข) - จะเข้ารหัสอย่างปลอดภัย",
+    "passwordNotSupported": "ไม่สนับสนุนฟิลด์รหัสผ่านสำหรับโมเดลนี้",
+    "patientIdAutoPopulated": "รหัสผู้ป่วย (เติมอัตโนมัติ)",
+    "patientIdLocked": "รหัสผู้ป่วย (ล็อคกับผู้ใช้ปัจจุบัน)",
+    "primaryKeyAutoGenerated": "คีย์หลัก (สร้างอัตโนมัติ)",
+    "primaryKeyReadOnly": "คีย์หลัก (อ่านอย่างเดียว)",
+    "selectDefault": "-- เลือก --",
+    "selectField": "-- เลือก {{field}} --",
+    "systemTimestamp": "ประทับเวลาระบบ (สร้างอัตโนมัติ)"
+  },
+  "header": {
+    "administrator": "ผู้บริหาร",
+    "logout": "ออกจากระบบ",
+    "returnToDashboard": "กลับสู่แดชบอร์ด",
+    "searchAriaLabel": "ค้นหาโมเดลข้อมูล",
+    "searchPlaceholder": "ค้นหาเวชระเบียน ผู้ใช้ หรือข้อมูล...",
+    "switchToMode": "เปลี่ยนเป็นโหมด {{mode}}",
+    "title": "ผู้บริหารเวชระเบียน"
+  },
+  "health": {
+    "applicationUptime": "เวลาใช้งานแอปพลิเคชัน",
+    "database": {
+      "activeUsers": "ผู้ใช้งาน",
+      "connectionStatus": "สถานะการเชื่อมต่อ",
+      "connectionTest": "การทดสอบการเชื่อมต่อ",
+      "databaseSize": "ขนาดฐานข้อมูล",
+      "failed": "ล้มเหลว",
+      "passed": "ผ่าน",
+      "patientRecords": "เวชระเบียนผู้ป่วย",
+      "title": "สุขภาพฐานข้อมูล"
+    },
+    "lastBackup": "การสำรองข้อมูลล่าสุด",
+    "lastRunFailed": "การรันล่าสุดล้มเหลว",
+    "lastUpdated": "อัปเดตล่าสุด: {{time}}",
+    "loading": "กำลังโหลดสุขภาพระบบ...",
+    "next": "ถัดไป: {{time}}",
+    "noneYet": "ยังไม่มี",
+    "noScheduleConfigured": "ไม่ได้กำหนดตารางเวลา",
+    "overallStatus": "สถานะระบบโดยรวม",
+    "performance": {
+      "appMemory": "หน่วยความจำแอป (RSS)",
+      "cpuDetails": "แอป: {{appPercent}}% จาก {{cores}} คอร์ (ระบบ: {{systemPercent}}%)",
+      "cpuUsage": "การใช้ CPU",
+      "memoryUsage": "การใช้หน่วยความจำ",
+      "memoryUsed": "ใช้ {{used}} MB (ระบบ: {{percent}}% จาก {{total}} MB)",
+      "responseTime": "เวลาตอบสนอง",
+      "systemLoad": "โหลดระบบ",
+      "title": "ประสิทธิภาพแอปพลิเคชัน"
+    },
+    "scheduled": "กำหนดการ: {{schedule}}",
+    "schedulePresets": {
+      "daily": "รายวัน",
+      "every_12_hours": "ทุก 12 ชั่วโมง",
+      "every_6_hours": "ทุก 6 ชั่วโมง"
+    },
+    "services": {
+      "adminInterface": "อินเตอร์เฟซผู้บริหาร",
+      "apiStatus": "สถานะ API",
+      "authService": "บริการการตรวจสอบตัวตน",
+      "frontendLogging": "การบันทึกส่วนหน้า",
+      "title": "บริการแอปพลิเคชัน"
+    },
+    "sso": {
+      "allowed": "อนุญาต",
+      "blocked": "บล็อค",
+      "passwordOnlyInfo": "ผู้ใช้สามารถเข้าสู่ระบบด้วยชื่อผู้ใช้/รหัสผ่านเท่านั้น",
+      "providerType": "ประเภทผู้ให้บริการ",
+      "registrationViaSso": "การลงทะเบียนผ่าน SSO",
+      "ssoStatus": "สถานะ SSO",
+      "title": "การเข้าสู่ระบบครั้งเดียว (SSO)"
+    },
+    "storage": {
+      "appStorage": "พื้นที่เก็บข้อมูลแอป",
+      "diskUsage": "การใช้ดิสก์",
+      "freeOf": "เหลือ {{free}} GB จาก {{total}} GB",
+      "title": "สุขภาพพื้นที่เก็บข้อมูล"
+    },
+    "subtitle": "สถานะระบบและเมตริกประสิทธิภาพแบบเรียลไทม์",
+    "title": "ตัวตรวจสอบสุขภาพระบบ"
+  },
+  "models": {
+    "backToDataModels": "กลับไปโมเดลข้อมูล",
+    "backToModel": "กลับไป {{modelName}}",
+    "bulkDeleteAssociated": "ข้อมูลที่เกี่ยวข้องทั้งหมด (รวมถึง {{types}}) จะถูกลบด้วย",
+    "bulkDeleteFailed": "การลบจำนวนมากล้มเหลว",
+    "bulkDeleteWarning": "คุณกำลังจะลบเวชระเบียน {{modelName}} จำนวน {{count}} รายการอย่างถาวร",
+    "bulkDeleteWarning_one": "คุณกำลังจะลบเวชระเบียน {{modelName}} จำนวน {{count}} รายการอย่างถาวร",
+    "bulkDeleteWarning_other": "คุณกำลังจะลบเวชระเบียน {{modelName}} จำนวน {{count}} รายการอย่างถาวร",
+    "changeRole": "เปลี่ยนบทบาท",
+    "changesSaved": "บันทึกการเปลี่ยนแปลงแล้ว",
+    "changeUsername": "เปลี่ยนชื่อผู้ใช้",
+    "clearSearch": "ล้างการค้นหา",
+    "columnVisibility": "การมองเห็นคอลัมน์",
+    "confirmBulkDeletion": "ยืนยันการลบจำนวนมาก",
+    "confirmDeletion": "ยืนยันการลบ",
+    "createNew": "สร้าง {{modelName}} ใหม่",
+    "createRecord": "สร้างเวชระเบียน",
+    "deleteFailed": "การลบล้มเหลว",
+    "deleteRecords": "ลบ {{count}} เวชระเบียน",
+    "deleteRecords_one": "ลบ {{count}} เวชระเบียน",
+    "deleteRecords_other": "ลบ {{count}} เวชระเบียน",
+    "deleteSelected": "ลบที่เลือก",
+    "deleteWarning": "จะลบเวชระเบียน {{modelName}} นี้และข้อมูลที่เกี่ยวข้องทั้งหมดอย่างถาวร:",
+    "editRecord": "แก้ไข {{modelName}}",
+    "exportFailed": "การส่งออกล้มเหลว",
+    "exportToCSV": "ส่งออกเป็น CSV",
+    "failedToBulkDelete": "ไม่สามารถลบเวชระเบียนได้",
+    "failedToDelete": "ไม่สามารถลบเวชระเบียนได้",
+    "failedToExport": "ไม่สามารถส่งออกข้อมูลได้",
+    "failedToGetPatient": "ไม่สามารถรับข้อมูลผู้ป่วยได้ กรุณาตรวจสอบว่าคุณมีเวชระเบียนผู้ป่วย",
+    "failedToSave": "ไม่สามารถบันทึกเวชระเบียนได้",
+    "fieldMaxLength": "ความยาวสูงสุด: {{length}}",
+    "fieldReferences": "อ้างอิง: {{reference}}",
+    "fieldRequired": "จำเป็น",
+    "fieldType": "ประเภท: {{type}}",
+    "fillForm": "กรอกแบบฟอร์มด้านล่างเพื่อสร้างเวชระเบียนใหม่",
+    "loadingForm": "กำลังโหลดแบบฟอร์มสร้างโมเดล...",
+    "noRecordsFound": "ไม่พบเวชระเบียน",
+    "perPage": "{{count}} รายการต่อหน้า",
+    "perPage_one": "{{count}} รายการต่อหน้า",
+    "perPage_other": "{{count}} รายการต่อหน้า",
+    "rawDataJson": "ข้อมูลดิบ (JSON)",
+    "recordDeleted": "ลบเวชระเบียนแล้ว",
+    "recordDeletedMessage": "ลบเวชระเบียน {{modelName}} #{{id}} เรียบร้อยแล้ว",
+    "recordId": "รหัสเวชระเบียน: {{id}}",
+    "recordsDeleted": "ลบเวชระเบียนแล้ว",
+    "recordsDeletedMessage": "ลบ {{count}} เวชระเบียนเรียบร้อยแล้ว",
+    "recordsDeletedMessage_one": "ลบ {{count}} เวชระเบียนเรียบร้อยแล้ว",
+    "recordsDeletedMessage_other": "ลบ {{count}} เวชระเบียนเรียบร้อยแล้ว",
+    "recordUpdated": "อัปเดตเวชระเบียนเรียบร้อยแล้ว",
+    "resetToDefault": "รีเซ็ตเป็นค่าเริ่มต้น",
+    "roleChangeLastAdmin": "หากนี่เป็นผู้ใช้ผู้บริหารคนสุดท้ายในระบบ คุณอาจสูญเสียสิทธิ์ผู้บริหาร",
+    "roleChangeText": "คุณกำลังจะยกเลิกสิทธิ์ผู้บริหารจากผู้ใช้รายนี้",
+    "roleChangeWarning": "คำเตือนการเปลี่ยนบทบาท",
+    "saveFailed": "การบันทึกล้มเหลว",
+    "searchPlaceholder": "ค้นหา {{modelName}}...",
+    "searchRecords": "ค้นหาเวชระเบียน",
+    "searchResult": "{{count}} ผลลัพธ์สำหรับ \"{{query}}\"",
+    "searchResult_one": "{{count}} ผลลัพธ์สำหรับ \"{{query}}\"",
+    "searchResult_other": "{{count}} ผลลัพธ์สำหรับ \"{{query}}\"",
+    "selected": "เลือก {{count}} รายการ",
+    "selected_one": "เลือก {{count}} รายการ",
+    "selected_other": "เลือก {{count}} รายการ",
+    "toggleColumnVisibility": "สลับการมองเห็นคอลัมน์",
+    "typeDeleteToConfirm": "พิมพ์ <strong>DELETE</strong> เพื่อยืนยัน",
+    "usernameChangeLogout": "จะออกจากระบบทันทีและต้องเข้าสู่ระบบใหม่ด้วยชื่อผู้ใช้ใหม่",
+    "usernameChangeText": "คุณกำลังจะเปลี่ยนชื่อผู้ใช้ของตัวเองจาก <strong>\"{{oldUsername}}\"</strong> เป็น <strong>\"{{newUsername}}\"</strong>",
+    "usernameChangeWarning": "คำเตือนการเปลี่ยนชื่อผู้ใช้",
+    "usernameUpdated": "อัปเดตชื่อผู้ใช้แล้ว",
+    "usernameUpdatedMessage": "ชื่อผู้ใช้ของคุณถูกเปลี่ยนแล้ว กรุณาเข้าสู่ระบบด้วยชื่อผู้ใช้ใหม่: \"{{username}}\"",
+    "viewRecord": "ดู {{modelName}}",
+    "visibleColumns": "คอลัมน์ที่มองเห็น"
+  },
+  "settings": {
+    "dataRetention": {
+      "title": "การเก็บรักษาข้อมูล",
+      "trashRetention": "การเก็บรักษาถังขยะ",
+      "trashRetentionDesc": "จำนวนวันที่เก็บไฟล์ที่ลบแล้วในถังขยะก่อนลบอย่างถาวร"
+    },
+    "loading": "กำลังโหลดการตั้งค่า...",
+    "resetAll": "รีเซ็ตทั้งหมด",
+    "saveAllChanges": "บันทึกการเปลี่ยนแปลงทั้งหมด",
+    "sso": {
+      "ssoDisabledInfo": "SSO ปิดการใช้งานอยู่ หากต้องการเปิดใช้ SSO กรุณากำหนดค่าตัวแปรสภาพแวดล้อมต่อไปนี้และรีสตาร์ทแอปพลิเคชัน:",
+      "ssoRegistration": "การลงทะเบียน SSO",
+      "testConnection": "ทดสอบการเชื่อมต่อ",
+      "testConnectionDesc": "ทดสอบการเชื่อมต่อและการกำหนดค่าผู้ให้บริการ SSO",
+      "testSsoConnection": "ทดสอบการเชื่อมต่อ SSO",
+      "title": "การเข้าสู่ระบบครั้งเดียว (SSO)"
+    },
+    "subtitle": "กำหนดค่าการตั้งค่าทั่วระบบและนโยบายการเก็บรักษา",
+    "title": "การตั้งค่าผู้บริหาร",
+    "userManagement": {
+      "allowRegistration": "อนุญาตการลงทะเบียนผู้ใช้ใหม่",
+      "allowRegistrationDesc": "เปิดหรือปิดความสามารถในการสร้างบัญชีใหม่จากหน้าเข้าสู่ระบบ"
+    }
+  },
+  "shared": {
+    "dark": "มืด",
+    "healthy": "แข็งแรง",
+    "info": "ข้อมูล",
+    "light": "สว่าง"
+  },
+  "sidebar": {
+    "adminNavigation": "การนำทางผู้บริหาร",
+    "comingSoon": "{{label}} (เร็วๆ นี้)",
+    "items": {
+      "analytics": "การวิเคราะห์",
+      "maintenance": "การบำรุงรักษา",
+      "trash": "ถังขยะ"
+    },
+    "sections": {
+      "dataManagement": "การจัดการข้อมูล",
+      "monitoring": "การตรวจสอบ",
+      "tools": "เครื่องมือ"
+    },
+    "toggleSidebar": "สลับแถบข้าง"
+  },
+  "tools": {
+    "subtitle": "เครื่องมือการบริหารสำหรับการบำรุงรักษาระบบและการจัดการข้อมูล",
+    "testLibrary": {
+      "categories": "หมวดหมู่",
+      "forceSyncAll": "บังคับซิงค์ทั้งหมด",
+      "forceSyncAllDesc": "<strong>บังคับซิงค์ทั้งหมด:</strong> จับคู่ส่วนประกอบทั้งหมดใหม่ (หมวดหมู่และชื่อมาตรฐาน)",
+      "libraryReloaded": "โหลดไลบรารีใหม่แล้ว",
+      "libraryVersion": "เวอร์ชันไลบรารี",
+      "operational": "ใช้งานได้",
+      "reloadDesc": "<strong>โหลดไลบรารีใหม่:</strong> รีเฟรชไลบรารีการทดสอบจากดิสก์ (ใช้หลังจากอัปเดต test_library.json)",
+      "reloadLibrary": "โหลดไลบรารีใหม่",
+      "syncComplete": "ซิงค์เสร็จสมบูรณ์",
+      "syncUnmatched": "ซิงค์ที่ไม่จับคู่",
+      "syncUnmatchedDesc": "<strong>ซิงค์ที่ไม่จับคู่:</strong> อัปเดตส่วนประกอบที่ยังไม่มีชื่อมาตรฐาน",
+      "title": "การบำรุงรักษาไลบรารีการทดสอบ",
+      "totalTests": "การทดสอบทั้งหมด"
+    },
+    "title": "เครื่องมือและการบำรุงรักษา"
+  },
+  "trash": {
+    "clearFilters": "ล้างตัวกรอง",
+    "deleteConfirm": "แน่ใจหรือไม่ว่าต้องการลบ <strong>{{filename}}</strong> อย่างถาวร?",
+    "deletedDateRange": "ช่วงวันที่ลบ",
+    "deleteFailed": "การลบล้มเหลว",
+    "deletePermanently": "ลบอย่างถาวร",
+    "deleteWarning": "การกระทำนี้ไม่สามารถยกเลิกได้ ไฟล์จะถูกลบออกจากระบบอย่างถาวร",
+    "errorLoading": "เกิดข้อผิดพลาดในการโหลดถังขยะ",
+    "fileCount_one": "{{count}} ไฟล์",
+    "fileCount_other": "{{count}} ไฟล์",
+    "fileDeleted": "ลบไฟล์แล้ว",
+    "fileDeletedMessage": "ลบ {{filename}} อย่างถาวรแล้ว",
+    "fileRestored": "กู้คืนไฟล์แล้ว",
+    "fileRestoredMessage": "กู้คืน {{filename}} ไปยังตำแหน่งเดิมแล้ว",
+    "fileType": "ประเภทไฟล์",
+    "filterByDeletedDate": "กรองตามช่วงวันที่ลบ",
+    "filterByFileType": "กรองตามประเภทไฟล์",
+    "filtered": "(กรองแล้ว)",
+    "loading": "กำลังโหลดเนื้อหาถังขยะ...",
+    "manualDeletion": "การลบด้วยตนเอง",
+    "noFilesInTrash": "ไม่มีไฟล์ในถังขยะ",
+    "noFilesMatch": "ไม่มีไฟล์ที่ตรงกับตัวกรองของคุณ",
+    "permanentlyDelete": "ลบอย่างถาวร",
+    "permanentlyDeleteFile": "ลบไฟล์อย่างถาวร",
+    "purgedDirectories_one": "ใน {{count}} ไดเรกทอรี",
+    "purgedDirectories_other": "ใน {{count}} ไดเรกทอรี",
+    "purgeDescription_one": "ไฟล์ที่เกินระยะเวลาการเก็บรักษาจะถูกลบออก ปัจจุบันมี <strong>{{count}} {{files}}</strong> ในถังขยะรวม <strong>{{size}}</strong>",
+    "purgeDescription_other": "ไฟล์ที่เกินระยะเวลาการเก็บรักษาจะถูกลบออก ปัจจุบันมี <strong>{{count}} {{files}}</strong> ในถังขยะรวม <strong>{{size}}</strong>",
+    "purgedMessage_one": "ลบไฟล์หมดอายุ {{count}} ไฟล์อย่างถาวรแล้ว",
+    "purgedMessage_other": "ลบไฟล์หมดอายุ {{count}} ไฟล์อย่างถาวรแล้ว",
+    "purgeExpired": "ล้างไฟล์หมดอายุ",
+    "purgeExpiredButton": "ล้างไฟล์หมดอายุ",
+    "purgeExpiredFiles": "ล้างไฟล์หมดอายุ",
+    "purgeFailed": "การล้างล้มเหลว",
+    "purgeWarning": "จะลบไฟล์หมดอายุทั้งหมดจากถังขยะอย่างถาวร การกระทำนี้ไม่สามารถยกเลิกได้",
+    "restoreConfirm": "แน่ใจหรือไม่ว่าต้องการกู้คืน <strong>{{filename}}</strong>",
+    "restoreFailed": "การกู้คืนล้มเหลว",
+    "restoreFile": "กู้คืนไฟล์",
+    "restoreTo": "ไปที่",
+    "restoreToOriginal": "กู้คืนไปยังตำแหน่งเดิม",
+    "searchAriaLabel": "ค้นหาไฟล์ถังขยะ",
+    "searchPlaceholder": "ค้นหาตามชื่อไฟล์หรือพาธ...",
+    "showingFiltered": "แสดง {{shown}} จาก {{total}} {{files}}",
+    "subtitle": "จัดการไฟล์ที่อัปโหลดแล้วถูกลบ กู้คืนไฟล์ไปยังตำแหน่งเดิมหรือลบอย่างถาวรเพื่อเพิ่มพื้นที่เก็บข้อมูล",
+    "tableHeaders": {
+      "actions": "การกระทำ",
+      "deleted": "ลบแล้ว",
+      "filename": "ชื่อไฟล์",
+      "originalLocation": "ตำแหน่งเดิม",
+      "reason": "เหตุผล",
+      "size": "ขนาด"
+    },
+    "title": "การจัดการถังขยะ",
+    "totalSize": "รวม {{size}}",
+    "trashPurged": "ล้างถังขยะแล้ว"
+  },
+  "users": {
+    "actionsFor": "การกระทำสำหรับ {{username}}",
+    "activate": "เปิดใช้งาน",
+    "authFilter": {
+      "all": "วิธีการตรวจสอบตัวตนทั้งหมด",
+      "hybrid": "ผสม",
+      "local": "ภายใน",
+      "sso": "SSO"
+    },
+    "changeRole": "เปลี่ยนบทบาท",
+    "clear": "ล้าง",
+    "deactivate": "ปิดใช้งาน",
+    "deleteModal": {
+      "cannotDeleteLastAdmin": "ไม่สามารถลบผู้บริหารคนสุดท้ายได้",
+      "cannotDeleteSelf": "คุณไม่สามารถลบบัญชีตัวเองได้",
+      "title": "ลบผู้ใช้",
+      "typeUsername": "พิมพ์ \"{{username}}\" เพื่อยืนยัน",
+      "warning": "การกระทำนี้ไม่สามารถยกเลิกได้ ข้อมูลทั้งหมดที่เกี่ยวข้องกับผู้ใช้รายนี้จะถูกลบอย่างถาวร"
+    },
+    "deleteUser": "ลบผู้ใช้",
+    "justNow": "เมื่อกี้",
+    "loginHistory": "ประวัติการเข้าสู่ระบบ",
+    "loginHistoryModal": {
+      "dateTime": "วันที่และเวลา",
+      "ipAddress": "ที่อยู่ IP",
+      "noHistory": "ไม่พบประวัติการเข้าสู่ระบบ",
+      "notAvailable": "ไม่มี",
+      "title": "ประวัติการเข้าสู่ระบบ: {{username}}"
+    },
+    "never": "ไม่เคย",
+    "noUsersFound": "ไม่พบผู้ใช้",
+    "noUsersInSystem": "ไม่มีผู้ใช้ในระบบ",
+    "noUsersMatchFilters": "ไม่มีผู้ใช้ที่ตรงกับตัวกรองของคุณ ลองปรับหรือล้างตัวกรอง",
+    "passwordModal": {
+      "bothFieldsRequired": "ต้องกรอกทั้งสองฟิลด์รหัสผ่าน",
+      "confirmPlaceholder": "ยืนยันรหัสผ่านใหม่",
+      "enterNewPassword": "ป้อนรหัสผ่านใหม่",
+      "forceChange": "บังคับเปลี่ยนรหัสผ่านในการเข้าสู่ระบบครั้งถัดไป",
+      "immediateReset": "จะรีเซ็ตรหัสผ่านของผู้ใช้ทันที จำเป็นต้องใช้รหัสผ่านใหม่เพื่อเข้าสู่ระบบ",
+      "newPassword": "รหัสผ่านใหม่",
+      "passwordDescription": "ขั้นต่ำ 6 ตัวอักษร อย่างน้อย 1 ตัวอักษรและ 1 ตัวเลข",
+      "passwordsDoNotMatch": "รหัสผ่านไม่ตรงกัน",
+      "resetFailed": "ไม่สามารถรีเซ็ตรหัสผ่านได้ กรุณาลองอีกครั้ง",
+      "resetSuccess": "รีเซ็ตรหัสผ่านสำหรับ {{username}} เรียบร้อยแล้ว!",
+      "resettingFor": "รีเซ็ตรหัสผ่านสำหรับ <strong>{{username}}</strong>",
+      "ssoWarning": "ผู้ใช้รายนี้ตรวจสอบตัวตนผ่าน SSO ({{provider}}) การตั้งรหัสผ่านภายในจะเปิดใช้การตรวจสอบตัวตนแบบผสม",
+      "title": "รีเซ็ตรหัสผ่านสำหรับ {{username}}",
+      "userInfo": "ผู้ใช้: {{username}} (ID: {{userId}})"
+    },
+    "roleFilter": {
+      "all": "บทบาททั้งหมด"
+    },
+    "roleModal": {
+      "cannotRemoveLastAdmin": "ไม่สามารถยกเลิกบทบาทผู้บริหารคนสุดท้ายได้",
+      "changingRole": "เปลี่ยนบทบาทสำหรับ <strong>{{username}}</strong>",
+      "grantAdmin": "จะให้สิทธิ์ผู้บริหารเต็มรูปแบบ",
+      "revokeAdmin": "จะยกเลิกสิทธิ์ผู้บริหาร",
+      "title": "เปลี่ยนบทบาทผู้ใช้"
+    },
+    "searchPlaceholder": "ค้นหาผู้ใช้...",
+    "statusFilter": {
+      "all": "สถานะทั้งหมด"
+    },
+    "tableHeaders": {
+      "auth": "การตรวจสอบ",
+      "lastLogin": "เข้าสู่ระบบล่าสุด"
+    },
+    "toggleActiveModal": {
+      "activateConfirm": "เปิดใช้งาน \"{{username}}\"? จะสามารถเข้าสู่ระบบได้อีกครั้ง",
+      "activateTitle": "เปิดใช้งานผู้ใช้",
+      "cannotDeactivateLastAdmin": "ไม่สามารถปิดใช้งานผู้บริหารคนสุดท้ายได้",
+      "cannotDeactivateSelf": "คุณไม่สามารถปิดใช้งานบัญชีตัวเองได้",
+      "deactivateConfirm": "ปิดใช้งาน \"{{username}}\"? จะไม่สามารถเข้าสู่ระบบได้จนกว่าจะเปิดใช้งานใหม่",
+      "deactivateTitle": "ปิดใช้งานผู้ใช้"
+    },
+    "userCount": "{{count}} ผู้ใช้",
+    "userCount_one": "{{count}} ผู้ใช้",
+    "userCount_other": "{{count}} ผู้ใช้"
+  }
+}

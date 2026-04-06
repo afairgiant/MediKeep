@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "เพิ่มบันทึกทางการแพทย์",
+      "clearSelections": "ยกเลิกการเลือกทั้งหมด",
+      "generateReport": "สร้างรายงาน ({{count}} บันทึก)",
+      "generateReport_one": "สร้างรายงาน ({{count}} บันทึก)",
+      "generateReport_other": "สร้างรายงาน ({{count}} บันทึก)",
+      "generateReportChartsOnly": "สร้างรายงาน ({{chartCount}} กราф)",
+      "generateReportWithCharts": "สร้างรายงาน ({{recordCount}} บันทึก, {{chartCount}} กราف)",
+      "selectAll": "เลือกบันทึกทั้งหมด"
+    },
+    "configuration": {
+      "description": "เลือกบันทึกทางการแพทย์ที่ต้องการรวมไว้ในรายงานแบบกำหนดเอง",
+      "title": "การกำหนดค่ารายงาน"
+    },
+    "icon": "",
+    "loading": "กำลังโหลดเครื่องมือสร้างรายงาน...",
+    "noData": {
+      "description": "กรุณาเพิ่มบันทึกทางการแพทย์ก่อนใช้เครื่องมือสร้างรายงาน",
+      "title": "ไม่มีข้อมูลทางการแพทย์"
+    },
+    "notifications": {
+      "templateLoaded": "โหลดเทมเพลตเรียบร้อย",
+      "templateLoadedMessage": "เทมเพลต \"{{name}}\" ถูกโหลดเรียบร้อยแล้ว"
+    },
+    "progress": {
+      "recordsSelected": "บันทึกที่เลือก"
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "เพิ่มข้อมูลประชากรและข้อมูลการติดต่อ",
+        "label": "รวมข้อมูลผู้ป่วย"
+      },
+      "includeProfilePicture": {
+        "description": "เพิ่มรูปถ่ายผู้ป่วยในหัวรายงาน",
+        "label": "รวมรูปโปรไฟล์"
+      },
+      "includeSummary": {
+        "description": "เพิ่มส่วนภาพรวมและสถิติ",
+        "label": "รวมสถิติสรุป"
+      },
+      "reportTitle": {
+        "label": "ชื่อรายงาน"
+      },
+      "title": "การตั้งค่ารายงาน"
+    },
+    "title": "เครื่องมือสร้างรายงานแบบกำหนดเอง",
+    "trendCharts": {
+      "dateFrom": "จาก",
+      "dateTo": "ถึง",
+      "emptyState": "ไม่มีข้อมูลแนวโน้ม กรุณาเพิ่มสัญญาณชีพหรือผลตรวจทางห้องปฏิบัติการเพื่อเปิดใช้กราฟแนวโน้ม",
+      "labTestCharts": {
+        "description": "ค้นหาและเลือกการตรวจทางห้องปฏิบัติการเพื่อสร้างกราฟ",
+        "searchPlaceholder": "ค้นหาการตรวจทางห้องปฏิบัติการ...",
+        "title": "กราฟการตรวจทางห้องปฏิบัติการ"
+      },
+      "maxReached": "ถึงขีดจำกัดสูงสุด 10 กราฟแล้ว",
+      "recordCount": "{{count}} บันทึก",
+      "recordCount_one": "{{count}} บันทึก",
+      "recordCount_other": "{{count}} บันทึก",
+      "removeChart": "ลบกราฟ {{name}}",
+      "selectedCharts": "กราฟที่เลือก ({{count}})",
+      "selectedCharts_one": "กราฟที่เลือก ({{count}})",
+      "selectedCharts_other": "กราฟที่เลือก ({{count}})",
+      "vitalCharts": {
+        "description": "เลือกสัญญาณชีพเพื่อสร้างกราฟ",
+        "title": "กราฟสัญญาณชีพ"
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "ไม่มีหมวดหมู่",
+    "noCategoriesDescription": "ไม่มีหมวดหมู่ข้อมูลทางการแพทย์สำหรับการสร้างรายงาน",
+    "noRecords": "ไม่มีบันทึก",
+    "recordCount": "{{count}} บันทึก",
+    "recordCount_one": "",
+    "recordCount_other": "",
+    "selected": "เลือกแล้ว {{count}} รายการ",
+    "selected_one": "",
+    "selected_other": "",
+    "showingFirst": "แสดง {{count}} บันทึกแรก มีบันทึกเพิ่มเติมแต่ไม่แสดงเพื่อประสิทธิภาพ",
+    "showingFirst_one": "",
+    "showingFirst_other": "",
+    "totalCount": "รวม {{count}} รายการ",
+    "totalCount_one": "",
+    "totalCount_other": ""
+  },
+  "dataExport": {
+    "availableData": "ข้อมูลที่มี",
+    "bulkExport": "ส่งออกเป็นชุด",
+    "csvDescription": "รูปแบบ CSV เหมาะสำหรับสเปรดชีต",
+    "dateFilterNote": "ตัวกรองวันที่จะใช้กับทุกประเภทที่เลือก",
+    "exportInfo": "ข้อมูลการส่งออก",
+    "exportTitle": "ส่งออกบันทึกทางการแพทย์",
+    "includeFilesNote": "อาจทำให้ขนาดไฟล์ดาวน์โหลดใหญ่ขึ้นอย่างมาก",
+    "jsonDescription": "รูปแบบ JSON ให้โครงสร้างข้อมูลแบบเต็มรูปแบบ",
+    "pdfDescription": "รูปแบบ PDF สร้างรายงานที่พิมพ์ได้",
+    "singleExport": "ส่งออกเดี่ยว",
+    "zipDescription": "การส่งออกเป็นชุดจะถูกบรรจุในไฟล์ ZIP"
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "อีก {{count}} รายการ",
+      "moreItems_other": "อีก {{count}} รายการ",
+      "title": "ข้อมูลที่มี"
+    },
+    "buttons": {
+      "bulkExport": "ส่งออกเป็นชุด {{count}} ประเภทเป็น ZIP",
+      "bulkExport_one": "ส่งออกเป็นชุด {{count}} ประเภทเป็น ZIP",
+      "bulkExport_other": "ส่งออกเป็นชุด {{count}} ประเภทเป็น ZIP",
+      "creatingZip": "กำลังสร้าง ZIP...",
+      "exportAs": "ส่งออก {{scope}} เป็น {{format}}",
+      "exporting": "กำลังส่งออก...",
+      "goToDashboard": "ไปที่แดชบอร์ด",
+      "refreshPage": "รีเฟรชหน้า"
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": "เลือกประเภทข้อมูลสำหรับการส่งออกเป็นชุด"
+      },
+      "dataToExport": {
+        "label": "ข้อมูลที่จะส่งออก",
+        "placeholder": "เลือกประเภทข้อมูล"
+      },
+      "dateRange": {
+        "endDate": "วันที่สิ้นสุด (ไม่บังคับ)",
+        "startDate": "วันที่เริ่มต้น (ไม่บังคับ)"
+      },
+      "format": {
+        "label": "รูปแบบการส่งออก",
+        "placeholder": "เลือกรูปแบบ"
+      },
+      "includeFiles": "รวมไฟล์แนบ (สร้างเป็นไฟล์ ZIP)",
+      "includePatientInfo": {
+        "description": "ยกเลิกการเลือกเพื่อไม่รวมรายละเอียดส่วนบุคคลของผู้ป่วยเพื่อความเป็นส่วนตัว",
+        "label": "รวมข้อมูลผู้ป่วย (ชื่อ ข้อมูลประชากร ฯลฯ)"
+      },
+      "title": "การกำหนดค่าการส่งออก"
+    },
+    "description": "ดาวน์โหลดข้อมูลทางการแพทย์ในรูปแบบต่างๆ สำหรับสำรองข้อมูลหรือแชร์กับผู้ให้บริการสุขภาพ",
+    "errors": {
+      "bulkExportFailed": "การส่งออกเป็นชุดล้มเหลว: {{message}}",
+      "bulkInvalidSettings": "กรุณาตรวจสอบการตั้งค่าการส่งออกเป็นชุด ตรวจสอบว่าได้เลือกประเภทข้อมูลอย่างน้อยหนึ่งประเภทและรูปแบบที่ถูกต้อง",
+      "bulkNoDataFound": "ไม่พบข้อมูลสำหรับเกณฑ์การส่งออกที่เลือก ลองเลือกประเภทข้อมูลอื่นหรือปรับช่วงวันที่",
+      "exportFailed": "การส่งออกล้มเหลว: {{message}}",
+      "invalidSettings": "กรุณาตรวจสอบการตั้งค่าการส่งออก ตรวจสอบว่าได้เลือกประเภทข้อมูลและรูปแบบที่ถูกต้อง",
+      "loadFailed": "ไม่สามารถโหลดข้อมูลการส่งออก: {{message}}",
+      "noActivePatient": "ไม่มีโปรไฟล์ผู้ป่วยที่เลือกในขณะนี้ กรุณาเลือกผู้ป่วยจากแดชบอร์ดเพื่อใช้ฟีเจอร์การส่งออก",
+      "noDataFound": "ไม่พบข้อมูลสำหรับเกณฑ์การส่งออกที่เลือก ลองเลือกประเภทข้อมูลหรือช่วงวันที่อื่น",
+      "noDataType": "กรุณาเลือกประเภทข้อมูลอย่างน้อยหนึ่งประเภทสำหรับการส่งออกเป็นชุด",
+      "sessionExpired": "เซสชันของคุณหมดอายุแล้ว กรุณารีเฟรชหน้าหรือเข้าสู่ระบบใหม่เพื่อเข้าถึงฟีเจอร์การส่งออก",
+      "validationFailed": "{{errors}}"
+    },
+    "exportMode": {
+      "bulkDescription": "ส่งออกข้อมูลหลายประเภทรวมกันในไฟล์ ZIP",
+      "bulkExport": "ส่งออกเป็นชุด",
+      "singleDescription": "ส่งออกข้อมูลประเภทเดียวในรูปแบบที่เลือก",
+      "singleExport": "ส่งออกเดี่ยว",
+      "title": "โหมดการส่งออก"
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "สร้างไฟล์ ZIP ที่มีข้อมูลหลายประเภทในรูปแบบที่เลือกสำหรับการสำรองข้อมูลแบบครอบคลุม",
+        "title": "การส่งออกเป็นชุด:"
+      },
+      "csv": {
+        "description": "ค่าที่แยกด้วยจุลภาคเหมาะสำหรับแอปพลิเคชันสเปรดชีตเช่น Excel หรือ Google Sheets",
+        "title": "รูปแบบ CSV:"
+      },
+      "fileAttachments": {
+        "description": "เมื่อมีสำหรับการส่งออก PDF ไฟล์ผลตรวจทางห้องปฏิบัติการสามารถรวมไว้ในไฟล์ ZIP ได้",
+        "title": "ไฟล์แนบ:"
+      },
+      "json": {
+        "description": "รูปแบบข้อมูลโครงสร้างที่เครื่องอ่านได้ เหมาะสำหรับการนำเข้าในระบบหรือแอปพลิเคชันอื่น",
+        "title": "รูปแบบ JSON:"
+      },
+      "pdf": {
+        "description": "รูปแบบเอกสารที่มนุษย์อ่านได้ เหมาะสำหรับการพิมพ์หรือแชร์กับผู้ให้บริการสุขภาพ",
+        "title": "รูปแบบ PDF:"
+      },
+      "title": "ข้อมูลการส่งออก"
+    },
+    "loading": "กำลังโหลดตัวเลือกการส่งออก...",
+    "scopes": {
+      "all": "บันทึกทั้งหมด",
+      "encounters": "การพบแพทย์"
+    },
+    "success": {
+      "bulkExportComplete": "การส่งออกเป็นชุดเสร็จสมบูรณ์! ไฟล์ ZIP ที่มี {{count}} ประเภทข้อมูลได้ถูกดาวน์โหลดแล้ว",
+      "bulkExportComplete_one": "การส่งออกเป็นชุดเสร็จสมบูรณ์! ไฟล์ ZIP ที่มี {{count}} ประเภทข้อมูลได้ถูกดาวน์โหลดแล้ว",
+      "bulkExportComplete_other": "การส่งออกเป็นชุดเสร็จสมบูรณ์! ไฟล์ ZIP ที่มี {{count}} ประเภทข้อมูลได้ถูกดาวน์โหลดแล้ว",
+      "exportComplete": "การส่งออกเสร็จสมบูรณ์! ไฟล์ {{format}} ของคุณได้ถูกดาวน์โหลดแล้ว"
+    },
+    "title": "ส่งออกบันทึกสุขภาพ"
+  },
+  "templates": {
+    "categories": "{{count}} หมวดหมู่",
+    "categories_one": "",
+    "categories_other": "",
+    "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบเทมเพลตนี้?",
+    "editTemplate": "แก้ไขเทมเพลต",
+    "loadTemplate": "โหลดเทมเพลต",
+    "manageTemplates": "จัดการเทมเพลต",
+    "moreTemplates": "... และอีก {{count}} เทมเพลต",
+    "moreTemplates_one": "",
+    "moreTemplates_other": "... และอีก {{count}} เทมเพลต",
+    "noSaved": "ไม่มีเทมเพลตที่บันทึกไว้",
+    "records": "{{count}} บันทึก",
+    "reportTemplates": "เทมเพลตรายงาน",
+    "saveAsTemplate": "บันทึกเป็นเทมเพลต",
+    "saveDescription": "เทมเพลตนี้จะบันทึกการตั้งค่ารายงานปัจจุบัน บันทึกที่เลือก และกราฟแนวโน้มที่เลือกของคุณ",
+    "savedTemplates": "เทมเพลตที่บันทึกไว้",
+    "updateTemplate": "อัปเดตเทมเพลต"
+  }
+}

@@ -15,7 +15,7 @@
     "cleanup": {
       "button": "Rensa filer",
       "cleaning": "Rensar...",
-      "description": "Rensa osynkroniserade filer och lös inkonsekvenser i dokumentlagring. Detta återställer misslyckade uppladdningar, rensar föräldralösa uppgifter och fixar databassynkroniseringsproblem.",
+      "description": "Rensa osynkroniserade filer och lös inkonsekvenser i dokumentlagring. Detta återställer misslyckade uppladdningar, rensar föräldralösa uppgifter och åtgärdar databassynkroniseringsproblem.",
       "title": "Filrensning"
     },
     "paperlessDescription": "Konfigurera Paperless-ngx dokumenthanteringsintegration"
@@ -78,7 +78,7 @@
     }
   },
   "releaseNotes": {
-    "currentVersion": "Nuvarande",
+    "currentVersion": "Aktuell",
     "dismiss": "Förstått",
     "empty": "Inga versionsanteckningar tillgängliga",
     "error": "Kan inte ladda versionsanteckningar",
@@ -95,7 +95,7 @@
     "preferences": "Applikationsinställningar",
     "releaseNotes": "Versionsanteckningar",
     "security": "Säkerhet",
-    "supportMediKeep": "Stödja MediKeep",
+    "supportMediKeep": "Stöd MediKeep",
     "systemInfo": "Systeminformation"
   },
   "security": {

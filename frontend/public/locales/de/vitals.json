@@ -18,11 +18,11 @@
   "editTitle": "Vitalzeichen bearbeiten",
   "form": {
     "dateTimePlaceholder": "",
-    "devicePlaceholder": "z.\u00a0B. Digitales Blutdruckmessgerät, Thermometermodell...",
+    "devicePlaceholder": "z. B. Digitales Blutdruckmessgerät, Thermometermodell...",
     "deviceUsed": "Verwendetes Gerät/Ausrüstung",
-    "diastolicBP": "Diastolischer Blutdruck",
+    "diastolicBP": "Diastolischer RR",
     "healthAlerts": "Gesundheitswarnungen",
-    "heightNotSet": "Größe nicht im Patientenprofil hinterlegt - BMI-Berechnung nicht verfügbar",
+    "heightNotSet": "Körpergröße nicht im Patientenprofil hinterlegt - BMI-Berechnung nicht verfügbar",
     "locationPlaceholder": "Wo wurden diese Messungen durchgeführt?",
     "locations": {
       "ambulatory": "Ambulante Versorgung",
@@ -37,25 +37,25 @@
     "notesPlaceholder": "Zusätzliche Notizen zur Vitalzeichenmessung...",
     "openCalendar": "Kalender öffnen",
     "painScaleUnit": "(0-10)",
-    "pasteDateTimeDescription": "Datum/Uhrzeit eingeben oder einfügen, oder Kalender zum Auswählen klicken",
+    "pasteDateTimeDescription": "Datum/Uhrzeit eingeben oder einfügen, oder Kalender zum Auswählen anklicken",
     "patientHeight": "Patientengröße: {{height}} Zoll (aus Profil)",
     "recordedDateTime": "Messdatum & -uhrzeit",
     "saveVitals": "Vitalzeichen speichern",
-    "systolicBP": "Systolischer Blutdruck",
+    "systolicBP": "Systolischer RR",
     "updateVitals": "Vitalzeichen aktualisieren",
     "validation": {
-      "a1cMax": "A1C darf 20% nicht überschreiten",
-      "a1cMin": "A1C muss mindestens 0% betragen",
-      "bloodGlucoseMax": "Blutzucker darf 800 mg/dL nicht überschreiten",
-      "bloodGlucoseMin": "Blutzucker muss mindestens 20 mg/dL betragen",
+      "a1cMax": "HbA1c darf 20% nicht überschreiten",
+      "a1cMin": "HbA1c muss mindestens 0% betragen",
+      "bloodGlucoseMax": "Blutzucker darf 800 mg/dl nicht überschreiten",
+      "bloodGlucoseMin": "Blutzucker muss mindestens 20 mg/dl betragen",
       "dateInFuture": "Datum darf nicht in der Zukunft liegen",
       "dateRequired": "Messdatum und -uhrzeit sind erforderlich",
       "deviceMaxLength": "Gerätename darf 100 Zeichen nicht überschreiten",
-      "diastolicMax": "Diastolischer Blutdruck darf 200 mmHg nicht überschreiten",
-      "diastolicMin": "Diastolischer Blutdruck muss mindestens 30 mmHg betragen",
+      "diastolicMax": "Diastolischer RR darf 200 mmHg nicht überschreiten",
+      "diastolicMin": "Diastolischer RR muss mindestens 30 mmHg betragen",
       "firstNameRequired": "Bitte geben Sie Ihren Vornamen ein",
-      "heartRateMax": "Herzfrequenz darf 250 BPM nicht überschreiten",
-      "heartRateMin": "Herzfrequenz muss mindestens 30 BPM betragen",
+      "heartRateMax": "Herzfrequenz darf 250 Schläge/min nicht überschreiten",
+      "heartRateMin": "Herzfrequenz muss mindestens 30 Schläge/min betragen",
       "lastNameRequired": "Bitte geben Sie Ihren Nachnamen ein",
       "notesMaxLength": "Notizen dürfen 1000 Zeichen nicht überschreiten",
       "oxygenMax": "Sauerstoffsättigung darf 100% nicht überschreiten",
@@ -66,8 +66,8 @@
       "passwordRequirements": "Passwort muss mindestens einen Buchstaben und eine Zahl enthalten",
       "respiratoryRateMax": "Atemfrequenz darf 100/min nicht überschreiten",
       "respiratoryRateMin": "Atemfrequenz muss mindestens 5/min betragen",
-      "systolicMax": "Systolischer Blutdruck darf 300 mmHg nicht überschreiten",
-      "systolicMin": "Systolischer Blutdruck muss mindestens 50 mmHg betragen",
+      "systolicMax": "Systolischer RR darf 300 mmHg nicht überschreiten",
+      "systolicMin": "Systolischer RR muss mindestens 50 mmHg betragen",
       "temperatureMax": "Temperatur darf {{max}}{{unit}} nicht überschreiten",
       "temperatureMin": "Temperatur muss mindestens {{min}}{{unit}} betragen",
       "timeInFuture": "Ausgewählte Uhrzeit darf nicht in der Zukunft liegen",
@@ -80,7 +80,7 @@
     "after_meal": "Nach dem Essen",
     "before_meal": "Vor dem Essen",
     "fasting": "Nüchtern",
-    "random": "Zufällig"
+    "random": "Gelegenheitswert"
   },
   "healthSummary": "Gesundheitsübersicht",
   "import": {
@@ -107,7 +107,7 @@
   "loading": "Vitalzeichen werden geladen...",
   "loadingStats": "Gesundheitsstatistiken werden geladen...",
   "modal": {
-    "a1c": "A1C",
+    "a1c": "HbA1c",
     "additionalMeasurements": "Zusätzliche Messungen",
     "bloodGlucose": "Blutzucker",
     "deviceUsed": "Verwendetes Gerät",
@@ -115,7 +115,7 @@
     "glucoseContextPlaceholder": "Optional",
     "painScale": "Schmerzskala",
     "physicalMeasurements": "Körperliche Messungen",
-    "practitionerId": "Arzt-ID",
+    "practitionerId": "Behandler-ID",
     "respiratoryRate": "Atemfrequenz",
     "title": "Vitalzeichen-Details"
   },
@@ -125,7 +125,7 @@
   "secondary": "Sekundär",
   "selectPatientPrompt": "Bitte wählen Sie einen Patienten aus, um Vitalzeichen anzuzeigen und zu verwalten.",
   "stats": {
-    "a1cDesc": "Klicken zum Filtern der Einträge mit A1C",
+    "a1cDesc": "Klicken zum Filtern der Einträge mit HbA1c",
     "bloodGlucoseDesc": "Klicken zum Filtern der Einträge mit Blutzucker",
     "bloodPressure": "Blutdruck",
     "bloodPressureDesc": "Klicken zum Filtern der Einträge mit Blutdruck",
@@ -144,7 +144,7 @@
     "deleteDay": "Tag löschen",
     "glucoseTrend": "Blutzuckertrend"
   },
-  "summaryDescription": "Aktuelle Messwerte und Durchschnitte - Klicken Sie auf eine Karte, um die Tabelle unten zu filtern",
+  "summaryDescription": "Aktuelle Messwerte und Durchschnittswerte - Klicken Sie auf eine Karte, um die Tabelle unten zu filtern",
   "systolic": "Systolisch",
   "table": {
     "errorLoading": "Fehler beim Laden der Vitalzeichen",
@@ -188,14 +188,14 @@
     "title": "Trendanalyse"
   },
   "units": {
-    "bpm": "BPM",
+    "bpm": "Schläge/min",
     "celsius": "°C",
     "cm": "cm",
     "fahrenheit": "°F",
     "inches": "Zoll",
     "kg": "kg",
     "lbs": "lbs",
-    "mgdl": "mg/dL",
+    "mgdl": "mg/dl",
     "mmHg": "mmHg",
     "perMin": "/min"
   }

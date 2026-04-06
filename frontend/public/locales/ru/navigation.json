@@ -83,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Панель администратора",
+      "allergies": "Аллергии",
+      "backupManagement": "Управление резервными копиями",
+      "conditions": "Заболевания",
       "customReports": "Пользовательские отчёты",
+      "dataModels": "Модели данных",
+      "emergencyContacts": "Экстренные контакты",
       "exportRecords": "Экспорт записей",
+      "familyHistory": "Семейный анамнез",
+      "immunizations": "Иммунизация",
+      "injuries": "Травмы",
+      "insurance": "Страхование",
+      "labResults": "Результаты анализов",
       "language": "Язык",
+      "medicalEquipment": "Медицинское оборудование",
+      "medications": "Препараты",
       "patientInfo": "Информация о пациенте",
+      "pharmacies": "Аптеки",
+      "practitioners": "Врачи",
+      "procedures": "Процедуры",
+      "settings": "Настройки",
+      "symptoms": "Симптомы",
+      "systemHealth": "Состояние системы",
       "tagManagement": "Управление тегами",
       "theme": "Тема",
-      "visitHistory": "История визитов"
+      "treatments": "Лечение",
+      "visitHistory": "История визитов",
+      "vitalSigns": "Жизненные показатели"
     },
     "sections": {
+      "administration": "Администрирование",
       "careAndTreatment": "Уход и лечение",
       "misc": "Прочее",
       "tools": "Инструменты"

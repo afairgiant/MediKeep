@@ -18,7 +18,7 @@
   "editTitle": "Modifier les signes vitaux",
   "form": {
     "dateTimePlaceholder": "",
-    "devicePlaceholder": "p. ex., Tensiomètre numérique, modèle de thermomètre...",
+    "devicePlaceholder": "par ex., Tensiomètre numérique, modèle de thermomètre...",
     "deviceUsed": "Appareil/équipement utilisé",
     "diastolicBP": "Pression diastolique",
     "healthAlerts": "Alertes de santé",

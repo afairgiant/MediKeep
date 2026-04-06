@@ -2,7 +2,7 @@
   "admin": {
     "createUser": {
       "linkPatient": {
-        "hint": "Maak in plaats van een nieuw patiëntdossier een koppeling met een bestaande patiënt (bijv. een kind dat nu een eigen login nodig heeft).",
+        "hint": "Maak in plaats van een nieuw patiëntdossier een koppeling met een bestaande patiënt (bijv. een kind dat nu een eigen inlog nodig heeft).",
         "selfRecordBadge": "Eigen dossier",
         "selfRecordWarning": "Dit is het eigen dossier van de huidige eigenaar. Er wordt een nieuw eigen dossier aangemaakt voor de oorspronkelijke eigenaar met hun demografische gegevens overgenomen. De oorspronkelijke eigenaar krijgt bewerkingstoegang tot deze patiënt."
       },
@@ -214,7 +214,7 @@
       "checkbox": "Koppelen aan bestaand patiëntdossier",
       "currentOwner": "Huidige eigenaar",
       "dob": "Geb.datum",
-      "hint": "In plaats van een nieuw patiëntdossier aan te maken, koppelt u de nieuwe gebruiker aan een bestaande patiënt (bijv. een kind dat nu een eigen login nodig heeft).",
+      "hint": "In plaats van een nieuw patiëntdossier aan te maken, koppelt u de nieuwe gebruiker aan een bestaande patiënt (bijv. een kind dat nu een eigen inlog nodig heeft).",
       "loading": "Patiënten laden...",
       "owner": "Eigenaar",
       "patientId": "ID",
@@ -633,13 +633,13 @@
     },
     "deleteUser": "Gebruiker verwijderen",
     "justNow": "Zojuist",
-    "loginHistory": "Logingeschiedenis",
+    "loginHistory": "Inloggeschiedenis",
     "loginHistoryModal": {
       "dateTime": "Datum & tijd",
       "ipAddress": "IP-adres",
-      "noHistory": "Geen logingeschiedenis gevonden",
+      "noHistory": "Geen inloggeschiedenis gevonden",
       "notAvailable": "N.v.t.",
-      "title": "Logingeschiedenis: {{username}}"
+      "title": "Inloggeschiedenis: {{username}}"
     },
     "never": "Nooit",
     "noUsersFound": "Geen gebruikers gevonden",
@@ -649,7 +649,7 @@
       "bothFieldsRequired": "Beide wachtwoordvelden zijn verplicht",
       "confirmPlaceholder": "Bevestig nieuw wachtwoord",
       "enterNewPassword": "Voer nieuw wachtwoord in",
-      "forceChange": "Wachtwoordwijziging afdwingen bij volgende login",
+      "forceChange": "Wachtwoordwijziging afdwingen bij volgende inlog",
       "immediateReset": "Hiermee wordt het wachtwoord van de gebruiker onmiddellijk hersteld. De gebruiker moet het nieuwe wachtwoord gebruiken om in te loggen.",
       "newPassword": "Nieuw wachtwoord",
       "passwordDescription": "Minimaal 6 tekens, ten minste 1 letter en 1 cijfer",
@@ -677,7 +677,7 @@
     },
     "tableHeaders": {
       "auth": "Authenticatie",
-      "lastLogin": "Laatste login"
+      "lastLogin": "Laatste inlog"
     },
     "toggleActiveModal": {
       "activateConfirm": "\"{{username}}\" activeren? Deze gebruiker kan dan weer inloggen.",

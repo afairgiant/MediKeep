@@ -18,7 +18,7 @@
   "editTitle": "Editar Sinais Vitais",
   "form": {
     "dateTimePlaceholder": "",
-    "devicePlaceholder": "ex.: Monitor de PA digital, Modelo do termômetro...",
+    "devicePlaceholder": "p. ex.: Monitor de PA digital, Modelo do termômetro...",
     "deviceUsed": "Dispositivo/Equipamento Utilizado",
     "diastolicBP": "PA Diastólica",
     "healthAlerts": "Alertas de Saúde",
@@ -167,7 +167,7 @@
     "exportCsv": "Exportar para CSV",
     "exportError": "Falha ao exportar dados. Tente novamente.",
     "exportSuccess": "Dados exportados com sucesso",
-    "glucoseContextFilter": "Tipo de Glicose Sanguínea",
+    "glucoseContextFilter": "Tipo de Glicemia",
     "latest": "Mais Recente",
     "noData": "Nenhum dado de tendência disponível",
     "noDataDesc": "Não há pontos de dados históricos para este sinal vital.",
@@ -183,7 +183,7 @@
     "selectTimeRange": "Selecionar Período",
     "showing": "Mostrando",
     "stdDev": "Desvio Padrão",
-    "summaryStatistics": "Estatísticas Resumo",
+    "summaryStatistics": "Estatísticas de Resumo",
     "timeRange": "Período",
     "title": "Análise de Tendências"
   },

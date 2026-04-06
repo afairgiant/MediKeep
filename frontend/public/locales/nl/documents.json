@@ -15,10 +15,10 @@
   },
   "fileCount": {
     "attached": "{{count}} bijgevoegd",
-    "attached_one": "{{count}} bijgevoegd",
-    "attached_other": "{{count}} bijgevoegd",
+    "attached_one": "",
+    "attached_other": "",
     "fileCount": "{{count}} bestand",
-    "fileCount_one": "{{count}} bestand",
+    "fileCount_one": "",
     "fileCount_other": "{{count}} bestanden",
     "noFiles": "Geen bestanden"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "BESTANDSDETAILS",
     "loading": "Bestanden laden...",
     "markedCount": "{{count}} bestand gemarkeerd voor verwijdering",
-    "markedCount_one": "{{count}} bestand gemarkeerd voor verwijdering",
+    "markedCount_one": "",
     "markedCount_other": "{{count}} bestanden gemarkeerd voor verwijdering",
     "markedForDeletion": "Gemarkeerd voor verwijdering",
     "noFiles": "Geen bestanden bijgevoegd",
@@ -38,21 +38,21 @@
     "statusProcessing": "Verwerken"
   },
   "fileUpload": {
-    "accepted": "Geaccepteerd: {{types}} • Max. grootte: {{size}} MB",
+    "accepted": "Geaccepteerd: {{types}} • Max. grootte: {{size}}MB",
     "chooseFiles": "Bestanden kiezen",
     "dragOrClick": "Sleep bestanden hierheen of klik om te selecteren",
     "remove": "Verwijderen",
     "selectedFiles": "Geselecteerde bestanden ({{count}})",
-    "selectedFiles_one": "Geselecteerd bestand ({{count}})",
-    "selectedFiles_other": "Geselecteerde bestanden ({{count}})"
+    "selectedFiles_one": "",
+    "selectedFiles_other": ""
   },
   "linkPaperless": {
     "from": "Van: {{name}}",
     "infoText": "Zoek naar documenten die al in Paperless staan om ze aan dit/deze {{entityType}} te koppelen. Geen upload nodig!",
     "linkDocument": "Document koppelen",
     "moreTags": "+{{count}} meer",
-    "moreTags_one": "+{{count}} meer",
-    "moreTags_other": "+{{count}} meer",
+    "moreTags_one": "",
+    "moreTags_other": "",
     "noDocumentsFound": "Geen documenten gevonden",
     "searchDocuments": "Documenten zoeken",
     "searchPlaceholder": "Zoeken op titel, inhoud of tags...",
@@ -113,20 +113,20 @@
   },
   "upload": {
     "completed": "{{count}} voltooid",
-    "completed_one": "{{count}} voltooid",
-    "completed_other": "{{count}} voltooid",
+    "completed_one": "",
+    "completed_other": "",
     "dragOrClick": "Sleep bestanden hierheen of klik om te selecteren",
     "failed": "{{count}} mislukt",
-    "failed_one": "{{count}} mislukt",
-    "failed_other": "{{count}} mislukt",
+    "failed_one": "",
+    "failed_other": "",
     "filesProgress": "{{completed}}/{{total}} bestanden",
-    "maxSize": "Maximale bestandsgrootte: {{size}} MB",
+    "maxSize": "Maximale bestandsgrootte: {{size}}MB",
     "overallProgress": "Totale voortgang",
     "percentComplete": "{{percent}}% voltooid",
     "remaining": "{{time}} resterend",
     "retryFailed": "Mislukte opnieuw proberen",
     "uploading": "{{count}} wordt geüpload",
-    "uploading_one": "{{count}} wordt geüpload",
+    "uploading_one": "",
     "uploading_other": "{{count}} worden geüpload"
   }
 }

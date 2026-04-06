@@ -15,10 +15,10 @@
   },
   "fileCount": {
     "attached": "{{count}} allegati",
-    "attached_one": "{{count}} allegato",
-    "attached_other": "{{count}} allegati",
+    "attached_one": "",
+    "attached_other": "",
     "fileCount": "{{count}} file",
-    "fileCount_one": "{{count}} file",
+    "fileCount_one": "",
     "fileCount_other": "{{count}} file",
     "noFiles": "Nessun file"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "DETTAGLI DEL FILE",
     "loading": "Caricamento file...",
     "markedCount": "{{count}} file contrassegnato per l'eliminazione",
-    "markedCount_one": "{{count}} file contrassegnato per l'eliminazione",
+    "markedCount_one": "",
     "markedCount_other": "{{count}} file contrassegnati per l'eliminazione",
     "markedForDeletion": "Contrassegnato per l'eliminazione",
     "noFiles": "Nessun file allegato",
@@ -38,21 +38,21 @@
     "statusProcessing": "In elaborazione"
   },
   "fileUpload": {
-    "accepted": "Accettati: {{types}} • Dimensione max: {{size}} MB",
+    "accepted": "Accettati: {{types}} • Dimensione max: {{size}}MB",
     "chooseFiles": "Scegli file",
     "dragOrClick": "Trascinare i file qui o fare clic per selezionare",
     "remove": "Rimuovi",
     "selectedFiles": "File selezionati ({{count}})",
-    "selectedFiles_one": "File selezionato ({{count}})",
-    "selectedFiles_other": "File selezionati ({{count}})"
+    "selectedFiles_one": "",
+    "selectedFiles_other": ""
   },
   "linkPaperless": {
     "from": "Da: {{name}}",
-    "infoText": "Cercare documenti già presenti in Paperless per collegarli a questo/a {{entityType}}. Nessun caricamento necessario!",
+    "infoText": "Cercare documenti già presenti in Paperless per collegarli a questo {{entityType}}. Nessun caricamento necessario!",
     "linkDocument": "Collega documento",
     "moreTags": "+{{count}} altri",
-    "moreTags_one": "+{{count}} altro",
-    "moreTags_other": "+{{count}} altri",
+    "moreTags_one": "",
+    "moreTags_other": "",
     "noDocumentsFound": "Nessun documento trovato",
     "searchDocuments": "Cerca documenti",
     "searchPlaceholder": "Cerca per titolo, contenuto o etichette...",
@@ -62,7 +62,7 @@
     "type": "Tipo: {{type}}"
   },
   "linkPapra": {
-    "infoText": "Cercare documenti già presenti in Papra per collegarli a questo/a {{entityType}}. Nessun caricamento necessario!",
+    "infoText": "Cercare documenti già presenti in Papra per collegarli a questo {{entityType}}. Nessun caricamento necessario!",
     "linkDocument": "Collega documento",
     "noDocumentsFound": "Nessun documento trovato",
     "searchPlaceholder": "Cerca documenti...",
@@ -104,29 +104,29 @@
     "viewMode": "Modalità di visualizzazione"
   },
   "storage": {
-    "backendLabel": "Archiviazione:",
+    "backendLabel": "Backend di archiviazione:",
     "connectedBadge": "Connesso",
     "local": "Archiviazione locale",
     "paperless": "Paperless-ngx",
     "papra": "Papra",
-    "selectBackend": "Seleziona archiviazione"
+    "selectBackend": "Seleziona backend di archiviazione"
   },
   "upload": {
     "completed": "{{count}} completati",
-    "completed_one": "{{count}} completato",
-    "completed_other": "{{count}} completati",
+    "completed_one": "",
+    "completed_other": "",
     "dragOrClick": "Trascinare i file qui o fare clic per selezionare",
     "failed": "{{count}} non riusciti",
-    "failed_one": "{{count}} non riuscito",
-    "failed_other": "{{count}} non riusciti",
+    "failed_one": "",
+    "failed_other": "",
     "filesProgress": "{{completed}}/{{total}} file",
-    "maxSize": "Dimensione massima del file: {{size}} MB",
+    "maxSize": "Dimensione massima del file: {{size}}MB",
     "overallProgress": "Avanzamento generale",
     "percentComplete": "{{percent}}% completato",
     "remaining": "{{time}} rimanente",
     "retryFailed": "Riprova non riusciti",
     "uploading": "{{count}} in caricamento",
-    "uploading_one": "{{count}} in caricamento",
-    "uploading_other": "{{count}} in caricamento"
+    "uploading_one": "",
+    "uploading_other": ""
   }
 }

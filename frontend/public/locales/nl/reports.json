@@ -204,7 +204,7 @@
     "editTemplate": "Sjabloon bewerken",
     "loadTemplate": "Sjabloon laden",
     "manageTemplates": "Sjablonen beheren",
-    "moreTemplates": "... en {{count}} sjabloon meer",
+    "moreTemplates": "... en {{count}} sjablonen meer",
     "moreTemplates_one": "... en {{count}} sjabloon meer",
     "moreTemplates_other": "... en {{count}} sjablonen meer",
     "noSaved": "Geen opgeslagen sjablonen",

@@ -58,10 +58,10 @@
         "codeDescription": "Описание медицинского кода",
         "conditionName": "Введите название заболевания",
         "diagnosis": "Введите диагноз",
-        "icd10Code": "например, E11.9",
+        "icd10Code": "напр., E11.9",
         "notes": "Введите клинические заметки, наблюдения или дополнительные сведения",
         "severity": "Выберите тяжесть",
-        "snomedCode": "например, 44054006"
+        "snomedCode": "напр., 44054006"
       },
       "saving": "Сохранение заболевания...",
       "severity": {
@@ -94,7 +94,7 @@
       "medicationLinkWarning": "Проблема при связывании лекарств"
     },
     "table": {
-      "icd10": "ICD-10"
+      "icd10": "МКБ-10"
     }
   },
   "emergencyContacts": {
@@ -145,10 +145,10 @@
     "form": {
       "create": "Создать оборудование",
       "lastService": "Дата последнего ТО",
-      "manufacturerPlaceholder": "например, ResMed, Philips",
+      "manufacturerPlaceholder": "напр., ResMed, Philips",
       "modelNumber": "Номер модели",
-      "modelPlaceholder": "например, AirSense 11",
-      "namePlaceholder": "например, ResMed AirSense 11",
+      "modelPlaceholder": "напр., AirSense 11",
+      "namePlaceholder": "напр., ResMed AirSense 11",
       "nextService": "Дата следующего ТО",
       "notesPlaceholder": "Дополнительные заметки об этом оборудовании",
       "practitioner": "Назначено врачом",
@@ -316,13 +316,13 @@
       "expirationDateDesc": "Когда истекает срок годности вакцины",
       "location": "Место/Учреждение",
       "locationDesc": "Где была введена вакцина",
-      "locationPlaceholder": "например, Аптека, Больница, Клиника",
+      "locationPlaceholder": "напр., Аптека, Больница, Клиника",
       "lotNumberDesc": "Номер серии вакцины",
       "lotNumberPlaceholder": "Введите номер серии",
       "manufacturerDesc": "Производитель вакцины",
       "manufacturerPlaceholder": "Введите производителя",
       "ndcNumberDesc": "Национальный код препарата",
-      "ndcNumberPlaceholder": "например, 12345-6789-01",
+      "ndcNumberPlaceholder": "напр., 12345-6789-01",
       "practitionerDesc": "Медицинский специалист, введший вакцину",
       "practitionerPlaceholder": "Выберите врача, проводившего вакцинацию",
       "routeID": "Внутрикожно (ID)",
@@ -339,10 +339,10 @@
       "tagsDesc": "Добавьте теги для категоризации и организации прививок",
       "tradeName": "Официальное/Торговое название",
       "tradeNameDesc": "Полное официальное название из документации на вакцину",
-      "tradeNamePlaceholder": "например, Flublok TRIV 2025-2026 PFS",
+      "tradeNamePlaceholder": "напр., Flublok TRIV 2025-2026 PFS",
       "updateImmunization": "Обновить прививку",
       "vaccineNameDesc": "Общепринятое название вакцины",
-      "vaccineNamePlaceholder": "например, Грипп, COVID-19, Tdap"
+      "vaccineNamePlaceholder": "напр., Грипп, COVID-19, АКДС"
     },
     "loadingImmunizations": "Загрузка прививок...",
     "noImmunizationsFound": "Прививки не найдены",
@@ -351,7 +351,7 @@
     },
     "viewModal": {
       "adminDetails": "Детали введения",
-      "doseHash": "Доза #{{number}}",
+      "doseHash": "Доза №{{number}}",
       "locationFacility": "Место/Учреждение",
       "title": "Подробности прививки",
       "tradeName": "Торговое название",
@@ -795,7 +795,7 @@
       "anesthesiaNotesDesc": "Дополнительная информация об анестезии",
       "anesthesiaNotesPlaceholder": "Введите сведения и заметки об анестезии",
       "anesthesiaTypeDesc": "Тип использованной анестезии",
-      "anesthesiaTypePlaceholder": "например, Общая, Местная, Регионарная",
+      "anesthesiaTypePlaceholder": "напр., Общая, Местная, Регионарная",
       "clinicalNotesDesc": "Дополнительная информация об этой процедуре",
       "clinicalNotesPlaceholder": "Введите клинические заметки, наблюдения или дополнительные сведения",
       "complicationsDesc": "Проблемы или осложнения, которые возникли",
@@ -806,7 +806,7 @@
       "durationDesc": "Сколько длилась процедура",
       "durationPlaceholder": "Введите длительность",
       "facilityDesc": "Медицинское учреждение",
-      "facilityPlaceholder": "например, Название больницы",
+      "facilityPlaceholder": "напр., Название больницы",
       "outcomeAbnormal": "Аномальный",
       "outcomeDesc": "Результат или исход процедуры",
       "outcomeInconclusive": "Неопределённый",
@@ -814,16 +814,16 @@
       "outcomeSuccessful": "Успешно",
       "practitionerDesc": "Медицинский специалист, проводящий процедуру",
       "procedureCodeDesc": "Код медицинского выставления счетов",
-      "procedureCodePlaceholder": "например, код CPT",
+      "procedureCodePlaceholder": "напр., код CPT",
       "procedureDate": "Дата процедуры",
       "procedureDateDesc": "Когда была проведена процедура",
       "procedureNameDesc": "Название процедуры",
       "procedureNamePlaceholder": "Введите название процедуры",
       "procedureTypeDesc": "Тип или категория процедуры",
-      "procedureTypePlaceholder": "например, Хирургическая, Диагностическая",
+      "procedureTypePlaceholder": "напр., Хирургическая, Диагностическая",
       "savingProcedure": "Сохранение процедуры...",
       "settingDesc": "Где была проведена процедура",
-      "settingPlaceholder": "например, Стационар, Амбулатория",
+      "settingPlaceholder": "напр., Стационар, Амбулатория",
       "statusDesc": "Текущий статус процедуры",
       "statusInProgress": "В процессе",
       "statusPostponed": "Отложена",
@@ -1149,11 +1149,11 @@
       "descriptionPlaceholder": "Опишите лечение",
       "dosageAmount": "Дозировка/Количество",
       "dosageDesc": "Количество или дозировка за процедуру",
-      "dosagePlaceholder": "например, 10мг, 1 сеанс",
+      "dosagePlaceholder": "напр., 10мг, 1 сеанс",
       "endDateDesc": "Когда заканчивается лечение (если применимо)",
       "enterTreatmentName": "Введите название лечения",
       "frequencyDesc": "Как часто проводится лечение",
-      "frequencyPlaceholder": "например, Ежедневно, Дважды в неделю",
+      "frequencyPlaceholder": "напр., Ежедневно, Дважды в неделю",
       "linkingPartialFailure": "Некоторые элементы не удалось связать",
       "linkingPartialFailureMessage": "",
       "notesDesc": "Дополнительная информация об этом лечении",
@@ -1173,7 +1173,7 @@
       "treatmentNameDesc": "Название лечения",
       "treatmentNotes": "Заметки о лечении",
       "treatmentTypeDesc": "Тип или категория лечения",
-      "treatmentTypePlaceholder": "например, Физиотерапия, Хирургия",
+      "treatmentTypePlaceholder": "напр., Физиотерапия, Хирургия",
       "updateTreatment": "Обновить лечение"
     },
     "linkExisting": "Связать существующее",
@@ -1263,7 +1263,7 @@
   "vitals": {
     "form": {
       "dateTimePlaceholder": "",
-      "devicePlaceholder": "например, цифровой тонометр, модель термометра...",
+      "devicePlaceholder": "напр., цифровой тонометр, модель термометра...",
       "heightNotSet": "Рост не указан в профиле пациента - расчёт ИМТ недоступен",
       "locationPlaceholder": "Где были сделаны эти измерения?",
       "lockedByImport": "Управляется средним значением импорта с устройства",

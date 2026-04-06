@@ -27,8 +27,8 @@
       "placeholder": "Zoeken in medische dossiers..."
     },
     "sections": {
-      "additionalResources": "Aanvullende informatie",
-      "coreMedical": "Kerninformatie medisch",
+      "additionalResources": "Aanvullende bronnen",
+      "coreMedical": "Kernmedische informatie",
       "healthMonitoring": "Gezondheidsmonitoring",
       "prevention": "Preventie & geschiedenis",
       "recentActivity": "Recente activiteit",
@@ -38,7 +38,7 @@
       "activeMedications": "Actieve medicatie"
     },
     "subtitle": "Beheer uw gezondheidsinformatie veilig",
-    "title": "MediKeep dashboard"
+    "title": "MediKeep Dashboard"
   },
   "invitations": {
     "acceptButton": "Uitnodiging accepteren",
@@ -83,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Admin Dashboard",
+      "allergies": "Allergieën",
+      "backupManagement": "Backupbeheer",
+      "conditions": "Aandoeningen",
       "customReports": "Aangepaste rapporten",
+      "dataModels": "Datamodellen",
+      "emergencyContacts": "Noodcontacten",
       "exportRecords": "Dossiers exporteren",
+      "familyHistory": "Familiegeschiedenis",
+      "immunizations": "Inentingen",
+      "injuries": "Verwondingen",
+      "insurance": "Verzekering",
+      "labResults": "Laboratoriumuitslagen",
       "language": "Taal",
+      "medicalEquipment": "Medische apparatuur",
+      "medications": "Medicatie",
       "patientInfo": "Patiëntinfo",
+      "pharmacies": "Apotheken",
+      "practitioners": "Zorgverleners",
+      "procedures": "Procedures",
+      "settings": "Instellingen",
+      "symptoms": "Symptomen",
+      "systemHealth": "Systeemstatus",
       "tagManagement": "Tagbeheer",
       "theme": "Thema",
-      "visitHistory": "Bezoekgeschiedenis"
+      "treatments": "Behandelingen",
+      "visitHistory": "Bezoekgeschiedenis",
+      "vitalSigns": "Vitale functies"
     },
     "sections": {
+      "administration": "Beheer",
       "careAndTreatment": "Zorg & behandeling",
       "misc": "Overig",
       "tools": "Hulpmiddelen"

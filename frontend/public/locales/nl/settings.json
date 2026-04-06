@@ -7,7 +7,7 @@
     }
   },
   "actions": {
-    "reset": "Wijzigingen herstellen",
+    "reset": "Wijzigingen ongedaan maken",
     "save": "Alle wijzigingen opslaan",
     "unsavedChanges": "U heeft niet-opgeslagen wijzigingen"
   },
@@ -68,7 +68,7 @@
     "sessionTimeout": {
       "description": "Stel de duur van inactiviteit in voordat uw sessie verloopt (in minuten)",
       "range": "minuten (5-1440)",
-      "title": "Sessietime-out"
+      "title": "Sessietimeout"
     },
     "unitSystem": {
       "description": "Kies of metingen worden weergegeven in imperiale (pond, voet, °F) of metrische (kilogram, centimeter, °C) eenheden",
@@ -82,7 +82,7 @@
     "dismiss": "Begrepen",
     "empty": "Geen release-opmerkingen beschikbaar",
     "error": "Kan release-opmerkingen niet laden",
-    "publishedOn": "Uitgebracht op {{date}}",
+    "publishedOn": "Uitgebracht {{date}}",
     "retry": "Opnieuw proberen",
     "showAll": "Meer releases tonen",
     "showLess": "Minder tonen",

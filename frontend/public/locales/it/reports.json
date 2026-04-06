@@ -11,13 +11,13 @@
       "selectAll": "Seleziona tutti i record"
     },
     "configuration": {
-      "description": "Selezionare le cartelle cliniche da includere nel report personalizzato",
+      "description": "Seleziona le cartelle cliniche da includere nel tuo report personalizzato",
       "title": "Configurazione report"
     },
     "icon": "",
     "loading": "Caricamento generatore di report...",
     "noData": {
-      "description": "Aggiungere prima alcune cartelle cliniche per utilizzare il generatore di report.",
+      "description": "Aggiungi prima alcune cartelle cliniche per utilizzare il generatore di report.",
       "title": "Nessun dato medico disponibile"
     },
     "notifications": {
@@ -29,15 +29,15 @@
     },
     "settingsModal": {
       "includePatientInfo": {
-        "description": "Aggiungere informazioni demografiche e di contatto",
+        "description": "Aggiungi informazioni demografiche e di contatto",
         "label": "Includi informazioni del paziente"
       },
       "includeProfilePicture": {
-        "description": "Aggiungere la foto del paziente all'intestazione del report",
+        "description": "Aggiungi la foto del paziente all'intestazione del report",
         "label": "Includi foto del profilo"
       },
       "includeSummary": {
-        "description": "Aggiungere la sezione panoramica e statistiche",
+        "description": "Aggiungi sezione panoramica e statistiche",
         "label": "Includi statistiche riepilogative"
       },
       "reportTitle": {
@@ -49,9 +49,9 @@
     "trendCharts": {
       "dateFrom": "Da",
       "dateTo": "A",
-      "emptyState": "Nessun dato di tendenza disponibile. Aggiungere segni vitali o risultati di laboratorio per abilitare i grafici di tendenza.",
+      "emptyState": "Nessun dato di tendenza disponibile. Aggiungi segni vitali o risultati di laboratorio per abilitare i grafici di tendenza.",
       "labTestCharts": {
-        "description": "Cercare e selezionare gli esami di laboratorio da rappresentare in grafico",
+        "description": "Cerca e seleziona gli esami di laboratorio da rappresentare in grafico",
         "searchPlaceholder": "Cerca esami di laboratorio...",
         "title": "Grafici esami di laboratorio"
       },
@@ -64,7 +64,7 @@
       "selectedCharts_one": "Grafici selezionati ({{count}})",
       "selectedCharts_other": "Grafici selezionati ({{count}})",
       "vitalCharts": {
-        "description": "Selezionare i segni vitali da rappresentare in grafico",
+        "description": "Seleziona i segni vitali da rappresentare in grafico",
         "title": "Grafici segni vitali"
       }
     }
@@ -74,17 +74,17 @@
     "noCategoriesDescription": "Nessuna categoria di dati medici è disponibile per la generazione di report.",
     "noRecords": "Nessun record disponibile",
     "recordCount": "{{count}} record",
-    "recordCount_one": "{{count}} record",
-    "recordCount_other": "{{count}} record",
+    "recordCount_one": "",
+    "recordCount_other": "",
     "selected": "{{count}} selezionati",
-    "selected_one": "{{count}} selezionato",
-    "selected_other": "{{count}} selezionati",
-    "showingFirst": "Visualizzazione dei primi {{count}} record. Sono disponibili altri record ma non vengono mostrati per motivi di prestazioni.",
-    "showingFirst_one": "Visualizzazione del primo {{count}} record. Sono disponibili altri record ma non vengono mostrati per motivi di prestazioni.",
-    "showingFirst_other": "Visualizzazione dei primi {{count}} record. Sono disponibili altri record ma non vengono mostrati per motivi di prestazioni.",
+    "selected_one": "",
+    "selected_other": "",
+    "showingFirst": "Visualizzazione dei primi {{count}} record. Sono disponibili altri record ma non vengono mostrati per motivi di performance.",
+    "showingFirst_one": "",
+    "showingFirst_other": "",
     "totalCount": "{{count}} totali",
-    "totalCount_one": "{{count}} totale",
-    "totalCount_other": "{{count}} totali"
+    "totalCount_one": "",
+    "totalCount_other": ""
   },
   "dataExport": {
     "availableData": "Dati disponibili",
@@ -112,16 +112,16 @@
       "creatingZip": "Creazione ZIP...",
       "exportAs": "Esporta {{scope}} come {{format}}",
       "exporting": "Esportazione...",
-      "goToDashboard": "Vai alla dashboard",
+      "goToDashboard": "Vai al cruscotto",
       "refreshPage": "Aggiorna la pagina"
     },
     "configuration": {
       "bulkSelection": {
-        "label": "Selezionare i tipi di dati per l'esportazione massiva"
+        "label": "Seleziona i tipi di dati per l'esportazione massiva"
       },
       "dataToExport": {
         "label": "Dati da esportare",
-        "placeholder": "Selezionare il tipo di dati"
+        "placeholder": "Seleziona il tipo di dati"
       },
       "dateRange": {
         "endDate": "Data di fine (facoltativa)",
@@ -129,27 +129,27 @@
       },
       "format": {
         "label": "Formato di esportazione",
-        "placeholder": "Selezionare il formato"
+        "placeholder": "Seleziona il formato"
       },
       "includeFiles": "Includi allegati (crea file ZIP)",
       "includePatientInfo": {
-        "description": "Deselezionare per escludere i dati personali del paziente per motivi di privacy",
-        "label": "Includi informazioni del paziente (nome, dati demografici, es.)"
+        "description": "Deseleziona per escludere i dati personali del paziente per motivi di privacy",
+        "label": "Includi informazioni del paziente (nome, dati demografici, ecc.)"
       },
       "title": "Configurazione esportazione"
     },
-    "description": "Scaricate i vostri dati medici in vari formati per il backup o la condivisione con i fornitori di assistenza sanitaria",
+    "description": "Scarica i tuoi dati medici in vari formati per il backup o la condivisione con i professionisti sanitari",
     "errors": {
       "bulkExportFailed": "Esportazione massiva non riuscita: {{message}}",
-      "bulkInvalidSettings": "Verificare le impostazioni di esportazione massiva. Assicurarsi di aver selezionato almeno un tipo di dati e un formato valido.",
-      "bulkNoDataFound": "Nessun dato trovato per i criteri di esportazione selezionati. Provare a selezionare tipi di dati diversi o a modificare l'intervallo di date.",
+      "bulkInvalidSettings": "Verifica le impostazioni di esportazione massiva. Assicurati di aver selezionato almeno un tipo di dati e un formato valido.",
+      "bulkNoDataFound": "Nessun dato trovato per i criteri di esportazione selezionati. Prova a selezionare tipi di dati diversi o a modificare l'intervallo di date.",
       "exportFailed": "Esportazione non riuscita: {{message}}",
-      "invalidSettings": "Verificare le impostazioni di esportazione. Assicurarsi di aver selezionato un tipo di dati e un formato validi.",
+      "invalidSettings": "Verifica le impostazioni di esportazione. Assicurati di aver selezionato un tipo di dati e un formato validi.",
       "loadFailed": "Caricamento dei dati di esportazione non riuscito: {{message}}",
-      "noActivePatient": "Nessun profilo paziente attualmente selezionato. Selezionare un paziente dalla dashboard per utilizzare la funzione di esportazione.",
-      "noDataFound": "Nessun dato trovato per i criteri di esportazione selezionati. Provare a selezionare un tipo di dati o un intervallo di date diverso.",
-      "noDataType": "Selezionare almeno un tipo di dati per l'esportazione massiva",
-      "sessionExpired": "La sessione è scaduta. Aggiornare la pagina o effettuare nuovamente l'accesso per utilizzare le funzioni di esportazione.",
+      "noActivePatient": "Nessun profilo paziente attualmente selezionato. Seleziona un paziente dal cruscotto per utilizzare la funzione di esportazione.",
+      "noDataFound": "Nessun dato trovato per i criteri di esportazione selezionati. Prova a selezionare un tipo di dati o un intervallo di date diverso.",
+      "noDataType": "Seleziona almeno un tipo di dati per l'esportazione massiva",
+      "sessionExpired": "La sessione è scaduta. Aggiorna la pagina o effettua nuovamente l'accesso per utilizzare le funzioni di esportazione.",
       "validationFailed": "{{errors}}"
     },
     "exportMode": {
@@ -178,7 +178,7 @@
         "title": "Formato JSON:"
       },
       "pdf": {
-        "description": "Formato documento leggibile perfetto per la stampa o la condivisione con i fornitori di assistenza sanitaria.",
+        "description": "Formato documento leggibile perfetto per la stampa o la condivisione con i professionisti sanitari.",
         "title": "Formato PDF:"
       },
       "title": "Informazioni sull'esportazione"
@@ -198,20 +198,20 @@
   },
   "templates": {
     "categories": "{{count}} categorie",
-    "categories_one": "{{count}} categoria",
-    "categories_other": "{{count}} categorie",
-    "deleteConfirm": "Eliminare questo modello?",
+    "categories_one": "",
+    "categories_other": "",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo modello?",
     "editTemplate": "Modifica modello",
     "loadTemplate": "Carica modello",
     "manageTemplates": "Gestisci modelli",
     "moreTemplates": "... e {{count}} altro modello",
-    "moreTemplates_one": "... e {{count}} altro modello",
+    "moreTemplates_one": "",
     "moreTemplates_other": "... e altri {{count}} modelli",
     "noSaved": "Nessun modello salvato",
     "records": "{{count}} record",
     "reportTemplates": "Modelli di report",
     "saveAsTemplate": "Salva come modello",
-    "saveDescription": "Questo modello salverà le impostazioni correnti del report, i record selezionati e i grafici di tendenza selezionati.",
+    "saveDescription": "Questo modello salverà le tue impostazioni attuali del report, i record selezionati e i grafici di tendenza selezionati.",
     "savedTemplates": "Modelli salvati",
     "updateTemplate": "Aggiorna modello"
   }

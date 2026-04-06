@@ -26,19 +26,19 @@
     "viewFailed": "Falha ao abrir o arquivo para visualização. Tente novamente."
   },
   "form": {
-    "conditionNotSelected": "Selecione uma condição",
+    "conditionNotSelected": "Por favor, selecione uma condição",
     "entityNotFound": "O item solicitado não foi encontrado.",
     "equipmentFieldsRequired": "Nome e tipo do equipamento são obrigatórios",
     "equipmentNotSelected": "Por favor, selecione pelo menos um equipamento",
-    "invalidDate": "Informe uma data válida.",
-    "invalidEmail": "Informe um endereço de e-mail válido.",
-    "invalidPhone": "Informe um número de telefone válido.",
-    "invalidPhoneDigits": "Informe um número de telefone válido",
-    "invalidWebsiteUrl": "Informe uma URL de site válida",
-    "medicationNotSelected": "Selecione um medicamento",
+    "invalidDate": "Por favor, informe uma data válida.",
+    "invalidEmail": "Por favor, informe um endereço de e-mail válido.",
+    "invalidPhone": "Por favor, informe um número de telefone válido.",
+    "invalidPhoneDigits": "Por favor, informe um número de telefone válido",
+    "invalidWebsiteUrl": "Por favor, informe uma URL de site válida",
+    "medicationNotSelected": "Por favor, selecione um medicamento",
     "mustBeValidNumber": "Deve ser um número válido",
-    "patientNotSelected": "Selecione um paciente.",
-    "requiredFieldMissing": "Preencha todos os campos obrigatórios.",
+    "patientNotSelected": "Por favor, selecione um paciente.",
+    "requiredFieldMissing": "Por favor, preencha todos os campos obrigatórios.",
     "submissionFailed": "Falha ao salvar o formulário. Verifique os dados e tente novamente."
   },
   "general": {
@@ -70,10 +70,10 @@
   "patientForm": {
     "birthDateFuture": "A data de nascimento não pode estar no futuro",
     "birthDateRequired": "Data de nascimento é obrigatória",
-    "createFailed": "Falha na criação: {{message}}",
+    "createFailed": "Falha na Criação: {{message}}",
     "firstNameRequired": "Nome é obrigatório",
     "lastNameRequired": "Sobrenome é obrigatório",
-    "updateFailed": "Falha na atualização: {{message}}"
+    "updateFailed": "Falha na Atualização: {{message}}"
   },
   "patientNotAvailable": "Informações do paciente não disponíveis",
   "relationships": {
@@ -94,7 +94,7 @@
   },
   "upload": {
     "allUploadsFailed": "Todos os envios de arquivos falharam. Verifique sua conexão e tente novamente.",
-    "batchUploadFailed": "Alguns arquivos falharam no envio. Verifique os erros individuais.",
+    "batchUploadFailed": "Alguns arquivos falharam no envio. Verifique os erros individuais dos arquivos.",
     "connectionError": "Erro de conexão. Verifique sua rede e tente novamente.",
     "duplicateFile": "Este arquivo já foi enviado.",
     "failed": "Falha ao enviar o arquivo. Tente novamente.",

@@ -2,7 +2,7 @@
   "admin": {
     "createUser": {
       "linkPatient": {
-        "hint": "Invece di creare un nuovo record paziente, collega il nuovo utente a un paziente esistente (es. un figlio che ora ha bisogno di un proprio accesso).",
+        "hint": "Invece di creare un nuovo record paziente, collega il nuovo utente a un paziente esistente (ad es. un figlio che ora ha bisogno di un proprio accesso).",
         "selfRecordBadge": "Record personale",
         "selfRecordWarning": "Questo è il record personale del proprietario attuale. Verrà creato un nuovo record personale per il proprietario originale con i suoi dati demografici copiati. Il proprietario originale riceverà l'accesso in modifica a questo paziente."
       },
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Elimina file definitivamente",
     "purgedDirectories_one": "in {{count}} directory",
     "purgedDirectories_other": "in {{count}} directory",
-    "purgeDescription_one": "I file che hanno superato il periodo di conservazione verranno rimossi. Attualmente {{verb}} <strong>{{count}} {{files}}</strong> nel cestino per un totale di <strong>{{size}}</strong>.",
-    "purgeDescription_other": "I file che hanno superato il periodo di conservazione verranno rimossi. Attualmente {{verb}} <strong>{{count}} {{files}}</strong> nel cestino per un totale di <strong>{{size}}</strong>.",
+    "purgeDescription_one": "I file che hanno superato il periodo di conservazione verranno rimossi. Attualmente c'è <strong>{{count}} {{files}}</strong> nel cestino per un totale di <strong>{{size}}</strong>.",
+    "purgeDescription_other": "I file che hanno superato il periodo di conservazione verranno rimossi. Attualmente ci sono <strong>{{count}} {{files}}</strong> nel cestino per un totale di <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} file scaduto eliminato definitivamente",
     "purgedMessage_other": "{{count}} file scaduti eliminati definitivamente",
     "purgeExpired": "Elimina scaduti",

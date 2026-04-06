@@ -1,0 +1,1303 @@
+{
+  "allergies": {
+    "messages": {
+      "loading": "กำลังโหลดข้อมูลแพ้ยา..."
+    }
+  },
+  "buttons": {
+    "addNew": "เพิ่มใหม่",
+    "back": "ย้อนกลับ",
+    "cancelSelection": "ยกเลิกการเลือก",
+    "create": "สร้าง",
+    "delete": "ลบ",
+    "done": "เสร็จสิ้น",
+    "link": "เชื่อมโยง",
+    "linkCondition": "เชื่อมโยงโรค",
+    "linkConditions": "เชื่อมโยงโรค",
+    "linkEquipment": "เชื่อมโยงอุปกรณ์",
+    "linkLabResult": "เชื่อมโยงผลแลป",
+    "linkMedication": "เชื่อมโยงยา",
+    "linkVisit": "เชื่อมโยงการเยี่ยม",
+    "print": "พิมพ์",
+    "refresh": "รีเฟรช",
+    "restore": "กู้คืน",
+    "save": "บันทึก",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง",
+    "search": "ค้นหา",
+    "share": "แชร์",
+    "showLess": "แสดงน้อยลง",
+    "showMore": "แสดงเพิ่มเติม",
+    "tryAgain": "ลองอีกครั้ง",
+    "update": "อัปเดต",
+    "view": "ดู"
+  },
+  "conditions": {
+    "addNew": "เพิ่มโรคใหม่",
+    "addTitle": "เพิ่มโรคใหม่",
+    "card": {
+      "durationEnded": "{{duration}} (จบแล้ว)",
+      "durationOngoing": "{{duration}} (กำลังดำเนิน)"
+    },
+    "editTitle": "แก้ไขโรค",
+    "form": {
+      "createCondition": "สร้างโรค",
+      "descriptions": {
+        "codeDescription": "คำอธิบายรหัสทางการแพทย์ที่เข้าใจได้",
+        "conditionName": "ชื่ออื่น (ถ้ามี)",
+        "diagnosis": "การวินิจฉัยหลักหรือโรค",
+        "endDate": "วันที่โรคสิ้นสุด (ถ้ามี)",
+        "icd10Code": "รหัสการจำแนกโรคนานาชาติ",
+        "notes": "ข้อมูลเพิ่มเติมเกี่ยวกับโรคนี้",
+        "onsetDate": "วันที่เริ่มมีโรค",
+        "practitioner": "ผู้ให้บริการสุขภาพที่เกี่ยวข้อง",
+        "snomedCode": "รหัส SNOMED CT",
+        "tags": "เพิ่มแท็กเพื่อจัดหมวดหมู่และจัดระเบียบโรค"
+      },
+      "medicationsDescription": "เชื่อมโยงยาที่ใช้รักษาหรือจัดการโรคนี้",
+      "placeholders": {
+        "codeDescription": "คำอธิบายรหัสทางการแพทย์",
+        "conditionName": "ป้อนชื่อโรค",
+        "diagnosis": "ป้อนการวินิจฉัย",
+        "icd10Code": "เช่น E11.9",
+        "notes": "ป้อนบันทึกทางคลินิก ข้อสังเกต หรือรายละเอียดเพิ่มเติม",
+        "severity": "เลือกความรุนแรง",
+        "snomedCode": "เช่น 44054006"
+      },
+      "saving": "กำลังบันทึกโรค...",
+      "severity": {
+        "critical": "วิกฤต",
+        "mild": "เล็กน้อย",
+        "moderate": "ปานกลาง",
+        "severe": "รุนแรง"
+      },
+      "status": {
+        "chronic": "เรื้อรัง"
+      },
+      "updateCondition": "อัปเดตโรค"
+    },
+    "getStarted": "คลิก \"เพิ่มโรคใหม่\" เพื่อเริ่มต้น",
+    "loading": "กำลังโหลดข้อมูลโรค...",
+    "modal": {
+      "labels": {
+        "endDate": "สิ้นสุด",
+        "onsetDate": "เริ่มต้น"
+      },
+      "noNotesAvailable": "ไม่มีบันทึกทางคลินิก",
+      "sections": {
+        "medicalCodes": "รหัสทางการแพทย์"
+      },
+      "title": "รายละเอียดโรค"
+    },
+    "noResults": "ไม่พบข้อมูลโรค",
+    "notifications": {
+      "medicationLinkFailed": "สร้างโรคแล้ว แต่ไม่สามารถเชื่อมโยงยาบางตัวได้ คุณสามารถเชื่อมโยงด้วยตนเองโดยการแก้ไขโรค",
+      "medicationLinkWarning": "ปัญหาการเชื่อมโยงยา"
+    },
+    "table": {
+      "icd10": "ICD-10"
+    }
+  },
+  "emergencyContacts": {
+    "actions": {
+      "addNew": "เพิ่มผู้ติดต่อฉุกเฉิน"
+    },
+    "card": {
+      "address": "ที่อยู่:",
+      "email": "อีเมล:",
+      "notes": "📝 หมายเหตุ",
+      "phone": "โทรศัพท์:",
+      "primary": "หลัก",
+      "relationship": "ความสัมพันธ์:",
+      "secondaryPhone": "โทรศัพท์สำรอง:"
+    },
+    "form": {
+      "addTitle": "เพิ่มผู้ติดต่อฉุกเฉิน",
+      "editTitle": "แก้ไขผู้ติดต่อฉุกเฉิน"
+    },
+    "page": {
+      "loading": "กำลังโหลดข้อมูลผู้ติดต่อฉุกเฉิน...",
+      "noContacts": "ไม่พบผู้ติดต่อฉุกเฉิน",
+      "noContactsDescription": "การมีผู้ติดต่อฉุกเฉินเป็นสิ่งสำคัญในกรณีเกิดเหตุฉุกเฉินทางการแพทย์"
+    },
+    "table": {
+      "primary": "หลัก"
+    },
+    "viewModal": {
+      "contactInfo": "📞 ข้อมูลการติดต่อ",
+      "editContact": "แก้ไขผู้ติดต่อ",
+      "icon": "🚨",
+      "notes": "📝 หมายเหตุ",
+      "primaryPhone": "โทรศัพท์หลัก",
+      "secondaryPhone": "โทรศัพท์สำรอง",
+      "title": "รายละเอียดผู้ติดต่อฉุกเฉิน"
+    }
+  },
+  "equipment": {
+    "addEquipment": "เพิ่มอุปกรณ์",
+    "addFirstEquipment": "เพิ่มอุปกรณ์ชิ้นแรกของคุณ",
+    "editEquipment": "แก้ไขอุปกรณ์",
+    "fields": {
+      "modelNumber": "รุ่น",
+      "nextService": "บำรุงรักษาครั้งถัดไป",
+      "prescribedDate": "วันที่สั่งจ่าย",
+      "serialNumber": "เลขที่ผลิต"
+    },
+    "form": {
+      "create": "สร้างอุปกรณ์",
+      "lastService": "วันที่บำรุงรักษาครั้งล่าสุด",
+      "manufacturerPlaceholder": "เช่น ResMed, Philips",
+      "modelNumber": "หมายเลขรุ่น",
+      "modelPlaceholder": "เช่น AirSense 11",
+      "namePlaceholder": "เช่น ResMed AirSense 11",
+      "nextService": "วันที่บำรุงรักษาครั้งถัดไป",
+      "notesPlaceholder": "หมายเหตุเพิ่มเติมเกี่ยวกับอุปกรณ์นี้",
+      "practitioner": "สั่งจ่ายโดย",
+      "prescribedDate": "วันที่สั่งจ่าย",
+      "saving": "กำลังบันทึกอุปกรณ์...",
+      "serialPlaceholder": "หมายเลขซีเรียลอุปกรณ์",
+      "supplierPlaceholder": "ผู้จำหน่ายอุปกรณ์",
+      "type": "ประเภทอุปกรณ์",
+      "update": "อัปเดตอุปกรณ์",
+      "usageInstructions": "คำแนะนำการใช้งาน",
+      "usagePlaceholder": "วิธีใช้อุปกรณ์นี้"
+    },
+    "loading": "กำลังโหลดข้อมูลอุปกรณ์...",
+    "noEquipmentFound": "ไม่พบอุปกรณ์",
+    "startAdding": "เริ่มต้นด้วยการเพิ่มอุปกรณ์ทางการแพทย์ชิ้นแรกของคุณ",
+    "viewModal": {
+      "dates": "วันที่สำคัญ",
+      "lastService": "บำรุงรักษาครั้งล่าสุด",
+      "manufacturerDetails": "รายละเอียดผู้ผลิต",
+      "modelNumber": "หมายเลขรุ่น",
+      "nextService": "บำรุงรักษาครั้งถัดไป",
+      "prescribedBy": "สั่งจ่ายโดย",
+      "prescribedDate": "วันที่สั่งจ่าย",
+      "title": "รายละเอียดอุปกรณ์",
+      "type": "ประเภทอุปกรณ์",
+      "usageInstructions": "คำแนะนำการใช้งาน"
+    }
+  },
+  "errors": {
+    "invalidPhone": "กรุณาป้อนหมายเลขโทรศัพท์ที่ถูกต้อง",
+    "loadFailed": "โหลดไม่สำเร็จ"
+  },
+  "familyHistory": {
+    "addFamilyMember": "เพิ่มสมาชิกในครอบครัว",
+    "card": {
+      "addCondition": "เพิ่มโรค",
+      "age": "อายุ",
+      "birthYear": "ปีเกิด",
+      "cannotEditSharedMember": "ไม่สามารถแก้ไขสมาชิกที่ถูกแชร์ได้",
+      "conditions": "โรค",
+      "deathYear": "ปีที่เสียชีวิต",
+      "deceased": "เสียชีวิตแล้ว",
+      "diagnosedAtAge": "วินิจฉัยเมื่ออายุ {{age}} ปี",
+      "noConditionsRecorded": "ไม่มีบันทึกโรค",
+      "notSelectable": "เลือกไม่ได้",
+      "selected": "ถูกเลือก",
+      "sharedBy": "แชร์โดย",
+      "subtitle": "สมาชิกครอบครัว",
+      "years": "ปี"
+    },
+    "conditionCountAcrossMembers": "{{conditionCount}} โรคจาก {{memberCount}} สมาชิกครอบครัว",
+    "confirmations": {
+      "deleteCondition": "คุณแน่ใจหรือไม่ที่จะลบโรคนี้?",
+      "deleteMember": "คุณแน่ใจหรือไม่ที่จะลบสมาชิกครอบครัวคนนี้?"
+    },
+    "emptyState": {
+      "addFirstMember": "เพิ่มสมาชิกครอบครัวคนแรกของคุณ",
+      "noFamilyMembers": "ยังไม่มีสมาชิกครอบครัว",
+      "startBuilding": "เริ่มสร้างประวัติการแพทย์ครอบครัวโดยการเพิ่มสมาชิกครอบครัวคนแรก"
+    },
+    "endSharingMode": "สิ้นสุดโหมดแชร์",
+    "errors": {
+      "createdButFailedRefresh": "สร้างสมาชิกครอบครัวสำเร็จแล้ว แต่ไม่สามารถรีเฟรชรายการได้ กรุณาโหลดหน้าใหม่เพื่อดูการเปลี่ยนแปลง",
+      "failedToDeleteCondition": "ลบโรคไม่สำเร็จ",
+      "failedToSaveCondition": "บันทึกโรคไม่สำเร็จ",
+      "familyMemberNotAvailable": "ข้อมูลสมาชิกครอบครัวไม่มี",
+      "updatedButFailedRefresh": "อัปเดตสมาชิกครอบครัวสำเร็จแล้ว แต่ไม่สามารถรีเฟรชรายการได้ กรุณาโหลดหน้าใหม่เพื่อดูการเปลี่ยนแปลง"
+    },
+    "form": {
+      "addConditionForMember": "เพิ่มโรคสำหรับ {{name}}",
+      "addMemberTitle": "เพิ่มสมาชิกครอบครัว",
+      "editConditionForMember": "แก้ไขโรคสำหรับ {{name}}",
+      "editMemberTitle": "แก้ไขสมาชิกครอบครัว"
+    },
+    "loadingFamilyHistory": "กำลังโหลดประวัติครอบครัว...",
+    "manageInvitations": "จัดการคำเชิญ",
+    "notifications": {
+      "cannotDelete": "ลบไม่ได้",
+      "cannotDeleteShared": "คุณไม่สามารถลบบันทึกประวัติครอบครัวที่ถูกแชร์ได้",
+      "cannotEdit": "แก้ไขไม่ได้",
+      "cannotEditShared": "คุณไม่สามารถแก้ไขบันทึกประวัติครอบครัวที่ถูกแชร์ได้"
+    },
+    "pageTitle": "ประวัติการแพทย์ครอบครัว",
+    "sharedConditionCountAcrossMembers": "{{conditionCount}} โรคจาก {{memberCount}} สมาชิกครอบครัวที่ถูกแชร์",
+    "sharedMemberCount": "{{filteredCount}} จาก {{totalCount}} สมาชิกครอบครัวที่แชร์ให้คุณ",
+    "sharedMembersCannotBeSelected": "ไม่สามารถเลือกสมาชิกครอบครัวที่ถูกแชร์เพื่อแชร์เพิ่มเติมได้",
+    "sharedTableName": "ประวัติครอบครัวที่ถูกแชร์",
+    "sharingMode": "โหมดแชร์",
+    "sharingModeActive": "โหมดแชร์ใช้งานอยู่",
+    "table": {
+      "diagnosisAge": "อายุเมื่อวินิจฉัย",
+      "familyMember": "สมาชิกครอบครัว",
+      "noConditions": "ไม่มีโรค",
+      "sharedBy": "แชร์โดย",
+      "yearsOld": "{{age}} ปี"
+    },
+    "tabs": {
+      "myFamily": "ครอบครัวของฉัน",
+      "sharedWithMe": "ที่แชร์ให้ฉัน"
+    },
+    "viewModal": {
+      "addCondition": "เพิ่มโรค",
+      "cannotAddConditionsShared": "ไม่สามารถเพิ่มโรคให้สมาชิกครอบครัวที่ถูกแชร์ได้",
+      "cannotDeleteConditionsShared": "ไม่สามารถลบโรคของสมาชิกครอบครัวที่ถูกแชร์ได้",
+      "cannotEditConditionsShared": "ไม่สามารถแก้ไขโรคของสมาชิกครอบครัวที่ถูกแชร์ได้",
+      "cannotEditShared": "ไม่สามารถแก้ไขสมาชิกครอบครัวที่ถูกแชร์ได้",
+      "deleteCondition": "ลบโรค",
+      "editCondition": "แก้ไขโรค",
+      "editFamilyMember": "แก้ไขสมาชิกครอบครัว",
+      "editMember": "แก้ไขสมาชิกครอบครัว",
+      "memberDetails": "รายละเอียดสมาชิก",
+      "modalTitle": "ประวัติการแพทย์ครอบครัว",
+      "sharedAt": "แชร์เมื่อ",
+      "sharingNote": "หมายเหตุการแชร์"
+    }
+  },
+  "fields": {
+    "endDate": {
+      "description": "วันที่สิ้นสุด (ถ้ามี)",
+      "label": "วันที่สิ้นสุด",
+      "placeholder": "เลือกวันที่สิ้นสุด"
+    },
+    "notes": {
+      "description": "รายละเอียดหรือหมายเหตุเพิ่มเติม",
+      "placeholder": "ข้อมูลเพิ่มเติม..."
+    },
+    "startDate": {
+      "description": "วันที่เริ่มต้น",
+      "label": "วันที่เริ่มต้น",
+      "placeholder": "เลือกวันที่เริ่มต้น"
+    },
+    "status": {
+      "description": "สถานะปัจจุบัน"
+    },
+    "tags": {
+      "description": "เพิ่มแท็กเพื่อช่วยจัดระเบียบและค้นหาบันทึกนี้ภายหลัง",
+      "placeholder": "เพิ่มแท็กเพื่อจัดระเบียบและค้นหาบันทึกนี้"
+    }
+  },
+  "filters": {
+    "clear": "ล้าง",
+    "itemCount": "{{filtered}} จาก {{total}} รายการ",
+    "title": "ฟิลเตอร์และค้นหา"
+  },
+  "immunizations": {
+    "addImmunization": "เพิ่มการฉีดวัคซีนใหม่",
+    "addNewImmunization": "เพิ่มการฉีดวัคซีนใหม่",
+    "card": {
+      "practitionerId": "รหัส: {{id}}"
+    },
+    "clickToGetStarted": "คลิก \"เพิ่มการฉีดวัคซีนใหม่\" เพื่อเริ่มต้น",
+    "editImmunization": "แก้ไขการฉีดวัคซีน",
+    "form": {
+      "adminRoute": "วิธีการฉีด",
+      "adminRouteDesc": "วิธีการฉีดวัคซีน",
+      "adminRoutePlaceholder": "เลือกวิธีการฉีด",
+      "adminSiteDesc": "ตำแหน่งที่ฉีดวัคซีน",
+      "adminSitePlaceholder": "เลือกตำแหน่งการฉีด",
+      "clinicalNotesDesc": "ข้อมูลเพิ่มเติมเกี่ยวกับการฉีดวัคซีนนี้",
+      "clinicalNotesPlaceholder": "ป้อนบันทึกทางคลินิก ปฏิกิริยา หรือรายละเอียดเพิ่มเติม",
+      "createImmunization": "สร้างการฉีดวัคซีน",
+      "dateAdministeredDesc": "วันที่ฉีดวัคซีน",
+      "doseNumberDesc": "เข็มที่เท่าไหร่ในชุด",
+      "doseNumberPlaceholder": "ป้อนหมายเลขเข็ม",
+      "expirationDateDesc": "วันหมดอายุของวัคซีน",
+      "location": "สถานที่/สถานพยาบาล",
+      "locationDesc": "สถานที่ฉีดวัคซีน",
+      "locationPlaceholder": "เช่น ร้านยา โรงพยาบาล คลินิก",
+      "lotNumberDesc": "หมายเลขล็อตวัคซีน",
+      "lotNumberPlaceholder": "ป้อนหมายเลขล็อต",
+      "manufacturerDesc": "ผู้ผลิตวัคซีน",
+      "manufacturerPlaceholder": "ป้อนชื่อผู้ผลิต",
+      "ndcNumberDesc": "รหัสยาแห่งชาติ",
+      "ndcNumberPlaceholder": "เช่น 12345-6789-01",
+      "practitionerDesc": "ผู้ให้บริการสุขภาพที่ฉีดวัคซีน",
+      "practitionerPlaceholder": "เลือกผู้ฉีดวัคซีน",
+      "routeID": "ฉีดในผิวหนัง (ID)",
+      "routeIM": "ฉีดในกล้ามเนื้อ (IM)",
+      "routeIV": "ฉีดในเส้นเลือด (IV)",
+      "routeSC": "ฉีดใต้ผิวหนัง (SC)",
+      "savingImmunization": "กำลังบันทึกการฉีดวัคซีน...",
+      "siteLeftArm": "แขนซ้าย",
+      "siteLeftDeltoid": "กล้ามเนื้อเดลตอยด์ซ้าย",
+      "siteLeftThigh": "ต้นขาซ้าย",
+      "siteRightArm": "แขนขวา",
+      "siteRightDeltoid": "กล้ามเนื้อเดลตอยด์ขวา",
+      "siteRightThigh": "ต้นขาขวา",
+      "tagsDesc": "เพิ่มแท็กเพื่อจัดหมวดหมู่และจัดระเบียบการฉีดวัคซีน",
+      "tradeName": "ชื่อทางการ/ชื่อทางการค้า",
+      "tradeNameDesc": "ชื่อทางการเต็มจากเอกสารวัคซีน",
+      "tradeNamePlaceholder": "เช่น Flublok TRIV 2025-2026 PFS",
+      "updateImmunization": "อัปเดตการฉีดวัคซีน",
+      "vaccineNameDesc": "ชื่อทั่วไปของวัคซีน",
+      "vaccineNamePlaceholder": "เช่น วัคซีนไข้หวัดใหญ่, COVID-19, Tdap"
+    },
+    "loadingImmunizations": "กำลังโหลดข้อมูลการฉีดวัคซีน...",
+    "noImmunizationsFound": "ไม่พบข้อมูลการฉีดวัคซีน",
+    "table": {
+      "site": "ตำแหน่ง"
+    },
+    "viewModal": {
+      "adminDetails": "รายละเอียดการฉีด",
+      "doseHash": "เข็มที่ {{number}}",
+      "locationFacility": "สถานที่/สถานพยาบาล",
+      "title": "รายละเอียดการฉีดวัคซีน",
+      "tradeName": "ชื่อทางการค้า",
+      "vaccineInfo": "ข้อมูลวัคซีน"
+    }
+  },
+  "insurance": {
+    "actions": {
+      "addNew": "+ เพิ่มประกันใหม่"
+    },
+    "card": {
+      "annualMax": "วงเงินสูงสุดต่อปี",
+      "basic": "พื้นฐาน",
+      "bin": "BIN",
+      "deductible": "ค่าเสียหายที่ต้องจ่ายเอง",
+      "effective": "มีผลตั้งแต่",
+      "examCopay": "ค่าตรวจ",
+      "expires": "หมดอายุ",
+      "frameAllowance": "ค่าเฟรม",
+      "group": "กลุ่ม",
+      "holder": "ผู้ถือ",
+      "member": "สมาชิก",
+      "memberId": "รหัสสมาชิก",
+      "pcn": "PCN",
+      "pcpCopay": "ค่าแพทย์ประจำตัว",
+      "plan": "แผน",
+      "preventive": "การป้องกัน",
+      "primary": "หลัก",
+      "specialistCopay": "ค่าแพทย์เฉพาะทาง"
+    },
+    "description": "จัดการข้อมูลประกันและบัตรดิจิทัลของคุณ",
+    "empty": {
+      "addFirst": "เพิ่มประกันชิ้นแรกของคุณ",
+      "noData": "เริ่มต้นด้วยการเพิ่มประกันชิ้นแรกของคุณ",
+      "title": "ไม่พบประกัน"
+    },
+    "form": {
+      "addTitle": "เพิ่มประกันใหม่",
+      "editTitle": "แก้ไขประกัน"
+    },
+    "loading": "กำลังโหลดข้อมูลประกัน...",
+    "viewModal": {
+      "additionalDetails": "รายละเอียดความคุ้มครองเพิ่มเติม",
+      "attachedDocuments": "เอกสารแนบ",
+      "claimsAddress": "ที่อยู่การเคลม",
+      "claimsPhone": "โทรศัพท์การเคลม",
+      "coinsurance": "โคอินชัวร์รันซ์",
+      "copay": "ค่าร่วมจ่าย",
+      "coverageDetails": "รายละเอียดความคุ้มครอง",
+      "coveragePeriod": "ระยะเวลาความคุ้มครอง",
+      "customerServicePhone": "โทรศัพท์บริการลูกค้า",
+      "deductible": "ค่าเสียหายที่ต้องจ่ายเอง",
+      "dentalCoverage": "ความคุ้มครองทันตกรรม",
+      "effectiveDate": "วันที่มีผล",
+      "employerGroup": "นายจ้าง/ผู้สนับสนุนกลุ่ม",
+      "memberInfo": "ข้อมูลสมาชิก",
+      "memberName": "ชื่อสมาชิก",
+      "mentalHealthCoverage": "ความคุ้มครองสุขภาพจิต",
+      "outOfPocketMax": "จ่ายสูงสุดเอง",
+      "pharmacyNetworkInfo": "ข้อมูลเครือข่ายร้านยา",
+      "policyHolder": "ผู้ถือกรมธรรม์",
+      "prescriptionCoverage": "ความคุ้มครองยาตามใบสั่ง",
+      "printCard": "พิมพ์บัตร",
+      "sameAsMember": "เหมือนกับสมาชิก",
+      "tabs": {
+        "contact": "ติดต่อ",
+        "coverage": "ความคุ้มครอง"
+      },
+      "title": "รายละเอียดประกัน",
+      "visionCoverage": "ความคุ้มครองการมองเห็น"
+    }
+  },
+  "invitations": {
+    "from": "จาก"
+  },
+  "key": "ค่าเริ่มต้น {{var}}",
+  "labels": {
+    "addCustom": "+ เพิ่ม \"{{value}}\"",
+    "linkedMedications": "ยาที่เชื่อมโยง",
+    "loading": "กำลังโหลด...",
+    "loadingOption": "กำลังโหลด {{option}}...",
+    "loadingRelatedConditions": "กำลังโหลดโรคที่เกี่ยวข้อง...",
+    "new": "ใหม่",
+    "no": "ไม่",
+    "noConditionsLinked": "ไม่มีโรคที่เชื่อมโยงกับผลแลปนี้",
+    "noEncountersLinked": "ไม่มีการเยี่ยมที่เชื่อมโยงกับการรักษานี้",
+    "noEquipmentLinked": "ไม่มีอุปกรณ์ที่เชื่อมโยงกับการรักษานี้",
+    "noLabResultsLinked": "ไม่มีผลแลปที่เชื่อมโยงกับการเยี่ยมนี้",
+    "noMedicationsLinked": "ไม่มียาที่เชื่อมโยงกับโรคนี้",
+    "none": "ไม่มี",
+    "noRating": "ไม่มีคะแนน",
+    "notAvailable": "ไม่มีข้อมูล",
+    "notCompleted": "ไม่เสร็จสิ้น",
+    "noVisitsLinked": "ไม่มีการเยี่ยมที่เชื่อมโยงกับผลแลปนี้",
+    "ordered": "สั่งแล้ว",
+    "phoneNumber": "หมายเลขโทรศัพท์",
+    "ratingStars": "{{count}}/5 ดาว",
+    "ratingStars_one": "{{count}}/5 ดาว",
+    "ratingStars_other": "{{count}}/5 ดาว",
+    "selectPurpose": "เลือกวัตถุประสงค์",
+    "viewDetails": "ดูรายละเอียด",
+    "viewPharmacyDetails": "ดูรายละเอียดร้านยา",
+    "visitDate": "วันที่เยี่ยม",
+    "visitWebsite": "เยี่ยมชมเว็บไซต์ ↗",
+    "yes": "ใช่"
+  },
+  "labResults": {
+    "emptyLabResultMessage": "คุณสร้างผลแลปแต่ไม่ได้เพิ่มส่วนประกอบการตรวจ คุณต้องการลบผลแลปนี้หรือไม่?",
+    "emptyLabResultWarning": "สร้างผลแลปแล้วแต่ว่างเปล่า",
+    "form": {
+      "linkedVisits": "การเยี่ยมที่เชื่อมโยง",
+      "linkVisitsDescription": "เชื่อมโยงผลแลปนี้กับการเยี่ยมที่มีการสั่งหรือตรวจสอบ",
+      "linkVisitsTitle": "เชื่อมโยงกับการเยี่ยม"
+    },
+    "labResultCreated": "สร้างผลแลป \"{{testName}}\" แล้ว ตอนนี้คุณสามารถอัปโหลดและแยกวิเคราะห์ PDF ได้",
+    "quickFormInstructions": "ป้อนชื่อสำหรับผลแลปนี้ แล้วคุณจะสามารถอัปโหลดและแยกวิเคราะห์ PDF ได้",
+    "quickImportModalTitle": "การนำเข้า PDF อย่างเร็ว - ขั้นตอนที่ {{step}} จาก 2",
+    "quickImportSuccess": "นำเข้าผลแลปและส่วนประกอบการตรวจสำเร็จ",
+    "testNameDescription": "นี่เป็นฟิลด์เดียวที่ต้องใส่ - คุณสามารถเพิ่มรายละเอียดเพิ่มเติมภายหลัง",
+    "testNamePlaceholder": "การตรวจเลือดต่อมไร้ท่อ ฯลฯ",
+    "unsavedDataInstructions": "คลิก \"เพิ่มส่วนประกอบ\" ในแท็บตัวอย่างเพื่อบันทึกข้อมูลที่แยกวิเคราะห์แล้วก่อนปิด",
+    "unsavedDataMessage_one": "คุณมีส่วนประกอบการตรวจที่แยกวิเคราะห์แล้ว {{count}} ส่วนที่ยังไม่ได้เพิ่ม หากปิดตอนนี้ คุณจะสูญเสียข้อมูลที่แยกวิเคราะห์นี้",
+    "unsavedDataMessage_other": "คุณมีส่วนประกอบการตรวจที่แยกวิเคราะห์แล้ว {{count}} ส่วนที่ยังไม่ได้เพิ่ม หากปิดตอนนี้ คุณจะสูญเสียข้อมูลที่แยกวิเคราะห์นี้",
+    "unsavedDataWarning": "ข้อมูลที่แยกวิเคราะห์แล้วยังไม่บันทึก"
+  },
+  "medications": {
+    "addNew": "เพิ่มยาใหม่",
+    "allTypes": "ทุกประเภท",
+    "clickToStart": "คลิก \"เพิ่มยาใหม่\" เพื่อเริ่มต้น",
+    "fields": {
+      "noIndication": "ไม่ระบุข้อบ่งใช้",
+      "prescriber": "แพทย์ผู้สั่งจ่าย"
+    },
+    "loading": "กำลังโหลดข้อมูลยา...",
+    "modal": {
+      "editMedication": "แก้ไขยา",
+      "labels": {
+        "alternativeName": "ชื่ออื่น",
+        "form": "รูปแบบ",
+        "purposeIndication": "วัตถุประสงค์/ข้อบ่งใช้"
+      },
+      "noSideEffects": "ไม่มีรายงานผลข้างเคียง",
+      "sections": {
+        "dosageInfo": "ข้อมูลขนาดยา",
+        "prescriberPharmacy": "แพทย์ผู้สั่งจ่ายและร้านยา",
+        "usedInTreatments": "ใช้ในการรักษา"
+      },
+      "tabs": {
+        "dosageRefills": "ขนาดยาและการเติม"
+      }
+    },
+    "noMedications": "ไม่พบยาหรืออาหารเสริม",
+    "quickFilter": "ฟิลเตอร์เร็ว",
+    "treatments": {
+      "empty": "ยานี้ไม่ได้ใช้ในการรักษาใด",
+      "loadError": "โหลดการรักษาไม่สำเร็จ",
+      "loading": "กำลังโหลดการรักษา...",
+      "overrideFrequency": "ความถี่"
+    },
+    "types": {
+      "herbal": "สมุนไพร/ธรรมชาติ",
+      "otc": "ยาที่ไม่ต้องใช้ใบสั่งแพทย์",
+      "prescription": "ยาตามใบสั่งแพทย์",
+      "supplement": "อาหารเสริม/วิตามิน"
+    }
+  },
+  "messages": {
+    "checkBackSoon": "กลับมาดูอีกครั้งเร็วๆ นี้สำหรับการอัปเดต!",
+    "clearAll": "ล้างทั้งหมด",
+    "confirmRemoveConditionRelationship": "คุณแน่ใจหรือไม่ที่จะลบความสัมพันธ์ของโรคนี้?",
+    "confirmRemoveEquipmentRelationship": "คุณแน่ใจหรือไม่ที่จะลบการเชื่อมโยงอุปกรณ์นี้?",
+    "confirmRemoveLabResultLink": "ลบการเชื่อมโยงผลแลปนี้?",
+    "confirmRemoveVisitLink": "ลบการเชื่อมโยงการเยี่ยมนี้?",
+    "displayError": "ไม่สามารถแสดงรายการนี้ได้ กรุณาลองรีเฟรชหน้า",
+    "doNotClose": "กรุณาอย่าปิดหน้าต่างนี้หรือเปลี่ยนหน้า",
+    "failedToLinkLabResult": "เชื่อมโยงผลแลปไม่สำเร็จ",
+    "failedToLinkVisit": "เชื่อมโยงการเยี่ยมไม่สำเร็จ",
+    "failedToUnlinkLabResult": "ยกเลิกการเชื่อมโยงผลแลปไม่สำเร็จ",
+    "failedToUnlinkVisit": "ยกเลิกการเชื่อมโยงการเยี่ยมไม่สำเร็จ",
+    "failedToUpdateRelationship": "อัปเดตความสัมพันธ์ไม่สำเร็จ",
+    "processing": "กำลังประมวลผล...",
+    "selectLabResult": "กรุณาเลือกผลแลป",
+    "selectVisit": "กรุณาเลือกการเยี่ยม",
+    "underDevelopment": "ส่วนนี้อยู่ระหว่างการพัฒนา",
+    "updateSuccess": "อัปเดตสำเร็จ"
+  },
+  "modals": {
+    "chooseConditionsToLink": "เลือกโรคที่จะเชื่อมโยง",
+    "chooseConditionToLink": "เลือกโรคที่จะเชื่อมโยง",
+    "chooseLabResultToLink": "เลือกผลแลปที่จะเชื่อมโยง",
+    "chooseMedicationToLink": "เลือกยาที่จะเชื่อมโยง",
+    "chooseVisitToLink": "เลือกการเยี่ยมที่จะเชื่อมโยง",
+    "describeConditionRelevance": "อธิบายความเกี่ยวข้องของโรคนี้กับผลแลป (ไม่บังคับ)",
+    "describeLabResultRelevance": "อธิบายความเกี่ยวข้องของผลแลปนี้กับการเยี่ยมนี้",
+    "describeVisitRelevance": "อธิบายความเกี่ยวข้องของการเยี่ยมนี้กับผลแลปนี้",
+    "linkConditionToLabResult": "เชื่อมโยงโรคกับผลแลป",
+    "linkLabResultToVisit": "เชื่อมโยงผลแลปกับการเยี่ยม",
+    "linkVisitToLabResult": "เชื่อมโยงการเยี่ยมกับผลแลป",
+    "noRelevanceNoteProvided": "ไม่มีหมายเหตุความเกี่ยวข้อง",
+    "purpose": "วัตถุประสงค์",
+    "relevanceNote": "หมายเหตุความเกี่ยวข้อง",
+    "relevanceNoteOptional": "หมายเหตุความเกี่ยวข้อง (ไม่บังคับ)",
+    "selectCondition": "เลือกโรค",
+    "selectLabResult": "เลือกผลแลป",
+    "selectMedications": "เลือกยา",
+    "selectPurpose": "เลือกวัตถุประสงค์",
+    "selectVisit": "เลือกการเยี่ยม"
+  },
+  "noResults": "ไม่พบแพทย์",
+  "pagination": {
+    "itemsPerPage": "รายการต่อหน้า",
+    "next": "ถัดไป",
+    "pageOf": "หน้า {{page}} จาก {{total}}",
+    "previous": "ก่อนหน้า",
+    "showingRange": "แสดง {{start}} ถึง {{end}} จาก {{total}} ผลลัพธ์"
+  },
+  "patientInfo": {
+    "createProfile": "สร้างโปรไฟล์",
+    "createPrompt": "กรุณาสร้างโปรไฟล์ผู้ป่วยของคุณเพื่อเริ่มต้น",
+    "createTitle": "สร้างโปรไฟล์ผู้ป่วย",
+    "editProfile": "แก้ไขโปรไฟล์",
+    "editTitle": "แก้ไขข้อมูลผู้ป่วย",
+    "fields": {
+      "birthDate": "วันเกิด",
+      "patientId": "รหัสผู้ป่วย",
+      "physician": "แพทย์ประจำตัว"
+    },
+    "loading": "กำลังโหลดข้อมูลผู้ป่วย...",
+    "noProfile": "ไม่พบโปรไฟล์ผู้ป่วย",
+    "notAssigned": "ไม่ได้กำหนด",
+    "notProvided": "ไม่ได้ระบุ",
+    "personalInfo": "ข้อมูลส่วนบุคคล",
+    "welcome": {
+      "message": "บัญชีของคุณถูกสร้างเรียบร้อยแล้ว กรุณาเติมโปรไฟล์ผู้ป่วยด้านล่างเพื่อเริ่มจัดการข้อมูลการแพทย์ของคุณ",
+      "title": "ยินดีต้อนรับสู่ MediKeep!"
+    }
+  },
+  "patients": {
+    "form": {
+      "address": {
+        "label": "ที่อยู่",
+        "placeholder": "ป้อนที่อยู่"
+      },
+      "birthDate": {
+        "label": "วันเกิด"
+      },
+      "bloodType": {
+        "placeholder": "เลือกหมู่เลือด"
+      },
+      "buttons": {
+        "createPatient": "สร้างผู้ป่วย",
+        "saveChanges": "บันทึกการเปลี่ยนแปลง"
+      },
+      "firstName": {
+        "placeholder": "ป้อนชื่อ"
+      },
+      "gender": {
+        "options": {
+          "preferNotToSay": "ไม่ต้องการระบุ"
+        }
+      },
+      "lastName": {
+        "placeholder": "ป้อนนามสกุล"
+      },
+      "messages": {
+        "createSuccess": "สร้าง {{firstName}} {{lastName}} สำเร็จ",
+        "updateSuccess": "อัปเดต {{firstName}} {{lastName}} สำเร็จ"
+      },
+      "physician": {
+        "label": "แพทย์ประจำตัว",
+        "placeholder": "เลือกแพทย์ (ไม่บังคับ)"
+      },
+      "relationship": {
+        "description": "บุคคลนี้มีความสัมพันธ์กับคุณอย่างไร?",
+        "label": "ความสัมพันธ์กับคุณ",
+        "options": {
+          "brother": "พี่ชาย/น้องชาย",
+          "child": "ลูก",
+          "daughter": "ลูกสาว",
+          "father": "บิดา",
+          "friend": "เพื่อน",
+          "grandchild": "หลาน",
+          "grandparent": "ปู่/ย่า/ตา/ยาย",
+          "mother": "มารดา",
+          "otherFamily": "ญาติอื่นๆ",
+          "parent": "บิดามารดา",
+          "partner": "คู่ชีวิต",
+          "select": "เลือกความสัมพันธ์ (ไม่บังคับ)",
+          "sibling": "พี่น้อง",
+          "sister": "พี่สาว/น้องสาว",
+          "son": "ลูกชาย",
+          "spouse": "คู่สมรส"
+        },
+        "placeholder": "เลือกความสัมพันธ์ (ไม่บังคับ)"
+      },
+      "saveFirstMessage": "บันทึกข้อมูลผู้ป่วยก่อน จากนั้นคุณสามารถเพิ่มรูปภาพได้",
+      "selfRecord": {
+        "description": "เลือกถ้าคุณกำลังสร้างบันทึกสำหรับตัวเอง",
+        "label": "นี่คือบันทึกการแพทย์ของฉันเอง"
+      }
+    },
+    "photoFormat": "JPEG, PNG, GIF หรือ BMP -- สูงสุด 15MB",
+    "removePhoto": "ลบรูปภาพ"
+  },
+  "patientSelector": {
+    "buttons": {
+      "addNew": "เพิ่มผู้ป่วยใหม่",
+      "deletePatient": "ลบผู้ป่วย",
+      "editPatient": "แก้ไขผู้ป่วย",
+      "removeAccess": "เอาสิทธิ์ออก",
+      "sharePatient": "แชร์ผู้ป่วย"
+    },
+    "errors": {
+      "loadFailed": "โหลดข้อมูลผู้ป่วยไม่สำเร็จ",
+      "noPatients": "ไม่พบผู้ป่วย"
+    },
+    "labels": {
+      "born": "เกิด",
+      "currentlyViewing": "กำลังดู:",
+      "patientActions": "การจัดการผู้ป่วย",
+      "switching": "กำลังเปลี่ยนผู้ป่วย...",
+      "switchTo": "เปลี่ยนไปผู้ป่วยอื่น:"
+    },
+    "messages": {
+      "noAccess": "คุณยังไม่มีสิทธิ์เข้าถึงผู้ป่วยใด สร้างผู้ป่วยใหม่เพื่อเริ่มต้น"
+    },
+    "modals": {
+      "createTitle": "สร้างผู้ป่วยใหม่",
+      "editTitle": "แก้ไขผู้ป่วย"
+    },
+    "placeholders": {
+      "loading": "กำลังโหลด...",
+      "select": "เลือกผู้ป่วยเพื่อเปลี่ยน..."
+    },
+    "stats": {
+      "owned": "เป็นเจ้าของ",
+      "total": "ทั้งหมด"
+    },
+    "title": "ตัวเลือกผู้ป่วย",
+    "tooltips": {
+      "addNew": "เพิ่มผู้ป่วยใหม่",
+      "expand": "ขยายตัวเลือกผู้ป่วย",
+      "minimize": "ย่อให้เหลือหนึ่งบรรทัด",
+      "refresh": "รีเฟรชข้อมูลผู้ป่วย",
+      "switchPatient": "เปลี่ยนผู้ป่วย"
+    }
+  },
+  "pharmacies": {
+    "actions": {
+      "addNew": "เพิ่มร้านยาใหม่"
+    },
+    "card": {
+      "storeNumber": "หมายเลขสาขา"
+    },
+    "empty": {
+      "noData": "คลิก \"เพิ่มร้านยาใหม่\" เพื่อเริ่มต้น",
+      "title": "ไม่พบร้านยา"
+    },
+    "errors": {
+      "loadFailed": "โหลดข้อมูลร้านยาไม่สำเร็จ กรุณาลองอีกครั้ง"
+    },
+    "form": {
+      "addTitle": "เพิ่มร้านยาใหม่",
+      "editTitle": "แก้ไขร้านยา"
+    },
+    "loading": "กำลังโหลดข้อมูลร้านยา...",
+    "viewModal": {
+      "contact": "ข้อมูลการติดต่อ",
+      "editButton": "แก้ไขร้านยา",
+      "location": "สถานที่",
+      "storeNumber": "สาขาที่",
+      "title": "รายละเอียดร้านยา"
+    }
+  },
+  "practitioners": {
+    "actions": {
+      "addNew": "เพิ่มแพทย์ใหม่"
+    },
+    "card": {
+      "subtitle": "แพทย์ผู้ให้บริการสุขภาพ"
+    },
+    "createPracticeError": "สร้างคลินิกไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "editPracticeError": "โหลดข้อมูลคลินิกสำหรับแก้ไขไม่สำเร็จ",
+    "empty": {
+      "noData": "คลิก \"เพิ่มแพทย์ใหม่\" เพื่อเริ่มต้น",
+      "title": "ไม่พบแพทย์ผู้ให้บริการสุขภาพ"
+    },
+    "errors": {
+      "generic": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง",
+      "loadFailed": "โหลดข้อมูลแพทย์ไม่สำเร็จ กรุณาลองอีกครั้ง"
+    },
+    "form": {
+      "addTitle": "เพิ่มแพทย์ใหม่",
+      "editTitle": "แก้ไขแพทย์"
+    },
+    "groupByPractice": "จัดกลุ่มตามคลินิก",
+    "loading": "กำลังโหลดข้อมูลแพทย์...",
+    "practices": {
+      "addNew": "เพิ่มคลินิก",
+      "cannotDelete": "ลบไม่ได้ - มีแพทย์อยู่",
+      "createSuccess": "สร้างคลินิกสำเร็จ",
+      "createTitle": "เพิ่มคลินิก",
+      "deleteConfirm": "คุณแน่ใจหรือไม่ที่จะลบ \"{{name}}\"? การกระทำนี้ไม่สามารถยกเลิกได้",
+      "deleteError": "ลบคลินิกไม่สำเร็จ",
+      "deleteSuccess": "ลบคลินิกสำเร็จ",
+      "emptyNoData": "คลิก \"เพิ่มคลินิก\" เพื่อสร้าง หรือจะถูกสร้างอัตโนมัติเมื่อเพิ่มแพทย์",
+      "emptyTitle": "ไม่พบคลินิก",
+      "searchPlaceholder": "ค้นหาคลินิก...",
+      "totalCount": "คลินิกทั้งหมด {{count}} แห่ง",
+      "totalCount_one": "คลินิกทั้งหมด {{count}} แห่ง",
+      "totalCount_other": "คลินิกทั้งหมด {{count}} แห่ง",
+      "unusedCount": "ไม่ได้ใช้ {{count}} แห่ง",
+      "unusedCount_one": "ไม่ได้ใช้ {{count}} แห่ง",
+      "unusedCount_other": "ไม่ได้ใช้ {{count}} แห่ง"
+    },
+    "tabs": {
+      "practices": "คลินิก"
+    },
+    "ungroupedTitle": "แพทย์อิสระ",
+    "viewModal": {
+      "editButton": "แก้ไขแพทย์",
+      "editPractice": "แก้ไขคลินิก",
+      "practiceDetails": "รายละเอียดคลินิก",
+      "practiceFax": "แฟ็กซ์",
+      "practiceLoadError": "โหลดรายละเอียดคลินิกไม่สำเร็จ",
+      "practiceLocations": "สาขา",
+      "practicePortal": "เว็บไซต์ผู้ป่วย",
+      "practiceUpdateError": "อัปเดตคลินิกไม่สำเร็จ",
+      "practiceUpdateSuccess": "อัปเดตคลินิกสำเร็จ",
+      "practitionerContact": "ติดต่อแพทย์",
+      "savePractice": "บันทึกคลินิก",
+      "title": "รายละเอียดแพทย์"
+    }
+  },
+  "procedures": {
+    "addFirstProcedure": "เพิ่มหัตถการแรกของคุณ",
+    "addNewProcedure": "เพิ่มหัตถการใหม่",
+    "addProcedure": "+ เพิ่มหัตถการ",
+    "editProcedure": "แก้ไขหัตถการ",
+    "form": {
+      "anesthesiaNotesDesc": "ข้อมูลยาชาเพิ่มเติม",
+      "anesthesiaNotesPlaceholder": "ป้อนรายละเอียดและหมายเหตุการให้ยาชา",
+      "anesthesiaTypeDesc": "ประเภทการให้ยาชา",
+      "anesthesiaTypePlaceholder": "เช่น ยาชาทั่วไป ยาชาเฉพาะที่ ยาชาระดับภูมิภาค",
+      "clinicalNotesDesc": "ข้อมูลเพิ่มเติมเกี่ยวกับหัตถการนี้",
+      "clinicalNotesPlaceholder": "ป้อนบันทึกทางคลินิก ข้อสังเกต หรือรายละเอียดเพิ่มเติม",
+      "complicationsDesc": "ปัญหาหรือภาวะแทรกซ้อนที่เกิดขึ้น",
+      "complicationsPlaceholder": "บันทึกภาวะแทรกซ้อนใดๆ",
+      "createProcedure": "สร้างหัตถการ",
+      "descriptionDesc": "คำอธิบายสั้นๆ ของหัตถการ",
+      "descriptionPlaceholder": "อธิบายหัตถการ",
+      "durationDesc": "ระยะเวลาที่ใช้ในหัตถการ",
+      "durationPlaceholder": "ป้อนระยะเวลา",
+      "facilityDesc": "สถานพยาบาล",
+      "facilityPlaceholder": "เช่น ชื่อโรงพยาบาล",
+      "outcomeAbnormal": "ผิดปกติ",
+      "outcomeDesc": "ผลลัพธ์หรือผลการรักษา",
+      "outcomeInconclusive": "ไม่สรุปได้",
+      "outcomePlaceholder": "เลือกผลลัพธ์",
+      "outcomeSuccessful": "สำเร็จ",
+      "practitionerDesc": "แพทย์ผู้ทำหัตถการ",
+      "procedureCodeDesc": "รหัสการเก็บเงิน",
+      "procedureCodePlaceholder": "เช่น รหัส CPT",
+      "procedureDate": "วันที่ทำหัตถการ",
+      "procedureDateDesc": "วันที่ทำหัตถการ",
+      "procedureNameDesc": "ชื่อหัตถการ",
+      "procedureNamePlaceholder": "ป้อนชื่อหัตถการ",
+      "procedureTypeDesc": "ประเภทหรือหมวดหมู่ของหัตถการ",
+      "procedureTypePlaceholder": "เช่น การผ่าตัด การตรวจวินิจฉัย",
+      "savingProcedure": "กำลังบันทึกหัตถการ...",
+      "settingDesc": "สถานที่ทำหัตถการ",
+      "settingPlaceholder": "เช่น ผู้ป่วยใน ผู้ป่วยนอก",
+      "statusDesc": "สถานะปัจจุบันของหัตถการ",
+      "statusInProgress": "กำลังดำเนินการ",
+      "statusPostponed": "เลื่อนออกไป",
+      "statusScheduled": "นัดหมายแล้ว",
+      "tagsDesc": "เพิ่มแท็กเพื่อจัดหมวดหมู่และจัดระเบียบหัตถการ",
+      "updateProcedure": "อัปเดตหัตถการ"
+    },
+    "loadingProcedures": "กำลังโหลดข้อมูลหัตถการ...",
+    "noProceduresFound": "ไม่พบหัตถการ",
+    "processing": "กำลังประมวลผล...",
+    "startAdding": "เริ่มต้นด้วยการเพิ่มหัตถการแรกของคุณ",
+    "table": {
+      "code": "รหัส"
+    },
+    "viewModal": {
+      "anesthesiaInfo": "ข้อมูลการให้ยาชา",
+      "noAnesthesiaNotes": "ไม่มีบันทึกการให้ยาชา",
+      "noClinicalNotes": "ไม่มีบันทึกทางคลินิก",
+      "noComplications": "ไม่มีรายงานภาวะแทรกซ้อน",
+      "noDescription": "ไม่มีคำอธิบาย",
+      "title": "รายละเอียดหัตถการ"
+    }
+  },
+  "search": {
+    "activeFilterCount": "ฟิลเตอร์ที่ใช้งาน {{count}} ตัว",
+    "activeFilterCount_one": "ฟิลเตอร์ที่ใช้งาน {{count}} ตัว",
+    "activeFilterCount_other": "ฟิลเตอร์ที่ใช้งาน {{count}} ตัว",
+    "activeFilters": "ฟิลเตอร์ที่ใช้งาน",
+    "addMoreTags": "เพิ่มแท็กเพิ่มเติม",
+    "advancedFilters": "ฟิลเตอร์ขั้นสูง",
+    "allTags": "แท็กทั้งหมด",
+    "allTime": "ทุกช่วงเวลา",
+    "anyTag": "แท็กใดก็ได้",
+    "collapseFilters": "ย่อฟิลเตอร์",
+    "columnType": "ประเภทบันทึก",
+    "dateLabels": {
+      "diagnosed": "วินิจฉัย",
+      "given": "ให้",
+      "identified": "ระบุ",
+      "performed": "ทำ",
+      "recorded": "บันทึก",
+      "started": "เริ่มต้น",
+      "tested": "ตรวจ",
+      "visited": "เยี่ยม"
+    },
+    "datePresets": "ตัวเลือกเร็ว",
+    "dateRange": "ช่วงวันที่",
+    "dateRangePlaceholder": "เลือกช่วงวันที่...",
+    "expandFilters": "ขยายฟิลเตอร์",
+    "fallbacks": {
+      "allergy": "แพ้",
+      "encounter": "การเยี่ยม",
+      "immunization": "การฉีดวัคซีน",
+      "medication": "ยา",
+      "procedure": "หัตถการ",
+      "record": "บันทึก"
+    },
+    "filterByTag": "ฟิลเตอร์ตามแท็ก: {{tag}}",
+    "filtered": "(ถูกกรอง)",
+    "filters": "ฟิลเตอร์",
+    "forQuery": "สำหรับ \"{{query}}\"",
+    "last30Days": "30 วันที่แล้ว",
+    "last6Months": "6 เดือนที่แล้ว",
+    "last7Days": "7 วันที่แล้ว",
+    "lastYear": "ปีที่แล้ว",
+    "loadingTags": "กำลังโหลดแท็ก...",
+    "matchAll": "ตรงกันทั้งหมด",
+    "matchAllDesc": "แสดงรายการที่มีแท็กที่เลือกทั้งหมด",
+    "matchAny": "ตรงกันแท็กใดก็ได้ที่เลือก",
+    "matchAnyDesc": "แสดงรายการที่มีแท็กอย่างน้อยหนึ่งตัวที่เลือก",
+    "noPatientMessage": "กรุณาเลือกผู้ป่วยจากหน้าแดชบอร์ดเพื่อค้นหาบันทึกการแพทย์",
+    "noPatientTitle": "ไม่ได้เลือกผู้ป่วย",
+    "noResults": "ไม่พบผลลัพธ์",
+    "noResultsFiltered": "ลองปรับฟิลเตอร์ แท็ก หรือคำค้นหา",
+    "noResultsGeneral": "ลองใช้คำค้นหาอื่นหรือตรวจสอบการสะกด",
+    "openFullRecord": "เปิดบันทึกเต็ม",
+    "page": "หน้า",
+    "perPage": "รายการต่อหน้า",
+    "placeholder": "ค้นหาบันทึกการแพทย์...",
+    "popularTags": "แท็กยอดนิยม",
+    "previewRecord": "ดูตัวอย่างบันทึก",
+    "recordTypes": "ประเภทบันทึก",
+    "removeTypeFilter": "ลบฟิลเตอร์ {{type}}",
+    "resultCount": "{{count}} ผลลัพธ์",
+    "resultCount_one": "{{count}} ผลลัพธ์",
+    "resultCount_other": "{{count}} ผลลัพธ์",
+    "resultsFound": "พบ {{count}} ผลลัพธ์",
+    "resultsFound_one": "",
+    "resultsFound_other": "พบ {{count}} ผลลัพธ์",
+    "searchFailed": "ค้นหาไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "searching": "กำลังค้นหา...",
+    "seeAll": "ดูทั้งหมด",
+    "selectTags": "เลือกแท็ก...",
+    "sortBy": "เรียงตาม",
+    "sortDateNewest": "วันที่ (ใหม่ที่สุดก่อน)",
+    "sortDateOldest": "วันที่ (เก่าที่สุดก่อน)",
+    "sortRelevance": "ความเกี่ยวข้อง",
+    "sortTitle": "หัวข้อ",
+    "subtitle": "ค้นหาข้ามบันทึกการแพทย์ทั้งหมด",
+    "subtitles": {
+      "result": "ผลลัพธ์: {{value}}"
+    },
+    "tagResultCount_other": "ผลลัพธ์แท็ก {{count}} รายการ",
+    "tagSearchFailed": "ค้นหาแท็กไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "textResultCount_other": "ผลลัพธ์ข้อความ {{count}} รายการ",
+    "title": "ผลการค้นหา",
+    "types": {
+      "encounters": "การเยี่ยม",
+      "vitals": "สัญญาณชีพ"
+    },
+    "viewCards": "มุมมองการ์ด",
+    "viewTable": "มุมมองตาราง"
+  },
+  "searchPlaceholders": {
+    "allergies": "ค้นหาการแพ้ ปฏิกิริยา แท็ก...",
+    "conditions": "ค้นหาโรค หมายเหตุ แท็ก...",
+    "emergencyContacts": "ค้นหาผู้ติดต่อ ความสัมพันธ์ โทรศัพท์ อีเมล...",
+    "familyHistory": "ค้นหาสมาชิกครอบครัว โรค หมายเหตุ...",
+    "generic": "ค้นหา...",
+    "immunizations": "ค้นหาการฉีดวัคซีน วัคซีน แท็ก...",
+    "injuries": "ค้นหาการบาดเจ็บ ส่วนของร่างกาย หมายเหตุ แท็ก...",
+    "insurance": "ค้นหาบริษัทประกัน ชื่อสมาชิก...",
+    "labResults": "ค้นหาผลแลป รหัสการตรวจ สถานที่ แพทย์ แท็ก...",
+    "medications": "ค้นหายา ข้อบ่งใช้ ขนาดยา แท็ก...",
+    "pharmacies": "ค้นหาร้านยา...",
+    "practitioners": "ค้นหาแพทย์...",
+    "procedures": "ค้นหาหัตถการ หมายเหตุ แท็ก...",
+    "symptoms": "ค้นหาอาการ คำอธิบาย แท็ก...",
+    "treatments": "ค้นหาการรักษา หมายเหตุ แท็ก...",
+    "visits": "ค้นหาการเยี่ยม เหตุผล หมายเหตุ แท็ก...",
+    "vitals": "ค้นหาหมายเหตุสัญญาณชีพ..."
+  },
+  "severity": {
+    "critical": "วิกฤต - อันตรายถึงชีวิต",
+    "lifeThreatening": "อันตรายถึงชีวิต - เสี่ยงภูมิแพ้รุนแรง",
+    "mild": "เล็กน้อย - รู้สึกไม่สบายเล็กน้อย",
+    "mildImpact": "เล็กน้อย - กระทบน้อย",
+    "moderate": "ปานกลาง - มีอาการที่รู้ได้",
+    "moderateImpact": "ปานกลาง - กระทบเป็นที่ร้ได้",
+    "severe": "รุนแรง - ปฏิกิริยาที่รุนแรง",
+    "severeImpact": "รุนแรง - กระทบอย่างมาก"
+  },
+  "status": {
+    "completed": "เสร็จสมบูรณ์",
+    "expired": "หมดอายุ",
+    "onHold": "พักการดำเนินการ",
+    "planned": "วางแผนแล้ว",
+    "stopped": "หยุด"
+  },
+  "statusDescriptions": {
+    "activeAllergic": "ใช้งาน - แพ้อยู่ในปัจจุบัน",
+    "activeCondition": "ใช้งาน - โรคกำลังดำเนิน",
+    "activeExperiencing": "ใช้งาน - มีอาการอยู่ในปัจจุบัน",
+    "chronicCondition": "เรื้อรัง - โรคระยะยาว",
+    "inactiveAllergic": "ไม่ใช้งาน - ไม่แพ้แล้ว",
+    "recurring": "กำเริบ - มาแล้วไป",
+    "resolvedAllergy": "หายแล้ว - หายจากการแพ้",
+    "resolvedCondition": "หายแล้ว - ไม่มีแล้ว",
+    "resolvedExperiencing": "หายแล้ว - ไม่มีอาการแล้ว"
+  },
+  "symptoms": {
+    "addSymptom": "เพิ่มอาการ",
+    "addSymptomTitle": "เพิ่มอาการใหม่",
+    "calendar": {
+      "episodesOn": "อาการเกิดขึ้นเมื่อ {{date}}",
+      "noEpisodes": "ไม่มีบันทึกอาการในเดือนนี้",
+      "noOccurrences": "ไม่พบอาการที่เกิดขึ้นในวันนี้",
+      "occurrenceId": "รหัสอาการ",
+      "pain": "ความเจ็บปวด",
+      "title": "ปฏิทินอาการ",
+      "viewSymptom": "ดูอาการ",
+      "weekDays": {
+        "fri": "ศ.",
+        "mon": "จ.",
+        "sat": "ส.",
+        "sun": "อา.",
+        "thu": "พฤ.",
+        "tue": "อ.",
+        "wed": "พ."
+      }
+    },
+    "chronic": "เรื้อรัง",
+    "commonTriggers": "สาเหตุทั่วไป",
+    "confirmDeleteSymptom": "คุณแน่ใจหรือไม่ที่จะลบอาการนี้และการเกิดขึ้นทั้งหมด?",
+    "editEpisodeTitle": "แก้ไขอาการ",
+    "editSymptomTitle": "แก้ไขอาการ",
+    "episode": "อาการ",
+    "episodes": "อาการ",
+    "first": "ครั้งแรก",
+    "last": "ครั้งล่าสุด",
+    "loading": "กำลังโหลดข้อมูลอาการ...",
+    "logEpisode": "บันทึกอาการ",
+    "logEpisodeTitle": "บันทึกอาการ",
+    "noPatientSelected": "ไม่ได้เลือกผู้ป่วย",
+    "noRecords": "ยังไม่มีการบันทึกอาการ",
+    "noRecordsPrompt": "คลิก \"เพิ่มอาการ\" เพื่อเริ่มติดตามอาการใหม่",
+    "selectPatientPrompt": "กรุณาเลือกหรือสร้างผู้ป่วยเพื่อติดตามอาการ",
+    "tabs": {
+      "calendar": "ปฏิทิน",
+      "list": "รายการ"
+    },
+    "timeline": {
+      "filters": {
+        "allDates": "ทุกวันที่",
+        "last3Months": "3 เดือนที่แล้ว",
+        "lastMonth": "เดือนที่แล้ว",
+        "lastWeek": "สัปดาห์ที่แล้ว",
+        "lastYear": "ปีที่แล้ว"
+      },
+      "noEpisodes": "ไม่มีบันทึกอาการในช่วงเวลานี้",
+      "recorded": "บันทึกแล้ว",
+      "title": "ลำดับเวลาอาการ"
+    },
+    "title": "อาการ",
+    "viewModal": {
+      "acute": "เฉียบพลัน",
+      "confirmDeleteEpisode": "คุณแน่ใจหรือไม่ที่จะลบอาการนี้?",
+      "deleteSymptom": "ลบอาการ",
+      "editSymptom": "แก้ไขอาการ",
+      "episodeHistory": "ประวัติอาการ",
+      "generalNotes": "หมายเหตุทั่วไป",
+      "impact": "ผลกระทบ",
+      "logFirstEpisode": "บันทึกอาการแรก",
+      "logNewEpisode": "บันทึกอาการใหม่",
+      "noEpisodesLogged": "ไม่มีการบันทึกอาการ",
+      "noEpisodesYet": "ยังไม่มีการบันทึกอาการ",
+      "noNotesProvided": "ไม่มีหมายเหตุ",
+      "relief": "การบรรเทา",
+      "title": "{{name}} - รายละเอียด",
+      "totalEpisodes": "อาการทั้งหมด",
+      "triggers": "สาเหตุ"
+    }
+  },
+  "tagManagement": {
+    "allTags": "แท็กทั้งหมด",
+    "createModal": {
+      "placeholder": "ป้อนชื่อแท็ก...",
+      "submit": "สร้างแท็ก",
+      "title": "สร้างแท็กใหม่"
+    },
+    "createTag": "สร้างแท็ก",
+    "deleteModal": {
+      "description": "การกระทำนี้จะลบแท็กออกจากบันทึกทั้งหมด {{count}} รายการ ไม่สามารถยกเลิกได้",
+      "description_one": "การกระทำนี้จะลบแท็กออกจากบันทึก {{count}} รายการ ไม่สามารถยกเลิกได้",
+      "description_other": "การกระทำนี้จะลบแท็กออกจากบันทึกทั้งหมด {{count}} รายการ ไม่สามารถยกเลิกได้",
+      "message": "คุณแน่ใจหรือไม่ที่จะลบแท็ก \"{{tag}}\"?"
+    },
+    "editModal": {
+      "colorLabel": "สีแท็ก",
+      "description": "การกระทำนี้จะเปลี่ยนชื่อแท็กในบันทึกทั้งหมด {{count}} รายการ",
+      "description_one": "การกระทำนี้จะเปลี่ยนชื่อแท็กในบันทึก {{count}} รายการ",
+      "description_other": "การกระทำนี้จะเปลี่ยนชื่อแท็กในบันทึกทั้งหมด {{count}} รายการ",
+      "placeholder": "ป้อนชื่อแท็กใหม่...",
+      "submit": "บันทึก",
+      "title": "แก้ไขแท็ก"
+    },
+    "errors": {
+      "createFailed": "สร้างแท็กไม่สำเร็จ",
+      "deleteFailed": "ลบแท็กไม่สำเร็จ",
+      "editFailed": "อัปเดตแท็กไม่สำเร็จ",
+      "loadFailed": "โหลดแท็กไม่สำเร็จ",
+      "replaceFailed": "แทนที่แท็กไม่สำเร็จ"
+    },
+    "icon": "🏷️",
+    "loading": "กำลังโหลดแท็ก...",
+    "menu": {
+      "replace": "แทนที่ด้วย..."
+    },
+    "noTags": "ไม่พบแท็ก",
+    "noTagsDescription": "เริ่มใช้แท็กในบันทึกการแพทย์ของคุณเพื่อดูที่นี่",
+    "noTagsSearch": "ไม่มีแท็กที่ตรงกับการค้นหาของคุณ",
+    "pressEnterToAdd": "กด Enter เพื่อเพิ่มแท็ก",
+    "replaceModal": {
+      "description": "การกระทำนี้จะแทนที่ \"{{oldTag}}\" ด้วย \"{{newTag}}\" ในบันทึกทั้งหมด {{count}} รายการ",
+      "description_one": "การกระทำนี้จะแทนที่ \"{{oldTag}}\" ด้วย \"{{newTag}}\" ในบันทึก {{count}} รายการ",
+      "description_other": "การกระทำนี้จะแทนที่ \"{{oldTag}}\" ด้วย \"{{newTag}}\" ในบันทึกทั้งหมด {{count}} รายการ",
+      "label": "แทนที่ด้วย",
+      "placeholder": "ป้อนชื่อแท็กที่จะแทนที่...",
+      "submit": "แทนที่แท็ก",
+      "title": "แทนที่แท็ก"
+    },
+    "searchPlaceholder": "ค้นหาแท็ก...",
+    "success": {
+      "created": "สร้างแท็ก \"{{tag}}\" สำเร็จ",
+      "deleted": "ลบแท็ก \"{{tag}}\" สำเร็จ",
+      "renamed": "เปลี่ยนชื่อ \"{{oldTag}}\" เป็น \"{{newTag}}\" สำเร็จ",
+      "replaced": "แทนที่ \"{{oldTag}}\" ด้วย \"{{newTag}}\" สำเร็จ",
+      "updated": "อัปเดตแท็ก \"{{tag}}\" สำเร็จ"
+    },
+    "table": {
+      "usageCount": "จำนวนการใช้งาน",
+      "usedIn": "ใช้ใน"
+    },
+    "title": "การจัดการแท็ก"
+  },
+  "time": {
+    "day": "วัน",
+    "days": "วัน",
+    "ended": "สิ้นสุด",
+    "month": "เดือน",
+    "months": "เดือน",
+    "ongoing": "กำลังดำเนิน",
+    "year": "ปี",
+    "years": "ปี"
+  },
+  "trash": {
+    "fileCount_one": "{{count}} ไฟล์"
+  },
+  "treatments": {
+    "addFirstTreatment": "เพิ่มการรักษาแรกของคุณ",
+    "addTreatment": "+ เพิ่มการรักษา",
+    "card": {
+      "conditionId": "โรค #{{id}}"
+    },
+    "clickToExpand": "คลิกเพื่อขยายและเพิ่มรายละเอียด (ไม่บังคับ)",
+    "conditionsLoadingError": "ข้อผิดพลาดในการโหลดโรค",
+    "createNew": "สร้างใหม่",
+    "form": {
+      "createTreatment": "สร้างการรักษา",
+      "createWithLinks": "กำลังสร้างแผนการรักษาและเชื่อมโยงรายการ...",
+      "creatingWithLinks": "กำลังสร้างการรักษาและเชื่อมโยงรายการ...",
+      "descriptionDesc": "คำอธิบายสั้นๆ ของการรักษา",
+      "descriptionPlaceholder": "อธิบายการรักษา",
+      "dosageAmount": "ขนาด/จำนวน",
+      "dosageDesc": "จำนวนหรือขนาดต่อการรักษา",
+      "dosagePlaceholder": "เช่น 10มก., 1 ครั้ง",
+      "endDateDesc": "วันที่สิ้นสุดการรักษา (ถ้ามี)",
+      "enterTreatmentName": "ป้อนชื่อการรักษา",
+      "frequencyDesc": "ความถี่ในการรักษา",
+      "frequencyPlaceholder": "เช่น ทุกวัน, สัปดาห์ละ 2 ครั้ง",
+      "linkingPartialFailure": "ไม่สามารถเชื่อมโยงรายการบางส่วนได้",
+      "linkingPartialFailureMessage": "",
+      "notesDesc": "ข้อมูลเพิ่มเติมเกี่ยวกับการรักษานี้",
+      "notesPlaceholder": "ป้อนหมายเหตุการรักษา ข้อสังเกต หรือรายละเอียดเพิ่มเติม",
+      "practitionerDesc": "ผู้ให้บริการสุขภาพที่ให้การรักษา",
+      "relatedConditionDesc": "เชื่อมโยงการรักษานี้กับโรค",
+      "savingTreatment": "กำลังบันทึกการรักษา...",
+      "selectCondition": "เลือกโรค",
+      "startDateDesc": "วันที่เริ่มการรักษา",
+      "statusDesc": "สถานะปัจจุบันของการรักษา",
+      "statusOnHold": "พักการดำเนินการ",
+      "statusPlanned": "วางแผนแล้ว",
+      "tabs": {
+        "scheduleDosage": "กำหนดการและขนาด"
+      },
+      "tagsDesc": "เพิ่มแท็กเพื่อจัดหมวดหมู่และจัดระเบียบการรักษา",
+      "treatmentNameDesc": "ชื่อการรักษา",
+      "treatmentNotes": "หมายเหตุการรักษา",
+      "treatmentTypeDesc": "ประเภทหรือหมวดหมู่ของการรักษา",
+      "treatmentTypePlaceholder": "เช่น กายภาพบำบัด การผ่าตัด",
+      "updateTreatment": "อัปเดตการรักษา"
+    },
+    "linkExisting": "เชื่อมโยงที่มีอยู่",
+    "loadingTreatments": "กำลังโหลดข้อมูลการรักษา...",
+    "medications": {
+      "default": "(จากยา)",
+      "empty": "ไม่มียาที่เชื่อมโยงกับแผนการรักษานี้",
+      "loadError": "โหลดข้อมูลยาไม่สำเร็จ",
+      "loading": "กำลังโหลดข้อมูลยา...",
+      "prescriber": "แพทย์ผู้สั่งจ่าย",
+      "timing": "เวลา"
+    },
+    "mode": {
+      "advancedDescription": "แผนเน้นยาพร้อมการปรับแต่งแต่ละยา",
+      "label": "โหมดการรักษา",
+      "simple": "เรียบง่าย",
+      "simpleDescription": "การติดตามพื้นฐานพร้อมกำหนดการและขนาด"
+    },
+    "noEquipmentLinkedDescription": "ค้นหาและเชื่อมโยงอุปกรณ์การแพทย์ที่ใช้ในการรักษานี้",
+    "noTreatmentsFound": "ไม่พบการรักษา",
+    "startAdding": "เริ่มต้นด้วยการเพิ่มการรักษาแรกของคุณ",
+    "timingLabel": "เวลา:",
+    "viewModal": {
+      "amountDosage": "จำนวน/ขนาด",
+      "conditionId": "โรค #{{id}}",
+      "conditionStatus": "สถานะโรค",
+      "dosageFrequency": "ขนาดและความถี่",
+      "noConditionLinked": "ไม่มีโรคที่เชื่อมโยง",
+      "practitionerId": "แพทย์ #{{id}}",
+      "schedule": "กำหนดการ",
+      "tabs": {
+        "equipment": "อุปกรณ์",
+        "labs": "แลป",
+        "schedule": "กำหนดการและขนาด"
+      },
+      "title": "รายละเอียดการรักษา",
+      "treatmentNotes": "หมายเหตุการรักษา"
+    }
+  },
+  "viewToggle": {
+    "cards": "การ์ด",
+    "components": "ส่วนประกอบ",
+    "label": "โหมดการแสดง",
+    "table": "ตาราง"
+  },
+  "visits": {
+    "addNewVisit": "เพิ่มการเยี่ยมใหม่",
+    "addVisit": "เพิ่มการเยี่ยมใหม่",
+    "card": {
+      "generalVisit": "การเยี่ยมทั่วไป"
+    },
+    "clickToGetStarted": "คลิก \"เพิ่มการเยี่ยมใหม่\" เพื่อเริ่มต้น",
+    "editVisit": "แก้ไขการเยี่ยม",
+    "form": {
+      "addVisit": "เพิ่มการเยี่ยม",
+      "savingVisit": "กำลังบันทึกการเยี่ยม...",
+      "tabs": {
+        "clinical": "ทางคลินิก",
+        "visitInfo": "ข้อมูลการเยี่ยม"
+      },
+      "updateVisit": "อัปเดตการเยี่ยม"
+    },
+    "loadingVisits": "กำลังโหลดข้อมูลการเยี่ยม...",
+    "noVisitsFound": "ไม่พบการเยี่ยมทางการแพทย์",
+    "table": {
+      "visitDate": "วันที่เยี่ยม",
+      "visitType": "ประเภทการเยี่ยม"
+    },
+    "title": "การเยี่ยมทางการแพทย์",
+    "viewModal": {
+      "chiefComplaint": "อาการสำคัญ",
+      "clinicalInformation": "ข้อมูลทางคลินิก",
+      "editVisit": "แก้ไขการเยี่ยม",
+      "followUpInstructions": "คำแนะนำติดตาม",
+      "generalVisit": "การเยี่ยมทั่วไป",
+      "location": "สถานที่",
+      "priority": "ลำดับความสำคัญ",
+      "tabs": {
+        "clinical": "ทางคลินิก",
+        "visitInfo": "ข้อมูลการเยี่ยม"
+      },
+      "title": "การเยี่ยม - {{date}}",
+      "treatmentPlan": "แผนการรักษา",
+      "visitInformation": "ข้อมูลการเยี่ยม"
+    }
+  },
+  "vitals": {
+    "form": {
+      "dateTimePlaceholder": "",
+      "devicePlaceholder": "เช่น เครื่องวัดความดันแบบดิจิทัล รุ่นเครื่องวัดอุณหภูมิ...",
+      "heightNotSet": "ไม่ได้ตั้งค่าส่วนสูงในโปรไฟล์ผู้ป่วย - ไม่สามารถคำนวณ BMI ได้",
+      "locationPlaceholder": "วัดค่าเหล่านี้ที่ไหน?",
+      "lockedByImport": "จัดการโดยค่าเฉลี่ยการนำเข้าจากอุปกรณ์",
+      "missingPatientInfo": "ขาดข้อมูลผู้ป่วย",
+      "notesPlaceholder": "หมายเหตุเพิ่มเติมเกี่ยวกับการวัดสัญญาณชีพ...",
+      "pasteDateTimeDescription": "พิมพ์หรือวางวันที่/เวลา หรือคลิกปฏิทินเพื่อเลือก",
+      "patientHeight": "ส่วนสูงผู้ป่วย: {{height}} นิ้ว (จากโปรไฟล์)",
+      "validation": {
+        "a1cMax": "A1C ไม่สามารถเกิน 20%",
+        "a1cMin": "A1C ต้องอย่างน้อย 0%",
+        "bloodGlucoseMax": "น้ำตาลในเลือดไม่สามารถเกิน 800 mg/dL",
+        "bloodGlucoseMin": "น้ำตาลในเลือดต้องอย่างน้อย 20 mg/dL",
+        "dateInFuture": "วันที่ไม่สามารถเป็นอนาคต",
+        "dateRequired": "ต้องระบุวันที่และเวลาที่วัด",
+        "deviceMaxLength": "ชื่ออุปกรณ์ไม่สามารถเกิน 100 ตัวอักษร",
+        "diastolicMax": "ความดันไดแอสโตลิคไม่สามารถเกิน 200 mmHg",
+        "diastolicMin": "ความดันไดแอสโตลิคต้องอย่างน้อย 30 mmHg",
+        "heartRateMax": "อัตราการเต้นของหัวใจไม่สามารถเกิน 250 BPM",
+        "heartRateMin": "อัตราการเต้นของหัวใจต้องอย่างน้อย 30 BPM",
+        "notesMaxLength": "หมายเหตุไม่สามารถเกิน 5000 ตัวอักษร",
+        "oxygenMax": "ระดับออกซิเจนไม่สามารถเกิน 100%",
+        "oxygenMin": "ระดับออกซิเจนต้องอย่างน้อย 50%",
+        "painScaleMax": "ระดับความเจ็บปวดไม่สามารถเกิน 10",
+        "painScaleMin": "ระดับความเจ็บปวดต้องอย่างน้อย 0",
+        "respiratoryRateMax": "อัตราการหายใจไม่สามารถเกิน 100/นาที",
+        "respiratoryRateMin": "อัตราการหายใจต้องอย่างน้อย 5/นาที",
+        "systolicMax": "ความดันซิสโตลิคไม่สามารถเกิน 300 mmHg",
+        "systolicMin": "ความดันซิสโตลิคต้องอย่างน้อย 50 mmHg",
+        "temperatureMax": "อุณหภูมิไม่สามารถเกิน {{max}}{{unit}}",
+        "temperatureMin": "อุณหภูมิต้องอย่างน้อย {{min}}{{unit}}",
+        "weightMax": "น้ำหนักไม่สามารถเกิน {{max}} {{unit}}",
+        "weightMin": "น้ำหนักต้องอย่างน้อย {{min}} {{unit}}"
+      }
+    }
+  },
+  "warning": "คำเตือน"
+}

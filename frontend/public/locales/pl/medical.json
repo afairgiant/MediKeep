@@ -45,7 +45,7 @@
       "label": "Typ reakcji",
       "options": {
         "anaphylaxis": "Anafilaksja",
-        "gastrointestinal": "Pokarmowa",
+        "gastrointestinal": "Żołądkowo-jelitowa",
         "respiratory": "Oddechowa",
         "skin": "Reakcja skórna"
       },
@@ -166,7 +166,7 @@
       },
       "notes": {
         "description": "Wszelkie dodatkowe notatki dotyczące tego kontaktu",
-        "placeholder": "Dodatkowe informacje (np. 'Dostępny tylko w dni robocze', 'Mówi po hiszpańsku')"
+        "placeholder": "Dodatkowe informacje (np. 'Dostępny tylko w dni robocze', 'Mówi po angielsku')"
       },
       "primaryPhone": {
         "description": "Główny numer telefonu",
@@ -299,7 +299,7 @@
         "relationshipOptions": {
           "aunt": "Ciotka",
           "brother": "Brat",
-          "cousin": "Kuzyn",
+          "cousin": "Kuzyn/Kuzynka",
           "father": "Ojciec",
           "maternalGrandfather": "Dziadek ze strony matki",
           "maternalGrandmother": "Babcia ze strony matki",
@@ -328,18 +328,18 @@
       "placeholder": "1, 2, 3..."
     },
     "expirationDate": {
-      "description": "Data ważności fiolki/dawki szczepionki",
+      "description": "Data ważności fiolki/dawki szczepionki użytej",
       "label": "Data ważności szczepionki",
       "placeholder": "Wybierz datę ważności"
     },
     "location": {
       "description": "Gdzie szczepionka została podana",
-      "placeholder": "np. Apteka CVS, Szpital, Klinika, Departament Zdrowia"
+      "placeholder": "np. Apteka, Szpital, Klinika, Departament Zdrowia"
     },
     "lotNumber": {
       "description": "Identyfikator partii do śledzenia",
       "label": "Numer partii",
-      "placeholder": "Numer partii szczepionki"
+      "placeholder": "Numer partii/serii szczepionki"
     },
     "manufacturer": {
       "description": "Producent szczepionki",
@@ -356,7 +356,7 @@
       "sanofi": "Sanofi"
     },
     "ndcNumber": {
-      "description": "Krajowy kod leku dla szczepionki",
+      "description": "Narodowy kod leku dla szczepionki",
       "label": "Numer NDC",
       "placeholder": "np. 12345-6789-01"
     },
@@ -469,7 +469,7 @@
     "recoveryNotes": {
       "description": "Notatki na temat postępu powrotu do zdrowia",
       "label": "Notatki powrotu do zdrowia",
-      "placeholder": "Aktualizacje postępów, osiągnięcia lub obserwacje"
+      "placeholder": "Aktualizacje postępów, kamienie milowe lub obserwacje"
     },
     "severity": {
       "description": "Jak poważny jest ten uraz",
@@ -579,7 +579,7 @@
         "placeholder": "np. 800-123-456"
       },
       "deductibleFamily": {
-        "description": "Roczna kwota własności dla rodziny",
+        "description": "Roczna kwota udziału własnego dla rodziny",
         "label": "Udział własny dla rodziny",
         "placeholder": "np. 2000"
       },
@@ -809,7 +809,7 @@
       "conditionLinkFailed": "Lek został zapisany, ale niektóre schorzenia nie mogły zostać powiązane. Możesz je powiązać później, edytując lek.",
       "conditionLinkPartialFailure": "Nie udało się powiązać {{count}} schorzeń",
       "conditionLinkPartialFailure_one": "Nie udało się powiązać {{count}} schorzenia",
-      "conditionLinkPartialFailure_other": "{{count}} condition links failed",
+      "conditionLinkPartialFailure_other": "Nie udało się powiązać {{count}} schorzeń",
       "linkConditionsDescription": "Opcjonalnie powiąż ten lek z istniejącymi schorzeniami",
       "noConditionsFound": "Nie znaleziono schorzeń",
       "saving": "Zapisywanie leku...",
@@ -1236,7 +1236,7 @@
   "treatmentPlan": {
     "clickToExpand": "Kliknij, aby rozwinąć i dodać szczegóły (opcjonalnie)",
     "conditions": "Schorzenia",
-    "encounters": "Spotkania",
+    "encounters": "Wizyty",
     "equipment": "Sprzęt",
     "medications": "Leki",
     "noEquipment": "Nie znaleziono sprzętu. Sprzęt można dodać po utworzeniu leczenia.",

@@ -1,112 +1,112 @@
 {
   "alert": {
-    "errorCount": "{{count}} errore",
-    "errorCount_one": "{{count}} errore",
-    "errorCount_other": "{{count}} errori",
-    "formError": "Errore nel modulo",
+    "errorCount": "{{count}} Errore",
+    "errorCount_one": "",
+    "errorCount_other": "{{count}} Errori",
+    "formError": "Errore del Modulo",
     "highPriority": "{{count}} ad alta priorità",
-    "highPriority_one": "{{count}} ad alta priorità",
-    "highPriority_other": "{{count}} ad alta priorità",
+    "highPriority_one": "",
+    "highPriority_other": "",
     "suggestions": "Suggerimenti:"
   },
   "boundary": {
     "componentLabel": "Componente:",
     "errorDetails": "Dettagli dell'errore",
-    "errorIdLabel": "ID errore:",
-    "errorLogged": "L'errore è stato registrato automaticamente per essere analizzato.",
-    "reloadPage": "Ricarica pagina",
+    "errorIdLabel": "ID Errore:",
+    "errorLogged": "L'errore è stato registrato automaticamente per l'analisi.",
+    "reloadPage": "Ricarica Pagina",
     "somethingWentWrong": "Qualcosa è andato storto",
     "tryAgain": "Riprova",
-    "unexpectedError": "Ci scusiamo, ma si è verificato un errore imprevisto nel sistema di cartelle cliniche."
+    "unexpectedError": "Ci scusiamo, ma si è verificato un errore imprevisto nel sistema delle cartelle cliniche."
   },
   "file": {
-    "deleteFailed": "Eliminazione del file non riuscita. Riprova.",
-    "downloadFailed": "Download del file non riuscito. Riprova.",
+    "deleteFailed": "Eliminazione del file non riuscita. Riprovare.",
+    "downloadFailed": "Download del file non riuscito. Riprovare.",
     "notFound": "File non trovato.",
-    "viewFailed": "Apertura del file per la visualizzazione non riuscita. Riprova."
+    "viewFailed": "Apertura del file per la visualizzazione non riuscita. Riprovare."
   },
   "form": {
-    "conditionNotSelected": "Seleziona una condizione",
+    "conditionNotSelected": "Si prega di selezionare una condizione",
     "entityNotFound": "L'elemento richiesto non è stato trovato.",
-    "equipmentFieldsRequired": "Il nome e il tipo di attrezzatura sono obbligatori",
-    "equipmentNotSelected": "Seleziona almeno un'attrezzatura",
-    "invalidDate": "Inserisci una data valida.",
-    "invalidEmail": "Inserisci un indirizzo email valido.",
-    "invalidPhone": "Inserisci un numero di telefono valido.",
-    "invalidPhoneDigits": "Inserisci un numero di telefono valido",
-    "invalidWebsiteUrl": "Inserisci un URL del sito valido",
-    "medicationNotSelected": "Seleziona un farmaco",
+    "equipmentFieldsRequired": "Il nome e il tipo dell'attrezzatura sono obbligatori",
+    "equipmentNotSelected": "Si prega di selezionare almeno un'attrezzatura",
+    "invalidDate": "Si prega di inserire una data valida.",
+    "invalidEmail": "Si prega di inserire un indirizzo email valido.",
+    "invalidPhone": "Si prega di inserire un numero di telefono valido.",
+    "invalidPhoneDigits": "Si prega di inserire un numero di telefono valido",
+    "invalidWebsiteUrl": "Si prega di inserire un URL del sito web valido",
+    "medicationNotSelected": "Si prega di selezionare un farmaco",
     "mustBeValidNumber": "Deve essere un numero valido",
-    "patientNotSelected": "Seleziona un paziente.",
-    "requiredFieldMissing": "Compila tutti i campi obbligatori.",
-    "submissionFailed": "Salvataggio del modulo non riuscito. Verifica i dati e riprova."
+    "patientNotSelected": "Si prega di selezionare un paziente.",
+    "requiredFieldMissing": "Si prega di compilare tutti i campi obbligatori.",
+    "submissionFailed": "Salvataggio del modulo non riuscito. Verificare i dati inseriti e riprovare."
   },
   "general": {
-    "maintenanceMode": "Il sistema è attualmente in manutenzione. Riprova più tardi.",
-    "permissionDenied": "Non hai l'autorizzazione per eseguire questa azione.",
-    "rateLimitExceeded": "Troppe richieste. Attendi un momento e riprova.",
-    "sessionExpired": "La sessione è scaduta. Accedi nuovamente.",
-    "storageFull": "Limite di archiviazione raggiunto. Libera spazio e riprova.",
-    "unknownError": "Si è verificato un errore imprevisto. Riprova.",
-    "validationError": "Verifica i dati inseriti e riprova."
+    "maintenanceMode": "Il sistema è attualmente in manutenzione. Riprovare più tardi.",
+    "permissionDenied": "Non si dispone dell'autorizzazione per eseguire questa azione.",
+    "rateLimitExceeded": "Troppe richieste. Attendere un momento e riprovare.",
+    "sessionExpired": "La sessione è scaduta. Si prega di accedere nuovamente.",
+    "storageFull": "Limite di archiviazione raggiunto. Liberare spazio e riprovare.",
+    "unknownError": "Si è verificato un errore imprevisto. Riprovare.",
+    "validationError": "Si prega di verificare i dati inseriti e riprovare."
   },
   "network": {
-    "connectionError": "Errore di connessione. Controlla la rete e riprova.",
-    "serverError": "Si è verificato un errore sul server. Riprova più tardi.",
-    "timeout": "La richiesta è scaduta. Riprova.",
-    "unavailable": "Rete non disponibile. Controlla la connessione."
+    "connectionError": "Errore di connessione. Verificare la rete e riprovare.",
+    "serverError": "Si è verificato un errore del server. Riprovare più tardi.",
+    "timeout": "Richiesta scaduta. Riprovare.",
+    "unavailable": "Rete non disponibile. Verificare la connessione."
   },
   "paperless": {
-    "authFailed": "Autenticazione con Paperless non riuscita. Controlla le credenziali.",
-    "configIncomplete": "La configurazione di Paperless è incompleta. Verifica le impostazioni.",
-    "connectionFailed": "Impossibile connettersi al servizio Paperless. Verifica la configurazione.",
-    "duplicateDocument": "Questo documento esiste già in Paperless. I documenti identici non possono essere inviati due volte.",
-    "notEnabled": "L'integrazione con Paperless non è abilitata. Attivala nelle Impostazioni.",
-    "taskFailed": "Invio del documento a Paperless non riuscito. Riprova o contatta il supporto.",
-    "taskTimeout": "Elaborazione del documento scaduta. Il documento potrebbe essere ancora in lavorazione su Paperless.",
+    "authFailed": "Autenticazione con il servizio Paperless non riuscita. Verificare le credenziali.",
+    "configIncomplete": "La configurazione di Paperless è incompleta. Verificare le impostazioni.",
+    "connectionFailed": "Impossibile connettersi al servizio Paperless. Verificare la configurazione.",
+    "duplicateDocument": "Questo documento esiste già in Paperless. I documenti identici non possono essere caricati due volte.",
+    "notEnabled": "L'integrazione Paperless non è abilitata. Attivarla nelle Impostazioni.",
+    "taskFailed": "Caricamento del documento su Paperless non riuscito. Riprovare o contattare il supporto.",
+    "taskTimeout": "Elaborazione del documento scaduta. Il documento potrebbe essere ancora in elaborazione in Paperless.",
     "unavailable": "Il servizio di gestione documenti non è attualmente disponibile.",
-    "uploadFailed": "Caricamento su Paperless non riuscito."
+    "uploadFailed": "Caricamento nel sistema di gestione documenti Paperless non riuscito."
   },
   "patientForm": {
     "birthDateFuture": "La data di nascita non può essere nel futuro",
     "birthDateRequired": "La data di nascita è obbligatoria",
-    "createFailed": "Creazione non riuscita: {{message}}",
+    "createFailed": "Creazione Non Riuscita: {{message}}",
     "firstNameRequired": "Il nome è obbligatorio",
     "lastNameRequired": "Il cognome è obbligatorio",
-    "updateFailed": "Aggiornamento non riuscito: {{message}}"
+    "updateFailed": "Aggiornamento Non Riuscito: {{message}}"
   },
-  "patientNotAvailable": "Informazioni paziente non disponibili",
+  "patientNotAvailable": "Informazioni del paziente non disponibili",
   "relationships": {
-    "addConditionFailed": "Impossibile aggiungere la relazione della condizione",
-    "addFailed": "Impossibile aggiungere la relazione",
-    "addMedicationFailed": "Impossibile aggiungere la relazione del farmaco",
-    "deleteFailed": "Impossibile eliminare la relazione",
-    "fetchFailed": "Impossibile caricare le relazioni",
-    "updateFailed": "Impossibile aggiornare la relazione"
+    "addConditionFailed": "Aggiunta della relazione condizione non riuscita",
+    "addFailed": "Aggiunta della relazione non riuscita",
+    "addMedicationFailed": "Aggiunta della relazione farmaco non riuscita",
+    "deleteFailed": "Eliminazione della relazione non riuscita",
+    "fetchFailed": "Caricamento delle relazioni non riuscito",
+    "updateFailed": "Aggiornamento della relazione non riuscito"
   },
   "success": {
     "batchUploadSuccess": "Tutti i file sono stati caricati con successo!",
     "fileDeleted": "File eliminato con successo.",
     "formSaved": "Modulo salvato con successo!",
-    "paperlessSyncSuccess": "Sincronizzato con successo con Paperless.",
+    "paperlessSyncSuccess": "Sincronizzazione con il sistema di gestione documenti Paperless completata con successo.",
     "uploadMultipleSuccess": "Tutti i file sono stati caricati con successo!",
     "uploadSuccess": "File caricato con successo!"
   },
   "upload": {
-    "allUploadsFailed": "Tutti i caricamenti dei file non sono riusciti. Controlla la connessione e riprova.",
-    "batchUploadFailed": "Alcuni file non sono stati caricati. Verifica gli errori individuali.",
-    "connectionError": "Errore di connessione. Controlla la rete e riprova.",
+    "allUploadsFailed": "Tutti i caricamenti dei file sono falliti. Verificare la connessione e riprovare.",
+    "batchUploadFailed": "Alcuni file non sono stati caricati. Verificare gli errori dei singoli file.",
+    "connectionError": "Errore di connessione. Verificare la rete e riprovare.",
     "duplicateFile": "Questo file è già stato caricato.",
-    "failed": "Caricamento del file non riuscito. Riprova.",
-    "fileProcessingFailed": "Elaborazione del file non riuscita. Prova un file diverso.",
+    "failed": "Caricamento del file non riuscito. Riprovare.",
+    "fileProcessingFailed": "Elaborazione del file non riuscita. Provare con un file diverso.",
     "fileTooLarge": "La dimensione del file supera il limite massimo.",
     "invalidFileType": "Tipo di file non supportato.",
-    "partialUploadSuccess": "Caricamento completato con alcuni errori. Rivedi i file non riusciti."
+    "partialUploadSuccess": "Caricamento completato con alcuni errori. Verificare i file falliti."
   },
   "warnings": {
     "duplicateWarning": "Questo file sembra essere un duplicato.",
-    "largeFileWarning": "File di grandi dimensioni rilevato. Il caricamento può richiedere diversi minuti.",
+    "largeFileWarning": "File di grandi dimensioni rilevato. Il caricamento potrebbe richiedere diversi minuti.",
     "partialSuccess": "Operazione completata con alcuni avvisi.",
-    "slowConnection": "Il caricamento sta impiegando più del normale a causa della connessione lenta."
+    "slowConnection": "Il caricamento sta richiedendo più tempo del normale a causa della connessione lenta."
   }
 }

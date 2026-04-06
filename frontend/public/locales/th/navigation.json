@@ -1,0 +1,122 @@
+{
+  "activity": {
+    "actions": {
+      "added": "เพิ่มแล้ว",
+      "deleted": "ลบแล้ว",
+      "modified": "แก้ไขแล้ว",
+      "removed": "นำออกแล้ว",
+      "scheduled": "นัดหมายแล้ว",
+      "updated": "อัปเดตแล้ว",
+      "viewed": "เปิดดูแล้ว"
+    }
+  },
+  "dashboard": {
+    "activity": {
+      "lastUpdated": "อัปเดตล่าสุด",
+      "noActivity": "ไม่มีกิจกรรมล่าสุด",
+      "noActivityDescription": "กิจกรรมบันทึกทางการแพท์ยของคุณจะแสดงที่นี่"
+    },
+    "hello": "สวัสดี",
+    "loading": "กำลังโหลดแดชบอร์ดทางการแพท์ย...",
+    "modules": {
+      "exportRecords": "ส่งออกบันทึก",
+      "visitHistory": "ประวัติการรับบริการ"
+    },
+    "search": {
+      "advancedSearch": "ค้นหาขั้นสูง",
+      "placeholder": "ค้นหาบันทึกทางการแพท์ย..."
+    },
+    "sections": {
+      "additionalResources": "ทรัพยากรเพิ่มเติม",
+      "coreMedical": "ข้อมูลทางการแพท์ยหลัก",
+      "healthMonitoring": "การตรวจติดตามสุขภาพ",
+      "prevention": "การป้องกันและประวัติ",
+      "recentActivity": "กิจกรรมล่าสุด",
+      "treatments": "การรักษาและกระบวนการ"
+    },
+    "stats": {
+      "activeMedications": "ยาที่ใช้อยู่"
+    },
+    "subtitle": "จัดการข้อมูลสุขภาพของคุณอย่างปลอดภัย",
+    "title": "แดชบอร์ด MediKeep"
+  },
+  "invitations": {
+    "acceptButton": "รับคำเชิญ",
+    "confirmDescription": "เมื่อยอมรับแล้ว คุณจะสามารถเข้าถึงข้อมูลทางการแพท์ยที่แชร์ได้",
+    "confirmQuestion": "คุณแน่ใจหรือไม่ว่าต้องการรับคำเชิญนี้?",
+    "confirmTitle": "ยืนยันการรับคำเชิญ",
+    "from": "จาก",
+    "lastUpdated": "อัปเดตล่าสุด",
+    "manageAll": "จัดการคำเชิญทั้งหมด",
+    "noPending": "ไม่มีคำเชิญที่รอการตอบรับ",
+    "noPendingDescription": "คำเชิญการแชร์ใหม่จะแสดงที่นี่",
+    "sharePatient": "แชร์ข้อมูลผู้ป่วย",
+    "title": "คำเชิญ",
+    "types": {
+      "patientRecord": "บันทึกผู้ป่วย"
+    }
+  },
+  "menu": {
+    "account": "บัญชีผู้ใช้",
+    "backToDashboard": "กลับไปที่แดชบอร์ด",
+    "darkMode": "โหมดมืด",
+    "help": "ช่วยเหลือ",
+    "lightMode": "โหมดสว่าง",
+    "logout": "ออกจากระบบ",
+    "patients": "ผู้ป่วย",
+    "profile": "โปรไฟล์",
+    "reports": "รายงาน",
+    "userActions": "การดำเนินการของผู้ใช้"
+  },
+  "pages": {
+    "help": "ช่วยเหลือและสนับสนุน",
+    "medicalHistory": "ประวัติทางการแพท์ย",
+    "patientDetails": "รายละเอียดผู้ป่วย",
+    "patientList": "รายชื่อผู้ป่วย",
+    "preferences": "การตั้งค่า",
+    "reports": "รายงาน",
+    "userProfile": "โปรไฟล์ผู้ใช้"
+  },
+  "sections": {
+    "personalInfo": "ข้อมูลส่วนตัว",
+    "preferences": "การตั้งค่า"
+  },
+  "sidebarNav": {
+    "items": {
+      "adminDashboard": "แดชบอร์ดผู้ดูแลระบบ",
+      "allergies": "การแพ้",
+      "backupManagement": "การจัดการข้อมูลสำรอง",
+      "conditions": "อาการป่วย",
+      "customReports": "รายงานที่กำหนดเอง",
+      "dataModels": "แบบจำลองข้อมูล",
+      "emergencyContacts": "ผู้ติดต่อฉุกเฉิน",
+      "exportRecords": "ส่งออกบันทึก",
+      "familyHistory": "ประวัติครอบครัว",
+      "immunizations": "การฉีดวัคซีน",
+      "injuries": "การบาดเจ็บ",
+      "insurance": "ประกันภัย",
+      "labResults": "ผลตรวจทางห้องปฏิบัติการ",
+      "language": "ภาษา",
+      "medicalEquipment": "อุปกรณ์ทางการแพท์ย",
+      "medications": "ยา",
+      "patientInfo": "ข้อมูลผู้ป่วย",
+      "pharmacies": "ร้านขายยา",
+      "practitioners": "แพทย์ผู้รักษา",
+      "procedures": "กระบวนการรักษา",
+      "settings": "การตั้งค่า",
+      "symptoms": "อาการ",
+      "systemHealth": "สถานะระบบ",
+      "tagManagement": "การจัดการป้ายกำกับ",
+      "theme": "ธีม",
+      "treatments": "การรักษา",
+      "visitHistory": "ประวัติการรับบริการ",
+      "vitalSigns": "สัญญาณชีพ"
+    },
+    "sections": {
+      "administration": "การบริหารจัดการ",
+      "careAndTreatment": "การดูแลและรักษา",
+      "misc": "อื่นๆ",
+      "tools": "เครื่องมือ"
+    }
+  }
+}

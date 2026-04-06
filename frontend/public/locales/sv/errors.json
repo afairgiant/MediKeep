@@ -13,7 +13,7 @@
     "componentLabel": "Komponent:",
     "errorDetails": "Feldetaljer",
     "errorIdLabel": "Fel-ID:",
-    "errorLogged": "Felet har loggats automatiskt för undersökning.",
+    "errorLogged": "Felet har loggats automatiskt för utredning.",
     "reloadPage": "Ladda om sidan",
     "somethingWentWrong": "Något gick fel",
     "tryAgain": "Försök igen",
@@ -85,12 +85,12 @@
     "updateFailed": "Det gick inte att uppdatera relationen"
   },
   "success": {
-    "batchUploadSuccess": "Alla filer har laddats upp!",
-    "fileDeleted": "Filen har tagits bort.",
-    "formSaved": "Formuläret har sparats!",
+    "batchUploadSuccess": "Alla filer har laddats upp framgångsrikt!",
+    "fileDeleted": "Filen har tagits bort framgångsrikt.",
+    "formSaved": "Formuläret har sparats framgångsrikt!",
     "paperlessSyncSuccess": "Synkronisering med Paperless dokumenthantering lyckades.",
-    "uploadMultipleSuccess": "Alla filer har laddats upp!",
-    "uploadSuccess": "Filen har laddats upp!"
+    "uploadMultipleSuccess": "Alla filer har laddats upp framgångsrikt!",
+    "uploadSuccess": "Filen har laddats upp framgångsrikt!"
   },
   "upload": {
     "allUploadsFailed": "Alla filuppladdningar misslyckades. Kontrollera din anslutning och försök igen.",

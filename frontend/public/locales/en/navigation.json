@@ -83,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Admin Dashboard",
+      "allergies": "Allergies",
+      "backupManagement": "Backup Management",
+      "conditions": "Conditions",
       "customReports": "Custom Reports",
+      "dataModels": "Data Models",
+      "emergencyContacts": "Emergency Contacts",
       "exportRecords": "Export Records",
+      "familyHistory": "Family History",
+      "immunizations": "Immunizations",
+      "injuries": "Injuries",
+      "insurance": "Insurance",
+      "labResults": "Lab Results",
       "language": "Language",
+      "medicalEquipment": "Medical Equipment",
+      "medications": "Medications",
       "patientInfo": "Patient Info",
+      "pharmacies": "Pharmacies",
+      "practitioners": "Practitioners",
+      "procedures": "Procedures",
+      "settings": "Settings",
+      "symptoms": "Symptoms",
+      "systemHealth": "System Health",
       "tagManagement": "Tag Management",
       "theme": "Theme",
-      "visitHistory": "Visit History"
+      "treatments": "Treatments",
+      "visitHistory": "Visit History",
+      "vitalSigns": "Vital Signs"
     },
     "sections": {
+      "administration": "Administration",
       "careAndTreatment": "Care & Treatment",
       "misc": "Misc.",
       "tools": "Tools"

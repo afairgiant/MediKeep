@@ -103,7 +103,7 @@
     "diagnosis": {
       "description": "Naam van de medische aandoening of diagnose",
       "label": "Diagnose",
-      "placeholder": "bijv. Hypertensie, Diabetes type 2, Astma"
+      "placeholder": "bv. Hypertensie, Diabetes type 2, Astma"
     },
     "endDate": {
       "description": "Wanneer de aandoening werd opgelost (indien van toepassing)",
@@ -112,7 +112,7 @@
     "icd10Code": {
       "description": "Internationale Classificatie van Ziekten code",
       "label": "ICD-10-code",
-      "placeholder": "bijv. I10, E11.9"
+      "placeholder": "bv. I10, E11.9"
     },
     "notes": {
       "description": "Aanvullende details over de aandoening, behandelgeschiedenis of observaties"
@@ -133,7 +133,7 @@
     "snomedCode": {
       "description": "SNOMED CT klinische terminologiecode",
       "label": "SNOMED-code",
-      "placeholder": "bijv. 38341003"
+      "placeholder": "bv. 38341003"
     },
     "status": {
       "description": "Huidige status van deze aandoening"
@@ -144,12 +144,12 @@
       "address": {
         "description": "Adres van het contact (optioneel)",
         "label": "Adres",
-        "placeholder": "bijv. Hoofdstraat 123, 1012 AB Amsterdam"
+        "placeholder": "bv. Hoofdstraat 123, 1012 AB Amsterdam"
       },
       "email": {
         "description": "Optioneel e-mailadres",
         "label": "E-mailadres",
-        "placeholder": "bijv. jan.devries@email.nl"
+        "placeholder": "bv. jan.devries@email.nl"
       },
       "isActive": {
         "description": "Dit contact is momenteel beschikbaar",
@@ -162,16 +162,16 @@
       "name": {
         "description": "Volledige naam van het noodcontact",
         "label": "Volledige naam",
-        "placeholder": "bijv. Jan de Vries"
+        "placeholder": "bv. Jan de Vries"
       },
       "notes": {
         "description": "Eventuele aanvullende notities over dit contact",
-        "placeholder": "Aanvullende informatie (bijv. 'Alleen doordeweeks bereikbaar', 'Spreekt Spaans')"
+        "placeholder": "Aanvullende informatie (bv. 'Alleen doordeweeks bereikbaar', 'Spreekt Spaans')"
       },
       "primaryPhone": {
         "description": "Primair telefoonnummer",
         "label": "Primair telefoonnummer",
-        "placeholder": "bijv. +31 6 12345678"
+        "placeholder": "bv. +31 6 12345678"
       },
       "relationship": {
         "description": "Relatie tot de patiënt",
@@ -181,7 +181,7 @@
       "secondaryPhone": {
         "description": "Optioneel secundair telefoonnummer",
         "label": "Secundair telefoonnummer",
-        "placeholder": "bijv. +31 20 1234567"
+        "placeholder": "bv. +31 20 1234567"
       }
     },
     "messages": {
@@ -203,7 +203,7 @@
         "conditionName": {
           "description": "Naam van de medische aandoening",
           "label": "Naam aandoening",
-          "placeholder": "bijv. Diabetes, Hartziekte, Kanker"
+          "placeholder": "bv. Diabetes, Hartziekte, Kanker"
         },
         "conditionType": {
           "description": "Categorie van medische aandoening",
@@ -213,12 +213,12 @@
         "diagnosisAge": {
           "description": "Leeftijd bij diagnose",
           "label": "Leeftijd bij diagnose",
-          "placeholder": "bijv. 45"
+          "placeholder": "bv. 45"
         },
         "icd10Code": {
           "description": "Medische diagnosecode (indien bekend)",
           "label": "ICD-10-code",
-          "placeholder": "bijv. E11.9"
+          "placeholder": "bv. E11.9"
         },
         "notes": {
           "description": "Behandeldetails, uitkomsten of andere relevante informatie",
@@ -262,12 +262,12 @@
         "birthYear": {
           "description": "Geboortejaar van het familielid",
           "label": "Geboortejaar",
-          "placeholder": "bijv. 1965"
+          "placeholder": "bv. 1965"
         },
         "deathYear": {
           "description": "Jaar waarin het familielid is overleden",
           "label": "Sterfjaar",
-          "placeholder": "bijv. 2020"
+          "placeholder": "bv. 2020"
         },
         "deceased": {
           "description": "Vink aan als het familielid is overleden",
@@ -334,7 +334,7 @@
     },
     "location": {
       "description": "Waar het vaccin is toegediend",
-      "placeholder": "bijv. Apotheek, Ziekenhuis, Kliniek, GGD"
+      "placeholder": "bv. Apotheek, Ziekenhuis, Kliniek, GGD"
     },
     "lotNumber": {
       "description": "Batchnummer voor tracking",
@@ -358,7 +358,7 @@
     "ndcNumber": {
       "description": "National Drug Code voor het vaccin",
       "label": "NDC-nummer",
-      "placeholder": "bijv. 12345-6789-01"
+      "placeholder": "bv. 12345-6789-01"
     },
     "notes": {
       "description": "Relevante details over de vaccinatie",
@@ -390,7 +390,7 @@
     "vaccineName": {
       "description": "Naam van het toegediende vaccin",
       "label": "Vaccinnaam",
-      "placeholder": "bijv. COVID-19 mRNA, Influenza, BMR"
+      "placeholder": "bv. COVID-19 mRNA, Influenza, BMR"
     }
   },
   "injuries": {
@@ -399,12 +399,12 @@
     "bodyLocation": {
       "description": "Specifiek lichaamsdeel dat door het letsel is getroffen",
       "label": "Lichaamslocatie",
-      "placeholder": "bijv. Linkerknie, Rechterschouder"
+      "placeholder": "bv. Linkerknie, Rechterschouder"
     },
     "bodyPart": {
       "description": "Het getroffen lichaamsdeel of gebied",
       "label": "Lichaamsdeel",
-      "placeholder": "bijv. Enkel, Pols, Knie"
+      "placeholder": "bv. Enkel, Pols, Knie"
     },
     "cardSubtitle": "Lichamelijk letsel",
     "cause": {
@@ -429,10 +429,10 @@
     "injuryName": {
       "description": "Een beschrijvende naam voor dit letsel",
       "label": "Naam letsel",
-      "placeholder": "bijv. Rechter enkelverstuiking"
+      "placeholder": "bv. Rechter enkelverstuiking"
     },
     "injuryType": {
-      "description": "Categorie van letsel (bijv. verstuiking, breuk)",
+      "description": "Categorie van letsel (bv. verstuiking, breuk)",
       "label": "Type letsel",
       "noResults": "Geen overeenkomende typen gevonden",
       "placeholder": "Selecteer of maak type aan"
@@ -451,7 +451,7 @@
     "mechanism": {
       "description": "Beschrijf hoe het letsel is ontstaan",
       "label": "Hoe het is gebeurd",
-      "placeholder": "bijv. Gevallen tijdens het wandelen"
+      "placeholder": "bv. Gevallen tijdens het wandelen"
     },
     "messages": {
       "loading": "Letsels laden...",
@@ -497,7 +497,7 @@
     },
     "treatmentReceived": {
       "description": "Beschrijving van de ontvangen behandeling",
-      "placeholder": "bijv. RICE-protocol, gips aangebracht"
+      "placeholder": "bv. RICE-protocol, gips aangebracht"
     },
     "viewModal": {
       "additionalInfo": "Aanvullende informatie",
@@ -510,17 +510,17 @@
       "annualMaximum": {
         "description": "Maximaal jaarlijks vergoedingsbedrag",
         "label": "Jaarlijks maximumbedrag",
-        "placeholder": "bijv. 1500"
+        "placeholder": "bv. 1500"
       },
       "basicCoverage": {
         "description": "Dekkingspercentage voor basisingrepen",
         "label": "Basisdekking %",
-        "placeholder": "bijv. 80"
+        "placeholder": "bv. 80"
       },
       "binNumber": {
         "description": "Bank Identification Number voor apotheek",
         "label": "BIN-nummer",
-        "placeholder": "bijv. 123456"
+        "placeholder": "bv. 123456"
       },
       "claimsAddress": {
         "description": "Adres voor het indienen van declaraties",
@@ -530,63 +530,63 @@
       "companyName": {
         "description": "Naam van de verzekeringsmaatschappij",
         "label": "Verzekeringsmaatschappij",
-        "placeholder": "bijv. CZ, VGZ, Zilveren Kruis"
+        "placeholder": "bv. CZ, VGZ, Zilveren Kruis"
       },
       "contactAllowance": {
         "description": "Jaarlijkse vergoeding voor contactlenzen",
         "label": "Contactlenzenvergoeding",
-        "placeholder": "bijv. 150"
+        "placeholder": "bv. 150"
       },
       "copayBrand": {
         "description": "Eigen bijdrage voor merkmedicatie",
         "label": "Eigen bijdrage merkmedicatie",
-        "placeholder": "bijv. 30"
+        "placeholder": "bv. 30"
       },
       "copayEmergencyRoom": {
         "description": "Eigen bijdrage voor bezoeken aan de spoedeisende hulp",
         "label": "Eigen bijdrage spoedeisende hulp",
-        "placeholder": "bijv. 200"
+        "placeholder": "bv. 200"
       },
       "copayGeneric": {
         "description": "Eigen bijdrage voor generieke medicatie",
         "label": "Eigen bijdrage generiek",
-        "placeholder": "bijv. 10"
+        "placeholder": "bv. 10"
       },
       "copayPrimaryCare": {
         "description": "Eigen bijdrage voor huisartsbezoeken",
         "label": "Eigen bijdrage huisarts",
-        "placeholder": "bijv. 25"
+        "placeholder": "bv. 25"
       },
       "copaySpecialist": {
         "description": "Eigen bijdrage voor specialistenbezoeken",
         "label": "Eigen bijdrage specialist",
-        "placeholder": "bijv. 50"
+        "placeholder": "bv. 50"
       },
       "copaySpecialty": {
         "description": "Eigen bijdrage voor specialistische medicatie",
         "label": "Eigen bijdrage specialistische medicatie",
-        "placeholder": "bijv. 50"
+        "placeholder": "bv. 50"
       },
       "copayUrgentCare": {
         "description": "Eigen bijdrage voor spoedzorgbezoeken",
         "label": "Eigen bijdrage spoedzorg",
-        "placeholder": "bijv. 75"
+        "placeholder": "bv. 75"
       },
       "coveragePeriodStatus": "Dekkingsperiode en status",
       "customerServicePhone": {
         "description": "Telefoonnummer van de klantenservice",
         "label": "Telefoon klantenservice",
-        "placeholder": "bijv. 0800-1234567"
+        "placeholder": "bv. 0800-1234567"
       },
       "deductibleFamily": {
         "description": "Jaarlijks eigen risico gezin",
         "label": "Eigen risico gezin",
-        "placeholder": "bijv. 770"
+        "placeholder": "bv. 770"
       },
       "deductibleIndividual": {
         "description": "Jaarlijks eigen risico individueel",
         "label": "Eigen risico individueel",
-        "placeholder": "bijv. 385"
+        "placeholder": "bv. 385"
       },
       "dentalPlanType": {
         "description": "Type tandartsverzekeringspolis",
@@ -614,12 +614,12 @@
       "employerGroup": {
         "description": "Bedrijf of organisatie die de verzekering verstrekt (indien van toepassing)",
         "label": "Werkgever/groepssponsor",
-        "placeholder": "bijv. ABC Bedrijf, Zelfstandig"
+        "placeholder": "bv. ABC Bedrijf, Zelfstandig"
       },
       "examCopay": {
         "description": "Eigen bijdrage voor oogonderzoeken",
         "label": "Eigen bijdrage oogonderzoek",
-        "placeholder": "bijv. 10"
+        "placeholder": "bv. 10"
       },
       "expirationDate": {
         "description": "Datum waarop de dekking eindigt (indien bekend)",
@@ -629,12 +629,12 @@
       "frameAllowance": {
         "description": "Jaarlijkse vergoeding voor monturen",
         "label": "Montuurvergoeding",
-        "placeholder": "bijv. 150"
+        "placeholder": "bv. 150"
       },
       "groupNumber": {
         "description": "Groepsnummer (indien van toepassing)",
         "label": "Groepsnummer",
-        "placeholder": "bijv. GRP123"
+        "placeholder": "bv. GRP123"
       },
       "insuranceType": {
         "description": "Type verzekeringsdekking",
@@ -654,22 +654,22 @@
       "lensCoverage": {
         "description": "Dekkingsdetails voor glazen",
         "label": "Glazendekking",
-        "placeholder": "bijv. 100% vergoed"
+        "placeholder": "bv. 100% vergoed"
       },
       "majorCoverage": {
         "description": "Dekkingspercentage voor grote ingrepen",
         "label": "Uitgebreide dekking %",
-        "placeholder": "bijv. 50"
+        "placeholder": "bv. 50"
       },
       "memberId": {
         "description": "Lidnummer van de verzekeringspas",
         "label": "Lidnummer",
-        "placeholder": "bijv. ABC123456789"
+        "placeholder": "bv. ABC123456789"
       },
       "memberName": {
         "description": "Naam zoals vermeld op de verzekeringspas",
         "label": "Naam verzekerde",
-        "placeholder": "bijv. Jan de Vries"
+        "placeholder": "bv. Jan de Vries"
       },
       "notes": {
         "description": "Eventuele aanvullende details of notities",
@@ -678,7 +678,7 @@
       "pcnNumber": {
         "description": "Verwerkerbeheersnummer",
         "label": "PCN-nummer",
-        "placeholder": "bijv. ABC123"
+        "placeholder": "bv. ABC123"
       },
       "pharmacyNetworkInfo": {
         "description": "Informatie over voorkeurs-apotheeknetwerken",
@@ -688,7 +688,7 @@
       "planName": {
         "description": "Naam van de specifieke verzekeringspolis",
         "label": "Polisnaam",
-        "placeholder": "bijv. Zorgverzekering Basis Plus"
+        "placeholder": "bv. Zorgverzekering Basis Plus"
       },
       "planType": {
         "description": "Type medische verzekeringspolis",
@@ -706,7 +706,7 @@
       "policyHolderName": {
         "description": "Naam van de polishouder (indien anders dan de verzekerde)",
         "label": "Naam polishouder",
-        "placeholder": "bijv. Marie de Vries (laat leeg indien gelijk aan verzekerde)"
+        "placeholder": "bv. Marie de Vries (laat leeg indien gelijk aan verzekerde)"
       },
       "preauthPhone": {
         "description": "Telefoonnummer voor voorafgaande machtigingen",
@@ -726,12 +726,12 @@
       "preventiveCoverage": {
         "description": "Dekkingspercentage voor preventieve zorg",
         "label": "Preventieve dekking %",
-        "placeholder": "bijv. 100"
+        "placeholder": "bv. 100"
       },
       "primaryCarePhysician": {
         "description": "Naam van uw huisarts",
         "label": "Huisarts",
-        "placeholder": "bijv. Dr. De Vries"
+        "placeholder": "bv. Dr. De Vries"
       },
       "providerServicesPhone": {
         "description": "Telefoonnummer voor zorgverlenerservice",
@@ -751,7 +751,7 @@
       "rxgroup": {
         "description": "Receptgroepsnummer",
         "label": "RX-groep",
-        "placeholder": "bijv. RXGRP123"
+        "placeholder": "bv. RXGRP123"
       },
       "saving": "Verzekering opslaan...",
       "status": {
@@ -780,7 +780,7 @@
       "websiteUrl": {
         "description": "Ledenportaal of website-URL",
         "label": "Website-URL",
-        "placeholder": "bijv. https://mijn.verzekering.nl"
+        "placeholder": "bv. https://mijn.verzekering.nl"
       }
     },
     "viewModal": {
@@ -797,12 +797,12 @@
     "alternativeName": {
       "description": "Optionele alternatieve of merknaam (2-100 tekens)",
       "label": "Alternatieve naam",
-      "placeholder": "bijv. merknaam of generieke naam"
+      "placeholder": "bv. merknaam of generieke naam"
     },
     "dosage": {
       "description": "Sterkte en hoeveelheid per dosis",
       "label": "Dosering",
-      "placeholder": "bijv. 10 mg, 1 tablet"
+      "placeholder": "bv. 10 mg, 1 tablet"
     },
     "form": {
       "addMedication": "Medicatie toevoegen",
@@ -818,17 +818,17 @@
     "frequency": {
       "description": "Hoe vaak de medicatie wordt ingenomen",
       "label": "Frequentie",
-      "placeholder": "bijv. Eenmaal daags, Tweemaal daags"
+      "placeholder": "bv. Eenmaal daags, Tweemaal daags"
     },
     "indication": {
       "description": "Waarvoor is deze medicatie? Beschrijf de reden of aandoening die wordt behandeld",
       "label": "Indicatie",
-      "placeholder": "bijv. Hoge bloeddruk, Naar behoefte bij pijn, Diabetesbehandeling"
+      "placeholder": "bv. Hoge bloeddruk, Naar behoefte bij pijn, Diabetesbehandeling"
     },
     "medicationName": {
       "description": "Generieke naam of merknaam van de medicatie (min. 2 tekens)",
       "label": "Naam medicatie",
-      "placeholder": "bijv. Lisinopril, Metformine"
+      "placeholder": "bv. Lisinopril, Metformine"
     },
     "medicationType": {
       "description": "Categorie van medicatie",
@@ -903,7 +903,7 @@
       "country": {
         "description": "Land waar de apotheek is gevestigd",
         "label": "Land",
-        "placeholder": "bijv. Nederland, België"
+        "placeholder": "bv. Nederland, België"
       },
       "locationDivider": "Locatiegegevens",
       "name": {
@@ -918,22 +918,22 @@
       "postalCode": {
         "description": "Postcode",
         "label": "Postcode",
-        "placeholder": "bijv. 1012 AB"
+        "placeholder": "bv. 1012 AB"
       },
       "specialtyServices": {
         "description": "Speciale diensten die door deze apotheek worden aangeboden",
         "label": "Specialiteiten",
-        "placeholder": "bijv. Vaccinaties, Bereiding, Medicatiebegeleiding"
+        "placeholder": "bv. Vaccinaties, Bereiding, Medicatiebegeleiding"
       },
       "stateProvince": {
         "description": "Provincie of regio",
         "label": "Provincie",
-        "placeholder": "bijv. Noord-Holland, Limburg"
+        "placeholder": "bv. Noord-Holland, Limburg"
       },
       "storeNumber": {
         "description": "Intern filiaal-identificatienummer",
         "label": "Filiaalnummer",
-        "placeholder": "bijv. 1234, #5678, Filiaal A"
+        "placeholder": "bv. 1234, #5678, Filiaal A"
       },
       "streetAddress": {
         "description": "Fysiek adres",
@@ -1045,7 +1045,7 @@
     "facility": {
       "description": "Waar de ingreep werd of zal worden uitgevoerd",
       "label": "Faciliteit",
-      "placeholder": "bijv. Algemeen Ziekenhuis, Polikliniek"
+      "placeholder": "bv. Algemeen Ziekenhuis, Polikliniek"
     },
     "notes": {
       "description": "Relevante observaties, pre-/postoperatieve instructies of details",
@@ -1059,7 +1059,7 @@
     "procedureCode": {
       "description": "Medische codering (CPT, ICD-10-PCS, enz.)",
       "label": "Ingreepcode",
-      "placeholder": "bijv. CPT-12345, ICD-10-PCS"
+      "placeholder": "bv. CPT-12345, ICD-10-PCS"
     },
     "procedureDate": {
       "description": "Wanneer de ingreep wordt/werd uitgevoerd",
@@ -1069,12 +1069,12 @@
     "procedureDuration": {
       "description": "Hoe lang de ingreep duurde/zal duren",
       "label": "Duur (minuten)",
-      "placeholder": "bijv. 30, 120"
+      "placeholder": "bv. 30, 120"
     },
     "procedureName": {
       "description": "Naam van de medische ingreep",
       "label": "Naam ingreep",
-      "placeholder": "bijv. Appendectomie, MRI-scan, Colonoscopie"
+      "placeholder": "bv. Appendectomie, MRI-scan, Colonoscopie"
     },
     "procedureSetting": {
       "description": "Waar de ingreep plaatsvindt",
@@ -1122,7 +1122,7 @@
       "duration": {
         "description": "Hoe lang duurde deze episode",
         "label": "Duur",
-        "placeholder": "bijv. 2 uur, 30 minuten, hele dag"
+        "placeholder": "bv. 2 uur, 30 minuten, hele dag"
       },
       "impactLevel": {
         "description": "Hoeveel heeft dit uw dagelijkse activiteiten beïnvloed",
@@ -1139,7 +1139,7 @@
       "location": {
         "description": "Waar op uw lichaam voelde u dit",
         "label": "Locatie",
-        "placeholder": "bijv. Linkerslaap, Lage rug, Hele lichaam"
+        "placeholder": "bv. Linkerslaap, Lage rug, Hele lichaam"
       },
       "occurrenceDate": {
         "description": "Datum van deze specifieke episode",
@@ -1190,7 +1190,7 @@
       "category": {
         "description": "Optionele categorie om symptomen te ordenen",
         "label": "Categorie",
-        "placeholder": "bijv. Pijn, Spijsvertering, Luchtwegen"
+        "placeholder": "bv. Pijn, Spijsvertering, Luchtwegen"
       },
       "firstOccurrenceDate": {
         "description": "Wanneer u dit symptoom voor het eerst opmerkte",
@@ -1224,7 +1224,7 @@
       "symptomName": {
         "description": "Naam van het symptoom dat u wilt bijhouden",
         "label": "Naam symptoom",
-        "placeholder": "bijv. Migraineaanval, Chronische rugpijn"
+        "placeholder": "bv. Migraineaanval, Chronische rugpijn"
       },
       "typicalTriggers": {
         "description": "Wat dit symptoom doorgaans veroorzaakt",
@@ -1248,7 +1248,7 @@
     "amount": {
       "description": "Hoeveelheid of intensiteit per sessie",
       "label": "Hoeveelheid",
-      "placeholder": "bijv. 500 mg, 2 tabletten, 30 minuten"
+      "placeholder": "bv. 500 mg, 2 tabletten, 30 minuten"
     },
     "endDate": {
       "description": "Verwachte of werkelijke voltooiingsdatum",
@@ -1307,7 +1307,7 @@
     "treatmentName": {
       "description": "Specifieke naam of beschrijving van de behandeling",
       "label": "Naam behandeling",
-      "placeholder": "bijv. Fysiotherapie voor lage rugpijn"
+      "placeholder": "bv. Fysiotherapie voor lage rugpijn"
     },
     "treatmentStatus": {
       "description": "Huidige fase in het behandeltraject",
@@ -1393,7 +1393,7 @@
         "reason": {
           "description": "Primair doel van dit medisch bezoek",
           "label": "Reden voor bezoek",
-          "placeholder": "bijv. Jaarlijkse controle, Vervolgafspraak, Symptoombespreking"
+          "placeholder": "bv. Jaarlijkse controle, Vervolgafspraak, Symptoombespreking"
         },
         "relatedCondition": {
           "description": "Koppel dit bezoek aan een specifieke aandoening indien van toepassing",

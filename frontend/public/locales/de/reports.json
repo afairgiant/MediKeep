@@ -15,7 +15,7 @@
       "title": "Berichtkonfiguration"
     },
     "icon": "",
-    "loading": "Berichte werden geladen...",
+    "loading": "Berichtgenerator wird geladen...",
     "noData": {
       "description": "Fügen Sie zuerst medizinische Datensätze hinzu, um den Berichtgenerator zu verwenden.",
       "title": "Keine medizinischen Daten verfügbar"
@@ -106,9 +106,9 @@
       "title": "Verfügbare Daten"
     },
     "buttons": {
-      "bulkExport": "{{count}} Typen als ZIP exportieren",
-      "bulkExport_one": "{{count}} Typ als ZIP exportieren",
-      "bulkExport_other": "{{count}} Typen als ZIP exportieren",
+      "bulkExport": "Massenexport {{count}} Typen als ZIP",
+      "bulkExport_one": "Massenexport {{count}} Typ als ZIP",
+      "bulkExport_other": "Massenexport {{count}} Typen als ZIP",
       "creatingZip": "ZIP wird erstellt...",
       "exportAs": "{{scope}} als {{format}} exportieren",
       "exporting": "Wird exportiert...",
@@ -178,7 +178,7 @@
         "title": "JSON-Format:"
       },
       "pdf": {
-        "description": "Lesbares Dokumentformat, perfekt zum Drucken oder Teilen mit Gesundheitsdienstleistern.",
+        "description": "Menschenlesbares Dokumentformat, perfekt zum Drucken oder Teilen mit Gesundheitsdienstleistern.",
         "title": "PDF-Format:"
       },
       "title": "Exportinformationen"
@@ -186,7 +186,7 @@
     "loading": "Exportoptionen werden geladen...",
     "scopes": {
       "all": "Alle Datensätze",
-      "encounters": "Begegnungen"
+      "encounters": "Patientenkontakte"
     },
     "success": {
       "bulkExportComplete": "Massenexport erfolgreich abgeschlossen! Ihre ZIP-Datei mit {{count}} Datentypen wurde heruntergeladen.",

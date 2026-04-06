@@ -22,7 +22,7 @@
     "conditionsCount_other": "",
     "customPermissions": "Anpassade behörigheter tillämpade",
     "expires": "Går ut: {{date}}",
-    "familyMembersSharedInfo": "{{count}} familjemedlemmar delade med dig av andra.",
+    "familyMembersSharedInfo": "{{count}} familjemedlemmar har delats med dig av andra.",
     "familyMembersSharedInfo_one": "",
     "familyMembersSharedInfo_other": "",
     "familySharesCount": "Familjehistorikdelningar ({{count}})",
@@ -41,7 +41,7 @@
     "patientSharesCount": "Patientdelningar ({{count}})",
     "patientSharesCount_one": "",
     "patientSharesCount_other": "",
-    "patientsSharedInfo": "{{count}} patienter delade med dig av andra.",
+    "patientsSharedInfo": "{{count}} patienter har delats med dig av andra.",
     "patientsSharedInfo_one": "",
     "patientsSharedInfo_other": "",
     "pendingInvitationsCount": "Väntande inbjudningar ({{count}})",
@@ -93,7 +93,7 @@
     "title": "Inbjudningssvar"
   },
   "sharing": {
-    "born": "Född: {{date}} • Sekretess: {{level}}",
+    "born": "Född: {{date}} • Integritet: {{level}}",
     "cancelInvitation": "Avbryt inbjudan",
     "currentlySharedWith": "Delas för närvarande med:",
     "editShare": "Redigera delning",

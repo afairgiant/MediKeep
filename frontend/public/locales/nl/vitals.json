@@ -121,7 +121,7 @@
   },
   "noDataAvailable": "Geen gegevens over vitale functies beschikbaar",
   "noPatientSelected": "Geen patiënt geselecteerd",
-  "recordVitalsPrompt": "Registreer uw eerste meting van vitale functies om gezondheidsmetingen bij te houden.",
+  "recordVitalsPrompt": "Registreer uw eerste meting van vitale functies om gezondheidsgegevens bij te houden.",
   "secondary": "Secundair",
   "selectPatientPrompt": "Selecteer een patiënt om vitale functies te bekijken en te beheren.",
   "stats": {

@@ -26,7 +26,7 @@
       "title": "Documentación"
     },
     "issues": {
-      "description": "¿Encontró un error o tiene una solicitud de función? Abra un issue en GitHub.",
+      "description": "¿Encontró un error o tiene una solicitud de función? Abra un problema en GitHub.",
       "title": "Reportar un problema"
     }
   },
@@ -137,8 +137,8 @@
     "connectionRequired": "Conexión requerida",
     "defaultLocation": "Ubicación de almacenamiento predeterminada",
     "filesCount": "{{count}} archivos",
-    "filesCount_one": "{{count}} archivo",
-    "filesCount_other": "{{count}} archivos",
+    "filesCount_one": "",
+    "filesCount_other": "",
     "localDescription": "Los archivos se almacenan directamente en este servidor. Ideal para configuraciones simples sin servicios externos.",
     "localStorage": "Almacenamiento local",
     "noUsageData": "No hay datos de uso de almacenamiento disponibles",

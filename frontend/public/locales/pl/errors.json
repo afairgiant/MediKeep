@@ -1,28 +1,28 @@
 {
   "alert": {
     "errorCount": "{{count}} Błąd",
-    "errorCount_one": "{{count}} Błąd",
+    "errorCount_one": "",
     "errorCount_other": "{{count}} Błędów",
-    "formError": "Błąd Formularza",
+    "formError": "Błąd formularza",
     "highPriority": "{{count}} wysokiej ważności",
-    "highPriority_one": "{{count}} wysokiej ważności",
-    "highPriority_other": "{{count}} wysokiej ważności",
+    "highPriority_one": "",
+    "highPriority_other": "",
     "suggestions": "Sugestie:"
   },
   "boundary": {
     "componentLabel": "Komponent:",
     "errorDetails": "Szczegóły błędu",
-    "errorIdLabel": "ID Błędu:",
+    "errorIdLabel": "ID błędu:",
     "errorLogged": "Błąd został automatycznie zarejestrowany do dalszej analizy.",
-    "reloadPage": "Przeładuj Stronę",
+    "reloadPage": "Przeładuj stronę",
     "somethingWentWrong": "Coś poszło nie tak",
-    "tryAgain": "Spróbuj Ponownie",
+    "tryAgain": "Spróbuj ponownie",
     "unexpectedError": "Przepraszamy, ale wystąpiło coś nieoczekiwanego w systemie dokumentacji medycznej."
   },
   "file": {
     "deleteFailed": "Nie udało się usunąć pliku. Proszę spróbować ponownie.",
     "downloadFailed": "Nie udało się pobrać pliku. Proszę spróbować ponownie.",
-    "notFound": "Plik nie znaleziony.",
+    "notFound": "Nie znaleziono pliku.",
     "viewFailed": "Nie udało się otworzyć pliku do podglądu. Proszę spróbować ponownie."
   },
   "form": {
@@ -61,7 +61,7 @@
     "configIncomplete": "Konfiguracja Paperless jest niekompletna. Proszę sprawdzić ustawienia.",
     "connectionFailed": "Nie można połączyć się z usługą Paperless. Proszę sprawdzić konfigurację.",
     "duplicateDocument": "Ten dokument już istnieje w systemie Paperless. Identyczne dokumenty nie mogą być przesyłane dwukrotnie.",
-    "notEnabled": "Integracja z Paperless nie jest włączona. Proszę włączyć ją w Ustawieniach.",
+    "notEnabled": "Integracja z Paperless nie jest włączona. Proszę włączyć ją w ustawieniach.",
     "taskFailed": "Przesyłanie dokumentu do systemu Paperless nie powiodło się. Proszę spróbować ponownie lub skontaktować się z pomocą techniczną.",
     "taskTimeout": "Przetwarzanie dokumentu przekroczyło limit czasu. Dokument może być nadal przetwarzany w systemie Paperless.",
     "unavailable": "Usługa zarządzania dokumentami jest obecnie niedostępna.",

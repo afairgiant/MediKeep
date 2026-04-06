@@ -49,7 +49,7 @@
         "icd10Code": "Kod Międzynarodowej Klasyfikacji Chorób",
         "notes": "Dodatkowe informacje o tym schorzeniu",
         "onsetDate": "Kiedy schorzenie się rozpoczęło",
-        "practitioner": "Powiązany pracownik ochrony zdrowotnej",
+        "practitioner": "Powiązany pracownik ochrony zdrowia",
         "snomedCode": "Kod SNOMED CT",
         "tags": "Dodaj tagi, aby kategoryzować i organizować schorzenia"
       },
@@ -117,7 +117,7 @@
     "page": {
       "loading": "Ładowanie kontaktów alarmowych...",
       "noContacts": "Nie znaleziono kontaktów alarmowych",
-      "noContactsDescription": "Ważne jest posiadanie kontaktów alarmowych dostępnych w przypadku sytuacji medycznych zagrażających życiu."
+      "noContactsDescription": "Ważne jest posiadanie kontaktów alarmowych dostępnych w przypadku nagłych sytuacji medycznych."
     },
     "table": {
       "primary": "Podstawowy"
@@ -323,7 +323,7 @@
       "manufacturerPlaceholder": "Wprowadź producenta",
       "ndcNumberDesc": "Krajowy kod leków",
       "ndcNumberPlaceholder": "np. 12345-6789-01",
-      "practitionerDesc": "Pracownik ochrony zdrowotnej, który podał szczepionkę",
+      "practitionerDesc": "Pracownik ochrony zdrowia, który podał szczepionkę",
       "practitionerPlaceholder": "Wybierz pracownika podającego szczepionkę",
       "routeID": "Śródskórne (ID)",
       "routeIM": "Domięśniowe (IM)",
@@ -474,7 +474,7 @@
     "testNamePlaceholder": "Badania endokrynologiczne krwi itp.",
     "unsavedDataInstructions": "Kliknij \"Dodaj składniki\" w zakładce Podgląd, aby zapisać przeanalizowane dane przed zamknięciem.",
     "unsavedDataMessage_one": "Masz {{count}} przeanalizowany składnik testu, który nie został jeszcze dodany. Jeśli zamkniesz teraz, utracisz te przeanalizowane dane.",
-    "unsavedDataMessage_other": "Masz {{count}} przeanalizowanych składników testu, które nie zostały jeszcze dodane. Jeśli zamkniesz teraz, utracisz te przeanalizowane dane.",
+    "unsavedDataMessage_other": "Masz {{count}} przeanalizowanych składników testów, które nie zostały jeszcze dodane. Jeśli zamkniesz teraz, utracisz te przeanalizowane dane.",
     "unsavedDataWarning": "Niezapisane przeanalizowane dane"
   },
   "medications": {
@@ -731,24 +731,24 @@
       "addNew": "Dodaj nowego lekarza"
     },
     "card": {
-      "subtitle": "Pracownik ochrony zdrowotnej"
+      "subtitle": "Pracownik ochrony zdrowia"
     },
     "createPracticeError": "Nie udało się utworzyć praktyki. Spróbuj ponownie.",
     "editPracticeError": "Nie udało się załadować praktyki do edycji",
     "empty": {
       "noData": "Kliknij \"Dodaj nowego lekarza\", aby rozpocząć.",
-      "title": "Nie znaleziono pracowników ochrony zdrowotnej"
+      "title": "Nie znaleziono pracowników ochrony zdrowia"
     },
     "errors": {
       "generic": "Wystąpił błąd. Spróbuj ponownie.",
-      "loadFailed": "Nie udało się załadować pracowników ochrony zdrowotnej. Spróbuj ponownie."
+      "loadFailed": "Nie udało się załadować pracowników ochrony zdrowia. Spróbuj ponownie."
     },
     "form": {
       "addTitle": "Dodaj nowego lekarza",
       "editTitle": "Edytuj lekarza"
     },
     "groupByPractice": "Grupuj według praktyki",
-    "loading": "Ładowanie pracowników ochrony zdrowotnej...",
+    "loading": "Ładowanie pracowników ochrony zdrowia...",
     "practices": {
       "addNew": "Dodaj praktykę",
       "cannotDelete": "Nie można usunąć - ma przypisanych pracowników",
@@ -795,7 +795,7 @@
       "anesthesiaNotesDesc": "Dodatkowe informacje o znieczuleniu",
       "anesthesiaNotesPlaceholder": "Wprowadź szczegóły i notatki dotyczące znieczulenia",
       "anesthesiaTypeDesc": "Typ zastosowanego znieczulenia",
-      "anesthesiaTypePlaceholder": "np. Ogólne, Lokalne, Regionalne",
+      "anesthesiaTypePlaceholder": "np. Ogólne, Miejscowe, Regionalne",
       "clinicalNotesDesc": "Dodatkowe informacje o tej procedurze",
       "clinicalNotesPlaceholder": "Wprowadź notatki kliniczne, obserwacje lub dodatkowe szczegóły",
       "complicationsDesc": "Wszelkie problemy lub powikłania, które wystąpiły",
@@ -812,7 +812,7 @@
       "outcomeInconclusive": "Niekonkluzywny",
       "outcomePlaceholder": "Wybierz wynik",
       "outcomeSuccessful": "Pomyślny",
-      "practitionerDesc": "Pracownik ochrony zdrowotnej przeprowadzający procedurę",
+      "practitionerDesc": "Pracownik ochrony zdrowia przeprowadzający procedurę",
       "procedureCodeDesc": "Kod medyczny do celów rozliczeniowych",
       "procedureCodePlaceholder": "np. kod CPT",
       "procedureDate": "Data procedury",
@@ -1158,7 +1158,7 @@
       "linkingPartialFailureMessage": "",
       "notesDesc": "Dodatkowe informacje o tym leczeniu",
       "notesPlaceholder": "Wprowadź notatki dotyczące leczenia, obserwacje lub dodatkowe szczegóły",
-      "practitionerDesc": "Pracownik ochrony zdrowotnej przeprowadzający leczenie",
+      "practitionerDesc": "Pracownik ochrony zdrowia przeprowadzający leczenie",
       "relatedConditionDesc": "Powiąż to leczenie ze schorzeniem",
       "savingTreatment": "Zapisywanie leczenia...",
       "selectCondition": "Wybierz schorzenie",

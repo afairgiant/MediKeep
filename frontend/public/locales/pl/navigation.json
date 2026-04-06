@@ -83,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Panel administratora",
+      "allergies": "Alergie",
+      "backupManagement": "Zarządzanie kopiami zapasowymi",
+      "conditions": "Schorzenia",
       "customReports": "Raporty niestandardowe",
+      "dataModels": "Modele danych",
+      "emergencyContacts": "Kontakty alarmowe",
       "exportRecords": "Eksportuj dokumentację",
+      "familyHistory": "Historia rodzinna",
+      "immunizations": "Szczepienia",
+      "injuries": "Urazy",
+      "insurance": "Ubezpieczenie",
+      "labResults": "Wyniki badań",
       "language": "Język",
+      "medicalEquipment": "Sprzęt medyczny",
+      "medications": "Leki",
       "patientInfo": "Informacje o pacjencie",
+      "pharmacies": "Apteki",
+      "practitioners": "Lekarze",
+      "procedures": "Procedury",
+      "settings": "Ustawienia",
+      "symptoms": "Objawy",
+      "systemHealth": "Stan systemu",
       "tagManagement": "Zarządzanie tagami",
       "theme": "Motyw",
-      "visitHistory": "Historia wizyt"
+      "treatments": "Leczenie",
+      "visitHistory": "Historia wizyt",
+      "vitalSigns": "Podstawowe parametry życiowe"
     },
     "sections": {
+      "administration": "Administracja",
       "careAndTreatment": "Opieka i leczenie",
       "misc": "Różne",
       "tools": "Narzędzia"

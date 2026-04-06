@@ -1,15 +1,321 @@
 {
-  "batch_id": "msgbatch_01PvYYKCLuiJ49DFieWFDSw8",
-  "created_at": "2026-04-06T17:49:56.543919",
+  "batch_id": "msgbatch_01EKX3MyDJtkeT2dqGiXxXXn",
+  "created_at": "2026-04-06T18:21:26.720701",
   "languages": [
+    "de",
+    "es",
+    "fr",
+    "it",
+    "nl",
     "pl",
     "pt",
     "ru",
-    "sv"
+    "sv",
+    "th"
   ],
   "mode": "review",
   "locales_dir": "frontend\\public\\locales",
   "request_map": {
+    "de__admin": {
+      "lang": "de",
+      "file": "admin.json"
+    },
+    "de__auth": {
+      "lang": "de",
+      "file": "auth.json"
+    },
+    "de__common": {
+      "lang": "de",
+      "file": "common.json"
+    },
+    "de__documents": {
+      "lang": "de",
+      "file": "documents.json"
+    },
+    "de__errors": {
+      "lang": "de",
+      "file": "errors.json"
+    },
+    "de__invitations": {
+      "lang": "de",
+      "file": "invitations.json"
+    },
+    "de__labresults": {
+      "lang": "de",
+      "file": "labresults.json"
+    },
+    "de__medical": {
+      "lang": "de",
+      "file": "medical.json"
+    },
+    "de__navigation": {
+      "lang": "de",
+      "file": "navigation.json"
+    },
+    "de__notifications": {
+      "lang": "de",
+      "file": "notifications.json"
+    },
+    "de__reportPdf": {
+      "lang": "de",
+      "file": "reportPdf.json"
+    },
+    "de__reports": {
+      "lang": "de",
+      "file": "reports.json"
+    },
+    "de__settings": {
+      "lang": "de",
+      "file": "settings.json"
+    },
+    "de__shared": {
+      "lang": "de",
+      "file": "shared.json"
+    },
+    "de__vitals": {
+      "lang": "de",
+      "file": "vitals.json"
+    },
+    "es__admin": {
+      "lang": "es",
+      "file": "admin.json"
+    },
+    "es__auth": {
+      "lang": "es",
+      "file": "auth.json"
+    },
+    "es__common": {
+      "lang": "es",
+      "file": "common.json"
+    },
+    "es__documents": {
+      "lang": "es",
+      "file": "documents.json"
+    },
+    "es__errors": {
+      "lang": "es",
+      "file": "errors.json"
+    },
+    "es__invitations": {
+      "lang": "es",
+      "file": "invitations.json"
+    },
+    "es__labresults": {
+      "lang": "es",
+      "file": "labresults.json"
+    },
+    "es__medical": {
+      "lang": "es",
+      "file": "medical.json"
+    },
+    "es__navigation": {
+      "lang": "es",
+      "file": "navigation.json"
+    },
+    "es__notifications": {
+      "lang": "es",
+      "file": "notifications.json"
+    },
+    "es__reportPdf": {
+      "lang": "es",
+      "file": "reportPdf.json"
+    },
+    "es__reports": {
+      "lang": "es",
+      "file": "reports.json"
+    },
+    "es__settings": {
+      "lang": "es",
+      "file": "settings.json"
+    },
+    "es__shared": {
+      "lang": "es",
+      "file": "shared.json"
+    },
+    "es__vitals": {
+      "lang": "es",
+      "file": "vitals.json"
+    },
+    "fr__admin": {
+      "lang": "fr",
+      "file": "admin.json"
+    },
+    "fr__auth": {
+      "lang": "fr",
+      "file": "auth.json"
+    },
+    "fr__common": {
+      "lang": "fr",
+      "file": "common.json"
+    },
+    "fr__documents": {
+      "lang": "fr",
+      "file": "documents.json"
+    },
+    "fr__errors": {
+      "lang": "fr",
+      "file": "errors.json"
+    },
+    "fr__invitations": {
+      "lang": "fr",
+      "file": "invitations.json"
+    },
+    "fr__labresults": {
+      "lang": "fr",
+      "file": "labresults.json"
+    },
+    "fr__medical": {
+      "lang": "fr",
+      "file": "medical.json"
+    },
+    "fr__navigation": {
+      "lang": "fr",
+      "file": "navigation.json"
+    },
+    "fr__notifications": {
+      "lang": "fr",
+      "file": "notifications.json"
+    },
+    "fr__reportPdf": {
+      "lang": "fr",
+      "file": "reportPdf.json"
+    },
+    "fr__reports": {
+      "lang": "fr",
+      "file": "reports.json"
+    },
+    "fr__settings": {
+      "lang": "fr",
+      "file": "settings.json"
+    },
+    "fr__shared": {
+      "lang": "fr",
+      "file": "shared.json"
+    },
+    "fr__vitals": {
+      "lang": "fr",
+      "file": "vitals.json"
+    },
+    "it__admin": {
+      "lang": "it",
+      "file": "admin.json"
+    },
+    "it__auth": {
+      "lang": "it",
+      "file": "auth.json"
+    },
+    "it__common": {
+      "lang": "it",
+      "file": "common.json"
+    },
+    "it__documents": {
+      "lang": "it",
+      "file": "documents.json"
+    },
+    "it__errors": {
+      "lang": "it",
+      "file": "errors.json"
+    },
+    "it__invitations": {
+      "lang": "it",
+      "file": "invitations.json"
+    },
+    "it__labresults": {
+      "lang": "it",
+      "file": "labresults.json"
+    },
+    "it__medical": {
+      "lang": "it",
+      "file": "medical.json"
+    },
+    "it__navigation": {
+      "lang": "it",
+      "file": "navigation.json"
+    },
+    "it__notifications": {
+      "lang": "it",
+      "file": "notifications.json"
+    },
+    "it__reportPdf": {
+      "lang": "it",
+      "file": "reportPdf.json"
+    },
+    "it__reports": {
+      "lang": "it",
+      "file": "reports.json"
+    },
+    "it__settings": {
+      "lang": "it",
+      "file": "settings.json"
+    },
+    "it__shared": {
+      "lang": "it",
+      "file": "shared.json"
+    },
+    "it__vitals": {
+      "lang": "it",
+      "file": "vitals.json"
+    },
+    "nl__admin": {
+      "lang": "nl",
+      "file": "admin.json"
+    },
+    "nl__auth": {
+      "lang": "nl",
+      "file": "auth.json"
+    },
+    "nl__common": {
+      "lang": "nl",
+      "file": "common.json"
+    },
+    "nl__documents": {
+      "lang": "nl",
+      "file": "documents.json"
+    },
+    "nl__errors": {
+      "lang": "nl",
+      "file": "errors.json"
+    },
+    "nl__invitations": {
+      "lang": "nl",
+      "file": "invitations.json"
+    },
+    "nl__labresults": {
+      "lang": "nl",
+      "file": "labresults.json"
+    },
+    "nl__medical": {
+      "lang": "nl",
+      "file": "medical.json"
+    },
+    "nl__navigation": {
+      "lang": "nl",
+      "file": "navigation.json"
+    },
+    "nl__notifications": {
+      "lang": "nl",
+      "file": "notifications.json"
+    },
+    "nl__reportPdf": {
+      "lang": "nl",
+      "file": "reportPdf.json"
+    },
+    "nl__reports": {
+      "lang": "nl",
+      "file": "reports.json"
+    },
+    "nl__settings": {
+      "lang": "nl",
+      "file": "settings.json"
+    },
+    "nl__shared": {
+      "lang": "nl",
+      "file": "shared.json"
+    },
+    "nl__vitals": {
+      "lang": "nl",
+      "file": "vitals.json"
+    },
     "pl__admin": {
       "lang": "pl",
       "file": "admin.json"
@@ -249,8 +555,68 @@
     "sv__vitals": {
       "lang": "sv",
       "file": "vitals.json"
+    },
+    "th__admin": {
+      "lang": "th",
+      "file": "admin.json"
+    },
+    "th__auth": {
+      "lang": "th",
+      "file": "auth.json"
+    },
+    "th__common": {
+      "lang": "th",
+      "file": "common.json"
+    },
+    "th__documents": {
+      "lang": "th",
+      "file": "documents.json"
+    },
+    "th__errors": {
+      "lang": "th",
+      "file": "errors.json"
+    },
+    "th__invitations": {
+      "lang": "th",
+      "file": "invitations.json"
+    },
+    "th__labresults": {
+      "lang": "th",
+      "file": "labresults.json"
+    },
+    "th__medical": {
+      "lang": "th",
+      "file": "medical.json"
+    },
+    "th__navigation": {
+      "lang": "th",
+      "file": "navigation.json"
+    },
+    "th__notifications": {
+      "lang": "th",
+      "file": "notifications.json"
+    },
+    "th__reportPdf": {
+      "lang": "th",
+      "file": "reportPdf.json"
+    },
+    "th__reports": {
+      "lang": "th",
+      "file": "reports.json"
+    },
+    "th__settings": {
+      "lang": "th",
+      "file": "settings.json"
+    },
+    "th__shared": {
+      "lang": "th",
+      "file": "shared.json"
+    },
+    "th__vitals": {
+      "lang": "th",
+      "file": "vitals.json"
     }
   },
   "status": "collected",
-  "collected_at": "2026-04-06T18:14:37.857576"
+  "collected_at": "2026-04-06T18:31:20.783401"
 }

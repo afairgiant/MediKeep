@@ -38,7 +38,7 @@
       },
       "smtpHost": {
         "description": "SMTP-сервер вашего почтового провайдера",
-        "label": "Сервер SMTP",
+        "label": "SMTP-сервер",
         "placeholder": "smtp.gmail.com"
       },
       "smtpPassword": {
@@ -87,7 +87,7 @@
       "name": {
         "description": "Понятное название для идентификации канала",
         "label": "Название канала",
-        "placeholder": "напр., Мой сервер Discord"
+        "placeholder": "например, Мой сервер Discord"
       },
       "title": "Данные канала",
       "type": {
@@ -398,7 +398,7 @@
     "nameTooLong": "Название не может превышать 100 символов",
     "serverUrlInvalid": "Неверный формат URL",
     "serverUrlRequired": "URL сервера обязателен",
-    "smtpHostRequired": "Сервер SMTP обязателен",
+    "smtpHostRequired": "SMTP-сервер обязателен",
     "smtpPasswordRequired": "Пароль SMTP обязателен",
     "smtpPortInvalid": "Порт должен быть от 1 до 65535",
     "smtpPortRequired": "Порт SMTP обязателен",

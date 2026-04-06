@@ -204,7 +204,7 @@
     "editTemplate": "Редактировать шаблон",
     "loadTemplate": "Загрузить шаблон",
     "manageTemplates": "Управление шаблонами",
-    "moreTemplates": "... и ещё {{count}} шаблон",
+    "moreTemplates": "... и ещё {{count}} шаблонов",
     "moreTemplates_one": "... и ещё {{count}} шаблон",
     "moreTemplates_other": "... и ещё {{count}} шаблонов",
     "noSaved": "Нет сохранённых шаблонов",

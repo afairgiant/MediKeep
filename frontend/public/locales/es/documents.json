@@ -15,10 +15,10 @@
   },
   "fileCount": {
     "attached": "{{count}} adjuntos",
-    "attached_one": "{{count}} adjunto",
-    "attached_other": "{{count}} adjuntos",
+    "attached_one": "",
+    "attached_other": "",
     "fileCount": "{{count}} archivo",
-    "fileCount_one": "{{count}} archivo",
+    "fileCount_one": "",
     "fileCount_other": "{{count}} archivos",
     "noFiles": "Sin archivos"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "DETALLES DEL ARCHIVO",
     "loading": "Cargando archivos...",
     "markedCount": "{{count}} archivo marcado para eliminación",
-    "markedCount_one": "{{count}} archivo marcado para eliminación",
+    "markedCount_one": "",
     "markedCount_other": "{{count}} archivos marcados para eliminación",
     "markedForDeletion": "Marcado para eliminación",
     "noFiles": "Sin archivos adjuntos",
@@ -38,21 +38,21 @@
     "statusProcessing": "Procesando"
   },
   "fileUpload": {
-    "accepted": "Aceptados: {{types}} • Tamaño máximo: {{size}} MB",
+    "accepted": "Aceptados: {{types}} • Tamaño máximo: {{size}}MB",
     "chooseFiles": "Elegir archivos",
     "dragOrClick": "Arrastre archivos aquí o haga clic para seleccionar",
     "remove": "Eliminar",
     "selectedFiles": "Archivos seleccionados ({{count}})",
-    "selectedFiles_one": "Archivo seleccionado ({{count}})",
-    "selectedFiles_other": "Archivos seleccionados ({{count}})"
+    "selectedFiles_one": "",
+    "selectedFiles_other": ""
   },
   "linkPaperless": {
     "from": "De: {{name}}",
     "infoText": "Busque documentos ya existentes en Paperless para vincularlos a este {{entityType}}. ¡No es necesario cargar archivos!",
     "linkDocument": "Vincular documento",
     "moreTags": "+{{count}} más",
-    "moreTags_one": "+{{count}} más",
-    "moreTags_other": "+{{count}} más",
+    "moreTags_one": "",
+    "moreTags_other": "",
     "noDocumentsFound": "No se encontraron documentos",
     "searchDocuments": "Buscar documentos",
     "searchPlaceholder": "Buscar por título, contenido o etiquetas...",
@@ -104,29 +104,29 @@
     "viewMode": "Modo de vista"
   },
   "storage": {
-    "backendLabel": "Almacenamiento:",
+    "backendLabel": "Sistema de almacenamiento:",
     "connectedBadge": "Conectado",
     "local": "Almacenamiento local",
     "paperless": "Paperless-ngx",
     "papra": "Papra",
-    "selectBackend": "Seleccionar almacenamiento"
+    "selectBackend": "Seleccionar sistema de almacenamiento"
   },
   "upload": {
     "completed": "{{count}} completados",
-    "completed_one": "{{count}} completado",
-    "completed_other": "{{count}} completados",
+    "completed_one": "",
+    "completed_other": "",
     "dragOrClick": "Arrastre archivos aquí o haga clic para seleccionar",
     "failed": "{{count}} fallidos",
-    "failed_one": "{{count}} fallido",
-    "failed_other": "{{count}} fallidos",
+    "failed_one": "",
+    "failed_other": "",
     "filesProgress": "{{completed}}/{{total}} archivos",
-    "maxSize": "Tamaño máximo de archivo: {{size}} MB",
+    "maxSize": "Tamaño máximo de archivo: {{size}}MB",
     "overallProgress": "Progreso general",
     "percentComplete": "{{percent}}% completado",
     "remaining": "{{time}} restante",
     "retryFailed": "Reintentar fallidos",
     "uploading": "{{count}} cargando",
-    "uploading_one": "{{count}} cargando",
-    "uploading_other": "{{count}} cargando"
+    "uploading_one": "",
+    "uploading_other": ""
   }
 }

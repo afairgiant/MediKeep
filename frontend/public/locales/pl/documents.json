@@ -15,10 +15,10 @@
   },
   "fileCount": {
     "attached": "{{count}} załączonych",
-    "attached_one": "{{count}} załączony",
-    "attached_other": "{{count}} załączonych",
+    "attached_one": "",
+    "attached_other": "",
     "fileCount": "{{count}} plik",
-    "fileCount_one": "{{count}} plik",
+    "fileCount_one": "",
     "fileCount_other": "{{count}} plików",
     "noFiles": "Brak plików"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "SZCZEGÓŁY PLIKU",
     "loading": "Ładowanie plików...",
     "markedCount": "{{count}} plik oznaczony do usunięcia",
-    "markedCount_one": "{{count}} plik oznaczony do usunięcia",
+    "markedCount_one": "",
     "markedCount_other": "{{count}} plików oznaczonych do usunięcia",
     "markedForDeletion": "Oznaczony do usunięcia",
     "noFiles": "Brak załączonych plików",
@@ -43,16 +43,16 @@
     "dragOrClick": "Przeciągnij pliki tutaj lub kliknij, aby wybrać",
     "remove": "Usuń",
     "selectedFiles": "Wybrane pliki ({{count}})",
-    "selectedFiles_one": "Wybrany plik ({{count}})",
-    "selectedFiles_other": "Wybrane pliki ({{count}})"
+    "selectedFiles_one": "",
+    "selectedFiles_other": ""
   },
   "linkPaperless": {
     "from": "Od: {{name}}",
     "infoText": "Wyszukaj dokumenty już znajdujące się w Paperless, aby połączyć je z tym {{entityType}}. Nie ma potrzeby przesyłania plików!",
     "linkDocument": "Połącz dokument",
     "moreTags": "+{{count}} więcej",
-    "moreTags_one": "+{{count}} więcej",
-    "moreTags_other": "+{{count}} więcej",
+    "moreTags_one": "",
+    "moreTags_other": "",
     "noDocumentsFound": "Nie znaleziono dokumentów",
     "searchDocuments": "Wyszukaj dokumenty",
     "searchPlaceholder": "Wyszukaj po tytule, treści lub tagach...",
@@ -113,12 +113,12 @@
   },
   "upload": {
     "completed": "{{count}} zakończonych",
-    "completed_one": "{{count}} zakończony",
-    "completed_other": "{{count}} zakończonych",
+    "completed_one": "",
+    "completed_other": "",
     "dragOrClick": "Przeciągnij pliki tutaj lub kliknij, aby wybrać",
     "failed": "{{count}} nieudanych",
-    "failed_one": "{{count}} nieudany",
-    "failed_other": "{{count}} nieudanych",
+    "failed_one": "",
+    "failed_other": "",
     "filesProgress": "{{completed}}/{{total}} plików",
     "maxSize": "Maksymalny rozmiar pliku: {{size}}MB",
     "overallProgress": "Całkowity postęp",
@@ -126,7 +126,7 @@
     "remaining": "{{time}} pozostało",
     "retryFailed": "Ponów nieudane",
     "uploading": "{{count}} przesyłanych",
-    "uploading_one": "{{count}} przesyłany",
-    "uploading_other": "{{count}} przesyłanych"
+    "uploading_one": "",
+    "uploading_other": ""
   }
 }

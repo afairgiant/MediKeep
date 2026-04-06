@@ -31,25 +31,25 @@
     }
   },
   "paperlessConnection": {
-    "apiTokenHelp": "Ваш API токен paperless-ngx. Найдите его в панели администратора Paperless в разделе Настройки.",
-    "apiTokenLabel": "API токен",
-    "apiTokenRecommended": "API токен (рекомендуется)",
+    "apiTokenHelp": "Ваш API-токен paperless-ngx. Найдите его в панели администратора Paperless в разделе Настройки.",
+    "apiTokenLabel": "API-токен",
+    "apiTokenRecommended": "API-токен (рекомендуется)",
     "authMethod": "Метод аутентификации",
     "connected": "Подключено к Paperless-ngx",
     "connectionError": "Не удалось подключиться. Проверьте URL и учётные данные.",
-    "methodInfo": "API токены являются рекомендуемым методом аутентификации для лучшей безопасности.",
+    "methodInfo": "API-токены являются рекомендуемым методом аутентификации для лучшей безопасности.",
     "passwordHelp": "Ваш пароль paperless-ngx.",
     "passwordLabel": "Пароль",
     "sessionStorage": "Использование сессионного хранилища для токена",
     "title": "Подключение к Paperless-ngx",
-    "urlHelp": "URL вашего экземпляра Paperless-ngx (например, https://paperless.example.com)",
+    "urlHelp": "URL вашего экземпляра Paperless-ngx (напр., https://paperless.example.com)",
     "urlLabel": "URL сервера",
     "usernameHelp": "Ваше имя пользователя paperless-ngx.",
     "usernameLabel": "Имя пользователя",
     "usernamePassword": "Имя пользователя и пароль"
   },
   "papra": {
-    "apiTokenPlaceholder": "Введите ваш API токен Papra",
+    "apiTokenPlaceholder": "Введите ваш API-токен Papra",
     "connectionFailed": "Подключение не удалось",
     "connectionSuccess": "Подключение успешно",
     "description": "Подключитесь к вашему экземпляру Papra для управления документами",
@@ -71,8 +71,8 @@
       "title": "Тайм-аут сессии"
     },
     "unitSystem": {
-      "description": "Выберите, отображать ли измерения в британской системе (фунты, футы, °F) или метрической системе (килограммы, сантиметры, °C)",
-      "imperial": "Британская (фунты, футы, °F)",
+      "description": "Выберите, отображать ли измерения в имперской системе (фунты, футы, °F) или метрической системе (килограммы, сантиметры, °C)",
+      "imperial": "Имперская (фунты, футы, °F)",
       "metric": "Метрическая (кг, см, °C)",
       "title": "Система единиц"
     }

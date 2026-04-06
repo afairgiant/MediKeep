@@ -1,0 +1,132 @@
+{
+  "errorBoundary": {
+    "browserCompat": "ปัญหาความเข้ากันได้ของเบราว์เซอร์",
+    "chartError": "ข้อผิดพลาดในการแสดงแผนภูมิ",
+    "chartErrorDescription": "ไม่สามารถแสดงแผนภูมิได้ กรุณาลองรีเฟรชหน้าเว็บ",
+    "documentError": "ข้อผิดพลาดของตัวจัดการเอกสาร",
+    "documentErrorDescription": "เกิดข้อผิดพลาดขณะจัดการเอกสาร ข้อมูลของท่านปลอดภัย",
+    "errorDetails": "รายละเอียดข้อผิดพลาด",
+    "invalidData": "ข้อมูลจากเซิร์ฟเวอร์ไม่ถูกต้อง",
+    "networkIssues": "ปัญหาการเชื่อมต่อเครือข่าย",
+    "tempIssues": "ปัญหาชั่วคราวของระบบ",
+    "tryAgain": "ลองใหม่อีกครั้ง",
+    "uploadError": "ข้อผิดพลาดความคืบหน้าการอัปโหลด",
+    "uploadErrorDescription": "เครื่องมือติดตามความคืบหน้าการอัปโหลดประสบปัญหา"
+  },
+  "fileCount": {
+    "attached": "แนบแล้ว {{count}} ไฟล์",
+    "attached_one": "",
+    "attached_other": "",
+    "fileCount": "{{count}} ไฟล์",
+    "fileCount_one": "",
+    "fileCount_other": "{{count}} ไฟล์",
+    "noFiles": "ไม่มีไฟล์"
+  },
+  "fileList": {
+    "fileDetails": "รายละเอียดไฟล์",
+    "loading": "กำลังโหลดไฟล์...",
+    "markedCount": "{{count}} ไฟล์ถูกทำเครื่องหมายเพื่อลบ",
+    "markedCount_one": "",
+    "markedCount_other": "{{count}} ไฟล์ถูกทำเครื่องหมายเพื่อลบ",
+    "markedForDeletion": "ทำเครื่องหมายเพื่อลบ",
+    "noFiles": "ไม่มีไฟล์แนบ",
+    "noMatch": "ไม่มีไฟล์ที่ตรงกับเงื่อนไขการค้นหา",
+    "showingFiles": "แสดง {{showing}} จากทั้งหมด {{total}} ไฟล์",
+    "statusDuplicate": "ซ้ำซ้อน",
+    "statusFailed": "ล้มเหลว",
+    "statusMissing": "หายไป",
+    "statusProcessing": "กำลังประมวลผล"
+  },
+  "fileUpload": {
+    "accepted": "รองรับ: {{types}} • ขนาดสูงสุด: {{size}}MB",
+    "chooseFiles": "เลือกไฟล์",
+    "dragOrClick": "ลากไฟล์มาที่นี่หรือคลิกเพื่อเลือก",
+    "remove": "ลบ",
+    "selectedFiles": "ไฟล์ที่เลือก ({{count}})",
+    "selectedFiles_one": "",
+    "selectedFiles_other": ""
+  },
+  "linkPaperless": {
+    "from": "จาก: {{name}}",
+    "infoText": "ค้นหาเอกสารที่มีอยู่แล้วใน Paperless เพื่อเชื่อมโยงกับ{{entityType}}นี้ ไม่ต้องอัปโหลดไฟล์ใหม่!",
+    "linkDocument": "เชื่อมโยงเอกสาร",
+    "moreTags": "+อีก {{count}} แท็ก",
+    "moreTags_one": "",
+    "moreTags_other": "",
+    "noDocumentsFound": "ไม่พบเอกสาร",
+    "searchDocuments": "ค้นหาเอกสาร",
+    "searchPlaceholder": "ค้นหาด้วยชื่อ เนื้อหา หรือแท็ก...",
+    "selected": "เลือกแล้ว",
+    "title": "เชื่อมโยงเอกสาร Paperless ที่มีอยู่",
+    "tryDifferent": "ลองใช้คำค้นหาอื่น",
+    "type": "ประเภท: {{type}}"
+  },
+  "linkPapra": {
+    "infoText": "ค้นหาเอกสารที่มีอยู่แล้วใน Papra เพื่อเชื่อมโยงกับ{{entityType}}นี้ ไม่ต้องอัปโหลดไฟล์ใหม่!",
+    "linkDocument": "เชื่อมโยงเอกสาร",
+    "noDocumentsFound": "ไม่พบเอกสาร",
+    "searchPlaceholder": "ค้นหาเอกสาร...",
+    "selected": "เลือกแล้ว",
+    "title": "เชื่อมโยงเอกสาร Papra ที่มีอยู่",
+    "tryDifferent": "ลองใช้คำค้นหาอื่น"
+  },
+  "manager": {
+    "addDocument": "เพิ่มเอกสาร",
+    "currentFiles": "ไฟล์ปัจจุบัน:",
+    "duplicateDocument": "เอกสารซ้ำซ้อน",
+    "duplicateExists": "เอกสารนี้มีอยู่แล้วใน Paperless และไม่สามารถอัปโหลดอีกครั้งได้",
+    "filesToUpload": "ไฟล์ที่จะอัปโหลด:",
+    "linkPaperless": "เชื่อมโยงเอกสาร Paperless ที่มีอยู่",
+    "linkPapra": "เชื่อมโยงเอกสาร Papra ที่มีอยู่",
+    "manageDocuments": "จัดการเอกสาร",
+    "processingPaperless": "กำลังประมวลผลเอกสารใน Paperless...",
+    "searchFiles": "ค้นหาไฟล์...",
+    "statusDuplicate": "ซ้ำซ้อน",
+    "statusFailed": "ล้มเหลว",
+    "statusUploaded": "อัปโหลดแล้ว",
+    "statusUploading": "กำลังอัปโหลดไปยัง Paperless...",
+    "syncCheck": "ตรวจสอบการซิงค์",
+    "uploadNewFile": "อัปโหลดไฟล์ใหม่",
+    "uploadSuccess": "อัปโหลดเอกสารเรียบร้อยแล้ว!"
+  },
+  "paperlessStatus": {
+    "autoSyncEnabled": "เปิดใช้การซิงค์อัตโนมัติ",
+    "documentAlreadyExists": "\"{{fileName}}\" เหมือนกับเอกสารที่มีอยู่แล้วใน Paperless",
+    "duplicateHint": "หากต้องการอัปโหลดเวอร์ชันใหม่ กรุณาแก้ไขเอกสารก่อน",
+    "processingDocument": "เอกสารกำลังถูกประมวลผลโดย Paperless...",
+    "syncFailed": "การซิงค์ล้มเหลว",
+    "syncing": "กำลังซิงค์..."
+  },
+  "renderMode": {
+    "compactView": "มุมมองแบบกะทัดรัด",
+    "gridView": "มุมมองแบบตาราง",
+    "listView": "มุมมองแบบรายการ",
+    "viewMode": "โหมดการแสดงผล"
+  },
+  "storage": {
+    "backendLabel": "แบ็กเอนด์จัดเก็บข้อมูล:",
+    "connectedBadge": "เชื่อมต่อแล้ว",
+    "local": "จัดเก็บในเครื่อง",
+    "paperless": "Paperless-ngx",
+    "papra": "Papra",
+    "selectBackend": "เลือกแบ็กเอนด์จัดเก็บข้อมูล"
+  },
+  "upload": {
+    "completed": "เสร็จสิ้น {{count}} ไฟล์",
+    "completed_one": "",
+    "completed_other": "",
+    "dragOrClick": "ลากไฟล์มาที่นี่หรือคลิกเพื่อเลือก",
+    "failed": "ล้มเหลว {{count}} ไฟล์",
+    "failed_one": "",
+    "failed_other": "",
+    "filesProgress": "{{completed}}/{{total}} ไฟล์",
+    "maxSize": "ขนาดไฟล์สูงสุด: {{size}}MB",
+    "overallProgress": "ความคืบหน้าโดยรวม",
+    "percentComplete": "เสร็จสิ้น {{percent}}%",
+    "remaining": "เหลืออีก {{time}}",
+    "retryFailed": "ลองใหม่สำหรับที่ล้มเหลว",
+    "uploading": "กำลังอัปโหลด {{count}} ไฟล์",
+    "uploading_one": "",
+    "uploading_other": ""
+  }
+}

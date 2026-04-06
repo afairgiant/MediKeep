@@ -14,17 +14,17 @@
     "activity": {
       "lastUpdated": "Ultimo aggiornamento",
       "noActivity": "Nessuna attività recente",
-      "noActivityDescription": "Le attività della tua cartella medica appariranno qui"
+      "noActivityDescription": "Le attività della tua cartella clinica appariranno qui"
     },
-    "hello": "Ciao",
-    "loading": "Caricamento della tua dashboard medica...",
+    "hello": "Salve",
+    "loading": "Caricamento della dashboard medica...",
     "modules": {
-      "exportRecords": "Esporta registri",
+      "exportRecords": "Esporta cartelle",
       "visitHistory": "Storico visite"
     },
     "search": {
       "advancedSearch": "Ricerca avanzata",
-      "placeholder": "Cerca nei registri medici..."
+      "placeholder": "Cerca nelle cartelle cliniche..."
     },
     "sections": {
       "additionalResources": "Risorse aggiuntive",
@@ -83,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Dashboard amministratore",
+      "allergies": "Allergie",
+      "backupManagement": "Gestione backup",
+      "conditions": "Patologie",
       "customReports": "Report personalizzati",
-      "exportRecords": "Esporta registri",
+      "dataModels": "Modelli dati",
+      "emergencyContacts": "Contatti di emergenza",
+      "exportRecords": "Esporta cartelle",
+      "familyHistory": "Anamnesi familiare",
+      "immunizations": "Vaccinazioni",
+      "injuries": "Lesioni",
+      "insurance": "Assicurazione",
+      "labResults": "Risultati di laboratorio",
       "language": "Lingua",
-      "patientInfo": "Informazioni del paziente",
+      "medicalEquipment": "Attrezzature mediche",
+      "medications": "Farmaci",
+      "patientInfo": "Informazioni paziente",
+      "pharmacies": "Farmacie",
+      "practitioners": "Medici",
+      "procedures": "Procedure",
+      "settings": "Impostazioni",
+      "symptoms": "Sintomi",
+      "systemHealth": "Stato del sistema",
       "tagManagement": "Gestione tag",
       "theme": "Tema",
-      "visitHistory": "Storico visite"
+      "treatments": "Trattamenti",
+      "visitHistory": "Storico visite",
+      "vitalSigns": "Segni vitali"
     },
     "sections": {
+      "administration": "Amministrazione",
       "careAndTreatment": "Cura e trattamento",
       "misc": "Varie",
       "tools": "Strumenti"

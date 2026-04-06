@@ -4,7 +4,7 @@
   "card": {
     "notRecorded": "Ej registrerat",
     "oxygenSaturation": "Syremättnad",
-    "title": "Vitalparameterregistrering"
+    "title": "Vitalparameterjournal"
   },
   "categories": {
     "diabetes": "Diabetes",
@@ -31,7 +31,7 @@
       "hospital": "Sjukhus",
       "urgentCare": "Akutvård"
     },
-    "lockedByImport": "Hanteras av enhetsimport genomsnitt",
+    "lockedByImport": "Hanteras av enhetsimporterat medelvärde",
     "measurementLocation": "Mätplats",
     "missingPatientInfo": "Saknad patientinformation",
     "notesPlaceholder": "Ytterligare anteckningar om vitalparametermätningen...",
@@ -87,15 +87,15 @@
     "back": "Tillbaka",
     "dateRange": "Datumintervall",
     "duplicate": "Duplikat",
-    "duplicatesFound": "Dubbletter hittade",
+    "duplicatesFound": "Dubbletter funna",
     "importButton": "Importera",
     "importing": "Importerar vitalparametrar...",
     "newReadings": "Nya avläsningar",
     "noDevice": "Välj en enhet",
     "noFile": "Välj en CSV-fil",
-    "parsingFailed": "Misslyckades med att analysera CSV-fil",
+    "parsingFailed": "Misslyckades med att tolka CSV-fil",
     "preview": "Förhandsgranska",
-    "previewTitle": "Förhandsgranska import",
+    "previewTitle": "Förhandsgranskning av import",
     "selectDevice": "Välj enhet",
     "selectDevicePlaceholder": "Välj din enhet...",
     "skipDuplicates": "Hoppa över dubbletter",
@@ -115,7 +115,7 @@
     "glucoseContextPlaceholder": "Valfritt",
     "painScale": "Smärtskala",
     "physicalMeasurements": "Fysiska mätningar",
-    "practitionerId": "Praktiker-ID",
+    "practitionerId": "Vårdgivar-ID",
     "respiratoryRate": "Andningsfrekvens",
     "title": "Detaljer för vitalparametrar"
   },
@@ -130,7 +130,7 @@
     "bloodPressure": "Blodtryck",
     "bloodPressureDesc": "Klicka för att filtrera poster med blodtryck",
     "bmi": "BMI",
-    "bmiDesc": "Body Mass Index",
+    "bmiDesc": "Kroppsmasseindex",
     "heartRate": "Hjärtfrekvens",
     "heartRateDesc": "Klicka för att filtrera poster med hjärtfrekvens",
     "temperature": "Senaste temperatur",
@@ -141,14 +141,14 @@
   "statsLoadError": "Kan inte ladda hälsostatistik",
   "summary": {
     "avgGlucose": "Medel",
-    "deleteDay": "Radera dag",
+    "deleteDay": "Ta bort dag",
     "glucoseTrend": "Glukostrend"
   },
   "summaryDescription": "Senaste avläsningar och medelvärden - Klicka på ett kort för att filtrera tabellen nedan",
   "systolic": "Systolisk",
   "table": {
-    "errorLoading": "Fel vid laddning av vitalparametrar",
-    "noRecords": "Inga vitalparameterregistreringar hittade",
+    "errorLoading": "Fel vid inläsning av vitalparametrar",
+    "noRecords": "Inga vitalparameterregistreringar funna",
     "noRecordsDesc": "Vitalparametrar kommer att visas här när de har registrerats",
     "oxygenSat": "O2-mättnad"
   },
@@ -166,7 +166,7 @@
     "dataTable": "Datatabell",
     "exportCsv": "Exportera till CSV",
     "exportError": "Misslyckades med att exportera data. Försök igen.",
-    "exportSuccess": "Data exporterad framgångsrikt",
+    "exportSuccess": "Data exporterades framgångsrikt",
     "glucoseContextFilter": "Blodsocker typ",
     "latest": "Senaste",
     "noData": "Inga trenddata tillgängliga",

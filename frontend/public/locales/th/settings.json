@@ -1,0 +1,164 @@
+{
+  "account": {
+    "deleteAccount": {
+      "button": "ลบบัญชี",
+      "description": "ลบบัญชีของคุณและข้อมูลทางการแพทย์ที่เกี่ยวข้องทั้งหมดอย่างถาวร การดำเนินการนี้ไม่สามารถยกเลิกได้",
+      "title": "ลบบัญชี"
+    }
+  },
+  "actions": {
+    "reset": "รีเซ็ตการเปลี่ยนแปลง",
+    "save": "บันทึกการเปลี่ยนแปลงทั้งหมด",
+    "unsavedChanges": "คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก"
+  },
+  "documents": {
+    "cleanup": {
+      "button": "จัดระเบียบไฟล์",
+      "cleaning": "กำลังจัดระเบียบ...",
+      "description": "จัดระเบียบไฟล์ที่ไม่ตรงกันและแก้ไขปัญหาการซิงค์เอกสาร ระบบจะรีเซ็ตการอัปโหลดที่ล้มเหลว ล้างงานที่ค้างอยู่ และแก้ไขปัญหาการซิงค์ฐานข้อมูล",
+      "title": "จัดระเบียบไฟล์"
+    },
+    "paperlessDescription": "กำหนดค่าการเชื่อมต่อระบบจัดการเอกสาร Paperless-ngx"
+  },
+  "help": {
+    "documentation": {
+      "description": "เรียกดูวิกิสำหรับคู่มือ วิธีการติดตั้ง และเอกสารประกอบคุณสมบัติต่างๆ",
+      "title": "เอกสารประกอบ"
+    },
+    "issues": {
+      "description": "พบข้อผิดพลาดหรือมีข้อเสนอแนะคุณสมบัติใหม่? รายงานปัญหาบน GitHub",
+      "title": "รายงานปัญหา"
+    }
+  },
+  "paperlessConnection": {
+    "apiTokenHelp": "โทเค็น API ของ paperless-ngx ของคุณ ค้นหาได้ในแผงควบคุมผู้ดูแลระบบ Paperless ในส่วนการตั้งค่า",
+    "apiTokenLabel": "โทเค็น API",
+    "apiTokenRecommended": "โทเค็น API (แนะนำ)",
+    "authMethod": "วิธีการยืนยันตัวตน",
+    "connected": "เชื่อมต่อกับ Paperless-ngx แล้ว",
+    "connectionError": "ไม่สามารถเชื่อมต่อได้ โปรดตรวจสอบ URL และข้อมูลประจำตัว",
+    "methodInfo": "โทเค็น API เป็นวิธีการยืนยันตัวตนที่แนะนำเพื่อความปลอดภัยที่ดีกว่า",
+    "passwordHelp": "รหัสผ่าน paperless-ngx ของคุณ",
+    "passwordLabel": "รหัสผ่าน",
+    "sessionStorage": "ใช้การจัดเก็บเซสชันสำหรับโทเค็น",
+    "title": "การเชื่อมต่อ Paperless-ngx",
+    "urlHelp": "URL ของอินสแตนซ์ Paperless-ngx ของคุณ (เช่น https://paperless.example.com)",
+    "urlLabel": "URL เซิร์ฟเวอร์",
+    "usernameHelp": "ชื่อผู้ใช้ paperless-ngx ของคุณ",
+    "usernameLabel": "ชื่อผู้ใช้",
+    "usernamePassword": "ชื่อผู้ใช้และรหัสผ่าน"
+  },
+  "papra": {
+    "apiTokenPlaceholder": "กรอกโทเค็น API ของ Papra",
+    "connectionFailed": "การเชื่อมต่อล้มเหลว",
+    "connectionSuccess": "เชื่อมต่อสำเร็จ",
+    "description": "เชื่อมต่อกับอินสแตนซ์ Papra ของคุณสำหรับการจัดการเอกสาร",
+    "organization": "องค์กร",
+    "organizationPlaceholder": "เลือกองค์กร",
+    "urlPlaceholder": "https://your-papra-instance.com"
+  },
+  "preferences": {
+    "dateFormat": {
+      "description": "เลือกรูปแบบการแสดงวันที่ในแอปพลิเคชัน",
+      "dmy": "วว/ดด/ปปปป (ยุโรป)",
+      "mdy": "ดด/วว/ปปปป (สหรัฐฯ)",
+      "title": "รูปแบบวันที่",
+      "ymd": "ปปปป-ดด-วว (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "กำหนดระยะเวลาการไม่ใช้งานก่อนที่เซสชันจะหมดอายุ (เป็นนาที)",
+      "range": "นาที (5-1440)",
+      "title": "การหมดเวลาเซสชัน"
+    },
+    "unitSystem": {
+      "description": "เลือกหน่วยการวัดที่จะแสดง ระหว่างหน่วยอิมพีเรียล (ปอนด์, ฟุต, °F) หรือเมตริก (กิโลกรัม, เซนติเมตร, °C)",
+      "imperial": "อิมพีเรียล (ปอนด์, ฟุต, °F)",
+      "metric": "เมตริก (กก., ซม., °C)",
+      "title": "หน่วยการวัด"
+    }
+  },
+  "releaseNotes": {
+    "currentVersion": "เวอร์ชันปัจจุบัน",
+    "dismiss": "เข้าใจแล้ว",
+    "empty": "ไม่มีบันทึกการเปิดตัว",
+    "error": "ไม่สามารถโหลดบันทึกการเปิดตัวได้",
+    "publishedOn": "เปิดตัวเมื่อ {{date}}",
+    "retry": "ลองอีกครั้ง",
+    "showAll": "แสดงการเปิดตัวเพิ่มเติม",
+    "showLess": "แสดงน้อยลง",
+    "viewOnGithub": "ดูบน GitHub",
+    "whatsNewTitle": "มีอะไรใหม่"
+  },
+  "sections": {
+    "accountManagement": "การจัดการบัญชี",
+    "gettingHelp": "การขอความช่วยเหลือ",
+    "preferences": "การตั้งค่าแอปพลิเคชัน",
+    "releaseNotes": "บันทึกการเปิดตัว",
+    "security": "ความปลอดภัย",
+    "supportMediKeep": "สนับสนุน MediKeep",
+    "systemInfo": "ข้อมูลระบบ"
+  },
+  "security": {
+    "password": {
+      "button": "เปลี่ยนรหัสผ่าน",
+      "confirmPassword": "ยืนยันรหัสผ่านใหม่",
+      "currentPassword": "รหัสผ่านปัจจุบัน",
+      "description": "เปลี่ยนรหัสผ่านบัญชีของคุณเพื่อรักษาความปลอดภัย",
+      "forceChange": {
+        "errors": {
+          "allFieldsRequired": "กรุณากรอกข้อมูลทุกช่อง",
+          "changeFailed": "การเปลี่ยนรหัสผ่านล้มเหลว กรุณาลองอีกครั้ง",
+          "passwordComplexity": "รหัสผ่านใหม่ต้องมีตัวอักษรและตัวเลขอย่างน้อยหนึ่งตัว",
+          "passwordMustDiffer": "รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านปัจจุบัน",
+          "passwordsMustMatch": "รหัสผ่านใหม่ไม่ตรงกัน",
+          "passwordTooShort": "รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร"
+        },
+        "submit": "ตั้งรหัสผ่านใหม่",
+        "submitting": "กำลังเปลี่ยนรหัสผ่าน...",
+        "subtitle": "บัญชีของคุณต้องเปลี่ยนรหัสผ่านก่อนจึงจะสามารถดำเนินการต่อได้ กรุณาตั้งรหัสผ่านใหม่ด้านล่าง",
+        "title": "จำเป็นต้องเปลี่ยนรหัสผ่าน"
+      },
+      "newPassword": "รหัสผ่านใหม่",
+      "passwordHelp": "อย่างน้อย 6 ตัวอักษร ต้องมีตัวอักษรและตัวเลข"
+    }
+  },
+  "settings": {
+    "releaseNotes": {
+      "noChanges": "ไม่มีการเปลี่ยนแปลงในการเปิดตัวนี้",
+      "whatsNewSubtitle": "นี่คือสิ่งที่เปลี่ยนแปลงตั้งแต่การอัปเดตล่าสุด"
+    }
+  },
+  "sponsor": {
+    "button": "สนับสนุนบน GitHub",
+    "buttonShort": "สนับสนุน",
+    "description": "MediKeep เป็นซอฟต์แวร์ฟรีและโอเพ่นซอร์ส หากคุณพบว่ามีประโยชน์ กรุณาพิจารณาสนับสนุนโปรเจคเพื่อช่วยในการพัฒนาและให้ดำเนินต่อไปได้"
+  },
+  "storage": {
+    "connectionRequired": "ต้องการการเชื่อมต่อ",
+    "defaultLocation": "ตำแหน่งจัดเก็บเริ่มต้น",
+    "filesCount": "{{count}} ไฟล์",
+    "filesCount_one": "",
+    "filesCount_other": "",
+    "localDescription": "ไฟล์จัดเก็บบนเซิร์ฟเวอร์นี้โดยตรง เหมาะสำหรับการตั้งค่าแบบง่ายที่ไม่ต้องใช้บริการภายนอก",
+    "localStorage": "การจัดเก็บในเครื่อง",
+    "noUsageData": "ไม่มีข้อมูลการใช้พื้นที่จัดเก็บ",
+    "paperless": "Paperless-ngx",
+    "paperlessDescription": "ไฟล์จะอัปโหลดไปยังเซิร์ฟเวอร์ Paperless-ngx ของคุณ มีคุณสมบัติ OCR การแท็ก และการจัดการเอกสารขั้นสูง",
+    "papra": "Papra",
+    "papraDescription": "ไฟล์จัดเก็บในอินสแตนซ์ Papra ของคุณ มีการจัดการเอกสารแบบมีระเบียบพร้อมองค์กร",
+    "title": "การตั้งค่าการจัดเก็บ",
+    "usageLabel": "การใช้พื้นที่จัดเก็บ"
+  },
+  "system": {
+    "timezone": {
+      "title": "เขตเวลา"
+    },
+    "version": {
+      "loading": "กำลังโหลดข้อมูลเวอร์ชัน...",
+      "title": "เวอร์ชันแอปพลิเคชัน",
+      "unavailable": "ข้อมูลเวอร์ชันไม่พร้อมใช้งาน",
+      "unknownApp": "แอปพลิเคชันไม่ทราบ",
+      "unknownVersion": "เวอร์ชันไม่ทราบ"
+    }
+  }
+}

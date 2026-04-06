@@ -87,7 +87,7 @@
       "name": {
         "description": "Um nome amigável para identificar este canal",
         "label": "Nome do Canal",
-        "placeholder": "por exemplo, Meu Servidor Discord"
+        "placeholder": "p. ex., Meu Servidor Discord"
       },
       "title": "Detalhes do Canal",
       "type": {

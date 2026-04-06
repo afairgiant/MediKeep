@@ -2,7 +2,7 @@
   "admin": {
     "createUser": {
       "linkPatient": {
-        "hint": "En lugar de crear un nuevo registro de paciente, vincule al nuevo usuario a un paciente existente (p. ej., un hijo que ahora necesita su propio inicio de sesión).",
+        "hint": "En lugar de crear un nuevo registro de paciente, vincule al nuevo usuario a un paciente existente (por ejemplo, un hijo que ahora necesita su propio inicio de sesión).",
         "selfRecordBadge": "Registro propio",
         "selfRecordWarning": "Este es el registro propio del propietario actual. Se creará un nuevo registro propio para el propietario original con sus datos demográficos copiados. El propietario original recibirá acceso de edición a este paciente."
       },
@@ -214,7 +214,7 @@
       "checkbox": "Vincular a un registro de paciente existente",
       "currentOwner": "Titular actual",
       "dob": "Fecha de nacimiento",
-      "hint": "En lugar de crear un nuevo registro de paciente, vincule al nuevo usuario a un paciente existente (p. ej., un hijo que ahora necesita su propio inicio de sesión).",
+      "hint": "En lugar de crear un nuevo registro de paciente, vincule al nuevo usuario a un paciente existente (por ejemplo, un hijo que ahora necesita su propio inicio de sesión).",
       "loading": "Cargando pacientes...",
       "owner": "Titular",
       "patientId": "ID",

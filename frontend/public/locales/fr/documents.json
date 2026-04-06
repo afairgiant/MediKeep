@@ -14,11 +14,11 @@
     "uploadErrorDescription": "Le suivi de progression du téléversement a rencontré une erreur."
   },
   "fileCount": {
-    "attached": "{{count}} joints",
-    "attached_one": "{{count}} joint",
-    "attached_other": "{{count}} joints",
+    "attached": "{{count}} joint",
+    "attached_one": "",
+    "attached_other": "",
     "fileCount": "{{count}} fichier",
-    "fileCount_one": "{{count}} fichier",
+    "fileCount_one": "",
     "fileCount_other": "{{count}} fichiers",
     "noFiles": "Aucun fichier"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "DÉTAILS DU FICHIER",
     "loading": "Chargement des fichiers...",
     "markedCount": "{{count}} fichier marqué pour suppression",
-    "markedCount_one": "{{count}} fichier marqué pour suppression",
+    "markedCount_one": "",
     "markedCount_other": "{{count}} fichiers marqués pour suppression",
     "markedForDeletion": "Marqué pour suppression",
     "noFiles": "Aucun fichier joint",
@@ -43,16 +43,16 @@
     "dragOrClick": "Glissez des fichiers ici ou cliquez pour sélectionner",
     "remove": "Supprimer",
     "selectedFiles": "Fichiers sélectionnés ({{count}})",
-    "selectedFiles_one": "Fichier sélectionné ({{count}})",
-    "selectedFiles_other": "Fichiers sélectionnés ({{count}})"
+    "selectedFiles_one": "",
+    "selectedFiles_other": ""
   },
   "linkPaperless": {
     "from": "De : {{name}}",
     "infoText": "Recherchez des documents déjà présents dans Paperless pour les lier à ce(tte) {{entityType}}. Aucun téléversement nécessaire !",
     "linkDocument": "Lier le document",
     "moreTags": "+{{count}} de plus",
-    "moreTags_one": "+{{count}} de plus",
-    "moreTags_other": "+{{count}} de plus",
+    "moreTags_one": "",
+    "moreTags_other": "",
     "noDocumentsFound": "Aucun document trouvé",
     "searchDocuments": "Rechercher des documents",
     "searchPlaceholder": "Rechercher par titre, contenu ou étiquettes...",
@@ -112,13 +112,13 @@
     "selectBackend": "Sélectionner le stockage"
   },
   "upload": {
-    "completed": "{{count}} terminés",
-    "completed_one": "{{count}} terminé",
-    "completed_other": "{{count}} terminés",
+    "completed": "{{count}} terminé",
+    "completed_one": "",
+    "completed_other": "",
     "dragOrClick": "Glissez des fichiers ici ou cliquez pour sélectionner",
-    "failed": "{{count}} échoués",
-    "failed_one": "{{count}} échoué",
-    "failed_other": "{{count}} échoués",
+    "failed": "{{count}} échoué",
+    "failed_one": "",
+    "failed_other": "",
     "filesProgress": "{{completed}}/{{total}} fichiers",
     "maxSize": "Taille maximale du fichier : {{size}} Mo",
     "overallProgress": "Progression globale",
@@ -126,7 +126,7 @@
     "remaining": "{{time}} restant",
     "retryFailed": "Réessayer les échoués",
     "uploading": "{{count}} en cours",
-    "uploading_one": "{{count}} en cours",
-    "uploading_other": "{{count}} en cours"
+    "uploading_one": "",
+    "uploading_other": ""
   }
 }

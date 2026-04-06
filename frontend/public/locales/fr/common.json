@@ -58,10 +58,10 @@
         "codeDescription": "Description du code médical",
         "conditionName": "Saisir le nom de la pathologie",
         "diagnosis": "Saisir le diagnostic",
-        "icd10Code": "p. ex., E11.9",
+        "icd10Code": "par ex., E11.9",
         "notes": "Saisir les notes cliniques, observations ou informations supplémentaires",
         "severity": "Sélectionner la sévérité",
-        "snomedCode": "p. ex., 44054006"
+        "snomedCode": "par ex., 44054006"
       },
       "saving": "Enregistrement de la pathologie...",
       "severity": {
@@ -94,7 +94,7 @@
       "medicationLinkWarning": "Problème de liaison de médicament"
     },
     "table": {
-      "icd10": "ICD-10"
+      "icd10": "CIM-10"
     }
   },
   "emergencyContacts": {
@@ -145,10 +145,10 @@
     "form": {
       "create": "Créer l'équipement",
       "lastService": "Date du dernier entretien",
-      "manufacturerPlaceholder": "p. ex., ResMed, Philips",
+      "manufacturerPlaceholder": "par ex., ResMed, Philips",
       "modelNumber": "Numéro de modèle",
-      "modelPlaceholder": "p. ex., AirSense 11",
-      "namePlaceholder": "p. ex., ResMed AirSense 11",
+      "modelPlaceholder": "par ex., AirSense 11",
+      "namePlaceholder": "par ex., ResMed AirSense 11",
       "nextService": "Date du prochain entretien",
       "notesPlaceholder": "Notes supplémentaires sur cet équipement",
       "practitioner": "Prescrit par",
@@ -316,13 +316,13 @@
       "expirationDateDesc": "Date d'expiration du vaccin",
       "location": "Lieu/Établissement",
       "locationDesc": "Lieu d'administration du vaccin",
-      "locationPlaceholder": "p. ex., Pharmacie, Hôpital, Clinique",
+      "locationPlaceholder": "par ex., Pharmacie, Hôpital, Clinique",
       "lotNumberDesc": "Numéro de lot du vaccin",
       "lotNumberPlaceholder": "Saisir le numéro de lot",
       "manufacturerDesc": "Fabricant du vaccin",
       "manufacturerPlaceholder": "Saisir le fabricant",
       "ndcNumberDesc": "Code national du médicament",
-      "ndcNumberPlaceholder": "p. ex., 12345-6789-01",
+      "ndcNumberPlaceholder": "par ex., 12345-6789-01",
       "practitionerDesc": "Professionnel de santé ayant administré le vaccin",
       "practitionerPlaceholder": "Sélectionner le praticien administrateur",
       "routeID": "Intradermique (ID)",
@@ -339,10 +339,10 @@
       "tagsDesc": "Ajouter des étiquettes pour classer et organiser les vaccinations",
       "tradeName": "Nom commercial/officiel",
       "tradeNameDesc": "Nom officiel complet figurant dans la documentation du vaccin",
-      "tradeNamePlaceholder": "p. ex., Flublok TRIV 2025-2026 PFS",
+      "tradeNamePlaceholder": "par ex., Flublok TRIV 2025-2026 PFS",
       "updateImmunization": "Mettre à jour la vaccination",
       "vaccineNameDesc": "Nom courant du vaccin",
-      "vaccineNamePlaceholder": "p. ex., Grippe, COVID-19, dTcaP"
+      "vaccineNamePlaceholder": "par ex., Grippe, COVID-19, dTcaP"
     },
     "loadingImmunizations": "Chargement des vaccinations...",
     "noImmunizationsFound": "Aucune vaccination trouvée",
@@ -406,7 +406,7 @@
       "deductible": "Franchise",
       "dentalCoverage": "Couverture dentaire",
       "effectiveDate": "Date d'entrée en vigueur",
-      "employerGroup": "Employeur / Parrain du groupe",
+      "employerGroup": "Employeur/Parrain du groupe",
       "memberInfo": "Informations du membre",
       "memberName": "Nom du membre",
       "mentalHealthCoverage": "Couverture en santé mentale",
@@ -491,7 +491,7 @@
       "labels": {
         "alternativeName": "Nom alternatif",
         "form": "Forme",
-        "purposeIndication": "Objet / Indication"
+        "purposeIndication": "Objet/Indication"
       },
       "noSideEffects": "Aucun effet secondaire signalé",
       "sections": {
@@ -512,10 +512,10 @@
       "overrideFrequency": "Fréq."
     },
     "types": {
-      "herbal": "Plante / Naturel",
+      "herbal": "Plante/Naturel",
       "otc": "Sans ordonnance",
       "prescription": "Sur ordonnance",
-      "supplement": "Supplément / Vitamine"
+      "supplement": "Supplément/Vitamine"
     }
   },
   "messages": {
@@ -640,7 +640,7 @@
           "parent": "Parent",
           "partner": "Partenaire",
           "select": "Sélectionner le lien (facultatif)",
-          "sibling": "Frère / Sœur",
+          "sibling": "Frère/Sœur",
           "sister": "Sœur",
           "son": "Fils",
           "spouse": "Conjoint(e)"
@@ -795,7 +795,7 @@
       "anesthesiaNotesDesc": "Informations complémentaires sur l'anesthésie",
       "anesthesiaNotesPlaceholder": "Saisir les détails et les notes sur l'anesthésie",
       "anesthesiaTypeDesc": "Type d'anesthésie utilisé",
-      "anesthesiaTypePlaceholder": "p. ex., Générale, Locale, Locorégionale",
+      "anesthesiaTypePlaceholder": "par ex., Générale, Locale, Locorégionale",
       "clinicalNotesDesc": "Informations complémentaires sur cet acte médical",
       "clinicalNotesPlaceholder": "Saisir les notes cliniques, observations ou informations supplémentaires",
       "complicationsDesc": "Tout problème ou complication survenu",
@@ -806,7 +806,7 @@
       "durationDesc": "Durée de l'acte médical",
       "durationPlaceholder": "Saisir la durée",
       "facilityDesc": "Établissement médical",
-      "facilityPlaceholder": "p. ex., Nom de l'hôpital",
+      "facilityPlaceholder": "par ex., Nom de l'hôpital",
       "outcomeAbnormal": "Anormal",
       "outcomeDesc": "Résultat ou issue de l'acte médical",
       "outcomeInconclusive": "Non concluant",
@@ -814,16 +814,16 @@
       "outcomeSuccessful": "Réussi",
       "practitionerDesc": "Professionnel de santé réalisant l'acte",
       "procedureCodeDesc": "Code de facturation médicale",
-      "procedureCodePlaceholder": "p. ex., code CPT",
+      "procedureCodePlaceholder": "par ex., code CPT",
       "procedureDate": "Date de l'acte médical",
       "procedureDateDesc": "Date de réalisation de l'acte médical",
       "procedureNameDesc": "Nom de l'acte médical",
       "procedureNamePlaceholder": "Saisir le nom de l'acte médical",
       "procedureTypeDesc": "Type ou catégorie de l'acte médical",
-      "procedureTypePlaceholder": "p. ex., Chirurgical, Diagnostique",
+      "procedureTypePlaceholder": "par ex., Chirurgical, Diagnostique",
       "savingProcedure": "Enregistrement de l'acte médical...",
       "settingDesc": "Lieu de réalisation de l'acte médical",
-      "settingPlaceholder": "p. ex., Hospitalisation, Ambulatoire",
+      "settingPlaceholder": "par ex., Hospitalisation, Ambulatoire",
       "statusDesc": "Statut actuel de l'acte médical",
       "statusInProgress": "En cours",
       "statusPostponed": "Reporté",
@@ -858,7 +858,7 @@
     "allTime": "Toute la période",
     "anyTag": "N'importe quelle étiquette",
     "collapseFilters": "Réduire les filtres",
-    "columnType": "Type",
+    "columnType": "Type d'enregistrement",
     "dateLabels": {
       "diagnosed": "Diagnostiqué",
       "given": "Administré",
@@ -888,7 +888,7 @@
     "last30Days": "30 derniers jours",
     "last6Months": "6 derniers mois",
     "last7Days": "7 derniers jours",
-    "lastYear": "Dernière année",
+    "lastYear": "Année passée",
     "loadingTags": "Chargement des étiquettes...",
     "matchAll": "Correspondre à tous",
     "matchAllDesc": "Afficher les éléments possédant toutes les étiquettes sélectionnées",
@@ -1149,11 +1149,11 @@
       "descriptionPlaceholder": "Décrire le traitement",
       "dosageAmount": "Dosage/Quantité",
       "dosageDesc": "Quantité ou dosage par traitement",
-      "dosagePlaceholder": "p. ex., 10 mg, 1 séance",
+      "dosagePlaceholder": "par ex., 10 mg, 1 séance",
       "endDateDesc": "Date de fin du traitement (si applicable)",
       "enterTreatmentName": "Saisir le nom du traitement",
       "frequencyDesc": "Fréquence d'administration du traitement",
-      "frequencyPlaceholder": "p. ex., Quotidien, Deux fois par semaine",
+      "frequencyPlaceholder": "par ex., Quotidien, Deux fois par semaine",
       "linkingPartialFailure": "Certains éléments n'ont pas pu être liés",
       "linkingPartialFailureMessage": "Le traitement a été créé, mais certains éléments n'ont pas pu être liés. Vous pouvez les lier manuellement en modifiant le traitement.",
       "notesDesc": "Informations supplémentaires sur ce traitement",
@@ -1162,7 +1162,7 @@
       "relatedConditionDesc": "Lier ce traitement à une pathologie",
       "savingTreatment": "Enregistrement du traitement...",
       "selectCondition": "Sélectionner une pathologie",
-      "startDateDesc": "Date de début du traitement, planifiée ou effective",
+      "startDateDesc": "Date de début du traitement",
       "statusDesc": "Statut actuel du traitement",
       "statusOnHold": "En attente",
       "statusPlanned": "Planifié",
@@ -1172,8 +1172,8 @@
       "tagsDesc": "Ajouter des étiquettes pour classer et organiser les traitements",
       "treatmentNameDesc": "Nom du traitement",
       "treatmentNotes": "Notes sur le traitement",
-      "treatmentTypeDesc": "Sélectionner une catégorie ou saisir la vôtre",
-      "treatmentTypePlaceholder": "Sélectionner ou saisir une catégorie",
+      "treatmentTypeDesc": "Type ou catégorie de traitement",
+      "treatmentTypePlaceholder": "par ex., Kinésithérapie, Chirurgie",
       "updateTreatment": "Mettre à jour le traitement"
     },
     "linkExisting": "Lier un existant",
@@ -1263,19 +1263,19 @@
   "vitals": {
     "form": {
       "dateTimePlaceholder": "Sélectionner la date et l'heure",
-      "devicePlaceholder": "p. ex., Tensiomètre numérique, Modèle de thermomètre...",
+      "devicePlaceholder": "par ex., Tensiomètre numérique, Modèle de thermomètre...",
       "heightNotSet": "Taille non renseignée dans le profil patient - Calcul de l'IMC indisponible",
       "locationPlaceholder": "Où ces mesures ont-elles été prises ?",
       "lockedByImport": "Géré par la moyenne d'importation de l'appareil",
       "missingPatientInfo": "Informations patient manquantes",
       "notesPlaceholder": "Notes supplémentaires sur la mesure des signes vitaux...",
       "pasteDateTimeDescription": "Saisissez ou collez la date/heure, ou cliquez sur le calendrier pour sélectionner",
-      "patientHeight": "Taille du patient : {{height}} pouces (depuis le profil)",
+      "patientHeight": "Taille du patient : {{height}} cm (depuis le profil)",
       "validation": {
         "a1cMax": "L'HbA1c ne peut pas dépasser 20 %",
         "a1cMin": "L'HbA1c doit être d'au moins 0 %",
-        "bloodGlucoseMax": "La glycémie ne peut pas dépasser 800 mg/dL",
-        "bloodGlucoseMin": "La glycémie doit être d'au moins 20 mg/dL",
+        "bloodGlucoseMax": "La glycémie ne peut pas dépasser 44,4 mmol/L",
+        "bloodGlucoseMin": "La glycémie doit être d'au moins 1,1 mmol/L",
         "dateInFuture": "La date ne peut pas être dans le futur",
         "dateRequired": "La date et l'heure de mesure sont obligatoires",
         "deviceMaxLength": "Le nom de l'appareil ne peut pas dépasser 100 caractères",

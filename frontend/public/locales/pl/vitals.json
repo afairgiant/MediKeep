@@ -82,7 +82,7 @@
     "fasting": "Na czczo",
     "random": "Losowy"
   },
-  "healthSummary": "Podsumowanie zdrowia",
+  "healthSummary": "Podsumowanie stanu zdrowia",
   "import": {
     "back": "Wstecz",
     "dateRange": "Zakres dat",
@@ -119,7 +119,7 @@
     "respiratoryRate": "Częstość oddychania",
     "title": "Szczegóły parametrów życiowych"
   },
-  "noDataAvailable": "Brak danych parametrów życiowych",
+  "noDataAvailable": "Brak dostępnych danych parametrów życiowych",
   "noPatientSelected": "Nie wybrano pacjenta",
   "recordVitalsPrompt": "Zarejestruj pierwszy pomiar parametrów życiowych, aby rozpocząć śledzenie wskaźników zdrowia.",
   "secondary": "Wtórny",
@@ -167,7 +167,7 @@
     "exportCsv": "Eksportuj do CSV",
     "exportError": "Nie udało się wyeksportować danych. Spróbuj ponownie.",
     "exportSuccess": "Dane wyeksportowane pomyślnie",
-    "glucoseContextFilter": "Typ cukru we krwi",
+    "glucoseContextFilter": "Typ pomiaru glukozy",
     "latest": "Najnowsze",
     "noData": "Brak danych trendu",
     "noDataDesc": "Brak historycznych punktów danych dla tego parametru życiowego.",

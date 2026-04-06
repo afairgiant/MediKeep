@@ -1,9 +1,9 @@
 {
   "addFirst": "Lägg till ditt första laboratorieresultat",
   "additionalNotes": {
-    "description": "Kliniska anteckningar eller speciella instruktioner",
+    "description": "Kliniska anteckningar eller särskilda instruktioner",
     "label": "Ytterligare anteckningar",
-    "placeholder": "Eventuell ytterligare information om testet, speciella instruktioner eller observationer..."
+    "placeholder": "Eventuell ytterligare information om testet, särskilda instruktioner eller observationer..."
   },
   "addNew": "+ Lägg till nytt laboratorieresultat",
   "addTitle": "Lägg till nytt laboratorieresultat",
@@ -78,9 +78,9 @@
     "withIssues_other": ""
   },
   "category": {
-    "bloodWork": "Blodarbete",
+    "bloodWork": "Blodprover",
     "cardiology": "Kardiologi",
-    "chemistry": "Kemi",
+    "chemistry": "Klinisk kemi",
     "genetics": "Genetik",
     "hearing": "Hörsel",
     "hematology": "Hematologi",
@@ -89,8 +89,8 @@
     "immunology": "Immunologi",
     "microbiology": "Mikrobiologi",
     "pathology": "Patologi",
-    "pulmonology": "Pulmonologi",
-    "stomatology": "Stomatologi"
+    "pulmonology": "Lungmedicin",
+    "stomatology": "Odontologi"
   },
   "completedDate": {
     "description": "Datum då resultaten färdigställdes",
@@ -99,11 +99,11 @@
   },
   "continueEditing": "Fortsätt redigera",
   "createAndContinue": "Skapa & ladda upp PDF",
-  "createFailed": "Misslyckades skapa laboratorieresultat",
-  "createFailedTryAgain": "Misslyckades skapa laboratorieresultat. Försök igen.",
+  "createFailed": "Misslyckades med att skapa laboratorieresultat",
+  "createFailedTryAgain": "Misslyckades med att skapa laboratorieresultat. Försök igen.",
   "creatingLabResult": "Skapar laboratorieresultat...",
   "deleteEmptyLabResult": "Ta bort laboratorieresultat",
-  "deleteFailed": "Misslyckades ta bort laboratorieresultat",
+  "deleteFailed": "Misslyckades med att ta bort laboratorieresultat",
   "discardParsedData": "Kassera tolkade data",
   "display": {
     "errorDisplaying": "Fel vid visning av testkomponenter",
@@ -174,7 +174,7 @@
     "tabs": {
       "testComponents": "Testkomponenter"
     },
-    "title": "Laboratorieresultatdetaljer"
+    "title": "Detaljer för laboratorieresultat"
   },
   "networkError": "Nätverksfel. Kontrollera din anslutning och försök igen.",
   "noResults": "Inga laboratorieresultat funna",
@@ -195,7 +195,7 @@
   "quickPdfImport": "Snabb PDF-import",
   "result": {
     "abnormal": "Avvikande - Utanför referensintervall",
-    "borderline": "Gränsvärde - Nära tröskel",
+    "borderline": "Gränsvärde - Nära tröskelvärde",
     "critical": "Kritiskt - Kräver omedelbar uppmärksamhet",
     "high": "Högt - Över normalintervall",
     "inconclusive": "Oklart - Behöver upprepas",
@@ -319,7 +319,7 @@
     "addTests": "Lägg till test",
     "categories": {
       "cardiology": "Kardiologi - Hjärt- & hjärtmarkörer",
-      "chemistry": "Kemi - Elektrolyter & mineraler",
+      "chemistry": "Klinisk kemi - Elektrolyter & mineraler",
       "endocrinology": "Endokrinologi - Hormoner & diabetes",
       "genetics": "Genetik - Genetiska test",
       "hematology": "Hematologi - Blodstatus & järn",
@@ -327,7 +327,7 @@
       "immunology": "Immunologi - Immunsystem & antikroppar",
       "lipids": "Lipider - Kolesterol & triglycerider",
       "microbiology": "Mikrobiologi - Infektioner & odlingar",
-      "molecular": "Molekylär - DNA-test",
+      "molecular": "Molekylärdiagnostik - DNA-test",
       "other": "Andra test",
       "pathology": "Patologi - Vävnads- & biopsianalys",
       "toxicology": "Toxikologi - Läkemedels- & giftscreening"
@@ -368,7 +368,7 @@
       "updating": "Uppdaterar testkomponent..."
     },
     "emptyState": {
-      "description": "Mallar tillhandahåller vanliga labbpaneler (blodstatus, CMP, etc.) där du kan ange värden och intervall. Bulkimport låter dig kopiera/klistra in resultat från labbrapporter för automatisk tolkning."
+      "description": "Mallar tillhandahåller vanliga labbpaneler (blodstatus, CMP, osv.) där du kan ange värden och intervall. Bulkimport låter dig kopiera/klistra in resultat från labbrapporter för automatisk tolkning."
     },
     "errorLoading": "Fel vid laddning av testkomponenter",
     "noComponents": "Inga testkomponenter",
@@ -396,7 +396,7 @@
   },
   "testNameDescription": "Detta är det enda obligatoriska fältet - du kan lägga till fler detaljer senare",
   "testNameLabel": "Namn på labbtest",
-  "testNamePlaceholder": "Endokrin blodanalys etc.",
+  "testNamePlaceholder": "Endokrin blodanalys osv.",
   "testNameRequired": "Testnamn krävs",
   "testNameTooLong": "Testnamn kan inte överstiga {{maxLength}} tecken",
   "testNameTooShort": "Testnamn måste vara minst {{minLength}} tecken",
@@ -407,10 +407,10 @@
   },
   "testType": {
     "emergency": "Akut - Kritisk prioritet",
-    "followUp": "Uppföljning - Upprepa testning",
-    "routine": "Rutin - Standardbehandling",
+    "followUp": "Uppföljning - Upprepningstestning",
+    "routine": "Rutin - Standardbearbetning",
     "screening": "Screening - Förebyggande testning",
-    "urgent": "Brådskande - Påskyndad behandling"
+    "urgent": "Brådskande - Påskyndad bearbetning"
   },
   "testTypeField": {
     "description": "Prioritet eller brådska för testet",

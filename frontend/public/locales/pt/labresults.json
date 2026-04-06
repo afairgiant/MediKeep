@@ -120,7 +120,7 @@
   "errorOccurred": "Ocorreu um erro",
   "form": {
     "abbreviation": "Abreviação",
-    "abbreviationPlaceholder": "p. ex., HGB",
+    "abbreviationPlaceholder": "p.ex., HGB",
     "addAnotherTest": "Adicionar Outro Exame",
     "autoCalculated": "Calculado automaticamente",
     "cannotRemoveLastRow": "Não é possível remover a última linha",
@@ -140,7 +140,7 @@
     "searchTests": "Digite para buscar exames...",
     "selectResult": "Selecionar resultado",
     "statusIndicator": "Indicador de Status:",
-    "testCodePlaceholder": "p. ex., 718-7",
+    "testCodePlaceholder": "p.ex., 718-7",
     "testComponents": "Componentes do Exame (Opcional)",
     "testComponentsDescription": "Opcionalmente adicione valores individuais do exame. Você também pode adicionar mais tarde.",
     "testDetails": "Detalhes do Exame",
@@ -312,7 +312,7 @@
   "testCode": {
     "description": "Código do laboratório ou LOINC",
     "label": "Código do Exame",
-    "placeholder": "p. ex., HC, 85025"
+    "placeholder": "p.ex., HC, 85025"
   },
   "testComponents": {
     "addTestComponents": "Adicionar Componentes do Exame",
@@ -351,16 +351,16 @@
       "linkedInfo": "Este exame será agrupado com outros exames \"{{testName}}\" nos gráficos de tendência.",
       "notDetermined": "Não determinado",
       "placeholders": {
-        "abbreviation": "p. ex., HGB",
+        "abbreviation": "p.ex., HGB",
         "linkedTest": "Selecione um exame padrão para vincular...",
         "maxValue": "Valor máximo",
         "minValue": "Valor mínimo",
         "notes": "Observações adicionais sobre este resultado de exame",
-        "rangeText": "p. ex., 'Negativo' ou 'Masculino: 13,5-17,5, Feminino: 12,0-15,5'",
+        "rangeText": "p.ex., 'Negativo' ou 'Masculino: 13,5-17,5, Feminino: 12,0-15,5'",
         "result": "Selecionar resultado",
-        "testCode": "p. ex., 718-7",
-        "testName": "p. ex., Hemoglobina",
-        "unit": "p. ex., g/dL",
+        "testCode": "p.ex., 718-7",
+        "testName": "p.ex., Hemoglobina",
+        "unit": "p.ex., g/dL",
         "value": "Digite o valor do exame"
       },
       "title": "Editar Componente do Exame",
@@ -387,12 +387,12 @@
   "testingFacility": {
     "description": "Onde o exame é/foi realizado",
     "label": "Laboratório",
-    "placeholder": "p. ex., Laboratório do Hospital Principal"
+    "placeholder": "p.ex., Laboratório do Hospital Principal"
   },
   "testName": {
     "description": "Nome ou descrição do exame laboratorial",
     "label": "Nome do Exame",
-    "placeholder": "p. ex., Hemograma Completo (HC)"
+    "placeholder": "p.ex., Hemograma Completo (HC)"
   },
   "testNameDescription": "Este é o único campo obrigatório - você pode adicionar mais detalhes depois",
   "testNameLabel": "Nome do Exame Laboratorial",

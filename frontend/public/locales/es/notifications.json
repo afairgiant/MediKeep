@@ -87,7 +87,7 @@
       "name": {
         "description": "Un nombre descriptivo para identificar este canal",
         "label": "Nombre del canal",
-        "placeholder": "ej., Mi servidor de Discord"
+        "placeholder": "por ejemplo, Mi servidor de Discord"
       },
       "title": "Detalles del canal",
       "type": {
@@ -117,13 +117,13 @@
     "noChannels": "No hay canales de notificación configurados",
     "noChannelsHint": "Añada un canal para empezar a recibir notificaciones",
     "notificationsSent": "{{count}} notificaciones enviadas",
-    "sentCount_one": "{{count}} enviados",
+    "sentCount_one": "{{count}} enviado",
     "sentCount_other": "{{count}} enviados",
     "test": "Probar",
     "testError": "Error al enviar la notificación de prueba",
     "testFailed": "Error en la notificación de prueba",
     "testing": "Probando...",
-    "testSuccess": "Notificación de prueba enviada con éxito",
+    "testSuccess": "¡Notificación de prueba enviada con éxito!",
     "title": "Canales de notificación",
     "types": {
       "discord": "Discord",
@@ -165,7 +165,7 @@
     },
     "backup_failed": {
       "description": "Cuando una copia de seguridad falla",
-      "name": "Copia de seguridad fallida"
+      "name": "Error en copia de seguridad"
     },
     "immunization_due": {
       "description": "Cuando una vacunación está próxima",
@@ -250,16 +250,16 @@
       "accessDeniedAdmin": "Acceso denegado: Se requieren privilegios de administrador",
       "accessDeniedRole": "Acceso denegado: Se requiere el rol {{role}}",
       "accessDeniedRoles": "Acceso denegado: Se requiere uno de estos roles: {{roles}}",
-      "accountCreatedSuccess": "Cuenta creada con éxito. Iniciando sesión...",
+      "accountCreatedSuccess": "¡Cuenta creada con éxito! Iniciando sesión...",
       "loginFailed": "Error de inicio de sesión",
       "loginRequired": "Por favor, inicie sesión para acceder a esta página",
-      "loginSuccess": "Inicio de sesión exitoso",
+      "loginSuccess": "¡Inicio de sesión exitoso!",
       "logoutSuccess": "Sesión cerrada con éxito",
       "sessionExpired": "Sesión expirada por inactividad",
       "sessionExpiredLogin": "Sesión expirada. Por favor, inicie sesión de nuevo.",
       "ssoFailed": "Error al iniciar sesión SSO",
-      "userCreatedSuccess": "Cuenta de usuario creada con éxito",
-      "userCreatedWithLinkSuccess": "Cuenta de usuario creada y vinculada con el paciente existente con éxito"
+      "userCreatedSuccess": "¡Cuenta de usuario creada con éxito!",
+      "userCreatedWithLinkSuccess": "¡Usuario creado y vinculado al paciente existente con éxito!"
     },
     "documents": {
       "linkFailed": "Error al vincular el documento",
@@ -270,7 +270,7 @@
     "familySharing": {
       "accessRevoked": "Acceso revocado",
       "invitationFailed": "Error al enviar la invitación",
-      "invitationSent": "Invitación enviada con éxito",
+      "invitationSent": "¡Invitación enviada con éxito!",
       "loadFailed": "Error al cargar la información de uso compartido",
       "revokeFailed": "Error al revocar el acceso"
     },
@@ -279,15 +279,15 @@
     },
     "generic": {
       "allOperationsFailed": "Todas las {{operation}} fallaron. Por favor, inténtelo de nuevo.",
-      "allOperationsSuccess": "Las {{total}} {{operation}} se completaron con éxito",
+      "allOperationsSuccess": "¡Todas las {{total}} {{operation}} se completaron con éxito!",
       "downloadFailed": "Error en la descarga",
       "operationFailed": "Error en la operación",
       "operationFailedTitle": "{{operation}} fallida",
       "operationPartial": "{{success}}/{{total}} {{operation}} completadas con éxito. {{failed}} fallaron.",
       "operationPartialTitle": "{{operation}} completada con errores",
-      "operationSuccess": "{{operation}} completada con éxito",
+      "operationSuccess": "¡{{operation}} completada con éxito!",
       "saveFailed": "Error al guardar",
-      "success": "Éxito",
+      "success": "¡Éxito!",
       "warning": "Advertencia"
     },
     "invitations": {
@@ -302,9 +302,9 @@
       "revokeFailed": "Error al revocar el acceso"
     },
     "labResults": {
-      "addedMessage": "Se añadieron {{count}} componentes al resultado de laboratorio.",
-      "addedSuccess": "Éxito",
-      "addFailed": "Error al añadir los componentes del análisis",
+      "addedMessage": "Se añadieron {{count}} componentes de análisis al resultado de laboratorio.",
+      "addedSuccess": "¡Éxito!",
+      "addFailed": "Error al añadir los componentes de análisis",
       "deletedMessage": "{{name}} ha sido eliminado",
       "deletedSuccess": "Componente eliminado",
       "noTextMessage": "Por favor, pegue el texto de los resultados de laboratorio en el área de entrada.",
@@ -376,7 +376,7 @@
       "completedWithErrors": "Carga completada con errores",
       "documentAdded": "Documento añadido a Paperless",
       "duplicateDocument": "Documento duplicado",
-      "fileUploadedSuccess": "\"{{fileName}}\" subido a Paperless con éxito",
+      "fileUploadedSuccess": "¡\"{{fileName}}\" subido a Paperless con éxito!",
       "fileUploadFailed": "Error en la carga del archivo",
       "paperlessUploadFailed": "Error en la carga a Paperless",
       "partialSuccess": "{{completed}}/{{total}} archivos subidos con éxito. {{failed}} fallaron."
@@ -385,7 +385,7 @@
       "deleteFailed": "Error al eliminar el registro de signos vitales",
       "deleteSuccess": "Registro de signos vitales eliminado con éxito",
       "formErrors": "Por favor, corrija los errores del formulario",
-      "savedSuccess": "Signos vitales {{action}} con éxito",
+      "savedSuccess": "¡Signos vitales {{action}} con éxito!",
       "saveFailed": "Error al {{action}} los signos vitales"
     }
   },

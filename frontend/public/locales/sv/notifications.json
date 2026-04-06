@@ -87,7 +87,7 @@
       "name": {
         "description": "Ett beskrivande namn för att identifiera denna kanal",
         "label": "Kanalnamn",
-        "placeholder": "exempelvis Min Discord-server"
+        "placeholder": "t.ex. Min Discord-server"
       },
       "title": "Kanaldetaljer",
       "type": {

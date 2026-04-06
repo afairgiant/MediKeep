@@ -1,0 +1,414 @@
+{
+  "channels": {
+    "add": "เพิ่มช่องทาง",
+    "configTitle": "การตั้งค่า {{type}}",
+    "confirmDelete": "คุณแน่ใจหรือไม่ว่าต้องการลบช่องทางนี้?",
+    "createError": "ไม่สามารถสร้างช่องทางได้",
+    "createFailed": "ไม่สามารถสร้างช่องทางได้",
+    "createSuccess": "สร้างช่องทางเรียบร้อยแล้ว",
+    "delete": "ลบช่องทาง",
+    "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบช่องทางนี้?",
+    "deleteError": "ไม่สามารถลบช่องทางได้",
+    "deleteFailed": "ไม่สามารถลบช่องทางได้",
+    "deleteSuccess": "ลบช่องทางเรียบร้อยแล้ว",
+    "description": "เพิ่มและจัดการช่องทางการส่งการแจ้งเตือนของคุณ",
+    "discord": {
+      "avatarUrl": {
+        "description": "รูปประจำตัวสำหรับบอทการแจ้งเตือน",
+        "label": "URL รูปประจำตัว (ไม่บังคับ)",
+        "placeholder": "https://example.com/avatar.png"
+      },
+      "username": {
+        "description": "ชื่อที่กำหนดเองสำหรับบอทการแจ้งเตือน",
+        "label": "ชื่อผู้ใช้บอท (ไม่บังคับ)",
+        "placeholder": "MediKeep"
+      },
+      "webhookUrl": {
+        "description": "สร้าง webhook ในการตั้งค่าเซิร์ฟเวอร์ Discord ของคุณ",
+        "label": "URL Webhook",
+        "placeholder": "https://discord.com/api/webhooks/..."
+      }
+    },
+    "edit": "แก้ไขช่องทาง",
+    "email": {
+      "fromEmail": {
+        "description": "ที่อยู่อีเมลผู้ส่ง",
+        "label": "อีเมลผู้ส่ง",
+        "placeholder": "notifications@example.com"
+      },
+      "smtpHost": {
+        "description": "เซิร์ฟเวอร์ SMTP ของผู้ให้บริการอีเมลของคุณ",
+        "label": "เซิร์ฟเวอร์ SMTP",
+        "placeholder": "smtp.gmail.com"
+      },
+      "smtpPassword": {
+        "description": "สำหรับ Gmail ใช้รหัสผ่านแอป",
+        "label": "รหัสผ่าน SMTP",
+        "placeholder": "รหัสผ่านแอปหรือรหัสผ่านอีเมล"
+      },
+      "smtpPort": {
+        "description": "โดยปกติ 587 (TLS) หรือ 465 (SSL)",
+        "label": "พอร์ต SMTP",
+        "placeholder": "587"
+      },
+      "smtpUser": {
+        "description": "ที่อยู่อีเมลหรือชื่อผู้ใช้ของคุณ",
+        "label": "ชื่อผู้ใช้ SMTP",
+        "placeholder": "your-email@gmail.com"
+      },
+      "toEmail": {
+        "description": "ปลายทางการส่งการแจ้งเตือน",
+        "label": "อีเมลปลายทาง",
+        "placeholder": "your-email@example.com"
+      },
+      "useTls": {
+        "description": "เปิดใช้การเข้ารหัส TLS (แนะนำ)",
+        "label": "ใช้ TLS"
+      }
+    },
+    "empty": "ไม่มีช่องทางการแจ้งเตือนที่ตั้งค่าไว้",
+    "emptyHint": "เพิ่มช่องทางเพื่อเริ่มรับการแจ้งเตือนผ่าน Discord, อีเมล, Gotify หรือ Webhook",
+    "errors": {
+      "fieldRequired": "จำเป็นต้องระบุ {{field}}",
+      "nameRequired": "จำเป็นต้องระบุชื่อช่องทาง"
+    },
+    "fields": {
+      "enabled": "เปิดใช้งานช่องทางนี้",
+      "name": "ชื่อช่องทาง",
+      "namePlaceholder": "เซิร์ฟเวอร์ Discord ของฉัน",
+      "type": "ประเภทช่องทาง"
+    },
+    "form": {
+      "configSection": "การตั้งค่าช่องทาง",
+      "enabled": {
+        "description": "รับการแจ้งเตือนผ่านช่องทางนี้",
+        "label": "เปิดใช้งานช่องทาง"
+      },
+      "name": {
+        "description": "ชื่อที่เป็นมิตรเพื่อระบุช่องทางนี้",
+        "label": "ชื่อช่องทาง",
+        "placeholder": "เช่น เซิร์ฟเวอร์ Discord ของฉัน"
+      },
+      "title": "รายละเอียดช่องทาง",
+      "type": {
+        "description": "บริการที่ใช้ส่งการแจ้งเตือน",
+        "label": "ประเภทช่องทาง",
+        "placeholder": "เลือกประเภทช่องทาง"
+      }
+    },
+    "gotify": {
+      "appToken": {
+        "description": "สร้างแอปพลิเคชันใน Gotify เพื่อรับโทเค็น",
+        "label": "โทเค็นแอป",
+        "placeholder": "โทเค็นแอปพลิเคชันจาก Gotify"
+      },
+      "priority": {
+        "description": "ระดับความสำคัญของข้อความ (1-10, ค่าเริ่มต้น 5)",
+        "placeholder": "5"
+      },
+      "serverUrl": {
+        "description": "URL เซิร์ฟเวอร์ Gotify ของคุณ",
+        "label": "URL เซิร์ฟเวอร์",
+        "placeholder": "https://gotify.example.com"
+      }
+    },
+    "lastUsed": "ใช้ครั้งล่าสุด",
+    "loadError": "ไม่สามารถโหลดรายละเอียดช่องทางได้",
+    "noChannels": "ไม่มีช่องทางการแจ้งเตือนที่ตั้งค่าไว้",
+    "noChannelsHint": "เพิ่มช่องทางเพื่อเริ่มรับการแจ้งเตือน",
+    "notificationsSent": "ส่งการแจ้งเตือน {{count}} ครั้ง",
+    "sentCount_one": "ส่ง {{count}} ครั้ง",
+    "sentCount_other": "ส่ง {{count}} ครั้ง",
+    "test": "ทดสอบ",
+    "testError": "ไม่สามารถส่งการแจ้งเตือนทดสอบได้",
+    "testFailed": "การแจ้งเตือนทดสอบล้มเหลว",
+    "testing": "กำลังทดสอบ...",
+    "testSuccess": "ส่งการแจ้งเตือนทดสอบเรียบร้อยแล้ว!",
+    "title": "ช่องทางการแจ้งเตือน",
+    "types": {
+      "discord": "Discord",
+      "gotify": "Gotify",
+      "webhook": "Webhook"
+    },
+    "updateError": "ไม่สามารถอัปเดตช่องทางได้",
+    "updateFailed": "ไม่สามารถอัปเดตช่องทางได้",
+    "updateSuccess": "อัปเดตช่องทางเรียบร้อยแล้ว",
+    "verified": "ยืนยันแล้ว",
+    "webhook": {
+      "authToken": {
+        "description": "โทเค็นการยืนยันตัวตนสำหรับ webhook",
+        "label": "โทเค็นยืนยันตัวตน (ไม่บังคับ)",
+        "placeholder": "Bearer token หรือ API key"
+      },
+      "headers": {
+        "description": "อ็อบเจ็กต์ JSON พร้อมส่วนหัวที่กำหนดเอง",
+        "label": "ส่วนหัวที่กำหนดเอง (ไม่บังคับ)",
+        "placeholder": "{\"Authorization\": \"Bearer token\"}"
+      },
+      "method": {
+        "description": "วิธี HTTP สำหรับคำขอ webhook",
+        "label": "วิธี HTTP"
+      },
+      "url": {
+        "description": "URL สำหรับรับข้อมูลการแจ้งเตือน",
+        "label": "URL Webhook",
+        "placeholder": "https://api.example.com/webhook"
+      }
+    }
+  },
+  "description": "ตั้งค่าวิธีการรับการแจ้งเตือนสำหรับเหตุการณ์สำคัญ",
+  "error": "ไม่สามารถโหลดการตั้งค่าการแจ้งเตือนได้",
+  "events": {
+    "backup_completed": {
+      "description": "เมื่อการสำรองข้อมูลเสร็จสมบูรณ์",
+      "name": "สำรองข้อมูลเสร็จสิ้น"
+    },
+    "backup_failed": {
+      "description": "เมื่อการสำรองข้อมูลล้มเหลว",
+      "name": "สำรองข้อมูลล้มเหลว"
+    },
+    "immunization_due": {
+      "description": "เมื่อการฉีดวัคซีนใกล้ครบกำหนด",
+      "name": "การฉีดวัคซีนใกล้ครบกำหนด"
+    },
+    "immunization_overdue": {
+      "description": "เมื่อการฉีดวัคซีนเกินกำหนด",
+      "name": "การฉีดวัคซีนเกินกำหนด"
+    },
+    "invitation_accepted": {
+      "description": "เมื่อคำเชิญแชร์ของคุณได้รับการตอบรับ",
+      "name": "คำเชิญได้รับการตอบรับ"
+    },
+    "invitation_received": {
+      "description": "เมื่อมีคนแชร์บันทึกให้คุณ",
+      "name": "ได้รับคำเชิญ"
+    },
+    "lab_result_abnormal": {
+      "description": "เมื่อผลการตรวจทางห้องปฏิบัติการอยู่นอกช่วงปกติ",
+      "name": "ผลการตรวจผิดปกติ"
+    },
+    "lab_result_available": {
+      "description": "เมื่อมีผลการตรวจทางห้องปฏิบัติการใหม่",
+      "name": "ผลการตรวจพร้อมใช้งาน"
+    },
+    "login_from_new_device": {
+      "description": "เมื่อบัญชีของคุณถูกเข้าใช้จากอุปกรณ์ใหม่",
+      "name": "เข้าสู่ระบบจากอุปกรณ์ใหม่"
+    },
+    "password_changed": {
+      "description": "เมื่อรหัสผ่านของคุณถูกเปลี่ยนแปลง",
+      "name": "เปลี่ยนรหัสผ่านแล้ว"
+    },
+    "share_revoked": {
+      "description": "เมื่อการเข้าถึงบันทึกที่แชร์ถูกเพิกถอน",
+      "name": "เพิกถอนการแชร์"
+    },
+    "test_notification": {
+      "description": "การแจ้งเตือนทดสอบด้วยตนเอง",
+      "name": "การแจ้งเตือนทดสอบ"
+    }
+  },
+  "history": {
+    "description": "การแจ้งเตือนล่าสุดที่ส่งผ่านช่องทางของคุณ",
+    "fields": {
+      "channel": "ช่องทาง"
+    },
+    "loading": "กำลังโหลดประวัติ...",
+    "noHistory": "ยังไม่มีการแจ้งเตือนที่ส่ง",
+    "noHistoryHint": "การแจ้งเตือนจะปรากฏที่นี่เมื่อส่งแล้ว",
+    "page": "หน้า {{current}} จาก {{total}}",
+    "showLess": "แสดงน้อยลง",
+    "showMore": "แสดงเพิ่มเติม",
+    "status": {
+      "failed": "ล้มเหลว",
+      "sent": "ส่งแล้ว"
+    },
+    "title": "ประวัติการแจ้งเตือน"
+  },
+  "loading": "กำลังโหลดการตั้งค่าการแจ้งเตือน...",
+  "preferences": {
+    "categories": {
+      "collaboration": "การแชร์และความร่วมมือ",
+      "medical": "เหตุการณ์ทางการแพทย์",
+      "other": "เหตุการณ์อื่นๆ",
+      "security": "การแจ้งเตือนความปลอดภัย",
+      "sharing": "การแชร์และคำเชิญ",
+      "system": "เหตุการณ์ระบบ"
+    },
+    "comingSoon": "เร็วๆ นี้",
+    "description": "เลือกเหตุการณ์ที่จะสร้างการแจ้งเตือนในแต่ละช่องทาง",
+    "loading": "กำลังโหลดค่ากำหนด...",
+    "noChannels": "เพิ่มช่องทางการแจ้งเตือนก่อนเพื่อตั้งค่าเหตุการณ์",
+    "saveFailed": "ไม่สามารถบันทึกค่ากำหนดได้",
+    "saveSuccess": "บันทึกค่ากำหนดแล้ว",
+    "title": "การแจ้งเตือนเหตุการณ์",
+    "updateError": "ไม่สามารถอัปเดตค่ากำหนดได้"
+  },
+  "title": "การตั้งค่าการแจ้งเตือน",
+  "toasts": {
+    "auth": {
+      "accessDeniedAdmin": "ปฏิเสธการเข้าถึง: จำเป็นต้องมีสิทธิ์ผู้ดูแลระบบ",
+      "accessDeniedRole": "ปฏิเสธการเข้าถึง: จำเป็นต้องมีบทบาท {{role}}",
+      "accessDeniedRoles": "ปฏิเสธการเข้าถึง: จำเป็นต้องมีบทบาทใดบทบาทหนึ่งต่อไปนี้: {{roles}}",
+      "accountCreatedSuccess": "สร้างบัญชีเรียบร้อยแล้ว! กำลังเข้าสู่ระบบ...",
+      "loginFailed": "เข้าสู่ระบบไม่สำเร็จ",
+      "loginRequired": "กรุณาเข้าสู่ระบบเพื่อเข้าถึงหน้านี้",
+      "loginSuccess": "เข้าสู่ระบบสำเร็จ!",
+      "logoutSuccess": "ออกจากระบบเรียบร้อยแล้ว",
+      "sessionExpired": "หมดเวลาเซสชันเนื่องจากไม่มีกิจกรรม",
+      "sessionExpiredLogin": "หมดเวลาเซสชัน กรุณาเข้าสู่ระบบอีกครั้ง",
+      "ssoFailed": "ไม่สามารถเริ่มการเข้าสู่ระบบ SSO ได้",
+      "userCreatedSuccess": "สร้างบัญชีผู้ใช้เรียบร้อยแล้ว!",
+      "userCreatedWithLinkSuccess": "สร้างผู้ใช้และเชื่อมโยงกับคนไข้ที่มีอยู่เรียบร้อยแล้ว!"
+    },
+    "documents": {
+      "linkFailed": "ไม่สามารถเชื่อมโยงเอกสารได้",
+      "linkSuccess": "เชื่อมโยงเอกสารเรียบร้อยแล้ว",
+      "unlinkFailed": "ไม่สามารถยกเลิกการเชื่อมโยงเอกสารได้",
+      "unlinkSuccess": "ยกเลิกการเชื่อมโยงเอกสารเรียบร้อยแล้ว"
+    },
+    "familySharing": {
+      "accessRevoked": "เพิกถอนการเข้าถึงแล้ว",
+      "invitationFailed": "ไม่สามารถส่งคำเชิญได้",
+      "invitationSent": "ส่งคำเชิญเรียบร้อยแล้ว!",
+      "loadFailed": "ไม่สามารถโหลดข้อมูลการแชร์ได้",
+      "revokeFailed": "ไม่สามารถเพิกถอนการเข้าถึงได้"
+    },
+    "files": {
+      "downloadFailed": "ดาวน์โหลดไฟล์ล้มเหลว"
+    },
+    "generic": {
+      "allOperationsFailed": "{{operation}} ทั้งหมดล้มเหลว กรุณาลองใหม่อีกครั้ง",
+      "allOperationsSuccess": "{{operation}} ทั้ง {{total}} รายการเสร็จสมบูรณ์!",
+      "downloadFailed": "ดาวน์โหลดล้มเหลว",
+      "operationFailed": "การดำเนินการล้มเหลว",
+      "operationFailedTitle": "{{operation}} ล้มเหลว",
+      "operationPartial": "{{operation}} {{success}}/{{total}} รายการเสร็จสมบูรณ์ ล้มเหลว {{failed}} รายการ",
+      "operationPartialTitle": "{{operation}} เสร็จสิ้นแต่มีข้อผิดพลาด",
+      "operationSuccess": "{{operation}} เสร็จสมบูรณ์!",
+      "saveFailed": "บันทึกล้มเหลว",
+      "success": "สำเร็จ!",
+      "warning": "คำเตือน"
+    },
+    "invitations": {
+      "accessRevoked": "เพิกถอนการเข้าถึงแล้ว",
+      "accessRevokedMessage": "การเข้าถึงถูกเพิกถอนแล้ว",
+      "alreadyRevoked": "เพิกถอนแล้ว",
+      "alreadyRevokedMessage": "คำเชิญนี้ถูกเพิกถอนไปแล้ว",
+      "cancelFailed": "ไม่สามารถยกเลิกคำเชิญได้",
+      "cancelled": "ยกเลิกคำเชิญแล้ว",
+      "cancelledMessage": "ยกเลิกคำเชิญเรียบร้อยแล้ว",
+      "respondFailed": "ไม่สามารถตอบรับคำเชิญได้",
+      "revokeFailed": "ไม่สามารถเพิกถอนการเข้าถึงได้"
+    },
+    "labResults": {
+      "addedMessage": "เพิ่มองค์ประกอบการทดสอบ {{count}} รายการในผลการตรวจทางห้องปฏิบัติการ",
+      "addedSuccess": "สำเร็จ!",
+      "addFailed": "ไม่สามารถเพิ่มองค์ประกอบการทดสอบได้",
+      "deletedMessage": "ลบ {{name}} แล้ว",
+      "deletedSuccess": "ลบองค์ประกอบแล้ว",
+      "noTextMessage": "กรุณาวางข้อความผลการตรวจทางห้องปฏิบัติการในพื้นที่ใส่ข้อมูล",
+      "noTextToParse": "ไม่มีข้อความให้วิเคราะห์",
+      "parsedCount": "พบองค์ประกอบการทดสอบ {{count}} รายการ ตรวจสอบได้ในแท็บตัวอย่าง",
+      "parseWarning": "ไม่สามารถวิเคราะห์บางบรรทัดได้",
+      "templateApplied": "ใช้แม่แบบแล้ว",
+      "templateAppliedMessage": "เพิ่มองค์ประกอบ {{count}} รายการจากแม่แบบ \"{{name}}\"",
+      "textParsed": "วิเคราะห์ข้อความแล้ว",
+      "trendExportFailed": "ไม่สามารถส่งออกแผนภูมิได้",
+      "trendExportSuccess": "ส่งออกแผนภูมิเรียบร้อยแล้ว",
+      "updateFailed": "ไม่สามารถอัปเดตองค์ประกอบได้"
+    },
+    "patient": {
+      "createdSuccess": "สร้าง {{name}} เรียบร้อยแล้ว",
+      "deletedNoOthers": "ลบ {{name}} เรียบร้อยแล้ว ไม่มีคนไข้รายอื่น",
+      "deletedSuccess": "ลบ {{name}} เรียบร้อยแล้ว",
+      "deletedSwitched": "ลบ {{name}} เรียบร้อยแล้ว เปลี่ยนไปที่ {{fallbackName}}",
+      "deleteFailed": "ลบล้มเหลว: {{message}}",
+      "deleteOwnOnly": "คุณสามารถลบได้เฉพาะคนไข้ที่คุณเป็นเจ้าของ",
+      "nowViewing": "กำลังดู {{name}}",
+      "removeAccessFailed": "เอาการเข้าถึงออกล้มเหลว: {{message}}",
+      "removedAccess": "เอาการเข้าถึง {{name}} ออกแล้ว",
+      "removeOwnOnly": "คุณไม่สามารถเอาการเข้าถึงคนไข้ที่คุณเป็นเจ้าของออกได้",
+      "switchFailed": "เปลี่ยนล้มเหลว: {{message}}",
+      "updatedSuccess": "อัปเดต {{name}} เรียบร้อยแล้ว"
+    },
+    "photo": {
+      "photoBeingUploaded": "กำลังอัปโหลดรูปภาพ กรุณารอให้เสร็จสิ้น",
+      "pleaseWait": "กรุณารอ",
+      "uploadSuccess": "อัปโหลดรูปภาพเรียบร้อยแล้ว"
+    },
+    "reports": {
+      "noRecordsMessage": "กรุณาเลือกอย่างน้อยหนึ่งบันทึกจากหมวดหมู่ด้านล่างเพื่อสร้างรายงาน",
+      "noRecordsSelected": "ไม่ได้เลือกบันทึก",
+      "templateDeleted": "ลบแม่แบบเรียบร้อยแล้ว",
+      "templateDeleteFailed": "ไม่สามารถลบแม่แบบได้",
+      "templateLoaded": "โหลดแม่แบบ \"{{name}}\" แล้ว",
+      "templateNameRequired": "จำเป็นต้องระบุชื่อแม่แบบ",
+      "templateSaved": "บันทึกแม่แบบเรียบร้อยแล้ว",
+      "templateSaveFailed": "ไม่สามารถบันทึกแม่แบบได้",
+      "validationError": "ข้อผิดพลาดการตรวจสอบ"
+    },
+    "settings": {
+      "cleanupComplete": "การทำความสะอาดเสร็จสิ้น: ทำความสะอาด {{cleaned}} ไฟล์ ลบ {{deleted}} ไฟล์",
+      "cleanupFailed": "ไม่สามารถทำความสะอาดไฟล์ได้ กรุณาลองใหม่ภายหลัง",
+      "noOutOfSync": "ไม่พบไฟล์ที่ไม่ซิงค์ให้ทำความสะอาด",
+      "sessionTimeoutUpdated": "อัปเดตเวลาหมดเซสชันเป็น {{minutes}} นาที เซสชันของคุณได้รับการรีเฟรชแล้ว"
+    },
+    "sharing": {
+      "accessRevoked": "เพิกถอนการเข้าถึงสำหรับผู้ใช้ {{userId}}",
+      "cancelFailed": "ไม่สามารถยกเลิกคำเชิญได้: {{message}}",
+      "invalidJson": "รูปแบบ JSON ไม่ถูกต้องใน {{fieldName}} กรุณาตรวจสอบไวยากรณ์",
+      "invitationCancelled": "ยกเลิกคำเชิญเรียบร้อยแล้ว",
+      "invitationFailed": "คำเชิญล้มเหลว: {{message}}",
+      "invitationSent": "ส่งคำเชิญไปยัง {{recipient}} เรียบร้อยแล้ว",
+      "revokeFailed": "เพิกถอนล้มเหลว: {{message}}",
+      "shareUpdated": "อัปเดตการแชร์คนไข้เรียบร้อยแล้ว",
+      "updateFailed": "อัปเดตล้มเหลว: {{message}}"
+    },
+    "tagSearch": {
+      "loadFailed": "ไม่สามารถโหลดแท็กยอดนิยมได้",
+      "noTagsSelected": "กรุณาเลือกอย่างน้อยหนึ่งแท็กเพื่อค้นหา",
+      "noTagsSelectedTitle": "ไม่ได้เลือกแท็ก",
+      "searchFailed": "ไม่สามารถค้นหาบันทึกตามแท็กได้"
+    },
+    "upload": {
+      "backgroundProcessing": "\"{{fileName}}\" กำลังดำเนินการในเบื้องหลัง คุณจะได้รับการแจ้งเตือนเมื่อเสร็จสิ้น",
+      "completedWithErrors": "อัปโหลดเสร็จสิ้นแต่มีข้อผิดพลาด",
+      "documentAdded": "เพิ่มเอกสารใน Paperless แล้ว",
+      "duplicateDocument": "เอกสารซ้ำ",
+      "fileUploadedSuccess": "อัปโหลด \"{{fileName}}\" ไปยัง Paperless เรียบร้อยแล้ว!",
+      "fileUploadFailed": "อัปโหลดไฟล์ล้มเหลว",
+      "paperlessUploadFailed": "อัปโหลด Paperless ล้มเหลว",
+      "partialSuccess": "อัปโหลด {{completed}}/{{total}} ไฟล์เรียบร้อยแล้ว ล้มเหลว {{failed}} ไฟล์"
+    },
+    "vitals": {
+      "deleteFailed": "ไม่สามารถลบบันทึกสัญญาณชีพได้",
+      "deleteSuccess": "ลบบันทึกสัญญาณชีพเรียบร้อยแล้ว",
+      "formErrors": "กรุณาแก้ไขข้อผิดพลาดในฟอร์ม",
+      "savedSuccess": "{{action}}สัญญาณชีพเรียบร้อยแล้ว!",
+      "saveFailed": "ไม่สามารถ{{action}}สัญญาณชีพได้"
+    }
+  },
+  "validation": {
+    "appTokenRequired": "จำเป็นต้องระบุโทเค็นแอป",
+    "fromEmailInvalid": "รูปแบบอีเมลไม่ถูกต้อง",
+    "fromEmailRequired": "จำเป็นต้องระบุอีเมลผู้ส่ง",
+    "headersInvalid": "ส่วนหัวต้องเป็น JSON ที่ถูกต้อง",
+    "nameRequired": "จำเป็นต้องระบุชื่อช่องทาง",
+    "nameTooLong": "ชื่อต้องไม่เกิน 100 ตัวอักษร",
+    "serverUrlInvalid": "รูปแบบ URL ไม่ถูกต้อง",
+    "serverUrlRequired": "จำเป็นต้องระบุ URL เซิร์ฟเวอร์",
+    "smtpHostRequired": "จำเป็นต้องระบุเซิร์ฟเวอร์ SMTP",
+    "smtpPasswordRequired": "จำเป็นต้องระบุรหัสผ่าน SMTP",
+    "smtpPortInvalid": "พอร์ตต้องอยู่ระหว่าง 1 ถึง 65535",
+    "smtpPortRequired": "จำเป็นต้องระบุพอร์ต SMTP",
+    "smtpUserRequired": "จำเป็นต้องระบุชื่อผู้ใช้ SMTP",
+    "toEmailInvalid": "รูปแบบอีเมลไม่ถูกต้อง",
+    "toEmailRequired": "จำเป็นต้องระบุอีเมลปลายทาง",
+    "typeRequired": "จำเป็นต้องระบุประเภทช่องทาง",
+    "urlInvalid": "รูปแบบ URL ไม่ถูกต้อง",
+    "urlRequired": "จำเป็นต้องระบุ URL Webhook",
+    "webhookUrlInvalid": "รูปแบบ URL Webhook ไม่ถูกต้อง",
+    "webhookUrlRequired": "จำเป็นต้องระบุ URL Webhook"
+  }
+}

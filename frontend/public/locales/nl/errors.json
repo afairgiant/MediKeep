@@ -1,12 +1,12 @@
 {
   "alert": {
-    "errorCount": "{{count}} fout",
-    "errorCount_one": "{{count}} fout",
-    "errorCount_other": "{{count}} fouten",
+    "errorCount": "{{count}} Fout",
+    "errorCount_one": "",
+    "errorCount_other": "{{count}} Fouten",
     "formError": "Formulierfout",
     "highPriority": "{{count}} hoge prioriteit",
-    "highPriority_one": "{{count}} hoge prioriteit",
-    "highPriority_other": "{{count}} hoge prioriteit",
+    "highPriority_one": "",
+    "highPriority_other": "",
     "suggestions": "Suggesties:"
   },
   "boundary": {
@@ -17,7 +17,7 @@
     "reloadPage": "Pagina herladen",
     "somethingWentWrong": "Er is iets misgegaan",
     "tryAgain": "Opnieuw proberen",
-    "unexpectedError": "Onze excuses, maar er is een onverwachte fout opgetreden in het medisch dossiersysteem."
+    "unexpectedError": "Onze excuses, maar er is iets onverwachts gebeurd in het medisch dossiersysteem."
   },
   "file": {
     "deleteFailed": "Bestand verwijderen mislukt. Probeer het opnieuw.",
@@ -28,8 +28,8 @@
   "form": {
     "conditionNotSelected": "Selecteer een aandoening",
     "entityNotFound": "Het gevraagde item kon niet worden gevonden.",
-    "equipmentFieldsRequired": "Naam en type van het apparaat zijn verplicht",
-    "equipmentNotSelected": "Selecteer minimaal één apparaat",
+    "equipmentFieldsRequired": "Naam en type van de apparatuur zijn verplicht",
+    "equipmentNotSelected": "Selecteer minimaal één apparatuur",
     "invalidDate": "Voer een geldige datum in.",
     "invalidEmail": "Voer een geldig e-mailadres in.",
     "invalidPhone": "Voer een geldig telefoonnummer in.",

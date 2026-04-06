@@ -42,7 +42,7 @@
     "passwordLabel": "Senha",
     "sessionStorage": "Usando armazenamento de sessão para token",
     "title": "Conexão Paperless-ngx",
-    "urlHelp": "A URL da sua instância do Paperless-ngx (por exemplo, https://paperless.exemplo.com)",
+    "urlHelp": "A URL da sua instância do Paperless-ngx (p. ex., https://paperless.exemplo.com)",
     "urlLabel": "URL do Servidor",
     "usernameHelp": "Seu nome de usuário do paperless-ngx.",
     "usernameLabel": "Nome de Usuário",

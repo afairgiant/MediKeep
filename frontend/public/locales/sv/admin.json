@@ -100,7 +100,7 @@
       "restoreSafetyNote": "En säkerhetskopia skapas automatiskt innan återställningsprocessen påbörjas.",
       "restoreWarning": "Detta kommer att återställa från säkerhetskopia och ERSÄTTA aktuell data!",
       "stayOnSettings": "Stanna på inställningar",
-      "typeCleanupToConfirm": "Skriv <strong>CLEANUP</strong> för att bekräfta",
+      "typeCleanupToConfirm": "Skriv <strong>RENSNING</strong> för att bekräfta",
       "unsavedChanges": "Osparade ändringar",
       "unsavedWarning": "Du har osparade ändringar i dina lagringsinställningar. Om du lämnar denna flik försvinner dina ändringar."
     },
@@ -480,10 +480,10 @@
     "searchResult_one": "{{count}} resultat för \"{{query}}\"",
     "searchResult_other": "{{count}} resultat för \"{{query}}\"",
     "selected": "{{count}} markerade",
-    "selected_one": "{{count}} vald",
-    "selected_other": "{{count}} valda",
+    "selected_one": "{{count}} markerad",
+    "selected_other": "{{count}} markerade",
     "toggleColumnVisibility": "Växla kolumnsynlighet",
-    "typeDeleteToConfirm": "Skriv <strong>DELETE</strong> för att bekräfta",
+    "typeDeleteToConfirm": "Skriv <strong>RADERA</strong> för att bekräfta",
     "usernameChangeLogout": "Detta loggar ut dig omedelbart och du måste logga in igen med det nya användarnamnet.",
     "usernameChangeText": "Du är på väg att ändra ditt eget användarnamn från <strong>\"{{oldUsername}}\"</strong> till <strong>\"{{newUsername}}\"</strong>.",
     "usernameChangeWarning": "Varning om ändring av användarnamn",
@@ -518,7 +518,7 @@
   },
   "shared": {
     "dark": "mörkt",
-    "healthy": "frisk",
+    "healthy": "hälsosam",
     "info": "Info",
     "light": "ljust"
   },

@@ -3,7 +3,7 @@
     "encounters": "Medische consulten"
   },
   "fields": {
-    "prescribingProvider": "Voorschrijvend arts",
+    "prescribingProvider": "Voorschrijvend zorgverlener",
     "allergen": "Allergeen",
     "reaction": "Reactie",
     "bloodPressure": "Bloeddruk",
@@ -23,10 +23,10 @@
     "insuranceProvider": "Verzekeraar",
     "coverageType": "Dekkingstype",
     "isPrimary": "Primair contact",
-    "purpose": "Indicatie",
+    "purpose": "Doel",
     "prescribedBy": "Voorgeschreven door",
     "quantity": "Hoeveelheid",
-    "refills": "Hervullingen",
+    "refills": "Herhalingen",
     "forConditions": "Voor aandoening(en)",
     "started": "Gestart",
     "ended": "Beëindigd",
@@ -41,14 +41,14 @@
     "injuryName": "Naam letsel",
     "onset": "Begin",
     "verification": "Verificatie",
-    "managingProvider": "Behandelend arts",
+    "managingProvider": "Behandelend zorgverlener",
     "performedBy": "Uitgevoerd door",
     "anesthesia": "Anesthesie",
-    "followUpRequired": "Vervolgafspraak vereist",
+    "followUpRequired": "Follow-up vereist",
     "findings": "Bevindingen",
     "clinicalDiagnosis": "Klinische diagnose",
     "expectedOutcome": "Verwacht resultaat",
-    "followUp": "Vervolg",
+    "followUp": "Follow-up",
     "adverseReaction": "Bijwerking",
     "medicationsPrescribed": "Voorgeschreven medicatie",
     "period": "Periode"
@@ -56,8 +56,8 @@
   "report": {
     "recordsSummary": "Dit rapport bevat {{total}} records in {{categories}} categorieën.",
     "recordsByCategory": "Records per categorie",
-    "record": "Dossier",
-    "records": "dossiers",
+    "record": "Record",
+    "records": "records",
     "generatedOn": "Gegenereerd op",
     "emergencyInformation": "Noodinformatie",
     "reportSummary": "Rapportsamenvatting",
@@ -95,7 +95,7 @@
     "primaryInsurance": "Primaire verzekering",
     "secondaryInsurance": "Secundaire/aanvullende verzekering",
     "trend": "Trend",
-    "trendChartTitle": "{{name}} - Trend",
+    "trendChartTitle": "{{name}} trend",
     "notice": "Mededeling"
   }
 }

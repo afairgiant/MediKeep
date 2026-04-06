@@ -42,7 +42,7 @@
     "form": {
       "createCondition": "Crear condición",
       "descriptions": {
-        "codeDescription": "Descripción legible del código médico",
+        "codeDescription": "Descripción legible de los códigos médicos",
         "conditionName": "Nombre alternativo opcional",
         "diagnosis": "Diagnóstico o condición principal",
         "endDate": "Cuándo finalizó la condición (si corresponde)",
@@ -104,7 +104,7 @@
     "card": {
       "address": "Dirección:",
       "email": "Correo electrónico:",
-      "notes": "Notas",
+      "notes": "📝 Notas",
       "phone": "Teléfono:",
       "primary": "PRINCIPAL",
       "relationship": "Parentesco:",
@@ -123,10 +123,10 @@
       "primary": "Principal"
     },
     "viewModal": {
-      "contactInfo": "Información de contacto",
+      "contactInfo": "📞 Información de contacto",
       "editContact": "Editar contacto",
       "icon": "🚨",
-      "notes": "Notas",
+      "notes": "📝 Notas",
       "primaryPhone": "Teléfono principal",
       "secondaryPhone": "Teléfono secundario",
       "title": "Detalles del contacto de emergencia"
@@ -284,8 +284,8 @@
       "description": "Estado actual"
     },
     "tags": {
-      "description": "Agregar etiquetas para encontrar este registro más tarde",
-      "placeholder": "Agregar etiquetas para organizar este registro"
+      "description": "Añada etiquetas para ayudar a organizar y buscar este registro más tarde",
+      "placeholder": "Agregar etiquetas para organizar y encontrar este registro"
     }
   },
   "filters": {
@@ -560,7 +560,7 @@
     "selectPurpose": "Seleccionar propósito",
     "selectVisit": "Seleccionar visita"
   },
-  "noResults": "No se encontraron médicos",
+  "noResults": "No se encontraron profesionales",
   "pagination": {
     "itemsPerPage": "Elementos por página",
     "next": "Siguiente",
@@ -1066,16 +1066,16 @@
     },
     "createTag": "Crear etiqueta",
     "deleteModal": {
-      "description": "Esto eliminará la etiqueta de los {{count}} registros. Esta acción no se puede deshacer.",
+      "description": "Esto eliminará la etiqueta de todos los {{count}} registros. Esta acción no se puede deshacer.",
       "description_one": "Esto eliminará la etiqueta de {{count}} registro. Esta acción no se puede deshacer.",
-      "description_other": "Esto eliminará la etiqueta de los {{count}} registros. Esta acción no se puede deshacer.",
+      "description_other": "Esto eliminará la etiqueta de todos los {{count}} registros. Esta acción no se puede deshacer.",
       "message": "¿Está seguro de que desea eliminar la etiqueta \"{{tag}}\"?"
     },
     "editModal": {
       "colorLabel": "Color de etiqueta",
-      "description": "Esto renombrará la etiqueta en los {{count}} registros.",
+      "description": "Esto renombrará la etiqueta en todos los {{count}} registros.",
       "description_one": "Esto renombrará la etiqueta en {{count}} registro.",
-      "description_other": "Esto renombrará la etiqueta en los {{count}} registros.",
+      "description_other": "Esto renombrará la etiqueta en todos los {{count}} registros.",
       "placeholder": "Introduzca el nuevo nombre de la etiqueta...",
       "submit": "Guardar",
       "title": "Editar etiqueta"
@@ -1097,9 +1097,9 @@
     "noTagsSearch": "Ninguna etiqueta coincide con su búsqueda.",
     "pressEnterToAdd": "Presione Enter para añadir una etiqueta",
     "replaceModal": {
-      "description": "Esto reemplazará \"{{oldTag}}\" con \"{{newTag}}\" en los {{count}} registros.",
+      "description": "Esto reemplazará \"{{oldTag}}\" con \"{{newTag}}\" en todos los {{count}} registros.",
       "description_one": "Esto reemplazará \"{{oldTag}}\" con \"{{newTag}}\" en {{count}} registro.",
-      "description_other": "Esto reemplazará \"{{oldTag}}\" con \"{{newTag}}\" en los {{count}} registros.",
+      "description_other": "Esto reemplazará \"{{oldTag}}\" con \"{{newTag}}\" en todos los {{count}} registros.",
       "label": "Reemplazar con",
       "placeholder": "Introduzca el nombre de la etiqueta de reemplazo...",
       "submit": "Reemplazar etiqueta",
@@ -1111,7 +1111,7 @@
       "deleted": "Etiqueta \"{{tag}}\" eliminada exitosamente",
       "renamed": "\"{{oldTag}}\" renombrada exitosamente a \"{{newTag}}\"",
       "replaced": "\"{{oldTag}}\" reemplazada exitosamente con \"{{newTag}}\"",
-      "updated": "Etiqueta \"{{tag}}\" actualizada correctamente"
+      "updated": "Etiqueta \"{{tag}}\" actualizada exitosamente"
     },
     "table": {
       "usageCount": "Cantidad de usos",

@@ -3,11 +3,11 @@
     "buttons": {
       "addRecords": "Lägg till journalhandlingar",
       "clearSelections": "Rensa alla val",
-      "generateReport": "Skapa rapport ({{count}} handlingar)",
-      "generateReport_one": "Skapa rapport ({{count}} handling)",
-      "generateReport_other": "Skapa rapport ({{count}} handlingar)",
-      "generateReportChartsOnly": "Skapa rapport ({{chartCount}} diagram)",
-      "generateReportWithCharts": "Skapa rapport ({{recordCount}} handlingar, {{chartCount}} diagram)",
+      "generateReport": "Generera rapport ({{count}} handlingar)",
+      "generateReport_one": "Generera rapport ({{count}} handling)",
+      "generateReport_other": "Generera rapport ({{count}} handlingar)",
+      "generateReportChartsOnly": "Generera rapport ({{chartCount}} diagram)",
+      "generateReportWithCharts": "Generera rapport ({{recordCount}} handlingar, {{chartCount}} diagram)",
       "selectAll": "Välj alla handlingar"
     },
     "configuration": {
@@ -51,11 +51,11 @@
       "dateTo": "Till",
       "emptyState": "Ingen trenddata tillgänglig. Lägg till vitala parametrar eller laboratorieresultat för att aktivera trenddiagram.",
       "labTestCharts": {
-        "description": "Sök och välj laboratorietester att kartlägga",
+        "description": "Sök och välj laboratorietester för diagram",
         "searchPlaceholder": "Sök laboratorietester...",
         "title": "Laboratorietestdiagram"
       },
-      "maxReached": "Maximum 10 diagram uppnått",
+      "maxReached": "Maximalt 10 diagram uppnått",
       "recordCount": "{{count}} handlingar",
       "recordCount_one": "{{count}} handling",
       "recordCount_other": "{{count}} handlingar",
@@ -64,7 +64,7 @@
       "selectedCharts_one": "Valda diagram ({{count}})",
       "selectedCharts_other": "Valda diagram ({{count}})",
       "vitalCharts": {
-        "description": "Välj vitala parametrar att kartlägga",
+        "description": "Välj vitala parametrar för diagram",
         "title": "Diagram för vitala parametrar"
       }
     }

@@ -359,7 +359,7 @@
     "title": "Medizinische Akten Admin"
   },
   "health": {
-    "applicationUptime": "Anwendungsverfügbarkeit",
+    "applicationUptime": "Anwendungslaufzeit",
     "database": {
       "activeUsers": "Aktive Benutzer",
       "connectionStatus": "Verbindungsstatus",
@@ -517,10 +517,10 @@
     }
   },
   "shared": {
-    "dark": "Dunkel",
+    "dark": "dunkel",
     "healthy": "gesund",
     "info": "Info",
-    "light": "Hell"
+    "light": "hell"
   },
   "sidebar": {
     "adminNavigation": "Admin-Navigation",
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Datei dauerhaft löschen",
     "purgedDirectories_one": "in {{count}} Verzeichnis",
     "purgedDirectories_other": "in {{count}} Verzeichnissen",
-    "purgeDescription_one": "Dateien, die die Aufbewahrungsfrist überschritten haben, werden entfernt. Derzeit {{verb}} sich <strong>{{count}} {{files}}</strong> im Papierkorb mit insgesamt <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Dateien, die die Aufbewahrungsfrist überschritten haben, werden entfernt. Derzeit {{verb}} sich <strong>{{count}} {{files}}</strong> im Papierkorb mit insgesamt <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Dateien, die die Aufbewahrungsfrist überschritten haben, werden entfernt. Derzeit befindet sich <strong>{{count}} {{files}}</strong> im Papierkorb mit insgesamt <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Dateien, die die Aufbewahrungsfrist überschritten haben, werden entfernt. Derzeit befinden sich <strong>{{count}} {{files}}</strong> im Papierkorb mit insgesamt <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} abgelaufene Datei dauerhaft gelöscht",
     "purgedMessage_other": "{{count}} abgelaufene Dateien dauerhaft gelöscht",
     "purgeExpired": "Abgelaufene bereinigen",
