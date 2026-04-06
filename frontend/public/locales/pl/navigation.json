@@ -14,63 +14,63 @@
     "activity": {
       "lastUpdated": "Ostatnia aktualizacja",
       "noActivity": "Brak niedawnej aktywności",
-      "noActivityDescription": "Działania Twojego rejestru medycznego pojawią się tutaj"
+      "noActivityDescription": "Działania związane z dokumentacją medyczną będą wyświetlane tutaj"
     },
-    "hello": "Cześć",
-    "loading": "Ładowanie Twojego pulpitu medycznego...",
+    "hello": "Witaj",
+    "loading": "Ładowanie pulpitu medycznego...",
     "modules": {
-      "exportRecords": "Eksportuj rejestry",
+      "exportRecords": "Eksportuj dokumentację",
       "visitHistory": "Historia wizyt"
     },
     "search": {
       "advancedSearch": "Wyszukiwanie zaawansowane",
-      "placeholder": "Szukaj wśród rejestrów medycznych..."
+      "placeholder": "Przeszukaj dokumentację medyczną..."
     },
     "sections": {
-      "additionalResources": "Zasoby dodatkowe",
+      "additionalResources": "Dodatkowe zasoby",
       "coreMedical": "Podstawowe informacje medyczne",
       "healthMonitoring": "Monitorowanie zdrowia",
       "prevention": "Profilaktyka i historia",
-      "recentActivity": "Niedawna aktywność",
+      "recentActivity": "Ostatnia aktywność",
       "treatments": "Zabiegi i procedury"
     },
     "stats": {
       "activeMedications": "Aktywne leki"
     },
-    "subtitle": "Bezpiecznie zarządzaj swoimi informacjami zdrowotnymi",
+    "subtitle": "Bezpiecznie zarządzaj informacjami o swoim zdrowiu",
     "title": "Panel główny MediKeep"
   },
   "invitations": {
     "acceptButton": "Zaakceptuj zaproszenie",
-    "confirmDescription": "Zaakceptowując, zyskasz dostęp do przeglądania udostępnionych informacji medycznych.",
+    "confirmDescription": "Po zaakceptowaniu uzyskasz dostęp do udostępnionych informacji medycznych.",
     "confirmQuestion": "Czy na pewno chcesz zaakceptować to zaproszenie?",
     "confirmTitle": "Potwierdź zaakceptowanie zaproszenia",
     "from": "Od",
     "lastUpdated": "Ostatnia aktualizacja",
     "manageAll": "Zarządzaj wszystkimi zaproszeniami",
     "noPending": "Brak oczekujących zaproszeń",
-    "noPendingDescription": "Nowe zaproszenia do współdzielenia pojawią się tutaj",
+    "noPendingDescription": "Nowe zaproszenia do udostępniania będą wyświetlane tutaj",
     "sharePatient": "Udostępnij pacjenta",
     "title": "Zaproszenia",
     "types": {
-      "patientRecord": "Rekord pacjenta"
+      "patientRecord": "Dokumentacja pacjenta"
     }
   },
   "menu": {
-    "account": "",
-    "backToDashboard": "Powrót do pulpitu",
-    "darkMode": "",
+    "account": "Konto",
+    "backToDashboard": "Powrót do pulpitu głównego",
+    "darkMode": "Tryb ciemny",
     "help": "Pomoc",
-    "lightMode": "",
+    "lightMode": "Tryb jasny",
     "logout": "Wyloguj",
     "patients": "Pacjenci",
     "profile": "Profil",
     "reports": "Raporty",
-    "userActions": ""
+    "userActions": "Akcje użytkownika"
   },
   "pages": {
     "help": "Pomoc i wsparcie",
-    "medicalHistory": "Historia medyczna",
+    "medicalHistory": "Historia choroby",
     "patientDetails": "Szczegóły pacjenta",
     "patientList": "Lista pacjentów",
     "preferences": "Preferencje",
@@ -78,15 +78,15 @@
     "userProfile": "Profil użytkownika"
   },
   "sections": {
-    "personalInfo": "Informacje osobiste",
+    "personalInfo": "Dane osobowe",
     "preferences": "Preferencje"
   },
   "sidebarNav": {
     "items": {
       "customReports": "Raporty niestandardowe",
-      "exportRecords": "Eksportuj rejestry",
+      "exportRecords": "Eksportuj dokumentację",
       "language": "Język",
-      "patientInfo": "Informacje pacjenta",
+      "patientInfo": "Informacje o pacjencie",
       "tagManagement": "Zarządzanie tagami",
       "theme": "Motyw",
       "visitHistory": "Historia wizyt"

@@ -3,12 +3,12 @@
     "createUser": {
       "linkPatient": {
         "hint": "Istället för att skapa en ny patientpost, länka den nya användaren till en befintlig patient (t.ex. ett barn som nu behöver en egen inloggning).",
-        "selfRecordBadge": "Eget register",
-        "selfRecordWarning": "Detta är den nuvarande ägarens eget register. Ett nytt eget register skapas för den ursprungliga ägaren med deras demografiska uppgifter kopierade. Den ursprungliga ägaren ges redigeringsbehörighet till denna patient."
+        "selfRecordBadge": "Egen journal",
+        "selfRecordWarning": "Detta är den nuvarande ägarens egen journal. En ny egen journal skapas för den ursprungliga ägaren med deras demografiska uppgifter kopierade. Den ursprungliga ägaren får redigeringsbehörighet till denna patient."
       },
       "passwordReqs": {
         "hasLetter": "Innehåller minst en bokstav",
-        "hasNumber": "Innehåller minst ett tal",
+        "hasNumber": "Innehåller minst en siffra",
         "minLength": "Minst 6 tecken"
       }
     }
@@ -219,8 +219,8 @@
       "owner": "Ägare",
       "patientId": "ID",
       "selectPlaceholder": "Välj en patient...",
-      "selfRecordBadge": "Egenpost",
-      "selfRecordWarning": "Detta är den nuvarande ägarens egenpost. En ny egenpost skapas för den ursprungliga ägaren med deras demografiska uppgifter kopierade. Den ursprungliga ägaren får redigeringsåtkomst till denna patient."
+      "selfRecordBadge": "Egen journal",
+      "selfRecordWarning": "Detta är den nuvarande ägarens egen journal. En ny egen journal skapas för den ursprungliga ägaren med deras demografiska uppgifter kopierade. Den ursprungliga ägaren får redigeringsåtkomst till denna patient."
     },
     "noteText": "En patientpost skapas automatiskt för denna användare med standardrollen \"user\".",
     "pageSubtitle": "Skapa ett nytt användarkonto med patientprofil",
@@ -557,7 +557,7 @@
     "title": "Verktyg och underhåll"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
+    "clearFilters": "Rensa filter",
     "deleteConfirm": "Är du säker på att du vill permanent radera <strong>{{filename}}</strong>?",
     "deletedDateRange": "Datumintervall för radering",
     "deleteFailed": "Radering misslyckades",
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Radera fil permanent",
     "purgedDirectories_one": "i {{count}} katalog",
     "purgedDirectories_other": "i {{count}} kataloger",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Filer som överskridit lagringstiden kommer att tas bort. För närvarande finns det <strong>{{count}} {{files}}</strong> i papperskorgen med en total storlek på <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Filer som överskridit lagringstiden kommer att tas bort. För närvarande finns det <strong>{{count}} {{files}}</strong> i papperskorgen med en total storlek på <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} utgången fil permanent raderad",
     "purgedMessage_other": "{{count}} utgångna filer permanent raderade",
     "purgeExpired": "Rensa utgångna",
@@ -601,12 +601,12 @@
     "showingFiltered": "Visar {{shown}} av {{total}} {{files}}",
     "subtitle": "Hantera raderade uppladdade filer. Återställ filer till deras ursprungliga plats eller ta bort dem permanent för att frigöra lagringsutrymme.",
     "tableHeaders": {
-      "actions": "Actions",
+      "actions": "Åtgärder",
       "deleted": "Raderad",
       "filename": "Filnamn",
       "originalLocation": "Ursprunglig plats",
-      "reason": "Reason",
-      "size": "Size"
+      "reason": "Anledning",
+      "size": "Storlek"
     },
     "title": "Papperskorgshantering",
     "totalSize": "{{size}} totalt",
@@ -646,20 +646,20 @@
     "noUsersInSystem": "Inga användare i systemet.",
     "noUsersMatchFilters": "Inga användare matchar dina filter. Försök justera eller rensa filter.",
     "passwordModal": {
-      "bothFieldsRequired": "",
-      "confirmPlaceholder": "",
-      "enterNewPassword": "",
+      "bothFieldsRequired": "Båda lösenordsfälten måste fyllas i",
+      "confirmPlaceholder": "Bekräfta nytt lösenord",
+      "enterNewPassword": "Ange nytt lösenord",
       "forceChange": "Tvinga lösenordsbyte vid nästa inloggning",
-      "immediateReset": "",
+      "immediateReset": "Detta återställer omedelbart användarens lösenord. De måste använda det nya lösenordet för att logga in.",
       "newPassword": "Nytt lösenord",
       "passwordDescription": "Minst 6 tecken, minst 1 bokstav och 1 siffra",
-      "passwordsDoNotMatch": "",
-      "resetFailed": "",
-      "resetSuccess": "",
+      "passwordsDoNotMatch": "Lösenorden stämmer inte överens",
+      "resetFailed": "Kunde inte återställa lösenord. Försök igen.",
+      "resetSuccess": "Lösenord återställt för {{username}}!",
       "resettingFor": "Återställ lösenord för <strong>{{username}}</strong>",
       "ssoWarning": "Denna användare autentiseras via SSO ({{provider}}). Att ange ett lokalt lösenord möjliggör hybridautentisering.",
-      "title": "",
-      "userInfo": ""
+      "title": "Återställ lösenord för {{username}}",
+      "userInfo": "Användare: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Alla roller"

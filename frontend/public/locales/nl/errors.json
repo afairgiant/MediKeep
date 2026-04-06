@@ -1,23 +1,23 @@
 {
   "alert": {
-    "errorCount": "",
-    "errorCount_one": "",
-    "errorCount_other": "",
-    "formError": "",
-    "highPriority": "",
-    "highPriority_one": "",
-    "highPriority_other": "",
-    "suggestions": ""
+    "errorCount": "{{count}} fout",
+    "errorCount_one": "{{count}} fout",
+    "errorCount_other": "{{count}} fouten",
+    "formError": "Formulierfout",
+    "highPriority": "{{count}} hoge prioriteit",
+    "highPriority_one": "{{count}} hoge prioriteit",
+    "highPriority_other": "{{count}} hoge prioriteit",
+    "suggestions": "Suggesties:"
   },
   "boundary": {
-    "componentLabel": "",
-    "errorDetails": "",
-    "errorIdLabel": "",
-    "errorLogged": "",
-    "reloadPage": "",
-    "somethingWentWrong": "",
-    "tryAgain": "",
-    "unexpectedError": ""
+    "componentLabel": "Component:",
+    "errorDetails": "Foutdetails",
+    "errorIdLabel": "Fout-ID:",
+    "errorLogged": "De fout is automatisch geregistreerd voor onderzoek.",
+    "reloadPage": "Pagina herladen",
+    "somethingWentWrong": "Er is iets misgegaan",
+    "tryAgain": "Opnieuw proberen",
+    "unexpectedError": "Onze excuses, maar er is een onverwachte fout opgetreden in het medisch dossiersysteem."
   },
   "file": {
     "deleteFailed": "Bestand verwijderen mislukt. Probeer het opnieuw.",

@@ -30,19 +30,19 @@
       "additionalResources": "Дополнительные ресурсы",
       "coreMedical": "Основная медицинская информация",
       "healthMonitoring": "Мониторинг здоровья",
-      "prevention": "Профилактика и история",
+      "prevention": "Профилактика и анамнез",
       "recentActivity": "Недавняя активность",
       "treatments": "Лечение и процедуры"
     },
     "stats": {
-      "activeMedications": "Активные лекарства"
+      "activeMedications": "Активные препараты"
     },
     "subtitle": "Безопасное управление вашей медицинской информацией",
     "title": "Панель управления MediKeep"
   },
   "invitations": {
     "acceptButton": "Принять приглашение",
-    "confirmDescription": "Приняв приглашение, вы получите доступ к просмотру общей медицинской информации.",
+    "confirmDescription": "Приняв приглашение, вы получите доступ к просмотру предоставленной медицинской информации.",
     "confirmQuestion": "Вы уверены, что хотите принять это приглашение?",
     "confirmTitle": "Подтверждение принятия приглашения",
     "from": "От",
@@ -50,36 +50,36 @@
     "manageAll": "Управление всеми приглашениями",
     "noPending": "Нет ожидающих приглашений",
     "noPendingDescription": "Новые приглашения к совместному доступу будут отображаться здесь",
-    "sharePatient": "Поделиться пациентом",
+    "sharePatient": "Поделиться данными пациента",
     "title": "Приглашения",
     "types": {
-      "patientRecord": "Запись пациента"
+      "patientRecord": "Медицинская карта пациента"
     }
   },
   "menu": {
-    "account": "",
+    "account": "Аккаунт",
     "backToDashboard": "Вернуться к панели управления",
-    "darkMode": "",
+    "darkMode": "Тёмная тема",
     "help": "Помощь",
-    "lightMode": "",
+    "lightMode": "Светлая тема",
     "logout": "Выйти",
     "patients": "Пациенты",
     "profile": "Профиль",
     "reports": "Отчёты",
-    "userActions": ""
+    "userActions": "Действия пользователя"
   },
   "pages": {
     "help": "Помощь и поддержка",
-    "medicalHistory": "История болезни",
+    "medicalHistory": "Анамнез",
     "patientDetails": "Данные пациента",
     "patientList": "Список пациентов",
-    "preferences": "Предпочтения",
+    "preferences": "Настройки",
     "reports": "Отчёты",
     "userProfile": "Профиль пользователя"
   },
   "sections": {
     "personalInfo": "Личная информация",
-    "preferences": "Предпочтения"
+    "preferences": "Настройки"
   },
   "sidebarNav": {
     "items": {

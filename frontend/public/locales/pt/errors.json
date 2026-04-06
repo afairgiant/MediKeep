@@ -1,23 +1,23 @@
 {
   "alert": {
-    "errorCount": "",
+    "errorCount": "{{count}} Erro",
     "errorCount_one": "",
-    "errorCount_other": "",
-    "formError": "",
-    "highPriority": "",
+    "errorCount_other": "{{count}} Erros",
+    "formError": "Erro no Formulário",
+    "highPriority": "{{count}} alta prioridade",
     "highPriority_one": "",
     "highPriority_other": "",
-    "suggestions": ""
+    "suggestions": "Sugestões:"
   },
   "boundary": {
-    "componentLabel": "",
-    "errorDetails": "",
-    "errorIdLabel": "",
-    "errorLogged": "",
-    "reloadPage": "",
-    "somethingWentWrong": "",
-    "tryAgain": "",
-    "unexpectedError": ""
+    "componentLabel": "Componente:",
+    "errorDetails": "Detalhes do erro",
+    "errorIdLabel": "ID do Erro:",
+    "errorLogged": "O erro foi registrado automaticamente para investigação.",
+    "reloadPage": "Recarregar Página",
+    "somethingWentWrong": "Algo deu errado",
+    "tryAgain": "Tentar Novamente",
+    "unexpectedError": "Lamentamos, mas algo inesperado aconteceu no sistema de prontuários médicos."
   },
   "file": {
     "deleteFailed": "Falha ao excluir o arquivo. Tente novamente.",

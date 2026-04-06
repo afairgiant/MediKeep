@@ -2,7 +2,7 @@
   "activity": {
     "actions": {
       "added": "Tillagd",
-      "deleted": "Borttagen",
+      "deleted": "Raderad",
       "modified": "Ändrad",
       "removed": "Borttagen",
       "scheduled": "Schemalagd",
@@ -57,16 +57,16 @@
     }
   },
   "menu": {
-    "account": "",
+    "account": "Konto",
     "backToDashboard": "Tillbaka till instrumentpanelen",
-    "darkMode": "",
+    "darkMode": "Mörkt läge",
     "help": "Hjälp",
-    "lightMode": "",
+    "lightMode": "Ljust läge",
     "logout": "Logga ut",
     "patients": "Patienter",
     "profile": "Profil",
     "reports": "Rapporter",
-    "userActions": ""
+    "userActions": "Användaråtgärder"
   },
   "pages": {
     "help": "Hjälp och support",

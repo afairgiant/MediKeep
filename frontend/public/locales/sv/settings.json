@@ -1,164 +1,164 @@
 {
   "account": {
     "deleteAccount": {
-      "button": "Delete Account",
-      "description": "Permanently delete your account and all associated medical data. This action cannot be undone.",
-      "title": "Delete Account"
+      "button": "Radera konto",
+      "description": "Radera ditt konto permanent och all associerad medicinsk data. Denna åtgärd kan inte ångras.",
+      "title": "Radera konto"
     }
   },
   "actions": {
-    "reset": "Reset Changes",
-    "save": "Save All Changes",
-    "unsavedChanges": "You have unsaved changes"
+    "reset": "Återställ ändringar",
+    "save": "Spara alla ändringar",
+    "unsavedChanges": "Du har osparade ändringar"
   },
   "documents": {
     "cleanup": {
-      "button": "Cleanup Files",
-      "cleaning": "Cleaning...",
-      "description": "Clean up out-of-sync files and resolve document storage inconsistencies. This will reset failed uploads, clear orphaned tasks, and fix database sync issues.",
-      "title": "File Cleanup"
+      "button": "Rensa filer",
+      "cleaning": "Rensar...",
+      "description": "Rensa osynkroniserade filer och lös inkonsekvenser i dokumentlagring. Detta återställer misslyckade uppladdningar, rensar föräldralösa uppgifter och fixar databassynkroniseringsproblem.",
+      "title": "Filrensning"
     },
-    "paperlessDescription": "Configure Paperless-ngx document management integration"
+    "paperlessDescription": "Konfigurera Paperless-ngx dokumenthanteringsintegration"
   },
   "help": {
     "documentation": {
-      "description": "Browse the wiki for guides, setup instructions, and feature documentation.",
-      "title": "Documentation"
+      "description": "Bläddra i wikin för guider, installationsinstruktioner och funktionsdokumentation.",
+      "title": "Dokumentation"
     },
     "issues": {
-      "description": "Found a bug or have a feature request? Open an issue on GitHub.",
-      "title": "Report an Issue"
+      "description": "Hittat en bugg eller har en funktionsförfrågan? Öppna ett ärende på GitHub.",
+      "title": "Rapportera ett problem"
     }
   },
   "paperlessConnection": {
-    "apiTokenHelp": "",
-    "apiTokenLabel": "",
-    "apiTokenRecommended": "",
-    "authMethod": "",
-    "connected": "",
-    "connectionError": "",
-    "methodInfo": "",
-    "passwordHelp": "",
-    "passwordLabel": "",
-    "sessionStorage": "",
-    "title": "",
-    "urlHelp": "",
-    "urlLabel": "",
-    "usernameHelp": "",
-    "usernameLabel": "",
-    "usernamePassword": ""
+    "apiTokenHelp": "Din paperless-ngx API-token. Hitta den i Paperless-adminpanelen under Inställningar.",
+    "apiTokenLabel": "API-token",
+    "apiTokenRecommended": "API-token (Rekommenderas)",
+    "authMethod": "Autentiseringsmetod",
+    "connected": "Ansluten till Paperless-ngx",
+    "connectionError": "Kan inte ansluta. Kontrollera din URL och uppgifter.",
+    "methodInfo": "API-tokens är den rekommenderade autentiseringsmetoden för bättre säkerhet.",
+    "passwordHelp": "Ditt paperless-ngx lösenord.",
+    "passwordLabel": "Lösenord",
+    "sessionStorage": "Använder sessionslagring för token",
+    "title": "Paperless-ngx anslutning",
+    "urlHelp": "URL:en till din Paperless-ngx instans (t.ex. https://paperless.example.com)",
+    "urlLabel": "Server-URL",
+    "usernameHelp": "Ditt paperless-ngx användarnamn.",
+    "usernameLabel": "Användarnamn",
+    "usernamePassword": "Användarnamn och lösenord"
   },
   "papra": {
-    "apiTokenPlaceholder": "",
-    "connectionFailed": "",
-    "connectionSuccess": "",
-    "description": "",
-    "organization": "",
-    "organizationPlaceholder": "",
-    "urlPlaceholder": ""
+    "apiTokenPlaceholder": "Ange din Papra API-token",
+    "connectionFailed": "Anslutning misslyckades",
+    "connectionSuccess": "Anslutning lyckades",
+    "description": "Anslut till din Papra-instans för dokumenthantering",
+    "organization": "Organisation",
+    "organizationPlaceholder": "Välj en organisation",
+    "urlPlaceholder": "https://din-papra-instans.com"
   },
   "preferences": {
     "dateFormat": {
-      "description": "Choose how dates are displayed throughout the application",
-      "dmy": "DD/MM/YYYY (European)",
-      "mdy": "MM/DD/YYYY (US)",
-      "title": "Date Format",
-      "ymd": "YYYY-MM-DD (ISO)"
+      "description": "Välj hur datum visas genom hela applikationen",
+      "dmy": "DD/MM/ÅÅÅÅ (Europeisk)",
+      "mdy": "MM/DD/ÅÅÅÅ (USA)",
+      "title": "Datumformat",
+      "ymd": "ÅÅÅÅ-MM-DD (ISO)"
     },
     "sessionTimeout": {
-      "description": "Set the duration of inactivity before your session expires (in minutes)",
-      "range": "minutes (5-1440)",
-      "title": "Session Timeout"
+      "description": "Ange varaktigheten för inaktivitet innan din session går ut (i minuter)",
+      "range": "minuter (5-1440)",
+      "title": "Sessionstimeout"
     },
     "unitSystem": {
-      "description": "Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units",
-      "imperial": "Imperial (lbs, feet, °F)",
-      "metric": "Metric (kg, cm, °C)",
-      "title": "Unit System"
+      "description": "Välj om mätningar ska visas i Imperial (pund, fot, °F) eller metriska (kilogram, centimeter, °C) enheter",
+      "imperial": "Imperial (lbs, fot, °F)",
+      "metric": "Metrisk (kg, cm, °C)",
+      "title": "Enhetssystem"
     }
   },
   "releaseNotes": {
-    "currentVersion": "Current",
-    "dismiss": "Got it",
-    "empty": "No release notes available",
-    "error": "Unable to load release notes",
-    "publishedOn": "Released {{date}}",
-    "retry": "Try Again",
-    "showAll": "Show more releases",
-    "showLess": "Show less",
-    "viewOnGithub": "View on GitHub",
-    "whatsNewTitle": "What's New"
+    "currentVersion": "Nuvarande",
+    "dismiss": "Förstått",
+    "empty": "Inga versionsanteckningar tillgängliga",
+    "error": "Kan inte ladda versionsanteckningar",
+    "publishedOn": "Släppt {{date}}",
+    "retry": "Försök igen",
+    "showAll": "Visa fler versioner",
+    "showLess": "Visa färre",
+    "viewOnGithub": "Visa på GitHub",
+    "whatsNewTitle": "Vad är nytt"
   },
   "sections": {
-    "accountManagement": "Account Management",
-    "gettingHelp": "Getting Help",
-    "preferences": "Application Preferences",
-    "releaseNotes": "Release Notes",
-    "security": "Security",
-    "supportMediKeep": "Support MediKeep",
-    "systemInfo": "System Information"
+    "accountManagement": "Kontohantering",
+    "gettingHelp": "Få hjälp",
+    "preferences": "Applikationsinställningar",
+    "releaseNotes": "Versionsanteckningar",
+    "security": "Säkerhet",
+    "supportMediKeep": "Stödja MediKeep",
+    "systemInfo": "Systeminformation"
   },
   "security": {
     "password": {
-      "button": "Change Password",
-      "confirmPassword": "",
-      "currentPassword": "",
-      "description": "Change your account password to keep your account secure",
+      "button": "Ändra lösenord",
+      "confirmPassword": "Bekräfta nytt lösenord",
+      "currentPassword": "Nuvarande lösenord",
+      "description": "Ändra ditt kontolösenord för att hålla ditt konto säkert",
       "forceChange": {
         "errors": {
-          "allFieldsRequired": "",
-          "changeFailed": "",
-          "passwordComplexity": "",
-          "passwordMustDiffer": "",
-          "passwordsMustMatch": "",
-          "passwordTooShort": ""
+          "allFieldsRequired": "Alla fält krävs.",
+          "changeFailed": "Misslyckades med att ändra lösenord. Försök igen.",
+          "passwordComplexity": "Nytt lösenord måste innehålla minst en bokstav och en siffra.",
+          "passwordMustDiffer": "Nytt lösenord måste skilja sig från ditt nuvarande lösenord.",
+          "passwordsMustMatch": "De nya lösenorden stämmer inte överens.",
+          "passwordTooShort": "Nytt lösenord måste vara minst 6 tecken."
         },
-        "submit": "",
-        "submitting": "",
-        "subtitle": "",
-        "title": ""
+        "submit": "Ange nytt lösenord",
+        "submitting": "Ändrar lösenord...",
+        "subtitle": "Ditt konto kräver en lösenordsändring innan du kan fortsätta. Ange ett nytt lösenord nedan.",
+        "title": "Lösenordsändring krävs"
       },
-      "newPassword": "",
-      "passwordHelp": ""
+      "newPassword": "Nytt lösenord",
+      "passwordHelp": "Minst 6 tecken, måste innehålla en bokstav och en siffra."
     }
   },
   "settings": {
     "releaseNotes": {
-      "noChanges": "No changes listed for this release",
-      "whatsNewSubtitle": "Here's what changed since your last update"
+      "noChanges": "Inga ändringar listade för denna version",
+      "whatsNewSubtitle": "Här är vad som ändrades sedan din senaste uppdatering"
     }
   },
   "sponsor": {
-    "button": "Sponsor on GitHub",
-    "buttonShort": "",
-    "description": "MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going."
+    "button": "Sponsra på GitHub",
+    "buttonShort": "Sponsra",
+    "description": "MediKeep är gratis och öppen källkod. Om du tycker den är användbar, överväg att sponsra projektet för att hjälpa till att finansiera utveckling och hålla det igång."
   },
   "storage": {
-    "connectionRequired": "",
-    "defaultLocation": "",
-    "filesCount": "",
+    "connectionRequired": "Anslutning krävs",
+    "defaultLocation": "Standardlagringsplats",
+    "filesCount": "{{count}} filer",
     "filesCount_one": "",
     "filesCount_other": "",
-    "localDescription": "",
-    "localStorage": "",
-    "noUsageData": "",
-    "paperless": "",
-    "paperlessDescription": "",
-    "papra": "",
-    "papraDescription": "",
-    "title": "",
-    "usageLabel": ""
+    "localDescription": "Filer lagras direkt på denna server. Bra för enkla installationer utan externa tjänster.",
+    "localStorage": "Lokal lagring",
+    "noUsageData": "Ingen lagringsanvändningsdata tillgänglig",
+    "paperless": "Paperless-ngx",
+    "paperlessDescription": "Filer laddas upp till din Paperless-ngx server. Tillhandahåller OCR, taggning och avancerad dokumenthantering.",
+    "papra": "Papra",
+    "papraDescription": "Filer lagras i din Papra-instans. Tillhandahåller organiserad dokumenthantering med organisationer.",
+    "title": "Lagringsinställningar",
+    "usageLabel": "Lagringsanvändning"
   },
   "system": {
     "timezone": {
-      "title": "Timezone"
+      "title": "Tidszon"
     },
     "version": {
-      "loading": "Loading version information...",
-      "title": "Application Version",
-      "unavailable": "Version information unavailable",
-      "unknownApp": "Unknown App",
-      "unknownVersion": "Unknown Version"
+      "loading": "Laddar versionsinformation...",
+      "title": "Applikationsversion",
+      "unavailable": "Versionsinformation otillgänglig",
+      "unknownApp": "Okänd app",
+      "unknownVersion": "Okänd version"
     }
   }
 }

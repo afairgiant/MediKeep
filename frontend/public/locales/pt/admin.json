@@ -2,7 +2,7 @@
   "admin": {
     "createUser": {
       "linkPatient": {
-        "hint": "Em vez de criar um novo registro de paciente, vincule o novo usuário a um paciente existente (por exemplo, um filho que agora precisa do seu próprio acesso).",
+        "hint": "Em vez de criar um novo registro de paciente, vincule o novo usuário a um paciente existente (p. ex., um filho que agora precisa do seu próprio acesso).",
         "selfRecordBadge": "Registro Próprio",
         "selfRecordWarning": "Este é o registro próprio do proprietário atual. Um novo registro próprio será criado para o proprietário original com seus dados demográficos copiados. O proprietário original receberá acesso de edição a este paciente."
       },
@@ -78,7 +78,7 @@
       "title": "Backups Existentes",
       "verify": "Verificar"
     },
-    "loading": "Carregando gestão de backups...",
+    "loading": "Carregando gerenciamento de backups...",
     "modals": {
       "analyzingBackup": "Analisando conteúdo do backup...",
       "cannotBeUndone": "Esta ação não pode ser desfeita.",
@@ -212,15 +212,15 @@
     "lastNamePlaceholder": "Insira o sobrenome",
     "linkPatient": {
       "checkbox": "Vincular a um registro de paciente existente",
-      "currentOwner": "Responsável atual",
+      "currentOwner": "Proprietário Atual",
       "dob": "Data de nascimento",
-      "hint": "Em vez de criar um novo registro de paciente, vincule o novo usuário a um paciente existente (por exemplo, uma criança que agora precisa do próprio login).",
+      "hint": "Em vez de criar um novo registro de paciente, vincule o novo usuário a um paciente existente (p. ex., uma criança que agora precisa do próprio login).",
       "loading": "Carregando pacientes...",
-      "owner": "Responsável",
+      "owner": "Proprietário",
       "patientId": "ID",
       "selectPlaceholder": "Selecione um paciente...",
-      "selfRecordBadge": "Auto-registro",
-      "selfRecordWarning": "Este é o auto-registro do responsável atual. Um novo auto-registro será criado para o responsável original com seus dados demográficos copiados. O responsável original receberá acesso de edição a este paciente."
+      "selfRecordBadge": "Registro Próprio",
+      "selfRecordWarning": "Este é o registro próprio do proprietário atual. Um novo registro próprio será criado para o proprietário original com seus dados demográficos copiados. O proprietário original receberá acesso de edição a este paciente."
     },
     "noteText": "Um registro de paciente será criado automaticamente para este usuário com a função padrão \"usuário\".",
     "pageSubtitle": "Criar uma nova conta de usuário com perfil de paciente",
@@ -231,7 +231,7 @@
       "hasNumber": "Contém pelo menos um número",
       "minLength": "Pelo menos 6 caracteres"
     },
-    "submitButton": "Criar conta",
+    "submitButton": "Criar Conta",
     "successRedirect": "Usuário \"{{username}}\" criado com sucesso!",
     "usernamePlaceholder": "Insira o nome de usuário",
     "validation": {
@@ -243,11 +243,11 @@
     }
   },
   "dashboard": {
-    "loading": "Carregando painel abrangente...",
+    "loading": "Carregando painel completo...",
     "quickActions": {
       "auditLogDesc": "Visualizar log de atividades do sistema",
       "backups": "Backups",
-      "backupsDesc": "Gestão de backups",
+      "backupsDesc": "Gerenciamento de backups",
       "createUser": "Criar Novo Usuário",
       "createUserDesc": "Criar conta de usuário com perfil de paciente",
       "dataModelsDesc": "Visualizar e gerenciar tabelas do banco de dados",
@@ -272,7 +272,7 @@
       "activePatients": "Pacientes Ativos",
       "totalUsers": "Total de Usuários"
     },
-    "subtitle": "Visão geral abrangente do sistema e gestão",
+    "subtitle": "Visão geral completa do sistema e gerenciamento",
     "systemHealth": {
       "databaseStatus": "Status do Banco de Dados",
       "errorLoading": "Erro ao carregar saúde do sistema",
@@ -285,7 +285,7 @@
   "dataModels": {
     "categories": {
       "coreMedical": "Médico Principal",
-      "fileManagement": "Gestão de Arquivos",
+      "fileManagement": "Gerenciamento de Arquivos",
       "healthcareDirectory": "Diretório de Saúde",
       "patientSupport": "Suporte ao Paciente",
       "sharingAccess": "Compartilhamento e Acesso",
@@ -438,8 +438,8 @@
     "createRecord": "Criar Registro",
     "deleteFailed": "Falha na exclusão",
     "deleteRecords": "Excluir {{count}} Registros",
-    "deleteRecords_one": "Excluir {{count}} registro",
-    "deleteRecords_other": "Excluir {{count}} registros",
+    "deleteRecords_one": "Excluir {{count}} Registro",
+    "deleteRecords_other": "Excluir {{count}} Registros",
     "deleteSelected": "Excluir Selecionados",
     "deleteWarning": "Isso excluirá permanentemente este registro de {{modelName}} e todos os dados associados:",
     "editRecord": "Editar {{modelName}}",
@@ -531,14 +531,14 @@
       "trash": "Lixeira"
     },
     "sections": {
-      "dataManagement": "Gestão de Dados",
+      "dataManagement": "Gerenciamento de Dados",
       "monitoring": "Monitoramento",
       "tools": "Ferramentas"
     },
     "toggleSidebar": "Alternar barra lateral"
   },
   "tools": {
-    "subtitle": "Ferramentas administrativas para manutenção do sistema e gestão de dados",
+    "subtitle": "Ferramentas administrativas para manutenção do sistema e gerenciamento de dados",
     "testLibrary": {
       "categories": "Categorias",
       "forceSyncAll": "Forçar Sincronização de Todos",
@@ -557,7 +557,7 @@
     "title": "Ferramentas e Manutenção"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
+    "clearFilters": "Limpar Filtros",
     "deleteConfirm": "Tem certeza de que deseja excluir permanentemente <strong>{{filename}}</strong>?",
     "deletedDateRange": "Período de exclusão",
     "deleteFailed": "Falha na exclusão",
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Excluir Arquivo Permanentemente",
     "purgedDirectories_one": "em {{count}} diretório",
     "purgedDirectories_other": "em {{count}} diretórios",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Arquivos que excederam o período de retenção serão removidos. Atualmente há <strong>{{count}} {{files}}</strong> na lixeira totalizando <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Arquivos que excederam o período de retenção serão removidos. Atualmente há <strong>{{count}} {{files}}</strong> na lixeira totalizando <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} arquivo expirado excluído permanentemente",
     "purgedMessage_other": "{{count}} arquivos expirados excluídos permanentemente",
     "purgeExpired": "Purgar Expirados",
@@ -599,16 +599,16 @@
     "searchAriaLabel": "Pesquisar arquivos na lixeira",
     "searchPlaceholder": "Pesquisar por nome de arquivo ou caminho...",
     "showingFiltered": "Exibindo {{shown}} de {{total}} {{files}}",
-    "subtitle": "Gerencie arquivos excluídos enviados. Restaure arquivos para o local original ou remova-os permanentemente para liberar espaço.",
+    "subtitle": "Gerencie arquivos enviados excluídos. Restaure arquivos para o local original ou remova-os permanentemente para liberar espaço.",
     "tableHeaders": {
-      "actions": "Actions",
+      "actions": "Ações",
       "deleted": "Excluído em",
       "filename": "Nome do Arquivo",
       "originalLocation": "Local Original",
-      "reason": "Reason",
-      "size": "Size"
+      "reason": "Motivo",
+      "size": "Tamanho"
     },
-    "title": "Gestão da Lixeira",
+    "title": "Gerenciamento da Lixeira",
     "totalSize": "{{size}} no total",
     "trashPurged": "Lixeira purgada"
   },
@@ -646,20 +646,20 @@
     "noUsersInSystem": "Nenhum usuário no sistema.",
     "noUsersMatchFilters": "Nenhum usuário corresponde aos seus filtros. Tente ajustar ou limpar os filtros.",
     "passwordModal": {
-      "bothFieldsRequired": "",
-      "confirmPlaceholder": "",
-      "enterNewPassword": "",
+      "bothFieldsRequired": "Ambos os campos de senha são obrigatórios",
+      "confirmPlaceholder": "Confirme a nova senha",
+      "enterNewPassword": "Digite a nova senha",
       "forceChange": "Forçar alteração de senha no próximo login",
-      "immediateReset": "",
+      "immediateReset": "Isso redefinirá imediatamente a senha do usuário. Ele precisará usar a nova senha para fazer login.",
       "newPassword": "Nova Senha",
       "passwordDescription": "Mín. 6 caracteres, pelo menos 1 letra e 1 número",
-      "passwordsDoNotMatch": "",
-      "resetFailed": "",
-      "resetSuccess": "",
+      "passwordsDoNotMatch": "As senhas não coincidem",
+      "resetFailed": "Falha ao redefinir senha. Por favor, tente novamente.",
+      "resetSuccess": "Senha redefinida com sucesso para {{username}}!",
       "resettingFor": "Redefinir senha para <strong>{{username}}</strong>",
       "ssoWarning": "Este usuário se autentica via SSO ({{provider}}). Definir uma senha local permitirá autenticação híbrida.",
-      "title": "",
-      "userInfo": ""
+      "title": "Redefinir Senha para {{username}}",
+      "userInfo": "Usuário: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Todas as Funções"

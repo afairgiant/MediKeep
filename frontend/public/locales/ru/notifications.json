@@ -116,7 +116,7 @@
     "loadError": "Не удалось загрузить данные канала",
     "noChannels": "Каналы уведомлений не настроены",
     "noChannelsHint": "Добавьте канал, чтобы начать получать уведомления",
-    "notificationsSent": "{{count}} уведомлений отправлено",
+    "notificationsSent": "Отправлено уведомлений: {{count}}",
     "sentCount_one": "{{count}} отправлено",
     "sentCount_other": "{{count}} отправлено",
     "test": "Тест",

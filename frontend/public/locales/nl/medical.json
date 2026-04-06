@@ -402,9 +402,9 @@
       "placeholder": "bijv. Linkerknie, Rechterschouder"
     },
     "bodyPart": {
-      "description": "The affected body part or area",
+      "description": "Het getroffen lichaamsdeel of gebied",
       "label": "Lichaamsdeel",
-      "placeholder": "e.g., Ankle, Wrist, Knee"
+      "placeholder": "bijv. Enkel, Pols, Knie"
     },
     "cardSubtitle": "Lichamelijk letsel",
     "cause": {
@@ -413,7 +413,7 @@
       "placeholder": "Beschrijf hoe het letsel is ontstaan..."
     },
     "dateOfInjury": {
-      "description": "The date when the injury happened (optional if unknown)",
+      "description": "De datum waarop het letsel is opgelopen (optioneel indien onbekend)",
       "label": "Datum van letsel"
     },
     "editTitle": "Letsel bewerken",
@@ -449,9 +449,9 @@
       "placeholder": "Selecteer zijde"
     },
     "mechanism": {
-      "description": "Describe how the injury occurred",
+      "description": "Beschrijf hoe het letsel is ontstaan",
       "label": "Hoe het is gebeurd",
-      "placeholder": "e.g., Fell while hiking"
+      "placeholder": "bijv. Gevallen tijdens het wandelen"
     },
     "messages": {
       "loading": "Letsels laden...",
@@ -474,7 +474,7 @@
     "severity": {
       "description": "Hoe ernstig is dit letsel",
       "options": {
-        "lifeThreatening": "Life-threatening - Emergency care needed",
+        "lifeThreatening": "Levensbedreigend - Spoedeisende hulp nodig",
         "mild": "Licht - Kleine ongemakken",
         "moderate": "Matig - Merkbare impact",
         "severe": "Ernstig - Aanzienlijke impact"
@@ -496,8 +496,8 @@
       "placeholder": "Beschrijf de ontvangen behandeling..."
     },
     "treatmentReceived": {
-      "description": "Description of treatment received",
-      "placeholder": "e.g., RICE protocol, cast applied"
+      "description": "Beschrijving van de ontvangen behandeling",
+      "placeholder": "bijv. RICE-protocol, gips aangebracht"
     },
     "viewModal": {
       "additionalInfo": "Aanvullende informatie",
@@ -808,8 +808,8 @@
       "addMedication": "Medicatie toevoegen",
       "conditionLinkFailed": "De medicatie is opgeslagen, maar sommige aandoeningen konden niet worden gekoppeld. U kunt ze later koppelen door de medicatie te bewerken.",
       "conditionLinkPartialFailure": "{{count}} aandoeningkoppeling(en) mislukt",
-      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
-      "conditionLinkPartialFailure_other": "{{count}} condition links failed",
+      "conditionLinkPartialFailure_one": "{{count}} aandoeningkoppeling mislukt",
+      "conditionLinkPartialFailure_other": "{{count}} aandoeningkoppelingen mislukt",
       "linkConditionsDescription": "Koppel deze medicatie optioneel aan bestaande aandoeningen",
       "noConditionsFound": "Geen aandoeningen gevonden",
       "saving": "Medicatie opslaan...",
@@ -1234,15 +1234,15 @@
     }
   },
   "treatmentPlan": {
-    "clickToExpand": "",
-    "conditions": "",
-    "encounters": "",
-    "equipment": "",
-    "medications": "",
-    "noEquipment": "",
-    "noLabResults": "",
-    "noMedications": "",
-    "noVisits": ""
+    "clickToExpand": "Klik om uit te vouwen en details toe te voegen (optioneel)",
+    "conditions": "Aandoeningen",
+    "encounters": "Consulten",
+    "equipment": "Apparatuur",
+    "medications": "Medicatie",
+    "noEquipment": "Geen apparatuur gevonden. Apparatuur kan worden toegevoegd na het aanmaken van de behandeling.",
+    "noLabResults": "Geen laboratoriumuitslagen gevonden. Maak eerst laboratoriumuitslagen aan om ze hier te koppelen.",
+    "noMedications": "Geen medicatie gevonden. Maak eerst medicatie aan om deze hier te koppelen.",
+    "noVisits": "Geen bezoeken gevonden. Maak eerst bezoeken aan om ze hier te koppelen."
   },
   "treatments": {
     "amount": {

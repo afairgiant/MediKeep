@@ -23,19 +23,19 @@
     "breakdownByType": "Podział według typu",
     "chartLabels": {
       "patients": "Pacjenci",
-      "userActivity": "Aktywność użytkownika"
+      "userActivity": "Aktywność użytkowników"
     },
     "customDateRange": "Niestandardowy zakres dat",
     "dailyAverage": "Średnia dzienna",
     "filterByDays": "Filtruj ostatnie {{days}} dni",
     "loading": "Ładowanie analityki...",
     "period": "Okres",
-    "recordsDistribution": "Dystrybucja rekordów",
-    "subtitle": "Trendy aktywności, porównania i dystrybucja rekordów",
+    "recordsDistribution": "Rozkład rekordów",
+    "subtitle": "Trendy aktywności, porównania i rozkład rekordów",
     "title": "Analityka",
-    "totalActivities": "Razem działań",
+    "totalActivities": "Łączna liczba działań",
     "userInteractions": "Interakcje użytkowników",
-    "vsPreviousPeriod": "w porównaniu do poprzedniego okresu"
+    "vsPreviousPeriod": "w porównaniu z poprzednim okresem"
   },
   "auditLog": {
     "actionFilter": "Działanie",
@@ -58,7 +58,7 @@
       "action": "Działanie",
       "entityType": "Typ encji",
       "recordId": "ID rekordu",
-      "timestamp": "Sygnatura czasowa"
+      "timestamp": "Znacznik czasowy"
     },
     "viewRecord": "Wyświetl rekord {{type}}",
     "viewRecordAriaLabel": "Wyświetl {{type}} #{{id}}"
@@ -98,7 +98,7 @@
       "restoreNow": "Przywróć teraz",
       "restorePreview": "Podgląd przywrócenia",
       "restoreSafetyNote": "Kopia zapasowa bezpieczeństwa zostanie automatycznie utworzona przed rozpoczęciem procesu przywracania.",
-      "restoreWarning": "Spowoduje przywrócenie z kopii zapasowej i ZASTĄPIENIE bieżących danych!",
+      "restoreWarning": "Spowoduje to przywrócenie z kopii zapasowej i ZASTĄPIENIE bieżących danych!",
       "stayOnSettings": "Pozostań w ustawieniach",
       "typeCleanupToConfirm": "Wpisz <strong>CLEANUP</strong> aby potwierdzić",
       "unsavedChanges": "Niezapisane zmiany",
@@ -120,11 +120,11 @@
       "invalidFileTypeDesc": "Proszę wybrać plik kopii zapasowej .sql lub .zip.",
       "moreOptions": "Więcej opcji",
       "title": "Operacje kopii zapasowych",
-      "uploadBackup": "Załaduj kopię zapasową",
-      "uploadBackupDesc": "Załaduj zewnętrzny plik kopii zapasowej (.sql lub .zip)"
+      "uploadBackup": "Prześlij kopię zapasową",
+      "uploadBackupDesc": "Prześlij zewnętrzny plik kopii zapasowej (.sql lub .zip)"
     },
     "preview": {
-      "affectedData": "Dotknięte dane",
+      "affectedData": "Dane, których dotyczy przywrócenie",
       "analysisNotAvailable": "Analiza kopii zapasowej niedostępna",
       "backupContent": "Zawartość kopii zapasowej",
       "backupDetails": "Szczegóły kopii zapasowej",
@@ -134,7 +134,7 @@
       "currentDatabase": "Bieżąca baza danych",
       "currentFiles": "Bieżące pliki",
       "manifest": "Manifest",
-      "noAffectedData": "Brak informacji o dotknięciu danych",
+      "noAffectedData": "Brak informacji o danych, których dotyczy przywrócenie",
       "noStatistics": "Brak dostępnych statystyk",
       "restoreMethod": "Metoda przywracania",
       "unknownType": "Nieznany typ kopii zapasowej"
@@ -153,13 +153,13 @@
       "retentionDaysDesc": "Usuń kopie zapasowe starsze niż ten okres (poza minimalną liczbą)",
       "retentionLogic": "Logika przechowywania",
       "saveRetention": "Zapisz ustawienia przechowywania",
-      "timeBasedCleanup": "<strong>Czyszczenie oparte na czasie:</strong> Usuń kopie zapasowe starsze niż {{days}} dni (poza minimalną liczbą)",
+      "timeBasedCleanup": "<strong>Czyszczenie czasowe:</strong> Usuń kopie zapasowe starsze niż {{days}} dni (poza minimalną liczbą)",
       "title": "Ustawienia przechowywania kopii zapasowych"
     },
     "schedule": {
       "completedSuccessfully": "Zakończono pomyślnie",
       "dayOfWeek": "Dzień tygodnia",
-      "dayOfWeekDesc": "W który dzień powinna się wykonać tygodniowa kopia zapasowa?",
+      "dayOfWeekDesc": "W który dzień powinna się wykonać cotygodniowa kopia zapasowa?",
       "days": {
         "fri": "Piątek",
         "mon": "Poniedziałek",
@@ -197,7 +197,7 @@
       "immediateLogin": "Użytkownik może logować się natychmiast po utworzeniu",
       "linkExisting": "Użyj \"Połącz z istniejącym pacjentem\", aby przenieść rekord pacjenta do nowego użytkownika",
       "patientRecord": "Rekord pacjenta zostanie automatycznie utworzony (lub połączony z istniejącym)",
-      "timestamps": "Sygnatury czasowe konta zostaną ustawione automatycznie"
+      "timestamps": "Znaczniki czasowe konta zostaną ustawione automatycznie"
     },
     "autoFeaturesTitle": "Automatycznie generowane funkcje",
     "cardSubtitle": "Wypełnij poniższy formularz, aby utworzyć nowe konto użytkownika",
@@ -222,7 +222,7 @@
       "selfRecordBadge": "Rekord własny",
       "selfRecordWarning": "To jest rekord własny bieżącego właściciela. Nowy rekord własny zostanie utworzony dla oryginalnego właściciela ze skopiowanymi danymi demograficznymi. Pierwotny właściciel otrzyma dostęp do edycji tego pacjenta."
     },
-    "noteText": "Rekord pacjenta zostanie automatycznie utworzony dla tego użytkownika z rolą domyślną \"użytkownik\".",
+    "noteText": "Rekord pacjenta zostanie automatycznie utworzony dla tego użytkownika z domyślną rolą \"użytkownik\".",
     "pageSubtitle": "Utwórz nowe konto użytkownika z profilem pacjenta",
     "pageTitle": "Utwórz nowego użytkownika",
     "passwordPlaceholder": "Wpisz hasło (min 6 znaków, zawierające literę i cyfrę)",
@@ -254,7 +254,7 @@
       "manageUsers": "Zarządzaj użytkownikami",
       "manageUsersDesc": "Wyświetl i zarządzaj kontami użytkowników",
       "settingsDesc": "Konfiguracja systemu",
-      "subtitle": "Typowe zadania administracyjne",
+      "subtitle": "Podstawowe zadania administracyjne",
       "systemHealthDesc": "Monitoruj status systemu",
       "title": "Szybkie akcje",
       "trash": "Kosz",
@@ -270,7 +270,7 @@
     "refreshAll": "Odśwież wszystko",
     "stats": {
       "activePatients": "Aktywni pacjenci",
-      "totalUsers": "Razem użytkowników"
+      "totalUsers": "Łączna liczba użytkowników"
     },
     "subtitle": "Kompleksowy przegląd i zarządzanie systemem",
     "systemHealth": {
@@ -284,7 +284,7 @@
   },
   "dataModels": {
     "categories": {
-      "coreMedical": "Medycyna jądrowa",
+      "coreMedical": "Podstawowa medycyna",
       "fileManagement": "Zarządzanie plikami",
       "healthcareDirectory": "Katalog opieki zdrowotnej",
       "patientSupport": "Wsparcie pacjentów",
@@ -293,33 +293,33 @@
     },
     "clearFilter": "Wyczyść filtr",
     "descriptions": {
-      "allergy": "Alergie pacjentów i reakcje",
-      "condition": "Warunki medyczne i diagnozy",
-      "emergency_contact": "Informacje kontaktowe w przypadku awaryjnym dla pacjentów",
-      "encounter": "Wizyty i wizyty u pacjentów",
+      "allergy": "Alergie i reakcje uczuleniowe pacjentów",
+      "condition": "Schorzenia medyczne i diagnozy",
+      "emergency_contact": "Informacje kontaktowe w sytuacjach awaryjnych dla pacjentów",
+      "encounter": "Wizyty i spotkania z pacjentami",
       "entity_file": "Załączniki plików dla wszystkich typów encji",
-      "family_condition": "Warunki medyczne członków rodziny",
+      "family_condition": "Schorzenia medyczne członków rodziny",
       "family_history_share": "Relacje udostępniania historii medycznej rodziny",
       "family_member": "Rekordy członków rodziny do historii medycznej",
       "immunization": "Rekordy szczepień i harmonogramy",
       "injury": "Obrażenia fizyczne, zwichnięcia, złamania i oparzenia",
       "injury_type": "Definicje typów obrażeń wielokrotnego użytku dla list rozwijanych",
-      "insurance": "Informacje o ubezpieczeniu pacjenta",
+      "insurance": "Informacje o ubezpieczeniu pacjentów",
       "invitation": "Zaproszenia systemowe do udostępniania i współpracy",
-      "lab_result": "Wyniki testów laboratoryjnych i wartości",
+      "lab_result": "Wyniki badań laboratoryjnych i wartości",
       "lab_result_file": "Dokumenty wyników laboratoriów i załączniki",
       "medical_equipment": "Urządzenia medyczne i sprzęt przepisany pacjentom",
-      "medication": "Przepisane leki i dawki",
+      "medication": "Przepisane leki i dawkowanie",
       "patient": "Dane demograficzne i informacje kontaktowe pacjenta",
       "patient_share": "Relacje udostępniania danych pacjentów między użytkownikami",
       "pharmacy": "Lokalizacje aptek i informacje kontaktowe",
       "practitioner": "Pracownicy opieki zdrowotnej i specjaliści",
       "procedure": "Procedury medyczne i operacje",
-      "symptom": "Definicje objawów i śledzenie",
+      "symptom": "Definicje objawów i ich śledzenie",
       "symptom_occurrence": "Indywidualne rekordy epizodów objawów",
       "treatment": "Plany leczenia i terapie",
       "user": "Użytkownicy systemu i administratorzy",
-      "vitals": "Ciśnienie krwi, częstość tętna, temperatura"
+      "vitals": "Ciśnienie krwi, tętno, temperatura"
     },
     "fallbackWarning": "Nie można załadować modeli z serwera. Wyświetlanie wbudowanej listy modeli.",
     "filterAriaLabel": "Filtruj modele danych",
@@ -339,7 +339,7 @@
     "enterPassword": "Wpisz hasło dla nowego użytkownika...",
     "notApplicable": "Nie dotyczy",
     "passwordHash": "Skrót hasła (tylko do odczytu ze względów bezpieczeństwa)",
-    "passwordNote": "Wpisz hasło w postaci zwykłego tekstu (minimum {{minLength}} znaków z literą i cyfrą) - zostanie bezpiecznie zahaszowane",
+    "passwordNote": "Wpisz hasło w postaci zwykłego tekstu (minimum {{minLength}} znaków z literą i cyfrą) - zostanie bezpiecznie zahashowane",
     "passwordNotSupported": "Pola hasła nie są obsługiwane dla tego modelu",
     "patientIdAutoPopulated": "ID pacjenta (automatycznie wypełniane)",
     "patientIdLocked": "ID pacjenta (zablokowane na bieżącego użytkownika)",
@@ -347,7 +347,7 @@
     "primaryKeyReadOnly": "Klucz główny (tylko do odczytu)",
     "selectDefault": "-- Wybierz --",
     "selectField": "-- Wybierz {{field}} --",
-    "systemTimestamp": "Sygnatura czasowa systemu (automatycznie generowana)"
+    "systemTimestamp": "Znacznik czasowy systemu (automatycznie generowany)"
   },
   "header": {
     "administrator": "Administrator",
@@ -366,7 +366,7 @@
       "connectionTest": "Test połączenia",
       "databaseSize": "Rozmiar bazy danych",
       "failed": "Nie powiodło się",
-      "passed": "Zaliczone",
+      "passed": "Zaliczono",
       "patientRecords": "Rekordy pacjentów",
       "title": "Stan bazy danych"
     },
@@ -381,7 +381,7 @@
     "performance": {
       "appMemory": "Pamięć aplikacji (RSS)",
       "cpuDetails": "Aplikacja: {{appPercent}}% z {{cores}} rdzeni (system: {{systemPercent}}%)",
-      "cpuUsage": "Użycie CPU",
+      "cpuUsage": "Użycie procesora",
       "memoryUsage": "Użycie pamięci",
       "memoryUsed": "{{used}} MB używane (system: {{percent}}% z {{total}} MB)",
       "responseTime": "Czas odpowiedzi",
@@ -396,7 +396,7 @@
     },
     "services": {
       "adminInterface": "Interfejs administracyjny",
-      "apiStatus": "Status interfejsu API",
+      "apiStatus": "Status API",
       "authService": "Usługa uwierzytelniania",
       "frontendLogging": "Logowanie frontendu",
       "title": "Usługi aplikacji"
@@ -431,7 +431,7 @@
     "changesSaved": "Zmiany zapisane",
     "changeUsername": "Zmień nazwę użytkownika",
     "clearSearch": "Wyczyść wyszukiwanie",
-    "columnVisibility": "Widoczność kolumny",
+    "columnVisibility": "Widoczność kolumn",
     "confirmBulkDeletion": "Potwierdź usunięcie zbiorcze",
     "confirmDeletion": "Potwierdź usunięcie",
     "createNew": "Utwórz nowy {{modelName}}",
@@ -462,7 +462,7 @@
     "perPage_other": "{{count}} na stronę",
     "rawDataJson": "Surowe dane (JSON)",
     "recordDeleted": "Rekord usunięty",
-    "recordDeletedMessage": "Pomyślnie usunięty rekord {{modelName}} #{{id}}",
+    "recordDeletedMessage": "Pomyślnie usunięto rekord {{modelName}} #{{id}}",
     "recordId": "ID rekordu: {{id}}",
     "recordsDeleted": "Rekordy usunięte",
     "recordsDeletedMessage": "Pomyślnie usunięto {{count}} rekordów",
@@ -470,7 +470,7 @@
     "recordsDeletedMessage_other": "Pomyślnie usunięto {{count}} rekordów",
     "recordUpdated": "Rekord zaktualizowany pomyślnie",
     "resetToDefault": "Zresetuj do domyślnego",
-    "roleChangeLastAdmin": "Jeśli jest to ostatni użytkownik z uprawnieniami administratora w systemie, możesz stracić dostęp do administracji.",
+    "roleChangeLastAdmin": "Jeśli jest to ostatni użytkownik z uprawnieniami administratora w systemie, możesz stracić dostęp administratora.",
     "roleChangeText": "Masz zamiar usunąć uprawnienia administratora tego użytkownika.",
     "roleChangeWarning": "Ostrzeżenie o zmianie roli",
     "saveFailed": "Zapisanie nie powiodło się",
@@ -482,7 +482,7 @@
     "selected": "{{count}} zaznaczono",
     "selected_one": "{{count}} zaznaczony",
     "selected_other": "{{count}} zaznaczonych",
-    "toggleColumnVisibility": "Przełącz widoczność kolumny",
+    "toggleColumnVisibility": "Przełącz widoczność kolumn",
     "typeDeleteToConfirm": "Wpisz <strong>DELETE</strong> aby potwierdzić",
     "usernameChangeLogout": "Spowoduje to natychmiastowe wylogowanie i będziesz musiał zalogować się ponownie przy użyciu nowej nazwy użytkownika.",
     "usernameChangeText": "Masz zamiar zmienić własną nazwę użytkownika z <strong>\"{{oldUsername}}\"</strong> na <strong>\"{{newUsername}}\"</strong>.",
@@ -502,14 +502,14 @@
     "resetAll": "Zresetuj wszystko",
     "saveAllChanges": "Zapisz wszystkie zmiany",
     "sso": {
-      "ssoDisabledInfo": "SSO jest obecnie wyłączony. Aby włączyć SSO, skonfiguruj następujące zmienne środowiskowe i uruchom ponownie aplikację:",
+      "ssoDisabledInfo": "SSO jest obecnie wyłączone. Aby włączyć SSO, skonfiguruj następujące zmienne środowiskowe i uruchom ponownie aplikację:",
       "ssoRegistration": "Rejestracja SSO",
-      "testConnection": "Test połączenia",
+      "testConnection": "Testuj połączenie",
       "testConnectionDesc": "Przetestuj połączenie dostawcy SSO i konfigurację",
       "testSsoConnection": "Przetestuj połączenie SSO",
       "title": "Logowanie jednokrotne (SSO)"
     },
-    "subtitle": "Konfiguruj ustawienia systemowe i polityki przechowywania",
+    "subtitle": "Konfiguruj ustawienia systemowe i zasady przechowywania",
     "title": "Ustawienia administracyjne",
     "userManagement": {
       "allowRegistration": "Zezwól na rejestrację nowych użytkowników",
@@ -518,7 +518,7 @@
   },
   "shared": {
     "dark": "ciemny",
-    "healthy": "zdrowy",
+    "healthy": "w dobrej kondycji",
     "info": "Informacja",
     "light": "jasny"
   },
@@ -541,23 +541,23 @@
     "subtitle": "Narzędzia administracyjne do konserwacji systemu i zarządzania danymi",
     "testLibrary": {
       "categories": "Kategorie",
-      "forceSyncAll": "Wymuś synchronizację wszystkiego",
-      "forceSyncAllDesc": "<strong>Wymuś synchronizację wszystkiego:</strong> Dopasowuje ponownie wszystkie komponenty (kategorie i nazwy kanoniczne)",
-      "libraryReloaded": "Biblioteka ponownie załadowana",
+      "forceSyncAll": "Wymuś synchronizację wszystkich",
+      "forceSyncAllDesc": "<strong>Wymuś synchronizację wszystkich:</strong> Ponownie dopasowuje wszystkie komponenty (kategorie i nazwy kanoniczne)",
+      "libraryReloaded": "Biblioteka została ponownie załadowana",
       "libraryVersion": "Wersja biblioteki",
-      "operational": "Operacyjny",
-      "reloadDesc": "<strong>Załaduj bibliotekę ponownie:</strong> Odświeża bibliotekę testów z dysku (użyj po zaktualizowaniu test_library.json)",
-      "reloadLibrary": "Załaduj bibliotekę ponownie",
+      "operational": "Działa",
+      "reloadDesc": "<strong>Załaduj ponownie bibliotekę:</strong> Odświeża bibliotekę testów z dysku (użyj po zaktualizowaniu test_library.json)",
+      "reloadLibrary": "Załaduj ponownie bibliotekę",
       "syncComplete": "Synchronizacja zakończona",
-      "syncUnmatched": "Synchronizuj niezgodne",
-      "syncUnmatchedDesc": "<strong>Synchronizuj niezgodne:</strong> Aktualizuje komponenty, które nie mają jeszcze nazwy kanonicznej",
+      "syncUnmatched": "Synchronizuj niedopasowane",
+      "syncUnmatchedDesc": "<strong>Synchronizuj niedopasowane:</strong> Aktualizuje komponenty, które nie mają jeszcze nazwy kanonicznej",
       "title": "Konserwacja biblioteki testów",
-      "totalTests": "Razem testów"
+      "totalTests": "Łączna liczba testów"
     },
     "title": "Narzędzia i konserwacja"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
+    "clearFilters": "Wyczyść filtry",
     "deleteConfirm": "Czy na pewno chcesz trwale usunąć <strong>{{filename}}</strong>?",
     "deletedDateRange": "Zakres dat usunięcia",
     "deleteFailed": "Usunięcie nie powiodło się",
@@ -573,7 +573,7 @@
     "fileType": "Typ pliku",
     "filterByDeletedDate": "Filtruj według zakresu dat usunięcia",
     "filterByFileType": "Filtruj według typu pliku",
-    "filtered": "(filtrowane)",
+    "filtered": "(przefiltrowane)",
     "loading": "Ładowanie zawartości kosza...",
     "manualDeletion": "Ręczne usunięcie",
     "noFilesInTrash": "Brak plików w koszu",
@@ -582,10 +582,10 @@
     "permanentlyDeleteFile": "Trwale usuń plik",
     "purgedDirectories_one": "w {{count}} katalogu",
     "purgedDirectories_other": "w {{count}} katalogach",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Pliki, które przekroczyły okres przechowywania zostaną usunięte. Obecnie znajduje się <strong>{{count}} {{files}}</strong> w koszu o łącznym rozmiarze <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Pliki, które przekroczyły okres przechowywania zostaną usunięte. Obecnie znajduje się <strong>{{count}} {{files}}</strong> w koszu o łącznym rozmiarze <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} wygasły plik został trwale usunięty",
-    "purgedMessage_other": "{{count}} wygasłe pliki zostały trwale usunięte",
+    "purgedMessage_other": "{{count}} wygasłych plików zostało trwale usuniętych",
     "purgeExpired": "Wyczyść wygasłe",
     "purgeExpiredButton": "Wyczyść wygasłe",
     "purgeExpiredFiles": "Wyczyść wygasłe pliki",
@@ -601,15 +601,15 @@
     "showingFiltered": "Wyświetlanie {{shown}} z {{total}} {{files}}",
     "subtitle": "Zarządzaj usuniętymi przesłanymi plikami. Przywróć pliki do ich oryginalnej lokalizacji lub usuń je na stałe, aby zwolnić miejsce.",
     "tableHeaders": {
-      "actions": "Actions",
+      "actions": "Działania",
       "deleted": "Usunięto",
       "filename": "Nazwa pliku",
       "originalLocation": "Oryginalna lokalizacja",
-      "reason": "Reason",
-      "size": "Size"
+      "reason": "Powód",
+      "size": "Rozmiar"
     },
     "title": "Zarządzanie koszem",
-    "totalSize": "{{size}} razem",
+    "totalSize": "{{size}} łącznie",
     "trashPurged": "Kosz wyczyszczony"
   },
   "users": {
@@ -623,7 +623,7 @@
     },
     "changeRole": "Zmień rolę",
     "clear": "Wyczyść",
-    "deactivate": "Deaktywuj",
+    "deactivate": "Dezaktywuj",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Nie można usunąć ostatniego administratora.",
       "cannotDeleteSelf": "Nie możesz usunąć własnego konta.",
@@ -646,20 +646,20 @@
     "noUsersInSystem": "Brak użytkowników w systemie.",
     "noUsersMatchFilters": "Żaden użytkownik nie pasuje do filtrów. Spróbuj dostosować lub wyczyścić filtry.",
     "passwordModal": {
-      "bothFieldsRequired": "",
-      "confirmPlaceholder": "",
-      "enterNewPassword": "",
+      "bothFieldsRequired": "Oba pola hasła są wymagane",
+      "confirmPlaceholder": "Potwierdź nowe hasło",
+      "enterNewPassword": "Wpisz nowe hasło",
       "forceChange": "Wymuś zmianę hasła przy następnym logowaniu",
-      "immediateReset": "",
+      "immediateReset": "Spowoduje to natychmiastowy reset hasła użytkownika. Będzie musiał użyć nowego hasła do logowania.",
       "newPassword": "Nowe hasło",
       "passwordDescription": "Min 6 znaków, co najmniej 1 litera i 1 cyfra",
-      "passwordsDoNotMatch": "",
-      "resetFailed": "",
-      "resetSuccess": "",
+      "passwordsDoNotMatch": "Hasła nie pasują",
+      "resetFailed": "Nie udało się zresetować hasła. Proszę spróbować ponownie.",
+      "resetSuccess": "Hasło zostało pomyślnie zresetowane dla {{username}}!",
       "resettingFor": "Resetowanie hasła dla <strong>{{username}}</strong>",
-      "ssoWarning": "Ten użytkownik uwierzytelnia się za pośrednictwem SSO ({{provider}}). Ustawienie hasła lokalnego umożliwi uwierzytelnianie hybrydowe.",
-      "title": "",
-      "userInfo": ""
+      "ssoWarning": "Ten użytkownik uwierzytelnia się przez SSO ({{provider}}). Ustawienie hasła lokalnego umożliwi uwierzytelnianie hybrydowe.",
+      "title": "Zresetuj hasło dla {{username}}",
+      "userInfo": "Użytkownik: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Wszystkie role"
@@ -668,7 +668,7 @@
       "cannotRemoveLastAdmin": "Nie można usunąć ostatniej roli administratora.",
       "changingRole": "Zmiana roli dla <strong>{{username}}</strong>",
       "grantAdmin": "Spowoduje to przyznanie pełnych uprawnień administracyjnych.",
-      "revokeAdmin": "Spowoduje to odwołanie uprawnień administracyjnych.",
+      "revokeAdmin": "Spowoduje to cofnięcie uprawnień administracyjnych.",
       "title": "Zmień rolę użytkownika"
     },
     "searchPlaceholder": "Szukaj użytkowników...",
@@ -676,16 +676,16 @@
       "all": "Wszystkie statusy"
     },
     "tableHeaders": {
-      "auth": "Autentykacja",
+      "auth": "Uwierzytelnianie",
       "lastLogin": "Ostatnie logowanie"
     },
     "toggleActiveModal": {
-      "activateConfirm": "Aktywuj \"{{username}}\"? Będą mogli logować się ponownie.",
+      "activateConfirm": "Aktywować \"{{username}}\"? Będą mogli logować się ponownie.",
       "activateTitle": "Aktywuj użytkownika",
       "cannotDeactivateLastAdmin": "Nie można dezaktywować ostatniego administratora.",
       "cannotDeactivateSelf": "Nie możesz dezaktywować własnego konta.",
-      "deactivateConfirm": "Deaktywuj \"{{username}}\"? Nie będą mogli logować się do czasu ponownej aktywacji.",
-      "deactivateTitle": "Deaktywuj użytkownika"
+      "deactivateConfirm": "Dezaktywować \"{{username}}\"? Nie będą mogli logować się do czasu ponownej aktywacji.",
+      "deactivateTitle": "Dezaktywuj użytkownika"
     },
     "userCount": "{{count}} użytkowników",
     "userCount_one": "{{count}} użytkownik",

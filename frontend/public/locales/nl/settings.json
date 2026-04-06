@@ -1,164 +1,164 @@
 {
   "account": {
     "deleteAccount": {
-      "button": "Delete Account",
-      "description": "Permanently delete your account and all associated medical data. This action cannot be undone.",
-      "title": "Delete Account"
+      "button": "Account verwijderen",
+      "description": "Verwijder uw account en alle bijbehorende medische gegevens definitief. Deze actie kan niet ongedaan worden gemaakt.",
+      "title": "Account verwijderen"
     }
   },
   "actions": {
-    "reset": "Reset Changes",
-    "save": "Save All Changes",
-    "unsavedChanges": "You have unsaved changes"
+    "reset": "Wijzigingen herstellen",
+    "save": "Alle wijzigingen opslaan",
+    "unsavedChanges": "U heeft niet-opgeslagen wijzigingen"
   },
   "documents": {
     "cleanup": {
-      "button": "Cleanup Files",
-      "cleaning": "Cleaning...",
-      "description": "Clean up out-of-sync files and resolve document storage inconsistencies. This will reset failed uploads, clear orphaned tasks, and fix database sync issues.",
-      "title": "File Cleanup"
+      "button": "Bestanden opschonen",
+      "cleaning": "Opschonen...",
+      "description": "Niet-gesynchroniseerde bestanden opschonen en inconsistenties in de documentopslag oplossen. Dit herstelt mislukte uploads, verwijdert verweesde taken en lost databasesynchronisatieproblemen op.",
+      "title": "Bestanden opschonen"
     },
-    "paperlessDescription": "Configure Paperless-ngx document management integration"
+    "paperlessDescription": "Paperless-ngx documentbeheerintegratie configureren"
   },
   "help": {
     "documentation": {
-      "description": "Browse the wiki for guides, setup instructions, and feature documentation.",
-      "title": "Documentation"
+      "description": "Blader door de wiki voor handleidingen, installatie-instructies en functiedocumentatie.",
+      "title": "Documentatie"
     },
     "issues": {
-      "description": "Found a bug or have a feature request? Open an issue on GitHub.",
-      "title": "Report an Issue"
+      "description": "Een bug gevonden of een functieverzoek? Open een issue op GitHub.",
+      "title": "Probleem melden"
     }
   },
   "paperlessConnection": {
-    "apiTokenHelp": "",
-    "apiTokenLabel": "",
-    "apiTokenRecommended": "",
-    "authMethod": "",
-    "connected": "",
-    "connectionError": "",
-    "methodInfo": "",
-    "passwordHelp": "",
-    "passwordLabel": "",
-    "sessionStorage": "",
-    "title": "",
-    "urlHelp": "",
-    "urlLabel": "",
-    "usernameHelp": "",
-    "usernameLabel": "",
-    "usernamePassword": ""
+    "apiTokenHelp": "Uw Paperless-ngx API-token. U vindt het in het Paperless-beheerdersdashboard onder Instellingen.",
+    "apiTokenLabel": "API-token",
+    "apiTokenRecommended": "API-token (Aanbevolen)",
+    "authMethod": "Authenticatiemethode",
+    "connected": "Verbonden met Paperless-ngx",
+    "connectionError": "Kan geen verbinding maken. Controleer uw URL en inloggegevens.",
+    "methodInfo": "API-tokens zijn de aanbevolen authenticatiemethode voor betere beveiliging.",
+    "passwordHelp": "Uw Paperless-ngx wachtwoord.",
+    "passwordLabel": "Wachtwoord",
+    "sessionStorage": "Sessie-opslag wordt gebruikt voor het token",
+    "title": "Paperless-ngx verbinding",
+    "urlHelp": "De URL van uw Paperless-ngx-instantie (bijv. https://paperless.voorbeeld.com)",
+    "urlLabel": "Server-URL",
+    "usernameHelp": "Uw Paperless-ngx gebruikersnaam.",
+    "usernameLabel": "Gebruikersnaam",
+    "usernamePassword": "Gebruikersnaam en wachtwoord"
   },
   "papra": {
-    "apiTokenPlaceholder": "",
-    "connectionFailed": "",
-    "connectionSuccess": "",
-    "description": "",
-    "organization": "",
-    "organizationPlaceholder": "",
-    "urlPlaceholder": ""
+    "apiTokenPlaceholder": "Voer uw Papra API-token in",
+    "connectionFailed": "Verbinding mislukt",
+    "connectionSuccess": "Verbinding geslaagd",
+    "description": "Verbind met uw Papra-instantie voor documentbeheer",
+    "organization": "Organisatie",
+    "organizationPlaceholder": "Selecteer een organisatie",
+    "urlPlaceholder": "https://uw-papra-instantie.com"
   },
   "preferences": {
     "dateFormat": {
-      "description": "Choose how dates are displayed throughout the application",
-      "dmy": "DD/MM/YYYY (European)",
-      "mdy": "MM/DD/YYYY (US)",
-      "title": "Date Format",
-      "ymd": "YYYY-MM-DD (ISO)"
+      "description": "Kies hoe datums in de applicatie worden weergegeven",
+      "dmy": "DD/MM/JJJJ (Europees)",
+      "mdy": "MM/DD/JJJJ (VS)",
+      "title": "Datumnotatie",
+      "ymd": "JJJJ-MM-DD (ISO)"
     },
     "sessionTimeout": {
-      "description": "Set the duration of inactivity before your session expires (in minutes)",
-      "range": "minutes (5-1440)",
-      "title": "Session Timeout"
+      "description": "Stel de duur van inactiviteit in voordat uw sessie verloopt (in minuten)",
+      "range": "minuten (5-1440)",
+      "title": "Sessietime-out"
     },
     "unitSystem": {
-      "description": "Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units",
-      "imperial": "Imperial (lbs, feet, °F)",
-      "metric": "Metric (kg, cm, °C)",
-      "title": "Unit System"
+      "description": "Kies of metingen worden weergegeven in imperiale (pond, voet, °F) of metrische (kilogram, centimeter, °C) eenheden",
+      "imperial": "Imperiaal (lbs, voet, °F)",
+      "metric": "Metrisch (kg, cm, °C)",
+      "title": "Eenhedensysteem"
     }
   },
   "releaseNotes": {
-    "currentVersion": "Current",
-    "dismiss": "Got it",
-    "empty": "No release notes available",
-    "error": "Unable to load release notes",
-    "publishedOn": "Released {{date}}",
-    "retry": "Try Again",
-    "showAll": "Show more releases",
-    "showLess": "Show less",
-    "viewOnGithub": "View on GitHub",
-    "whatsNewTitle": "What's New"
+    "currentVersion": "Huidig",
+    "dismiss": "Begrepen",
+    "empty": "Geen release-opmerkingen beschikbaar",
+    "error": "Kan release-opmerkingen niet laden",
+    "publishedOn": "Uitgebracht op {{date}}",
+    "retry": "Opnieuw proberen",
+    "showAll": "Meer releases tonen",
+    "showLess": "Minder tonen",
+    "viewOnGithub": "Bekijken op GitHub",
+    "whatsNewTitle": "Wat is nieuw"
   },
   "sections": {
-    "accountManagement": "Account Management",
-    "gettingHelp": "Getting Help",
-    "preferences": "Application Preferences",
-    "releaseNotes": "Release Notes",
-    "security": "Security",
-    "supportMediKeep": "Support MediKeep",
-    "systemInfo": "System Information"
+    "accountManagement": "Accountbeheer",
+    "gettingHelp": "Hulp krijgen",
+    "preferences": "Applicatievoorkeuren",
+    "releaseNotes": "Release-opmerkingen",
+    "security": "Beveiliging",
+    "supportMediKeep": "MediKeep ondersteunen",
+    "systemInfo": "Systeeminformatie"
   },
   "security": {
     "password": {
-      "button": "Change Password",
-      "confirmPassword": "",
-      "currentPassword": "",
-      "description": "Change your account password to keep your account secure",
+      "button": "Wachtwoord wijzigen",
+      "confirmPassword": "Nieuw wachtwoord bevestigen",
+      "currentPassword": "Huidig wachtwoord",
+      "description": "Wijzig het wachtwoord van uw account om het veilig te houden",
       "forceChange": {
         "errors": {
-          "allFieldsRequired": "",
-          "changeFailed": "",
-          "passwordComplexity": "",
-          "passwordMustDiffer": "",
-          "passwordsMustMatch": "",
-          "passwordTooShort": ""
+          "allFieldsRequired": "Alle velden zijn verplicht.",
+          "changeFailed": "Wachtwoord wijzigen mislukt. Probeer het opnieuw.",
+          "passwordComplexity": "Het nieuwe wachtwoord moet minimaal één letter en één cijfer bevatten.",
+          "passwordMustDiffer": "Het nieuwe wachtwoord moet verschillen van het huidige wachtwoord.",
+          "passwordsMustMatch": "De nieuwe wachtwoorden komen niet overeen.",
+          "passwordTooShort": "Het nieuwe wachtwoord moet minimaal 6 tekens bevatten."
         },
-        "submit": "",
-        "submitting": "",
-        "subtitle": "",
-        "title": ""
+        "submit": "Nieuw wachtwoord instellen",
+        "submitting": "Wachtwoord wordt gewijzigd...",
+        "subtitle": "Uw account vereist een wachtwoordwijziging voordat u kunt doorgaan. Stel hieronder een nieuw wachtwoord in.",
+        "title": "Wachtwoordwijziging vereist"
       },
-      "newPassword": "",
-      "passwordHelp": ""
+      "newPassword": "Nieuw wachtwoord",
+      "passwordHelp": "Minimaal 6 tekens, moet een letter en een cijfer bevatten."
     }
   },
   "settings": {
     "releaseNotes": {
-      "noChanges": "No changes listed for this release",
-      "whatsNewSubtitle": "Here's what changed since your last update"
+      "noChanges": "Geen wijzigingen vermeld voor deze release",
+      "whatsNewSubtitle": "Dit is er veranderd sinds uw laatste update"
     }
   },
   "sponsor": {
-    "button": "Sponsor on GitHub",
-    "buttonShort": "",
-    "description": "MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going."
+    "button": "Sponsoren op GitHub",
+    "buttonShort": "Sponsoren",
+    "description": "MediKeep is gratis en open source. Als u het nuttig vindt, overweeg dan het project te sponsoren om de ontwikkeling te financieren en het actief te houden."
   },
   "storage": {
-    "connectionRequired": "",
-    "defaultLocation": "",
-    "filesCount": "",
-    "filesCount_one": "",
-    "filesCount_other": "",
-    "localDescription": "",
-    "localStorage": "",
-    "noUsageData": "",
-    "paperless": "",
-    "paperlessDescription": "",
-    "papra": "",
-    "papraDescription": "",
-    "title": "",
-    "usageLabel": ""
+    "connectionRequired": "Verbinding vereist",
+    "defaultLocation": "Standaard opslaglocatie",
+    "filesCount": "{{count}} bestanden",
+    "filesCount_one": "{{count}} bestand",
+    "filesCount_other": "{{count}} bestanden",
+    "localDescription": "Bestanden worden direct op deze server opgeslagen. Geschikt voor eenvoudige configuraties zonder externe diensten.",
+    "localStorage": "Lokale opslag",
+    "noUsageData": "Geen opslaggebruiksgegevens beschikbaar",
+    "paperless": "Paperless-ngx",
+    "paperlessDescription": "Bestanden worden geüpload naar uw Paperless-ngx-server. Biedt OCR, tagging en geavanceerd documentbeheer.",
+    "papra": "Papra",
+    "papraDescription": "Bestanden worden opgeslagen in uw Papra-instantie. Biedt georganiseerd documentbeheer met organisaties.",
+    "title": "Opslagvoorkeuren",
+    "usageLabel": "Opslaggebruik"
   },
   "system": {
     "timezone": {
-      "title": "Timezone"
+      "title": "Tijdzone"
     },
     "version": {
-      "loading": "Loading version information...",
-      "title": "Application Version",
-      "unavailable": "Version information unavailable",
-      "unknownApp": "Unknown App",
-      "unknownVersion": "Unknown Version"
+      "loading": "Versie-informatie laden...",
+      "title": "Applicatieversie",
+      "unavailable": "Versie-informatie niet beschikbaar",
+      "unknownApp": "Onbekende applicatie",
+      "unknownVersion": "Onbekende versie"
     }
   }
 }

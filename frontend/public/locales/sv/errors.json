@@ -1,23 +1,23 @@
 {
   "alert": {
-    "errorCount": "",
+    "errorCount": "{{count}} Fel",
     "errorCount_one": "",
-    "errorCount_other": "",
-    "formError": "",
-    "highPriority": "",
+    "errorCount_other": "{{count}} Fel",
+    "formError": "Formulärfel",
+    "highPriority": "{{count}} hög prioritet",
     "highPriority_one": "",
     "highPriority_other": "",
-    "suggestions": ""
+    "suggestions": "Förslag:"
   },
   "boundary": {
-    "componentLabel": "",
-    "errorDetails": "",
-    "errorIdLabel": "",
-    "errorLogged": "",
-    "reloadPage": "",
-    "somethingWentWrong": "",
-    "tryAgain": "",
-    "unexpectedError": ""
+    "componentLabel": "Komponent:",
+    "errorDetails": "Feldetaljer",
+    "errorIdLabel": "Fel-ID:",
+    "errorLogged": "Felet har loggats automatiskt för undersökning.",
+    "reloadPage": "Ladda om sidan",
+    "somethingWentWrong": "Något gick fel",
+    "tryAgain": "Försök igen",
+    "unexpectedError": "Vi ber om ursäkt, men något oväntat inträffade i journalsystemet."
   },
   "file": {
     "deleteFailed": "Det gick inte att ta bort filen. Försök igen.",

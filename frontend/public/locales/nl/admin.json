@@ -557,7 +557,7 @@
     "title": "Hulpmiddelen & onderhoud"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
+    "clearFilters": "Filters wissen",
     "deleteConfirm": "Weet u zeker dat u <strong>{{filename}}</strong> permanent wilt verwijderen?",
     "deletedDateRange": "Verwijderd datumbereik",
     "deleteFailed": "Verwijderen mislukt",
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Bestand permanent verwijderen",
     "purgedDirectories_one": "in {{count}} map",
     "purgedDirectories_other": "in {{count}} mappen",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Bestanden die de bewaartermijn hebben overschreden worden verwijderd. Momenteel {{verb}} er <strong>{{count}} {{files}}</strong> in de prullenbak met een totale grootte van <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Bestanden die de bewaartermijn hebben overschreden worden verwijderd. Momenteel {{verb}} er <strong>{{count}} {{files}}</strong> in de prullenbak met een totale grootte van <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} verlopen bestand permanent verwijderd",
     "purgedMessage_other": "{{count}} verlopen bestanden permanent verwijderd",
     "purgeExpired": "Verlopen opschonen",
@@ -601,12 +601,12 @@
     "showingFiltered": "{{shown}} van {{total}} {{files}} weergegeven",
     "subtitle": "Beheer verwijderde geüploade bestanden. Herstel bestanden naar hun oorspronkelijke locatie of verwijder ze permanent om opslagruimte vrij te maken.",
     "tableHeaders": {
-      "actions": "Actions",
+      "actions": "Acties",
       "deleted": "Verwijderd",
       "filename": "Bestandsnaam",
       "originalLocation": "Oorspronkelijke locatie",
-      "reason": "Reason",
-      "size": "Size"
+      "reason": "Reden",
+      "size": "Grootte"
     },
     "title": "Prullenbakbeheer",
     "totalSize": "{{size}} totaal",
@@ -646,20 +646,20 @@
     "noUsersInSystem": "Geen gebruikers in het systeem.",
     "noUsersMatchFilters": "Geen gebruikers komen overeen met uw filters. Probeer de filters aan te passen of te wissen.",
     "passwordModal": {
-      "bothFieldsRequired": "",
-      "confirmPlaceholder": "",
-      "enterNewPassword": "",
+      "bothFieldsRequired": "Beide wachtwoordvelden zijn verplicht",
+      "confirmPlaceholder": "Bevestig nieuw wachtwoord",
+      "enterNewPassword": "Voer nieuw wachtwoord in",
       "forceChange": "Wachtwoordwijziging afdwingen bij volgende login",
-      "immediateReset": "",
+      "immediateReset": "Hiermee wordt het wachtwoord van de gebruiker onmiddellijk hersteld. De gebruiker moet het nieuwe wachtwoord gebruiken om in te loggen.",
       "newPassword": "Nieuw wachtwoord",
       "passwordDescription": "Minimaal 6 tekens, ten minste 1 letter en 1 cijfer",
-      "passwordsDoNotMatch": "",
-      "resetFailed": "",
-      "resetSuccess": "",
+      "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
+      "resetFailed": "Wachtwoord herstellen mislukt. Probeer het opnieuw.",
+      "resetSuccess": "Wachtwoord succesvol hersteld voor {{username}}!",
       "resettingFor": "Wachtwoord herstellen voor <strong>{{username}}</strong>",
       "ssoWarning": "Deze gebruiker authenticeert via SSO ({{provider}}). Het instellen van een lokaal wachtwoord maakt hybride authenticatie mogelijk.",
-      "title": "",
-      "userInfo": ""
+      "title": "Wachtwoord herstellen voor {{username}}",
+      "userInfo": "Gebruiker: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Alle rollen"

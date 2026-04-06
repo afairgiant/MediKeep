@@ -1,218 +1,218 @@
 {
   "builder": {
     "buttons": {
-      "addRecords": "",
-      "clearSelections": "",
-      "generateReport": "",
-      "generateReport_one": "",
-      "generateReport_other": "",
-      "generateReportChartsOnly": "",
-      "generateReportWithCharts": "",
-      "selectAll": ""
+      "addRecords": "Добавить медицинские записи",
+      "clearSelections": "Очистить все выборы",
+      "generateReport": "Создать отчёт ({{count}} записей)",
+      "generateReport_one": "Создать отчёт ({{count}} запись)",
+      "generateReport_other": "Создать отчёт ({{count}} записей)",
+      "generateReportChartsOnly": "Создать отчёт ({{chartCount}} графиков)",
+      "generateReportWithCharts": "Создать отчёт ({{recordCount}} записей, {{chartCount}} графиков)",
+      "selectAll": "Выбрать все записи"
     },
     "configuration": {
-      "description": "",
-      "title": ""
+      "description": "Выберите медицинские записи для включения в персональный отчёт",
+      "title": "Настройка отчёта"
     },
     "icon": "",
-    "loading": "Loading reports...",
+    "loading": "Загрузка конструктора отчётов...",
     "noData": {
-      "description": "",
-      "title": ""
+      "description": "Сначала добавьте медицинские записи для использования конструктора отчётов.",
+      "title": "Медицинские данные отсутствуют"
     },
     "notifications": {
-      "templateLoaded": "",
-      "templateLoadedMessage": ""
+      "templateLoaded": "Шаблон загружен",
+      "templateLoadedMessage": "Шаблон \"{{name}}\" был загружен."
     },
     "progress": {
-      "recordsSelected": ""
+      "recordsSelected": "Выбрано записей"
     },
     "settingsModal": {
       "includePatientInfo": {
-        "description": "",
-        "label": ""
+        "description": "Добавить демографическую и контактную информацию",
+        "label": "Включить информацию о пациенте"
       },
       "includeProfilePicture": {
-        "description": "",
-        "label": ""
+        "description": "Добавить фото пациента в заголовок отчёта",
+        "label": "Включить фото профиля"
       },
       "includeSummary": {
-        "description": "",
-        "label": ""
+        "description": "Добавить обзор и раздел статистики",
+        "label": "Включить сводную статистику"
       },
       "reportTitle": {
-        "label": ""
+        "label": "Заголовок отчёта"
       },
-      "title": ""
+      "title": "Настройки отчёта"
     },
-    "title": "",
+    "title": "Конструктор персональных отчётов",
     "trendCharts": {
-      "dateFrom": "",
-      "dateTo": "",
-      "emptyState": "",
+      "dateFrom": "С",
+      "dateTo": "По",
+      "emptyState": "Данные для трендов недоступны. Добавьте жизненные показатели или результаты лабораторных анализов для создания графиков трендов.",
       "labTestCharts": {
-        "description": "",
-        "searchPlaceholder": "",
-        "title": ""
+        "description": "Найдите и выберите лабораторные анализы для графиков",
+        "searchPlaceholder": "Поиск лабораторных анализов...",
+        "title": "Графики лабораторных анализов"
       },
-      "maxReached": "",
-      "recordCount": "",
-      "recordCount_one": "",
-      "recordCount_other": "",
-      "removeChart": "",
-      "selectedCharts": "",
-      "selectedCharts_one": "",
-      "selectedCharts_other": "",
+      "maxReached": "Достигнуто максимальное количество графиков (10)",
+      "recordCount": "{{count}} записей",
+      "recordCount_one": "{{count}} запись",
+      "recordCount_other": "{{count}} записей",
+      "removeChart": "Удалить график {{name}}",
+      "selectedCharts": "Выбранные графики ({{count}})",
+      "selectedCharts_one": "Выбранные графики ({{count}})",
+      "selectedCharts_other": "Выбранные графики ({{count}})",
       "vitalCharts": {
-        "description": "",
-        "title": ""
+        "description": "Выберите жизненные показатели для графиков",
+        "title": "Графики жизненных показателей"
       }
     }
   },
   "categories": {
-    "noCategories": "",
-    "noCategoriesDescription": "",
-    "noRecords": "",
-    "recordCount": "",
-    "recordCount_one": "",
-    "recordCount_other": "",
-    "selected": "",
-    "selected_one": "",
-    "selected_other": "",
-    "showingFirst": "",
-    "showingFirst_one": "",
-    "showingFirst_other": "",
-    "totalCount": "",
-    "totalCount_one": "",
-    "totalCount_other": ""
+    "noCategories": "Категории недоступны",
+    "noCategoriesDescription": "Категории медицинских данных для создания отчётов недоступны.",
+    "noRecords": "Записи недоступны",
+    "recordCount": "{{count}} записей",
+    "recordCount_one": "{{count}} запись",
+    "recordCount_other": "{{count}} записей",
+    "selected": "{{count}} выбрано",
+    "selected_one": "{{count}} выбрана",
+    "selected_other": "{{count}} выбрано",
+    "showingFirst": "Показаны первые {{count}} записей. Дополнительные записи доступны, но не отображаются для повышения производительности.",
+    "showingFirst_one": "Показана первая {{count}} запись. Дополнительные записи доступны, но не отображаются для повышения производительности.",
+    "showingFirst_other": "Показаны первые {{count}} записей. Дополнительные записи доступны, но не отображаются для повышения производительности.",
+    "totalCount": "{{count}} всего",
+    "totalCount_one": "{{count}} всего",
+    "totalCount_other": "{{count}} всего"
   },
   "dataExport": {
-    "availableData": "",
-    "bulkExport": "",
-    "csvDescription": "",
-    "dateFilterNote": "",
-    "exportInfo": "",
-    "exportTitle": "",
-    "includeFilesNote": "",
-    "jsonDescription": "",
-    "pdfDescription": "",
-    "singleExport": "",
-    "zipDescription": ""
+    "availableData": "Доступные данные",
+    "bulkExport": "Массовый экспорт",
+    "csvDescription": "Формат CSV идеален для электронных таблиц",
+    "dateFilterNote": "Фильтры по датам применяются ко всем выбранным типам",
+    "exportInfo": "Информация об экспорте",
+    "exportTitle": "Экспорт медицинских записей",
+    "includeFilesNote": "Это может значительно увеличить размер загрузки",
+    "jsonDescription": "Формат JSON предоставляет полную структуру данных",
+    "pdfDescription": "Формат PDF создаёт печатные отчёты",
+    "singleExport": "Одиночный экспорт",
+    "zipDescription": "Массовые экспорты упаковываются в ZIP-файл"
   },
   "export": {
     "availableData": {
-      "moreItems_one": "",
-      "moreItems_other": "",
-      "title": ""
+      "moreItems_one": "ещё {{count}} элемент",
+      "moreItems_other": "ещё {{count}} элементов",
+      "title": "Доступные данные"
     },
     "buttons": {
-      "bulkExport": "",
-      "bulkExport_one": "",
-      "bulkExport_other": "",
-      "creatingZip": "",
-      "exportAs": "",
-      "exporting": "",
-      "goToDashboard": "",
-      "refreshPage": ""
+      "bulkExport": "Массовый экспорт {{count}} типов как ZIP",
+      "bulkExport_one": "Массовый экспорт {{count}} типа как ZIP",
+      "bulkExport_other": "Массовый экспорт {{count}} типов как ZIP",
+      "creatingZip": "Создание ZIP...",
+      "exportAs": "Экспортировать {{scope}} как {{format}}",
+      "exporting": "Экспорт...",
+      "goToDashboard": "Перейти к панели управления",
+      "refreshPage": "Обновить страницу"
     },
     "configuration": {
       "bulkSelection": {
-        "label": ""
+        "label": "Выберите типы данных для массового экспорта"
       },
       "dataToExport": {
-        "label": "",
-        "placeholder": ""
+        "label": "Данные для экспорта",
+        "placeholder": "Выберите тип данных"
       },
       "dateRange": {
-        "endDate": "",
-        "startDate": ""
+        "endDate": "Дата окончания (необязательно)",
+        "startDate": "Дата начала (необязательно)"
       },
       "format": {
-        "label": "",
-        "placeholder": ""
+        "label": "Формат экспорта",
+        "placeholder": "Выберите формат"
       },
-      "includeFiles": "",
+      "includeFiles": "Включить вложенные файлы (создаст ZIP-файл)",
       "includePatientInfo": {
-        "description": "",
-        "label": ""
+        "description": "Снимите флажок для исключения персональных данных пациента для обеспечения конфиденциальности",
+        "label": "Включить информацию о пациенте (имя, демографические данные и т.д.)"
       },
-      "title": ""
+      "title": "Настройка экспорта"
     },
-    "description": "",
+    "description": "Загрузите ваши медицинские данные в различных форматах для резервного копирования или обмена с медицинскими работниками",
     "errors": {
-      "bulkExportFailed": "",
-      "bulkInvalidSettings": "",
-      "bulkNoDataFound": "",
-      "exportFailed": "",
-      "invalidSettings": "",
-      "loadFailed": "",
-      "noActivePatient": "",
-      "noDataFound": "",
-      "noDataType": "",
-      "sessionExpired": "",
-      "validationFailed": ""
+      "bulkExportFailed": "Ошибка массового экспорта: {{message}}",
+      "bulkInvalidSettings": "Пожалуйста, проверьте настройки массового экспорта. Убедитесь, что выбран хотя бы один тип данных и допустимый формат.",
+      "bulkNoDataFound": "Данные по выбранным критериям экспорта не найдены. Попробуйте выбрать другие типы данных или изменить диапазон дат.",
+      "exportFailed": "Ошибка экспорта: {{message}}",
+      "invalidSettings": "Пожалуйста, проверьте настройки экспорта. Убедитесь, что выбран допустимый тип данных и формат.",
+      "loadFailed": "Не удалось загрузить данные экспорта: {{message}}",
+      "noActivePatient": "В настоящее время не выбран профиль пациента. Выберите пациента на панели управления для использования функции экспорта.",
+      "noDataFound": "Данные по выбранным критериям экспорта не найдены. Попробуйте выбрать другой тип данных или диапазон дат.",
+      "noDataType": "Выберите хотя бы один тип данных для массового экспорта",
+      "sessionExpired": "Ваша сессия истекла. Обновите страницу или войдите в систему снова для доступа к функциям экспорта.",
+      "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "",
-      "bulkExport": "",
-      "singleDescription": "",
-      "singleExport": "",
-      "title": ""
+      "bulkDescription": "Экспорт нескольких типов данных вместе в ZIP-файл",
+      "bulkExport": "Массовый экспорт",
+      "singleDescription": "Экспорт одного типа данных в выбранном формате",
+      "singleExport": "Одиночный экспорт",
+      "title": "Режим экспорта"
     },
     "icon": "",
     "information": {
       "bulk": {
-        "description": "",
-        "title": ""
+        "description": "Создаёт ZIP-файл, содержащий несколько типов данных в выбранном формате для комплексного резервного копирования данных.",
+        "title": "Массовый экспорт:"
       },
       "csv": {
-        "description": "",
-        "title": ""
+        "description": "Значения, разделённые запятыми, подходящие для приложений электронных таблиц, таких как Excel или Google Sheets.",
+        "title": "Формат CSV:"
       },
       "fileAttachments": {
-        "description": "",
-        "title": ""
+        "description": "При наличии для PDF-экспортов файлы результатов лабораторных анализов могут быть включены в ZIP-архив.",
+        "title": "Вложенные файлы:"
       },
       "json": {
-        "description": "",
-        "title": ""
+        "description": "Машиночитаемый формат структурированных данных, идеальный для импорта в другие системы или приложения.",
+        "title": "Формат JSON:"
       },
       "pdf": {
-        "description": "",
-        "title": ""
+        "description": "Человекочитаемый формат документа, идеальный для печати или обмена с медицинскими работниками.",
+        "title": "Формат PDF:"
       },
-      "title": ""
+      "title": "Информация об экспорте"
     },
-    "loading": "Loading export options...",
+    "loading": "Загрузка опций экспорта...",
     "scopes": {
-      "all": "",
-      "encounters": ""
+      "all": "Все записи",
+      "encounters": "Обращения"
     },
     "success": {
-      "bulkExportComplete": "",
-      "bulkExportComplete_one": "",
-      "bulkExportComplete_other": "",
-      "exportComplete": ""
+      "bulkExportComplete": "Массовый экспорт успешно завершён! Ваш ZIP-файл, содержащий {{count}} типов данных, был загружен.",
+      "bulkExportComplete_one": "Массовый экспорт успешно завершён! Ваш ZIP-файл, содержащий {{count}} тип данных, был загружен.",
+      "bulkExportComplete_other": "Массовый экспорт успешно завершён! Ваш ZIP-файл, содержащий {{count}} типов данных, был загружен.",
+      "exportComplete": "Экспорт успешно завершён! Ваш файл {{format}} был загружен."
     },
-    "title": ""
+    "title": "Экспорт медицинских записей"
   },
   "templates": {
-    "categories": "",
-    "categories_one": "",
-    "categories_other": "",
-    "deleteConfirm": "",
-    "editTemplate": "",
-    "loadTemplate": "",
-    "manageTemplates": "",
-    "moreTemplates": "",
-    "moreTemplates_one": "",
-    "moreTemplates_other": "",
-    "noSaved": "",
-    "records": "",
-    "reportTemplates": "",
-    "saveAsTemplate": "",
-    "saveDescription": "",
-    "savedTemplates": "",
-    "updateTemplate": ""
+    "categories": "{{count}} категорий",
+    "categories_one": "{{count}} категория",
+    "categories_other": "{{count}} категорий",
+    "deleteConfirm": "Вы уверены, что хотите удалить этот шаблон?",
+    "editTemplate": "Редактировать шаблон",
+    "loadTemplate": "Загрузить шаблон",
+    "manageTemplates": "Управление шаблонами",
+    "moreTemplates": "... и ещё {{count}} шаблон",
+    "moreTemplates_one": "... и ещё {{count}} шаблон",
+    "moreTemplates_other": "... и ещё {{count}} шаблонов",
+    "noSaved": "Нет сохранённых шаблонов",
+    "records": "{{count}} записей",
+    "reportTemplates": "Шаблоны отчётов",
+    "saveAsTemplate": "Сохранить как шаблон",
+    "saveDescription": "Этот шаблон сохранит ваши текущие настройки отчёта, выбранные записи и выбранные графики трендов.",
+    "savedTemplates": "Сохранённые шаблоны",
+    "updateTemplate": "Обновить шаблон"
   }
 }

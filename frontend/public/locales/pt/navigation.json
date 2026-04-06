@@ -57,16 +57,16 @@
     }
   },
   "menu": {
-    "account": "",
-    "backToDashboard": "Voltar ao painel",
-    "darkMode": "",
+    "account": "Conta",
+    "backToDashboard": "Voltar ao Painel",
+    "darkMode": "Modo Escuro",
     "help": "Ajuda",
-    "lightMode": "",
+    "lightMode": "Modo Claro",
     "logout": "Sair",
     "patients": "Pacientes",
     "profile": "Perfil",
     "reports": "Relatórios",
-    "userActions": ""
+    "userActions": "Ações do Usuário"
   },
   "pages": {
     "help": "Ajuda e Suporte",

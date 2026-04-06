@@ -1,23 +1,23 @@
 {
   "alert": {
-    "errorCount": "",
-    "errorCount_one": "",
-    "errorCount_other": "",
-    "formError": "",
-    "highPriority": "",
-    "highPriority_one": "",
-    "highPriority_other": "",
-    "suggestions": ""
+    "errorCount": "{{count}} ошибка",
+    "errorCount_one": "{{count}} ошибка",
+    "errorCount_other": "{{count}} ошибок",
+    "formError": "Ошибка формы",
+    "highPriority": "{{count}} высокий приоритет",
+    "highPriority_one": "{{count}} высокий приоритет",
+    "highPriority_other": "{{count}} высокий приоритет",
+    "suggestions": "Предложения:"
   },
   "boundary": {
-    "componentLabel": "",
-    "errorDetails": "",
-    "errorIdLabel": "",
-    "errorLogged": "",
-    "reloadPage": "",
-    "somethingWentWrong": "",
-    "tryAgain": "",
-    "unexpectedError": ""
+    "componentLabel": "Компонент:",
+    "errorDetails": "Детали ошибки",
+    "errorIdLabel": "ID ошибки:",
+    "errorLogged": "Ошибка автоматически зарегистрирована для расследования.",
+    "reloadPage": "Перезагрузить страницу",
+    "somethingWentWrong": "Что-то пошло не так",
+    "tryAgain": "Попробовать снова",
+    "unexpectedError": "Извините, произошёл неожиданный сбой в системе медицинских записей."
   },
   "file": {
     "deleteFailed": "Не удалось удалить файл. Пожалуйста, попробуйте снова.",

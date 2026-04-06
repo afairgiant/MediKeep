@@ -243,7 +243,7 @@
     }
   },
   "dashboard": {
-    "loading": "Загрузка панели управления...",
+    "loading": "Загрузка комплексной панели управления...",
     "quickActions": {
       "auditLogDesc": "Просмотр журнала активности системы",
       "backups": "Резервные копии",
@@ -480,7 +480,7 @@
     "searchResult_one": "{{count}} результат для \"{{query}}\"",
     "searchResult_other": "{{count}} результатов для \"{{query}}\"",
     "selected": "{{count}} выбрано",
-    "selected_one": "{{count}} выбрано",
+    "selected_one": "{{count}} выбрана",
     "selected_other": "{{count}} выбрано",
     "toggleColumnVisibility": "Переключить видимость столбцов",
     "typeDeleteToConfirm": "Введите <strong>DELETE</strong> для подтверждения",
@@ -557,7 +557,7 @@
     "title": "Инструменты и обслуживание"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
+    "clearFilters": "Очистить фильтры",
     "deleteConfirm": "Вы уверены, что хотите навсегда удалить <strong>{{filename}}</strong>?",
     "deletedDateRange": "Диапазон дат удаления",
     "deleteFailed": "Ошибка удаления",
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Удалить файл навсегда",
     "purgedDirectories_one": "в {{count}} каталоге",
     "purgedDirectories_other": "в {{count}} каталогах",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Файлы, превысившие срок хранения, будут удалены. В настоящее время в корзине находится <strong>{{count}} {{files}}</strong> общим размером <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Файлы, превысившие срок хранения, будут удалены. В настоящее время в корзине находятся <strong>{{count}} {{files}}</strong> общим размером <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} файл с истёкшим сроком окончательно удалён",
     "purgedMessage_other": "{{count}} файлов с истёкшим сроком окончательно удалено",
     "purgeExpired": "Очистить истёкшие",
@@ -601,12 +601,12 @@
     "showingFiltered": "Показано {{shown}} из {{total}} {{files}}",
     "subtitle": "Управление удалёнными файлами. Восстановите файлы в исходное расположение или окончательно удалите их для освобождения хранилища.",
     "tableHeaders": {
-      "actions": "Actions",
+      "actions": "Действия",
       "deleted": "Удалён",
       "filename": "Имя файла",
       "originalLocation": "Исходное расположение",
-      "reason": "Reason",
-      "size": "Size"
+      "reason": "Причина",
+      "size": "Размер"
     },
     "title": "Управление корзиной",
     "totalSize": "{{size}} всего",
@@ -646,20 +646,20 @@
     "noUsersInSystem": "В системе нет пользователей.",
     "noUsersMatchFilters": "Нет пользователей, соответствующих фильтрам. Попробуйте изменить или сбросить фильтры.",
     "passwordModal": {
-      "bothFieldsRequired": "",
-      "confirmPlaceholder": "",
-      "enterNewPassword": "",
+      "bothFieldsRequired": "Требуется заполнить оба поля пароля",
+      "confirmPlaceholder": "Подтвердите новый пароль",
+      "enterNewPassword": "Введите новый пароль",
       "forceChange": "Требовать смену пароля при следующем входе",
-      "immediateReset": "",
+      "immediateReset": "Это действие немедленно сбросит пароль пользователя. Для входа потребуется использовать новый пароль.",
       "newPassword": "Новый пароль",
       "passwordDescription": "Минимум 6 символов, хотя бы 1 буква и 1 цифра",
-      "passwordsDoNotMatch": "",
-      "resetFailed": "",
-      "resetSuccess": "",
+      "passwordsDoNotMatch": "Пароли не совпадают",
+      "resetFailed": "Не удалось сбросить пароль. Пожалуйста, попробуйте снова.",
+      "resetSuccess": "Пароль для пользователя {{username}} успешно сброшен!",
       "resettingFor": "Сброс пароля для <strong>{{username}}</strong>",
       "ssoWarning": "Этот пользователь аутентифицируется через SSO ({{provider}}). Установка локального пароля позволит использовать гибридную аутентификацию.",
-      "title": "",
-      "userInfo": ""
+      "title": "Сброс пароля для {{username}}",
+      "userInfo": "Пользователь: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Все роли"
