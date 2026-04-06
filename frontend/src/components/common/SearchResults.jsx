@@ -33,6 +33,7 @@ import {
   IconChevronRight,
   IconExternalLink
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { searchService } from '../../services/searchService';
 
@@ -43,6 +44,7 @@ const SearchResults = ({
   onClose,
   visible = false
 }) => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const { formatDateTime } = useDateFormat();
 
@@ -91,9 +93,9 @@ const SearchResults = ({
         <Group gap="xs">
           <IconSearch size="1rem" />
           <Text size="sm" fw={500}>
-            Search Results
+            {t('search.title')}
             {query && (
-              <Text span c="dimmed"> for "{query}"</Text>
+              <Text span c="dimmed"> {t('search.forQuery', { query })}</Text>
             )}
           </Text>
         </Group>
@@ -202,7 +204,7 @@ const SearchResults = ({
           <Divider />
           <Group justify="space-between" p="sm">
             <Text size="xs" c="dimmed">
-              {results.length} result{results.length !== 1 ? 's' : ''} found
+              {t('search.resultsFound', { count: results.length })}
             </Text>
             <Button
               size="xs"
@@ -213,7 +215,7 @@ const SearchResults = ({
                 if (onClose) onClose();
               }}
             >
-              See All
+              {t('search.seeAll')}
             </Button>
           </Group>
         </div>

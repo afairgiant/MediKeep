@@ -118,8 +118,6 @@
     "noChannelsHint": "Dodaj kanał, aby rozpocząć otrzymywanie powiadomień",
     "notificationsSent": "{{count}} powiadomień wysłanych",
     "sentCount_one": "{{count}} wysłanych",
-    "sentCount_few": "{{count}} sent",
-    "sentCount_many": "{{count}} sent",
     "sentCount_other": "{{count}} wysłanych",
     "test": "Test",
     "testError": "Nie udało się wysłać powiadomienia testowego",

@@ -24,6 +24,7 @@ import {
   IconChevronDown,
 } from '@tabler/icons-react';
 
+import { useTranslation } from 'react-i18next';
 import FileList from './FileList';
 import StorageBackendSelector from './StorageBackendSelector';
 
@@ -56,6 +57,7 @@ const RenderModeContent = memo(({
   onRemovePendingFile,
   onPendingFileDescriptionChange,
 }) => {
+  const { t } = useTranslation('documents');
   if (loading && files.length === 0) {
     return (
       <Center py="xl">
@@ -98,7 +100,7 @@ const RenderModeContent = memo(({
           variant="light"
           leftSection={<IconCheck size={10} />}
         >
-          Auto-sync enabled
+          {t('paperlessStatus.autoSyncEnabled')}
         </Badge>
       )}
     </Stack>
@@ -115,7 +117,7 @@ const RenderModeContent = memo(({
               rightSection={<IconChevronDown size={16} />}
               disabled={loading}
             >
-              Add Document
+              {t('manager.addDocument')}
             </Button>
           </Menu.Target>
           <Menu.Dropdown>
@@ -123,14 +125,14 @@ const RenderModeContent = memo(({
               leftSection={<IconUpload size={16} />}
               onClick={onUploadModalOpen}
             >
-              Upload New File
+              {t('manager.uploadNewFile')}
             </Menu.Item>
             {paperlessSettings?.paperless_enabled && (
               <Menu.Item
                 leftSection={<IconLink size={16} />}
                 onClick={onLinkModalOpen}
               >
-                Link Existing Paperless Document
+                {t('manager.linkPaperless')}
               </Menu.Item>
             )}
             {paperlessSettings?.papra_enabled && (
@@ -138,7 +140,7 @@ const RenderModeContent = memo(({
                 leftSection={<IconLink size={16} />}
                 onClick={onPapraLinkModalOpen}
               >
-                Link Existing Papra Document
+                {t('manager.linkPapra')}
               </Menu.Item>
             )}
           </Menu.Dropdown>
@@ -157,13 +159,13 @@ const RenderModeContent = memo(({
       onClick={onCheckSyncStatus}
       title="Check sync status with remote storage"
     >
-      Sync Check
+      {t('manager.syncCheck')}
     </Button>
   );
 
   const pendingFilesList = pendingFiles.length > 0 && (
     <Stack gap="md">
-      <Title order={5}>Files to Upload:</Title>
+      <Title order={5}>{t('manager.filesToUpload')}</Title>
       <Stack gap="sm">
         {pendingFiles.map(pendingFile => (
           <Paper key={pendingFile.id} withBorder p="sm" bg="blue.1">
@@ -214,7 +216,7 @@ const RenderModeContent = memo(({
 
         {hasRemoteFiles && (
           <Group justify="space-between" align="center">
-            <Text fw={500}>Files</Text>
+            <Text fw={500}>{t('shared:tabs.documents')}</Text>
             {syncCheckButton}
           </Group>
         )}
@@ -239,7 +241,7 @@ const RenderModeContent = memo(({
         {files.length > 0 && (
           <Stack gap="md">
             <Group justify="space-between" align="center">
-              <Title order={5}>Current Files:</Title>
+              <Title order={5}>{t('manager.currentFiles')}</Title>
               {syncCheckButton}
             </Group>
             <FileList

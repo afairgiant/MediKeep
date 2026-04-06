@@ -1,12 +1,14 @@
 import logger from '../../services/logger';
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui';
 import { Button, Alert } from '../ui';
 import { apiService } from '../../services/api';
 import './ChangePasswordModal.css';
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
+  const { t } = useTranslation(['auth', 'common', 'shared']);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -52,22 +54,22 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
       !passwordData.newPassword ||
       !passwordData.confirmPassword
     ) {
-      setError('All password fields are required');
+      setError(t('changePassword.allFieldsRequired'));
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('New passwords do not match');
+      setError(t('settings:security.password.forceChange.errors.passwordsMustMatch'));
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setError('New password must be at least 6 characters long');
+      setError(t('settings:security.password.forceChange.errors.passwordTooShort'));
       return;
     }
 
     if (passwordData.currentPassword === passwordData.newPassword) {
-      setError('New password must be different from current password');
+      setError(t('settings:security.password.forceChange.errors.passwordMustDiffer'));
       return;
     }
 
@@ -78,7 +80,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         newPassword: passwordData.newPassword,
       });
 
-      setSuccessMessage('Password changed successfully!');
+      setSuccessMessage(t('changePassword.success'));
       resetForm();
 
       // Close modal after 2 seconds
@@ -97,7 +99,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Change Password"
+      title={t('changePassword.title')}
       size="small"
       className="change-password-modal"
     >
@@ -107,7 +109,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
         <form onSubmit={handlePasswordChange} className="password-form">
           <div className="form-group">
-            <label htmlFor="currentPassword">Current Password</label>
+            <label htmlFor="currentPassword">{t('settings:security.password.currentPassword')}</label>
             <input
               type="password"
               id="currentPassword"
@@ -121,7 +123,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="newPassword">New Password</label>
+            <label htmlFor="newPassword">{t('settings:security.password.newPassword')}</label>
             <input
               type="password"
               id="newPassword"
@@ -134,12 +136,12 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
               disabled={isChangingPassword}
             />
             <small className="form-help">
-              Password must be at least 6 characters long
+              {t('changePassword.passwordHelp')}
             </small>
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm New Password</label>
+            <label htmlFor="confirmPassword">{t('settings:security.password.confirmPassword')}</label>
             <input
               type="password"
               id="confirmPassword"
@@ -159,7 +161,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
               onClick={handleClose}
               disabled={isChangingPassword}
             >
-              Cancel
+              {t('shared:fields.cancel')}
             </Button>
             <Button
               type="submit"
@@ -167,7 +169,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
               loading={isChangingPassword}
               disabled={isChangingPassword}
             >
-              {isChangingPassword ? 'Changing Password...' : 'Change Password'}
+              {isChangingPassword ? t('settings:security.password.forceChange.submitting') : t('settings:security.password.button')}
             </Button>
           </div>
         </form>

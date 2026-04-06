@@ -23,6 +23,7 @@ import {
   IconDownload,
   IconClock,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -41,6 +42,7 @@ const TemplateManager = ({
   onDeleteTemplate,
   isSaving = false,
 }) => {
+  const { t } = useTranslation(['reports', 'shared']);
   const { formatDate } = useDateFormat();
   const [showSaveModal, { open: openSaveModal, close: closeSaveModal }] = useDisclosure(false);
   const [showEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
@@ -153,16 +155,16 @@ const TemplateManager = ({
             rightSection={<IconChevronDown size={16} />}
             variant="outline"
           >
-            Templates
+            {t('templates.manageTemplates')}
           </Button>
         </Menu.Target>
 
         <Menu.Dropdown>
-          <Menu.Label>Report Templates</Menu.Label>
+          <Menu.Label>{t('templates.reportTemplates')}</Menu.Label>
           
           {templates.length === 0 ? (
             <Menu.Item disabled>
-              <Text size="sm" c="dimmed">No saved templates</Text>
+              <Text size="sm" c="dimmed">{t('templates.noSaved')}</Text>
             </Menu.Item>
           ) : (
             templates.slice(0, 5).map((template) => (
@@ -180,11 +182,11 @@ const TemplateManager = ({
                   )}
                   <Group gap="xs">
                     <Badge size="xs" color="blue" variant="light">
-                      {template.selected_records?.length || 0} categories
+                      {t('templates.categories', { count: template.selected_records?.length || 0 })}
                     </Badge>
                     {template.is_public && (
                       <Badge size="xs" color="green" variant="light">
-                        Public
+                        {t('shared:categories.shared')}
                       </Badge>
                     )}
                   </Group>
@@ -196,7 +198,7 @@ const TemplateManager = ({
           {templates.length > 5 && (
             <Menu.Item disabled>
               <Text size="xs" c="dimmed">
-                ... and {templates.length - 5} more
+                {t('templates.moreTemplates', { count: templates.length - 5 })}
               </Text>
             </Menu.Item>
           )}
@@ -208,7 +210,7 @@ const TemplateManager = ({
             onClick={handleSaveNew}
             disabled={!hasSelections}
           >
-            Save Current Selection
+            {t('templates.saveAsTemplate')}
           </Menu.Item>
         </Menu.Dropdown>
       </Menu>
@@ -216,7 +218,7 @@ const TemplateManager = ({
       {/* Templates List (for expanded view) */}
       {templates.length > 0 && (
         <Paper p="md" withBorder radius="md" mt="md">
-          <Text fw={500} mb="sm">Saved Templates</Text>
+          <Text fw={500} mb="sm">{t('templates.savedTemplates')}</Text>
           <Stack gap="xs">
             {templates.map((template) => (
               <TemplateCard
@@ -287,16 +289,16 @@ const TemplateManager = ({
 
           <Alert color="blue" variant="light">
             <Text size="sm">
-              This template will save your current record selections and can be reused for future reports.
+              {t('templates.saveDescription')}
             </Text>
           </Alert>
 
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={closeSaveModal}>
-              Cancel
+              {t('shared:fields.cancel')}
             </Button>
             <Button onClick={handleSubmitSave} loading={isSaving}>
-              Save Template
+              {t('templates.saveAsTemplate')}
             </Button>
           </Group>
         </Stack>
@@ -356,10 +358,10 @@ const TemplateManager = ({
 
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={closeEditModal}>
-              Cancel
+              {t('shared:fields.cancel')}
             </Button>
             <Button onClick={handleSubmitEdit}>
-              Update Template
+              {t('templates.updateTemplate')}
             </Button>
           </Group>
         </Stack>
@@ -372,6 +374,7 @@ const TemplateManager = ({
  * Individual template card component
  */
 const TemplateCard = ({ template, onLoad, onEdit, onDelete, formatDate }) => {
+  const { t } = useTranslation(['reports', 'shared']);
   return (
     <Paper p="sm" withBorder radius="sm" bg="var(--color-bg-secondary)">
       <Group justify="space-between">
@@ -379,11 +382,11 @@ const TemplateCard = ({ template, onLoad, onEdit, onDelete, formatDate }) => {
           <Group>
             <Text fw={500} size="sm">{template.name}</Text>
             <Badge size="xs" color="blue" variant="light">
-              {template.selected_records?.length || 0} categories
+              {t('templates.categories', { count: template.selected_records?.length || 0 })}
             </Badge>
             {template.is_public && (
               <Badge size="xs" color="green" variant="light">
-                Public
+                {t('shared:categories.shared')}
               </Badge>
             )}
           </Group>
@@ -406,7 +409,7 @@ const TemplateCard = ({ template, onLoad, onEdit, onDelete, formatDate }) => {
 
         <Group gap="xs">
           <Button size="xs" variant="light" onClick={onLoad}>
-            Load
+            {t('templates.loadTemplate')}
           </Button>
           <ActionIcon size="sm" variant="subtle" onClick={onEdit} aria-label={`Edit template ${template.name}`}>
             <IconEdit size={16} aria-hidden="true" />

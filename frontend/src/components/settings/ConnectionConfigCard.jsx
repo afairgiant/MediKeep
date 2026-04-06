@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, Button } from '../ui';
 import frontendLogger from '../../services/frontendLogger';
 
@@ -19,6 +20,7 @@ const ConnectionConfigCard = ({
   serverInfo = null,
   disabled = false,
 }) => {
+  const { t } = useTranslation('settings');
   const [showPassword, setShowPassword] = useState(false);
   const [showApiToken, setShowApiToken] = useState(false);
   const [authMethod, setAuthMethod] = useState('token'); // 'token' or 'credentials'
@@ -291,7 +293,7 @@ const ConnectionConfigCard = ({
         <div className="paperless-section-header">
           <div className="paperless-section-title">
             <span className="paperless-section-icon">🔗</span>
-            <h3>Paperless-ngx Connection</h3>
+            <h3>{t('paperlessConnection.title')}</h3>
           </div>
 
           <div
@@ -309,7 +311,7 @@ const ConnectionConfigCard = ({
         <div className="paperless-form-section">
           <div className="paperless-form-group">
             <label htmlFor="paperless-url" className="paperless-form-label">
-              Server URL *
+              {t('paperlessConnection.urlLabel')} *
             </label>
             <input
               id="paperless-url"
@@ -324,15 +326,14 @@ const ConnectionConfigCard = ({
               <div className="paperless-form-error">{validationErrors.url}</div>
             )}
             <div className="paperless-form-help">
-              The URL of your paperless-ngx instance (HTTP allowed for
-              localhost, HTTPS required for external URLs)
+              {t('paperlessConnection.urlHelp')}
             </div>
           </div>
 
           {/* Authentication Method Selector */}
           <div className="paperless-form-group">
             <label className="paperless-form-label">
-              Authentication Method
+              {t('paperlessConnection.authMethod')}
             </label>
             <div className="paperless-auth-method-selector">
               <div className="paperless-radio-group">
@@ -345,7 +346,7 @@ const ConnectionConfigCard = ({
                     onChange={() => handleAuthMethodChange('token')}
                     disabled={disabled || testingConnection}
                   />
-                  <span>API Token (Recommended)</span>
+                  <span>{t('paperlessConnection.apiTokenRecommended')}</span>
                 </label>
                 <label className="paperless-radio-option">
                   <input
@@ -356,13 +357,12 @@ const ConnectionConfigCard = ({
                     onChange={() => handleAuthMethodChange('credentials')}
                     disabled={disabled || testingConnection}
                   />
-                  <span>Username & Password</span>
+                  <span>{t('paperlessConnection.usernamePassword')}</span>
                 </label>
               </div>
             </div>
             <div className="paperless-form-help">
-              API tokens are more secure and don't expire. Generate one in your
-              Paperless-ngx admin panel.
+              {t('paperlessConnection.methodInfo')}
             </div>
           </div>
 
@@ -373,7 +373,7 @@ const ConnectionConfigCard = ({
                 htmlFor="paperless-api-token"
                 className="paperless-form-label"
               >
-                API Token *
+                {t('paperlessConnection.apiTokenLabel')} *
               </label>
               <div className="paperless-token-input-group">
                 <input
@@ -401,8 +401,7 @@ const ConnectionConfigCard = ({
                 </div>
               )}
               <div className="paperless-form-help">
-                Your paperless-ngx API token (found in Profile → Tokens or
-                generate a new one)
+                {t('paperlessConnection.apiTokenHelp')}
               </div>
             </div>
           )}
@@ -415,7 +414,7 @@ const ConnectionConfigCard = ({
                   htmlFor="paperless-username"
                   className="paperless-form-label"
                 >
-                  Username *
+                  {t('paperlessConnection.usernameLabel')} *
                 </label>
                 <input
                   id="paperless-username"
@@ -432,7 +431,7 @@ const ConnectionConfigCard = ({
                   </div>
                 )}
                 <div className="paperless-form-help">
-                  Your paperless-ngx username
+                  {t('paperlessConnection.usernameHelp')}
                 </div>
               </div>
 
@@ -441,7 +440,7 @@ const ConnectionConfigCard = ({
                   htmlFor="paperless-password"
                   className="paperless-form-label"
                 >
-                  Password *
+                  {t('paperlessConnection.passwordLabel')} *
                 </label>
                 <div className="paperless-token-input-group">
                   <input
@@ -469,7 +468,7 @@ const ConnectionConfigCard = ({
                   </div>
                 )}
                 <div className="paperless-form-help">
-                  Your paperless-ngx password
+                  {t('paperlessConnection.passwordHelp')}
                 </div>
               </div>
             </>
@@ -491,23 +490,23 @@ const ConnectionConfigCard = ({
             <div className="paperless-server-info">
               <div className="server-info-item">
                 <span className="server-info-label">
-                  ✓ Connection successful
+                  {t('paperlessConnection.connected')}
                 </span>
               </div>
               {serverInfo?.auth_method && (
                 <div className="server-info-item">
                   <span className="server-info-label">
-                    Authentication:{' '}
+                    {t('paperlessConnection.authMethod')}:{' '}
                     {serverInfo.auth_method === 'token'
-                      ? 'API Token'
-                      : 'Username/Password'}
+                      ? t('paperlessConnection.apiTokenLabel')
+                      : t('paperlessConnection.usernamePassword')}
                   </span>
                 </div>
               )}
               {serverInfo?.used_saved_credentials && (
                 <div className="server-info-item">
                   <span className="server-info-label">
-                    Using saved credentials
+                    {t('paperlessConnection.sessionStorage')}
                   </span>
                 </div>
               )}
@@ -517,8 +516,7 @@ const ConnectionConfigCard = ({
           {connectionStatus === 'failed' && (
             <div className="paperless-connection-error">
               <div className="connection-error-message">
-                Unable to connect to paperless-ngx. Please check your URL and
-                authentication credentials.
+                {t('paperlessConnection.connectionError')}
               </div>
             </div>
           )}

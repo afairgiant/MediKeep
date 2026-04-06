@@ -42,7 +42,7 @@ import { exportService } from '../services/exportService';
 
 const ExportPage = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['reports', 'common', 'shared']);
   const { unitSystem } = useUserPreferences();
 
   // State management
@@ -92,13 +92,13 @@ const ExportPage = () => {
           setTimeout(() => loadInitialData(retryCount + 1), 1000);
           return;
         }
-        setError(t('exportPage.errors.sessionExpired'));
+        setError(t('export.errors.sessionExpired'));
       } else if (error.status === 400 && error.message?.includes('No active patient')) {
         // Handle missing active patient error
-        setError(t('exportPage.errors.noActivePatient'));
+        setError(t('export.errors.noActivePatient'));
       } else {
         setError(
-          t('exportPage.errors.loadFailed', { message: error.message || t('labels.pleaseTryAgain', 'Please try again.') })
+          t('export.errors.loadFailed', { message: error.message || t('common:labels.pleaseTryAgain', 'Please try again.') })
         );
       }
       logger.error('Export data loading failed:', error);
@@ -115,7 +115,7 @@ const ExportPage = () => {
       // Validate parameters
       const validation = exportService.validateExportParams(exportConfig);
       if (!validation.isValid) {
-        setError(t('exportPage.errors.validationFailed', { errors: validation.errors.join(', ') }));
+        setError(t('export.errors.validationFailed', { errors: validation.errors.join(', ') }));
         return;
       }
 
@@ -136,23 +136,23 @@ const ExportPage = () => {
 
       await exportService.downloadExport(params);
       setSuccess(
-        t('exportPage.success.exportComplete', { format: exportConfig.format.toUpperCase() })
+        t('export.success.exportComplete', { format: exportConfig.format.toUpperCase() })
       );
 
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
       if (error.status === 400 && error.message?.includes('No active patient')) {
-        setError(t('exportPage.errors.noActivePatient'));
+        setError(t('export.errors.noActivePatient'));
       } else if (error.status === 422) {
-        setError(t('exportPage.errors.invalidSettings'));
+        setError(t('export.errors.invalidSettings'));
       } else if (error.status === 404) {
-        setError(t('exportPage.errors.noDataFound'));
+        setError(t('export.errors.noDataFound'));
       } else if (error.data && error.data.detail) {
         // Use the detailed error message from the backend if available
-        setError(t('exportPage.errors.exportFailed', { message: error.data.detail }));
+        setError(t('export.errors.exportFailed', { message: error.data.detail }));
       } else {
-        setError(t('exportPage.errors.exportFailed', { message: error.message || t('labels.pleaseTryAgain', 'Please try again.') }));
+        setError(t('export.errors.exportFailed', { message: error.message || t('common:labels.pleaseTryAgain', 'Please try again.') }));
       }
     } finally {
       setLoading(false);
@@ -166,7 +166,7 @@ const ExportPage = () => {
 
       const scopes = selectedScopes.filter(scope => scope !== 'all');
       if (scopes.length === 0) {
-        setError(t('exportPage.errors.noDataType'));
+        setError(t('export.errors.noDataType'));
         return;
       }
 
@@ -181,23 +181,23 @@ const ExportPage = () => {
 
       await exportService.downloadBulkExport(requestData);
       setSuccess(
-        t('exportPage.success.bulkExportComplete', { count: scopes.length })
+        t('export.success.bulkExportComplete', { count: scopes.length })
       );
 
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
       if (error.status === 400 && error.message?.includes('No active patient')) {
-        setError(t('exportPage.errors.noActivePatient'));
+        setError(t('export.errors.noActivePatient'));
       } else if (error.status === 422) {
-        setError(t('exportPage.errors.bulkInvalidSettings'));
+        setError(t('export.errors.bulkInvalidSettings'));
       } else if (error.status === 404) {
-        setError(t('exportPage.errors.bulkNoDataFound'));
+        setError(t('export.errors.bulkNoDataFound'));
       } else if (error.data && error.data.detail) {
         // Use the detailed error message from the backend if available
-        setError(t('exportPage.errors.bulkExportFailed', { message: error.data.detail }));
+        setError(t('export.errors.bulkExportFailed', { message: error.data.detail }));
       } else {
-        setError(t('exportPage.errors.bulkExportFailed', { message: error.message || t('labels.pleaseTryAgain', 'Please try again.') }));
+        setError(t('export.errors.bulkExportFailed', { message: error.message || t('common:labels.pleaseTryAgain', 'Please try again.') }));
       }
     } finally {
       setLoading(false);
@@ -238,16 +238,16 @@ const ExportPage = () => {
   };
 
   if (summaryLoading) {
-    return <MedicalPageLoading message={t('exportPage.loading', 'Loading export options...')} />;
+    return <MedicalPageLoading message={t('export.loading', 'Loading export options...')} />;
   }
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title={t('exportPage.title')} icon={t('exportPage.icon')} />
+      <PageHeader title={t('export.title')} icon={t('export.icon')} />
 
       <Stack gap="lg">
         <Text size="lg" c="dimmed">
-          {t('exportPage.description')}
+          {t('export.description')}
         </Text>
 
         {/* Alerts */}
@@ -269,7 +269,7 @@ const ExportPage = () => {
                     variant="light"
                     onClick={() => window.location.reload()}
                   >
-                    {t('exportPage.buttons.refreshPage')}
+                    {t('export.buttons.refreshPage')}
                   </Button>
                   <Button
                     size="xs"
@@ -287,7 +287,7 @@ const ExportPage = () => {
                     variant="light"
                     onClick={() => navigate('/dashboard')}
                   >
-                    {t('exportPage.buttons.goToDashboard')}
+                    {t('export.buttons.goToDashboard')}
                   </Button>
                   <Button
                     size="xs"
@@ -320,7 +320,7 @@ const ExportPage = () => {
           <Group justify="space-between" mb={{ base: 'xs', sm: 'lg' }}>
             <Group gap="xs">
               <IconChartBar size={20} />
-              <Title order={{ base: 3, sm: 2 }}>{t('exportPage.availableData.title')}</Title>
+              <Title order={{ base: 3, sm: 2 }}>{t('export.availableData.title')}</Title>
             </Group>
             <ActionIcon
               variant="subtle"
@@ -411,7 +411,7 @@ const ExportPage = () => {
         <Paper shadow="sm" p="xl" radius="md" withBorder>
           <Group mb="lg">
             <IconSettings size={20} />
-            <Title order={2}>{t('exportPage.exportMode.title')}</Title>
+            <Title order={2}>{t('export.exportMode.title')}</Title>
           </Group>
           <Group gap="xs" mb="md">
             <Button
@@ -419,20 +419,20 @@ const ExportPage = () => {
               onClick={() => setBulkMode(false)}
               leftSection={<IconDownload size={16} />}
             >
-              {t('exportPage.exportMode.singleExport')}
+              {t('export.exportMode.singleExport')}
             </Button>
             <Button
               variant={bulkMode ? 'filled' : 'outline'}
               onClick={() => setBulkMode(true)}
               leftSection={<IconArchive size={16} />}
             >
-              {t('exportPage.exportMode.bulkExport')}
+              {t('export.exportMode.bulkExport')}
             </Button>
           </Group>
           <Text size="sm" c="dimmed">
             {!bulkMode
-              ? t('exportPage.exportMode.singleDescription')
-              : t('exportPage.exportMode.bulkDescription')}
+              ? t('export.exportMode.singleDescription')
+              : t('export.exportMode.bulkDescription')}
           </Text>
         </Paper>
 
@@ -440,14 +440,14 @@ const ExportPage = () => {
         <Paper shadow="sm" p="xl" radius="md" withBorder>
           <Group mb="lg">
             <IconSettings size={20} />
-            <Title order={2}>{t('exportPage.configuration.title')}</Title>
+            <Title order={2}>{t('export.configuration.title')}</Title>
           </Group>
 
           <Stack gap="lg">
             {/* Format Selection */}
             <Select
-              label={t('exportPage.configuration.format.label')}
-              placeholder={t('exportPage.configuration.format.placeholder')}
+              label={t('export.configuration.format.label')}
+              placeholder={t('export.configuration.format.placeholder')}
               value={exportConfig.format}
               onChange={value =>
                 setExportConfig(prev => ({ ...prev, format: value }))
@@ -463,8 +463,8 @@ const ExportPage = () => {
             {/* Scope Selection */}
             {!bulkMode ? (
               <Select
-                label={t('exportPage.configuration.dataToExport.label')}
-                placeholder={t('exportPage.configuration.dataToExport.placeholder')}
+                label={t('export.configuration.dataToExport.label')}
+                placeholder={t('export.configuration.dataToExport.placeholder')}
                 value={exportConfig.scope}
                 onChange={value =>
                   setExportConfig(prev => ({ ...prev, scope: value }))
@@ -481,7 +481,7 @@ const ExportPage = () => {
             ) : (
               <Box>
                 <Text fw={500} size="sm" mb="xs">
-                  {t('exportPage.configuration.bulkSelection.label')}
+                  {t('export.configuration.bulkSelection.label')}
                 </Text>
                 <Stack gap="xs">
                   {formats.scopes
@@ -502,7 +502,7 @@ const ExportPage = () => {
             <Group grow>
               <TextInput
                 type="date"
-                label={t('exportPage.configuration.dateRange.startDate')}
+                label={t('export.configuration.dateRange.startDate')}
                 value={exportConfig.startDate}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -513,7 +513,7 @@ const ExportPage = () => {
               />
               <TextInput
                 type="date"
-                label={t('exportPage.configuration.dateRange.endDate')}
+                label={t('export.configuration.dateRange.endDate')}
                 value={exportConfig.endDate}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -527,7 +527,7 @@ const ExportPage = () => {
             {/* Include Files Option (PDF only) */}
             {exportConfig.format === 'pdf' && !bulkMode && (
               <Checkbox
-                label={t('exportPage.configuration.includeFiles')}
+                label={t('export.configuration.includeFiles')}
                 checked={exportConfig.includeFiles}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -541,8 +541,8 @@ const ExportPage = () => {
             {/* Include Patient Info Option (PDF only) */}
             {exportConfig.format === 'pdf' && !bulkMode && (
               <Checkbox
-                label={t('exportPage.configuration.includePatientInfo.label')}
-                description={t('exportPage.configuration.includePatientInfo.description')}
+                label={t('export.configuration.includePatientInfo.label')}
+                description={t('export.configuration.includePatientInfo.description')}
                 checked={exportConfig.includePatientInfo}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -566,8 +566,8 @@ const ExportPage = () => {
                   loading={loading}
                 >
                   {loading
-                    ? t('exportPage.buttons.exporting')
-                    : t('exportPage.buttons.exportAs', { scope: exportConfig.scope, format: exportConfig.format.toUpperCase() })}
+                    ? t('export.buttons.exporting')
+                    : t('export.buttons.exportAs', { scope: exportConfig.scope, format: exportConfig.format.toUpperCase() })}
                 </Button>
               ) : (
                 <Button
@@ -580,8 +580,8 @@ const ExportPage = () => {
                   loading={loading}
                 >
                   {loading
-                    ? t('exportPage.buttons.creatingZip')
-                    : t('exportPage.buttons.bulkExport', { count: selectedScopes.length })}
+                    ? t('export.buttons.creatingZip')
+                    : t('export.buttons.bulkExport', { count: selectedScopes.length })}
                 </Button>
               )}
             </Group>
@@ -592,47 +592,47 @@ const ExportPage = () => {
         <Paper shadow="sm" p="xl" radius="md" withBorder variant="outline">
           <Group mb="lg">
             <IconInfoCircle size={20} />
-            <Title order={2}>{t('exportPage.information.title')}</Title>
+            <Title order={2}>{t('export.information.title')}</Title>
           </Group>
           <Stack gap="md">
             <Box>
               <Text fw={500} mb="xs">
-                {t('exportPage.information.json.title')}
+                {t('export.information.json.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                {t('exportPage.information.json.description')}
+                {t('export.information.json.description')}
               </Text>
             </Box>
             <Box>
               <Text fw={500} mb="xs">
-                {t('exportPage.information.csv.title')}
+                {t('export.information.csv.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                {t('exportPage.information.csv.description')}
+                {t('export.information.csv.description')}
               </Text>
             </Box>
             <Box>
               <Text fw={500} mb="xs">
-                {t('exportPage.information.pdf.title')}
+                {t('export.information.pdf.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                {t('exportPage.information.pdf.description')}
+                {t('export.information.pdf.description')}
               </Text>
             </Box>
             <Box>
               <Text fw={500} mb="xs">
-                {t('exportPage.information.bulk.title')}
+                {t('export.information.bulk.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                {t('exportPage.information.bulk.description')}
+                {t('export.information.bulk.description')}
               </Text>
             </Box>
             <Box>
               <Text fw={500} mb="xs">
-                {t('exportPage.information.fileAttachments.title')}
+                {t('export.information.fileAttachments.title')}
               </Text>
               <Text size="sm" c="dimmed">
-                {t('exportPage.information.fileAttachments.description')}
+                {t('export.information.fileAttachments.description')}
               </Text>
             </Box>
             <Divider />

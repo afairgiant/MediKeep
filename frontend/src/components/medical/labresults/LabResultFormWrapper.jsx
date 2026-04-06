@@ -104,14 +104,14 @@ const PendingRelationshipsPicker = ({
   return (
     <Stack gap="md">
       <Text size="sm" c="dimmed">
-        {t('labResults.messages.relationshipsSaveFirst')}
+        {t('labresults:messages.relationshipsSaveFirst')}
       </Text>
 
       {/* Conditions section */}
       {conditions.length > 0 && (
         <Paper withBorder p="md">
           <Stack gap="sm">
-            <Title order={6}>{t('labResults.form.linkConditionsTitle')}</Title>
+            <Title order={6}>{t('labresults:form.linkConditionsTitle')}</Title>
 
             {/* Already-added pending conditions */}
             {pendingConditions.map((pc, index) => (
@@ -250,7 +250,7 @@ const PendingRelationshipsPicker = ({
       {conditions.length === 0 && encounters.length === 0 && (
         <Paper withBorder p="md" ta="center">
           <Text c="dimmed">
-            {t('labResults.messages.relationshipsCreateInfo')}
+            {t('labresults:messages.relationshipsCreateInfo')}
           </Text>
         </Paper>
       )}
@@ -295,45 +295,45 @@ const LabResultFormWrapper = ({
   const [pendingEncounters, setPendingEncounters] = useState([]);
 
   const statusOptions = [
-    { value: 'ordered', label: t('labResults.status.ordered') },
-    { value: 'in-progress', label: t('labResults.status.inProgress') },
-    { value: 'completed', label: t('labResults.status.completed') },
-    { value: 'cancelled', label: t('labResults.status.cancelled') },
+    { value: 'ordered', label: t('labresults:status.ordered') },
+    { value: 'in-progress', label: t('labresults:status.inProgress') },
+    { value: 'completed', label: t('labresults:status.completed') },
+    { value: 'cancelled', label: t('labresults:status.cancelled') },
   ];
 
   const categoryOptions = [
-    { value: 'blood work', label: t('labResults.category.bloodWork') },
-    { value: 'imaging', label: t('labResults.category.imaging') },
-    { value: 'pathology', label: t('labResults.category.pathology') },
-    { value: 'microbiology', label: t('labResults.category.microbiology') },
-    { value: 'chemistry', label: t('labResults.category.chemistry') },
-    { value: 'hematology', label: t('labResults.category.hematology') },
-    { value: 'hepatology', label: t('labResults.category.hepatology') },
-    { value: 'immunology', label: t('labResults.category.immunology') },
-    { value: 'genetics', label: t('labResults.category.genetics') },
-    { value: 'cardiology', label: t('labResults.category.cardiology') },
-    { value: 'pulmonology', label: t('labResults.category.pulmonology') },
-    { value: 'hearing', label: t('labResults.category.hearing') },
-    { value: 'stomatology', label: t('labResults.category.stomatology') },
+    { value: 'blood work', label: t('labresults:category.bloodWork') },
+    { value: 'imaging', label: t('labresults:category.imaging') },
+    { value: 'pathology', label: t('labresults:category.pathology') },
+    { value: 'microbiology', label: t('labresults:category.microbiology') },
+    { value: 'chemistry', label: t('labresults:category.chemistry') },
+    { value: 'hematology', label: t('labresults:category.hematology') },
+    { value: 'hepatology', label: t('labresults:category.hepatology') },
+    { value: 'immunology', label: t('labresults:category.immunology') },
+    { value: 'genetics', label: t('labresults:category.genetics') },
+    { value: 'cardiology', label: t('labresults:category.cardiology') },
+    { value: 'pulmonology', label: t('labresults:category.pulmonology') },
+    { value: 'hearing', label: t('labresults:category.hearing') },
+    { value: 'stomatology', label: t('labresults:category.stomatology') },
     { value: 'other', label: t('shared:fields.other') },
   ];
 
   const testTypeOptions = [
-    { value: 'routine', label: t('labResults.testType.routine') },
-    { value: 'urgent', label: t('labResults.testType.urgent') },
-    { value: 'emergency', label: t('labResults.testType.emergency') },
-    { value: 'follow-up', label: t('labResults.testType.followUp') },
-    { value: 'screening', label: t('labResults.testType.screening') },
+    { value: 'routine', label: t('labresults:testType.routine') },
+    { value: 'urgent', label: t('labresults:testType.urgent') },
+    { value: 'emergency', label: t('labresults:testType.emergency') },
+    { value: 'follow-up', label: t('labresults:testType.followUp') },
+    { value: 'screening', label: t('labresults:testType.screening') },
   ];
 
   const labResultOptions = [
-    { value: 'normal', label: t('labResults.result.normal'), color: 'green' },
-    { value: 'abnormal', label: t('labResults.result.abnormal'), color: 'red' },
-    { value: 'critical', label: t('labResults.result.critical'), color: 'red' },
-    { value: 'high', label: t('labResults.result.high'), color: 'orange' },
-    { value: 'low', label: t('labResults.result.low'), color: 'orange' },
-    { value: 'borderline', label: t('labResults.result.borderline'), color: 'yellow' },
-    { value: 'inconclusive', label: t('labResults.result.inconclusive'), color: 'gray' },
+    { value: 'normal', label: t('labresults:result.normal'), color: 'green' },
+    { value: 'abnormal', label: t('labresults:result.abnormal'), color: 'red' },
+    { value: 'critical', label: t('labresults:result.critical'), color: 'red' },
+    { value: 'high', label: t('labresults:result.high'), color: 'orange' },
+    { value: 'low', label: t('labresults:result.low'), color: 'orange' },
+    { value: 'borderline', label: t('labresults:result.borderline'), color: 'yellow' },
+    { value: 'inconclusive', label: t('labresults:result.inconclusive'), color: 'gray' },
   ];
 
   const practitionerOptions = practitioners.map(p => ({
@@ -471,13 +471,13 @@ const LabResultFormWrapper = ({
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="results" leftSection={<IconChartBar size={16} />}>
-                {t('labResults.tabs.resultsStatus')}
+                {t('labresults:tabs.resultsStatus')}
               </Tabs.Tab>
               <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
                 {editingItem ? t('shared:tabs.documents') : t('shared:tabs.addFiles')}
               </Tabs.Tab>
               <Tabs.Tab value="relationships" leftSection={<IconLink size={16} />}>
-                {t('labResults.tabs.relationships')}
+                {t('labresults:tabs.relationships')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes')}
@@ -493,8 +493,8 @@ const LabResultFormWrapper = ({
                       label={t('shared:fields.testName')}
                       value={formData.test_name || ''}
                       onChange={handleTextInputChange('test_name')}
-                      placeholder={t('labResults.testName.placeholder')}
-                      description={t('labResults.testName.description')}
+                      placeholder={t('labresults:testName.placeholder')}
+                      description={t('labresults:testName.description')}
                       required
                     />
                   </Grid.Col>
@@ -503,20 +503,20 @@ const LabResultFormWrapper = ({
                       label={t('shared:fields.testCode')}
                       value={formData.test_code || ''}
                       onChange={handleTextInputChange('test_code')}
-                      placeholder={t('labResults.testCode.placeholder')}
-                      description={t('labResults.testCode.description')}
+                      placeholder={t('labresults:testCode.placeholder')}
+                      description={t('labresults:testCode.description')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('labResults.testCategory.label')}
+                      label={t('labresults:testCategory.label')}
                       value={formData.test_category || null}
                       data={categoryOptions}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'test_category', value: value || '' } });
                       }}
                       placeholder={t('shared:labels.selectCategory')}
-                      description={t('labResults.testCategory.description')}
+                      description={t('labresults:testCategory.description')}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -524,25 +524,25 @@ const LabResultFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('labResults.testTypeField.label')}
+                      label={t('labresults:testTypeField.label')}
                       value={formData.test_type || null}
                       data={testTypeOptions}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'test_type', value: value || '' } });
                       }}
-                      placeholder={t('labResults.testTypeField.placeholder')}
-                      description={t('labResults.testTypeField.description')}
+                      placeholder={t('labresults:testTypeField.placeholder')}
+                      description={t('labresults:testTypeField.description')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('labResults.testingFacility.label')}
+                      label={t('labresults:testingFacility.label')}
                       value={formData.facility || ''}
                       onChange={handleTextInputChange('facility')}
-                      placeholder={t('labResults.testingFacility.placeholder')}
-                      description={t('labResults.testingFacility.description')}
+                      placeholder={t('labresults:testingFacility.placeholder')}
+                      description={t('labresults:testingFacility.description')}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -554,7 +554,7 @@ const LabResultFormWrapper = ({
                         onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
                       }}
                       placeholder={t('shared:fields.selectPractitioner')}
-                      description={t('labResults.orderingPractitioner.description')}
+                      description={t('labresults:orderingPractitioner.description')}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -587,14 +587,14 @@ const LabResultFormWrapper = ({
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('labResults.testStatus.label')}
+                      label={t('labresults:testStatus.label')}
                       value={formData.status || null}
                       data={statusOptions}
                       onChange={(value) => {
                         onInputChange({ target: { name: 'status', value: value || '' } });
                       }}
                       placeholder={t('shared:fields.selectStatus')}
-                      description={t('labResults.testStatus.description')}
+                      description={t('labresults:testStatus.description')}
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
@@ -606,8 +606,8 @@ const LabResultFormWrapper = ({
                       onChange={(value) => {
                         onInputChange({ target: { name: 'labs_result', value: value || '' } });
                       }}
-                      placeholder={t('labResults.labResult.placeholder')}
-                      description={t('labResults.labResult.description')}
+                      placeholder={t('labresults:labResult.placeholder')}
+                      description={t('labresults:labResult.description')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
@@ -622,7 +622,7 @@ const LabResultFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
-                      description={t('labResults.orderedDate.description')}
+                      description={t('labresults:orderedDate.description')}
                       clearable
                       firstDayOfWeek={0}
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
@@ -638,7 +638,7 @@ const LabResultFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
-                      description={t('labResults.completedDate.description')}
+                      description={t('labresults:completedDate.description')}
                       clearable
                       firstDayOfWeek={0}
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
@@ -648,7 +648,7 @@ const LabResultFormWrapper = ({
                     <Grid.Col span={12}>
                       <Box>
                         <Text size="sm" fw={500} mb="xs">
-                          {t('labResults.form.statusIndicator')}
+                          {t('labresults:form.statusIndicator')}
                         </Text>
                         <Badge
                           color={getStatusColor(formData.status)}
@@ -664,7 +664,7 @@ const LabResultFormWrapper = ({
                     <Grid.Col span={12}>
                       <Box>
                         <Text size="sm" fw={500} mb="xs">
-                          {t('labResults.form.resultIndicator')}
+                          {t('labresults:form.resultIndicator')}
                         </Text>
                         {getResultBadge(formData.labs_result)}
                       </Box>
@@ -679,7 +679,7 @@ const LabResultFormWrapper = ({
                     ) : (
                       <Paper withBorder p="md">
                         <Text size="sm" c="dimmed">
-                          {t('labResults.messages.testComponentsEditInfo')}
+                          {t('labresults:messages.testComponentsEditInfo')}
                         </Text>
                       </Paper>
                     )}
@@ -712,9 +712,9 @@ const LabResultFormWrapper = ({
                     {conditions.length > 0 && (
                       <Paper withBorder p="md" bg="var(--color-bg-secondary)">
                         <Stack gap="md">
-                          <Title order={5}>{t('labResults.form.linkConditionsTitle')}</Title>
+                          <Title order={5}>{t('labresults:form.linkConditionsTitle')}</Title>
                           <Text size="sm" c="dimmed">
-                            {t('labResults.form.linkConditionsDescription')}
+                            {t('labresults:form.linkConditionsDescription')}
                           </Text>
                           <ConditionRelationships
                             labResultId={editingItem.id}
@@ -746,7 +746,7 @@ const LabResultFormWrapper = ({
                     {conditions.length === 0 && encounters.length === 0 && (
                       <Paper withBorder p="md" ta="center">
                         <Text c="dimmed">
-                          {t('labResults.messages.relationshipsCreateInfo')}
+                          {t('labresults:messages.relationshipsCreateInfo')}
                         </Text>
                       </Paper>
                     )}
@@ -774,8 +774,8 @@ const LabResultFormWrapper = ({
                   label={t('shared:fields.additionalNotes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
-                  placeholder={t('labResults.additionalNotes.placeholder')}
-                  description={t('labResults.additionalNotes.description')}
+                  placeholder={t('labresults:additionalNotes.placeholder')}
+                  description={t('labresults:additionalNotes.description')}
                   rows={5}
                   minRows={3}
                   autosize

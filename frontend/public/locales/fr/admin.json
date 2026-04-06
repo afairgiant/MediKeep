@@ -27,14 +27,12 @@
     },
     "customDateRange": "Plage temporelle personnalisée",
     "dailyAverage": "Moyenne quotidienne",
-    "days_many": "{{count}} days",
     "filterByDays": "Filtrer sur les {{days}} derniers jours",
     "loading": "Chargement des analyses de données...",
     "period": "Période",
     "recordsDistribution": "Distribution des données",
     "subtitle": "Tendances, comparaisons, et distribution des données",
     "title": "Analyse de données",
-    "total_many": "{{count}} total",
     "totalActivities": "Activités totales",
     "userInteractions": "Interactions des utilisateurs",
     "vsPreviousPeriod": "vs. période précédente"
@@ -68,7 +66,6 @@
   "backup": {
     "existingBackups": {
       "count_one": "{{count}} sauvegarde",
-      "count_many": "{{count}} backups",
       "count_other": "{{count}} sauvegardes",
       "download": "Télécharger",
       "noBackups": "Aucun backup trouvé",
@@ -129,7 +126,6 @@
     "preview": {
       "affectedData": "Données affectées",
       "analysisNotAvailable": "Analyse du backup non disponible",
-      "andMore_many": "...and {{count}} more",
       "backupContent": "Contenu du backup",
       "backupDetails": "Détails du backup",
       "backupFiles": "Fichiers du backup",
@@ -137,21 +133,15 @@
       "createdAt": "Créé le : {{date}}",
       "currentDatabase": "Base de données actuelle",
       "currentFiles": "Fichiers actuels",
-      "filesCount_many": "{{count}} files ({{size}})",
-      "filesOnly_many": "{{count}} files",
       "manifest": "Manifeste",
       "noAffectedData": "Aucune information disponible sur les données affectées",
       "noStatistics": "Aucune statistique disponible",
       "restoreMethod": "Méthode de restauration",
-      "sqlStatements_many": "{{count}} SQL statements",
-      "totalRecords_many": "{{count}} total records",
       "unknownType": "Type de backup inconnu"
     },
     "retention": {
       "backupsUnit": "sauvegardes",
-      "countProtection_many": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
       "currentStatus_one": "<strong>Statut actuel :</strong> {{count}} backup conservé (max : {{max}})",
-      "currentStatus_many": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})",
       "currentStatus_other": "<strong>Statut actuel :</strong> {{count}} backups conservés (max : {{max}})",
       "daysUnit": "jours",
       "maximumCount": "Décompte maximum des backups",
@@ -271,7 +261,6 @@
       "trashDesc": "Récupérez les fichiers supprimés"
     },
     "recentActivity": {
-      "count_many": "{{count}} activities",
       "errorLoading": "Erreur lors du chargement de l'activité",
       "noActivity": "Aucune activité récente à afficher",
       "subtitle": "Derniers événements systèmes",
@@ -281,8 +270,6 @@
     "refreshAll": "Tout rafraîchir",
     "stats": {
       "activePatients": "Patients actifs",
-      "activePrescriptions_many": "{{count}} active prescriptions",
-      "recentRegistrations_many": "+{{count}} this week",
       "totalUsers": "Utilisateurs totaux"
     },
     "subtitle": "Aperçu et gestion exhaustives du système",
@@ -426,7 +413,6 @@
     "storage": {
       "appStorage": "Stockage de l'application",
       "diskUsage": "Utilisation du disque",
-      "filesAcross_many": "across {{count}} files",
       "freeOf": "{{free}} Gb libre(s) sur {{total}} Gb",
       "title": "Santé du stockage"
     },
@@ -438,8 +424,8 @@
     "backToModel": "Retour à {{modelName}}",
     "bulkDeleteAssociated": "Toutes les données associées (y compris {{types}}) seront également supprimées.",
     "bulkDeleteFailed": "Echec de la suppression de masse",
+    "bulkDeleteWarning": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrements {{modelName}}.",
     "bulkDeleteWarning_one": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrement {{modelName}}.",
-    "bulkDeleteWarning_many": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrements {{modelName}}.",
     "bulkDeleteWarning_other": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrements {{modelName}}.",
     "changeRole": "Changer le rôle",
     "changesSaved": "Changements sauvegardés",
@@ -453,7 +439,6 @@
     "deleteFailed": "Echec de la suppression",
     "deleteRecords": "Supprimer {{count}} entrées",
     "deleteRecords_one": "Supprimer {{count}} enregistrement",
-    "deleteRecords_many": "Delete {{count}} Records",
     "deleteRecords_other": "Supprimer {{count}} enregistrements",
     "deleteSelected": "Supprimer la sélection",
     "deleteWarning": "Ceci supprimera définitivement cette entrée de type {{modelName}} et toutes les données associées :",
@@ -474,7 +459,6 @@
     "noRecordsFound": "Aucune entrée trouvée",
     "perPage": "{{count}} par page",
     "perPage_one": "{{count}} par page",
-    "perPage_many": "{{count}} per page",
     "perPage_other": "{{count}} par page",
     "rawDataJson": "Données brutes (JSON)",
     "recordDeleted": "Entrée supprimée",
@@ -483,7 +467,6 @@
     "recordsDeleted": "Entrées supprimées",
     "recordsDeletedMessage": "Suppression réussie de {{count}} entrées",
     "recordsDeletedMessage_one": "{{count}} enregistrement supprimé avec succès",
-    "recordsDeletedMessage_many": "Successfully deleted {{count}} records",
     "recordsDeletedMessage_other": "{{count}} enregistrements supprimés avec succès",
     "recordUpdated": "Entrée mise à jour avec succès",
     "resetToDefault": "Revenir à la valeur par défaut",
@@ -493,15 +476,13 @@
     "saveFailed": "Echec de la sauvegarde",
     "searchPlaceholder": "Rechercher dans {{modelName}}...",
     "searchRecords": "Rechercher dans les entrées",
+    "searchResult": "{{count}} résultats pour \"{{query}}\"",
     "searchResult_one": "{{count}} résultat pour \"{{query}}\"",
-    "searchResult_many": "{{count}} résultats pour \"{{query}}\"",
     "searchResult_other": "{{count}} résultats pour \"{{query}}\"",
     "selected": "{{count}} sélectionné(s)",
     "selected_one": "{{count}} sélectionné",
-    "selected_many": "{{count}} selected",
     "selected_other": "{{count}} sélectionnés",
     "toggleColumnVisibility": "(Dés)activer la visibilité des colonnes",
-    "totalRecords_many": "{{count}} total records",
     "typeDeleteToConfirm": "Saisissez <strong>DELETE</strong> pour confirmer",
     "usernameChangeLogout": "Ceci vous déconnectera immédiatement et vous devrez vous reconnecter avec le nouveau nom d'utilisateur.",
     "usernameChangeText": "Vous êtes sur le point de changer votre propre nom d'utilisateur de <strong>\"{{oldUsername}}\"</strong> vers <strong>\"{{newUsername}}\"</strong>.",
@@ -509,9 +490,7 @@
     "usernameUpdated": "Nom d'utilisateur mis à jour",
     "usernameUpdatedMessage": "Votre nom d'utilisateur a été modifié. Veuillez vous connecter avec votre nouveau nom : \"{{username}}\"",
     "viewRecord": "Afficher {{modelName}}",
-    "visibleColumns": "Colonnes visibles",
-    "searchResult": "{{count}} résultats pour \"{{query}}\"",
-    "bulkDeleteWarning": "Vous êtes sur le point de supprimer définitivement {{count}} enregistrements {{modelName}}."
+    "visibleColumns": "Colonnes visibles"
   },
   "settings": {
     "dataRetention": {
@@ -562,14 +541,11 @@
     "subtitle": "Outils administratifs pour la maintenance du système et la gestion des données",
     "testLibrary": {
       "categories": "Catégories",
-      "categoriesUpdated_many": "Categories Updated: {{count}}",
       "forceSyncAll": "Forcer la synchronisation complète",
       "forceSyncAllDesc": "<strong>Forcer la synchronisation complète :</strong> Réassocie tous les composants (catégories et noms canoniques)",
       "libraryReloaded": "Bibliothèque rechargée",
       "libraryVersion": "Version de la bibliothèque",
-      "namesUpdated_many": "Names Updated: {{count}}",
       "operational": "Opérationnelle",
-      "processed_many": "Processed: {{count}}",
       "reloadDesc": "<strong>Recharger la bibliothèque :</strong> Rafraîchit la bibliothèque de test à partir du disque (utilisez après avoir mis à jour test_library.json)",
       "reloadLibrary": "Recharger la bibliothèque",
       "syncComplete": "Synchronisation complète",
@@ -581,6 +557,7 @@
     "title": "Outils & Maintenance"
   },
   "trash": {
+    "clearFilters": "Clear Filters",
     "deleteConfirm": "Voulez-vous vraiment supprimer définitivement <strong>{{filename}}</strong>?",
     "deletedDateRange": "Plage temporelle de suppression",
     "deleteFailed": "Echec de la suppression",
@@ -588,7 +565,7 @@
     "deleteWarning": "Cette action est définitive. Le fichier sera définitivement supprimé du système.",
     "errorLoading": "Erreur lors du chargement de la corbeille",
     "fileCount_one": "{{count}} fichier",
-    "fileCount_many": "{{count}} files",
+    "fileCount_other": "{{count}} fichiers",
     "fileDeleted": "Fichier supprimé",
     "fileDeletedMessage": "{{filename}} supprimé définitivement",
     "fileRestored": "Fichier restauré",
@@ -604,11 +581,10 @@
     "permanentlyDelete": "Supprimer définitivement",
     "permanentlyDeleteFile": "Supprimer définitivement le fichier",
     "purgedDirectories_one": "dans {{count}} dossier",
-    "purgedDirectories_many": "across {{count}} directories",
     "purgedDirectories_other": "dans {{count}} dossiers",
-    "purgeDescription_many": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} fichier expiré supprimé définitivement",
-    "purgedMessage_many": "{{count}} expired files permanently deleted",
     "purgedMessage_other": "{{count}} fichiers expirés supprimés définitivement",
     "purgeExpired": "Purger les fichiers expirés",
     "purgeExpiredButton": "Purger les fichiers expirés",
@@ -625,14 +601,16 @@
     "showingFiltered": "Affichage de {{shown}} sur {{total}} {{files}}",
     "subtitle": "Gérez les fichiers téléversés supprimés. Restaurez les fichiers à leur emplacement d'origine ou supprimez-les définitivement pour libérer de l'espace de stockage.",
     "tableHeaders": {
+      "actions": "Actions",
       "deleted": "Supprimé",
       "filename": "Nom du fichier",
-      "originalLocation": "Emplacement d'origine"
+      "originalLocation": "Emplacement d'origine",
+      "reason": "Reason",
+      "size": "Size"
     },
     "title": "Gestion de la corbeille",
     "totalSize": "{{size}} au total",
-    "trashPurged": "Corbeille purgée",
-    "fileCount_other": "{{count}} fichiers"
+    "trashPurged": "Corbeille purgée"
   },
   "users": {
     "actionsFor": "Actions pour {{username}}",
@@ -645,7 +623,6 @@
     },
     "changeRole": "Changer le rôle",
     "clear": "Effacer",
-    "daysAgo_many": "{{count}}d ago",
     "deactivate": "Désactiver",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Impossible de supprimer le dernier administrateur.",
@@ -655,7 +632,6 @@
       "warning": "Cette action est définitive. Toutes les données associées à cet utilisateur seront définitivement supprimées."
     },
     "deleteUser": "Supprimer l'utilisateur",
-    "hoursAgo_many": "{{count}}h ago",
     "justNow": "A l'instant",
     "loginHistory": "Historique de connexion",
     "loginHistoryModal": {
@@ -665,17 +641,25 @@
       "notAvailable": "N/D",
       "title": "Historique de connexion : {{username}}"
     },
-    "minutesAgo_many": "{{count}}m ago",
     "never": "Jamais",
     "noUsersFound": "Aucun utilisateur trouvé",
     "noUsersInSystem": "Aucun utilisateur dans ce système.",
     "noUsersMatchFilters": "Aucun utilisateur ne correspond à vos filtres. Essayez d'ajuster ou d'effacer les filtres.",
     "passwordModal": {
+      "bothFieldsRequired": "",
+      "confirmPlaceholder": "",
+      "enterNewPassword": "",
       "forceChange": "Forcer le changement de mot de passe à la prochaine connexion",
+      "immediateReset": "",
       "newPassword": "Nouveau mot de passe",
       "passwordDescription": "Minimum 6 caractères, au moins 1 lettre et 1 chiffre",
+      "passwordsDoNotMatch": "",
+      "resetFailed": "",
+      "resetSuccess": "",
       "resettingFor": "Réinitialiser le mot de passe pour <strong>{{username}}</strong>",
-      "ssoWarning": "Cet utilisateur s'authentifie via SSO ({{provider}}). Définir un mot de passe local permettra l'authentification hybride."
+      "ssoWarning": "Cet utilisateur s'authentifie via SSO ({{provider}}). Définir un mot de passe local permettra l'authentification hybride.",
+      "title": "",
+      "userInfo": ""
     },
     "roleFilter": {
       "all": "Tous les rôles"
@@ -703,9 +687,8 @@
       "deactivateConfirm": "Désactiver \"{{username}}\" ? Cet utilisateur ne pourra plus se connecter jusqu'à ce qu'il soit réactivé.",
       "deactivateTitle": "Désactiver l'utilisateur"
     },
+    "userCount": "{{count}} utilisateurs",
     "userCount_one": "{{count}} utilisateur",
-    "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} utilisateurs",
-    "userCount": "{{count}} utilisateurs"
+    "userCount_other": "{{count}} utilisateurs"
   }
 }

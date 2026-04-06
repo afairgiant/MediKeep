@@ -73,12 +73,8 @@
     "noData": "Dodaj wyniki laboratoryjne z komponentami badań, aby je tutaj zobaczyć.",
     "noResults": "Nie znaleziono komponentów badań",
     "readingCount_one": "{{count}} odczyt",
-    "readingCount_few": "{{count}} readings",
-    "readingCount_many": "{{count}} readings",
     "refRange": "Zakres ref.",
     "searchPlaceholder": "Szukaj badań...",
-    "showing_few": "Showing {{count}} unique tests",
-    "showing_many": "Showing {{count}} unique tests",
     "sort": {
       "alphabetical": "A-Z"
     },
@@ -101,13 +97,13 @@
   "conditions": {
     "codeDescription": {
       "description": "Czytelny dla człowieka opis kodu",
-      "placeholder": "Opis kodu medycznego",
-      "label": "Opis kodu"
+      "label": "Opis kodu",
+      "placeholder": "Opis kodu medycznego"
     },
     "diagnosis": {
       "description": "Nazwa schorzenia lub diagnozy",
-      "placeholder": "np. Nadciśnienie, Cukrzyca typu 2, Astma",
-      "label": "Diagnoza"
+      "label": "Diagnoza",
+      "placeholder": "np. Nadciśnienie, Cukrzyca typu 2, Astma"
     },
     "endDate": {
       "description": "Kiedy schorzenie zostało wyleczone (jeśli dotyczy)",
@@ -115,8 +111,8 @@
     },
     "icd10Code": {
       "description": "Międzynarodowa Klasyfikacja Chorób",
-      "placeholder": "np. I10, E11.9",
-      "label": "Kod ICD-10"
+      "label": "Kod ICD-10",
+      "placeholder": "np. I10, E11.9"
     },
     "notes": {
       "description": "Dodatkowe szczegóły dotyczące schorzenia, historii leczenia lub obserwacji"
@@ -136,8 +132,8 @@
     },
     "snomedCode": {
       "description": "Kod terminologii klinicznej SNOMED CT",
-      "placeholder": "np. 38341003",
-      "label": "Kod SNOMED"
+      "label": "Kod SNOMED",
+      "placeholder": "np. 38341003"
     },
     "status": {
       "description": "Aktualny status tego schorzenia"
@@ -147,13 +143,13 @@
     "form": {
       "address": {
         "description": "Adres kontaktu (opcjonalnie)",
-        "placeholder": "np. 123 Main St, City, State 12345",
-        "label": "Adres"
+        "label": "Adres",
+        "placeholder": "np. 123 Main St, City, State 12345"
       },
       "email": {
         "description": "Opcjonalny adres e-mail",
-        "placeholder": "np. john.smith@email.com",
-        "label": "Adres e-mail"
+        "label": "Adres e-mail",
+        "placeholder": "np. john.smith@email.com"
       },
       "isActive": {
         "description": "Ten kontakt jest aktualnie dostępny",
@@ -165,8 +161,8 @@
       },
       "name": {
         "description": "Pełne imię i nazwisko kontaktu alarmowego",
-        "placeholder": "np. John Smith",
-        "label": "Imię i nazwisko"
+        "label": "Imię i nazwisko",
+        "placeholder": "np. John Smith"
       },
       "notes": {
         "description": "Wszelkie dodatkowe notatki dotyczące tego kontaktu",
@@ -206,8 +202,8 @@
       "condition": {
         "conditionName": {
           "description": "Nazwa schorzenia medycznego",
-          "placeholder": "np. Cukrzyca, Choroba serca, Rak",
-          "label": "Nazwa schorzenia"
+          "label": "Nazwa schorzenia",
+          "placeholder": "np. Cukrzyca, Choroba serca, Rak"
         },
         "conditionType": {
           "description": "Kategoria schorzenia medycznego",
@@ -221,8 +217,8 @@
         },
         "icd10Code": {
           "description": "Kod diagnozy medycznej (jeśli znany)",
-          "placeholder": "np. E11.9",
-          "label": "Kod ICD-10"
+          "label": "Kod ICD-10",
+          "placeholder": "np. E11.9"
         },
         "notes": {
           "description": "Szczegóły leczenia, wyniki lub inne istotne informacje",
@@ -282,10 +278,14 @@
           "label": "Płeć",
           "placeholder": "Wybierz płeć"
         },
+        "genderOptions": {
+          "female": "Kobieta",
+          "male": "Mężczyzna"
+        },
         "name": {
           "description": "Pełne imię i nazwisko członka rodziny",
-          "placeholder": "Wpisz imię i nazwisko członka rodziny",
-          "label": "Imię i nazwisko"
+          "label": "Imię i nazwisko",
+          "placeholder": "Wpisz imię i nazwisko członka rodziny"
         },
         "notes": {
           "description": "Wszelkie dodatkowe notatki lub ważne informacje",
@@ -308,10 +308,6 @@
           "paternalGrandmother": "Babcia ze strony ojca",
           "sister": "Siostra",
           "uncle": "Wujek"
-        },
-        "genderOptions": {
-          "male": "Mężczyzna",
-          "female": "Kobieta"
         }
       }
     }
@@ -323,13 +319,13 @@
   "immunizations": {
     "dateAdministered": {
       "description": "Kiedy szczepionka została podana",
-      "placeholder": "Wybierz datę podania",
-      "label": "Data podania"
+      "label": "Data podania",
+      "placeholder": "Wybierz datę podania"
     },
     "doseNumber": {
       "description": "Która dawka w serii",
-      "placeholder": "1, 2, 3...",
-      "label": "Numer dawki"
+      "label": "Numer dawki",
+      "placeholder": "1, 2, 3..."
     },
     "expirationDate": {
       "description": "Data wygaśnięcia fiolki/dawki szczepionki",
@@ -342,13 +338,13 @@
     },
     "lotNumber": {
       "description": "Identyfikator partii do śledzenia",
-      "placeholder": "Numer partii/partii szczepionki",
-      "label": "Numer partii"
+      "label": "Numer partii",
+      "placeholder": "Numer partii/partii szczepionki"
     },
     "manufacturer": {
       "description": "Producent szczepionki",
-      "placeholder": "Wybierz producenta",
-      "label": "Producent"
+      "label": "Producent",
+      "placeholder": "Wybierz producenta"
     },
     "manufacturerOptions": {
       "astraZeneca": "AstraZeneca",
@@ -361,8 +357,8 @@
     },
     "ndcNumber": {
       "description": "Krajowy kod leku na szczepionkę",
-      "placeholder": "np. 12345-6789-01",
-      "label": "Numer NDC"
+      "label": "Numer NDC",
+      "placeholder": "np. 12345-6789-01"
     },
     "notes": {
       "description": "Wszelkie istotne szczegóły dotyczące szczepienia",
@@ -393,8 +389,8 @@
     },
     "vaccineName": {
       "description": "Nazwa podanej szczepionki",
-      "placeholder": "np. COVID-19 mRNA, Grypa, MMR",
-      "label": "Nazwa szczepionki"
+      "label": "Nazwa szczepionki",
+      "placeholder": "np. COVID-19 mRNA, Grypa, MMR"
     }
   },
   "injuries": {
@@ -406,7 +402,9 @@
       "placeholder": "np. Lewe kolano, prawe ramię"
     },
     "bodyPart": {
-      "label": "Część ciała"
+      "description": "The affected body part or area",
+      "label": "Część ciała",
+      "placeholder": "e.g., Ankle, Wrist, Knee"
     },
     "cardSubtitle": "Uraz fizyczny",
     "cause": {
@@ -415,6 +413,7 @@
       "placeholder": "Opisz, jak doszło do urazu..."
     },
     "dateOfInjury": {
+      "description": "The date when the injury happened (optional if unknown)",
       "label": "Data urazu"
     },
     "editTitle": "Edytuj uraz",
@@ -450,7 +449,9 @@
       "placeholder": "Wybierz stronę"
     },
     "mechanism": {
-      "label": "Jak się to stało"
+      "description": "Describe how the injury occurred",
+      "label": "Jak się to stało",
+      "placeholder": "e.g., Fell while hiking"
     },
     "messages": {
       "loading": "Ładowanie urazów...",
@@ -473,6 +474,7 @@
     "severity": {
       "description": "Jak poważny jest ten uraz",
       "options": {
+        "lifeThreatening": "Life-threatening - Emergency care needed",
         "mild": "Łagodne - Nieznaczny dyskomfort",
         "moderate": "Umiarkowane - Zauważalny wpływ",
         "severe": "Ciężkie - Znaczący wpływ"
@@ -490,8 +492,12 @@
     },
     "treatment": {
       "description": "Medyczne leczenie udzielone za uraz",
-      "placeholder": "Opisz otrzymane leczenie...",
-      "label": "Otrzymane leczenie"
+      "label": "Otrzymane leczenie",
+      "placeholder": "Opisz otrzymane leczenie..."
+    },
+    "treatmentReceived": {
+      "description": "Description of treatment received",
+      "placeholder": "e.g., RICE protocol, cast applied"
     },
     "viewModal": {
       "additionalInfo": "Dodatkowe informacje",
@@ -595,10 +601,10 @@
       "dividers": {
         "additionalInfo": "Informacje dodatkowe",
         "basicInfo": "Podstawowe informacje ubezpieczenia",
+        "contactInfo": "Informacje kontaktowe",
         "coverageDetails": "Szczegóły pokrycia",
         "coveragePeriodStatus": "Okres ochrony i status",
-        "memberInfo": "Informacje członka",
-        "contactInfo": "Informacje kontaktowe"
+        "memberInfo": "Informacje członka"
       },
       "effectiveDate": {
         "description": "Data rozpoczęcia ubezpieczenia",
@@ -617,8 +623,8 @@
       },
       "expirationDate": {
         "description": "Data zakończenia ubezpieczenia (jeśli znana)",
-        "placeholder": "Wybierz datę wygaśnięcia",
-        "label": "Data wygaśnięcia"
+        "label": "Data wygaśnięcia",
+        "placeholder": "Wybierz datę wygaśnięcia"
       },
       "frameAllowance": {
         "description": "Roczny przydział na oprawki",
@@ -627,8 +633,8 @@
       },
       "groupNumber": {
         "description": "Numer grupy (jeśli dotyczy)",
-        "placeholder": "np. GRP123",
-        "label": "Numer grupy"
+        "label": "Numer grupy",
+        "placeholder": "np. GRP123"
       },
       "insuranceType": {
         "description": "Rodzaj ubezpieczenia",
@@ -737,8 +743,8 @@
         "options": {
           "child": "Dziecko",
           "dependent": "Osoba na utrzymaniu",
-          "spouse": "Małżonek",
-          "self": "Ja"
+          "self": "Ja",
+          "spouse": "Małżonek"
         },
         "placeholder": "Wybierz pokrewieństwo"
       },
@@ -782,131 +788,9 @@
     }
   },
   "labResults": {
-    "additionalNotes": {
-      "description": "Notatki kliniczne lub specjalne instrukcje",
-      "placeholder": "Wszelkie dodatkowe informacje dotyczące badania, specjalne instrukcje lub obserwacje...",
-      "label": "Dodatkowe notatki"
-    },
-    "category": {
-      "bloodWork": "Badania krwi",
-      "cardiology": "Kardiologia",
-      "chemistry": "Chemia",
-      "genetics": "Genetyka",
-      "hearing": "Słuch",
-      "hematology": "Hematologia",
-      "hepatology": "Hepatologia",
-      "imaging": "Obrazowanie (rentgen, MRI, CT)",
-      "immunology": "Immunologia",
-      "microbiology": "Mikrobiologia",
-      "pathology": "Patologia",
-      "pulmonology": "Pulmonologia",
-      "stomatology": "Stomatologia"
-    },
-    "completedDate": {
-      "description": "Data finalizacji wyników",
-      "placeholder": "Kiedy wyniki były dostępne",
-      "label": "Data ukończenia"
-    },
     "form": {
-      "abbreviation": "Skrót",
-      "abbreviationPlaceholder": "e.g., HGB",
-      "addAnotherTest": "Dodaj kolejne badanie",
-      "autoCalculated": "Obliczane automatycznie",
-      "cannotRemoveLastRow": "Nie można usunąć ostatniego wiersza",
       "componentCreationWarning": "Wynik laboratoryjny zapisany, ale nie można było dodać komponentów badania. Możesz je dodać ze strony widoku.",
-      "linkConditionsDescription": "Powiąż ten wynik laboratoryjny z istotnymi schorzeniami medycznymi, aby lepiej śledzić i organizować.",
-      "linkConditionsTitle": "Połącz schorzenia medyczne",
-      "notesOptional": "Uwagi (opcjonalnie)",
-      "refMax": "Maks. ref.",
-      "refMin": "Min. ref.",
-      "relationshipCreationWarning": "Wynik laboratoryjny zapisany, ale niektóre relacje nie mogły być utworzone. Możesz je dodać ze strony edycji.",
-      "removeRow": "Usuń wiersz",
-      "result": "Wynik",
-      "resultIndicator": "Wskaźnik wyniku:",
-      "searchTests": "Wpisz, aby wyszukać testy...",
-      "selectResult": "Wybierz wynik",
-      "statusIndicator": "Wskaźnik stanu:",
-      "testCodePlaceholder": "e.g., 718-7",
-      "testComponents": "Komponenty badania (opcjonalnie)",
-      "testComponentsDescription": "Opcjonalnie dodaj poszczególne wartości badania. Możesz też dodać je później.",
-      "testDetails": "Szczegóły badania",
-      "unit": "Jednostka"
-    },
-    "labResult": {
-      "description": "Klasyfikacja wyniku badania",
-      "placeholder": "Wybierz wynik (jeśli dostępny)",
-      "label": "Wynik laboratoryjny"
-    },
-    "messages": {
-      "relationshipsCreateInfo": "Relacje można dodać po zapisaniu wyniku laboratoryjnego.",
-      "relationshipsSaveFirst": "Najpierw zapisz wynik laboratoryjny, aby utworzyć linki relacji.",
-      "testComponentsEditInfo": "Komponenty badania można zarządzać ze strony widoku po zapisaniu."
-    },
-    "orderedDate": {
-      "description": "Data, kiedy badanie zostało zamówione",
-      "placeholder": "Kiedy badanie zostało zamówione",
-      "label": "Data zamówienia"
-    },
-    "orderingPractitioner": {
-      "description": "Lekarz, który zamówił badanie",
-      "label": "Lekarz zamawiający",
-      "placeholder": "Wybierz lekarza"
-    },
-    "result": {
-      "abnormal": "Nieprawidłowy - Poza normą",
-      "borderline": "Graniczny - Blisko progu",
-      "critical": "Krytyczny - Wymaga natychmiastowej uwagi",
-      "high": "Wysoki - Powyżej normy",
-      "inconclusive": "Niejednoznaczny - Wymaga powtórzenia",
-      "low": "Niski - Poniżej normy",
-      "normal": "Normalny - W normie"
-    },
-    "status": {
-      "cancelled": "Anulowano - Test został anulowany",
-      "completed": "Ukończono - Wyniki są dostępne",
-      "inProgress": "W toku - Próbka jest przetwarzana",
-      "ordered": "Zamówiono - Test został zamówiony"
-    },
-    "tabs": {
-      "relationships": "Relacje",
-      "resultsStatus": "Wyniki i status"
-    },
-    "testCategory": {
-      "description": "Typ badania laboratoryjnego",
-      "label": "Kategoria badania",
-      "placeholder": "Wybierz kategorię"
-    },
-    "testCode": {
-      "description": "Kod laboratoryjny lub LOINC",
-      "placeholder": "np. CBC, 85025",
-      "label": "Kod badania"
-    },
-    "testingFacility": {
-      "description": "Gdzie badanie jest/było wykonywane",
-      "label": "Placówka testująca",
-      "placeholder": "np. Laboratorium głównego szpitala"
-    },
-    "testName": {
-      "description": "Nazwa lub opis badania laboratoryjnego",
-      "placeholder": "np. Morfologia krwi (CBC)",
-      "label": "Nazwa badania"
-    },
-    "testStatus": {
-      "description": "Aktualny status badania laboratoryjnego",
-      "label": "Status badania",
-      "placeholder": "Wybierz status"
-    },
-    "testType": {
-      "emergency": "Nagłe - Priorytet krytyczny",
-      "followUp": "Kontrolne - Powtórne badanie",
-      "routine": "Rutynowe - Standardowe przetwarzanie",
-      "screening": "Przesiewowe - Badanie profilaktyczne",
-      "urgent": "Pilne - Przyspieszane przetwarzanie"
-    },
-    "testTypeField": {
-      "description": "Priorytet lub pilność badania",
-      "label": "Typ badania",
-      "placeholder": "Wybierz poziom pilności"
+      "relationshipCreationWarning": "Wynik laboratoryjny zapisany, ale niektóre relacje nie mogły być utworzone. Możesz je dodać ze strony edycji."
     }
   },
   "medications": {
@@ -917,16 +801,14 @@
     },
     "dosage": {
       "description": "Siła i ilość na jedną dawkę",
-      "placeholder": "np. 10 mg, 1 tabletka",
-      "label": "Dawkowanie"
+      "label": "Dawkowanie",
+      "placeholder": "np. 10 mg, 1 tabletka"
     },
     "form": {
       "addMedication": "Dodaj lek",
       "conditionLinkFailed": "Lek został zapisany, ale niektóre schorzenia nie mogły zostać powiązane. Możesz je powiązać później, edytując lek.",
       "conditionLinkPartialFailure": "{{count}} powiązanie/a schorzeń nie powiodło się",
       "conditionLinkPartialFailure_one": "{{count}} condition link failed",
-      "conditionLinkPartialFailure_few": "{{count}} powiązania schorzeń nie powiodły się",
-      "conditionLinkPartialFailure_many": "{{count}} powiązań schorzeń nie powiodło się",
       "conditionLinkPartialFailure_other": "{{count}} condition links failed",
       "linkConditionsDescription": "Opcjonalnie powiąż ten lek z istniejącymi schorzeniami",
       "noConditionsFound": "Nie znaleziono schorzeń",
@@ -935,8 +817,8 @@
     },
     "frequency": {
       "description": "Jak często przyjmować lek",
-      "placeholder": "np. Raz dziennie, Dwa razy dziennie",
-      "label": "Częstotliwość"
+      "label": "Częstotliwość",
+      "placeholder": "np. Raz dziennie, Dwa razy dziennie"
     },
     "indication": {
       "description": "Do czego służy ten lek? Opisz powód lub schorzenie, które jest leczone",
@@ -945,18 +827,18 @@
     },
     "medicationName": {
       "description": "Generyczna lub markowa nazwa leku (min. 2 znaki)",
-      "placeholder": "np. Lisinopril, Metformin",
-      "label": "Nazwa leku"
+      "label": "Nazwa leku",
+      "placeholder": "np. Lisinopril, Metformin"
     },
     "medicationType": {
       "description": "Kategoria leku",
-      "placeholder": "Wybierz typ",
-      "label": "Typ leku"
+      "label": "Typ leku",
+      "placeholder": "Wybierz typ"
     },
     "pharmacy": {
       "description": "Apteka, w której realizowany jest lek",
-      "placeholder": "Wybierz aptekę",
-      "label": "Apteka"
+      "label": "Apteka",
+      "placeholder": "Wybierz aptekę"
     },
     "prescribingProvider": {
       "description": "Lekarz, który przepisał lek",
@@ -965,25 +847,25 @@
     },
     "route": {
       "description": "Jak lek jest podawany",
+      "label": "Droga podania",
       "options": {
         "inhalation": "Inhalacja",
         "injection": "Zastrzyk",
         "intramuscular": "Domięśniowo",
         "intravenous": "Dożylnie",
+        "nasal": "Donosowo",
+        "oral": "Doustnie",
         "rectal": "Doodbytniczo",
         "subcutaneous": "Podskórnie",
         "sublingual": "Podjęzycznie",
-        "topical": "Miejscowo",
-        "oral": "Doustnie",
-        "nasal": "Donosowo"
+        "topical": "Miejscowo"
       },
-      "placeholder": "Wybierz drogę",
-      "label": "Droga podania"
+      "placeholder": "Wybierz drogę"
     },
     "sideEffects": {
       "description": "Znane lub doświadczane skutki uboczne tego leku",
-      "placeholder": "Wymień znane lub doświadczane skutki uboczne...",
-      "label": "Skutki uboczne"
+      "label": "Skutki uboczne",
+      "placeholder": "Wymień znane lub doświadczane skutki uboczne..."
     }
   },
   "pharmacies": {
@@ -1015,13 +897,13 @@
       },
       "city": {
         "description": "Lokalizacja miasta",
-        "placeholder": "San Francisco",
-        "label": "Miasto"
+        "label": "Miasto",
+        "placeholder": "San Francisco"
       },
       "country": {
         "description": "Kraj, w którym znajduje się apteka",
-        "placeholder": "np. Stany Zjednoczone, Kanada",
-        "label": "Kraj"
+        "label": "Kraj",
+        "placeholder": "np. Stany Zjednoczone, Kanada"
       },
       "locationDivider": "Informacje o lokalizacji",
       "name": {
@@ -1035,18 +917,18 @@
       },
       "postalCode": {
         "description": "Kod pocztowy lub kod pocztowy",
-        "placeholder": "np. 90210, M5V 2T6",
-        "label": "Kod pocztowy"
+        "label": "Kod pocztowy",
+        "placeholder": "np. 90210, M5V 2T6"
       },
       "specialtyServices": {
         "description": "Specjalne usługi oferowane przez aptekę",
-        "placeholder": "np. Szczepienia, Preparaty złożone, Zarządzanie terapią lekami",
-        "label": "Specjalności"
+        "label": "Specjalności",
+        "placeholder": "np. Szczepienia, Preparaty złożone, Zarządzanie terapią lekami"
       },
       "stateProvince": {
         "description": "Stan, prowincja lub region",
-        "placeholder": "np. Kalifornia, Ontario",
-        "label": "Województwo/Prowincja"
+        "label": "Województwo/Prowincja",
+        "placeholder": "np. Kalifornia, Ontario"
       },
       "storeNumber": {
         "description": "Wewnętrzny identyfikator sklepu",
@@ -1100,13 +982,13 @@
     "form": {
       "email": {
         "description": "Zawodowy adres e-mail",
-        "placeholder": "doctor@example.com",
-        "label": "Adres e-mail"
+        "label": "Adres e-mail",
+        "placeholder": "doctor@example.com"
       },
       "name": {
         "description": "Pełne imię i nazwisko lekarza z tytułem",
-        "placeholder": "Dr Jan Kowalski",
-        "label": "Imię i nazwisko"
+        "label": "Imię i nazwisko",
+        "placeholder": "Dr Jan Kowalski"
       },
       "phone": {
         "description": "Główny numer kontaktowy",
@@ -1136,11 +1018,12 @@
   "procedures": {
     "anesthesiaNotes": {
       "description": "Wszelkie notatki dotyczące podania znieczulenia",
-      "placeholder": "Notatki związane z znieczuleniem...",
-      "label": "Notatki znieczulenia"
+      "label": "Notatki znieczulenia",
+      "placeholder": "Notatki związane z znieczuleniem..."
     },
     "anesthesiaType": {
       "description": "Rodzaj użytego znieczulenia",
+      "label": "Typ znieczulenia",
       "options": {
         "general": "Ogólne - Całkowita utrata przytomności",
         "local": "Miejscowe - Znieczulenie określonego obszaru",
@@ -1148,13 +1031,12 @@
         "regional": "Regionalne - Znieczulenie większego obszaru",
         "sedation": "Sedacja - Zrelaksowany, ale przytomny"
       },
-      "placeholder": "Wybierz typ znieczulenia",
-      "label": "Typ znieczulenia"
+      "placeholder": "Wybierz typ znieczulenia"
     },
     "complications": {
       "description": "Dokumentuj wszelkie powikłania, niepożądane zdarzenia lub nieoczekiwane wyniki",
-      "placeholder": "Wszelkie powikłania, które wystąpiły podczas zabiegu...",
-      "label": "Powikłania"
+      "label": "Powikłania",
+      "placeholder": "Wszelkie powikłania, które wystąpiły podczas zabiegu..."
     },
     "description": {
       "description": "Szczegółowy opis procedury",
@@ -1162,8 +1044,8 @@
     },
     "facility": {
       "description": "Gdzie procedura była lub będzie wykonywana",
-      "placeholder": "np. Szpital Ogólny, Ośrodek Ambulatoryjny",
-      "label": "Placówka"
+      "label": "Placówka",
+      "placeholder": "np. Szpital Ogólny, Ośrodek Ambulatoryjny"
     },
     "notes": {
       "description": "Wszelkie istotne obserwacje, instrukcje przed/po operacji lub szczegóły",
@@ -1176,8 +1058,8 @@
     },
     "procedureCode": {
       "description": "Kodowanie medyczne (CPT, ICD-10-PCS, itd.)",
-      "placeholder": "np. CPT-12345, ICD-10-PCS",
-      "label": "Kod procedury"
+      "label": "Kod procedury",
+      "placeholder": "np. CPT-12345, ICD-10-PCS"
     },
     "procedureDate": {
       "description": "Kiedy procedura jest/była wykonywana",
@@ -1186,13 +1068,13 @@
     },
     "procedureDuration": {
       "description": "Jak długo procedura trwała/będzie trwać",
-      "placeholder": "np. 30, 120",
-      "label": "Czas trwania (minuty)"
+      "label": "Czas trwania (minuty)",
+      "placeholder": "np. 30, 120"
     },
     "procedureName": {
       "description": "Nazwa procedury medycznej",
-      "placeholder": "np. Appendektomia, Skan MRI, Kolonoskopia",
-      "label": "Nazwa procedury"
+      "label": "Nazwa procedury",
+      "placeholder": "np. Appendektomia, Skan MRI, Kolonoskopia"
     },
     "procedureSetting": {
       "description": "Gdzie procedura się odbywa",
@@ -1208,6 +1090,7 @@
     },
     "procedureType": {
       "description": "Kategoria procedury",
+      "label": "Typ procedury",
       "options": {
         "diagnostic": "Diagnostyczna - Badanie/Obrazowanie",
         "emergency": "Nagła - Opieka nagła",
@@ -1215,7 +1098,6 @@
         "surgical": "Chirurgiczna - Procedura inwazywna",
         "therapeutic": "Terapeutyczna - Leczenie"
       },
-      "label": "Typ procedury",
       "placeholder": "Wybierz typ"
     },
     "status": {
@@ -1229,8 +1111,8 @@
     "occurrence": {
       "additionalNotes": {
         "description": "Wszelkie inne istotne informacje dotyczące tego wystąpienia",
-        "placeholder": "Dodatkowe szczegóły dotyczące tego epizodu...",
-        "label": "Dodatkowe notatki"
+        "label": "Dodatkowe notatki",
+        "placeholder": "Dodatkowe szczegóły dotyczące tego epizodu..."
       },
       "associatedSymptoms": {
         "description": "Inne objawy, które wystąpiły w tym epizodzie",
@@ -1239,8 +1121,8 @@
       },
       "duration": {
         "description": "Jak długo trwał ten epizod",
-        "placeholder": "np. 2 godziny, 30 minut, cały dzień",
-        "label": "Czas trwania"
+        "label": "Czas trwania",
+        "placeholder": "np. 2 godziny, 30 minut, cały dzień"
       },
       "impactLevel": {
         "description": "Jak bardzo wpłynęło to na Twoje codzienne czynności",
@@ -1256,8 +1138,8 @@
       },
       "location": {
         "description": "Gdzie w ciele czułeś to",
-        "placeholder": "np. Lewa świątynia, Dolne plecy, Całe ciało",
-        "label": "Lokalizacja"
+        "label": "Lokalizacja",
+        "placeholder": "np. Lewa świątynia, Dolne plecy, Całe ciało"
       },
       "occurrenceDate": {
         "description": "Data tego konkretnego epizodu",
@@ -1307,8 +1189,8 @@
     "parent": {
       "category": {
         "description": "Opcjonalna kategoria do organizacji objawów",
-        "placeholder": "np. Ból, Zaburzenia żołądkowo-jelitowe, Oddychanie",
-        "label": "Kategoria"
+        "label": "Kategoria",
+        "placeholder": "np. Ból, Zaburzenia żołądkowo-jelitowe, Oddychanie"
       },
       "firstOccurrenceDate": {
         "description": "Kiedy po raz pierwszy zauważyłeś ten objaw",
@@ -1341,8 +1223,8 @@
       },
       "symptomName": {
         "description": "Nazwa objawu, który chcesz śledzić",
-        "placeholder": "np. Ból głowy migrena, Przewlekły ból pleców",
-        "label": "Nazwa objawu"
+        "label": "Nazwa objawu",
+        "placeholder": "np. Ból głowy migrena, Przewlekły ból pleców"
       },
       "typicalTriggers": {
         "description": "Co zwykle wyzwala ten objaw",
@@ -1350,6 +1232,17 @@
         "placeholder": "Dodaj typowe wyzwalacze (stres, pogoda, jedzenie itp.)"
       }
     }
+  },
+  "treatmentPlan": {
+    "clickToExpand": "",
+    "conditions": "",
+    "encounters": "",
+    "equipment": "",
+    "medications": "",
+    "noEquipment": "",
+    "noLabResults": "",
+    "noMedications": "",
+    "noVisits": ""
   },
   "treatments": {
     "amount": {
@@ -1363,8 +1256,8 @@
     },
     "frequency": {
       "description": "Jak często zabieg się odbywa",
-      "placeholder": "Wybierz częstotliwość",
-      "label": "Częstotliwość"
+      "label": "Częstotliwość",
+      "placeholder": "Wybierz częstotliwość"
     },
     "frequencyOptions": {
       "asNeeded": "W razie potrzeby (PRN)",
@@ -1383,15 +1276,15 @@
       "specificStartDate": "Data rozpoczęcia zabiegu"
     },
     "mode": {
+      "advancedOption": "Plan leczenia",
       "description": "Wybierz sposób śledzenia tego zabiegu",
       "label": "Tryb zabiegu",
-      "simpleOption": "Prosty",
-      "advancedOption": "Plan leczenia"
+      "simpleOption": "Prosty"
     },
     "notes": {
       "description": "Aktualizacje postępów, obserwacje lub ważne notatki",
-      "placeholder": "Notatki o postępach, skutki uboczne, zmiany, wyniki...",
-      "label": "Dodatkowe notatki"
+      "label": "Dodatkowe notatki",
+      "placeholder": "Notatki o postępach, skutki uboczne, zmiany, wyniki..."
     },
     "practitioner": {
       "description": "Przypisz lekarza do tego zabiegu",
@@ -1399,8 +1292,8 @@
     },
     "relatedCondition": {
       "description": "Połącz ten zabieg z konkretnym schorzeniem medycznym",
-      "placeholder": "Wybierz schorzenie (opcjonalnie)",
-      "label": "Powiązane schorzenie"
+      "label": "Powiązane schorzenie",
+      "placeholder": "Wybierz schorzenie (opcjonalnie)"
     },
     "startDate": {
       "description": "Kiedy zabieg się zaczął/będzie się zaczynać",
@@ -1413,8 +1306,8 @@
     },
     "treatmentName": {
       "description": "Konkretna nazwa lub opis zabiegu",
-      "placeholder": "np. Fizjoterapia bólu dolnej części pleców",
-      "label": "Nazwa zabiegu"
+      "label": "Nazwa zabiegu",
+      "placeholder": "np. Fizjoterapia bólu dolnej części pleców"
     },
     "treatmentStatus": {
       "description": "Bieżący etap w przepływie zabiegu",
@@ -1430,6 +1323,7 @@
     },
     "treatmentType": {
       "description": "Kategoria zabiegu",
+      "label": "Typ zabiegu",
       "options": {
         "behavioralTherapy": "Terapia behawioralna - Leczenie zdrowia psychicznego",
         "chemotherapy": "Chemioterapia - Leczenie nowotworów",
@@ -1443,7 +1337,6 @@
         "speechTherapy": "Logopedia - Poprawa komunikacji",
         "surgery": "Chirurgia - Procedura chirurgiczna"
       },
-      "label": "Typ zabiegu",
       "placeholder": "Wybierz typ"
     }
   },
@@ -1482,8 +1375,8 @@
         },
         "durationMinutes": {
           "description": "Jak długo trwała wizyta",
-          "placeholder": "Czas trwania wizyty",
-          "label": "Czas trwania (minuty)"
+          "label": "Czas trwania (minuty)",
+          "placeholder": "Czas trwania wizyty"
         },
         "followUpInstructions": {
           "description": "Instrukcje dalszej opieki i wizyt kontrolnych",
@@ -1547,13 +1440,13 @@
     "relatedCondition": {
       "label": "Powiązane schorzenie (opcjonalnie)"
     },
-    "viewModal": {
-      "followUpInstructions": "Instrukcje kontrolne",
-      "priority": "Priorytet",
-      "chiefComplaint": "Główna skarga"
-    },
     "table": {
       "visitType": "Typ wizyty"
+    },
+    "viewModal": {
+      "chiefComplaint": "Główna skarga",
+      "followUpInstructions": "Instrukcje kontrolne",
+      "priority": "Priorytet"
     }
   }
 }

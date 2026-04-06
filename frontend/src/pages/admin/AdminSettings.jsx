@@ -374,6 +374,7 @@ const AdminSettings = () => {
                 <Text size="sm" mb="xs">
                   {t('settings.sso.ssoDisabledInfo', 'SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:')}
                 </Text>
+                {/* eslint-disable i18next/no-literal-string -- environment variable names */}
                 <List size="sm" spacing={4}>
                   <List.Item>
                     <Code>SSO_ENABLED=true</Code>
@@ -394,6 +395,7 @@ const AdminSettings = () => {
                     <Code>SSO_REDIRECT_URI</Code>
                   </List.Item>
                 </List>
+                {/* eslint-enable i18next/no-literal-string */}
               </Alert>
             )}
           </Stack>

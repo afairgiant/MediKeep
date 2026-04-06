@@ -118,7 +118,6 @@
     "noChannelsHint": "Adicione um canal para começar a receber notificações",
     "notificationsSent": "{{count}} notificações enviadas",
     "sentCount_one": "{{count}} enviados",
-    "sentCount_many": "{{count}} sent",
     "sentCount_other": "{{count}} enviados",
     "test": "Testar",
     "testError": "Falha ao enviar notificação de teste",

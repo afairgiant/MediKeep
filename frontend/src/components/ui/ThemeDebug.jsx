@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- debug component, not user-facing */
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 

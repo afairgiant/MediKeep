@@ -26,6 +26,7 @@ import {
     IconChevronRight
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useTranslation } from 'react-i18next';
 
 const InvitationCard = ({
     invitation,
@@ -35,6 +36,7 @@ const InvitationCard = ({
     onView,
     compact = false
 }) => {
+    const { t } = useTranslation(['invitations', 'shared']);
     const { formatDateTime } = useDateFormat();
 
     const getStatusColor = (status) => {
@@ -52,11 +54,11 @@ const InvitationCard = ({
     const getInvitationTypeDisplay = (type) => {
         switch (type) {
             case 'family_history_share':
-                return 'Family History Share';
+                return t('response.familyHistoryShare');
             case 'patient_share':
-                return 'Patient Record Share';
+                return t('response.patientRecordShare');
             case 'family_join':
-                return 'Family Group Invitation';
+                return t('response.familyGroupInvitation');
             default:
                 return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
@@ -152,7 +154,7 @@ const InvitationCard = ({
                                             color="red"
                                             onClick={() => onCancel && onCancel(invitation)}
                                         >
-                                            Cancel
+                                            {t('card.cancelInvitation')}
                                         </Menu.Item>
                                     )}
                                     {invitation.status === 'accepted' && invitation.invitation_type === 'family_history_share' && (
@@ -161,7 +163,7 @@ const InvitationCard = ({
                                             color="red"
                                             onClick={() => onCancel && onCancel(invitation)}
                                         >
-                                            Revoke Access
+                                            {t('card.revokeAccess')}
                                         </Menu.Item>
                                     )}
                                 </Menu.Dropdown>
@@ -183,13 +185,11 @@ const InvitationCard = ({
                 {invitation.context_data && invitation.invitation_type === 'family_history_share' && (
                     <Group gap="xs" wrap="nowrap">
                         <Text size="xs" c="dimmed">
-                            Sharing: {
-                                invitation.context_data.is_bulk_invite ? (
-                                    `${invitation.context_data.family_member_count || invitation.context_data.family_members?.length || 0} family members`
-                                ) : (
-                                    `${invitation.context_data.family_member_name} (${invitation.context_data.family_member_relationship})`
-                                )
-                            }
+                            {t('card.sharing', {
+                                details: invitation.context_data.is_bulk_invite
+                                    ? t('utils.familyMemberCount', { count: invitation.context_data.family_member_count || invitation.context_data.family_members?.length || 0 })
+                                    : `${invitation.context_data.family_member_name} (${invitation.context_data.family_member_relationship})`
+                            })}
                         </Text>
                     </Group>
                 )}
@@ -214,7 +214,7 @@ const InvitationCard = ({
                             <Group gap="xs">
                                 <IconAlertTriangle size="0.7rem" />
                                 <Text size="xs" c={isExpired ? 'red' : 'dimmed'}>
-                                    {isExpired ? 'Expired' : 'Expires'}: {formatDateTime(invitation.expires_at)}
+                                    {isExpired ? t('card.expiredDate', { date: formatDateTime(invitation.expires_at) }) : t('card.expiresDate', { date: formatDateTime(invitation.expires_at) })}
                                 </Text>
                             </Group>
                         )}
@@ -230,7 +230,7 @@ const InvitationCard = ({
                                 leftSection={<IconX size="0.8rem" />}
                                 onClick={() => onRespond && onRespond(invitation, 'rejected')}
                             >
-                                Reject
+                                {t('card.rejectInvitation')}
                             </Button>
                             <Button
                                 size="xs"
@@ -238,7 +238,7 @@ const InvitationCard = ({
                                 leftSection={<IconCheck size="0.8rem" />}
                                 onClick={() => onRespond && onRespond(invitation, 'accepted')}
                             >
-                                Accept
+                                {t('card.acceptInvitation')}
                             </Button>
                         </Group>
                     )}
@@ -248,7 +248,7 @@ const InvitationCard = ({
                 {isExpired && (
                     <Alert icon={<IconClock />} color="red" variant="light">
                         <Text size="xs">
-                            This invitation has expired and can no longer be responded to.
+                            {t('card.expiredWarning')}
                         </Text>
                     </Alert>
                 )}

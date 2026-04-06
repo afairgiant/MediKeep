@@ -35,6 +35,7 @@ import {
   IconMedicalCross
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { useTranslation } from 'react-i18next';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import { getCategoryDisplayName, getCategoryColor, CATEGORY_SELECT_OPTIONS, QUALITATIVE_SELECT_OPTIONS } from '../../../constants/labCategories';
@@ -77,6 +78,7 @@ function TestComponentTemplates({
   onError,
   disabled = false,
 }: TestComponentTemplatesProps): React.ReactElement {
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const [selectedTemplate, setSelectedTemplate] = useState<TestTemplate | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -439,10 +441,10 @@ function TestComponentTemplates({
         <Group justify="space-between" align="center">
           <Group gap="xs">
             <IconTemplate size={20} />
-            <Title order={4}>Test Templates</Title>
+            <Title order={4}>{t('labresults:templates.title')}</Title>
           </Group>
           <Badge variant="light" color="blue">
-            {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''}
+            {t('labresults:templates.templateCount', { count: filteredTemplates.length })}
           </Badge>
         </Group>
 
@@ -478,9 +480,9 @@ function TestComponentTemplates({
           <Center p="xl">
             <Stack align="center" gap="md">
               <IconFlask size={48} color="var(--mantine-color-gray-5)" />
-              <Text size="lg" c="dimmed">No templates found</Text>
+              <Text size="lg" c="dimmed">{t('labresults:templates.noTemplates')}</Text>
               <Text size="sm" c="dimmed" ta="center">
-                Try adjusting your search or filter criteria
+                {t('labresults:templates.noTemplatesDescription')}
               </Text>
             </Stack>
           </Center>
@@ -509,7 +511,7 @@ function TestComponentTemplates({
                   <Group gap="xs">
                     <IconMedicalCross size={14} />
                     <Text size="xs" c="dimmed">
-                      {template.tests.length} test{template.tests.length !== 1 ? 's' : ''}
+                      {t('labresults:templates.testCount', { count: template.tests.length })}
                     </Text>
                   </Group>
 
@@ -535,7 +537,7 @@ function TestComponentTemplates({
                     disabled={disabled}
                     fullWidth
                   >
-                    Use Template
+                    {t('labresults:templates.useTemplate')}
                   </Button>
                 </Stack>
               </Card>
@@ -574,16 +576,14 @@ function TestComponentTemplates({
 
             <Stack gap="md">
               {selectedTemplate && (
-                <Alert color="blue" title={selectedTemplate.id === 'custom_entry' ? 'Custom Entry' : 'Template Instructions'}>
+                <Alert color="blue" title={selectedTemplate.id === 'custom_entry' ? t('labresults:templates.customEntry') : t('labresults:templates.templateInstructions')}>
                   {selectedTemplate.id === 'custom_entry' ? (
                     <>
-                      Enter your own test components. Fill in the test name, unit, value, and optional reference ranges.
-                      Click &ldquo;Add Another Test&rdquo; to add more rows as needed.
+                      {t('labresults:templates.customEntryInstructions')}
                     </>
                   ) : (
                     <>
-                      Enter the test values and reference ranges for each test below.
-                      Reference ranges should match what your lab provides. Leave tests blank if not performed.
+                      {t('labresults:templates.templateInstructionsText')}
                     </>
                   )}
                 </Alert>
@@ -595,44 +595,44 @@ function TestComponentTemplates({
                   <Paper withBorder p="xs" bg="var(--color-bg-secondary)">
                     <Group gap="xs" wrap="nowrap">
                       <Box style={{ width: '180px', minWidth: '180px' }}>
-                        <Text size="xs" fw={600}>Test Name</Text>
+                        <Text size="xs" fw={600}>{t('shared:fields.testName')}</Text>
                       </Box>
                       {selectedTemplate?.id === 'custom_entry' && (
                         <>
                           <Box style={{ width: '100px', minWidth: '100px' }}>
-                            <Text size="xs" fw={600}>Abbreviation</Text>
+                            <Text size="xs" fw={600}>{t('labresults:testComponents.editModal.fields.abbreviation')}</Text>
                           </Box>
                           <Box style={{ width: '100px', minWidth: '100px' }}>
-                            <Text size="xs" fw={600}>Test Code</Text>
+                            <Text size="xs" fw={600}>{t('shared:fields.testCode')}</Text>
                           </Box>
                         </>
                       )}
                       <Box style={{ width: '100px', minWidth: '100px' }}>
-                        <Text size="xs" fw={600}>Unit</Text>
+                        <Text size="xs" fw={600}>{t('labresults:testComponents.editModal.fields.unit')}</Text>
                       </Box>
                       <Box style={{ width: '100px', minWidth: '100px' }}>
-                        <Text size="xs" fw={600}>Value</Text>
+                        <Text size="xs" fw={600}>{t('shared:labels.value')}</Text>
                       </Box>
                       <Box style={{ width: '100px', minWidth: '100px' }}>
-                        <Text size="xs" fw={600}>Min Range</Text>
+                        <Text size="xs" fw={600}>{t('labresults:testComponents.editModal.fields.minimum')}</Text>
                       </Box>
                       <Box style={{ width: '100px', minWidth: '100px' }}>
-                        <Text size="xs" fw={600}>Max Range</Text>
+                        <Text size="xs" fw={600}>{t('labresults:testComponents.editModal.fields.maximum')}</Text>
                       </Box>
                       <Box style={{ width: '120px', minWidth: '120px' }}>
-                        <Text size="xs" fw={600}>Status</Text>
+                        <Text size="xs" fw={600}>{t('shared:fields.status')}</Text>
                       </Box>
                       <Box style={{ flex: 1, minWidth: '120px' }}>
-                        <Text size="xs" fw={600}>Notes</Text>
+                        <Text size="xs" fw={600}>{t('shared:tabs.notes')}</Text>
                       </Box>
                       {selectedTemplate?.id === 'custom_entry' && (
                         <Box style={{ width: '180px', minWidth: '180px' }}>
-                          <Text size="xs" fw={600}>Category</Text>
+                          <Text size="xs" fw={600}>{t('shared:labels.category')}</Text>
                         </Box>
                       )}
                       {selectedTemplate?.id === 'custom_entry' && (
                         <Box style={{ width: '50px', minWidth: '50px' }}>
-                          <Text size="xs" fw={600}>Action</Text>
+                          <Text size="xs" fw={600}>{t('shared:labels.actions')}</Text>
                         </Box>
                       )}
                     </Group>
@@ -842,7 +842,7 @@ function TestComponentTemplates({
                       fullWidth
                       size="xs"
                     >
-                      Add Another Test
+                      {t('labresults:templates.addAnotherTest')}
                     </Button>
                   )}
                 </Stack>
@@ -855,7 +855,7 @@ function TestComponentTemplates({
                   onClick={() => setIsModalOpen(false)}
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {t('shared:fields.cancel')}
                 </Button>
                 <Button
                   onClick={handleSubmit}
@@ -865,11 +865,10 @@ function TestComponentTemplates({
                   {(() => {
                     const filledCount = formValues.components.filter(hasFilledValue).length;
                     const totalCount = formValues.components.length;
-                    const plural = filledCount !== 1 ? 's' : '';
 
-                    if (filledCount === 0) return `Add Tests (0/${totalCount} filled)`;
-                    if (filledCount === totalCount) return `Add ${filledCount} Test${plural}`;
-                    return `Add ${filledCount} of ${totalCount} Test${plural}`;
+                    if (filledCount === 0) return t('labresults:templates.addTests', { filled: 0, total: totalCount });
+                    if (filledCount === totalCount) return t('labresults:templates.addTestsAll', { count: filledCount });
+                    return t('labresults:templates.addTestsPartial', { filled: filledCount, total: totalCount, count: filledCount });
                   })()}
                 </Button>
               </Group>

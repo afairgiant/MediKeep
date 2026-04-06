@@ -57,12 +57,16 @@
     }
   },
   "menu": {
+    "account": "",
     "backToDashboard": "Terug naar dashboard",
+    "darkMode": "",
     "help": "Help",
+    "lightMode": "",
     "logout": "Uitloggen",
     "patients": "Patiënten",
     "profile": "Profiel",
-    "reports": "Rapporten"
+    "reports": "Rapporten",
+    "userActions": ""
   },
   "pages": {
     "help": "Help & ondersteuning",

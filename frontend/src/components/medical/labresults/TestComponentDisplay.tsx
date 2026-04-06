@@ -22,6 +22,7 @@ import {
   Skeleton
 } from '@mantine/core';
 import { IconInfoCircle, IconEdit, IconTrash, IconChartLine } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
 import { getCategoryDisplayName, getCategoryColor, getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
@@ -50,6 +51,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
   onTrendClick,
   onError
 }) => {
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const handleError = (error: Error, context: string) => {
     logger.error('test_component_display_error', {
       message: `Error in TestComponentDisplay: ${context}`,
@@ -190,9 +192,9 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                   </Badge>
                 )}
                 {/* Trend indicator badge */}
-                <Tooltip label="Click card to view historical trends">
+                <Tooltip label={t('shared:labels.trendCharts')}>
                   <Badge variant="light" color="blue" size="xs" leftSection={<IconChartLine size={10} />}>
-                    Trends
+                    {t('shared:labels.trendCharts')}
                   </Badge>
                 </Tooltip>
               </Group>
@@ -242,7 +244,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
           {/* Reference Range */}
           {component.result_type !== 'qualitative' && (
             <Group gap="xs" align="center">
-              <Text size="xs" c="dimmed" fw={500}>Reference:</Text>
+              <Text size="xs" c="dimmed" fw={500}>{t('labresults:display.referenceLabel')}</Text>
               <Text size="xs">{referenceRange}</Text>
               {component.unit && referenceRange !== 'Not specified' && (
                 <Text size="xs" c="dimmed">{component.unit}</Text>
@@ -287,9 +289,9 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
   const EmptyState: React.FC = () => (
     <Center p="xl">
       <Stack align="center" gap="md">
-        <Text size="lg" c="dimmed">No test components found</Text>
+        <Text size="lg" c="dimmed">{t('labresults:display.noComponents')}</Text>
         <Text size="sm" c="dimmed" ta="center">
-          Test components will appear here once they are added to this lab result.
+          {t('labresults:display.noComponentsDescription')}
         </Text>
       </Stack>
     </Center>
@@ -377,7 +379,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                   }
                 />
                 <Text size="sm" c="dimmed">
-                  {sortedGroupedComponents[category].length} test{sortedGroupedComponents[category].length !== 1 ? 's' : ''}
+                  {t('labresults:templates.testCount', { count: sortedGroupedComponents[category].length })}
                 </Text>
               </Group>
 
@@ -396,8 +398,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     handleError(error as Error, 'render');
 
     return (
-      <Alert color="red" title="Error displaying test components">
-        Unable to display test components. Please try refreshing the page.
+      <Alert color="red" title={t('labresults:display.errorDisplaying')}>
+        {t('common:messages.displayError')}
       </Alert>
     );
   }

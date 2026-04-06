@@ -219,9 +219,9 @@ const Insurance = () => {
     status: (value, item) => <StatusBadge status={item.status} />,
     is_primary: (value, item) => {
       if (item.is_primary) {
-        return <Badge color="green" variant="filled" size="sm">Yes</Badge>;
+        return <Badge color="green" variant="filled" size="sm">{t('labels.yes')}</Badge>;
       }
-      return <Badge color="gray" variant="light" size="sm">No</Badge>;
+      return <Badge color="gray" variant="light" size="sm">{t('labels.no')}</Badge>;
     },
   };
 

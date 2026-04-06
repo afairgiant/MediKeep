@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- debug component, not user-facing */
 /**
  * DebugResponsive - Debug component to see responsive state
  */

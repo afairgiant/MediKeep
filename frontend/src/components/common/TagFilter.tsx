@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MultiSelect, Switch, Group, Text, Badge, ActionIcon, Stack } from '@mantine/core';
 import { X, Tag } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/api';
 import logger from '../../services/logger';
 
@@ -19,6 +20,7 @@ export function TagFilter({
   matchAll,
   onMatchAllChange
 }: TagFilterProps) {
+  const { t } = useTranslation('common');
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [popularTags, setPopularTags] = useState<Array<{ tag: string; count: number }>>([]);
@@ -137,7 +139,7 @@ export function TagFilter({
             onChange={(e) => onMatchAllChange(e.currentTarget.checked)}
             label={
               <Text size="sm">
-                Match {matchAll ? 'ALL' : 'ANY'} selected tags
+                {matchAll ? t('search.matchAll') : t('search.matchAny')}
               </Text>
             }
           />
@@ -153,7 +155,7 @@ export function TagFilter({
       {popularTags.length > 0 && selectedTags.length === 0 && (
         <div>
           <Text size="xs" fw={500} c="dimmed" mb="xs">
-            Popular tags:
+            {t('search.popularTags')}
           </Text>
           <Group gap="xs">
             {popularTags.slice(0, 8).map(({ tag, count }) => (

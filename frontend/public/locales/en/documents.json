@@ -1,0 +1,132 @@
+{
+  "errorBoundary": {
+    "browserCompat": "Browser compatibility problems",
+    "chartError": "Chart Display Error",
+    "chartErrorDescription": "Unable to render chart. Please try refreshing.",
+    "documentError": "Document Manager Error",
+    "documentErrorDescription": "An error occurred while managing documents. Your data is safe.",
+    "errorDetails": "Error Details",
+    "invalidData": "Invalid data from the server",
+    "networkIssues": "Network connectivity issues",
+    "tempIssues": "Temporary system issues",
+    "tryAgain": "Try Again",
+    "uploadError": "Upload Progress Error",
+    "uploadErrorDescription": "The upload progress tracker encountered an error."
+  },
+  "fileCount": {
+    "attached": "{{count}} attached",
+    "attached_one": "",
+    "attached_other": "",
+    "fileCount": "{{count}} file",
+    "fileCount_one": "",
+    "fileCount_other": "{{count}} files",
+    "noFiles": "No files"
+  },
+  "fileList": {
+    "fileDetails": "FILE DETAILS",
+    "loading": "Loading files...",
+    "markedCount": "{{count}} file marked for deletion",
+    "markedCount_one": "",
+    "markedCount_other": "{{count}} files marked for deletion",
+    "markedForDeletion": "Marked for deletion",
+    "noFiles": "No files attached",
+    "noMatch": "No files match your search criteria.",
+    "showingFiles": "Showing {{showing}} of {{total}} files",
+    "statusDuplicate": "Duplicate",
+    "statusFailed": "Failed",
+    "statusMissing": "Missing",
+    "statusProcessing": "Processing"
+  },
+  "fileUpload": {
+    "accepted": "Accepted: {{types}} • Max size: {{size}}MB",
+    "chooseFiles": "Choose Files",
+    "dragOrClick": "Drag files here or click to select",
+    "remove": "Remove",
+    "selectedFiles": "Selected Files ({{count}})",
+    "selectedFiles_one": "",
+    "selectedFiles_other": ""
+  },
+  "linkPaperless": {
+    "from": "From: {{name}}",
+    "infoText": "Search for documents already in Paperless to link them to this {{entityType}}. No file upload needed!",
+    "linkDocument": "Link Document",
+    "moreTags": "+{{count}} more",
+    "moreTags_one": "",
+    "moreTags_other": "",
+    "noDocumentsFound": "No documents found",
+    "searchDocuments": "Search documents",
+    "searchPlaceholder": "Search by title, content, or tags...",
+    "selected": "Selected",
+    "title": "Link Existing Paperless Document",
+    "tryDifferent": "Try a different search term",
+    "type": "Type: {{type}}"
+  },
+  "linkPapra": {
+    "infoText": "Search for documents already in Papra to link them to this {{entityType}}. No file upload needed!",
+    "linkDocument": "Link Document",
+    "noDocumentsFound": "No documents found",
+    "searchPlaceholder": "Search documents...",
+    "selected": "Selected",
+    "title": "Link Existing Papra Document",
+    "tryDifferent": "Try a different search term"
+  },
+  "manager": {
+    "addDocument": "Add Document",
+    "currentFiles": "Current Files:",
+    "duplicateDocument": "Duplicate Document",
+    "duplicateExists": "This document already exists in Paperless and cannot be uploaded again.",
+    "filesToUpload": "Files to Upload:",
+    "linkPaperless": "Link Existing Paperless Document",
+    "linkPapra": "Link Existing Papra Document",
+    "manageDocuments": "Manage Documents",
+    "processingPaperless": "Processing document in Paperless...",
+    "searchFiles": "Search files...",
+    "statusDuplicate": "Duplicate",
+    "statusFailed": "Failed",
+    "statusUploaded": "Uploaded",
+    "statusUploading": "Uploading to Paperless...",
+    "syncCheck": "Sync Check",
+    "uploadNewFile": "Upload New File",
+    "uploadSuccess": "Document uploaded successfully!"
+  },
+  "paperlessStatus": {
+    "autoSyncEnabled": "Auto-sync enabled",
+    "documentAlreadyExists": "\"{{fileName}}\" is identical to a document already in Paperless.",
+    "duplicateHint": "If you need to upload a new version, please modify the document first.",
+    "processingDocument": "Document is being processed by Paperless...",
+    "syncFailed": "Sync failed",
+    "syncing": "Syncing..."
+  },
+  "renderMode": {
+    "compactView": "Compact View",
+    "gridView": "Grid View",
+    "listView": "List View",
+    "viewMode": "View Mode"
+  },
+  "storage": {
+    "backendLabel": "Storage Backend:",
+    "connectedBadge": "Connected",
+    "local": "Local Storage",
+    "paperless": "Paperless-ngx",
+    "papra": "Papra",
+    "selectBackend": "Select storage backend"
+  },
+  "upload": {
+    "completed": "{{count}} completed",
+    "completed_one": "",
+    "completed_other": "",
+    "dragOrClick": "Drag files here or click to select",
+    "failed": "{{count}} failed",
+    "failed_one": "",
+    "failed_other": "",
+    "filesProgress": "{{completed}}/{{total}} files",
+    "maxSize": "Max file size: {{size}}MB",
+    "overallProgress": "Overall Progress",
+    "percentComplete": "{{percent}}% complete",
+    "remaining": "{{time}} remaining",
+    "retryFailed": "Retry Failed",
+    "uploading": "{{count}} uploading",
+    "uploading_one": "",
+    "uploading_other": ""
+  }
+}

@@ -76,7 +76,7 @@ function SaveResetBar({ visible, saving, onSave, onReset, t }) {
       <div className="settings-actions">
         <div className="settings-actions-info">
           <div className="settings-changes-indicator">
-            {t('settings.actions.unsavedChanges', 'You have unsaved changes')}
+            {t('actions.unsavedChanges', 'You have unsaved changes')}
           </div>
         </div>
 
@@ -86,7 +86,7 @@ function SaveResetBar({ visible, saving, onSave, onReset, t }) {
             onClick={onReset}
             disabled={saving}
           >
-            {t('settings.actions.reset', 'Reset Changes')}
+            {t('actions.reset', 'Reset Changes')}
           </Button>
 
           <Button
@@ -94,7 +94,7 @@ function SaveResetBar({ visible, saving, onSave, onReset, t }) {
             disabled={saving}
             loading={saving}
           >
-            {saving ? t('shared:labels.saving', 'Saving...') : t('settings.actions.save', 'Save All Changes')}
+            {saving ? t('shared:labels.saving', 'Saving...') : t('actions.save', 'Save All Changes')}
           </Button>
         </div>
       </div>
@@ -103,7 +103,7 @@ function SaveResetBar({ visible, saving, onSave, onReset, t }) {
 }
 
 const Settings = () => {
-  const { t } = useTranslation(['common', 'notifications', 'shared']);
+  const { t } = useTranslation(['settings', 'common', 'notifications', 'shared']);
   const { user, updateSessionTimeout } = useAuth();
   const {
     preferences: userPreferences,
@@ -370,19 +370,20 @@ const Settings = () => {
 
   function renderVersionInfo() {
     if (loadingVersion) {
-      return t('settings.system.version.loading', 'Loading version information...');
+      return t('system.version.loading', 'Loading version information...');
     }
 
     if (!versionInfo) {
-      return t('settings.system.version.unavailable', 'Version information unavailable');
+      return t('system.version.unavailable', 'Version information unavailable');
     }
 
-    const appName = versionInfo.app_name || t('settings.system.version.unknownApp', 'Unknown App');
-    const version = versionInfo.version || t('settings.system.version.unknownVersion', 'Unknown Version');
+    const appName = versionInfo.app_name || t('system.version.unknownApp', 'Unknown App');
+    const version = versionInfo.version || t('system.version.unknownVersion', 'Unknown Version');
 
+    /* eslint-disable-next-line i18next/no-literal-string -- version display format */
     return (
       <span>
-        <strong>{appName}</strong> v{version}
+        <strong>{appName}</strong> {'v'}{version}
       </span>
     );
   }
@@ -440,18 +441,18 @@ const Settings = () => {
         {/* Security Settings Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.security', 'Security')}</h3>
+            <h3 className="settings-section-title">{t('sections.security', 'Security')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
                 <div className="settings-option-title">{t('shared:labels.password', 'Password')}</div>
                 <div className="settings-option-description">
-                  {t('settings.security.password.description', 'Change your account password to keep your account secure')}
+                  {t('security.password.description', 'Change your account password to keep your account secure')}
                 </div>
               </div>
               <div className="settings-option-control">
                 <Button variant="secondary" onClick={() => setIsPasswordModalOpen(true)}>
-                  {t('settings.security.password.button', 'Change Password')}
+                  {t('security.password.button', 'Change Password')}
                 </Button>
               </div>
             </div>
@@ -461,18 +462,18 @@ const Settings = () => {
         {/* Account Management Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.accountManagement', 'Account Management')}</h3>
+            <h3 className="settings-section-title">{t('sections.accountManagement', 'Account Management')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.account.deleteAccount.title', 'Delete Account')}</div>
+                <div className="settings-option-title">{t('account.deleteAccount.title', 'Delete Account')}</div>
                 <div className="settings-option-description">
-                  {t('settings.account.deleteAccount.description', 'Permanently delete your account and all associated medical data. This action cannot be undone.')}
+                  {t('account.deleteAccount.description', 'Permanently delete your account and all associated medical data. This action cannot be undone.')}
                 </div>
               </div>
               <div className="settings-option-control">
                 <Button variant="danger" onClick={() => setIsDeleteAccountModalOpen(true)}>
-                  {t('settings.account.deleteAccount.button', 'Delete Account')}
+                  {t('account.deleteAccount.button', 'Delete Account')}
                 </Button>
               </div>
             </div>
@@ -482,18 +483,18 @@ const Settings = () => {
         {/* Application Preferences Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.preferences', 'Application Preferences')}</h3>
+            <h3 className="settings-section-title">{t('sections.preferences', 'Application Preferences')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.preferences.unitSystem.title', 'Unit System')}</div>
+                <div className="settings-option-title">{t('preferences.unitSystem.title', 'Unit System')}</div>
                 <div className="settings-option-description">
-                  {t('settings.preferences.unitSystem.description', 'Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units')}
+                  {t('preferences.unitSystem.description', 'Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units')}
                 </div>
               </div>
               <div className="settings-option-control">
                 {loadingPreferences ? (
-                  <div className="settings-loading">{t('labels.loading', 'Loading...')}</div>
+                  <div className="settings-loading">{t('common:labels.loading', 'Loading...')}</div>
                 ) : (
                   <div className="settings-radio-group">
                     <label className="settings-radio-option">
@@ -506,7 +507,7 @@ const Settings = () => {
                         disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
-                        {t('settings.preferences.unitSystem.imperial', 'Imperial (lbs, feet, °F)')}
+                        {t('preferences.unitSystem.imperial', 'Imperial (lbs, feet, °F)')}
                       </span>
                     </label>
 
@@ -520,7 +521,7 @@ const Settings = () => {
                         disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
-                        {t('settings.preferences.unitSystem.metric', 'Metric (kg, cm, °C)')}
+                        {t('preferences.unitSystem.metric', 'Metric (kg, cm, °C)')}
                       </span>
                     </label>
                   </div>
@@ -531,14 +532,14 @@ const Settings = () => {
             {/* Date Format Option */}
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.preferences.dateFormat.title', 'Date Format')}</div>
+                <div className="settings-option-title">{t('preferences.dateFormat.title', 'Date Format')}</div>
                 <div className="settings-option-description">
-                  {t('settings.preferences.dateFormat.description', 'Choose how dates are displayed throughout the application')}
+                  {t('preferences.dateFormat.description', 'Choose how dates are displayed throughout the application')}
                 </div>
               </div>
               <div className="settings-option-control">
                 {loadingPreferences ? (
-                  <div className="settings-loading">{t('labels.loading', 'Loading...')}</div>
+                  <div className="settings-loading">{t('common:labels.loading', 'Loading...')}</div>
                 ) : (
                   <div className="settings-radio-group">
                     <label className="settings-radio-option">
@@ -551,8 +552,9 @@ const Settings = () => {
                         disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
-                        {t('settings.preferences.dateFormat.mdy', 'MM/DD/YYYY (US)')}
-                        <span className="settings-radio-example"> - e.g., 01/25/2026</span>
+                        {t('preferences.dateFormat.mdy', 'MM/DD/YYYY (US)')}
+                        {/* eslint-disable-next-line i18next/no-literal-string -- date format example */}
+                        <span className="settings-radio-example">{' - e.g., 01/25/2026'}</span>
                       </span>
                     </label>
 
@@ -566,8 +568,9 @@ const Settings = () => {
                         disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
-                        {t('settings.preferences.dateFormat.dmy', 'DD/MM/YYYY (European)')}
-                        <span className="settings-radio-example"> - e.g., 25/01/2026</span>
+                        {t('preferences.dateFormat.dmy', 'DD/MM/YYYY (European)')}
+                        {/* eslint-disable-next-line i18next/no-literal-string -- date format example */}
+                        <span className="settings-radio-example">{' - e.g., 25/01/2026'}</span>
                       </span>
                     </label>
 
@@ -581,8 +584,9 @@ const Settings = () => {
                         disabled={savingPreferences}
                       />
                       <span className="settings-radio-label">
-                        {t('settings.preferences.dateFormat.ymd', 'YYYY-MM-DD (ISO)')}
-                        <span className="settings-radio-example"> - e.g., 2026-01-25</span>
+                        {t('preferences.dateFormat.ymd', 'YYYY-MM-DD (ISO)')}
+                        {/* eslint-disable-next-line i18next/no-literal-string -- date format example */}
+                        <span className="settings-radio-example">{' - e.g., 2026-01-25'}</span>
                       </span>
                     </label>
                   </div>
@@ -593,14 +597,14 @@ const Settings = () => {
             {/* Session Timeout Option */}
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.preferences.sessionTimeout.title', 'Session Timeout')}</div>
+                <div className="settings-option-title">{t('preferences.sessionTimeout.title', 'Session Timeout')}</div>
                 <div className="settings-option-description">
-                  {t('settings.preferences.sessionTimeout.description', 'Set the duration of inactivity before your session expires (in minutes)')}
+                  {t('preferences.sessionTimeout.description', 'Set the duration of inactivity before your session expires (in minutes)')}
                 </div>
               </div>
               <div className="settings-option-control">
                 {loadingPreferences ? (
-                  <span className="settings-value-placeholder">{t('labels.loading', 'Loading...')}</span>
+                  <span className="settings-value-placeholder">{t('common:labels.loading', 'Loading...')}</span>
                 ) : (
                   <div className="settings-timeout-control">
                     <input
@@ -626,7 +630,7 @@ const Settings = () => {
                       }}
                     />
                     <span style={{ marginLeft: '10px', fontSize: '14px', color: 'var(--color-text-muted)' }}>
-                      {t('settings.preferences.sessionTimeout.range', 'minutes (5-1440)')}
+                      {t('preferences.sessionTimeout.range', 'minutes (5-1440)')}
                     </span>
                   </div>
                 )}
@@ -662,7 +666,8 @@ const Settings = () => {
             <Group justify="space-between">
               <Group gap="sm">
                 {paperlessOpen ? <IconChevronDown size={18} /> : <IconChevronRight size={18} />}
-                <Text fw={600} size="md">Paperless-ngx</Text>
+                {/* eslint-disable-next-line i18next/no-literal-string -- product name */}
+              <Text fw={600} size="md">{'Paperless-ngx'}</Text>
                 {localPreferences?.paperless_enabled && (
                   <Text size="xs" c={localPreferences?.paperless_connection_verified ? 'green' : 'yellow'} fw={500}>
                     {localPreferences?.paperless_connection_verified ? 'Connected' : 'Enabled'}
@@ -670,7 +675,7 @@ const Settings = () => {
                 )}
               </Group>
               <Text size="sm" c="dimmed">
-                {t('settings.documents.paperlessDescription', 'Configure Paperless-ngx document management integration')}
+                {t('documents.paperlessDescription', 'Configure Paperless-ngx document management integration')}
               </Text>
             </Group>
           </UnstyledButton>
@@ -691,7 +696,8 @@ const Settings = () => {
             <Group justify="space-between">
               <Group gap="sm">
                 {papraOpen ? <IconChevronDown size={18} /> : <IconChevronRight size={18} />}
-                <Text fw={600} size="md">Papra</Text>
+                {/* eslint-disable-next-line i18next/no-literal-string -- product name */}
+              <Text fw={600} size="md">{'Papra'}</Text>
                 {localPreferences?.papra_enabled && (
                   <Text size="xs" c={localPreferences?.papra_connection_verified ? 'green' : 'yellow'} fw={500}>
                     {localPreferences?.papra_connection_verified ? 'Connected' : 'Enabled'}
@@ -699,7 +705,7 @@ const Settings = () => {
                 )}
               </Group>
               <Text size="sm" c="dimmed">
-                {t('settings.papra.description')}
+                {t('papra.description')}
               </Text>
             </Group>
           </UnstyledButton>
@@ -719,9 +725,9 @@ const Settings = () => {
           <div className="settings-section">
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.documents.cleanup.title', 'File Cleanup')}</div>
+                <div className="settings-option-title">{t('documents.cleanup.title', 'File Cleanup')}</div>
                 <div className="settings-option-description">
-                  {t('settings.documents.cleanup.description', 'Clean up out-of-sync files and resolve document storage inconsistencies. This will reset failed uploads, clear orphaned tasks, and fix database sync issues.')}
+                  {t('documents.cleanup.description', 'Clean up out-of-sync files and resolve document storage inconsistencies. This will reset failed uploads, clear orphaned tasks, and fix database sync issues.')}
                 </div>
               </div>
               <div className="settings-option-control">
@@ -731,7 +737,7 @@ const Settings = () => {
                   disabled={cleaningFiles || loadingPreferences}
                   loading={cleaningFiles}
                 >
-                  {cleaningFiles ? t('settings.documents.cleanup.cleaning', 'Cleaning...') : t('settings.documents.cleanup.button', 'Cleanup Files')}
+                  {cleaningFiles ? t('documents.cleanup.cleaning', 'Cleaning...') : t('documents.cleanup.button', 'Cleanup Files')}
                 </Button>
               </div>
             </div>
@@ -760,11 +766,11 @@ const Settings = () => {
       <div className="settings-content" role="tabpanel" id="settings-tabpanel-about" aria-labelledby="settings-tab-about">
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.systemInfo', 'System Information')}</h3>
+            <h3 className="settings-section-title">{t('sections.systemInfo', 'System Information')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.system.version.title', 'Application Version')}</div>
+                <div className="settings-option-title">{t('system.version.title', 'Application Version')}</div>
                 <div className="settings-option-description">
                   {renderVersionInfo()}
                 </div>
@@ -773,7 +779,7 @@ const Settings = () => {
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.system.timezone.title', 'Timezone')}</div>
+                <div className="settings-option-title">{t('system.timezone.title', 'Timezone')}</div>
                 <div className="settings-option-description">
                   {timezoneService.getTimezone()}
                 </div>
@@ -785,13 +791,13 @@ const Settings = () => {
         {/* Getting Help Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.gettingHelp', 'Getting Help')}</h3>
+            <h3 className="settings-section-title">{t('sections.gettingHelp', 'Getting Help')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.help.documentation.title', 'Documentation')}</div>
+                <div className="settings-option-title">{t('help.documentation.title', 'Documentation')}</div>
                 <div className="settings-option-description">
-                  {t('settings.help.documentation.description', 'Browse the wiki for guides, setup instructions, and feature documentation.')}
+                  {t('help.documentation.description', 'Browse the wiki for guides, setup instructions, and feature documentation.')}
                 </div>
               </div>
               <div className="settings-option-control">
@@ -799,16 +805,16 @@ const Settings = () => {
                   variant="secondary"
                   onClick={() => window.open('https://github.com/afairgiant/MediKeep/wiki', '_blank', 'noopener,noreferrer')}
                 >
-                  {t('settings.help.documentation.title', 'Documentation')}
+                  {t('help.documentation.title', 'Documentation')}
                 </Button>
               </div>
             </div>
 
             <div className="settings-option">
               <div className="settings-option-info">
-                <div className="settings-option-title">{t('settings.help.issues.title', 'Report an Issue')}</div>
+                <div className="settings-option-title">{t('help.issues.title', 'Report an Issue')}</div>
                 <div className="settings-option-description">
-                  {t('settings.help.issues.description', 'Found a bug or have a feature request? Open an issue on GitHub.')}
+                  {t('help.issues.description', 'Found a bug or have a feature request? Open an issue on GitHub.')}
                 </div>
               </div>
               <div className="settings-option-control">
@@ -816,7 +822,7 @@ const Settings = () => {
                   variant="secondary"
                   onClick={() => window.open('https://github.com/afairgiant/MediKeep/issues', '_blank', 'noopener,noreferrer')}
                 >
-                  {t('settings.help.issues.title', 'Report an Issue')}
+                  {t('help.issues.title', 'Report an Issue')}
                 </Button>
               </div>
             </div>
@@ -826,19 +832,19 @@ const Settings = () => {
         {/* Support MediKeep Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.supportMediKeep', 'Support MediKeep')}</h3>
+            <h3 className="settings-section-title">{t('sections.supportMediKeep', 'Support MediKeep')}</h3>
 
             <div className="settings-option">
               <div className="settings-option-info">
                 <div className="settings-option-description">
-                  {t('settings.sponsor.description', 'MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going.')}
+                  {t('sponsor.description', 'MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going.')}
                 </div>
               </div>
               <div className="settings-option-control">
                 <Button
                   onClick={() => window.open('https://github.com/sponsors/afairgiant', '_blank', 'noopener,noreferrer')}
                 >
-                  {t('settings.sponsor.button', 'Sponsor on GitHub')}
+                  {t('sponsor.button', 'Sponsor on GitHub')}
                 </Button>
               </div>
             </div>
@@ -848,7 +854,7 @@ const Settings = () => {
         {/* Release Notes Section */}
         <Card>
           <div className="settings-section">
-            <h3 className="settings-section-title">{t('settings.sections.releaseNotes', 'Release Notes')}</h3>
+            <h3 className="settings-section-title">{t('sections.releaseNotes', 'Release Notes')}</h3>
             <ReleaseNotesHistory />
           </div>
         </Card>

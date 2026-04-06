@@ -25,6 +25,7 @@ import {
     IconCalendarEvent
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { useTranslation } from 'react-i18next';
 import invitationApi from '../../services/api/invitationApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { renderFamilyHistoryContextDetails } from '../../utils/invitationUtils';
@@ -35,6 +36,7 @@ const InvitationResponseModal = ({
     invitation,
     onSuccess
 }) => {
+    const { t } = useTranslation(['invitations', 'shared']);
     const { formatDateTime } = useDateFormat();
     const [loading, setLoading] = useState(false);
     const [responseNote, setResponseNote] = useState('');
@@ -89,11 +91,11 @@ const InvitationResponseModal = ({
     const getInvitationTypeDisplay = (type) => {
         switch (type) {
             case 'family_history_share':
-                return 'Family History Share';
+                return t('response.familyHistoryShare');
             case 'patient_share':
-                return 'Patient Record Share';
+                return t('response.patientRecordShare');
             case 'family_join':
-                return 'Family Group Invitation';
+                return t('response.familyGroupInvitation');
             default:
                 return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
         }
@@ -120,7 +122,7 @@ const InvitationResponseModal = ({
         // Default fallback for other invitation types
         return (
             <Text size="sm" c="dimmed">
-                Additional details available after acceptance
+                {t('response.additionalDetails')}
             </Text>
         );
     };
@@ -131,7 +133,7 @@ const InvitationResponseModal = ({
         <Modal
             opened={opened}
             onClose={handleClose}
-            title="Invitation Response"
+            title={t('response.title')}
             size="md"
             centered
         >
@@ -158,18 +160,18 @@ const InvitationResponseModal = ({
                     </Group>
                     
                     <Text size="sm" c="dimmed" mb="sm">
-                        From: {invitation.sent_by?.name} ({invitation.sent_by?.email})
+                        {t('response.from', { name: invitation.sent_by?.name, email: invitation.sent_by?.email })}
                     </Text>
-                    
+
                     <Text size="sm" c="dimmed">
                         <IconCalendarEvent size="0.9rem" style={{ marginRight: 4 }} />
-                        Sent: {formatDateTime(invitation.created_at)}
+                        {t('response.sent', { date: formatDateTime(invitation.created_at) })}
                     </Text>
                     
                     {invitation.expires_at && (
                         <Text size="sm" c="dimmed">
                             <IconAlertTriangle size="0.9rem" style={{ marginRight: 4 }} />
-                            Expires: {formatDateTime(invitation.expires_at)}
+                            {t('manager.expires', { date: formatDateTime(invitation.expires_at) })}
                         </Text>
                     )}
                 </Paper>
@@ -194,12 +196,12 @@ const InvitationResponseModal = ({
 
                 {/* Response Note */}
                 <Textarea
-                    label="Response Note (Optional)"
-                    placeholder="Add a note with your response..."
+                    label={t('response.responseNote')}
+                    placeholder={t('response.notePlaceholder')}
                     value={responseNote}
                     onChange={(e) => setResponseNote(e.target.value)}
                     rows={3}
-                    description="This note will be visible to the sender"
+                    description={t('response.noteVisible')}
                 />
 
                 {/* Action Buttons */}
@@ -209,33 +211,33 @@ const InvitationResponseModal = ({
                         onClick={handleClose}
                         disabled={loading}
                     >
-                        Cancel
+                        {t('shared:fields.cancel')}
                     </Button>
-                    
-                    <Button 
-                        color="red" 
+
+                    <Button
+                        color="red"
                         variant="outline"
                         onClick={() => handleResponse('rejected')}
                         disabled={loading}
                         leftSection={<IconX size="1rem" />}
                     >
-                        Reject
+                        {t('response.reject')}
                     </Button>
-                    
-                    <Button 
-                        color="green" 
+
+                    <Button
+                        color="green"
                         onClick={() => handleResponse('accepted')}
                         disabled={loading}
                         leftSection={<IconCheck size="1rem" />}
                     >
-                        Accept
+                        {t('response.accept')}
                     </Button>
                 </Group>
 
                 {/* Additional Info */}
                 <Alert icon={<IconInfoCircle />} color="blue" variant="light">
                     <Text size="xs">
-                        Once you respond, the sender will be notified and this invitation will be marked as {selectedResponse || 'responded to'}.
+                        {t('response.responseInfo')}
                     </Text>
                 </Alert>
             </Stack>

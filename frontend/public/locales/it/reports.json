@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "",
+      "clearSelections": "",
+      "generateReport": "",
+      "generateReport_one": "",
+      "generateReport_other": "",
+      "generateReportChartsOnly": "",
+      "generateReportWithCharts": "",
+      "selectAll": ""
+    },
+    "configuration": {
+      "description": "",
+      "title": ""
+    },
+    "icon": "",
+    "loading": "Loading reports...",
+    "noData": {
+      "description": "",
+      "title": ""
+    },
+    "notifications": {
+      "templateLoaded": "",
+      "templateLoadedMessage": ""
+    },
+    "progress": {
+      "recordsSelected": ""
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "",
+        "label": ""
+      },
+      "includeProfilePicture": {
+        "description": "",
+        "label": ""
+      },
+      "includeSummary": {
+        "description": "",
+        "label": ""
+      },
+      "reportTitle": {
+        "label": ""
+      },
+      "title": ""
+    },
+    "title": "",
+    "trendCharts": {
+      "dateFrom": "",
+      "dateTo": "",
+      "emptyState": "",
+      "labTestCharts": {
+        "description": "",
+        "searchPlaceholder": "",
+        "title": ""
+      },
+      "maxReached": "",
+      "recordCount": "",
+      "recordCount_one": "",
+      "recordCount_other": "",
+      "removeChart": "",
+      "selectedCharts": "",
+      "selectedCharts_one": "",
+      "selectedCharts_other": "",
+      "vitalCharts": {
+        "description": "",
+        "title": ""
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "",
+    "noCategoriesDescription": "",
+    "noRecords": "",
+    "recordCount": "",
+    "recordCount_one": "",
+    "recordCount_other": "",
+    "selected": "",
+    "selected_one": "",
+    "selected_other": "",
+    "showingFirst": "",
+    "showingFirst_one": "",
+    "showingFirst_other": "",
+    "totalCount": "",
+    "totalCount_one": "",
+    "totalCount_other": ""
+  },
+  "dataExport": {
+    "availableData": "",
+    "bulkExport": "",
+    "csvDescription": "",
+    "dateFilterNote": "",
+    "exportInfo": "",
+    "exportTitle": "",
+    "includeFilesNote": "",
+    "jsonDescription": "",
+    "pdfDescription": "",
+    "singleExport": "",
+    "zipDescription": ""
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "",
+      "moreItems_other": "",
+      "title": ""
+    },
+    "buttons": {
+      "bulkExport": "",
+      "bulkExport_one": "",
+      "bulkExport_other": "",
+      "creatingZip": "",
+      "exportAs": "",
+      "exporting": "",
+      "goToDashboard": "",
+      "refreshPage": ""
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": ""
+      },
+      "dataToExport": {
+        "label": "",
+        "placeholder": ""
+      },
+      "dateRange": {
+        "endDate": "",
+        "startDate": ""
+      },
+      "format": {
+        "label": "",
+        "placeholder": ""
+      },
+      "includeFiles": "",
+      "includePatientInfo": {
+        "description": "",
+        "label": ""
+      },
+      "title": ""
+    },
+    "description": "",
+    "errors": {
+      "bulkExportFailed": "",
+      "bulkInvalidSettings": "",
+      "bulkNoDataFound": "",
+      "exportFailed": "",
+      "invalidSettings": "",
+      "loadFailed": "",
+      "noActivePatient": "",
+      "noDataFound": "",
+      "noDataType": "",
+      "sessionExpired": "",
+      "validationFailed": ""
+    },
+    "exportMode": {
+      "bulkDescription": "",
+      "bulkExport": "",
+      "singleDescription": "",
+      "singleExport": "",
+      "title": ""
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "",
+        "title": ""
+      },
+      "csv": {
+        "description": "",
+        "title": ""
+      },
+      "fileAttachments": {
+        "description": "",
+        "title": ""
+      },
+      "json": {
+        "description": "",
+        "title": ""
+      },
+      "pdf": {
+        "description": "",
+        "title": ""
+      },
+      "title": ""
+    },
+    "loading": "Loading export options...",
+    "scopes": {
+      "all": "",
+      "encounters": ""
+    },
+    "success": {
+      "bulkExportComplete": "",
+      "bulkExportComplete_one": "",
+      "bulkExportComplete_other": "",
+      "exportComplete": ""
+    },
+    "title": ""
+  },
+  "templates": {
+    "categories": "",
+    "categories_one": "",
+    "categories_other": "",
+    "deleteConfirm": "",
+    "editTemplate": "",
+    "loadTemplate": "",
+    "manageTemplates": "",
+    "moreTemplates": "",
+    "moreTemplates_one": "",
+    "moreTemplates_other": "",
+    "noSaved": "",
+    "records": "",
+    "reportTemplates": "",
+    "saveAsTemplate": "",
+    "saveDescription": "",
+    "savedTemplates": "",
+    "updateTemplate": ""
+  }
+}

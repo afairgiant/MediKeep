@@ -36,6 +36,7 @@ import {
   IconFilter
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { useTranslation } from 'react-i18next';
 import {
   labTestComponentApi,
   TrendResponse
@@ -59,6 +60,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   testName,
   patientId
 }) => {
+  const { t } = useTranslation(['medical', 'shared']);
   const [trendData, setTrendData] = useState<TrendResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -353,7 +355,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         <Group gap="sm">
           <IconChartLine size={24} />
           <div>
-            <Text fw={600} size="lg">Trend Analysis</Text>
+            <Text fw={600} size="lg">{t('labresults:trends.title')}</Text>
             {testName && <Text size="sm" c="dimmed">{testName}</Text>}
           </div>
         </Group>
@@ -384,7 +386,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
               <Group justify="space-between" align="center">
                 <Group gap="xs">
                   <IconFilter size={16} />
-                  <Text fw={600} size="sm">Time Range</Text>
+                  <Text fw={600} size="sm">{t('labresults:trends.timeRange')}</Text>
                 </Group>
               </Group>
 
@@ -411,7 +413,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
               {timeRange !== 'all' && (
                 <Paper withBorder p="sm" radius="sm" bg="blue.0">
                   <Group gap="xs" justify="center">
-                    <Text size="sm" fw={600}>Showing:</Text>
+                    <Text size="sm" fw={600}>{t('labresults:trends.showing')}</Text>
                     <Badge size="lg" variant="filled">
                       {getTimeRangeLabel(timeRange)}
                     </Badge>
@@ -427,7 +429,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           <Paper withBorder p="md" radius="md">
             <Stack gap="md">
               <Group justify="space-between" align="center">
-                <Text fw={600} size="sm">Summary Statistics</Text>
+                <Text fw={600} size="sm">{t('labresults:trends.summaryStatistics')}</Text>
                 <Group gap="xs">
                   <Tooltip label="Refresh data">
                     <ActionIcon variant="subtle" onClick={loadTrendData} size="sm">
@@ -453,14 +455,14 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                     </Box>
                   ))}
                   <Box>
-                    <Text size="xs" c="dimmed">Total</Text>
+                    <Text size="xs" c="dimmed">{t('labresults:trends.total')}</Text>
                     <Text fw={700} size="xl">{trendData.statistics.count}</Text>
                   </Box>
                 </Group>
               ) : (
                 <Group gap="xl">
                   <Box>
-                    <Text size="xs" c="dimmed">Latest</Text>
+                    <Text size="xs" c="dimmed">{t('labresults:trends.latest')}</Text>
                     <Group gap="xs" align="baseline">
                       <Text fw={700} size="xl">
                         {trendData.statistics.latest?.toFixed(2) ?? 'N/A'}
@@ -470,7 +472,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                   </Box>
 
                   <Box>
-                    <Text size="xs" c="dimmed">Average</Text>
+                    <Text size="xs" c="dimmed">{t('labresults:trends.average')}</Text>
                     <Group gap="xs" align="baseline">
                       <Text fw={600} size="lg">
                         {trendData.statistics.average?.toFixed(2) ?? 'N/A'}
@@ -480,7 +482,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                   </Box>
 
                   <Box>
-                    <Text size="xs" c="dimmed">Range</Text>
+                    <Text size="xs" c="dimmed">{t('labresults:trends.range')}</Text>
                     <Group gap="xs" align="baseline">
                       <Text fw={600} size="sm">
                         {trendData.statistics.min?.toFixed(2)} - {trendData.statistics.max?.toFixed(2)}
@@ -502,29 +504,29 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                 </Badge>
 
                 <Badge variant="light" color="blue" size="lg">
-                  {trendData.statistics.count} data points
+                  {t('labresults:trends.dataPoints', { count: trendData.statistics.count })}
                 </Badge>
 
                 {trendData.statistics.time_in_range_percent !== null && trendData.statistics.time_in_range_percent !== undefined && (
                   <Badge variant="light" color="green" size="lg">
-                    {trendData.statistics.time_in_range_percent.toFixed(1)}% in range
+                    {t('labresults:trends.inRange', { percent: trendData.statistics.time_in_range_percent.toFixed(1) })}
                   </Badge>
                 )}
               </Group>
 
               <Group gap="sm">
                 <Text size="xs" c="dimmed">
-                  Normal: <Text span fw={600}>{trendData.statistics.normal_count}</Text>
+                  {t('labresults:trends.normalLabel')} <Text span fw={600}>{trendData.statistics.normal_count}</Text>
                 </Text>
-                <Text size="xs" c="dimmed">•</Text>
+                <Text size="xs" c="dimmed">{'\u2022'}</Text>
                 <Text size="xs" c="dimmed">
-                  Abnormal: <Text span fw={600}>{trendData.statistics.abnormal_count}</Text>
+                  {t('labresults:trends.abnormalLabel')} <Text span fw={600}>{trendData.statistics.abnormal_count}</Text>
                 </Text>
                 {trendData.result_type !== 'qualitative' && trendData.statistics.std_dev !== null && trendData.statistics.std_dev !== undefined && (
                   <>
-                    <Text size="xs" c="dimmed">•</Text>
+                    <Text size="xs" c="dimmed">{'\u2022'}</Text>
                     <Text size="xs" c="dimmed">
-                      Std Dev: <Text span fw={600}>{trendData.statistics.std_dev.toFixed(2)}</Text>
+                      {t('labresults:trends.stdDevLabel')} <Text span fw={600}>{trendData.statistics.std_dev.toFixed(2)}</Text>
                     </Text>
                   </>
                 )}
@@ -538,10 +540,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'chart')}>
             <Tabs.List>
               <Tabs.Tab value="chart" leftSection={<IconChartLine size={16} />}>
-                Chart
+                {t('labresults:trends.chart')}
               </Tabs.Tab>
               <Tabs.Tab value="table" leftSection={<IconTable size={16} />}>
-                Data Table
+                {t('labresults:trends.dataTable')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -560,9 +562,9 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
             <Stack align="center" gap="md">
               <IconChartLine size={48} color="var(--mantine-color-gray-5)" />
-              <Title order={3} c="dimmed">No trend data available</Title>
+              <Title order={3} c="dimmed">{t('labresults:trends.noData')}</Title>
               <Text size="sm" c="dimmed" ta="center">
-                There are no historical data points for this test component.
+                {t('labresults:trends.noDataDescription')}
               </Text>
             </Stack>
           </Paper>

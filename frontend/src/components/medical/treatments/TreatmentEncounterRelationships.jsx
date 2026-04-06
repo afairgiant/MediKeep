@@ -146,14 +146,14 @@ function TreatmentEncounterRelationships({
                       )}
                       {relationship.visit_sequence && (
                         <Badge variant="outline" size="sm" color="grape">
-                          Visit #{relationship.visit_sequence}
+                          {t('shared:labels.visitType')} #{relationship.visit_sequence}
                         </Badge>
                       )}
                     </Group>
 
                     {encounter?.reason && (
                       <Text size="sm" c="dimmed">
-                        <strong>Reason:</strong> {encounter.reason}
+                        <strong>{t('shared:labels.reason')}:</strong> {encounter.reason}
                       </Text>
                     )}
 

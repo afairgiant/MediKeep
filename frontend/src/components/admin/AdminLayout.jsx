@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Center, Loader, Text, Alert, Button, Stack } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
@@ -12,6 +13,7 @@ import logger from '../../services/logger';
 import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
+  const { t } = useTranslation('navigation');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -124,7 +126,7 @@ const AdminLayout = ({ children }) => {
             {error}
           </Alert>
           <Button variant="light" onClick={() => navigate('/dashboard')}>
-            Return to Dashboard
+            {t('menu.backToDashboard')}
           </Button>
         </Stack>
       </Center>

@@ -132,11 +132,11 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
 
   const handlePreview = useCallback(async () => {
     if (!selectedDevice) {
-      setError(t('vitals.import.noDevice', 'Please select a device'));
+      setError(t('vitals:import.noDevice', 'Please select a device'));
       return;
     }
     if (!file) {
-      setError(t('vitals.import.noFile', 'Please select a CSV file'));
+      setError(t('vitals:import.noFile', 'Please select a CSV file'));
       return;
     }
     if (!patientId) return;
@@ -153,7 +153,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
         err?.response?.data?.message ||
         err?.response?.data?.detail ||
         err?.message ||
-        t('vitals.import.parsingFailed', 'Failed to parse CSV file');
+        t('vitals:import.parsingFailed', 'Failed to parse CSV file');
       setError(message);
     } finally {
       setLoading(false);
@@ -196,8 +196,8 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
   const renderSelectStep = () => (
     <Stack gap="md">
       <Select
-        label={t('vitals.import.selectDevice', 'Select Device')}
-        placeholder={t('vitals.import.selectDevicePlaceholder', 'Choose your device...')}
+        label={t('vitals:import.selectDevice', 'Select Device')}
+        placeholder={t('vitals:import.selectDevicePlaceholder', 'Choose your device...')}
         data={deviceOptions}
         value={selectedDevice}
         onChange={setSelectedDevice}
@@ -205,8 +205,8 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
       />
 
       <FileInput
-        label={t('vitals.import.uploadFile', 'Upload CSV File')}
-        placeholder={t('vitals.import.uploadFile', 'Upload CSV File')}
+        label={t('vitals:import.uploadFile', 'Upload CSV File')}
+        placeholder={t('vitals:import.uploadFile', 'Upload CSV File')}
         accept=".csv"
         value={file}
         onChange={setFile}
@@ -228,7 +228,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
           loading={loading}
           leftSection={<IconFileImport size={16} />}
         >
-          {t('vitals.import.preview', 'Preview')}
+          {t('vitals:import.preview', 'Preview')}
         </Button>
       </Group>
     </Stack>
@@ -247,7 +247,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
                 {previewData.total_readings}
               </Text>
               <Text size="xs" c="dimmed">
-                {t('vitals.import.totalReadings', 'Total Readings')}
+                {t('vitals:import.totalReadings', 'Total Readings')}
               </Text>
             </Stack>
             <Stack gap={2} align="center">
@@ -255,7 +255,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
                 {previewData.new_count}
               </Text>
               <Text size="xs" c="dimmed">
-                {t('vitals.import.newReadings', 'New Readings')}
+                {t('vitals:import.newReadings', 'New Readings')}
               </Text>
             </Stack>
             <Stack gap={2} align="center">
@@ -263,7 +263,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
                 {previewData.duplicate_count}
               </Text>
               <Text size="xs" c="dimmed">
-                {t('vitals.import.duplicatesFound', 'Duplicates Found')}
+                {t('vitals:import.duplicatesFound', 'Duplicates Found')}
               </Text>
             </Stack>
           </Group>
@@ -272,7 +272,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
         {/* Date range */}
         {previewData.date_range_start && previewData.date_range_end && (
           <Text size="sm" c="dimmed">
-            {t('vitals.import.dateRange', 'Date Range')}:{' '}
+            {t('vitals:import.dateRange', 'Date Range')}:{' '}
             {formatDate(previewData.date_range_start)} -{' '}
             {formatDate(previewData.date_range_end)}
           </Text>
@@ -288,7 +288,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
                 })}
               </Text>
               <Checkbox
-                label={t('vitals.import.skipDuplicates', 'Skip duplicate readings')}
+                label={t('vitals:import.skipDuplicates', 'Skip duplicate readings')}
                 checked={skipDuplicates}
                 onChange={(e) => setSkipDuplicates(e.currentTarget.checked)}
               />
@@ -309,7 +309,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
             ))}
             {previewData.warnings.length > 5 && (
               <Text size="xs" c="dimmed" mt="xs">
-                ...and {previewData.warnings.length - 5} more
+                {t('shared:labels.andCountMore', { count: previewData.warnings.length - 5 })}
               </Text>
             )}
           </Alert>
@@ -320,7 +320,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
           <Table.Thead>
             <Table.Tr>
               <Table.Th>{t('shared:labels.date', 'Date')}</Table.Th>
-              <Table.Th>{t('vitals.modal.bloodGlucose', 'Glucose')} (mg/dL)</Table.Th>
+              <Table.Th>{t('vitals:modal.bloodGlucose', 'Glucose')} ({t('vitals:units.mgdl')})</Table.Th>
               <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -338,7 +338,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
                 <Table.Td>
                   {row.is_duplicate ? (
                     <Badge color="orange" size="sm" variant="light">
-                      {t('vitals.import.duplicate', 'Duplicate')}
+                      {t('vitals:import.duplicate', 'Duplicate')}
                     </Badge>
                   ) : (
                     <Badge color="green" size="sm" variant="light">
@@ -378,10 +378,10 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
             }}
             leftSection={<IconArrowLeft size={16} />}
           >
-            {t('vitals.import.back', 'Back')}
+            {t('vitals:import.back', 'Back')}
           </Button>
           <Button onClick={handleImport} leftSection={<IconFileImport size={16} />}>
-            {t('vitals.import.importButton', 'Import')}{' '}
+            {t('vitals:import.importButton', 'Import')}{' '}
             {skipDuplicates && previewData.duplicate_count > 0
               ? `(${previewData.new_count})`
               : `(${previewData.total_readings})`}
@@ -395,7 +395,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
     <Center py="xl">
       <Stack align="center" gap="md">
         <Loader size="lg" />
-        <Text>{t('vitals.import.importing', 'Importing vitals...')}</Text>
+        <Text>{t('vitals:import.importing', 'Importing vitals...')}</Text>
       </Stack>
     </Center>
   );
@@ -405,7 +405,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
 
     const message =
       importResult.skipped_duplicates > 0
-        ? t('vitals.import.successWithSkipped', 'Imported {{imported}} readings ({{skipped}} duplicates skipped)', {
+        ? t('vitals:import.successWithSkipped', 'Imported {{imported}} readings ({{skipped}} duplicates skipped)', {
             imported: importResult.imported_count,
             skipped: importResult.skipped_duplicates,
           })
@@ -438,15 +438,15 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
   const getTitle = () => {
     switch (step) {
       case 'select':
-        return t('vitals.import.title', 'Import Vitals');
+        return t('vitals:import.title', 'Import Vitals');
       case 'preview':
-        return t('vitals.import.previewTitle', 'Import Preview');
+        return t('vitals:import.previewTitle', 'Import Preview');
       case 'importing':
-        return t('vitals.import.importing', 'Importing vitals...');
+        return t('vitals:import.importing', 'Importing vitals...');
       case 'complete':
-        return t('vitals.import.title', 'Import Vitals');
+        return t('vitals:import.title', 'Import Vitals');
       default:
-        return t('vitals.import.title', 'Import Vitals');
+        return t('vitals:import.title', 'Import Vitals');
     }
   };
 

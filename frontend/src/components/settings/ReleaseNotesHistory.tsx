@@ -29,7 +29,7 @@ function ReleaseItem({
   release,
   currentVersion,
 }: ReleaseItemProps): React.ReactElement {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('settings');
 
   return (
     <Accordion.Item value={release.tag_name}>
@@ -39,7 +39,7 @@ function ReleaseItem({
             <Text fw={500}>{release.name || release.tag_name}</Text>
             {isCurrentRelease(release.tag_name, currentVersion) && (
               <Badge color="blue" size="sm" variant="filled">
-                {t('settings.releaseNotes.currentVersion', 'Current')}
+                {t('releaseNotes.currentVersion', 'Current')}
               </Badge>
             )}
           </Group>
@@ -72,7 +72,7 @@ function ReleaseItem({
           mt="sm"
           display="inline-block"
         >
-          {t('settings.releaseNotes.viewOnGithub', 'View on GitHub')}
+          {t('releaseNotes.viewOnGithub', 'View on GitHub')}
         </Anchor>
       </Accordion.Panel>
     </Accordion.Item>
@@ -80,7 +80,7 @@ function ReleaseItem({
 }
 
 function ReleaseNotesHistory(): React.ReactElement {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('settings');
   const [releases, setReleases] = useState<Release[]>([]);
   const [currentVersion, setCurrentVersion] = useState('');
   const [loading, setLoading] = useState(true);
@@ -124,10 +124,10 @@ function ReleaseNotesHistory(): React.ReactElement {
     return (
       <Stack align="center" gap="sm" py="md">
         <Text c="dimmed">
-          {t('settings.releaseNotes.error', 'Unable to load release notes')}
+          {t('releaseNotes.error', 'Unable to load release notes')}
         </Text>
         <Button variant="secondary" onClick={fetchReleases}>
-          {t('settings.releaseNotes.retry', 'Try Again')}
+          {t('releaseNotes.retry', 'Try Again')}
         </Button>
       </Stack>
     );
@@ -136,7 +136,7 @@ function ReleaseNotesHistory(): React.ReactElement {
   if (releases.length === 0) {
     return (
       <Text c="dimmed" ta="center" py="md">
-        {t('settings.releaseNotes.empty', 'No release notes available')}
+        {t('releaseNotes.empty', 'No release notes available')}
       </Text>
     );
   }
@@ -162,8 +162,8 @@ function ReleaseNotesHistory(): React.ReactElement {
           style={{ alignSelf: 'center' }}
         >
           {expanded
-            ? t('settings.releaseNotes.showLess', 'Show less')
-            : t('settings.releaseNotes.showAll', 'Show more releases')}
+            ? t('releaseNotes.showLess', 'Show less')
+            : t('releaseNotes.showAll', 'Show more releases')}
         </Button>
       )}
     </Stack>

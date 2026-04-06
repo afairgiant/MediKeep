@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Stack, Group, Text, Divider, UnstyledButton, Overlay } from '@mantine/core';
 import { IconX, IconLogout } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
 import NavigationToggle from './NavigationToggle';
 import './TabletSidebar.css';
@@ -24,6 +25,7 @@ const TabletSidebar = ({
   onLogout,
   className = ''
 }) => {
+  const { t } = useTranslation(['navigation', 'shared']);
   // Handle escape key to close sidebar
   useEffect(() => {
     const handleEscapeKey = (event) => {
@@ -120,7 +122,7 @@ const TabletSidebar = ({
           <Stack spacing="sm">
             <Group justify="space-between" align="center">
               <Text size="lg" fw={700} c="blue">
-                🔧 Admin
+                {t('shared:labels.admin')}
               </Text>
               <UnstyledButton 
                 onClick={onClose}
@@ -227,7 +229,7 @@ const TabletSidebar = ({
               >
                 <IconLogout size={16} />
                 <Text size="sm" fw={500}>
-                  Logout
+                  {t('menu.logout')}
                 </Text>
               </UnstyledButton>
             )}

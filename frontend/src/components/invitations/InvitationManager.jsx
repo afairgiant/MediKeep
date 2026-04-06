@@ -29,6 +29,7 @@ import {
   IconClock,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { useTranslation } from 'react-i18next';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCacheManager } from '../../hooks/useGlobalData';
@@ -41,6 +42,7 @@ import InvitationCard from './InvitationCard';
 import InvitationResponseModal from './InvitationResponseModal';
 
 const InvitationManager = ({ opened, onClose, onUpdate }) => {
+  const { t } = useTranslation(['invitations', 'shared']);
   const { user: authUser } = useAuth();
   const { invalidatePatientList } = useCacheManager();
   const { formatDate } = useDateFormat();
@@ -469,7 +471,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         title={
           <Group gap="sm">
             <IconMail size="1.2rem" />
-            <Title order={3}>Invitation Manager</Title>
+            <Title order={3}>{t('manager.title')}</Title>
           </Group>
         }
         size="xl"
@@ -498,7 +500,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   </Badge>
                 }
               >
-                Sent by Me
+                {t('manager.sentByMe')}
               </Tabs.Tab>
               <Tabs.Tab
                 value="shared_with_me"
@@ -509,7 +511,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   </Badge>
                 }
               >
-                Shared with Me
+                {t('manager.sharedWithMe')}
               </Tabs.Tab>
             </Tabs.List>
 
@@ -527,14 +529,14 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   {sentInvitations.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        Invitations ({sentInvitations.length})
+                        {t('manager.invitationsCount', { count: sentInvitations.length })}
                       </Title>
                       <Alert icon={<IconInfoCircle />} color="blue" variant="light" mb="md">
                         <Text size="sm">
-                          You have sent {sentInvitations.length} invitation(s).
+                          {t('manager.sentInvitationsInfo', { count: sentInvitations.length })}
                           {sentInvitations.filter(inv => inv.status === 'pending')
                             .length > 0 &&
-                            ` ${sentInvitations.filter(inv => inv.status === 'pending').length} are still pending.`}
+                            ` ${t('manager.pendingStillCount', { count: sentInvitations.filter(inv => inv.status === 'pending').length })}`}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -555,11 +557,11 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   {sharedPatientsByMe.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        Patient Shares ({sharedPatientsByMe.length})
+                        {t('manager.patientSharesCount', { count: sharedPatientsByMe.length })}
                       </Title>
                       <Alert icon={<IconUsers />} color="green" variant="light" mb="md">
                         <Text size="sm">
-                          You have shared {sharedPatientsByMe.length} patient(s) with others.
+                          {t('manager.sharedPatientsInfo', { count: sharedPatientsByMe.length })}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -577,16 +579,14 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                     {patientShare.patient?.first_name} {patientShare.patient?.last_name}
                                   </Text>
                                   <Text size="sm" c="dimmed">
-                                    Born: {patientShare.patient?.birth_date}
+                                    {t('manager.born', { date: patientShare.patient?.birth_date })}
                                   </Text>
                                   <Text size="xs" c="dimmed">
-                                    Shared with{' '}
-                                    {patientShare.shared_with_user?.name || patientShare.shared_with_user?.username || `User ${patientShare.shared_with_user_id}`}
+                                    {t('manager.sharedWith', { name: patientShare.shared_with_user?.name || patientShare.shared_with_user?.username || `User ${patientShare.shared_with_user_id}` })}
                                   </Text>
                                   {patientShare.created_at && (
                                     <Text size="xs" c="dimmed">
-                                      on{' '}
-                                      {formatDate(patientShare.created_at)}
+                                      {t('manager.on', { date: formatDate(patientShare.created_at) })}
                                     </Text>
                                   )}
                                 </div>
@@ -597,13 +597,13 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               {patientShare.custom_permissions && (
                                 <Text size="xs" c="dimmed">
-                                  Custom permissions applied
+                                  {t('manager.customPermissions')}
                                 </Text>
                               )}
 
                               {patientShare.expires_at && (
                                 <Text size="xs" c="orange">
-                                  Expires: {formatDate(patientShare.expires_at)}
+                                  {t('manager.expires', { date: formatDate(patientShare.expires_at) })}
                                 </Text>
                               )}
 
@@ -614,7 +614,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                   color="red"
                                   onClick={() => handleRevokeMyPatientShare(patientShare)}
                                 >
-                                  Revoke Access
+                                  {t('manager.revokeAccess')}
                                 </Button>
                               </Group>
                             </Stack>
@@ -627,8 +627,8 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
               ) : (
                 <EmptyState
                   icon={<IconSend size="2rem" />}
-                  title="No Sent Invitations"
-                  description="You haven't sent any invitations or shared any patients yet."
+                  title={t('manager.noSentTitle')}
+                  description={t('manager.noSentDescription')}
                 />
               )}
             </Tabs.Panel>
@@ -647,7 +647,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   {receivedInvitations.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        Pending Invitations ({receivedInvitations.length})
+                        {t('manager.pendingInvitationsCount', { count: receivedInvitations.length })}
                       </Title>
                       <Alert
                         icon={<IconClock />}
@@ -656,8 +656,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                         mb="md"
                       >
                         <Text size="sm">
-                          You have {receivedInvitations.length} pending
-                          invitation(s) waiting for your response.
+                          {t('manager.pendingInvitationsInfo', { count: receivedInvitations.length })}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -683,7 +682,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   {sharedWithMe.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        Family History Shares ({sharedWithMe.length})
+                        {t('manager.familySharesCount', { count: sharedWithMe.length })}
                       </Title>
                       <Alert
                         icon={<IconUsers />}
@@ -692,8 +691,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                         mb="md"
                       >
                         <Text size="sm">
-                          {sharedWithMe.length} family member(s) shared with you
-                          by others.
+                          {t('manager.familyMembersSharedInfo', { count: sharedWithMe.length })}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -723,13 +721,11 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                       ` • Born ${shareItem.family_member.birth_year}`}
                                   </Text>
                                   <Text size="xs" c="dimmed">
-                                    Shared by{' '}
-                                    {shareItem.share_details?.shared_by?.name}
+                                    {t('manager.sharedBy', { name: shareItem.share_details?.shared_by?.name })}
                                   </Text>
                                   {shareItem.share_details?.shared_at && (
                                     <Text size="xs" c="dimmed">
-                                      on{' '}
-                                      {formatDate(shareItem.share_details.shared_at)}
+                                      {t('manager.on', { date: formatDate(shareItem.share_details.shared_at) })}
                                     </Text>
                                   )}
                                 </div>
@@ -747,9 +743,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               <Group justify="space-between" mt="sm">
                                 <Text size="xs" c="dimmed">
-                                  {shareItem.family_member.family_conditions
-                                    ?.length || 0}{' '}
-                                  condition(s)
+                                  {t('manager.conditionsCount', { count: shareItem.family_member.family_conditions?.length || 0 })}
                                 </Text>
                                 <Button
                                   size="xs"
@@ -757,7 +751,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                   color="red"
                                   onClick={() => handleRevokeFamilyHistoryShare(shareItem)}
                                 >
-                                  Remove Access
+                                  {t('manager.removeAccess')}
                                 </Button>
                               </Group>
                             </Stack>
@@ -771,7 +765,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   {sharedPatientsWithMe.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        Patient Shares ({sharedPatientsWithMe.length})
+                        {t('manager.patientSharesCount', { count: sharedPatientsWithMe.length })}
                       </Title>
                       <Alert
                         icon={<IconUsers />}
@@ -780,8 +774,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                         mb="md"
                       >
                         <Text size="sm">
-                          {sharedPatientsWithMe.length} patient(s) shared with you
-                          by others.
+                          {t('manager.patientsSharedInfo', { count: sharedPatientsWithMe.length })}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -799,16 +792,14 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                     {patientShare.patient?.first_name} {patientShare.patient?.last_name}
                                   </Text>
                                   <Text size="sm" c="dimmed">
-                                    Born: {patientShare.patient?.birth_date}
+                                    {t('manager.born', { date: patientShare.patient?.birth_date })}
                                   </Text>
                                   <Text size="xs" c="dimmed">
-                                    Shared by{' '}
-                                    {patientShare.shared_by_user?.name || patientShare.shared_by_user?.username}
+                                    {t('manager.sharedBy', { name: patientShare.shared_by_user?.name || patientShare.shared_by_user?.username })}
                                   </Text>
                                   {patientShare.created_at && (
                                     <Text size="xs" c="dimmed">
-                                      on{' '}
-                                      {formatDate(patientShare.created_at)}
+                                      {t('manager.on', { date: formatDate(patientShare.created_at) })}
                                     </Text>
                                   )}
                                 </div>
@@ -819,13 +810,13 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               {patientShare.custom_permissions && (
                                 <Text size="xs" c="dimmed">
-                                  Custom permissions applied
+                                  {t('manager.customPermissions')}
                                 </Text>
                               )}
 
                               {patientShare.expires_at && (
                                 <Text size="xs" c="orange">
-                                  Expires: {formatDate(patientShare.expires_at)}
+                                  {t('manager.expires', { date: formatDate(patientShare.expires_at) })}
                                 </Text>
                               )}
 
@@ -836,7 +827,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                   color="red"
                                   onClick={() => handleRevokePatientShare(patientShare)}
                                 >
-                                  Remove Access
+                                  {t('manager.removeAccess')}
                                 </Button>
                               </Group>
                             </Stack>
@@ -849,8 +840,8 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
               ) : (
                 <EmptyState
                   icon={<IconUsers size="2rem" />}
-                  title="No Shared Records"
-                  description="No medical records or family history has been shared with you yet."
+                  title={t('manager.noSharedTitle')}
+                  description={t('manager.noSharedDescription')}
                 />
               )}
             </Tabs.Panel>
@@ -861,19 +852,18 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
           {/* Quick Actions */}
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              {sentInvitations.length} sent • {receivedInvitations.length}{' '}
-              pending • {sharedWithMe.length + sharedPatientsWithMe.length} active shares
+              {t('manager.summaryText', { sent: sentInvitations.length, pending: receivedInvitations.length, active: sharedWithMe.length + sharedPatientsWithMe.length })}
             </Text>
             <Group gap="sm">
               <Button variant="subtle" onClick={onClose}>
-                Close
+                {t('shared:labels.close')}
               </Button>
               <Button
                 variant="light"
                 onClick={loadInvitations}
                 leftSection={<IconRefresh size="1rem" />}
               >
-                Refresh
+                {t('shared:labels.retry')}
               </Button>
             </Group>
           </Group>

@@ -1,4 +1,5 @@
 import React from 'react';
+import i18n from '../../i18n/config';
 import {
   Overlay,
   Center,
@@ -103,7 +104,7 @@ const FormLoadingOverlay = ({
 
             {type === 'loading' && (
               <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
-                Please do not close this window or navigate away
+                {i18n.t('common:messages.doNotClose')}
               </Text>
             )}
           </Stack>

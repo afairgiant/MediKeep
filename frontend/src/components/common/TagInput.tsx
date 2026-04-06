@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Badge, TextInput, ActionIcon, Group, Text, Paper, ScrollArea } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useTranslation } from 'react-i18next';
 import apiService from '../../services/api';
 import logger from '../../services/logger';
 
@@ -26,6 +27,7 @@ export function TagInput({
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const { t } = useTranslation('common');
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [popularTags, setPopularTags] = useState<string[]>([]);
@@ -245,7 +247,7 @@ export function TagInput({
               <>
                 {inputValue === '' && suggestions.length > 0 && (
                   <Text size="xs" c="dimmed" p="xs" style={{ borderBottom: '1px solid var(--color-border-light)' }}>
-                    Common tags:
+                    {t('search.popularTags')}
                   </Text>
                 )}
                 {suggestions.map((suggestion) => (
@@ -276,7 +278,8 @@ export function TagInput({
       
       {/* Helper text */}
       <Text size="xs" c="dimmed" mt={4}>
-        {value.length}/{maxTags} tags • Press Enter to add a tag
+        {/* eslint-disable-next-line i18next/no-literal-string -- tag count format */}
+        {`${value.length}/${maxTags}`} {t('tagManagement.pressEnterToAdd', 'Press Enter to add a tag')}
       </Text>
       
       {(validationError || error) && (

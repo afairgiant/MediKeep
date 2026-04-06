@@ -24,6 +24,7 @@ import {
   IconAlertTriangle,
   IconRefresh,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import PaperlessUploadStatus from './PaperlessUploadStatus';
 
 const UploadProgressModal = ({
@@ -41,6 +42,7 @@ const UploadProgressModal = ({
   estimatedTimeRemaining,
   uploadSpeed,
 }) => {
+  const { t } = useTranslation('documents');
   const getFileStatusIcon = (status) => {
     switch (status) {
       case 'completed':
@@ -149,13 +151,13 @@ const UploadProgressModal = ({
         <Paper withBorder p="md" bg="var(--color-bg-secondary)">
           <Stack gap="sm">
             <Group justify="space-between" align="center">
-              <Text fw={500}>Overall Progress</Text>
+              <Text fw={500}>{t('upload.overallProgress')}</Text>
               <Badge
                 variant="light"
                 color={getOverallStatusColor()}
                 size="lg"
               >
-                {completedFiles}/{files.length} files
+                {t('upload.filesProgress', { completed: completedFiles, total: files.length })}
               </Badge>
             </Group>
             
@@ -174,11 +176,11 @@ const UploadProgressModal = ({
             
             <Group justify="space-between" align="center">
               <Text size="sm" c="dimmed">
-                {Math.round(overallProgress)}% complete
+                {t('upload.percentComplete', { percent: Math.round(overallProgress) })}
               </Text>
               {estimatedTimeRemaining && !isCompleted && (
                 <Text size="sm" c="dimmed">
-                  {estimatedTimeRemaining} remaining
+                  {t('upload.remaining', { time: estimatedTimeRemaining })}
                 </Text>
               )}
               {uploadSpeed && !isCompleted && (
@@ -198,7 +200,7 @@ const UploadProgressModal = ({
                 <IconCheck size={12} />
               </ThemeIcon>
               <Text size="sm" c="green.7">
-                {completedFiles} completed
+                {t('upload.completed', { count: completedFiles })}
               </Text>
             </Group>
           )}
@@ -209,7 +211,7 @@ const UploadProgressModal = ({
                 <Loader size={12} />
               </ThemeIcon>
               <Text size="sm" c="blue.7">
-                {uploadingFiles} uploading
+                {t('upload.uploading', { count: uploadingFiles })}
               </Text>
             </Group>
           )}
@@ -220,7 +222,7 @@ const UploadProgressModal = ({
                 <IconX size={12} />
               </ThemeIcon>
               <Text size="sm" c="red.7">
-                {failedFiles} failed
+                {t('upload.failed', { count: failedFiles })}
               </Text>
             </Group>
           )}
@@ -231,7 +233,7 @@ const UploadProgressModal = ({
         {/* Individual File Progress */}
         <Stack gap="xs" style={{ maxHeight: '300px', overflowY: 'auto' }}>
           <Text fw={500} size="sm" c="dimmed">
-            FILE DETAILS
+            {t('fileList.fileDetails')}
           </Text>
           
           {files.map((file, index) => (
@@ -273,7 +275,7 @@ const UploadProgressModal = ({
               onClick={onRetry}
               disabled={!isCompleted}
             >
-              Retry Failed
+              {t('upload.retryFailed')}
             </Button>
           )}
           

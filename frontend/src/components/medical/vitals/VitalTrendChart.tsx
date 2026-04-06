@@ -121,16 +121,16 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
   // Get labels for blood pressure or other dual-value vitals
   const getPrimaryLabel = () => {
     if (trendData.vital_type === 'blood_pressure') {
-      return t('vitals.systolic', 'Systolic');
+      return t('vitals:systolic', 'Systolic');
     }
     return trendData.vital_type_label;
   };
 
   const getSecondaryLabel = () => {
     if (trendData.vital_type === 'blood_pressure') {
-      return t('vitals.diastolic', 'Diastolic');
+      return t('vitals:diastolic', 'Diastolic');
     }
-    return t('vitals.secondary', 'Secondary');
+    return t('vitals:secondary', 'Secondary');
   };
 
   // Custom tooltip
@@ -148,7 +148,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
 
           {isAggregated && data.count && (
             <Badge size="sm" variant="light" color="gray">
-              {data.count} {t('vitals.trends.readings', 'readings')}
+              {data.count} {t('vitals:trends.readings', 'readings')}
             </Badge>
           )}
 
@@ -163,7 +163,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
               </Group>
               {isAggregated && data.min !== undefined && data.max !== undefined && (
                 <Text size="xs" c="dimmed">
-                  {t('vitals.trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
+                  {t('vitals:trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
                 </Text>
               )}
               {data.secondaryValue !== null && data.secondaryValue !== undefined && (
@@ -177,7 +177,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
                   </Group>
                   {isAggregated && data.secondaryMin !== undefined && data.secondaryMax !== undefined && (
                     <Text size="xs" c="dimmed">
-                      {t('vitals.trends.range', 'Range')}: {Math.round(data.secondaryMin)} - {Math.round(data.secondaryMax)}
+                      {t('vitals:trends.range', 'Range')}: {Math.round(data.secondaryMin)} - {Math.round(data.secondaryMax)}
                     </Text>
                   )}
                 </>
@@ -193,7 +193,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
               </Group>
               {isAggregated && data.min !== undefined && data.max !== undefined && (
                 <Text size="xs" c="dimmed">
-                  {t('vitals.trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
+                  {t('vitals:trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
                 </Text>
               )}
               {isBloodGlucose && data.glucose_context && (
@@ -216,7 +216,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
     return (
       <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
         <Text size="sm" c="dimmed" ta="center">
-          {t('vitals.trends.noDataPoints', 'No data points to display')}
+          {t('vitals:trends.noDataPoints', 'No data points to display')}
         </Text>
       </Paper>
     );

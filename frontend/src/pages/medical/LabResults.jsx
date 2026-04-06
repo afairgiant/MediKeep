@@ -646,13 +646,13 @@ const LabResults = () => {
       return (
         <EmptyState
           emoji="🧪"
-          title={t('labResults.noResults', 'No Lab Results Found')}
+          title={t('labresults:noResults', 'No Lab Results Found')}
           hasActiveFilters={dataManagement.hasActiveFilters}
           filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-          noDataMessage={t('labResults.startAdding', 'Start by adding your first lab result.')}
+          noDataMessage={t('labresults:startAdding', 'Start by adding your first lab result.')}
           actionButton={
             <Button variant="filled" onClick={handleAddLabResult}>
-              {t('labResults.addFirst', 'Add Your First Lab Result')}
+              {t('labresults:addFirst', 'Add Your First Lab Result')}
             </Button>
           }
         />
@@ -698,7 +698,7 @@ const LabResults = () => {
             { header: t('shared:tabs.documents', 'Files'), accessor: 'files', priority: 'low', width: 150 },
           ]}
           patientData={currentPatient}
-          tableName={t('labResults.title', 'Lab Results')}
+          tableName={t('labresults:title', 'Lab Results')}
           onView={handleViewLabResult}
           onEdit={handleEditLabResult}
           onDelete={handleDeleteLabResult}
@@ -729,8 +729,8 @@ const LabResults = () => {
   if (loading) {
     return (
       <MedicalPageLoading
-        message={t('labResults.loading', 'Loading lab results...')}
-        hint={t('labResults.loadingHint', 'If this takes too long, please refresh the page')}
+        message={t('labresults:loading', 'Loading lab results...')}
+        hint={t('labresults:loadingHint', 'If this takes too long, please refresh the page')}
       />
     );
   }
@@ -738,7 +738,7 @@ const LabResults = () => {
   return (
     <>
       <Container size="xl" py="sm">
-        <PageHeader title={t('labResults.title', 'Lab Results')} icon="🧪" />
+        <PageHeader title={t('labresults:title', 'Lab Results')} icon="🧪" />
 
         <Stack gap="sm" mt="md">
           <MedicalPageAlerts
@@ -749,13 +749,13 @@ const LabResults = () => {
 
           <MedicalPageActions
             primaryAction={{
-              label: t('labResults.addNew', '+ Add New Lab Result'),
+              label: t('labresults:addNew', '+ Add New Lab Result'),
               onClick: handleAddLabResult,
               size: 'sm',
             }}
             secondaryActions={[
               {
-                label: t('labResults.quickPdfImport', 'Quick PDF Import'),
+                label: t('labresults:quickPdfImport', 'Quick PDF Import'),
                 onClick: () => setShowQuickImportModal(true),
                 leftSection: <IconFileUpload size={16} />,
                 size: 'sm',
@@ -785,7 +785,7 @@ const LabResults = () => {
         <LabResultFormWrapper
           isOpen={showModal}
           onClose={() => !isBlocking && handleCloseModal()}
-          title={editingLabResult ? t('labResults.editTitle', 'Edit Lab Result') : t('labResults.addTitle', 'Add New Lab Result')}
+          title={editingLabResult ? t('labresults:editTitle', 'Edit Lab Result') : t('labresults:addTitle', 'Add New Lab Result')}
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}

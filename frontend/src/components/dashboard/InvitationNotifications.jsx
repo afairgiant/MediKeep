@@ -377,7 +377,7 @@ const InvitationNotifications = () => {
                   </Text>
                 </Group>
                 <Text size="xs" c="dimmed">
-                  From: {selectedInvitation.sent_by?.name}
+                  {t('invitations:card.from', { name: selectedInvitation.sent_by?.name })}
                 </Text>
                 <Badge size="xs" variant="light" color="blue">
                   {getInvitationTypeDisplay(selectedInvitation.invitation_type)}

@@ -240,7 +240,7 @@ const Analytics = () => {
               loading={analyticsLoading}
               variant="light"
             >
-              Refresh
+              {t('shared:labels.retry')}
             </Button>
           </Group>
         </Card>
@@ -257,7 +257,7 @@ const Analytics = () => {
                   onClick={() => handlePresetDays(d)}
                   aria-label={t('analytics.filterByDays', 'Filter by last {{days}} days', { days: d })}
                 >
-                  {d}d
+                  {t('shared:labels.countDays', { count: d })}
                 </Button>
               ))}
             </Group>
@@ -308,8 +308,9 @@ const Analytics = () => {
                     {t('shared:labels.countDays', '{{count}} days', { count: analyticsData?.date_range?.days || 0 })}
                   </Text>
                   {comparisonData.previous_period && (
+                    // eslint-disable-next-line i18next/no-literal-string -- date range comparison
                     <Text size="xs" c="dimmed" mt={4}>
-                      vs. {comparisonData.previous_period.start} to {comparisonData.previous_period.end}
+                      {`vs. ${comparisonData.previous_period.start} to ${comparisonData.previous_period.end}`}
                     </Text>
                   )}
                 </Paper>

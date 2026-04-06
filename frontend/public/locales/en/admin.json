@@ -424,6 +424,7 @@
     "backToModel": "Back to {{modelName}}",
     "bulkDeleteAssociated": "All associated data (including {{types}}) will also be deleted.",
     "bulkDeleteFailed": "Bulk delete failed",
+    "bulkDeleteWarning": "You are about to permanently delete {{count}} {{modelName}} records.",
     "bulkDeleteWarning_one": "You are about to permanently delete {{count}} {{modelName}} record.",
     "bulkDeleteWarning_other": "You are about to permanently delete {{count}} {{modelName}} records.",
     "changeRole": "Change Role",
@@ -475,6 +476,7 @@
     "saveFailed": "Save failed",
     "searchPlaceholder": "Search {{modelName}}...",
     "searchRecords": "Search records",
+    "searchResult": "{{count}} results for \"{{query}}\"",
     "searchResult_one": "{{count}} result for \"{{query}}\"",
     "searchResult_other": "{{count}} results for \"{{query}}\"",
     "selected": "{{count}} selected",
@@ -488,9 +490,7 @@
     "usernameUpdated": "Username updated",
     "usernameUpdatedMessage": "Your username has been changed. Please log in with your new username: \"{{username}}\"",
     "viewRecord": "View {{modelName}}",
-    "visibleColumns": "Visible columns",
-    "searchResult": "{{count}} results for \"{{query}}\"",
-    "bulkDeleteWarning": "You are about to permanently delete {{count}} {{modelName}} records."
+    "visibleColumns": "Visible columns"
   },
   "settings": {
     "dataRetention": {
@@ -557,6 +557,7 @@
     "title": "Tools & Maintenance"
   },
   "trash": {
+    "clearFilters": "Clear Filters",
     "deleteConfirm": "Are you sure you want to permanently delete <strong>{{filename}}</strong>?",
     "deletedDateRange": "Deleted date range",
     "deleteFailed": "Delete failed",
@@ -564,6 +565,7 @@
     "deleteWarning": "This action cannot be undone. The file will be permanently removed from the system.",
     "errorLoading": "Error loading trash",
     "fileCount_one": "{{count}} file",
+    "fileCount_other": "{{count}} files",
     "fileDeleted": "File deleted",
     "fileDeletedMessage": "{{filename}} permanently deleted",
     "fileRestored": "File restored",
@@ -580,6 +582,8 @@
     "permanentlyDeleteFile": "Permanently Delete File",
     "purgedDirectories_one": "across {{count}} directory",
     "purgedDirectories_other": "across {{count}} directories",
+    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} expired file permanently deleted",
     "purgedMessage_other": "{{count}} expired files permanently deleted",
     "purgeExpired": "Purge Expired",
@@ -597,14 +601,16 @@
     "showingFiltered": "Showing {{shown}} of {{total}} {{files}}",
     "subtitle": "Manage deleted uploaded files. Restore files to their original location or permanently remove them to free up storage.",
     "tableHeaders": {
+      "actions": "Actions",
       "deleted": "Deleted",
       "filename": "Filename",
-      "originalLocation": "Original Location"
+      "originalLocation": "Original Location",
+      "reason": "Reason",
+      "size": "Size"
     },
     "title": "Trash Management",
     "totalSize": "{{size}} total",
-    "trashPurged": "Trash purged",
-    "fileCount_other": "{{count}} files"
+    "trashPurged": "Trash purged"
   },
   "users": {
     "actionsFor": "Actions for {{username}}",
@@ -640,11 +646,20 @@
     "noUsersInSystem": "No users in the system.",
     "noUsersMatchFilters": "No users match your filters. Try adjusting or clearing filters.",
     "passwordModal": {
+      "bothFieldsRequired": "Both password fields are required",
+      "confirmPlaceholder": "Confirm new password",
+      "enterNewPassword": "Enter new password",
       "forceChange": "Force password change on next login",
+      "immediateReset": "This will immediately reset the user's password. They will need to use the new password to log in.",
       "newPassword": "New Password",
       "passwordDescription": "Min 6 characters, at least 1 letter and 1 number",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "resetFailed": "Failed to reset password. Please try again.",
+      "resetSuccess": "Password reset successfully for {{username}}!",
       "resettingFor": "Reset password for <strong>{{username}}</strong>",
-      "ssoWarning": "This user authenticates via SSO ({{provider}}). Setting a local password will allow hybrid authentication."
+      "ssoWarning": "This user authenticates via SSO ({{provider}}). Setting a local password will allow hybrid authentication.",
+      "title": "Reset Password for {{username}}",
+      "userInfo": "User: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "All Roles"
@@ -672,8 +687,8 @@
       "deactivateConfirm": "Deactivate \"{{username}}\"? They will not be able to log in until reactivated.",
       "deactivateTitle": "Deactivate User"
     },
+    "userCount": "{{count}} users",
     "userCount_one": "{{count}} user",
-    "userCount_other": "{{count}} users",
-    "userCount": "{{count}} users"
+    "userCount_other": "{{count}} users"
   }
 }

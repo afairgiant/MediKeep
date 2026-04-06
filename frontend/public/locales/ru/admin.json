@@ -27,16 +27,12 @@
     },
     "customDateRange": "Пользовательский диапазон дат",
     "dailyAverage": "Среднее за день",
-    "days_few": "{{count}} days",
-    "days_many": "{{count}} days",
     "filterByDays": "Фильтр за последние {{days}} дней",
     "loading": "Загрузка аналитики...",
     "period": "Период",
     "recordsDistribution": "Распределение записей",
     "subtitle": "Тенденции активности, сравнения и распределение записей",
     "title": "Аналитика",
-    "total_few": "{{count}} total",
-    "total_many": "{{count}} total",
     "totalActivities": "Всего действий",
     "userInteractions": "Взаимодействия пользователей",
     "vsPreviousPeriod": "по сравнению с предыдущим периодом"
@@ -70,8 +66,6 @@
   "backup": {
     "existingBackups": {
       "count_one": "{{count}} резервная копия",
-      "count_few": "{{count}} backups",
-      "count_many": "{{count}} backups",
       "count_other": "{{count}} резервных копий",
       "download": "Скачать",
       "noBackups": "Резервные копии не найдены",
@@ -132,8 +126,6 @@
     "preview": {
       "affectedData": "Затронутые данные",
       "analysisNotAvailable": "Анализ резервной копии недоступен",
-      "andMore_few": "...and {{count}} more",
-      "andMore_many": "...and {{count}} more",
       "backupContent": "Содержимое резервной копии",
       "backupDetails": "Подробности резервной копии",
       "backupFiles": "Файлы резервной копии",
@@ -141,27 +133,15 @@
       "createdAt": "Создана: {{date}}",
       "currentDatabase": "Текущая база данных",
       "currentFiles": "Текущие файлы",
-      "filesCount_few": "{{count}} files ({{size}})",
-      "filesCount_many": "{{count}} files ({{size}})",
-      "filesOnly_few": "{{count}} files",
-      "filesOnly_many": "{{count}} files",
       "manifest": "Манифест",
       "noAffectedData": "Информация о затронутых данных недоступна",
       "noStatistics": "Статистика недоступна",
       "restoreMethod": "Метод восстановления",
-      "sqlStatements_few": "{{count}} SQL statements",
-      "sqlStatements_many": "{{count}} SQL statements",
-      "totalRecords_few": "{{count}} total records",
-      "totalRecords_many": "{{count}} total records",
       "unknownType": "Неизвестный тип резервной копии"
     },
     "retention": {
       "backupsUnit": "копий",
-      "countProtection_few": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
-      "countProtection_many": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
       "currentStatus_one": "<strong>Текущее состояние:</strong> {{count}} резервная копия сохранена (макс: {{max}})",
-      "currentStatus_few": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})",
-      "currentStatus_many": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})",
       "currentStatus_other": "<strong>Текущее состояние:</strong> {{count}} резервных копий сохранено (макс: {{max}})",
       "daysUnit": "дней",
       "maximumCount": "Максимальное количество копий",
@@ -281,8 +261,6 @@
       "trashDesc": "Восстановление удалённых файлов"
     },
     "recentActivity": {
-      "count_few": "{{count}} activities",
-      "count_many": "{{count}} activities",
       "errorLoading": "Ошибка загрузки активности",
       "noActivity": "Нет последней активности для отображения",
       "subtitle": "Последние системные события",
@@ -292,10 +270,6 @@
     "refreshAll": "Обновить всё",
     "stats": {
       "activePatients": "Активные пациенты",
-      "activePrescriptions_few": "{{count}} active prescriptions",
-      "activePrescriptions_many": "{{count}} active prescriptions",
-      "recentRegistrations_few": "+{{count}} this week",
-      "recentRegistrations_many": "+{{count}} this week",
       "totalUsers": "Всего пользователей"
     },
     "subtitle": "Комплексный обзор системы и управление",
@@ -439,8 +413,6 @@
     "storage": {
       "appStorage": "Хранилище приложения",
       "diskUsage": "Использование диска",
-      "filesAcross_few": "across {{count}} files",
-      "filesAcross_many": "across {{count}} files",
       "freeOf": "{{free}} ГБ свободно из {{total}} ГБ",
       "title": "Состояние хранилища"
     },
@@ -452,9 +424,8 @@
     "backToModel": "Назад к {{modelName}}",
     "bulkDeleteAssociated": "Все связанные данные (включая {{types}}) также будут удалены.",
     "bulkDeleteFailed": "Ошибка массового удаления",
+    "bulkDeleteWarning": "Вы собираетесь навсегда удалить {{count}} записей {{modelName}}.",
     "bulkDeleteWarning_one": "Вы собираетесь навсегда удалить {{count}} запись {{modelName}}.",
-    "bulkDeleteWarning_few": "Вы собираетесь навсегда удалить {{count}} записи {{modelName}}.",
-    "bulkDeleteWarning_many": "Вы собираетесь навсегда удалить {{count}} записей {{modelName}}.",
     "bulkDeleteWarning_other": "Вы собираетесь навсегда удалить {{count}} записей {{modelName}}.",
     "changeRole": "Изменить роль",
     "changesSaved": "Изменения сохранены",
@@ -468,8 +439,6 @@
     "deleteFailed": "Ошибка удаления",
     "deleteRecords": "Удалить {{count}} записей",
     "deleteRecords_one": "Удалить {{count}} запись",
-    "deleteRecords_few": "Удалить {{count}} записи",
-    "deleteRecords_many": "Удалить {{count}} записей",
     "deleteRecords_other": "Удалить {{count}} записей",
     "deleteSelected": "Удалить выбранные",
     "deleteWarning": "Это действие навсегда удалит запись {{modelName}} и все связанные данные:",
@@ -490,8 +459,6 @@
     "noRecordsFound": "Записи не найдены",
     "perPage": "{{count}} на страницу",
     "perPage_one": "{{count}} на страницу",
-    "perPage_few": "{{count}} на страницу",
-    "perPage_many": "{{count}} на страницу",
     "perPage_other": "{{count}} на страницу",
     "rawDataJson": "Исходные данные (JSON)",
     "recordDeleted": "Запись удалена",
@@ -500,8 +467,6 @@
     "recordsDeleted": "Записи удалены",
     "recordsDeletedMessage": "Успешно удалено {{count}} записей",
     "recordsDeletedMessage_one": "{{count}} запись успешно удалена",
-    "recordsDeletedMessage_few": "Успешно удалено {{count}} записи",
-    "recordsDeletedMessage_many": "Успешно удалено {{count}} записей",
     "recordsDeletedMessage_other": "{{count}} записей успешно удалено",
     "recordUpdated": "Запись успешно обновлена",
     "resetToDefault": "Сбросить по умолчанию",
@@ -511,18 +476,13 @@
     "saveFailed": "Ошибка сохранения",
     "searchPlaceholder": "Поиск {{modelName}}...",
     "searchRecords": "Поиск записей",
+    "searchResult": "{{count}} результатов для \"{{query}}\"",
     "searchResult_one": "{{count}} результат для \"{{query}}\"",
-    "searchResult_few": "{{count}} результата для \"{{query}}\"",
-    "searchResult_many": "{{count}} результатов для \"{{query}}\"",
     "searchResult_other": "{{count}} результатов для \"{{query}}\"",
     "selected": "{{count}} выбрано",
     "selected_one": "{{count}} выбрано",
-    "selected_few": "{{count}} выбрано",
-    "selected_many": "{{count}} выбрано",
     "selected_other": "{{count}} выбрано",
     "toggleColumnVisibility": "Переключить видимость столбцов",
-    "totalRecords_few": "{{count}} total records",
-    "totalRecords_many": "{{count}} total records",
     "typeDeleteToConfirm": "Введите <strong>DELETE</strong> для подтверждения",
     "usernameChangeLogout": "Это действие приведёт к немедленному выходу из системы, и вам нужно будет войти с новым именем пользователя.",
     "usernameChangeText": "Вы собираетесь изменить имя пользователя с <strong>«{{oldUsername}}»</strong> на <strong>«{{newUsername}}»</strong>.",
@@ -530,9 +490,7 @@
     "usernameUpdated": "Имя пользователя обновлено",
     "usernameUpdatedMessage": "Ваше имя пользователя изменено. Пожалуйста, войдите с новым именем пользователя: «{{username}}»",
     "viewRecord": "Просмотр {{modelName}}",
-    "visibleColumns": "Видимые столбцы",
-    "searchResult": "{{count}} результатов для \"{{query}}\"",
-    "bulkDeleteWarning": "Вы собираетесь навсегда удалить {{count}} записей {{modelName}}."
+    "visibleColumns": "Видимые столбцы"
   },
   "settings": {
     "dataRetention": {
@@ -583,17 +541,11 @@
     "subtitle": "Административные инструменты для обслуживания системы и управления данными",
     "testLibrary": {
       "categories": "Категории",
-      "categoriesUpdated_few": "Categories Updated: {{count}}",
-      "categoriesUpdated_many": "Categories Updated: {{count}}",
       "forceSyncAll": "Принудительная синхронизация всех",
       "forceSyncAllDesc": "<strong>Принудительная синхронизация:</strong> Повторно сопоставляет все компоненты (категории и канонические имена)",
       "libraryReloaded": "Библиотека перезагружена",
       "libraryVersion": "Версия библиотеки",
-      "namesUpdated_few": "Names Updated: {{count}}",
-      "namesUpdated_many": "Names Updated: {{count}}",
       "operational": "Работает",
-      "processed_few": "Processed: {{count}}",
-      "processed_many": "Processed: {{count}}",
       "reloadDesc": "<strong>Перезагрузить библиотеку:</strong> Обновляет библиотеку тестов с диска (используйте после обновления test_library.json)",
       "reloadLibrary": "Перезагрузить библиотеку",
       "syncComplete": "Синхронизация завершена",
@@ -605,6 +557,7 @@
     "title": "Инструменты и обслуживание"
   },
   "trash": {
+    "clearFilters": "Clear Filters",
     "deleteConfirm": "Вы уверены, что хотите навсегда удалить <strong>{{filename}}</strong>?",
     "deletedDateRange": "Диапазон дат удаления",
     "deleteFailed": "Ошибка удаления",
@@ -612,8 +565,7 @@
     "deleteWarning": "Это действие нельзя отменить. Файл будет безвозвратно удалён из системы.",
     "errorLoading": "Ошибка загрузки корзины",
     "fileCount_one": "{{count}} файл",
-    "fileCount_few": "{{count}} files",
-    "fileCount_many": "{{count}} files",
+    "fileCount_other": "{{count}} файлов",
     "fileDeleted": "Файл удалён",
     "fileDeletedMessage": "{{filename}} окончательно удалён",
     "fileRestored": "Файл восстановлен",
@@ -629,14 +581,10 @@
     "permanentlyDelete": "Удалить навсегда",
     "permanentlyDeleteFile": "Удалить файл навсегда",
     "purgedDirectories_one": "в {{count}} каталоге",
-    "purgedDirectories_few": "across {{count}} directories",
-    "purgedDirectories_many": "across {{count}} directories",
     "purgedDirectories_other": "в {{count}} каталогах",
-    "purgeDescription_few": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_many": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} файл с истёкшим сроком окончательно удалён",
-    "purgedMessage_few": "{{count}} expired files permanently deleted",
-    "purgedMessage_many": "{{count}} expired files permanently deleted",
     "purgedMessage_other": "{{count}} файлов с истёкшим сроком окончательно удалено",
     "purgeExpired": "Очистить истёкшие",
     "purgeExpiredButton": "Очистить истёкшие",
@@ -653,14 +601,16 @@
     "showingFiltered": "Показано {{shown}} из {{total}} {{files}}",
     "subtitle": "Управление удалёнными файлами. Восстановите файлы в исходное расположение или окончательно удалите их для освобождения хранилища.",
     "tableHeaders": {
+      "actions": "Actions",
       "deleted": "Удалён",
       "filename": "Имя файла",
-      "originalLocation": "Исходное расположение"
+      "originalLocation": "Исходное расположение",
+      "reason": "Reason",
+      "size": "Size"
     },
     "title": "Управление корзиной",
     "totalSize": "{{size}} всего",
-    "trashPurged": "Корзина очищена",
-    "fileCount_other": "{{count}} файлов"
+    "trashPurged": "Корзина очищена"
   },
   "users": {
     "actionsFor": "Действия для {{username}}",
@@ -673,8 +623,6 @@
     },
     "changeRole": "Изменить роль",
     "clear": "Очистить",
-    "daysAgo_few": "{{count}}d ago",
-    "daysAgo_many": "{{count}}d ago",
     "deactivate": "Деактивировать",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Невозможно удалить последнего администратора.",
@@ -684,8 +632,6 @@
       "warning": "Это действие нельзя отменить. Все данные, связанные с этим пользователем, будут безвозвратно удалены."
     },
     "deleteUser": "Удалить пользователя",
-    "hoursAgo_few": "{{count}}h ago",
-    "hoursAgo_many": "{{count}}h ago",
     "justNow": "Только что",
     "loginHistory": "История входов",
     "loginHistoryModal": {
@@ -695,18 +641,25 @@
       "notAvailable": "Н/Д",
       "title": "История входов: {{username}}"
     },
-    "minutesAgo_few": "{{count}}m ago",
-    "minutesAgo_many": "{{count}}m ago",
     "never": "Никогда",
     "noUsersFound": "Пользователи не найдены",
     "noUsersInSystem": "В системе нет пользователей.",
     "noUsersMatchFilters": "Нет пользователей, соответствующих фильтрам. Попробуйте изменить или сбросить фильтры.",
     "passwordModal": {
+      "bothFieldsRequired": "",
+      "confirmPlaceholder": "",
+      "enterNewPassword": "",
       "forceChange": "Требовать смену пароля при следующем входе",
+      "immediateReset": "",
       "newPassword": "Новый пароль",
       "passwordDescription": "Минимум 6 символов, хотя бы 1 буква и 1 цифра",
+      "passwordsDoNotMatch": "",
+      "resetFailed": "",
+      "resetSuccess": "",
       "resettingFor": "Сброс пароля для <strong>{{username}}</strong>",
-      "ssoWarning": "Этот пользователь аутентифицируется через SSO ({{provider}}). Установка локального пароля позволит использовать гибридную аутентификацию."
+      "ssoWarning": "Этот пользователь аутентифицируется через SSO ({{provider}}). Установка локального пароля позволит использовать гибридную аутентификацию.",
+      "title": "",
+      "userInfo": ""
     },
     "roleFilter": {
       "all": "Все роли"
@@ -734,10 +687,8 @@
       "deactivateConfirm": "Деактивировать «{{username}}»? Пользователь не сможет входить в систему до повторной активации.",
       "deactivateTitle": "Деактивировать пользователя"
     },
+    "userCount": "{{count}} пользователей",
     "userCount_one": "{{count}} пользователь",
-    "userCount_few": "{{count}} users",
-    "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} пользователей",
-    "userCount": "{{count}} пользователей"
+    "userCount_other": "{{count}} пользователей"
   }
 }

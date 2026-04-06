@@ -287,7 +287,7 @@ const TreatmentPlanSetup = ({
                 {/* Show detail fields for each selected medication */}
                 {selectedMedIds.length > 0 && (
                   <Stack gap="xs">
-                    <Text size="xs" c="dimmed">Click to expand and add details (optional)</Text>
+                    <Text size="xs" c="dimmed">{t('treatmentPlan.clickToExpand')}</Text>
                     {selectedMedIds.map((medId) => {
                       const metadata = getItemMetadata('medications', medId);
                       return (
@@ -390,7 +390,7 @@ const TreatmentPlanSetup = ({
 
                 {medicationOptions.length === 0 && !loading && (
                   <Text size="sm" c="dimmed" ta="center">
-                    No medications found. Create medications first to link them here.
+                    {t('treatmentPlan.noMedications')}
                   </Text>
                 )}
               </Stack>
@@ -414,7 +414,7 @@ const TreatmentPlanSetup = ({
                 {/* Show detail fields for each selected visit */}
                 {selectedEncIds.length > 0 && (
                   <Stack gap="xs">
-                    <Text size="xs" c="dimmed">Click to expand and add details (optional)</Text>
+                    <Text size="xs" c="dimmed">{t('treatmentPlan.clickToExpand')}</Text>
                     {selectedEncIds.map((encId) => {
                       const metadata = getItemMetadata('encounters', encId);
                       return (
@@ -456,7 +456,7 @@ const TreatmentPlanSetup = ({
 
                 {encounterOptions.length === 0 && !loading && (
                   <Text size="sm" c="dimmed" ta="center">
-                    No visits found. Create visits first to link them here.
+                    {t('treatmentPlan.noVisits')}
                   </Text>
                 )}
               </Stack>
@@ -480,7 +480,7 @@ const TreatmentPlanSetup = ({
                 {/* Show detail fields for each selected lab */}
                 {selectedLabIds.length > 0 && (
                   <Stack gap="xs">
-                    <Text size="xs" c="dimmed">Click to expand and add details (optional)</Text>
+                    <Text size="xs" c="dimmed">{t('treatmentPlan.clickToExpand')}</Text>
                     {selectedLabIds.map((labId) => {
                       const metadata = getItemMetadata('labResults', labId);
                       return (
@@ -521,7 +521,7 @@ const TreatmentPlanSetup = ({
 
                 {labResultOptions.length === 0 && !loading && (
                   <Text size="sm" c="dimmed" ta="center">
-                    No lab results found. Create lab results first to link them here.
+                    {t('treatmentPlan.noLabResults')}
                   </Text>
                 )}
               </Stack>
@@ -545,7 +545,7 @@ const TreatmentPlanSetup = ({
                 {/* Show detail fields for each selected equipment */}
                 {selectedEquipIds.length > 0 && (
                   <Stack gap="xs">
-                    <Text size="xs" c="dimmed">Click to expand and add details (optional)</Text>
+                    <Text size="xs" c="dimmed">{t('treatmentPlan.clickToExpand')}</Text>
                     {selectedEquipIds.map((equipId) => {
                       const metadata = getItemMetadata('equipment', equipId);
                       return (
@@ -583,7 +583,7 @@ const TreatmentPlanSetup = ({
 
                 {equipmentOptions.length === 0 && !loading && (
                   <Text size="sm" c="dimmed" ta="center">
-                    No equipment found. Equipment can be added after creating the treatment.
+                    {t('treatmentPlan.noEquipment')}
                   </Text>
                 )}
               </Stack>

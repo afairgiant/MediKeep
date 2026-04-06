@@ -15,7 +15,7 @@ import logger from '../../services/logger';
  * as a Papra-specific extra after successful connection.
  */
 const PapraSettings = ({ settings, onSettingChange, loading }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('settings');
 
   const [testingConnection, setTestingConnection] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState(null);
@@ -78,7 +78,7 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
 
       if (result && result.status === 'success') {
         setConnectionStatus('success');
-        setConnectionMessage(t('settings.papra.connectionSuccess'));
+        setConnectionMessage(t('papra.connectionSuccess'));
         // Optimistically mark verified so StoragePreferencesCard unlocks immediately
         onSettingChange('papra_connection_verified', true);
         logger.info('papra_connection_test_success', { component: 'PapraSettings' });
@@ -87,7 +87,7 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
         setOrganizations(mapOrganizations(orgList));
       } else {
         setConnectionStatus('error');
-        setConnectionMessage(result?.message || t('settings.papra.connectionFailed'));
+        setConnectionMessage(result?.message || t('papra.connectionFailed'));
         logger.warn('papra_connection_test_failed', {
           component: 'PapraSettings',
           message: result?.message,
@@ -95,7 +95,7 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
       }
     } catch (error) {
       setConnectionStatus('error');
-      setConnectionMessage(error.message || t('settings.papra.connectionFailed'));
+      setConnectionMessage(error.message || t('papra.connectionFailed'));
       logger.error('papra_connection_test_error', {
         component: 'PapraSettings',
         error: error.message,
@@ -120,10 +120,10 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
       onEnabledChange={handleEnabledChange}
       url={papraUrl}
       onUrlChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.url, value)}
-      urlPlaceholder={t('settings.papra.urlPlaceholder')}
+      urlPlaceholder={t('papra.urlPlaceholder')}
       token={papraApiToken}
       onTokenChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.apiToken, value)}
-      tokenPlaceholder={t('settings.papra.apiTokenPlaceholder')}
+      tokenPlaceholder={t('papra.apiTokenPlaceholder')}
       hasTokenSaved={papraHasSavedToken}
       onTestConnection={handleTestConnection}
       testingConnection={testingConnection}
@@ -133,8 +133,8 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
       renderExtras={({ connectionStatus: status }) =>
         (hasConnection || status === 'success' || isVerified) && (
           <Select
-            label={t('settings.papra.organization')}
-            placeholder={t('settings.papra.organizationPlaceholder')}
+            label={t('papra.organization')}
+            placeholder={t('papra.organizationPlaceholder')}
             data={organizations}
             value={papraOrganizationId || null}
             onChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.organizationId, value ?? '')}

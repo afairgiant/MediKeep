@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- debug component, not user-facing */
 /**
  * DebugNavigation - Debug component to test what's rendering
  */

@@ -89,7 +89,7 @@ const VitalsForm = ({
 
     return {
       recorded_date: {
-        label: t('vitals.form.recordedDateTime', 'Measurement Date & Time'),
+        label: t('vitals:form.recordedDateTime', 'Measurement Date & Time'),
         type: 'datetime',
         required: true,
         icon: IconCalendar,
@@ -105,9 +105,9 @@ const VitalsForm = ({
         },
       },
       systolic_bp: {
-        label: t('vitals.form.systolicBP', 'Systolic BP'),
+        label: t('vitals:form.systolicBP', 'Systolic BP'),
         type: 'number',
-        unit: t('vitals.units.mmHg', 'mmHg'),
+        unit: t('vitals:units.mmHg', 'mmHg'),
         placeholder: '120',
         icon: IconHeart,
         min: 50,
@@ -131,9 +131,9 @@ const VitalsForm = ({
         },
       },
       diastolic_bp: {
-        label: t('vitals.form.diastolicBP', 'Diastolic BP'),
+        label: t('vitals:form.diastolicBP', 'Diastolic BP'),
         type: 'number',
-        unit: t('vitals.units.mmHg', 'mmHg'),
+        unit: t('vitals:units.mmHg', 'mmHg'),
         placeholder: '80',
         icon: IconHeart,
         min: 30,
@@ -157,9 +157,9 @@ const VitalsForm = ({
         },
       },
       heart_rate: {
-        label: t('vitals.stats.heartRate', 'Heart Rate'),
+        label: t('vitals:stats.heartRate', 'Heart Rate'),
         type: 'number',
-        unit: t('vitals.units.bpm', 'BPM'),
+        unit: t('vitals:units.bpm', 'BPM'),
         placeholder: '72',
         icon: IconActivity,
         min: 30,
@@ -183,7 +183,7 @@ const VitalsForm = ({
         },
       },
       temperature: {
-        label: t('vitals.stats.temperature', 'Temperature'),
+        label: t('vitals:stats.temperature', 'Temperature'),
         type: 'number',
         unit: labels.temperature,
         placeholder: unitSystem === 'imperial' ? '98.6' : '37.0',
@@ -211,7 +211,7 @@ const VitalsForm = ({
         },
       },
       weight: {
-        label: t('vitals.stats.weight', 'Weight'),
+        label: t('vitals:stats.weight', 'Weight'),
         type: 'number',
         unit: labels.weight,
         placeholder: unitSystem === 'imperial' ? '150' : '68',
@@ -239,9 +239,9 @@ const VitalsForm = ({
         },
       },
       respiratory_rate: {
-        label: t('vitals.modal.respiratoryRate', 'Respiratory Rate'),
+        label: t('vitals:modal.respiratoryRate', 'Respiratory Rate'),
         type: 'number',
-        unit: t('vitals.units.perMin', '/min'),
+        unit: t('vitals:units.perMin', '/min'),
         placeholder: '16',
         icon: IconLungs,
         min: 5,
@@ -265,7 +265,7 @@ const VitalsForm = ({
         },
       },
       oxygen_saturation: {
-        label: t('vitals.card.oxygenSaturation', 'Oxygen Saturation'),
+        label: t('vitals:card.oxygenSaturation', 'Oxygen Saturation'),
         type: 'number',
         unit: '%',
         placeholder: '98',
@@ -291,9 +291,9 @@ const VitalsForm = ({
         },
       },
       blood_glucose: {
-        label: t('vitals.modal.bloodGlucose', 'Blood Glucose'),
+        label: t('vitals:modal.bloodGlucose', 'Blood Glucose'),
         type: 'number',
-        unit: t('vitals.units.mgdl', 'mg/dL'),
+        unit: t('vitals:units.mgdl', 'mg/dL'),
         placeholder: '100',
         icon: IconDropletFilled,
         min: 20,
@@ -317,7 +317,7 @@ const VitalsForm = ({
         },
       },
       a1c: {
-        label: t('vitals.modal.a1c', 'A1C'),
+        label: t('vitals:modal.a1c', 'A1C'),
         type: 'number',
         unit: '%',
         placeholder: '5.7',
@@ -343,9 +343,9 @@ const VitalsForm = ({
         },
       },
       pain_scale: {
-        label: t('vitals.modal.painScale', 'Pain Scale'),
+        label: t('vitals:modal.painScale', 'Pain Scale'),
         type: 'number',
-        unit: t('vitals.form.painScaleUnit', '(0-10)'),
+        unit: t('vitals:form.painScaleUnit', '(0-10)'),
         placeholder: '0',
         icon: IconMoodSad,
         min: 0,
@@ -369,7 +369,7 @@ const VitalsForm = ({
         },
       },
       location: {
-        label: t('vitals.form.measurementLocation', 'Measurement Location'),
+        label: t('vitals:form.measurementLocation', 'Measurement Location'),
         type: 'select',
         placeholder: t(
           'vitals.form.locationPlaceholder',
@@ -377,18 +377,18 @@ const VitalsForm = ({
         ),
         icon: IconMapPin,
         options: [
-          { value: 'home', label: t('vitals.form.locations.home', 'Home') },
+          { value: 'home', label: t('vitals:form.locations.home', 'Home') },
           {
             value: 'clinic',
-            label: t('vitals.form.locations.clinic', 'Clinic'),
+            label: t('vitals:form.locations.clinic', 'Clinic'),
           },
           {
             value: 'hospital',
-            label: t('vitals.form.locations.hospital', 'Hospital'),
+            label: t('vitals:form.locations.hospital', 'Hospital'),
           },
           {
             value: 'urgent_care',
-            label: t('vitals.form.locations.urgentCare', 'Urgent Care'),
+            label: t('vitals:form.locations.urgentCare', 'Urgent Care'),
           },
           {
             value: 'pharmacy',
@@ -396,13 +396,13 @@ const VitalsForm = ({
           },
           {
             value: 'ambulatory',
-            label: t('vitals.form.locations.ambulatory', 'Ambulatory Care'),
+            label: t('vitals:form.locations.ambulatory', 'Ambulatory Care'),
           },
           { value: 'other', label: t('shared:fields.other', 'Other') },
         ],
       },
       device_used: {
-        label: t('vitals.form.deviceUsed', 'Device/Equipment Used'),
+        label: t('vitals:form.deviceUsed', 'Device/Equipment Used'),
         type: 'text',
         placeholder: t(
           'vitals.form.devicePlaceholder',
@@ -873,7 +873,7 @@ const VitalsForm = ({
                 <ActionIcon
                   variant="subtle"
                   onClick={() => setDatePickerOpened(o => !o)}
-                  aria-label={t('vitals.form.openCalendar', 'Open calendar')}
+                  aria-label={t('vitals:form.openCalendar', 'Open calendar')}
                 >
                   <IconCalendar size={16} />
                 </ActionIcon>
@@ -996,7 +996,7 @@ const VitalsForm = ({
           variant="light"
           color="orange"
           icon={<IconAlertTriangle size={16} />}
-          title={t('vitals.form.healthAlerts', 'Health Alerts')}
+          title={t('vitals:form.healthAlerts', 'Health Alerts')}
         >
           <Stack gap="xs">
             {warnings.map((warning, index) => (
@@ -1016,13 +1016,13 @@ const VitalsForm = ({
                 value="datetime"
                 leftSection={<IconCalendar size={16} />}
               >
-                {t('vitals.tabs.dateTime', 'Date & Time')}
+                {t('vitals:tabs.dateTime', 'Date & Time')}
               </Tabs.Tab>
               <Tabs.Tab value="vitals" leftSection={<IconActivity size={16} />}>
                 {t('shared:categories.vital_signs', 'Vital Signs')}
               </Tabs.Tab>
               <Tabs.Tab value="context" leftSection={<IconMapPin size={16} />}>
-                {t('vitals.tabs.context', 'Context')}
+                {t('vitals:tabs.context', 'Context')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
@@ -1056,15 +1056,15 @@ const VitalsForm = ({
                   <Grid.Col span={6}>{renderField('a1c')}</Grid.Col>
                   <Grid.Col span={6}>
                     <Select
-                      label={t('vitals.modal.glucoseContext', 'Measurement Type')}
-                      placeholder={t('vitals.modal.glucoseContextPlaceholder', 'Optional')}
+                      label={t('vitals:modal.glucoseContext', 'Measurement Type')}
+                      placeholder={t('vitals:modal.glucoseContextPlaceholder', 'Optional')}
                       value={formData.glucose_context || null}
                       onChange={(val) => handleInputChange('glucose_context', val || '')}
                       data={[
-                        { value: 'fasting', label: t('vitals.glucoseContext.fasting', 'Fasting') },
-                        { value: 'before_meal', label: t('vitals.glucoseContext.before_meal', 'Before Meal') },
-                        { value: 'after_meal', label: t('vitals.glucoseContext.after_meal', 'After Meal') },
-                        { value: 'random', label: t('vitals.glucoseContext.random', 'Random') },
+                        { value: 'fasting', label: t('vitals:glucoseContext.fasting', 'Fasting') },
+                        { value: 'before_meal', label: t('vitals:glucoseContext.before_meal', 'Before Meal') },
+                        { value: 'after_meal', label: t('vitals:glucoseContext.after_meal', 'After Meal') },
+                        { value: 'random', label: t('vitals:glucoseContext.random', 'Random') },
                       ]}
                       leftSection={<IconDropletFilled size={16} />}
                       clearable
@@ -1108,7 +1108,7 @@ const VitalsForm = ({
                 {calculatedBMI && (
                   <Card shadow="xs" p="sm" radius="md" withBorder mt="md">
                     <Group justify="space-between">
-                      <Text fw={500}>{t('vitals.stats.bmi', 'BMI')}</Text>
+                      <Text fw={500}>{t('vitals:stats.bmi', 'BMI')}</Text>
                       <Badge size="lg" variant="light" color="blue">
                         {calculatedBMI}
                       </Badge>
@@ -1161,8 +1161,8 @@ const VitalsForm = ({
               loading={isLoading}
             >
               {isEdit
-                ? t('vitals.form.updateVitals', 'Update Vitals')
-                : t('vitals.form.saveVitals', 'Save Vitals')}
+                ? t('vitals:form.updateVitals', 'Update Vitals')
+                : t('vitals:form.saveVitals', 'Save Vitals')}
             </Button>
           </Group>
         </Stack>

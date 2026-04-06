@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- debug/test page, not user-facing */
 /**
  * ResponsiveNavigation Test Page
  * For manually testing navigation behavior across different breakpoints

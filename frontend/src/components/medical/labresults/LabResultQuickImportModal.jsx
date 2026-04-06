@@ -52,12 +52,12 @@ const LabResultQuickImportModal = ({
 
     // Validate required fields
     if (!patientId) {
-      setError(t('labResults.patientIdRequired', 'Patient ID is required. Please select a patient first.'));
+      setError(t('labresults:patientIdRequired', 'Patient ID is required. Please select a patient first.'));
       return;
     }
 
     if (!testName.trim()) {
-      setError(t('labResults.testNameRequired', 'Test name is required'));
+      setError(t('labresults:testNameRequired', 'Test name is required'));
       return;
     }
 
@@ -68,7 +68,7 @@ const LabResultQuickImportModal = ({
     // Validate sanitized value (after removing dangerous characters)
     if (sanitizedTestName.length < MIN_TEST_NAME_LENGTH) {
       setError(
-        t('labResults.testNameTooShort', 'Test name must be at least {{minLength}} characters', {
+        t('labresults:testNameTooShort', 'Test name must be at least {{minLength}} characters', {
           minLength: MIN_TEST_NAME_LENGTH,
         })
       );
@@ -77,7 +77,7 @@ const LabResultQuickImportModal = ({
 
     if (sanitizedTestName.length > MAX_TEST_NAME_LENGTH) {
       setError(
-        t('labResults.testNameTooLong', 'Test name cannot exceed {{maxLength}} characters', {
+        t('labresults:testNameTooLong', 'Test name cannot exceed {{maxLength}} characters', {
           maxLength: MAX_TEST_NAME_LENGTH,
         })
       );
@@ -150,7 +150,7 @@ const LabResultQuickImportModal = ({
 
             // Map field names to user-friendly names
             const fieldName = field === 'test_name'
-              ? t('labResults.testNameLabel', 'Test name')
+              ? t('labresults:testNameLabel', 'Test name')
               : field.replace(/_/g, ' ');
 
             return `${fieldName}: ${message}`;
@@ -165,18 +165,18 @@ const LabResultQuickImportModal = ({
       }
       // Detect network errors for better user messaging
       else if (err instanceof TypeError && !navigator.onLine) {
-        errorMessage = t('labResults.networkError', 'Network error. Please check your connection and try again.');
+        errorMessage = t('labresults:networkError', 'Network error. Please check your connection and try again.');
       } else if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT' || err.message?.toLowerCase().includes('timeout')) {
-        errorMessage = t('labResults.timeoutError', 'Request timed out. Please try again.');
+        errorMessage = t('labresults:timeoutError', 'Request timed out. Please try again.');
       } else if (err instanceof TypeError || err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET') {
-        errorMessage = t('labResults.networkError', 'Network error. Please check your connection and try again.');
+        errorMessage = t('labresults:networkError', 'Network error. Please check your connection and try again.');
       }
 
-      setError(errorMessage || t('labResults.createFailedTryAgain', 'Failed to create lab result. Please try again.'));
+      setError(errorMessage || t('labresults:createFailedTryAgain', 'Failed to create lab result. Please try again.'));
 
       notifications.show({
         title: t('shared:labels.error', 'Error'),
-        message: errorMessage || t('labResults.createFailed', 'Failed to create lab result'),
+        message: errorMessage || t('labresults:createFailed', 'Failed to create lab result'),
         color: 'red',
         autoClose: 5000,
       });
@@ -276,7 +276,7 @@ const LabResultQuickImportModal = ({
 
       notifications.show({
         title: t('shared:labels.success', 'Success'),
-        message: t('labResults.labResultDeleted', 'Lab result deleted'),
+        message: t('labresults:labResultDeleted', 'Lab result deleted'),
         color: 'green',
       });
     } catch (err) {
@@ -289,7 +289,7 @@ const LabResultQuickImportModal = ({
 
       notifications.show({
         title: t('shared:labels.error', 'Error'),
-        message: t('labResults.deleteFailed', 'Failed to delete lab result'),
+        message: t('labresults:deleteFailed', 'Failed to delete lab result'),
         color: 'red',
       });
     } finally {
@@ -349,12 +349,12 @@ const LabResultQuickImportModal = ({
           {/* Stepper */}
           <Stepper active={activeStep} size="sm">
             <Stepper.Step
-              label={t('labResults.stepperLabels.labResultInfo', 'Lab Result Info')}
-              description={t('labResults.stepperLabels.enterTestName', 'Enter test name')}
+              label={t('labresults:stepperLabels.labResultInfo', 'Lab Result Info')}
+              description={t('labresults:stepperLabels.enterTestName', 'Enter test name')}
             />
             <Stepper.Step
-              label={t('labResults.stepperLabels.uploadParse', 'Upload & Parse')}
-              description={t('labResults.stepperLabels.importFromPdf', 'Import from PDF')}
+              label={t('labresults:stepperLabels.uploadParse', 'Upload & Parse')}
+              description={t('labresults:stepperLabels.importFromPdf', 'Import from PDF')}
             />
           </Stepper>
 
@@ -397,7 +397,7 @@ const LabResultQuickImportModal = ({
               )}
 
               <TextInput
-                label={t('labResults.testNameLabel', 'Lab Test Name')}
+                label={t('labresults:testNameLabel', 'Lab Test Name')}
                 placeholder={t(
                   'labResults.testNamePlaceholder',
                   'Endocrine Bloodwork etc.'
@@ -416,7 +416,7 @@ const LabResultQuickImportModal = ({
                 autoFocus
                 error={
                   error && !testName.trim()
-                    ? t('labResults.testNameRequired', 'Test name is required')
+                    ? t('labresults:testNameRequired', 'Test name is required')
                     : null
                 }
               />
@@ -431,13 +431,13 @@ const LabResultQuickImportModal = ({
                   loading={isCreating}
                   disabled={!testName.trim()}
                 >
-                  {t('labResults.createAndContinue', 'Create & Upload PDF')}
+                  {t('labresults:createAndContinue', 'Create & Upload PDF')}
                 </Button>
               </Group>
 
               <FormLoadingOverlay
                 visible={isCreating}
-                message={t('labResults.creatingLabResult', 'Creating lab result...')}
+                message={t('labresults:creatingLabResult', 'Creating lab result...')}
               />
             </Stack>
           )}
@@ -473,7 +473,7 @@ const LabResultQuickImportModal = ({
 
                   notifications.show({
                     title: t('shared:labels.error', 'Error'),
-                    message: error.message || t('labResults.errorOccurred', 'An error occurred'),
+                    message: error.message || t('labresults:errorOccurred', 'An error occurred'),
                     color: 'red',
                   });
                 }}
@@ -517,10 +517,10 @@ const LabResultQuickImportModal = ({
 
           <Group justify="flex-end" mt="md">
             <Button variant="subtle" onClick={handleCancelDataLoss}>
-              {t('labResults.continueEditing', 'Continue Editing')}
+              {t('labresults:continueEditing', 'Continue Editing')}
             </Button>
             <Button color="orange" onClick={handleConfirmDataLoss}>
-              {t('labResults.discardParsedData', 'Discard Parsed Data')}
+              {t('labresults:discardParsedData', 'Discard Parsed Data')}
             </Button>
           </Group>
         </Stack>
@@ -554,7 +554,7 @@ const LabResultQuickImportModal = ({
               onClick={handleCancelDelete}
               disabled={isDeleting}
             >
-              {t('labResults.keepEmptyLabResult', 'Keep Lab Result')}
+              {t('labresults:keepEmptyLabResult', 'Keep Lab Result')}
             </Button>
             <Button
               color="red"
@@ -562,7 +562,7 @@ const LabResultQuickImportModal = ({
               loading={isDeleting}
               disabled={isDeleting}
             >
-              {t('labResults.deleteEmptyLabResult', 'Delete Lab Result')}
+              {t('labresults:deleteEmptyLabResult', 'Delete Lab Result')}
             </Button>
           </Group>
         </Stack>

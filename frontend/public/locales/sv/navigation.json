@@ -57,12 +57,16 @@
     }
   },
   "menu": {
+    "account": "",
     "backToDashboard": "Tillbaka till instrumentpanelen",
+    "darkMode": "",
     "help": "Hjälp",
+    "lightMode": "",
     "logout": "Logga ut",
     "patients": "Patienter",
     "profile": "Profil",
-    "reports": "Rapporter"
+    "reports": "Rapporter",
+    "userActions": ""
   },
   "pages": {
     "help": "Hjälp och support",

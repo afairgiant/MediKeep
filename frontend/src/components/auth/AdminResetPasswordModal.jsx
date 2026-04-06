@@ -10,10 +10,12 @@ import {
   Paper,
 } from '@mantine/core';
 import { IconAlertTriangle } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { adminApiService } from '../../services/api/adminApi';
 import logger from '../../services/logger';
 
 const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
+  const { t } = useTranslation(['admin', 'auth', 'common', 'shared']);
   const [passwordData, setPasswordData] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -40,24 +42,24 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
     setSuccessMessage('');
 
     if (!passwordData.newPassword || !passwordData.confirmPassword) {
-      setError('Both password fields are required');
+      setError(t('users.passwordModal.bothFieldsRequired'));
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('users.passwordModal.passwordsDoNotMatch'));
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError(t('admin:createUser.validation.passwordMinLength'));
       return;
     }
 
     const hasLetter = /[a-zA-Z]/.test(passwordData.newPassword);
     const hasNumber = /\d/.test(passwordData.newPassword);
     if (!hasLetter || !hasNumber) {
-      setError('Password must contain at least one letter and one number');
+      setError(t('admin:createUser.validation.passwordRequirements'));
       return;
     }
 
@@ -67,7 +69,7 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
 
       setPasswordData({ newPassword: '', confirmPassword: '' });
       setError('');
-      setSuccessMessage(`Password reset successfully for ${username}!`);
+      setSuccessMessage(t('users.passwordModal.resetSuccess', { username }));
 
       setTimeout(() => {
         handleClose();
@@ -88,7 +90,7 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
     <Modal
       opened={isOpen}
       onClose={handleClose}
-      title={`Reset Password for ${username}`}
+      title={t('users.passwordModal.title', { username })}
       size="sm"
       centered
     >
@@ -111,7 +113,7 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
           style={{ borderLeft: '4px solid var(--mantine-color-blue-5)' }}
         >
           <Text size="sm">
-            <strong>User:</strong> {username} (ID: {userId})
+            {t('users.passwordModal.userInfo', { username, userId })}
           </Text>
           <Alert
             color="yellow"
@@ -121,7 +123,7 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
             p="xs"
           >
             <Text size="xs">
-              This will immediately reset the user&apos;s password. They will need to use the new password to log in.
+              {t('users.passwordModal.immediateReset')}
             </Text>
           </Alert>
         </Paper>
@@ -129,19 +131,19 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
         <form onSubmit={handlePasswordReset}>
           <Stack gap="md">
             <PasswordInput
-              label="New Password"
-              placeholder="Enter new password"
+              label={t('users.passwordModal.newPassword')}
+              placeholder={t('users.passwordModal.enterNewPassword')}
               value={passwordData.newPassword}
               onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.currentTarget.value }))}
               required
               minLength={6}
               disabled={isResetting}
-              description="At least 6 characters with one letter and one number"
+              description={t('users.passwordModal.passwordDescription')}
             />
 
             <PasswordInput
-              label="Confirm New Password"
-              placeholder="Confirm new password"
+              label={t('settings:security.password.confirmPassword')}
+              placeholder={t('users.passwordModal.confirmPlaceholder')}
               value={passwordData.confirmPassword}
               onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.currentTarget.value }))}
               required
@@ -154,13 +156,13 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
                 onClick={handleClose}
                 disabled={isResetting}
               >
-                Cancel
+                {t('shared:fields.cancel')}
               </Button>
               <Button
                 type="submit"
                 loading={isResetting}
               >
-                Reset Password
+                {t('shared:labels.resetPassword')}
               </Button>
             </Group>
           </Stack>

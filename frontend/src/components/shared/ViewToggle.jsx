@@ -32,7 +32,7 @@ const ViewToggle = ({ viewMode, onViewModeChange, showPrint = false, modes = ['c
       </div>
       {showPrint && viewMode === 'table' && (
         <button className="print-button" onClick={() => window.print()}>
-          🖨️ {t('buttons.print', 'Print')}
+          {t('buttons.print', 'Print')}
         </button>
       )}
     </div>

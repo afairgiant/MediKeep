@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs, Badge, Text, Stack, Center } from '@mantine/core';
 import { IconFileDescription } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import RecordSelector from './RecordSelector';
 
 /**
@@ -19,6 +20,7 @@ const CategoryTabs = ({
   onToggleCategory,
   categoryDisplayNames = {},
 }) => {
+  const { t } = useTranslation('reports');
   // If no categories available, show empty state
   if (!categories || categories.length === 0) {
     return (
@@ -26,9 +28,9 @@ const CategoryTabs = ({
         <Stack align="center" gap="md">
           <IconFileDescription size={64} stroke={1} color="var(--mantine-color-gray-5)" />
           <Stack align="center" gap="xs">
-            <Text fw={500} size="lg">No Categories Available</Text>
+            <Text fw={500} size="lg">{t('categories.noCategories')}</Text>
             <Text c="dimmed" ta="center">
-              No medical data categories are available for report generation.
+              {t('categories.noCategoriesDescription')}
             </Text>
           </Stack>
         </Stack>
@@ -60,7 +62,7 @@ const CategoryTabs = ({
                   {categoryDisplayNames[category] || formatCategoryName(category)}
                 </Text>
                 <Text size="xs" c="dimmed">
-                  {categoryData?.count || 0} records
+                  {t('categories.recordCount', { count: categoryData?.count || 0 })}
                 </Text>
               </Stack>
             </Tabs.Tab>

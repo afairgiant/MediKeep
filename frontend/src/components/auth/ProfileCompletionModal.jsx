@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Modal, Button } from '../ui';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
 import {
@@ -12,6 +13,7 @@ import {
 import './ProfileCompletionModal.css';
 
 const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
+  const { t } = useTranslation('auth');
   const { user } = useAuth();
   const { patient } = useCurrentPatient();
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
     <Modal
       isOpen={isOpen}
       onClose={handleCompleteSetup}
-      title="Welcome! Complete Your Profile"
+      title={t('profile.title')}
       size="medium"
       closeOnOverlayClick={false}
       className="profile-completion-modal"
@@ -49,7 +51,7 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
         <div className="completion-header">
           <div className="completion-icon"><img src="/medikeep-icon.svg" alt="" width={48} height={48} /></div>
           <p className="completion-message">
-            Welcome to MediKeep! {message}
+            {message}
           </p>
         </div>
 
@@ -61,17 +63,17 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
             ></div>
           </div>
           <span className="progress-text">
-            Medical Profile: {completion.completionPercentage}% Complete
+            {t('profile.medicalProfile', { percentage: completion.completionPercentage })}
           </span>
         </div>
 
         <div className="completion-benefits">
-          <h4>Why complete your medical profile?</h4>
+          <h4>{t('profile.whyComplete')}</h4>
           <ul>
-            <li>🏥 Accurate medical record keeping</li>
-            <li>📊 Better health tracking and insights</li>
-            <li>🚨 Important for emergency situations</li>
-            <li>👨‍⚕️ Enhanced healthcare coordination</li>
+            <li>{t('profile.accurateRecords')}</li>
+            <li>{t('profile.betterTracking')}</li>
+            <li>{t('profile.emergencySituations')}</li>
+            <li>{t('profile.enhancedCoordination')}</li>
           </ul>
         </div>
 
@@ -82,14 +84,14 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
               className="details-toggle"
               onClick={() => setShowDetails(!showDetails)}
             >
-              {showDetails ? '▼' : '▶'} What needs to be updated?
+              {showDetails ? '\u25BC' : '\u25B6'} {t('profile.whatNeedsUpdate')}
             </button>
 
             {showDetails && (
               <div className="details-content">
                 {completion.missingFields.length > 0 && (
                   <div className="missing-section">
-                    <h5>Missing Information:</h5>
+                    <h5>{t('profile.missingInformation')}</h5>
                     <ul>
                       {completion.missingFields.map((field, index) => (
                         <li key={index}>{field}</li>
@@ -100,7 +102,7 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
 
                 {placeholders.hasPlaceholders && (
                   <div className="placeholder-section">
-                    <h5>Placeholder Values:</h5>
+                    <h5>{t('profile.placeholderValues')}</h5>
                     <ul>
                       {placeholders.placeholderFields.map((field, index) => (
                         <li key={index}>{field}</li>
@@ -119,7 +121,7 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
             onClick={handleUpdateProfile}
             className="update-btn"
           >
-            Complete Medical Profile
+            {t('profile.completeProfile')}
           </Button>
 
           <Button
@@ -127,7 +129,7 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
             onClick={handleCompleteSetup}
             className="skip-btn"
           >
-            Skip for Now
+            {t('profile.skipForNow')}
           </Button>
         </div>
       </div>

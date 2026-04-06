@@ -10,6 +10,7 @@ import {
   Box,
 } from '@mantine/core';
 import { IconCamera, IconX, IconTrash } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import logger from '../../services/logger';
@@ -22,6 +23,7 @@ const PatientPhotoUpload = ({
   onPhotoDelete,
   disabled = false,
 }) => {
+  const { t } = useTranslation('common');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
 
@@ -183,12 +185,12 @@ const PatientPhotoUpload = ({
               disabled={disabled || isUploading}
               leftSection={<IconTrash size={14} />}
             >
-              Remove Photo
+              {t('patients.removePhoto')}
             </Button>
           )}
 
           <Text size="xs" c="dimmed">
-            JPEG, PNG, GIF, or BMP -- Max 15MB
+            {t('patients.photoFormat')}
           </Text>
         </Stack>
       </Group>

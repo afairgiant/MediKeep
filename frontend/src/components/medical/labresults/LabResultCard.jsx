@@ -52,7 +52,7 @@ const LabResultCard = React.memo(({
         value: labResult.test_code
       },
       {
-        label: t('labResults.testTypeField.label'),
+        label: t('labresults:testTypeField.label'),
         value: labResult.test_type,
         render: (value) => value ? (
           <Badge variant="light" color="cyan" size="sm">
@@ -61,7 +61,7 @@ const LabResultCard = React.memo(({
         ) : t('shared:labels.notSpecified')
       },
       {
-        label: t('labResults.testingFacility.label'),
+        label: t('labresults:testingFacility.label'),
         value: labResult.facility
       },
       {

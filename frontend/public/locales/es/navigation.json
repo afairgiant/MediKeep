@@ -54,16 +54,19 @@
     "title": "Invitaciones",
     "types": {
       "patientRecord": "Historial del paciente"
-    },
-    "viewAll_many": "View all {{count}} invitations"
+    }
   },
   "menu": {
+    "account": "",
     "backToDashboard": "Volver al tablero",
+    "darkMode": "",
     "help": "Ayuda",
+    "lightMode": "",
     "logout": "Cerrar sesión",
     "patients": "Pacientes",
     "profile": "Perfil",
-    "reports": "Informes"
+    "reports": "Informes",
+    "userActions": ""
   },
   "pages": {
     "help": "Ayuda",

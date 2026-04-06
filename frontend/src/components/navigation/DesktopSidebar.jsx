@@ -9,6 +9,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Stack, Group, Text, Divider, UnstyledButton } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconLogout } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
 import './DesktopSidebar.css';
 
@@ -21,6 +22,7 @@ const DesktopSidebar = ({
   onLogout,
   className = ''
 }) => {
+  const { t } = useTranslation(['navigation', 'shared']);
   // Create responsive Mantine components
   const ResponsiveBox = ResponsiveComponentFactory.createMantine(Box, {
     w: isOpen ? { lg: 280, xl: 300 } : { lg: 60, xl: 60 },
@@ -65,7 +67,7 @@ const DesktopSidebar = ({
           <Group justify="space-between" align="center">
             {isOpen && (
               <Text size="lg" fw={700} c="blue">
-                🔧 Admin
+                {t('shared:labels.admin')}
               </Text>
             )}
             <UnstyledButton 
@@ -186,7 +188,7 @@ const DesktopSidebar = ({
               <IconLogout size={16} />
               {isOpen && (
                 <Text size="sm" fw={500}>
-                  Logout
+                  {t('menu.logout')}
                 </Text>
               )}
             </UnstyledButton>

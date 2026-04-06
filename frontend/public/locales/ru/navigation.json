@@ -54,17 +54,19 @@
     "title": "Приглашения",
     "types": {
       "patientRecord": "Запись пациента"
-    },
-    "viewAll_few": "View all {{count}} invitations",
-    "viewAll_many": "View all {{count}} invitations"
+    }
   },
   "menu": {
+    "account": "",
     "backToDashboard": "Вернуться к панели управления",
+    "darkMode": "",
     "help": "Помощь",
+    "lightMode": "",
     "logout": "Выйти",
     "patients": "Пациенты",
     "profile": "Профиль",
-    "reports": "Отчёты"
+    "reports": "Отчёты",
+    "userActions": ""
   },
   "pages": {
     "help": "Помощь и поддержка",

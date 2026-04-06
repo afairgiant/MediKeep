@@ -424,6 +424,7 @@
     "backToModel": "Zurück zu {{modelName}}",
     "bulkDeleteAssociated": "Alle zugehörigen Daten (einschließlich {{types}}) werden ebenfalls gelöscht.",
     "bulkDeleteFailed": "Massenlöschung fehlgeschlagen",
+    "bulkDeleteWarning": "Sie sind dabei, {{count}} {{modelName}}-Datensätze dauerhaft zu löschen.",
     "bulkDeleteWarning_one": "Sie sind dabei, {{count}} {{modelName}}-Datensatz dauerhaft zu löschen.",
     "bulkDeleteWarning_other": "Sie sind dabei, {{count}} {{modelName}}-Datensätze dauerhaft zu löschen.",
     "changeRole": "Rolle ändern",
@@ -475,6 +476,7 @@
     "saveFailed": "Speichern fehlgeschlagen",
     "searchPlaceholder": "{{modelName}} durchsuchen...",
     "searchRecords": "Datensätze durchsuchen",
+    "searchResult": "{{count}} Ergebnisse für \"{{query}}\"",
     "searchResult_one": "{{count}} Ergebnis für \"{{query}}\"",
     "searchResult_other": "{{count}} Ergebnisse für \"{{query}}\"",
     "selected": "{{count}} ausgewählt",
@@ -488,9 +490,7 @@
     "usernameUpdated": "Benutzername aktualisiert",
     "usernameUpdatedMessage": "Ihr Benutzername wurde geändert. Bitte melden Sie sich mit Ihrem neuen Benutzernamen an: \"{{username}}\"",
     "viewRecord": "{{modelName}} anzeigen",
-    "visibleColumns": "Sichtbare Spalten",
-    "searchResult": "{{count}} Ergebnisse für \"{{query}}\"",
-    "bulkDeleteWarning": "Sie sind dabei, {{count}} {{modelName}}-Datensätze dauerhaft zu löschen."
+    "visibleColumns": "Sichtbare Spalten"
   },
   "settings": {
     "dataRetention": {
@@ -557,6 +557,7 @@
     "title": "Werkzeuge & Wartung"
   },
   "trash": {
+    "clearFilters": "Clear Filters",
     "deleteConfirm": "Möchten Sie <strong>{{filename}}</strong> wirklich dauerhaft löschen?",
     "deletedDateRange": "Löschdatumsbereich",
     "deleteFailed": "Löschung fehlgeschlagen",
@@ -564,6 +565,7 @@
     "deleteWarning": "Diese Aktion kann nicht rückgängig gemacht werden. Die Datei wird dauerhaft aus dem System entfernt.",
     "errorLoading": "Fehler beim Laden des Papierkorbs",
     "fileCount_one": "{{count}} Datei",
+    "fileCount_other": "{{count}} Dateien",
     "fileDeleted": "Datei gelöscht",
     "fileDeletedMessage": "{{filename}} dauerhaft gelöscht",
     "fileRestored": "Datei wiederhergestellt",
@@ -580,6 +582,8 @@
     "permanentlyDeleteFile": "Datei dauerhaft löschen",
     "purgedDirectories_one": "in {{count}} Verzeichnis",
     "purgedDirectories_other": "in {{count}} Verzeichnissen",
+    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} abgelaufene Datei dauerhaft gelöscht",
     "purgedMessage_other": "{{count}} abgelaufene Dateien dauerhaft gelöscht",
     "purgeExpired": "Abgelaufene bereinigen",
@@ -597,14 +601,16 @@
     "showingFiltered": "{{shown}} von {{total}} {{files}} angezeigt",
     "subtitle": "Gelöschte hochgeladene Dateien verwalten. Dateien am ursprünglichen Speicherort wiederherstellen oder dauerhaft entfernen, um Speicherplatz freizugeben.",
     "tableHeaders": {
+      "actions": "Actions",
       "deleted": "Gelöscht",
       "filename": "Dateiname",
-      "originalLocation": "Ursprünglicher Speicherort"
+      "originalLocation": "Ursprünglicher Speicherort",
+      "reason": "Reason",
+      "size": "Size"
     },
     "title": "Papierkorbverwaltung",
     "totalSize": "{{size}} gesamt",
-    "trashPurged": "Papierkorb bereinigt",
-    "fileCount_other": "{{count}} Dateien"
+    "trashPurged": "Papierkorb bereinigt"
   },
   "users": {
     "actionsFor": "Aktionen für {{username}}",
@@ -640,11 +646,20 @@
     "noUsersInSystem": "Keine Benutzer im System.",
     "noUsersMatchFilters": "Keine Benutzer entsprechen Ihren Filtern. Versuchen Sie, die Filter anzupassen oder zu löschen.",
     "passwordModal": {
+      "bothFieldsRequired": "",
+      "confirmPlaceholder": "",
+      "enterNewPassword": "",
       "forceChange": "Passwortänderung bei nächster Anmeldung erzwingen",
+      "immediateReset": "",
       "newPassword": "Neues Passwort",
       "passwordDescription": "Mindestens 6 Zeichen, mindestens 1 Buchstabe und 1 Zahl",
+      "passwordsDoNotMatch": "",
+      "resetFailed": "",
+      "resetSuccess": "",
       "resettingFor": "Passwort für <strong>{{username}}</strong> zurücksetzen",
-      "ssoWarning": "Dieser Benutzer authentifiziert sich über SSO ({{provider}}). Das Setzen eines lokalen Passworts ermöglicht die hybride Authentifizierung."
+      "ssoWarning": "Dieser Benutzer authentifiziert sich über SSO ({{provider}}). Das Setzen eines lokalen Passworts ermöglicht die hybride Authentifizierung.",
+      "title": "",
+      "userInfo": ""
     },
     "roleFilter": {
       "all": "Alle Rollen"
@@ -672,8 +687,8 @@
       "deactivateConfirm": "\"{{username}}\" deaktivieren? Der Benutzer kann sich nicht anmelden, bis er wieder aktiviert wird.",
       "deactivateTitle": "Benutzer deaktivieren"
     },
+    "userCount": "{{count}} Benutzer",
     "userCount_one": "{{count}} Benutzer",
-    "userCount_other": "{{count}} Benutzer",
-    "userCount": "{{count}} Benutzer"
+    "userCount_other": "{{count}} Benutzer"
   }
 }

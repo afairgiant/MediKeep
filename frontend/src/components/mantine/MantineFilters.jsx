@@ -294,7 +294,7 @@ const MantineFilters = ({
                 fw={500}
                 c={colorScheme === 'dark' ? 'gray.3' : 'dimmed'}
               >
-                Advanced Filters
+                {t('search.advancedFilters')}
               </Text>
 
               <Group gap="md" align="flex-end">
@@ -475,7 +475,7 @@ const MantineFilters = ({
                         marginRight: '8px',
                       }}
                     >
-                      Sort by:
+                      {t('search.sortBy')}
                     </Text>
                     <Select
                       placeholder="Sort by"

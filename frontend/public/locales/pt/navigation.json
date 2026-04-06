@@ -54,16 +54,19 @@
     "title": "Convites",
     "types": {
       "patientRecord": "Prontuário do Paciente"
-    },
-    "viewAll_many": "View all {{count}} invitations"
+    }
   },
   "menu": {
+    "account": "",
     "backToDashboard": "Voltar ao painel",
+    "darkMode": "",
     "help": "Ajuda",
+    "lightMode": "",
     "logout": "Sair",
     "patients": "Pacientes",
     "profile": "Perfil",
-    "reports": "Relatórios"
+    "reports": "Relatórios",
+    "userActions": ""
   },
   "pages": {
     "help": "Ajuda e Suporte",

@@ -57,12 +57,16 @@
     }
   },
   "menu": {
+    "account": "",
     "backToDashboard": "Zurück zum Dashboard",
+    "darkMode": "",
     "help": "Hilfe",
+    "lightMode": "",
     "logout": "Abmelden",
     "patients": "Patienten",
     "profile": "Profil",
-    "reports": "Berichte"
+    "reports": "Berichte",
+    "userActions": ""
   },
   "pages": {
     "help": "Hilfe & Support",

@@ -21,7 +21,8 @@ export const showProgressNotification = (id, title, message, progress = 0) => {
         />
         <Group position="apart" mt="xs">
           <Text size="xs" color="dimmed">
-            {progress}% Complete
+            {/* eslint-disable-next-line i18next/no-literal-string -- progress percentage */}
+            {`${progress}%`}
           </Text>
           <Text size="xs" color="dimmed">
             {progress < 100 ? 'In Progress...' : 'Finishing up...'}

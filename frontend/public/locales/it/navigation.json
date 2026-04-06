@@ -54,16 +54,19 @@
     "title": "Inviti",
     "types": {
       "patientRecord": "Cartella del paziente"
-    },
-    "viewAll_many": "View all {{count}} invitations"
+    }
   },
   "menu": {
+    "account": "",
     "backToDashboard": "Torna alla Dashboard",
+    "darkMode": "",
     "help": "Aiuto",
+    "lightMode": "",
     "logout": "Esci",
     "patients": "Pazienti",
     "profile": "Profilo",
-    "reports": "Report"
+    "reports": "Report",
+    "userActions": ""
   },
   "pages": {
     "help": "Aiuto e supporto",

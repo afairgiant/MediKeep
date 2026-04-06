@@ -27,14 +27,12 @@
     },
     "customDateRange": "Intervallo di date personalizzato",
     "dailyAverage": "Media giornaliera",
-    "days_many": "{{count}} days",
     "filterByDays": "Filtra per ultimi {{days}} giorni",
     "loading": "Caricamento analisi...",
     "period": "Periodo",
     "recordsDistribution": "Distribuzione dei record",
     "subtitle": "Tendenze delle attività, confronti e distribuzione dei record",
     "title": "Analisi",
-    "total_many": "{{count}} total",
     "totalActivities": "Attività totali",
     "userInteractions": "Interazioni utente",
     "vsPreviousPeriod": "rispetto al periodo precedente"
@@ -68,7 +66,6 @@
   "backup": {
     "existingBackups": {
       "count_one": "{{count}} backup",
-      "count_many": "{{count}} backups",
       "count_other": "{{count}} backup",
       "download": "Scarica",
       "noBackups": "Nessun backup trovato",
@@ -129,7 +126,6 @@
     "preview": {
       "affectedData": "Dati interessati",
       "analysisNotAvailable": "Analisi del backup non disponibile",
-      "andMore_many": "...and {{count}} more",
       "backupContent": "Contenuto del backup",
       "backupDetails": "Dettagli backup",
       "backupFiles": "File di backup",
@@ -137,21 +133,15 @@
       "createdAt": "Creato: {{date}}",
       "currentDatabase": "Database attuale",
       "currentFiles": "File attuali",
-      "filesCount_many": "{{count}} files ({{size}})",
-      "filesOnly_many": "{{count}} files",
       "manifest": "Manifesto",
       "noAffectedData": "Nessuna informazione sui dati interessati disponibile",
       "noStatistics": "Nessuna statistica disponibile",
       "restoreMethod": "Metodo di ripristino",
-      "sqlStatements_many": "{{count}} SQL statements",
-      "totalRecords_many": "{{count}} total records",
       "unknownType": "Tipo di backup sconosciuto"
     },
     "retention": {
       "backupsUnit": "backup",
-      "countProtection_many": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
       "currentStatus_one": "<strong>Stato attuale:</strong> {{count}} backup archiviato (max: {{max}})",
-      "currentStatus_many": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})",
       "currentStatus_other": "<strong>Stato attuale:</strong> {{count}} backup archiviati (max: {{max}})",
       "daysUnit": "giorni",
       "maximumCount": "Conteggio massimo backup",
@@ -271,7 +261,6 @@
       "trashDesc": "Recupera file eliminati"
     },
     "recentActivity": {
-      "count_many": "{{count}} activities",
       "errorLoading": "Errore durante il caricamento delle attività",
       "noActivity": "Nessuna attività recente da visualizzare",
       "subtitle": "Ultimi eventi di sistema",
@@ -281,8 +270,6 @@
     "refreshAll": "Aggiorna tutto",
     "stats": {
       "activePatients": "Pazienti attivi",
-      "activePrescriptions_many": "{{count}} active prescriptions",
-      "recentRegistrations_many": "+{{count}} this week",
       "totalUsers": "Utenti totali"
     },
     "subtitle": "Panoramica completa del sistema e gestione",
@@ -426,7 +413,6 @@
     "storage": {
       "appStorage": "Storage dell'applicazione",
       "diskUsage": "Utilizzo disco",
-      "filesAcross_many": "across {{count}} files",
       "freeOf": "{{free}} GB liberi su {{total}} GB",
       "title": "Stato dello storage"
     },
@@ -438,8 +424,8 @@
     "backToModel": "Torna a {{modelName}}",
     "bulkDeleteAssociated": "Anche tutti i dati associati (inclusi {{types}}) verranno eliminati.",
     "bulkDeleteFailed": "Eliminazione multipla fallita",
+    "bulkDeleteWarning": "Stai per eliminare definitivamente {{count}} record di {{modelName}}.",
     "bulkDeleteWarning_one": "Stai per eliminare definitivamente {{count}} record di {{modelName}}.",
-    "bulkDeleteWarning_many": "Stai per eliminare definitivamente {{count}} record di {{modelName}}.",
     "bulkDeleteWarning_other": "Stai per eliminare definitivamente {{count}} record di {{modelName}}.",
     "changeRole": "Modifica ruolo",
     "changesSaved": "Modifiche salvate",
@@ -453,7 +439,6 @@
     "deleteFailed": "Eliminazione fallita",
     "deleteRecords": "Elimina {{count}} record",
     "deleteRecords_one": "Elimina {{count}} record",
-    "deleteRecords_many": "Delete {{count}} Records",
     "deleteRecords_other": "Elimina {{count}} record",
     "deleteSelected": "Elimina selezionati",
     "deleteWarning": "Questo eliminerà permanentemente questo record {{modelName}} e tutti i dati associati:",
@@ -474,7 +459,6 @@
     "noRecordsFound": "Nessun record trovato",
     "perPage": "{{count}} per pagina",
     "perPage_one": "{{count}} per pagina",
-    "perPage_many": "{{count}} per page",
     "perPage_other": "{{count}} per pagina",
     "rawDataJson": "Dati grezzi (JSON)",
     "recordDeleted": "Record eliminato",
@@ -483,7 +467,6 @@
     "recordsDeleted": "Record eliminati",
     "recordsDeletedMessage": "{{count}} record eliminati con successo",
     "recordsDeletedMessage_one": "{{count}} record eliminato con successo",
-    "recordsDeletedMessage_many": "Successfully deleted {{count}} records",
     "recordsDeletedMessage_other": "{{count}} record eliminati con successo",
     "recordUpdated": "Record aggiornato con successo",
     "resetToDefault": "Ripristina predefiniti",
@@ -493,15 +476,13 @@
     "saveFailed": "Salvataggio fallito",
     "searchPlaceholder": "Cerca {{modelName}}...",
     "searchRecords": "Cerca record",
+    "searchResult": "{{count}} risultati per \"{{query}}\"",
     "searchResult_one": "{{count}} risultato per \"{{query}}\"",
-    "searchResult_many": "{{count}} risultati per \"{{query}}\"",
     "searchResult_other": "{{count}} risultati per \"{{query}}\"",
     "selected": "{{count}} selezionati",
     "selected_one": "{{count}} selezionato",
-    "selected_many": "{{count}} selected",
     "selected_other": "{{count}} selezionati",
     "toggleColumnVisibility": "Attiva/disattiva visibilità colonne",
-    "totalRecords_many": "{{count}} total records",
     "typeDeleteToConfirm": "Digita <strong>DELETE</strong> per confermare",
     "usernameChangeLogout": "Verrai disconnesso immediatamente e dovrai accedere nuovamente con il nuovo nome utente.",
     "usernameChangeText": "Stai per modificare il tuo nome utente da <strong>\"{{oldUsername}}\"</strong> a <strong>\"{{newUsername}}\"</strong>.",
@@ -509,9 +490,7 @@
     "usernameUpdated": "Nome utente aggiornato",
     "usernameUpdatedMessage": "Il tuo nome utente è stato modificato. Effettua l'accesso con il nuovo nome utente: \"{{username}}\"",
     "viewRecord": "Visualizza {{modelName}}",
-    "visibleColumns": "Colonne visibili",
-    "searchResult": "{{count}} risultati per \"{{query}}\"",
-    "bulkDeleteWarning": "Stai per eliminare definitivamente {{count}} record di {{modelName}}."
+    "visibleColumns": "Colonne visibili"
   },
   "settings": {
     "dataRetention": {
@@ -562,14 +541,11 @@
     "subtitle": "Strumenti amministrativi per la manutenzione del sistema e la gestione dei dati",
     "testLibrary": {
       "categories": "Categorie",
-      "categoriesUpdated_many": "Categories Updated: {{count}}",
       "forceSyncAll": "Forza sincronizzazione completa",
       "forceSyncAllDesc": "<strong>Forza sincronizzazione completa:</strong> Rielabora tutti i componenti (categorie e nomi canonici)",
       "libraryReloaded": "Libreria ricaricata",
       "libraryVersion": "Versione libreria",
-      "namesUpdated_many": "Names Updated: {{count}}",
       "operational": "Operativo",
-      "processed_many": "Processed: {{count}}",
       "reloadDesc": "<strong>Ricarica libreria:</strong> Aggiorna la libreria dei test dal disco (usare dopo l'aggiornamento di test_library.json)",
       "reloadLibrary": "Ricarica libreria",
       "syncComplete": "Sincronizzazione completata",
@@ -581,6 +557,7 @@
     "title": "Strumenti e manutenzione"
   },
   "trash": {
+    "clearFilters": "Clear Filters",
     "deleteConfirm": "Sei sicuro di voler eliminare definitivamente <strong>{{filename}}</strong>?",
     "deletedDateRange": "Intervallo date di eliminazione",
     "deleteFailed": "Eliminazione fallita",
@@ -588,7 +565,7 @@
     "deleteWarning": "Questa azione non può essere annullata. Il file verrà rimosso permanentemente dal sistema.",
     "errorLoading": "Errore durante il caricamento del cestino",
     "fileCount_one": "{{count}} file",
-    "fileCount_many": "{{count}} files",
+    "fileCount_other": "{{count}} file",
     "fileDeleted": "File eliminato",
     "fileDeletedMessage": "{{filename}} eliminato definitivamente",
     "fileRestored": "File ripristinato",
@@ -604,11 +581,10 @@
     "permanentlyDelete": "Elimina definitivamente",
     "permanentlyDeleteFile": "Elimina file definitivamente",
     "purgedDirectories_one": "in {{count}} directory",
-    "purgedDirectories_many": "across {{count}} directories",
     "purgedDirectories_other": "in {{count}} directory",
-    "purgeDescription_many": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} file scaduto eliminato definitivamente",
-    "purgedMessage_many": "{{count}} expired files permanently deleted",
     "purgedMessage_other": "{{count}} file scaduti eliminati definitivamente",
     "purgeExpired": "Elimina scaduti",
     "purgeExpiredButton": "Elimina scaduti",
@@ -625,14 +601,16 @@
     "showingFiltered": "Visualizzazione di {{shown}} su {{total}} {{files}}",
     "subtitle": "Gestisci i file caricati eliminati. Ripristina i file nella posizione originale o rimuovili definitivamente per liberare spazio di archiviazione.",
     "tableHeaders": {
+      "actions": "Actions",
       "deleted": "Eliminato",
       "filename": "Nome file",
-      "originalLocation": "Posizione originale"
+      "originalLocation": "Posizione originale",
+      "reason": "Reason",
+      "size": "Size"
     },
     "title": "Gestione cestino",
     "totalSize": "{{size}} totale",
-    "trashPurged": "Cestino svuotato",
-    "fileCount_other": "{{count}} file"
+    "trashPurged": "Cestino svuotato"
   },
   "users": {
     "actionsFor": "Azioni per {{username}}",
@@ -645,7 +623,6 @@
     },
     "changeRole": "Modifica ruolo",
     "clear": "Cancella",
-    "daysAgo_many": "{{count}}d ago",
     "deactivate": "Disattiva",
     "deleteModal": {
       "cannotDeleteLastAdmin": "Impossibile eliminare l'ultimo amministratore.",
@@ -655,7 +632,6 @@
       "warning": "Questa azione non può essere annullata. Tutti i dati associati a questo utente verranno eliminati definitivamente."
     },
     "deleteUser": "Elimina utente",
-    "hoursAgo_many": "{{count}}h ago",
     "justNow": "Adesso",
     "loginHistory": "Cronologia accessi",
     "loginHistoryModal": {
@@ -665,17 +641,25 @@
       "notAvailable": "N/D",
       "title": "Cronologia accessi: {{username}}"
     },
-    "minutesAgo_many": "{{count}}m ago",
     "never": "Mai",
     "noUsersFound": "Nessun utente trovato",
     "noUsersInSystem": "Nessun utente nel sistema.",
     "noUsersMatchFilters": "Nessun utente corrisponde ai filtri. Prova a modificare o cancellare i filtri.",
     "passwordModal": {
+      "bothFieldsRequired": "",
+      "confirmPlaceholder": "",
+      "enterNewPassword": "",
       "forceChange": "Forza il cambio password al prossimo accesso",
+      "immediateReset": "",
       "newPassword": "Nuova password",
       "passwordDescription": "Minimo 6 caratteri, almeno 1 lettera e 1 numero",
+      "passwordsDoNotMatch": "",
+      "resetFailed": "",
+      "resetSuccess": "",
       "resettingFor": "Reimposta la password per <strong>{{username}}</strong>",
-      "ssoWarning": "Questo utente si autentica tramite SSO ({{provider}}). L'impostazione di una password locale consentirà l'autenticazione ibrida."
+      "ssoWarning": "Questo utente si autentica tramite SSO ({{provider}}). L'impostazione di una password locale consentirà l'autenticazione ibrida.",
+      "title": "",
+      "userInfo": ""
     },
     "roleFilter": {
       "all": "Tutti i ruoli"
@@ -703,9 +687,8 @@
       "deactivateConfirm": "Disattivare \"{{username}}\"? Non potrà accedere fino alla riattivazione.",
       "deactivateTitle": "Disattiva utente"
     },
+    "userCount": "{{count}} utenti",
     "userCount_one": "{{count}} utente",
-    "userCount_many": "{{count}} users",
-    "userCount_other": "{{count}} utenti",
-    "userCount": "{{count}} utenti"
+    "userCount_other": "{{count}} utenti"
   }
 }

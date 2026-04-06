@@ -1,0 +1,132 @@
+{
+  "errorBoundary": {
+    "browserCompat": "",
+    "chartError": "",
+    "chartErrorDescription": "",
+    "documentError": "",
+    "documentErrorDescription": "",
+    "errorDetails": "",
+    "invalidData": "",
+    "networkIssues": "",
+    "tempIssues": "",
+    "tryAgain": "",
+    "uploadError": "",
+    "uploadErrorDescription": ""
+  },
+  "fileCount": {
+    "attached": "",
+    "attached_one": "",
+    "attached_other": "",
+    "fileCount": "",
+    "fileCount_one": "",
+    "fileCount_other": "",
+    "noFiles": ""
+  },
+  "fileList": {
+    "fileDetails": "",
+    "loading": "",
+    "markedCount": "",
+    "markedCount_one": "",
+    "markedCount_other": "",
+    "markedForDeletion": "",
+    "noFiles": "",
+    "noMatch": "",
+    "showingFiles": "",
+    "statusDuplicate": "",
+    "statusFailed": "",
+    "statusMissing": "",
+    "statusProcessing": ""
+  },
+  "fileUpload": {
+    "accepted": "",
+    "chooseFiles": "",
+    "dragOrClick": "",
+    "remove": "",
+    "selectedFiles": "",
+    "selectedFiles_one": "",
+    "selectedFiles_other": ""
+  },
+  "linkPaperless": {
+    "from": "",
+    "infoText": "",
+    "linkDocument": "",
+    "moreTags": "",
+    "moreTags_one": "",
+    "moreTags_other": "",
+    "noDocumentsFound": "",
+    "searchDocuments": "",
+    "searchPlaceholder": "",
+    "selected": "",
+    "title": "",
+    "tryDifferent": "",
+    "type": ""
+  },
+  "linkPapra": {
+    "infoText": "",
+    "linkDocument": "",
+    "noDocumentsFound": "",
+    "searchPlaceholder": "",
+    "selected": "",
+    "title": "",
+    "tryDifferent": ""
+  },
+  "manager": {
+    "addDocument": "",
+    "currentFiles": "",
+    "duplicateDocument": "",
+    "duplicateExists": "",
+    "filesToUpload": "",
+    "linkPaperless": "",
+    "linkPapra": "",
+    "manageDocuments": "",
+    "processingPaperless": "",
+    "searchFiles": "",
+    "statusDuplicate": "",
+    "statusFailed": "",
+    "statusUploaded": "",
+    "statusUploading": "",
+    "syncCheck": "",
+    "uploadNewFile": "",
+    "uploadSuccess": ""
+  },
+  "paperlessStatus": {
+    "autoSyncEnabled": "",
+    "documentAlreadyExists": "",
+    "duplicateHint": "",
+    "processingDocument": "",
+    "syncFailed": "",
+    "syncing": ""
+  },
+  "renderMode": {
+    "compactView": "",
+    "gridView": "",
+    "listView": "",
+    "viewMode": ""
+  },
+  "storage": {
+    "backendLabel": "",
+    "connectedBadge": "",
+    "local": "",
+    "paperless": "",
+    "papra": "",
+    "selectBackend": ""
+  },
+  "upload": {
+    "completed": "",
+    "completed_one": "",
+    "completed_other": "",
+    "dragOrClick": "",
+    "failed": "",
+    "failed_one": "",
+    "failed_other": "",
+    "filesProgress": "",
+    "maxSize": "",
+    "overallProgress": "",
+    "percentComplete": "",
+    "remaining": "",
+    "retryFailed": "",
+    "uploading": "",
+    "uploading_one": "",
+    "uploading_other": ""
+  }
+}

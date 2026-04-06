@@ -118,8 +118,6 @@
     "noChannelsHint": "Добавьте канал, чтобы начать получать уведомления",
     "notificationsSent": "{{count}} уведомлений отправлено",
     "sentCount_one": "{{count}} отправлено",
-    "sentCount_few": "{{count}} sent",
-    "sentCount_many": "{{count}} sent",
     "sentCount_other": "{{count}} отправлено",
     "test": "Тест",
     "testError": "Не удалось отправить тестовое уведомление",

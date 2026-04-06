@@ -1,4 +1,24 @@
 {
+  "alert": {
+    "errorCount": "",
+    "errorCount_one": "",
+    "errorCount_other": "",
+    "formError": "",
+    "highPriority": "",
+    "highPriority_one": "",
+    "highPriority_other": "",
+    "suggestions": ""
+  },
+  "boundary": {
+    "componentLabel": "",
+    "errorDetails": "",
+    "errorIdLabel": "",
+    "errorLogged": "",
+    "reloadPage": "",
+    "somethingWentWrong": "",
+    "tryAgain": "",
+    "unexpectedError": ""
+  },
   "file": {
     "deleteFailed": "Nie udało się usunąć pliku. Proszę spróbować ponownie.",
     "downloadFailed": "Nie udało się pobrać pliku. Proszę spróbować ponownie.",

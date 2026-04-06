@@ -1,4 +1,24 @@
 {
+  "alert": {
+    "errorCount": "{{count}} Error",
+    "errorCount_one": "",
+    "errorCount_other": "{{count}} Errors",
+    "formError": "Form Error",
+    "highPriority": "{{count}} high priority",
+    "highPriority_one": "",
+    "highPriority_other": "",
+    "suggestions": "Suggestions:"
+  },
+  "boundary": {
+    "componentLabel": "Component:",
+    "errorDetails": "Error details",
+    "errorIdLabel": "Error ID:",
+    "errorLogged": "The error has been automatically logged for investigation.",
+    "reloadPage": "Reload Page",
+    "somethingWentWrong": "Something went wrong",
+    "tryAgain": "Try Again",
+    "unexpectedError": "We're sorry, but something unexpected happened in the medical records system."
+  },
   "file": {
     "deleteFailed": "Failed to delete file. Please try again.",
     "downloadFailed": "Failed to download file. Please try again.",

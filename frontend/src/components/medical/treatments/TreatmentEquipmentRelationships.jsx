@@ -395,14 +395,14 @@ function TreatmentEquipmentRelationships({
 
                       {eq?.manufacturer && (
                         <Text size="sm" c="dimmed">
-                          <strong>Manufacturer:</strong> {eq.manufacturer}
+                          <strong>{t('shared:fields.manufacturer')}:</strong> {eq.manufacturer}
                           {eq.model_number && ` | Model: ${eq.model_number}`}
                         </Text>
                       )}
 
                       {relationship.specific_settings && (
                         <Text size="sm" c="dimmed">
-                          <strong>Settings:</strong> {relationship.specific_settings}
+                          <strong>{t('shared:labels.settings')}:</strong> {relationship.specific_settings}
                         </Text>
                       )}
 
@@ -506,7 +506,7 @@ function TreatmentEquipmentRelationships({
             <Text c="dimmed">{t('labels.noEquipmentLinked', 'No equipment linked to this treatment')}</Text>
             {!isViewMode && (
               <Text size="xs" c="dimmed" mt="xs">
-                Link medical equipment like CPAP machines, inhalers, or monitors.
+                {t('treatments.noEquipmentLinkedDescription')}
               </Text>
             )}
           </Paper>
@@ -516,7 +516,7 @@ function TreatmentEquipmentRelationships({
         {!isViewMode && (
           <Group justify="space-between" align="center">
             <Text size="sm" c="dimmed">
-              {availableOptions.length} equipment item{availableOptions.length !== 1 ? 's' : ''} available to link
+              {t('shared:labels.countTotal', { count: availableOptions.length })}
             </Text>
             <Button
               variant="light"
@@ -553,8 +553,8 @@ function TreatmentEquipmentRelationships({
 
             <Tabs value={addMode} onChange={setAddMode}>
               <Tabs.List>
-                <Tabs.Tab value="existing">Link Existing</Tabs.Tab>
-                <Tabs.Tab value="new">Create New</Tabs.Tab>
+                <Tabs.Tab value="existing">{t('treatments.linkExisting')}</Tabs.Tab>
+                <Tabs.Tab value="new">{t('treatments.createNew')}</Tabs.Tab>
               </Tabs.List>
 
               {/* Existing Equipment Tab */}
@@ -617,7 +617,7 @@ function TreatmentEquipmentRelationships({
                     </>
                   ) : (
                     <Alert color="blue" variant="light">
-                      No equipment available to link. Use the "Create New" tab to add equipment.
+                      {t('labels.noEquipmentLinked')}
                     </Alert>
                   )}
                 </Stack>
@@ -627,7 +627,7 @@ function TreatmentEquipmentRelationships({
               <Tabs.Panel value="new" pt="md">
                 <Stack gap="md">
                   <Text size="sm" c="dimmed">
-                    Create new equipment and automatically link it to this treatment.
+                    {t('treatments.noEquipmentLinkedDescription')}
                   </Text>
 
                   <Divider label="Equipment Details" labelPosition="center" />

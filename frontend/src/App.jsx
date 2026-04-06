@@ -628,6 +628,7 @@ function App() {
                         {/* Emergency service worker cleanup route */}
                         <Route
                           path="/kill-sw"
+                          /* eslint-disable i18next/no-literal-string -- emergency developer route */
                           element={<div style={{padding: '20px', textAlign: 'center'}}>
                             <h1>Service Worker Cleanup</h1>
                             <p>All service workers and caches have been cleared.</p>
@@ -636,6 +637,7 @@ function App() {
                               Go Back to App
                             </button>
                           </div>}
+                          /* eslint-enable i18next/no-literal-string */
                         />
                         {/* Default redirect */}
                         <Route

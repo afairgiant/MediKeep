@@ -64,7 +64,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   onError,
   onLabResultUpdated
 }) => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['labresults', 'common', 'shared']);
   const [activeTab, setActiveTab] = useState<string>('display');
   const [components, setComponents] = useState<LabTestComponent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,8 +210,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       setComponents(prev => prev.filter(c => c.id !== component.id));
 
       notifications.show({
-        title: t('testComponents.notifications.componentDeleted', 'Component Deleted'),
-        message: t('testComponents.notifications.hasBeenDeleted', '{{name}} has been deleted', { name: component.test_name }),
+        title: t('labresults:testComponents.notifications.componentDeleted', 'Component Deleted'),
+        message: t('labresults:testComponents.notifications.hasBeenDeleted', '{{name}} has been deleted', { name: component.test_name }),
         color: 'green'
       });
 
@@ -308,7 +308,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       <Group justify="space-between" align="center">
         <Group gap="xs">
           <IconFlask size={20} />
-          <Title order={4}>{t('testComponents.title', 'Test Components')}</Title>
+          <Title order={4}>{t('labresults:testComponents.title', 'Test Components')}</Title>
           {components.length > 0 && (
             <Badge variant="light" color="blue">
               {t('shared:labels.countTest', '{{count}} test', { count: components.length })}
@@ -323,14 +323,14 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
               variant="filled"
               onClick={() => setShowAddModal(true)}
             >
-              {t('testComponents.addTests', 'Add Tests')}
+              {t('labresults:testComponents.addTests', 'Add Tests')}
             </Button>
           )}
           <ActionIcon
             variant="subtle"
             onClick={handleRefresh}
             loading={refreshing}
-            title={t('testComponents.refreshComponents', 'Refresh components')}
+            title={t('labresults:testComponents.refreshComponents', 'Refresh components')}
           >
             <IconRefresh size={16} />
           </ActionIcon>
@@ -341,7 +341,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       {error && (
         <Alert
           icon={<IconAlertCircle size={16} />}
-          title={t('testComponents.errorLoading', 'Error loading test components')}
+          title={t('labresults:testComponents.errorLoading', 'Error loading test components')}
           color="red"
           onClose={() => setError(null)}
         >
@@ -357,14 +357,14 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             leftSection={getTabIcon('display')}
             rightSection={getTabBadge('display')}
           >
-            {t('testComponents.tabs.testResults', 'Test Results')}
+            {t('labresults:testComponents.tabs.testResults', 'Test Results')}
           </Tabs.Tab>
 
           <Tabs.Tab
             value="stats"
             leftSection={getTabIcon('stats')}
           >
-            {t('testComponents.tabs.statistics', 'Statistics')}
+            {t('labresults:testComponents.tabs.statistics', 'Statistics')}
           </Tabs.Tab>
         </Tabs.List>
 
@@ -403,10 +403,9 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           <Stack align="center" gap="lg">
             <IconFlask size={48} color="var(--mantine-color-gray-5)" />
             <Stack align="center" gap="md">
-              <Title order={3} c="dimmed">No test components yet</Title>
+              <Title order={3} c="dimmed">{t('tabs.noComponentsYet')}</Title>
               <Text size="sm" c="dimmed" ta="center" maw={400}>
-                Add individual test results using templates or bulk import from lab reports.
-                Test components provide detailed breakdowns of lab results.
+                {t('tabs.noComponentsDescription')}
               </Text>
             </Stack>
 
@@ -419,12 +418,12 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
                 }}
                 variant="filled"
               >
-                {t('testComponents.addTestComponents', 'Add Test Components')}
+                {t('labresults:testComponents.addTestComponents', 'Add Test Components')}
               </Button>
             </Group>
 
             <Text size="xs" c="dimmed" ta="center" maw={500}>
-              {t('testComponents.emptyState.description', 'Templates provide common lab panels (CBC, CMP, etc.) where you can enter values and ranges. Bulk import allows you to copy/paste results from lab reports for automatic parsing.')}
+              {t('labresults:testComponents.emptyState.description', 'Templates provide common lab panels (CBC, CMP, etc.) where you can enter values and ranges. Bulk import allows you to copy/paste results from lab reports for automatic parsing.')}
             </Text>
           </Stack>
         </Paper>
@@ -435,9 +434,9 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
           <Stack align="center" gap="md">
             <IconFlask size={48} color="var(--mantine-color-gray-5)" />
-            <Title order={3} c="dimmed">{t('testComponents.noComponents', 'No test components')}</Title>
+            <Title order={3} c="dimmed">{t('labresults:testComponents.noComponents', 'No test components')}</Title>
             <Text size="sm" c="dimmed" ta="center">
-              {t('testComponents.noComponentsDescription', "This lab result doesn't have any individual test components added yet.")}
+              {t('labresults:testComponents.noComponentsDescription', "This lab result doesn't have any individual test components added yet.")}
             </Text>
           </Stack>
         </Paper>
@@ -461,7 +460,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         title={
           <Group gap="xs">
             <IconPlus size={20} />
-            <Text fw={600}>{t('testComponents.addTestComponents', 'Add Test Components')}</Text>
+            <Text fw={600}>{t('labresults:testComponents.addTestComponents', 'Add Test Components')}</Text>
           </Group>
         }
         size="calc(100vw - 40px)"
@@ -471,10 +470,10 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         <Tabs value={addModalTab} onChange={(value) => setAddModalTab(value || 'templates')}>
           <Tabs.List>
             <Tabs.Tab value="templates" leftSection={<IconTemplate size={16} />}>
-              Templates
+              {t('tabs.templates')}
             </Tabs.Tab>
             <Tabs.Tab value="bulk" leftSection={<IconUpload size={16} />}>
-              Bulk Import
+              {t('tabs.bulkEntry')}
             </Tabs.Tab>
           </Tabs.List>
 

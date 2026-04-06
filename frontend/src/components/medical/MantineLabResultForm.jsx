@@ -30,66 +30,66 @@ const MantineLabResultForm = ({
 
   // Status options with visual indicators
   const statusOptions = [
-    { value: 'ordered', label: t('labResults.status.ordered') },
-    { value: 'in-progress', label: t('labResults.status.inProgress') },
-    { value: 'completed', label: t('labResults.status.completed') },
-    { value: 'cancelled', label: t('labResults.status.cancelled') },
+    { value: 'ordered', label: t('labresults:status.ordered') },
+    { value: 'in-progress', label: t('labresults:status.inProgress') },
+    { value: 'completed', label: t('labresults:status.completed') },
+    { value: 'cancelled', label: t('labresults:status.cancelled') },
   ];
 
   // Test category options
   const categoryOptions = [
-    { value: 'blood work', label: t('labResults.category.bloodWork') },
-    { value: 'imaging', label: t('labResults.category.imaging') },
-    { value: 'pathology', label: t('labResults.category.pathology') },
-    { value: 'microbiology', label: t('labResults.category.microbiology') },
-    { value: 'chemistry', label: t('labResults.category.chemistry') },
-    { value: 'hematology', label: t('labResults.category.hematology') },
-    { value: 'hepatology', label: t('labResults.category.hepatology') },
-    { value: 'immunology', label: t('labResults.category.immunology') },
-    { value: 'genetics', label: t('labResults.category.genetics') },
-    { value: 'cardiology', label: t('labResults.category.cardiology') },
-    { value: 'pulmonology', label: t('labResults.category.pulmonology') },
-    { value: 'hearing', label: t('labResults.category.hearing') },
-    { value: 'stomatology', label: t('labResults.category.stomatology') },
+    { value: 'blood work', label: t('labresults:category.bloodWork') },
+    { value: 'imaging', label: t('labresults:category.imaging') },
+    { value: 'pathology', label: t('labresults:category.pathology') },
+    { value: 'microbiology', label: t('labresults:category.microbiology') },
+    { value: 'chemistry', label: t('labresults:category.chemistry') },
+    { value: 'hematology', label: t('labresults:category.hematology') },
+    { value: 'hepatology', label: t('labresults:category.hepatology') },
+    { value: 'immunology', label: t('labresults:category.immunology') },
+    { value: 'genetics', label: t('labresults:category.genetics') },
+    { value: 'cardiology', label: t('labresults:category.cardiology') },
+    { value: 'pulmonology', label: t('labresults:category.pulmonology') },
+    { value: 'hearing', label: t('labresults:category.hearing') },
+    { value: 'stomatology', label: t('labresults:category.stomatology') },
     { value: 'other', label: t('shared:fields.other') },
   ];
 
   // Test type options with urgency levels
   const testTypeOptions = [
-    { value: 'routine', label: t('labResults.testType.routine') },
-    { value: 'urgent', label: t('labResults.testType.urgent') },
-    { value: 'emergency', label: t('labResults.testType.emergency') },
-    { value: 'follow-up', label: t('labResults.testType.followUp') },
-    { value: 'screening', label: t('labResults.testType.screening') },
+    { value: 'routine', label: t('labresults:testType.routine') },
+    { value: 'urgent', label: t('labresults:testType.urgent') },
+    { value: 'emergency', label: t('labresults:testType.emergency') },
+    { value: 'follow-up', label: t('labresults:testType.followUp') },
+    { value: 'screening', label: t('labresults:testType.screening') },
   ];
 
   // Lab result options with color coding
   const labResultOptions = [
     {
       value: 'normal',
-      label: t('labResults.result.normal'),
+      label: t('labresults:result.normal'),
       color: 'green',
     },
     {
       value: 'abnormal',
-      label: t('labResults.result.abnormal'),
+      label: t('labresults:result.abnormal'),
       color: 'red',
     },
     {
       value: 'critical',
-      label: t('labResults.result.critical'),
+      label: t('labresults:result.critical'),
       color: 'red',
     },
-    { value: 'high', label: t('labResults.result.high'), color: 'orange' },
-    { value: 'low', label: t('labResults.result.low'), color: 'orange' },
+    { value: 'high', label: t('labresults:result.high'), color: 'orange' },
+    { value: 'low', label: t('labresults:result.low'), color: 'orange' },
     {
       value: 'borderline',
-      label: t('labResults.result.borderline'),
+      label: t('labresults:result.borderline'),
       color: 'yellow',
     },
     {
       value: 'inconclusive',
-      label: t('labResults.result.inconclusive'),
+      label: t('labresults:result.inconclusive'),
       color: 'gray',
     },
   ];
@@ -138,12 +138,12 @@ const MantineLabResultForm = ({
   // Custom content for divider, badges, condition relationships, and file management
   const customContent = (
     <>
-      <Divider label={t('labResults.form.testDetails')} labelPosition="center" />
+      <Divider label={t('labresults:form.testDetails')} labelPosition="center" />
 
       {/* Status Badge */}
       {formData.status && (
         <div style={{ marginTop: '-8px', marginBottom: '8px' }}>
-          <Text size="sm" fw={500} mb="xs">{t('labResults.form.statusIndicator')}</Text>
+          <Text size="sm" fw={500} mb="xs">{t('labresults:form.statusIndicator')}</Text>
           <Badge
             color={getStatusColor(formData.status)}
             variant="light"
@@ -157,7 +157,7 @@ const MantineLabResultForm = ({
       {/* Result Badge */}
       {formData.labs_result && (
         <div style={{ marginBottom: '16px' }}>
-          <Text size="sm" fw={500} mb="xs">{t('labResults.form.resultIndicator')}</Text>
+          <Text size="sm" fw={500} mb="xs">{t('labresults:form.resultIndicator')}</Text>
           {getResultBadge(formData.labs_result)}
         </div>
       )}
@@ -168,9 +168,9 @@ const MantineLabResultForm = ({
           <Divider label={t('shared:labels.relatedConditions')} labelPosition="center" mt="lg" />
           <Paper withBorder p="md" bg="var(--color-bg-secondary)">
             <Stack gap="md">
-              <Title order={5}>{t('labResults.form.linkConditionsTitle')}</Title>
+              <Title order={5}>{t('labresults:form.linkConditionsTitle')}</Title>
               <Text size="sm" c="dimmed">
-                {t('labResults.form.linkConditionsDescription')}
+                {t('labresults:form.linkConditionsDescription')}
               </Text>
               <ConditionRelationships
                 labResultId={editingLabResult.id}

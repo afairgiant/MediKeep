@@ -552,7 +552,7 @@ export const ResponsiveTable = memo(({
                 
                 {showSecondaryInfo && !compactMode && displayFields.length < columns.length && (
                   <Text size="xs" c="dimmed">
-                    +{columns.length - displayFields.length} more field{columns.length - displayFields.length !== 1 ? 's' : ''}
+                    {t('shared:labels.countMore', { count: columns.length - displayFields.length })}
                   </Text>
                 )}
                 {hasActions && (

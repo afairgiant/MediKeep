@@ -112,7 +112,7 @@ export function RelationshipAddFooter({
   return (
     <Group justify="space-between" align="center">
       <Text size="sm" c="dimmed">
-        {availableCount} {displayName} available to link
+        {t('shared:labels.countTotal', { count: availableCount })}
       </Text>
       <Button
         variant="light"

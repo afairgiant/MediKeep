@@ -15,10 +15,12 @@ import {
   Code,
 } from '@mantine/core';
 import { IconAlertTriangle, IconTrash } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import BaseApiService from '../../services/api/baseApi';
 
 const DeleteAccountModal = ({ isOpen, onClose }) => {
+  const { t } = useTranslation(['auth', 'common', 'shared']);
   const { user, logout } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmationText, setConfirmationText] = useState('');
@@ -29,7 +31,7 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
 
   const handleDeleteAccount = async () => {
     if (confirmationText !== requiredConfirmationText) {
-      setError('Please type the exact confirmation text to proceed.');
+      setError(t('deleteAccount.mustMatchExactly'));
       return;
     }
 
@@ -80,7 +82,7 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
     <Modal
       opened={isOpen}
       onClose={handleClose}
-      title={step === 1 ? 'Delete Account' : 'Confirm Account Deletion'}
+      title={step === 1 ? t('deleteAccount.title') : t('deleteAccount.confirmAccountDeletion')}
       size="md"
       closeOnClickOutside={!isDeleting}
       closeOnEscape={!isDeleting}
@@ -90,29 +92,29 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
           <>
             <Alert
               icon={<IconAlertTriangle size={16} />}
-              title="WARNING: This action cannot be undone!"
+              title={t('deleteAccount.warningTitle')}
               color="red"
               variant="light"
             />
 
             <Stack spacing="sm">
-              <Title order={4}>This will permanently delete:</Title>
+              <Title order={4}>{t('deleteAccount.permanentlyDelete')}</Title>
               <List spacing="xs" size="sm">
-                <List.Item>Your user account ({user?.username})</List.Item>
+                <List.Item>{t('deleteAccount.userAccount', { username: user?.username })}</List.Item>
                 <List.Item>
-                  Your patient profile and personal information
+                  {t('deleteAccount.patientProfile')}
                 </List.Item>
                 <List.Item>
-                  ALL medical records including:
+                  {t('deleteAccount.allMedicalRecords')}
                   <List withPadding spacing="xs" size="sm" mt="xs">
-                    <List.Item>Medications and prescriptions</List.Item>
-                    <List.Item>Lab results and medical files</List.Item>
-                    <List.Item>Allergies and medical conditions</List.Item>
-                    <List.Item>Procedures and treatments</List.Item>
-                    <List.Item>Immunization records</List.Item>
-                    <List.Item>Vital signs and measurements</List.Item>
-                    <List.Item>Medical encounters and visits</List.Item>
-                    <List.Item>Emergency contacts</List.Item>
+                    <List.Item>{t('deleteAccount.records.medicationsAndPrescriptions')}</List.Item>
+                    <List.Item>{t('deleteAccount.records.labResultsAndFiles')}</List.Item>
+                    <List.Item>{t('deleteAccount.records.allergiesAndConditions')}</List.Item>
+                    <List.Item>{t('deleteAccount.records.proceduresAndTreatments')}</List.Item>
+                    <List.Item>{t('deleteAccount.records.immunizationRecords')}</List.Item>
+                    <List.Item>{t('deleteAccount.records.vitalSigns')}</List.Item>
+                    <List.Item>{t('deleteAccount.records.encountersAndVisits')}</List.Item>
+                    <List.Item>{t('deleteAccount.records.emergencyContacts')}</List.Item>
                   </List>
                 </List.Item>
               </List>
@@ -120,20 +122,19 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
               <Paper p="md" withBorder bg="red.1">
                 <Text size="sm">
                   <Text component="span" fw={700}>
-                    Once deleted, this data cannot be recovered.
+                    {t('deleteAccount.dataCannotBeRecovered')}
                   </Text>{' '}
-                  If you're having issues with the application, please consider
-                  contacting support instead of deleting your account.
+                  {t('deleteAccount.contactSupport')}
                 </Text>
               </Paper>
             </Stack>
 
             <Group position="right">
               <Button variant="default" onClick={handleClose}>
-                Cancel
+                {t('shared:fields.cancel')}
               </Button>
               <Button color="red" onClick={handleNextStep}>
-                I Understand, Continue
+                {t('deleteAccount.understand')}
               </Button>
             </Group>
           </>
@@ -143,15 +144,14 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
           <>
             <Alert
               icon={<IconAlertTriangle size={16} />}
-              title="Final Confirmation Required"
+              title={t('deleteAccount.finalConfirmation')}
               color="red"
               variant="light"
             />
 
             <Stack spacing="sm">
               <Text size="sm">
-                To confirm that you want to permanently delete your account and
-                all associated data, please type the following text exactly:
+                {t('deleteAccount.typeConfirmation')}
               </Text>
 
               <Paper p="sm" bg="gray.2">
@@ -161,15 +161,15 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
               </Paper>
 
               <TextInput
-                label="Type confirmation text:"
+                label={t('deleteAccount.confirmationLabel')}
                 value={confirmationText}
                 onChange={e => setConfirmationText(e.target.value)}
-                placeholder="Type the confirmation text"
+                placeholder={t('deleteAccount.confirmationPlaceholder')}
                 disabled={isDeleting}
                 error={
                   confirmationText &&
                   confirmationText !== requiredConfirmationText
-                    ? 'Text must match exactly'
+                    ? t('deleteAccount.exactMatchError')
                     : null
                 }
                 autoFocus
@@ -188,7 +188,7 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
                 onClick={handlePreviousStep}
                 disabled={isDeleting}
               >
-                Back
+                {t('common:buttons.back')}
               </Button>
               <Button
                 color="red"
@@ -200,8 +200,8 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
                 loading={isDeleting}
               >
                 {isDeleting
-                  ? 'Deleting Account...'
-                  : 'Delete My Account Forever'}
+                  ? t('deleteAccount.deleting')
+                  : t('deleteAccount.deleteForever')}
               </Button>
             </Group>
           </>

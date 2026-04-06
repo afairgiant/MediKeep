@@ -424,6 +424,7 @@
     "backToModel": "Tillbaka till {{modelName}}",
     "bulkDeleteAssociated": "All tillhörande data (inklusive {{types}}) kommer också att raderas.",
     "bulkDeleteFailed": "Massradering misslyckades",
+    "bulkDeleteWarning": "Du håller på att permanent radera {{count}} {{modelName}}-poster.",
     "bulkDeleteWarning_one": "Du håller på att permanent radera {{count}} {{modelName}}-post.",
     "bulkDeleteWarning_other": "Du håller på att permanent radera {{count}} {{modelName}}-poster.",
     "changeRole": "Ändra roll",
@@ -475,6 +476,7 @@
     "saveFailed": "Sparning misslyckades",
     "searchPlaceholder": "Sök {{modelName}}...",
     "searchRecords": "Sök poster",
+    "searchResult": "{{count}} resultat för \"{{query}}\"",
     "searchResult_one": "{{count}} resultat för \"{{query}}\"",
     "searchResult_other": "{{count}} resultat för \"{{query}}\"",
     "selected": "{{count}} markerade",
@@ -488,9 +490,7 @@
     "usernameUpdated": "Användarnamn uppdaterat",
     "usernameUpdatedMessage": "Ditt användarnamn har ändrats. Logga in med ditt nya användarnamn: \"{{username}}\"",
     "viewRecord": "Visa {{modelName}}",
-    "visibleColumns": "Synliga kolumner",
-    "searchResult": "{{count}} resultat för \"{{query}}\"",
-    "bulkDeleteWarning": "Du håller på att permanent radera {{count}} {{modelName}}-poster."
+    "visibleColumns": "Synliga kolumner"
   },
   "settings": {
     "dataRetention": {
@@ -557,6 +557,7 @@
     "title": "Verktyg och underhåll"
   },
   "trash": {
+    "clearFilters": "Clear Filters",
     "deleteConfirm": "Är du säker på att du vill permanent radera <strong>{{filename}}</strong>?",
     "deletedDateRange": "Datumintervall för radering",
     "deleteFailed": "Radering misslyckades",
@@ -564,6 +565,7 @@
     "deleteWarning": "Denna åtgärd kan inte ångras. Filen kommer att tas bort permanent från systemet.",
     "errorLoading": "Fel vid laddning av papperskorgen",
     "fileCount_one": "{{count}} fil",
+    "fileCount_other": "{{count}} filer",
     "fileDeleted": "Fil raderad",
     "fileDeletedMessage": "{{filename}} permanent raderad",
     "fileRestored": "Fil återställd",
@@ -580,6 +582,8 @@
     "permanentlyDeleteFile": "Radera fil permanent",
     "purgedDirectories_one": "i {{count}} katalog",
     "purgedDirectories_other": "i {{count}} kataloger",
+    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} utgången fil permanent raderad",
     "purgedMessage_other": "{{count}} utgångna filer permanent raderade",
     "purgeExpired": "Rensa utgångna",
@@ -597,14 +601,16 @@
     "showingFiltered": "Visar {{shown}} av {{total}} {{files}}",
     "subtitle": "Hantera raderade uppladdade filer. Återställ filer till deras ursprungliga plats eller ta bort dem permanent för att frigöra lagringsutrymme.",
     "tableHeaders": {
+      "actions": "Actions",
       "deleted": "Raderad",
       "filename": "Filnamn",
-      "originalLocation": "Ursprunglig plats"
+      "originalLocation": "Ursprunglig plats",
+      "reason": "Reason",
+      "size": "Size"
     },
     "title": "Papperskorgshantering",
     "totalSize": "{{size}} totalt",
-    "trashPurged": "Papperskorg rensad",
-    "fileCount_other": "{{count}} filer"
+    "trashPurged": "Papperskorg rensad"
   },
   "users": {
     "actionsFor": "Åtgärder för {{username}}",
@@ -640,11 +646,20 @@
     "noUsersInSystem": "Inga användare i systemet.",
     "noUsersMatchFilters": "Inga användare matchar dina filter. Försök justera eller rensa filter.",
     "passwordModal": {
+      "bothFieldsRequired": "",
+      "confirmPlaceholder": "",
+      "enterNewPassword": "",
       "forceChange": "Tvinga lösenordsbyte vid nästa inloggning",
+      "immediateReset": "",
       "newPassword": "Nytt lösenord",
       "passwordDescription": "Minst 6 tecken, minst 1 bokstav och 1 siffra",
+      "passwordsDoNotMatch": "",
+      "resetFailed": "",
+      "resetSuccess": "",
       "resettingFor": "Återställ lösenord för <strong>{{username}}</strong>",
-      "ssoWarning": "Denna användare autentiseras via SSO ({{provider}}). Att ange ett lokalt lösenord möjliggör hybridautentisering."
+      "ssoWarning": "Denna användare autentiseras via SSO ({{provider}}). Att ange ett lokalt lösenord möjliggör hybridautentisering.",
+      "title": "",
+      "userInfo": ""
     },
     "roleFilter": {
       "all": "Alla roller"
@@ -672,8 +687,8 @@
       "deactivateConfirm": "Inaktivera \"{{username}}\"? De kommer inte att kunna logga in förrän kontot återaktiveras.",
       "deactivateTitle": "Inaktivera användare"
     },
+    "userCount": "{{count}} användare",
     "userCount_one": "{{count}} användare",
-    "userCount_other": "{{count}} användare",
-    "userCount": "{{count}} användare"
+    "userCount_other": "{{count}} användare"
   }
 }

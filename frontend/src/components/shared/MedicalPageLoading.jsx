@@ -16,8 +16,8 @@ import { Container, Center, Stack, Loader, Text } from '@mantine/core';
  * // With hint text
  * if (loading) return (
  *   <MedicalPageLoading
- *     message={t('labResults.loading')}
- *     hint={t('labResults.loadingHint')}
+ *     message={t('labresults:loading')}
+ *     hint={t('labresults:loadingHint')}
  *   />
  * );
  */

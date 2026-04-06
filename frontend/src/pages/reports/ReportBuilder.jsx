@@ -38,7 +38,7 @@ import logger from '../../services/logger';
 import { useTranslation } from 'react-i18next';
 
 const ReportBuilder = () => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['reports', 'common', 'shared']);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -165,8 +165,8 @@ const ReportBuilder = () => {
 
       // Load template selections (this would need to be implemented in the hook)
       notifications.show({
-        title: t('reportBuilder.notifications.templateLoaded'),
-        message: t('reportBuilder.notifications.templateLoadedMessage', { name: template.name }),
+        title: t('builder.notifications.templateLoaded'),
+        message: t('builder.notifications.templateLoadedMessage', { name: template.name }),
         color: 'blue',
         autoClose: 5000,
       });
@@ -176,26 +176,26 @@ const ReportBuilder = () => {
   // Build generate button label
   const getGenerateButtonLabel = () => {
     if (selectedCount > 0 && trendChartCount > 0) {
-      return t('reportBuilder.buttons.generateReportWithCharts', {
+      return t('builder.buttons.generateReportWithCharts', {
         recordCount: selectedCount,
         chartCount: trendChartCount,
       });
     }
     if (trendChartCount > 0) {
-      return t('reportBuilder.buttons.generateReportChartsOnly', {
+      return t('builder.buttons.generateReportChartsOnly', {
         chartCount: trendChartCount,
       });
     }
-    return t('reportBuilder.buttons.generateReport', { count: selectedCount });
+    return t('builder.buttons.generateReport', { count: selectedCount });
   };
 
   if (loading || templatesLoading) {
-    return <MedicalPageLoading message={t('reportBuilder.loading', 'Loading reports...')} />;
+    return <MedicalPageLoading message={t('builder.loading', 'Loading reports...')} />;
   }
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title={t('reportBuilder.title')} icon={t('reportBuilder.icon')} />
+      <PageHeader title={t('builder.title')} icon={t('builder.icon')} />
 
       <Stack gap="lg">
         {/* Error alerts */}
@@ -219,9 +219,9 @@ const ReportBuilder = () => {
         <Paper shadow="sm" p="lg" radius="md" withBorder>
           <Group justify="space-between" mb="md">
             <Stack gap={4}>
-              <Title order={3}>{t('reportBuilder.configuration.title')}</Title>
+              <Title order={3}>{t('builder.configuration.title')}</Title>
               <Text c="dimmed" size="sm">
-                {t('reportBuilder.configuration.description')}
+                {t('builder.configuration.description')}
               </Text>
             </Stack>
 
@@ -251,7 +251,7 @@ const ReportBuilder = () => {
           {hasSelections && (
             <Box mb="md">
               <Group justify="space-between" mb={4}>
-                <Text size="sm" fw={500}>{t('reportBuilder.progress.recordsSelected')}</Text>
+                <Text size="sm" fw={500}>{t('builder.progress.recordsSelected')}</Text>
                 <Text size="sm" c="dimmed">
                   {selectedCount} {t('shared:labels.medicalRecords', 'records')}
                   {trendChartCount > 0 && `, ${trendChartCount} ${t('shared:labels.trendCharts', 'charts').toLowerCase()}`}
@@ -283,12 +283,12 @@ const ReportBuilder = () => {
                 }}
                 disabled={!dataSummary?.categories || Object.keys(dataSummary.categories).length === 0}
               >
-                {t('reportBuilder.buttons.selectAll')}
+                {t('builder.buttons.selectAll')}
               </Button>
             )}
             {hasSelections && (
               <Button size="xs" variant="subtle" color="red" onClick={clearSelections}>
-                {t('reportBuilder.buttons.clearSelections')}
+                {t('builder.buttons.clearSelections')}
               </Button>
             )}
           </Group>
@@ -350,13 +350,13 @@ const ReportBuilder = () => {
                   <Stack align="center" gap="md">
                     <IconFileDescription size={64} stroke={1} color="var(--mantine-color-gray-5)" />
                     <Stack align="center" gap="xs">
-                      <Title order={3}>{t('reportBuilder.noData.title')}</Title>
+                      <Title order={3}>{t('builder.noData.title')}</Title>
                       <Text c="dimmed" ta="center">
-                        {t('reportBuilder.noData.description')}
+                        {t('builder.noData.description')}
                       </Text>
                     </Stack>
                     <Button onClick={() => navigate('/medications')}>
-                      {t('reportBuilder.buttons.addRecords')}
+                      {t('builder.buttons.addRecords')}
                     </Button>
                   </Stack>
                 </Center>
@@ -386,34 +386,34 @@ const ReportBuilder = () => {
       <Modal
         opened={showSettingsModal}
         onClose={closeSettingsModal}
-        title={t('reportBuilder.settingsModal.title')}
+        title={t('builder.settingsModal.title')}
         size="md"
       >
         <Stack gap="md">
           <TextInput
-            label={t('reportBuilder.settingsModal.reportTitle.label')}
+            label={t('builder.settingsModal.reportTitle.label')}
             value={reportSettings.report_title}
             onChange={(event) => updateReportSettings({ report_title: event.target.value })}
           />
 
           <Stack gap="sm">
             <Switch
-              label={t('reportBuilder.settingsModal.includePatientInfo.label')}
-              description={t('reportBuilder.settingsModal.includePatientInfo.description')}
+              label={t('builder.settingsModal.includePatientInfo.label')}
+              description={t('builder.settingsModal.includePatientInfo.description')}
               checked={reportSettings.include_patient_info}
               onChange={(event) => updateReportSettings({ include_patient_info: event.currentTarget.checked })}
             />
 
             <Switch
-              label={t('reportBuilder.settingsModal.includeProfilePicture.label')}
-              description={t('reportBuilder.settingsModal.includeProfilePicture.description')}
+              label={t('builder.settingsModal.includeProfilePicture.label')}
+              description={t('builder.settingsModal.includeProfilePicture.description')}
               checked={reportSettings.include_profile_picture}
               onChange={(event) => updateReportSettings({ include_profile_picture: event.currentTarget.checked })}
             />
 
             <Switch
-              label={t('reportBuilder.settingsModal.includeSummary.label')}
-              description={t('reportBuilder.settingsModal.includeSummary.description')}
+              label={t('builder.settingsModal.includeSummary.label')}
+              description={t('builder.settingsModal.includeSummary.description')}
               checked={reportSettings.include_summary}
               onChange={(event) => updateReportSettings({ include_summary: event.currentTarget.checked })}
             />

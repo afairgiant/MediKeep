@@ -1,4 +1,24 @@
 {
+  "alert": {
+    "errorCount": "",
+    "errorCount_one": "",
+    "errorCount_other": "",
+    "formError": "",
+    "highPriority": "",
+    "highPriority_one": "",
+    "highPriority_other": "",
+    "suggestions": ""
+  },
+  "boundary": {
+    "componentLabel": "",
+    "errorDetails": "",
+    "errorIdLabel": "",
+    "errorLogged": "",
+    "reloadPage": "",
+    "somethingWentWrong": "",
+    "tryAgain": "",
+    "unexpectedError": ""
+  },
   "file": {
     "deleteFailed": "Error al eliminar el archivo.",
     "downloadFailed": "Error al descargar el archivo. Por favor, inténtelo de nuevo.",

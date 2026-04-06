@@ -1,5 +1,6 @@
 import React from 'react';
 import { Alert, Button } from '@mantine/core';
+import i18n from '../../i18n/config';
 import logger from '../../services/logger';
 
 /**
@@ -29,15 +30,15 @@ class UploadProgressErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <Alert color="red" title="Upload Progress Error">
-          Something went wrong with progress tracking. Your upload may still be processing.
-          <Button 
+        <Alert color="red" title={i18n.t('documents:errorBoundary.uploadError')}>
+          {i18n.t('documents:errorBoundary.uploadErrorDescription')}
+          <Button
             onClick={() => this.setState({ hasError: false, error: null })}
             variant="light"
             size="sm"
             style={{ marginTop: '8px' }}
           >
-            Continue
+            {i18n.t('documents:errorBoundary.tryAgain')}
           </Button>
         </Alert>
       );

@@ -54,17 +54,19 @@
     "title": "Zaproszenia",
     "types": {
       "patientRecord": "Rekord pacjenta"
-    },
-    "viewAll_few": "View all {{count}} invitations",
-    "viewAll_many": "View all {{count}} invitations"
+    }
   },
   "menu": {
+    "account": "",
     "backToDashboard": "Powrót do pulpitu",
+    "darkMode": "",
     "help": "Pomoc",
+    "lightMode": "",
     "logout": "Wyloguj",
     "patients": "Pacjenci",
     "profile": "Profil",
-    "reports": "Raporty"
+    "reports": "Raporty",
+    "userActions": ""
   },
   "pages": {
     "help": "Pomoc i wsparcie",

@@ -47,7 +47,8 @@ const Header = ({
           type="button"
           title={t('shared:labels.settings')}
         >
-          ⚙️
+          {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
+          {'\u2699\uFE0F'}
         </button>
         {showThemeToggle && <ThemeToggle />}
       </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/auth/simpleAuthService';
 import SSOConflictModal from './SSOConflictModal';
@@ -7,6 +8,7 @@ import GitHubLinkModal from './GitHubLinkModal';
 import logger from '../../services/logger';
 
 const SSOCallback = () => {
+  const { t } = useTranslation('auth');
   const [searchParams] = useSearchParams();
   const [error, setError] = useState(null);
   const [processing, setProcessing] = useState(true);
@@ -83,9 +85,7 @@ const SSOCallback = () => {
         
         // Handle registration disabled error
         if (result.error.includes('registration is disabled') || result.error.includes('Registration is disabled')) {
-          setError(
-            'Account creation is disabled. Your SSO authentication was successful, but no account exists for your email. Please contact an administrator to create an account for you.'
-          );
+          setError(t('sso.callback.registrationDisabled'));
         } else {
           setError(result.error);
         }
@@ -165,7 +165,7 @@ const SSOCallback = () => {
         error: error.message,
         category: 'sso_callback_component'
       });
-      setError('An unexpected error occurred during authentication');
+      setError(t('sso.callback.unexpectedError'));
       setProcessing(false);
     }
   };
@@ -222,7 +222,7 @@ const SSOCallback = () => {
         error: error.message,
         category: 'sso_callback_component'
       });
-      setError('An error occurred while resolving the account conflict');
+      setError(t('sso.callback.errorResolving'));
       setShowConflictModal(false);
     } finally {
       setResolvingConflict(false);
@@ -270,7 +270,7 @@ const SSOCallback = () => {
 
   const handleGithubLinkClose = () => {
     setShowGithubLinkModal(false);
-    setError('GitHub linking cancelled');
+    setError(t('sso.callback.githubLinkingCancelled'));
   };
 
   if (processing) {
@@ -292,16 +292,16 @@ const SSOCallback = () => {
           animation: 'spin 1s linear infinite',
           marginBottom: '1rem'
         }}></div>
-        <h2>Completing sign-in...</h2>
-        <p>Please wait while we authenticate your account</p>
+        <h2>{t('sso.callback.completingSignIn')}</h2>
+        <p>{t('sso.callback.pleaseWait')}</p>
         {processingTime > 5 && (
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9em', marginTop: '0.5rem' }}>
-            This is taking longer than usual. SSO provider may be slow to respond...
+            {t('sso.callback.slowResponse')}
           </p>
         )}
         {processingTime > 15 && (
           <p style={{ color: 'var(--color-danger)', fontSize: '0.9em', marginTop: '0.5rem' }}>
-            Still waiting for SSO provider response. If this continues, please try again.
+            {t('sso.callback.stillWaiting')}
           </p>
         )}
         <style>
@@ -336,7 +336,7 @@ const SSOCallback = () => {
           textAlign: 'center',
           width: '100%'
         }}>
-          <h2 style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>Authentication Failed</h2>
+          <h2 style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>{t('sso.authFailed')}</h2>
           <div style={{ 
             backgroundColor: 'var(--color-danger-light)',
             border: '1px solid var(--color-danger)',
@@ -360,10 +360,10 @@ const SSOCallback = () => {
                 fontSize: '1rem'
               }}
             >
-              Back to Login
+              {t('userCreation.backToLogin')}
             </button>
             {error.includes('administrator') && (
-              <a 
+              <a
                 href="mailto:admin@example.com"
                 style={{
                   color: 'var(--color-primary)',
@@ -374,7 +374,7 @@ const SSOCallback = () => {
                   fontSize: '1rem'
                 }}
               >
-                Contact Administrator
+                {t('sso.callback.contactAdmin')}
               </a>
             )}
           </div>

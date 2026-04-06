@@ -163,7 +163,7 @@ const ModelCreate = () => {
     return (
       <AdminLayout>
         <div className="model-edit-error">
-          <h2>Error</h2>
+          <h2>{t('shared:labels.error')}</h2>
           <p>{error}</p>
           <Button variant="secondary" onClick={handleCancel}>
             {t('common:buttons.back', 'Back')}
