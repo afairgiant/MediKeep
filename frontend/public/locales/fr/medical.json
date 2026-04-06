@@ -17,21 +17,21 @@
       "placeholder": "Sélectionnez le type d'allergie"
     },
     "cardSubtitle": "Allergie médicale",
-    "editTitle": "Editer une allergie",
+    "editTitle": "Modifier une allergie",
     "emptyState": {
       "noData": "Cliquez sur \"Ajouter une allergie\" pour commencer.",
       "title": "Aucune allergie trouvée"
     },
     "messages": {
       "loading": "Chargement des allergies...",
-      "saving": "Sauvegarde des allergies..."
+      "saving": "Sauvegarde de l'allergie..."
     },
     "modal": {
       "title": "Détails de l'allergie"
     },
     "noMedicationLinked": "Aucun médicament lié",
     "onsetDate": {
-      "description": "Quand l'allergie a été pour la première fois identifiée",
+      "description": "Quand l'allergie a été identifiée pour la première fois",
       "placeholder": "Sélectionnez la date de survenue"
     },
     "reaction": {
@@ -103,7 +103,7 @@
     "diagnosis": {
       "description": "Nom de la condition médicale ou du diagnostic",
       "label": "Diagnostic",
-      "placeholder": "ex : Hypertension, diabète de type 2, asthme"
+      "placeholder": "p. ex. Hypertension, diabète de type 2, asthme"
     },
     "endDate": {
       "description": "Quand la condition a été résolue (si applicable)",
@@ -112,7 +112,7 @@
     "icd10Code": {
       "description": "Code de la Classification internationale des maladies",
       "label": "Code CIM-10",
-      "placeholder": "ex : I10, E11.9"
+      "placeholder": "p. ex. I10, E11.9"
     },
     "notes": {
       "description": "Détails supplémentaires sur la condition, l'historique des traitements, ou autres observations"
@@ -131,9 +131,9 @@
       "placeholder": "Sélectionnez le niveau de sévérité"
     },
     "snomedCode": {
-      "description": "Code de terminologie clinique SNOMED",
+      "description": "Code de terminologie clinique SNOMED CT",
       "label": "Code SNOMED",
-      "placeholder": "ex : 38341003"
+      "placeholder": "p. ex. 38341003"
     },
     "status": {
       "description": "Statut actuel de cette condition"
@@ -144,12 +144,12 @@
       "address": {
         "description": "Adresse du contact (optionnel)",
         "label": "Adresse",
-        "placeholder": "ex : 123 Grand-rue, Cité, 12345"
+        "placeholder": "p. ex. 123 Grand-rue, Cité, 12345"
       },
       "email": {
         "description": "Adresse email optionnelle",
         "label": "Adresse email",
-        "placeholder": "ex : jean.martin@email.com"
+        "placeholder": "p. ex. jean.martin@email.com"
       },
       "isActive": {
         "description": "Ce contact est actuellement disponible",
@@ -162,16 +162,16 @@
       "name": {
         "description": "Nom complet du contact d'urgence",
         "label": "Nom complet",
-        "placeholder": "ex : Jean Martin"
+        "placeholder": "p. ex. Jean Martin"
       },
       "notes": {
-        "description": "Toute note supplémentaires au sujet de ce contact",
-        "placeholder": "Informations supplémentaires (ex : 'Disponible uniquement en semaine', 'Parle espagnol')"
+        "description": "Toute note supplémentaire au sujet de ce contact",
+        "placeholder": "Informations supplémentaires (p. ex. 'Disponible uniquement en semaine', 'Parle espagnol')"
       },
       "primaryPhone": {
         "description": "Numéro de téléphone principal",
         "label": "Téléphone principal",
-        "placeholder": "ex : +33 6 12 34 56 78"
+        "placeholder": "p. ex. +33 6 12 34 56 78"
       },
       "relationship": {
         "description": "Relation avec le patient",
@@ -181,7 +181,7 @@
       "secondaryPhone": {
         "description": "Numéro de téléphone secondaire optionnel",
         "label": "Téléphone secondaire",
-        "placeholder": "ex : +33 6 12 34 56 78"
+        "placeholder": "p. ex. +33 6 12 34 56 78"
       }
     },
     "messages": {
@@ -203,7 +203,7 @@
         "conditionName": {
           "description": "Nom de la condition médicale",
           "label": "Nom de la condition",
-          "placeholder": "ex : Diabète, problème cardiaque, cancer"
+          "placeholder": "p. ex. Diabète, problème cardiaque, cancer"
         },
         "conditionType": {
           "description": "Catégorie de condition médicale",
@@ -213,12 +213,12 @@
         "diagnosisAge": {
           "description": "Age lors du diagnostic",
           "label": "Age de diagnostic",
-          "placeholder": "ex : 45"
+          "placeholder": "p. ex. 45"
         },
         "icd10Code": {
           "description": "Code de diagnostic médical (si connu)",
           "label": "Code CIM-10",
-          "placeholder": "ex : E11.9"
+          "placeholder": "p. ex. E11.9"
         },
         "notes": {
           "description": "Détails de traitement, résultats, ou autres informations pertinentes",
@@ -262,12 +262,12 @@
         "birthYear": {
           "description": "Année de naissance du membre de la famille",
           "label": "Année de naissance",
-          "placeholder": "ex : 1965"
+          "placeholder": "p. ex. 1965"
         },
         "deathYear": {
           "description": "Année de décès du membre de la famille",
           "label": "Année de décès",
-          "placeholder": "ex : 2020"
+          "placeholder": "p. ex. 2020"
         },
         "deceased": {
           "description": "Cochez si le membre de la famille est décédé",
@@ -334,7 +334,7 @@
     },
     "location": {
       "description": "Lieu où le vaccin a été administré",
-      "placeholder": "ex : Pharmacie, hôpital, clinique, département de santé"
+      "placeholder": "p. ex. Pharmacie, hôpital, clinique, département de santé"
     },
     "lotNumber": {
       "description": "Numéro d'identification pour le suivi",
@@ -358,7 +358,7 @@
     "ndcNumber": {
       "description": "Identificateur du National Drug Code américain pour le vaccin",
       "label": "Numéro NDC",
-      "placeholder": "ex : 12345-6789-01"
+      "placeholder": "p. ex. 12345-6789-01"
     },
     "notes": {
       "description": "Tout détail pertinent concernant cette immunisation",
@@ -390,7 +390,7 @@
     "vaccineName": {
       "description": "Nom du vaccin administré",
       "label": "Nom du vaccin",
-      "placeholder": "ex : COVID-19 à ARN messager, Grippe, ROR"
+      "placeholder": "p. ex. COVID-19 à ARN messager, Grippe, ROR"
     }
   },
   "injuries": {
@@ -399,12 +399,12 @@
     "bodyLocation": {
       "description": "Partie du corps spécifique affectée par la blessure",
       "label": "Partie du corps",
-      "placeholder": "ex : Genous gauche, épaule droite"
+      "placeholder": "p. ex. Genou gauche, épaule droite"
     },
     "bodyPart": {
-      "description": "The affected body part or area",
+      "description": "La partie du corps ou la zone affectée",
       "label": "Partie du corps",
-      "placeholder": "e.g., Ankle, Wrist, Knee"
+      "placeholder": "p. ex. Cheville, poignet, genou"
     },
     "cardSubtitle": "Blessure physique",
     "cause": {
@@ -413,10 +413,10 @@
       "placeholder": "Décrivez comment la blessure s'est produite..."
     },
     "dateOfInjury": {
-      "description": "The date when the injury happened (optional if unknown)",
+      "description": "La date à laquelle la blessure s'est produite (optionnel si inconnue)",
       "label": "Date de la blessure"
     },
-    "editTitle": "Editer une blessure",
+    "editTitle": "Modifier une blessure",
     "emptyState": {
       "noData": "Cliquez sur \"Ajouter une nouvelle blessure\" pour commencer.",
       "title": "Aucune blessure trouvée"
@@ -429,10 +429,10 @@
     "injuryName": {
       "description": "Nom descriptif de cette blessure",
       "label": "Nom de la blessure",
-      "placeholder": "ex : Entorse à la cheville droite"
+      "placeholder": "p. ex. Entorse à la cheville droite"
     },
     "injuryType": {
-      "description": "Catégorie de blessure (ex : entorse, fracture)",
+      "description": "Catégorie de blessure (p. ex. entorse, fracture)",
       "label": "Type de blessure",
       "noResults": "Aucun type correspondant trouvé",
       "placeholder": "Sélectionnez ou créez un type"
@@ -449,9 +449,9 @@
       "placeholder": "Sélectionnez un côté"
     },
     "mechanism": {
-      "description": "Describe how the injury occurred",
+      "description": "Décrivez comment la blessure s'est produite",
       "label": "Comment elle s'est produite",
-      "placeholder": "e.g., Fell while hiking"
+      "placeholder": "p. ex. Chute durant une randonnée"
     },
     "messages": {
       "loading": "Chargement des blessures...",
@@ -474,7 +474,7 @@
     "severity": {
       "description": "Le niveau de sévérité de cette blessure",
       "options": {
-        "lifeThreatening": "Life-threatening - Emergency care needed",
+        "lifeThreatening": "Engageant le pronostic vital - Soins d'urgence nécessaires",
         "mild": "Léger - Gêne mineure",
         "moderate": "Modéré - Impact notable",
         "severe": "Grave - Impact significatif"
@@ -496,8 +496,8 @@
       "placeholder": "Décrivez le traitement reçu..."
     },
     "treatmentReceived": {
-      "description": "Description of treatment received",
-      "placeholder": "e.g., RICE protocol, cast applied"
+      "description": "Description du traitement reçu",
+      "placeholder": "p. ex. Protocole RGCE (repos, glace, compression, élévation), pose d'un plâtre"
     },
     "viewModal": {
       "additionalInfo": "Informations supplémentaires",
@@ -510,83 +510,83 @@
       "annualMaximum": {
         "description": "Montant du bénéfice maximum annuel",
         "label": "Bénéfice maximum annuel",
-        "placeholder": "ex : 1500"
+        "placeholder": "p. ex. 1500"
       },
       "basicCoverage": {
         "description": "Pourcentage de couverture pour les procédures basiques",
         "label": "Pourcentage de couverture basique",
-        "placeholder": "ex : 80"
+        "placeholder": "p. ex. 80"
       },
       "binNumber": {
         "description": "Numéro d'identification bancaire pour la pharmacie",
         "label": "BIN (numéro américain)",
-        "placeholder": "ex : 123456"
+        "placeholder": "p. ex. 123456"
       },
       "claimsAddress": {
-        "description": "Adresse pour les demandes",
+        "description": "Adresse pour les demandes de remboursement",
         "label": "Adresse de demandes",
-        "placeholder": "Saisissez l'adresse physique de demandes..."
+        "placeholder": "Saisissez l'adresse postale de demandes..."
       },
       "companyName": {
         "description": "Nom de la compagnie d'assurances",
         "label": "Compagnie d'assurances",
-        "placeholder": "ex : MMA"
+        "placeholder": "p. ex. MMA"
       },
       "contactAllowance": {
         "description": "Allocation annuelle pour les lentilles de contact",
         "label": "Allocation de lentilles de contact",
-        "placeholder": "ex : 150"
+        "placeholder": "p. ex. 150"
       },
       "copayBrand": {
         "description": "Montant du ticket modérateur pour les médicaments de marque",
-        "label": "Ticker modérateur de marque",
-        "placeholder": "ex : 30"
+        "label": "Ticket modérateur de marque",
+        "placeholder": "p. ex. 30"
       },
       "copayEmergencyRoom": {
         "description": "Montant du ticket modérateur pour les visites au service des urgences",
         "label": "Ticket modérateur pour le service des urgences",
-        "placeholder": "ex : 200"
+        "placeholder": "p. ex. 200"
       },
       "copayGeneric": {
         "description": "Montant du ticket modérateur pour les médicaments génériques",
         "label": "Ticket modérateur de générique",
-        "placeholder": "ex : 10"
+        "placeholder": "p. ex. 10"
       },
       "copayPrimaryCare": {
         "description": "Montant du ticket modérateur pour les visites chez le médecin traitant",
         "label": "Ticket modérateur pour le médecin traitant",
-        "placeholder": "ex : 25"
+        "placeholder": "p. ex. 25"
       },
       "copaySpecialist": {
         "description": "Montant du ticket modérateur pour les visites chez un spécialiste",
         "label": "Ticket modérateur pour les spécialistes",
-        "placeholder": "ex : 50"
+        "placeholder": "p. ex. 50"
       },
       "copaySpecialty": {
         "description": "Ticket modérateur pour les médicaments spécialisés",
         "label": "Ticket modérateur spécialisé",
-        "placeholder": "ex : 50"
+        "placeholder": "p. ex. 50"
       },
       "copayUrgentCare": {
         "description": "Montant du ticket modérateur pour les visites pour soins urgents",
         "label": "Ticket modérateur pour les soins urgents",
-        "placeholder": "ex : 75"
+        "placeholder": "p. ex. 75"
       },
       "coveragePeriodStatus": "Période de couverture et statut",
       "customerServicePhone": {
         "description": "Numéro de téléphone du service client",
         "label": "Téléphone du service client",
-        "placeholder": "ex : 01 12 34 56 78"
+        "placeholder": "p. ex. 01 12 34 56 78"
       },
       "deductibleFamily": {
         "description": "Montant de la franchise annuelle pour la famille",
         "label": "Franchise familiale",
-        "placeholder": "ex : 2000"
+        "placeholder": "p. ex. 2000"
       },
       "deductibleIndividual": {
         "description": "Montant de la franchise annuelle pour l'individu",
         "label": "Franchise individuelle",
-        "placeholder": "ex : 1000"
+        "placeholder": "p. ex. 1000"
       },
       "dentalPlanType": {
         "description": "Type de formule d'assurance dentaire",
@@ -603,23 +603,23 @@
         "basicInfo": "Informations de base de l'assurance",
         "contactInfo": "Informations de contact",
         "coverageDetails": "Détails de couverture",
-        "coveragePeriodStatus": "Période de couverture & statut",
-        "memberInfo": "Information de membre"
+        "coveragePeriodStatus": "Période de couverture et statut",
+        "memberInfo": "Informations du membre"
       },
       "effectiveDate": {
         "description": "Date à laquelle débute la couverture",
-        "label": "Date d'effectivité",
-        "placeholder": "Sélectionnez la date d'effectivité"
+        "label": "Date d'effet",
+        "placeholder": "Sélectionnez la date d'effet"
       },
       "employerGroup": {
         "description": "Entreprise ou organisation fournissant l'assurance (si applicable)",
         "label": "Employeur/Sponsor de groupe",
-        "placeholder": "ex : ABC Corporation, auto-entrepreneur"
+        "placeholder": "p. ex. ABC Corporation, auto-entrepreneur"
       },
       "examCopay": {
         "description": "Montant du ticket modérateur pour les examens oculaires",
         "label": "Ticket modérateur pour un examen",
-        "placeholder": "ex : 10"
+        "placeholder": "p. ex. 10"
       },
       "expirationDate": {
         "description": "Date à laquelle la couverture expire (si connue)",
@@ -629,12 +629,12 @@
       "frameAllowance": {
         "description": "Allocation annuelle pour les montures",
         "label": "Allocation de monture",
-        "placeholder": "ex : 150"
+        "placeholder": "p. ex. 150"
       },
       "groupNumber": {
         "description": "Numéro du groupe (si applicable)",
         "label": "Numéro du groupe",
-        "placeholder": "ex : GRP123"
+        "placeholder": "p. ex. GRP123"
       },
       "insuranceType": {
         "description": "Type de couverture de l'assurance",
@@ -654,22 +654,22 @@
       "lensCoverage": {
         "description": "Détails de la couverture pour les verres",
         "label": "Couverture des verres",
-        "placeholder": "ex : 100 %"
+        "placeholder": "p. ex. 100 %"
       },
       "majorCoverage": {
         "description": "Pourcentage de couverture pour les procédures majeures",
         "label": "Pourcentage de couverture majeure",
-        "placeholder": "ex : 50"
+        "placeholder": "p. ex. 50"
       },
       "memberId": {
-        "description": "Nombre d'ID de membre sur la carte d'assurance",
-        "label": "ID de membre",
-        "placeholder": "ex : ABC123456789"
+        "description": "Numéro d'identifiant de membre sur la carte d'assurance",
+        "label": "Identifiant de membre",
+        "placeholder": "p. ex. ABC123456789"
       },
       "memberName": {
         "description": "Nom tel qu'il apparaît sur la carte d'assurance",
         "label": "Nom du membre",
-        "placeholder": "ex : Jean Martin"
+        "placeholder": "p. ex. Jean Martin"
       },
       "notes": {
         "description": "Tous détails ou notes supplémentaires",
@@ -678,7 +678,7 @@
       "pcnNumber": {
         "description": "Numéro de contrôle de préparateur",
         "label": "PCN (numéro américain)",
-        "placeholder": "ex : ABC123"
+        "placeholder": "p. ex. ABC123"
       },
       "pharmacyNetworkInfo": {
         "description": "Informations sur les réseaux de pharmacie préférés",
@@ -688,7 +688,7 @@
       "planName": {
         "description": "Nom de la formule d'assurance spécifique",
         "label": "Nom de la formule",
-        "placeholder": "ex : Santé essentielle"
+        "placeholder": "p. ex. Santé essentielle"
       },
       "planType": {
         "description": "Type de formule d'assurance médicale",
@@ -706,7 +706,7 @@
       "policyHolderName": {
         "description": "Nom de l'assuré (si différent du membre)",
         "label": "Nom de l'assuré",
-        "placeholder": "ex : Jeanne Dupont (laissez vide si identique au membre)"
+        "placeholder": "p. ex. Jeanne Dupont (laissez vide si identique au membre)"
       },
       "preauthPhone": {
         "description": "Numéro de téléphone pour les pré-autorisations",
@@ -726,23 +726,23 @@
       "preventiveCoverage": {
         "description": "Pourcentage de couverture pour les soins préventifs",
         "label": "Pourcentage de couverture préventive",
-        "placeholder": "ex : 100"
+        "placeholder": "p. ex. 100"
       },
       "primaryCarePhysician": {
         "description": "Nom de votre médecin traitant",
         "label": "Médecin traitant",
-        "placeholder": "ex : Dr. Dupont"
+        "placeholder": "p. ex. Dr. Dupont"
       },
       "providerServicesPhone": {
-        "description": "Numéro de téléphone de services du fournisseur",
-        "label": "Téléphone de services du fournisseur"
+        "description": "Numéro de téléphone des services du prestataire",
+        "label": "Téléphone des services du prestataire"
       },
       "relationshipToHolder": {
         "description": "Votre relation avec l'assuré",
         "label": "Relation avec l'assuré",
         "options": {
           "child": "Enfant",
-          "dependent": "Dépendant",
+          "dependent": "Personne à charge",
           "self": "Soi-même",
           "spouse": "Conjoint"
         },
@@ -751,7 +751,7 @@
       "rxgroup": {
         "description": "Numéro du groupe de prescription",
         "label": "Groupe RX américain",
-        "placeholder": "ex : RXGRP123"
+        "placeholder": "p. ex. RXGRP123"
       },
       "saving": "Enregistrement de l'assurance...",
       "status": {
@@ -780,7 +780,7 @@
       "websiteUrl": {
         "description": "Portail de membre ou URL du site web",
         "label": "URL du site web",
-        "placeholder": "ex : https://membre.assurance.com"
+        "placeholder": "p. ex. https://membre.assurance.com"
       }
     },
     "viewModal": {
@@ -797,19 +797,19 @@
     "alternativeName": {
       "description": "Nom alternatif ou de marque optionnel (2 à 100 caractères)",
       "label": "Nom alternatif",
-      "placeholder": "ex : nom de marque ou nom générique"
+      "placeholder": "p. ex. nom de marque ou nom générique"
     },
     "dosage": {
       "description": "Masse et quantité par dose",
       "label": "Posologie",
-      "placeholder": "ex : 10mg, 1 tablette"
+      "placeholder": "p. ex. 10mg, 1 comprimé"
     },
     "form": {
       "addMedication": "Ajouter un médicament",
       "conditionLinkFailed": "Le médicament a été enregistré, mais certaines pathologies n'ont pas pu être associées. Vous pouvez les associer plus tard en modifiant le médicament.",
       "conditionLinkPartialFailure": "{{count}} association(s) de pathologie ont échoué",
-      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
-      "conditionLinkPartialFailure_other": "{{count}} condition links failed",
+      "conditionLinkPartialFailure_one": "{{count}} association de pathologie a échoué",
+      "conditionLinkPartialFailure_other": "{{count}} associations de pathologie ont échoué",
       "linkConditionsDescription": "Associer optionnellement ce médicament à des pathologies existantes",
       "noConditionsFound": "Aucune pathologie trouvée",
       "saving": "Sauvegarde du médicament...",
@@ -818,17 +818,17 @@
     "frequency": {
       "description": "Fréquence de prise du médicament",
       "label": "Fréquence",
-      "placeholder": "ex : une fois par jour, deux fois par jour"
+      "placeholder": "p. ex. une fois par jour, deux fois par jour"
     },
     "indication": {
       "description": "Pourquoi prendre ce médicament ? Décrivez la raison ou la condition traitée",
       "label": "Indication",
-      "placeholder": "ex : hypertension, si nécessaire pour la douleur, gestion du diabète"
+      "placeholder": "p. ex. hypertension, si nécessaire pour la douleur, gestion du diabète"
     },
     "medicationName": {
       "description": "Nom de marque ou générique du médicament (2 caractères minimum)",
       "label": "Nom du médicament",
-      "placeholder": "ex : Lisinopril, Metformine"
+      "placeholder": "p. ex. Lisinopril, Metformine"
     },
     "medicationType": {
       "description": "Catégorie de médicament",
@@ -842,7 +842,7 @@
     },
     "prescribingProvider": {
       "description": "Docteur ayant prescrit ce médicament",
-      "label": "Médecin prescrivant",
+      "label": "Médecin prescripteur",
       "placeholder": "Sélectionnez un médecin"
     },
     "route": {
@@ -879,7 +879,7 @@
           "costcoPharmacy": "Pharmacie de Costco",
           "cvs": "CVS",
           "hebPharmacy": "Pharmacie de H-E-B",
-          "hospitalPharmacy": "Pharmacie d'un hôpital",
+          "hospitalPharmacy": "Pharmacie d'hôpital",
           "independent": "Indépendante",
           "kaiserPermanente": "Kaiser Permanente",
           "krogerPharmacy": "Pharmacie de Kroger",
@@ -896,14 +896,14 @@
         "placeholder": "Sélectionnez une chaîne ou un type de pharmacie"
       },
       "city": {
-        "description": "Emplacement de la cité",
-        "label": "Cité",
+        "description": "Ville",
+        "label": "Ville",
         "placeholder": "Paris"
       },
       "country": {
         "description": "Pays où la pharmacie se situe",
         "label": "Pays",
-        "placeholder": "ex : France, Canada"
+        "placeholder": "p. ex. France, Canada"
       },
       "locationDivider": "Informations sur le lieu",
       "name": {
@@ -918,22 +918,22 @@
       "postalCode": {
         "description": "Code postal ou code ZIP",
         "label": "Code postal",
-        "placeholder": "ex : 90210, M5V 2T6"
+        "placeholder": "p. ex. 75001, M5V 2T6"
       },
       "specialtyServices": {
         "description": "Services spéciaux offerts par cette pharmacie",
         "label": "Spécialités",
-        "placeholder": "ex : Vaccinations, préparations, gestion des thérapies médicamenteuses"
+        "placeholder": "p. ex. Vaccinations, préparations, gestion des thérapies médicamenteuses"
       },
       "stateProvince": {
         "description": "Etat, province ou région",
         "label": "Région / Etat / Province",
-        "placeholder": "ex : Ile-de-France, Québec"
+        "placeholder": "p. ex. Ile-de-France, Québec"
       },
       "storeNumber": {
         "description": "Identificateur interne du magasin",
         "label": "Numéro du magasin",
-        "placeholder": "ex : 1234, N°5678, Magasin A"
+        "placeholder": "p. ex. 1234, N°5678, Magasin A"
       },
       "streetAddress": {
         "description": "Adresse physique",
@@ -956,15 +956,15 @@
       "name": {
         "description": "Nom de l'établissement ou de la clinique",
         "label": "Nom de l'établissement",
-        "placeholder": "Hôpital général de la cité"
+        "placeholder": "Hôpital général de la ville"
       },
       "notes": {
         "description": "Toute information supplémentaire sur l'établissement",
         "placeholder": "Toute note supplémentaire sur cet établissement..."
       },
       "patientPortal": {
-        "description": "URL pour le portail de patient",
-        "label": "URL du portail de patient",
+        "description": "URL pour le portail patient",
+        "label": "URL du portail patient",
         "placeholder": "https://portail.etablissement.com"
       },
       "phone": {
@@ -1010,7 +1010,7 @@
         "placeholder": "Cherchez parmi les spécialités ou créez-en une..."
       },
       "website": {
-        "description": "Site web professionel ou page du cabinet",
+        "description": "Site web professionnel ou page du cabinet",
         "placeholder": "https://www.exemple.com"
       }
     }
@@ -1045,7 +1045,7 @@
     "facility": {
       "description": "L'endroit où la procédure a (eu) lieu",
       "label": "Etablissement",
-      "placeholder": "ex : Hôpital général, centre de consultation externe"
+      "placeholder": "p. ex. Hôpital général, centre de consultation externe"
     },
     "notes": {
       "description": "Toute observation pertinente, instruction pré-/post-opératoire, ou autres détails",
@@ -1059,7 +1059,7 @@
     "procedureCode": {
       "description": "Code médical (CPT, ICD-10-PCS, etc.)",
       "label": "Code de procédure",
-      "placeholder": "ex : CPT-12345, ICD-10-PCS"
+      "placeholder": "p. ex. CPT-12345, ICD-10-PCS"
     },
     "procedureDate": {
       "description": "Quand la procédure a (eu) lieu",
@@ -1069,12 +1069,12 @@
     "procedureDuration": {
       "description": "Durée de la procédure",
       "label": "Durée (minutes)",
-      "placeholder": "ex : 30, 120"
+      "placeholder": "p. ex. 30, 120"
     },
     "procedureName": {
       "description": "Nom de la procédure médicale",
       "label": "Nom de la procédure",
-      "placeholder": "ex : Appendicectomie, IRM, coloscopie"
+      "placeholder": "p. ex. Appendicectomie, IRM, coloscopie"
     },
     "procedureSetting": {
       "description": "Où la procédure a lieu",
@@ -1122,7 +1122,7 @@
       "duration": {
         "description": "Combien de temps a duré cette crise",
         "label": "Durée",
-        "placeholder": "ex : 2 heures, 30 minutes, toute la journée"
+        "placeholder": "p. ex. 2 heures, 30 minutes, toute la journée"
       },
       "impactLevel": {
         "description": "Combien cela affecte vos activités quotidiennes",
@@ -1139,7 +1139,7 @@
       "location": {
         "description": "Où dans votre corps vous avez ressenti cela",
         "label": "Emplacement",
-        "placeholder": "ex : Tempe gauche, bas du dos, corps entier"
+        "placeholder": "p. ex. Tempe gauche, bas du dos, corps entier"
       },
       "occurrenceDate": {
         "description": "Date de cette crise spécifique",
@@ -1167,7 +1167,7 @@
         "placeholder": "Quand la crise s'est résolue"
       },
       "resolvedTime": {
-        "description": "L'heure à laquelle la cette crise s'est résolue",
+        "description": "L'heure à laquelle cette crise s'est résolue",
         "label": "Heure de résolution",
         "placeholder": "Heure à laquelle la crise s'est résolue"
       },
@@ -1190,10 +1190,10 @@
       "category": {
         "description": "Catégorie optionnelle pour organiser les symptômes",
         "label": "Catégorie",
-        "placeholder": "ex : Douleur, digestif, respiratoire"
+        "placeholder": "p. ex. Douleur, digestif, respiratoire"
       },
       "firstOccurrenceDate": {
-        "description": "Quand vous avez pour la première fois remarqué ce symptôme",
+        "description": "Quand vous avez remarqué ce symptôme pour la première fois",
         "label": "Date de première occurrence",
         "placeholder": "Quand le symptôme a eu lieu pour la première fois"
       },
@@ -1207,9 +1207,9 @@
         "label": "Condition chronique"
       },
       "resolvedDate": {
-        "description": "La data à laquelle ce symptôme s'est pleinement résolu",
+        "description": "La date à laquelle ce symptôme s'est pleinement résolu",
         "label": "Date de résolution",
-        "placeholder": "Quand ce symptôe s'est résoluWhen was this symptom resolved"
+        "placeholder": "Quand ce symptôme s'est résolu"
       },
       "status": {
         "description": "Statut général actuel de ce symptôme",
@@ -1224,7 +1224,7 @@
       "symptomName": {
         "description": "Nom du symptôme que vous souhaitez suivre",
         "label": "Nom du symptôme",
-        "placeholder": "ex : Migraine, douleur du dos chronique"
+        "placeholder": "p. ex. Migraine, douleur du dos chronique"
       },
       "typicalTriggers": {
         "description": "Ce qui déclenche typiquement ce symptôme",
@@ -1234,21 +1234,21 @@
     }
   },
   "treatmentPlan": {
-    "clickToExpand": "",
-    "conditions": "",
-    "encounters": "",
-    "equipment": "",
-    "medications": "",
-    "noEquipment": "",
-    "noLabResults": "",
-    "noMedications": "",
-    "noVisits": ""
+    "clickToExpand": "Cliquez pour développer et ajouter des détails (optionnel)",
+    "conditions": "Conditions",
+    "encounters": "Consultations",
+    "equipment": "Equipement",
+    "medications": "Médicaments",
+    "noEquipment": "Aucun équipement trouvé. L'équipement peut être ajouté après la création du traitement.",
+    "noLabResults": "Aucun résultat d'analyse trouvé. Créez d'abord des résultats d'analyse pour les associer ici.",
+    "noMedications": "Aucun médicament trouvé. Créez d'abord des médicaments pour les associer ici.",
+    "noVisits": "Aucune visite trouvée. Créez d'abord des visites pour les associer ici."
   },
   "treatments": {
     "amount": {
       "description": "Quantité ou intensité par session",
       "label": "Quantité",
-      "placeholder": "ex : 500mg, 2 tablettes, 30 minutes"
+      "placeholder": "p. ex. 500mg, 2 comprimés, 30 minutes"
     },
     "endDate": {
       "description": "Date de fin du traitement, prévue ou exacte",
@@ -1307,7 +1307,7 @@
     "treatmentName": {
       "description": "Nom spécifique ou description du traitement",
       "label": "Nom du traitement",
-      "placeholder": "ex : Physiothérapie pour douleur du dos"
+      "placeholder": "p. ex. Physiothérapie pour douleur du dos"
     },
     "treatmentStatus": {
       "description": "Stade actuel du traitement",
@@ -1329,7 +1329,7 @@
         "chemotherapy": "Chimiothérapie - Traitement contre le cancer",
         "dialysis": "Dialyse - Soutien de la fonction rénale",
         "immunotherapy": "Immunothérapie - Traitement du système immunitaire",
-        "medication": "Médicament - Thérapie chimique",
+        "medication": "Médicament - Thérapie médicamenteuse",
         "occupationalTherapy": "Ergothérapie - Améliorations fonctionnelles",
         "other": "Autre - Spécifier dans la description",
         "physicalTherapy": "Physiothérapie - Réhabilitation",
@@ -1352,7 +1352,7 @@
     },
     "form": {
       "dividers": {
-        "clinicalInformation": "Informations cliniues"
+        "clinicalInformation": "Informations cliniques"
       },
       "fields": {
         "additionalNotes": {
@@ -1393,7 +1393,7 @@
         "reason": {
           "description": "But premier de cette visite médicale",
           "label": "Motif de la visite",
-          "placeholder": "ex : Visite de contrôle annuelle, suivi, revue de symptômes"
+          "placeholder": "p. ex. Visite de contrôle annuelle, suivi, revue de symptômes"
         },
         "relatedCondition": {
           "description": "Connectez cette visite à une condition spécifique si applicable",

@@ -1,23 +1,23 @@
 {
   "alert": {
-    "errorCount": "",
-    "errorCount_one": "",
-    "errorCount_other": "",
-    "formError": "",
-    "highPriority": "",
-    "highPriority_one": "",
-    "highPriority_other": "",
-    "suggestions": ""
+    "errorCount": "{{count}} erreur",
+    "errorCount_one": "{{count}} erreur",
+    "errorCount_other": "{{count}} erreurs",
+    "formError": "Erreur de formulaire",
+    "highPriority": "{{count}} haute priorité",
+    "highPriority_one": "{{count}} haute priorité",
+    "highPriority_other": "{{count}} haute priorité",
+    "suggestions": "Suggestions :"
   },
   "boundary": {
-    "componentLabel": "",
-    "errorDetails": "",
-    "errorIdLabel": "",
-    "errorLogged": "",
-    "reloadPage": "",
-    "somethingWentWrong": "",
-    "tryAgain": "",
-    "unexpectedError": ""
+    "componentLabel": "Composant :",
+    "errorDetails": "Détails de l'erreur",
+    "errorIdLabel": "ID de l'erreur :",
+    "errorLogged": "L'erreur a été automatiquement enregistrée pour investigation.",
+    "reloadPage": "Recharger la page",
+    "somethingWentWrong": "Une erreur s'est produite",
+    "tryAgain": "Réessayer",
+    "unexpectedError": "Nous sommes désolés, mais quelque chose d'inattendu s'est produit dans le système de dossiers médicaux."
   },
   "file": {
     "deleteFailed": "Echec de la suppression du fichier. Veuillez réessayer.",

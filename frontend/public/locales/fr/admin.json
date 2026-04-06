@@ -41,7 +41,7 @@
     "actionFilter": "Action",
     "dateRange": "Plage temporelle",
     "entityTypeFilter": "Type d'entité",
-    "errorLoading": "Erreur lors du chagement du journal d'audit",
+    "errorLoading": "Erreur lors du chargement du journal d'audit",
     "filterByAction": "Filtrer par action",
     "filterByDateRange": "Filtrer par plage temporelle",
     "filterByEntityType": "Filtrer par type d'entité",
@@ -112,7 +112,7 @@
       "completeCleanup": "Nettoyage complet",
       "createFullBackup": "Créer un backup complet",
       "creating": "Création...",
-      "databaseOnly": "Base de donnée uniquement",
+      "databaseOnly": "Base de données uniquement",
       "filesOnly": "Fichiers uniquement",
       "fullBackup": "Backup du système entier",
       "fullBackupDesc": "Backup complet (base de données + fichiers)",
@@ -179,7 +179,7 @@
         "every12Hours": "Toutes les 12 heures",
         "every6Hours": "Toutes les 6 heures"
       },
-      "saveSchedule": "Programme de sauvegarde",
+      "saveSchedule": "Sauvegarder la programmation",
       "timeOfDay": "Moment de la journée",
       "timeOfDayDesc": "Quand doit avoir lieu le backup ? (format 24h)",
       "title": "Programmation des backups automatiques",
@@ -214,7 +214,7 @@
       "checkbox": "Connecter à un dossier de patient existant",
       "currentOwner": "Propriétaire actuel",
       "dob": "Date de naissance",
-      "hint": "Au lieu de créer un nouveau dossier de patient, connectez le nouvel utilisateur à un patient existant (ex : un enfant qui a besoin de son propre compte).",
+      "hint": "Au lieu de créer un nouveau dossier de patient, connectez le nouvel utilisateur à un patient existant (p. ex., un enfant qui a besoin de son propre compte).",
       "loading": "Chargement des patients...",
       "owner": "Propriétaire",
       "patientId": "ID",
@@ -316,12 +316,12 @@
       "practitioner": "Professionnels de santé et spécialistes",
       "procedure": "Procédures et opérations médicales",
       "symptom": "Définitions et suivi de symptômes",
-      "symptom_occurrence": "Entrées de crises symptômatiques individuelles",
+      "symptom_occurrence": "Entrées de crises symptomatiques individuelles",
       "treatment": "Plans de traitement et thérapies",
       "user": "Utilisateurs et administrateurs système",
       "vitals": "Tension artérielle, rythme cardiaque, température"
     },
-    "fallbackWarning": "Impossible de charger les modèles depuis le serveur. Affichage de la liste de modèle intégrée.",
+    "fallbackWarning": "Impossible de charger les modèles depuis le serveur. Affichage de la liste de modèles intégrée.",
     "filterAriaLabel": "Filtrer les modèles de données",
     "filterPlaceholder": "Filtrer les modèles...",
     "noMatchFilter": "Aucun modèle ne correspond à \"{{query}}\"",
@@ -329,7 +329,7 @@
   },
   "directoryCard": {
     "files": "fichiers",
-    "mb": "MB",
+    "mb": "Mo",
     "ok": "OK"
   },
   "fieldRenderer": {
@@ -361,7 +361,7 @@
   "health": {
     "applicationUptime": "Application disponible depuis",
     "database": {
-      "activeUsers": "Utilisateurs catifs",
+      "activeUsers": "Utilisateurs actifs",
       "connectionStatus": "Statut de connexion",
       "connectionTest": "Test de connexion",
       "databaseSize": "Taille de la base de données",
@@ -383,8 +383,8 @@
       "cpuDetails": "App : {{appPercent}} % de {{cores}} coeurs (système : {{systemPercent}} %)",
       "cpuUsage": "Utilisation du CPU",
       "memoryUsage": "Utilisation de la mémoire",
-      "memoryUsed": "{{used}} Mb utilisé(s) (système : {{percent}} % de {{total}} Mb)",
-      "responseTime": "Temps de répones",
+      "memoryUsed": "{{used}} Mo utilisé(s) (système : {{percent}} % de {{total}} Mo)",
+      "responseTime": "Temps de réponse",
       "systemLoad": "Charge du système",
       "title": "Performance de l'application"
     },
@@ -398,11 +398,11 @@
       "adminInterface": "Interface administrateur",
       "apiStatus": "Statut de l'API",
       "authService": "Service d'authentification",
-      "frontendLogging": "Connexion au frontend",
+      "frontendLogging": "Journalisation du frontend",
       "title": "Services de l'application"
     },
     "sso": {
-      "allowed": "Permis",
+      "allowed": "Autorisé",
       "blocked": "Bloqué",
       "passwordOnlyInfo": "Les utilisateurs peuvent uniquement se connecter avec un nom d'utilisateur et un mot de passe",
       "providerType": "Type de fournisseur",
@@ -413,7 +413,7 @@
     "storage": {
       "appStorage": "Stockage de l'application",
       "diskUsage": "Utilisation du disque",
-      "freeOf": "{{free}} Gb libre(s) sur {{total}} Gb",
+      "freeOf": "{{free}} Go libre(s) sur {{total}} Go",
       "title": "Santé du stockage"
     },
     "subtitle": "Statut en temps réel du système et indicateurs de performance",
@@ -512,7 +512,7 @@
     "subtitle": "Configurez les paramètres systèmes et la politique de rétention",
     "title": "Paramètres administrateur",
     "userManagement": {
-      "allowRegistration": "Permette l'enregistrement de nouveaux utilisateurs",
+      "allowRegistration": "Permettre l'enregistrement de nouveaux utilisateurs",
       "allowRegistrationDesc": "Activer ou désactiver la possibilité pour les nouveaux utilisateurs de créer des comptes depuis la page de connexion"
     }
   },
@@ -551,14 +551,14 @@
       "syncComplete": "Synchronisation complète",
       "syncUnmatched": "Synchroniser les entrées non associées",
       "syncUnmatchedDesc": "<strong>Synchroniser les entrées non associées :</strong> Met à jour les composants qui n'ont pas encore de nom canonique",
-      "title": "Tester la maintenance de la bibliothèqye",
+      "title": "Maintenance de la bibliothèque de tests",
       "totalTests": "Tests totaux"
     },
     "title": "Outils & Maintenance"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
-    "deleteConfirm": "Voulez-vous vraiment supprimer définitivement <strong>{{filename}}</strong>?",
+    "clearFilters": "Effacer les filtres",
+    "deleteConfirm": "Voulez-vous vraiment supprimer définitivement <strong>{{filename}}</strong> ?",
     "deletedDateRange": "Plage temporelle de suppression",
     "deleteFailed": "Echec de la suppression",
     "deletePermanently": "Supprimer définitivement",
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Supprimer définitivement le fichier",
     "purgedDirectories_one": "dans {{count}} dossier",
     "purgedDirectories_other": "dans {{count}} dossiers",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Les fichiers ayant dépassé la période de rétention seront supprimés. Actuellement, il y a <strong>{{count}} {{files}}</strong> dans la corbeille pour un total de <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Les fichiers ayant dépassé la période de rétention seront supprimés. Actuellement, il y a <strong>{{count}} {{files}}</strong> dans la corbeille pour un total de <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} fichier expiré supprimé définitivement",
     "purgedMessage_other": "{{count}} fichiers expirés supprimés définitivement",
     "purgeExpired": "Purger les fichiers expirés",
@@ -605,8 +605,8 @@
       "deleted": "Supprimé",
       "filename": "Nom du fichier",
       "originalLocation": "Emplacement d'origine",
-      "reason": "Reason",
-      "size": "Size"
+      "reason": "Raison",
+      "size": "Taille"
     },
     "title": "Gestion de la corbeille",
     "totalSize": "{{size}} au total",
@@ -646,20 +646,20 @@
     "noUsersInSystem": "Aucun utilisateur dans ce système.",
     "noUsersMatchFilters": "Aucun utilisateur ne correspond à vos filtres. Essayez d'ajuster ou d'effacer les filtres.",
     "passwordModal": {
-      "bothFieldsRequired": "",
-      "confirmPlaceholder": "",
-      "enterNewPassword": "",
+      "bothFieldsRequired": "Les deux champs de mot de passe sont requis",
+      "confirmPlaceholder": "Confirmez le nouveau mot de passe",
+      "enterNewPassword": "Saisissez le nouveau mot de passe",
       "forceChange": "Forcer le changement de mot de passe à la prochaine connexion",
-      "immediateReset": "",
+      "immediateReset": "Ceci réinitialisera immédiatement le mot de passe de l'utilisateur. Il devra utiliser le nouveau mot de passe pour se connecter.",
       "newPassword": "Nouveau mot de passe",
       "passwordDescription": "Minimum 6 caractères, au moins 1 lettre et 1 chiffre",
-      "passwordsDoNotMatch": "",
-      "resetFailed": "",
-      "resetSuccess": "",
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+      "resetFailed": "Echec de la réinitialisation du mot de passe. Veuillez réessayer.",
+      "resetSuccess": "Mot de passe réinitialisé avec succès pour {{username}} !",
       "resettingFor": "Réinitialiser le mot de passe pour <strong>{{username}}</strong>",
       "ssoWarning": "Cet utilisateur s'authentifie via SSO ({{provider}}). Définir un mot de passe local permettra l'authentification hybride.",
-      "title": "",
-      "userInfo": ""
+      "title": "Réinitialiser le mot de passe pour {{username}}",
+      "userInfo": "Utilisateur : {{username}} (ID : {{userId}})"
     },
     "roleFilter": {
       "all": "Tous les rôles"

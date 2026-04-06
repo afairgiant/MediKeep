@@ -57,16 +57,16 @@
     }
   },
   "menu": {
-    "account": "",
+    "account": "Compte",
     "backToDashboard": "Retour au tableau de bord",
-    "darkMode": "",
+    "darkMode": "Mode sombre",
     "help": "Aide",
-    "lightMode": "",
+    "lightMode": "Mode clair",
     "logout": "Déconnexion",
     "patients": "Patients",
     "profile": "Profil",
     "reports": "Rapports",
-    "userActions": ""
+    "userActions": "Actions utilisateur"
   },
   "pages": {
     "help": "Aide & Support",
