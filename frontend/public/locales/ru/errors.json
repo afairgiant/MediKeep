@@ -1,12 +1,12 @@
 {
   "alert": {
     "errorCount": "{{count}} ошибка",
-    "errorCount_one": "",
+    "errorCount_one": "{{count}} ошибка",
     "errorCount_other": "{{count}} ошибок",
     "formError": "Ошибка формы",
     "highPriority": "{{count}} высокого приоритета",
-    "highPriority_one": "",
-    "highPriority_other": "",
+    "highPriority_one": "{{count}} высокого приоритета",
+    "highPriority_other": "{{count}} высокого приоритета",
     "suggestions": "Предложения:"
   },
   "boundary": {

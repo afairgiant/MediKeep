@@ -58,8 +58,8 @@
     "previewComponents_one": "Просмотр {{count}} компонента",
     "previewComponents_other": "Просмотр {{count}} компонентов",
     "previewCount": "Просмотр ({{count}})",
-    "previewCount_one": "",
-    "previewCount_other": "",
+    "previewCount_one": "Просмотр ({{count}})",
+    "previewCount_other": "Просмотр ({{count}})",
     "qualitativeResults": "Качественные результаты (положительные/отрицательные)",
     "skipEmptyLines": "Пропускать пустые строки",
     "skipEmptyLinesDesc": "Игнорировать пустые строки при разборе",
@@ -71,11 +71,11 @@
     "tryTextInput": "Попробуйте использовать вкладку «Ввод текста» для ручной вставки результатов.",
     "useExample": "Использовать пример",
     "validComponents": "{{count}} действительных компонентов",
-    "validComponents_one": "",
-    "validComponents_other": "",
+    "validComponents_one": "{{count}} действительных компонентов",
+    "validComponents_other": "{{count}} действительных компонентов",
     "withIssues": "{{count}} с проблемами",
-    "withIssues_one": "",
-    "withIssues_other": ""
+    "withIssues_one": "{{count}} с проблемами",
+    "withIssues_other": "{{count}} с проблемами"
   },
   "category": {
     "bloodWork": "Анализы крови",

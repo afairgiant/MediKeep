@@ -1,12 +1,12 @@
 {
   "alert": {
     "errorCount": "{{count}} Fehler",
-    "errorCount_one": "",
+    "errorCount_one": "{{count}} Fehler",
     "errorCount_other": "{{count}} Fehler",
     "formError": "Formularfehler",
     "highPriority": "{{count}} mit hoher Priorität",
-    "highPriority_one": "",
-    "highPriority_other": "",
+    "highPriority_one": "{{count}} mit hoher Priorität",
+    "highPriority_other": "{{count}} mit hoher Priorität",
     "suggestions": "Vorschläge:"
   },
   "boundary": {

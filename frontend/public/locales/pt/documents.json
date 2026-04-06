@@ -15,10 +15,10 @@
   },
   "fileCount": {
     "attached": "{{count}} anexados",
-    "attached_one": "",
-    "attached_other": "",
+    "attached_one": "{{count}} anexados",
+    "attached_other": "{{count}} anexados",
     "fileCount": "{{count}} ficheiro",
-    "fileCount_one": "",
+    "fileCount_one": "{{count}} ficheiro",
     "fileCount_other": "{{count}} ficheiros",
     "noFiles": "Nenhum ficheiro"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "DETALHES DO FICHEIRO",
     "loading": "A carregar ficheiros...",
     "markedCount": "{{count}} ficheiro marcado para eliminação",
-    "markedCount_one": "",
+    "markedCount_one": "{{count}} ficheiro marcado para eliminação",
     "markedCount_other": "{{count}} ficheiros marcados para eliminação",
     "markedForDeletion": "Marcado para eliminação",
     "noFiles": "Nenhum ficheiro anexado",
@@ -43,16 +43,16 @@
     "dragOrClick": "Arraste ficheiros aqui ou clique para selecionar",
     "remove": "Remover",
     "selectedFiles": "Ficheiros selecionados ({{count}})",
-    "selectedFiles_one": "",
-    "selectedFiles_other": ""
+    "selectedFiles_one": "Ficheiros selecionados ({{count}})",
+    "selectedFiles_other": "Ficheiros selecionados ({{count}})"
   },
   "linkPaperless": {
     "from": "De: {{name}}",
     "infoText": "Procure documentos já existentes no Paperless para os associar a este {{entityType}}. Não é necessário carregar ficheiros!",
     "linkDocument": "Associar documento",
     "moreTags": "+{{count}} mais",
-    "moreTags_one": "",
-    "moreTags_other": "",
+    "moreTags_one": "+{{count}} mais",
+    "moreTags_other": "+{{count}} mais",
     "noDocumentsFound": "Nenhum documento encontrado",
     "searchDocuments": "Pesquisar documentos",
     "searchPlaceholder": "Pesquisar por título, conteúdo ou etiquetas...",
@@ -113,12 +113,12 @@
   },
   "upload": {
     "completed": "{{count}} concluídos",
-    "completed_one": "",
-    "completed_other": "",
+    "completed_one": "{{count}} concluídos",
+    "completed_other": "{{count}} concluídos",
     "dragOrClick": "Arraste ficheiros aqui ou clique para selecionar",
     "failed": "{{count}} falhados",
-    "failed_one": "",
-    "failed_other": "",
+    "failed_one": "{{count}} falhados",
+    "failed_other": "{{count}} falhados",
     "filesProgress": "{{completed}}/{{total}} ficheiros",
     "maxSize": "Tamanho máximo do ficheiro: {{size}}MB",
     "overallProgress": "Progresso geral",
@@ -126,7 +126,7 @@
     "remaining": "{{time}} restante",
     "retryFailed": "Tentar novamente os falhados",
     "uploading": "{{count}} a carregar",
-    "uploading_one": "",
-    "uploading_other": ""
+    "uploading_one": "{{count}} a carregar",
+    "uploading_other": "{{count}} a carregar"
   }
 }

@@ -911,7 +911,7 @@
     "resultCount_one": "{{count}} wynik",
     "resultCount_other": "{{count}} wyników",
     "resultsFound": "Znaleziono {{count}} wyników",
-    "resultsFound_one": "",
+    "resultsFound_one": "Znaleziono {{count}} wyników",
     "resultsFound_other": "Znaleziono {{count}} wyników",
     "searchFailed": "Wyszukiwanie nieudane. Spróbuj ponownie.",
     "searching": "Wyszukiwanie...",

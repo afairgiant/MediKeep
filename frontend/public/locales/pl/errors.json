@@ -1,12 +1,12 @@
 {
   "alert": {
     "errorCount": "{{count}} Błąd",
-    "errorCount_one": "",
+    "errorCount_one": "{{count}} Błąd",
     "errorCount_other": "{{count}} Błędów",
     "formError": "Błąd formularza",
     "highPriority": "{{count}} wysokiej ważności",
-    "highPriority_one": "",
-    "highPriority_other": "",
+    "highPriority_one": "{{count}} wysokiej ważności",
+    "highPriority_other": "{{count}} wysokiej ważności",
     "suggestions": "Sugestie:"
   },
   "boundary": {

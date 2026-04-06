@@ -15,10 +15,10 @@
   },
   "fileCount": {
     "attached": "{{count}} bifogade",
-    "attached_one": "",
-    "attached_other": "",
+    "attached_one": "{{count}} bifogade",
+    "attached_other": "{{count}} bifogade",
     "fileCount": "{{count}} fil",
-    "fileCount_one": "",
+    "fileCount_one": "{{count}} fil",
     "fileCount_other": "{{count}} filer",
     "noFiles": "Inga filer"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "FILDETALJER",
     "loading": "Laddar filer...",
     "markedCount": "{{count}} fil markerad för borttagning",
-    "markedCount_one": "",
+    "markedCount_one": "{{count}} fil markerad för borttagning",
     "markedCount_other": "{{count}} filer markerade för borttagning",
     "markedForDeletion": "Markerad för borttagning",
     "noFiles": "Inga filer bifogade",
@@ -43,16 +43,16 @@
     "dragOrClick": "Dra filer hit eller klicka för att välja",
     "remove": "Ta bort",
     "selectedFiles": "Valda filer ({{count}})",
-    "selectedFiles_one": "",
-    "selectedFiles_other": ""
+    "selectedFiles_one": "Valda filer ({{count}})",
+    "selectedFiles_other": "Valda filer ({{count}})"
   },
   "linkPaperless": {
     "from": "Från: {{name}}",
     "infoText": "Sök efter dokument som redan finns i Paperless för att länka dem till denna {{entityType}}. Ingen filuppladdning behövs!",
     "linkDocument": "Länka dokument",
     "moreTags": "+{{count}} till",
-    "moreTags_one": "",
-    "moreTags_other": "",
+    "moreTags_one": "+{{count}} till",
+    "moreTags_other": "+{{count}} till",
     "noDocumentsFound": "Inga dokument hittades",
     "searchDocuments": "Sök dokument",
     "searchPlaceholder": "Sök efter titel, innehåll eller taggar...",
@@ -113,12 +113,12 @@
   },
   "upload": {
     "completed": "{{count}} slutförda",
-    "completed_one": "",
-    "completed_other": "",
+    "completed_one": "{{count}} slutförda",
+    "completed_other": "{{count}} slutförda",
     "dragOrClick": "Dra filer hit eller klicka för att välja",
     "failed": "{{count}} misslyckades",
-    "failed_one": "",
-    "failed_other": "",
+    "failed_one": "{{count}} misslyckades",
+    "failed_other": "{{count}} misslyckades",
     "filesProgress": "{{completed}}/{{total}} filer",
     "maxSize": "Max filstorlek: {{size}}MB",
     "overallProgress": "Totalt framsteg",
@@ -126,7 +126,7 @@
     "remaining": "{{time}} kvar",
     "retryFailed": "Försök igen med misslyckade",
     "uploading": "{{count}} laddas upp",
-    "uploading_one": "",
-    "uploading_other": ""
+    "uploading_one": "{{count}} laddas upp",
+    "uploading_other": "{{count}} laddas upp"
   }
 }

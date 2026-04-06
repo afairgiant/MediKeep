@@ -15,10 +15,10 @@
   },
   "fileCount": {
     "attached": "{{count}} allegati",
-    "attached_one": "",
-    "attached_other": "",
+    "attached_one": "{{count}} allegati",
+    "attached_other": "{{count}} allegati",
     "fileCount": "{{count}} file",
-    "fileCount_one": "",
+    "fileCount_one": "{{count}} file",
     "fileCount_other": "{{count}} file",
     "noFiles": "Nessun file"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "DETTAGLI DEL FILE",
     "loading": "Caricamento file...",
     "markedCount": "{{count}} file contrassegnato per l'eliminazione",
-    "markedCount_one": "",
+    "markedCount_one": "{{count}} file contrassegnato per l'eliminazione",
     "markedCount_other": "{{count}} file contrassegnati per l'eliminazione",
     "markedForDeletion": "Contrassegnato per l'eliminazione",
     "noFiles": "Nessun file allegato",
@@ -43,16 +43,16 @@
     "dragOrClick": "Trascinare i file qui o fare clic per selezionare",
     "remove": "Rimuovi",
     "selectedFiles": "File selezionati ({{count}})",
-    "selectedFiles_one": "",
-    "selectedFiles_other": ""
+    "selectedFiles_one": "File selezionati ({{count}})",
+    "selectedFiles_other": "File selezionati ({{count}})"
   },
   "linkPaperless": {
     "from": "Da: {{name}}",
     "infoText": "Cercare documenti già presenti in Paperless per collegarli a questo {{entityType}}. Nessun caricamento necessario!",
     "linkDocument": "Collega documento",
     "moreTags": "+{{count}} altri",
-    "moreTags_one": "",
-    "moreTags_other": "",
+    "moreTags_one": "+{{count}} altri",
+    "moreTags_other": "+{{count}} altri",
     "noDocumentsFound": "Nessun documento trovato",
     "searchDocuments": "Cerca documenti",
     "searchPlaceholder": "Cerca per titolo, contenuto o etichette...",
@@ -113,12 +113,12 @@
   },
   "upload": {
     "completed": "{{count}} completati",
-    "completed_one": "",
-    "completed_other": "",
+    "completed_one": "{{count}} completati",
+    "completed_other": "{{count}} completati",
     "dragOrClick": "Trascinare i file qui o fare clic per selezionare",
     "failed": "{{count}} non riusciti",
-    "failed_one": "",
-    "failed_other": "",
+    "failed_one": "{{count}} non riusciti",
+    "failed_other": "{{count}} non riusciti",
     "filesProgress": "{{completed}}/{{total}} file",
     "maxSize": "Dimensione massima del file: {{size}}MB",
     "overallProgress": "Avanzamento generale",
@@ -126,7 +126,7 @@
     "remaining": "{{time}} rimanente",
     "retryFailed": "Riprova non riusciti",
     "uploading": "{{count}} in caricamento",
-    "uploading_one": "",
-    "uploading_other": ""
+    "uploading_one": "{{count}} in caricamento",
+    "uploading_other": "{{count}} in caricamento"
   }
 }

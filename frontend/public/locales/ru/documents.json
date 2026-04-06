@@ -15,10 +15,10 @@
   },
   "fileCount": {
     "attached": "{{count}} прикреплено",
-    "attached_one": "",
-    "attached_other": "",
+    "attached_one": "{{count}} прикреплено",
+    "attached_other": "{{count}} прикреплено",
     "fileCount": "{{count}} файл",
-    "fileCount_one": "",
+    "fileCount_one": "{{count}} файл",
     "fileCount_other": "{{count}} файлов",
     "noFiles": "Нет файлов"
   },
@@ -26,7 +26,7 @@
     "fileDetails": "ПОДРОБНОСТИ ФАЙЛА",
     "loading": "Загрузка файлов...",
     "markedCount": "{{count}} файл отмечен для удаления",
-    "markedCount_one": "",
+    "markedCount_one": "{{count}} файл отмечен для удаления",
     "markedCount_other": "{{count}} файлов отмечено для удаления",
     "markedForDeletion": "Отмечен для удаления",
     "noFiles": "Нет прикреплённых файлов",
@@ -43,16 +43,16 @@
     "dragOrClick": "Перетащите файлы сюда или нажмите для выбора",
     "remove": "Удалить",
     "selectedFiles": "Выбранные файлы ({{count}})",
-    "selectedFiles_one": "",
-    "selectedFiles_other": ""
+    "selectedFiles_one": "Выбранные файлы ({{count}})",
+    "selectedFiles_other": "Выбранные файлы ({{count}})"
   },
   "linkPaperless": {
     "from": "От: {{name}}",
     "infoText": "Найдите документы, уже находящиеся в Paperless, чтобы связать их с этим {{entityType}}. Загружать файлы не нужно!",
     "linkDocument": "Связать документ",
     "moreTags": "+ещё {{count}}",
-    "moreTags_one": "",
-    "moreTags_other": "",
+    "moreTags_one": "+ещё {{count}}",
+    "moreTags_other": "+ещё {{count}}",
     "noDocumentsFound": "Документы не найдены",
     "searchDocuments": "Поиск документов",
     "searchPlaceholder": "Поиск по названию, содержимому или тегам...",
@@ -113,12 +113,12 @@
   },
   "upload": {
     "completed": "{{count}} завершено",
-    "completed_one": "",
-    "completed_other": "",
+    "completed_one": "{{count}} завершено",
+    "completed_other": "{{count}} завершено",
     "dragOrClick": "Перетащите файлы сюда или нажмите для выбора",
     "failed": "{{count}} с ошибкой",
-    "failed_one": "",
-    "failed_other": "",
+    "failed_one": "{{count}} с ошибкой",
+    "failed_other": "{{count}} с ошибкой",
     "filesProgress": "{{completed}}/{{total}} файлов",
     "maxSize": "Макс. размер файла: {{size}}МБ",
     "overallProgress": "Общий прогресс",
@@ -126,7 +126,7 @@
     "remaining": "осталось {{time}}",
     "retryFailed": "Повторить неудачные",
     "uploading": "{{count}} загружается",
-    "uploading_one": "",
-    "uploading_other": ""
+    "uploading_one": "{{count}} загружается",
+    "uploading_other": "{{count}} загружается"
   }
 }

@@ -1,12 +1,12 @@
 {
   "alert": {
     "errorCount": "ข้อผิดพลาด {{count}} รายการ",
-    "errorCount_one": "",
+    "errorCount_one": "ข้อผิดพลาด {{count}} รายการ",
     "errorCount_other": "ข้อผิดพลาด {{count}} รายการ",
     "formError": "ข้อผิดพลาดในแบบฟอร์ม",
     "highPriority": "ความสำคัญสูง {{count}} รายการ",
-    "highPriority_one": "",
-    "highPriority_other": "",
+    "highPriority_one": "ความสำคัญสูง {{count}} รายการ",
+    "highPriority_other": "ความสำคัญสูง {{count}} รายการ",
     "suggestions": "คำแนะนำ:"
   },
   "boundary": {

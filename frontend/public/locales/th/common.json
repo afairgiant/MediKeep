@@ -911,7 +911,7 @@
     "resultCount_one": "{{count}} ผลลัพธ์",
     "resultCount_other": "{{count}} ผลลัพธ์",
     "resultsFound": "พบ {{count}} ผลลัพธ์",
-    "resultsFound_one": "",
+    "resultsFound_one": "พบ {{count}} ผลลัพธ์",
     "resultsFound_other": "พบ {{count}} ผลลัพธ์",
     "searchFailed": "ค้นหาไม่สำเร็จ กรุณาลองอีกครั้ง",
     "searching": "กำลังค้นหา...",

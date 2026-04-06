@@ -1,12 +1,12 @@
 {
   "alert": {
     "errorCount": "{{count}} Errore",
-    "errorCount_one": "",
+    "errorCount_one": "{{count}} Errore",
     "errorCount_other": "{{count}} Errori",
     "formError": "Errore del Modulo",
     "highPriority": "{{count}} ad alta priorità",
-    "highPriority_one": "",
-    "highPriority_other": "",
+    "highPriority_one": "{{count}} ad alta priorità",
+    "highPriority_other": "{{count}} ad alta priorità",
     "suggestions": "Suggerimenti:"
   },
   "boundary": {

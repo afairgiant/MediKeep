@@ -911,7 +911,7 @@
     "resultCount_one": "{{count}} результат",
     "resultCount_other": "{{count}} результатов",
     "resultsFound": "Найдено {{count}} результат",
-    "resultsFound_one": "",
+    "resultsFound_one": "Найдено {{count}} результат",
     "resultsFound_other": "Найдено {{count}} результатов",
     "searchFailed": "Поиск не удался. Попробуйте снова.",
     "searching": "Поиск...",

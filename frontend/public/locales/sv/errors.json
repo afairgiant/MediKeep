@@ -1,12 +1,12 @@
 {
   "alert": {
     "errorCount": "{{count}} Fel",
-    "errorCount_one": "",
+    "errorCount_one": "{{count}} Fel",
     "errorCount_other": "{{count}} Fel",
     "formError": "Formulärfel",
     "highPriority": "{{count}} hög prioritet",
-    "highPriority_one": "",
-    "highPriority_other": "",
+    "highPriority_one": "{{count}} hög prioritet",
+    "highPriority_other": "{{count}} hög prioritet",
     "suggestions": "Förslag:"
   },
   "boundary": {
