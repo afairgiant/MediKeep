@@ -122,9 +122,9 @@
       "placeholder": "Ausbruchsdatum auswählen"
     },
     "relatedMedication": {
-      "description": "Verknüpfe diese Erkrankung mit einem bestimmten Medikament",
+      "description": "Verkn\u00fcpfen Sie diese Erkrankung mit einem bestimmten Medikament",
       "label": "Verwandtes Medikament",
-      "placeholder": "Wähle ein Medikament (optional)"
+      "placeholder": "Medikament ausw\u00e4hlen (optional)"
     },
     "severity": {
       "description": "Wie schwerwiegend die Erkrankung ist",
@@ -367,7 +367,7 @@
     "route": {
       "description": "Art der Verabreichung",
       "label": "Verabreichungsweg",
-      "placeholder": "Wähle den Verabreichungsweg"
+      "placeholder": "Verabreichungsweg ausw\u00e4hlen"
     },
     "routeOptions": {
       "intradermal": "Intradermal (ID)",
@@ -402,9 +402,9 @@
       "placeholder": "z.B. Linkes Knie, Rechte Schulter"
     },
     "bodyPart": {
-      "description": "The affected body part or area",
-      "label": "Körperteil",
-      "placeholder": "e.g., Ankle, Wrist, Knee"
+      "description": "Der betroffene K\u00f6rperteil oder Bereich",
+      "label": "K\u00f6rperteil",
+      "placeholder": "z.\u00a0B. Kn\u00f6chel, Handgelenk, Knie"
     },
     "cardSubtitle": "Körperliche Verletzung",
     "cause": {
@@ -413,7 +413,7 @@
       "placeholder": "Beschreiben Sie, wie die Verletzung auftrat..."
     },
     "dateOfInjury": {
-      "description": "The date when the injury happened (optional if unknown)",
+      "description": "Das Datum, an dem die Verletzung auftrat (optional, falls unbekannt)",
       "label": "Verletzungsdatum"
     },
     "editTitle": "Verletzung bearbeiten",
@@ -449,9 +449,9 @@
       "placeholder": "Seite auswählen"
     },
     "mechanism": {
-      "description": "Describe how the injury occurred",
+      "description": "Beschreiben Sie, wie die Verletzung auftrat",
       "label": "Wie es passiert ist",
-      "placeholder": "e.g., Fell while hiking"
+      "placeholder": "z.\u00a0B. Sturz beim Wandern"
     },
     "messages": {
       "loading": "Verletzungen werden geladen...",
@@ -474,7 +474,7 @@
     "severity": {
       "description": "Wie schwer ist diese Verletzung",
       "options": {
-        "lifeThreatening": "Life-threatening - Emergency care needed",
+        "lifeThreatening": "Lebensbedrohlich - Notfallversorgung erforderlich",
         "mild": "Leicht - Geringfügige Beschwerden",
         "moderate": "Mäßig - Spürbare Beeinträchtigung",
         "severe": "Schwer - Erhebliche Beeinträchtigung"
@@ -496,8 +496,8 @@
       "placeholder": "Beschreiben Sie die erhaltene Behandlung..."
     },
     "treatmentReceived": {
-      "description": "Description of treatment received",
-      "placeholder": "e.g., RICE protocol, cast applied"
+      "description": "Beschreibung der erhaltenen Behandlung",
+      "placeholder": "z.\u00a0B. PECH-Regel, Gips angelegt"
     },
     "viewModal": {
       "additionalInfo": "Zusätzliche Informationen",
@@ -808,8 +808,8 @@
       "addMedication": "Medikament hinzufügen",
       "conditionLinkFailed": "Das Medikament wurde gespeichert, aber einige Erkrankungen konnten nicht verknüpft werden. Sie können diese später beim Bearbeiten des Medikaments verknüpfen.",
       "conditionLinkPartialFailure": "{{count}} Erkrankungsverknüpfung(en) fehlgeschlagen",
-      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
-      "conditionLinkPartialFailure_other": "{{count}} condition links failed",
+      "conditionLinkPartialFailure_one": "{{count}} Erkrankungsverkn\u00fcpfung fehlgeschlagen",
+      "conditionLinkPartialFailure_other": "{{count}} Erkrankungsverkn\u00fcpfungen fehlgeschlagen",
       "linkConditionsDescription": "Optional dieses Medikament mit bestehenden Erkrankungen verknüpfen",
       "noConditionsFound": "Keine Erkrankungen gefunden",
       "saving": "Medikament wird gespeichert...",
@@ -821,7 +821,7 @@
       "placeholder": "z. B. Einmal täglich, Zweimal täglich"
     },
     "indication": {
-      "description": "Wofür dieses Medikament verwendet wird? Beschreibe den Grund oder die behandelte Erkrankung",
+      "description": "Wof\u00fcr wird dieses Medikament verwendet? Beschreiben Sie den Grund oder die behandelte Erkrankung",
       "label": "Indikation",
       "placeholder": "z. B. Bluthochdruck, Bei Bedarf gegen Schmerzen, Diabetes-Management"
     },
@@ -860,7 +860,7 @@
         "sublingual": "Sublingual",
         "topical": "Topisch"
       },
-      "placeholder": "Wähle den Weg"
+      "placeholder": "Applikationsweg ausw\u00e4hlen"
     },
     "sideEffects": {
       "description": "Bekannte oder erlebte Nebenwirkungen dieses Medikaments",
@@ -960,7 +960,7 @@
       },
       "notes": {
         "description": "Weitere Informationen zur Praxis",
-        "placeholder": "Zusaetzliche Notizen zu dieser Praxis..."
+        "placeholder": "Zus\u00e4tzliche Notizen zu dieser Praxis..."
       },
       "patientPortal": {
         "description": "URL des Patientenportals",
@@ -996,9 +996,9 @@
         "placeholder": "(555) 123-4567"
       },
       "practice": {
-        "description": "Arbeitsplatz oder medizinische Einrichtung",
-        "label": "Praxis/Krankenhaus",
-        "placeholder": "Städtisches Krankenhaus"
+        "description": "W\u00e4hlen Sie eine bestehende Praxis oder geben Sie einen Namen ein, um eine neue zu erstellen",
+        "label": "Praxis/Klinik",
+        "placeholder": "Praxis suchen oder erstellen..."
       },
       "rating": {
         "description": "Ihre Gesamtbewertung dieses Arztes (0-5)",
@@ -1234,15 +1234,15 @@
     }
   },
   "treatmentPlan": {
-    "clickToExpand": "",
-    "conditions": "",
-    "encounters": "",
-    "equipment": "",
-    "medications": "",
-    "noEquipment": "",
-    "noLabResults": "",
-    "noMedications": "",
-    "noVisits": ""
+    "clickToExpand": "Zum Erweitern klicken und Details hinzuf\u00fcgen (optional)",
+    "conditions": "Erkrankungen",
+    "encounters": "Begegnungen",
+    "equipment": "Ausstattung",
+    "medications": "Medikamente",
+    "noEquipment": "Keine Ausstattung gefunden. Ausstattung kann nach dem Erstellen der Behandlung hinzugef\u00fcgt werden.",
+    "noLabResults": "Keine Laborergebnisse gefunden. Erstellen Sie zuerst Laborergebnisse, um sie hier zu verkn\u00fcpfen.",
+    "noMedications": "Keine Medikamente gefunden. Erstellen Sie zuerst Medikamente, um sie hier zu verkn\u00fcpfen.",
+    "noVisits": "Keine Besuche gefunden. Erstellen Sie zuerst Besuche, um sie hier zu verkn\u00fcpfen."
   },
   "treatments": {
     "amount": {

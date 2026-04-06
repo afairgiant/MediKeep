@@ -557,7 +557,7 @@
     "title": "Werkzeuge & Wartung"
   },
   "trash": {
-    "clearFilters": "Clear Filters",
+    "clearFilters": "Filter löschen",
     "deleteConfirm": "Möchten Sie <strong>{{filename}}</strong> wirklich dauerhaft löschen?",
     "deletedDateRange": "Löschdatumsbereich",
     "deleteFailed": "Löschung fehlgeschlagen",
@@ -582,8 +582,8 @@
     "permanentlyDeleteFile": "Datei dauerhaft löschen",
     "purgedDirectories_one": "in {{count}} Verzeichnis",
     "purgedDirectories_other": "in {{count}} Verzeichnissen",
-    "purgeDescription_one": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
-    "purgeDescription_other": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgeDescription_one": "Dateien, die die Aufbewahrungsfrist überschritten haben, werden entfernt. Derzeit {{verb}} sich <strong>{{count}} {{files}}</strong> im Papierkorb mit insgesamt <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Dateien, die die Aufbewahrungsfrist überschritten haben, werden entfernt. Derzeit {{verb}} sich <strong>{{count}} {{files}}</strong> im Papierkorb mit insgesamt <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} abgelaufene Datei dauerhaft gelöscht",
     "purgedMessage_other": "{{count}} abgelaufene Dateien dauerhaft gelöscht",
     "purgeExpired": "Abgelaufene bereinigen",
@@ -601,12 +601,12 @@
     "showingFiltered": "{{shown}} von {{total}} {{files}} angezeigt",
     "subtitle": "Gelöschte hochgeladene Dateien verwalten. Dateien am ursprünglichen Speicherort wiederherstellen oder dauerhaft entfernen, um Speicherplatz freizugeben.",
     "tableHeaders": {
-      "actions": "Actions",
+      "actions": "Aktionen",
       "deleted": "Gelöscht",
       "filename": "Dateiname",
       "originalLocation": "Ursprünglicher Speicherort",
-      "reason": "Reason",
-      "size": "Size"
+      "reason": "Grund",
+      "size": "Größe"
     },
     "title": "Papierkorbverwaltung",
     "totalSize": "{{size}} gesamt",
@@ -646,20 +646,20 @@
     "noUsersInSystem": "Keine Benutzer im System.",
     "noUsersMatchFilters": "Keine Benutzer entsprechen Ihren Filtern. Versuchen Sie, die Filter anzupassen oder zu löschen.",
     "passwordModal": {
-      "bothFieldsRequired": "",
-      "confirmPlaceholder": "",
-      "enterNewPassword": "",
+      "bothFieldsRequired": "Beide Passwortfelder sind erforderlich",
+      "confirmPlaceholder": "Neues Passwort bestätigen",
+      "enterNewPassword": "Neues Passwort eingeben",
       "forceChange": "Passwortänderung bei nächster Anmeldung erzwingen",
-      "immediateReset": "",
+      "immediateReset": "Dadurch wird das Passwort des Benutzers sofort zurückgesetzt. Der Benutzer muss das neue Passwort verwenden, um sich anzumelden.",
       "newPassword": "Neues Passwort",
       "passwordDescription": "Mindestens 6 Zeichen, mindestens 1 Buchstabe und 1 Zahl",
-      "passwordsDoNotMatch": "",
-      "resetFailed": "",
-      "resetSuccess": "",
+      "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+      "resetFailed": "Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut.",
+      "resetSuccess": "Passwort für {{username}} erfolgreich zurückgesetzt!",
       "resettingFor": "Passwort für <strong>{{username}}</strong> zurücksetzen",
       "ssoWarning": "Dieser Benutzer authentifiziert sich über SSO ({{provider}}). Das Setzen eines lokalen Passworts ermöglicht die hybride Authentifizierung.",
-      "title": "",
-      "userInfo": ""
+      "title": "Passwort zurücksetzen für {{username}}",
+      "userInfo": "Benutzer: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Alle Rollen"
