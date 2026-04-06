@@ -1,164 +1,164 @@
 {
   "account": {
     "deleteAccount": {
-      "button": "Delete Account",
-      "description": "Permanently delete your account and all associated medical data. This action cannot be undone.",
-      "title": "Delete Account"
+      "button": "Eliminar cuenta",
+      "description": "Eliminar permanentemente su cuenta y todos los datos médicos asociados. Esta acción no se puede deshacer.",
+      "title": "Eliminar cuenta"
     }
   },
   "actions": {
-    "reset": "Reset Changes",
-    "save": "Save All Changes",
-    "unsavedChanges": "You have unsaved changes"
+    "reset": "Restablecer cambios",
+    "save": "Guardar todos los cambios",
+    "unsavedChanges": "Tiene cambios sin guardar"
   },
   "documents": {
     "cleanup": {
-      "button": "Cleanup Files",
-      "cleaning": "Cleaning...",
-      "description": "Clean up out-of-sync files and resolve document storage inconsistencies. This will reset failed uploads, clear orphaned tasks, and fix database sync issues.",
-      "title": "File Cleanup"
+      "button": "Limpiar archivos",
+      "cleaning": "Limpiando...",
+      "description": "Limpie archivos desincronizados y resuelva inconsistencias en el almacenamiento de documentos. Esto restablecerá las cargas fallidas, eliminará tareas huérfanas y corregirá problemas de sincronización de la base de datos.",
+      "title": "Limpieza de archivos"
     },
-    "paperlessDescription": "Configure Paperless-ngx document management integration"
+    "paperlessDescription": "Configurar la integración de gestión de documentos Paperless-ngx"
   },
   "help": {
     "documentation": {
-      "description": "Browse the wiki for guides, setup instructions, and feature documentation.",
-      "title": "Documentation"
+      "description": "Explore el wiki para encontrar guías, instrucciones de configuración y documentación de funciones.",
+      "title": "Documentación"
     },
     "issues": {
-      "description": "Found a bug or have a feature request? Open an issue on GitHub.",
-      "title": "Report an Issue"
+      "description": "¿Encontró un error o tiene una solicitud de función? Abra un issue en GitHub.",
+      "title": "Reportar un problema"
     }
   },
   "paperlessConnection": {
-    "apiTokenHelp": "",
-    "apiTokenLabel": "",
-    "apiTokenRecommended": "",
-    "authMethod": "",
-    "connected": "",
-    "connectionError": "",
-    "methodInfo": "",
-    "passwordHelp": "",
-    "passwordLabel": "",
-    "sessionStorage": "",
-    "title": "",
-    "urlHelp": "",
-    "urlLabel": "",
-    "usernameHelp": "",
-    "usernameLabel": "",
-    "usernamePassword": ""
+    "apiTokenHelp": "Su token de API de Paperless-ngx. Encuéntrelo en el panel de administración de Paperless en Configuración.",
+    "apiTokenLabel": "Token de API",
+    "apiTokenRecommended": "Token de API (Recomendado)",
+    "authMethod": "Método de autenticación",
+    "connected": "Conectado a Paperless-ngx",
+    "connectionError": "No se pudo conectar. Por favor, verifique su URL y credenciales.",
+    "methodInfo": "Los tokens de API son el método de autenticación recomendado para mayor seguridad.",
+    "passwordHelp": "Su contraseña de Paperless-ngx.",
+    "passwordLabel": "Contraseña",
+    "sessionStorage": "Usando almacenamiento de sesión para el token",
+    "title": "Conexión de Paperless-ngx",
+    "urlHelp": "La URL de su instancia de Paperless-ngx (p. ej., https://paperless.ejemplo.com)",
+    "urlLabel": "URL del servidor",
+    "usernameHelp": "Su nombre de usuario de Paperless-ngx.",
+    "usernameLabel": "Nombre de usuario",
+    "usernamePassword": "Usuario y contraseña"
   },
   "papra": {
-    "apiTokenPlaceholder": "",
-    "connectionFailed": "",
-    "connectionSuccess": "",
-    "description": "",
-    "organization": "",
-    "organizationPlaceholder": "",
-    "urlPlaceholder": ""
+    "apiTokenPlaceholder": "Ingrese su token de API de Papra",
+    "connectionFailed": "Conexión fallida",
+    "connectionSuccess": "Conexión exitosa",
+    "description": "Conecte con su instancia de Papra para la gestión de documentos",
+    "organization": "Organización",
+    "organizationPlaceholder": "Seleccionar una organización",
+    "urlPlaceholder": "https://su-instancia-papra.com"
   },
   "preferences": {
     "dateFormat": {
-      "description": "Choose how dates are displayed throughout the application",
-      "dmy": "DD/MM/YYYY (European)",
-      "mdy": "MM/DD/YYYY (US)",
-      "title": "Date Format",
-      "ymd": "YYYY-MM-DD (ISO)"
+      "description": "Elija cómo se muestran las fechas en toda la aplicación",
+      "dmy": "DD/MM/AAAA (Europeo)",
+      "mdy": "MM/DD/AAAA (EE. UU.)",
+      "title": "Formato de fecha",
+      "ymd": "AAAA-MM-DD (ISO)"
     },
     "sessionTimeout": {
-      "description": "Set the duration of inactivity before your session expires (in minutes)",
-      "range": "minutes (5-1440)",
-      "title": "Session Timeout"
+      "description": "Establezca la duración de inactividad antes de que expire su sesión (en minutos)",
+      "range": "minutos (5-1440)",
+      "title": "Tiempo de espera de sesión"
     },
     "unitSystem": {
-      "description": "Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units",
-      "imperial": "Imperial (lbs, feet, °F)",
-      "metric": "Metric (kg, cm, °C)",
-      "title": "Unit System"
+      "description": "Elija si desea mostrar las mediciones en unidades imperiales (libras, pies, °F) o métricas (kilogramos, centímetros, °C)",
+      "imperial": "Imperial (lbs, pies, °F)",
+      "metric": "Métrico (kg, cm, °C)",
+      "title": "Sistema de unidades"
     }
   },
   "releaseNotes": {
-    "currentVersion": "Current",
-    "dismiss": "Got it",
-    "empty": "No release notes available",
-    "error": "Unable to load release notes",
-    "publishedOn": "Released {{date}}",
-    "retry": "Try Again",
-    "showAll": "Show more releases",
-    "showLess": "Show less",
-    "viewOnGithub": "View on GitHub",
-    "whatsNewTitle": "What's New"
+    "currentVersion": "Actual",
+    "dismiss": "Entendido",
+    "empty": "No hay notas de versión disponibles",
+    "error": "No se pudieron cargar las notas de versión",
+    "publishedOn": "Publicado el {{date}}",
+    "retry": "Intentar de nuevo",
+    "showAll": "Mostrar más versiones",
+    "showLess": "Mostrar menos",
+    "viewOnGithub": "Ver en GitHub",
+    "whatsNewTitle": "Novedades"
   },
   "sections": {
-    "accountManagement": "Account Management",
-    "gettingHelp": "Getting Help",
-    "preferences": "Application Preferences",
-    "releaseNotes": "Release Notes",
-    "security": "Security",
-    "supportMediKeep": "Support MediKeep",
-    "systemInfo": "System Information"
+    "accountManagement": "Gestión de cuenta",
+    "gettingHelp": "Obtener ayuda",
+    "preferences": "Preferencias de la aplicación",
+    "releaseNotes": "Notas de versión",
+    "security": "Seguridad",
+    "supportMediKeep": "Apoyar MediKeep",
+    "systemInfo": "Información del sistema"
   },
   "security": {
     "password": {
-      "button": "Change Password",
-      "confirmPassword": "",
-      "currentPassword": "",
-      "description": "Change your account password to keep your account secure",
+      "button": "Cambiar contraseña",
+      "confirmPassword": "Confirmar nueva contraseña",
+      "currentPassword": "Contraseña actual",
+      "description": "Cambie la contraseña de su cuenta para mantenerla segura",
       "forceChange": {
         "errors": {
-          "allFieldsRequired": "",
-          "changeFailed": "",
-          "passwordComplexity": "",
-          "passwordMustDiffer": "",
-          "passwordsMustMatch": "",
-          "passwordTooShort": ""
+          "allFieldsRequired": "Todos los campos son obligatorios.",
+          "changeFailed": "Error al cambiar la contraseña. Por favor, inténtelo de nuevo.",
+          "passwordComplexity": "La nueva contraseña debe contener al menos una letra y un número.",
+          "passwordMustDiffer": "La nueva contraseña debe ser diferente de su contraseña actual.",
+          "passwordsMustMatch": "Las nuevas contraseñas no coinciden.",
+          "passwordTooShort": "La nueva contraseña debe tener al menos 6 caracteres."
         },
-        "submit": "",
-        "submitting": "",
-        "subtitle": "",
-        "title": ""
+        "submit": "Establecer nueva contraseña",
+        "submitting": "Cambiando contraseña...",
+        "subtitle": "Su cuenta requiere un cambio de contraseña antes de poder continuar. Por favor, establezca una nueva contraseña a continuación.",
+        "title": "Cambio de contraseña requerido"
       },
-      "newPassword": "",
-      "passwordHelp": ""
+      "newPassword": "Nueva contraseña",
+      "passwordHelp": "Al menos 6 caracteres, debe incluir una letra y un número."
     }
   },
   "settings": {
     "releaseNotes": {
-      "noChanges": "No changes listed for this release",
-      "whatsNewSubtitle": "Here's what changed since your last update"
+      "noChanges": "No hay cambios listados para esta versión",
+      "whatsNewSubtitle": "Esto es lo que ha cambiado desde su última actualización"
     }
   },
   "sponsor": {
-    "button": "Sponsor on GitHub",
-    "buttonShort": "",
-    "description": "MediKeep is free and open source. If you find it useful, consider sponsoring the project to help fund development and keep it going."
+    "button": "Patrocinar en GitHub",
+    "buttonShort": "Patrocinar",
+    "description": "MediKeep es gratuito y de código abierto. Si lo encuentra útil, considere patrocinar el proyecto para ayudar a financiar el desarrollo y mantenerlo activo."
   },
   "storage": {
-    "connectionRequired": "",
-    "defaultLocation": "",
-    "filesCount": "",
-    "filesCount_one": "",
-    "filesCount_other": "",
-    "localDescription": "",
-    "localStorage": "",
-    "noUsageData": "",
-    "paperless": "",
-    "paperlessDescription": "",
-    "papra": "",
-    "papraDescription": "",
-    "title": "",
-    "usageLabel": ""
+    "connectionRequired": "Conexión requerida",
+    "defaultLocation": "Ubicación de almacenamiento predeterminada",
+    "filesCount": "{{count}} archivos",
+    "filesCount_one": "{{count}} archivo",
+    "filesCount_other": "{{count}} archivos",
+    "localDescription": "Los archivos se almacenan directamente en este servidor. Ideal para configuraciones simples sin servicios externos.",
+    "localStorage": "Almacenamiento local",
+    "noUsageData": "No hay datos de uso de almacenamiento disponibles",
+    "paperless": "Paperless-ngx",
+    "paperlessDescription": "Los archivos se cargan a su servidor Paperless-ngx. Proporciona OCR, etiquetado y gestión avanzada de documentos.",
+    "papra": "Papra",
+    "papraDescription": "Los archivos se almacenan en su instancia de Papra. Proporciona gestión organizada de documentos con organizaciones.",
+    "title": "Preferencias de almacenamiento",
+    "usageLabel": "Uso de almacenamiento"
   },
   "system": {
     "timezone": {
-      "title": "Timezone"
+      "title": "Zona horaria"
     },
     "version": {
-      "loading": "Loading version information...",
-      "title": "Application Version",
-      "unavailable": "Version information unavailable",
-      "unknownApp": "Unknown App",
-      "unknownVersion": "Unknown Version"
+      "loading": "Cargando información de versión...",
+      "title": "Versión de la aplicación",
+      "unavailable": "Información de versión no disponible",
+      "unknownApp": "Aplicación desconocida",
+      "unknownVersion": "Versión desconocida"
     }
   }
 }

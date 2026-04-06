@@ -1,23 +1,23 @@
 {
   "alert": {
-    "errorCount": "",
-    "errorCount_one": "",
-    "errorCount_other": "",
-    "formError": "",
-    "highPriority": "",
-    "highPriority_one": "",
-    "highPriority_other": "",
-    "suggestions": ""
+    "errorCount": "{{count}} error",
+    "errorCount_one": "{{count}} error",
+    "errorCount_other": "{{count}} errores",
+    "formError": "Error de formulario",
+    "highPriority": "{{count}} de alta prioridad",
+    "highPriority_one": "{{count}} de alta prioridad",
+    "highPriority_other": "{{count}} de alta prioridad",
+    "suggestions": "Sugerencias:"
   },
   "boundary": {
-    "componentLabel": "",
-    "errorDetails": "",
-    "errorIdLabel": "",
-    "errorLogged": "",
-    "reloadPage": "",
-    "somethingWentWrong": "",
-    "tryAgain": "",
-    "unexpectedError": ""
+    "componentLabel": "Componente:",
+    "errorDetails": "Detalles del error",
+    "errorIdLabel": "ID del error:",
+    "errorLogged": "El error ha sido registrado automáticamente para su investigación.",
+    "reloadPage": "Recargar página",
+    "somethingWentWrong": "Algo salió mal",
+    "tryAgain": "Intentar de nuevo",
+    "unexpectedError": "Lo sentimos, pero ocurrió algo inesperado en el sistema de registros médicos."
   },
   "file": {
     "deleteFailed": "Error al eliminar el archivo.",

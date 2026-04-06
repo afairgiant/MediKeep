@@ -1,218 +1,218 @@
 {
   "builder": {
     "buttons": {
-      "addRecords": "",
-      "clearSelections": "",
-      "generateReport": "",
-      "generateReport_one": "",
-      "generateReport_other": "",
-      "generateReportChartsOnly": "",
-      "generateReportWithCharts": "",
-      "selectAll": ""
+      "addRecords": "Agregar registros medicos",
+      "clearSelections": "Borrar todas las selecciones",
+      "generateReport": "Generar informe ({{count}} registros)",
+      "generateReport_one": "Generar informe ({{count}} registro)",
+      "generateReport_other": "Generar informe ({{count}} registros)",
+      "generateReportChartsOnly": "Generar informe ({{chartCount}} graficos)",
+      "generateReportWithCharts": "Generar informe ({{recordCount}} registros, {{chartCount}} graficos)",
+      "selectAll": "Seleccionar todos los registros"
     },
     "configuration": {
-      "description": "",
-      "title": ""
+      "description": "Seleccione los registros medicos para incluir en su informe personalizado",
+      "title": "Configuracion del informe"
     },
     "icon": "",
-    "loading": "Loading reports...",
+    "loading": "Cargando generador de informes...",
     "noData": {
-      "description": "",
-      "title": ""
+      "description": "Agregue algunos registros medicos primero para usar el generador de informes.",
+      "title": "No hay datos medicos disponibles"
     },
     "notifications": {
-      "templateLoaded": "",
-      "templateLoadedMessage": ""
+      "templateLoaded": "Plantilla cargada",
+      "templateLoadedMessage": "La plantilla \"{{name}}\" se ha cargado."
     },
     "progress": {
-      "recordsSelected": ""
+      "recordsSelected": "Registros seleccionados"
     },
     "settingsModal": {
       "includePatientInfo": {
-        "description": "",
-        "label": ""
+        "description": "Agregar informacion demografica y de contacto",
+        "label": "Incluir informacion del paciente"
       },
       "includeProfilePicture": {
-        "description": "",
-        "label": ""
+        "description": "Agregar foto del paciente al encabezado del informe",
+        "label": "Incluir foto de perfil"
       },
       "includeSummary": {
-        "description": "",
-        "label": ""
+        "description": "Agregar seccion de resumen y estadisticas",
+        "label": "Incluir estadisticas de resumen"
       },
       "reportTitle": {
-        "label": ""
+        "label": "Titulo del informe"
       },
-      "title": ""
+      "title": "Configuracion del informe"
     },
-    "title": "",
+    "title": "Generador de informes personalizado",
     "trendCharts": {
-      "dateFrom": "",
-      "dateTo": "",
-      "emptyState": "",
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
+      "emptyState": "No hay datos de tendencias disponibles. Agregue signos vitales o resultados de laboratorio para habilitar los graficos de tendencias.",
       "labTestCharts": {
-        "description": "",
-        "searchPlaceholder": "",
-        "title": ""
+        "description": "Busque y seleccione pruebas de laboratorio para graficar",
+        "searchPlaceholder": "Buscar pruebas de laboratorio...",
+        "title": "Graficos de pruebas de laboratorio"
       },
-      "maxReached": "",
-      "recordCount": "",
-      "recordCount_one": "",
-      "recordCount_other": "",
-      "removeChart": "",
-      "selectedCharts": "",
-      "selectedCharts_one": "",
-      "selectedCharts_other": "",
+      "maxReached": "Se alcanzo el maximo de 10 graficos",
+      "recordCount": "{{count}} registros",
+      "recordCount_one": "{{count}} registro",
+      "recordCount_other": "{{count}} registros",
+      "removeChart": "Eliminar grafico de {{name}}",
+      "selectedCharts": "Graficos seleccionados ({{count}})",
+      "selectedCharts_one": "Graficos seleccionados ({{count}})",
+      "selectedCharts_other": "Graficos seleccionados ({{count}})",
       "vitalCharts": {
-        "description": "",
-        "title": ""
+        "description": "Seleccione signos vitales para graficar",
+        "title": "Graficos de signos vitales"
       }
     }
   },
   "categories": {
-    "noCategories": "",
-    "noCategoriesDescription": "",
-    "noRecords": "",
-    "recordCount": "",
-    "recordCount_one": "",
-    "recordCount_other": "",
-    "selected": "",
-    "selected_one": "",
-    "selected_other": "",
-    "showingFirst": "",
-    "showingFirst_one": "",
-    "showingFirst_other": "",
-    "totalCount": "",
-    "totalCount_one": "",
-    "totalCount_other": ""
+    "noCategories": "No hay categorias disponibles",
+    "noCategoriesDescription": "No hay categorias de datos medicos disponibles para la generacion de informes.",
+    "noRecords": "No hay registros disponibles",
+    "recordCount": "{{count}} registros",
+    "recordCount_one": "{{count}} registro",
+    "recordCount_other": "{{count}} registros",
+    "selected": "{{count}} seleccionados",
+    "selected_one": "{{count}} seleccionado",
+    "selected_other": "{{count}} seleccionados",
+    "showingFirst": "Mostrando los primeros {{count}} registros. Hay mas registros disponibles pero no se muestran por rendimiento.",
+    "showingFirst_one": "Mostrando el primer {{count}} registro. Hay mas registros disponibles pero no se muestran por rendimiento.",
+    "showingFirst_other": "Mostrando los primeros {{count}} registros. Hay mas registros disponibles pero no se muestran por rendimiento.",
+    "totalCount": "{{count}} en total",
+    "totalCount_one": "{{count}} en total",
+    "totalCount_other": "{{count}} en total"
   },
   "dataExport": {
-    "availableData": "",
-    "bulkExport": "",
-    "csvDescription": "",
-    "dateFilterNote": "",
-    "exportInfo": "",
-    "exportTitle": "",
-    "includeFilesNote": "",
-    "jsonDescription": "",
-    "pdfDescription": "",
-    "singleExport": "",
-    "zipDescription": ""
+    "availableData": "Datos disponibles",
+    "bulkExport": "Exportacion masiva",
+    "csvDescription": "El formato CSV es ideal para hojas de calculo",
+    "dateFilterNote": "Los filtros de fecha se aplican a todos los tipos seleccionados",
+    "exportInfo": "Informacion de exportacion",
+    "exportTitle": "Exportar registros medicos",
+    "includeFilesNote": "Esto puede aumentar significativamente el tamano de la descarga",
+    "jsonDescription": "El formato JSON proporciona la estructura de datos completa",
+    "pdfDescription": "El formato PDF crea informes imprimibles",
+    "singleExport": "Exportacion individual",
+    "zipDescription": "Las exportaciones masivas se empaquetan en un archivo ZIP"
   },
   "export": {
     "availableData": {
-      "moreItems_one": "",
-      "moreItems_other": "",
-      "title": ""
+      "moreItems_one": "{{count}} elemento mas",
+      "moreItems_other": "{{count}} elementos mas",
+      "title": "Datos disponibles"
     },
     "buttons": {
-      "bulkExport": "",
-      "bulkExport_one": "",
-      "bulkExport_other": "",
-      "creatingZip": "",
-      "exportAs": "",
-      "exporting": "",
-      "goToDashboard": "",
-      "refreshPage": ""
+      "bulkExport": "Exportar {{count}} tipos como ZIP",
+      "bulkExport_one": "Exportar {{count}} tipo como ZIP",
+      "bulkExport_other": "Exportar {{count}} tipos como ZIP",
+      "creatingZip": "Creando ZIP...",
+      "exportAs": "Exportar {{scope}} como {{format}}",
+      "exporting": "Exportando...",
+      "goToDashboard": "Ir al panel de control",
+      "refreshPage": "Actualizar pagina"
     },
     "configuration": {
       "bulkSelection": {
-        "label": ""
+        "label": "Seleccionar tipos de datos para exportacion masiva"
       },
       "dataToExport": {
-        "label": "",
-        "placeholder": ""
+        "label": "Datos a exportar",
+        "placeholder": "Seleccionar tipo de datos"
       },
       "dateRange": {
-        "endDate": "",
-        "startDate": ""
+        "endDate": "Fecha de fin (opcional)",
+        "startDate": "Fecha de inicio (opcional)"
       },
       "format": {
-        "label": "",
-        "placeholder": ""
+        "label": "Formato de exportacion",
+        "placeholder": "Seleccionar formato"
       },
-      "includeFiles": "",
+      "includeFiles": "Incluir archivos adjuntos (crea un archivo ZIP)",
       "includePatientInfo": {
-        "description": "",
-        "label": ""
+        "description": "Desmarque para excluir datos personales del paciente por privacidad",
+        "label": "Incluir informacion del paciente (nombre, datos demograficos, etc.)"
       },
-      "title": ""
+      "title": "Configuracion de exportacion"
     },
-    "description": "",
+    "description": "Descargue sus datos medicos en varios formatos para respaldo o para compartir con proveedores de salud",
     "errors": {
-      "bulkExportFailed": "",
-      "bulkInvalidSettings": "",
-      "bulkNoDataFound": "",
-      "exportFailed": "",
-      "invalidSettings": "",
-      "loadFailed": "",
-      "noActivePatient": "",
-      "noDataFound": "",
-      "noDataType": "",
-      "sessionExpired": "",
-      "validationFailed": ""
+      "bulkExportFailed": "La exportacion masiva fallo: {{message}}",
+      "bulkInvalidSettings": "Verifique la configuracion de exportacion masiva. Asegurese de haber seleccionado al menos un tipo de datos y un formato valido.",
+      "bulkNoDataFound": "No se encontraron datos para los criterios de exportacion seleccionados. Intente seleccionar diferentes tipos de datos o ajustar el rango de fechas.",
+      "exportFailed": "La exportacion fallo: {{message}}",
+      "invalidSettings": "Verifique la configuracion de exportacion. Asegurese de haber seleccionado un tipo de datos y formato validos.",
+      "loadFailed": "No se pudieron cargar los datos de exportacion: {{message}}",
+      "noActivePatient": "No hay un perfil de paciente seleccionado actualmente. Seleccione un paciente desde el panel de control para usar la funcion de exportacion.",
+      "noDataFound": "No se encontraron datos para los criterios de exportacion seleccionados. Intente seleccionar un tipo de datos o rango de fechas diferente.",
+      "noDataType": "Seleccione al menos un tipo de datos para la exportacion masiva",
+      "sessionExpired": "Su sesion ha expirado. Actualice la pagina o inicie sesion nuevamente para acceder a las funciones de exportacion.",
+      "validationFailed": "{{errors}}"
     },
     "exportMode": {
-      "bulkDescription": "",
-      "bulkExport": "",
-      "singleDescription": "",
-      "singleExport": "",
-      "title": ""
+      "bulkDescription": "Exportar varios tipos de datos juntos en un archivo ZIP",
+      "bulkExport": "Exportacion masiva",
+      "singleDescription": "Exportar un solo tipo de datos en el formato elegido",
+      "singleExport": "Exportacion individual",
+      "title": "Modo de exportacion"
     },
     "icon": "",
     "information": {
       "bulk": {
-        "description": "",
-        "title": ""
+        "description": "Crea un archivo ZIP que contiene varios tipos de datos en el formato elegido para un respaldo completo de datos.",
+        "title": "Exportacion masiva:"
       },
       "csv": {
-        "description": "",
-        "title": ""
+        "description": "Valores separados por comas, adecuados para aplicaciones de hojas de calculo como Excel o Google Sheets.",
+        "title": "Formato CSV:"
       },
       "fileAttachments": {
-        "description": "",
-        "title": ""
+        "description": "Cuando estan disponibles para exportaciones PDF, los archivos de resultados de laboratorio se pueden incluir en un archivo ZIP.",
+        "title": "Archivos adjuntos:"
       },
       "json": {
-        "description": "",
-        "title": ""
+        "description": "Formato de datos estructurados legible por maquina, ideal para importar a otros sistemas o aplicaciones.",
+        "title": "Formato JSON:"
       },
       "pdf": {
-        "description": "",
-        "title": ""
+        "description": "Formato de documento legible, perfecto para imprimir o compartir con proveedores de salud.",
+        "title": "Formato PDF:"
       },
-      "title": ""
+      "title": "Informacion de exportacion"
     },
-    "loading": "Loading export options...",
+    "loading": "Cargando opciones de exportacion...",
     "scopes": {
-      "all": "",
-      "encounters": ""
+      "all": "Todos los registros",
+      "encounters": "Consultas"
     },
     "success": {
-      "bulkExportComplete": "",
-      "bulkExportComplete_one": "",
-      "bulkExportComplete_other": "",
-      "exportComplete": ""
+      "bulkExportComplete": "La exportacion masiva se completo con exito. Su archivo ZIP con {{count}} tipos de datos se ha descargado.",
+      "bulkExportComplete_one": "La exportacion masiva se completo con exito. Su archivo ZIP con {{count}} tipo de datos se ha descargado.",
+      "bulkExportComplete_other": "La exportacion masiva se completo con exito. Su archivo ZIP con {{count}} tipos de datos se ha descargado.",
+      "exportComplete": "La exportacion se completo con exito. Su archivo {{format}} se ha descargado."
     },
-    "title": ""
+    "title": "Exportar registros de salud"
   },
   "templates": {
-    "categories": "",
-    "categories_one": "",
-    "categories_other": "",
-    "deleteConfirm": "",
-    "editTemplate": "",
-    "loadTemplate": "",
-    "manageTemplates": "",
-    "moreTemplates": "",
-    "moreTemplates_one": "",
-    "moreTemplates_other": "",
-    "noSaved": "",
-    "records": "",
-    "reportTemplates": "",
-    "saveAsTemplate": "",
-    "saveDescription": "",
-    "savedTemplates": "",
-    "updateTemplate": ""
+    "categories": "{{count}} categorias",
+    "categories_one": "{{count}} categoria",
+    "categories_other": "{{count}} categorias",
+    "deleteConfirm": "Esta seguro de que desea eliminar esta plantilla?",
+    "editTemplate": "Editar plantilla",
+    "loadTemplate": "Cargar plantilla",
+    "manageTemplates": "Administrar plantillas",
+    "moreTemplates": "... y {{count}} plantilla mas",
+    "moreTemplates_one": "... y {{count}} plantilla mas",
+    "moreTemplates_other": "... y {{count}} plantillas mas",
+    "noSaved": "No hay plantillas guardadas",
+    "records": "{{count}} registros",
+    "reportTemplates": "Plantillas de informes",
+    "saveAsTemplate": "Guardar como plantilla",
+    "saveDescription": "Esta plantilla guardara la configuracion actual del informe, los registros seleccionados y los graficos de tendencias seleccionados.",
+    "savedTemplates": "Plantillas guardadas",
+    "updateTemplate": "Actualizar plantilla"
   }
 }

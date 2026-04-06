@@ -218,7 +218,7 @@
         "icd10Code": {
           "description": "Código de diagnóstico médico (si se conoce)",
           "label": "Código CIE-10",
-          "placeholder": "e.g., E11.9"
+          "placeholder": "ej., E11.9"
         },
         "notes": {
           "description": "Detalles del tratamiento, resultados u otra información relevante",
@@ -230,7 +230,7 @@
           "placeholder": "Seleccione el nivel de gravedad"
         },
         "severityOptions": {
-          "critical": "Critica - Amenaza para la vida",
+          "critical": "Crítica - Amenaza para la vida",
           "mild": "Leve - Impacto menor",
           "moderate": "Moderada - Impacto notable",
           "severe": "Severa - Impacto significativo"
@@ -402,9 +402,9 @@
       "placeholder": "ej., Rodilla izquierda, Hombro derecho"
     },
     "bodyPart": {
-      "description": "The affected body part or area",
+      "description": "La parte o zona del cuerpo afectada",
       "label": "Parte del cuerpo",
-      "placeholder": "e.g., Ankle, Wrist, Knee"
+      "placeholder": "ej., Tobillo, Muñeca, Rodilla"
     },
     "cardSubtitle": "Lesión física",
     "cause": {
@@ -413,7 +413,7 @@
       "placeholder": "Describa cómo ocurrió la lesión..."
     },
     "dateOfInjury": {
-      "description": "The date when the injury happened (optional if unknown)",
+      "description": "La fecha en que ocurrió la lesión (opcional si se desconoce)",
       "label": "Fecha de la lesión"
     },
     "editTitle": "Editar lesión",
@@ -449,9 +449,9 @@
       "placeholder": "Seleccione el lado"
     },
     "mechanism": {
-      "description": "Describe how the injury occurred",
+      "description": "Describa cómo ocurrió la lesión",
       "label": "Cómo ocurrió",
-      "placeholder": "e.g., Fell while hiking"
+      "placeholder": "ej., Se cayó mientras caminaba por el monte"
     },
     "messages": {
       "loading": "Cargando lesiones...",
@@ -474,7 +474,7 @@
     "severity": {
       "description": "Cuán grave es esta lesión",
       "options": {
-        "lifeThreatening": "Life-threatening - Emergency care needed",
+        "lifeThreatening": "Potencialmente mortal - Se necesita atención de emergencia",
         "mild": "Leve - Molestia menor",
         "moderate": "Moderado - Impacto notable",
         "severe": "Grave - Impacto significativo"
@@ -496,8 +496,8 @@
       "placeholder": "Describa el tratamiento recibido..."
     },
     "treatmentReceived": {
-      "description": "Description of treatment received",
-      "placeholder": "e.g., RICE protocol, cast applied"
+      "description": "Descripción del tratamiento recibido",
+      "placeholder": "ej., Protocolo RICE, yeso aplicado"
     },
     "viewModal": {
       "additionalInfo": "Información adicional",
@@ -640,10 +640,10 @@
         "description": "Tipo de cobertura de seguro",
         "label": "Tipo de seguro",
         "options": {
-          "dental": "🦷 Seguro dental",
-          "medical": "🏥 Seguro médico",
-          "prescription": "💊 Seguro de medicamentos",
-          "vision": "👁️ Seguro de visión"
+          "dental": "\uD83E\uDDB7 Seguro dental",
+          "medical": "\uD83C\uDFE5 Seguro médico",
+          "prescription": "\uD83D\uDC8A Seguro de medicamentos",
+          "vision": "\uD83D\uDC41\uFE0F Seguro de visión"
         },
         "placeholder": "Seleccione el tipo de seguro"
       },
@@ -808,8 +808,8 @@
       "addMedication": "Añadir medicamento",
       "conditionLinkFailed": "El medicamento se guardó, pero algunas condiciones no pudieron vincularse. Puede vincularlas más tarde editando el medicamento.",
       "conditionLinkPartialFailure": "{{count}} vínculo(s) de condición fallaron",
-      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
-      "conditionLinkPartialFailure_other": "{{count}} condition links failed",
+      "conditionLinkPartialFailure_one": "{{count}} vínculo de condición falló",
+      "conditionLinkPartialFailure_other": "{{count}} vínculos de condición fallaron",
       "linkConditionsDescription": "Vincular opcionalmente este medicamento a condiciones existentes",
       "noConditionsFound": "No se encontraron condiciones",
       "saving": "Guardando medicamento...",
@@ -949,17 +949,17 @@
   "practices": {
     "form": {
       "fax": {
-        "description": "Numero de fax del consultorio",
-        "label": "Numero de fax",
+        "description": "Número de fax del consultorio",
+        "label": "Número de fax",
         "placeholder": "+1 555 123-4568"
       },
       "name": {
-        "description": "Nombre del consultorio o clinica",
+        "description": "Nombre del consultorio o clínica",
         "label": "Nombre del consultorio",
         "placeholder": "Hospital General de la Ciudad"
       },
       "notes": {
-        "description": "Informacion adicional sobre el consultorio",
+        "description": "Información adicional sobre el consultorio",
         "placeholder": "Notas adicionales sobre este consultorio..."
       },
       "patientPortal": {
@@ -968,8 +968,8 @@
         "placeholder": "https://portal.consultorio.com"
       },
       "phone": {
-        "description": "Numero de telefono principal del consultorio",
-        "label": "Telefono del consultorio"
+        "description": "Número de teléfono principal del consultorio",
+        "label": "Teléfono del consultorio"
       },
       "website": {
         "description": "Sitio web oficial del consultorio",
@@ -1234,15 +1234,15 @@
     }
   },
   "treatmentPlan": {
-    "clickToExpand": "",
-    "conditions": "",
-    "encounters": "",
-    "equipment": "",
-    "medications": "",
-    "noEquipment": "",
-    "noLabResults": "",
-    "noMedications": "",
-    "noVisits": ""
+    "clickToExpand": "Haga clic para expandir y añadir detalles (opcional)",
+    "conditions": "Condiciones",
+    "encounters": "Consultas",
+    "equipment": "Equipamiento",
+    "medications": "Medicamentos",
+    "noEquipment": "No se encontró equipamiento. El equipamiento se puede añadir después de crear el tratamiento.",
+    "noLabResults": "No se encontraron resultados de laboratorio. Cree resultados de laboratorio primero para vincularlos aquí.",
+    "noMedications": "No se encontraron medicamentos. Cree medicamentos primero para vincularlos aquí.",
+    "noVisits": "No se encontraron consultas. Cree consultas primero para vincularlas aquí."
   },
   "treatments": {
     "amount": {
